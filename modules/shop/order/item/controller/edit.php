@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -51,8 +51,6 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 
 		$oAdditionalTab->delete($this->getField('shop_measure_id'));
 
-		$oShop_Controller_Edit = new Shop_Controller_Edit($this->_Admin_Form_Action);
-
 		// Добавляем единицы измерения
 		$oMeasuresField = Admin_Form_Entity::factory('Select')
 			->id('itemMeasure')
@@ -60,7 +58,7 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 			->caption(Core::_('Shop_Item.shop_measure_id'))
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-2'))
 			->options(
-				$oShop_Controller_Edit->fillMeasures()
+				Shop_Controller::fillMeasures()
 			)
 			->value($this->_object->shop_measure_id);
 

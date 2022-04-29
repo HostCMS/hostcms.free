@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -31,27 +31,35 @@ if (Core_Auth::logged())
 
 		if (strval($json))
 		{
-			// Произошло сохранение с присвоением ID
-			$oAdmin_Form_Autosave = /*$prev_entity_id == 0 && $entity_id
-				? Core_Entity::factory('Admin_Form_Autosave')->getObject($admin_form_id, $dataset, $prev_entity_id)
-				: */Core_Entity::factory('Admin_Form_Autosave')->getObject($admin_form_id, $dataset, $entity_id);
+			try {
+				// Произошло сохранение с присвоением ID
+				$oAdmin_Form_Autosave = /*$prev_entity_id == 0 && $entity_id
+					? Core_Entity::factory('Admin_Form_Autosave')->getObject($admin_form_id, $dataset, $prev_entity_id)
+					: */Core_Entity::factory('Admin_Form_Autosave')->getObject($admin_form_id, $dataset, $entity_id);
 
-			if (is_null($oAdmin_Form_Autosave))
-			{
-				$oAdmin_Form_Autosave = Core_Entity::factory('Admin_Form_Autosave');
-				$oAdmin_Form_Autosave->admin_form_id = $admin_form_id;
-				$oAdmin_Form_Autosave->dataset = $dataset;
-				$oAdmin_Form_Autosave->entity_id = $entity_id;
+				if (is_null($oAdmin_Form_Autosave))
+				{
+					$oAdmin_Form_Autosave = Core_Entity::factory('Admin_Form_Autosave');
+					$oAdmin_Form_Autosave->admin_form_id = $admin_form_id;
+					$oAdmin_Form_Autosave->dataset = $dataset;
+					$oAdmin_Form_Autosave->entity_id = $entity_id;
+				}
+
+				$oAdmin_Form_Autosave->json = $json;
+				$oAdmin_Form_Autosave->datetime = Core_Date::timestamp2sql(time());
+				$oAdmin_Form_Autosave->save();
+
+				$aReturn = array(
+					'id' => $oAdmin_Form_Autosave->id,
+					'status' => 'success'
+				);
 			}
-
-			$oAdmin_Form_Autosave->json = $json;
-			$oAdmin_Form_Autosave->datetime = Core_Date::timestamp2sql(time());
-			$oAdmin_Form_Autosave->save();
-
-			$aReturn = array(
-				'id' => $oAdmin_Form_Autosave->id,
-				'status' => 'success'
-			);
+			catch (Exception $e)
+			{
+				$aReturn = array(
+					'status' => 'error'
+				);
+			}
 		}
 
 		Core::showJson($aReturn);

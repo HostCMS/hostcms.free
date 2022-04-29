@@ -22,7 +22,7 @@
 			<xsl:variable name="shop_id" select="@id" />
 
 			<p>
-				&labelBonus; <b><xsl:value-of select="format-number(sum(/siteuser/transactions/shop_siteuser_transaction[shop_id = $shop_id]/amount_base_currency), '0.##')" /><xsl:text> </xsl:text><xsl:value-of select="/siteuser/shop[@id = $shop_id]/shop_currency/name" /></b>
+				&labelBonus; <b><xsl:value-of select="format-number(sum(/siteuser/transactions/shop_siteuser_transaction[shop_id = $shop_id]/amount_base_currency), '0.##')" /><xsl:text> </xsl:text><xsl:value-of select="/siteuser/shop[@id = $shop_id]/shop_currency/sign" /></b>
 			</p>
 
 			<xsl:choose>
@@ -51,7 +51,7 @@
 			<b><xsl:value-of select="login" /></b><xsl:text> </xsl:text>
 			<xsl:value-of select="date" /><xsl:text> &labelBonuses; </xsl:text>
 			<xsl:value-of select="format-number(sum(/siteuser/transactions/shop_siteuser_transaction[shop_id = $shop_id][shop_order/siteuser_id = $siteuser_id]/amount_base_currency), '0.##')" /><xsl:text> </xsl:text>
-			<xsl:value-of select="/siteuser/shop[@id = $shop_id]/shop_currency/name" />
+			<xsl:value-of select="/siteuser/shop[@id = $shop_id]/shop_currency/sign" />
 
 			<!-- Рефералы пользователя -->
 			<xsl:if test="count(affiliats/siteuser)">

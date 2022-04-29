@@ -45,5 +45,7 @@ return array(
 	'percent_error' => "Знижка не може бути більше 100%!",
 	'siteuser_groups' => "Группа доступа",
 	'all' => 'Все',
-	'not_apply_purchase_discount' => 'Не применять скидки от суммы заказа'
+	'not_apply_purchase_discount' => 'Не применять скидки от суммы заказа',
+	'guid' => '<acronym title="Ідентифікатор товару для формату CommerceML, наприклад ID00029527">Ідентифікатор товару CommerceML</acronym>',
+	'tab_export' => 'Експорт/Імпорт',
 );

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -60,7 +60,7 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 			->caption(Core::_('Shop_Payment_System.shop_id'))
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
 			->options(
-				$this->_fillShops()
+				Shop_Controller::fillShops(CURRENT_SITE)
 			)
 			->value($this->_object->shop_id);
 
@@ -68,13 +68,13 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 
 		$oAdditionalTab->delete($this->getField('shop_currency_id'));
 
-		$Shop_Controller_Edit = new Shop_Controller_Edit($this->_Admin_Form_Action);
-
 		$oCurrencyField = Admin_Form_Entity::factory('Select')
 			->name('shop_currency_id')
 			->caption(Core::_('Shop_Payment_System.shop_currency_id'))
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
-			->options($Shop_Controller_Edit->fillCurrencies())
+			->options(
+				Shop_Controller::fillCurrencies()
+			)
 			->value($this->_object->shop_currency_id);
 
 		$oMainRow1->add($oCurrencyField);
@@ -171,26 +171,6 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 		$this->title($title);
 
 		return $this;
-	}
-
-	/**
-	 * Fill shop list
-	 * @return array
-	 */
-	protected function _fillShops()
-	{
-		$oObject = Core_Entity::factory('Site', CURRENT_SITE);
-
-		$aObjects = $oObject->Shops->findAll();
-
-		$aResult = array(' … ');
-
-		foreach ($aObjects as $oObject)
-		{
-			$aResult[$oObject->id] = $oObject->name;
-		}
-
-		return $aResult;
 	}
 
 	/**

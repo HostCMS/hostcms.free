@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -233,7 +233,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					// ->caption(Core::_('Shop_Order.order_currency'))
 					->divAttr(array('class' => ''))
 					->options(
-						$Shop_Controller_Edit->fillCurrencies()
+						Shop_Controller::fillCurrencies()
 					)
 					->name('shop_currency_id')
 					->value($this->_object->shop_currency_id)
@@ -411,6 +411,8 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			? $this->_object->Shop_Order_Items->findAll(FALSE)
 			: array();
 
+		$oShop_Currency = $this->_object->Shop_Currency;
+
 		foreach ($aShop_Order_Items as $key => $oShop_Order_Item)
 		{
 			// Тип товара
@@ -461,7 +463,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					<td class="hidden-xs hidden-sm">' . $smallImage . '</td>
 					<td><input class="form-control" name="shop_order_item_name_' . $oShop_Order_Item->id . '" value="' . htmlspecialchars($oShop_Order_Item->name) . '" /></td>
 					<td width="25" class="hidden-xs hidden-sm">' . $oShop_Order_Item->showCodesBackend(NULL, $this->_Admin_Form_Controller) . '</i></td>
-					<td width="5%"><input class="form-control" name="shop_order_item_quantity_' . $oShop_Order_Item->id . '" value="' . $oShop_Order_Item->quantity . '" /></td>
+					<td width="5%"><input class="form-control" name="shop_order_item_quantity_' . $oShop_Order_Item->id . '" value="' . Core_Str::hideZeros($oShop_Order_Item->quantity) . '" /></td>
 					<td width="10%"><input class="form-control" name="shop_order_item_price_' . $oShop_Order_Item->id . '" value="' . $oShop_Order_Item->price . '" /></td>
 					<td width="5%" class="hidden-xs hidden-sm"><input class="form-control" name="shop_order_item_rate_' . $oShop_Order_Item->id . '" value="' . $oShop_Order_Item->rate . '" /></td>
 					<td width="10%" class="hidden-xs hidden-sm">' . $type_select . '</td>
@@ -1342,6 +1344,11 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			$this->_object->historyPushChangeStatus();
 			$this->_object->notifyBotsChangeStatus();
+
+			if (Core::moduleIsActive('webhook'))
+			{
+				Webhook_Controller::notify('onShopOrderChangeStatus', $this->_object);
+			}
 		}
 
 		$this->_object->checkShopOrderItemStatuses();

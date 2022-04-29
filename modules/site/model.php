@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Site
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Site_Model extends Core_Entity
 {
@@ -83,14 +83,21 @@ class Site_Model extends Core_Entity
 		'counter_useragent' => array(),
 		'counter_visit' => array(),
 		'cdn_site' => array(),
+		'deal' => array(),
+		'deal_template' => array(),
 		'document' => array(),
 		'document_dir' => array(),
 		'document_status' => array(),
+		'field' => array(),
 		'form' => array(),
 		'forum' => array(),
 		'helpdesk' => array(),
 		'informationsystem' => array(),
 		'informationsystem_dir'	=> array(),
+		'lead' => array(),
+		'lead_need' => array(),
+		'lead_maturity' => array(),
+		'lead_status' => array(),
 		'list' => array(),
 		'list_dir' => array(),
 		'maillist' => array(),
@@ -100,6 +107,8 @@ class Site_Model extends Core_Entity
 		'seo_site' => array(),
 		'shop' => array(),
 		'shop_dir' => array(),
+		'shortlink' => array(),
+		'shortlink_dir' => array(),
 		'siteuser' => array(),
 		'siteuser_property' => array(),
 		'siteuser_property_dir' => array(),
@@ -113,15 +122,7 @@ class Site_Model extends Core_Entity
 		'structure_menu' => array(),
 		'template' => array(),
 		'template_dir' => array(),
-		'shortlink' => array(),
-		'shortlink_dir' => array(),
-		'deal' => array(),
-		'deal_template' => array(),
-		'lead' => array(),
-		'lead_need' => array(),
-		'lead_maturity' => array(),
-		'lead_status' => array(),
-		'field' => array(),
+		'webhook' => array(),
 	);
 
 	/**
@@ -366,6 +367,11 @@ class Site_Model extends Core_Entity
 			$this->Fields->deleteAll(FALSE);
 		}
 
+		if (Core::moduleIsActive('webhook'))
+		{
+			$this->Webhooks->deleteAll(FALSE);
+		}
+
 		$this->Site_Aliases->deleteAll(FALSE);
 
 		$this->Structures->deleteAll(FALSE);
@@ -402,6 +408,9 @@ class Site_Model extends Core_Entity
 			try
 			{
 				Core_File::delete($this->getFaviconPath());
+
+				$this->favicon = '';
+				$this->save();
 			} catch (Exception $e) {}
 		}
 
@@ -522,8 +531,8 @@ class Site_Model extends Core_Entity
 
 	public function imgBackend()
 	{
-		return $this->favicon
-			? '<img src="' . $this->getFaviconHref() . '"/>'
+		return $this->favicon != ''
+			? '<img width="16" src="' . $this->getFaviconHref() . '"/>'
 			: '';
 	}
 

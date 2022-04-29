@@ -7,14 +7,14 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Directory
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Directory_Controller_Tab_Messenger extends Directory_Controller_Tab
 {
 	protected $_directoryTypeName = 'Directory_Messenger_Type';
-	protected $_titleHeaderColor = 'yellow';
+	protected $_titleHeaderColor = 'purple';
 	// protected $_titleHeaderColor = 'bordered-yellow';
 	protected $_faTitleIcon = 'fa fa-comments-o';
 
@@ -72,7 +72,7 @@ class Directory_Controller_Tab_Messenger extends Directory_Controller_Tab
 		if ($this->showPublicityControlElement)
 		{
 			$iMessengerPublic = $oUser_Directory_Messenger ? $oUser_Directory_Messenger->Directory_Messenger->public : 0;
-			
+
 			$oRowElements->add(
 				Admin_Form_Entity::factory('Checkbox')
 					->divAttr(array('class' => 'col-xs-3 col-sm-2 no-padding margin-top-23'))
@@ -81,7 +81,7 @@ class Directory_Controller_Tab_Messenger extends Directory_Controller_Tab
 					->checked($iMessengerPublic ? $iMessengerPublic : FALSE)
 					->caption(Core::_('Directory_Messenger.messenger_public'))
 			);
-			
+
 			// Для нового свойства добавляет скрытое поле, хранящее состояние чекбокса
 			/*if (!$oUser_Directory_Messenger)
 			{
@@ -96,13 +96,13 @@ class Directory_Controller_Tab_Messenger extends Directory_Controller_Tab
 
 		return $oRowElements;
 	}
-	
+
 	public function applyObjectProperty($Admin_Form_Controller, $object)
 	{
 		$windowId = $Admin_Form_Controller->getWindowId();
 
 		$prefix = preg_replace('/[^A-Za-z0-9_-]/', '', $this->prefix);
-		
+
 		// Мессенджеры, установленные значения
 		$aDirectory_Messenger = $object->Directory_Messengers->findAll(FALSE);
 		foreach ($aDirectory_Messenger as $oDirectory_Messenger)

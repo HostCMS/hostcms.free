@@ -8,9 +8,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Session_Phpredis extends Core_Session
 {
@@ -18,7 +18,7 @@ class Core_Session_Phpredis extends Core_Session
 	 * Redis instance
 	 * @var Redis
 	 */
-	protected $_redis = NULL;
+	static protected $_redis = NULL;
 
 	/**
 	 * Session has been read
@@ -66,37 +66,54 @@ class Core_Session_Phpredis extends Core_Session
 	 */
 	public function __construct()
 	{
-		$this->_redis = new Redis();
+		self::_connect();
 
-		$aConfig = Core::$mainConfig['session'] + array(
-			'server' => '127.0.0.1',
-			'port' => 6379,
-			'auth' => NULL,
-			'database' => NULL
-		);
-
-		if (!$this->_redis->connect($aConfig['server'], $aConfig['port']))
-		{
-			$this->_error('Redis connection error. Check \'session\' section, see modules/core/config/config.php');
-		}
-
-		if (!is_null($aConfig['auth']) && !$this->_redis->auth($aConfig['auth']))
-		{
-			$this->_error('Redis connection authenticate error. Check \'session\' section, see modules/core/config/config.php');
-		}
-
-		if (!is_null($aConfig['database']) && !$this->_redis->select($aConfig['database']))
-		{
-			$this->_error('Redis changing the selected database error. Check \'session\' section, see modules/core/config/config.php');
-		}
-
-		if (is_null($this->_prefix))
-		{
-			$this->_prefix = Core::crc32(CMS_FOLDER);
-		}
+		is_null($this->_prefix)
+			&& $this->_prefix = Core::crc32(CMS_FOLDER);
 
 		// Should be INT
 		$this->_ttl = intval(ini_get('session.gc_maxlifetime'));
+	}
+
+	static protected _connect()
+	{
+		if (is_null(self::_redis))
+		{
+			self::_redis = new Redis();
+
+			$aConfig = Core::$mainConfig['session'] + array(
+				'server' => '127.0.0.1',
+				'port' => 6379,
+				'auth' => NULL,
+				'database' => NULL
+			);
+
+			if (!self::_redis->connect($aConfig['server'], $aConfig['port']))
+			{
+				self::_error('Redis connection error. Check \'session\' section, see modules/core/config/config.php');
+				self::_redis = NULL;
+
+				return FALSE;
+			}
+
+			if (!is_null($aConfig['auth']) && !self::_redis->auth($aConfig['auth']))
+			{
+				self::_error('Redis connection authenticate error. Check \'session\' section, see modules/core/config/config.php');
+				self::_redis = NULL;
+
+				return FALSE;
+			}
+
+			if (!is_null($aConfig['database']) && !self::_redis->select($aConfig['database']))
+			{
+				self::_error('Redis changing the selected database error. Check \'session\' section, see modules/core/config/config.php');
+				self::_redis = NULL;
+
+				return FALSE;
+			}
+		}
+
+		return TRUE;
 	}
 
 	/**
@@ -135,7 +152,7 @@ class Core_Session_Phpredis extends Core_Session
 
 		if ($this->_lock($id))
 		{
-			$value = $this->_redis->get($key);
+			$value = self::_redis->get($key);
 
 			$this->_read = TRUE;
 
@@ -150,7 +167,7 @@ class Core_Session_Phpredis extends Core_Session
 					// Should be INT
 					$this->_ttl = intval($aUnpackedHash[1]);
 
-					$this->_redis->expire($key, $this->_ttl);
+					self::_redis->expire($key, $this->_ttl);
 				}
 
 				return substr($value, 4);
@@ -172,7 +189,7 @@ class Core_Session_Phpredis extends Core_Session
 		{
 			$key = $this->_getKey($id);
 
-			$this->_redis->set($key, pack($this->_format, $this->_ttl) . $value, $this->_ttl);
+			self::_redis->set($key, pack($this->_format, $this->_ttl) . $value, $this->_ttl);
 
 			$this->_unlock($id);
 
@@ -193,7 +210,7 @@ class Core_Session_Phpredis extends Core_Session
 		{
 			$key = $this->_getKey($id);
 
-			$this->_redis->del($key);
+			self::_redis->del($key);
 
 			$this->_unlock($id);
 
@@ -221,7 +238,7 @@ class Core_Session_Phpredis extends Core_Session
 			// Should be INT
 			$this->_ttl = intval($maxlifetime);
 
-			$this->_redis->expire($key, $this->_ttl);
+			self::_redis->expire($key, $this->_ttl);
 		}
 
 		// Set cookie with expiration date
@@ -256,8 +273,8 @@ class Core_Session_Phpredis extends Core_Session
 		while (!connection_aborted())
 		{
 			// Redis 2.6.12+
-			if ($this->_redis->set($this->_lockKey, $this->_lockToken, array('NX')))
-			//if ($this->_redis->setNx($this->_lockKey, $this->_lockToken))
+			if (self::_redis->set($this->_lockKey, $this->_lockToken, array('NX')))
+			//if (self::_redis->setNx($this->_lockKey, $this->_lockToken))
 			{
 				return TRUE;
 			}
@@ -266,7 +283,7 @@ class Core_Session_Phpredis extends Core_Session
 
 			if ($iTime > $this->_lockTimeout)
 			{
-				$this->_error('HostCMS session lock error: Timeout. Please wait! Refreshing page ... <script>setTimeout(function() {window.location.reload(true);}, 1000);</script>');
+				self::_error('HostCMS session lock error: Timeout. Please wait! Refreshing page ... <script>setTimeout(function() {window.location.reload(true);}, 1000);</script>');
 			}
 
 			usleep($this->_nextStepDelay);
@@ -289,7 +306,7 @@ class Core_Session_Phpredis extends Core_Session
 			return 0
 		end';
 
-		$this->_redis->eval($script, array($this->_lockKey, $this->_redis->_serialize($this->_lockToken)), 1);
+		self::_redis->eval($script, array($this->_lockKey, self::_redis->_serialize($this->_lockToken)), 1);
 
 		$this->_lockKey = NULL;
 

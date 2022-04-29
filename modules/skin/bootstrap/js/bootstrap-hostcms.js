@@ -267,6 +267,24 @@ function isEmpty(str) {
 				},
 			});
 		},
+		showCounterparty: function(object) {
+			var $object = $(object),
+				$prev = $object.prev(),
+				$parent = $object.parents('.counterparty-block');
+
+			$parent.find('li.hidden').removeClass('hidden');
+			$prev.addClass('showed');
+			$object.remove();
+		},
+		showKanbanCounterparty: function(object) {
+			var $object = $(object),
+				// $prev = $object.prev();
+				$parent = $object.parents('.row');
+
+			$parent.find('.deal-client-row.hidden').removeClass('hidden');
+			// $prev.addClass('showed');
+			$object.remove();
+		},
 		showAutosave: function($form)
 		{
 			var admin_form_id = $form.data('adminformid');
@@ -275,7 +293,7 @@ function isEmpty(str) {
 			{
 				var dataset = $form.data('datasetid'),
 					entity_id = $('input[name = id]', $form).val();
-				
+
 				$.ajax({
 					url: '/admin/admin_form/index.php',
 					data: { 'show_autosave': 1, 'admin_form_id': admin_form_id, 'dataset': dataset, 'entity_id': entity_id },
@@ -1595,9 +1613,9 @@ function isEmpty(str) {
 						try {
 							localStorage.setItem('bookmarks', JSON.stringify(resultData));
 						} catch (e) {
-							if (e == QUOTA_EXCEEDED_ERR) {
-								console.log('localStorage: QUOTA_EXCEEDED_ERR');
-							}
+							// if (e == QUOTA_EXCEEDED_ERR) {
+								console.log('localStorage error: ' + e);
+							// }
 						}
 					}, $.refreshBookmarksCallback]
 				});
@@ -1960,16 +1978,18 @@ function isEmpty(str) {
 			});
 		},
 		_kanbanStepMoveCallback: function(result){
-
 			if (result.status == 'success')
 			{
 				if (result.update)
 				{
-					var jKanban = $('.kanban-board .kanban-board-header');
+					// var jKanban = $('.kanban-board .kanban-board-header');
+					var jKanban = $('.kanban-board');
 
 					$.each(result.update, function(id, object){
-						jKanban.find('#data-' + id).html(object.data);
-						// jKanban.find('#data-' + id + ' .kanban-deals-amount').text(object.amount);
+						// jKanban.find('#data-' + id).html(object.data);
+						jKanban.find('#data-' + id + ' .kanban-deals-count').text(object.data.count ? object.data.count : '');
+						// jKanban.find('#data-' + id + ' #amount').empty();
+						jKanban.find('#data-' + id + ' .kanban-deals-amount').text(typeof object.data.amount !== 'undefined' ? object.data.amount : object.data);
 					});
 				}
 			}
@@ -1981,10 +2001,9 @@ function isEmpty(str) {
 			}
 		},
 		_kanbanStepMoveLeadCallback: function(result){
-
 			if (result.status == 'success')
 			{
-				if(result.last_step == 1)
+				if (result.last_step == 1)
 				{
 					var id = 'hostcms[checked][0][' + result.lead_id + ']',
 						/*id = 'hostcms[checked][0][' + result itemObject.id + ']',*/
@@ -1997,11 +2016,13 @@ function isEmpty(str) {
 
 					$.adminLoad({path: '/admin/lead/index.php', action: 'morphLead', operation: 'finish', post: post, additionalParams: '', windowId: result.window_id});
 				}
-				else if(result.type == 2)
+				else if (result.type == 2)
 				{
 					//$(itemObject).addClass('failed');
 					$('li#lead-' + result.lead_id).addClass('failed');
 				}
+
+				$._kanbanStepMoveCallback(result);
 			}
 		},
 		sortableKanban: function(options) {
@@ -2010,22 +2031,140 @@ function isEmpty(str) {
 				container: null,
 				updateData: false,
 				windowId: 'id_content',
-				moveCallback: $._kanbanStepMoveCallback
+				moveCallback: $._kanbanStepMoveCallback,
+				handle: ".drag-handle"
 			}, options);
 
+			$(options.container).on('mousedown', function(e) {
+
+				//console.log('options.container mousedown', e.target);
+
+				var $this = $(this), sortableLi = $(e.target).closest(".connectedSortable > li:not('.failed'):not('.finish')");
+
+
+				if (sortableLi.length)
+				{
+					$(this).data('mousedownLi', sortableLi.attr('id'));
+
+					//console.log($(this).data('mousedownLi'));
+
+					var currentSortableList = sortableLi.parents('.connectedSortable');
+
+					console.log('mousedown');
+					console.log("currentSortableList.outerHeight()", currentSortableList.outerHeight());
+					console.log("$(this).outerHeight()", $(this).outerHeight());
+				}
+			})
+			.on('mousemove', function(){
+
+				var $this = $(this), currentSortableList, kanbanActionWrapper, delta;
+
+				if ($this.data('mousedownLi'))
+				{
+					//$(options.container + ' .kanban-action-wrapper').removeClass('hidden');
+					console.log('mousemove');
+
+					currentSortableList = $this.find('#' + $this.data('mousedownLi')).parents('.connectedSortable');
+
+					kanbanActionWrapper = $(options.container + ' .kanban-action-wrapper');
+
+					delta = currentSortableList.offset().top + currentSortableList.outerHeight() - kanbanActionWrapper.offset().top
+
+					//console.log('currentSortableList.offset().top + currentSortableList.outerHeight()', currentSortableList.offset().top + currentSortableList.outerHeight());
+					//console.log('kanbanActionWrapper.offset().top', kanbanActionWrapper.offset().top);
+					console.log('delta', delta);
+
+					if (delta > 0)
+					{
+						$this.data(
+							{
+								containerOriginalHeight:  $this.outerHeight(),
+								currentSortableListHeight: currentSortableList.outerHeight()
+							}
+						);
+
+						console.log("$this.outerHeight()", $this.outerHeight());
+						console.log("currentSortableList.outerHeight()", currentSortableList.outerHeight());
+
+						//currentSortableList.outerHeight(currentSortableList.outerHeight() - delta - 5);
+					}
+
+					// currentSortableList.height(300);
+				}
+
+			})
+			.on('mouseup', function() {
+
+				var $this = $(this), currentSortableList;
+
+
+				if ($this.data('containerOriginalHeight'))
+				{
+					//console.log('$this.data()', $this.data());
+					currentSortableList = $this.find('#' + $this.data('mousedownLi')).parents('.connectedSortable');
+
+					console.log('mouseup');
+					console.log('currentSortableList.outerHeight()', currentSortableList.outerHeight());
+
+					//currentSortableList.outerHeight($this.data('currentSortableListHeight'));
+
+					//$this.outerHeight($this.data('containerOriginalHeight'));
+
+					$this
+						.removeData('containerOriginalHeight')
+						.removeData('currentSortableListHeight');
+				}
+
+				$this.removeData('mousedownLi');
+			});
+
+
 			$(options.container + ' .connectedSortable').sortable({
+				//appendTo: document.body,
 				items: "> li:not('.failed'):not('.finish')",
 				connectWith: options.container + ' .connectedSortable',
 				placeholder: 'placeholder',
-				handle: ".drag-handle",
+				// handle: ".drag-handle",
+				handle: options.handle,
 				helper: "clone",
-				//helper: "original",
+				/* helper: function (event, item) {
+
+					//!!! Для корректной работы хелпер надо прикреплять к body
+					var $item = $(item),
+						positions = $item.offset(),
+						//positions = $item.position(),
+						$helper = $item.clone(),
+						//$container = $('body');
+						$container = $item.parents('.kanban-board');
+						//$kanbanBoard = $item.parents('.kanban-board');
+
+					$helper
+						.addClass('body-ui-sortable-helper')
+						.css('z-index', 100);
+
+					console.log('item positions', positions);
+
+					$container.append($helper);
+
+					//+ $(window).scrollTop() + 200
+					$helper.offset({ top: positions.top , left: positions.left});
+					$helper.find('.well').css({'background-color': 'red'});
+					//$helper.css({ top: positions.top, left: positions.left});
+
+					console.log('$helper.position()', $helper.offset());
+					console.log("$(window).scrollTop()", $(window).scrollTop());
+
+					return $helper;
+				}, */
 				tolerance: "pointer",
 				// revert: true,
 				scroll: false,
+				//scroll: true,
 				//containment:  'document',
 				//scroll: true,
 				receive: function (event, ui) {
+
+					console.log('receive');
 					var sender_id = $(ui.sender[0]).data('step-id'),
 						target_id = $(this).data('step-id'),
 						$element = $(event.target),
@@ -2037,8 +2176,10 @@ function isEmpty(str) {
 							.addClass('hidden')
 							.addClass('just-hidden');
 
-						$element.css('background-color', $element.data('old-background'));
-						$element.css('color', '#fff');
+						// $element.css('background-color', $element.data('old-background'));
+						// $element.css('color', '#fff');
+
+						$element.css('opacity', 1);
 
 						target_id = $element.data('id');
 
@@ -2057,7 +2198,57 @@ function isEmpty(str) {
 				},
 				start: function (event, ui) {
 
-					var $item = $(ui.item[0]), $ul = $item.parent();
+					console.log('start event', event);
+
+					var kanbanActionWrapper = $(options.container + ' .kanban-action-wrapper');
+
+					//console.log(kanbanActionWrapper.offset().top - kanbanActionWrapper.scrollTop());
+					//console.log(kanbanActionWrapper.offset().top);
+
+					//currentSortableList = ui.item.parents('.connectedSortable');
+
+					//var delta = currentSortableList.offset().top + currentSortableList.outerHeight() - kanbanActionWrapper.offset().top
+
+					/* if (delta > 0)
+					{
+						currentSortableList.outerHeight(currentSortableList.outerHeight() - delta - 10);
+					}  */
+
+					//console.log('start delta', delta);
+
+					//currentSortableList.height(300);
+
+					//console.log("ui.helper", ui.helper);
+					//console.log("ui.item", ui.item);
+
+					//ui.helper.children('.well').css('background-color', 'red');
+
+					//console.log('event', event);
+					//kanbanBoardRow
+
+
+					var $item = $(ui.item[0]), $ul = $item.parent(),
+						kanbanBoardWrapper = $item.parents('.kanban-board').children('.kanban-wrapper'),
+						//positions = ui.item.offset(),
+						$container = ui.item.parents('.kanban-board');
+
+						//console.log('before item positions', positions);
+
+						//console.log("ui.helper.offset()", ui.helper.offset());
+						//alert(11);
+
+
+					if (kanbanBoardWrapper.hasClass('scrollable'))
+					{
+						//console.log('!!!!!');
+						kanbanBoardWrapper
+							.attr('data-draggingItem', true)
+							.data('draggingItemId', $item.attr('id'));
+
+						$('body').on('mousemove', moveKanbanItem);
+							//.data("scrollingRemoved", 1)
+							//.removeClass("scrollable");
+					}
 
 					//var clone = $('<li>').html($item.html());
 					//var clone = $('<li class="222" style="">1111<li>');
@@ -2068,23 +2259,70 @@ function isEmpty(str) {
 					//$(options.container + ' .connectedSortable').trigger('sortover');
 
 					//clone.attr('class', '222').attr('id', '111111111');
-					//$(ui.helper[0]).before(clone);
-					//$item.before(clone);
+					// $(ui.helper[0]).before(clone);
+					// $item.before(clone);
 
 					//$ul.outerHeight($ul.outerHeight() + 90);
 
-					$(options.container + ' .kanban-action-wrapper').removeClass('hidden');
+					//$(options.container + ' .kanban-action-wrapper').removeClass('hidden');
+					//$(options.container + ' .kanban-action-wrapper').animate({height: "100px"}, 500);
+					//$(options.container + ' .kanban-action-wrapper').css("visibility", "visible");
 
 					$item.removeClass('cancel-' + $item.data('id'));
 
 					// Ghost
-					$(options.container + ' .connectedSortable').find('li:hidden')/*.not('.placeholder')*/
+					//alert(11);
+					/*.not('.placeholder')*/
+				 	var hiddenElement = $(options.container + ' .connectedSortable').find('li:hidden')
 						.addClass('ghost-item')
 						.addClass('cancel-' + $item.data('id'))
 						.css('opacity', .5)
 						.show();
+
+					//var positions = ui.item.offset();
+					/*var positions = hiddenElement.offset();
+
+					console.log('after item positions', positions);
+
+					ui.item.css('background-color', 'red');
+
+					ui.helper
+						.addClass('body-ui-sortable-helper')
+						.css('z-index', 100);
+
+					ui.helper.offset({ top: positions.top , left: positions.left});
+					*/
+
+				//	$container.append(ui.helper);
+
+					//console.log('ui.helper.offset()', ui.helper.offset());*/
+
 				},
 				stop: function (event, ui) {
+
+					//$(options.container + ' .kanban-action-wrapper').css("visibility", "hidden");
+
+					console.log("$item.ui.item.parents('.connectedSortable')", ui.item.parents('.connectedSortable'));
+
+					//currentSortableList.removeAttr('style');
+
+					//return;
+
+					//console.log('stop');
+
+					//kanbanBoardRow
+					//
+					var kanbanBoardWrapper = $(ui.item[0]).parents('.kanban-board').children(".kanban-wrapper");
+
+					if (kanbanBoardWrapper.attr('data-draggingItem'))
+					{
+						kanbanBoardWrapper
+							.removeAttr('data-draggingItem')
+							.removeData('draggingItemId');
+
+						$('body').unbind('mousemove', moveKanbanItem);
+					}
+
 					ui.item.parents('.kanban-action-item').find('.kanban-action-item-name').addClass('hidden');
 					ui.item.parents('.kanban-action-item').find('.return').removeClass('hidden');
 
@@ -2109,21 +2347,30 @@ function isEmpty(str) {
 					//$(options.container + ' .connectedSortable').sortable("option", "scroll", true);
 				},
 				over: function (event, ui) {
+
+					console.log('over');
+
 					var $element = $(event.target);
 
 					if ($element.hasClass('kanban-action-item'))
 					{
-						$element.css('background-color', $element.data('background'));
-						$element.css('color', $element.data('old-background'));
+						$element.css('opacity', 0.6);
+
+						var bg = $element.data('hover-bg');
+						$(ui.helper[0]).find('.well').css('background-color', bg);
 					}
 				},
 				out: function (event, ui) {
+					console.log('out');
+
 					var $element = $(event.target);
 
 					if ($element.hasClass('kanban-action-item'))
 					{
-						$element.css('background-color', $element.data('old-background'));
-						$element.css('color', '#fff');
+						$element.css('opacity', 1);
+
+						ui.helper !== null
+							&& $(ui.helper[0]).find('.well').css('background-color', '#fff');
 					}
 
 					//$(options.container + ' .connectedSortable').sortable("option", "scroll", true);
@@ -2158,9 +2405,133 @@ function isEmpty(str) {
 
 				$(options.container + ' .connectedSortable').find('.just-hidden').removeClass('hidden');
 			});
+
+			$(function(){
+
+				prepareKanbanBoard();
+				$(window).on('resize', prepareKanbanBoard);
+			});
+
+			// Обработчик перемещения элемента канбана
+			function moveKanbanItem(event){
+
+				//kanbanBoardRow
+				var kanbanBoard = $(event.target).parents('.kanban-board'), kanbanBoardWrapper = kanbanBoard.find('.scrollable');
+
+				if	(kanbanBoardWrapper.length)
+				{
+
+					var draggingItemHelper = kanbanBoard.find('#' + kanbanBoardWrapper.data('draggingItemId') + '.ui-sortable-helper'),
+						draggingItemHelperOffset = draggingItemHelper.offset(),
+						draggingItemHelperWidth = draggingItemHelper.width(),
+						draggingItemHelperOffsetLeft = draggingItemHelperOffset.left, // Левая граница хэлпера
+						draggingItemHelperOffsetRight = draggingItemHelperOffsetLeft + draggingItemHelperWidth, // Правая граница хэлпера
+						kanbanBoardOffsetLeft = kanbanBoard.offset().left,
+						kanbanBoardOffsetRight = kanbanBoardOffsetLeft + kanbanBoard.innerWidth(),
+						kanbanBoardRowMaxScrollLeft = kanbanBoardWrapper.get(0).scrollWidth - kanbanBoardWrapper.innerWidth(),
+						deltaMousePosition = kanbanBoardWrapper.data('currentMousePositionX') - event.pageX,
+						kanbanBoardRowScrollLeft, newKanbanBoardRowScrollLeft, deltaMove,
+						deltaBorder = deltaMousePosition > 0
+							? draggingItemHelperOffsetLeft - kanbanBoardOffsetLeft
+							: kanbanBoardOffsetRight - draggingItemHelperOffsetRight;
+
+					if (deltaBorder < 10)
+					{
+						kanbanBoardRowScrollLeft = kanbanBoardWrapper.scrollLeft();
+
+						deltaMove = deltaMousePosition * 15;
+
+						if (kanbanBoardRowScrollLeft > 0 || kanbanBoardRowScrollLeft == 0 && kanbanBoardRowScrollLeft < kanbanBoardRowMaxScrollLeft)
+						{
+							if (kanbanBoardRowScrollLeft > 0 )
+							{
+								newKanbanBoardRowScrollLeft = kanbanBoardRowScrollLeft > deltaMove ? kanbanBoardRowScrollLeft - deltaMove : 0;
+							}
+							else
+							{
+								newKanbanBoardRowScrollLeft = kanbanBoardRowScrollLeft - deltaMove;
+
+								newKanbanBoardRowScrollLeft = kanbanBoardRowMaxScrollLeft > newKanbanBoardRowScrollLeft
+									? newKanbanBoardRowScrollLeft
+									: kanbanBoardRowMaxScrollLeft
+							}
+
+							kanbanBoardWrapper.scrollLeft(newKanbanBoardRowScrollLeft);
+						}
+					}
+
+					kanbanBoardWrapper.data('currentMousePositionX', event.pageX);
+				}
+			}
+
+			function prepareKanbanBoard(){
+
+				//console.log('prepareKanbanBoard');
+				//kanbanBoardRow
+
+				var kanbanBoardWrapper = $('.kanban-board > .kanban-wrapper');
+
+				if ( kanbanBoardWrapper.length && kanbanBoardWrapper.get(0).scrollWidth > kanbanBoardWrapper.innerWidth())
+				{
+					kanbanBoardWrapper
+						.addClass('scrollable')
+						.on('mousedown', function (e){
+
+							$(this)
+								.data({
+									currentMousePositionX: e.pageX
+								})
+								.attr('data-mousedown', true)
+								.parent()
+								.addClass('noselect');
+
+							$(window).one('mouseup', function (){
+
+								kanbanBoardWrapper
+									.removeAttr('data-mousedown')
+									.parent()
+									.removeClass('noselect');
+							});
+						})
+						.on('mousemove', function (e){
+
+							var $this = $(this), kanbanBoard = $this.parent('.kanban-board'), deltaMousePosition;
+
+							if ($this.attr('data-mousedown') && !$this.attr('data-draggingItem'))
+							{
+								deltaMousePosition = $this.data('currentMousePositionX') - e.pageX;
+
+								// Двигаем мышь налево
+								if (deltaMousePosition > 0 && ($this.scrollLeft() < $this.get(0).scrollWidth - $this.innerWidth()))
+								{
+									$this.scrollLeft($this.scrollLeft() + deltaMousePosition);
+								}
+								else if($this.scrollLeft() > 0)
+								{
+									$this.scrollLeft($this.scrollLeft() + deltaMousePosition);
+								}
+
+								$this.data('currentMousePositionX', e.pageX);
+							}
+						});
+				}
+				else
+				{
+					kanbanBoardWrapper.removeClass('scrollable');
+				}
+			}
 		},
 		closeActions: function(container, ui) {
+
+			console.log('closeActions');
+
+			//$(container + ' .kanban-action-wrapper').animate({height: "0px"}, 500);
+			//$(container + ' .kanban-action-wrapper').css("visibility", "hidden");
+
+			return;
+
 			$(container + ' .kanban-action-wrapper').slideUp("slow", function(){
+
 				$(this)
 					.addClass('hidden')
 					.removeAttr('style');
@@ -2176,7 +2547,7 @@ function isEmpty(str) {
 			});
 		},
 		showKanban: function(container) {
-			var $kanban = $(container + ' > .row:first'),
+			var $kanban = $(container + ' > .kanban-wrapper:first'),
 				$prevNav = $('.horizon-prev', container),
 				$nextNav = $('.horizon-next', container);
 
@@ -2203,14 +2574,19 @@ function isEmpty(str) {
 				// Set mousewheel event
 				$kanban.on({
 
+					/*
 					'mousewheel': function(event, delta) {
 
-						this.scrollLeft -= (delta * 30);
+						console.log('mousewheel event', event);
+
+						 this.scrollLeft -= (delta * 30);
 
 						showButtons(this.scrollLeft);
 
 						event.preventDefault();
-					},
+
+					}, */
+
 					'touchmove scroll': function() {
 
 						showButtons(this.scrollLeft);
@@ -2400,8 +2776,9 @@ function isEmpty(str) {
 				modalBody = dialog.find('.modal-body'),
 				content = dialog.find('.modal-body .bootbox-body div');
 
-			dialog.on('shown.bs.modal', function () {
+			// console.log(settings.className);
 
+			dialog.on('shown.bs.modal', function () {
 				$('html').css('overflow', 'hidden');
 			});
 
@@ -2433,9 +2810,7 @@ function isEmpty(str) {
 			//{
 			var oContentBlock = settings.AppendTo ? $(settings.AppendTo) : $(window),
 				widthContentBlock = oContentBlock.width() - 50,
-				widthModalDialog = settings.width && settings.width < widthContentBlock ? settings.width : widthContentBlock;
-
-			//console.log('modalWindow');
+				widthModalDialog = settings.width && $.isNumeric(settings.width) && settings.width > widthContentBlock ? widthContentBlock : settings.width;
 
 			dialog
 				.find('.modal-dialog')
@@ -2902,9 +3277,9 @@ function isEmpty(str) {
 							try {
 								localStorage.setItem('chat_messages_list', JSON.stringify(result));
 							} catch (e) {
-								if (e == QUOTA_EXCEEDED_ERR) {
-									console.log('localStorage: QUOTA_EXCEEDED_ERR');
-								}
+								// if (e == QUOTA_EXCEEDED_ERR) {
+									console.log('localStorage error: ' + e);
+								// }
 							}
 						}, $.refreshMessagesListCallback]
 					});
@@ -2993,9 +3368,9 @@ function isEmpty(str) {
 							try {
 								localStorage.setItem('chat', JSON.stringify(data));
 							} catch (e) {
-								if (e == QUOTA_EXCEEDED_ERR) {
-									console.log('localStorage: QUOTA_EXCEEDED_ERR');
-								}
+								// if (e == QUOTA_EXCEEDED_ERR) {
+									console.log('localStorage: ' + e);
+								// }
 							}
 						}, $.refreshChatCallback]
 					});
@@ -3079,9 +3454,9 @@ function isEmpty(str) {
 							try {
 								localStorage.setItem('chat_user_statuses', JSON.stringify(result));
 							} catch (e) {
-								if (e == QUOTA_EXCEEDED_ERR) {
-									console.log('localStorage: QUOTA_EXCEEDED_ERR');
-								}
+								// if (e == QUOTA_EXCEEDED_ERR) {
+									console.log('localStorage: ' + e);
+								// }
 							}
 						}, $.refreshUserStatusesCallback]
 					});
@@ -3681,9 +4056,9 @@ function isEmpty(str) {
 						try {
 							localStorage.setItem('events', JSON.stringify(resultData));
 						} catch (e) {
-							if (e == QUOTA_EXCEEDED_ERR) {
-								console.log('localStorage: QUOTA_EXCEEDED_ERR');
-							}
+							// if (e == QUOTA_EXCEEDED_ERR) {
+								console.log('localStorage error: ' + e);
+							// }
 						}
 					}, $.refreshEventsCallback]
 				});
@@ -4183,9 +4558,9 @@ function isEmpty(str) {
 				try {
 					localStorage.setItem(itemName, JSON.stringify(object));
 				} catch (e) {
-					if (e == QUOTA_EXCEEDED_ERR) {
-						console.log('localStorage: QUOTA_EXCEEDED_ERR');
-					}
+					// if (e == QUOTA_EXCEEDED_ERR) {
+						console.log('localStorage: ' + e);
+					// }
 				}
 			}
 		},
@@ -7028,7 +7403,7 @@ function isEmpty(str) {
 								.append($('<div class="image">' + (image_small.length ? '<img class="backend-thumbnail" src="' + image_small + '">' : '') + '</div>'))
 								.append($('<div class="name"><a>' + $.escapeHtml(item.label) + '</a></div>'))
 								.append($('<div class="count">' + (count.length ? '<span class="label label-' + color + ' white">' + item.count + '</span>' : '') + '</div>'))
-								.append($('<div class="price">').text(item.price_with_tax + ' ' + item.currency))
+								.append($('<div class="price">').text(item.price_with_tax_formatWithCurrency))
 								.append($('<div class="marking">').text(item.marking))
 								.appendTo(ul);
 						}
@@ -8782,8 +9157,12 @@ function formAutosave()
 				var date = new Date();
 
 				$('h5.row-title').find('.autosave-icon').remove();
-				$('h5.row-title').append('<i title="' + i18n['autosave_icon_title'] + date.toLocaleString() + '" class="fas fa-save autosave-icon azure"></i>');
-				$('h5.row-title').find('.autosave-icon').fadeOut(300).fadeIn(300);
+
+				if (answer.status == 'success')
+				{
+					$('h5.row-title').append('<i title="' + i18n['autosave_icon_title'] + date.toLocaleString() + '" class="fas fa-save autosave-icon azure"></i>');
+					$('h5.row-title').find('.autosave-icon').fadeOut(300).fadeIn(300);
+				}
 			}
 		});
 	}

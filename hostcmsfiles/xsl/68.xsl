@@ -36,7 +36,7 @@
 					<!-- Частичная оплата с лицевого счета -->
 					<xsl:if test="siteuser/transaction_amount/node() and siteuser/transaction_amount &gt; 0">
 						<p>
-					<label><input type="checkbox" name="partial_payment_by_personal_account" /> &labelPartiallyPay; <strong><xsl:value-of select="siteuser/transaction_amount" /><xsl:text> </xsl:text><xsl:value-of select="shop_currency/name" /></strong></label>
+					<label><input type="checkbox" name="partial_payment_by_personal_account" /> &labelPartiallyPay; <strong><xsl:value-of select="siteuser/transaction_amount" /><xsl:text> </xsl:text><xsl:value-of select="shop_currency/sign" /></strong></label>
 						</p>
 					</xsl:if>
 					

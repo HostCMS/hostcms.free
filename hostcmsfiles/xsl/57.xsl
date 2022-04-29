@@ -51,7 +51,7 @@
 										<td></td>
 										<td>
 											<!-- Amount -->
-											<xsl:value-of select="format-number($available_bonuses * -1, '### ##0,00', 'my')"/><xsl:text> </xsl:text><xsl:value-of select="/shop/shop_currency/name" disable-output-escaping="yes"/>
+											<xsl:value-of select="format-number($available_bonuses * -1, '### ##0,00', 'my')"/><xsl:text> </xsl:text><xsl:value-of select="/shop/shop_currency/sign" disable-output-escaping="yes"/>
 										</td>
 										<xsl:if test="count(/shop/shop_warehouse)">
 											<td></td>
@@ -66,7 +66,7 @@
 									<td></td>
 									<td></td>
 									<td>
-										<xsl:value-of select="format-number(total_amount, '### ##0,00', 'my')"/><xsl:text> </xsl:text><xsl:value-of disable-output-escaping="yes" select="/shop/shop_currency/name"/>
+										<xsl:value-of select="format-number(total_amount, '### ##0,00', 'my')"/><xsl:text> </xsl:text><xsl:value-of disable-output-escaping="yes" select="/shop/shop_currency/sign"/>
 									</td>
 									<td></td>
 									<xsl:if test="count(/shop/shop_warehouse)">
@@ -160,7 +160,7 @@
 					</xsl:for-each>
 				</xsl:variable>
 				
-				<xsl:value-of select="format-number(sum(exsl:node-set($subTotals)/sum), '### ##0,00', 'my')"/><xsl:text> </xsl:text><xsl:value-of disable-output-escaping="yes" select="/shop/shop_currency/name"/>
+				<xsl:value-of select="format-number(sum(exsl:node-set($subTotals)/sum), '### ##0,00', 'my')"/><xsl:text> </xsl:text><xsl:value-of disable-output-escaping="yes" select="/shop/shop_currency/sign"/>
 			</td>
 			<xsl:if test="count(/shop/shop_warehouse)">
 			<td><xsl:text> </xsl:text></td>
@@ -234,7 +234,7 @@
 			<td></td>
 			<td>
 				<!-- Amount -->
-				<xsl:value-of select="format-number(discount_amount * -1, '### ##0,00', 'my')"/><xsl:text> </xsl:text><xsl:value-of select="/shop/shop_currency/name" disable-output-escaping="yes"/>
+				<xsl:value-of select="format-number(discount_amount * -1, '### ##0,00', 'my')"/><xsl:text> </xsl:text><xsl:value-of select="/shop/shop_currency/sign" disable-output-escaping="yes"/>
 			</td>
 			<xsl:if test="count(/shop/shop_warehouse)">
 				<td></td>
@@ -253,7 +253,7 @@
 			<td></td>
 			<td>
 				<!-- Amount -->
-				<xsl:value-of select="format-number(discount_amount * -1, '### ##0,00', 'my')"/><xsl:text> </xsl:text><xsl:value-of select="/shop/shop_currency/name" disable-output-escaping="yes"/>
+				<xsl:value-of select="format-number(discount_amount * -1, '### ##0,00', 'my')"/><xsl:text> </xsl:text><xsl:value-of select="/shop/shop_currency/sign" disable-output-escaping="yes"/>
 			</td>
 			<xsl:if test="count(/shop/shop_warehouse)">
 				<td></td>

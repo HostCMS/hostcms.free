@@ -17,9 +17,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Session
 {
@@ -61,17 +61,32 @@ abstract class Core_Session
 
 	/**
 	 * Cookie Lifetime, default 31536000
-	 * @return int
+	 * @var int
 	 */
 	static protected $_cookieLifetime = 31536000;
 
 	/**
 	 * Set Cookie Lifetime
-	 * @param int
+	 * @param int $lifetime
 	 */
 	static public function cookieLifetime($lifetime)
 	{
 		self::$_cookieLifetime = $lifetime;
+	}
+
+	/**
+	 * Domain, auto-detected by default
+	 * @var string
+	 */
+	static protected $_domain = NULL;
+
+	/**
+	 * Set Domain
+	 * @param string $domain
+	 */
+	static public function domain($domain)
+	{
+		self::$_domain = $domain;
 	}
 
 	/**
@@ -99,11 +114,13 @@ abstract class Core_Session
 				//ini_set('session.gc_maxlifetime', self::$_cookieLifetime);
 			}
 
-			list($domain) = explode(':', strtolower(Core_Array::get($_SERVER, 'HTTP_HOST')));
+			is_null(self::$_domain)
+				? list($domain) = explode(':', strtolower(Core_Array::get($_SERVER, 'HTTP_HOST')))
+				: $domain = self::$_domain;
 
 			if (!empty($domain) && !headers_sent())
 			{
-				// Обрезаем www у домена
+				// Cut 'www.'
 				strpos($domain, 'www.') === 0 && $domain = substr($domain, 4);
 
 				// Явное указание domain возможно только для домена второго и более уровня
@@ -330,7 +347,7 @@ abstract class Core_Session
 	 * Show error
 	 * @param string $content
 	 */
-	protected function _error($content)
+	static protected function _error($content)
 	{
 		self::$_error = $content;
 	}

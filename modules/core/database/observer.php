@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Database
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Database_Observer
 {
@@ -137,6 +137,8 @@ class Core_Database_Observer
 						{
 							$aLog['explain'][] = $row;
 						}
+						
+						$oExplainCore_DataBase->free();
 					}
 				}*/
 

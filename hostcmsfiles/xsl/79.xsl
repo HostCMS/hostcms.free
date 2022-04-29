@@ -36,7 +36,7 @@
 
 						<br />&labelSum; <b><xsl:value-of select="format-number(total_amount, '### ##0,00', 'my')"/>
 						<xsl:text> </xsl:text>
-						<xsl:value-of disable-output-escaping="yes" select="shop_currency/name"/></b>
+						<xsl:value-of disable-output-escaping="yes" select="shop_currency/sign"/></b>
 					</p>
 
 					<p><a href="{/shop/url}cart/">&labelLink; →</a></p>

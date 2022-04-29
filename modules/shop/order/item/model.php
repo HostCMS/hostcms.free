@@ -15,7 +15,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Item_Model extends Core_Entity
 {
@@ -102,7 +102,7 @@ class Shop_Order_Item_Model extends Core_Entity
 	}
 
 	/**
-	 * Get order sum with currency name
+	 * Backend, get order sum with currency name
 	 * @return string
 	 */
 	public function sumBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
@@ -110,9 +110,38 @@ class Shop_Order_Item_Model extends Core_Entity
 		if (!$this->shop_order_item_status_id || !$this->Shop_Order_Item_Status->canceled)
 		{
 			return htmlspecialchars(
-				sprintf("%.2f %s", $this->getAmount(), $this->Shop_Order->Shop_Currency->name)
+				$this->Shop_Order->Shop_Currency->formatWithCurrency($this->getAmount())
 			);
 		}
+	}
+
+	/**
+	 * Backend, get quantity
+	 * @return string
+	 */
+	public function quantityBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return Core_Str::hideZeros($this->quantity);
+	}
+
+	/**
+	 * Backend, get price
+	 * @return string
+	 */
+	public function priceBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return htmlspecialchars(
+			$this->Shop_Order->Shop_Currency->format($this->price)
+		);
+	}
+
+	/**
+	 * Backend, get price
+	 * @return string
+	 */
+	public function rateBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return $this->rate ? $this->rate . '%' : '';
 	}
 
 	/**
@@ -463,9 +492,20 @@ class Shop_Order_Item_Model extends Core_Entity
 			}
 		}
 
+		$price = $this->getPrice();
+		$tax = $this->getTax();
+
+		$oShop_Currency = $this->Shop_Order->Shop_Currency;
+
 		$this->clearXmlTags()
-			->addXmlTag('price', $this->getPrice())
-			->addXmlTag('tax', $this->getTax());
+			->addXmlTag('price', $price, array(
+				'formatted' => $oShop_Currency->format($price),
+				'formattedWithCurrency' => $oShop_Currency->formatWithCurrency($price))
+			)
+			->addXmlTag('tax', $tax, array(
+				'formatted' => $oShop_Currency->format($tax),
+				'formattedWithCurrency' => $oShop_Currency->formatWithCurrency($tax))
+			);
 
 		// Заказ оплачен и товар электронный
 		if ($this->Shop_Order->paid == 1 /*&& $this->Shop_Item->type == 1*/)

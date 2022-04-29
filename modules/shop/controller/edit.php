@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -67,7 +67,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
-		
+
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		switch ($modelName)
@@ -392,7 +392,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->caption(Core::_('Shop.shop_currency_id'))
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
 					->options(
-						$this->fillCurrencies()
+						Shop_Controller::fillCurrencies()
 					)
 					->value($this->_object->shop_currency_id);
 
@@ -494,7 +494,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->caption(Core::_('Shop.default_shop_measure_id'))
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-2'))
 					->options(
-						$this->fillMeasures()
+						Shop_Controller::fillMeasures()
 					)
 					->value($this->_object->default_shop_measure_id);
 
@@ -519,7 +519,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->caption(Core::_('Shop.shop_measure_id'))
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-2'))
 					->options(
-						$this->fillMeasures()
+						Shop_Controller::fillMeasures()
 					)
 					->value($this->_object->shop_measure_id);
 
@@ -1000,30 +1000,6 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	}
 
 	/**
-	 * Get currency array
-	 * @return array
-	 */
-	public function fillCurrencies()
-	{
-		$oCurrency = Core_Entity::factory('Shop_Currency');
-
-		$oCurrency->queryBuilder()
-			->orderBy('sorting')
-			->orderBy('name');
-
-		//$aCurrencyArray = array(' … ');
-		$aCurrencyArray = array();
-
-		$aCurrencies = $oCurrency->findAll();
-		foreach ($aCurrencies as $oCurrency)
-		{
-			$aCurrencyArray[$oCurrency->id] = $oCurrency->name;
-		}
-
-		return $aCurrencyArray;
-	}
-
-	/**
 	 * Get tax array
 	 * @return array
 	 */
@@ -1036,7 +1012,6 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->orderBy('id');
 
 		$aTaxArray = array(' … ');
-		// $aTaxArray = array();
 
 		$aShop_Taxes = $oShop_Taxes->findAll(FALSE);
 		foreach ($aShop_Taxes as $oShop_Tax)
@@ -1053,21 +1028,6 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	public function fillOrderStatuses($iParentId = 0, $iLevel = 0)
 	{
-		/*$oOrderStatus = Core_Entity::factory('Shop_Order_Status');
-
-		$oOrderStatus->queryBuilder()
-			->orderBy('name');
-
-		$aOrderStatusArray = array(' … ');
-
-		$aOrderStatuses = $oOrderStatus->findAll();
-		foreach ($aOrderStatuses as $oOrderStatus)
-		{
-			$aOrderStatusArray[$oOrderStatus->id] = $oOrderStatus->name;
-		}
-
-		return $aOrderStatusArray;*/
-
 		$aReturn = array('...');
 
 		$iLevel = intval($iLevel);
@@ -1091,26 +1051,21 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	}
 
 	/**
+	 * Get currency array
+	 * @return array
+	 */
+	public function fillCurrencies()
+	{
+		return Shop_Controller::fillCurrencies();
+	}
+
+	/**
 	 * Get measures array
 	 * @return array
 	 */
 	public function fillMeasures()
 	{
-		$oMeasure = Core_Entity::factory('Shop_Measure');
-
-		$oMeasure->queryBuilder()
-			->orderBy('name');
-
-		$aMeasures = $oMeasure->findAll();
-
-		$aMeasureArray = array(' … ');
-
-		foreach ($aMeasures as $oMeasure)
-		{
-			$aMeasureArray[$oMeasure->id] = $oMeasure->name;
-		}
-
-		return $aMeasureArray;
+		return Shop_Controller::fillMeasures();
 	}
 
 	/**
@@ -1258,22 +1213,12 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	}
 
 	/**
-	 * Fill list of shops for site
+	 * Get shops for list
 	 * @param int $iSiteId site ID
 	 * @return array
 	 */
 	public function fillShops($iSiteId)
 	{
-		$iSiteId = intval($iSiteId);
-
-		$aReturn = array();
-
-		$aObjects = Core_Entity::factory('Site', $iSiteId)->Shops->findAll();
-		foreach ($aObjects as $oObject)
-		{
-			$aReturn[$oObject->id] = $oObject->name;
-		}
-
-		return $aReturn;
+		return Shop_Controller::fillShops($iSiteId);
 	}
 }

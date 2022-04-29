@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Sql
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Sql_Controller
 {
@@ -153,7 +153,7 @@ class Sql_Controller
 
 			while (!feof($fd))
 			{
-				$sql .= fread($fd, 1000);
+				$sql .= str_replace("\r", "\n", fread($fd, 1000));
 
 				$feof = feof($fd);
 
@@ -168,8 +168,6 @@ class Sql_Controller
 					}
 				}
 
-				$sql = str_replace("\r", "\n", $sql);
-
 				do {
 					$newLinePos = strpos($sql, "\n");
 
@@ -177,8 +175,7 @@ class Sql_Controller
 					{
 						if ($newLinePos !== FALSE)
 						{
-							$line = substr($sql, 0, $newLinePos - 1);
-
+							$line = substr($sql, 0, $newLinePos);
 							$sql = substr($sql, $newLinePos + 1);
 						}
 						elseif ($feof)
@@ -195,7 +192,7 @@ class Sql_Controller
 							$query .= $line . "\n";
 
 							// Собираем запрос разделенный на несколько строк
-							if (substr($line, -1) == ';' || $feof)
+							if (substr($line, -1) == ';' || $feof && $sql == '')
 							{
 								$this->_executeQuery($query) && $iQuery++;
 

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -122,16 +122,16 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 // Действие "Удалить ico-файл"
 $oAdminFormActionDeleteIcoFile = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 	->Admin_Form_Actions
-	->getByName('deleteIcoFile');
+	->getByName('deleteFavicon');
 
-if ($oAdminFormActionDeleteIcoFile && $oAdmin_Form_Controller->getAction() == 'deleteIcoFile')
+if ($oAdminFormActionDeleteIcoFile && $oAdmin_Form_Controller->getAction() == 'deleteFavicon')
 {
 	$oSiteControllerDeleteIcoFile = Admin_Form_Action_Controller::factory(
 		'Admin_Form_Action_Controller_Type_Delete_File', $oAdminFormActionDeleteIcoFile
 	);
 
 	$oSiteControllerDeleteIcoFile
-		->methodName('deleteIcoFile')
+		->methodName('deleteFavicon')
 		->divId(array('preview_large_icofile', 'delete_large_icofile'));
 
 	// Добавляем контроллер редактирования контроллеру формы

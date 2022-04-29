@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Event
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -29,9 +29,24 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			$object->parent_id = intval(Core_Array::getGet('parent_id', 0));
 			$object->crm_project_id = intval(Core_Array::getGet('crm_project_id', 0));
+
+			if (!is_null(Core_Array::getGet('event_status_id')))
+			{
+				$object->event_status_id = Core_Array::getGet('event_status_id', 0, 'int');
+			}
 		}
 
-		parent::setObject($object);
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
 
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
@@ -40,7 +55,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->add($oAdditionalRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oAdditionalRow2 = Admin_Form_Entity::factory('Div')->class('row'));
 
-		if ($object->id)
+		if ($this->_object->id)
 		{
 			$oAdditionalTab->move($this->getField('id')->divAttr(array('class' => 'form-group col-xs-12')), $oAdditionalRow1);
 		}
@@ -719,6 +734,8 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainRowTimeSlider->add($oDivWrapTimeSlider);
 
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
+
+		// var_dump($windowId);
 
 		$oAdmin_Form_Entity_Code = Admin_Form_Entity::factory('Code');
 		$oAdmin_Form_Entity_Code->html(
@@ -2478,8 +2495,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			break;
 			case 'markDeleted':
 				$this->_object->markDeleted();
-
-				$operation == 'markDeleted' && $this->addContent($sJsRefresh);
+				$this->addMessage($sJsRefresh);
 			break;
 		}
 

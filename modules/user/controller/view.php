@@ -9,9 +9,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage User
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Controller_View extends Admin_Form_Action_Controller
 {
@@ -88,7 +88,7 @@ class User_Controller_View extends Admin_Form_Action_Controller
 	{
 		ob_start();
 		?>
-		<div class="row">
+		<div class="row representative-view">
 			<div class="col-md-12">
 				<div class="profile-container">
 					<div class="profile-header row">
@@ -120,20 +120,22 @@ class User_Controller_View extends Admin_Form_Action_Controller
 									{
 										$aCompany_Department_Post_Users = $this->_object->Company_Department_Post_Users->getAllByCompany_id($oCompany->id);
 
-										foreach ($aCompany_Department_Post_Users as $oCompany_Department_Post_User)
+										if (count($aCompany_Department_Post_Users))
 										{
-											if (count($aCompanies))
+											?>
+											<div class="h5 user-view-h5 semi-bold">
+												<?php echo htmlspecialchars($oCompany->name)?>
+											</div>
+											<?php
+
+											foreach ($aCompany_Department_Post_Users as $oCompany_Department_Post_User)
 											{
-											?>
-												<div class="h5">
-													<?php echo htmlspecialchars($oCompany->name)?>
+												?>
+												<div class="user-view-posts">
+													<span><?php echo htmlspecialchars($oCompany_Department_Post_User->Company_Department->name)?></span> <span class="gray"><?php echo htmlspecialchars($oCompany_Department_Post_User->Company_Post->name)?></span>
 												</div>
-											<?php
+												<?php
 											}
-											?>
-											<div class="semi-bold"><?php echo htmlspecialchars($oCompany_Department_Post_User->Company_Department->name)?></div>
-											<div class="gray"><?php echo htmlspecialchars($oCompany_Department_Post_User->Company_Post->name)?></div>
-											<?php
 										}
 									}
 									?>
@@ -183,8 +185,8 @@ class User_Controller_View extends Admin_Form_Action_Controller
 												?>
 													<div class="col-xs-12 col-md-6">
 														<div class="profile-contacts no-padding-left no-padding-top no-padding-right">
-															<div class="profile-badge orange">
-																<i class="fa fa-phone orange"></i>
+															<div class="profile-badge palegreen">
+																<i class="fa fa-phone palegreen"></i>
 																<span><?php echo Core::_("User.view_phones")?></span>
 															</div>
 															<div class="contact-info">
@@ -195,9 +197,9 @@ class User_Controller_View extends Admin_Form_Action_Controller
 
 																$sPhoneType = !is_null($oDirectory_Phone_Type->id)
 																	? htmlspecialchars($oDirectory_Phone_Type->name) . ": "
-																	: '<i class="fa fa-phone orange margin-right-10"></i>';
+																	: '<i class="fa fa-phone palegreen margin-right-10"></i>';
 															?>
-																<p><?php echo $sPhoneType?><span class="semi-bold"><?php echo htmlspecialchars($oDirectory_Phone->value)?></span></p>
+																<p><span class="popup-type"><?php echo $sPhoneType?></span><span><?php echo htmlspecialchars($oDirectory_Phone->value)?></span></p>
 															<?php
 															}
 															?>
@@ -215,8 +217,8 @@ class User_Controller_View extends Admin_Form_Action_Controller
 												?>
 													<div class="col-xs-12 col-md-6">
 														<div class="profile-contacts no-padding-left no-padding-top no-padding-right">
-															<div class="profile-badge palegreen">
-																<i class="fa fa-envelope-o palegreen"></i>
+															<div class="profile-badge warning">
+																<i class="fa fa-envelope-o warning"></i>
 																<span><?php echo Core::_("User.view_emails")?></span>
 															</div>
 															<div class="contact-info">
@@ -227,9 +229,9 @@ class User_Controller_View extends Admin_Form_Action_Controller
 
 																$sEmailType = !is_null($oDirectory_Email_Type->id)
 																	? htmlspecialchars($oDirectory_Email_Type->name) . ": "
-																	: '<i class="fa fa-envelope-o palegreen margin-right-10"></i>';
+																	: '<i class="fa fa-envelope-o warning margin-right-10"></i>';
 															?>
-																<p><?php echo $sEmailType?><a href="mailto:<?php echo htmlspecialchars($oDirectory_Email->value)?>"><span class="semi-bold"><?php echo htmlspecialchars($oDirectory_Email->value)?></span></a></p>
+																<p><span class="popup-type"><?php echo $sEmailType?></span><a href="mailto:<?php echo htmlspecialchars($oDirectory_Email->value)?>"><span><?php echo htmlspecialchars($oDirectory_Email->value)?></span></a></p>
 															<?php
 															}
 															?>
@@ -264,7 +266,7 @@ class User_Controller_View extends Admin_Form_Action_Controller
 																	? '<i class="' . htmlspecialchars($oDirectory_Social_Type->ico) . ' margin-right-10"></i>'
 																	: '<i class="fa fa-envelope-o azure margin-right-10"></i>';
 															?>
-																<p><?php echo $sSocialType?><a href="<?php echo htmlspecialchars($oDirectory_Social->value)?>" target="_blank"><?php echo htmlspecialchars($oDirectory_Social->value)?></a></p>
+																<p><span class="popup-type"><?php echo $sSocialType?></span><a href="<?php echo htmlspecialchars($oDirectory_Social->value)?>" target="_blank"><?php echo htmlspecialchars($oDirectory_Social->value)?></a></p>
 															<?php
 															}
 															?>
@@ -282,8 +284,8 @@ class User_Controller_View extends Admin_Form_Action_Controller
 												?>
 													<div class="col-xs-12 col-md-6">
 														<div class="profile-contacts no-padding-left no-padding-top no-padding-right">
-															<div class="profile-badge yellow">
-																<i class="fa fa-comments-o yellow"></i>
+															<div class="profile-badge purple">
+																<i class="fa fa-comments-o purple"></i>
 																<span><?php echo Core::_("User.view_messengers")?></span>
 															</div>
 															<div class="contact-info">
@@ -294,9 +296,9 @@ class User_Controller_View extends Admin_Form_Action_Controller
 
 																$sMessengerType = !is_null($oDirectory_Messenger_Type->id) && strlen($oDirectory_Messenger_Type->ico)
 																	? '<i class="' . htmlspecialchars($oDirectory_Messenger_Type->ico) . ' margin-right-10"></i>'
-																	: '<i class="fa fa-comments-o yellow margin-right-10"></i>';
+																	: '<i class="fa fa-comments-o purple margin-right-10"></i>';
 															?>
-																<p><?php echo $sMessengerType?><a href="<?php echo sprintf($oDirectory_Messenger_Type->link, $oDirectory_Messenger->value)?>" target="_blank"><?php echo htmlspecialchars($oDirectory_Messenger->value)?></a></p>
+																<p><span class="popup-type"><?php echo $sMessengerType?></span><a href="<?php echo sprintf($oDirectory_Messenger_Type->link, $oDirectory_Messenger->value)?>" target="_blank"><?php echo htmlspecialchars($oDirectory_Messenger->value)?></a></p>
 															<?php
 															}
 															?>

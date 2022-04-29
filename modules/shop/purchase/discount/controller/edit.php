@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -61,7 +61,7 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 				->divAttr(array('class' => ''))
 				->options(array(
 					'%',
-					$this->_object->Shop->Shop_Currency->name
+					$this->_object->Shop->Shop_Currency->sign
 				))
 				->value($this->_object->type)
 				->class('form-control input-group-addon')
@@ -84,13 +84,13 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 			->move($this->getField('min_amount')->divAttr(array('class' => 'form-group col-xs-12 col-sm-2')), $oMainRow2)
 			->move($this->getField('max_amount')->divAttr(array('class' => 'form-group col-xs-12 col-sm-2')), $oMainRow2);
 
-		$Shop_Controller_Edit = new Shop_Controller_Edit($this->_Admin_Form_Action);
-
 		$oMainRow2->add(
 			Admin_Form_Entity::factory('Select')
 				->name('shop_currency_id')
 				->caption(Core::_('Shop_Purchase_Discount.shop_currency_id'))
-				->options($Shop_Controller_Edit->fillCurrencies())
+				->options(
+					Shop_Controller::fillCurrencies()
+				)
 				->divAttr(array('class' => 'form-group col-xs-12 col-sm-2'))
 				->value(
 					is_null($this->_object->id)

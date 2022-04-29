@@ -128,4 +128,9 @@ return array(
 	'tabEvents' => 'Справи',
 
 	'crm_project_id' => 'Проект',
+
+	'event_deadline' => 'Прострочено',
+	'event_today' => 'Сьогодні',
+	'event_empty' => 'Скоро',
+	'more' => 'eще',
 );

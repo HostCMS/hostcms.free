@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Discounts',
@@ -53,5 +53,7 @@ return array(
 	'percent_error' => "Discount cannot be more than 100%!",
 	'siteuser_groups' => "Access Group",
 	'all' => 'All',
-	'not_apply_purchase_discount' => 'Do not apply discounts on order amount'
+	'not_apply_purchase_discount' => 'Do not apply discounts on order amount',
+	'guid' => '<acronym title="Product identifier for CommerceML format, e.g. ID00029527">CommerceML product identifier</acronym>',
+	'tab_export' => 'Export/Import',
 );

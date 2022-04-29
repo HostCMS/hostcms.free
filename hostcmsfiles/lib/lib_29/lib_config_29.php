@@ -70,8 +70,9 @@ try
 			->showShopItems(Core_Page::instance()->libParams['showShopItems'])
 			// Показывать модификации в карте сайта
 			->showModifications(Core_Array::get(Core_Page::instance()->libParams, 'showModifications', 1))
-			// Показывать метки магазина
+			// Показывать SEO-фильтры магазина
 			->showShopFilter(TRUE)
+			// Показывать метки магазина
 			->showShopTags(TRUE);
 	}
 

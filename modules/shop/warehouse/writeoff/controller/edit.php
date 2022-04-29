@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -241,7 +241,7 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 							<td>' . htmlspecialchars($oShop_Item->name) . $externalLink . '</td>
 							<td>' . htmlspecialchars($oShop_Item->Shop_Measure->name) . '</td>
 							<td><span class="price">' . htmlspecialchars($oShop_Warehouse_Writeoff_Item->price) . '</span></td>
-							<td>' . htmlspecialchars($oShop_Item->Shop_Currency->name) . '</td>
+							<td>' . htmlspecialchars($oShop_Item->Shop_Currency->sign) . '</td>
 							<td width="80"><input class="set-item-count form-control" name="shop_item_quantity_' . $oShop_Warehouse_Writeoff_Item->id . '" value="' . $oShop_Warehouse_Writeoff_Item->count . '" /></td>
 							<td><span class="calc-warehouse-sum">' . $sum . '</span></td>
 							<td><a class="delete-associated-item" onclick="mainFormLocker.unlock(); res = confirm(\'' . Core::_('Shop_Warehouse_Writeoff.delete_dialog') . '\'); if (res) { var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next); ' . $onclick . ' } return res;"><i class="fa fa-times-circle darkorange"></i></a></td>

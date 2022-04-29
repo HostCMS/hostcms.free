@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Directory
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Directory_Controller_Tab_Phone extends Directory_Controller_Tab
 {
@@ -96,7 +96,7 @@ class Directory_Controller_Tab_Phone extends Directory_Controller_Tab
 
 		return $oRowElements;
 	}
-	
+
 	public function applyObjectProperty($Admin_Form_Controller, $object)
 	{
 		$windowId = $Admin_Form_Controller->getWindowId();

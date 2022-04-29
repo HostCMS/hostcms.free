@@ -42,7 +42,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Cart_Controller_Show extends Core_Controller
 {
@@ -338,14 +338,20 @@ class Shop_Cart_Controller_Show extends Core_Controller
 			Core::factory('Core_Xml_Entity')
 				->name('total_amount')
 				->value($this->amount)
+				->addAttribute('formatted', $oShop->Shop_Currency->format($this->amount))
+				->addAttribute('formattedWithCurrency', $oShop->Shop_Currency->formatWithCurrency($this->amount))
 		)->addEntity(
 			Core::factory('Core_Xml_Entity')
 				->name('total_discount')
 				->value($fAppliedDiscountsAmount)
+				->addAttribute('formatted', $oShop->Shop_Currency->format($fAppliedDiscountsAmount))
+				->addAttribute('formattedWithCurrency', $oShop->Shop_Currency->formatWithCurrency($fAppliedDiscountsAmount))
 		)->addEntity(
 			Core::factory('Core_Xml_Entity')
 				->name('total_tax')
 				->value($this->tax)
+				->addAttribute('formatted', $oShop->Shop_Currency->format($this->tax))
+				->addAttribute('formattedWithCurrency', $oShop->Shop_Currency->formatWithCurrency($this->tax))
 		)->addEntity(
 			Core::factory('Core_Xml_Entity')
 				->name('total_quantity')

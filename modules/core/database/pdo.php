@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Database
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_DataBase_Pdo extends Core_DataBase
 {
@@ -555,6 +555,8 @@ class Core_DataBase_Pdo extends Core_DataBase
 		{
 			$return[] = $row[0];
 		}
+		
+		$this->_free($result);
 
 		return $return;
 	}
@@ -582,6 +584,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 
 		$result = $this->_connection->query($query);
 
+		// free in the _fetch
 		return $this->_fetch($result, FALSE);
 	}
 
@@ -603,6 +606,8 @@ class Core_DataBase_Pdo extends Core_DataBase
 		{
 			$return[] = $row;
 		}
+		
+		$this->_free($result);
 
 		return $return;
 	}
@@ -665,9 +670,8 @@ class Core_DataBase_Pdo extends Core_DataBase
 	 */
 	public function result($bCache = TRUE)
 	{
-		$result = $this->getResult();
-
-		return $this->_fetch($result, $bCache);
+		// free in the _fetch
+		return $this->_fetch($this->getResult(), $bCache);
 	}
 
 	/**
@@ -761,8 +765,11 @@ class Core_DataBase_Pdo extends Core_DataBase
 	 */
 	protected function _currentAssoc($result = NULL)
 	{
-		is_null($result) && $result = $this->_result;
+		is_null($result)
+			&& $result = $this->_result;
+
 		$result->setFetchMode(PDO::FETCH_ASSOC);
+
 		return $result->fetch();
 	}
 

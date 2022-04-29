@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Model extends Core_Entity
 {
@@ -346,12 +346,8 @@ class Shop_Order_Model extends Core_Entity
 	 */
 	public function sum()
 	{
-		//$language = Core_i18n::instance()->getLng();
-
-		return sprintf(
-			"%s %s",
-			Shop_Controller::instance()->round($this->getAmount()),
-			htmlspecialchars($this->Shop_Currency->name)
+		return $this->Shop_Currency->formatWithCurrency(
+			Shop_Controller::instance()->round($this->getAmount())
 		);
 	}
 
@@ -381,7 +377,7 @@ class Shop_Order_Model extends Core_Entity
 	 */
 	public function weightBackend()
 	{
-		return $this->getWeight();
+		return Core_Str::hideZeros($this->getWeight());
 	}
 
 	public function smallAvatarBackend()
@@ -471,6 +467,11 @@ class Shop_Order_Model extends Core_Entity
 			{
 				$oShop_Order_Item->markDeleted();
 			}
+
+			if (Core::moduleIsActive('webhook'))
+			{
+				Webhook_Controller::notify('onShopOrderCanceled', $this);
+			}
 		}
 
 		Core_Event::notify($this->_modelName . '.onAfterCancel', $this);
@@ -502,6 +503,11 @@ class Shop_Order_Model extends Core_Entity
 				&& $this->reserveItems();*/
 
 			$this->historyPushCanceled();
+
+			if (Core::moduleIsActive('webhook'))
+			{
+				Webhook_Controller::notify('onShopOrderUncanceled', $this);
+			}
 		}
 
 		Core_Event::notify($this->_modelName . '.onAfterUncancel', $this);
@@ -858,8 +864,22 @@ class Shop_Order_Model extends Core_Entity
 	protected function _prepareData()
 	{
 		$this
-			->clearXmlTags()
-			->addXmlTag('amount', $this->getAmount())
+			->clearXmlTags();
+
+		if ($this->shop_currency_id)
+		{
+			$amount = $this->getAmount();
+
+			$this
+				->addXmlTag('amount', $amount, array(
+					'formatted' => $this->Shop_Currency->format($amount),
+					'formattedWithCurrency' => $this->Shop_Currency->formatWithCurrency($amount))
+				);
+
+			$this->_showXmlCurrency && $this->addEntity($this->Shop_Currency);
+		}
+
+		$this
 			->addXmlTag('payment_datetime', $this->payment_datetime == '0000-00-00 00:00:00'
 				? $this->payment_datetime
 				: strftime($this->Shop->format_datetime, Core_Date::sql2timestamp($this->payment_datetime)))
@@ -875,8 +895,6 @@ class Shop_Order_Model extends Core_Entity
 
 		!isset($this->_forbiddenTags['dir'])
 			&& $this->addXmlTag('dir', Core_Page::instance()->shopCDN . $this->getOrderHref());
-
-		$this->_showXmlCurrency && $this->shop_currency_id && $this->addEntity($this->Shop_Currency);
 
 		$this->source_id && $this->addEntity(
 			$this->Source->clearEntities()
@@ -942,7 +960,7 @@ class Shop_Order_Model extends Core_Entity
 
 		if ($this->_showXmlItems)
 		{
-			$amount = $total_tax = 0;
+			$total_amount = $total_tax = 0;
 
 			$aShop_Order_Items = $this->Shop_Order_Items->findAll(FALSE);
 			foreach ($aShop_Order_Items as $oShop_Order_Item)
@@ -956,19 +974,26 @@ class Shop_Order_Model extends Core_Entity
 					);
 
 					$total_tax += $oShop_Order_Item->getTax() * $oShop_Order_Item->quantity;
-					$amount += $oShop_Order_Item->getAmount();
+					$total_amount += $oShop_Order_Item->getAmount();
 				}
 			}
 
 			// Total order amount
+			$total_amount = Shop_Controller::instance()->round($total_amount);
+			$total_tax = Shop_Controller::instance()->round($total_tax);
+			
 			$this->addEntity(
 				Core::factory('Core_Xml_Entity')
 					->name('total_amount')
-					->value(Shop_Controller::instance()->round($amount))
+					->value($total_amount)
+					->addAttribute('formatted', $this->Shop_Currency->format($total_amount))
+					->addAttribute('formattedWithCurrency', $this->Shop_Currency->formatWithCurrency($total_amount))
 			)->addEntity(
 				Core::factory('Core_Xml_Entity')
 					->name('total_tax')
-					->value(Shop_Controller::instance()->round($total_tax))
+					->value($total_tax)
+					->addAttribute('formatted', $this->Shop_Currency->format($total_tax))
+					->addAttribute('formattedWithCurrency', $this->Shop_Currency->formatWithCurrency($total_tax))
 			);
 		}
 
@@ -1067,10 +1092,20 @@ class Shop_Order_Model extends Core_Entity
 
 				$this->historyPushChangeStatus();
 				$this->notifyBotsChangeStatus();
+
+				if (Core::moduleIsActive('webhook'))
+				{
+					Webhook_Controller::notify('onShopOrderChangeStatus', $this);
+				}
 			}
 
 			// История
 			$this->historyPushPaid();
+
+			if (Core::moduleIsActive('webhook'))
+			{
+				Webhook_Controller::notify('onShopOrderPaid', $this);
+			}
 		}
 
 		Core_Event::notify($this->_modelName . '.onAfterPaid', $this);
@@ -1199,6 +1234,11 @@ class Shop_Order_Model extends Core_Entity
 
 			// История
 			$this->historyPushPaid();
+
+			if (Core::moduleIsActive('webhook'))
+			{
+				Webhook_Controller::notify('onShopOrderCancelPaid', $this);
+			}
 		}
 
 		Core_Event::notify($this->_modelName . '.onAfterCancelPaid', $this);
@@ -1239,6 +1279,11 @@ class Shop_Order_Model extends Core_Entity
 
 					$this->historyPushChangeStatus();
 					$this->notifyBotsChangeStatus();
+
+					if (Core::moduleIsActive('webhook'))
+					{
+						Webhook_Controller::notify('onShopOrderChangeStatus', $this);
+					}
 				}
 
 				$oShop_Order_Item_Status->canceled
@@ -2459,19 +2504,19 @@ class Shop_Order_Model extends Core_Entity
 								<?php echo Core::_("Shop_Order.table_mark")?>
 							</th>
 							<th>
-								<?php echo Core::_("Shop_Order.table_price") . ", " . htmlspecialchars($this->Shop->Shop_Currency->name)?>
+								<?php echo Core::_("Shop_Order.table_price") . ", " . htmlspecialchars($this->Shop_Currency->sign)?>
 							</th>
-							<th>
+							<th width="10%">
 								<?php echo Core::_("Shop_Order.table_amount")?>
 							</th>
-							<th>
+							<th width="10%">
 								<?php echo Core::_("Shop_Order.table_nds_tax")?>
 							</th>
-							<th>
-								<?php echo Core::_("Shop_Order.table_nds_value") . ", " . htmlspecialchars($this->Shop->Shop_Currency->name)?>
+							<th width="10%">
+								<?php echo Core::_("Shop_Order.table_nds_value") . ", " . htmlspecialchars($this->Shop_Currency->sign)?>
 							</th>
-							<th>
-								<?php echo Core::_("Shop_Order.table_amount_value") . ", " . htmlspecialchars($this->Shop->Shop_Currency->name)?>
+							<th width="10%">
+								<?php echo Core::_("Shop_Order.table_amount_value") . ", " . htmlspecialchars($this->Shop_Currency->sign)?>
 							</th>
 						</tr>
 					</thead>
@@ -2531,7 +2576,7 @@ class Shop_Order_Model extends Core_Entity
 									<?php echo number_format(Shop_Controller::instance()->round($oShop_Order_Item->price), 2, '.', '')?>
 								</td>
 								<td>
-									<?php echo $oShop_Order_Item->quantity?>
+									<?php echo Core_Str::hideZeros($oShop_Order_Item->quantity)?>
 								</td>
 								<td>
 									<?php echo $sShopTaxRate != 0 ? "{$sShopTaxRate}%" : '-'?>
@@ -2552,7 +2597,7 @@ class Shop_Order_Model extends Core_Entity
 								<?php echo Core::_("Shop_Order.table_nds")?>
 							</td>
 							<td width="80%" align="right" style="border-bottom: 1px solid #e9e9e9" colspan="3">
-								<?php echo sprintf("%.2f", $fShopTaxValueSum) . " " . htmlspecialchars($this->Shop->Shop_Currency->name)?>
+								<?php echo $this->Shop_Currency->formatWithCurrency($fShopTaxValueSum)?>
 							</td>
 						</tr>
 						<tr class="footer">
@@ -2560,7 +2605,7 @@ class Shop_Order_Model extends Core_Entity
 								<?php echo Core::_("Shop_Order.table_all_to_pay")?>
 							</td>
 							<td align="right" colspan="3">
-								<?php echo sprintf("%.2f", $fShopOrderItemSum) . " " . htmlspecialchars($this->Shop->Shop_Currency->name)?>
+								<?php echo $this->Shop_Currency->formatWithCurrency($fShopOrderItemSum)?>
 							</td>
 						</tr>
 					</tbody>
@@ -2994,7 +3039,7 @@ class Shop_Order_Model extends Core_Entity
 
 		$aReplace['amount_in_words'] = Core_Inflection::available($lng)
 			? Core_Str::ucfirst(Core_Inflection::instance($lng)->currencyInWords($aReplace['amount_tax_included'], $this->Shop_Currency->code))
-			: $aReplace['amount_tax_included'] . ' ' . $this->Shop_Currency->code;
+			: $aReplace['amount_tax_included'] . ' ' . $this->Shop_Currency->sign;
 
 		$aReplace['delivery_name'] = $this->shop_delivery_id ? Core_Str::ucfirst($this->Shop_Delivery->name) : '';
 

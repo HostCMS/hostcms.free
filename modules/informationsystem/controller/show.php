@@ -69,7 +69,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Controller_Show extends Core_Controller
 {
@@ -625,8 +625,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 				if ($this->calculateTotal)
 				{
-					$row = Core_QueryBuilder::select(array('FOUND_ROWS()', 'count'))->execute()->asAssoc()->current();
-					$this->total = $row['count'];
+					$this->total = Core_QueryBuilder::select()->getFoundRows();
 
 					$this->addEntity(
 						Core::factory('Core_Xml_Entity')
@@ -1068,7 +1067,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			}
 		}
 
-		$path = isset($matches['path'])
+		$path = isset($matches['path']) && $matches['path'] != '/'
 			? Core_Str::ltrimUri($matches['path'])
 			: NULL;
 

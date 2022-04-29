@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -218,7 +218,7 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 							: '') . '</td>
 						<td>' . htmlspecialchars($oShop_Item->Shop_Measure->name) . '</td>
 						<td><span class="price">' . $aPrices['price_tax'] . '</span></td>
-						<td>' . htmlspecialchars($oShop_Item->Shop_Currency->name) . '</td>
+						<td>' . htmlspecialchars($oShop_Item->Shop_Currency->sign) . '</td>
 						<td class="calc-warehouse-count">' . $rest . '</td>
 						<td width="80"><input class="set-item-count form-control" name="shop_item_quantity_' . $oShop_Warehouse_Inventory_Item->id . '" value="' . $oShop_Warehouse_Inventory_Item->count . '" /></td>
 						<td class="diff-warehouse-count"></td>

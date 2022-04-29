@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Dir_Model extends Core_Entity
 {
@@ -18,12 +18,6 @@ class Shop_Dir_Model extends Core_Entity
 	 * @var string
 	 */
 	public $img = 0;
-
-	/**
-	 * Backend property
-	 * @var string
-	 */
-	public $shop_currency_name = NULL;
 
 	/**
 	 * Backend property

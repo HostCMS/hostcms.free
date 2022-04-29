@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -672,7 +672,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								<td>' . htmlspecialchars($oShop_Item->name) . $externalLink . '</td>
 								<td>' . htmlspecialchars($oShop_Item->marking) . '</td>
 								<td width="25"><input class="set-item-count form-control" name="set_count_' . $oShop_Item_Set->id . '" value="' . $oShop_Item_Set->count . '" /></td>
-								<td>' . htmlspecialchars($price) . ' ' . htmlspecialchars($oShop_Item->Shop_Currency->name) . '</td>
+								<td>' . htmlspecialchars($oShop_Item->Shop_Currency->formatWithCurrency($price)) . '</td>
 								<td><a class="delete-associated-item" onclick="' . $onclick . '"><i class="fa fa-times-circle darkorange"></i></a></td>
 							</tr>
 						';
@@ -779,14 +779,14 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				// Удаляем единицы измерения
 				$oAdditionalTab->delete($this->getField('shop_measure_id'));
 
-				$Shop_Controller_Edit = new Shop_Controller_Edit($this->_Admin_Form_Action);
-
 				// Единицы измерения
 				$oMainRow7->add(
 					Admin_Form_Entity::factory('Select')
 						->caption(Core::_('Shop_Item.shop_measure_id'))
 						->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'))
-						->options($Shop_Controller_Edit->fillMeasures())
+						->options(
+							Shop_Controller::fillMeasures()
+						)
 						->name('shop_measure_id')
 						->value($this->_object->id
 							? $this->_object->shop_measure_id
@@ -967,7 +967,9 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oShopCurrencySelect = Admin_Form_Entity::factory('Select')
 					->caption("&nbsp;")
 					->divAttr(array('class' => 'form-group col-xs-6 col-sm-2'))
-					->options($Shop_Controller_Edit->fillCurrencies())
+					->options(
+						Shop_Controller::fillCurrencies()
+					)
 					->name('shop_currency_id')
 					->value($this->_object->shop_currency_id);
 
@@ -1429,7 +1431,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								<td>' . htmlspecialchars($oShop_Item->name) . '</td>
 								<td>' . htmlspecialchars($oShop_Item->marking) . '</td>
 								<td width="25"><input class="set-item-count form-control" name="associated_count_' . $oShop_Item_Associated->id . '" value="' . $oShop_Item_Associated->count . '" /></td>
-								<td>' . htmlspecialchars($oShop_Item->price) . ' ' . htmlspecialchars($oShop_Item->Shop_Currency->name) . '</td>
+								<td>' . htmlspecialchars($oShop_Item->Shop_Currency->formatWithCurrency($oShop_Item->price)) . '</td>
 								<td><a class="delete-associated-item" onclick="' . $link . '"><i class="fa fa-times-circle darkorange"></i></a></td>
 							</tr>
 						';

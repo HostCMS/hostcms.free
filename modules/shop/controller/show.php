@@ -100,7 +100,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Controller_Show extends Core_Controller
 {
@@ -993,7 +993,17 @@ class Shop_Controller_Show extends Core_Controller
 				return $this;
 			}
 
-			$this->_cacheTags[] = 'shop_group_' . (is_array($this->group) ? implode(',', $this->group) : intval($this->group));
+			if (is_array($this->group))
+			{
+				foreach ($this->group as $cacheGroupId)
+				{
+					$this->_cacheTags[] = 'shop_group_' . intval($cacheGroupId);
+				}
+			}
+			else
+			{
+				$this->_cacheTags[] = 'shop_group_' . intval($this->group);
+			}
 		}
 
 		$bTpl = $this->_mode == 'tpl';
@@ -1176,8 +1186,7 @@ class Shop_Controller_Show extends Core_Controller
 
 				if ($this->calculateTotal)
 				{
-					$row = Core_QueryBuilder::select(array('FOUND_ROWS()', 'count'))->execute()->asAssoc()->current();
-					$this->total = $row['count'];
+					$this->total = Core_QueryBuilder::select()->getFoundRows();
 
 					$this->addEntity(
 						Core::factory('Core_Xml_Entity')
@@ -1522,7 +1531,11 @@ class Shop_Controller_Show extends Core_Controller
 		$aProperties = $this->group === FALSE
 			? (is_array($this->itemsPropertiesList) && count($this->itemsPropertiesList)
 				? $oShop_Item_Property_List->Properties->getAllByid($this->itemsPropertiesList, FALSE, 'IN')
-				: $oShop_Item_Property_List->Properties->findAll()
+				//: $oShop_Item_Property_List->Properties->findAll()
+				: ($this->itemsPropertiesList === FALSE && is_array($this->itemsProperties) && count($this->itemsProperties)
+					? $oShop_Item_Property_List->Properties->getAllByid($this->itemsProperties, FALSE, 'IN')
+					: $oShop_Item_Property_List->Properties->findAll()
+				)
 			)
 			: $oShop_Item_Property_List->getPropertiesForGroup($this->group && $this->subgroups && !is_array($this->group)
 					? $this->getSubgroups($this->group)
@@ -2345,7 +2358,7 @@ class Shop_Controller_Show extends Core_Controller
 			setcookie('affiliate_name', $matches['user'], time() + 31536000, '/');
 		}
 
-		$path = isset($matches['path'])
+		$path = isset($matches['path']) && $matches['path'] != '/'
 			? Core_Str::ltrimUri($matches['path'])
 			: NULL;
 
@@ -3365,7 +3378,7 @@ class Shop_Controller_Show extends Core_Controller
 	}
 
 	/**
-	 * Add items properties to XML
+	 * Add list of item's properties to XML
 	 * @param int $parent_id
 	 * @param object $parentObject
 	 * @return self

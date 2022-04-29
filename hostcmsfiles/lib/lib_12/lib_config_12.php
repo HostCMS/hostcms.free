@@ -12,12 +12,13 @@ $Shop_Controller_YandexMarket
 	// ->outlets(TRUE)
 	->parseUrl()
 	// ->additionalImages(array('images'))
-	->model('ADV')
+	// ->model('ADV')
 	->groupModifications(FALSE)
 	//->modifications(TRUE)
 	//->deliveryOptions(TRUE)
 	// ->itemsForbiddenProperties(array(7431, 7493))
 	// ->additionalTagNames(array('expiry' => 8365))
+	// ->checkRest(TRUE)
 	->show();
 
 exit();

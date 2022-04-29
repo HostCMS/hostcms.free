@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Field
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Field_Controller_Tab
 {
@@ -71,10 +71,10 @@ class Field_Controller_Tab
 
 	/**
 	* Set object
-	* @param Core_Entity $object object
+	* @param mixed $object object
 	* @return self
 	*/
-	public function setObject(Core_Entity $object)
+	public function setObject($object)
 	{
 		$this->_object = $object;
 		return $this;

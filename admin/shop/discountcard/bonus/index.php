@@ -3,9 +3,9 @@
  * Online shop.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -103,7 +103,7 @@ $oAdmin_Form_Controller->addEntity(
 				<div class="widget-body bordered-left bordered-warning">
 					<form class="form-inline" role="form" action="' . $oAdmin_Form_Controller->getPath() . '" method="POST">
 						<div class="form-group">
-							<input name="writeoff" type="text" class="form-control" placeholder="' . Core::_('Shop_Discountcard_Bonus.available', $bonusesAmount, $oShop->Shop_Currency->name) . '">
+							<input name="writeoff" type="text" class="form-control" placeholder="' . Core::_('Shop_Discountcard_Bonus.available', $bonusesAmount, $oShop->Shop_Currency->sign) . '">
 						</div>
 
 						<button type="submit" class="btn btn-warning" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('writeoff_bonuses') . '">' . Core::_('Shop_Discountcard_Bonus.writeoff') . '</button>

@@ -7,15 +7,15 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Directory
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 {
 	protected $_directoryTypeName = 'Directory_Address_Type';
 
-	protected $_titleHeaderColor = 'purple';
+	protected $_titleHeaderColor = 'darkorange';
 
 	protected $_faTitleIcon = 'fa fa-map-marker';
 
@@ -134,13 +134,13 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 
 		return $oRowElements;
 	}
-	
+
 	public function applyObjectProperty($Admin_Form_Controller, $object)
 	{
 		$windowId = $Admin_Form_Controller->getWindowId();
-		
+
 		$prefix = preg_replace('/[^A-Za-z0-9_-]/', '', $this->prefix);
-		
+
 		// Адреса, установленные значения
 		$aDirectory_Addresses = $object->Directory_Addresses->findAll(FALSE);
 		foreach ($aDirectory_Addresses as $oDirectory_Address)
@@ -233,7 +233,7 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 				}
 			}
 		}
-		
+
 		return $this;
 	}
 }

@@ -199,10 +199,10 @@
 						<td class="td_header">&labelOrderItemName;</td>
 						<td class="td_header">&labelOrderItemCount;</td>
 						<td class="td_header">&labelOrderMeasure;</td>
-						<td class="td_header">&labelOrderItemPrice;,<xsl:text> </xsl:text><xsl:value-of disable-output-escaping="yes" select="/shop/shop_order/shop_currency/name" /></td>
+						<td class="td_header">&labelOrderItemPrice;,<xsl:text> </xsl:text><xsl:value-of disable-output-escaping="yes" select="/shop/shop_order/shop_currency/sign" /></td>
 						<td class="td_header">&labelOrderValueAddedTaxRate;</td>
-						<td class="td_header">&labelOrderValueAddedTax;,<xsl:text> </xsl:text><xsl:value-of disable-output-escaping="yes" select="/shop/shop_order/shop_currency/name" /></td>
-						<td class="td_header" style="border-right: black 1px solid; border-left: black 1px solid;">&labelOrderAmount;, <xsl:text> </xsl:text><xsl:value-of disable-output-escaping="yes" select="/shop/shop_order/shop_currency/name" /></td>
+						<td class="td_header">&labelOrderValueAddedTax;,<xsl:text> </xsl:text><xsl:value-of disable-output-escaping="yes" select="/shop/shop_order/shop_currency/sign" /></td>
+						<td class="td_header" style="border-right: black 1px solid; border-left: black 1px solid;">&labelOrderAmount;, <xsl:text> </xsl:text><xsl:value-of disable-output-escaping="yes" select="/shop/shop_order/shop_currency/sign" /></td>
 					</tr>
 					<!-- Ordered Items -->
 					<xsl:apply-templates select="shop_order/shop_order_item"/>
@@ -214,7 +214,7 @@
 						<td align="right" colspan="2" style="border-bottom: black 1px solid;">
 							<xsl:choose>
 							<xsl:when test="shop_order/total_tax != 0">
-								<xsl:value-of select="format-number(shop_order/total_tax, '### ##0,00', 'my')"/><xsl:text> </xsl:text><xsl:value-of disable-output-escaping="yes" select="/shop/shop_order/shop_currency/name" />
+								<xsl:value-of select="format-number(shop_order/total_tax, '### ##0,00', 'my')"/><xsl:text> </xsl:text><xsl:value-of disable-output-escaping="yes" select="/shop/shop_order/shop_currency/sign" />
 							</xsl:when>
 							<xsl:otherwise>
 								<b>&labelOrderWithoutVat;</b>
@@ -230,7 +230,7 @@
 						</td>
 						<td align="right" colspan="2">
 							<b>
-								<xsl:value-of select="format-number(shop_order/total_amount, '### ##0,00', 'my')"/><xsl:text> </xsl:text><xsl:value-of disable-output-escaping="yes" select="/shop/shop_order/shop_currency/name" /></b>
+								<xsl:value-of select="format-number(shop_order/total_amount, '### ##0,00', 'my')"/><xsl:text> </xsl:text><xsl:value-of disable-output-escaping="yes" select="/shop/shop_order/shop_currency/sign" /></b>
 						</td>
 					</tr>
 					</table>

@@ -35,7 +35,7 @@
 			<xsl:apply-templates select="shop/shop_siteuser_transaction"/>
 		</table>
 
-		<p>&labelTransactionAmount; <b><xsl:value-of select="shop/transaction_amount"/><xsl:text> </xsl:text><xsl:value-of select="shop/shop_currency/name"/></b></p>
+		<p>&labelTransactionAmount; <b><xsl:value-of select="shop/transaction_amount"/><xsl:text> </xsl:text><xsl:value-of select="shop/shop_currency/sign"/></b></p>
 	</xsl:template>
 
 	<!-- Шаблон для магазина -->
@@ -45,9 +45,9 @@
 				<xsl:value-of select="datetime"/>
 			</td>
 			<td>
-				<xsl:value-of select="amount"/><xsl:text> </xsl:text><xsl:value-of select="shop_currency/name"/></td>
+				<xsl:value-of select="amount"/><xsl:text> </xsl:text><xsl:value-of select="shop_currency/sign"/></td>
 			<td>
-				<xsl:value-of select="amount_base_currency"/><xsl:text> </xsl:text><xsl:value-of select="../shop_currency/name"/></td>
+				<xsl:value-of select="amount_base_currency"/><xsl:text> </xsl:text><xsl:value-of select="../shop_currency/sign"/></td>
 			<td align="center">
 				<xsl:choose>
 					<xsl:when test="shop_order_id != 0">

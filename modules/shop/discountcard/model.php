@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
  class Shop_Discountcard_Model extends Core_Entity
 {
@@ -161,7 +161,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 			: '#aebec4'
 		);
 
-		return '<span class="label" style="background-color: ' . $color . '">' . htmlspecialchars($this->number) . '</span><br /><span class="small darkgray">Σ ' . htmlspecialchars($this->amount . ' ' . $this->Shop->Shop_Currency->name) . '</span>';
+		return '<span class="label" style="background-color: ' . $color . '">' . htmlspecialchars($this->number) . '</span><br /><span class="small darkgray">Σ ' . htmlspecialchars($this->Shop->Shop_Currency->formatWithCurrency($this->amount)) . '</span>';
 	}
 
 	/**

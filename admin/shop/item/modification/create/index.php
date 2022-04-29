@@ -3,9 +3,9 @@
  * Online shop.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../../bootstrap.php');
 
@@ -165,21 +165,6 @@ foreach ($aProperties as $oProperty)
 	}
 }
 
-$aCurrencies = array(' … ');
-$aShop_Currencies = Core_Entity::factory('Shop_Currency')->findAll();
-foreach ($aShop_Currencies as $oShop_Currency)
-{
-	$aCurrencies[$oShop_Currency->id] = $oShop_Currency->name;
-}
-
-$aMeasures = array(' … ');
-$aShop_Measures = Core_Entity::factory('Shop_Measure')->findAll();
-
-foreach ($aShop_Measures as $oShop_Measure)
-{
-	$aMeasures[$oShop_Measure->id] = $oShop_Measure->name;
-}
-
 $oMainTab = Admin_Form_Entity::factory('Tab')->name('main');
 
 $oMainTab
@@ -187,6 +172,13 @@ $oMainTab
 	->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 	->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 	->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'));
+
+$aCurrencies = array(' … ');
+$aShop_Currencies = Core_Entity::factory('Shop_Currency')->findAll();
+foreach ($aShop_Currencies as $oShop_Currency)
+{
+	$aCurrencies[$oShop_Currency->id] = $oShop_Currency->sign;
+}
 
 $oDiv_Amount = Admin_Form_Entity::factory('Div')
 	->class('form-group col-xs-12 col-sm-6 col-md-3 amount-currency')
@@ -206,6 +198,13 @@ $oDiv_Amount = Admin_Form_Entity::factory('Div')
 	);
 
 $oMainRow1->add($oDiv_Amount);
+
+$aMeasures = array(' … ');
+$aShop_Measures = Core_Entity::factory('Shop_Measure')->findAll();
+foreach ($aShop_Measures as $oShop_Measure)
+{
+	$aMeasures[$oShop_Measure->id] = $oShop_Measure->name;
+}
 
 $oMainRow1->add(
 	Admin_Form_Entity::factory('Select')

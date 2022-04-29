@@ -11,7 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controller
 {
@@ -802,8 +802,8 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				}
 				$this->addMessage(ob_get_clean());
 
-				// $this->_return = TRUE;
 				$this->_return = $parentWindowId == '';
+				// $this->_return = TRUE;
 			break;
 			case 'applyModal':
 				$this->_applyObjectProperty();
@@ -811,17 +811,16 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				//$windowId = $this->_Admin_Form_Controller->getWindowId();
 				$modalWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('modalWindowId'));
 				$parentWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('parentWindowId'));
-
-				$this->addContent('<script>$(\'#' . $modalWindowId . '\').parents(\'.bootbox\').modal(\'hide\');</script>');
+				$this->addContent("<script>$('#" . Core_Str::escapeJavascriptVariable($modalWindowId) . "').parents('.bootbox').modal('hide');</script>");
 
 				// При модальном показе $parentWindowId будет название окна родителя
 				$this->_return = $parentWindowId == '';
 				//$this->_return = TRUE;
 			break;
 			case 'markDeleted':
-				$windowId = $this->_Admin_Form_Controller->getWindowId();
-				$this->addContent("<script>$('#{$windowId}').parents('.bootbox').modal('hide');</script>");
-
+				// Закрытие окна происходит на самой кнопке удаления справа от основных кнопок
+				//$windowId = $this->_Admin_Form_Controller->getWindowId();
+				//$this->addContent("<script>$('#" . Core_Str::escapeJavascriptVariable($windowId) . "').parents('.bootbox').modal('hide');</script>");
 				$this->_return = TRUE;
 			break;
 			default:
@@ -949,6 +948,16 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 
 		// Autosave
 		$this->_deleteAutosave();
+
+		// Webhooks
+		if (Core::moduleIsActive('webhook'))
+		{
+			$webhookName = 'on' . implode('', array_map('ucfirst', explode('_', $this->_object->getModelName())));
+
+			$this->_object->isEmptyPrimaryKey()
+				? Webhook_Controller::notify($webhookName . 'Create', $this->_object)
+				: Webhook_Controller::notify($webhookName . 'Update', $this->_object);
+		}
 
 		$this->_object->save();
 
@@ -1120,7 +1129,10 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 		{
 			$onclick = $this->_Admin_Form_Controller
 				->windowId(strlen($parentWindowId) ? $parentWindowId : $windowId)
-				->getAdminSendForm(array('action' => 'markDeleted', 'operation' => 'markDeleted'));
+				->getAdminSendForm($sOperaion == 'modal'
+					? array('action' => 'edit', 'operation' => 'markDeleted')
+					: array('action' => 'markDeleted')
+				);
 
 			if ($sOperaion == 'modal')
 			{

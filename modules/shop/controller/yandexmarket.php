@@ -64,7 +64,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Controller_YandexMarket extends Core_Controller
 {
@@ -687,6 +687,9 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			$this->_Shop_Items
 				->queryBuilder()
 				->join('shop_warehouse_items', 'shop_warehouse_items.shop_item_id', '=', 'shop_items.id')
+				->join('shop_warehouses', 'shop_warehouses.id', '=', 'shop_warehouse_items.shop_warehouse_id')
+				->where('shop_warehouses.active', '=', 1)
+				->where('shop_warehouses.deleted', '=', 0)
 				->groupBy('shop_items.id')
 				->having(Core_QueryBuilder::expression('SUM(shop_warehouse_items.count)'), '>', 0);
 		}
@@ -737,6 +740,9 @@ class Shop_Controller_YandexMarket extends Core_Controller
 									->queryBuilder()
 									->select('shop_items.*')
 									->join('shop_warehouse_items', 'shop_warehouse_items.shop_item_id', '=', 'shop_items.id')
+									->join('shop_warehouses', 'shop_warehouses.id', '=', 'shop_warehouse_items.shop_warehouse_id')
+									->where('shop_warehouses.active', '=', 1)
+									->where('shop_warehouses.deleted', '=', 0)
 									->groupBy('shop_items.id')
 									->having(Core_QueryBuilder::expression('SUM(shop_warehouse_items.count)'), '>', 0);
 							}
@@ -1112,6 +1118,9 @@ class Shop_Controller_YandexMarket extends Core_Controller
 				$oItem_Associateds
 					->queryBuilder()
 					->join('shop_warehouse_items', 'shop_warehouse_items.shop_item_id', '=', 'shop_items.id')
+					->join('shop_warehouses', 'shop_warehouses.id', '=', 'shop_warehouse_items.shop_warehouse_id')
+					->where('shop_warehouses.active', '=', 1)
+					->where('shop_warehouses.deleted', '=', 0)
 					->groupBy('shop_items.id')
 					->having(Core_QueryBuilder::expression('SUM(shop_warehouse_items.count)'), '>', 0);
 			}

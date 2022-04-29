@@ -24,7 +24,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 {
@@ -1930,8 +1930,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 												$sCurrency = $this->_aCurrencyCodes[$sCurrency];
 											}
 
-											$oItem_Shop_Currency = Core_Entity::factory('Shop_Currency')
-												->getByLike($sCurrency, FALSE);
+											$oItem_Shop_Currency = Core_Entity::factory('Shop_Currency')->getByLike($sCurrency, FALSE);
 
 											// Валюта у самого товара
 											$sCurrency = strval($oPrice->Валюта);
@@ -1952,8 +1951,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 											}
 
 											// Валюта спеццены
-											$oPrice_Currency = Core_Entity::factory('Shop_Currency')
-												->getByLike($sCurrency, FALSE);
+											$oPrice_Currency = Core_Entity::factory('Shop_Currency')->getByLike($sCurrency, FALSE);
 
 											if (!is_null($oItem_Shop_Currency)
 												&& !is_null($oPrice_Currency)
@@ -2021,6 +2019,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 										{
 											$oShop_Currency = Core_Entity::factory('Shop_Currency');
 											$oShop_Currency->name = $sCurrency;
+											$oShop_Currency->sign = $sCurrency;
 											$oShop_Currency->code = $sCurrency;
 											$oShop_Currency->exchange_rate = 1;
 										}
@@ -2985,6 +2984,11 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 									$oShop_Order->historyPushChangeStatus();
 									$oShop_Order->notifyBotsChangeStatus();
+
+									if (Core::moduleIsActive('webhook'))
+									{
+										Webhook_Controller::notify('onShopOrderChangeStatus', $oShop_Order);
+									}
 								}
 							break;
 						}

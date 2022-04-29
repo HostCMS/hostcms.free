@@ -27,7 +27,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Sitemap extends Core_Servant_Properties
 {
@@ -311,7 +311,13 @@ class Core_Sitemap extends Core_Servant_Properties
 			->where('informationsystem_groups.informationsystem_id', '=', $oInformationsystem->id)
 			->where('informationsystem_groups.shortcut_id', '=', 0)
 			->where('informationsystem_groups.deleted', '=', 0);
-		$aRow = $oCore_QueryBuilder_Select->execute()->asAssoc()->current();
+		
+		$oDataBase = $oCore_QueryBuilder_Select->execute();
+		
+		$aRow = $oDataBase->asAssoc()->current();
+		
+		$oDataBase->free();
+		
 		$maxId = $aRow['max_id'];
 
 		$iFrom = 0;
@@ -373,7 +379,13 @@ class Core_Sitemap extends Core_Servant_Properties
 				->from('informationsystem_items')
 				->where('informationsystem_items.informationsystem_id', '=', $oInformationsystem->id)
 				->where('informationsystem_items.deleted', '=', 0);
-			$aRow = $oCore_QueryBuilder_Select->execute()->asAssoc()->current();
+			
+			$oDataBase = $oCore_QueryBuilder_Select->execute();
+			
+			$aRow = $oDataBase->asAssoc()->current();
+			
+			$oDataBase->free();
+			
 			$maxId = $aRow['max_id'];
 
 			$iFrom = 0;
@@ -454,7 +466,12 @@ class Core_Sitemap extends Core_Servant_Properties
 				->from('tags')
 				->where('tags.deleted', '=', 0);
 
-			$aRow = $oCore_QueryBuilder_Select->execute()->asAssoc()->current();
+			$oDataBase = $oCore_QueryBuilder_Select->execute();
+
+			$aRow = $oDataBase->asAssoc()->current();
+			
+			$oDataBase->free();
+			
 			$maxId = $aRow['max_id'];
 
 			$iFrom = 0;
@@ -533,7 +550,13 @@ class Core_Sitemap extends Core_Servant_Properties
 			->where('shop_groups.shop_id', '=', $oShop->id)
 			->where('shop_groups.shortcut_id', '=', 0)
 			->where('shop_groups.deleted', '=', 0);
-		$aRow = $oCore_QueryBuilder_Select->execute()->asAssoc()->current();
+		
+		$oDataBase = $oCore_QueryBuilder_Select->execute();
+		
+		$aRow = $oDataBase->asAssoc()->current();
+		
+		$oDataBase->free();
+		
 		$maxId = $aRow['max_id'];
 
 		$iFrom = 0;
@@ -596,7 +619,13 @@ class Core_Sitemap extends Core_Servant_Properties
 				->from('shop_items')
 				->where('shop_items.shop_id', '=', $oShop->id)
 				->where('shop_items.deleted', '=', 0);
-			$aRow = $oCore_QueryBuilder_Select->execute()->asAssoc()->current();
+			
+			$oDataBase = $oCore_QueryBuilder_Select->execute();
+			
+			$aRow = $oDataBase->asAssoc()->current();
+			
+			$oDataBase->free();
+			
 			$maxId = $aRow['max_id'];
 
 			$iFrom = 0;
@@ -681,7 +710,12 @@ class Core_Sitemap extends Core_Servant_Properties
 				->from('tags')
 				->where('tags.deleted', '=', 0);
 
-			$aRow = $oCore_QueryBuilder_Select->execute()->asAssoc()->current();
+			$oDataBase = $oCore_QueryBuilder_Select->execute();
+
+			$aRow = $oDataBase->asAssoc()->current();
+			
+			$oDataBase->free();
+			
 			$maxId = $aRow['max_id'];
 
 			$iFrom = 0;
@@ -742,7 +776,13 @@ class Core_Sitemap extends Core_Servant_Properties
 				->from('shop_filter_seos')
 				->where('shop_filter_seos.shop_id', '=', $oShop->id)
 				->where('shop_filter_seos.deleted', '=', 0);
-			$aRow = $oCore_QueryBuilder_Select->execute()->asAssoc()->current();
+			
+			$oDataBase = $oCore_QueryBuilder_Select->execute();
+			
+			$aRow = $oDataBase->asAssoc()->current();
+			
+			$oDataBase->free();
+			
 			$maxId = $aRow['max_id'];
 
 			$iFrom = 0;

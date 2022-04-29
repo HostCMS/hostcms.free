@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Database
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_DataBase
 {
@@ -152,6 +152,7 @@ abstract class Core_DataBase
 			$query .= ' LIKE ' . $this->quote($selectionCondition);
 		}
 
+		// free in the result
 		$result = $this->query($query)->asAssoc()->result();
 
 		$return = array();
@@ -611,6 +612,8 @@ abstract class Core_DataBase
 
 		$aCreate = $this->query("SHOW CREATE TABLE {$sColumnName}")->asAssoc()->current();
 
+		$this->free();
+
 		$stdOut->write(
 			"{$aCreate['Create Table']};\r\n\r\n" .
 			"-- \r\n" .
@@ -673,7 +676,9 @@ abstract class Core_DataBase
 			$i++;
 		}
 
-		$oCore_QueryBuilderSelect->unbuffered(FALSE)->free();
+		$oCore_QueryBuilderSelect
+			->unbuffered(FALSE)
+			->free();
 
 		if ($i > 0)
 		{
@@ -887,10 +892,10 @@ abstract class Core_DataBase
 		{
 			$query = 'SHOW COLLATION';
 
-			$result = $this->query($query)->asAssoc()->result();
+			$aResult = $this->query($query)->asAssoc()->result();
 
 			$this->_collations = array();
-			foreach ($result as $row)
+			foreach ($aResult as $row)
 			{
 				$this->_collations[$row['Charset']][] = $row['Collation'];
 			}

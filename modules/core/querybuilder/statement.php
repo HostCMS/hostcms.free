@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Querybuilder
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_QueryBuilder_Statement
 {
@@ -69,10 +69,8 @@ abstract class Core_QueryBuilder_Statement
 	 */
 	public function execute($sql = NULL)
 	{
-		if (is_null($sql))
-		{
-			$sql = $this->build();
-		}
+		is_null($sql)
+			&& $sql = $this->build();
 
 		// Set type of query
 		$oDataBase = $this->_dataBase

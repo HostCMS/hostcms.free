@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Print_Form_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -49,7 +49,7 @@ class Shop_Print_Form_Controller_Edit extends Admin_Form_Action_Controller_Type_
 			->caption(Core::_('Shop_Print_Form.shop_id'))
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
 			->options(
-				$this->_fillShops()
+				Shop_Controller::fillShops(CURRENT_SITE)
 			)
 			->value($this->_object->shop_id);
 
@@ -86,27 +86,7 @@ class Shop_Print_Form_Controller_Edit extends Admin_Form_Action_Controller_Type_
 
 		return $this;
 	}
-
-	/**
-	 * Fill shop list
-	 * @return array
-	 */
-	protected function _fillShops()
-	{
-		$oSite = Core_Entity::factory('Site', CURRENT_SITE);
-
-		$aShops = $oSite->Shops->findAll();
-
-		$aResult = array(' … ');
-
-		foreach ($aShops as $oShop)
-		{
-			$aResult[$oShop->id] = $oShop->name;
-		}
-
-		return $aResult;
-	}
-
+	
 	/**
 	 * Processing of the form. Apply object fields.
 	 * @hostcms-event Shop_Print_Form_Controller_Edit.onAfterRedeclaredApplyObjectProperty

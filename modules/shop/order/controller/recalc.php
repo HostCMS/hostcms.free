@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Controller_Recalc extends Admin_Form_Action_Controller
 {
@@ -120,7 +120,7 @@ class Shop_Order_Controller_Recalc extends Admin_Form_Action_Controller
 													<input name="shop_delivery_condition_price" type="radio" data-name="<?php echo htmlspecialchars($aData['name'])?>" value="<?php echo htmlspecialchars($aData['value'])?>" <?php echo $checked?>/>
 													<span class="text">
 														<b><?php echo htmlspecialchars($aData['name'])?></b>
-														<small class="margin-left-20"><?php echo htmlspecialchars($aData['value']) . ' ' . htmlspecialchars($oShop_Currency->name)?></small>
+														<small class="margin-left-20"><?php echo htmlspecialchars($oShop_Currency->formatWithCurrency($aData['value']))?></small>
 													</span>
 												</label>
 											</div>

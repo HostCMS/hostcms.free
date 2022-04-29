@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Field
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -356,11 +356,10 @@ class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				{
 					$oAdditionalTab->delete($this->getField('shop_id'));
 
-					$oShop_Controller_Edit = new Shop_Controller_Edit($this->_Admin_Form_Action);
 					// Селектор с группой
 					$oSelect_Shops = Admin_Form_Entity::factory('Select')
 						->options(
-							array(' … ') + $oShop_Controller_Edit->fillShops(CURRENT_SITE)
+							array(' … ') + Shop_Controller::fillShops(CURRENT_SITE)
 						)
 						->name('shop_id')
 						->value($this->_object->shop_id)

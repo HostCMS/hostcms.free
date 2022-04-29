@@ -24,4 +24,11 @@ return array(
 	'update_currency' => 'Оновити курси валют',
 	'update_success'=>'Курси валют успішно оновлені',
 	'date'=>'Дата курсу',
+	'sign'=> 'Знак валюти',
+	'sign_position'=> 'Позиція знака',
+	'decimal_separator'=> 'Десятичний роздільник',
+	'thousands_separator'=> 'Розділювач тисяч',
+	'hide_zeros'=> 'Не показувати незначні нулі',
+	'after_number'=> 'Після суми',
+	'before_number'=> 'Перед сумою',
 );

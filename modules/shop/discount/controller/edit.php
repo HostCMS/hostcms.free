@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -38,6 +38,16 @@ class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 		parent::_prepareForm();
 
 		$oMainTab = $this->getTab('main');
+		// $oAdditionalTab = $this->getTab('additional');
+
+		// Создаем вкладку
+		$oShopDiscountTabExportImport = Admin_Form_Entity::factory('Tab')
+			->caption(Core::_('Shop_Discount.tab_export'))
+			->name('ExportImport');
+
+		// Добавляем вкладку
+		$this
+			->addTabAfter($oShopDiscountTabExportImport, $oMainTab);
 
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -48,6 +58,14 @@ class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 			->add($oSiteuserGroupBlock = Admin_Form_Entity::factory('Div')->class('well with-header well-sm'))
 			->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'));
+
+		$oShopDiscountTabExportImport
+			->add($oShopDiscountTabExportImportRow1 = Admin_Form_Entity::factory('Div')->class('row'));
+
+		//Переносим GUID на "Экспорт/Импорт"
+		$oMainTab->move($this->getField('guid'), $oShopDiscountTabExportImport);
+
+		$oShopDiscountTabExportImport->move($this->getField('guid'), $oShopDiscountTabExportImportRow1);
 
 		$this->getField('description')->rows(7)->wysiwyg(Core::moduleIsActive('wysiwyg'));
 		$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2);
@@ -135,7 +153,7 @@ class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 				->divAttr(array('class' => ''))
 				->options(array(
 					'%',
-					$this->_object->Shop->Shop_Currency->name
+					$this->_object->Shop->Shop_Currency->sign
 				))
 				->value($this->_object->type)
 				->class('form-control input-group-addon')

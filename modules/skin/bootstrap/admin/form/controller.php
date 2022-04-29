@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 {
@@ -300,7 +300,17 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 			{
 				$onclick = $this->getAdminLoadAjax($this->getPath(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, $viewName);
 
-				?><a id="<?php echo htmlspecialchars($viewName)?>" onclick="<?php echo $onclick?>" class="btn btn-default <?php if ($viewName == $this->view) { echo 'active'; }?>" data-view="<?php echo htmlspecialchars($viewName)?>"><?php echo Core::_('Admin_Form.' . $viewName)?></a><?php
+				?><a id="<?php echo htmlspecialchars($viewName)?>" onclick="<?php echo $onclick?>" class="btn btn-default <?php if ($viewName == $this->view) { echo 'active'; }?>" data-view="<?php echo htmlspecialchars($viewName)?>"><?php
+					switch ($viewName)
+					{
+						case 'list':
+							?><i class="fa fa-bars"></i><?php
+						break;
+						case 'kanban':
+							?><i class="fa fa-align-left fa-rotate-90"></i><?php
+						break;
+					}
+				?><?php echo Core::_('Admin_Form.' . $viewName)?></a><?php
 			}
 			?></div><?php
 		}

@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Property_Controller_Edit extends Property_Controller_Edit
 {
@@ -52,17 +52,12 @@ class Shop_Item_Property_Controller_Edit extends Property_Controller_Edit
 				$oShopItemTabExportImport
 					->add($oShopItemTabExportImportRow1 = Admin_Form_Entity::factory('Div')->class('row'));
 
-				// Создаем экземпляр контроллера магазина
-				$Shop_Controller_Edit = new Shop_Controller_Edit($this->_Admin_Form_Action);
-
-				//Переносим GUID на "Экспорт/Импорт"
 				$oAdditionalTab->move($this->getField('guid'), $oShopItemTabExportImport);
 
-				// Создаем поле единиц измерения как выпадающий список
 				$oShopMeasuresSelect = Admin_Form_Entity::factory('Select')
 					->caption(Core::_("Shop_Item.shop_measure_id"))
 					->options(
-						$Shop_Controller_Edit->fillMeasures()
+						Shop_Controller::fillMeasures()
 					)
 					->name('shop_measure_id')
 					->value($this->_object->Shop_Item_Property->shop_measure_id)
@@ -70,7 +65,6 @@ class Shop_Item_Property_Controller_Edit extends Property_Controller_Edit
 
 				$oMainRow1->add($oShopMeasuresSelect);
 
-				// Префикс
 				$oShopPrefixInput = Admin_Form_Entity::factory('Input')
 					->caption(Core::_('Shop_Item.property_prefix'))
 					->name('prefix')
@@ -79,7 +73,6 @@ class Shop_Item_Property_Controller_Edit extends Property_Controller_Edit
 
 				$oMainRow1->add($oShopPrefixInput);
 
-				// Способ отображения в фильтре
 				$oShopFilterSelect = Admin_Form_Entity::factory('Select')
 					->caption(Core::_('Shop_Item.property_filter'))
 					->options(

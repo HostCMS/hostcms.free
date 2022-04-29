@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Delivery_Condition_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -103,7 +103,7 @@ class Shop_Delivery_Condition_Controller_Edit extends Admin_Form_Action_Controll
 					Admin_Form_Entity::factory('Select')
 						->caption(Core::_('Shop_Delivery_Condition.shop_currency_id'))
 						->options(
-							$Shop_Controller_Edit->fillCurrencies()
+							Shop_Controller::fillCurrencies()
 						)
 						->name('shop_currency_id')
 						->divAttr(array('class' => 'form-group col-xs-4 col-sm-2'))
