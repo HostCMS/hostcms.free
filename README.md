@@ -1,2 +1,2 @@
 # hostcms6.free
-Free Edition of Modern, Responsive, Professional and Secure CMS: HostCMS v. 6
+Free Edition of Modern, Responsive, Professional and Secure CMS: HostCMS v. 7
