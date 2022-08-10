@@ -143,7 +143,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 						<i class="fa fa-expand gray"></i>
 					</a>
 					<a data-toggle="refresh" onclick="$(this).find('i').addClass('fa-spin'); $.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#coreEventsAdminPage'), 'button': $(this).find('i') });">
-						<i class="fa fa-refresh gray"></i>
+						<i class="fa-solid fa-rotate gray"></i>
 					</a>
 				</div>
 			</div>
@@ -316,7 +316,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 										<span class="user-company"><?php echo phpversion() ?></span>
 									</div>
 									<?php
-									if (version_compare(phpversion(), '5.3.0', ">="))
+									if (version_compare(phpversion(), '5.4.0', '>='))
 									{
 										$divClass = ' bg-palegreen';
 										$iClass = ' fa-check';
@@ -339,7 +339,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 										<span class="user-company"><?php echo $dbVersion ?></span>
 									</div>
 									<?php
-									if (version_compare($dbVersion, '5.0.0', ">=") )
+									if (version_compare($dbVersion, '5.0.0', '>=') )
 									{
 										$divClass = ' bg-palegreen';
 										$iClass = ' fa-check';
@@ -362,7 +362,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 										<span class="user-company"><?php echo $gdVersion ?></span>
 									</div>
 									<?php
-									if (version_compare($gdVersion, '2.0', ">="))
+									if (version_compare($gdVersion, '2.0', '>='))
 									{
 										$divClass = ' bg-palegreen';
 										$iClass = ' fa-check';
@@ -386,7 +386,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 									</div>
 
 									<?php
-									if (version_compare($pcreVersion, '7.0', ">="))
+									if (version_compare($pcreVersion, '7.0', '>='))
 									{
 										$divClass = ' bg-palegreen';
 										$iClass = ' fa-check';
@@ -654,7 +654,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 			{
 				?><div class="filter-sites">
 					<input type="text" class="filter-sites-input" placeholder="<?php echo Core::_('Site.filter_placeholder')?>">
-					<i class="fa fa-search"></i>
+					<i class="fa-solid fa-magnifying-glass"></i>
 				</div><?php
 			}
 			?>

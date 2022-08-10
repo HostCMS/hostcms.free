@@ -131,6 +131,7 @@ class Property_Value_Int_Model extends Core_Entity
 	 * @return self
 	 * @hostcms-event property_value_int.onBeforeAddListItem
 	 * @hostcms-event property_value_int.onBeforeAddInformationsystemItem
+	 * @hostcms-event property_value_int.onBeforeAddInformationsystemGroup
 	 * @hostcms-event property_value_int.onBeforeAddShopItem
 	 * @hostcms-event property_value_int.onBeforeAddShopGroup
 	 */
@@ -139,13 +140,15 @@ class Property_Value_Int_Model extends Core_Entity
 		$oProperty = $this->Property;
 
 		// ---------------------------
-		/*$this->_tagName = $this->Property->tag_name;
+		/*$this->_tagName = $oProperty->tag_name;
 		return $this;*/
 		// ---------------------------
 
 		$this->clearXmlTags()
-			->addXmlTag('property_dir_id', $this->Property->property_dir_id)
+			->addXmlTag('property_dir_id', $oProperty->property_dir_id)
 			->addXmlTag('tag_name', $oProperty->tag_name);
+
+		!$oProperty->multiple && $this->addForbiddenTag('sorting');
 
 		// List
 		if ($oProperty->type == 3 && Core::moduleIsActive('list'))

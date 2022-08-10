@@ -26,6 +26,7 @@ return array(
 	'add_event' => 'Дело',
 	'add_deal' => 'Сделку',
 	'add_note' => 'Заметка',
+	'add_document' => 'Документ',
 	'add_attachment' => 'Файл',
 	'tabNotes' => 'Заметки',
 	'enable_after_save' => 'Будет доступно после сохранения',
@@ -33,4 +34,5 @@ return array(
 	'color' => 'Цвет',
 	'completed' => 'Завершен',
 	'changeCompleted_success' => 'Завершенность проекта изменена',
+	'documents_count' => 'Документы: %s',
 );

@@ -1,5 +1,5 @@
 <?php
 
-return array(	
-
+return array(
+	'crm_project_id' => 'Ідентифікатор проекту'
 );

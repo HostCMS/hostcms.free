@@ -107,6 +107,9 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 			case 2:
 				$controller = 'Event_Controller_Edit';
 			break;
+			case 3:
+				$controller = 'Dms_Document_Controller_Edit';
+			break;
 		}
 	}
 
@@ -130,6 +133,9 @@ $oAdmin_Form_Controller->addDataset(
 );
 
 $oAdmin_Form_Controller->addExternalReplace('{event_id}', $oEvent->id);
+
+Core_Event::attach('Admin_Form_Controller.onAfterShowContent', array('User_Controller', 'onAfterShowContentPopover'), array($oAdmin_Form_Controller));
+Core_Event::attach('Admin_Form_Action_Controller_Type_Edit.onAfterRedeclaredPrepareForm', array('User_Controller', 'onAfterRedeclaredPrepareForm'));
 
 // Показ формы
 $oAdmin_Form_Controller->execute();

@@ -21,6 +21,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 	 */
 	protected $_allowedProperties = array(
 		'title', // Form Title
+		'pageTitle', // Form Title
 		'skipColumns', // Array of skipped columns
 		'tabClass', // Additional class for Admin_Form_Entity_Tab
 		'tabsClass', // Additional class for Admin_Form_Entity_Tabs
@@ -740,7 +741,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 
 				$this->_Admin_Form_Controller
 					->title($this->title)
-					->pageTitle($this->title);
+					->pageTitle(!is_null($this->pageTitle) ? $this->pageTitle : $this->title);
 
 				$this->_return = $this->_showEditForm();
 			break;
@@ -1058,9 +1059,9 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 			->tabs($this->_getAdmin_Form_Entity_Tabs())
 			->buttons($this->_addButtons());
 
-		$content = $oAdmin_Form_Action_Controller_Type_Edit_Show->showEditForm();
-
 		ob_start();
+		
+		$content = $oAdmin_Form_Action_Controller_Type_Edit_Show->showEditForm();
 
 		$sAdmin_View = NULL;
 		if (!is_null($this->_Admin_Form_Controller))
@@ -1073,7 +1074,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 		$oAdmin_View = Admin_View::create($sAdmin_View);
 		$oAdmin_View
 			->children($oAdmin_Form_Action_Controller_Type_Edit_Show->children)
-			->pageTitle($oAdmin_Form_Action_Controller_Type_Edit_Show->title)
+			->pageTitle(!is_null($this->pageTitle) ? $this->pageTitle : $this->title)
 			->module($this->_Admin_Form_Controller->getModule())
 			->content($content)
 			->message($oAdmin_Form_Action_Controller_Type_Edit_Show->message)

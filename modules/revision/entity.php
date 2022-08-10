@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Revision
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Revision_Entity
 {
@@ -104,7 +104,7 @@ class Revision_Entity
 	public function delete($primaryKey = NULL)
 	{
 		$offset = 0;
-		$limit = 100;
+		$limit = 500;
 
 		$singular = Core_Inflection::getSingular($this->table_name);
 
@@ -114,7 +114,11 @@ class Revision_Entity
 			$oRevisions = Core_Entity::factory('Revision');
 			$oRevisions
 				->queryBuilder()
+				->clearSelect()
+				->select('id', 'model', 'user_id', 'deleted')
 				->where('model', '=', $singular)
+				->clearOrderBy()
+				->orderBy('id', 'ASC')
 				->offset($offset)
 				->limit($limit);
 

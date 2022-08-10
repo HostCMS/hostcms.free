@@ -20,7 +20,7 @@ class Directory_Controller_Tab_Social extends Directory_Controller_Tab
 
 	protected function _execute($oPersonalDataInnerWrapper)
 	{
-		$aDirectory_Relations = $this->relation->findAll();
+		// $aDirectory_Relations = $this->relation->findAll();
 
 		$aMasDirectoryTypes = $this->_getDirectoryTypes();
 
@@ -48,9 +48,9 @@ class Directory_Controller_Tab_Social extends Directory_Controller_Tab
 	}
 
 	protected function _socialTemplate($aMasDirectorySocials, $oUser_Directory_Social = NULL)
-	{		
+	{
 		$sNameSuffix = $oUser_Directory_Social ? '#' . $oUser_Directory_Social->Directory_Social->id : '[]';
-		
+
 		$oRowElements = Admin_Form_Entity::factory('Div')
 			->class('row')
 			->add(
@@ -59,14 +59,14 @@ class Directory_Controller_Tab_Social extends Directory_Controller_Tab
 					->name($this->prefix . 'social' . $sNameSuffix)
 					->value($oUser_Directory_Social ? $oUser_Directory_Social->Directory_Social->directory_social_type_id : '')
 					->caption(Core::_('Directory_Social.social'))
-					->divAttr(array('class' => 'form-group col-xs-4'))
+					->divAttr(array('class' => 'form-group col-xs-6 col-lg-4'))
 			)
 			->add(
 				Admin_Form_Entity::factory('Input')
 					->name($this->prefix . 'social_address' . ($oUser_Directory_Social ? '#' . $oUser_Directory_Social->Directory_Social->id : '[]'))
 					->value($oUser_Directory_Social ? $oUser_Directory_Social->Directory_Social->value : '')
 					->caption(Core::_('Directory_Social.social_address'))
-					->divAttr(array('class' => 'form-group no-padding-left ' . ($this->showPublicityControlElement ? 'col-sm-4 col-xs-3' : 'col-lg-5 col-sm-6 col-xs-5')))
+					->divAttr(array('class' => 'form-group no-padding-left ' . ($this->showPublicityControlElement ? 'col-lg-4 col-xs-6' : 'col-lg-5 col-sm-6 col-xs-5')))
 			);
 
 		if ($this->showPublicityControlElement)
@@ -75,13 +75,13 @@ class Directory_Controller_Tab_Social extends Directory_Controller_Tab
 
 			$oRowElements->add(
 				Admin_Form_Entity::factory('Checkbox')
-					->divAttr(array('class' => 'col-xs-3 col-sm-2 no-padding margin-top-23'))
+					->divAttr(array('class' => 'col-xs-6 col-lg-2 no-padding-lg margin-top-23-lg margin-right-5-lg'))
 					->name($this->prefix . 'social_public' . $sNameSuffix)
 					->value(1)
 					->checked($iSocialPublic ? $iSocialPublic : FALSE)
 					->caption(Core::_('Directory_Social.social_public'))
 			);
-			
+
 			// Для нового свойства добавляет скрытое поле, хранящее состояние чекбокса
 			/*if (!$oUser_Directory_Social)
 			{
@@ -96,7 +96,7 @@ class Directory_Controller_Tab_Social extends Directory_Controller_Tab
 
 		return $oRowElements;
 	}
-	
+
 	public function applyObjectProperty($Admin_Form_Controller, $object)
 	{
 		$windowId = $Admin_Form_Controller->getWindowId();

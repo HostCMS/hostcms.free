@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Установка цен',
@@ -39,6 +39,7 @@ return array(
 	'add_item_placeholder' => "Введите название товара",
 	'print_price_id' => "Цена (для печати)",
 	'apply_item' => "Установка цены из списка товаров",
+	'apply_item_change_attributes' => "Установка цены через изменение атрибутов",
 	'post_success' => 'Документ проведен успешно!',
 	'unpost_success' => 'Документ распроведен успешно!',
 	'convolution' => 'Свёртка базы',

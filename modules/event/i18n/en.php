@@ -10,7 +10,7 @@ return array(
 	'events_menu_statuses' => 'Statuses',
 	'events_menu_meeting_places' => 'Meeting places',
 	'add_title' => 'Add event',
-	'edit_title' => 'Edit event',
+	'edit_title' => '%s',
 	'complete' => 'Complete',
 	'resume' => 'Resume',
 	'id' => 'ID',
@@ -152,4 +152,5 @@ return array(
 	'history_change_completed-1' => '<span class="darkorange">Event completed unsuccessfully</span>',
 
 	'event_files' => 'Files',
+	'tabDmsDocuments' => 'Documents',
 );

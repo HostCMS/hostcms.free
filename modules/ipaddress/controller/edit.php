@@ -14,13 +14,13 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 class Ipaddress_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
 	/**
-	 * Set object
-	 * @param object $object object
+	 * Prepare backend item's edit form
+	 *
 	 * @return self
 	 */
-	public function setObject($object)
+	protected function _prepareForm()
 	{
-		parent::setObject($object);
+		parent::_prepareForm();
 
 		$this->title(
 			$this->_object->id

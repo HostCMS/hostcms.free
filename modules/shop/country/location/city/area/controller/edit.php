@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Country_Location_City_Area_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -26,7 +26,17 @@ class Shop_Country_Location_City_Area_Controller_Edit extends Admin_Form_Action_
 			$object->shop_country_location_city_id = Core_Array::getGet('shop_city_id');
 		}
 
-		parent::setObject($object);
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
 
 		$title = $this->_object->id
 			? Core::_('Shop_Country_Location_City_Area.edit_city_area_tytle', $this->_object->name)

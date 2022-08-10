@@ -39,7 +39,7 @@ class Skin_Bootstrap_Module_Update_Module extends Update_Module
 
 			$aUsers = Core_Entity::factory('User')->getAllBySuperuser(1, FALSE);
 
-			if (!$error && $iUpdateCounts)
+			if (!$error && $iUpdateCounts && Core::moduleIsActive('notification'))
 			{
 				$oUpdate = end($aUpdates['entities']);
 
@@ -66,7 +66,7 @@ class Skin_Bootstrap_Module_Update_Module extends Update_Module
 
 			$aModuleUpdates = Update_Controller::instance()->parseModules();
 
-			if (count($aModuleUpdates))
+			if (count($aModuleUpdates) && Core::moduleIsActive('notification'))
 			{
 				foreach ($aModuleUpdates as $oModuleUpdate)
 				{
@@ -97,7 +97,7 @@ class Skin_Bootstrap_Module_Update_Module extends Update_Module
 				<div class="databox radius-bordered databox-shadowed hostcms-widget-databox">
 					<div class="databox-left bg-themethirdcolor">
 						<div class="databox-piechart">
-							<a href="/admin/update/index.php" onclick="$.adminLoad({path: '/admin/update/index.php'}); return false"><i class="fa fa-refresh fa-3x"></i></a>
+							<a href="/admin/update/index.php" onclick="$.adminLoad({path: '/admin/update/index.php'}); return false"><i class="fa-solid fa-rotate fa-3x"></i></a>
 						</div>
 					</div>
 					<div class="databox-right">
@@ -130,7 +130,7 @@ class Skin_Bootstrap_Module_Update_Module extends Update_Module
 							}
 						?></div>
 						<div class="databox-stat themethirdcolor radius-bordered">
-							<i class="stat-icon icon-lg fa fa-refresh"></i>
+							<i class="stat-icon icon-lg fa-solid fa-rotate"></i>
 						</div>
 					</div>
 				</div>

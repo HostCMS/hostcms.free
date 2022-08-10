@@ -141,7 +141,7 @@ class Property_Model extends Core_Entity
 	 * @param boolean $bCache cache mode
 	 * @return array|NULL
 	 */
-	public function getValues($entityId, $bCache = TRUE)
+	public function getValues($entityId, $bCache = TRUE, $bSorting = FALSE)
 	{
 		if (is_null($this->type))
 		{
@@ -158,7 +158,7 @@ class Property_Model extends Core_Entity
 
 		return Property_Controller_Value::factory($this->type)
 			->setProperty($this)
-			->getValues($entityId, $bCache);
+			->getValues($entityId, $bCache, $bSorting);
 	}
 
 	/**
@@ -604,8 +604,10 @@ class Property_Model extends Core_Entity
 				$this->List->clearEntities()
 			);
 
-			if (is_bool($this->_config['add_list_items']) && $this->_config['add_list_items']
-				|| is_array($this->_config['add_list_items']) && in_array($this->id, $this->_config['add_list_items'])
+			if (!isset($this->_forbiddenTags['list_items']) && 
+				(is_bool($this->_config['add_list_items']) && $this->_config['add_list_items']
+					|| is_array($this->_config['add_list_items']) && in_array($this->id, $this->_config['add_list_items'])
+				)
 			)
 			{
 				$oList_Items = $this->List->List_Items;

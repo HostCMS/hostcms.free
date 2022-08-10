@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Price_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -25,7 +25,17 @@ class Shop_Price_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$object->shop_id = Core_Array::getGet('shop_id');
 		}
 
-		parent::setObject($object);
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
 
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
@@ -89,11 +99,11 @@ class Shop_Price_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->name('apply_for_all')
 			->caption(Core::_("Shop_Item.prices_add_form_apply_for_all"))
 			->value(1)
-			->checked($object->id == 0);
+			->checked($this->_object->id == 0);
 
 		$oMainRow3->add($oApplyForAll);
 
-		if (!is_null($object->id))
+		if (!is_null($this->_object->id))
 		{
 			$oRecalculatePrice = Admin_Form_Entity::factory('Checkbox')
 				->name('recalculate_price')

@@ -589,6 +589,24 @@ class Template_Model extends Core_Entity
 		$newObject->saveManifestFile($this->loadManifestFile());
 		$newObject->saveLngFile($oSite->lng, $this->loadLngFile($oSite->lng));
 
+		// Template_Sections
+		$aTemplate_Sections = $this->Template_Sections->findAll(FALSE);
+
+		foreach ($aTemplate_Sections as $oTemplate_Section)
+		{
+			$oNew_Template_Section = clone $oTemplate_Section;
+			$newObject->add($oNew_Template_Section);
+
+			// Template_Section_Libs
+			$aTemplate_Section_Libs = $oTemplate_Section->Template_Section_Libs->findAll(FALSE);
+
+			foreach ($aTemplate_Section_Libs as $oTemplate_Section_Lib)
+			{
+				$oNew_Template_Section_Lib = clone $oTemplate_Section_Lib;
+				$oNew_Template_Section->add($oNew_Template_Section_Lib);
+			}
+		}
+
 		$aTemplates = $this->Templates->findAll();
 
 		foreach ($aTemplates as $oTemplate)
@@ -726,8 +744,16 @@ class Template_Model extends Core_Entity
 			if (Core::checkPanel() && Core_Auth::logged())
 			{
 				$oUser = Core_Auth::getCurrentUser();
-				$this->_checkUserAccess = $oUser->checkModuleAccess(array('template'), $this->Site)
-					&& $oUser->checkObjectAccess($this);
+
+				try
+				{
+					$this->_checkUserAccess = $oUser->checkModuleAccess(array('template'), $this->Site)
+						&& $oUser->checkObjectAccess($this);
+				}
+				catch (Exception $e)
+				{
+					$this->_checkUserAccess = FALSE;
+				}
 			}
 			else
 			{

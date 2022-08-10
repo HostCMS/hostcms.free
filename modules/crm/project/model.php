@@ -24,6 +24,7 @@ class Crm_Project_Model extends Core_Entity
 		'crm_project_crm_note' => array(),
 		'crm_note' => array('through' => 'crm_project_crm_note'),
 		'crm_project_attachment' => array(),
+		'dms_document' => array(),
 	);
 
 	/**
@@ -79,7 +80,7 @@ class Crm_Project_Model extends Core_Entity
 			Core_Html_Entity::factory('Span')
 				->class('label-crm-project')
 				->style('border-color: #53a93f; color: #53a93f; background-color: ' . Core_Str::hex2lighter('#53a93f', 0.88))
-				->value('<i class="fa fa-tasks"></i> ' . $countEvents)
+				->value('<i class="fa fa-tasks fa-fw"></i> ' . $countEvents)
 				->title(Core::_('Crm_Project.events_count', $countEvents))
 				->execute();
 		}
@@ -89,24 +90,34 @@ class Crm_Project_Model extends Core_Entity
 			Core_Html_Entity::factory('Span')
 				->class('label-crm-project')
 				->style('border-color: #57b5e3; color: #57b5e3; background-color: ' . Core_Str::hex2lighter('#57b5e3', 0.88))
-				->value('<i class="fa fa-handshake-o"></i> ' . $countDeals)
+				->value('<i class="fa fa-handshake-o fa-fw"></i> ' . $countDeals)
 				->title(Core::_('Crm_Project.deals_count', $countDeals))
+				->execute();
+		}
+
+		if (Core::moduleIsActive('dms') && $countDocuments = $this->Dms_Documents->getCount())
+		{
+			Core_Html_Entity::factory('Span')
+				->class('label-crm-project')
+				->style('border-color: #d73d32; color: #d73d32; background-color: ' . Core_Str::hex2lighter('#d73d32', 0.88))
+				->value('<i class="fa fa-columns fa-fw"></i> ' . $countDocuments)
+				->title(Core::_('Crm_Project.documents_count', $countDocuments))
 				->execute();
 		}
 
 		$countNotes = $this->Crm_Project_Crm_Notes->getCount();
 		$countNotes && Core_Html_Entity::factory('Span')
 			->class('label-crm-project')
-			->style('border-color: #d73d32; color: #d73d32; background-color: ' . Core_Str::hex2lighter('#d73d32', 0.88))
-			->value('<i class="fa fa-comment-o"></i> ' . $countNotes)
+			->style('border-color: #f4b400; color: #f4b400; background-color: ' . Core_Str::hex2lighter('#f4b400', 0.88))
+			->value('<i class="fa fa-comment-o fa-fw"></i> ' . $countNotes)
 			->title(Core::_('Crm_Project.notes_count', $countNotes))
 			->execute();
 
 		$countFiles = $this->Crm_Project_Attachments->getCount();
 		$countFiles && Core_Html_Entity::factory('Span')
 			->class('label-crm-project')
-			->style('border-color: #f4b400; color: #f4b400; background-color: ' . Core_Str::hex2lighter('#f4b400', 0.88))
-			->value('<i class="fa fa-file-o"></i> ' . $countFiles)
+			->style('border-color: #981b48; color: #981b48; background-color: ' . Core_Str::hex2lighter('#981b48', 0.88))
+			->value('<i class="fa fa fa-file-text-o fa-fw"></i> ' . $countFiles)
 			->title(Core::_('Crm_Project.files_count', $countFiles))
 			->execute();
 	}
@@ -128,12 +139,6 @@ class Crm_Project_Model extends Core_Entity
 	 */
  	public function deadlineBackend()
 	{
-		/*$class = !$this->completed ? $this->getDeadlineClass() : '';
-
-		return $this->deadline != '0000-00-00 00:00:00'
-			? '<span class="' . $class . '">' . Core_Date::timestamp2string(Core_Date::sql2timestamp($this->deadline)) . '</span>'
-			: '—';*/
-
 		if ($this->deadline != '0000-00-00 00:00:00')
 		{
 			if ($this->completed)
@@ -187,6 +192,39 @@ class Crm_Project_Model extends Core_Entity
 		}
 
 		return $class;
+	}
+
+	/**
+	 * Show crm project badge
+	 * @param Admin_Form_Controller_Model $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function showBadge($oAdmin_Form_Controller)
+	{
+		$oUser = Core_Auth::getCurrentUser();
+		$oSite = Core_Entity::factory('Site', CURRENT_SITE);
+
+		$bModuleAccess = $oUser->checkModuleAccess(array('crm_project'), $oSite);
+
+		$color = strlen($this->color)
+			? htmlspecialchars($this->color)
+			: '#aebec4';
+
+		?><div class="related-events-wrapper">
+			<div class="related-events" style="color: <?php echo $color?>; background-color:<?php echo Core_Str::hex2lighter($color, 0.88)?>"><i class="fas fa-tasks"></i></div>
+			<div>
+				<?php
+				if ($bModuleAccess)
+				{
+					?><a style="color: <?php echo $color?>" href="/admin/crm/project/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $this->id?>]=1" onclick="$.modalLoad({path: '/admin/crm/project/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $this->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>'}); return false"><?php echo htmlspecialchars($this->name)?></a><?php
+				}
+				else
+				{
+					?><span style="color: <?php echo $color?>"><?php echo htmlspecialchars($this->name)?></span><?php
+				}
+				?>
+			</div>
+		</div><?php
 	}
 
 	/**
@@ -295,6 +333,14 @@ class Crm_Project_Model extends Core_Entity
 				->execute();
 		}
 
+		if (Core::moduleIsActive('dms'))
+		{
+			Core_QueryBuilder::update('dms_documents')
+				->set('crm_project_id', 0)
+				->where('crm_project_id', '=', $this->id)
+				->execute();
+		}
+
 		$this->deleteDir();
 
 		return parent::delete($primaryKey);
@@ -306,7 +352,7 @@ class Crm_Project_Model extends Core_Entity
 			? htmlspecialchars($this->color)
 			: '#aebec4';
 
-		?><span class="label label-related margin-right-5" style="color: <?php echo $color?>; background-color:<?php echo Core_Str::hex2lighter($color, 0.88)?>"><i class="fa fa-folder-o margin-right-5"></i><a style="color: inherit;" href="/admin/crm/project/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $this->id?>]=1" onclick="$.modalLoad({path: '/admin/crm/project/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $this->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>'}); return false"><?php echo htmlspecialchars($this->name)?></a></span><?php
+		?><span class="label label-related margin-right-5" style="color: <?php echo $color?>; background-color:<?php echo Core_Str::hex2lighter($color, 0.88)?>"><i class="fa-regular fa-folder-open margin-right-5"></i><a style="color: inherit;" href="/admin/crm/project/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $this->id?>]=1" onclick="$.modalLoad({path: '/admin/crm/project/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $this->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>'}); return false"><?php echo htmlspecialchars($this->name)?></a></span><?php
 
 		return $this;
 	}

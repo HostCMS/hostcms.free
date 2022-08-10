@@ -91,17 +91,6 @@ class Admin_Form_Action_Controller_Type_Rollback extends Admin_Form_Action_Contr
 				}
 			}
 
-			$aColors = array(
-				'palegreen',
-				'warning',
-				'info',
-				'maroon',
-				'darkorange',
-				'blue',
-				'danger'
-			);
-			$iCountColors = count($aColors);
-
 			if (Core::moduleIsActive('revision'))
 			{
 				ob_start();
@@ -110,52 +99,42 @@ class Admin_Form_Action_Controller_Type_Rollback extends Admin_Form_Action_Contr
 
 				if (count($aRevisions))
 				{
-					$aRevisions = array_slice($aRevisions, 0, 9);
+					$aRevisions = array_slice($aRevisions, 0, 12);
 
-					?><ul class="timeline timeline-left timeline-revisions"><?php
-					$prevDate = NULL;
-
-					$i = 0;
-
-					foreach ($aRevisions as $key => $oRevision)
-					{
-						$color = $aColors[$i % $iCountColors];
-
-						$iDatetime = Core_Date::sql2timestamp($oRevision->datetime);
-						$sDate = Core_Date::timestamp2date($iDatetime);
-
-						if ($prevDate != $sDate)
-						{
-							?><li class="timeline-node">
-								<a class="badge badge-<?php echo $color?>"><?php echo Core_Date::timestamp2string(Core_Date::date2timestamp($sDate), FALSE)?></a>
-							</li><?php
-
-							$prevDate = $sDate;
-							$i++;
-						}
-
-						$radioColor = $aColors[($i - 1) % $iCountColors];
-
-						$checked = $key == 0 ? 'checked="checked"' : '';
-
-						$oRevision->printValue();
-						?>
-						<li>
-							<div class="form-group col-xs-12">
-								<div class="radio">
-									<label>
-										<input name="revision_version_id" type="radio" value="<?php echo $oRevision->id?>" class="colored-<?php echo $radioColor?>" <?php echo $checked?>/>
-										<div class="text"><?php echo Core::_('Revision.version_title', $oRevision->id)?></div>
-										<div class="date"><?php echo Core_Date::timestamp2datetime($iDatetime)?></div>
-										<div class="value"><a id="revision<?php echo $oRevision->id?>" href="javascript:void(0);"><i class="fa fa-eye <?php echo $radioColor?>"></i></a></div>
-										<?php echo $oRevision->User->getAvatarWithName()?>
-									</label>
-								</div>
-							</div>
-						</li>
+					?>
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th></th>
+								<th><?php echo Core::_('Revision.version')?></th>
+								<th style="text-align:center"><?php echo Core::_('Revision.date')?></th>
+								<th><?php echo Core::_('Revision.view')?></th>
+								<th style="text-align:center"><?php echo Core::_('Revision.user')?></th>
+							</tr>
+						</thead>
+						<tbody>
 						<?php
-					}
-					?></ul><?php
+							foreach ($aRevisions as $key => $oRevision)
+							{
+								$iDatetime = Core_Date::sql2timestamp($oRevision->datetime);
+
+								$checked = $key == 0 ? 'checked="checked"' : '';
+
+								$oRevision->printValue();
+								?>
+								<tr>
+									<td width="30px"><label><input name="revision_version_id" type="radio" value="<?php echo $oRevision->id?>" class="colored-blue" <?php echo $checked?>/><span class="text"></span></label></td>
+									<td><?php echo $oRevision->id?></td>
+									<td width="120px"><?php echo Core_Date::timestamp2string($iDatetime)?></td>
+									<td style="text-align:center"><a id="revision<?php echo $oRevision->id?>" href="javascript:void(0);"><i class="fa-solid fa-eye gray"></i></a></td>
+									<td style="text-align:left"><?php echo $oRevision->User->getAvatarWithName()?></td>
+								</tr>
+								<?php
+							}
+						?>
+						</tbody>
+					</table>
+					<?php
 				}
 				else
 				{
@@ -174,7 +153,7 @@ class Admin_Form_Action_Controller_Type_Rollback extends Admin_Form_Action_Contr
 					$oAdmin_Form_Entity_Button = Admin_Form_Entity::factory('Button')
 						->name('apply')
 						->type('submit')
-						->class('applyButton btn btn-palegreen')
+						->class('applyButton btn btn-info')
 						->value($this->buttonName)
 						->onclick(
 							'bootbox.hideAll(); '
@@ -185,7 +164,8 @@ class Admin_Form_Action_Controller_Type_Rollback extends Admin_Form_Action_Contr
 					$oCore_Html_Entity_Form
 						->add(
 							Admin_Form_Entity::factory('Div')
-								->class('form-group col-xs-12 margin-top-15')
+								// ->class('form-group col-xs-12 margin-top-15')
+								->class('margin-top-10')
 								->add($oAdmin_Form_Entity_Button)
 						);
 				}

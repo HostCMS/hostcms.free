@@ -490,6 +490,8 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		$this->step = $this->_aConfig['maxCount'];
 		$this->entriesLimit = $this->_aConfig['entriesLimit'];
 
+		$this->encoding = 'UTF-8';
+
 		$this->separator = ';';
 		$this->limiter = '"';
 		$this->importAction = 1;
@@ -3785,6 +3787,9 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 		switch ($oProperty->type)
 		{
+			case 0: // Int
+				$changedValue = Shop_Controller::convertDecimal($sPropertyValue);
+			break;
 			// Файл
 			case 2:
 				$changedValue = $sPropertyValue;
@@ -4426,6 +4431,9 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		{
 			switch ($oProperty->type)
 			{
+				case 0: // Int
+					$changedValue = Shop_Controller::convertDecimal($sPropertyValue);
+				break;
 				// Файл
 				case 2:
 					$changedValue = NULL;

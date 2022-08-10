@@ -27,9 +27,6 @@ class Crm_Project_Note_Controller_Add extends Crm_Note_Controller_Add
 
 		$oCrm_Note = $this->_object;
 
-		$oCrm_Note->result = $result;
-		$oCrm_Note->save();
-
 		$oCrm_Project = Core_Entity::factory('Crm_Project', $crm_project_id);
 		$oCrm_Project->add($oCrm_Note);
 

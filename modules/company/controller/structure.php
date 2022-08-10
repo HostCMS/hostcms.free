@@ -573,7 +573,7 @@ class Company_Controller_Structure extends Admin_Form_Controller_View
 													if ($bHead)
 													{
 														?>
-														<i class="fa fa-star gold"></i>
+														<i class="fas fa-crown gold"></i>
 														<?php
 													}
 													?>

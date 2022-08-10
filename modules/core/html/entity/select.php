@@ -18,6 +18,8 @@ class Core_Html_Entity_Select extends Core_Html_Entity
 	 * @var array
 	 */
 	protected $_allowedProperties = array(
+		'value',
+		'options',
 		'disabled',
 		'multiple',
 		'name',
@@ -30,6 +32,16 @@ class Core_Html_Entity_Select extends Core_Html_Entity
 	 * @var array
 	 */
 	protected $_skipProperties = array(
+		'options', // array
+		'value'
+	);
+	
+	// Remove _skipProperies after 7.0.2
+	/**
+	 * Skip properties
+	 * @var array
+	 */
+	protected $_skipProperies = array(
 		'options', // array
 		'value'
 	);

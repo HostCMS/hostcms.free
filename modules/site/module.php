@@ -23,14 +23,14 @@ class Site_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2022-04-29';
+	public $date = '2022-08-05';
 
 	/**
 	 * Module name
 	 * @var string
 	 */
 	protected $_moduleName = 'site';
-	
+
 	/**
 	 * Get Module's Menu
 	 * @return array
@@ -41,7 +41,7 @@ class Site_Module extends Core_Module
 			array(
 				'sorting' => 140,
 				'block' => 3,
-				'ico' => 'fa fa-globe',
+				'ico' => 'fa-solid fa-globe',
 				'name' => Core::_('Site.menu'),
 				'href' => "/admin/site/index.php",
 				'onclick' => "$.adminLoad({path: '/admin/site/index.php'}); return false"

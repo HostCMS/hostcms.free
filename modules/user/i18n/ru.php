@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage User
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Сотрудники',
@@ -66,7 +66,7 @@ return array(
 
 	'chat_message' => 'Напишите сообщение',
 	'chat_messages_none' => 'Нет сообщений',
-	'chat_count_unread_message' => 'Непрочитанные сообщения: %s',
+	'chat_count_unread_message' => 'Непрочитанные сообщения: ',
 	'chat_count_new_message' => 'Новые сообщения: ',
 	'new_message_from' => 'Новое сообщение от %s %s',
 	'wallpaper' => 'Обои',

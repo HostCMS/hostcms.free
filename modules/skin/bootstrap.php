@@ -54,6 +54,7 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/ace/mode-smarty.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/ace/ext-language_tools.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/ace/ext-searchbox-hostcms.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/ace/ext-prompt.js')
 
 			->addJs('/modules/skin/' . $this->_skinName . '/js/star-rating.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/typeahead-bs2.min.js')
@@ -80,9 +81,8 @@ class Skin_Bootstrap extends Core_Skin
 
 		$this
 			->addCss('/modules/skin/' . $this->_skinName . '/css/bootstrap.min.css')
-			->addCss('/modules/skin/' . $this->_skinName . '/fonts/fontawesome/5/css/fontawesome.min.css')
-			->addCss('/modules/skin/' . $this->_skinName . '/fonts/fontawesome/5/css/solid.min.css')
-			->addCss('/modules/skin/' . $this->_skinName . '/fonts/fontawesome/5/css/brands.min.css')
+			->addCss('/modules/skin/' . $this->_skinName . '/fonts/fontawesome/6/css/all.min.css')
+			->addCss('/modules/skin/' . $this->_skinName . '/fonts/fontawesome/5/css/all.min.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/fonts/fontawesome/4/css/font-awesome.min.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/fonts/open-sans/open-sans.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/hostcms.min.css')
@@ -183,12 +183,26 @@ class Skin_Bootstrap extends Core_Skin
 					&& $wallpaperId = $aUser_Wallpapers[0]->id;
 			}
 
-			$sWallpaperPath = $wallpaperId
-				? '/upload/user/wallpaper/' . htmlspecialchars(Core_Entity::factory('User_Wallpaper', $wallpaperId)->image_large)
-				: '/modules/skin/bootstrap/img/bg.jpg';
+			$sWallpaperPath = $sWallpaperColor = NULL;
+
+			if ($wallpaperId)
+			{
+				$oUser_Wallpaper = Core_Entity::factory('User_Wallpaper', $wallpaperId);
+				$oUser_Wallpaper->image_large != ''
+					&& $sWallpaperPath = '/upload/user/wallpaper/' . htmlspecialchars($oUser_Wallpaper->image_large);
+				$oUser_Wallpaper->color != ''
+					&& $sWallpaperColor = htmlspecialchars($oUser_Wallpaper->color);
+			}
+			else
+			{
+				$sWallpaperPath = '/modules/skin/bootstrap/img/bg.jpg';
+			}
 
 			echo PHP_EOL;
-			?><style type="text/css">body.hostcms-bootstrap1:before { background-image: url("<?php echo $sWallpaperPath?>"); }</style><?php
+			?><style type="text/css">body.hostcms-bootstrap1:before { <?php
+				echo !is_null($sWallpaperPath) ? 'background-image: url("' . $sWallpaperPath . '");' : '';
+				echo !is_null($sWallpaperColor) ? 'background-color: ' . $sWallpaperColor . ';' : '';
+			?> }</style><?php
 		}
 
 		return $this;
@@ -213,7 +227,7 @@ class Skin_Bootstrap extends Core_Skin
 					<!-- /Navbar Barnd -->
 					<!-- Sidebar Collapse -->
 					<div class="sidebar-collapse" id="sidebar-collapse">
-						<i class="collapse-icon fa fa-bars"></i>
+						<i class="collapse-icon fa-solid fa-bars"></i>
 					</div>
 					<!-- /Sidebar Collapse -->
 					<!-- Account Area and Settings -->
@@ -340,7 +354,7 @@ class Skin_Bootstrap extends Core_Skin
 								?>
 								<li id="bookmarks">
 									<a href="#" title="<?php echo Core::_('Admin.bookmarks')?>" data-toggle="dropdown" class="dropdown-toggle">
-										<i class="icon fa fa-star-o"></i>
+										<i class="icon fa-regular fa-star"></i>
 										<span class="badge hidden"></span>
 									</a>
 									<div id="bookmarksListBox" class="pull-left dropdown-menu dropdown-arrow dropdown-bookmark dropdown-notifications">
@@ -386,7 +400,7 @@ class Skin_Bootstrap extends Core_Skin
 								</li>
 								<li>
 									<a id="sound-switch" title="<?php echo Core::_('Admin.sound')?>" href="#">
-										<i class="icon fa fa-<?php echo $oUser->sound ? 'volume-up' : 'volume-off'?>"></i>
+										<i class="icon fa-solid fa-<?php echo $oUser->sound ? 'volume-high' : 'volume-off'?>"></i>
 									</a>
 
 									<?php
@@ -491,7 +505,7 @@ class Skin_Bootstrap extends Core_Skin
 								?>
 								<li id="notifications">
 									<a href="#" title="<?php echo Core::_('Admin.notifications')?>" data-toggle="dropdown" class="dropdown-toggle">
-										<i class="icon fa fa-bell"></i>
+										<i class="icon fa-regular fa-bell"></i>
 										<span class="badge hidden"></span>
 									</a>
 									<div id="notificationsListBox" class="pull-right dropdown-menu dropdown-arrow dropdown-notifications">
@@ -558,18 +572,18 @@ class Skin_Bootstrap extends Core_Skin
 									$schema = $oCurrentSite->https ? 'https://' : 'http://';
 
 									?><a title="<?php echo Core::_('Admin.viewSite')?>" target="_blank" href="<?php echo $schema, htmlspecialchars($oAlias->name)?>">
-										<i class="icon fa fa-desktop"></i>
+										<i class="icon fa-solid fa-display"></i>
 									</a><?php
 								}
 								?>
 								</li>
 								<li>
-									<span class="account-area-site-name hidden-xs hidden-sm hidden-md">
+									<span class="account-area-site-name hidden-xs hidden-sm hidden-md" title="<?php echo htmlspecialchars($oCurrentSite->name)?>">
 										<?php echo htmlspecialchars($oCurrentSite->name)?>
 									</span>
 
 									<a class="dropdown-toggle" id="sitesListIcon" data-toggle="dropdown" title="<?php echo Core::_('Admin.selectSite')?>" href="#">
-										<i class="icon fa fa-globe"></i>
+										<i class="icon fa-solid fa-globe"></i>
 										<span class="badge"></span>
 									</a>
 									<!--Tasks Dropdown-->
@@ -588,7 +602,7 @@ class Skin_Bootstrap extends Core_Skin
 								</li>
 								<li>
 									<a class="dropdown-toggle" data-toggle="dropdown" title="<?php echo Core::_('Admin.backend-language')?>" href="#">
-										<i class="icon fa fa-flag"></i>
+										<i class="icon fa-solid fa-flag"></i>
 									</a>
 
 									<div id="languagesListBox" class=" pull-right dropdown-menu dropdown-arrow dropdown-notifications">
@@ -645,7 +659,7 @@ class Skin_Bootstrap extends Core_Skin
 								{
 								?><li>
 									<a id="chat-link" title="<?php echo Core::_('Admin.chat')?>" href="#">
-										<i class="icon glyphicon glyphicon-comment"></i>
+										<i class="icon fa-solid fa-message"></i>
 										<span class="badge hidden"></span>
 									</a>
 									<div id="chatbar" class="page-chatbar">
@@ -709,6 +723,52 @@ class Skin_Bootstrap extends Core_Skin
 									</div>
 									<script>
 										$(function(){
+											$(document).on('visibilitychange', function(){
+												if ( window.chatMessagesListScrollDown )
+												{
+													$.chatMessagesListScrollDown();
+													window.chatMessagesListScrollDown = false;
+												}
+											});
+										});
+
+										/* $(window).on('load', function() {
+
+											// Создаем и сохраняем уникальный идентификатор вкладки браузера
+										 	window.tabId = 'tab_' + Math.random().toString().split('.')[1];
+
+										 	var storageWindowTabs = localStorage.getItem('window_tabs'),
+												windowTabs = storageWindowTabs ? JSON.parse(storageWindowTabs) : [];
+
+												windowTabs.push(window.tabId);
+
+											localStorage.setItem('window_tabs', JSON.stringify(windowTabs));
+
+											console.log('window load');
+										})
+										.on('unload', function() {
+											// Удаляем уникальный идентификатор вкладки браузера
+											var storageWindowTabs = localStorage.getItem('window_tabs');
+
+											if (storageWindowTabs)
+											{
+												windowTabs = JSON.parse(storageWindowTabs);
+
+												for( var i = 0; i < windowTabs.length; i++)
+												{
+													if ( windowTabs[i] === window.tabId)
+													{
+														windowTabs.splice(i, 1);
+														break;
+													}
+												}
+
+												localStorage.setItem('window_tabs', JSON.stringify(windowTabs));
+											}
+											console.log('window unload');
+										}); */
+
+										$(function(){
 											// Chat
 											$('.page-container').append($('#chatbar'));
 											$("#chat-link, #chatbar div.back").on('click', {path: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oModule->id?>&type=77', context: $('#chatbar .contacts-list') }, function(event) { $(this).hasClass('open') && $.chatGetUsersList(event) });
@@ -735,7 +795,7 @@ class Skin_Bootstrap extends Core_Skin
 										<section class="hidden-sm">
 											<h2>
 												<span class="profile">
-													<span>
+													<span title="<?php echo htmlspecialchars($oUserName != '' ? $oUserName : $oUser->login)?>">
 														<?php echo htmlspecialchars($oUserName != '' ? $oUserName : $oUser->login)?>
 													</span>
 												</span>
@@ -805,8 +865,14 @@ class Skin_Bootstrap extends Core_Skin
 												{
 												?>
 												<li>
-													<span class="colorpick-btn">
-														<img onclick="$.changeWallpaper(this)" data-id="<?php echo $oUser_Wallpaper->id?>" data-original-path="<?php echo htmlspecialchars($oUser_Wallpaper->getLargeImageFileHref())?>" src="<?php echo htmlspecialchars($oUser_Wallpaper->getSmallImageFileHref())?>" />
+													<span onclick="$.changeWallpaper(this)" data-id="<?php echo $oUser_Wallpaper->id?>" data-original-path="<?php
+															echo $oUser_Wallpaper->image_large != '' ? htmlspecialchars($oUser_Wallpaper->getLargeImageFileHref()) : ''
+														?>" data-original-color="<?php
+															echo $oUser_Wallpaper->color != '' ? htmlspecialchars($oUser_Wallpaper->color) : ''
+														?>" class="colorpick-btn"<?php echo $oUser_Wallpaper->color != '' ? ' style="background-color: ' . htmlspecialchars($oUser_Wallpaper->color) . '"' : ''?>><?php
+														if ($oUser_Wallpaper->image_large != '') {
+															?><img src="<?php echo htmlspecialchars($oUser_Wallpaper->getSmallImageFileHref())?>" /><?php
+														}?>
 													</span>
 												</li>
 												<?php
@@ -844,7 +910,7 @@ class Skin_Bootstrap extends Core_Skin
 								<!-- Settings -->
 							</ul><div class="setting">
 								<a id="btn-setting" title="<?php echo Core::_('Admin.settings')?>" href="#">
-									<i class="icon glyphicon glyphicon-cog"></i>
+									<i class="icon fa-solid fa-cog"></i>
 								</a>
 							</div><div class="setting-container">
 								<label>
@@ -891,7 +957,7 @@ class Skin_Bootstrap extends Core_Skin
 			<!-- Page Sidebar Header-->
 			<div class="sidebar-header-wrapper">
 				<input type="text" class="searchinput" />
-				<i class="searchicon fa fa-search"></i>
+				<i class="searchicon fa-solid fa-magnifying-glass"></i>
 
 				<!-- Search Reports, Charts, Emails or Notifications -->
 				<!-- <div class="searchhelper"></div>-->
@@ -1882,8 +1948,8 @@ class Skin_Bootstrap extends Core_Skin
 									->width(16)->height(16)
 									->src('/hostcmsfiles/images/folder_page_edit.gif')
 									->id('hostcmsEditInformationsystem')
-									->alt(Core::_('Informationsystem.edit_title'))
-									->title(Core::_('Informationsystem.edit_title'))
+									->alt(Core::_('Informationsystem.edit_title', $oInformationsystem->name))
+									->title(Core::_('Informationsystem.edit_title', $oInformationsystem->name))
 							)
 					);
 				}

@@ -199,6 +199,25 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	}
 
 	/**
+	 * Move bonus to another dir
+	 * @param int $iShopBonusDirId target dir id
+	 * @return Core_Entity
+	 * @hostcms-event shop_bonus.onBeforeMove
+	 * @hostcms-event shop_bonus.onAfterMove
+	 */
+	public function move($iShopBonusDirId)
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($iShopBonusDirId));
+
+		$this->shop_bonus_dir_id = $iShopBonusDirId;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
+
+		return $this;
+	}
+
+	/**
 	 * Get Related Site
 	 * @return Site_Model|NULL
 	 * @hostcms-event shop_bonus.onBeforeGetRelatedSite

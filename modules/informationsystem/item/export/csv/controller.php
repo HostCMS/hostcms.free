@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Informationsystem
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properties
 {
@@ -190,7 +190,7 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 
 	/**
 	 * Get item data
-	 * @param int $oInformationsystem_Item item
+	 * @param object $oInformationsystem_Item item
 	 * @return array
 	 */
 	protected function _getItemData($oInformationsystem_Item)

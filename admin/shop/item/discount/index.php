@@ -271,9 +271,12 @@ $oAdmin_Form_Dataset
 	->addCondition(
 		array('join' => array('shop_item_discounts', 'shop_discounts.id', '=', 'shop_item_discounts.shop_discount_id'))
 	)
-	->addCondition(array('where' => array('shop_item_discounts.shop_item_id', '=', $oShopItem->id)));
+	->addCondition(array('where' => array('shop_item_discounts.shop_item_id', '=', $oShopItem->id)))
+	->addCondition(array('where' => array('shop_item_discounts.siteuser_id', '=', 0)));
 
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
+
+$oAdmin_Form_Controller->addExternalReplace('{shop_group_id}', $oShopGroup->id ? $oShopGroup->id : 0);
 
 // Источник данных 1 - Бонусы
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(

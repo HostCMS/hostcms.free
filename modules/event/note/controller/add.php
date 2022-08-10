@@ -23,15 +23,21 @@ class Event_Note_Controller_Add extends Crm_Note_Controller_Add
 		parent::execute();
 
 		$iEventId = Core_Array::getGet('event_id', 0, 'int');
+
 		$result = Core_Array::getPost('result', 0, 'int');
+
+		$completed = Core_Array::getPost('completed', 0, 'int');
 
 		$oCrm_Note = $this->_object;
 
-		$oCrm_Note->result = $result;
-		$oCrm_Note->save();
-
 		$oEvent = Core_Entity::factory('Event', $iEventId);
 		$oEvent->add($oCrm_Note);
+
+		if ($result)
+		{
+			$oEvent->completed = $completed;
+			$oEvent->save();
+		}
 
 		$aFiles = Core_Array::getFiles('file', array());
 

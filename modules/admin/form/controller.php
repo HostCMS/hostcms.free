@@ -323,7 +323,8 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		$formSettings['limit'] > 0 && $this->limit($formSettings['limit']);
 		$formSettings['current'] > 0 && $this->current($formSettings['current']);
 
-		if ($formSettings['sortingfield'] > 0)
+		// может быть строковым
+		if ($formSettings['sortingfield'] != '')
 		{
 			$oAdmin_Form_Field_Sorting = $this->getAdminFormFieldById($formSettings['sortingfield']);
 

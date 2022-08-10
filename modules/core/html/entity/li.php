@@ -19,7 +19,8 @@ class Core_Html_Entity_Li extends Core_Html_Entity
 	 */
 	protected $_allowedProperties = array(
 		'type',
-		'value'
+		'value',
+		'liValue'
 	); 
 	
 	/**

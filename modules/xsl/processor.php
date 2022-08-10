@@ -16,9 +16,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Xsl
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Xsl_Processor
 {
@@ -211,48 +211,60 @@ abstract class Xsl_Processor
 	 */
 	public function formatXml($content)
 	{
-		// Разделяем содержимое файла по строкам
-		//$string_array = explode("\r\n", $content);
-		$string_array = explode("\n", $content);
+		$aLines = explode("\n", $content);
 
 		// Число отступов от левого края
-		$current_level = 0;
+		$iCurrentLevel = 0;
 
 		// Количество открывающихся тегов
-		$count_opening_tag = 0;
+		$iOpeningTag = 0;
 
-		// Количество закрывающихся тегов
-		$count_closing_tag = 0;
+		$bCdata = FALSE;
 
-		foreach ($string_array as $key => $value)
+		foreach ($aLines as $key => $value)
 		{
-			// Удаляем в строке лишние пробелы
-			$value = trim($value);
+			stripos($value, '<![CDATA[') !== FALSE
+				&& $bCdata = TRUE;
 
-			// Подсчитываем количество закрывающихся тегов
-			$count_closing_tag += mb_substr_count($value, '</') ;
+			stripos($value, ']]>') !== FALSE
+				&& $bCdata = FALSE;
 
-			$current_level = $count_opening_tag - $count_closing_tag;
-
-			// Добавляем дополнительный отступ для строки имеющей внутри закрывающийся тег и
-			// при этом не начинающейся с закрывающегося тега
-			if (mb_substr_count($value, '</') > 0 && mb_strpos($value, '</') !== 0 && mb_strpos($value, '<') === 0)
+			if ($bCdata)
 			{
-				$current_level++;
+				$value = rtrim($value, "\r");
+			}
+			else
+			{
+				// Удаляем в строке лишние пробелы
+				$value = trim($value);
+
+				$tmp = preg_replace(array("'<!--.*?-->'siu", "'<!.*?>'siu",), '', $value);
+
+				// Подсчитываем количество открывающихся тегов
+				$iTags = mb_substr_count($tmp, '<')
+					- mb_substr_count($tmp, '</') * 2 // считается и как открытый
+					- mb_substr_count($tmp, '/>')
+					- mb_substr_count($tmp, '<?xml');
+
+				// В строке больше закрывающих тегов, например, </xsl:choose>, смещаем на таб назад
+				$iCurrentLevel = $iTags < 0
+					? $iOpeningTag + $iTags
+					: $iOpeningTag;
+
+				$iCurrentLevel < 0 && $iCurrentLevel = 0;
+
+				$iOpeningTag += $iTags;
 			}
 
-			$current_level < 0 && $current_level = 0;
-
 			// Добиваем строку нужным количеством табуляций
-			$string_array[$key] = str_pad('', $current_level, "\t") . $value;
-
-			// Подсчитываем количество открывающихся тегов
-			$count_opening_tag += mb_substr_count($value, '<') - mb_substr_count($value, '</') - mb_substr_count($value, '/>') - mb_substr_count($value, '<!') - mb_substr_count($value, '<?xml');
+			$aLines[$key] = $bCdata
+				? $value
+				: ($value !== ''
+					? str_pad('', $iCurrentLevel, "\t") . $value
+					: ''
+				);
 		}
 
-		// \r\n, т.к. трим удаляет \r, оставленный выше
-		$new_content = implode("\r\n", $string_array);
-
-		return $new_content;
+		return implode("\r\n", $aLines);
 	}
 }

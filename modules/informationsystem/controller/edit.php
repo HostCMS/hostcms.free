@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Informationsystem
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -118,7 +118,8 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 
 				$oInformationsystemTabSeoTemplates
 					->add($oInformationsystemGroupBlock = Admin_Form_Entity::factory('Div')->class('well with-header'))
-					->add($oInformationsystemItemBlock = Admin_Form_Entity::factory('Div')->class('well with-header'));
+					->add($oInformationsystemItemBlock = Admin_Form_Entity::factory('Div')->class('well with-header'))
+					->add($oInformationsystemRootBlock = Admin_Form_Entity::factory('Div')->class('well with-header'));
 
 				$oInformationsystemGroupBlock
 					->add($oInformationsystemGroupHeaderDiv = Admin_Form_Entity::factory('Div')
@@ -146,6 +147,20 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 				$oInformationsystemItemHeaderDiv
 					->add(Admin_Form_Entity::factory('Code')->html(
 						Informationsystem_Controller::showItemButton()
+					));
+
+				$oInformationsystemRootBlock
+					->add($oInformationsystemRootHeaderDiv = Admin_Form_Entity::factory('Div')
+						->class('header bordered-warning')
+						->value(Core::_("Informationsystem.seo_root_header"))
+					)
+					->add($oInformationsystemRootBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oInformationsystemRootBlockRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oInformationsystemRootBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+
+				$oInformationsystemRootHeaderDiv
+					->add(Admin_Form_Entity::factory('Code')->html(
+						Informationsystem_Controller::showRootButton()
 					));
 
 				$this
@@ -372,12 +387,15 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 
 				// Seo templates
 				$oMainTab
-					->move($this->getField('seo_group_title_template')->divAttr(array('class' => 'form-group col-xs-12')), $oInformationsystemGroupBlockRow1)
-					->move($this->getField('seo_group_description_template')->divAttr(array('class' => 'form-group col-xs-12')), $oInformationsystemGroupBlockRow2)
-					->move($this->getField('seo_group_keywords_template')->divAttr(array('class' => 'form-group col-xs-12')), $oInformationsystemGroupBlockRow3)
-					->move($this->getField('seo_item_title_template')->divAttr(array('class' => 'form-group col-xs-12')), $oInformationsystemItemBlockRow1)
-					->move($this->getField('seo_item_description_template')->divAttr(array('class' => 'form-group col-xs-12')), $oInformationsystemItemBlockRow2)
-					->move($this->getField('seo_item_keywords_template')->divAttr(array('class' => 'form-group col-xs-12')), $oInformationsystemItemBlockRow3);
+					->move($this->getField('seo_group_title_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oInformationsystemGroupBlockRow1)
+					->move($this->getField('seo_group_description_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oInformationsystemGroupBlockRow2)
+					->move($this->getField('seo_group_keywords_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oInformationsystemGroupBlockRow3)
+					->move($this->getField('seo_item_title_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oInformationsystemItemBlockRow1)
+					->move($this->getField('seo_item_description_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oInformationsystemItemBlockRow2)
+					->move($this->getField('seo_item_keywords_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oInformationsystemItemBlockRow3)
+					->move($this->getField('seo_root_title_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oInformationsystemRootBlockRow1)
+					->move($this->getField('seo_root_description_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oInformationsystemRootBlockRow2)
+					->move($this->getField('seo_root_keywords_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oInformationsystemRootBlockRow3);
 
 				// Изображение
 				$oWatermarkFileField = Admin_Form_Entity::factory('File');

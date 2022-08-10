@@ -640,12 +640,10 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 				$oInformationsystemGroupDescriptionTab
 					->add($oInformationsystemGroupDescriptionTabRow1 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oInformationsystemGroupDescriptionTabRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-				;
+					->add($oInformationsystemGroupDescriptionTabRow2 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$oInformationsystemGroupExportTab
-					->add($oInformationsystemGroupExportTabRow1 = Admin_Form_Entity::factory('Div')->class('row'))
-				;
+					->add($oInformationsystemGroupExportTabRow1 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				// Name
 				$oMainTab
@@ -716,8 +714,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				}
 
 				$oMainTab
-					->move($this->getField('description'), $oInformationsystemGroupDescriptionTabRow1)
-				;
+					->move($this->getField('description'), $oInformationsystemGroupDescriptionTabRow1);
 
 				// Description
 				//$oMainTab->move($this->getField('description'), $oMainRow3);

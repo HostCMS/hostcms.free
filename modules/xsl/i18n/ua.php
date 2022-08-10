@@ -29,5 +29,9 @@ return array(
 	'XSL_root_dir' => 'XSL-шаблони',
 	'delete_success' => 'Елемент видалений!',
 	'undelete_success' => 'Елемент відновлено!',
-	'option_formatOutput' => 'Форматувати висновок'
+	'option_formatOutput' => 'Форматувати висновок',
+	'import' => 'Імпорт',
+	'import_file' => "Виберіть файл з комп/'ютера",
+	'import_button' => 'Завантажити',
+	'importXsls_success' => 'Імпорт завершено!',
 );

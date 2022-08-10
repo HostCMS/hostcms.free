@@ -25,7 +25,7 @@ class Shop_Item_Comment_Controller_Edit extends Comment_Controller_Edit
 		$object = $this->_object;
 
 		$oShop = is_null($object->id)
-			? Core_Entity::factory('Shop', $object->Comment_Shop_Item->Shop_Item->shop_id)
+			? Core_Entity::factory('Shop_Item', Core_Array::getRequest('shop_item_id', 0, 'int'))->Shop
 			: $object->Comment_Shop_Item->Shop_Item->Shop;
 
 		$oMainTab = $this->getTab('main');
@@ -58,8 +58,8 @@ class Shop_Item_Comment_Controller_Edit extends Comment_Controller_Edit
 				? Core_Entity::factory('Comment', $this->_object->parent_id)->Comment_Shop_Item->shop_item_id
 				: Core_Array::getRequest('shop_item_id'))
 			: $this->_object->Comment_Shop_Item->shop_item_id;
-			
-		$oShop_Item = Core_Entity::factory('Shop_Item', $shop_item_id);	
+
+		$oShop_Item = Core_Entity::factory('Shop_Item', $shop_item_id);
 
 		$oAdmin_Form_Entity_Input_Name = Admin_Form_Entity::factory('Input')
 			->name('shop_item_id')
@@ -74,10 +74,7 @@ class Shop_Item_Comment_Controller_Edit extends Comment_Controller_Edit
 					->value('<i class="fa fa-external-link"></i>')
 					->target('_blank')
 					->href("/admin/shop/item/index.php?hostcms[action]=edit&hostcms[window]=id_content&shop_id={$oShop->id}&shop_group_id={$oShop_Item->shop_group_id}&hostcms[checked][1][{$shop_item_id}]=1")
-					
-					//->href("/admin/shop/item/index.php?hostcms[action]=edit&hostcms[window]=id_content&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystem_Item->informationsystem_group_id}&hostcms[checked][1][{$informationsystem_item_id}]=1")
 			);
-
 
 		$oAdditionalRow1->add($oAdmin_Form_Entity_Input_Name);
 	}
@@ -91,15 +88,7 @@ class Shop_Item_Comment_Controller_Edit extends Comment_Controller_Edit
 		parent::_applyObjectProperty();
 
 		$Comment_Shop_Item = $this->_object->Comment_Shop_Item;
-
-		/*if (is_null($Comment_Shop_Item->id))
-		{
-			$Comment_Shop_Item->shop_item_id = intval($this->_object->parent_id
-				? Core_Entity::factory('Comment', $this->_object->parent_id)->Comment_Shop_Item->shop_item_id
-				: Core_Array::getRequest('shop_item_id'));
-			$Comment_Shop_Item->save();
-		}*/
-		$Comment_Shop_Item->shop_item_id = Core_Array::getRequest('shop_item_id');
+		$Comment_Shop_Item->shop_item_id = Core_Array::getRequest('shop_item_id', 0, 'int');
 		$Comment_Shop_Item->save();
 
 		// Cached tags

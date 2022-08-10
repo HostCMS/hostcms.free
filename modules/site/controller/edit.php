@@ -27,7 +27,17 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$this->addSkipColumn('favicon');
 
-		parent::setObject($object);
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
 
 		$oSiteTabFormats = Admin_Form_Entity::factory('Tab')
 			->caption(Core::_('Site.site_dates'))

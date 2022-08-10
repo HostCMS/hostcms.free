@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Tpl
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'TPL-шаблоны',
@@ -37,4 +37,8 @@ return array(
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
 	'panel_tpl_array' => 'элементов: %s',
+	'import' => 'Импорт',
+	'import_file' => 'Выберите файл с компьютера',
+	'import_button' => 'Загрузить',
+	'importTpls_success' => 'Импорт завершен!',
 );

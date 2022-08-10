@@ -161,4 +161,5 @@ return array(
 	'date' => 'Дата',
 	'change_user' => 'Зміна відповідального: "%s"',
 	'merge_success' => 'Одиниці вимірювання об\'єднані!',
+	'shop_order_status_deadline' => 'Час життя статусу',
 );

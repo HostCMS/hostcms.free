@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Status_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -28,7 +28,17 @@ class Shop_Order_Status_Controller_Edit extends Admin_Form_Action_Controller_Typ
 			$object->parent_id = Core_Array::getGet('parent_id', 0);
 		}
 
-		parent::setObject($object);
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
 
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
@@ -37,7 +47,8 @@ class Shop_Order_Status_Controller_Edit extends Admin_Form_Action_Controller_Typ
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'));
+			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		$oAdditionalTab->delete($this->getField('parent_id'));
 
@@ -63,8 +74,21 @@ class Shop_Order_Status_Controller_Edit extends Admin_Form_Action_Controller_Typ
 
 		$oMainTab
 			->move($this->getField('name')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1)
-			->move($this->getField('color')->set('data-control', 'hue')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-md-3')), $oMainRow2)
-			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-md-3')), $oMainRow2);
+			->move($this->getField('color')->set('data-control', 'hue')->divAttr(array('class' => 'form-group col-xs-6 col-sm-4 col-md-3')), $oMainRow2)
+			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-6 col-sm-4 col-md-3')), $oMainRow2);
+
+		$oAdditionalTab->delete($this->getField('deadline_shop_order_status_id'));
+
+		$oDropdownlistOrderStatuses = Admin_Form_Entity::factory('Dropdownlist')
+			->options(self::getDropdownlistOptions())
+			->name('deadline_shop_order_status_id')
+			->value($this->_object->deadline_shop_order_status_id)
+			->caption(Core::_('Shop_Order_Status.deadline_shop_order_status_id'))
+			->divAttr(array('class' => 'form-group col-xs-6'));
+
+		$oMainRow3->add($oDropdownlistOrderStatuses);
+
+		$oMainTab->move($this->getField('lifetime')->divAttr(array('class' => 'form-group col-xs-6 col-sm-3')), $oMainRow3);
 
 		$oAdditionalTab->delete($this->getField('shop_order_item_status_id'));
 
@@ -73,11 +97,11 @@ class Shop_Order_Status_Controller_Edit extends Admin_Form_Action_Controller_Typ
 			->name('shop_order_item_status_id')
 			->value($this->_object->shop_order_item_status_id)
 			->caption(Core::_('Shop_Order_Status.shop_order_item_status_id'))
-			->divAttr(array('class' => 'form-group col-xs-6'));
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
-		$oMainRow3->add($oDropdownlistStatuses);
+		$oMainRow4->add($oDropdownlistStatuses);
 
-		$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow4);
+		$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow5);
 
 		if ($this->_object->id && Core::moduleIsActive('bot'))
 		{

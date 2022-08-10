@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 {
@@ -138,7 +138,8 @@ class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 
 						if (!is_null($oShop_Warehouse))
 						{
-							$fRest = $oShop_Warehouse->getRest($this->_object->id);
+							$oShop_Warehouse_Item = $oShop_Warehouse->Shop_Warehouse_Items->getByShop_item_id($this->_object->id, FALSE);
+							$fRest = $oShop_Warehouse_Item ? $oShop_Warehouse_Item->count : NULL;
 
 							if ($fRest != $value)
 							{

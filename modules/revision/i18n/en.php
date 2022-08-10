@@ -6,7 +6,7 @@
  * @subpackage Revision
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Revisions',
@@ -21,4 +21,8 @@ return array(
 	'empty' => 'No versions available',
 	'module_not_active' => 'The "Revisions" module is disabled in the list of modules!',
 	'revision_success' => 'Version restored successfully!',
+	'version' => 'Version',
+	'date' => 'Date',
+	'view' => 'View',
+	'user' => 'Author',
 );

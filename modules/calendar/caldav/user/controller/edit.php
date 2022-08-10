@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Calendar
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Calendar_Caldav_User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -62,12 +62,6 @@ class Calendar_Caldav_User_Controller_Edit extends Admin_Form_Action_Controller_
 			}
 
 			parent::setObject($object);
-
-			$oMainTab = $this->getTab('main');
-
-			$oMainTab
-				->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
-				->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'));
 
 			$this->title(
 				$this->_object->id

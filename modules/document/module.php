@@ -23,7 +23,7 @@ class Document_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2022-04-29';
+	public $date = '2022-08-05';
 
 	/**
 	 * Module name
@@ -57,12 +57,17 @@ class Document_Module extends Core_Module
 	 * @param $offset
 	 * @param $limit
 	 * @return array
-	 * @hostcms-event Helpdesk_Module.indexing
+	 * @hostcms-event Document_Module.indexing
 	 */
 	public function indexing($offset, $limit)
 	{
 		$offset = intval($offset);
 		$limit = intval($limit);
+
+		Core_Log::instance()->clear()
+			->notify(FALSE)
+			->status(Core_Log::$MESSAGE)
+			->write("document indexing({$offset}, {$limit})");
 
 		$oDocuments = Core_Entity::factory('Document');
 		$oDocuments

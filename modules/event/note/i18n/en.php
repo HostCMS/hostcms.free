@@ -1,17 +1,17 @@
 <?php
 
 return array(
-	'model_name' => 'Event notes',
-	'event_notes_title' => 'Notes',
-	'event_notes_menu_add' => 'Add',
-	'add_title' => 'Add note',
+	'model_name' => 'Event Notes',
+	'notes_title' => 'Notes',
+	'notes_menu_add' => 'Add',
+	'add_title' => 'Adding a note',
 	'edit_title' => 'Edit note',
-	'id' => 'Id',
+	'id' => 'Identifier',
 	'text' => 'Text',
 	'note_placeholder' => 'Note text',
-	'markDeleted_success' => 'Note deleted successfully!',
+	'markDeleted_success' => 'The note was deleted successfully!',
 	'edit_success' => 'Note added successfully!',
-	'add_notification' => 'Added new note in event "%s"',
-	'delete_success' => 'Element deleted!',
-	'undelete_success' => 'Element restored!',
+	'add_notification' => 'Added a new note in the event "%s"',
+	'delete_success' => 'Item deleted!',
+	'undelete_success' => 'Item restored!',
 );

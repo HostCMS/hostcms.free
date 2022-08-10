@@ -54,6 +54,9 @@ class Event_Timeline_Dataset extends Admin_Form_Dataset
 
 	protected function _getQb0($id = NULL)
 	{
+		// Load model columns BEFORE FOUND_ROWS()
+		Core_Entity::factory('Event_History')->getTableColumns();
+
 		$oQb = Core_QueryBuilder::select(array(0, 'type'), 'id', 'datetime')
 			->from('event_histories')
 			->where('event_histories.event_id', '=', $this->_event->id);
@@ -65,6 +68,9 @@ class Event_Timeline_Dataset extends Admin_Form_Dataset
 
 	protected function _getQb1($id = NULL)
 	{
+		// Load model columns BEFORE FOUND_ROWS()
+		Core_Entity::factory('Crm_Note')->getTableColumns();
+
 		$oQb = Core_QueryBuilder::select(array(1, 'type'), 'crm_notes.id', 'datetime')
 			->from('crm_notes')
 			->leftJoin('event_crm_notes', 'crm_notes.id', '=', 'event_crm_notes.crm_note_id')
@@ -78,12 +84,31 @@ class Event_Timeline_Dataset extends Admin_Form_Dataset
 
 	protected function _getQb2($id = NULL)
 	{
+		// Load model columns BEFORE FOUND_ROWS()
+		Core_Entity::factory('Event')->getTableColumns();
+
 		$oQb = Core_QueryBuilder::select(array(2, 'type'), 'id', 'datetime')
 			->from('events')
 			->where('events.parent_id', '=', $this->_event->id)
 			->where('events.deleted', '=', 0);
 
 		$id && $oQb->where('events.id', '=', $id);
+
+		return $oQb;
+	}
+
+	protected function _getQb3($id = NULL)
+	{
+		// Load model columns BEFORE FOUND_ROWS()
+		Core_Entity::factory('Dms_Document')->getTableColumns();
+
+		$oQb = Core_QueryBuilder::select(array(3, 'type'), 'dms_documents.id', array('created', 'datetime'))
+			->from('dms_documents')
+			->leftJoin('event_dms_documents', 'dms_documents.id', '=', 'event_dms_documents.dms_document_id')
+			->where('event_dms_documents.event_id', '=', $this->_event->id)
+			->where('dms_documents.deleted', '=', 0);
+
+		$id && $oQb->where('dms_documents.id', '=', $id);
 
 		return $oQb;
 	}
@@ -96,6 +121,7 @@ class Event_Timeline_Dataset extends Admin_Form_Dataset
 				->sqlCalcFoundRows()
 				->union($this->_getQb1())
 				->union($this->_getQb2())
+				->union($this->_getQb3())
 				->unionOrderBy('datetime', 'DESC')
 				->unionLimit($this->_limit)
 				->unionOffset($this->_offset);
@@ -134,13 +160,16 @@ class Event_Timeline_Dataset extends Admin_Form_Dataset
 		switch ($object->type)
 		{
 			case 0:
-				return Core_Entity::factory('Event_History', $object->id);
+				return Core_Entity::factory('Event_History', $object->id)->dataDatetime($object->datetime);
 			break;
 			case 1:
-				return Core_Entity::factory('Crm_Note', $object->id);
+				return Core_Entity::factory('Crm_Note', $object->id)->dataDatetime($object->datetime);
 			break;
 			case 2:
-				return Core_Entity::factory('Event', $object->id);
+				return Core_Entity::factory('Event', $object->id)->dataDatetime($object->datetime);
+			break;
+			case 3:
+				return Core_Entity::factory('Dms_Document', $object->id)->dataDatetime($object->datetime);
 			break;
 			default:
 				throw new Core_Exception('_getObjectByType(): Wrong type', array(), 0, FALSE);
@@ -213,6 +242,7 @@ class Event_Timeline_Dataset extends Admin_Form_Dataset
 				{
 					$oObject = new stdClass();
 					$oObject->type = $type;
+					$oObject->datetime = Core_Date::timestamp2sql(time());
 					$oObject->id = 0;
 				}
 

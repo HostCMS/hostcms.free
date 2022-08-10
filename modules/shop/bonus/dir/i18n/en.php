@@ -18,4 +18,5 @@ return array(
 	'undelete_success' => 'Item restored!',
 	'edit_success' => "The bonus section has been changed successfully!",
 	'copy_success' => "Item copied successfully!",
+	'move_success' => 'Bonuses sections moved',
 );

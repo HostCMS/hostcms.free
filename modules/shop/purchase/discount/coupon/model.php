@@ -89,6 +89,25 @@ class Shop_Purchase_Discount_Coupon_Model extends Core_Entity
 	}
 
 	/**
+	 * Move discount to another dir
+	 * @param int $iShopPurchaseDiscountCouponDirId target dir id
+	 * @return Core_Entity
+	 * @hostcms-event shop_discount.onBeforeMove
+	 * @hostcms-event shop_discount.onAfterMove
+	 */
+	public function move($iShopPurchaseDiscountCouponDirId)
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($iShopPurchaseDiscountCouponDirId));
+
+		$this->shop_purchase_discount_coupon_dir_id = $iShopPurchaseDiscountCouponDirId;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
+
+		return $this;
+	}
+
+	/**
 	 * Change status of activity for coupon
 	 * @return self
 	 */

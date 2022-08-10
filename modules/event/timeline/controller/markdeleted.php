@@ -30,6 +30,9 @@ class Event_Timeline_Controller_Markdeleted extends Admin_Form_Action_Controller
 			case 'Crm_Note_Model':
 				$type = 'note';
 			break;
+			case 'Dms_Document_Model':
+				$type = 'dms_document';
+			break;
 			default:
 				$type = NULL;
 		}

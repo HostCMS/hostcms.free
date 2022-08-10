@@ -31,7 +31,17 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 			->addSkipColumn('image_width')
 			;
 
-		parent::setObject($object);
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
 
 		$this->addMessage(
 			Core_Message::get(Core::_('Shop_Payment_System.attention'), 'error')

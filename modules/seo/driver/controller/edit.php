@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Seo
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Seo_Driver_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -20,14 +20,24 @@ class Seo_Driver_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	public function setObject($object)
 	{
-		$title = $object->id
+		$this
+			->addSkipColumn('expired_in');
+
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
+
+		$title = $this->_object->id
 			? Core::_('Seo_Driver.edit_title')
 			: Core::_('Seo_Driver.add_title');
-
-		$this
-			->addSkipColumn('expired_in');			
-			
-		parent::setObject($object);
 
 		$this->title($title);
 

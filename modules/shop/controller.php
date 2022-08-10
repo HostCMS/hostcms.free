@@ -270,6 +270,9 @@ class Shop_Controller
 					<li>
 						<a onclick="$.insertSeoTemplate(lastFocusedGroup, \'\{this.filterProducer}\')">' . Core::_("Shop.seo_template_filter_producer") . '</a>
 					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedGroup, \'\{this.pageNumber \x22, ' . Core::_("Shop.seo_template_group_page") . ' %d\x22\}\')">' . Core::_("Shop.seo_template_group_page_number") . '</a>
+					</li>
 					<li class="divider"></li>
 					<li class="disabled">
 						<a class="bold">' . Core::_("Shop.seo_template_group") . '</a>
@@ -285,9 +288,6 @@ class Shop_Controller
 					</li>
 					<li>
 						<a onclick="$.insertSeoTemplate(lastFocusedGroup, \'\{group.groupPathWithSeparator \x22 → \x22 1\}\')">' . Core::_("Shop.seo_template_group_path") . '</a>
-					</li>
-					<li>
-						<a onclick="$.insertSeoTemplate(lastFocusedGroup, \'\{this.pageNumber \x22, ' . Core::_("Shop.seo_template_group_page") . ' %d\x22\}\')">' . Core::_("Shop.seo_template_group_page_number") . '</a>
 					</li>
 				</ul>
 			</div>
@@ -326,6 +326,9 @@ class Shop_Controller
 					<li>
 						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{this.filterProducer}\')">' . Core::_("Shop.seo_template_filter_producer") . '</a>
 					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{this.pageNumber \x22, ' . Core::_("Shop.seo_template_group_page") . ' %d\x22\}\')">' . Core::_("Shop.seo_template_group_page_number") . '</a>
+					</li>
 					<li class="divider"></li>
 					<li class="disabled">
 						<a class="bold">' . Core::_("Shop.seo_template_group") . '</a>
@@ -341,9 +344,6 @@ class Shop_Controller
 					</li>
 					<li>
 						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{group.groupPathWithSeparator \x22 → \x22 1\}\')">' . Core::_("Shop.seo_template_group_path") . '</a>
-					</li>
-					<li>
-						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{this.pageNumber \x22, ' . Core::_("Shop.seo_template_group_page") . ' %d\x22\}\')">' . Core::_("Shop.seo_template_group_page_number") . '</a>
 					</li>
 					<li class="divider"></li>
 					<li class="disabled">
@@ -366,6 +366,46 @@ class Shop_Controller
 					</li>
 					<li>
 						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{item.currencyName\}\')">' . Core::_("Shop.seo_template_item_currency") . '</a>
+					</li>
+				</ul>
+			</div>
+		';
+
+		return $html;
+	}
+
+	static public function showRootButton()
+	{
+		$html = '
+			<script>
+				var lastFocusedRoot;
+
+				$(function(){
+
+					$("textarea[name^=\'seo_root_\']").on("focus", function() {
+
+						lastFocusedRoot = $(document.activeElement);
+					});
+				})
+			</script>
+			<div class="btn-group pull-right">
+				<a class="btn btn-sm btn-default"><i class="fa fa-plus"></i></a>
+				<a class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
+				<ul class="dropdown-menu dropdown-default" role="menu">
+					<li class="disabled">
+						<a class="bold">' . Core::_("Shop.seo_template_shop") . '</a>
+					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedRoot, \'\{shop.name\}\')">' . Core::_("Shop.seo_template_shop_name") . '</a>
+					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedRoot, \'\{this.seoFilter \x22: \x22 \x22, \x22\}\')">' . Core::_("Shop.seo_template_filter") . '</a>
+					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedRoot, \'\{this.filterProducer}\')">' . Core::_("Shop.seo_template_filter_producer") . '</a>
+					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedRoot, \'\{this.pageNumber \x22, ' . Core::_("Shop.seo_template_group_page") . ' %d\x22\}\')">' . Core::_("Shop.seo_template_group_page_number") . '</a>
 					</li>
 				</ul>
 			</div>

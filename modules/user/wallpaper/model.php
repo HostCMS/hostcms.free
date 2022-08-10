@@ -53,6 +53,16 @@ class User_Wallpaper_Model extends Core_Entity
 	}
 
 	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function nameBackend()
+	{
+		return '<i class="fa fa-circle" style="margin-right: 5px; color: ' . ($this->color ? htmlspecialchars($this->color) : '#aebec4') . '"></i> '
+			. '<span class="editable" id="apply_check_0_' . $this->id . '_fv_1135">' . htmlspecialchars($this->name) . '</span>';
+	}
+
+	/**
 	 * Get user wallpaper href
 	 * @return string
 	 */

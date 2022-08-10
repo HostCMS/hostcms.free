@@ -201,6 +201,25 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 	}
 
 	/**
+	 * Move discount to another dir
+	 * @param int $iShopPurchaseDiscountDirId target dir id
+	 * @return Core_Entity
+	 * @hostcms-event shop_purchase_discount.onBeforeMove
+	 * @hostcms-event shop_purchase_discount.onAfterMove
+	 */
+	public function move($iShopPurchaseDiscountDirId)
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($iShopPurchaseDiscountDirId));
+
+		$this->shop_purchase_discount_dir_id = $iShopPurchaseDiscountDirId;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
+
+		return $this;
+	}
+
+	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity

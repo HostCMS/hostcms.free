@@ -1482,8 +1482,8 @@ class Shop_Group_Model extends Core_Entity
 	public function imgBackend()
 	{
 		return $this->shortcut_id
-			? '<i class="fa fa-link"></i>'
-			: '<i class="fa fa-folder-open-o"></i>';
+			? '<i class="fa-solid fa-link"></i>'
+			: '<i class="fa-regular fa-folder-open"></i>';
 	}
 
 	/**

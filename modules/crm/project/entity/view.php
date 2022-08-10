@@ -264,7 +264,7 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 					case 2:
 						$badge = 'fa fa-comment-o';
 
-						$color = 'danger';
+						$color = 'warning';
 
 						$oObject = Core_Entity::factory('Crm_Note', $oEntity->id);
 						$oObject->result && $class = 'timeline-crm-note-result';
@@ -279,7 +279,7 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 							?><div class="crm-note-attachment-wrapper"><?php echo $files?></div><?php
 						}
 						?>
-						<div class="timeline-body-footer small gray"><span class="gray"><?php $oObject->User->showLink($oAdmin_Form_Controller->getWindowId())?></span><span class="pull-right"><?php echo date('H:i', $iDatetime)?></span></div>
+						<div class="timeline-body-footer small gray"><span class="timeline-user"><?php $oObject->User->showLink($oAdmin_Form_Controller->getWindowId())?></span><span class="timeline-date pull-right"><?php echo date('H:i', $iDatetime)?></span></div>
 						<?php
 						$text = ob_get_clean();
 
@@ -287,9 +287,9 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 						$entityPath = '/admin/crm/project/note/index.php';
 					break;
 					case 3:
-						$badge = 'fa fa-file-o';
+						$badge = 'fa fa-file-text-o';
 
-						$color = 'warning';
+						$color = 'maroon';
 
 						$oObject = Core_Entity::factory('Crm_Project_Attachment', $oEntity->id);
 
@@ -310,6 +310,31 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 
 						$iEntityAdminFormId = 326;
 						$entityPath = '/admin/crm/project/attachment/index.php';
+					break;
+					case 4:
+						$badge = 'fa fa-columns';
+
+						$color = 'danger';
+
+						$oObject = Core_Entity::factory('Dms_Document', $oEntity->id);
+
+						ob_start();
+						if (strlen($oObject->numberBackend()))
+						{
+							?><div><?php echo $oObject->numberBackend()?></div><?php
+						}
+
+						echo $oObject->nameBackend(NULL, $oAdmin_Form_Controller, TRUE);
+
+						if ($oObject->dms_document_type_id)
+						{
+							?><div class="margin-top-5"><?php echo $oObject->dms_document_type_idBackend()?></div><?php
+						}
+
+						$text = ob_get_clean();
+
+						$iEntityAdminFormId = 278;
+						$entityPath = '/admin/dms/document/index.php';
 					break;
 				}
 				?>

@@ -96,7 +96,8 @@ if (Core_Array::getPost('oneStepCheckout'))
 			!is_array($aPropertiesValue) && $aPropertiesValue = array($aPropertiesValue);
 			foreach ($aPropertiesValue as $sPropertyValue)
 			{
-				$_SESSION['hostcmsOrder']['properties'][] = array($oProperty->id, $sPropertyValue);
+				$sPropertyValue !== ''
+					&& $_SESSION['hostcmsOrder']['properties'][] = array($oProperty->id, $sPropertyValue);
 			}
 		}
 	}
@@ -220,26 +221,47 @@ switch (Core_Array::getPost('recount') ? 0 : Core_Array::getPost('step'))
 				{
 					if (isset($aPropertiesValue['name']))
 					{
-						if (Core_File::isValidExtension($aPropertiesValue['name'], Core::$mainConfig['availableExtension']))
+						// Multiple Files
+						if (is_array($aPropertiesValue['name']))
 						{
-							try
+							$aTmpValues = array();
+							foreach ($aPropertiesValue as $propName => $aPropValue)
 							{
-								$sTempFileName = tempnam(CMS_FOLDER . TMP_DIR, "ord");
-
-								if ($sTempFileName !== FALSE)
+								foreach ($aPropValue as $key => $value)
 								{
-									// Copy uploaded file to the temp dir
-									Core_File::copy($aPropertiesValue['tmp_name'], $sTempFileName);
-									Core_File::delete($aPropertiesValue['tmp_name']);
-
-									// Replace path
-									$aPropertiesValue['tmp_name'] = $sTempFileName;
-
-									// Save to session
-									$_SESSION['hostcmsOrder']['properties'][] = array($oProperty->id, $aPropertiesValue);
+									$aTmpValues[$key][$propName] = $value;
 								}
 							}
-							catch (Exception $e) {};
+						}
+						// Single File
+						else
+						{
+							$aTmpValues = array($aPropertiesValue);
+						}
+
+						foreach ($aTmpValues as $aPropertiesValue)
+						{
+							if (Core_File::isValidExtension($aPropertiesValue['name'], Core::$mainConfig['availableExtension']))
+							{
+								try
+								{
+									$sTempFileName = tempnam(CMS_FOLDER . TMP_DIR, "ord");
+
+									if ($sTempFileName !== FALSE)
+									{
+										// Copy uploaded file to the temp dir
+										Core_File::copy($aPropertiesValue['tmp_name'], $sTempFileName);
+										Core_File::delete($aPropertiesValue['tmp_name']);
+
+										// Replace path
+										$aPropertiesValue['tmp_name'] = $sTempFileName;
+
+										// Save to session
+										$_SESSION['hostcmsOrder']['properties'][] = array($oProperty->id, $aPropertiesValue);
+									}
+								}
+								catch (Exception $e) {};
+							}
 						}
 					}
 				}

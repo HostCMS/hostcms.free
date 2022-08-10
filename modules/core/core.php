@@ -261,10 +261,16 @@ class Core
 
 		// List of modules
 		$aModules = Core_Entity::factory('Module')->findAll();
+		
+		// First of all load the list of modules
 		foreach ($aModules as $oModule)
 		{
 			self::$modulesList[$oModule->path] = $oModule;
-
+		}
+		
+		// Then load each module
+		foreach ($aModules as $oModule)
+		{
 			// Call module's __construct()
 			$oModule->active && $oModule->loadModule();
 		}
@@ -964,7 +970,7 @@ class Core
 
 		exit();
 	}
-	
+
 	/**
 	 * Get Real Client Ip
 	 * @return string
@@ -981,7 +987,7 @@ class Core
 		{
 			return $_SERVER['HTTP_DDG_CONNECTING_IP'];
 		}
-		
+
 		return Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1');
 	}
 }

@@ -1,17 +1,17 @@
 <?php
 
 return array(
-	'model_name' => 'Замітки до справи',
-	'event_notes_title' => 'Замітки',
-	'event_notes_menu_add' => 'Додати',
-	'add_title' => 'Додавання замітки',
+	'model_name' => 'Нотатки до cправи',
+	'notes_title' => 'Нотатки',
+	'notes_menu_add' => 'Додати',
+	'add_title' => 'Як додати нотатку',
 	'edit_title' => 'Редагування замітки',
 	'id' => 'Ідентифікатор',
 	'text' => 'Текст',
 	'note_placeholder' => 'Текст замітки',
 	'markDeleted_success' => 'Замітка видалена успішно!',
 	'edit_success' => 'Замітка успішно додана!',
-	'add_notification' => 'Додана нова замітка в справи "%s"',
-	'delete_success' => 'Елемент видалений!',
+	'add_notification' => 'Додано нову замітка в cправи "%s"',
+	'delete_success' => 'Елемент знищений!',
 	'undelete_success' => 'Елемент відновлено!',
 );

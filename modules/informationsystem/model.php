@@ -748,7 +748,7 @@ class Informationsystem_Model extends Core_Entity
 		$countInformationsystemGroups = $this->Informationsystem_Groups->getCount();
 		$countInformationsystemGroups && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
-			->value('<i class="fa fa-folder-open-o"></i> ' . $countInformationsystemGroups)
+			->value('<i class="fa-regular fa-folder-open"></i> ' . $countInformationsystemGroups)
 			->title(Core::_('Informationsystem.all_groups_count', $countInformationsystemGroups))
 			->execute();
 

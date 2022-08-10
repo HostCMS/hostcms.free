@@ -275,6 +275,7 @@ class Core_Auth
 		header('X-Frame-Options: SAMEORIGIN');
 		header('X-Content-Type-Options: nosniff');
 		header('X-XSS-Protection: 1; mode=block');
+		header('Strict-Transport-Security: max-age=0');
 		header('Content-Security-Policy: ' . Core::$mainConfig['backendContentSecurityPolicy']);
 
 		if (!defined('DENY_INI_SET') || !DENY_INI_SET)
@@ -467,9 +468,15 @@ class Core_Auth
 
 						$aSites = $oSites->findAll(FALSE);
 
-						$site_id = isset($aSites[0])
-							? $aSites[0]->id
-							: NULL;
+						if (isset($aSites[0]))
+						{
+							$site_id = $aSites[0]->id;
+						}
+						else
+						{
+							self::logout();
+							exit();
+						}
 					}
 				}
 

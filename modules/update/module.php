@@ -23,7 +23,7 @@ class Update_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2022-04-29';
+	public $date = '2022-08-05';
 
 	/**
 	 * Module name
@@ -70,7 +70,7 @@ class Update_Module extends Core_Module
 
 		return array(
 			'icon' => array(
-				'ico' => 'fa fa-refresh',
+				'ico' => 'fa-solid fa-rotate',
 				'color' => 'white',
 				'background-color' => 'bg-warning'
 			),

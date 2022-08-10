@@ -78,8 +78,8 @@ class Sql_Controller
 	 */
 	public function executeByString($sql)
 	{
-		// вернуть в 7.0.1
-		//$sql = Core_Str::removeBOM($sql);
+		$sql = Core_Str::removeBOM($sql);
+
 		if (substr($sql, 0, 3) === "\xEF\xBB\xBF")
 		{
 			$sql = substr($sql, 3);
@@ -222,10 +222,14 @@ class Sql_Controller
 		try
 		{
 			isset($this->_config['storageEngine']) && $this->_config['storageEngine'] != 'MyISAM'
-				&& $sql = str_replace(' ENGINE=MyISAM', ' ENGINE=' . $this->_config['storageEngine'], $sql);
+				&& $sql = str_ireplace(' ENGINE=MyISAM', " ENGINE={$this->_config['storageEngine']}", $sql);
 
 			isset($this->_config['charset']) && $this->_config['charset'] != 'utf8'
-				&& $sql = str_replace(' CHARSET=utf8;', ' CHARSET=' . $this->_config['charset'] . ';', $sql);
+				&& $sql = str_ireplace(
+					array(' CHARSET=utf8;', ' CHARACTER SET utf8 ', ' COLLATE utf8_'),
+					array(" CHARSET={$this->_config['charset']};", " CHARACTER SET {$this->_config['charset']} ", " COLLATE {$this->_config['charset']}_"),
+					$sql
+				);
 
 			$this->_Core_DataBase->setQueryType(1)->query($sql);
 

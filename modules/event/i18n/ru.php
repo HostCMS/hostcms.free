@@ -18,7 +18,7 @@ return array(
 	'events_menu_statuses' => 'Статусы',
 	'events_menu_meeting_places' => 'Места встреч',
 	'add_title' => 'Добавление дела',
-	'edit_title' => 'Редактирование дела "%s"',
+	'edit_title' => '%s',
 	'complete' => 'Завершено',
 	'in_process' => 'В процессе',
 	'failed' => 'Провалено',
@@ -133,6 +133,7 @@ return array(
 	'attachment_header' => 'Файлы',
 	'tabNotes' => 'Заметки',
 	'tabEvents' => 'Дела',
+	'tabDmsDocuments' => 'Документы',
 
 	'crm_project_id' => 'Проект',
 

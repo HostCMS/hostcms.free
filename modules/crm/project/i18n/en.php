@@ -33,4 +33,6 @@ return array(
 	'changeCompleted_success' => 'Completion of the project has been changed',
 	'files_count' => 'Files: %s',
 	'add_attachment' => 'File',
+	'add_document' => 'Document',
+	'documents_count' => 'Documents: %s',
 );

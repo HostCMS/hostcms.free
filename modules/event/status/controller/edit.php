@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Event
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Event_Status_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -17,13 +17,13 @@ class Event_Status_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 	const TYPE = 0;
 
 	/**
-	 * Set object
-	 * @param object $object object
+	 * Prepare backend item's edit form
+	 *
 	 * @return self
 	 */
-	public function setObject($object)
+	protected function _prepareForm()
 	{
-		parent::setObject($object);
+		parent::_prepareForm();
 
 		$this->title($this->_object->id
 			? Core::_('Event_Status.edit_title', $this->_object->name)

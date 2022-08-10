@@ -245,14 +245,14 @@ class Document_Model extends Core_Entity
 
 			foreach ($aStructures as $oStructure)
 			{
-				$sListStructures .= '<i class="fa fa-folder-open-o" style="margin-right: 5px"></i><a onclick="'
+				$sListStructures .= '<i class="fa-regular fa-folder-open" style="margin-right: 5px"></i><a onclick="'
 				. ("$.adminCheckObject({objectId: 'check_0_" . $oStructure->id . "', windowId: 'id_content'}); $.adminLoad({path: '/admin/structure/index.php', action: 'edit', additionalParams: '', windowId: 'id_content'}); return false")
 				. '">' . htmlspecialchars($oStructure->name) . "</a><br />";
 			}
 
 			// type="button"
 			Admin_Form_Entity::factory('Code')
-				->html('<a id="document_' . $this->id . '" class="structure_list_link" tabindex="0" role="button" data-toggle="popover" data-placement="right" data-container="body", data-content="' . htmlspecialchars($sListStructures) . '" data-title="' . Core::_('Document.structures') . '" data-titleclass="bordered-darkorange" title="' . Core::_('Document.structures') . '"><i class="fa fa-link gray"></i></a>
+				->html('<a id="document_' . $this->id . '" class="structure_list_link" tabindex="0" role="button" data-toggle="popover" data-placement="right" data-container="body", data-content="' . htmlspecialchars($sListStructures) . '" data-title="' . Core::_('Document.structures') . '" data-titleclass="bordered-darkorange" title="' . Core::_('Document.structures') . '"><i class="fa-solid fa-link gray"></i></a>
 				')
 				->execute();
 

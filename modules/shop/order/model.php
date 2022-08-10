@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -577,8 +577,8 @@ class Shop_Order_Model extends Core_Entity
 				AND `max_price` > 0, 1, 0) AS `orderfield`
 			FROM `shop_deliveries`, `shop_delivery_conditions`
 			WHERE `shop_id`='{$oShop->id}'
-				AND `shop_deliveries`.`deleted`='0'
-				AND `shop_delivery_conditions`.`deleted`='0'
+				AND `shop_deliveries`.`deleted` = 0
+				AND `shop_delivery_conditions`.`deleted` = 0
 				AND `shop_deliveries`.`id`=`shop_delivery_conditions`.`shop_delivery_id`
 				AND `shop_delivery_conditions`.`shop_delivery_id`='{$this->shop_delivery_id}'
 				AND `shop_country_id`='{$iCountryId}'
@@ -586,9 +586,9 @@ class Shop_Order_Model extends Core_Entity
 				AND `shop_country_location_city_id` = '{$iCityId}'
 				AND `shop_country_location_city_area_id` = '{$iCityAreaId}'
 				AND `min_weight` <= '{$iOrderWeight}'
-				AND (`max_weight` >= '{$iOrderWeight}' OR `max_weight` = '0')
+				AND (`max_weight` >= '{$iOrderWeight}' OR `max_weight` = 0)
 				AND `min_price` <= '{$iOrderSum}'
-				AND (`max_price` >= '{$iOrderSum}' OR `max_price` = '0')
+				AND (`max_price` >= '{$iOrderSum}' OR `max_price` = 0)
 			ORDER BY
 				`orderfield` DESC,
 				`min_weight` DESC,
@@ -602,8 +602,7 @@ class Shop_Order_Model extends Core_Entity
 				->setQueryType(0)
 				->query($sql)
 				->asObject('Shop_Delivery_Condition_Model')
-				->result()
-			;
+				->result();
 
 			$iRowCount = count($aRows);
 
@@ -2750,6 +2749,7 @@ class Shop_Order_Model extends Core_Entity
 		$aOptions += array(
 			'amount' => 0,
 			'quantity' => 0,
+			'weight' => 0,
 			'prices' => array(),
 			'applyDiscounts' => TRUE,
 			'applyDiscountCards' => TRUE
@@ -2759,6 +2759,7 @@ class Shop_Order_Model extends Core_Entity
 		{
 			$amount = $aOptions['amount'];
 			$quantity = $aOptions['quantity'];
+			$weight = $aOptions['weight'];
 			$aDiscountPrices = $aOptions['prices'];
 
 			$oShop = $this->Shop;
@@ -2796,6 +2797,7 @@ class Shop_Order_Model extends Core_Entity
 				$oShop_Purchase_Discount_Controller
 					->amount($amount)
 					->quantity($quantity)
+					->weight($weight)
 					->couponText($this->coupon)
 					->siteuserId($this->siteuser_id ? $this->siteuser_id : 0)
 					->prices($aDiscountPrices)
@@ -2967,6 +2969,8 @@ class Shop_Order_Model extends Core_Entity
 	{
 		ob_start();
 
+		$this->checkShopOrderStatusDeadline();
+
 		$path = $oAdmin_Form_Controller->getPath();
 
 		$oCore_Html_Entity_Dropdownlist = new Core_Html_Entity_Dropdownlist();
@@ -2985,6 +2989,18 @@ class Shop_Order_Model extends Core_Entity
 					->data('change-context', 'true')
 				)
 			->execute();
+
+		if ($this->shop_order_status_deadline != '0000-00-00 00:00:00')
+		{
+			$bgColor = Core_Str::hex2lighter($this->Shop_Order_Status->color, 0.88);
+
+			Core_Html_Entity::factory('Div')
+				->style("color: {$this->Shop_Order_Status->color}; background-color: {$bgColor}")
+				->class('margin-left-10 badge badge-square')
+				->title(Core::_('Shop_Order_Status.deadline', Core_Date::sql2datetime($this->shop_order_status_deadline)))
+				->value("<i class='fas fa-stopwatch margin-right-5'></i>" . Core_Date::sql2string($this->shop_order_status_deadline))
+				->execute();
+		}
 
 		return ob_get_clean();
 	}
@@ -3634,6 +3650,25 @@ class Shop_Order_Model extends Core_Entity
 		}
 
 		return implode("\n<br />", $aReturn);
+	}
+
+	/**
+	 * Check shop order status deadline
+	 * @return self
+	 */
+	public function checkShopOrderStatusDeadline()
+	{
+		if ($this->shop_order_status_deadline != '0000-00-00 00:00:00'
+			&& Core_Date::sql2timestamp($this->shop_order_status_deadline) < time()
+		)
+		{
+			if ($this->Shop_Order_Status->deadline_shop_order_status_id)
+			{
+				Core_Entity::factory('Shop_Order_Status', $this->Shop_Order_Status->deadline_shop_order_status_id)->setStatus($this);
+			}
+		}
+
+		return $this;
 	}
 
 	/**

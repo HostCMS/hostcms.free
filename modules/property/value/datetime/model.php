@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Property
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Value_Datetime_Model extends Core_Entity
 {
@@ -133,14 +133,18 @@ class Property_Value_Datetime_Model extends Core_Entity
 	 */
 	protected function _prepareData()
 	{
+		$oProperty = $this->Property;
+
 		$this->clearXmlTags()
-			->addXmlTag('property_dir_id', $this->Property->property_dir_id)
-			->addXmlTag('tag_name', $this->Property->tag_name);
+			->addXmlTag('property_dir_id', $oProperty->property_dir_id)
+			->addXmlTag('tag_name', $oProperty->tag_name);
+
+		!$oProperty->multiple && $this->addForbiddenTag('sorting');
 
 		$value = '';
 		if ($this->value != '0000-00-00 00:00:00')
 		{
-			$value = $this->Property->type == 8
+			$value = $oProperty->type == 8
 				? strftime($this->_dateFormat, Core_Date::sql2timestamp($this->value))
 				: strftime($this->_dateTimeFormat, Core_Date::sql2timestamp($this->value));
 		}

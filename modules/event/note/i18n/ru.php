@@ -2,8 +2,8 @@
 
 return array(
 	'model_name' => 'Заметки к делу',
-	'event_notes_title' => 'Заметки',
-	'event_notes_menu_add' => 'Добавить',
+	'notes_title' => 'Заметки',
+	'notes_menu_add' => 'Добавить',
 	'add_title' => 'Добавление заметки',
 	'edit_title' => 'Редактирование заметки',
 	'id' => 'Идентификатор',

@@ -190,6 +190,8 @@ class Update_Entity extends Core_Entity
 			// 5 - истек период поддержки
 			if (!$error || $error == 5)
 			{
+				Core_Database::instance()->query('SET SESSION wait_timeout = 600');
+
 				foreach ($oXml->update as $value)
 				{
 					$current_update_id = (int)$value->attributes()->id;
@@ -207,8 +209,6 @@ class Update_Entity extends Core_Entity
 					!is_dir($current_update_dir) && Core_File::mkdir($current_update_dir);
 
 					$aUpdateItems = array();
-
-					Core_Database::instance()->query('SET SESSION wait_timeout = 28800');
 
 					$aModules = $value->xpath('modules/module');
 					foreach ($aModules as $key => $module)
@@ -328,9 +328,7 @@ class Update_Entity extends Core_Entity
 								->status(Core_Log::$MESSAGE)
 								->write(Core::_('Update.msg_execute_sql'));
 
-							//$sql_code = Core_File::read($aTmpUpdateItem['sql']);
-							//Sql_Controller::instance()->execute($sql_code);
-							Sql_Controller::instance()->execute($aTmpUpdateItem['sql']);
+							Sql_Controller::instance()->executeByString($aTmpUpdateItem['sql']);
 						}
 
 						// Clear Core_ORM_ColumnCache, Core_ORM_RelationCache
@@ -412,7 +410,7 @@ class Update_Entity extends Core_Entity
 			->value('β')
 			->execute();
 	}
-	
+
 	/**
 	 * Get Related Site
 	 * @return NULL

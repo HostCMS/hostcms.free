@@ -19,6 +19,8 @@ class Core_Mail_Imap extends Core_Servant_Properties
 	 * @var array
 	 */
 	protected $_allowedProperties = array(
+		'offset',
+		'limit',
 		'server', // сервер для соединения (IMAP, POP3)
 		'port',
 		'type', // imap, pop3
@@ -37,6 +39,9 @@ class Core_Mail_Imap extends Core_Servant_Properties
 
 		$this->delete = FALSE;
 		$this->ssl = FALSE;
+
+		$this->offset = 0;
+		$this->limit = 50;
 	}
 
 	/**
@@ -126,7 +131,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 				$protocol = '/pop3';
 			break;
 			default:
-				throw new Core_Exception("Wrong type '%type', 'imap' and 'pop3' are possible.",
+				throw new Core_Exception("Wrong type '%type', 'imap' or 'pop3' are possible.",
 					array('%type' => $this->type)
 				);
 		}
@@ -136,17 +141,13 @@ class Core_Mail_Imap extends Core_Servant_Properties
 
 		$protocol .= '/novalidate-cert/notls';
 
-		// Формируем имя ящика
 		$mailbox = '{' . $this->server . ':' . intval($this->port) . $protocol . '}INBOX';
 
 		$aParam = $this->ssl
 			? array('DISABLE_AUTHENTICATOR' => 'GSSAPI') // PLAIN
 			: array();
 
-		// Устанавливаем соединение с почтовым сервером
-		$this->_stream = version_compare(PHP_VERSION, '5.3.2') >= 0
-			? @imap_open($mailbox, $this->login, $this->password, 0, 0, $aParam)
-			: @imap_open($mailbox, $this->login, $this->password);
+		$this->_stream = @imap_open($mailbox, $this->login, $this->password, 0, 0, $aParam);
 
 		// Соединение с почтовым сервером не установлено
 		if (!$this->_stream)
@@ -167,12 +168,15 @@ class Core_Mail_Imap extends Core_Servant_Properties
 			return $this;
 		}
 
-		$i = 0;
 		$this->_aMessages = array();
 
-		while ($i < $iCount)
+		// POP3 has no concept of read and unread messages
+		$aMailIds = imap_search($this->_stream, 'UNSEEN');
+		$aMailIds = array_slice($aMailIds, $this->offset, $this->limit);
+
+		foreach ($aMailIds as $i)
 		{
-			$imap_fetchheader = imap_fetchheader($this->_stream, $i + 1);
+			$imap_fetchheader = imap_fetchheader($this->_stream, $i);
 
 			// Fix bug 'Fatal error: imap_headerinfo(): Address buffer overflow'
 			// header can't be more 16K length
@@ -184,7 +188,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 			}
 
 			// Метаданные сообщения (структура)
-			$structure = imap_fetchstructure($this->_stream, $i + 1);
+			$structure = imap_fetchstructure($this->_stream, $i);
 
 			// Тип сообщения
 			$this->_aMessages[$i]['type'] = $structure->subtype;
@@ -196,7 +200,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 
 			// Сохраняем заголовки
 			$this->_headers = '';
-			$this->_aMessages[$i]['headers'] = imap_fetchbody($this->_stream, $i + 1, 0);
+			$this->_aMessages[$i]['headers'] = imap_fetchbody($this->_stream, $i, 0);
 
 			// Заголовки письма
 			$aImap_fetchheader = explode("\n", trim($imap_fetchheader));
@@ -214,7 +218,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 			$this->_aMessages[$i]['fetchheader_str'] = $this->_saveHeaders($fetchheader, $this->_aMessages[$i]['code']);
 
 			// Заголовки письма
-			$header_message = imap_headerinfo($this->_stream, $i + 1);
+			$header_message = imap_headerinfo($this->_stream, $i);
 
 			// Дата письма
 			$this->_aMessages[$i]['date'] = strftime("%d.%m.%Y %H:%M:%S", strtotime(
@@ -257,11 +261,23 @@ class Core_Mail_Imap extends Core_Servant_Properties
 				? mb_decode_mimeheader($header_message->subject)
 				: '';
 
-			$i++;
+			//$i++;
 		}
 
 		// Удалить письма после просмотра
-		$this->delete && $this->_deleteMessages($this->_stream);
+		if ($this->delete)
+		{
+			$this->_deleteMessages($this->_stream);
+		}
+		// Пометить сообщения прочитанными
+		elseif ($this->type == 'imap')
+		{
+			// Пометить прочитанными
+			imap_setflag_full($this->_stream, implode(',', array_keys($this->_aMessages)), '\\Seen');
+
+			// Применить установку флагов
+			imap_expunge($this->_stream);
+		}
 
 		// imap_errors() для пресечения вывода сообщений об ошибках, в том числе, если ящик пуст
 		imap_errors();
@@ -391,7 +407,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 	protected function _parseMessage($i)
 	{
 		// Метаданные сообщения
-		$structure = imap_fetchstructure($this->_stream, $i + 1);
+		$structure = imap_fetchstructure($this->_stream, $i);
 
 		// Если сообщение состоит из нескольких частей, формируем массив, каждый элемент которого будет содержанием соответствующей части сообщения
 		$aStructureParts = $this->_aMessages[$i]['structure_array'] = $this->_structure2array($structure);
@@ -448,7 +464,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 						$messageNumber = ($iStructurePartNumber + 1) . '.' . ($iPartNumber + 1);
 
 						$sPartBody = $this->_bodyDecode(
-							imap_fetchbody($this->_stream, $i + 1, $messageNumber), $aPart['encoding']
+							imap_fetchbody($this->_stream, $i, $messageNumber), $aPart['encoding']
 						);
 
 						!is_null($partCharset)
@@ -482,7 +498,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 			}
 			else
 			{
-				$body = imap_fetchbody($this->_stream, $i + 1, strval($iStructurePartNumber + 1));
+				$body = imap_fetchbody($this->_stream, $i, strval($iStructurePartNumber + 1));
 				$body = $this->_bodyDecode($body, $aStructurePart['encoding']);
 
 				// $aStructurePart encoding
@@ -547,19 +563,14 @@ class Core_Mail_Imap extends Core_Servant_Properties
 	/**
 	 * Удаление всех писем из почтового ящика
 	 * @param resource $stream Идентификатор открытого соединения с почтовым сервером
+	 * @return self
 	 */
 	protected function _deleteMessages($stream)
 	{
-		// Количество писем в почтовом ящике
-		$iCount = imap_num_msg($stream);
+		// Помечаем на удаление полученные
+		imap_delete($stream, implode(',', array_keys($this->_aMessages)));
 
-		// Помечаем на удаление все письма в ящике
-		for ($i = 0; $i < $iCount; $i++)
-		{
-			imap_delete($stream, $i + 1);
-		}
-
-		// Удаляем письма, помеченные на удаление
+		// Удаляем письма
 		imap_expunge($stream);
 
 		return $this;

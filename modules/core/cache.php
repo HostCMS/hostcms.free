@@ -281,6 +281,7 @@ abstract class Core_Cache
 	public function deleteTags($actualKey)
 	{
 		Core_QueryBuilder::delete('cache_tags')
+			->ignore()
 			->where('hashcrc32', '=', Core::crc32($actualKey))
 			->execute();
 

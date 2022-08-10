@@ -20,7 +20,7 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 	public function execute()
 	{
 		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
-		$oAdmin_Form = $oAdmin_Form_Controller->getAdminForm();
+		// $oAdmin_Form = $oAdmin_Form_Controller->getAdminForm();
 
 		$oAdmin_View = Admin_View::create($oAdmin_Form_Controller->Admin_View)
 			->pageTitle($oAdmin_Form_Controller->pageTitle)
@@ -90,7 +90,7 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 
 		$aAdmin_Form_Fields = $oAdmin_Form->Admin_Form_Fields->findAll();
 
-		$oSortingField = $oAdmin_Form_Controller->getSortingField();
+		// $oSortingField = $oAdmin_Form_Controller->getSortingField();
 
 		$oUser = Core_Auth::getCurrentUser();
 
@@ -145,7 +145,7 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 										'menubar' => 'false',
 										'statusbar' => 'false',
 										'plugins' => '"advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table code wordcount"',
-										'toolbar1' => '"bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | removeformat"'
+										'toolbar1' => '"bold italic underline alignleft aligncenter alignright alignjustify bullist numlist removeformat"'
 									))
 									->divAttr(array('class' => ''))
 									->controller($oAdmin_Form_Controller)
@@ -162,10 +162,13 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 									<span class="margin-right-20" onclick="$.showDropzone(this, '<?php echo $windowId?>');"><i class="fa fa-paperclip fa-fw"></i> <?php echo Core::_('Crm_Note.file')?></span>
 									<div class="checkbox">
 										<label>
-											<input name="result" type="checkbox" class="colored-blue" value="1"/>
+											<input name="result" type="checkbox" class="colored-blue" value="1" onclick="$('#<?php echo $windowId?> .event-completed').toggleClass('hidden')"/>
 											<span class="text"><?php echo Core::_('Crm_Note.result')?></span>
 										</label>
 									</div>
+									<?php
+									echo $oEvent->getCompletedDropdown($this->_Admin_Form_Controller);
+									?>
 								</div>
 								<button id="sendForm" class="btn btn-palegreen btn-sm" type="submit">
 									<?php echo Core::_('Crm_Note.send')?>
@@ -244,7 +247,17 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 						$color = $aColors[$i % $iCountColors];
 
 						$class = '';
-						$oEntity->result && $class = 'timeline-crm-note-result';
+
+						// $oEntity->result && $class = 'timeline-crm-note-result';
+
+						if ($oEntity->result == 1)
+						{
+							$class = 'timeline-crm-note-result';
+						}
+						elseif ($oEntity->result == -1)
+						{
+							$class = 'timeline-crm-note-result-unsuccessfull';
+						}
 
 						$iDatetime = Core_Date::sql2timestamp($oEntity->datetime);
 						$sDate = Core_Date::timestamp2date($iDatetime);
@@ -311,11 +324,15 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 								<div class="timeline-body">
 									<?php
 										$text = $oEntity->text;
-										$files = $oEntity->getFilesBlock($oEvent);
 
-										if (!is_null($files))
+										if (Core::moduleIsActive('crm'))
 										{
-											$text .= '<div class="crm-note-attachment-wrapper">' . $files . '</div>';
+											$files = $oEntity->getFilesBlock($oEvent);
+
+											if (!is_null($files))
+											{
+												$text .= '<div class="crm-note-attachment-wrapper">' . $files . '</div>';
+											}
 										}
 
 										echo $text;

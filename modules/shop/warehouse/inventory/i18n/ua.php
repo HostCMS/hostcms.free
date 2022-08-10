@@ -34,4 +34,5 @@ return array(
 	'diff' => "Відхилення",
 	'post_success' => 'Документ проведено успішно!',
 	'unpost_success' => 'Документ розпроведено успішно!',
+	'apply_item_change_attributes' => 'Інвентаризація при зміні атрибутів',
 );

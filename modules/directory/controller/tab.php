@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Directory
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Directory_Controller_Tab extends Core_Servant_Properties
 {
@@ -52,7 +52,7 @@ abstract class Directory_Controller_Tab extends Core_Servant_Properties
 	public function execute()
 	{
 		$oPersonalDataInnerWrapper = Admin_Form_Entity::factory('Div')
-			->class('well well-sm margin-bottom-10')
+			->class('well well-sm margin-bottom-10 directory-well')
 			->add(
 				Admin_Form_Entity::factory('Code')
 					->html('<p class="semi-bold"><i class="widget-icon ' . $this->_faTitleIcon . ' icon-separator ' . $this->_titleHeaderColor . '"></i>' . $this->title . '</p>')
@@ -75,10 +75,10 @@ abstract class Directory_Controller_Tab extends Core_Servant_Properties
 	protected function _buttons($className = '')
 	{
 		return Admin_Form_Entity::factory('Div') // div с кноками + и -
-			->class('add-remove-property margin-top-23 pull-left' . (count($this->_aDirectory_Relations) ? ' btn-group' : '') . ($className ? ' ' . $className : ''))
+			->class('add-remove-property margin-top-23-lg pull-left' . (count($this->_aDirectory_Relations) ? ' btn-group' : '') . ($className ? ' ' . $className : ''))
 			->add(
 				Admin_Form_Entity::factory('Code')
-					->html('<div class="btn btn-palegreen" onclick="$.cloneFormRow(this); event.stopPropagation();"><i class="fa fa-plus-circle close"></i></div><div class="btn btn-darkorange btn-delete' . (count($this->_aDirectory_Relations) ? '' : ' hide') . '" onclick="$.deleteFormRow(this); event.stopPropagation();"><i class="fa fa-minus-circle close"></i></div>')
+					->html('<div class="btn btn-palegreen inverted" onclick="$.cloneFormRow(this); event.stopPropagation();"><i class="fa fa-plus-circle close"></i></div><div class="btn btn-darkorange btn-delete inverted' . (count($this->_aDirectory_Relations) ? '' : ' hide') . '" onclick="$.deleteFormRow(this); event.stopPropagation();"><i class="fa fa-minus-circle close"></i></div>')
 			);
 	}
 

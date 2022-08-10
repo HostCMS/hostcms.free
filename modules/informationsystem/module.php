@@ -23,7 +23,7 @@ class Informationsystem_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2022-04-29';
+	public $date = '2022-08-05';
 
 	/**
 	 * Module name
@@ -114,6 +114,11 @@ class Informationsystem_Module extends Core_Module
 		switch ($_SESSION['search_block'])
 		{
 			case 0:
+				Core_Log::instance()->clear()
+					->notify(FALSE)
+					->status(Core_Log::$MESSAGE)
+					->write("indexingInformationsystemGroups({$offset}, {$limit})");
+				
 				$aTmpResult = $this->indexingInformationsystemGroups($offset, $limit);
 
 				$_SESSION['last_limit'] = count($aTmpResult);
@@ -133,6 +138,11 @@ class Informationsystem_Module extends Core_Module
 				}
 
 			case 1:
+				Core_Log::instance()->clear()
+					->notify(FALSE)
+					->status(Core_Log::$MESSAGE)
+					->write("indexingInformationsystemItems({$offset}, {$limit})");
+					
 				$aTmpResult = $this->indexingInformationsystemItems($offset, $limit);
 
 				$_SESSION['last_limit'] = count($aTmpResult);
@@ -336,7 +346,7 @@ class Informationsystem_Module extends Core_Module
 						$additionalParams = "informationsystem_id={$oInformationsystem_Group->Informationsystem->id}&informationsystem_group_id={$oInformationsystem_Group->id}";
 						$href = $oAdmin_Form_Controller->getAdminLoadHref($sPath, NULL, NULL, $additionalParams);
 						$onclick = $oAdmin_Form_Controller->getAdminLoadAjax($sPath, NULL, NULL, $additionalParams);
-						$icon = "fa fa-folder-open-o";
+						$icon = "fa-regular fa-folder-open";
 					}
 				break;
 				case 2: // Информационые элементы

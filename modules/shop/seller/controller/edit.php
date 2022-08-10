@@ -20,8 +20,6 @@ class Shop_Seller_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	public function setObject($object)
 	{
-		$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0));
-
 		if (!$object->id)
 		{
 			$object->shop_id = Core_Array::getGet('shop_id');
@@ -35,7 +33,19 @@ class Shop_Seller_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->addSkipColumn('image_small_width')
 			->addSkipColumn('image_small_height');
 
-		parent::setObject($object);
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
+
+		$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0));
 
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');

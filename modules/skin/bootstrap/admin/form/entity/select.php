@@ -128,7 +128,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Select extends Skin_Default_Admin_Form_En
 					->class('input-group' . (strlen($this->caption) ? ' margin-top-21' : ''))
 					->add(
 						Admin_Form_Entity::factory('Code')
-							->html('<span class="input-group-addon"><i class="fa fa-search"></i></span>
+							->html('<span class="input-group-addon"><i class="fa-solid fa-magnifying-glass"></i></span>
 								<input class="form-control" type="text" id="filter_' . $this->id . '" onkeyup="clearTimeout(' . $filterName . '.timeout); ' . $filterName . '.timeout = setTimeout(function(){' . $filterName . ".Set($(event.target).val()); {$filterName}.Filter(); }, 500)". '" onkeypress="if (event.keyCode == 13) return false;" />' .
 								'<span class="input-group-addon" onclick="' . " $(this).prev('input').val(''); {$filterName}.Set(''); {$filterName}.Filter();" . '"><i class="fa fa-times-circle no-margin"></i></span>'
 							)

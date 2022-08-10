@@ -23,7 +23,7 @@ class Shop_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2022-04-29';
+	public $date = '2022-08-05';
 
 	/**
 	 * Module name
@@ -44,7 +44,8 @@ class Shop_Module extends Core_Module
 		5 => 'unsetApplyPurchaseDiscounts',
 		6 => 'setApplyPurchaseDiscounts',
 		7 => 'recountSets',
-		8 => 'updateCurrency'
+		8 => 'updateCurrency',
+		9 => 'checkShopOrderStatusDeadline'
 	);
 
 	protected $_options = array(
@@ -128,6 +129,11 @@ class Shop_Module extends Core_Module
 		switch ($_SESSION['search_block'])
 		{
 			case 0:
+				Core_Log::instance()->clear()
+					->notify(FALSE)
+					->status(Core_Log::$MESSAGE)
+					->write("indexingShopGroups({$offset}, {$limit})");
+
 				$aTmpResult = $this->indexingShopGroups($offset, $limit);
 
 				$_SESSION['last_limit'] = count($aTmpResult);
@@ -148,6 +154,11 @@ class Shop_Module extends Core_Module
 
 			case 1:
 				// Следующая индексация
+				Core_Log::instance()->clear()
+					->notify(FALSE)
+					->status(Core_Log::$MESSAGE)
+					->write("indexingShopItems({$offset}, {$limit})");
+
 				$aTmpResult = $this->indexingShopItems($offset, $limit);
 
 				$_SESSION['last_limit'] = count($aTmpResult);
@@ -169,6 +180,11 @@ class Shop_Module extends Core_Module
 
 			case 2:
 				// Следующая индексация
+				Core_Log::instance()->clear()
+					->notify(FALSE)
+					->status(Core_Log::$MESSAGE)
+					->write("indexingShopSellers({$offset}, {$limit})");
+
 				$aTmpResult = $this->indexingShopSellers($offset, $limit);
 
 				$_SESSION['last_limit'] = count($aTmpResult);
@@ -190,6 +206,11 @@ class Shop_Module extends Core_Module
 
 			case 3:
 				// Следующая индексация
+				Core_Log::instance()->clear()
+					->notify(FALSE)
+					->status(Core_Log::$MESSAGE)
+					->write("indexingShopProducers({$offset}, {$limit})");
+
 				$aTmpResult = $this->indexingShopProducers($offset, $limit);
 
 				$_SESSION['last_limit'] = count($aTmpResult);
@@ -211,6 +232,11 @@ class Shop_Module extends Core_Module
 
 			case 4:
 				// Следующая индексация
+				Core_Log::instance()->clear()
+					->notify(FALSE)
+					->status(Core_Log::$MESSAGE)
+					->write("indexingShopFilterSeos({$offset}, {$limit})");
+
 				$aTmpResult = $this->indexingShopFilterSeos($offset, $limit);
 
 				$_SESSION['last_limit'] = count($aTmpResult);
@@ -407,6 +433,8 @@ class Shop_Module extends Core_Module
 			->join('structures', 'shops.structure_id', '=', 'structures.id')
 			->where('structures.active', '=', 1)
 			->where('structures.indexing', '=', 1)
+			->where('shop_producers.indexing', '=', 1)
+			->where('shop_producers.active', '=', 1)
 			->where('shop_producers.deleted', '=', 0)
 			->where('shops.deleted', '=', 0)
 			->where('structures.deleted', '=', 0)
@@ -755,6 +783,37 @@ class Shop_Module extends Core_Module
 
 					$oShop_Currency_Driver = Shop_Currency_Driver::instance($entityId);
 					$oShop_Currency_Driver->execute();
+				break;
+				case 9:
+					if (!$entityId)
+					{
+						throw new Core_Exception('callSchedule:: entityId expected as shop_id, fill in the form', array(), 0, FALSE);
+					}
+
+					$oShop = Core_Entity::factory('Shop', $entityId);
+
+					$limit = 1000;
+					$position = 0;
+
+					do {
+						$oShop_Orders = $oShop->Shop_Orders;
+						$oShop_Orders->queryBuilder()
+							->where('shop_orders.shop_order_status_deadline', '!=', '0000-00-00 00:00:00')
+							->limit($limit)
+							->offset($position)
+							->clearOrderBy()
+							->orderBy('shop_orders.id');
+
+						$aShop_Orders = $oShop_Orders->findAll(FALSE);
+
+						foreach ($aShop_Orders as $oShop_Order)
+						{
+							$oShop_Order->checkShopOrderStatusDeadline();
+						}
+
+						$position += $limit;
+					}
+					while(count($aShop_Orders));
 				break;
 			}
 		}

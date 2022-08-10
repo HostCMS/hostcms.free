@@ -17,7 +17,9 @@ class Core_Html_Entity_Noscript extends Core_Html_Entity
 	 * Allowed object properties
 	 * @var array
 	 */
-	protected $_allowedProperties = array();
+	protected $_allowedProperties = array(
+		'value'
+	);
 
 	/**
 	 * Skip properties

@@ -1333,32 +1333,34 @@ class Shop_Controller_Show extends Core_Controller
 
 			Core_Event::notify(get_class($this) . '.onBeforeAddShopItems', $this, array($aShop_Items));
 
-			foreach ($aShop_Items as $oShop_Item)
+			foreach ($aShop_Items as $oOriginal_Shop_Item)
 			{
-				$this->_shownIDs[] = $oShop_Item->id;
+				$this->_shownIDs[] = $oOriginal_Shop_Item->id;
 
 				// Tagged cache
-				$bCache && $this->_cacheTags[] = 'shop_item_' . $oShop_Item->id;
+				$bCache && $this->_cacheTags[] = 'shop_item_' . $oOriginal_Shop_Item->id;
 
 				// Shortcut
-				$iShortcut = $oShop_Item->shortcut_id;
+				$iShortcut = $oOriginal_Shop_Item->shortcut_id;
 
 				if ($iShortcut)
 				{
-					$oShortcut_Item = $oShop_Item;
-					$oShop_Item = $oShop_Item->Shop_Item;
+					$oShortcut_Item = $oOriginal_Shop_Item;
+					$oOriginal_Shop_Item = $oOriginal_Shop_Item->Shop_Item;
 				}
 				else // Так как ярлык не будет иметь dataTmpId и он будет NULL
 				{
 					// Group modifications in the parent item, both modificationsList and modificationsGroup need
-					!$this->item && $this->modificationsList && $this->modificationsGroup && $oShop_Item->dataTmpId != $oShop_Item->id
-						&& $oShop_Item = $oShop_Item->Modification;
+					!$this->item && $this->modificationsList && $this->modificationsGroup && $oOriginal_Shop_Item->dataTmpId != $oOriginal_Shop_Item->id
+						&& $oOriginal_Shop_Item = $oOriginal_Shop_Item->Modification;
 				}
 
+				$oShop_Item = clone $oOriginal_Shop_Item;
 				$oShop_Item
+					->id($oOriginal_Shop_Item->id)
 					->clearEntities()
 					// shortcodes may clear attached entities
-					->clearEntitiesAfterGetXml(FALSE)
+					//->clearEntitiesAfterGetXml(FALSE)
 					->cartQuantity(1);
 
 				if (!$bTpl)
@@ -1381,7 +1383,7 @@ class Shop_Controller_Show extends Core_Controller
 						// ID оригинального ярлыка
 						if ($iShortcut)
 						{
-							$oOriginal_Shop_Item = $oShop_Item;
+							//$oOriginal_Shop_Item = $oShop_Item;
 
 							$oShop_Item = clone $oShop_Item;
 							$oShop_Item
@@ -1425,7 +1427,8 @@ class Shop_Controller_Show extends Core_Controller
 						!$this->sets && $oShop_Item->showXmlSets($this->sets);
 
 						// Siteuser
-						$oShop_Item->showXmlSiteuser($this->siteuser)
+						$oShop_Item
+							->showXmlSiteuser($this->siteuser)
 							->showXmlSiteuserProperties($this->siteuserProperties);
 
 						$this->addEntity($oShop_Item);
@@ -1583,7 +1586,7 @@ class Shop_Controller_Show extends Core_Controller
 					$oShop_Item_Property->Shop_Measure
 				);
 
-				if ($this->filterCounts && $oShop->filter && in_array($oShop_Item_Property->filter, array(2, 3, 4, 5, 6, 7)))
+				if ($this->filterCounts && $oShop->filter && in_array($oShop_Item_Property->filter, array(2, 3, 4, 5, 6, 7, 99)))
 				{
 					$tableName = $this->getFilterTableName();
 					$columnName = 'property' . $oProperty->id;
@@ -1594,6 +1597,7 @@ class Shop_Controller_Show extends Core_Controller
 
 					$oQueryBuilder = $this->prepareFastfilterQbForProperty($oProperty, $distinctField, $columnName);
 
+					// от и до
 					if ($oShop_Item_Property->filter != 6)
 					{
 						if ($this->itemsPropertiesListJustAvailable
@@ -2375,7 +2379,7 @@ class Shop_Controller_Show extends Core_Controller
 		if ($path != '')
 		{
 			$oProperty = NULL;
-			$aPropertyValuesToSet = array();
+			$aPropertyValuesToSet = NULL;
 
 			$step = 'group';
 			$aPath = explode('/', $path);
@@ -2522,6 +2526,8 @@ class Shop_Controller_Show extends Core_Controller
 					case 'filterValue':
 						if (!is_null($oProperty))
 						{
+							!is_array($aPropertyValuesToSet) && $aPropertyValuesToSet = array();
+
 							if ($oProperty->type == 3)
 							{
 								$oList_Item = $oShop->filter_mode == 0
@@ -2574,14 +2580,16 @@ class Shop_Controller_Show extends Core_Controller
 					case 'filter':
 						if (!is_null($oProperty))
 						{
-							if (count($aPropertyValuesToSet))
+							if (is_array($aPropertyValuesToSet) && count($aPropertyValuesToSet))
 							{
 								$this->addFilter('property', $oProperty->id,
 									count($aPropertyValuesToSet) == 1 ? '=' : 'IN',
 									count($aPropertyValuesToSet) == 1 ? $aPropertyValuesToSet[0] : $aPropertyValuesToSet
 								);
 
+								// Значения были, остается пустой массив, а не NULL
 								$aPropertyValuesToSet = array();
+
 								$oProperty = NULL;
 
 								if ($step === 'finish')
@@ -2618,7 +2626,9 @@ class Shop_Controller_Show extends Core_Controller
 								elseif ($oShop_Item_Property->filter != 5 && $oShop_Item_Property->filter != 6)
 								{
 									$step = 'filterValue';
-									$aPropertyValuesToSet = array();
+									
+									// Значений для этого фильтра еще не было, сохраняем NULL
+									$aPropertyValuesToSet = NULL;
 								}
 								else
 								{
@@ -2789,6 +2799,12 @@ class Shop_Controller_Show extends Core_Controller
 						return $this->error404();
 				}
 			}
+			
+			// Был указан фильтр, требующий значений, но значения заданы не были
+			if ($step == 'filterValue' && !is_null($oProperty) && is_null($aPropertyValuesToSet))
+			{
+				return $this->error404();
+			}
 		}
 		elseif (is_null($path))
 		{
@@ -2921,6 +2937,7 @@ class Shop_Controller_Show extends Core_Controller
 					->$joinType('shop_filter_seo_properties', 'shop_filter_seo_properties.shop_filter_seo_id', '=', 'shop_filter_seos.id')
 					->where('shop_filter_seos.shop_id', '=', $oShop->id)
 					->where('shop_filter_seos.active', '=', 1)
+					->where('shop_filter_seos.deleted', '=', 0)
 					->where('shop_filter_seos.shop_producer_id', '=', intval($this->producer))
 					->groupBy('shop_filter_seos.id')
 					->clearOrderBy()
@@ -2970,56 +2987,84 @@ class Shop_Controller_Show extends Core_Controller
 			}
 			else
 			{
-				if (is_numeric($this->group) && $this->group && is_null($this->tag))
+				if (is_null($this->tag))
 				{
-					$oShop_Group = Core_Entity::factory('Shop_Group', $this->group);
-
-					$oCore_Meta = new Core_Meta();
-					$oCore_Meta
-						->addObject('shop', $oShop)
-						->addObject('group', $oShop_Group)
-						->addObject('this', $this);
-
-					// Title
-					if ($oShop_Group->seo_title != '')
+					if (is_numeric($this->group) && $this->group)
 					{
-						$seo_title = $oShop_Group->seo_title;
+						$oShop_Group = Core_Entity::factory('Shop_Group', $this->group);
+
+						$oCore_Meta = new Core_Meta();
+						$oCore_Meta
+							->addObject('shop', $oShop)
+							->addObject('group', $oShop_Group)
+							->addObject('this', $this);
+
+						// Title
+						if ($oShop_Group->seo_title != '')
+						{
+							$seo_title = $oShop_Group->seo_title;
+						}
+						elseif ($this->_seoGroupTitle != '')
+						{
+							$seo_title = $oCore_Meta->apply($this->_seoGroupTitle);
+						}
+						else
+						{
+							$seo_title = $oShop_Group->name;
+						}
+
+						// Description
+						if ($oShop_Group->seo_description != '')
+						{
+							$seo_description = $oShop_Group->seo_description;
+						}
+						elseif ($this->_seoGroupDescription != '')
+						{
+							$seo_description = $oCore_Meta->apply($this->_seoGroupDescription);
+						}
+						else
+						{
+							$seo_description = $oShop_Group->name;
+						}
+
+						// Keywords
+						if ($oShop_Group->seo_keywords != '')
+						{
+							$seo_keywords = $oShop_Group->seo_keywords ;
+						}
+						elseif ($this->_seoGroupKeywords != '')
+						{
+							$seo_keywords = $oCore_Meta->apply($this->_seoGroupKeywords);
+						}
+						else
+						{
+							$seo_keywords = $oShop_Group->name;
+						}
 					}
-					elseif ($this->_seoGroupTitle != '')
-					{
-						$seo_title = $oCore_Meta->apply($this->_seoGroupTitle);
-					}
+					// Корневая группа
 					else
 					{
-						$seo_title = $oShop_Group->name;
-					}
+						$oCore_Meta = new Core_Meta();
+						$oCore_Meta
+							->addObject('shop', $oShop)
+							->addObject('this', $this);
+							
+						if ($oShop->seo_root_title_template != '')
+						{
+							$seo_title = $oCore_Meta->apply($oShop->seo_root_title_template);
+						}
 
-					// Description
-					if ($oShop_Group->seo_description != '')
-					{
-						$seo_description = $oShop_Group->seo_description;
-					}
-					elseif ($this->_seoGroupDescription != '')
-					{
-						$seo_description = $oCore_Meta->apply($this->_seoGroupDescription);
-					}
-					else
-					{
-						$seo_description = $oShop_Group->name;
-					}
+						// Description
+						if ($oShop->seo_root_keywords_template != '')
+						{
+							$seo_description = $oCore_Meta->apply($oShop->seo_root_keywords_template );
+						}
 
-					// Keywords
-					if ($oShop_Group->seo_keywords != '')
-					{
-						$seo_keywords = $oShop_Group->seo_keywords ;
-					}
-					elseif ($this->_seoGroupKeywords != '')
-					{
-						$seo_keywords = $oCore_Meta->apply($this->_seoGroupKeywords);
-					}
-					else
-					{
-						$seo_keywords = $oShop_Group->name;
+						// Keywords
+						if ($oShop->seo_root_description_template != '')
+						{
+							$seo_keywords = $oCore_Meta->apply($oShop->seo_root_description_template );
+						}
 					}
 				}
 				elseif (!is_null($this->tag) && Core::moduleIsActive('tag'))
@@ -5486,6 +5531,9 @@ class Shop_Controller_Show extends Core_Controller
 
 		// Список производителей
 		$oShop_Producers = $oShop->Shop_Producers;
+
+		$oShop_Producers->queryBuilder()
+			->where('shop_producers.active', '=', 1);
 
 		if ($oShop->filter)
 		{

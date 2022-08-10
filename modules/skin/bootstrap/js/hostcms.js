@@ -91,11 +91,8 @@ $('.page-content')
 			}
 
 		} else {
-
-			$('body')
-				.removeClass("full-screen");
-			$('#fullscreen-toggler')
-				.removeClass("active");
+			$('body').removeClass("full-screen");
+			$('#fullscreen-toggler').removeClass("active");
 
 			if (document.exitFullscreen) {
 				document.exitFullscreen();
@@ -104,12 +101,10 @@ $('.page-content')
 			} else if (document.webkitExitFullscreen) {
 				document.webkitExitFullscreen();
 			}
-
 		}
 	})
 	// refresh
 	.on('click', '#refresh-toggler', function (e) {
-
 		if (typeof _windowSettings == 'undefined')
 		{
 			window.location.reload();
@@ -374,6 +369,13 @@ function scrollTo(el, offset) {
 
 /*Show Notification*/
 function Notify(message, description, position, timeout, theme, icon, closable, sound) {
+	if (typeof sound == 'undefined')
+	{
+		sound = $('#sound-switch').data('soundEnabled') === undefined
+			? false
+			: !!$('#sound-switch').data('soundEnabled');
+	}
+
 	toastr.options.positionClass = 'toast-' + position;
 	toastr.options.extendedTimeOut = 0; //1000;
 	toastr.options.timeOut = timeout;

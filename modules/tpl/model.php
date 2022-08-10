@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Tpl
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Tpl_Model extends Core_Entity
 {
@@ -330,5 +330,14 @@ class Tpl_Model extends Core_Entity
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function exportBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return '<a target="_blank" href="' . $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'exportTpls', NULL, 1, intval($this->id), 'tpl_dir_id=' . Core_Array::getGet('tpl_dir_id')) . '"><i class="fa fa-upload"></i></a>';
 	}
 }

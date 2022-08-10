@@ -198,14 +198,14 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 						<i class="fa fa-expand gray"></i>
 					</a>
 					<a data-toggle="upload" data-module-id="<?php echo $oModule->id?>">
-						<i class="fa fa-refresh gray"></i>
+						<i class="fa-solid fa-rotate gray"></i>
 					</a>
 					<?php
 					if (!$oUser->read_only)
 					{
 						?><a href="#" data-toggle="toggle-actions">
 							<i class="fa fa-plus darkgray" title="<?php echo Core::_('Event.titleAddEvent');?>"></i>
-							<i class="fa fa-search darkgray hidden" title="<?php echo Core::_('Event.titleSearch');?>"></i>
+							<i class="fa-solid fa-magnifying-glass darkgray hidden" title="<?php echo Core::_('Event.titleSearch');?>"></i>
 						</a><?php
 					}
 					?>
@@ -217,7 +217,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 					<div class="task-search">
 						<span class="search-event input-icon">
 							<input type="text" class="form-control" placeholder="<?php echo Core::_('Event.placeholderSearch');?>">
-							<i class="fa fa-search gray"></i>
+							<i class="fa-solid fa-magnifying-glass gray"></i>
 						</span>
 						<?php
 						if (!$oUser->read_only)

@@ -190,6 +190,7 @@ class Shop_Cart_Controller_Onestep extends Core_Controller
 				$oShop_Purchase_Discount_Controller
 					->amount($aTotal['amount'])
 					->quantity($this->quantity)
+					->weight($aTotal['weight'])
 					->couponText($this->couponText)
 					->siteuserId($this->_oSiteuser ? $this->_oSiteuser->id : 0)
 					->prices(array($aTotal['amount']));

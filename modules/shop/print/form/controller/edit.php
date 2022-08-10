@@ -25,7 +25,17 @@ class Shop_Print_Form_Controller_Edit extends Admin_Form_Action_Controller_Type_
 			$object->shop_id = Core_Array::getGet('shop_id');
 		}
 
-		parent::setObject($object);
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
 
 		$this->addMessage(
 			Core_Message::get(Core::_('Shop_Print_Form.attention'), 'error')
@@ -86,7 +96,7 @@ class Shop_Print_Form_Controller_Edit extends Admin_Form_Action_Controller_Type_
 
 		return $this;
 	}
-	
+
 	/**
 	 * Processing of the form. Apply object fields.
 	 * @hostcms-event Shop_Print_Form_Controller_Edit.onAfterRedeclaredApplyObjectProperty

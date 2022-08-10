@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Market
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'menu' => 'Hostmarket',
@@ -19,6 +19,7 @@ return array(
 	'server_error_respond_12' => 'Wrong server answer. Please contact support.',
 	'server_error_respond_13' => 'Module does not exist.',
 	'server_error_respond_14' => 'Module File not found.',
+	'server_error_respond_15' => 'Error loading module file, probably too large.',
 	'install' => 'Install',
 	'installed' => 'Installed',
 	'free' => 'Free',

@@ -110,27 +110,12 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 				$oMainRow1->add($oPositionSelectField);
 
 				$oMainTab
-					->move($this->getField('start_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 col-lg-2')), $oMainRow1)
-					->move($this->getField('end_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 col-lg-2')), $oMainRow1)
-					->move($this->getField('min_amount')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow2)
-					->move($this->getField('max_amount')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow2);
+					->move($this->getField('start_datetime')->divAttr(array('class' => 'form-group col-xs-6 col-sm-6 col-md-3 col-lg-2')), $oMainRow1)
+					->move($this->getField('end_datetime')->divAttr(array('class' => 'form-group col-xs-6 col-sm-6 col-md-3 col-lg-2')), $oMainRow1);
+
+				$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 				$oMainRow2->add(
-					Admin_Form_Entity::factory('Select')
-						->name('shop_currency_id')
-						->caption(Core::_('Shop_Purchase_Discount.shop_currency_id'))
-						->options(
-							Shop_Controller::fillCurrencies()
-						)
-						->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
-						->value(
-							is_null($this->_object->id)
-								? $this->_object->Shop->shop_currency_id
-								: $this->_object->shop_currency_id
-						)
-				);
-
-				$oMainRow3->add(
 					Admin_Form_Entity::factory('Radiogroup')
 						->name('mode')
 						->value($this->_object->mode)
@@ -147,13 +132,37 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 							)
 						)
 						->divAttr(array('class' => 'form-group col-xs-12'))
+						->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [0,1,2]); window.dispatchEvent(new Event('resize'));")
 				);
 
 				$oMainTab
-					->move($this->getField('min_count')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow4)
-					->move($this->getField('max_count')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow4)
-					->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 margin-top-21')), $oMainRow5)
-					->move($this->getField('coupon')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 margin-top-21')), $oMainRow5);
+					->move($this->getField('min_amount')->divAttr(array('class' => 'form-group col-xs-4 col-sm-3')), $oMainRow3)
+					->move($this->getField('max_amount')->divAttr(array('class' => 'form-group col-xs-4 col-sm-3')), $oMainRow3);
+
+				$oMainRow3->add(
+					Admin_Form_Entity::factory('Select')
+						->name('shop_currency_id')
+						->caption(Core::_('Shop_Purchase_Discount.shop_currency_id'))
+						->options(
+							Shop_Controller::fillCurrencies()
+						)
+						->divAttr(array('class' => 'form-group col-xs-4 col-sm-3'))
+						->value(
+							is_null($this->_object->id)
+								? $this->_object->Shop->shop_currency_id
+								: $this->_object->shop_currency_id
+						)
+				);
+
+				$measureName = $this->_object->Shop->Shop_Measure->name;
+
+				$oMainTab
+					->move($this->getField('min_count')->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 hidden-2')), $oMainRow4)
+					->move($this->getField('max_count')->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 hidden-2')), $oMainRow4)
+					->move($this->getField('min_weight')->caption(Core::_('Shop_Purchase_Discount.min_weight', $measureName))->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 hidden-2')), $oMainRow5)
+					->move($this->getField('max_weight')->caption(Core::_('Shop_Purchase_Discount.max_weight', $measureName))->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 hidden-2')), $oMainRow5)
+					->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 margin-top-21')), $oMainRow6)
+					->move($this->getField('coupon')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 margin-top-21')), $oMainRow6);
 
 				// Удаляем группу
 				$oAdditionalTab->delete($this->getField('shop_purchase_discount_dir_id'));
@@ -167,10 +176,15 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 					->value($this->_object->shop_purchase_discount_dir_id)
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3'));
 
-				$oMainRow5->add($oGroupSelect);
+				$oMainRow6->add($oGroupSelect);
 
 				$oMainTab
-					->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3')), $oMainRow5);
+					->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-6 col-sm-6 col-md-3')), $oMainRow6);
+
+				$oMainTab->add(
+					Admin_Form_Entity::factory('Code')
+						->html("<script>radiogroupOnChange('{$windowId}', '{$this->_object->mode}', [0,1,2])</script>")
+				);
 
 				$title = $this->_object->id
 					? Core::_('Shop_Purchase_Discount.edit_order_discount_form_title', $this->_object->name)

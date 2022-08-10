@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage User
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Wallpaper_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -24,7 +24,17 @@ class User_Wallpaper_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 			->addSkipColumn('image_large')
 			->addSkipColumn('image_small');
 
-		parent::setObject($object);
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
 
 		$oMainTab = $this->getTab('main');
 
@@ -32,8 +42,7 @@ class User_Wallpaper_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		$oMainTab->move($this->getField('name'), $oMainRow1);
 
@@ -67,11 +76,21 @@ class User_Wallpaper_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 					'show' => FALSE
 				)
 			)
-			->divAttr(array('class' => 'input-group col-xs-12 col-sm-6'));
+			->divAttr(array('class' => 'form-group no-padding-left col-xs-12 col-sm-6'));
 
 		$oMainRow2->add($oImageField);
 
-		$oMainTab->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow3);
+		$sColorValue = ($this->_object->id && $this->getField('color')->value)
+			? $this->getField('color')->value
+			: '#eee6cf';
+
+		$this->getField('color')
+			->colorpicker(TRUE)
+			->value($sColorValue);
+
+		$oMainTab
+			->move($this->getField('color')->set('data-control', 'hue')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow2)
+			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow2);
 
 		$title = $this->_object->id
 			? Core::_('User_Wallpaper.edit_title', $this->_object->name)
@@ -89,13 +108,16 @@ class User_Wallpaper_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 	 */
 	protected function _applyObjectProperty()
 	{
+		$previousColor = $this->_object->color;
+
 		parent::_applyObjectProperty();
 
-		if (
-			// Поле файла существует
+		$bNewImage = // Поле файла существует
 			!is_null($aFileData = Core_Array::getFiles('image', NULL))
 			// и передан файл
-			&& intval($aFileData['size']) > 0)
+			&& intval($aFileData['size']) > 0;
+
+		if ($bNewImage)
 		{
 			if (Core_File::isValidExtension($aFileData['name'], array('JPG', 'JPEG', 'GIF', 'PNG')))
 			{
@@ -142,7 +164,6 @@ class User_Wallpaper_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 					$this->_object->save();
 				}
 
-				$this->addMessage('<script>$.loadWallpaper(' . $this->_object->id . ')</script>');
 			}
 			else
 			{
@@ -153,6 +174,11 @@ class User_Wallpaper_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 					)
 				);
 			}
+		}
+
+		if ($bNewImage || $previousColor != $this->_object->color)
+		{
+			$this->addMessage('<script>$.loadWallpaper(' . $this->_object->id . ')</script>');
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));

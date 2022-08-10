@@ -76,7 +76,17 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->addSkipColumn('timestamp')
 			->addSkipColumn('data_template_id');
 
-		parent::setObject($object);
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
 
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
@@ -89,6 +99,8 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'));
+
+		$modelName = $this->_object->getModelName();
 
 		switch ($modelName)
 		{

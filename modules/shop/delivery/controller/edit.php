@@ -31,7 +31,17 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 			->addSkipColumn('image_width')
 			;
 
-		parent::setObject($object);
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
 
 		// Главная вкладка
 		$oMainTab = $this->getTab('main');
@@ -41,10 +51,7 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
-			// ->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
-			// ->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
-		;
+			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		$oAdditionalTab->add($oAdditionalRow1 = Admin_Form_Entity::factory('Div')->class('row'));
 
@@ -171,7 +178,7 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 				)
 			)
 			->divAttr(array('class' => 'form-group col-xs-12 col-md-4 margin-top-21'))
-			->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [0,1])")
+			->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [0,1]); window.dispatchEvent(new Event('resize'));")
 			->value($this->_object->type)
 			->name('type');
 
@@ -185,6 +192,7 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 
 		$oTextarea->caption(Core::_('Shop_Delivery.handler'))
 			->name('code')
+			->id('code_handler')
 			->value($this->_object->loadHandlerFile())
 			->divAttr(array('id' => 'code', 'class' => 'form-group col-xs-12 hidden-0'))
 			->rows(15)

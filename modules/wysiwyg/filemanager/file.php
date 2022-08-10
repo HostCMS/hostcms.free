@@ -155,6 +155,22 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 
 		return $this;
 	}
+	
+	/**
+	 * Delete object from database
+	 * @param mixed $primaryKey primary key for deleting object
+	 * @return Core_Entity
+	 */
+	public function extract($primaryKey = NULL)
+	{
+		$filePath = $this->_getFullPath();
+		$dirname = dirname($filePath);
+		
+		$Core_Tar = new Core_Tar($filePath);
+		$Core_Tar->extractModify($dirname, $dirname);
+
+		return $this;
+	}
 
 	/**
 	 * Callback function
@@ -168,7 +184,7 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 			$oCore_Html_Entity_Img = Core_Html_Entity::factory('A')
 				->add(
 					Core_Html_Entity::factory('I')
-						->class('fa fa-download')
+						->class('fa fa-download palegreen')
 				)
 				->href("/admin/filemanager/index.php?hostcms[action]=download&cdir=" . rawurlencode(Core_File::pathCorrection(Core_Array::getRequest('cdir'))) . "&dir=" . rawurlencode(Core_File::pathCorrection(Core_Array::getRequest('dir'))) ."&hostcms[checked][1][{$this->hash}]=1")
 				->target('_blank')
@@ -233,7 +249,7 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 		if ($this->type == 'link')
 		{
 			Core_Html_Entity::factory('I')
-				->class('fa fa-link fa-small')
+				->class('fa-solid fa-link fa-small')
 				->execute();
 		}
 	}
@@ -244,7 +260,7 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 	public function image()
 	{
 		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')
-			->class('fm_preview');
+			->class('fm-preview-' . $this->type);
 
 		$oChild = Core_Html_Entity::factory('I')
 			->class('fa fa-file-text-o');
@@ -254,13 +270,16 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 			$aExt = array('JPG', 'JPEG', 'GIF', 'PNG');
 
 			// Ассоциированные иконки
-			$ext = Core_File::getExtension($this->name);
+			/*$ext = Core_File::getExtension($this->name);
 
 			if (isset(Core::$mainConfig['fileIcons'][$ext]))
 			{
 				$oChild = Core_Html_Entity::factory('Img')
 					->src('/admin/images/icons/' . Core::$mainConfig['fileIcons'][$ext]);
-			}
+			}*/
+
+			$oChild = Core_Html_Entity::factory('I')
+				->class(Core_File::getIcon($this->name));
 
 			/*$icon_file = '/admin/images/icons/' . (
 				isset(Core::$mainConfig['fileIcons'][$ext])
@@ -422,15 +441,9 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 		}
 		else
 		{
-			$oChild = Core_Html_Entity::factory('I')
-					->class('fa fa-folder-open-o');
-
-			/*$icon_file = $this->name == '..'
-				? '/admin/images/top_point.gif'
-				: '/admin/images/folder.gif';*/
+			$oChild = Core_Html_Entity::factory('I')->class('fa-regular fa-folder-open wysiwyg-folder');
 		}
 
-		/*?><div class=""><img src="<?php echo $icon_file?>" /></div><?php*/
 		$oCore_Html_Entity_Div
 			->add($oChild)
 			->execute();
@@ -443,5 +456,23 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 	public function datetime()
 	{
 		return Core_Date::sql2datetime($this->datetime);
+	}
+	
+	/**
+	 * Check user access to admin form action
+	 * @param string $actionName admin form action name
+	 * @param User_Model $oUser user object
+	 * @return bool
+	 */
+	public function checkBackendAccess($actionName, $oUser)
+	{
+		switch ($actionName)
+		{
+			case 'extract':
+				return substr($this->name, -7) === '.tar.gz';
+			break;
+		}
+
+		return TRUE;
 	}
 }

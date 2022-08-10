@@ -20,6 +20,7 @@ class Shop_Order_Status_Model extends Core_Entity
 	protected $_hasMany = array(
 		'shop' => array(),
 		'shop_order_status' => array('foreign_key' => 'parent_id'),
+		'deadline_shop_order_status' => array('foreign_key' => 'deadline_shop_order_status_id'),
 		'shop_order_history' => array(),
 		'shop_payment_system' => array(),
 	);
@@ -30,6 +31,7 @@ class Shop_Order_Status_Model extends Core_Entity
 	 */
 	protected $_belongsTo = array(
 		'shop_order_status' => array('foreign_key' => 'parent_id'),
+		'deadline_shop_order_status' => array('foreign_key' => 'deadline_shop_order_status_id'),
 		'shop_order_item_status' => array(),
 		'user' => array()
 	);
@@ -221,5 +223,33 @@ class Shop_Order_Status_Model extends Core_Entity
 		}
 
 		return parent::delete($primaryKey);
+	}
+
+	/**
+	 * Set Status for Shop_Order
+	 * @param Shop_Order_Model $oShop_Order
+	 * @return self
+	 */
+	public function setStatus(Shop_Order_Model $oShop_Order)
+	{
+		$oShop_Order->shop_order_status_id = $this->id ? $this->id : 0;
+
+		$oShop_Order->status_datetime = Core_Date::timestamp2sql(time());
+
+		$oShop_Order->shop_order_status_deadline = $oShop_Order->shop_order_status_id && $oShop_Order->Shop_Order_Status->lifetime > 0
+			? Core_Date::timestamp2sql(strtotime("+{$oShop_Order->Shop_Order_Status->lifetime} minutes"))
+			: '0000-00-00 00:00:00';
+
+		$oShop_Order->save();
+
+		$oShop_Order->historyPushChangeStatus();
+		$oShop_Order->notifyBotsChangeStatus();
+
+		if (Core::moduleIsActive('webhook'))
+		{
+			Webhook_Controller::notify('onShopOrderChangeStatus', $oShop_Order);
+		}
+
+		return $this;
 	}
 }

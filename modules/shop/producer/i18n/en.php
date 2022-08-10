@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Manufacturers',
@@ -56,5 +56,8 @@ return array(
 	'move_producers_groups_title' => "Move Producers",
 	'move_producers_groups_id' => "Parent Group",
 	'move_success' => 'Manufacturers moved successfully',
-	'merge_success' => 'Manufacturers merged successfully!',	
+	'merge_success' => 'Manufacturers merged successfully!',
+	'changeIndexing_success' => 'Indexing has been changed.',
+	'changeIndexing_error' => 'Error occurred during changing indexing.',
+	"indexing" =>'Indexing',
 );

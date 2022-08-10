@@ -26,7 +26,17 @@ class Company_Location_Controller_Edit extends Admin_Form_Action_Controller_Type
 			$object->parent_id = Core_Array::getGet('parent_id', 0);
 		}
 
-		parent::setObject($object);
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
 
 		$this->title($this->_object->id
 			? Core::_('Company_Location.edit_title', $this->_object->name)

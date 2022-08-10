@@ -18,6 +18,7 @@ class Core_Html_Entity_Label extends Core_Html_Entity
 	 * @var array
 	 */
 	protected $_allowedProperties = array(
+		'value',
 		'accesskey',
 		'for'
 	);
@@ -29,14 +30,14 @@ class Core_Html_Entity_Label extends Core_Html_Entity
 	protected $_skipProperties = array(
 		'value' // идет в значение <label>
 	);
-	
+
 	/**
 	 * Executes the business logic.
 	 */
 	public function execute()
 	{
 		$aAttr = $this->getAttrsString();
-		
+
 		echo PHP_EOL;
 
 		/**

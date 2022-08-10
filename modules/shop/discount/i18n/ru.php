@@ -60,4 +60,8 @@ return array(
 	'guid' => '<acronym title="Идентификатор товара для формата CommerceML, например ID00029527">Идентификатор товара CommerceML</acronym>',
 	'tab_export' => 'Экспорт/Импорт',
 	'copy_success' => "Элемент успешно скопирован!",
+	'root' => "Корень",
+	'move_dirs_title' => "Перенос разделов и элементов",
+	'move_items_dirs' => "Родительский раздел",
+	'move_success' => 'Скидки перенесены',
 );

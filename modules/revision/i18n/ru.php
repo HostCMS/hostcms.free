@@ -6,7 +6,7 @@
  * @subpackage Revision
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Хранилище версий',
@@ -21,4 +21,8 @@ return array(
 	'empty' => 'Нет доступных версий',
 	'module_not_active' => 'Модуль "Хранилище версий" выключен в списке модулей!',
 	'revision_success' => 'Версия восстановлена успешно!',
+	'version' => 'Версия',
+	'date' => 'Дата',
+	'view' => 'Просмотр',
+	'user' => 'Автор',
 );

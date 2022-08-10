@@ -149,5 +149,10 @@ return array(
 
 	'filter_enter_title' => 'Введите название фильтра',
 
-	'upload_file' => 'Загрузить файл'
+	'upload_file' => 'Загрузить файл',
+
+	'successfully' => 'Успешно',
+	'failed' => 'Не успешно',
+
+	'timeline_empty' => 'Лента действий пуста!'
 );

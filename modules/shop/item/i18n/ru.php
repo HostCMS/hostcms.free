@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Товары магазина',
@@ -67,6 +67,7 @@ return array(
 	'properties_show_kind_checkbox_one' => 'Флажок',
 	'properties_show_kind_from_to' => 'От.. до..',
 	'properties_show_kind_listbox' => 'Список - список с множественным выбором',
+	'properties_show_seo_filter' => 'Только для SEO-фильтра',
 
 	'warehouse_header' => "Количество товара на складах",
 	'property_header' => "Дополнительные свойства",
@@ -359,4 +360,8 @@ return array(
 	'attribute_item_tab' => 'Товары',
 	'attribute_group_tab' => 'Группы',
 	'include_subgroups' => 'Учитывать подгруппы',
+	'attribute_item_main_tab' => 'Основные',
+	'attribute_item_price_tab' => 'Цены',
+	'attribute_item_warehouse_tab' => 'Склады',
+	'shop_discount_siteuser_title' => 'Персональные скидки',
 );

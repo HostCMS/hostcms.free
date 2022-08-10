@@ -7,24 +7,24 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Printlayout
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Printlayout_Driver_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
 	/**
-	 * Set object
-	 * @param object $object object
+	 * Prepare backend item's edit form
+	 *
 	 * @return self
 	 */
-	public function setObject($object)
+	protected function _prepareForm()
 	{
-		$title = $object->id
-			? Core::_('Printlayout_Driver.edit_title', $object->name)
-			: Core::_('Printlayout_Driver.add_title');
+		parent::_prepareForm();
 
-		parent::setObject($object);
+		$title = $this->_object->id
+			? Core::_('Printlayout_Driver.edit_title', $this->_object->name)
+			: Core::_('Printlayout_Driver.add_title');
 
 		$oMainTab = $this->getTab('main');
 

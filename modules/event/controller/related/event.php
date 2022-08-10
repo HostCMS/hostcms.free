@@ -127,79 +127,115 @@ class Event_Controller_Related_Event extends Admin_Form_Controller_View
 
 		// $aEntities = array_reverse($aEntities);
 
-		?>
-			<div class="row">
-				<div class="col-xs-12">
-					<?php
-					foreach ($aEntities as $oEvent)
-					{
-						$iDatetime = Core_Date::sql2timestamp($oEvent->datetime);
+		$aColors = array(
+			'palegreen',
+			'warning',
+			'info',
+			'maroon',
+			'darkorange',
+			'blue',
+			'danger'
+		);
+		$iCountColors = count($aColors);
 
-						?><div class="well well-shop-items well-bordered">
-							<div class="pull-right lead-shop-item-actions">
-							<?php
-							// Отображать в списке действий
-							if ($oAdmin_Form->show_operations)
-							{
-								$aAllowed_Admin_Form_Actions = $oAdmin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser);
+		if (count($aEntities))
+		{
+			?><ul class="timeline crm-note-list timeline-left timeline-no-vertical"><?php
+			$prevDate = NULL;
 
-								$path = $oAdmin_Form_Controller->getPath();
+			$i = 0;
 
-								foreach ($aAllowed_Admin_Form_Actions as $oAdmin_Form_Action)
+			foreach ($aEntities as $oEvent)
+			{
+				$color = $aColors[$i % $iCountColors];
+
+				$iDatetime = Core_Date::sql2timestamp($oEvent->datetime);
+				$sDate = Core_Date::timestamp2date($iDatetime);
+
+				if ($prevDate != $sDate)
+				{
+					?><li class="timeline-node">
+						<a class="badge badge-<?php echo $color?>"><?php echo Core_Date::timestamp2string(Core_Date::date2timestamp($sDate), FALSE)?></a>
+					</li><?php
+
+					$prevDate = $sDate;
+					$i++;
+				}
+				?>
+				<li class="timeline-inverted">
+					<div class="timeline-badge palegreen">
+							<i class="fa fa-tasks"></i>
+					</div>
+					<div class="timeline-panel">
+						<div class="timeline-header bordered-bottom bordered-palegreen">
+							<div class="pull-right timeline-entity-actions">
+								<?php
+								// Отображать в списке действий
+								if ($oAdmin_Form->show_operations)
 								{
-									$aAllowedActions = array('edit', 'markDeleted');
+									$aAllowed_Admin_Form_Actions = $oAdmin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser);
 
-									// Отображаем действие, только если разрешено.
-									if (!$oAdmin_Form_Action->single || !in_array($oAdmin_Form_Action->name, $aAllowedActions))
+									$path = $oAdmin_Form_Controller->getPath();
+
+									foreach ($aAllowed_Admin_Form_Actions as $oAdmin_Form_Action)
 									{
-										continue;
+										$aAllowedActions = array('edit', 'markDeleted');
+
+										// Отображаем действие, только если разрешено.
+										if (!$oAdmin_Form_Action->single || !in_array($oAdmin_Form_Action->name, $aAllowedActions))
+										{
+											continue;
+										}
+
+										if (method_exists($oEvent, 'checkBackendAccess') && !$oEvent->checkBackendAccess($oAdmin_Form_Action->name, $oUser))
+										{
+											continue;
+										}
+
+										$Admin_Word_Value = $oAdmin_Form_Action->Admin_Word->getWordByLanguage($oAdmin_Language->id);
+
+										$name = $Admin_Word_Value && strlen($Admin_Word_Value->name) > 0
+											? $Admin_Word_Value->name
+											: '';
+
+										$href = $oAdmin_Form_Controller->getAdminActionLoadHref($path, $oAdmin_Form_Action->name, NULL, 0, $oEvent->id, $additionalParams, 10, 1, NULL, NULL, 'list');
+
+										$onclick = $oAdmin_Form_Action->name == 'edit'
+											? $oAdmin_Form_Controller->getAdminActionModalLoad(array('path' => $path, 'action' => $oAdmin_Form_Action->name, 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => $oEvent->id, 'additionalParams' => $additionalParams, 'width' => '90%'))
+											: $oAdmin_Form_Controller->getAdminActionLoadAjax($path, $oAdmin_Form_Action->name, NULL, 0, $oEvent->id, $additionalParams, 10, 1, NULL, NULL, 'list');
+
+										// Добавляем установку метки для чекбокса и строки + добавлем уведомление, если необходимо
+										if ($oAdmin_Form_Action->confirm)
+										{
+											$onclick = "res = confirm('".Core::_('Admin_Form.confirm_dialog', htmlspecialchars($name))."'); if (!res) { $('#{$windowId} #row_0_{$oEvent->id}').toggleHighlight(); } else {mainFormLocker.unlock(); {$onclick}} return res;";
+										}
+										?><a onclick="<?php echo htmlspecialchars($onclick)?>" href="<?php echo htmlspecialchars($href)?>" title="<?php echo htmlspecialchars($name)?>"><i class="<?php echo htmlspecialchars($oAdmin_Form_Action->icon)?>"></i></a><?php
 									}
-
-									if (method_exists($oEvent, 'checkBackendAccess') && !$oEvent->checkBackendAccess($oAdmin_Form_Action->name, $oUser))
-									{
-										continue;
-									}
-
-									$Admin_Word_Value = $oAdmin_Form_Action->Admin_Word->getWordByLanguage($oAdmin_Language->id);
-
-									$name = $Admin_Word_Value && strlen($Admin_Word_Value->name) > 0
-										? $Admin_Word_Value->name
-										: '';
-
-									$href = $oAdmin_Form_Controller->getAdminActionLoadHref($path, $oAdmin_Form_Action->name, NULL, 0, $oEvent->id, $additionalParams, 10, 1, NULL, NULL, 'list');
-
-									$onclick = $oAdmin_Form_Action->name == 'edit'
-										? $oAdmin_Form_Controller->getAdminActionModalLoad(array('path' => $path, 'action' => $oAdmin_Form_Action->name, 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => $oEvent->id, 'additionalParams' => $additionalParams, 'width' => '90%'))
-										: $oAdmin_Form_Controller->getAdminActionLoadAjax($path, $oAdmin_Form_Action->name, NULL, 0, $oEvent->id, $additionalParams, 10, 1, NULL, NULL, 'list');
-
-									// Добавляем установку метки для чекбокса и строки + добавлем уведомление, если необходимо
-									if ($oAdmin_Form_Action->confirm)
-									{
-										$onclick = "res = confirm('".Core::_('Admin_Form.confirm_dialog', htmlspecialchars($name))."'); if (!res) { $('#{$windowId} #row_0_{$oEvent->id}').toggleHighlight(); } else {mainFormLocker.unlock(); {$onclick}} return res;";
-									}
-									?><a onclick="<?php echo htmlspecialchars($onclick)?>" href="<?php echo htmlspecialchars($href)?>" title="<?php echo htmlspecialchars($name)?>"><i class="<?php echo htmlspecialchars($oAdmin_Form_Action->icon)?>"></i></a><?php
 								}
-							}
-							?>
+								?>
+							</div>
 						</div>
-						<?php echo $oEvent->showContent($oAdmin_Form_Controller)?>
-						<div class="small gray well-info">
-							<?php
-							$oEventCreator = $oEvent->getCreator();
+						<div class="timeline-body">
+							<?php echo $oEvent->showContent($oAdmin_Form_Controller)?>
+							<div class="small gray well-info">
+								<?php
+								$oEventCreator = $oEvent->getCreator();
 
-							if (!is_null($oEventCreator))
-							{
-								?><span class="gray"><?php $oEventCreator->showLink($oAdmin_Form_Controller->getWindowId())?></span><?php
-							}
-							?>
-							<span class="pull-right"><?php echo date('H:i', $iDatetime)?></span>
+								if (!is_null($oEventCreator))
+								{
+									?><span class="gray"><?php $oEventCreator->showLink($oAdmin_Form_Controller->getWindowId())?></span><?php
+								}
+								?>
+								<span class="pull-right"><?php echo date('H:i', $iDatetime)?></span>
+							</div>
 						</div>
-					</div><?php
-					}
-					?>
-				</div>
-			</div>
-
+					</div>
+				</li>
+				<?php
+			}
+			?></ul><?php
+		}
+		?>
 			<script>
 			$(function(){
 				$('#<?php echo $windowId?> :input').on('click', function() { mainFormLocker.unlock() });

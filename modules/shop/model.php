@@ -49,7 +49,9 @@ class Shop_Model extends Core_Entity
 		'shop_compare' => array(),
 		'shop_delivery' => array(),
 		'shop_bonus' => array(),
+		'shop_bonus_dir' => array(),
 		'shop_discount' => array(),
+		'shop_discount_dir' => array(),
 		'shop_group' => array(),
 		'shop_group_property' => array(),
 		'shop_group_property_dir' => array(),
@@ -65,6 +67,8 @@ class Shop_Model extends Core_Entity
 		'shop_producer' => array(),
 		'shop_producer_dir' => array(),
 		'shop_purchase_discount' => array(),
+		'shop_purchase_discount_dir' => array(),
+		'shop_purchase_discount_coupon_dir' => array(),
 		'shop_seller' => array(),
 		'shop_siteuser_transaction' => array(),
 		'shop_warehouse' => array(),
@@ -339,7 +343,9 @@ class Shop_Model extends Core_Entity
 		$this->Shop_Compares->deleteAll(FALSE);
 		$this->Shop_Deliveries->deleteAll(FALSE);
 		$this->Shop_Bonuses->deleteAll(FALSE);
+		$this->Shop_Bonus_Dirs->deleteAll(FALSE);
 		$this->Shop_Discounts->deleteAll(FALSE);
+		$this->Shop_Discount_Dirs->deleteAll(FALSE);
 		$this->Shop_Groups->deleteAll(FALSE);
 		$this->Shop_Items->deleteAll(FALSE);
 		$this->Shop_Orders->deleteAll(FALSE);
@@ -347,6 +353,8 @@ class Shop_Model extends Core_Entity
 		$this->Shop_Prices->deleteAll(FALSE);
 		$this->Shop_Producers->deleteAll(FALSE);
 		$this->Shop_Purchase_Discounts->deleteAll(FALSE);
+		$this->Shop_Purchase_Discount_Dirs->deleteAll(FALSE);
+		$this->Shop_Purchase_Discount_Coupon_Dirs->deleteAll(FALSE);
 		$this->Shop_Sellers->deleteAll(FALSE);
 		$this->Shop_Siteuser_Transactions->deleteAll(FALSE);
 		$this->Shop_Warehouses->deleteAll(FALSE);
@@ -1081,7 +1089,7 @@ class Shop_Model extends Core_Entity
 		$countShopGroups = $this->Shop_Groups->getCount();
 		$countShopGroups && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
-			->value('<i class="fa fa-folder-open-o"></i> ' . $countShopGroups)
+			->value('<i class="fa-regular fa-folder-open"></i> ' . $countShopGroups)
 			->title(Core::_('Shop.all_groups_count', $countShopGroups))
 			->execute();
 
@@ -1123,7 +1131,7 @@ class Shop_Model extends Core_Entity
 
 			$aRow = $oQB->execute()->asAssoc()->current();
 
-			$return = '<div style="position: relative"><a href="' . $href . '" onclick="' . $onclick . '"><i class="fa fa-refresh" title="' . $aRow['count'] . '"></i></a>';
+			$return = '<div style="position: relative"><a href="' . $href . '" onclick="' . $onclick . '"><i class="fa-solid fa-rotate" title="' . $aRow['count'] . '"></i></a>';
 
 			if ($aRow['count'] == 0)
 			{

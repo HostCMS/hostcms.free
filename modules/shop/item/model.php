@@ -1852,6 +1852,15 @@ class Shop_Item_Model extends Core_Entity
 			htmlspecialchars($object->name)
 		);
 
+		if ($object->modification_id)
+		{
+			$oCore_Html_Entity_Div->value .= '<span class="small darkgray margin-left-5"> → ' . htmlspecialchars($object->Modification->name) . '</span>';
+		}
+		elseif ($object->shortcut_id)
+		{
+			$oCore_Html_Entity_Div->value .= '<span class="small darkgray margin-left-5"> → ' . htmlspecialchars($object->Shop_Item->name) . '</span>';
+		}
+
 		// Barcodes
 		$aShop_Item_Barcodes = $this->Shop_Item_Barcodes->findAll(FALSE);
 		foreach ($aShop_Item_Barcodes as $oShop_Item_Barcode)
@@ -2992,7 +3001,7 @@ class Shop_Item_Model extends Core_Entity
 	 */
 	public function discountsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		$countDiscount = $this->Shop_Item_Discounts->getCount();
+		$countDiscount = $this->Shop_Item_Discounts->getCountBySiteuser_id(0);
 		$countBonuses = $this->Shop_Item_Bonuses->getCount();
 
 		$count = $countDiscount + $countBonuses;
@@ -3129,6 +3138,22 @@ class Shop_Item_Model extends Core_Entity
 				}
 			}
 
+			$aShop_Specialprices = $this->Shop_Specialprices->findAll(FALSE);
+
+			if (count($aShop_Specialprices))
+			{
+				$aBackup['shop_specialprices'] = array();
+				foreach ($aShop_Specialprices as $oShop_Specialprice)
+				{
+					$aBackup['shop_specialprices'][] = array(
+						'min_quantity' => $oShop_Specialprice->min_quantity,
+						'max_quantity' => $oShop_Specialprice->max_quantity,
+						'price' => $oShop_Specialprice->price,
+						'percent' => $oShop_Specialprice->percent,
+					);
+				}
+			}
+
 			Revision_Controller::backup($this, $aBackup);
 		}
 
@@ -3202,6 +3227,35 @@ class Shop_Item_Model extends Core_Entity
 					}
 				}
 
+				if (isset($aBackup['shop_specialprices']))
+				{
+					$aShop_Specialprices = $this->Shop_Specialprices->findAll(FALSE);
+
+					foreach ($aBackup['shop_specialprices'] as $aTmp)
+					{
+						if (count($aShop_Specialprices))
+						{
+							$oShop_Specialprice = array_shift($aShop_Specialprices);
+						}
+						else
+						{
+							$oShop_Specialprice = Core_Entity::factory('Shop_Specialprice');
+							$oShop_Specialprice->shop_item_id = $this->id;
+						}
+
+						$oShop_Specialprice->min_quantity = $aTmp['min_quantity'];
+						$oShop_Specialprice->max_quantity = $aTmp['max_quantity'];
+						$oShop_Specialprice->price = $aTmp['price'];
+						$oShop_Specialprice->percent = $aTmp['percent'];
+						$oShop_Specialprice->save();
+					}
+
+					foreach ($aShop_Specialprices as $oShop_Specialprice)
+					{
+						$oShop_Specialprice->delete();
+					}
+				}
+
 				$this->save();
 			}
 		}
@@ -3217,7 +3271,7 @@ class Shop_Item_Model extends Core_Entity
 	{
 		if ($this->shortcut_id)
 		{
-			return '<i class="fa fa-link"></i>';
+			return '<i class="fa-solid fa-link"></i>';
 		}
 		elseif (strlen($this->image_small) || strlen($this->image_large))
 		{
@@ -3232,7 +3286,7 @@ class Shop_Item_Model extends Core_Entity
 		}
 		else
 		{
-			return '<i class="fa fa-file-text-o"></i>';
+			return '<i class="fa-regular fa-image"></i>';
 		}
 	}
 

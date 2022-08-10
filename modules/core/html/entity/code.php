@@ -17,16 +17,18 @@ class Core_Html_Entity_Code extends Core_Html_Entity
 	 * Allowed object properties
 	 * @var array
 	 */
-	protected $_allowedProperties = array();
+	protected $_allowedProperties = array(
+		'value'
+	);
 
 	/**
 	 * Skip properties
 	 * @var array
 	 */
 	protected $_skipProperties = array(
-		'value' // идет в значение <span>
+		'value'
 	);
-	
+
 	/**
 	 * Executes the business logic.
 	 */

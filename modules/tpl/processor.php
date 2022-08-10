@@ -134,35 +134,11 @@ class Tpl_Processor
 			$this->_smarty->assign($key, $value);
 		}
 
-		/*
-		//$this->_smarty->assign("xxx", '<h1>gdfgdfgdf</h1>');
-		$this->_smarty->assign("xxx", time(), true);
-
-		// загружаем конфигурационные переменные и присваиваем их шаблону
-		//$this->_smarty->config_load('my.conf');
-
-		//$this->_smarty->force_compile = true;
-		//$this->_smarty->debugging = true;
-		//$this->_smarty->caching = true;
-		//$this->_smarty->cache_lifetime = 120;
-
-		$this->_smarty->assign("Name", "Fred Irving Johnathan Bradley Peppergill", true);
-		$this->_smarty->assign("FirstName", array("John", "Mary", "James", "Henry"));
-		$this->_smarty->assign("LastName", array("Doe", "Smith", "Johnson", "Case"));
-		$this->_smarty->assign("Class", array(array("A", "B", "C", "D"), array("E", "F", "G", "H"), array("I", "J", "K", "L"),
-			array("M", "N", "O", "P")));
-
-		$this->_smarty->assign("contacts", array(array("phone" => "1", "fax" => "2", "cell" => "3"),
-			array("phone" => "555-4444", "fax" => "555-3333", "cell" => "760-1234")));
-
-		$this->_smarty->assign("option_values", array("NY", "NE", "KS", "IA", "OK", "TX"));
-		$this->_smarty->assign("option_output", array("New York", "Nebraska", "Kansas", "Iowa", "Oklahoma", "Texas"));
-		$this->_smarty->assign("option_selected", "NE");
-		*/
-
-		$this->_smarty->display($this->_tpl->getTplFilePath());
+		$return = $this->_smarty->fetch($this->_tpl->getTplFilePath());
 
 		Core_Event::notify('Tpl_Processor.onAfterProcess', $this);
+		
+		return $return;
 	}
 
 	/**

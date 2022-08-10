@@ -16,7 +16,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - cdata(array('description')) массив тегов, передаваемых с форматированием в виде блока символьных данных — CDATA, по умолчанию array(). Если длина кода превышает установленные лимиты, будет произведено удаление тегов и сокращение текста до установленных лимитов.
  * - removeForbiddenTag(name) удалить тег из списка запрещенных к передаче в генерируемый YML.
  * - modifications(TRUE|FALSE) экспортировать модификации, по умолчанию TRUE.
- * - surcharge(200) дополнительная наценка на все товары, по умолчанию 0.
+ * - surcharge(200|'20%') дополнительная наценка на все товары, может быть указана в абсолютном значении, либо процентом, по умолчанию 0.
  * - rootItems(TRUE|FALSE) экспортировать корневые товары, по умолчанию FALSE.
  * - groupModifications(TRUE|FALSE) группировать модификации (атрибут group_id у offer, используется только в категориях Одежда, обувь и аксессуары, Мебель, Косметика, парфюмерия и уход, Детские товары, Аксессуары для портативной электроники), по умолчанию FALSE.
  * - recommended(TRUE|FALSE) экспортировать рекомендованные товары, по умолчанию FALSE.
@@ -842,6 +842,32 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	}
 
 	/**
+	 * Get Surcharge
+	 * @param Shop_Item_Model $oShop_Item
+	 * @return float
+	 */
+	protected function _getSurcharge($oShop_Item)
+	{
+		if (substr($this->surcharge, -1) === '%')
+		{
+			$percent = substr($this->surcharge, 0, -1);
+
+			return is_numeric($percent) && $percent > 0
+				? $oShop_Item->price * ($percent / 100)
+				: 0;
+		}
+
+		$oShop = $this->getEntity();
+
+		// Получаем коэффициент пересчета из валюты товара в валюту магазина
+		$currency_coefficient = Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
+			$oShop_Item->Shop_Currency, $oShop->Shop_Currency
+		);
+
+		return $this->surcharge * $currency_coefficient;
+	}
+
+	/**
 	 * Print offer's content
 	 * @param Shop_Item_Model $oShop_Item
 	 * @return self
@@ -870,39 +896,11 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		В формате YML не поддерживается элемент currencies с информацией о валютах магазина и курсах конвертации. */
 		if ($this->priceMode == 'shop' || $this->model == 'ADV' || $this->model == 'DBS')
 		{
-			if ($this->surcharge)
-			{
-				// Получаем коэффициент пересчета из валюты товара в валюту магазина
-				$currency_coefficient = Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
-					$oShop_Item->Shop_Currency, $oShop->Shop_Currency
-				);
-
-				$surcharge = $this->surcharge * $currency_coefficient;
-			}
-			else
-			{
-				$surcharge = 0;
-			}
-
-			$aPrices = $this->_Shop_Item_Controller->calculatePrice($oShop_Item->price + $surcharge, $oShop_Item);
+			$aPrices = $this->_Shop_Item_Controller->calculatePrice($oShop_Item->price + $this->_getSurcharge($oShop_Item), $oShop_Item);
 		}
 		elseif ($this->priceMode == 'item')
 		{
-			if ($this->surcharge)
-			{
-				// Получаем коэффициент пересчета из валюты магазина в валюту товара
-				$currency_coefficient = Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
-					$oShop->Shop_Currency, $oShop_Item->Shop_Currency
-				);
-
-				$surcharge = $this->surcharge * $currency_coefficient;
-			}
-			else
-			{
-				$surcharge = 0;
-			}
-
-			$aPrices = $this->_Shop_Item_Controller->calculatePriceInItemCurrency($oShop_Item->price + $surcharge, $oShop_Item);
+			$aPrices = $this->_Shop_Item_Controller->calculatePriceInItemCurrency($oShop_Item->price + $this->_getSurcharge($oShop_Item), $oShop_Item);
 		}
 		else
 		{
@@ -1215,6 +1213,13 @@ class Shop_Controller_YandexMarket extends Core_Controller
 							break;
 							default:
 								$tmpValue = $aProperty_Values[0]->value;
+						}
+
+						if ($oProperty->type == 3)
+						{
+							$tmpValue = $aProperty_Values[0]->value
+								? $aProperty_Values[0]->List_Item->value
+								: '';
 						}
 
 						$tmpValue != ''
@@ -1799,6 +1804,8 @@ class Shop_Controller_YandexMarket extends Core_Controller
 				? $this->_getRegion($aResponse['cart']['delivery']['region'])
 				: array();
 
+			$bDelivery = FALSE;
+
 			$aDeliveries = array();
 
 			if (count($aRegion))
@@ -1892,8 +1899,6 @@ class Shop_Controller_YandexMarket extends Core_Controller
 							1 => 'POST',
 							2 => 'DELIVERY',
 						);
-
-						$bDelivery = FALSE;
 
 						foreach ($aShop_Deliveries as $oShop_Delivery)
 						{

@@ -42,7 +42,7 @@
 			settings = hQuery.extend({
 				save: function(item, settings){
 					var value;
-					
+
 					switch(item.attr('hostcms:type'))
 					{
 						case 'textarea':
@@ -53,7 +53,7 @@
 						default:
 							value = item.text();
 					}
-					
+
 					var data = {
 						'id': item.attr('hostcms:id'),
 						'entity': item.attr('hostcms:entity'),
@@ -205,12 +205,8 @@
 										},
 										script_url: "/admin/wysiwyg/tinymce.min.js",
 										menubar: false,
-										plugins: [
-											'advlist autolink lists link image charmap print preview anchor',
-											'searchreplace visualblocks code fullscreen',
-											'insertdatetime media table paste help wordcount importcss'
-										],
-										toolbar: 'undo redo | styleselect formatselect | bold italic underline backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | code help',
+										plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table  importcss',
+										toolbar: 'undo redo | styleselect formatselect | bold italic underline backcolor | alignleft aligncenter alignright alignjustify | bullist numlist | link unlink image media preview table | removeformat code',
 										content_css: aCss
 									}, settings.wysiwygConfig));
 								}, 300);

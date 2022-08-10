@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -54,6 +54,16 @@ $oAdmin_Form_Entity_Menus->add(
 		->onclick(
 			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
+)->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Xsl.import'))
+		->icon('fa fa-download')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/admin/xsl/import/index.php', NULL, NULL, 'xsl_dir_id=' . $xsl_dir_id)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/xsl/import/index.php', NULL, NULL, 'xsl_dir_id=' . $xsl_dir_id)
+		)
 );
 
 // Добавляем все меню контроллеру
@@ -72,7 +82,7 @@ $oAdmin_Form_Controller->addEntity(
 					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
 						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
 						<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
-						<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '"><i class="fa fa-search fa-fw"></i></button>
+						<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '"><i class="fa-solid fa-magnifying-glass fa-fw"></i></button>
 					</form>
 				</div>
 			</div>
@@ -130,6 +140,39 @@ if ($xsl_dir_id)
 
 		// Добавляем все хлебные крошки контроллеру
 		$oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
+	}
+}
+
+$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('importXsls');
+
+if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'importXsls')
+{
+	$oUserCurrent = Core_Auth::getCurrentUser();
+	if (!$oUserCurrent->read_only)
+	{
+		if (isset($_FILES['json_file']) && intval($_FILES['json_file']['size']) > 0)
+		{
+			try {
+				$content = Core_File::read($_FILES['json_file']['tmp_name']);
+
+				$oXsl_Import_Controller = Admin_Form_Action_Controller::factory(
+					'Xsl_Import_Controller', $oAdmin_Form_Action
+				);
+
+				$oXsl_Import_Controller
+					->content($content)
+					->xsl_dir_id($xsl_dir_id)
+					// ->execute()
+					;
+
+				$oAdmin_Form_Controller->addAction($oXsl_Import_Controller);
+			}
+			catch (Exception $exc) {
+				Core_Message::show($exc->getMessage(), "error");
+			}
+		}
 	}
 }
 
@@ -193,6 +236,22 @@ if ($oAdminFormActionRollback && $oAdmin_Form_Controller->getAction() == 'rollba
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($oControllerRollback);
+}
+
+// Действие "Экспорт"
+$oAdminFormActionExportXsl = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('exportXsls');
+
+if ($oAdminFormActionExportXsl && $oAdmin_Form_Controller->getAction() == 'exportXsls')
+{
+	$oXsl_Export_Controller = Admin_Form_Action_Controller::factory(
+		'Xsl_Export_Controller', $oAdminFormActionExportXsl
+	);
+
+	$oXsl_Export_Controller
+		->controller($oAdmin_Form_Controller)
+		->export();
 }
 
 // Источник данных 0

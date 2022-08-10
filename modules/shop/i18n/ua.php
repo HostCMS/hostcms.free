@@ -145,12 +145,16 @@ return array(
 	'tab_seo_templates' => 'Шаблони SEO',
 	'seo_group_header' => 'Шаблони груп',
 	'seo_item_header' => 'Шаблони товарів',
+	'seo_root_header' => 'Шаблони кореневої сторінки',
 	'seo_group_title_template' => 'Шаблон title',
 	'seo_group_description_template' => 'Шаблон description',
 	'seo_group_keywords_template' => 'Шаблон keywords',
 	'seo_item_title_template' => 'Шаблон title',
 	'seo_item_description_template' => 'Шаблон description',
 	'seo_item_keywords_template' => 'Шаблон keywords',
+	'seo_root_title_template' => 'Шаблон title',
+	'seo_root_description_template' => 'Шаблон description',
+	'seo_root_keywords_template' => 'Шаблон keywords',
 
 	'seo_template_shop' => 'Магазин',
 	'seo_template_shop_name' => 'Назва магазину',
@@ -203,5 +207,6 @@ return array(
 	'option_itemSmallImage' => 'Шаблон іменування малого зображення товару',
 	'option_groupLargeImage' => 'Шаблон іменування великого зображення групи',
 	'option_groupSmallImage' => 'Шаблон іменування малого зображення групи',
-	'option_shop_item_card_xsl' => 'XSL-шаблон цінників'
+	'option_shop_item_card_xsl' => 'XSL-шаблон цінників',
+	'schedule-checkShopOrderStatusDeadline' => 'Перевірка статусів замовлень',
 );

@@ -165,4 +165,5 @@ return array(
 	'date' => 'Date',
 	'change_user' => 'Change responsible user: "%s"',
 	'merge_success' => 'Measure merged successfully!',
+	'shop_order_status_deadline' => 'Status deadline',
 );

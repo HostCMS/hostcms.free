@@ -26,7 +26,17 @@ class Shop_Warehouse_Cell_Controller_Edit extends Admin_Form_Action_Controller_T
 			$object->parent_id = Core_Array::getGet('parent_id', 0);
 		}
 
-		parent::setObject($object);
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
 
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');

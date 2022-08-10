@@ -1835,7 +1835,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	{
 		if ($this->shortcut_id)
 		{
-			return '<i class="fa fa-link"></i>';
+			return '<i class="fa-solid fa-link"></i>';
 		}
 		elseif (strlen($this->image_small))
 		{
@@ -1853,7 +1853,7 @@ class Informationsystem_Item_Model extends Core_Entity
 		}
 		else
 		{
-			return '<i class="fa fa-file-text-o"></i>';
+			return '<i class="fa-regular fa-image"></i>';
 		}
 	}
 

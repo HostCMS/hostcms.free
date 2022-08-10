@@ -22,7 +22,7 @@ class Company_Module extends Core_Module{
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2022-04-29';
+	public $date = '2022-08-05';
 
 
 	/**

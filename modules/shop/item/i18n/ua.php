@@ -58,6 +58,7 @@ return array(
 	'properties_show_kind_checkbox_one' => 'Прапорець',
 	'properties_show_kind_from_to' => 'Від.. до..',
 	'properties_show_kind_listbox' => 'Список - список з множинним вибором',
+	'properties_show_seo_filter' => 'Тільки для SEO-фільтра',
 
 	'warehouse_header' => "Кількість товару на складах",
 	'property_header' => "Додаткові властивості",
@@ -355,4 +356,8 @@ return array(
 	'attribute_item_tab' => 'Товари',
 	'attribute_group_tab' => 'Групи',
 	'include_subgroups' => 'Учитувати підгрупи',
+	'attribute_item_main_tab' => 'Основні',
+	'attribute_item_price_tab' => 'Ціни',
+	'attribute_item_warehouse_tab' => 'Склади',
+	'shop_discount_siteuser_title' => 'Персональні знижки',
 );

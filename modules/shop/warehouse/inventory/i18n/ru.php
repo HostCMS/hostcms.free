@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Инвентаризация',
@@ -42,4 +42,5 @@ return array(
 	'diff' => "Отклон",
 	'post_success' => 'Документ проведен успешно!',
 	'unpost_success' => 'Документ распроведен успешно!',
+	'apply_item_change_attributes' => 'Инвентаризация при изменении атрибутов',
 );

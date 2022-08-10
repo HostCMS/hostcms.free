@@ -14,16 +14,16 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 class Shop_Warehouse_Incoming_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
 	/**
-	 * Set object
-	 * @param object $object object
+	 * Prepare backend item's edit form
+	 *
 	 * @return self
 	 */
-	public function setObject($object)
+	protected function _prepareForm()
 	{
+		parent::_prepareForm();
+
 		$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0));
 		$oShop_Group = Core_Entity::factory('Shop_Group', Core_Array::getGet('shop_group_id', 0));
-
-		parent::setObject($object);
 
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
