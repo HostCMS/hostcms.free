@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Delivery_Condition_Dir_Model extends Core_Entity
 {
@@ -71,11 +71,11 @@ class Shop_Delivery_Condition_Dir_Model extends Core_Entity
 		$link = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $link);
 		$onclick = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $onclick);
 
-		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div');
+		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div');
 
 		$oCore_Html_Entity_Div
 			->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->href($link)
 					->onclick($onclick)
 					->value(htmlspecialchars($this->name))
@@ -84,7 +84,7 @@ class Shop_Delivery_Condition_Dir_Model extends Core_Entity
 		$count = $this->getChildCount();
 		$count && $oCore_Html_Entity_Div
 			->add(
-				Core::factory('Core_Html_Entity_Span')
+				Core_Html_Entity::factory('Span')
 					->class('badge badge-hostcms badge-square')
 					->value($count)
 			);

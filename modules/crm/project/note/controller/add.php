@@ -7,11 +7,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Crm
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
-class Crm_Project_Note_Controller_Add extends Admin_Form_Action_Controller
+class Crm_Project_Note_Controller_Add extends Crm_Note_Controller_Add
 {
 	/**
 	 * Executes the business logic.
@@ -20,33 +20,51 @@ class Crm_Project_Note_Controller_Add extends Admin_Form_Action_Controller
 	 */
 	public function execute($operation = NULL)
 	{
-		if (!is_null(Core_Array::getRequest('text_note')) && strlen(Core_Array::getRequest('text_note')))
+		parent::execute();
+
+		$crm_project_id = Core_Array::getGet('crm_project_id', 0, 'int');
+		$result = Core_Array::getPost('result', 0, 'int');
+
+		$oCrm_Note = $this->_object;
+
+		$oCrm_Note->result = $result;
+		$oCrm_Note->save();
+
+		$oCrm_Project = Core_Entity::factory('Crm_Project', $crm_project_id);
+		$oCrm_Project->add($oCrm_Note);
+
+		$aFiles = Core_Array::getFiles('file', array());
+
+		if (is_array($aFiles) && isset($aFiles['name']))
 		{
-			$crm_project_id = intval(Core_Array::getGet('crm_project_id', 0));
-			$sCommentText = trim(strval(Core_Array::getRequest('text_note')));
+			$oCrm_Note->dir = $oCrm_Project->getHref();
+			$oCrm_Note->save();
 
-			$oCrm_Project_Note = Core_Entity::factory('Crm_Project_Note');
-			$oCrm_Project_Note->crm_project_id = $crm_project_id;
-			$oCrm_Project_Note->text = $sCommentText;
-			$oCrm_Project_Note->datetime = Core_Date::timestamp2sql(time());
-			$oCrm_Project_Note->save();
+			$iCount = count($aFiles['name']);
 
-			$oModule = Core_Entity::factory('Module')->getByPath('crm_project');
+			for ($i = 0; $i < $iCount; $i++)
+			{
+				$aFile = array(
+					'name' => $aFiles['name'][$i],
+					'tmp_name' => $aFiles['tmp_name'][$i],
+					'size' => $aFiles['size'][$i]
+				);
 
-			$oCrm_Project = $oCrm_Project_Note->Crm_Project;
+				if (intval($aFile['size']) > 0)
+				{
+					$oCrm_Note_Attachment = Core_Entity::factory('Crm_Note_Attachment');
+					$oCrm_Note_Attachment->crm_note_id = $oCrm_Note->id;
 
-			// Добавляем уведомление
-			$oNotification = Core_Entity::factory('Notification')
-				->title(Core::_('Crm_Project_Note.add_notification', $oCrm_Project->name, FALSE))
-				->description($sCommentText)
-				->datetime(Core_Date::timestamp2sql(time()))
-				->module_id($oModule->id)
-				->type(1) // 1 - В сделку добавлена заметка
-				->entity_id($oCrm_Project->id)
-				->save();
-
-			// Связываем уведомление с сотрудниками
-			Core_Entity::factory('User', $oCrm_Project->user_id)->add($oNotification);
+					$oCrm_Note_Attachment
+						->setDir(CMS_FOLDER . $oCrm_Note->dir)
+						->setHref($oCrm_Project->getHref())
+						->saveFile($aFile['tmp_name'], $aFile['name']);
+				}
+			}
 		}
+
+		$this->addMessage("<script>$(function() {
+			$.adminLoad({ path: '/admin/crm/project/note/index.php', additionalParams: 'crm_project_id=" . $oCrm_Project->id . "', windowId: 'crm-project-notes' });
+		});</script>");
 	}
 }

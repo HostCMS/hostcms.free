@@ -8,98 +8,30 @@ Shop_Payment_System_Handler::checkAfterContent($oShop);
 
 Shop_Delivery_Handler::checkAfterContent($oShop);
 
+Core_Session::start();
+
 // ------------------------------------------------
 // Вывод информации о статусе платежа после его совершения и перенаправления с платежной системы
 // ------------------------------------------------
 if (isset($_REQUEST['payment'])
 	|| isset($_GET['action']) && ($_GET['action'] == 'PaymentSuccess' || $_GET['action'] == 'PaymentFail')
 	|| isset($_REQUEST['pg_order_id'])
+	|| isset($_REQUEST['result'])
 )
 {
-	// Получаем ID заказа
-	if (isset($_REQUEST['order_id']))
+	if (isset($_SESSION['last_order_id']))
 	{
-		$order_id = Core_Array::getRequest('order_id', 0, 'int');
-	}
-	//от Яндекса
-	elseif(isset($_GET['orderNumber']))
-	{
-		$order_id = Core_Array::getGet('orderNumber', 0, 'int');
-	}
-	//от PayPal
-	elseif(isset($_REQUEST['invoice']))
-	{
-		$oShop_Order = Core_Entity::factory('Shop_Order')->getByGuid(Core_Array::getRequest('invoice'));
-		$order_id = $oShop_Order ? intval($oShop_Order->id) : NULL;
-	}
-	//от IntellectMoney
-	elseif(isset($_REQUEST['orderId']))
-	{
-		$order_id = Core_Array::getGet('orderId', 0, 'int');
-	}
-	//от Platron
-	elseif(isset($_REQUEST['pg_order_id']))
-	{
-		$order_id = Core_Array::getRequest('pg_order_id', 0, 'int');
-	}
-	else
-	{
-		$order_id = Core_Array::getRequest('InvId', 0, 'int');
-	}
+		$oShop_Order = Core_Entity::factory('Shop_Order')->find(intval($_SESSION['last_order_id']));
 
-	$oShop_Order = Core_Entity::factory('Shop_Order')->find($order_id);
-
-	if (Core::moduleIsActive('siteuser'))
-	{
-		$siteuser_id = 0;
-
-		$oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
-		if ($oSiteuser)
-		{
-			$siteuser_id = $oSiteuser->id;
-		}
-	}
-	else
-	{
-		$siteuser_id = FALSE;
-	}
-
-	// Если заказ принадлежит текущему авторизированному пользователю
-	if ($oShop_Order->siteuser_id == $siteuser_id)
-	{
-		if (Core_Array::getRequest('payment') == 'success' || Core_Array::getRequest('action') == 'PaymentSuccess' || Core_Array::getRequest('pg_order_id') > 0)
-		{
-			?><h1>Подтверждение платежа</h1>
-			<p>Спасибо, информация об оплате заказа <strong>№ <?php echo $oShop_Order->invoice?></strong>
-получена.</p>
-			<?php
-		}
-		else
-		{
-			?><h1>Платеж не получен</h1>
-			<p>К сожалению при оплате заказа <strong>№ <?php echo $oShop_Order->invoice?></strong> произошла ошибка.</p>
-			<?php
-		}
-	}
-	// Для случаев, когда отключен модуль "Клиенты"
-	elseif ($siteuser_id === FALSE)
-	{
 		?><h1>Подтверждение платежа</h1>
-		<p>Благодарим за посещение нашего магазина!</p>
+		<p>Спасибо, информация об оплате заказа <strong>№ <?php echo htmlspecialchars($oShop_Order->invoice)?></strong>
+получена.</p>
 		<?php
-	}
-	else
-	{
-		?><h1>Ошибка</h1>
-		<p>Неверный номер заказа!</p>
-		<?php
-	}
 
-	// Прерываем выполнение типовой динамической страницы
-	return TRUE;
+		// Прерываем выполнение типовой динамической страницы
+		return TRUE;
+	}
 }
-
-Core_Session::start();
 
 if (Core_Array::getPost('oneStepCheckout'))
 {
@@ -127,7 +59,7 @@ if (Core_Array::getPost('oneStepCheckout'))
 	{
 		Shop_Cart_Controller::instance()
 			->shop_item_id($shop_item_id)
-			->quantity(Core_Array::getRequest('count', 1))
+			->quantity(Core_Array::getRequest('count', 1, 'float'))
 			->add();
 	}
 

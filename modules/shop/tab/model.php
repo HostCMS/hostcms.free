@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Tab_Model extends Core_Entity
 {
@@ -54,6 +54,14 @@ class Shop_Tab_Model extends Core_Entity
 	);
 
 	/**
+	 * List of Shortcodes tags
+	 * @var array
+	 */
+	protected $_shortcodeTags = array(
+		'text'
+	);
+
+	/**
 	 * Constructor.
 	 * @param int $id entity ID
 	 */
@@ -77,7 +85,7 @@ class Shop_Tab_Model extends Core_Entity
 	public function count_groupsBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$count = $this->Shop_Tab_Groups->getCount();
-		$count && Core::factory('Core_Html_Entity_Span')
+		$count && Core_Html_Entity::factory('Span')
 			->class('badge badge-darkorange badge-square')
 			->value($count)
 			->execute();
@@ -92,7 +100,7 @@ class Shop_Tab_Model extends Core_Entity
 	public function count_itemsBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$count = $this->Shop_Tab_Items->getCount();
-		$count && Core::factory('Core_Html_Entity_Span')
+		$count && Core_Html_Entity::factory('Span')
 			->class('badge badge-azure badge-square')
 			->value($count)
 			->execute();
@@ -107,7 +115,7 @@ class Shop_Tab_Model extends Core_Entity
 	public function count_producersBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$count = $this->Shop_Tab_Producers->getCount();
-		$count && Core::factory('Core_Html_Entity_Span')
+		$count && Core_Html_Entity::factory('Span')
 			->class('badge badge-warning badge-square')
 			->value($count)
 			->execute();
@@ -119,7 +127,7 @@ class Shop_Tab_Model extends Core_Entity
 	 */
 	public function nameBackend()
 	{
-		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')->value(
+		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')->value(
 			htmlspecialchars($this->name)
 		);
 

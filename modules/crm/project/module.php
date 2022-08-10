@@ -23,7 +23,7 @@ class Crm_Project_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2021-12-29';
+	public $date = '2022-04-29';
 
 	/**
 	 * Module name
@@ -61,7 +61,7 @@ class Crm_Project_Module extends Core_Module
 	{
 		switch ($type)
 		{
-			case 1: // Добавлена заметка
+			case 6: // Добавлена заметка
 				$sIconIco = "fa-comment-o";
 				$sIconColor = "white";
 				$sBackgroundColor = "bg-azure";

@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Informationsystem
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Item_Comment_Controller_Edit extends Comment_Controller_Edit
 {
@@ -58,11 +58,22 @@ class Informationsystem_Item_Comment_Controller_Edit extends Comment_Controller_
 				: Core_Array::getRequest('informationsystem_item_id'))
 			: $this->_object->Comment_Informationsystem_Item->informationsystem_item_id;
 
+		$oInformationsystem_Item = Core_Entity::factory('Informationsystem_Item', $informationsystem_item_id);
+
 		$oAdmin_Form_Entity_Input_Name = Admin_Form_Entity::factory('Input')
 			->name('informationsystem_item_id')
 			->caption(Core::_('Informationsystem_Item_Comment.informationsystem_item_id'))
 			->value($informationsystem_item_id)
-			->class('form-control col-xs-12');
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
+			->class('form-control')
+			->add(
+				Admin_Form_Entity::factory('A')
+					->id('pathLink')
+					->class('input-group-addon bg-blue bordered-blue')
+					->value('<i class="fa fa-external-link"></i>')
+					->target('_blank')
+					->href("/admin/informationsystem/item/index.php?hostcms[action]=edit&hostcms[window]=id_content&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystem_Item->informationsystem_group_id}&hostcms[checked][1][{$informationsystem_item_id}]=1")
+			);
 
 		$oAdditionalRow1->add($oAdmin_Form_Entity_Input_Name);
 	}

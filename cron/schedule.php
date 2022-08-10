@@ -9,10 +9,10 @@
  * /usr/bin/php --php-ini /etc/php.ini /var/www/site.ru/httpdocs/cron/schedule.php
  * Реальный путь на сервере к корневой директории сайта уточните в службе поддержки хостинга.
  *
- * @package HostCMS 6\cron
- * @version 6.x
+ * @package HostCMS
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 
 require_once(dirname(__FILE__) . '/../' . 'bootstrap.php');

@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Delivery_Option_Controller_Tab extends Core_Servant_Properties
 {
@@ -213,7 +213,7 @@ class Shop_Item_Delivery_Option_Controller_Tab extends Core_Servant_Properties
 						->save();
 
 					ob_start();
-					Core::factory('Core_Html_Entity_Script')
+					Core_Html_Entity::factory('Script')
 						->value("$(\"#{$windowId} input[name='deliveryOptionDay_\\[\\]']\").eq(0).prop('name', 'deliveryOptionDay_{$oShop_Item_Delivery_Option->id}');
 						$(\"#{$windowId} select[name='deliveryOptionOrderBefore_\\[\\]']\").eq(0).prop('name', 'deliveryOptionOrderBefore_{$oShop_Item_Delivery_Option->id}');
 						$(\"#{$windowId} select[name='deliveryOptionType_\\[\\]']\").eq(0).prop('name', 'deliveryOptionType_{$oShop_Item_Delivery_Option->id}');

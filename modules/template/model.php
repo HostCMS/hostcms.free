@@ -627,7 +627,7 @@ class Template_Model extends Core_Entity
 				break;
 			}
 
-			Core::factory('Core_Html_Entity_Span')
+			Core_Html_Entity::factory('Span')
 				->class('label label-info')
 				->value($css)
 				->execute();
@@ -635,14 +635,14 @@ class Template_Model extends Core_Entity
 
 		if (strlen($this->loadTemplateJsFile()))
 		{
-			Core::factory('Core_Html_Entity_Span')
+			Core_Html_Entity::factory('Span')
 				->class('label label-warning')
 				->value('JS')
 				->execute();
 		}
 
 		$count = $this->Templates->getCount();
-		$count > 0 && Core::factory('Core_Html_Entity_Span')
+		$count > 0 && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
 			->value($count)
 			->execute();
@@ -658,7 +658,7 @@ class Template_Model extends Core_Entity
 	{
 		$count = $this->Template_Sections->getCount();
 
-		$count && Core::factory('Core_Html_Entity_Span')
+		$count && Core_Html_Entity::factory('Span')
 			->class('badge badge-ico badge-darkorange white')
 			->value($count < 100 ? $count : '∞')
 			->title($count)

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Command
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Command_Controller_Default extends Core_Command_Controller
 {
@@ -67,12 +67,39 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 
 		$sLastChar = substr($this->_uri, -1);
 
+		// Shortlink
+		if ($sLastChar != '/' && Core::moduleIsActive('shortlink'))
+		{
+			$oShortlinks = Core_Entity::factory('Shortlink');
+			$oShortlinks->queryBuilder()
+				->where('active', '=', 1)
+				->where('shortlink', '=', ltrim($this->_uri, '/'))
+				->limit(1);
+
+			$aShortlinks = $oShortlinks->findAll(FALSE);
+
+			if (isset($aShortlinks[0]))
+			{
+				$sQuery = "UPDATE `shortlinks` SET `hits` = `hits` + 1 WHERE `id` = " . intval($aShortlinks[0]->id);
+
+				Core_DataBase::instance()
+					->setQueryType(2)
+					->query($sQuery);
+
+				$oCore_Response
+					->status($aShortlinks[0]->type)
+					->header('Location', $aShortlinks[0]->source);
+
+				return $oCore_Response;
+			}
+		}
+
 		// Путь заканчивается на слэш
 		if ($sLastChar == '/'
 		// или передаются данные методом GET
 		// || isset(Core::$url['query']) // style.css?1341303578 doesn't work
-		// или запрет на 302 редирект к последнему слэшу
-		|| defined('DENY_LOCATION_302_LAST_SLASH') && DENY_LOCATION_302_LAST_SLASH)
+		// или запрет редирект к последнему слэшу
+		|| defined('OPTIONAL_TRAILING_SLASH') && OPTIONAL_TRAILING_SLASH)
 		{
 			// Получаем ID текущей страницы для указанного сайта по массиву
 			$oStructure = $this->getStructure($this->_uri, CURRENT_SITE);
@@ -88,33 +115,6 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 		}
 		else
 		{
-			// Shortlink
-			if ($sLastChar != '/' && Core::moduleIsActive('shortlink'))
-			{
-				$oShortlinks = Core_Entity::factory('Shortlink');
-				$oShortlinks->queryBuilder()
-					->where('active', '=', 1)
-					->where('shortlink', '=', ltrim($this->_uri, '/'))
-					->limit(1);
-
-				$aShortlinks = $oShortlinks->findAll(FALSE);
-
-				if (isset($aShortlinks[0]))
-				{
-					$sQuery = "UPDATE `shortlinks` SET `hits` = `hits` + 1 WHERE `id` = " . intval($aShortlinks[0]->id);
-
-					Core_DataBase::instance()
-						->setQueryType(2)
-						->query($sQuery);
-
-					$oCore_Response
-						->status($aShortlinks[0]->type)
-						->header('Location', $aShortlinks[0]->source);
-
-					return $oCore_Response;
-				}
-			}
-
 			// Если после последнего слэша указывается имя файла с расширением в два или более символов
 			if (!defined('NOT_EXISTS_FILE_404_ERROR') || NOT_EXISTS_FILE_404_ERROR)
 			{
@@ -131,6 +131,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 				}
 			}
 
+			// Редирект на пусть с добавлением слэша
 			$uri = str_replace(array("\r", "\n"), '', $this->_uri);
 
 			if ($uri != '/' && strpos($uri, '//') !== 0)
@@ -482,7 +483,20 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 			if (!is_null($hostcmsAction))
 			{
 				Core_Session::start();
-				$_SESSION['HOSTCMS_SHOW_XML'] = $hostcmsAction == 'SHOW_XML';
+				
+				$oUser = Core_Auth::getCurrentUser();
+
+				if ($hostcmsAction == 'SHOW_XML'
+					&& Core::moduleIsActive('xsl')
+					&& $oUser && $oUser->checkModuleAccess(array('xsl'), $oSite)
+				)
+				{
+					$_SESSION['HOSTCMS_SHOW_XML'] = $hostcmsAction == 'SHOW_XML';
+				}
+				elseif (isset($_SESSION['HOSTCMS_SHOW_XML']))
+				{
+					unset($_SESSION['HOSTCMS_SHOW_XML']);
+				}
 			}
 		}
 

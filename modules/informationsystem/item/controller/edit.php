@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -177,7 +177,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					<script>
 					$(function(){
 						$("#' . $windowId . ' .shortcut-group-tags").select2({
-							language: "' . Core_i18n::instance()->getLng() . '",
+							language: "' . Core_I18n::instance()->getLng() . '",
 							minimumInputLength: 1,
 							placeholder: "' . Core::_('Informationsystem_Item.select_group') . '",
 							tags: true,
@@ -255,7 +255,6 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 					$oSiteuserSelect = Admin_Form_Entity::factory('Select')
 						->caption(Core::_('Informationsystem_Group.siteuser_id'))
-						->id('object_siteuser_id')
 						->options(
 							!is_null($oSiteuser->id)
 								? array($oSiteuser->id => $oSiteuser->login . ' [' . $oSiteuser->id . ']')
@@ -555,7 +554,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					$html = '<script>
 					$(function(){
 						$("#' . $windowId . ' .informationsystem-item-tags").select2({
-							language: "' . Core_i18n::instance()->getLng() . '",
+							language: "' . Core_I18n::instance()->getLng() . '",
 							minimumInputLength: 2,
 							placeholder: "' . Core::_('Informationsystem_Item.type_tag') . '",
 							tags: true,
@@ -903,7 +902,6 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 					$oSiteuserSelect = Admin_Form_Entity::factory('Select')
 						->caption(Core::_('Informationsystem_Group.siteuser_id'))
-						->id('object_siteuser_id')
 						->options(
 							!is_null($oSiteuser->id)
 								? array($oSiteuser->id => $oSiteuser->login . ' [' . $oSiteuser->id . ']')
@@ -1004,7 +1002,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 			$windowId = $this->_Admin_Form_Controller->getWindowId();
 
-			$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+			$oCore_Html_Entity_Script = Core_Html_Entity::factory('Script')
 			->value("
 				$('#{$windowId} [name = informationsystem_group_name]').autocomplete({
 					source: function(request, response) {
@@ -1346,7 +1344,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 			// Поле файла большого изображения существует
 			!is_null($aFileData = Core_Array::getFiles('image', NULL))
 			// и передан файл
-			&& intval($aFileData['size']) > 0;
+			&& $aFileData['size'];
 
 		if ($bLargeImageIsCorrect)
 		{
@@ -1386,10 +1384,10 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 			}
 		}
 
-		$aSmallFileData = Core_Array::getFiles('small_image', NULL);
 		$bSmallImageIsCorrect =
 			// Поле файла малого изображения существует
-			!is_null($aSmallFileData)
+			!is_null($aSmallFileData = Core_Array::getFiles('small_image', NULL))
+			// и передан файл
 			&& $aSmallFileData['size'];
 
 		// Задано малое изображение и при этом не задано создание малого изображения
@@ -1647,7 +1645,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				. $this->_object->getPath();
 
 			$this->_Admin_Form_Controller->addMessage(
-				Core::factory('Core_Html_Entity_Script')
+				Core_Html_Entity::factory('Script')
 					->value("$('#{$windowId} input#path').val('" . Core_Str::escapeJavascriptVariable($this->_object->path) . "');
 					$('#{$windowId} a#pathLink').attr('href', '" . Core_Str::escapeJavascriptVariable($sUrl) . "').attr('target', '_blank')")
 				->execute()

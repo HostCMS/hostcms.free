@@ -35,51 +35,15 @@ $oAdmin_Form_Controller
 	->addView('entity', 'Crm_Project_Entity_View')
 	->view('entity');
 
-if (!is_null(Core_Array::getPost('showPopover')))
-{
-	$aJSON = array(
-		'html' => ''
-	);
-
-	$oCurrentUser = Core_Auth::getCurrentUser();
-
-	$company_id = Core_Array::getPost('company_id', 0, 'int');
-	$person_id = Core_Array::getPost('person_id', 0, 'int');
-	$user_id = Core_Array::getPost('user_id', 0, 'int');
-
-	if ($user_id)
-	{
-		$oUser = Core_Entity::factory('User')->getById($user_id);
-
-		if (!is_null($oUser))
-		{
-			$aJSON['html'] = $oUser->getProfilePopupBlock();
-		}
-	}
-	else
-	{
-		$oEntity = $company_id
-			? Core_Entity::factory('Siteuser_Company')->getById($company_id)
-			: Core_Entity::factory('Siteuser_Person')->getById($person_id);
-
-		if (!is_null($oEntity) && $oCurrentUser->checkObjectAccess($oEntity))
-		{
-			$aJSON['html'] = $oEntity->getProfilePopupBlock();
-		}
-	}
-
-	Core::showJson($aJSON);
-}
-
 if (!$oCrm_Project->id || $oCrm_Project->site_id != CURRENT_SITE)
 {
 	throw new Core_Exception('Crm project does not exist.');
 }
 
-if (!Core::moduleIsActive('event'))
+/*if (!Core::moduleIsActive('event'))
 {
 	throw new Core_Exception('Module "Event" not active');
-}
+}*/
 
 $windowId = $oAdmin_Form_Controller->getWindowId();
 
@@ -93,15 +57,15 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 // Элементы меню
 if (Core::moduleIsActive('event'))
 {
-$oAdmin_Form_Entity_Menus
-	->add(
-		Admin_Form_Entity::factory('Menu')
-			->name(Core::_('Crm_Project.add_event'))
-			->icon('fa fa-plus')
-			->onclick(
-				"$.modalLoad({path: '/admin/event/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&{$additionalParams}', windowId: '{$windowId}'}); return false"
-			)
-	);
+	$oAdmin_Form_Entity_Menus
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Crm_Project.add_event'))
+				->icon('fa fa-plus')
+				->onclick(
+					"$.modalLoad({path: '/admin/event/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&{$additionalParams}', windowId: '{$windowId}'}); return false"
+				)
+		);
 }
 
 if (Core::moduleIsActive('deal'))
@@ -123,6 +87,13 @@ $oAdmin_Form_Entity_Menus->add(
 		->onclick(
 			"$.modalLoad({path: '/admin/crm/project/note/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&{$additionalParams}', windowId: '{$windowId}'}); return false"
 		)
+)->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Crm_Project.add_attachment'))
+		->icon('fa fa-plus')
+		->onclick(
+			"$.modalLoad({path: '/admin/crm/project/attachment/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&{$additionalParams}', windowId: '{$windowId}'}); return false"
+		)
 );
 
 // Добавляем все меню контроллеру
@@ -137,10 +108,12 @@ $oAdminFormEntityBreadcrumbs
 		Admin_Form_Entity::factory('Breadcrumb')
 			->name(Core::_('Crm_Project.title'))
 			->href(
-				$oAdmin_Form_Controller->getAdminLoadHref($sCrmProjectPath, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'list')
+				// $oAdmin_Form_Controller->getAdminLoadHref($sCrmProjectPath, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'list')
+				$oAdmin_Form_Controller->getAdminLoadHref(array('path' => $sCrmProjectPath, 'view' => 'list'))
 			)
 			->onclick(
-				$oAdmin_Form_Controller->getAdminLoadAjax($sCrmProjectPath, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'list')
+				// $oAdmin_Form_Controller->getAdminLoadAjax($sCrmProjectPath, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'list')
+				$oAdmin_Form_Controller->getAdminLoadAjax(array('path' => $sCrmProjectPath, 'view' => 'list'))
 			)
 	)
 	->add(
@@ -180,65 +153,12 @@ $oAdmin_Form_Controller->addDataset(
 	$oAdmin_Form_Dataset
 );
 
-Core_Event::attach('Admin_Form_Controller.onAfterShowContent', function($oAdmin_Form_Controller) {
-	$windowId = $oAdmin_Form_Controller->getWindowId();
-	?>
-	<script>
-		$('[data-popover="hover"]').on('mouseenter', function(event) {
-			var $this = $(this);
+Core_Event::attach('Admin_Form_Controller.onAfterShowContent', array('User_Controller', 'onAfterShowContentPopover'), array($oAdmin_Form_Controller));
 
-			if (!$this.data("bs.popover"))
-			{
-				$this.popover({
-					placement:'top',
-					trigger:'manual',
-					html:true,
-					content: function() {
-						var content = '';
-
-						$.ajax({
-							url: '/admin/crm/project/entity/index.php',
-							data: { showPopover: 1, person_id: $(this).data('person-id'), company_id: $(this).data('company-id'), user_id: $(this).data('user-id') },
-							dataType: 'json',
-							type: 'POST',
-							async: false,
-							success: function(response) {
-								content = response.html;
-							}
-						});
-
-						return content;
-					},
-					container: "#<?php echo $windowId?>"
-				});
-
-				$this.attr('data-popoverAttached', true);
-
-				$this.on('hide.bs.popover', function(e) {
-					$this.attr('data-popoverAttached')
-						? $this.removeAttr('data-popoverAttached')
-						: e.preventDefault();
-				})
-				.on('show.bs.popover', function(e) {
-					!$this.attr('data-popoverAttached') && e.preventDefault();
-				})
-				.on('shown.bs.popover', function(e) {
-					$('#' + $this.attr('aria-describedby')).on('mouseleave', function(e) {
-						!$this.parent().find(e.relatedTarget).length && $this.popover('destroy');
-					});
-				})
-				.on('mouseleave', function(e) {
-					!$(e.relatedTarget).parent('#' + $this.attr('aria-describedby')).length
-					&& $this.attr('data-popoverAttached')
-					&& $this.popover('destroy');
-				});
-
-				$this.popover('show');
-			}
-		});
-	</script>
-	<?php
-});
+if (Core::moduleIsActive('siteuser'))
+{
+	Core_Event::attach('Admin_Form_Controller.onAfterShowContent', array('Siteuser_Controller', 'onAfterShowContentPopover'), array($oAdmin_Form_Controller));
+}
 
 // Показ формы
 $oAdmin_Form_Controller->execute();

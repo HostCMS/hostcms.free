@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Controller_Tab extends Core_Servant_Properties
 {
@@ -181,7 +181,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		ob_start();
-		Core::factory('Core_Html_Entity_Img')
+		Core_Html_Entity::factory('Img')
 			->src('/admin/images/action_add.gif')
 			->id('add')
 			->class('pointer left5px img_line')
@@ -200,7 +200,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	public function getImgDelete($onclick = '$.deleteNewProperty(this)')
 	{
 		ob_start();
-		Core::factory('Core_Html_Entity_Img')
+		Core_Html_Entity::factory('Img')
 			->src('/admin/images/action_delete.gif')
 			->id('delete')
 			->class('pointer left5px img_line')
@@ -857,7 +857,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 		if ($oProperty->multiple)
 		{
-			$oAdmin_Form_Entity_Section->add(Core::factory('Core_Html_Entity_Script')->value("
+			$oAdmin_Form_Entity_Section->add(Core_Html_Entity::factory('Script')->value("
 				$('.section-" . $oProperty->id . "').sortable({
 					connectWith: '.section-" . $oProperty->id . "',
 					items: '> div#property_" . $oProperty->id . "',
@@ -891,6 +891,12 @@ class Property_Controller_Tab extends Core_Servant_Properties
 							.css('opacity', 1);
 					}
 				}).disableSelection();
+
+				$('.section-" . $oProperty->id . " :input').on('touchstart', function(e){
+					$('.section-" . $oProperty->id . "').sortable('disable');
+				}).on('touchend', function(e){
+					$('.section-" . $oProperty->id . "').sortable('enable');
+				});
 			"));
 		}
 
@@ -952,7 +958,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 		// autocomplete should be added always
 		$oDiv_Group->add(
-			Core::factory('Core_Html_Entity_Script')->value("
+			Core_Html_Entity::factory('Script')->value("
 				$('#{$windowId} input[id ^= id_property_{$oProperty->id}]').autocomplete({
 					source: function(request, response) {
 						var jInput = $(this.element),
@@ -1071,7 +1077,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 		// autocomplete should be added always
 		$oDiv_Group->add(
-			Core::factory('Core_Html_Entity_Script')->value("
+			Core_Html_Entity::factory('Script')->value("
 				$('#{$windowId} input[id ^= input_property_{$oProperty->id}]').autocomplete({
 					source: function(request, response) {
 						var jInput = $(this.element),
@@ -1256,7 +1262,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 		// autocomplete should be added always
 		$oDiv_Group->add(
-			Core::factory('Core_Html_Entity_Script')->value("
+			Core_Html_Entity::factory('Script')->value("
 				$('#{$windowId} input[id ^= input_property_{$oProperty->id}]').autocomplete({
 					source: function(request, response) {
 						var jInput = $(this.element),
@@ -1435,7 +1441,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 		// autocomplete should be added always
 		$oDiv_Group->add(
-			Core::factory('Core_Html_Entity_Script')->value("
+			Core_Html_Entity::factory('Script')->value("
 				$('#{$windowId} input[id ^= input_property_{$oProperty->id}]').autocomplete({
 				source: function(request, response) {
 					var jInput = $(this.element),
@@ -1617,7 +1623,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 		// autocomplete should be added always
 		$oDiv_Group->add(
-			Core::factory('Core_Html_Entity_Script')->value("
+			Core_Html_Entity::factory('Script')->value("
 				$('#{$windowId} input[id ^= input_property_{$oProperty->id}]').autocomplete({
 				source: function(request, response) {
 					var jInput = $(this.element),
@@ -1696,27 +1702,11 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 	protected function _setValue($oProperty_Value, $value)
 	{
-		!isset($this->_aSortings[$oProperty_Value->property_id])
-			&& $this->_aSortings[$oProperty_Value->property_id] = 0;
-
-		if ($oProperty_Value->id)
-		{
-			$sorting = $this->_aSortings[$oProperty_Value->property_id]++;
-			if (isset($this->_aSortingTree[$oProperty_Value->property_id]))
-			{
-				$sorting = array_search($oProperty_Value->id, $this->_aSortingTree[$oProperty_Value->property_id]);
-			}
-		}
-		else
-		{
-			$sorting = $this->_aSortings[$oProperty_Value->property_id]++;
-		}
-
 		$value = $this->_correctValue($oProperty_Value->Property, $value);
 
 		$oProperty_Value
 			->setValue($value)
-			->sorting($sorting)
+			->sorting($this->_getSorting($oProperty_Value))
 			->save();
 
 		return $this;
@@ -1783,7 +1773,6 @@ class Property_Controller_Tab extends Core_Servant_Properties
 				break;
 				case 2: // File
 					// Values already exist
-
 					$aLargeFile = Core_Array::getFiles("property_{$oProperty->id}_{$oProperty_Value->id}");
 					$aSmallFile = Core_Array::getFiles("small_property_{$oProperty->id}_{$oProperty_Value->id}");
 
@@ -1792,7 +1781,6 @@ class Property_Controller_Tab extends Core_Servant_Properties
 					if (!is_null($description))
 					{
 						$oProperty_Value->file_description = $description;
-						$oProperty_Value->save();
 					}
 
 					$description_small = Core_Array::getPost("description_small_property_{$oProperty->id}_{$oProperty_Value->id}");
@@ -1800,11 +1788,14 @@ class Property_Controller_Tab extends Core_Servant_Properties
 					if (!is_null($description_small))
 					{
 						$oProperty_Value->file_small_description = $description_small;
-						$oProperty_Value->save();
 					}
 					// ----
 
-					$this->_loadFiles($aLargeFile, $aSmallFile, $oProperty_Value, $oProperty, "property_{$oProperty->id}_{$oProperty_Value->id}");
+					$oProperty_Value
+						->sorting($this->_getSorting($oProperty_Value))
+						->save();
+
+					$this->_loadFiles($aLargeFile, $aSmallFile, $oProperty_Value, "property_{$oProperty->id}_{$oProperty_Value->id}");
 				break;
 			}
 		}
@@ -1853,7 +1844,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 								$this->_setValue($oNewProperty_Value, $newValue);
 
 								ob_start();
-								Core::factory('Core_Html_Entity_Script')
+								Core_Html_Entity::factory('Script')
 									->value("$(\"#{$windowId} *[name='property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'property_{$oProperty->id}_{$oNewProperty_Value->id}')")
 									->execute();
 
@@ -1875,7 +1866,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 						for ($i = 0; $i < $iCount; $i++)
 						{
-							$oFileValue = $oProperty->createNewValue($this->_object->id);
+							$oProperty_Value = $oProperty->createNewValue($this->_object->id);
 
 							ob_start();
 
@@ -1901,43 +1892,45 @@ class Property_Controller_Tab extends Core_Servant_Properties
 							$description = $this->_getEachPost("description_property_{$oProperty->id}");
 							if (!is_null($description))
 							{
-								$oFileValue->file_description = $description;
+								$oProperty_Value->file_description = $description;
 							}
 
 							$description_small = $this->_getEachPost("description_small_property_{$oProperty->id}");
 
 							if (!is_null($description_small))
 							{
-								$oFileValue->file_small_description = $description_small;
+								$oProperty_Value->file_small_description = $description_small;
 							}
 							// -------
 
-							$oFileValue->save();
+							$oProperty_Value
+								->sorting($this->_getSorting($oProperty_Value))
+								->save();
 
-							$this->_loadFiles($aLargeFile, $aSmallFile, $oFileValue, $oProperty, "property_{$oProperty->id}");
+							$this->_loadFiles($aLargeFile, $aSmallFile, $oProperty_Value, "property_{$oProperty->id}");
 
 							$this->_Admin_Form_Controller->addMessage(ob_get_clean());
 
 							ob_start();
-							Core::factory('Core_Html_Entity_Script')
-								->value("$(\"#{$windowId} div[id^='file_large'] input[name='property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'property_{$oProperty->id}_{$oFileValue->id}');" .
-								"$(\"#{$windowId} div[id^='file_small'] input[name='small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_property_{$oProperty->id}_{$oFileValue->id}');" .
+							Core_Html_Entity::factory('Script')
+								->value("$(\"#{$windowId} div[id^='file_large'] input[name='property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'property_{$oProperty->id}_{$oProperty_Value->id}');" .
+								"$(\"#{$windowId} div[id^='file_small'] input[name='small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_property_{$oProperty->id}_{$oProperty_Value->id}');" .
 								// Description
-								"$(\"#{$windowId} input[name='description_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'description_property_{$oProperty->id}_{$oFileValue->id}');" .
-								"$(\"#{$windowId} input[name='description_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'description_small_property_{$oProperty->id}_{$oFileValue->id}');" .
+								"$(\"#{$windowId} input[name='description_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'description_property_{$oProperty->id}_{$oProperty_Value->id}');" .
+								"$(\"#{$windowId} input[name='description_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'description_small_property_{$oProperty->id}_{$oProperty_Value->id}');" .
 								// Large
-								"$(\"#{$windowId} input[name='large_max_width_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'large_max_width_property_{$oProperty->id}_{$oFileValue->id}');" .
-								"$(\"#{$windowId} input[name='large_max_height_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'large_max_height_property_{$oProperty->id}_{$oFileValue->id}');" .
-								"$(\"#{$windowId} input[name='large_preserve_aspect_ratio_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'large_preserve_aspect_ratio_property_{$oProperty->id}_{$oFileValue->id}');" .
-								"$(\"#{$windowId} input[name='large_place_watermark_checkbox_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'large_place_watermark_checkbox_property_{$oProperty->id}_{$oFileValue->id}');" .
-								"$(\"#{$windowId} input[name='watermark_position_x_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'watermark_position_x_property_{$oProperty->id}_{$oFileValue->id}');" .
-								"$(\"#{$windowId} input[name='watermark_position_y_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'watermark_position_y_property_{$oProperty->id}_{$oFileValue->id}');" .
+								"$(\"#{$windowId} input[name='large_max_width_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'large_max_width_property_{$oProperty->id}_{$oProperty_Value->id}');" .
+								"$(\"#{$windowId} input[name='large_max_height_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'large_max_height_property_{$oProperty->id}_{$oProperty_Value->id}');" .
+								"$(\"#{$windowId} input[name='large_preserve_aspect_ratio_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'large_preserve_aspect_ratio_property_{$oProperty->id}_{$oProperty_Value->id}');" .
+								"$(\"#{$windowId} input[name='large_place_watermark_checkbox_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'large_place_watermark_checkbox_property_{$oProperty->id}_{$oProperty_Value->id}');" .
+								"$(\"#{$windowId} input[name='watermark_position_x_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'watermark_position_x_property_{$oProperty->id}_{$oProperty_Value->id}');" .
+								"$(\"#{$windowId} input[name='watermark_position_y_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'watermark_position_y_property_{$oProperty->id}_{$oProperty_Value->id}');" .
 								// Small
-								"$(\"#{$windowId} input[name='small_max_width_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_max_width_small_property_{$oProperty->id}_{$oFileValue->id}');" .
-								"$(\"#{$windowId} input[name='small_max_height_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_max_height_small_property_{$oProperty->id}_{$oFileValue->id}');" .
-								"$(\"#{$windowId} input[name='small_preserve_aspect_ratio_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_preserve_aspect_ratio_small_property_{$oProperty->id}_{$oFileValue->id}');" .
-								"$(\"#{$windowId} input[name='small_place_watermark_checkbox_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_place_watermark_checkbox_small_property_{$oProperty->id}_{$oFileValue->id}');" .
-								"$(\"#{$windowId} input[name='create_small_image_from_large_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'create_small_image_from_large_small_property_{$oProperty->id}_{$oFileValue->id}');"
+								"$(\"#{$windowId} input[name='small_max_width_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_max_width_small_property_{$oProperty->id}_{$oProperty_Value->id}');" .
+								"$(\"#{$windowId} input[name='small_max_height_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_max_height_small_property_{$oProperty->id}_{$oProperty_Value->id}');" .
+								"$(\"#{$windowId} input[name='small_preserve_aspect_ratio_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_preserve_aspect_ratio_small_property_{$oProperty->id}_{$oProperty_Value->id}');" .
+								"$(\"#{$windowId} input[name='small_place_watermark_checkbox_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_place_watermark_checkbox_small_property_{$oProperty->id}_{$oProperty_Value->id}');" .
+								"$(\"#{$windowId} input[name='create_small_image_from_large_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'create_small_image_from_large_small_property_{$oProperty->id}_{$oProperty_Value->id}');"
 								)
 								->execute();
 
@@ -1983,16 +1976,42 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	}
 
 	/**
+	 * Get property value sorting
+	 * @param Property_Value_Model $oProperty_Value
+	 * @return int
+	 */
+	protected function _getSorting($oProperty_Value)
+	{
+		// Sorting
+		!isset($this->_aSortings[$oProperty_Value->property_id])
+			&& $this->_aSortings[$oProperty_Value->property_id] = 0;
+
+		if ($oProperty_Value->id)
+		{
+			$sorting = $this->_aSortings[$oProperty_Value->property_id]++;
+			if (isset($this->_aSortingTree[$oProperty_Value->property_id]))
+			{
+				$sorting = array_search($oProperty_Value->id, $this->_aSortingTree[$oProperty_Value->property_id]);
+			}
+		}
+		else
+		{
+			$sorting = $this->_aSortings[$oProperty_Value->property_id]++;
+		}
+
+		return $sorting;
+	}
+
+	/**
 	* Load files
 	* @param array $aLargeFile large file data
 	* @param array $aSmallFile small file data
-	* @param Property_Value_File_Model $oFileValue value of file object
-	* @param Property_Model $oProperty property
+	* @param Property_Value_File_Model $oProperty_Value value of file object
 	* @param string $sPropertyName property name
 	*/
-	protected function _loadFiles($aLargeFile, $aSmallFile, $oFileValue, $oProperty, $sPropertyName)
+	protected function _loadFiles($aLargeFile, $aSmallFile, $oProperty_Value, $sPropertyName)
 	{
-		$oFileValue->setDir(
+		$oProperty_Value->setDir(
 			$this->linkedObject->getDirPath($this->_object)
 		);
 
@@ -2001,8 +2020,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		$aFileData = $aLargeFile;
 		$aSmallFileData = $aSmallFile;
 
-		$large_image = '';
-		$small_image = '';
+		$large_image = $small_image = '';
 
 		$aCore_Config = Core::$mainConfig;
 
@@ -2020,9 +2038,9 @@ class Property_Controller_Tab extends Core_Servant_Properties
 			if (Core_File::isValidExtension($aFileData['name'], $aCore_Config['availableExtension']))
 			{
 				// Удаление файла большого изображения
-				if ($oFileValue->file)
+				if ($oProperty_Value->file)
 				{
-					$oFileValue
+					$oProperty_Value
 						->deleteLargeFile()
 						//->deleteSmallFile()
 						;
@@ -2033,7 +2051,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 				// Не преобразовываем название загружаемого файла
 				$large_image = !$this->linkedObject->changeFilename
 					? $file_name
-					: $this->linkedObject->getLargeFileName($this->_object, $oFileValue, $aFileData['name']);
+					: $this->linkedObject->getLargeFileName($this->_object, $oProperty_Value, $aFileData['name']);
 			}
 			else
 			{
@@ -2057,9 +2075,9 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		if ($bSmallImageIsCorrect || $create_small_image_from_large && $bLargeImageIsCorrect)
 		{
 			// Удаление файла малого изображения
-			if ($oFileValue->file_small)
+			if ($oProperty_Value->file_small)
 			{
-				$oFileValue->deleteSmallFile();
+				$oProperty_Value->deleteSmallFile();
 			}
 
 			// Явно указано малое изображение
@@ -2067,7 +2085,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 				&& Core_File::isValidExtension($aSmallFileData['name'], $aCore_Config['availableExtension']))
 			{
 				// задано изображение
-				if ($oFileValue->file != '')
+				if ($oProperty_Value->file != '')
 				{
 					$create_large_image = FALSE;
 				}
@@ -2094,7 +2112,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 				else
 				{
 					$small_image = $this->linkedObject
-						->getSmallFileName($this->_object, $oFileValue, $aSmallFileData['name']);
+						->getSmallFileName($this->_object, $oProperty_Value, $aSmallFileData['name']);
 				}
 			}
 			elseif ($create_small_image_from_large && $bLargeImageIsCorrect)
@@ -2115,6 +2133,8 @@ class Property_Controller_Tab extends Core_Servant_Properties
 				);
 			}
 		}
+
+
 
 		if ($bLargeImageIsCorrect || $bSmallImageIsCorrect)
 		{
@@ -2188,21 +2208,21 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 				if ($result['large_image'])
 				{
-					$oFileValue->file = $large_image;
-					$oFileValue->file_name = is_null($param['large_image_name'])
+					$oProperty_Value->file = $large_image;
+					$oProperty_Value->file_name = is_null($param['large_image_name'])
 						? ''
 						: $param['large_image_name'];
 				}
 
 				if ($result['small_image'])
 				{
-					$oFileValue->file_small = $small_image;
-					$oFileValue->file_small_name = is_null($param['small_image_name'])
+					$oProperty_Value->file_small = $small_image;
+					$oProperty_Value->file_small_name = is_null($param['small_image_name'])
 						? ''
 						: $param['small_image_name'];
 				}
 
-				$oFileValue->save();
+				$oProperty_Value->save();
 			}
 			catch (Exception $e)
 			{

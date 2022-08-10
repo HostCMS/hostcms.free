@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 {
@@ -830,7 +830,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 		);
  		$path = Core_Str::escapeJavascriptVariable($this->getPath());
 
-		Core::factory('Core_Html_Entity_Select')
+		Core_Html_Entity::factory('Select')
 			->onchange("$.adminLoad({path: '{$path}', additionalParams: '{$additionalParams}', limit: this.options[this.selectedIndex].value, windowId : '{$windowId}'}); return false")
 			->options($this->_onPage)
 			->value($sCurrentValue)
@@ -856,7 +856,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 
 		$this->current > $total_page && $this->current = $total_page;
 
-		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
+		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')
 			->style('float: left; text-align: center; margin-top: 10px');
 
 		// Формируем скрытые ссылки навигации для перехода по Ctrl + стрелка
@@ -865,7 +865,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 			// Ссылка на следующую страницу
 			$page = $this->current + 1 ? $this->current + 1 : 1;
 			$oCore_Html_Entity_Div->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->onclick($this->getAdminLoadAjax($this->getPath(), NULL, NULL, NULL, NULL, $page))
 					->id('id_next')
 			);
@@ -876,7 +876,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 			// Ссылка на предыдущую страницу
 			$page = $this->current - 1 ? $this->current - 1 : 1;
 			$oCore_Html_Entity_Div->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->onclick($this->getAdminLoadAjax($this->getPath(), NULL, NULL, NULL, NULL, $page))
 					->id('id_prev')
 			);
@@ -900,7 +900,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 			if ($this->current == 1)
 			{
 				$oCore_Html_Entity_Div->add(
-					Core::factory('Core_Html_Entity_Span')
+					Core_Html_Entity::factory('Span')
 						->class('current')
 						->value($link_num_begin)
 				);
@@ -911,7 +911,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 				$onclick = $this->getAdminLoadAjax($this->getPath(), NULL, NULL, NULL, NULL, 1);
 
 				$oCore_Html_Entity_Div->add(
-					Core::factory('Core_Html_Entity_A')
+					Core_Html_Entity::factory('A')
 						->href($href)
 						->onclick($onclick)
 						->class('page_link')
@@ -925,7 +925,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 					$onclick = $this->getAdminLoadAjax($this->getPath(), NULL, NULL, NULL, NULL, 2);
 
 					$oCore_Html_Entity_Div->add(
-						Core::factory('Core_Html_Entity_A')
+						Core_Html_Entity::factory('A')
 							->href($href)
 							->onclick($onclick)
 							->class('page_link')
@@ -943,7 +943,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 				{
 					// Страница является текущей
 					$oCore_Html_Entity_Div->add(
-						Core::factory('Core_Html_Entity_Span')
+						Core_Html_Entity::factory('Span')
 							->class('current')
 							->value($link_number)
 					);
@@ -953,7 +953,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 					$href = $this->getAdminLoadHref($this->getPath(), NULL, NULL, NULL, NULL, $link_number);
 					$onclick = $this->getAdminLoadAjax($this->getPath(), NULL, NULL, NULL, NULL, $link_number);
 					$oCore_Html_Entity_Div->add(
-						Core::factory('Core_Html_Entity_A')
+						Core_Html_Entity::factory('A')
 							->href($href)
 							->onclick($onclick)
 							->class('page_link')
@@ -966,7 +966,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 			if ($this->current == $total_page)
 			{
 				$oCore_Html_Entity_Div->add(
-					Core::factory('Core_Html_Entity_Span')
+					Core_Html_Entity::factory('Span')
 							->class('current')
 							->value($total_page)
 				);
@@ -980,7 +980,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 					$onclick = $this->getAdminLoadAjax($this->getPath(), NULL, NULL, NULL, NULL, $total_page - 1);
 
 					$oCore_Html_Entity_Div->add(
-						Core::factory('Core_Html_Entity_A')
+						Core_Html_Entity::factory('A')
 							->href($href)
 							->onclick($onclick)
 							->class('page_link')
@@ -993,7 +993,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 
 				// Последняя страница не является текущей
 				$oCore_Html_Entity_Div->add(
-					Core::factory('Core_Html_Entity_A')
+					Core_Html_Entity::factory('A')
 						->href($href)
 						->onclick($onclick)
 						->class('page_link')
@@ -1002,7 +1002,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 			}
 
 			$oCore_Html_Entity_Div->execute();
-			Core::factory('Core_Html_Entity_Div')
+			Core_Html_Entity::factory('Div')
 				->style('clear: both')
 				->execute();
 		}

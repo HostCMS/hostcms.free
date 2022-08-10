@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Delivery_Model extends Core_Entity
 {
@@ -27,7 +27,8 @@ class Shop_Delivery_Model extends Core_Entity
 		'shop_delivery_condition' => array(),
 		'shop_delivery_condition_dir' => array(),
 		'shop_delivery_payment_system' => array(),
-		'shop_payment_system' => array('through' => 'shop_delivery_payment_system')
+		'shop_payment_system' => array('through' => 'shop_delivery_payment_system'),
+		'shop_delivery_interval' => array()
 	);
 
 	/**
@@ -270,6 +271,7 @@ class Shop_Delivery_Model extends Core_Entity
 
 		$this->Shop_Delivery_Conditions->deleteAll(FALSE);
 		$this->Shop_Delivery_Payment_Systems->deleteAll(FALSE);
+		$this->Shop_Delivery_Intervals->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);
 	}
@@ -393,7 +395,7 @@ class Shop_Delivery_Model extends Core_Entity
 	public function conditionsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$count = $this->Shop_Delivery_Conditions->getCount();
-		$count && Core::factory('Core_Html_Entity_Span')
+		$count && Core_Html_Entity::factory('Span')
 			->class('badge badge-ico badge-azure white')
 			->value($count < 100 ? $count : '∞')
 			->title($count)

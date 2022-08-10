@@ -80,7 +80,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 					->setOr()
 					->having('shop_items.id', 'LIKE', $sQueryLike)
 				->havingClose()
-				->limit(15)
+				->limit(Core::$mainConfig['autocompleteItems'])
 				->clearOrderBy()
 				->orderBy(Core_QueryBuilder::raw('IF(shop_items.modification_id = 0, 0, 1)'), 'ASC')
 				->orderBy('shop_items.name', 'ASC');
@@ -171,7 +171,8 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 					'count' => $rest,
 					'image_small' => $imageSmall,
 					'aPrices' => $aPrices,
-					'aWarehouses' => $aWarehouses
+					'aWarehouses' => $aWarehouses,
+					'link' => "/admin/shop/item/index.php?hostcms[action]=edit&hostcms[current]=1&hostcms[window]=id_content&shop_id={$oShop->id}&shop_dir_id={$oShop->shop_dir_id}&shop_group_id={$oShop_Item->shop_group_id}&hostcms[checked][1][{$oShop_Item->id}]=1"
 				);
 			}
 		}
@@ -183,7 +184,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 			$oShop_Deliveries->queryBuilder()
 				->where('shop_deliveries.name', 'LIKE', $sQueryLike)
 				->where('shop_deliveries.active', '=', 1)
-				->limit(15);
+				->limit(Core::$mainConfig['autocompleteItems']);
 
 			$aShop_Deliveries = $oShop_Deliveries->findAll(FALSE);
 
@@ -214,7 +215,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 				->where('shop_purchase_discounts.active', '=', 1)
 				->where('shop_purchase_discounts.start_datetime', '<=', $datetime)
 				->where('shop_purchase_discounts.end_datetime', '>=', $datetime)
-				->limit(15);
+				->limit(Core::$mainConfig['autocompleteItems']);
 
 			$aShop_Purchase_Discounts = $oShop_Purchase_Discounts->findAll(FALSE);
 

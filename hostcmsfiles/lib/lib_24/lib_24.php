@@ -255,7 +255,7 @@ function uploadImage($oObject, $aFileData)
 }
 
 // Удаления файла доп. св-ва
-$delete_property_value = Core_Array::getGet('delete_property_value');
+$delete_property_value = Core_Array::getGet('delete_property_value', 0, 'int');
 if (!is_null($delete_property_value) && !$bNewUser)
 {
 	$aProperty_Values = $oSiteuser->getPropertyValues(FALSE);
@@ -326,7 +326,7 @@ if (!is_null(Core_Array::getPost('apply')))
 								$Antispam_Controller
 									->addText($oSiteuser->login)
 									->addText($oSiteuser->email);
-									
+
 								if (!is_null(Core_Array::getPost("company_name")))
 								{
 									$aSiteuserCompanies = Core_Array::getPost("company_name");
@@ -368,7 +368,7 @@ if (!is_null(Core_Array::getPost('apply')))
 											->addText(Core_Array::get($aSiteuserPeopleAddresses, $key, '', 'str'));
 									}
 								}
-								
+
 								$bAntispamAnswer = $Antispam_Controller->execute();
 
 								// Check e-mail
@@ -537,14 +537,33 @@ if (!is_null(Core_Array::getPost('apply')))
 										$oSiteuser_Person->name = Core_Array::getPost("person_name{$oSiteuser_Person->id}", '', 'str');
 										$oSiteuser_Person->surname = Core_Array::getPost("person_surname{$oSiteuser_Person->id}", '', 'str');
 										$oSiteuser_Person->patronymic = Core_Array::getPost("person_patronymic{$oSiteuser_Person->id}", '', 'str');
-										$oSiteuser_Person->postcode = Core_Array::getPost("person_postcode{$oSiteuser_Person->id}", '', 'str');
-										$oSiteuser_Person->country = Core_Array::getPost("person_country{$oSiteuser_Person->id}", '', 'str');
-										$oSiteuser_Person->city = Core_Array::getPost("person_city{$oSiteuser_Person->id}", '', 'str');
-										$oSiteuser_Person->address = Core_Array::getPost("person_address{$oSiteuser_Person->id}", '', 'str');
+
+										// $oSiteuser_Person->postcode = Core_Array::getPost("person_postcode{$oSiteuser_Person->id}", '', 'str');
+										// $oSiteuser_Person->country = Core_Array::getPost("person_country{$oSiteuser_Person->id}", '', 'str');
+										// $oSiteuser_Person->city = Core_Array::getPost("person_city{$oSiteuser_Person->id}", '', 'str');
+										// $oSiteuser_Person->address = Core_Array::getPost("person_address{$oSiteuser_Person->id}", '', 'str');
+
 										$oSiteuser_Person->save();
 
 										$aFileData = Core_Array::getFiles("person_image{$oSiteuser_Person->id}", array());
 										uploadImage($oSiteuser_Person, $aFileData);
+									}
+
+									if (!is_null(Core_Array::getPost("person_address{$oSiteuser_Person->id}")))
+									{
+										$aDirectory_Addresses = $oSiteuser_Person->Directory_Addresses->findAll();
+										if (!isset($aDirectory_Addresses[0]))
+										{
+											$aDirectory_Addresses[0] = Core_Entity::factory('Directory_Address');
+											$aDirectory_Addresses[0]->value = '';
+											$oSiteuser_Person->add($aDirectory_Addresses[0]);
+										}
+
+										$aDirectory_Addresses[0]->postcode = Core_Array::getPost("person_postcode{$oSiteuser_Person->id}", '', 'str');
+										$aDirectory_Addresses[0]->country = Core_Array::getPost("person_country{$oSiteuser_Person->id}", '', 'str');
+										$aDirectory_Addresses[0]->city = Core_Array::getPost("person_city{$oSiteuser_Person->id}", '', 'str');
+										$aDirectory_Addresses[0]->value = Core_Array::getPost("person_address{$oSiteuser_Person->id}", '', 'str');
+										$aDirectory_Addresses[0]->save();
 									}
 
 									applyDirectoryValues($oSiteuser_Person->id, $oSiteuser_Person, 'Directory_Phone');
@@ -646,10 +665,12 @@ if (!is_null(Core_Array::getPost('apply')))
 
 												$oSiteuser_Person->surname = Core_Array::get($aSiteuserPeopleSurnames, $key, '', 'str');
 												$oSiteuser_Person->patronymic = Core_Array::get($aSiteuserPeoplePatronymics, $key, '', 'str');
-												$oSiteuser_Person->postcode = Core_Array::get($aSiteuserPeoplePostcodes, $key, '', 'str');
-												$oSiteuser_Person->country = Core_Array::get($aSiteuserPeopleCountries, $key, '', 'str');
-												$oSiteuser_Person->city = Core_Array::get($aSiteuserPeopleCities, $key, '', 'str');
-												$oSiteuser_Person->address = Core_Array::get($aSiteuserPeopleAddresses, $key, '', 'str');
+
+												// $oSiteuser_Person->postcode = Core_Array::get($aSiteuserPeoplePostcodes, $key, '', 'str');
+												// $oSiteuser_Person->country = Core_Array::get($aSiteuserPeopleCountries, $key, '', 'str');
+												// $oSiteuser_Person->city = Core_Array::get($aSiteuserPeopleCities, $key, '', 'str');
+												// $oSiteuser_Person->address = Core_Array::get($aSiteuserPeopleAddresses, $key, '', 'str');
+
 												$oSiteuser_Person->save();
 
 												$aFileData = Core_Array::getFiles("person_image", array());
@@ -665,6 +686,17 @@ if (!is_null(Core_Array::getPost('apply')))
 													);
 
 													uploadImage($oSiteuser_Person, $aTmpFile);
+												}
+
+												$value = Core_Array::get($aSiteuserPeopleAddresses, $key, '', 'str');
+												if ($value != '')
+												{
+													$oDirectory_Address = Core_Entity::factory('Directory_Address');
+													$oDirectory_Address->country = Core_Array::get($aSiteuserPeopleCountries, $key, '', 'str');
+													$oDirectory_Address->postcode = Core_Array::get($aSiteuserPeoplePostcodes, $key, '', 'str');
+													$oDirectory_Address->city = Core_Array::get($aSiteuserPeopleCities, $key, '', 'str');
+													$oDirectory_Address->value = $value;
+													$oSiteuser_Person->add($oDirectory_Address);
 												}
 
 												applyDirectoryValues(0, $oSiteuser_Person, 'Directory_Phone');
@@ -788,6 +820,7 @@ if (!is_null(Core_Array::getRequest('fast')))
 	$location = Core_Array::getRequest('location');
 	!is_null($location)
 		&& strlen($location)
+		&& is_string($location)
 		&& $Siteuser_Controller_Show->location($location);
 }
 

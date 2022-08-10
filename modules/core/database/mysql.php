@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Database
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_DataBase_Mysql extends Core_DataBase
 {
@@ -275,6 +275,26 @@ class Core_DataBase_Mysql extends Core_DataBase
 				$max = 4294967295;
 				break;
 
+			case 'char':
+				$type = 'string';
+				$default_max_length = 255;
+				break;
+			case 'binary':
+				$type = 'string';
+				$default_max_length = 255;
+				$binary = TRUE;
+				break;
+
+			case 'varchar':
+				$type = 'string';
+				$default_max_length = 65535;
+				break;
+			case 'varbinary':
+				$type = 'string';
+				$default_max_length = 65535;
+				$binary = TRUE;
+				break;
+
 			case 'tinytext':
 				$type = 'string';
 				$default_max_length = 255;
@@ -320,9 +340,8 @@ class Core_DataBase_Mysql extends Core_DataBase
 				break;
 		}
 
-		if ($type)
-		{
-			return array(
+		return $type
+			? array(
 				'datatype' => $switchType,
 				'type' => $type,
 				'fixed' => $fixed,
@@ -331,11 +350,10 @@ class Core_DataBase_Mysql extends Core_DataBase
 				'zerofill' => $zerofill,
 				'min' => $min,
 				'max' => $max,
+				'defined_max_length' => $max_length,
 				'max_length' => is_null($max_length) ? $default_max_length : $max_length
-			);
-		}
-
-		return parent::getColumnType($columnType);
+			)
+			: parent::getColumnType($columnType);
 	}
 
 	/**
@@ -797,12 +815,12 @@ class Core_DataBase_Mysql extends Core_DataBase
 	 */
 	protected function _currentObject($result = NULL, $bCache = TRUE)
 	{
-		$object_name = is_null($this->_asObject) ? 'stdClass' : $this->_asObject;
+		$objectName = is_null($this->_asObject) ? 'stdClass' : $this->_asObject;
 		$result = is_null($result) ? $this->_result : $result;
 
-		$return = mysql_fetch_object($result, $object_name);
+		$return = mysql_fetch_object($result, $objectName);
 
-		if ($bCache && $return && $object_name instanceof Core_ORM)
+		if ($bCache && $return && $return instanceof Core_ORM)
 		{
 			$Core_ObjectWatcher = Core_ObjectWatcher::instance();
 
@@ -810,6 +828,12 @@ class Core_DataBase_Mysql extends Core_DataBase
 
 			if (!is_null($object))
 			{
+				// move dataXXX values
+				foreach ($return->getDataValues() as $key => $value)
+				{
+					$object->$key = $value;
+				}
+
 				return $object;
 			}
 

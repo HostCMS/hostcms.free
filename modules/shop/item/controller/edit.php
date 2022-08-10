@@ -87,7 +87,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			break;
 		}
 
-		return parent::setObject($object);;
+		return parent::setObject($object);
 	}
 
 	/**
@@ -355,7 +355,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$(function(){
 					$("#' . $windowId . ' .shortcut-group-tags").select2({
 						dropdownParent: $("#' . $windowId . '"),
-						language: "' . Core_i18n::instance()->getLng() . '",
+						language: "' . Core_I18n::instance()->getLng() . '",
 						minimumInputLength: 2,
 						placeholder: "' . Core::_('Shop_Item.select_group') . '",
 						tags: true,
@@ -481,7 +481,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->value($this->_object->modification_id)
 						->type('hidden');
 
-					$oCore_Html_Entity_Script_Modification = Core::factory('Core_Html_Entity_Script')
+					$oCore_Html_Entity_Script_Modification = Core_Html_Entity::factory('Script')
 					->value("
 						$('#{$windowId} [name = modification_name]').autocomplete({
 							source: function(request, response) {
@@ -699,7 +699,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->name('set_item_name')
 				);
 
-				$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+				$oCore_Html_Entity_Script = Core_Html_Entity::factory('Script')
 					->value("$('#{$windowId} .add-set-item').autocompleteShopItem({
 							shop_id: '{$this->_object->shop_id}',
 							shop_currency_id: 0
@@ -769,7 +769,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$this->getField('weight')
 					->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'))
 					->add(
-						Core::factory('Core_Html_Entity_Span')
+						Core_Html_Entity::factory('Span')
 							->class('input-group-addon dimension_patch')
 							->value(htmlspecialchars($oShop->Shop_Measure->name))
 					);
@@ -860,7 +860,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$oSiteuserSelect = Admin_Form_Entity::factory('Select')
 						->caption(Core::_('Shop_Item.siteuser_id'))
-						->id('object_siteuser_id')
 						->options($options)
 						->name('siteuser_id')
 						->class('siteuser-tag')
@@ -918,7 +917,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$(function(){
 					$("#' . $windowId . ' .shop-tabs").select2({
 						dropdownParent: $("#' . $windowId . '"),
-						language: "' . Core_i18n::instance()->getLng() . '",
+						language: "' . Core_I18n::instance()->getLng() . '",
 						minimumInputLength: 1,
 						placeholder: "' . Core::_('Shop_Tab.select_tab') . '",
 						tags: true,
@@ -1080,7 +1079,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->format(array('maxlen' => array('value' => 12), 'lib' => array('value' => 'decimal')));
 
 				ob_start();
-				Core::factory('Core_Html_Entity_Div')
+				Core_Html_Entity::factory('Div')
 					->style('float: left; padding-top: 30px;')
 					->value(Core::_("Shop_Item.or"))
 					->execute();
@@ -1310,7 +1309,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$(function(){
 						$("#' . $windowId . ' .shop-item-tags").select2({
 							dropdownParent: $("#' . $windowId . '"),
-							language: "' . Core_i18n::instance()->getLng() . '",
+							language: "' . Core_I18n::instance()->getLng() . '",
 							minimumInputLength: 1,
 							placeholder: "' . Core::_('Shop_Item.type_tag') . '",
 							tags: true,
@@ -1358,7 +1357,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$(function(){
 					$("#' . $windowId . ' .shop-item-barcodes").select2({
 						dropdownParent: $("#' . $windowId . '"),
-						language: "' . Core_i18n::instance()->getLng() . '",
+						language: "' . Core_I18n::instance()->getLng() . '",
 						minimumInputLength: 1,
 						placeholder: "' . Core::_('Shop_Item.type_barcode') . '",
 						tags: true,
@@ -1424,17 +1423,20 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							? $oShop_Item->Shop_Item
 							: $oShop_Item;
 
-						$link = $this->_Admin_Form_Controller->getAdminActionLoadAjax(/*$this->_Admin_Form_Controller->getPath()*/'/admin/shop/item/index.php', 'deleteAssociated', NULL, $this->_object->modification_id == 0 ? 1 : 0, $oShop_Item->id, "associated_item_id={$oShop_Item_Associated->id}");
+						if ($oShop_Item->id)
+						{
+							$link = $this->_Admin_Form_Controller->getAdminActionLoadAjax(/*$this->_Admin_Form_Controller->getPath()*/'/admin/shop/item/index.php', 'deleteAssociated', NULL, $this->_object->modification_id == 0 ? 1 : 0, $oShop_Item->id, "associated_item_id={$oShop_Item_Associated->id}");
 
-						$associatedTable .= '
-							<tr id="' . $oShop_Item_Associated->id . '">
-								<td>' . htmlspecialchars($oShop_Item->name) . '</td>
-								<td>' . htmlspecialchars($oShop_Item->marking) . '</td>
-								<td width="25"><input class="set-item-count form-control" name="associated_count_' . $oShop_Item_Associated->id . '" value="' . $oShop_Item_Associated->count . '" /></td>
-								<td>' . htmlspecialchars($oShop_Item->Shop_Currency->formatWithCurrency($oShop_Item->price)) . '</td>
-								<td><a class="delete-associated-item" onclick="' . $link . '"><i class="fa fa-times-circle darkorange"></i></a></td>
-							</tr>
-						';
+							$associatedTable .= '
+								<tr id="' . $oShop_Item_Associated->id . '">
+									<td>' . htmlspecialchars($oShop_Item->name) . '</td>
+									<td>' . htmlspecialchars($oShop_Item->marking) . '</td>
+									<td width="25"><input class="set-item-count form-control" name="associated_count_' . $oShop_Item_Associated->id . '" value="' . $oShop_Item_Associated->count . '" /></td>
+									<td>' . htmlspecialchars($oShop_Item->Shop_Currency->formatWithCurrency($oShop_Item->price)) . '</td>
+									<td><a class="delete-associated-item" onclick="' . $link . '"><i class="fa fa-times-circle darkorange"></i></a></td>
+								</tr>
+							';
+						}
 					}
 				}
 
@@ -1463,7 +1465,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->name('associated_item_name')
 				);
 
-				$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+				$oCore_Html_Entity_Script = Core_Html_Entity::factory('Script')
 					->value("$('#{$windowId} .add-associated-item').autocompleteShopItem({ shop_id: '{$this->_object->shop_id}', shop_currency_id: 0}, function(event, ui) {
 						$('<input type=\'hidden\' name=\'associated_item_id[]\'/>')
 							.val(typeof ui.item.id !== 'undefined' ? ui.item.id : 0)
@@ -1480,9 +1482,9 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$this->getField('length')
 					->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4 no-padding-right'))
 					->add(
-						Core::factory('Core_Html_Entity_Span')
-						->class('input-group-addon dimension_patch')
-						->value('×')
+						Core_Html_Entity::factory('Span')
+							->class('input-group-addon dimension_patch')
+							->value('×')
 					)
 					->caption(Core::_('Shop_Item.item_length'));
 
@@ -1492,9 +1494,9 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4 no-padding'))
 					->caption(Core::_('Shop_Item.item_width'))
 					->add(
-						Core::factory('Core_Html_Entity_Span')
-						->class('input-group-addon dimension_patch')
-						->value('×')
+						Core_Html_Entity::factory('Span')
+							->class('input-group-addon dimension_patch')
+							->value('×')
 					);
 
 				$oMainTab->move($this->getField('width'), $oMainRow11);
@@ -1503,7 +1505,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4 no-padding'))
 					->caption(Core::_('Shop_Item.item_height'))
 					->add(
-						Core::factory('Core_Html_Entity_Span')
+						Core_Html_Entity::factory('Span')
 							->class('input-group-addon dimension_patch')
 							->value(Core::_('Shop.size_measure_' . $oShop->size_measure))
 					);
@@ -1664,7 +1666,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$(function(){
 					$("#' . $windowId . ' .shortcut-group-tags").select2({
 						dropdownParent: $("#' . $windowId . '"),
-						language: "' . Core_i18n::instance()->getLng() . '",
+						language: "' . Core_I18n::instance()->getLng() . '",
 						minimumInputLength: 2,
 						placeholder: "' . Core::_('Shop_Item.select_group') . '",
 						tags: true,
@@ -1767,7 +1769,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$oSiteuserSelect = Admin_Form_Entity::factory('Select')
 						->caption(Core::_('Shop_Group.siteuser_id'))
-						->id('object_siteuser_id')
 						->options($options)
 						->name('siteuser_id')
 						->class('siteuser-tag')
@@ -1807,7 +1808,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$(function(){
 					$("#' . $windowId . ' .shop-tabs").select2({
 						dropdownParent: $("#' . $windowId . '"),
-						language: "' . Core_i18n::instance()->getLng() . '",
+						language: "' . Core_I18n::instance()->getLng() . '",
 						minimumInputLength: 1,
 						placeholder: "' . Core::_('Shop_Tab.select_tab') . '",
 						tags: true,
@@ -2252,7 +2253,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						ob_start();
 						$onclick = $this->_Admin_Form_Controller->getAdminActionLoadAjax($this->_Admin_Form_Controller->getPath(), 'deleteSetItem', NULL, $this->_object->modification_id == 0 ? 1 : 0, $this->_object->id, "set_item_id={$oShop_Item_Set->id}");
 
-						Core::factory('Core_Html_Entity_Script')
+						Core_Html_Entity::factory('Script')
 							->value("$(\"#{$windowId} input[name='set_item_id\\[\\]']\").remove();
 							var tmpInput = $(\"#{$windowId} input[name='set_count\\[\\]']\").eq(0),
 								tmpTr = tmpInput.closest('tr');
@@ -2317,7 +2318,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							$this->_object->add($oShop_Specialprice);
 
 							ob_start();
-							Core::factory('Core_Html_Entity_Script')
+							Core_Html_Entity::factory('Script')
 								->value("$(\"#{$windowId} input[name='specMinQuantity_\\[\\]']\").eq(0).prop('name', 'specMinQuantity_{$oShop_Specialprice->id}');
 								$(\"#{$windowId} input[name='specMaxQuantity_\\[\\]']\").eq(0).prop('name', 'specMaxQuantity_{$oShop_Specialprice->id}');
 								$(\"#{$windowId} input[name='specPrice_\\[\\]']\").eq(0).prop('name', 'specPrice_{$oShop_Specialprice->id}');
@@ -2982,7 +2983,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				. $this->_object->getPath();
 
 			$this->_Admin_Form_Controller->addMessage(
-				Core::factory('Core_Html_Entity_Script')
+				Core_Html_Entity::factory('Script')
 					->value("$('#{$windowId} input#path').val('" . Core_Str::escapeJavascriptVariable($this->_object->path) . "');
 					$('#{$windowId} a#pathLink').attr('href', '" . Core_Str::escapeJavascriptVariable($sUrl) . "').attr('target', '_blank')")
 				->execute()
@@ -3164,7 +3165,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 			$windowId = $this->_Admin_Form_Controller->getWindowId();
 
-			$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+			$oCore_Html_Entity_Script = Core_Html_Entity::factory('Script')
 				->value("$('#{$windowId} [name = shop_group_name]').autocomplete({
 					source: function(request, response) {
 						$.ajax({

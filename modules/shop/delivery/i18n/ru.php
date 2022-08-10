@@ -47,4 +47,5 @@ return array(
 	'conditions_for_delivery' => 'Условия доставки для "%s"',
 	'empty_conditions_for_delivery' => 'Условия доставки отсутствуют',
 	'apply_button' => 'Применить',
+	'intervals' => 'Интервалы',
 );

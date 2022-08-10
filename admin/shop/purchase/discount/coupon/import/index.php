@@ -3,9 +3,9 @@
  * Online shop.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../../../bootstrap.php');
 
@@ -238,7 +238,7 @@ else
 									$oShop_Purchase_Discount_Coupon->save();
 									$iCounter++;
 								}
-								catch(Exception $e)
+								catch (Exception $e)
 								{
 									Core_Message::show('Save error', "error");
 								}
@@ -254,7 +254,7 @@ else
 			{
 				Core_File::delete($sTmpFileName);
 			}
-			catch(Exception $e)
+			catch (Exception $e)
 			{
 				Core_Message::show(Core::_('Shop_Purchase_Discount_Coupon.import_error', $e->getMessage()), "error");
 			}

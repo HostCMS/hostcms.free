@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Producer_Dir_Model extends Core_Entity
 {
@@ -106,7 +106,7 @@ class Shop_Producer_Dir_Model extends Core_Entity
 	{
 		$count = $this->getChildCount();
 
-		$count > 0 && Core::factory('Core_Html_Entity_Span')
+		$count > 0 && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
 			->value($count)
 			->execute();

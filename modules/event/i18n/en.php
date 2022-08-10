@@ -132,4 +132,24 @@ return array(
 	'event_today' => 'Today',
 	'event_empty' => 'Coming soon',
 	'more' => 'more',
+
+	'deleteEntity_success' => 'Entity deleted!',
+
+	'no_events' => 'No events',
+
+	'history_add_event' => 'Adding an event',
+	'history_change_status' => 'Status changed to "%s"',
+	'history_change_type' => 'Type changed to "%s"',
+	'history_change_group' => 'Group changed to "%s"',
+	'history_change_important0' => 'Important removed',
+	'history_change_important1' => 'Important is set',
+	'history_change_place_from_empty' => 'Meeting place "%s" has been set',
+	'history_change_place_to_empty' => 'Removed meeting place "%s"',
+	'history_change_place' => 'Meeting place changed from "%s" to "%s"',
+	'history_add_file' => 'Added file <b>%s</b>',
+	'history_change_completed0' => '<span class="azure">Event returned to work</span>',
+	'history_change_completed1' => '<span class="palegreen">Event completed successfully</span>',
+	'history_change_completed-1' => '<span class="darkorange">Event completed unsuccessfully</span>',
+
+	'event_files' => 'Files',
 );

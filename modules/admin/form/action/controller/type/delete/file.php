@@ -8,9 +8,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Admin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Type_Delete_File extends Admin_Form_Action_Controller
 {
@@ -20,6 +20,7 @@ class Admin_Form_Action_Controller_Type_Delete_File extends Admin_Form_Action_Co
 	 */
 	protected $_allowedProperties = array(
 		'methodName',
+		'dir',
 		'divId'
 	);
 
@@ -49,6 +50,11 @@ class Admin_Form_Action_Controller_Type_Delete_File extends Admin_Form_Action_Co
 			throw new Core_Exception('divId is NULL.');
 		}
 
+		if (method_exists($this->_object, 'setDir'))
+		{
+			$this->_object->setDir($this->dir);
+		}
+
 		$methodName = $this->methodName;
 		$this->_object->$methodName($operation);
 
@@ -61,7 +67,7 @@ class Admin_Form_Action_Controller_Type_Delete_File extends Admin_Form_Action_Co
 		{
 			// Удаляем дочерние узлы
 			// $('#{$windowId} div#file_{$sDivId}').toggleClass('hidden');
-			Core::factory('Core_Html_Entity_Script')
+			Core_Html_Entity::factory('Script')
 				->value("$('#{$windowId} div#file_{$sDivId}').prev('input').toggleClass('hidden');
 				$('#{$windowId} #{$sDivId}').remove();")
 				->execute();

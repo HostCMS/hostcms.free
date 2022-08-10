@@ -94,7 +94,7 @@ class Shop_Cart_Model extends Core_Entity
 			? $this->Shop_Item->Shop_Item
 			: $this->Shop_Item;
 
-		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div');
+		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div');
 
 		// Зачеркнут в зависимости от статуса родительского товара или своего статуса
 		if (!$object->active)
@@ -109,14 +109,14 @@ class Shop_Cart_Model extends Core_Entity
 		else
 		{
 			$oCore_Html_Entity_Div->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->href(
 						$oAdmin_Form_Controller->getAdminActionLoadHref('/admin/shop/item/index.php', 'edit', NULL, 1, $object->id)
 					)
 					->target('_blank')
 					->value(htmlspecialchars($this->name))
 					->add(
-						Core::factory('Core_Html_Entity_I')->class('fa fa-external-link')
+						Core_Html_Entity::factory('I')->class('fa fa-external-link')
 					)
 			);
 		}

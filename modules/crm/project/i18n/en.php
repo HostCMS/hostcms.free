@@ -31,4 +31,6 @@ return array(
 	'color' => 'Color',
 	'completed' => 'Completed',
 	'changeCompleted_success' => 'Completion of the project has been changed',
+	'files_count' => 'Files: %s',
+	'add_attachment' => 'File',
 );

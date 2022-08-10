@@ -3,9 +3,9 @@
  * Online shop.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -167,7 +167,7 @@ $oAdmin_Form_Action_Edit = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 	->Admin_Form_Actions
 	->getByName('edit');
 
-if ($oAdmin_Form_Action_Edit)
+if ($oAdmin_Form_Action_Edit && $oAdmin_Form_Controller->getAction() == 'edit')
 {
 	$Shop_Item_Digital_Controller_Edit = Admin_Form_Action_Controller::factory(
 		'Shop_Item_Digital_Controller_Edit', $oAdmin_Form_Action_Edit

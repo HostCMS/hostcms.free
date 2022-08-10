@@ -8,9 +8,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Mail
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Mail_Imap extends Core_Servant_Properties
 {
@@ -47,7 +47,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 
 	/**
 	 * IMAP stream
-	 * @var resource
+	 * @var resource|NULL
 	 */
 	protected $_stream = NULL;
 
@@ -145,7 +145,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 
 		// Устанавливаем соединение с почтовым сервером
 		$this->_stream = version_compare(PHP_VERSION, '5.3.2') >= 0
-			? @imap_open($mailbox, $this->login, $this->password, NULL, 0, $aParam)
+			? @imap_open($mailbox, $this->login, $this->password, 0, 0, $aParam)
 			: @imap_open($mailbox, $this->login, $this->password);
 
 		// Соединение с почтовым сервером не установлено
@@ -275,7 +275,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 	/**
 	 * Разбор структуры сообщения и сохранение результата в массив
 	 *
-	 * @param array $structure Массив со структурой сообщения
+	 * @param mixed $structure Массив со структурой сообщения
 	 * @return array
 	 */
 	protected function _structure2array($structure)
@@ -287,7 +287,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 		{
 			// Разбираем структуру сообщения
 			// [parts][0][]
-			foreach ($structure->parts as $part_num => $part_param)
+			foreach ($structure->parts as /*$part_num =>*/ $part_param)
 			{
 				// [parts][0][type]
 				foreach ($part_param as $attribute => $attributeValue)
@@ -299,7 +299,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 						{
 							if (is_object($parameter_values) && isset($parameter_values->attribute) && isset($parameter_values->value))
 							{
-								$aStructureParts[$j][mb_strtolower($attribute)][mb_strtolower(strval($parameter_values->attribute))] = strval($parameter_values->value);
+								$aStructureParts[$j][strtolower($attribute)][strtolower(strval($parameter_values->attribute))] = strval($parameter_values->value);
 							}
 						}
 					}
@@ -309,17 +309,17 @@ class Core_Mail_Imap extends Core_Servant_Properties
 						{
 							if (is_array($parameter_values_part_values))
 							{
-								$aStructureParts[$j][mb_strtolower($attribute)][mb_strtolower(strval($parameter_values_part_num))] = $parameter_values_part_values;
+								$aStructureParts[$j][strtolower($attribute)][strtolower(strval($parameter_values_part_num))] = $parameter_values_part_values;
 							}
 							else
 							{
-								$aStructureParts[$j][mb_strtolower($attribute)][mb_strtolower(strval($attributeValue->attribute))] = strval($attributeValue->value);
+								$aStructureParts[$j][strtolower($attribute)][strtolower(strval($attributeValue->attribute))] = strval($attributeValue->value);
 							}
 						}
 					}
 					else
 					{
-						$aStructureParts[$j][mb_strtolower($attribute)] = $attributeValue;
+						$aStructureParts[$j][strtolower($attribute)] = $attributeValue;
 					}
 				}
 
@@ -335,21 +335,15 @@ class Core_Mail_Imap extends Core_Servant_Properties
 		{
 			foreach ($structure as $attribute => $attributeValue)
 			{
-				if (is_array($attributeValue))
+				if (is_array($attributeValue) || is_object($attributeValue))
 				{
 					// [parts][0][parameters][]
-					foreach ($attributeValue as $parameter_num => $parameter_values)
+					foreach ($attributeValue as /*$parameter_num => */ $parameter_values)
 					{
-						if (!is_array($parameter_values))
+						if (is_object($parameter_values))
 						{
 							// [parts][0][parameters][0][attribute]
-							foreach ($parameter_values as $parameter_values_part_values)
-							{
-								if (!is_array($parameter_values_part_values) && isset($parameter_values->attribute) && isset($parameter_values->value))
-								{
-									$aStructureParts[$j][strtolower($parameter_values->attribute)] = $parameter_values->value;
-								}
-							}
+							$aStructureParts[$j][strtolower($parameter_values->attribute)] = strval($parameter_values->value);
 						}
 					}
 				}
@@ -385,6 +379,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 				}
 			}
 		}
+
 		return $this->_headers;
 	}
 
@@ -505,7 +500,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 
 				switch ($partType)
 				{
-					// multipart
+					// multipart see above
 					//case 1:
 					//break;
 					// text

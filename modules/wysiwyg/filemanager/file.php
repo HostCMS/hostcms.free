@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Wysiwyg
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Wysiwyg_Filemanager_File extends Core_Entity
 {
@@ -165,12 +165,10 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 		if ($this->type == 'file')
 		{
 			ob_start();
-			$oCore_Html_Entity_Img = Core::factory('Core_Html_Entity_A')
+			$oCore_Html_Entity_Img = Core_Html_Entity::factory('A')
 				->add(
-					Core::factory('Core_Html_Entity_I')
+					Core_Html_Entity::factory('I')
 						->class('fa fa-download')
-					/*Core::factory('Core_Html_Entity_Img')
-						->src('/admin/images/disk.gif')*/
 				)
 				->href("/admin/filemanager/index.php?hostcms[action]=download&cdir=" . rawurlencode(Core_File::pathCorrection(Core_Array::getRequest('cdir'))) . "&dir=" . rawurlencode(Core_File::pathCorrection(Core_Array::getRequest('dir'))) ."&hostcms[checked][1][{$this->hash}]=1")
 				->target('_blank')
@@ -234,7 +232,7 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 	{
 		if ($this->type == 'link')
 		{
-			Core::factory('Core_Html_Entity_I')
+			Core_Html_Entity::factory('I')
 				->class('fa fa-link fa-small')
 				->execute();
 		}
@@ -245,10 +243,10 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 	 */
 	public function image()
 	{
-		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
+		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')
 			->class('fm_preview');
 
-		$oChild = Core::factory('Core_Html_Entity_I')
+		$oChild = Core_Html_Entity::factory('I')
 			->class('fa fa-file-text-o');
 
 		if ($this->type == 'file')
@@ -260,7 +258,7 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 
 			if (isset(Core::$mainConfig['fileIcons'][$ext]))
 			{
-				$oChild = Core::factory('Core_Html_Entity_Img')
+				$oChild = Core_Html_Entity::factory('Img')
 					->src('/admin/images/icons/' . Core::$mainConfig['fileIcons'][$ext]);
 			}
 
@@ -410,7 +408,7 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 							$sImgContent = Core_File::read($filePath);
 						}
 
-						$oChild = Core::factory('Core_Html_Entity_Img')
+						$oChild = Core_Html_Entity::factory('Img')
 							->src(
 								"data:" . Core_Mime::getFileMime($filePath) .
 								";base64," . base64_encode($sImgContent)
@@ -424,7 +422,7 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 		}
 		else
 		{
-			$oChild = Core::factory('Core_Html_Entity_I')
+			$oChild = Core_Html_Entity::factory('I')
 					->class('fa fa-folder-open-o');
 
 			/*$icon_file = $this->name == '..'

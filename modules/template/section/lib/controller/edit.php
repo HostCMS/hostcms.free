@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Template
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -115,23 +115,23 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 					->value('<i class="fa fa-pencil"></i>')
 			);
 
-		$Div_Lib_Properies = Admin_Form_Entity::factory('Code');
+		$Div_Lib_Properties = Admin_Form_Entity::factory('Code');
 
 		ob_start();
 		// DIV для св-в типовой дин. страницы
 		// Для выбранного стандартно
-		Core::factory('Core_Html_Entity_Script')
+		Core_Html_Entity::factory('Script')
 			->value("$('#{$windowId} #lib_id').change();")
 			->execute();
 
-		$Div_Lib_Properies
+		$Div_Lib_Properties
 			->html(ob_get_clean());
 
 		$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2);
 
 		$oMainRow3->add($Select_LibDir);
 		$oMainRow4->add($Select_Lib);
-		$oMainRow5->add($Div_Lib_Properies);
+		$oMainRow5->add($Div_Lib_Properties);
 
 		$oMainTab
 			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3')), $oMainRow3)
@@ -148,7 +148,7 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 	{
 		parent::_applyObjectProperty();
 
-		// Lib properies
+		// Lib properties
 		if ($this->_object->lib_id)
 		{
 			$JSON = Structure_Controller_Libproperties::getJson($this->_object);

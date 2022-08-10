@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -22,9 +22,9 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 	{
 		if (!$object->id)
 		{
-			$oShopItem = Core_Entity::factory('Shop_Item', Core_Array::getGet('shop_item_id', 0));
+			$oShopItem = Core_Entity::factory('Shop_Item', Core_Array::getGet('shop_item_id', 0, 'int'));
 
-			$object->shop_id = $oShopItem->Shop->id;
+			$object->shop_id = $oShopItem->shop_id;
 		}
 
 		return parent::setObject($object);
@@ -49,8 +49,6 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 
 		$this->addTab($oMainTab);
 
-		$oShop = $this->_object->Shop;
-
 		$modelName = $this->_object->getModelName();
 
 		switch ($modelName)
@@ -58,12 +56,12 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 			case 'shop_discount':
 			default:
 				$caption = Core::_('Shop_Discount.item_discount_name');
-				$options = $this->_fillDiscounts($oShop->id);
+				$options = $this->_fillDiscounts($this->_object->shop_id);
 				$name = 'shop_discount_id';
 			break;
 			case 'shop_bonus':
 				$caption = Core::_('Shop_Bonus.item_bonus_name');
-				$options = $this->_fillBonuses($oShop->id);
+				$options = $this->_fillBonuses($this->_object->shop_id);
 				$name = 'shop_bonus_id';
 			break;
 		}

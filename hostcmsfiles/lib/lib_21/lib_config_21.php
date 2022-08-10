@@ -3,7 +3,7 @@
 // Запрещаем индексацию страницы
 Core_Page::instance()->response->header('X-Robots-Tag', 'none');
 
-$id = Core_Array::getGet('id');
+$id = Core_Array::getGet('id', 0, 'int');
 if (Core::moduleIsActive('advertisement') && $id)
 {
 	$oAdvertisement_Controller = Advertisement_Controller::instance()

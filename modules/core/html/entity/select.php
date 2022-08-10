@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Html
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Html_Entity_Select extends Core_Html_Entity
 {
@@ -21,14 +21,15 @@ class Core_Html_Entity_Select extends Core_Html_Entity
 		'disabled',
 		'multiple',
 		'name',
-		'size'
+		'size',
+		'form'
 	);
 
 	/**
 	 * Skip properties
 	 * @var array
 	 */
-	protected $_skipProperies = array(
+	protected $_skipProperties = array(
 		'options', // array
 		'value'
 	);

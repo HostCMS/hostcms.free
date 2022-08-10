@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Document
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Document_Model extends Core_Entity
 {
@@ -311,13 +311,12 @@ class Document_Model extends Core_Entity
 
 		Core_Event::notify($this->_modelName . '.onBeforeExecute', $this);
 
-		$checkPanel = Core::checkPanel();
-		if ($checkPanel
-			&& ($oUser = Core_Auth::getCurrentUser())
+		$checkPanel = Core::checkPanel() && ($oUser = Core_Auth::getCurrentUser())
 			&& ($oSite = Core_Entity::factory('Site', CURRENT_SITE))
 			&& $oUser->checkModuleAccess(array('document'), $oSite)
-			&& $oUser->checkObjectAccess($this)
-		)
+			&& $oUser->checkObjectAccess($this);
+		
+		if ($checkPanel)
 		{
 			?><div hostcms:id="<?php echo intval($this->id)?>" hostcms:field="editInPlace" hostcms:entity="document" hostcms:type="wysiwyg"><?php
 		}

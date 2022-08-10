@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Directory
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Directory_Controller_Tab_Website extends Directory_Controller_Tab
 {
@@ -82,7 +82,7 @@ class Directory_Controller_Tab_Website extends Directory_Controller_Tab
 			/*if (!$oUser_Directory_Website)
 			{
 				$oRowElements->add(
-					Core::factory('Core_Html_Entity_Input')
+					Core_Html_Entity::factory('Input')
 						->type('hidden')
 						->value(0)
 						->name($this->prefix . 'website_public_value' . $sNameSuffix)
@@ -124,7 +124,7 @@ class Directory_Controller_Tab_Website extends Directory_Controller_Tab
 			{
 				// Удаляем пустую строку с полями
 				ob_start();
-				Core::factory('Core_Html_Entity_Script')
+				Core_Html_Entity::factory('Script')
 					->value("$.deleteFormRow($(\"#{$windowId} input[name='{$prefix}website_address#{$oDirectory_Website->id}']\").closest('.row').find('.btn-delete').get(0));")
 					->execute();
 
@@ -162,7 +162,7 @@ class Directory_Controller_Tab_Website extends Directory_Controller_Tab
 					$object->add($oDirectory_Website);
 
 					ob_start();
-					Core::factory('Core_Html_Entity_Script')
+					Core_Html_Entity::factory('Script')
 						->value("$(\"#{$windowId} input[name='{$prefix}website_address\\[\\]']\").eq({$i}).prop('name', '{$prefix}website_address#{$oDirectory_Website->id}').closest('.row').find('.btn-delete').removeClass('hide');
 						$(\"#{$windowId} input[name='{$prefix}website_description\\[\\]']\").eq({$i}).prop('name', '{$prefix}website_description#{$oDirectory_Website->id}');
 						$(\"#{$windowId} input[name='{$prefix}website_public\\[\\]']\").eq({$i}).prop('name', '{$prefix}website_public#{$oDirectory_Website->id}');

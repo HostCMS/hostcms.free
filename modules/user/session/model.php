@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage User
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Session_Model extends Core_Entity
 {
@@ -72,7 +72,7 @@ class User_Session_Model extends Core_Entity
 	 */
 	public function imgBackend()
 	{
-		!is_null($this->dataSession) && Core::factory('Core_Html_Entity_Span')
+		!is_null($this->dataSession) && Core_Html_Entity::factory('Span')
 			->value('<i class="fa fa-check-circle green" title="Session exists"></i>')
 			->execute();
 	}

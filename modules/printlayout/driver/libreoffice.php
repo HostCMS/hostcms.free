@@ -6,11 +6,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * Printlayout_Driver_Libreoffice
  * yum install libreoffice-core libreoffice-headless libreoffice-writer
  *
- * @package HostCMS 6
+ * @package HostCMS
  * @subpackage Printlayout
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Printlayout_Driver_Libreoffice extends Printlayout_Driver_Controller
 {
@@ -24,10 +24,28 @@ class Printlayout_Driver_Libreoffice extends Printlayout_Driver_Controller
 	{
 		$tmpPath = CMS_FOLDER . TMP_DIR;
 
-		// Пользователь apache не имеет $HOME, поэтому libreoffice не может работать, если $HOME не определен
-		@shell_exec('export HOME=' . $tmpPath . ' && libreoffice --headless --writer -convert-to pdf --outdir ' . $tmpPath . ' ' . $this->_sourceDocx);
+		$sh = '';
 
-		Core_File::delete($this->_sourceDocx);
+		// Пользователь apache не имеет $HOME, поэтому libreoffice не может работать, если $HOME не определен
+		if (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN')
+		{
+			$sh .= 'export HOME=' . $tmpPath . ' && ';
+		}
+
+		$aConfig = Core_Config::instance()->get('printlayout_config', array());
+
+		$libreofficePath = isset($aConfig['libreoffice']['path'])
+			? strval($aConfig['libreoffice']['path'])
+			: '';
+
+		if (strlen($libreofficePath))
+		{
+			$sh .= $libreofficePath . ' --headless --writer --invisible --convert-to pdf --outdir ' . $tmpPath . ' ' . $this->_sourceDocx;
+
+			@shell_exec($sh);
+
+			Core_File::delete($this->_sourceDocx);
+		}
 
 		return $this;
 	}

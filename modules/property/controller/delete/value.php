@@ -8,9 +8,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Property
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Controller_Delete_Value extends Admin_Form_Action_Controller
 {
@@ -68,7 +68,7 @@ class Property_Controller_Delete_Value extends Admin_Form_Action_Controller
 							$oValue->deleteSmallFile();
 
 							ob_start();
-							Core::factory('Core_Html_Entity_Script')
+							Core_Html_Entity::factory('Script')
 								->value("$(\"#{$windowId} #preview_small_id_property_{$oProperty->id}_{$oValue->id},#{$windowId} #delete_small_id_property_{$oProperty->id}_{$oValue->id}\").remove()")
 								->execute();
 							$this->addMessage(ob_get_clean());
@@ -80,7 +80,7 @@ class Property_Controller_Delete_Value extends Admin_Form_Action_Controller
 							$oValue->deleteLargeFile();
 
 							ob_start();
-							Core::factory('Core_Html_Entity_Script')
+							Core_Html_Entity::factory('Script')
 								->value("$(\"#{$windowId} #preview_large_id_property_{$oProperty->id}_{$oValue->id}, #{$windowId} #delete_large_id_property_{$oProperty->id}_{$oValue->id}\").remove()")
 								->execute();
 							$this->addMessage(ob_get_clean());

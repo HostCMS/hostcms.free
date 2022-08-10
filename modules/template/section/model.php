@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Template
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Section_Model extends Core_Entity
 {
@@ -123,7 +123,7 @@ class Template_Section_Model extends Core_Entity
 	{
 		$count = $this->Template_Section_Libs->getCount();
 
-		$count && Core::factory('Core_Html_Entity_Span')
+		$count && Core_Html_Entity::factory('Span')
 			->class('badge badge-ico badge-azure white')
 			->value($count < 100 ? $count : '∞')
 			->title($count)

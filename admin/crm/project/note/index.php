@@ -3,9 +3,9 @@
  * Crm Projects.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -68,14 +68,21 @@ if ($oAdmin_Form_Action_Add_Note && $oAdmin_Form_Controller->getAction() == 'add
 
 // Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
-	Core_Entity::factory('Crm_Project_Note')
+	Core_Entity::factory('Crm_Note')
 );
 
 $oAdmin_Form_Dataset
 	->addCondition(
-		array('where' => array('crm_project_notes.crm_project_id', '=', $oCrm_Project->id))
-	)->addCondition(
-		array('orderBy' => array('crm_project_notes.id', 'DESC'))
+		array('select' => array('crm_notes.*'))
+	)
+	->addCondition(
+		array('join' => array('crm_project_crm_notes', 'crm_notes.id', '=', 'crm_project_crm_notes.crm_note_id'))
+	)
+	->addCondition(
+		array('where' => array('crm_project_crm_notes.crm_project_id', '=', $oCrm_Project->id))
+	)
+	->addCondition(
+		array('orderBy' => array('crm_notes.datetime', 'DESC'))
 	);
 
 // Добавляем источник данных контроллеру формы

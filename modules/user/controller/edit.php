@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage User
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -475,7 +475,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			{
 				// Удаляем пустую строку с полями
 				/*ob_start();
-				Core::factory('Core_Html_Entity_Script')
+				Core_Html_Entity::factory('Script')
 					->value("$.deleteFormRow($(\"#{$windowId} select[name='email_type#{$oDirectory_Email->id}']\").closest('.row').find('.btn-delete').get(0));")
 					->execute();
 
@@ -505,7 +505,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$this->_object->add($oDirectory_Email);
 
 					ob_start();
-					Core::factory('Core_Html_Entity_Script')
+					Core_Html_Entity::factory('Script')
 						->value("$(\"#{$windowId} select[name='email_type\\[\\]']\").eq({$i}).prop('name', 'email_type#{$oDirectory_Email->id}').closest('.row').find('.btn-delete').removeClass('hide');
 						$(\"#{$windowId} input[name='email\\[\\]']\").eq({$i}).prop('name', 'email#{$oDirectory_Email->id}');")
 						->execute();
@@ -538,7 +538,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			{
 				// Удаляем пустую строку с полями
 				/*ob_start();
-				Core::factory('Core_Html_Entity_Script')
+				Core_Html_Entity::factory('Script')
 					->value("$.deleteFormRow($(\"#{$windowId} select[name='phone_type#{$oDirectory_Phone->id}']\").closest('.row').find('.btn-delete').get(0));")
 					->execute();
 				$this->_Admin_Form_Controller->addMessage(ob_get_clean());*/
@@ -568,7 +568,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$this->_object->add($oDirectory_Phone);
 
 					ob_start();
-					Core::factory('Core_Html_Entity_Script')
+					Core_Html_Entity::factory('Script')
 						->value("$(\"#{$windowId} select[name='phone_type\\[\\]']\").eq({$i}).prop('name', 'phone_type#{$oDirectory_Phone->id}').closest('.row').find('.btn-delete').removeClass('hide');
 						$(\"#{$windowId} input[name='phone\\[\\]']\").eq({$i}).prop('name', 'phone#{$oDirectory_Phone->id}');
 						")
@@ -609,7 +609,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			{
 				// Удаляем пустую строку с полями
 				/*ob_start();
-				Core::factory('Core_Html_Entity_Script')
+				Core_Html_Entity::factory('Script')
 					->value("$.deleteFormRow($(\"#{$windowId} select[name='social#{$oDirectory_Social->id}']\").closest('.row').find('.btn-delete').get(0));")
 					->execute();
 				$this->_Admin_Form_Controller->addMessage(ob_get_clean());*/
@@ -646,7 +646,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$this->_object->add($oDirectory_Social);
 
 					ob_start();
-					Core::factory('Core_Html_Entity_Script')
+					Core_Html_Entity::factory('Script')
 						->value("$(\"#{$windowId} select[name='social\\[\\]']\").eq({$i}).prop('name', 'social#{$oDirectory_Social->id}').closest('.row').find('.btn-delete').removeClass('hide');
 						$(\"#{$windowId} input[name='social_address\\[\\]']\").eq({$i}).prop('name', 'social_address#{$oDirectory_Social->id}');
 						")
@@ -680,7 +680,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			{
 				// Удаляем пустую строку с полями
 				/*ob_start();
-				Core::factory('Core_Html_Entity_Script')
+				Core_Html_Entity::factory('Script')
 					->value("$.deleteFormRow($(\"#{$windowId} select[name='messenger#{$oDirectory_Messenger->id}']\").closest('.row').find('.btn-delete').get(0));")
 					->execute();
 				$this->_Admin_Form_Controller->addMessage(ob_get_clean());*/
@@ -710,7 +710,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$this->_object->add($oDirectory_Messenger);
 
 					ob_start();
-					Core::factory('Core_Html_Entity_Script')
+					Core_Html_Entity::factory('Script')
 						->value("$(\"#{$windowId} select[name='messenger\\[\\]']\").eq({$i}).prop('name', 'messenger#{$oDirectory_Messenger->id}').closest('.row').find('.btn-delete').removeClass('hide');
 						$(\"#{$windowId} input[name='messenger_username\\[\\]']\").eq({$i}).prop('name', 'messenger_username#{$oDirectory_Messenger->id}');
 						")
@@ -751,7 +751,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			{
 				// Удаляем пустую строку с полями
 				/*ob_start();
-				Core::factory('Core_Html_Entity_Script')
+				Core_Html_Entity::factory('Script')
 					->value("$.deleteFormRow($(\"#{$windowId} input[name='website_address#{$oDirectory_Website->id}']\").closest('.row').find('.btn-delete').get(0));")
 					->execute();
 				$this->_Admin_Form_Controller->addMessage(ob_get_clean());*/
@@ -790,7 +790,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$oUser_Directory_Website = $oDirectory_Website->User_Directory_Websites->getByUser_Id($this->_object->id);
 
 					ob_start();
-					Core::factory('Core_Html_Entity_Script')
+					Core_Html_Entity::factory('Script')
 						->value("$(\"#{$windowId} input[name='website_address\\[\\]']\").eq({$i}).prop('name', 'website_address#{$oUser_Directory_Website->id}').closest('.row').find('.btn-delete').removeClass('hide');
 						$(\"#{$windowId} input[name='website_description\\[\\]']\").eq({$i}).prop('name', 'website_description#{$oUser_Directory_Website->id}');
 

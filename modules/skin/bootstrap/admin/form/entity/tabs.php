@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Tabs extends Skin_Default_Admin_Form_Entity_Tabs
 {
@@ -24,43 +24,47 @@ class Skin_Bootstrap_Admin_Form_Entity_Tabs extends Skin_Default_Admin_Form_Enti
 		if (count($this->_children) > 1)
 		{
 			?><ul id="tab" class="nav nav-tabs <?php echo htmlspecialchars($this->class)?>"><?php
-				$tab_id = 0;
-				foreach ($this->_children as $oAdmin_Form_Tab_Entity)
+			$tab_id = 0;
+			foreach ($this->_children as $oAdmin_Form_Tab_Entity)
+			{
+				// Hide inactive tabs
+				if ($oAdmin_Form_Tab_Entity->active)
 				{
-					// Hide inactive tabs
-					if ($oAdmin_Form_Tab_Entity->active)
+					$tab_id == $this->current
+						&& $oAdmin_Form_Tab_Entity->class .= ' active';
+
+					$tabId = strlen($oAdmin_Form_Tab_Entity->id)
+						? $oAdmin_Form_Tab_Entity->id
+						: $windowId . '-tab-' . $tab_id;
+
+					$aAttr = $oAdmin_Form_Tab_Entity
+						->addSkipProperty('id') // используется ниже у самого таба
+						->getAttrsString();
+
+					?><li <?php echo implode(' ', $aAttr)?>>
+					<a href="#<?php echo htmlspecialchars($tabId)?>" data-toggle="tab"><?php
+
+					echo htmlspecialchars($oAdmin_Form_Tab_Entity->caption);
+
+					if (strlen($oAdmin_Form_Tab_Entity->icon))
 					{
-						$class = $oAdmin_Form_Tab_Entity->class;
-						$tab_id == $this->current && $class .= ' active';
-
-						$tabId = strlen($oAdmin_Form_Tab_Entity->id)
-							? $oAdmin_Form_Tab_Entity->id
-							: $windowId . '-tab-' . $tab_id;
-
-						?><li class="<?php echo htmlspecialchars($class)?>">
-						<a href="#<?php echo htmlspecialchars($tabId)?>" data-toggle="tab"><?php
-						
-						echo htmlspecialchars($oAdmin_Form_Tab_Entity->caption);
-						
-						if (strlen($oAdmin_Form_Tab_Entity->icon))
-						{
-							echo '<i class="' . htmlspecialchars($oAdmin_Form_Tab_Entity->icon) . '" title="' . htmlspecialchars($oAdmin_Form_Tab_Entity->iconTitle) . '"></i>';
-						}
-						
-						if (!is_null($oAdmin_Form_Tab_Entity->badge))
-						{
-							$badgeColor = strlen($oAdmin_Form_Tab_Entity->badgeColor)
-								? $oAdmin_Form_Tab_Entity->badgeColor
-								: 'default';
-
-							?><span class="badge badge-<?php echo htmlspecialchars($badgeColor)?> margin-left-5"><?php echo htmlspecialchars($oAdmin_Form_Tab_Entity->badge)?></span><?php
-						}
-						?></a>
-						</li><?php
+						echo '<i class="' . htmlspecialchars($oAdmin_Form_Tab_Entity->icon) . '" title="' . htmlspecialchars($oAdmin_Form_Tab_Entity->iconTitle) . '"></i>';
 					}
 
-					$tab_id++;
+					if (!is_null($oAdmin_Form_Tab_Entity->badge))
+					{
+						$badgeColor = strlen($oAdmin_Form_Tab_Entity->badgeColor)
+							? $oAdmin_Form_Tab_Entity->badgeColor
+							: 'default';
+
+						?><span class="badge badge-<?php echo htmlspecialchars($badgeColor)?> margin-left-5"><?php echo htmlspecialchars($oAdmin_Form_Tab_Entity->badge)?></span><?php
+					}
+					?></a>
+					</li><?php
 				}
+
+				$tab_id++;
+			}
 			?></ul><?php
 		}
 
@@ -70,7 +74,11 @@ class Skin_Bootstrap_Admin_Form_Entity_Tabs extends Skin_Default_Admin_Form_Enti
 		<?php
 		foreach ($this->_children as $oAdmin_Form_Tab_Entity)
 		{
-			?><div class="tab-pane fade <?php echo $tab_id == $this->current ? 'in active' : ''?>" id="<?php echo htmlspecialchars(strlen($oAdmin_Form_Tab_Entity->id) ? $oAdmin_Form_Tab_Entity->id : $windowId . '-tab-' . $tab_id) ?>">
+			$tabId = strlen($oAdmin_Form_Tab_Entity->id)
+				? $oAdmin_Form_Tab_Entity->id
+				: $windowId . '-tab-' . $tab_id;
+
+			?><div class="tab-pane fade <?php echo $tab_id == $this->current ? 'in active' : ''?>" id="<?php echo htmlspecialchars($tabId)?>">
 			<?php
 			$oAdmin_Form_Tab_Entity->execute();
 			?></div><?php

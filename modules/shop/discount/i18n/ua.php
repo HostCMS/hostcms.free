@@ -48,4 +48,8 @@ return array(
 	'not_apply_purchase_discount' => 'Не применять скидки от суммы заказа',
 	'guid' => '<acronym title="Ідентифікатор товару для формату CommerceML, наприклад ID00029527">Ідентифікатор товару CommerceML</acronym>',
 	'tab_export' => 'Експорт/Імпорт',
+	'shop_discount_dir_id' => 'Розділ',
+	'sorting' => "Порядок сортування",
+	'apply_success' => "Інформація успішно змінена.",
+	'copy_success' => "Елемент успішно скопійований!",
 );

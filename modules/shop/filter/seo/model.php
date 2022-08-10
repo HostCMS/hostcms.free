@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Filter_Seo_Model extends Core_Entity
 {
@@ -118,7 +118,7 @@ class Shop_Filter_Seo_Model extends Core_Entity
 	 */
 	public function nameBackend()
 	{
-		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')->value(
+		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')->value(
 			htmlspecialchars($this->name)
 		);
 
@@ -130,11 +130,11 @@ class Shop_Filter_Seo_Model extends Core_Entity
 		}
 
 		$oCore_Html_Entity_Div->add(
-			Core::factory('Core_Html_Entity_A')
+			Core_Html_Entity::factory('A')
 				->href($sPath)
 				->target('_blank')
 				->add(
-					Core::factory('Core_Html_Entity_I')->class('fa fa-external-link')
+					Core_Html_Entity::factory('I')->class('fa fa-external-link')
 				)
 		);
 

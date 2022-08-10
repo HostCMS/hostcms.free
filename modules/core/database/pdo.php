@@ -239,6 +239,26 @@ class Core_DataBase_Pdo extends Core_DataBase
 				$max = 4294967295;
 				break;
 
+			case 'char':
+				$type = 'string';
+				$default_max_length = 255;
+				break;
+			case 'binary':
+				$type = 'string';
+				$default_max_length = 255;
+				$binary = TRUE;
+				break;
+
+			case 'varchar':
+				$type = 'string';
+				$default_max_length = 65535;
+				break;
+			case 'varbinary':
+				$type = 'string';
+				$default_max_length = 65535;
+				$binary = TRUE;
+				break;
+
 			case 'tinytext':
 				$type = 'string';
 				$default_max_length = 255;
@@ -284,9 +304,8 @@ class Core_DataBase_Pdo extends Core_DataBase
 				break;
 		}
 
-		if ($type)
-		{
-			return array(
+		return $type
+			? array(
 				'datatype' => $switchType,
 				'type' => $type,
 				'fixed' => $fixed,
@@ -295,11 +314,10 @@ class Core_DataBase_Pdo extends Core_DataBase
 				'zerofill' => $zerofill,
 				'min' => $min,
 				'max' => $max,
+				'defined_max_length' => $max_length,
 				'max_length' => is_null($max_length) ? $default_max_length : $max_length
-			);
-		}
-
-		return parent::getColumnType($columnType);
+			)
+			: parent::getColumnType($columnType);
 	}
 
 	/**
@@ -555,7 +573,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 		{
 			$return[] = $row[0];
 		}
-		
+
 		$this->_free($result);
 
 		return $return;
@@ -606,7 +624,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 		{
 			$return[] = $row;
 		}
-		
+
 		$this->_free($result);
 
 		return $return;
@@ -781,10 +799,10 @@ class Core_DataBase_Pdo extends Core_DataBase
 	 */
 	protected function _currentObject($result = NULL, $bCache = TRUE)
 	{
-		$object_name = is_null($this->_asObject) ? 'stdClass' : $this->_asObject;
+		$objectName = is_null($this->_asObject) ? 'stdClass' : $this->_asObject;
 		$result = is_null($result) ? $this->_result : $result;
 
-		$result->setFetchMode(PDO::FETCH_CLASS/*|PDO::FETCH_PROPS_LATE*/, $object_name);
+		$result->setFetchMode(PDO::FETCH_CLASS/*|PDO::FETCH_PROPS_LATE*/, $objectName);
 		$return = $result->fetch();
 
 		if ($bCache && $return && $return instanceof Core_ORM)
@@ -795,6 +813,12 @@ class Core_DataBase_Pdo extends Core_DataBase
 
 			if (!is_null($object))
 			{
+				// move dataXXX values
+				foreach ($return->getDataValues() as $key => $value)
+				{
+					$object->$key = $value;
+				}
+
 				return $object;
 			}
 

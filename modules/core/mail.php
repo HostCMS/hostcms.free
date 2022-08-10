@@ -27,7 +27,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Mail
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Mail
 {
@@ -256,6 +256,15 @@ abstract class Core_Mail
 	}
 
 	/**
+	 * Get subject
+	 * @return string
+	 */
+	public function getSubject()
+	{
+		return $this->_subject;
+	}
+
+	/**
 	 * Message text
 	 * @var string
 	 */
@@ -270,6 +279,15 @@ abstract class Core_Mail
 	{
 		$this->_message = $message;
 		return $this;
+	}
+
+	/**
+	 * Get message
+	 * @return string
+	 */
+	public function getMessage()
+	{
+		return $this->_message;
 	}
 
 	/**

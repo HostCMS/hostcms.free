@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Company
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Company_Location_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -96,7 +96,7 @@ class Company_Location_Controller_Edit extends Admin_Form_Action_Controller_Type
 			->value('$(function() {
 				$("#' . $windowId . ' #responsible_user_id").selectUser({
 					placeholder: "' . Core::_('Company_Location.start_input') . '",
-					language: "' . Core_i18n::instance()->getLng() . '",
+					language: "' . Core_I18n::instance()->getLng() . '",
 					dropdownParent: $("#' . $windowId . '")
 				})
 				.val("' . $this->_object->responsible_user_id . '")

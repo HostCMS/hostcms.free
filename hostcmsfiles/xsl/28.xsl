@@ -497,7 +497,7 @@
 					<div class="field">
 						<fieldset class="maillist_fieldset">
 							<legend>Адреса</legend>
-							<xsl:apply-templates select="directory_address">
+							<xsl:apply-templates select="directory_address" mode="siteuser_company">
 								<xsl:with-param name="siteuser_company_id" select="@id" />
 							</xsl:apply-templates>
 						</fieldset>
@@ -557,20 +557,21 @@
 					<input type="text" name="person_patronymic{$suffix}" placeholder="Отчество" value="{patronymic}" class="width1" />
 				</div>
 			</div>
-			<div class="row">
+			<!-- <div class="row">
 				<div class="field">
 					<input type="text" name="person_postcode{$suffix}" placeholder="Индекс" value="{postcode}" class="width1" />
 					<input type="text" name="person_country{$suffix}" placeholder="Страна" value="{country}" class="width1" />
 					<input type="text" name="person_city{$suffix}" placeholder="Город" value="{city}" class="width1" />
 				</div>
-			</div>
-			<div class="row">
-				<div class="field">
-					<input type="text" name="person_address{$suffix}" placeholder="Адрес" value="{address}" class="width2" style="width: 95%"/>
-				</div>
-			</div>
+			</div> -->
 
 			<xsl:if test="/siteuser/@id = ''">
+				<div class="row">
+					<div class="field">
+						<input type="text" name="person_address{$suffix}" placeholder="Адрес" value="{address}" class="width2" style="width: 95%"/>
+					</div>
+				</div>
+
 				<div class="row">
 					<div class="field">
 						<input type="text" name="person_phone{$suffix}" value="{name}" placeholder="Телефон" class="width2" style="width: 95%"/>
@@ -586,6 +587,19 @@
 				<div class="row">
 					<div class="field">
 						<input type="text" name="person_website{$suffix}" value="{name}" placeholder="Сайт" class="width2" style="width: 95%"/>
+					</div>
+				</div>
+			</xsl:if>
+
+			<xsl:if test="/siteuser/@id > 0 and count(directory_address)">
+				<div class="row">
+					<div class="field">
+						<fieldset class="maillist_fieldset">
+							<legend>Адреса</legend>
+							<xsl:apply-templates select="directory_address" mode="siteuser_person">
+								<xsl:with-param name="siteuser_person_id" select="@id" />
+							</xsl:apply-templates>
+						</fieldset>
 					</div>
 				</div>
 			</xsl:if>
@@ -631,13 +645,28 @@
 		</div>
 	</xsl:template>
 
-	<xsl:template match="directory_address">
+	<xsl:template match="directory_address" mode="siteuser_company">
 		<xsl:param name="siteuser_company_id"/>
 
 		<div class="row">
 			<div class="field">
 				<input type="text" name="company_{$siteuser_company_id}_address_{@id}" value="{value}" class="width1" />
 				<select name="company_{$siteuser_company_id}_directory_address_type_{@id}">
+					<xsl:apply-templates select="/siteuser/directory_address_types/directory_address_type">
+						<xsl:with-param name="directory_address_type_id" select="directory_address_type_id" />
+					</xsl:apply-templates>
+				</select>
+			</div>
+		</div>
+	</xsl:template>
+
+	<xsl:template match="directory_address" mode="siteuser_person">
+		<xsl:param name="siteuser_person_id"/>
+
+		<div class="row">
+			<div class="field">
+				<input type="text" name="person_{$siteuser_person_id}_address_{@id}" value="{value}" class="width1" />
+				<select name="person_{$siteuser_person_id}_directory_address_type_{@id}">
 					<xsl:apply-templates select="/siteuser/directory_address_types/directory_address_type">
 						<xsl:with-param name="directory_address_type_id" select="directory_address_type_id" />
 					</xsl:apply-templates>

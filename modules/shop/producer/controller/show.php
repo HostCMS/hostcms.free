@@ -311,7 +311,8 @@ class Shop_Producer_Controller_Show extends Core_Controller
 			{
 				// Попытка получения группы
 				$oShop_Producer = $oShop->Shop_Producers->getByPath($sPath);
-				if (!is_null($oShop_Producer))
+
+				if (!is_null($oShop_Producer) && $oShop_Producer->active)
 				{
 					$this->producer = $oShop_Producer->id;
 				}

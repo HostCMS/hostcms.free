@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Model extends Core_Entity
 {
@@ -212,13 +212,13 @@ class Shop_Warehouse_Model extends Core_Entity
 
 		$aResult = $queryBuilder->execute()->asAssoc()->current();
 
-		$aResult['count'] && Core::factory('Core_Html_Entity_Span')
+		$aResult['count'] && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
 			->value($aResult['count'])
 			->title(Core::_('Shop_Warehouse.shop_items_count'))
 			->execute();
 
-		$this->shop_warehouse_type_id && Core::factory('Core_Html_Entity_Code')
+		$this->shop_warehouse_type_id && Core_Html_Entity::factory('Code')
 			->value('<span class="badge badge-square badge-max-width margin-left-5" title="' . htmlspecialchars($this->Shop_Warehouse_Type->name) . '" style="background-color: ' . htmlspecialchars($this->Shop_Warehouse_Type->color) . '">' . htmlspecialchars($this->Shop_Warehouse_Type->name) . '</span>')
 			->execute();
 
@@ -226,7 +226,7 @@ class Shop_Warehouse_Model extends Core_Entity
 
 		foreach ($aTags as $oTag)
 		{
-			Core::factory('Core_Html_Entity_Code')
+			Core_Html_Entity::factory('Code')
 				->value('<span class="badge badge-square badge-max-width badge-lightgray margin-left-5" title="' . htmlspecialchars($oTag->name) . '"><i class="fa fa-tag"></i> ' . htmlspecialchars($oTag->name) . '</span>')
 				->execute();
 		}
@@ -241,7 +241,7 @@ class Shop_Warehouse_Model extends Core_Entity
 	public function itemsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$count = $this->Shop_Warehouse_Items->getCount();
-		$count && Core::factory('Core_Html_Entity_Span')
+		$count && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
 			->value($count)
 			->title($count)
@@ -379,7 +379,7 @@ class Shop_Warehouse_Model extends Core_Entity
 		$aExternalReplace = $oAdmin_Form_Controller->getExternalReplace();
 
 		ob_start();
-		Core::factory('Core_Html_Entity_A')
+		Core_Html_Entity::factory('A')
 			->value(htmlspecialchars($this->name))
 			->href("/admin/shop/warehouse/cell/index.php?shop_warehouse_id={$this->id}&shop_id={$aExternalReplace['{shop_id}']}&shop_group_id={$aExternalReplace['{shop_group_id}']}")
 			->onclick("$.adminLoad({path: '/admin/shop/warehouse/cell/index.php',additionalParams: 'shop_warehouse_id=" . $this->id . "&shop_id=" . $aExternalReplace['{shop_id}'] . "&shop_group_id=" . $aExternalReplace['{shop_group_id}'] . "', windowId: '{$windowId}'}); return false;")

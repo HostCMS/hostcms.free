@@ -25,7 +25,7 @@
 				<h1><xsl:value-of select="shop_filter_seo/h1"/></h1>
 				
 				<xsl:if test="page = 0 and shop_filter_seo/text != ''">
-					<div ><xsl:value-of disable-output-escaping="yes" select="shop_filter_seo/text"/></div>
+					<div><xsl:value-of disable-output-escaping="yes" select="shop_filter_seo/text"/></div>
 				</xsl:if>
 			</xsl:when>
 			<xsl:when test="$group = 0">

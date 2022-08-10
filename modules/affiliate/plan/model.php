@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Affiliate
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Affiliate_Plan_Model extends Core_Entity
 {
@@ -199,7 +199,7 @@ class Affiliate_Plan_Model extends Core_Entity
 	public function levelsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$count = $this->Affiliate_Plan_Levels->getCount();
-		$count && Core::factory('Core_Html_Entity_Span')
+		$count && Core_Html_Entity::factory('Span')
 			->class('badge badge-ico badge-azure white')
 			->value($count)
 			->execute();

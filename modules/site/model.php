@@ -88,6 +88,17 @@ class Site_Model extends Core_Entity
 		'document' => array(),
 		'document_dir' => array(),
 		'document_status' => array(),
+		'dms_class' => array(),
+		'dms_communication' => array(),
+		'dms_field' => array(),
+		'dms_field_dir' => array(),
+		'dms_state' => array(),
+		'dms_template_instruction_dir' => array(),
+		'dms_template_instruction' => array(),
+		'dms_participant' => array(),
+		'dms_workflow_template_dir' => array(),
+		'dms_workflow_template' => array(),
+		'dms_workflow' => array(),
 		'field' => array(),
 		'form' => array(),
 		'forum' => array(),
@@ -370,6 +381,21 @@ class Site_Model extends Core_Entity
 		if (Core::moduleIsActive('webhook'))
 		{
 			$this->Webhooks->deleteAll(FALSE);
+		}
+
+		if (Core::moduleIsActive('dms'))
+		{
+			$this->Dms_Classes->deleteAll(FALSE);
+			$this->Dms_Communications->deleteAll(FALSE);
+			$this->Dms_Fields->deleteAll(FALSE);
+			$this->Dms_Field_Dirs->deleteAll(FALSE);
+			$this->Dms_States->deleteAll(FALSE);
+			$this->Dms_Participants->deleteAll(FALSE);
+			$this->Dms_Template_Instruction_Dirs->deleteAll(FALSE);
+			$this->Dms_Template_Instructions->deleteAll(FALSE);
+			$this->Dms_Workflow_Template_Dirs->deleteAll(FALSE);
+			$this->Dms_Workflow_Templates->deleteAll(FALSE);
+			$this->Dms_Workflows->deleteAll(FALSE);
 		}
 
 		$this->Site_Aliases->deleteAll(FALSE);
@@ -1712,7 +1738,7 @@ class Site_Model extends Core_Entity
 	{
 		if ($this->https)
 		{
-			Core::factory('Core_Html_Entity_Span')
+			Core_Html_Entity::factory('Span')
 				->class('badge badge-square badge-info')
 				->style('font-size: 10px !important;')
 				->value('HTTPS')
@@ -1721,7 +1747,7 @@ class Site_Model extends Core_Entity
 
 		if ($this->protect)
 		{
-			Core::factory('Core_Html_Entity_Span')
+			Core_Html_Entity::factory('Span')
 				->class('badge badge-square badge-azure')
 				->style('font-size: 10px !important;')
 				->value('<i class="fa fa-shield"></i>')
@@ -1731,7 +1757,7 @@ class Site_Model extends Core_Entity
 
 		if (strlen($this->csp))
 		{
-			Core::factory('Core_Html_Entity_Span')
+			Core_Html_Entity::factory('Span')
 				->class('badge badge-square badge-maroon')
 				->style('font-size: 10px !important;')
 				->title('Content-Security-Policy: ' . $this->csp)
@@ -1743,13 +1769,13 @@ class Site_Model extends Core_Entity
 
 		if (count($aSite_Aliases))
 		{
-			$oDiv = Core::factory('Core_Html_Entity_Div')->class('margin-top-5');
+			$oDiv = Core_Html_Entity::factory('Div')->class('margin-top-5');
 
 			$aTmpSite_Aliases = array_slice($aSite_Aliases, 0, 12);
 			foreach ($aTmpSite_Aliases as $oSite_Aliases)
 			{
 				$oDiv->add(
-					$oSpan = Core::factory('Core_Html_Entity_Span')
+					$oSpan = Core_Html_Entity::factory('Span')
 						->class('label label-' . ($oSite_Aliases->current ? 'palegreen' : 'gray'))
 						->value(htmlspecialchars(substr($oSite_Aliases->name, 0, 4) === "xn--"
 							? Core_Str::idnToUtf8($oSite_Aliases->name) . ' [' . $oSite_Aliases->name . ']'
@@ -1760,14 +1786,14 @@ class Site_Model extends Core_Entity
 				if ($oSite_Aliases->redirect)
 				{
 					$oSpan->add(
-						Core::factory('Core_Html_Entity_I')
+						Core_Html_Entity::factory('I')
 							->class('fa fa-arrow-circle-right azure fa-small')
 					);
 				}
 			}
 
 			count($aTmpSite_Aliases) < count($aSite_Aliases) && $oDiv->add(
-				Core::factory('Core_Html_Entity_Span')
+				Core_Html_Entity::factory('Span')
 					->class('label label-gray')
 					->value('…')
 				);

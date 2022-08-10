@@ -10,7 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Printlayout
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Printlayout_Controller_Print extends Admin_Form_Action_Controller
 {
@@ -67,9 +67,9 @@ abstract class Printlayout_Controller_Print extends Admin_Form_Action_Controller
 
 			$this->_newWindowId = 'Printlayout_Print_' . time();
 
-			$oCore_Html_Entity_Form = Core::factory('Core_Html_Entity_Form');
+			$oCore_Html_Entity_Form = Core_Html_Entity::factory('Form');
 
-			$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
+			$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')
 				->id($this->_newWindowId)
 				->add($oCore_Html_Entity_Form);
 
@@ -87,17 +87,17 @@ abstract class Printlayout_Controller_Print extends Admin_Form_Action_Controller
 				{
 					$oCore_Html_Entity_Form
 						->add(
-							 Core::factory('Core_Html_Entity_Input')
+							 Core_Html_Entity::factory('Input')
 								->name('hostcms[checked][' . $datasetKey . '][' . $key . ']')
 								->value(1)
 								->type('hidden')
 						)->add(
-							 Core::factory('Core_Html_Entity_Input')
+							 Core_Html_Entity::factory('Input')
 								->name('hostcms[action]')
 								->value('print')
 								->type('hidden')
 						)->add(
-							 Core::factory('Core_Html_Entity_Input')
+							 Core_Html_Entity::factory('Input')
 								->name('hostcms[operation]')
 								->value('apply')
 								->type('hidden')
@@ -130,18 +130,18 @@ abstract class Printlayout_Controller_Print extends Admin_Form_Action_Controller
 				->add(Admin_Form_Entity::factory('Code')->html($this->_showEditForm()));
 
 			// Download button
-			$oCore_Html_Entity_Download = Core::factory('Core_Html_Entity_A')
+			$oCore_Html_Entity_Download = Core_Html_Entity::factory('A')
 				->title(Core::_('Printlayout.download'))
 				->class('btn btn-success white download-button')
 				->href('javascript:void(0);')
 				->onclick('setTimeout(function() { bootbox.hideAll(); }, 500); $(this).closest("form").submit();')
 				->add(
-					Core::factory('Core_Html_Entity_I')
+					Core_Html_Entity::factory('I')
 						->class('fa fa-download no-margin')
 				);
 
 			// Send mail button
-			$oCore_Html_Entity_Mail = Core::factory('Core_Html_Entity_A')
+			$oCore_Html_Entity_Mail = Core_Html_Entity::factory('A')
 				->title(Core::_('Printlayout.mail'))
 				->class('btn btn-warning white mail-button')
 				->href('javascript:void(0);')
@@ -156,7 +156,7 @@ abstract class Printlayout_Controller_Print extends Admin_Form_Action_Controller
 					$("#' . $windowId . ' .message-address, .message-text, .message-button, .deal-siteuser, .message-subject, .message-emails").removeClass("hidden");
 
 					$("#' . $windowId . ' .email-select").select2({
-						language: "' . Core_i18n::instance()->getLng() . '",
+						language: "' . Core_I18n::instance()->getLng() . '",
 						minimumInputLength: 2,
 						placeholder: "' . Core::_('Informationsystem_Item.type_tag') . '",
 						tags: true,
@@ -171,7 +171,7 @@ abstract class Printlayout_Controller_Print extends Admin_Form_Action_Controller
 					$(this).closest("form").removeAttr("target");
 				')
 				->add(
-					Core::factory('Core_Html_Entity_I')
+					Core_Html_Entity::factory('I')
 						->class('fa fa-envelope no-margin')
 				);
 
@@ -194,7 +194,7 @@ abstract class Printlayout_Controller_Print extends Admin_Form_Action_Controller
 				? 200
 				: 100 + $this->_rowsCount * 30;
 
-			Core::factory('Core_Html_Entity_Script')
+			Core_Html_Entity::factory('Script')
 				->value("$(function() {
 					$('#{$this->_newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . Core_Str::escapeJavascriptVariable($this->title) . "', AppendTo: '#{$windowId}', width: 250, height: {$iHeight}, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
 				->execute();
@@ -421,7 +421,7 @@ abstract class Printlayout_Controller_Print extends Admin_Form_Action_Controller
 					->value('
 						$(function(){
 							$("#' . $windowId . ' #representative").selectPersonCompany({
-								language: "' . Core_i18n::instance()->getLng() . '",
+								language: "' . Core_I18n::instance()->getLng() . '",
 								placeholder: ""
 							});
 							$("#' . $windowId . ' #representative").on("select2:select", function (e) {

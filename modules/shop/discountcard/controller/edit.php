@@ -69,7 +69,6 @@ class Shop_Discountcard_Controller_Edit extends Admin_Form_Action_Controller_Typ
 
 			$oSiteuserSelect = Admin_Form_Entity::factory('Select')
 				->caption(Core::_('Shop_Discountcard.siteuser_id'))
-				->id('object_siteuser_id')
 				->options($options)
 				->name('siteuser_id')
 				->class('siteuser-tag')
@@ -116,7 +115,7 @@ class Shop_Discountcard_Controller_Edit extends Admin_Form_Action_Controller_Typ
 	 */
 	public function execute($operation = NULL)
 	{
-		if (!is_null($operation) && $operation != '')
+		if (!$this->_object->id && !is_null($operation) && $operation != '')
 		{
 			$siteuser_id = Core_Array::get($this->_formValues, 'siteuser_id', 0, 'int');
 

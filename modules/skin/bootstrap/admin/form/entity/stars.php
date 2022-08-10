@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Stars extends Skin_Default_Admin_Form_Entity_Input {
 
@@ -21,9 +21,9 @@ class Skin_Bootstrap_Admin_Form_Entity_Stars extends Skin_Default_Admin_Form_Ent
 		$this->_allowedProperties[] = 'step';
 		$this->_allowedProperties[] = 'stars';
 
-		$this->_skipProperies[] = 'step';
-		$this->_skipProperies[] = 'stars';
-		$this->_skipProperies[] = 'size';
+		$this->_skipProperties[] = 'step';
+		$this->_skipProperties[] = 'stars';
+		$this->_skipProperties[] = 'size';
 
 		parent::__construct();
 

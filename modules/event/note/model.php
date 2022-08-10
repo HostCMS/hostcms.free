@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Event
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Event_Note_Model extends Core_Entity
 {
@@ -83,7 +83,7 @@ class Event_Note_Model extends Core_Entity
 					return TRUE;
 				}
 			break;
-			case 'addEventNote':
+			case 'addNote':
 				return is_null($this->id);
 			break;
 		}

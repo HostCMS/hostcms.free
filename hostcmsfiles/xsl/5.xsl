@@ -43,7 +43,7 @@
 							&labelLine2;
 						</xsl:otherwise>
 					</xsl:choose>
-				</div >
+				</div>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>

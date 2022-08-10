@@ -28,9 +28,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Select extends Admin_Form_Entity
 {
@@ -38,13 +38,14 @@ class Skin_Default_Admin_Form_Entity_Select extends Admin_Form_Entity
 	 * Skip properties
 	 * @var array
 	 */
-	protected $_skipProperies = array(
+	protected $_skipProperties = array(
 		'divAttr', // array
 		'options', // array
 		'caption',
 		'value', // идет в selected
 		'format', // array, массив условий форматирования
 		'filter',
+		'filterName',
 		'caseSensitive',
 		'invertor',
 		'invertor_id',
@@ -66,13 +67,13 @@ class Skin_Default_Admin_Form_Entity_Select extends Admin_Form_Entity
 	public function __construct()
 	{
 		// Combine
-		$this->_skipProperies = array_combine($this->_skipProperies, $this->_skipProperies);
+		$this->_skipProperties = array_combine($this->_skipProperties, $this->_skipProperties);
 
 		$oCore_Html_Entity_Select = new Core_Html_Entity_Select();
 		$this->_allowedProperties += $oCore_Html_Entity_Select->getAllowedProperties();
 
 		// Свойства, исключаемые для <select>, добавляем в список разрешенных объекта
-		$this->_allowedProperties += $this->_skipProperies;
+		$this->_allowedProperties += $this->_skipProperties;
 
 		parent::__construct();
 
@@ -225,51 +226,52 @@ class Skin_Default_Admin_Form_Entity_Select extends Admin_Form_Entity
 	protected function _filter()
 	{
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
-		$iFilterCount = self::$iFilterCount;
+		
+		$filterName = !is_null($this->filterName)
+			? $this->filterName
+			: "oSelectFilter" . (self::$iFilterCount++);
 
-		Core::factory('Core_Html_Entity_Div')
+		Core_Html_Entity::factory('Div')
 			->style("float: left; opacity: 0.7")
 			->add(
-				Core::factory('Core_Html_Entity_Img')
+				Core_Html_Entity::factory('Img')
 					->src('/admin/images/filter.gif')
 					->class('img_line')
 					->style('margin-left: 10px')
 			)
 			->add(
-				Core::factory('Core_Html_Entity_Input')
+				Core_Html_Entity::factory('Input')
 					->size(15)
 					->id("filter_{$this->id}")
-					->onkeyup("clearTimeout(oSelectFilter{$iFilterCount}.timeout); oSelectFilter{$iFilterCount}.timeout = setTimeout(function(){oSelectFilter{$iFilterCount}.Set(document.getElementById('filter_" . Core_Str::escapeJavascriptVariable($this->id) . "').value); oSelectFilter{$iFilterCount}.Filter();}, 500)")
+					->onkeyup("clearTimeout({$filterName}.timeout); {$filterName}.timeout = setTimeout(function(){{$filterName}.Set(document.getElementById('filter_" . Core_Str::escapeJavascriptVariable($this->id) . "').value); {$filterName}.Filter();}, 500)")
 					->onkeypress("if (event.keyCode == 13) return false;")
 			)
 			->add(
-				Core::factory('Core_Html_Entity_Input')
+				Core_Html_Entity::factory('Input')
 					->type("button")
-					->onclick("this.form.filter_" . Core_Str::escapeJavascriptVariable($this->id) . ".value = '';oSelectFilter{$iFilterCount}.Set('');oSelectFilter{$iFilterCount}.Filter();")
+					->onclick("this.form.filter_" . Core_Str::escapeJavascriptVariable($this->id) . ".value = '';{$filterName}.Set('');{$filterName}.Filter();")
 					->value(Core::_('Admin_Form.clear'))
 					->class('saveButton')
 			)
 			->add(
-				Core::factory('Core_Html_Entity_Input')
+				Core_Html_Entity::factory('Input')
 					->id("filter_ignorecase_{$this->id}")
 					->type("checkbox")
-					->onclick("oSelectFilter{$iFilterCount}.SetIgnoreCase(!this.checked);oSelectFilter{$iFilterCount}.Filter()")
+					->onclick("{$filterName}.SetIgnoreCase(!this.checked);{$filterName}.Filter()")
 			)
 			->add(
-				Core::factory('Core_Html_Entity_Label')
+				Core_Html_Entity::factory('Label')
 					->for("filter_ignorecase_{$this->id}")
 					->value(Core::_('Admin_Form.case_sensitive'))
 			)
 			->add(
-				Core::factory('Core_Html_Entity_Script')
-					->value("var oSelectFilter{$iFilterCount} = new cSelectFilter('" . Core_Str::escapeJavascriptVariable($windowId) . "', '" . Core_Str::escapeJavascriptVariable($this->id) . "');")
+				Core_Html_Entity::factory('Script')
+					->value("var {$filterName} = new cSelectFilter('" . Core_Str::escapeJavascriptVariable($windowId) . "', '" . Core_Str::escapeJavascriptVariable($this->id) . "');")
 			)
 			->execute();
 
 		Admin_Form_Entity::factory('Separator')
 			->execute();
-
-		self::$iFilterCount++;
 
 		return $this;
 	}

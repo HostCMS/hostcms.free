@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Array
 {
@@ -89,6 +89,11 @@ class Core_Array
 							: (bool)$value
 						)
 						: FALSE;
+				break;
+				case 'array':
+					$value = is_array($value)
+						? $value
+						: array();
 				break;
 				default:
 					throw new Core_Exception('Core_Array wrong \'%name\' filter name', array('%name' => $filter));
@@ -319,6 +324,27 @@ class Core_Array
 
 		return $array;
 	}
+	
+	/**
+	 * Возвращает случайное значение из массива
+	 *
+	 * @param array $array массив
+	 * <code>
+	 * <?php
+	 * $array = array('field1', 'field2', 'field3');
+	 *
+	 * $value = Core_Array::randomValue($array);
+	 *
+	 * var_dump($value);
+	 * ?>
+	 * </code>
+	 * @return mixed
+	 */
+	static public function randomValue(array $array)
+	{
+		$key = array_rand($array);
+		return $array[$key];
+	}
 
 	/**
 	 * Get the value of the last element
@@ -459,5 +485,36 @@ class Core_Array
 		}
 
 		return implode(', ', $aReturn);
+	}
+	
+	/**
+	 * Find value by key in multidimensional array
+	 * @param array $array
+	 * @param mixed $key
+	 * @return NULL|mixed Null or value
+	 */
+	static public function findByKey(array $array, $key)
+	{
+		if (isset($array[$key]))
+		{
+			return $array[$key];
+		}
+		else
+		{
+			foreach ($array as $subArray)
+			{
+				if (is_array($subArray))
+				{
+					$result = self::findByKey($subArray, $key);
+
+					if (!is_null($result))
+					{
+						return $result;
+					}
+				}
+			}
+		}
+
+		return NULL;
 	}
 }

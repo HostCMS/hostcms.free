@@ -199,7 +199,7 @@ class Field_Controller_Tab
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		ob_start();
-		Core::factory('Core_Html_Entity_Img')
+		Core_Html_Entity::factory('Img')
 			->src('/admin/images/action_add.gif')
 			->id('add')
 			->class('pointer left5px img_line')
@@ -218,7 +218,7 @@ class Field_Controller_Tab
 	public function getImgDelete($onclick = '$.deleteNewField(this)')
 	{
 		ob_start();
-		Core::factory('Core_Html_Entity_Img')
+		Core_Html_Entity::factory('Img')
 			->src('/admin/images/action_delete.gif')
 			->id('delete')
 			->class('pointer left5px img_line')
@@ -930,7 +930,7 @@ class Field_Controller_Tab
 
 		// autocomplete should be added always
 		$oDiv_Group->add(
-			Core::factory('Core_Html_Entity_Script')->value("
+			Core_Html_Entity::factory('Script')->value("
 				$('#{$windowId} input[id ^= id_field_{$oField->id}]').autocomplete({
 					source: function(request, response) {
 						var jInput = $(this.element),
@@ -1049,7 +1049,7 @@ class Field_Controller_Tab
 
 		// autocomplete should be added always
 		$oDiv_Group->add(
-			Core::factory('Core_Html_Entity_Script')->value("
+			Core_Html_Entity::factory('Script')->value("
 				$('#{$windowId} input[id ^= input_field_{$oField->id}]').autocomplete({
 					source: function(request, response) {
 						var jInput = $(this.element),
@@ -1236,7 +1236,7 @@ class Field_Controller_Tab
 
 		// autocomplete should be added always
 		$oDiv_Group->add(
-			Core::factory('Core_Html_Entity_Script')->value("
+			Core_Html_Entity::factory('Script')->value("
 				$('#{$windowId} input[id ^= input_field_{$oField->id}]').autocomplete({
 					source: function(request, response) {
 						var jInput = $(this.element),
@@ -1415,7 +1415,7 @@ class Field_Controller_Tab
 
 		// autocomplete should be added always
 		$oDiv_Group->add(
-			Core::factory('Core_Html_Entity_Script')->value("
+			Core_Html_Entity::factory('Script')->value("
 				$('#{$windowId} input[id ^= input_field_{$oField->id}]').autocomplete({
 				source: function(request, response) {
 					var jInput = $(this.element),
@@ -1597,7 +1597,7 @@ class Field_Controller_Tab
 
 		// autocomplete should be added always
 		$oDiv_Group->add(
-			Core::factory('Core_Html_Entity_Script')->value("
+			Core_Html_Entity::factory('Script')->value("
 				$('#{$windowId} input[id ^= input_field_{$oField->id}]').autocomplete({
 				source: function(request, response) {
 					var jInput = $(this.element),
@@ -1808,7 +1808,7 @@ class Field_Controller_Tab
 								$this->_setValue($oNewField_Value, $newValue);
 
 								ob_start();
-								Core::factory('Core_Html_Entity_Script')
+								Core_Html_Entity::factory('Script')
 									->value("$(\"#{$windowId} *[name='field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'field_{$oField->id}_{$oNewField_Value->id}')")
 									->execute();
 
@@ -1874,7 +1874,7 @@ class Field_Controller_Tab
 							$this->_Admin_Form_Controller->addMessage(ob_get_clean());
 
 							ob_start();
-							Core::factory('Core_Html_Entity_Script')
+							Core_Html_Entity::factory('Script')
 								->value("$(\"#{$windowId} div[id^='file_large'] input[name='field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'field_{$oField->id}_{$oFileValue->id}');" .
 								"$(\"#{$windowId} div[id^='file_small'] input[name='small_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'small_field_{$oField->id}_{$oFileValue->id}');" .
 								// Description

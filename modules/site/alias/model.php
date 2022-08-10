@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Site
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Site_Alias_Model extends Core_Entity
 {
@@ -345,11 +345,11 @@ class Site_Alias_Model extends Core_Entity
 	 */
 	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		$this->name != '' && Core::factory('Core_Html_Entity_A')
+		$this->name != '' && Core_Html_Entity::factory('A')
 			->href('http://' . $this->alias_name_without_mask)
 			->target('_blank')
 			->add(
-				Core::factory('Core_Html_Entity_I')
+				Core_Html_Entity::factory('I')
 					->class('fa fa-external-link')
 			)
 			->execute();

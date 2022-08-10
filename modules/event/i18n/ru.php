@@ -140,4 +140,24 @@ return array(
 	'event_today' => 'Сегодня',
 	'event_empty' => 'Скоро',
 	'more' => 'еще',
+
+	'deleteEntity_success' => 'Элемент удален!',
+
+	'no_events' => 'Нет дел',
+
+	'history_add_event' => 'Добавление дела',
+	'history_change_status' => 'Статус изменен на "%s"',
+	'history_change_type' => 'Тип изменен на "%s"',
+	'history_change_group' => 'Группа изменена на "%s"',
+	'history_change_important0' => 'Снята важность',
+	'history_change_important1' => 'Установлена важность',
+	'history_change_place_from_empty' => 'Установлено место встречи "%s"',
+	'history_change_place_to_empty' => 'Удалено место встречи "%s"',
+	'history_change_place' => 'Место встречи изменено с "%s" на "%s"',
+	'history_add_file' => 'Добавлен файл <b>%s</b>',
+	'history_change_completed0' => '<span class="azure">Дело возвращено в работу</span>',
+	'history_change_completed1' => '<span class="palegreen">Дело завершено успешно</span>',
+	'history_change_completed-1' => '<span class="darkorange">Дело завершено неуспешно</span>',
+
+	'event_files' => 'Файлы',
 );

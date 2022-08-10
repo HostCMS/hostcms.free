@@ -2655,10 +2655,10 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		{
 			Core_Event::notify('Shop_Item_Import_Cml_Controller.onBeforeImportMeasure', $this, array($oNode));
 
-			$okei = trim(strval($oNode->Код));
+			$okei = intval($oNode->Код);
 
 			// Получаем по коду ОКЕЙ
-			$oShop_Measure = strlen($okei)
+			$oShop_Measure = $okei > 0
 				? Core_Entity::factory('Shop_Measure')->getByOkei($okei, FALSE)
 				: NULL;
 
@@ -2839,11 +2839,11 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		if (isset($oNode->БазоваяЕдиница))
 		{
 			$okei = is_null($oNode->БазоваяЕдиница->attributes()->Код)
-				? trim(strval($oNode->БазоваяЕдиница)) // CML 3.x: Товар/БазоваяЕдиница
-				: trim(strval($oNode->БазоваяЕдиница->attributes()->Код));
+				? intval($oNode->БазоваяЕдиница) // CML 3.x: Товар/БазоваяЕдиница
+				: intval($oNode->БазоваяЕдиница->attributes()->Код);
 
 			// Получаем по коду ОКЕЙ
-			$oShop_Measure = strlen($okei)
+			$oShop_Measure = $okei > 0
 				? Core_Entity::factory('Shop_Measure')->getByOkei($okei, FALSE)
 				: NULL;
 

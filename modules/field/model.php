@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Field
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Field_Model extends Core_Entity
 {
@@ -189,7 +189,7 @@ class Field_Model extends Core_Entity
 	{
 		if ($this->obligatory)
 		{
-			Core::factory('Core_Html_Entity_Span')
+			Core_Html_Entity::factory('Span')
 				->value('<i class="fa fa-asterisk darkorange fa-small"></i>')
 				->execute();
 		}

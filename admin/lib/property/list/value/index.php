@@ -3,9 +3,9 @@
  * Libs.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../../bootstrap.php');
 
@@ -30,21 +30,16 @@ $oAdmin_Form_Controller
 $oAdminFormEntityMenus = Admin_Form_Entity::factory('Menus');
 
 // Элементы меню
-$oAdminFormEntityMenus->add(
+$oAdminFormEntityMenus->add(	
 	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Lib_Property_List_Value.menu_title'))
-		->icon('fa fa-asterisk')
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Lib_Property_List_Value.menu_add'))
-				->icon('fa fa-plus')
-				->img('/admin/images/list_add.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-				)
+		->name(Core::_('Lib_Property_List_Value.menu_add'))
+		->icon('fa fa-plus')
+		->img('/admin/images/list_add.gif')
+		->href(
+			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
 );
 

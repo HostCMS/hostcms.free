@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Sql
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Sql_Table_Field_Entity
 {
@@ -128,19 +128,19 @@ class Sql_Table_Field_Entity
 			switch ($this->Key)
 			{
 				case 'PRI':
-					Core::factory('Core_Html_Entity_I')
+					Core_Html_Entity::factory('I')
 						->class('fas fa-key azure')
 						->title('PRIMARY KEY')
 						->execute();
 				break;
 				case 'UNI':
-					Core::factory('Core_Html_Entity_I')
+					Core_Html_Entity::factory('I')
 						->class('fas fa-key darkorange')
 						->title('UNIQUE KEY')
 						->execute();
 				break;
 				case 'MUL':
-					Core::factory('Core_Html_Entity_I')
+					Core_Html_Entity::factory('I')
 						->class('fas fa-key warning')
 						->title('MULTIPLE KEY')
 						->execute();
@@ -172,7 +172,7 @@ class Sql_Table_Field_Entity
 	 */
 	public function NullBackend()
 	{
-		$this->Null == 'YES' && Core::factory('Core_Html_Entity_Span')
+		$this->Null == 'YES' && Core_Html_Entity::factory('Span')
 			->value('<i class="fa fa-check-circle green" title="NULL"></i>')
 			->execute();
 	}

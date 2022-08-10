@@ -34,6 +34,8 @@ class Directory_Address_Model extends Core_Entity
 		'company_directory_address' => array(),
 		'siteuser_company' => array('through' => 'siteuser_company_directory_address'),
 		'siteuser_company_directory_address' => array(),
+		'siteuser_person' => array('through' => 'siteuser_people_directory_address'),
+		'siteuser_person_directory_address' => array(),
 		'lead' => array('through' => 'lead_directory_address'),
 		'lead_directory_address' => array()
 	);
@@ -81,6 +83,7 @@ class Directory_Address_Model extends Core_Entity
 		if (Core::moduleIsActive('siteuser'))
 		{
 			$this->Siteuser_Company_Directory_Addresses->deleteAll(FALSE);
+			$this->Siteuser_Person_Directory_Addresses->deleteAll(FALSE);
 		}
 
 		return parent::delete($primaryKey);

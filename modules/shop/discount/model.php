@@ -28,6 +28,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 */
 	protected $_belongsTo = array(
 		'shop' => array(),
+		'shop_discount_dir' => array(),
 		'shop_item' =>array(),
 		'user' => array()
 	);
@@ -51,6 +52,14 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		'user_id',
 		'start_datetime',
 		'end_datetime',
+	);
+
+	/**
+	 * Default sorting for models
+	 * @var array
+	 */
+	protected $_sorting = array(
+		'shop_discounts.sorting' => 'ASC'
 	);
 
 	/**
@@ -145,6 +154,29 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	}
 
 	/**
+	 * Copy object
+	 * @return Core_Entity
+	 * @hostcms-event shop_discount.onAfterRedeclaredCopy
+	 */
+	public function copy()
+	{
+		$newObject = parent::copy();
+
+		$newObject->guid = Core_Guid::get();
+		$newObject->save();
+
+		$aShop_Discount_Siteuser_Groups = $this->Shop_Discount_Siteuser_Groups->findAll(FALSE);
+		foreach ($aShop_Discount_Siteuser_Groups as $oShop_Discount_Siteuser_Group)
+		{
+			$newObject->add(clone $oShop_Discount_Siteuser_Group);
+		}
+
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
+
+		return $newObject;
+	}
+
+	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return self
@@ -226,10 +258,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 */
 	public function nameBackend()
 	{
-		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div');
+		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div');
 
 		$oCore_Html_Entity_Div->add(
-			$Core_Html_Entity_Span = Core::factory('Core_Html_Entity_Span')->value(
+			$Core_Html_Entity_Span = Core_Html_Entity::factory('Span')->value(
 				htmlspecialchars($this->name)
 			)
 		);
@@ -242,21 +274,20 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		// Зачеркнут в зависимости от статуса родительского товара или своего статуса
 		if (!$this->active)
 		{
-			// $oCore_Html_Entity_Div->class('inactive');
 			$Core_Html_Entity_Span->class('line-through');
 		}
 		elseif (!$bRightTime)
 		{
 			$Core_Html_Entity_Span
 				->add(
-					Core::factory('Core_Html_Entity_I')->class('fa fa-clock-o black')
+					Core_Html_Entity::factory('I')->class('fa fa-clock-o black')
 				);
 		}
 
 		if ($this->coupon && strlen($this->coupon_text))
 		{
 			$oCore_Html_Entity_Div->add(
-				Core::factory('Core_Html_Entity_Span')
+				Core_Html_Entity::factory('Span')
 					->class('badge badge-square badge-sky badge-sm')
 					->value(htmlspecialchars($this->coupon_text))
 			);
@@ -265,9 +296,20 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		if ($this->start_time != '00:00:00' || $this->end_time != '23:59:59')
 		{
 			$oCore_Html_Entity_Div->add(
-				Core::factory('Core_Html_Entity_Span')
+				Core_Html_Entity::factory('Span')
 					->class('badge badge-square badge-orange badge-sm')
 					->value($this->start_time . ' – ' . $this->end_time)
+			);
+		}
+
+		if ($this->not_apply_purchase_discount)
+		{
+			$oCore_Html_Entity_Div->add(
+				Core_Html_Entity::factory('Span')
+					->class('fa-stack')
+					->style('font-size: 0.7em;')
+					->title(Core::_('Shop_Discount.not_apply_purchase_discount'))
+					->value('<i class="fas fa-percent fa-stack-1x"></i><i class="fas fa-ban fa-stack-2x danger"></i>')
 			);
 		}
 
@@ -286,7 +328,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		if ($allDays)
 		{
 			$oCore_Html_Entity_Div->add(
-				Core::factory('Core_Html_Entity_Span')
+				Core_Html_Entity::factory('Span')
 					->class('badge badge-square badge-palegreen badge-sm')
 					->value(Core::_('Shop_Discount.all_days'))
 				);
@@ -300,7 +342,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 				if ($this->$fieldName)
 				{
 					$oCore_Html_Entity_Div->add(
-						Core::factory('Core_Html_Entity_Span')
+						Core_Html_Entity::factory('Span')
 							->class('badge badge-square badge-palegreen badge-sm')
 							->value(Core::_('Shop_Discount.' . $fieldName))
 						);
@@ -308,28 +350,29 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 			}
 		}
 
-		$aShop_Discount_Siteuser_Groups = $this->Shop_Discount_Siteuser_Groups->findAll();
-		foreach ($aShop_Discount_Siteuser_Groups as $oShop_Discount_Siteuser_Group)
+		$aShop_Discount_Siteuser_Groups = $this->Shop_Discount_Siteuser_Groups->findAll(FALSE);
+		if (count($aShop_Discount_Siteuser_Groups))
 		{
-			$siteuserGroupName = $oShop_Discount_Siteuser_Group->siteuser_group_id
-				? htmlspecialchars($oShop_Discount_Siteuser_Group->Siteuser_Group->name)
-				: Core::_('Shop_Discount.all');
+			foreach ($aShop_Discount_Siteuser_Groups as $oShop_Discount_Siteuser_Group)
+			{
+				$siteuserGroupName = $oShop_Discount_Siteuser_Group->siteuser_group_id
+					? htmlspecialchars($oShop_Discount_Siteuser_Group->Siteuser_Group->name)
+					: Core::_('Shop_Discount.all');
 
-			$oCore_Html_Entity_Div->add(
-				Core::factory('Core_Html_Entity_Span')
-					->class('badge badge-square badge-hostcms')
-					->value('<i class="fa fa-users darkgray"></i> ' . $siteuserGroupName)
-				);
+				$oCore_Html_Entity_Div->add(
+					Core_Html_Entity::factory('Span')
+						->class('badge badge-square badge-hostcms')
+						->value('<i class="fa fa-users darkgray"></i> ' . $siteuserGroupName)
+					);
+			}
 		}
-
-		if ($this->not_apply_purchase_discount)
+		else
 		{
 			$oCore_Html_Entity_Div->add(
-				Core::factory('Core_Html_Entity_Span')
-					->class('fa-stack')
-					->style('font-size: 0.7em;')
-					->title(Core::_('Shop_Discount.not_apply_purchase_discount'))
-					->value('<i class="fas fa-percent fa-stack-1x"></i><i class="fas fa-ban fa-stack-2x danger"></i>')
+				Core_Html_Entity::factory('Span')
+					->class('badge badge-darkorange badge-ico white')
+					->add(Core_Html_Entity::factory('I')->class('fa fa-exclamation-triangle'))
+					->title('Empty group list!')
 			);
 		}
 
@@ -375,11 +418,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function valueBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function valueBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		echo $this->type == 0
-			? '%'
-			: ' ' . htmlspecialchars($this->Shop->Shop_Currency->sign);
+		return $this->type == 0
+			? Core_Str::hideZeros($this->value) . '%'
+			: htmlspecialchars($this->Shop->Shop_Currency->formatWithCurrency($this->value));
 	}
 
 	/**

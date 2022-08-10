@@ -194,11 +194,13 @@ class Shop_Order_Model extends Core_Entity
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
 
+		$sDir = $this->getOrderPath();
+
 		// Удаляем значения доп. свойств
 		$aPropertyValues = $this->getPropertyValues(FALSE);
 		foreach ($aPropertyValues as $oPropertyValue)
 		{
-			$oPropertyValue->Property->type == 2 && $oPropertyValue->setDir($this->getOrderPath());
+			$oPropertyValue->Property->type == 2 && $oPropertyValue->setDir($sDir);
 			$oPropertyValue->delete();
 		}
 
@@ -227,6 +229,11 @@ class Shop_Order_Model extends Core_Entity
 				->set('shop_order_id', 0)
 				->where('shop_order_id', '=', $this->id)
 				->execute();
+		}
+
+		if (is_dir($sDir))
+		{
+			Core_File::deleteDir($sDir);
 		}
 
 		return parent::delete($primaryKey);
@@ -452,10 +459,16 @@ class Shop_Order_Model extends Core_Entity
 			{
 				$oShop_Discountcard_Bonus = Core_Entity::factory('Shop_Discountcard_Bonus')->getById($oShop_Discountcard_Bonus_Transaction->shop_discountcard_bonus_id);
 
-				if (!is_null($oShop_Discountcard_Bonus))
+				if (!is_null($oShop_Discountcard_Bonus) && $oShop_Discountcard_Bonus->written_off >= $oShop_Discountcard_Bonus_Transaction->amount)
 				{
-					$oShop_Discountcard_Bonus->amount += $oShop_Discountcard_Bonus_Transaction->amount;
+					$oShop_Discountcard_Bonus->written_off -= $oShop_Discountcard_Bonus_Transaction->amount;
 					$oShop_Discountcard_Bonus->save();
+				}
+				else
+				{
+					Core_Log::instance()->clear()
+						->status(Core_Log::$ERROR)
+						->write('Shop_Order_Model: The transaction amount is greater than what was debited');
 				}
 
 				$oShop_Discountcard_Bonus_Transaction->delete();
@@ -981,7 +994,7 @@ class Shop_Order_Model extends Core_Entity
 			// Total order amount
 			$total_amount = Shop_Controller::instance()->round($total_amount);
 			$total_tax = Shop_Controller::instance()->round($total_tax);
-			
+
 			$this->addEntity(
 				Core::factory('Core_Xml_Entity')
 					->name('total_amount')
@@ -1493,7 +1506,7 @@ class Shop_Order_Model extends Core_Entity
 				{
 					Core_Log::instance()->clear()
 						->status(Core_Log::$ERROR)
-						->write('Wrong Sertificate Settings');
+						->write('Wrong Shop_Item_Certificate Settings');
 				}
 			}
 
@@ -2662,7 +2675,7 @@ class Shop_Order_Model extends Core_Entity
 	{
 		$count = $this->Shop_Order_items->getCount();
 
-		$count && Core::factory('Core_Html_Entity_Span')
+		$count && Core_Html_Entity::factory('Span')
 			->class('badge badge-ico badge-palegreen white')
 			->value($count < 100 ? $count : '∞')
 			->title($count)
@@ -2962,7 +2975,7 @@ class Shop_Order_Model extends Core_Entity
 			str_replace(array('"'), array('&quot;'), $oAdmin_Form_Controller->additionalParams)
 		);
 
-		Core::factory('Core_Html_Entity_Span')
+		Core_Html_Entity::factory('Span')
 			->class('padding-left-10')
 			->add(
 				$oCore_Html_Entity_Dropdownlist
@@ -3537,12 +3550,19 @@ class Shop_Order_Model extends Core_Entity
 		$aShop_Order_Items = $oShop_Order->Shop_Order_Items->findAll(FALSE);
 		foreach ($aShop_Order_Items as $oNew_Shop_Order_Item)
 		{
-			$oShop_Order_Items = $this->Shop_Order_Items;
-			$oShop_Order_Items->queryBuilder()
-				->where('shop_order_items.shop_item_id', '=', $oNew_Shop_Order_Item->shop_item_id)
-				->where('shop_order_items.type', '=', $oNew_Shop_Order_Item->type);
+			if ($oNew_Shop_Order_Item->shop_item_id)
+			{
+				$oShop_Order_Items = $this->Shop_Order_Items;
+				$oShop_Order_Items->queryBuilder()
+					->where('shop_order_items.shop_item_id', '=', $oNew_Shop_Order_Item->shop_item_id)
+					->where('shop_order_items.type', '=', $oNew_Shop_Order_Item->type);
 
-			$oShop_Order_Item = $oShop_Order_Items->getFirst();
+				$oShop_Order_Item = $oShop_Order_Items->getFirst();
+			}
+			else
+			{
+				$oShop_Order_Item = NULL;
+			}
 
 			if (is_null($oShop_Order_Item))
 			{

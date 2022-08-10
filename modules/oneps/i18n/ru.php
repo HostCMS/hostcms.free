@@ -2,10 +2,10 @@
 /**
  * Oneps.
  *
- * @package HostCMS 6\Oneps
- * @version 6.x
+ * @package HostCMS\Oneps
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'menu' => 'Услуги раскрутки сайтов',

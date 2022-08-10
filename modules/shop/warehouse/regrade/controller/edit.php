@@ -118,7 +118,7 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 		$oScriptResponsibleUsers = Admin_Form_Entity::factory('Script')
 			->value('$("#' . $windowId . ' #user_id").selectUser({
 					placeholder: "",
-					language: "' . Core_i18n::instance()->getLng() . '",
+					language: "' . Core_I18n::instance()->getLng() . '",
 					dropdownParent: $("#' . $windowId . '")
 				});'
 			);
@@ -426,7 +426,7 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 					$script .= "$(\"#{$windowId} input[name='shop_item_quantity\\[\\]']\").eq(0).remove();";
 				}
 
-				Core::factory('Core_Html_Entity_Script')
+				Core_Html_Entity::factory('Script')
 					->value($script)
 					->execute();
 				$this->_Admin_Form_Controller->addMessage(ob_get_clean());

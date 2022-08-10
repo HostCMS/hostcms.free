@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Price_Setting_Model extends Core_Entity
 {
@@ -259,7 +259,7 @@ class Shop_Price_Setting_Model extends Core_Entity
 	public function count_itemsBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$count = $this->Shop_Price_Setting_Items->getCount();
-		$count && Core::factory('Core_Html_Entity_Span')
+		$count && Core_Html_Entity::factory('Span')
 			->class('badge badge-info badge-square')
 			->value($count)
 			->execute();

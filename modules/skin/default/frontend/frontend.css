@@ -3,11 +3,12 @@
 /* Панель в клиентском разделе */
 .hostcmsPanel *, .hostcmsSection, .hostcmsSection * { box-sizing: border-box }
 .hostcmsPanel *::after, .hostcmsPanel *::before { box-sizing: border-box }
-.hostcmsPanel{ display: block !important; padding: 10px; box-shadow: 0 0 5px rgba(100, 100, 100, 0.60); border-radius: 10px; zoom: 1; z-index: 10001; position: absolute; margin-top: 5px; background-color: #FFF; cursor: move; opacity: .9; line-height: normal; font-family: Arial,sans-serif; font-size: 10pt }
+.hostcmsPanel{ display: block !important; padding: 10px; box-shadow: 0 0 5px rgba(100, 100, 100, 0.60); border-radius: 10px; zoom: 1; z-index: 10001; position: absolute; margin-top: 5px; background-color: #FFF; cursor: move; opacity: .9; line-height: normal; font-family: Arial,sans-serif; font-size: 10pt; user-select: none }
 .hostcmsPanel img { vertical-align: baseline }
 .hostcmsPanel a:link,.hostcmsPanel a:visited,.hostcmsPanel a:hover{color:#0070BD;text-decoration:underline}
 .hostcmsPanel .hostcmsSubPanel{ margin-bottom: -4px; white-space: nowrap}
-.hostcmsPanel .hostcmsSubPanel a img{margin: 0 2px !important; cursor: pointer; max-width: 16px !important; max-height: 16px !important }
+.hostcmsPanel .hostcmsSubPanel a { display: inline !important; }
+.hostcmsPanel .hostcmsSubPanel a img {margin: 0 2px !important; cursor: pointer; max-width: 16px !important; max-height: 16px !important }
 .hostcmsTopPanel{left:50%;margin-left:-110px;top:0}
 /* Панель для XSL */
 .hostcmsXsl {margin: 3px 0}

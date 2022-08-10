@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -146,7 +146,7 @@ $oUser = Core_Auth::getCurrentUser();
 
 if (!$oUser->read_only)
 {
-	$oCore_Html_Entity_Form_File = Core::factory('Core_Html_Entity_Form')
+	$oCore_Html_Entity_Form_File = Core_Html_Entity::factory('Form')
 		->action($sAdminFormAction)
 		->method('post')
 		->enctype('multipart/form-data')
@@ -159,10 +159,10 @@ if (!$oUser->read_only)
 
 	$oMainTab
 		->add(
-			Core::factory('Core_Html_Entity_Div')
+			Core_Html_Entity::factory('Div')
 				->id('dropzone')
 				->add(
-					Core::factory('Core_Html_Entity_Div')
+					Core_Html_Entity::factory('Div')
 					->class('dz-message needsclick')
 					->value('<i class="fa fa-arrow-circle-o-up"></i> ' . Core::_('Wysiwyg_Filemanager.upload_message'))
 				)
@@ -191,7 +191,7 @@ if (!$oUser->read_only)
 			</script>
 		'))
 		->add(
-			Core::factory('Core_Html_Entity_Div')
+			Core_Html_Entity::factory('Div')
 				->class('row')
 				->add(
 					Admin_Form_Entity::factory('Input')
@@ -212,7 +212,7 @@ if (!$oUser->read_only)
 						->divAttr(array('class' => 'form-group col-xs-2 col-sm-2 col-md-2 col-lg-2'))
 				)
 				->add(
-					Core::factory('Core_Html_Entity_Div')
+					Core_Html_Entity::factory('Div')
 						->class('form-group col-xs-3 col-sm-3 col-md-3 col-lg-3')
 						->add(
 							Admin_Form_Entity::factory('Button')
@@ -233,7 +233,7 @@ if (!$oUser->read_only)
 	ob_start();
 	$oCore_Html_Entity_Form_File->execute();
 
-	Core::factory('Core_Html_Entity_Script')
+	Core_Html_Entity::factory('Script')
 		->value('$(window).off(\'beforeunload\');')
 		->execute();
 

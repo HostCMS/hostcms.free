@@ -46,7 +46,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Structure
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Structure_Controller_Show extends Core_Controller
 {
@@ -258,7 +258,15 @@ class Structure_Controller_Show extends Core_Controller
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeRedeclaredShow', $this);
 
-		$this->showPanel && Core::checkPanel() && $this->_showPanel();
+		$oSite = $this->getEntity();
+
+		// Load user BEFORE FOUND_ROWS()
+		$oUser = Core_Auth::getCurrentUser();
+
+		$this->showPanel && Core::checkPanel()
+			&& in_array($this->_mode, array('xsl', 'tpl'))
+			&& $oUser && $oUser->checkModuleAccess(array('structure'), $oSite)
+			&& $this->_showPanel();
 
 		$bCache = $this->cache && Core::moduleIsActive('cache');
 		if ($bCache)
@@ -296,8 +304,6 @@ class Structure_Controller_Show extends Core_Controller
 			$this->_aStructures[$oStructure->parent_id][] = $oStructure->clearEntities();
 		}
 
-		$oSite = $this->getEntity();
-
 		// Показывать дополнительные свойства
 		if ($this->showProperties)
 		{
@@ -324,12 +330,12 @@ class Structure_Controller_Show extends Core_Controller
 
 		is_null($this->parentId) && $this->parentId = 0;
 
-		if ($this->showInformationsystemGroups || $this->showInformationsystemItems)
+		if (Core::moduleIsActive('informationsystem') && ($this->showInformationsystemGroups || $this->showInformationsystemItems))
 		{
 			$this->_selectInformationsystems();
 		}
 
-		if ($this->showShopGroups || $this->showShopItems)
+		if (Core::moduleIsActive('shop') && ($this->showShopGroups || $this->showShopItems))
 		{
 			$this->_selectShops();
 		}
@@ -1099,14 +1105,14 @@ class Structure_Controller_Show extends Core_Controller
 	protected function _showPanel()
 	{
 		// Panel
-		$oXslPanel = Core::factory('Core_Html_Entity_Div')
+		$oXslPanel = Core_Html_Entity::factory('Div')
 			->class('hostcmsPanel')
 			->style('display: none');
 
-		$oXslSubPanel = Core::factory('Core_Html_Entity_Div')
+		$oXslSubPanel = Core_Html_Entity::factory('Div')
 			->class('hostcmsSubPanel hostcmsXsl')
 			->add(
-				Core::factory('Core_Html_Entity_Img')
+				Core_Html_Entity::factory('Img')
 					->width(3)->height(16)
 					->src('/hostcmsfiles/images/drag_bg.gif')
 			);
@@ -1116,11 +1122,11 @@ class Structure_Controller_Show extends Core_Controller
 		$sTitle = Core::_('Structure.add_title');
 
 		$oXslSubPanel->add(
-			Core::factory('Core_Html_Entity_A')
+			Core_Html_Entity::factory('A')
 				->href("{$sPath}?{$sAdditional}")
 				->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
 				->add(
-					Core::factory('Core_Html_Entity_Img')
+					Core_Html_Entity::factory('Img')
 						->width(16)->height(16)
 						->src('/admin/images/structure_add.gif')
 						->alt($sTitle)

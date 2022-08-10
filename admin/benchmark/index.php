@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -483,7 +483,7 @@ function benchmarkShow($oAdmin_Form_Controller)
 
 						$aChanged[] = $aRow['Name'];
 					}
-					catch(Core_Exception $e)
+					catch (Core_Exception $e)
 					{
 						Core_Message::show($e->getMessage(), 'error');
 					}
@@ -529,7 +529,7 @@ function benchmarkShow($oAdmin_Form_Controller)
 
 						$aChanged[$aTable['Name']] = $aTable['Name'];
 					}
-					catch(Core_Exception $e)
+					catch (Core_Exception $e)
 					{
 						Core_Message::show($e->getMessage(), 'error');
 					}
@@ -575,7 +575,7 @@ function benchmarkShow($oAdmin_Form_Controller)
 						// У таблицы могло и не быть изменения, а полям меняли
 						$aChanged[$aTable['Name']] = $aTable['Name'];
 					}
-					catch(Core_Exception $e)
+					catch (Core_Exception $e)
 					{
 						Core_Message::show($e->getMessage(), 'error');
 					}
@@ -747,7 +747,7 @@ function benchmarkShow($oAdmin_Form_Controller)
 							</label>
 							<div class="col-sm-10">
 								<?php
-								Core::factory('Core_Html_Entity_Select')
+								Core_Html_Entity::factory('Select')
 									->options(
 										array_combine($aAvailabledEngines, $aAvailabledEngines)
 									)
@@ -896,7 +896,7 @@ function benchmarkShow($oAdmin_Form_Controller)
 							</label>
 							<div class="col-sm-10">
 								<?php
-								Core::factory('Core_Html_Entity_Select')
+								Core_Html_Entity::factory('Select')
 									->options(
 										array_combine($aAvailabledCharsets, $aAvailabledCharsets)
 									)

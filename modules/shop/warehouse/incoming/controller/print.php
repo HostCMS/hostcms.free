@@ -5,11 +5,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 /**
  * Shop_Warehouse_Incoming_Controller_Print
  *
- * @package HostCMS 6
+ * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Incoming_Controller_Print extends Printlayout_Controller_Print
 {

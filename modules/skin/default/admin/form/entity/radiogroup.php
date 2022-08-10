@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Radiogroup extends Admin_Form_Entity_Input
 {
@@ -25,13 +25,13 @@ class Skin_Default_Admin_Form_Entity_Radiogroup extends Admin_Form_Entity_Input
 		$this->_allowedProperties[] = 'ico';
 		$this->_allowedProperties[] = 'buttonset';
 
-		$this->_skipProperies[] = 'id';
-		$this->_skipProperies[] = 'value';
-		$this->_skipProperies[] = 'radio';
-		$this->_skipProperies[] = 'labelAttr';
-		$this->_skipProperies[] = 'separator';
-		$this->_skipProperies[] = 'ico';
-		$this->_skipProperies[] = 'buttonset';
+		$this->_skipProperties[] = 'id';
+		$this->_skipProperties[] = 'value';
+		$this->_skipProperties[] = 'radio';
+		$this->_skipProperties[] = 'labelAttr';
+		$this->_skipProperties[] = 'separator';
+		$this->_skipProperties[] = 'ico';
+		$this->_skipProperties[] = 'buttonset';
 
 		parent::__construct();
 

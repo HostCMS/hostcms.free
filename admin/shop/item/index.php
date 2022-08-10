@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -1306,6 +1306,8 @@ if (strlen($sGlobalSearch))
 				->addCondition(array('where' => array('shop_groups.id', '=', $sGlobalSearch)))
 				->addCondition(array('setOr' => array()))
 				->addCondition(array('where' => array('shop_groups.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_groups.guid', '=', $sGlobalSearch)))
 				->addCondition(array('setOr' => array()))
 				->addCondition(array('where' => array('shop_groups.path', 'LIKE', '%' . $sGlobalSearch . '%')))
 				->addCondition(array('setOr' => array()))

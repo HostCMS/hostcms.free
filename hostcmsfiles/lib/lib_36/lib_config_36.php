@@ -11,7 +11,7 @@ $sCmsFolderTemporaryDirectory = CMS_FOLDER . $sMonthTemporaryDirectory;
 // Магазин для выгрузки
 $oShop = Core_Entity::factory('Shop')->find(Core_Array::get(Core_Page::instance()->libParams, 'shopId'));
 
-// Размер блока выгружаемых данных (10000000 = 10 мБ)
+// Размер блока выгружаемых данных (10000000 = 10 мБ). Для "Мой склад" устанавливать (1000000 = 1 мБ)
 $iFileLimit = 10000000;
 
 // Логировать обмен
@@ -28,8 +28,9 @@ $BOM = "\xEF\xBB\xBF";
 // Решение проблемы авторизации при PHP в режиме CGI
 if (isset($_REQUEST['authorization'])
 || (isset($_SERVER['argv'][0])
-		&& empty($_SERVER['PHP_AUTH_USER'])
-		&& empty($_SERVER['PHP_AUTH_PW'])))
+	&& empty($_SERVER['PHP_AUTH_USER'])
+	&& empty($_SERVER['PHP_AUTH_PW']))
+)
 {
 	$authorization_base64 = isset($_REQUEST['authorization'])
 		? $_REQUEST['authorization']
@@ -171,28 +172,31 @@ elseif ($sType == 'catalog' && $sMode == 'file' && ($sFileName = Core_Array::get
 	$sFullFileName = $sCmsFolderTemporaryDirectory . $sFileName;
 	Core_File::mkdir(dirname($sFullFileName), CHMOD, TRUE);
 
-	$bDebug && Core_Log::instance()->clear()
-		->status(Core_Log::$MESSAGE)
-		->write('1С, type=catalog, mode=file, destination=' . $sFullFileName);
-
 	clearstatcache();
 
-	if (is_file($sFullFileName)
-		// Размер меньше блока или прошло 5 минут с даты последнего изменения
-		&& (filesize($sFullFileName) < $iFileLimit * 0.95 || (filemtime($sFullFileName) + 60 * 5) < time())
-	)
+	if (is_file($sFullFileName))
 	{
-		$bDebug && Core_Log::instance()->clear()
-			->status(Core_Log::$MESSAGE)
-			->write('1С, DELETE previous file, type=catalog, mode=file, destination=' . $sFullFileName
-				. ', filesize: ' . filesize($sFullFileName) . ', fileLimit: ' . $iFileLimit
-				. ', time: ' . filemtime($sFullFileName) . ', current: ' . time()
-			);
+		$filesize = filesize($sFullFileName);
+		$blocks = $iFileLimit / $filesize;
+		$blocksDelta = $blocks - intval($blocks);
 
-		Core_File::delete($sFullFileName);
+		// Накопленная разница между размером файла и размерами блока больше, чем 10% или прошло 5 минут с даты последнего изменения
+		if ($blocksDelta > 0.1 || (filemtime($sFullFileName) + 60 * 5) < time())
+		{
+			$bDebug && Core_Log::instance()->clear()
+				->status(Core_Log::$MESSAGE)
+				->write('1С, DELETE previous file, type=catalog, mode=file, destination=' . $sFullFileName
+					. ', filesize: ' . $filesize . ', fileLimit: ' . $iFileLimit . ', blocksDelta: ' . sprintf("%.3f", $blocksDelta)
+					. ', time: ' . filemtime($sFullFileName) . ', current: ' . time()
+				);
+
+			Core_File::delete($sFullFileName);
+		}
 	}
 
-	if (file_put_contents($sFullFileName, file_get_contents("php://input"), FILE_APPEND) !== FALSE
+	$content = file_get_contents("php://input");
+
+	if (file_put_contents($sFullFileName, $content, FILE_APPEND) !== FALSE
 		&& @chmod($sFullFileName, CHMOD_FILE))
 	{
 		echo "{$BOM}success";
@@ -201,6 +205,12 @@ elseif ($sType == 'catalog' && $sMode == 'file' && ($sFileName = Core_Array::get
 	{
 		echo "{$BOM}failure\nCan't save incoming data to file: {$sFullFileName}";
 	}
+
+	clearstatcache();
+
+	$bDebug && Core_Log::instance()->clear()
+		->status(Core_Log::$MESSAGE)
+		->write('1С, type=catalog, mode=file, destination=' . $sFullFileName . ', contentSize=' . strlen($content) . ', fileSize=' . filesize($sFullFileName));
 }
 elseif ($sType == 'catalog' && $sMode == 'import' && !is_null($sFileName = Core_Array::getGet('filename')))
 {

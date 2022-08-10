@@ -124,7 +124,7 @@ class Skin_Default extends Core_Skin
 		$aJs = $this->getJs();
 		foreach ($aJs as $sPath)
 		{
-			Core::factory('Core_Html_Entity_Script')
+			Core_Html_Entity::factory('Script')
 				->src($sPath . '?' . $timestamp)
 				->execute();
 		}
@@ -268,10 +268,10 @@ if ($this->_mode != 'blank')
 			foreach ($aConfig as $sSkinName => $aSkinConfig)
 			{
 				$aSkinConfig += array('cover' => 'cover.jpg');
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->href('./index.php?skinName=' . $sSkinName)
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->src('/modules/skin/' . $sSkinName . '/images/' . $aSkinConfig['cover'])
 							->alt(Core::_("Skin_{$sSkinName}.name"))
 							->title(Core::_("Skin_{$sSkinName}.name"))
@@ -323,7 +323,7 @@ if ($this->_mode != 'blank')
 		$message = Core_Skin::instance()->answer()->message;
 		if ($message)
 		{
-			Core::factory('Core_Html_Entity_Div')
+			Core_Html_Entity::factory('Div')
 				->id('authorizationError')
 				->value($message)
 				->execute();
@@ -351,7 +351,7 @@ if ($this->_mode != 'blank')
 						{
 							if ($oAdmin_Language->active)
 							{
-								Core::factory('Core_Html_Entity_Img')
+								Core_Html_Entity::factory('Img')
 									->src($this->getImageHref() . "/flags/{$oAdmin_Language->shortname}.png")
 									->id("{$oAdmin_Language->shortname}Lng")
 									->alt($oAdmin_Language->shortname)
@@ -390,7 +390,7 @@ if ($this->_mode != 'blank')
 		/*$message = Core_Skin::instance()->answer()->message;
 		if ($message)
 		{
-			Core::factory('Core_Html_Entity_Div')
+			Core_Html_Entity::factory('Div')
 				->id('authorizationError')
 				->value($message)
 				->execute();
@@ -412,7 +412,7 @@ if ($this->_mode != 'blank')
 
 						foreach ($aLng as $shortname => $name)
 						{
-							Core::factory('Core_Html_Entity_Img')
+							Core_Html_Entity::factory('Img')
 								->src($this->getImageHref() . "/flags/{$shortname}.png")
 								->id("{$shortname}Lng")
 								->alt($shortname)
@@ -651,7 +651,7 @@ if ($this->_mode != 'blank')
 			$aUl = array();
 			for ($iUl = 0; $iUl < $iUlCount; $iUl++)
 			{
-				$aUl[] = Core::factory('Core_Html_Entity_Ul')
+				$aUl[] = Core_Html_Entity::factory('Ul')
 					->class('sortable')
 					->id('sortable' . $iUl);
 			}
@@ -668,13 +668,13 @@ if ($this->_mode != 'blank')
 						$sId = 'sh_' . $aMenu['moduleId'];
 						isset($aUl[$aMenu['block']]) && $aUl[$aMenu['block']]
 							->add(
-								Core::factory('Core_Html_Entity_Li')
+								Core_Html_Entity::factory('Li')
 									->id($sId)
 									->add(
-										Core::factory('Core_Html_Entity_Div')
+										Core_Html_Entity::factory('Div')
 											->class('shortcut')
 											->add(
-												Core::factory('Core_Html_Entity_Img')
+												Core_Html_Entity::factory('Img')
 													->src($this->getImageHref() . 'module/' . (
 														empty($aMenu['image'])
 															? 'default.png'
@@ -682,11 +682,11 @@ if ($this->_mode != 'blank')
 														)
 											)
 									)->add(
-										Core::factory('Core_Html_Entity_Div')
+										Core_Html_Entity::factory('Div')
 											->class('shortcutLabel')
 											//->value($aMenu['name'])
 											->add(
-												Core::factory('Core_Html_Entity_A')
+												Core_Html_Entity::factory('A')
 												->href($aMenu['href'])
 												->value($aMenu['name'])
 											)
@@ -704,7 +704,7 @@ if ($this->_mode != 'blank')
 			}
 
 			$sJs .= '})(jQuery);';
-			Core::factory('Core_Html_Entity_Script')
+			Core_Html_Entity::factory('Script')
 				->value($sJs)
 				->execute();
 
@@ -754,7 +754,7 @@ if ($this->_mode != 'blank')
 			$aUser_Notes = $oUser->User_Notes->findAll();
 			foreach ($aUser_Notes as $oUser_Note)
 			{
-				Core::factory('Core_Html_Entity_Div')
+				Core_Html_Entity::factory('Div')
 					->class('note')
 					->id("note{$oUser_Note->id}")
 					->value($oUser_Note->value)
@@ -797,7 +797,7 @@ if ($this->_mode != 'blank')
 							$aAdminPage += array('title' => '');
 							// $oUser_Setting = $oUser->User_Settings->getByModuleIdAndTypeAndEntityId($oModule->id, $type, 0);
 
-							Core::factory('Core_Html_Entity_A')
+							Core_Html_Entity::factory('A')
 								->class("{action: '$.widgetLoad({ path: \'/admin/index.php?ajaxWidgetLoad&widgetAjax&moduleId={$oModule->id}&type={$type}\' })', img: '{$this->getImageHref()}module/{$oModule->path}.png'}")
 								->value($aAdminPage['title'])
 								->execute();
@@ -813,7 +813,7 @@ if ($this->_mode != 'blank')
 
 				foreach ($aSites as $oSite)
 				{
-					Core::factory('Core_Html_Entity_A')
+					Core_Html_Entity::factory('A')
 						->class("{action: '$.reloadDesktop({$oSite->id})', img: '" . (
 							$oSite->id == CURRENT_SITE ? ' /modules/skin/default/images/check.png' : ''
 							) . "'}")

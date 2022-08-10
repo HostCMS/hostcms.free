@@ -9,16 +9,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_View
 {
-	 /**
-	 * Is showing filter necessary
-	 * @var boolean
-	 */
-	protected $_showFilter = FALSE;
-
 	protected function _isFilterNecessary()
 	{
 		$oAdmin_Form = $this->_Admin_Form_Controller->getAdminForm();
@@ -39,7 +33,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 			if ($oAdmin_Form_Field_Changed->allow_filter || $oAdmin_Form_Field_Changed->view == 1)
 			{
-				$this->_showFilter = TRUE;
+				$this->showFilter = TRUE;
 				break;
 			}
 		}
@@ -47,22 +41,16 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 		return $this;
 	}
 
-	 /**
-	 * Is showing ChangeViews necessary
-	 * @var boolean
-	 */
-	protected $_showChangeViews = TRUE;
-
 	protected function _topMenuBar()
 	{
 		?><div class="table-toolbar">
 			<?php
-			Core_Event::notify('Admin_Form_Controller.onBeforeShowMenu', $this->_Admin_Form_Controller);
+			Core_Event::notify('Admin_Form_Controller.onBeforeShowMenu', $this->_Admin_Form_Controller, array($this));
 			?>
 			<?php $this->_Admin_Form_Controller->showFormMenus()?>
 			<div class="table-toolbar-right pull-right">
-				<?php $this->_pageSelector()?>
-				<?php $this->_showChangeViews && $this->_Admin_Form_Controller->showChangeViews()?>
+				<?php $this->showPageSelector && $this->_pageSelector()?>
+				<?php $this->showChangeViews && $this->_Admin_Form_Controller->showChangeViews()?>
 			</div>
 			<div class="clear"></div>
 		</div>
@@ -138,15 +126,15 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
  		$path = Core_Str::escapeJavascriptVariable($oAdmin_Form_Controller->getPath());
 
 		// TOP FILTER
-		if ($this->_showFilter)
+		if ($this->showFilter)
 		{
-			$oCore_Html_Entity_Span = Core::factory('Core_Html_Entity_Span')
+			$oCore_Html_Entity_Span = Core_Html_Entity::factory('Span')
 				->class('btn btn-sm btn-default margin-right-10')
 				->id('showTopFilterButton')
 				->onclick('$.toggleFilter(); $.changeFilterStatus({ path: \'' . $path . '\', show: +$(".topFilter").is(":visible") })')
 				->title(Core::_('Admin_Form.filter'))
 				->add(
-					Core::factory('Core_Html_Entity_I')->class('fa fa-filter no-margin')
+					Core_Html_Entity::factory('I')->class('fa fa-filter no-margin')
 				);
 
 			$iFilters = count(Core_Array::get($oAdmin_Form_Controller->filterSettings, 'tabs', array()));
@@ -154,7 +142,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 			if ($iFilters > 1)
 			{
 				$oCore_Html_Entity_Span->add(
-					Core::factory('Core_Html_Entity_Span')
+					Core_Html_Entity::factory('Span')
 						->class('badge badge-orange')
 						->value($iFilters - 1)
 				);
@@ -164,14 +152,14 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 		}
 
 		// CSV Export
-		$oCore_Html_Entity_Span = Core::factory('Core_Html_Entity_A')
+		$oCore_Html_Entity_Span = Core_Html_Entity::factory('A')
 			->class('btn btn-sm btn-default margin-right-10')
 			->id('showTopFilterButton')
 			->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath()) . '&hostcms[export]=csv')
 			->title(Core::_('Admin_Form.export_csv'))
 			->target('_blank')
 			->add(
-				Core::factory('Core_Html_Entity_I')->class('fa fa-upload no-margin')
+				Core_Html_Entity::factory('I')->class('fa fa-upload no-margin')
 			)
 			->execute();
 
@@ -187,17 +175,18 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 	{
 		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
 
-		$sShowNavigation = $oAdmin_Form_Controller->getTotalCount() > $oAdmin_Form_Controller->limit;
+		$bShowNavigation = $this->showPageNavigation
+			&& $oAdmin_Form_Controller->getTotalCount() > $oAdmin_Form_Controller->limit;
 
-		Core_Event::notify('Admin_Form_Controller.onBeforeShowFooter', $oAdmin_Form_Controller);
+		Core_Event::notify('Admin_Form_Controller.onBeforeShowFooter', $oAdmin_Form_Controller, array($this));
 
 		?><div class="DTTTFooter">
 			<div class="row">
-				<div class="col-xs-12 <?php echo $sShowNavigation ? 'col-sm-6 col-md-7 col-lg-8' : ''?>">
+				<div class="col-xs-12 <?php echo $bShowNavigation ? 'col-sm-6 col-md-7 col-lg-8' : ''?>">
 					<?php $this->bottomActions()?>
 				</div>
 				<?php
-				if ($sShowNavigation)
+				if ($bShowNavigation)
 				{
 					?><div class="col-xs-12 col-sm-6 col-md-5 col-lg-4">
 						<?php $oAdmin_Form_Controller->pageNavigation()?>
@@ -226,7 +215,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 		</script>
 		<?php
 
-		Core_Event::notify('Admin_Form_Controller.onAfterShowFooter', $oAdmin_Form_Controller);
+		Core_Event::notify('Admin_Form_Controller.onAfterShowFooter', $oAdmin_Form_Controller, array($this));
 
 		return $this;
 	}
@@ -262,7 +251,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 			return FALSE;
 		}
 
-		if ($this->_showFilter)
+		if ($this->showFilter)
 		{
 			$aHide = array();
 			$path = Core_Str::escapeJavascriptVariable($oAdmin_Form_Controller->getPath());
@@ -511,7 +500,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 					$aAllowed_Admin_Form_Actions = $oAdmin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser);
 
 					if ($oAdmin_Form->show_operations && $oAdmin_Form_Controller->showOperations
-						|| $allow_filter && $this->_showFilter)
+						|| $allow_filter && $this->showFilter)
 					{
 							$iSingleActionCount = 0;
 
@@ -520,7 +509,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 								$oAdmin_Form_Action->single && $iSingleActionCount++;
 							}
 
-						?><th class="filter-action-<?php echo $iSingleActionCount?>">&nbsp;</th><?php
+						?><th class="filter-action-<?php echo $iSingleActionCount?> sticky-column">&nbsp;</th><?php
 					}
 					?>
 				</tr><?php
@@ -573,11 +562,11 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 			// Фильтр показываем если есть события или хотя бы у одного есть фильтр
 			if ($oAdmin_Form->show_operations && $oAdmin_Form_Controller->showOperations
-				|| $allow_filter && $this->_showFilter)
+				|| $allow_filter && $this->showFilter)
 			{
 				$onclick = $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath());
 
-				?><td class="apply-button"><?php
+				?><td class="apply-button sticky-column"><?php
 					?>
 					<div class="btn-group">
 						<a class="btn btn-xs btn-palegreen" id="admin_forms_apply_button" title="<?php echo Core::_('Admin_Form.button_to_filter')?>" onclick="mainFormLocker.unlock(); <?php echo $onclick?>"><i class="fa fa-search"></i></a>
@@ -596,13 +585,20 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 			$aDatasets = $oAdmin_Form_Controller->getDatasets();
 			foreach ($aDatasets as $datasetKey => $oAdmin_Form_Dataset)
 			{
-				// Добавляем внешнюю замену по датасету
-				$oAdmin_Form_Controller->addExternalReplace('{dataset_key}', $datasetKey);
+				try {
+					// Добавляем внешнюю замену по датасету
+					$oAdmin_Form_Controller->addExternalReplace('{dataset_key}', $datasetKey);
 
-				$quotedDatasetKey = htmlspecialchars($datasetKey);
-				$escapedDatasetKey = Core_Str::escapeJavascriptVariable($oAdmin_Form_Controller->jQueryEscape($datasetKey));
+					$quotedDatasetKey = htmlspecialchars($datasetKey);
+					$escapedDatasetKey = Core_Str::escapeJavascriptVariable($oAdmin_Form_Controller->jQueryEscape($datasetKey));
 
-				$aDataFromDataset = $oAdmin_Form_Dataset->load();
+					$aDataFromDataset = $oAdmin_Form_Dataset->load();
+				}
+				catch (Exception $e)
+				{
+					Core_Message::show($e->getMessage(), 'error');
+					$aDataFromDataset = array();
+				}
 
 				if (!empty($aDataFromDataset))
 				{
@@ -1045,14 +1041,14 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 						// Действия для строки в правом столбце
 						if ($oAdmin_Form->show_operations && $oAdmin_Form_Controller->showOperations
-							/*|| $allow_filter && $this->_showFilter*/)
+							/*|| $allow_filter && $this->showFilter*/)
 						{
 							$sContents = '';
 
-							$oCore_Html_Entity_Ul = Core::factory('Core_Html_Entity_Ul')
+							$oCore_Html_Entity_Ul = Core_Html_Entity::factory('Ul')
 								->class('dropdown-menu pull-right');
 
-							?><td><?php
+							?><td class="sticky-column"><?php
 
 							$sActionsFullView = $sActionsShortView = '';
 
@@ -1084,8 +1080,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 								}
 
 								// Если у модели есть метод checkBackendAccess(), то проверяем права на это действие, совершаемое текущим пользователем
-								if (method_exists($oEntity, 'checkBackendAccess')
-									&& !$oEntity->checkBackendAccess($oAdmin_Form_Action_Changed->name, $oUser))
+								if (method_exists($oEntity, 'checkBackendAccess') && !$oEntity->checkBackendAccess($oAdmin_Form_Action_Changed->name, $oUser))
 								{
 									continue;
 								}
@@ -1122,7 +1117,8 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 										? $oAdmin_Form_Controller->getAdminActionModalLoad(array(
 											'path' => $oAdmin_Form_Controller->getPath(), 'action' => $oAdmin_Form_Action_Changed->name,
 											'operation' => 'modal',
-											'datasetKey' => $datasetKey, 'datasetValue' => $entityKey
+											'datasetKey' => $datasetKey, 'datasetValue' => $entityKey,
+											'width' => '90%'
 										))
 										: $oAdmin_Form_Controller->getAdminActionLoadAjax(array(
 											'path' => $oAdmin_Form_Controller->getPath(), 'action' => $oAdmin_Form_Action_Changed->name,
@@ -1146,9 +1142,9 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 							if ($iActionsCount)
 							{
-							?><div class="btn-group <?php echo $iActionsCount > 1 ? 'visible-md visible-lg' : ''?>">
-								<?php echo $sActionsFullView?>
-							</div><?php
+								?><div class="btn-group <?php echo $iActionsCount > 1 ? 'visible-md visible-lg' : ''?>">
+									<?php echo $sActionsFullView?>
+								</div><?php
 
 								if ($iActionsCount > 1)
 								{

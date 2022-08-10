@@ -3,9 +3,9 @@
 * Online shop.
 *
 * @package HostCMS
-* @version 6.x
+* @version 7.x
 * @author Hostmake LLC
-* @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -220,7 +220,7 @@ else
 					)
 				)
 				->add(Admin_Form_Entity::factory('Div')->class('row')
-					->add(Core::factory('Core_Html_Entity_Input')
+					->add(Core_Html_Entity::factory('Input')
 						->type('hidden')
 						->name('shop_id')
 						->value($oShop->id)

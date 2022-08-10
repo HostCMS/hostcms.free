@@ -133,4 +133,24 @@ return array(
 	'event_today' => 'Сьогодні',
 	'event_empty' => 'Скоро',
 	'more' => 'eще',
+
+	'deleteEntity_success' => 'Елемент видалено!',
+
+	'no_events' => 'Немає справ',
+
+	'history_add_event' => 'Додавання справи',
+	'history_change_status' => 'Статус змінено на "%s"',
+	'history_change_type' => 'Тип змінено на "%s"',
+	'history_change_group' => 'Група змінена на "%s"',
+	'history_change_important0' => 'Знято значення',
+	'history_change_important1' => 'Встановлено значення',
+	'history_change_place_from_empty' => 'Встановлено місце зустрічі "%s"',
+	'history_change_place_to_empty' => 'Видалено місце зустрічі "%s"',
+	'history_change_place' => 'Місце зустрічі змінено з "%s" на "%s"',
+	'history_add_file' => 'Доданий файл <b>%s</b>',
+	'history_change_completed0' => '<span class="azure">Справа повернута в роботу</span>',
+	'history_change_completed1' => '<span class="palegreen">Справа завершена успішно</span>',
+	'history_change_completed-1' => '<span class="darkorange">Справа завершена неуспішно</span>',
+
+	'event_files' => 'Файли',
 );

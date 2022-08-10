@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Event_Module extends Event_Module
 {
@@ -348,7 +348,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 													// Создатель дела
 													$oUser_Creator = $oEvent_Creator->User;
 												?>
-												<div class="<?php echo $oUser_Creator->isOnline() ? 'online margin-left-5 margin-right-5' : 'offline margin-left-5 margin-right-5'; ?>"></div><span class="task-creator"><a href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][<?php echo $oUser_Creator->id?>]=1" onclick="$.modalLoad({path: '/admin/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oUser_Creator->id?>]=1', windowId: 'id_content'}); return false"><?php echo htmlspecialchars($oUser_Creator->getFullName())?></a></span>
+												<div class="<?php echo $oUser_Creator->isOnline() ? 'online margin-left-5 margin-right-5' : 'offline margin-left-5 margin-right-5'; ?>"></div><span class="task-creator"><?php $oUser_Creator->showLink('id_content')?></span>
 												<?php
 												}
 											}

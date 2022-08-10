@@ -9,9 +9,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Checkbox extends Admin_Form_Entity_Input
 {
@@ -26,7 +26,7 @@ class Skin_Default_Admin_Form_Entity_Checkbox extends Admin_Form_Entity_Input
 		parent::__construct();
 		$this->type('checkbox');
 
-		$this->_skipProperies['checked'] = 'checked';
+		$this->_skipProperties['checked'] = 'checked';
 	}
 
 	/**

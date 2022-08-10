@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Lib
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Lib_Controller_Delete_File extends Admin_Form_Action_Controller
 {
@@ -27,17 +27,29 @@ class Lib_Controller_Delete_File extends Admin_Form_Action_Controller
 			{
 				$aJson = json_decode($this->_object->options, TRUE);
 
-				if (isset($aJson[$varible_name][$operation]))
+				$bMultiply = isset($aJson[$varible_name][$operation]) && is_array($aJson[$varible_name]);
+
+				$filepath = $bMultiply
+					? $aJson[$varible_name][$operation]
+					: $aJson[$varible_name];
+
+				if (strlen($filepath))
 				{
 					try {
-						// Core_File::delete($this->_object->getLibFilePath() . $aJson[$varible_name][$operation]);
-						Core_File::delete(CMS_FOLDER . $aJson[$varible_name][$operation]);
-
-						unset($aJson[$varible_name][$operation]);
-
-						$this->_object->options(json_encode($aJson));
-						$this->_object->save();
+						Core_File::delete(CMS_FOLDER . ltrim($filepath, '/'));
 					} catch (Core_Exception $e) {}
+
+					if ($bMultiply)
+					{
+						unset($aJson[$varible_name][$operation]);
+					}
+					else
+					{
+						unset($aJson[$varible_name]);
+					}
+
+					$this->_object->options(json_encode($aJson));
+					$this->_object->save();
 				}
 			}
 		}

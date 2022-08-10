@@ -1,13 +1,5 @@
 <?php
-/**
- * Online shop.
- *
- * @package HostCMS
- * @subpackage Shop
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'Bonuses',
 	'show_item_bonus_title' => "Bonuses for product \"%s\"",
@@ -43,4 +35,10 @@ return array(
 	'accrual_date' => 'Accrual date',
 	'accrual_days' => 'Through (days)',
 	'expire_days' => 'On (days)',
+	'badge_from' => 'from %s to %s days',
+	'badge_through' => 'after %s days and for %s days',
+	'shop_bonus_dir_id' => 'Section',
+	'sorting' => 'Sort order',
+	'copy_success' => "Item copied successfully!",
+	'apply_success' => "Information changed successfully.",
 );

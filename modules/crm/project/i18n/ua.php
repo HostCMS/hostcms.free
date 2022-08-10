@@ -31,4 +31,6 @@ return array(
 	'color' => 'Колір',
 	'completed' => 'Завершено',
 	'changeCompleted_success' => 'Завершеність проекту змінена',
+	'files_count' => 'Файли: %s',
+	'add_attachment' => 'Файл',
 );

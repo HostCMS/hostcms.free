@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Image_Gd extends Core_Image
 {
@@ -453,11 +453,11 @@ class Core_Image_Gd extends Core_Image
 	/**
 	 * Добавление водяного знака
 	 *
-	 * @param resource $sourceResource исходное изображение
-	 * @param resource $watermarkResource водяной знак
+	 * @param GdImage $sourceResource исходное изображение
+	 * @param GdImage $watermarkResource водяной знак
 	 * @param int $watermarkX позиция по оси X
 	 * @param int $watermarkY позиция по оси Y
-	 * @return resource
+	 * @return GdImage
 	 */
 	static protected function _addWatermark($sourceResource, $watermarkResource, $watermarkX = NULL, $watermarkY = NULL)
 	{

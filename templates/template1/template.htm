@@ -262,11 +262,11 @@
 		// Если модуль рекламы доступен
 		if (Core::moduleIsActive('counter'))
 		{
-		?><!-- HostCMS Counter -->
-		<script type="text/javascript">document.cookie="hostmake=1; path=/";document.write("<a href=\"http://www.hostcms.ru/\"><img src=\"/counter/counter.php?rand="+Math.random()+"&id=1&refer="+escape(document.referrer)+"&amp;current_page="+escape(window.location.href)+"&cookie="+(document.cookie?"Y":"N")+"&java="+(navigator.javaEnabled()?"Y":"N")+"&screen="+screen.width+'x'+screen.height+"&px="+(((navigator.appName.substring(0,9)=="Microsoft"))?screen.colorDepth:screen.pixelDepth)+"&js_version=1.6&counter=1\" alt=\"HostCMS Counter\" width=\"88\" height=\"31\" /></a>")</script>
-		<noscript>
-		<a href="http://www.hostcms.ru/">
-		<img alt="HostCMS Counter" height="31" src="/counter/counter.php?id=1&amp;counter=1" width="88" /></a></noscript><!-- HostCMS Counter --><?php
+		?><!--HostCMS counter--><a href="https://www.hostcms.ru" target="_blank"><img id="hcntr0" width="1" height="1" style="border:0" title="HostCMS Counter" alt="" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"/></a>
+<script >(function(h,c,m,s){h.getElementById("hcntr0").src="//hostcms6/counter/counter.php?r="+Math.random()+"&id=1&refer="+escape(h.referrer)+"&current_page="+escape(s.location.href)+"&cookie="+(h.cookie?"Y":"N")+"&java="+(m.javaEnabled()?"Y":"N")+"&screen="+c.width+'x'+c.height+"&counter=0"})(document,screen,navigator,window)</script>
+<noscript>
+<a href="https://www.hostcms.ru">
+<img alt="HostCMS Counter" height="1" src="//hostcms6/counter/counter.php?id=1&amp;counter=0" width="1" /></a></noscript><!--/HostCMS--><?php
 		}
 		?>
 	</div>

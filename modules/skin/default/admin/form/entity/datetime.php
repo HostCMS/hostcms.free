@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_DateTime extends Admin_Form_Entity_Input
 {
@@ -23,8 +23,8 @@ class Skin_Default_Admin_Form_Entity_DateTime extends Admin_Form_Entity_Input
 			'dateTimeFormat',
 		);
 
-		$this->_skipProperies[] = 'options';
-		$this->_skipProperies[] = 'dateTimeFormat';
+		$this->_skipProperties[] = 'options';
+		$this->_skipProperties[] = 'dateTimeFormat';
 
 		parent::__construct();
 

@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Comment_Controller_Edit extends Comment_Controller_Edit
 {
@@ -58,12 +58,26 @@ class Shop_Item_Comment_Controller_Edit extends Comment_Controller_Edit
 				? Core_Entity::factory('Comment', $this->_object->parent_id)->Comment_Shop_Item->shop_item_id
 				: Core_Array::getRequest('shop_item_id'))
 			: $this->_object->Comment_Shop_Item->shop_item_id;
+			
+		$oShop_Item = Core_Entity::factory('Shop_Item', $shop_item_id);	
 
 		$oAdmin_Form_Entity_Input_Name = Admin_Form_Entity::factory('Input')
 			->name('shop_item_id')
 			->caption(Core::_('Shop_Item_Comment.shop_item_id'))
 			->value($shop_item_id)
-			->class('form-control col-xs-12');
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
+			->class('form-control col-xs-12')
+			->add(
+				Admin_Form_Entity::factory('A')
+					->id('pathLink')
+					->class('input-group-addon bg-blue bordered-blue')
+					->value('<i class="fa fa-external-link"></i>')
+					->target('_blank')
+					->href("/admin/shop/item/index.php?hostcms[action]=edit&hostcms[window]=id_content&shop_id={$oShop->id}&shop_group_id={$oShop_Item->shop_group_id}&hostcms[checked][1][{$shop_item_id}]=1")
+					
+					//->href("/admin/shop/item/index.php?hostcms[action]=edit&hostcms[window]=id_content&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystem_Item->informationsystem_group_id}&hostcms[checked][1][{$informationsystem_item_id}]=1")
+			);
+
 
 		$oAdditionalRow1->add($oAdmin_Form_Entity_Input_Name);
 	}

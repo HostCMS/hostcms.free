@@ -7,20 +7,22 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Sql
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Sql_Table_Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
 	/**
-	 * Set object
-	 * @param object $object object
+	 * Prepare backend item's edit form
+	 *
 	 * @return self
 	 */
-	public function setObject($object)
+	protected function _prepareForm()
 	{
-		parent::setObject($object);
+		parent::_prepareForm();
+
+		$object = $this->_object;
 
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
@@ -40,6 +42,7 @@ class Sql_Table_Field_Controller_Edit extends Admin_Form_Action_Controller_Type_
 			? Core_DataBase::instance()->getColumnType($object->Type)
 			: array(
 				'datatype' => '',
+				'defined_max_length' => '',
 				'max_length' => '',
 				'binary' => FALSE,
 				'unsigned' => FALSE,
@@ -109,7 +112,7 @@ class Sql_Table_Field_Controller_Edit extends Admin_Form_Action_Controller_Type_
 			->add(
 				Admin_Form_Entity::factory('Input')
 					->name('type_length')
-					->value($aType['max_length'])
+					->value($aType['defined_max_length'])
 					->caption(Core::_('sql_table_field.type_length'))
 					->divAttr(array('class' => 'form-group col-xs-12 col-md-3'))
 			);
@@ -242,7 +245,6 @@ class Sql_Table_Field_Controller_Edit extends Admin_Form_Action_Controller_Type_
 		$oMainTab
 			->move($this->getField('Comment'), $oMainRow7);
 
-
 		$oMainTab
 			->delete($this->getField('Key'))
 			->delete($this->getField('Extra'))
@@ -302,14 +304,22 @@ class Sql_Table_Field_Controller_Edit extends Admin_Form_Action_Controller_Type_
 
 			$query .= ' ' . $sField;
 
-			$query .= ' ' . preg_replace('/[^A-Z]/', '', $this->_formValues['type_name']);
+			$query .= ' ' . preg_replace('/[^A-Z]/', '', Core_Array::get($this->_formValues, 'type_name'));
 
-			if (trim($this->_formValues['type_length']) != ''
-				&& !in_array($aType['datatype'], array('double', 'real', 'serial', 'date', 'datetime', 'year', 'tinyblob', 'blob', 'mediumblob', 'longblob', 'enum', 'set', 'point', 'multipoint', 'multilinestring', 'multipolygon', 'ge3ometrycollection', 'json'))
+			$type_length = preg_replace('/[^0-9,]/', '', Core_Array::get($this->_formValues, 'type_length'));
+
+			// Required length for some types
+			if ($type_length == '' && in_array($aType['datatype'], array('char', 'varchar', 'binary', 'varbinary')))
+			{
+				$type_length = $aType['max_length'];
+			}
+
+			if ($type_length != ''
 				&& $aType['type'] != 'bool'
+				&& !in_array($aType['datatype'], array('double', 'real', 'serial', 'date', 'datetime', 'year', 'tinyblob', 'blob', 'mediumblob', 'longblob', 'enum', 'set', 'point', 'multipoint', 'multilinestring', 'multipolygon', 'ge3ometrycollection', 'json'))
 			)
 			{
-				$query .= '(' . preg_replace('/[^0-9,]/', '', $this->_formValues['type_length']) . ')';
+				$query .= '(' . $type_length . ')';
 			}
 
 			// Attr

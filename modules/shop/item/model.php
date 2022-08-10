@@ -125,6 +125,8 @@ class Shop_Item_Model extends Core_Entity
 		'shop_tab' => array('through' => 'shop_tab_item'),
 		'shop_tab_item' => array(),
 		'shop_item_certificate' => array(),
+		'lead_shop_item' => array(),
+		'deal_shop_item' => array(),
 	);
 
 	/**
@@ -1556,9 +1558,9 @@ class Shop_Item_Model extends Core_Entity
 
 		$window_id = $oAdmin_Form_Controller->getWindowId();
 
-		Core::factory('Core_Html_Entity_A')
+		Core_Html_Entity::factory('A')
 			->add(
-				Core::factory('Core_Html_Entity_I')
+				Core_Html_Entity::factory('I')
 					->class('fa fa-lightbulb-o ' . ($iCount ? 'fa-active' : 'fa-inactive'))
 			)
 			->href($oAdmin_Form_Controller->getAdminActionLoadHref("/admin/shop/item/associated/index.php", 'adminChangeAssociated', NULL, 1, intval($this->id)))
@@ -1753,6 +1755,16 @@ class Shop_Item_Model extends Core_Entity
 		$this->Shop_Price_Entries->deleteAll(FALSE);
 		$this->Shop_Tab_Items->deleteAll(FALSE);
 
+		if (Core::moduleIsActive('deal'))
+		{
+			$this->Deal_Shop_Items->deleteAll(FALSE);
+		}
+
+		if (Core::moduleIsActive('lead'))
+		{
+			$this->Lead_Shop_Items->deleteAll(FALSE);
+		}
+
 		$this->Shop_Item_Certificate->delete();
 
 		// Fast filter
@@ -1825,14 +1837,14 @@ class Shop_Item_Model extends Core_Entity
 			? $this->Shop_Item
 			: $this;
 
-		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
+		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')
 			->class('d-flex align-items-center');
 
 		if (is_null(Core_Array::getGet('shop_item_id')) && $object->modification_id)
 		{
 			$oCore_Html_Entity_Div
 				->add(
-					Core::factory('Core_Html_Entity_I')->class('fa fa-code-fork margin-right-5 order-first')
+					Core_Html_Entity::factory('I')->class('fa fa-code-fork margin-right-5 order-first')
 				);
 		}
 
@@ -1845,7 +1857,7 @@ class Shop_Item_Model extends Core_Entity
 		foreach ($aShop_Item_Barcodes as $oShop_Item_Barcode)
 		{
 			$oCore_Html_Entity_Div->add(
-				Core::factory('Core_Html_Entity_Span')
+				Core_Html_Entity::factory('Span')
 					->class('label label-sm darkgray bordered-1 bordered-gray margin-left-5')
 					->value($oShop_Item_Barcode->value)
 			);
@@ -1873,11 +1885,11 @@ class Shop_Item_Model extends Core_Entity
 					. $object->getPath();
 
 				$oCore_Html_Entity_Div->add(
-					Core::factory('Core_Html_Entity_A')
+					Core_Html_Entity::factory('A')
 						->href($href)
 						->target('_blank')
 						->add(
-							Core::factory('Core_Html_Entity_I')->class('fa fa-external-link margin-left-5')
+							Core_Html_Entity::factory('I')->class('fa fa-external-link margin-left-5')
 						)
 				);
 			}
@@ -1886,7 +1898,7 @@ class Shop_Item_Model extends Core_Entity
 		{
 			$oCore_Html_Entity_Div
 				->add(
-					Core::factory('Core_Html_Entity_I')->class('fa fa-clock-o black margin-left-5')
+					Core_Html_Entity::factory('I')->class('fa fa-clock-o black margin-left-5')
 				);
 		}
 
@@ -2427,12 +2439,12 @@ class Shop_Item_Model extends Core_Entity
 
 		if (!isset($this->_forbiddenTags['getPrices']))
 		{
+			// Prices
+			$aPrices = $this->getPrices();
+
 			if ($this->shop_currency_id)
 			{
 				$oShopCurrency = $this->Shop->Shop_Currency;
-
-				// Prices
-				$aPrices = $this->getPrices();
 
 				// Будет совпадать с ценой вместе с налогом
 				$this->addXmlTag('price', $aPrices['price_discount'], array(
@@ -2934,7 +2946,7 @@ class Shop_Item_Model extends Core_Entity
 			? Core_Entity::factory('Shop_Item', $this->shortcut_id)
 			: $this;
 
-		$oShop_Item->shop_currency_id == 0 && Core::factory('Core_Html_Entity_I')
+		$oShop_Item->shop_currency_id == 0 && Core_Html_Entity::factory('I')
 			->class('fa fa-exclamation-triangle darkorange')
 			->title(Core::_('Shop_Item.shop_item_not_currency'))
 			->execute();
@@ -2949,7 +2961,7 @@ class Shop_Item_Model extends Core_Entity
 	public function relatedBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$count = $this->Shop_Item_Associateds->getCount();
-		$count && Core::factory('Core_Html_Entity_Span')
+		$count && Core_Html_Entity::factory('Span')
 			->class('badge badge-ico badge-azure white')
 			->value($count < 100 ? $count : '∞')
 			->title($count)
@@ -2965,7 +2977,7 @@ class Shop_Item_Model extends Core_Entity
 	public function modificationsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$count = $this->Modifications->getCount();
-		$count && Core::factory('Core_Html_Entity_Span')
+		$count && Core_Html_Entity::factory('Span')
 			->class('badge badge-ico badge-darkorange white')
 			->value($count < 100 ? $count : '∞')
 			->title($count)
@@ -2985,7 +2997,7 @@ class Shop_Item_Model extends Core_Entity
 
 		$count = $countDiscount + $countBonuses;
 
-		$count && Core::factory('Core_Html_Entity_Span')
+		$count && Core_Html_Entity::factory('Span')
 			->class('badge badge-ico badge-palegreen white')
 			->value($count < 100 ? $count : '∞')
 			->title($count)
@@ -3003,7 +3015,7 @@ class Shop_Item_Model extends Core_Entity
 		if (Core::moduleIsActive('comment'))
 		{
 			$count = $this->Comments->getCount();
-			$count && Core::factory('Core_Html_Entity_Span')
+			$count && Core_Html_Entity::factory('Span')
 				->class('badge badge-ico white')
 				->value($count < 100 ? $count : '∞')
 				->title($count)
@@ -3023,7 +3035,7 @@ class Shop_Item_Model extends Core_Entity
 		{
 			case 1:
 				// Digital
-				Core::factory('Core_Html_Entity_Span')
+				Core_Html_Entity::factory('Span')
 					->class('badge badge-ico badge-danger white')
 					->style('padding-left: 1px;')
 					->value('<i class="fa fa-table fa-fw"></i>')
@@ -3032,7 +3044,7 @@ class Shop_Item_Model extends Core_Entity
 			break;
 			case 2:
 				// Divisible
-				Core::factory('Core_Html_Entity_Span')
+				Core_Html_Entity::factory('Span')
 					->class('badge badge-ico badge-warning white')
 					->style('padding-left: 2px;')
 					->value('<i class="fa fa-puzzle-piece fa-fw"></i>')
@@ -3041,7 +3053,7 @@ class Shop_Item_Model extends Core_Entity
 			break;
 			case 3:
 				// Set
-				Core::factory('Core_Html_Entity_Span')
+				Core_Html_Entity::factory('Span')
 					->class('badge badge-ico badge-sky white')
 					->style('padding-left: 1px;')
 					->value('<i class="fa fa-archive fa-fw"></i>')
@@ -3050,7 +3062,7 @@ class Shop_Item_Model extends Core_Entity
 			break;
 			case 4:
 				// Certificate
-				Core::factory('Core_Html_Entity_Span')
+				Core_Html_Entity::factory('Span')
 					->class('badge badge-ico badge-maroon white')
 					->style('padding-left: 1px;')
 					->value('<i class="fa fa-certificate fa-fw"></i>')

@@ -15,9 +15,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Tpl
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Tpl_Processor
 {
@@ -262,16 +262,26 @@ class Tpl_Processor
 				<li>
 					<span class="bold"><?php echo htmlspecialchars($key)?>: </span>
 					<?php
-						switch (gettype($variable))
+						$type = gettype($variable);
+						switch ($type)
 						{
+							case 'boolean':
+								$value = "(boolean) " . ($variable === TRUE ? 'true' : 'false');
+							break;
+							case 'NULL':
+								$value = "NULL";
+							break;
 							case 'object':
 								$value = "(object) " . get_class($variable);
 							break;
 							case 'array':
 								$value = "(array), " . Core::_('Tpl.panel_tpl_array', count($variable));
 							break;
+							case 'resource':
+								$value = "(resource)";
+							break;
 							default:
-								$value = $variable;
+								$value = "({$type}), " . $variable;
 						}
 					?>
 					<span><?php echo htmlspecialchars($value)?></span>

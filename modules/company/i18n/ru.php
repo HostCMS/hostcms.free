@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Company
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Компании',
@@ -54,5 +54,6 @@ return array(
 	'show_phone_types' => 'Типы телефонов',
 	'show_address_types' => 'Типы адресов',
 	'show_socials' => 'Социальные сети',
-	'show_messengers' => 'Мессенджеры'
+	'show_messengers' => 'Мессенджеры',
+	'image' => 'Изображение',
 );

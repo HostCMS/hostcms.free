@@ -22,7 +22,7 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
 		$oAdmin_Form = $oAdmin_Form_Controller->getAdminForm();
 
-		$oAdmin_View = Admin_View::create($this->_Admin_Form_Controller->Admin_View)
+		$oAdmin_View = Admin_View::create($oAdmin_Form_Controller->Admin_View)
 			->pageTitle($oAdmin_Form_Controller->pageTitle)
 			->module($oAdmin_Form_Controller->module);
 
@@ -55,7 +55,7 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 
 		if ($total_count)
 		{
-			?><div class="row margin-bottom-20">
+			?><div class="row margin-bottom-20 margin-top-10">
 				<div class="col-xs-12 col-sm-6 col-md-8 text-align-left">
 					<?php $this->_Admin_Form_Controller->pageNavigation()?>
 				</div>
@@ -92,17 +92,19 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 
 		$oSortingField = $oAdmin_Form_Controller->getSortingField();
 
-		$oCurrentUser = Core_Auth::getCurrentUser();
+		$oUser = Core_Auth::getCurrentUser();
 
 		if (empty($aAdmin_Form_Fields))
 		{
 			throw new Core_Exception('Admin form does not have fields.');
 		}
 
-		$windowId = $oAdmin_Form_Controller->getWindowId();
+		// $windowId = $oAdmin_Form_Controller->getWindowId();
+		$parentWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('parentWindowId'));
+		$windowId = $parentWindowId ? $parentWindowId : $oAdmin_Form_Controller->getWindowId();
 
 		// Устанавливаем ограничения на источники
-		$oAdmin_Form_Controller->setDatasetConditions();
+		$oAdmin_Form_Controller->setDatasetLimits()->setDatasetConditions();
 
 		$aDatasets = $oAdmin_Form_Controller->getDatasets();
 
@@ -130,22 +132,45 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 		$iCountColors = count($aColors);
 		?>
 		<div class="deal-note-board">
-			<div class="row">
-				<?php
-				if ($oEvent->checkPermission2Edit($oCurrentUser))
-				{
-				?>
-				<div class="col-xs-12 margin-bottom-20">
-					<form action="/admin/event/note/index.php" method="POST" class="padding-bottom-10">
-						<div class="input-group">
-							<textarea rows="2" name="text_note" type="text" class="form-control" placeholder="<?php echo Core::_('Event_Note.note_placeholder')?>"></textarea>
-							<span class="input-group-btn padding-left-30 formButtons">
-								<button id="sendForm" class="btn btn-default" type="submit" onclick="<?php echo $oAdmin_Form_Controller
-									->checked(array(0 => array(0)))
-									->getAdminSendForm(array('action' => 'addEventNote', 'additionalParams' => $additionalParams))?>">
-									<i class="fa fa-plus fa-fw"></i>
+			<div class="">
+				<div>
+					<form action="/admin/event/note/index.php?hostcms[action]=addNote&_=<?php echo time()?>&hostcms[checked][0][0]=1&event_id=<?php echo $event_id?>" method="POST" enctype='multipart/form-data' class="padding-bottom-10 dropzone-form dropzone-form-note">
+						<div class="timeline-comment-wrapper">
+							<?php
+								Admin_Form_Entity::factory('Textarea')
+									->name('text_note')
+									->rows(5)
+									->wysiwyg(Core::moduleIsActive('wysiwyg'))
+									->wysiwygOptions(array(
+										'menubar' => 'false',
+										'statusbar' => 'false',
+										'plugins' => '"advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table code wordcount"',
+										'toolbar1' => '"bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | removeformat"'
+									))
+									->divAttr(array('class' => ''))
+									->controller($oAdmin_Form_Controller)
+									->execute();
+							?>
+							<div class="margin-top-10 crm-note-attachments-dropzone hidden">
+								<!-- <div class="previews"></div> -->
+								<div id="dropzone">
+									<div class="dz-message needsclick"><i class="fa fa-arrow-circle-o-up"></i> <?php echo Core::_('Admin_Form.upload_file')?></div>
+								</div>
+							</div>
+							<div class="timeline-comment-panel formButtons">
+								<div class="timeline-comment-panel-file">
+									<span class="margin-right-20" onclick="$.showDropzone(this, '<?php echo $windowId?>');"><i class="fa fa-paperclip fa-fw"></i> <?php echo Core::_('Crm_Note.file')?></span>
+									<div class="checkbox">
+										<label>
+											<input name="result" type="checkbox" class="colored-blue" value="1"/>
+											<span class="text"><?php echo Core::_('Crm_Note.result')?></span>
+										</label>
+									</div>
+								</div>
+								<button id="sendForm" class="btn btn-palegreen btn-sm" type="submit">
+									<?php echo Core::_('Crm_Note.send')?>
 								</button>
-							</span>
+							</div>
 						</div>
 
 						<script>
@@ -155,13 +180,61 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 						});
 						</script>
 					</form>
-				</div>
-				<?php
-				}
 
+					<script>
+					$(function() {
+						var $form = $("#<?php echo $windowId?> .dropzone-form-note");
+						$form.dropzone({
+							url: $form.attr('action'),
+							parallelUploads: 10,
+							maxFilesize: 5,
+							paramName: 'file',
+							uploadMultiple: true,
+							clickable: '#<?php echo $windowId?> .dropzone-form-note #dropzone',
+							previewsContainer: '#<?php echo $windowId?> .dropzone-form-note #dropzone',
+							autoProcessQueue: false,
+							autoDiscover: false,
+							init: function() {
+								var dropzone = this;
+
+								$(".dropzone-form-note button#sendForm").on("click", function(e) {
+									e.preventDefault();
+									e.stopPropagation();
+
+									// Сохраним из визуальных редакторов данные
+									if (typeof tinyMCE != 'undefined')
+									{
+										tinyMCE.triggerSave();
+									}
+
+									if (dropzone.getQueuedFiles().length)
+									{
+										$form.append('<input type="hidden" name="hostcms[window]" value="<?php echo $windowId?>">');
+										dropzone.processQueue();
+									}
+									else
+									{
+										<?php echo $oAdmin_Form_Controller->checked(array(0 => array(0)))->getAdminSendForm(array('action' => 'addNote', 'additionalParams' => $additionalParams))?>
+									}
+								});
+							},
+							success : function(file, response){
+								var $window = $("#<?php echo $oAdmin_Form_Controller->getWindowId()?>"),
+									window_id = $('li[data-type="timeline"] > a').data('window-id');
+
+								$.beforeContentLoad($window);
+								$.insertContent($window, response.form_html);
+								$.adminLoad({ path: '/admin/event/timeline/index.php', additionalParams: 'event_id=<?php echo $event_id?>', windowId: window_id });
+							}
+						});
+					});
+					</script>
+				</div>
+
+				<?php
 				if (count($aEntities))
 				{
-					?><ul class="timeline timeline-left"><?php
+					?><ul class="timeline crm-note-list cmr-note-timeline timeline-left timeline-no-vertical"><?php
 					$prevDate = NULL;
 
 					$i = 0;
@@ -170,7 +243,8 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 					{
 						$color = $aColors[$i % $iCountColors];
 
-						$oUser = $oEntity->User;
+						$class = '';
+						$oEntity->result && $class = 'timeline-crm-note-result';
 
 						$iDatetime = Core_Date::sql2timestamp($oEntity->datetime);
 						$sDate = Core_Date::timestamp2date($iDatetime);
@@ -185,9 +259,9 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 							$i++;
 						}
 						?>
-						<li class="timeline-inverted">
+						<li class="timeline-inverted <?php echo $class?>">
 							<div class="timeline-badge palegreen">
-								<img class="img-circle" src="<?php echo $oUser->getAvatar()?>" width="30" height="30"/>
+								<img class="img-circle" src="<?php echo $oEntity->User->getAvatar()?>" width="30" height="30"/>
 							</div>
 							<div class="timeline-panel">
 								<div class="timeline-header bordered-bottom bordered-palegreen">
@@ -206,8 +280,7 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 													continue;
 												}
 
-												if (method_exists($oEntity, 'checkBackendAccess')
-													&& !$oEntity->checkBackendAccess($oAdmin_Form_Action->name, $oCurrentUser))
+												if (method_exists($oEntity, 'checkBackendAccess') && !$oEntity->checkBackendAccess($oAdmin_Form_Action->name, $oUser))
 												{
 													continue;
 												}
@@ -221,13 +294,13 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 												$href = $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), $oAdmin_Form_Action->name, NULL, 0, intval($oEntity->id));
 
 												$onclick = $oAdmin_Form_Action->name == 'edit'
-													? "$.modalLoad({path: '{$oAdmin_Form_Controller->getPath()}', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][{$oEntity->id}]=1&event_id={$oEvent->id}', windowId: '{$windowId}'}); return false"
+													? "$.modalLoad({path: '{$oAdmin_Form_Controller->getPath()}', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][{$oEntity->id}]=1&event_id={$oEvent->id}&parentWindowId={$windowId}', windowId: '{$windowId}', width: '90%'}); return false"
 													: $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), $oAdmin_Form_Action->name, NULL, 0, intval($oEntity->id));
 
 												// Добавляем установку метки для чекбокса и строки + добавлем уведомление, если необходимо
 												if ($oAdmin_Form_Action->confirm)
 												{
-													$onclick = "res = confirm('".Core::_('Admin_Form.confirm_dialog', htmlspecialchars($name))."'); if (!res) { $('#{$windowId} #row_0_{$oEntity->id}').toggleHighlight(); } else {{$onclick}} return res;";
+													$onclick = "res = confirm('".Core::_('Admin_Form.confirm_dialog', htmlspecialchars($name))."'); if (!res) { $('#{$windowId} #row_0_{$oEntity->id}').toggleHighlight(); } else {mainFormLocker.unlock(); {$onclick}} return res;";
 												}
 												?><a onclick="mainFormLocker.unlock(); <?php echo htmlspecialchars($onclick)?>" href="<?php echo htmlspecialchars($href)?>" title="<?php echo htmlspecialchars($name)?>"><i class="<?php echo htmlspecialchars($oAdmin_Form_Action->icon)?>"></i></a><?php
 											}
@@ -236,9 +309,19 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 									</div>
 								</div>
 								<div class="timeline-body">
-									<?php echo nl2br(htmlspecialchars($oEntity->text))?>
+									<?php
+										$text = $oEntity->text;
+										$files = $oEntity->getFilesBlock($oEvent);
 
-									<div class="small gray"><span><a class="gray" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][<?php echo $oUser->id?>]=1" onclick="$.modalLoad({path: '/admin/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oUser->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>'}); return false" title="<?php echo htmlspecialchars($oUser->getFullName())?>"><?php echo htmlspecialchars($oUser->getFullName())?></a></span><span class="pull-right"><?php echo date('H:i', $iDatetime)?></span></div>
+										if (!is_null($files))
+										{
+											$text .= '<div class="crm-note-attachment-wrapper">' . $files . '</div>';
+										}
+
+										echo $text;
+									?>
+
+									<div class="timeline-body-footer small gray"><span class="timeline-user"><?php $oEntity->User->showLink($oAdmin_Form_Controller->getWindowId())?></span><span class="timeline-date pull-right"><?php echo date('H:i', $iDatetime)?></span></div>
 								</div>
 							</div>
 						</li>

@@ -128,7 +128,41 @@ abstract class Core_Session
 					? '.' . $domain
 					: '';
 
-				session_set_cookie_params(self::$_cookieLifetime, '/', $domain, FALSE, TRUE);
+				$aConfig = Core::$mainConfig['session'] + array(
+					'samesite' => 'Lax',
+					'secure' => FALSE,
+					'httponly' => TRUE
+				);
+
+				// SameSite=None; Secure
+				$aConfig['samesite'] == 'None' && $aConfig['secure'] = TRUE;
+
+				// SameSite attribute of Lax or Strict is OK
+				$bSendSameSite = Core_Cookie::sendSameSite($aConfig['samesite']);
+
+				// Браузер совместим
+				if ($bSendSameSite)
+				{
+					if (PHP_VERSION_ID >= 70300)
+					{
+						session_set_cookie_params(array(
+							'lifetime' => self::$_cookieLifetime,
+							'path' => '/',
+							'domain' => $domain,
+							'secure' => $aConfig['secure'],
+							'httponly' => $aConfig['httponly'],
+							'samesite' => $aConfig['samesite']
+						));
+					}
+					else
+					{
+						session_set_cookie_params(self::$_cookieLifetime, '/; SameSite=' . $aConfig['samesite'], $domain, $aConfig['secure'], $aConfig['httponly']);
+					}
+				}
+				else
+				{
+					session_set_cookie_params(self::$_cookieLifetime, '/', $domain, $aConfig['secure'], $aConfig['httponly']);
+				}
 			}
 
 			// При повторном запуске $_SESSION уже будет
@@ -147,8 +181,9 @@ abstract class Core_Session
 				{
 					// Service Unavailable
 					Core_Response::sendHttpStatusCode(503);
+					@header('Content-Type: text/html; charset=UTF-8');
 
-					throw new Core_Exception(self::$_error . 'Please wait! Refreshing page ... <script>setTimeout(function() {window.location.reload(true);}, 500);</script>');
+					throw new Core_Exception(self::$_error . 'Please wait! Refreshing page ... <script>setTimeout(function() {window.location.reload(true);}, 3000);</script>');
 				}
 			}
 
@@ -443,4 +478,9 @@ abstract class Core_Session
 	 * @return boolean
 	 */
 	abstract public function sessionMaxlifetime($maxlifetime, $overwrite = FALSE);
+
+	/**
+	 * Delete all sessions
+	 */
+	static public function flushAll() { }
 }

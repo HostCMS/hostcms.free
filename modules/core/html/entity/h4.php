@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Html
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Html_Entity_H4 extends Core_Html_Entity
 {
@@ -25,7 +25,7 @@ class Core_Html_Entity_H4 extends Core_Html_Entity
 	 * Skip properties
 	 * @var array
 	 */
-	protected $_skipProperies = array(
+	protected $_skipProperties = array(
 		'value'
 	);
 

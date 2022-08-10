@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Sql
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Sql_Dataset_Repair extends Admin_Form_Dataset
 {
@@ -42,36 +42,47 @@ class Sql_Dataset_Repair extends Admin_Form_Dataset
 	 */
 	public function load()
 	{
-		$aTables = $this->_database->getTables();
-		$aRepair = array();
-		
-		foreach ($aTables as $sTable)
+		if (!$this->_loaded)
 		{
-			$aTableStatus = $this->_database->setQueryType(0)
-				->asAssoc()
-				->query("SHOW TABLE STATUS LIKE " . $this->_database->quote($sTable))
-				->current();
+			$aTables = $this->_database->getTables();
+			
+			$aRepair = array();
+			
+			foreach ($aTables as $sTable)
+			{
+				$aTableStatus = $this->_database->setQueryType(0)
+					->asAssoc()
+					->query("SHOW TABLE STATUS LIKE " . $this->_database->quote($sTable))
+					->current();
 
-			// Just for MyISAM
-			if (strtolower(Core_Array::get($aTableStatus, 'Engine')) == 'myisam')
-			{
-				$aRepair[] = $this->_database->quoteColumnName($sTable);
-			}
-		}
-
-		if (count($aRepair))
-		{
-			try
-			{
-				$this->_database->setQueryType(0)
-					->query("REPAIR TABLE " . implode(',', $aRepair));
-			}
-			catch (Exception $e)
-			{
-				Core_Message::show($e->getMessage(), 'error');
+				// Just for MyISAM
+				if (strtolower(Core_Array::get($aTableStatus, 'Engine')) == 'myisam')
+				{
+					$aRepair[] = $this->_database->quoteColumnName($sTable);
+				}
 			}
 
-			$this->_objects = $this->_database->asObject(NULL)->result();
+			if (count($aRepair))
+			{
+				try
+				{
+					$this->_database->setQueryType(0)
+						->query("REPAIR TABLE " . implode(',', $aRepair));
+						
+					if (!is_null(Core_Array::getRequest('debug')))
+					{
+						echo '<p><b>Reset AUTO_INCREMENT</b>: <pre>', Core_DataBase::instance()->getLastQuery(), '</pre></p>';
+					}
+				}
+				catch (Exception $e)
+				{
+					Core_Message::show($e->getMessage(), 'error');
+				}
+
+				$this->_objects = $this->_database->asObject(NULL)->result();
+			}
+			
+			$this->_loaded = TRUE;
 		}
 
 		return $this->_objects;

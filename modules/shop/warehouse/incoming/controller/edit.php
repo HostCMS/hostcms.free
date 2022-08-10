@@ -62,7 +62,6 @@ class Shop_Warehouse_Incoming_Controller_Edit extends Admin_Form_Action_Controll
 
 			$oSiteuserSelect = Admin_Form_Entity::factory('Select')
 				->caption(Core::_('Shop_Warehouse_Incoming.siteuser_id'))
-				->id('object_siteuser_id')
 				->options($options)
 				->name('siteuser_id')
 				->class('siteuser-tag')
@@ -127,7 +126,7 @@ class Shop_Warehouse_Incoming_Controller_Edit extends Admin_Form_Action_Controll
 		$oScriptResponsibleUsers = Admin_Form_Entity::factory('Script')
 			->value('$("#' . $windowId . ' #user_id").selectUser({
 					placeholder: "",
-					language: "' . Core_i18n::instance()->getLng() . '",
+					language: "' . Core_I18n::instance()->getLng() . '",
 					dropdownParent: $("#' . $windowId . '")
 				});'
 			);
@@ -313,7 +312,7 @@ class Shop_Warehouse_Incoming_Controller_Edit extends Admin_Form_Action_Controll
 				)
 		);
 
-		$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+		$oCore_Html_Entity_Script = Core_Html_Entity::factory('Script')
 			->value("$('#{$windowId} .add-shop-item').autocompleteShopItem({shop_id: '{$oShop->id}', price_mode: 'item', shop_currency_id: 0}, function(event, ui) {
 				var newRow = $('<tr data-item-id=\"' + ui.item.id + '\"><td class=\"index\">' + $('#{$windowId} .index_value').val() + '</td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td><span class=\"price\">' + ui.item.price_with_tax + '</span><input type=\"hidden\" name=\"shop_item_price[]\" value=\"' + ui.item.price_with_tax +'\"/></td><td>' + $.escapeHtml(ui.item.currency) + '</td><td width=\"80\"><input class=\"set-item-count form-control\" onsubmit=\"$(\'.add-shop-item\').focus();return false;\" name=\"shop_item_quantity[]\" value=\"\"/></td><td><span class=\"calc-warehouse-sum\"></span></td><td><a class=\"delete-associated-item\" onclick=\"var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>');
 
@@ -460,7 +459,7 @@ class Shop_Warehouse_Incoming_Controller_Edit extends Admin_Form_Action_Controll
 				$script .= "$(\"#{$windowId} input[name='shop_item_quantity\\[\\]']\").eq(0).remove();";
 			}
 
-			Core::factory('Core_Html_Entity_Script')
+			Core_Html_Entity::factory('Script')
 				->value($script)
 				->execute();
 			$this->_Admin_Form_Controller->addMessage(ob_get_clean());

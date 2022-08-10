@@ -98,6 +98,7 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 	/**
 	 * Get reserved items
 	 * @return int
+	 * @hostcms-event shop_warehouse_item_model.onAfterGetReserved
 	 */
 	public function getReserved()
 	{
@@ -115,7 +116,13 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 			$reserved += $oShop_Item_Reserved->count;
 		}
 
-		return $reserved;
+		Core_Event::notify($this->_modelName . '.onAfterGetReserved', $this, array($reserved));
+		
+		$eventResult = Core_Event::getLastReturn();
+
+		return !is_null($eventResult)
+			? $eventResult
+			: $reserved;
 	}
 
 	/**
@@ -236,7 +243,7 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 	 */
 	public function adminPriceBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		$this->Shop_Item->type == 3 && Core::factory('Core_Html_Entity_Span')
+		$this->Shop_Item->type == 3 && Core_Html_Entity::factory('Span')
 			->class('badge badge-ico badge-purple white')
 			->style('padding-left: 1px;')
 			->value('<i class="fa fa-archive fa-fw"></i>')
@@ -277,7 +284,7 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 	{
 		$oShop_Item = $this->Shop_Item;
 
-		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')->value(
+		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')->value(
 			htmlspecialchars($oShop_Item->name)
 		);
 
@@ -304,11 +311,11 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 
 				$oCore_Html_Entity_Div
 				->add(
-					Core::factory('Core_Html_Entity_A')
+					Core_Html_Entity::factory('A')
 						->href($href)
 						->target('_blank')
 						->add(
-							Core::factory('Core_Html_Entity_I')->class('fa fa-external-link')
+							Core_Html_Entity::factory('I')->class('fa fa-external-link')
 						)
 				);
 			}
@@ -317,7 +324,7 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 		{
 			$oCore_Html_Entity_Div
 				->add(
-					Core::factory('Core_Html_Entity_I')->class('fa fa-clock-o black')
+					Core_Html_Entity::factory('I')->class('fa fa-clock-o black')
 				);
 		}
 
@@ -349,7 +356,7 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 			? Core_Entity::factory('Shop_Item', $this->Shop_Item->shortcut_id)
 			: $this->Shop_Item;
 
-		$oShop_Item->shop_currency_id == 0 && Core::factory('Core_Html_Entity_Span')
+		$oShop_Item->shop_currency_id == 0 && Core_Html_Entity::factory('Span')
 			->class('badge badge-ico badge-darkorange white')
 			->value('<i class="fa fa-exclamation fa-fw"></i>')
 			->title(Core::_('Shop_Item.shop_item_not_currency'))
@@ -386,7 +393,7 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 	 */
 	/*public function countBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		$this->count == '0.00' && Core::factory('Core_Html_Entity_Span')
+		$this->count == '0.00' && Core_Html_Entity::factory('Span')
 			->class('badge badge-ico badge-darkorange white')
 			->value('<i class="fa fa-exclamation"></i>')
 			->execute();
@@ -404,7 +411,7 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 
 		$this->count == 0 && $class = '';
 
-		Core::factory('Core_Html_Entity_Span')
+		Core_Html_Entity::factory('Span')
 			->class($class)
 			->value($this->count)
 			->execute();

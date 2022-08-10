@@ -33,4 +33,9 @@ return array(
 	'changeStatus_success' => "Інформація успішно змінена",
 	'delete_success' => 'Елемент видалений!',
 	'undelete_success' => 'Елемент відновлено!',
+	'badge_coupon_count' => 'Кількість купонів пов\'язаних зі знижкою',
+	'shop_purchase_discount_dir_id' => 'Розділ',
+	'sorting' => 'Порядок сортування',
+	'apply_success' => "Інформація успішно змінена.",
+	'copy_success' => "Елемент успішно скопійований!",
 );

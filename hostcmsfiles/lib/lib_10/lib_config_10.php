@@ -13,7 +13,7 @@ if (Core_Array::getRequest('compare'))
 
 	$oShop_Compare_Controller = Shop_Compare_Controller::instance();
 
-	foreach ($compare as $key => $shop_item_id)
+	foreach ($compare as $shop_item_id)
 	{
 		$oShop_Compare_Controller
 			->clear()

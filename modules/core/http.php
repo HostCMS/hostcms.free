@@ -50,7 +50,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Http
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Http
 {
@@ -573,5 +573,78 @@ abstract class Core_Http
 			}
 		}
 		return $aReturn;
+	}
+
+	/**
+	 * Get random OS for $browser and $version
+	 * @param string $browser
+	 * @param string $version
+	 * @return string
+	 */
+	static public function getOs($browser, $version = NULL)
+	{
+		is_null($version) && $browser == 'firefox'
+			&& $version = rand(40, 96) . '.' . rand(0, 9);
+
+		switch (rand(0,2))
+		{
+			// Windows
+			case 0:
+				$os = 'Windows NT 10.0';
+
+				$os .= $browser == 'firefox'
+					? "; Win64; x64; rv:{$version}"
+					: Core_Array::randomValue(array('', '; Win64; x64', '; WOW64'));
+			break;
+			// MacOS
+			case 1:
+				$os = 'Macintosh; Intel Mac OS X ';
+
+				$os .= $browser == 'firefox'
+					? rand(10, 12) . '.' . rand(0,2) . "; rv:{$version}"
+					: rand(10, 12) . '_' . rand(0,2);
+			break;
+			// Linux
+			case 2:
+				$os = 'X11';
+
+				$os .= $browser == 'chrome'
+					? '; Linux x86_64'
+					: Core_Array::randomValue(array('; Ubuntu; Linux i686', '; Ubuntu; Linux x86_64', '; Fedora; Linux x86_64')) . "; rv:{$version}";
+			break;
+		}
+
+		return $os;
+	}
+
+	/**
+	 * Get random User Agent
+	 * @param string|NULL $browser 'chrome' or 'firefox', random if NULL
+	 * @return string
+	 */
+	static public function generateUserAgent($browser = NULL)
+	{
+		is_null($browser)
+			&& $browser = rand(0, 1) ? 'chrome' : 'firefox';
+
+		if ($browser == 'chrome')
+		{
+			$version = rand(60, 97) . '.0.' . rand(1000, 5000) . '.' . rand(10, 400);
+			$os = self::getOs($browser, $version);
+			$appleVersion = (rand(0, 1) ? rand(533, 537) : rand(600, 603)) . '.' . rand(30, 50);
+			$userAgent = "Mozilla/5.0 ({$os}) AppleWebKit/{$appleVersion} (KHTML, like Gecko) Chrome/{$version} Safari/{$appleVersion}";
+		}
+		elseif ($browser == 'firefox')
+		{
+			$version = rand(60, 96) . '.' . rand(0, 9);
+			$os = self::getOs($browser, $version);
+			$userAgent = "Mozilla/5.0 ({$os}) Gecko/20100101 Firefox/{$version}";
+		}
+		else
+		{
+			$userAgent = '';
+		}
+
+		return $userAgent;
 	}
 }

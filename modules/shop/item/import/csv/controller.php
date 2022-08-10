@@ -28,7 +28,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 {
@@ -1136,7 +1136,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			foreach ($this->_aPropertiesTree[$parent_id] as $oProperty)
 			{
 				$this->aEntities[$prefix . '-' . $oProperty->id] = array(
-					'caption' => str_repeat('  ', $level) . $oProperty->name,
+					'caption' => str_repeat('  ', $level) . $oProperty->name . " [{$oProperty->id}]",
 					'attr' => array('style' => 'background-color: ' . $color)
 				);
 
@@ -3545,10 +3545,9 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 									$oNew_Modification->sorting = $sorting;
 									$oNew_Modification->save();
 
-									$this->_incInsertedItems($oNew_Modification->id);
+									$aModifications[] = $oNew_Modification;
 
-									// Цены для создаваемых модификаций
-									$this->_setPrices($oNew_Modification);
+									$this->_incInsertedItems($oNew_Modification->id);
 
 									// Свойства для заданной модификации
 									foreach ($aCombinedValues as $propertyId => $propertyValue)
@@ -3559,23 +3558,22 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 										$oProperty_Value->value($propertyValue);
 										$oProperty_Value->save();
 									}
+								}
+
+								foreach ($aModifications as $oModification)
+								{
+									// Цены для создаваемых модификаций
+									$this->_setPrices($oModification);
 
 									// Fast filter
 									if ($this->_oCurrentShop->filter)
 									{
 										$oShop_Filter_Controller = new Shop_Filter_Controller($this->_oCurrentShop);
-										$oShop_Filter_Controller->fill($oNew_Modification);
+										$oShop_Filter_Controller->fill($oModification);
 									}
 
 									$this->deleteUnsentModificationsByProperties
-										&& $aAffectedModifications[] = $oNew_Modification->id;
-								}
-								elseif ($this->deleteUnsentModificationsByProperties)
-								{
-									foreach ($aModifications as $oModification)
-									{
-										$aAffectedModifications[] = $oModification->id;
-									}
+										&& $aAffectedModifications[] = $oModification->id;
 								}
 							}
 						}
@@ -3858,7 +3856,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				{
 					$changedValue = $oShop_Item->id;
 				}
-				elseif(is_numeric($sPropertyValue))
+				elseif (is_numeric($sPropertyValue))
 				{
 					$oShop_Item = $oProperty->Shop->Shop_Items->getById($sPropertyValue);
 
@@ -4495,7 +4493,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 					{
 						$changedValue = $oShop_Item->id;
 					}
-					elseif(is_numeric($sPropertyValue))
+					elseif (is_numeric($sPropertyValue))
 					{
 						$oShop_Item = $oProperty->Shop->Shop_Items->getById($sPropertyValue);
 

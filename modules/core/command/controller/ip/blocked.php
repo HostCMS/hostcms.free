@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Command
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Command_Controller_Ip_Blocked extends Core_Command_Controller
 {
@@ -90,10 +90,10 @@ class Core_Command_Controller_Ip_Blocked extends Core_Command_Controller
 			->setMode('authorization')
 			->header();
 
-		Core::factory('Core_Html_Entity_Div')
+		Core_Html_Entity::factory('Div')
 			->class('indexMessage')
-			->add(Core::factory('Core_Html_Entity_H1')->value($title))
-			->add(Core::factory('Core_Html_Entity_P')->value(
+			->add(Core_Html_Entity::factory('H1')->value($title))
+			->add(Core_Html_Entity::factory('P')->value(
 				$title = Core::_('Core.access_forbidden')
 			))
 			->execute();

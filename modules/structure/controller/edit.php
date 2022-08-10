@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Structure
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -405,21 +405,21 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->value('<i class="fa fa-pencil"></i>')
 			);
 
-		$Div_Lib_Properies = Admin_Form_Entity::factory('Code');
+		$Div_Lib_Properties = Admin_Form_Entity::factory('Code');
 
 		ob_start();
 		// DIV для св-в типовой дин. страницы
 		// Для выбранного стандартно
-		Core::factory('Core_Html_Entity_Script')
+		Core_Html_Entity::factory('Script')
 			->value("$('#{$windowId} #lib_id').change(); $('#{$windowId} #template_id').change();")
 			->execute();
 
-		$Div_Lib_Properies
+		$Div_Lib_Properties
 			->html(ob_get_clean());
 
 		$oMainRow9->add($Select_LibDir);
 		$oMainRow10->add($Select_Lib);
-		$oMainRow11->add($Div_Lib_Properies);
+		$oMainRow11->add($Div_Lib_Properties);
 
 		// Динамическая страница
 		$oTextarea_Structure_Source = Admin_Form_Entity::factory('Textarea');
@@ -610,7 +610,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$this->_object->save();
 		}
 
-		// Lib properies
+		// Lib properties
 		if ($this->_object->type == 2 && $this->_object->lib_id)
 		{
 			$oLib = $this->_object->Lib;
@@ -661,7 +661,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				. $this->_object->getPath();
 
 			$this->_Admin_Form_Controller->addMessage(
-				Core::factory('Core_Html_Entity_Script')
+				Core_Html_Entity::factory('Script')
 					->value("$('#{$windowId} input#path').val('" . Core_Str::escapeJavascriptVariable($this->_object->path) . "');
 					$('#{$windowId} a#pathLink').attr('href', '" . Core_Str::escapeJavascriptVariable($sUrl) . "').attr('target', '_blank')")
 				->execute()

@@ -362,7 +362,7 @@ class Shop_Warehouse_Writeoff_Model extends Core_Entity
 	public function count_itemsBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$count = $this->Shop_Warehouse_Writeoff_Items->getCount();
-		$count && Core::factory('Core_Html_Entity_Span')
+		$count && Core_Html_Entity::factory('Span')
 			->class('badge badge-warning badge-square')
 			->value($count)
 			->execute();

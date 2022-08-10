@@ -1073,20 +1073,20 @@ class Shop_Model extends Core_Entity
 	 */
 	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		!$this->structure_id && Core::factory('Core_Html_Entity_Span')
+		!$this->structure_id && Core_Html_Entity::factory('Span')
 			->class('badge badge-darkorange badge-ico white')
-			->add(Core::factory('Core_Html_Entity_I')->class('fa fa-chain-broken'))
+			->add(Core_Html_Entity::factory('I')->class('fa fa-chain-broken'))
 			->execute();
 
 		$countShopGroups = $this->Shop_Groups->getCount();
-		$countShopGroups && Core::factory('Core_Html_Entity_Span')
+		$countShopGroups && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
 			->value('<i class="fa fa-folder-open-o"></i> ' . $countShopGroups)
 			->title(Core::_('Shop.all_groups_count', $countShopGroups))
 			->execute();
 
 		$countShopItems = $this->Shop_Items->getCount();
-		$countShopItems && Core::factory('Core_Html_Entity_Span')
+		$countShopItems && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
 			->value('<i class="fa fa-file-o"></i> ' . $countShopItems)
 			->title(Core::_('Shop.all_items_count', $countShopItems))
@@ -1129,7 +1129,7 @@ class Shop_Model extends Core_Entity
 			{
 				ob_start();
 
-				Core::factory('Core_Html_Entity_I')
+				Core_Html_Entity::factory('I')
 					->class('fa fa-exclamation-triangle darkorange')
 					->execute();
 
@@ -1178,7 +1178,7 @@ class Shop_Model extends Core_Entity
 	 */
 	public function shop_currency_idBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		$this->Shop_Currency->id == 0 && Core::factory('Core_Html_Entity_I')
+		$this->Shop_Currency->id == 0 && Core_Html_Entity::factory('I')
 			->class('fa fa-exclamation-triangle darkorange')
 			->execute();
 	}

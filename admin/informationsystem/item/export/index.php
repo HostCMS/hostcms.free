@@ -3,9 +3,9 @@
  * Information systems.
 *
 * @package HostCMS
-* @version 6.x
+* @version 7.x
 * @author Hostmake LLC
-* @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -182,8 +182,8 @@ $oMainTab
 			Admin_Form_Entity::factory('Select')
 				->name("export_encoding")
 				->options(array(
-					'Windows-1251' => Core::_('Informationsystem_Item.input_file_encoding0'),
-					'UTF-8' => Core::_('Informationsystem_Item.input_file_encoding1')
+					'UTF-8' => Core::_('Informationsystem_Item.input_file_encoding1'),
+					'Windows-1251' => Core::_('Informationsystem_Item.input_file_encoding0')
 				))
 				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6', 'id' => 'import_price_encoding'))
 				->caption(Core::_('Informationsystem_Item.export_encoding')))
@@ -208,9 +208,9 @@ $oMainTab
 			->divAttr(array('class' => 'form-group col-xs-12', 'id' => 'export_external_properties_allow_groups'))
 			->value(TRUE)))
 	->add(Admin_Form_Entity::factory('Div')->class('row')
-		->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('action')->value('export'))
-		->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('informationsystem_group_id')->value(Core_Array::getGet('informationsystem_group_id')))
-		->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('informationsystem_id')->value(Core_Array::getGet('informationsystem_id', 0)))
+		->add(Core_Html_Entity::factory('Input')->type('hidden')->name('action')->value('export'))
+		->add(Core_Html_Entity::factory('Input')->type('hidden')->name('informationsystem_group_id')->value(Core_Array::getGet('informationsystem_group_id')))
+		->add(Core_Html_Entity::factory('Input')->type('hidden')->name('informationsystem_id')->value(Core_Array::getGet('informationsystem_id', 0)))
 	);
 
 $oAdmin_Form_Entity_Form->add(
@@ -220,7 +220,7 @@ $oAdmin_Form_Entity_Form->add(
 		->class('applyButton btn btn-blue')
 	)
 	->add(
-	Core::factory('Core_Html_Entity_Script')
+	Core_Html_Entity::factory('Script')
 		->type("text/javascript")
 		->value("ShowExport('{$windowId}', 0)")
 	);

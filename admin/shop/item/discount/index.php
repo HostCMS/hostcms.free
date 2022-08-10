@@ -3,9 +3,9 @@
  * Online shop.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -202,7 +202,7 @@ $oAdmin_Form_Action_Edit = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 	->Admin_Form_Actions
 	->getByName('edit');
 
-if ($oAdmin_Form_Action_Edit)
+if ($oAdmin_Form_Action_Edit && $oAdmin_Form_Controller->getAction() == 'edit')
 {
 	$Shop_Item_Discount_Controller_Edit = Admin_Form_Action_Controller::factory(
 		'Shop_Item_Discount_Controller_Edit', $oAdmin_Form_Action_Edit
@@ -212,16 +212,15 @@ if ($oAdmin_Form_Action_Edit)
 }
 
 // Действие "Удалить"
-$oAdmin_Form_Action_Edit = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+$oAdmin_Form_Action_MarkDeleted = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 	->Admin_Form_Actions
 	->getByName('markDeleted');
 
-if ($oAdmin_Form_Action_Edit)
+if ($oAdmin_Form_Action_MarkDeleted && $oAdmin_Form_Controller->getAction() == 'markDeleted')
 {
 	$Shop_Item_Discount_Controller_Delete = Admin_Form_Action_Controller::factory(
-		'Shop_Item_Discount_Controller_Delete', $oAdmin_Form_Action_Edit
+		'Shop_Item_Discount_Controller_Delete', $oAdmin_Form_Action_MarkDeleted
 	);
-	$Shop_Item_Discount_Controller_Delete->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 	$oAdmin_Form_Controller->addAction($Shop_Item_Discount_Controller_Delete);
 }
 

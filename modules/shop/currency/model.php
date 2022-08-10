@@ -171,7 +171,7 @@ class Shop_Currency_Model extends Core_Entity
 		$str = $this->format($decimal);
 
 		return $this->sign_position == 0
-			? $str . ' ' . $this->sign
+			? $str . ' ' . $this->sign
 			: $this->sign . $str;
 	}
 }

@@ -1033,6 +1033,15 @@ class Core_ORM
 	}
 
 	/**
+	 * Get name of Database Driver
+	 * @return string
+	 */
+	static public function getDatabaseDriver()
+	{
+		return self::$_databaseDriver;
+	}
+
+	/**
 	 * Get Database
 	 * @return Core_DataBase
 	 */
@@ -1520,11 +1529,22 @@ class Core_ORM
 
 		if (!Core_Event::notify($this->_modelName . '.onCall' . $property, $this))
 		{
+			self::clearColumnCache();
+
 			throw new Core_Exception("The property '%property' does not exist in the model '%model'",
 				array('%property' => $property, '%model' => $this->getModelName()));
 		}
 
 		return Core_Event::getLastReturn();
+	}
+
+	/**
+	 * Get dataValues
+	 * @return array
+	 */
+	public function getDataValues()
+	{
+		return $this->_dataValues;
 	}
 
 	/**
@@ -1625,6 +1645,8 @@ class Core_ORM
 
 		if (!Core_Event::notify($this->_modelName . '.onCall' . $property, $this, array($value)))
 		{
+			self::clearColumnCache();
+
 			throw new Core_Exception("The property '%property' does not exist in the model '%model'",
 				array('%property' => $property, '%model' => $this->getModelName()));
 		}
@@ -1671,6 +1693,8 @@ class Core_ORM
 
 		if (!Core_Event::notify($this->_modelName . '.onCall' . $name, $this, $arguments))
 		{
+			self::clearColumnCache();
+
 			throw new Core_Exception("The method '%methodName' does not exist in the model '%modelName'",
 				array('%methodName' => $name, '%modelName' => $this->getModelName()));
 		}
@@ -2076,7 +2100,7 @@ class Core_ORM
 		// Reset $this->_queryBuilder
 		$this->_queryBuilder = NULL;
 
-		// Mark all properies as changed
+		// Mark all properties as changed
 		foreach ($this->_modelColumns as $key => $value)
 		{
 			$this->$key = $value;

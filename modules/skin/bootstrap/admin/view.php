@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_View extends Admin_View
 {
@@ -122,7 +122,7 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 					<a href="#" id="fullscreen-toggler" class="fullscreen">
 						<i class="glyphicon glyphicon-fullscreen"></i>
 					</a>
-					<a id="bookmark-toggler" class="bookmark <?php echo $class?>" onclick="$.addUserBookmark({title: '<?php echo Core::_("User_Bookmark.title")?>', value: '<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars($this->pageTitle))?>', submit: '<?php echo Core::_("User_Bookmark.submit")?>', cancel: '<?php echo Core::_("User_Bookmark.cancel")?>' , module_id: <?php echo $module_id?>, path: '<?php echo Core_Str::escapeJavascriptVariable($sPagePath)?>'});">
+					<a id="bookmark-toggler" class="bookmark <?php echo $class?>" onclick="$.addUserBookmark({title: '<?php echo Core::_("User_Bookmark.title")?>', value: '<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars($title))?>', submit: '<?php echo Core::_("User_Bookmark.submit")?>', cancel: '<?php echo Core::_("User_Bookmark.cancel")?>' , module_id: <?php echo $module_id?>, path: '<?php echo Core_Str::escapeJavascriptVariable($sPagePath)?>'});">
 						<i class="glyphicon glyphicon-star-empty"></i>
 					</a>
 				</div><?php
@@ -148,8 +148,8 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 				$ico = !is_null($this->module)
 					&& ($aMenu = $this->module->getMenu())
 					&& isset($aMenu[0])
-					? Core_Array::get($aMenu[0], 'ico', 'fa-barcode')
-					: 'fa-barcode';
+					? Core_Array::get($aMenu[0], 'ico', 'fa fa-barcode')
+					: 'fa fa-barcode';
 
 				?><h5 class="row-title before-pink"><i class="<?php echo htmlspecialchars($ico)?>"></i><?php echo htmlspecialchars(html_entity_decode($this->pageTitle, ENT_COMPAT, 'UTF-8'))?></h5><?php
 			}

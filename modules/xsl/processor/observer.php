@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Xsl
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Xsl_Processor_Observer
 {
@@ -42,14 +42,14 @@ class Xsl_Processor_Observer
 
 		if (Core::checkPanel() && Core_Array::getSession('HOSTCMS_SHOW_XML'))
 		{
-			$oXslPanel = Core::factory('Core_Html_Entity_Div')
+			$oXslPanel = Core_Html_Entity::factory('Div')
 				->class('hostcmsPanel')
 				->style('display: none');
 
-			$oXslSubPanel = Core::factory('Core_Html_Entity_Div')
+			$oXslSubPanel = Core_Html_Entity::factory('Div')
 				->class('hostcmsSubPanel hostcmsXsl')
 				->add(
-					Core::factory('Core_Html_Entity_Img')
+					Core_Html_Entity::factory('Img')
 						->width(3)->height(16)
 						->src('/hostcmsfiles/images/drag_bg.gif')
 				);
@@ -62,11 +62,11 @@ class Xsl_Processor_Observer
 			$sTitle = Core::_('Xsl.panel_edit_xsl', $oXsl->name);
 
 			$oXslSubPanel->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
 					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "'}); return false")
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->width(16)->height(16)
 							->src('/hostcmsfiles/images/xsl_edit.gif')
 							->id('hostcmsEditXsl')
@@ -79,7 +79,7 @@ class Xsl_Processor_Observer
 			$oCore_Registry->set('Xsl_Processor.count', $iCount);
 
 			ob_start();
-			Core::factory('Core_Html_Entity_Textarea')
+			Core_Html_Entity::factory('Textarea')
 					->readonly('readonly')
 					->value($object->formatXml($object->getXml()))
 					//->onclick('$(this).select()')
@@ -88,10 +88,10 @@ class Xsl_Processor_Observer
 
 			$sTitle = Core::_('Xsl.panel_edit_xml', $oXsl->name);
 			$oXslSubPanel->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->onclick("hQuery.showWindow('xmlWindow{$iCount}', '" . Core_Str::escapeJavascriptVariable($form_content) . "', {width: 600, height: 450, title: '{$sTitle}'})")
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->src('/hostcmsfiles/images/xml.gif')
 							->id('hostcmsShowXml')
 							->alt($sTitle)
@@ -101,37 +101,37 @@ class Xsl_Processor_Observer
 			);
 
 			$oXslSubPanel->add(
-				Core::factory('Core_Html_Entity_Div')
+				Core_Html_Entity::factory('Div')
 					->class('hostcmsButton')
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->src('/hostcmsfiles/images/time.png')
 					)
 					->add(
-						Core::factory('Core_Html_Entity_Div')
+						Core_Html_Entity::factory('Div')
 							->value(
 								Core::_('Xsl.panel_xsl_time', $iTime)
 							)
 					)
 			)
 			->add(
-				Core::factory('Core_Html_Entity_Div')
+				Core_Html_Entity::factory('Div')
 					->class('hostcmsButton')
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->src('/hostcmsfiles/images/size.png')
 					)
 					->add(
-						Core::factory('Core_Html_Entity_Div')
+						Core_Html_Entity::factory('Div')
 							->value(
 								Core::_('Xsl.panel_xsl_size', number_format(mb_strlen($object->getXml()), 0, ',', ' '))
 							)
 					)
 			)->add(
-				Core::factory('Core_Html_Entity_Div')
+				Core_Html_Entity::factory('Div')
 					->class('hostcmsButton')
 					->add(
-						Core::factory('Core_Html_Entity_Div')
+						Core_Html_Entity::factory('Div')
 							->value("ID {$oXsl->id}")
 					)
 			);

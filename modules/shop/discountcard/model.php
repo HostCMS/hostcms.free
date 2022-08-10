@@ -378,8 +378,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		$link = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $oAdmin_Form_Field->link);
 		$onclick = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $oAdmin_Form_Field->onclick);
 
-		Core::factory('Core_Html_Entity_Div')->add(
-			Core::factory('Core_Html_Entity_A')
+		Core_Html_Entity::factory('Div')->add(
+			Core_Html_Entity::factory('A')
 				->href($link)
 				->onclick($onclick)
 				->value($bonusesAmount)

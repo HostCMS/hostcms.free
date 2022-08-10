@@ -65,8 +65,8 @@ if (Core::moduleIsActive('search'))
 		->len(Core_Page::instance()->libParams['maxlen'])
 		->query(Core_Array::getGet('text'));
 
-	$text = Core_Array::getGet('text');
-	if (!is_null($text))
+	$text = Core_Array::getGet('text', '', 'str');
+	if (strlen($text))
 	{
 		Core_Page::instance()->title(
 			Core::_('Search.frontend_title', $text)

@@ -3,9 +3,9 @@
  * Online shop.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -249,7 +249,9 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 									'attr' => $aTmpOptions['attr']
 								);
 
-								$aAllCaptions[] = $aTmpOptions['caption'];
+								// spase and non-breaking space // trim non-breaking space broke utf-8!
+								//$aAllCaptions[] = ltrim($aTmpOptions['caption'], '  ');
+								$aAllCaptions[] = mb_strtolower(str_replace('  ', '', $aTmpOptions['caption']));
 							}
 
 							$oMainTab = Admin_Form_Entity::factory('Tab')->name('main');
@@ -271,20 +273,19 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 								//for ($j = 0; $j < $iValuesCount; $j++)
 								foreach ($oShop_Item_Import_Csv_Controller->aEntities as $optionValue => $aTmpOptions)
 								{
-									$aCsvLine[$i] = trim($aCsvLine[$i]);
+									$aCsvLine[$i] = trim(mb_strtolower(str_replace('  ', '', $aCsvLine[$i])));
 
 									//$sCaption = $oShop_Item_Import_Csv_Controller->aCaptions[$j];
-									$sCaption = trim($aTmpOptions['caption']);
+									$sCaption = trim(mb_strtolower(str_replace('  ', '', $aTmpOptions['caption'])));
 
-									if (!$aAlreadySelected
-									&& (mb_strtolower($aCsvLine[$i]) == mb_strtolower($sCaption)
-									|| (strlen($sCaption) > 0
-										&& strlen($aCsvLine[$i]) > 0
-										&& (strpos($aCsvLine[$i], $sCaption) !== FALSE || strpos($sCaption, $aCsvLine[$i]) !== FALSE)
-										// Чтобы не было срабатывания "Город" -> "Городской телефон"
-										// Если есть целиком подходящее поле
-										&& !array_search($aCsvLine[$i], $aAllCaptions))
-									))
+									if (!$aAlreadySelected && ($aCsvLine[$i] == $sCaption
+										|| (strlen($sCaption) > 0 && strlen($aCsvLine[$i]) > 0
+											&& (strpos($aCsvLine[$i], $sCaption) !== FALSE || strpos($sCaption, $aCsvLine[$i]) !== FALSE)
+											// Чтобы не было срабатывания "Город" -> "Городской телефон"
+											// Если есть целиком подходящее поле
+											&& !array_search($aCsvLine[$i], $aAllCaptions))
+										)
+									)
 									{
 										$selected = $optionValue;
 
@@ -311,23 +312,23 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 							}
 
 							$oMainTab->add(Admin_Form_Entity::factory('Div')->class('row')
-								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('shop_group_id')->value($oShopGroup->id))
-								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('csv_filename')->value($sTmpFileName))
-								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_price_separator')->value($sSeparator))
-								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_price_stop')->value($sLimiter))
-								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('firstlineheader')->value(isset($_POST['import_price_name_field_f']) ? 1 : 0))
-								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('locale')->value($sLocale))
-								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_price_max_time')->value(Core_Array::getPost('import_price_max_time')))
-								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_price_delay')->value(Core_Array::getPost('import_price_delay')))
-								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_entries_limit')->value(Core_Array::getPost('import_entries_limit')))
-								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_price_max_count')->value(Core_Array::getPost('import_price_max_count')))
-								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_price_load_files_path')->value(Core_Array::getPost('import_price_load_files_path')))
-								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_price_action_items')->value(Core_Array::getPost('import_price_action_items')))
-								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('shop_groups_parent_id')->value($shop_groups_parent_id))
-								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('search_event_indexation')->value(isset($_POST['search_event_indexation']) ? 1 : 0))
-								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_price_action_delete_image')->value(isset($_POST['import_price_action_delete_image']) ? 1 : 0))
-								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('delete_property_values')->value(isset($_POST['delete_property_values']) ? 1 : 0))
-								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('delete_unsent_modifications_by_properties')->value(isset($_POST['delete_unsent_modifications_by_properties']) ? 1 : 0))
+								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('shop_group_id')->value($oShopGroup->id))
+								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('csv_filename')->value($sTmpFileName))
+								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('import_price_separator')->value($sSeparator))
+								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('import_price_stop')->value($sLimiter))
+								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('firstlineheader')->value(isset($_POST['import_price_name_field_f']) ? 1 : 0))
+								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('locale')->value($sLocale))
+								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('import_price_max_time')->value(Core_Array::getPost('import_price_max_time')))
+								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('import_price_delay')->value(Core_Array::getPost('import_price_delay')))
+								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('import_entries_limit')->value(Core_Array::getPost('import_entries_limit')))
+								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('import_price_max_count')->value(Core_Array::getPost('import_price_max_count')))
+								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('import_price_load_files_path')->value(Core_Array::getPost('import_price_load_files_path')))
+								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('import_price_action_items')->value(Core_Array::getPost('import_price_action_items')))
+								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('shop_groups_parent_id')->value($shop_groups_parent_id))
+								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('search_event_indexation')->value(isset($_POST['search_event_indexation']) ? 1 : 0))
+								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('import_price_action_delete_image')->value(isset($_POST['import_price_action_delete_image']) ? 1 : 0))
+								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('delete_property_values')->value(isset($_POST['delete_property_values']) ? 1 : 0))
+								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('delete_unsent_modifications_by_properties')->value(isset($_POST['delete_unsent_modifications_by_properties']) ? 1 : 0))
 							);
 
 							$oAdmin_Form_Entity_Form->add($oMainTab);
@@ -537,7 +538,7 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 		if ($sRedirectAction)
 		{
 			$iRedirectTime = 1000 * $import_price_delay;
-			Core::factory('Core_Html_Entity_Script')
+			Core_Html_Entity::factory('Script')
 				->type('text/javascript')
 				->value('var timeout = setTimeout(function (){ ' . $sRedirectAction . '}, ' . $iRedirectTime . ');')
 				->execute();
@@ -608,8 +609,8 @@ else
 				Admin_Form_Entity::factory('Select')
 				->name("import_price_encoding")
 				->options(array(
-					'Windows-1251' => Core::_('Shop_Item.input_file_encoding0'),
-					'UTF-8' => Core::_('Shop_Item.input_file_encoding1')
+					'UTF-8' => Core::_('Shop_Item.input_file_encoding1'),
+					'Windows-1251' => Core::_('Shop_Item.input_file_encoding0')
 				))
 				->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 col-lg-2 hidden-1'))
 				->caption(Core::_('Shop_Item.price_list_encoding'))
@@ -771,7 +772,7 @@ if ($sOnClick)
 			->class('applyButton btn btn-blue')
 			->onclick($sOnClick)
 	)->add(
-		Core::factory('Core_Html_Entity_Script')
+		Core_Html_Entity::factory('Script')
 			->type("text/javascript")
 			->value("radiogroupOnChange('{$windowId}', 0, [0,1])")
 	);

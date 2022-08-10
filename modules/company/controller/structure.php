@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Company
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Company_Controller_Structure extends Admin_Form_Controller_View
 {
@@ -561,22 +561,11 @@ class Company_Controller_Structure extends Admin_Form_Controller_View
 												<tr class="user" data-user-id="<?php echo $oUser->id?>" data-company-post-id="<?php echo $oUser_Company_Post->id?>">
 													<td>
 													<?php
-													echo "<img width=\"30\" height=\"30\" src=\"" . $oUser->getAvatar() . "\" class=\"img-circle user-avatar margin-right-10\" />";
+													echo "<img width=\"30\" height=\"30\" src=\"" . $oUser->getAvatar() . "\" class=\"img-circle margin-right-10\" />";
 
 													$bHead = $oUser->isHeadOfDepartment($oCompany_Department);
-
-													$aName = array(
-														$oUser->surname,
-														$oUser->name,
-														$oUser->patronymic
-													);
-
-													$aName = array_filter($aName, 'strlen');
-													$sFullName = implode(' ', $aName);
-
-													$name = htmlspecialchars(strlen($sFullName) ? $sFullName : $oUser->login);
 													?>
-													<span class="user-name"><a href="/admin/user/index.php?hostcms[action]=view&amp;hostcms[checked][0][<?php echo $oUser->id?>]=1" onclick="$.modalLoad({path: '/admin/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oUser->id?>]=1', windowId: 'user_info'}); return false" title="<?php echo $name?>"><?php echo $name?></a></span> <span class="darkgray small">[<?php echo htmlspecialchars($oUser->login)?>]</span>
+													<span class="user-name"><?php echo $oUser->showLink($this->_Admin_Form_Controller->getWindowId())?></span> <span class="darkgray small">[<?php echo htmlspecialchars($oUser->login)?>]</span>
 
 													<div class="<?php echo $oUser->isOnline() ? 'online' : 'offline'; ?>"></div>
 

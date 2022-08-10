@@ -78,13 +78,13 @@ class Shop_Item_Property_Controller_Edit extends Property_Controller_Edit
 					->options(
 						array(
 							0 => Core::_('Shop_Item.properties_show_kind_none'),
-							1 => Core::_('Shop_Item.properties_show_kind_text'),
-							2 => Core::_('Shop_Item.properties_show_kind_list'),
-							3 => Core::_('Shop_Item.properties_show_kind_radio'),
-							4 => Core::_('Shop_Item.properties_show_kind_checkbox'),
-							7 => Core::_('Shop_Item.properties_show_kind_listbox'),
-							5 => Core::_('Shop_Item.properties_show_kind_checkbox_one'),
-							6 => Core::_('Shop_Item.properties_show_kind_from_to')
+							1 => array('value' => Core::_('Shop_Item.properties_show_kind_text'), 'attr' => array('class' => 'shown-0 shown-11 shown-1 shown-4 shown-6 shown-8 shown-9')),
+							2 => array('value' => Core::_('Shop_Item.properties_show_kind_list'), 'attr' => array('class' => 'shown-3')),
+							3 => array('value' => Core::_('Shop_Item.properties_show_kind_radio'), 'attr' => array('class' => 'shown-3')),
+							4 => array('value' => Core::_('Shop_Item.properties_show_kind_checkbox'), 'attr' => array('class' => 'shown-3')),
+							7 => array('value' => Core::_('Shop_Item.properties_show_kind_listbox'), 'attr' => array('class' => 'shown-3')),
+							5 => array('value' => Core::_('Shop_Item.properties_show_kind_checkbox_one'), 'attr' => array('class' => 'shown-7')),
+							6 => array('value' => Core::_('Shop_Item.properties_show_kind_from_to'), 'attr' => array('class' => 'shown-0 shown-11 shown-8 shown-9'))
 						)
 					)
 					->name('filter')
@@ -113,12 +113,12 @@ class Shop_Item_Property_Controller_Edit extends Property_Controller_Edit
 					->value(1)
 					->checked(is_null($object->id))
 					->caption(Core::_("Shop_Item.add_value"))
+					->class('colored-danger')
 					->name("add_value");
 
 				$oMainRow4->add($oAddValueCheckbox);
 
 				$oShopItemTabExportImport->move($this->getField('guid'), $oShopItemTabExportImportRow1);
-
 			break;
 			case 'property_dir':
 			default:

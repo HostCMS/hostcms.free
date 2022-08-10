@@ -195,10 +195,10 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$sRadiogroupOnChangeList = implode(',', array_keys($aListTypes));
 
-				// Селектор с группой
 				$oSelect_Type = Admin_Form_Entity::factory('Select')
 					->options($aListTypes)
 					->name('type')
+					->id('id_type')
 					->value($this->_object->type)
 					->caption(Core::_('Property.type'))
 					->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [{$sRadiogroupOnChangeList}])")
@@ -257,7 +257,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							->value($this->_object->list_id)
 							->type('hidden');
 
-						$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+						$oCore_Html_Entity_Script = Core_Html_Entity::factory('Script')
 							->value("
 								$('#{$windowId} [name = list_name]').autocomplete({
 									source: function(request, response) {
@@ -541,7 +541,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->value($this->_object->$fieldName)
 				->type('hidden');
 
-			$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+			$oCore_Html_Entity_Script = Core_Html_Entity::factory('Script')
 				->value("
 					$('#{$windowId} [name = property_dir_name]').autocomplete({
 						source: function(request, response) {

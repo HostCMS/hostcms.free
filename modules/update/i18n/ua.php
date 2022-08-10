@@ -27,7 +27,7 @@ return array(
 	'update_files_error' => 'Помилка розпакування tar.gz файлу.',
 	'server_return_empty_answer' => 'Сервер повернув порожню відповідь, найбільш ймовірно на хостингу заборонені вихідні з\'єднання з використанням fsockopen(). Зверніться до хостинг-провайдера або адміністратора сервера.',
 	'support_available' => 'Період технічної підтримки доступний до %s р.',
-	'support_has_expired' => 'Період технічної підтримки закінчився %s р. <a href="http://%s/users/" target="_blank">Продовжити підтримку</a>. Даны на %s',
+	'support_has_expired' => 'Період технічної підтримки закінчився %s р. <a href="https://%s/users/" target="_blank">Продовжити підтримку</a>. Даны на %s',
 	'support_unavailable' => 'Технічна підтримка недоступна',
 	'msg_update_required' => 'Запрошені оновлення %s',
 	'msg_installing_package' => 'Установка пакету оновлень %s',
@@ -39,5 +39,5 @@ return array(
 	'add_system_notification' => 'Оновлення %s',
 	'system_notification_description' => 'Доступно оновлення %s',
 	'add_module_notification' => 'Оновлення модуля %s',
-	'system_notification_description' => 'Доступна нова версія %s',
+	'module_notification_description' => 'Доступна нова версія %s',
 );

@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Country_Location_City_Area_Model extends Core_Entity
 {
@@ -119,7 +119,7 @@ class Shop_Country_Location_City_Area_Model extends Core_Entity
 	 */
 	public function nameBackend()
 	{
-		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')->value(
+		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')->value(
 			htmlspecialchars($this->name)
 		);
 

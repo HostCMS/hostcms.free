@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Informationsystem
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Item_Comment_Model extends Comment_Model
 {
@@ -40,11 +40,11 @@ class Informationsystem_Item_Comment_Model extends Comment_Model
 		$oSite_Alias = $oSite->getCurrentAlias();
 		!is_null($oSite_Alias) && $href = 'http://' . $oSite_Alias->name . $href;
 
-		Core::factory('Core_Html_Entity_A')
+		Core_Html_Entity::factory('A')
 			->href($href)
 			->target('_blank')
 			->add(
-				Core::factory('Core_Html_Entity_I')->class('fa fa-external-link')
+				Core_Html_Entity::factory('I')->class('fa fa-external-link')
 			)
 			->execute();
 

@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Link extends Admin_Form_Entity
 {
@@ -33,10 +33,10 @@ class Skin_Default_Admin_Form_Entity_Link extends Admin_Form_Entity
 	{
 		parent::__construct();
 
-		$this->a = Core::factory('Core_Html_Entity_A')->target('_blank');
-		$this->img = Core::factory('Core_Html_Entity_Img');
-		$this->icon = Core::factory('Core_Html_Entity_I');
-		$this->div = Core::factory('Core_Html_Entity_Div');
+		$this->a = Core_Html_Entity::factory('A')->target('_blank');
+		$this->img = Core_Html_Entity::factory('Img');
+		$this->icon = Core_Html_Entity::factory('I');
+		$this->div = Core_Html_Entity::factory('Div');
 	}
 
 	/**
@@ -68,7 +68,7 @@ class Skin_Default_Admin_Form_Entity_Link extends Admin_Form_Entity
 		if (strlen($this->caption))
 		{
 			$this->div->add(
-				Core::factory('Core_Html_Entity_Span')
+				Core_Html_Entity::factory('Span')
 					->class('caption')
 					->value(htmlspecialchars($this->caption))
 			);
@@ -78,7 +78,7 @@ class Skin_Default_Admin_Form_Entity_Link extends Admin_Form_Entity
 			->add($this->a
 				->add($this->icon)
 				->add(
-					Core::factory('Core_Html_Entity_Code')
+					Core_Html_Entity::factory('Code')
 						->value(htmlspecialchars($this->a->value))
 				)
 				->value('')

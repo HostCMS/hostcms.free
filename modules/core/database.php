@@ -843,6 +843,7 @@ abstract class Core_DataBase
 			'zerofill' => $zerofill,
 			'min' => $min,
 			'max' => $max,
+			'defined_max_length' => $max_length,
 			'max_length' => $max_length
 		);
 	}

@@ -39,7 +39,7 @@ class Event_Controller
 	{
 		$timestamp = Core_Date::sql2timestamp($datetime);
 
-		$day = date('j', $timestamp) != date('j')
+		$day = date('j-m-Y', $timestamp) !== date('j-m-Y')
 			? date('j', $timestamp)
 			: '';
 
@@ -116,7 +116,7 @@ class Event_Controller
 		else
 		{
 			$class = 'empty';
-			$events = 'Нет дел';
+			$events = Core::_('Event.no_events');
 		}
 
 		?><span class="<?php echo $class?>"><?php echo $events?>

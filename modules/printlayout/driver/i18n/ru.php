@@ -3,10 +3,10 @@
 /**
  * Printlayout.
  *
- * @package HostCMS 6\Printlayout
- * @version 6.x
+ * @package HostCMS\Printlayout
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Драйвер',

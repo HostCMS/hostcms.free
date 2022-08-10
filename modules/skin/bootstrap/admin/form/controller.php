@@ -20,12 +20,6 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 	protected $_onPage = array (10 => 10, 20 => 20, 30 => 30, 50 => 50, 100 => 100, 500 => 500, 1000 => 1000);
 
 	/**
-	 * Is showing filter necessary
-	 * @var boolean
-	 */
-	protected $_showFilter = FALSE;
-
-	/**
 	 * Apply form settings
 	 * @return self
 	 */
@@ -255,7 +249,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 
 		?><label><?php
 
-		Core::factory('Core_Html_Entity_Select')
+		Core_Html_Entity::factory('Select')
 			->class('form-control input-sm')
 			->onchange("mainFormLocker.unlock(); $.adminLoad({path: '{$path}', additionalParams: '{$additionalParams}', limit: this.options[this.selectedIndex].value, view: '{$view}', windowId : '{$windowId}'}); return false")
 			->options($this->_onPage)
@@ -310,7 +304,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 							?><i class="fa fa-align-left fa-rotate-90"></i><?php
 						break;
 					}
-				?><?php echo Core::_('Admin_Form.' . $viewName)?></a><?php
+				?><span class="hidden-xxs hidden-xs"><?php echo Core::_('Admin_Form.' . $viewName)?></span></a><?php
 			}
 			?></div><?php
 		}
@@ -340,10 +334,10 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 		{
 			$this->current > $total_page && $this->current = $total_page;
 
-			$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
+			$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')
 				->class('dataTables_paginate paging_bootstrap');
 
-			$oCore_Html_Entity_Ul = Core::factory('Core_Html_Entity_Ul')
+			$oCore_Html_Entity_Ul = Core_Html_Entity::factory('Ul')
 				->class('pagination pull-left');
 
 			$oCore_Html_Entity_Div->add($oCore_Html_Entity_Ul);
@@ -351,10 +345,10 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 			// Ссылка на предыдущую страницу
 			$page = $this->current - 1 ? $this->current - 1 : 1;
 
-			$oCore_Html_Entity_Li = Core::factory('Core_Html_Entity_Li');
+			$oCore_Html_Entity_Li = Core_Html_Entity::factory('Li');
 			$oCore_Html_Entity_Ul->add($oCore_Html_Entity_Li);
 
-			$oCore_Html_Entity_A = Core::factory('Core_Html_Entity_A');
+			$oCore_Html_Entity_A = Core_Html_Entity::factory('A');
 			$oCore_Html_Entity_Li
 				->class('prev' . ($this->current == 1 ? ' disabled' : ''))
 				->add(
@@ -384,10 +378,10 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 			// Определяем число ссылок выводимых на страницу.
 			$count_link = $link_num_end - $link_num_begin + 1;
 
-			$oCore_Html_Entity_Li = Core::factory('Core_Html_Entity_Li');
+			$oCore_Html_Entity_Li = Core_Html_Entity::factory('Li');
 			$oCore_Html_Entity_Ul->add($oCore_Html_Entity_Li);
 
-			$oCore_Html_Entity_A = Core::factory('Core_Html_Entity_A');
+			$oCore_Html_Entity_A = Core_Html_Entity::factory('A');
 
 			if ($this->current == 1)
 			{
@@ -415,7 +409,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 					$oCore_Html_Entity_Li->add($oCore_Html_Entity_A);
 
 					// Заменяем "1" на "..."
-					$oCore_Html_Entity_A = Core::factory('Core_Html_Entity_A');
+					$oCore_Html_Entity_A = Core_Html_Entity::factory('A');
 					$href = $this->getAdminLoadHref($this->getPath(), NULL, NULL, NULL, NULL, 2);
 					$onclick = $this->getAdminLoadAjax($this->getPath(), NULL, NULL, NULL, NULL, 2);
 
@@ -434,11 +428,11 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 			{
 				$link_number = $link_num_begin + $i;
 
-				$oCore_Html_Entity_Li = Core::factory('Core_Html_Entity_Li');
+				$oCore_Html_Entity_Li = Core_Html_Entity::factory('Li');
 				$oCore_Html_Entity_Ul->add($oCore_Html_Entity_Li);
 
 
-				$oCore_Html_Entity_A = Core::factory('Core_Html_Entity_A')
+				$oCore_Html_Entity_A = Core_Html_Entity::factory('A')
 					->value($link_number);
 				$oCore_Html_Entity_Li->add($oCore_Html_Entity_A);
 
@@ -458,7 +452,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 				}
 			}
 
-			$oCore_Html_Entity_Li = Core::factory('Core_Html_Entity_Li');
+			$oCore_Html_Entity_Li = Core_Html_Entity::factory('Li');
 			$oCore_Html_Entity_Ul->add($oCore_Html_Entity_Li);
 
 			// Если последняя страница является текущей
@@ -466,7 +460,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 			{
 				$oCore_Html_Entity_Li->class('active');
 
-				$oCore_Html_Entity_A = Core::factory('Core_Html_Entity_A')
+				$oCore_Html_Entity_A = Core_Html_Entity::factory('A')
 					->value($total_page);
 
 				$oCore_Html_Entity_Li->add($oCore_Html_Entity_A);
@@ -479,7 +473,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 					$href = $this->getAdminLoadHref($this->getPath(), NULL, NULL, NULL, NULL, $total_page - 1);
 					$onclick = $this->getAdminLoadAjax($this->getPath(), NULL, NULL, NULL, NULL, $total_page - 1);
 
-					$oCore_Html_Entity_A = Core::factory('Core_Html_Entity_A')
+					$oCore_Html_Entity_A = Core_Html_Entity::factory('A')
 						->href($href)
 						->onclick($onclick)
 						->value('…');
@@ -490,7 +484,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 				$href = $this->getAdminLoadHref($this->getPath(), NULL, NULL, NULL, NULL, $total_page);
 				$onclick = $this->getAdminLoadAjax($this->getPath(), NULL, NULL, NULL, NULL, $total_page);
 
-				$oCore_Html_Entity_A = Core::factory('Core_Html_Entity_A');
+				$oCore_Html_Entity_A = Core_Html_Entity::factory('A');
 
 				// Последняя страница не является текущей
 				$oCore_Html_Entity_A
@@ -498,16 +492,16 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 					->onclick($onclick)
 					->value($total_page);
 
-				$oCore_Html_Entity_Li = Core::factory('Core_Html_Entity_Li');
+				$oCore_Html_Entity_Li = Core_Html_Entity::factory('Li');
 				$oCore_Html_Entity_Ul->add($oCore_Html_Entity_Li);
 				$oCore_Html_Entity_Li->add($oCore_Html_Entity_A);
 			}
 
 			// Формируем скрытые ссылки навигации для перехода по Ctrl + стрелка
-			$oCore_Html_Entity_Li = Core::factory('Core_Html_Entity_Li');
+			$oCore_Html_Entity_Li = Core_Html_Entity::factory('Li');
 			$oCore_Html_Entity_Ul->add($oCore_Html_Entity_Li);
 
-			$oCore_Html_Entity_A = Core::factory('Core_Html_Entity_A');
+			$oCore_Html_Entity_A = Core_Html_Entity::factory('A');
 
 			// Ссылка на следующую страницу
 			$page = $this->current + 1 ? $this->current + 1 : 1;
@@ -531,7 +525,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 			$sHref = $this->getAdminLoadHref($this->getPath(), NULL, NULL, NULL, NULL, '');
 			$sOnclick = $this->getAdminLoadAjax($this->getPath(), NULL, NULL, NULL, NULL, '');
 
-			$oCore_Html_Entity_Li = Core::factory('Core_Html_Entity_Li')
+			$oCore_Html_Entity_Li = Core_Html_Entity::factory('Li')
 				->class('page-selector-wrap')
 				->add(
 					Admin_Form_Entity::factory('Code')

@@ -3,9 +3,9 @@
 * Online shop.
 *
 * @package HostCMS
-* @version 6.x
+* @version 7.x
 * @author Hostmake LLC
-* @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -422,9 +422,10 @@ $oMainTab->add(
 			Admin_Form_Entity::factory('Select')
 				->name("import_price_encoding")
 				->options(array(
-					'Windows-1251' => Core::_('Shop_Item.input_file_encoding0'),
-					'UTF-8' => Core::_('Shop_Item.input_file_encoding1')
+					'UTF-8' => Core::_('Shop_Item.input_file_encoding1'),
+					'Windows-1251' => Core::_('Shop_Item.input_file_encoding0')
 				))
+				->value(1)
 				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 hidden-2 hidden-3'))
 				->caption(Core::_('Shop_Item.price_list_encoding')))
 		)
@@ -484,9 +485,9 @@ $oMainTab->add(
 			->divAttr(array('class' => 'form-group col-xs-12 hidden-1 hidden-2 hidden-3'))
 			->value(TRUE)))
 	->add(Admin_Form_Entity::factory('Div')->class('row')
-		->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('action')->value('export'))
-		->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('shop_group_id')->value(Core_Array::getGet('shop_group_id')))
-		->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('shop_id')->value(Core_Array::getGet('shop_id', 0)))
+		->add(Core_Html_Entity::factory('Input')->type('hidden')->name('action')->value('export'))
+		->add(Core_Html_Entity::factory('Input')->type('hidden')->name('shop_group_id')->value(Core_Array::getGet('shop_group_id')))
+		->add(Core_Html_Entity::factory('Input')->type('hidden')->name('shop_id')->value(Core_Array::getGet('shop_id', 0)))
 	);
 
 $oAdmin_Form_Entity_Form->add(
@@ -496,7 +497,7 @@ $oAdmin_Form_Entity_Form->add(
 	->class('applyButton btn btn-blue')
 )
 ->add(
-	Core::factory('Core_Html_Entity_Script')
+	Core_Html_Entity::factory('Script')
 		->type("text/javascript")
 		->value("radiogroupOnChange('{$windowId}', 0, [0,1,2,3])")
 );

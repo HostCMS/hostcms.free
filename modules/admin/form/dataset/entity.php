@@ -76,7 +76,7 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 	protected function _getFoundRows()
 	{
 		// Warning
-		if (Core_Array::getRequest('debug'))
+		if (!is_null(Core_Array::getRequest('debug')))
 		{
 			echo '<p><b>Query FOUND_ROWS</b>.</p>';
 		}
@@ -119,7 +119,7 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 		$Core_DataBase->free();
 
 		// Warning
-		if (Core_Array::getRequest('debug'))
+		if (!is_null(Core_Array::getRequest('debug')))
 		{
 			echo '<p><b>getCount Query</b>: <pre>', $Core_DataBase->getLastQuery(), '</pre></p>';
 		}
@@ -174,7 +174,7 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 				$oCore_DataBase->free();
 
 				// Warning
-				if (Core_Array::getRequest('debug'))
+				if (!is_null(Core_Array::getRequest('debug')))
 				{
 					echo '<p><b>Query</b>: sqlCalcFoundRows before FOUND_ROWS()</p>';
 				}
@@ -230,7 +230,7 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 			$this->_objects = $this->_entity->findAll(FALSE);
 
 			// Warning
-			if (Core_Array::getRequest('debug'))
+			if (!is_null(Core_Array::getRequest('debug')))
 			{
 				echo '<p><b>Select Query</b>: <pre>', Core_DataBase::instance()->getLastQuery(), '</pre></p>';
 			}

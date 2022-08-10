@@ -68,7 +68,7 @@ class Core_Sitemap extends Core_Servant_Properties
 	{
 		parent::__construct();
 
-		if (!defined('DENY_INI_SET') || !DENY_INI_SET)
+		if ((!defined('DENY_INI_SET') || !DENY_INI_SET) && strpos(@ini_get('disable_functions'), 'set_time_limit') === FALSE)
 		{
 			@set_time_limit(21600);
 			ini_set('max_execution_time', '21600');
@@ -145,6 +145,7 @@ class Core_Sitemap extends Core_Servant_Properties
 	 * Select Structure_Models by parent_id
 	 * @param int $structure_id structure ID
 	 * @return array
+	 * @hostcms-event Core_Sitemap.onBeforeSelectStructures
 	 */
 	protected function _selectStructuresByParentId($structure_id)
 	{
@@ -159,6 +160,8 @@ class Core_Sitemap extends Core_Servant_Properties
 			->where('structures.siteuser_group_id', 'IN', $this->_aSiteuserGroups)
 			->orderBy('sorting')
 			->orderBy('name');
+
+		Core_Event::notify('Core_Sitemap.onBeforeSelectStructures', $this, array($oStructures));
 
 		$aStructure = $oStructures->findAll(FALSE);
 
@@ -311,13 +314,13 @@ class Core_Sitemap extends Core_Servant_Properties
 			->where('informationsystem_groups.informationsystem_id', '=', $oInformationsystem->id)
 			->where('informationsystem_groups.shortcut_id', '=', 0)
 			->where('informationsystem_groups.deleted', '=', 0);
-		
+
 		$oDataBase = $oCore_QueryBuilder_Select->execute();
-		
+
 		$aRow = $oDataBase->asAssoc()->current();
-		
+
 		$oDataBase->free();
-		
+
 		$maxId = $aRow['max_id'];
 
 		$iFrom = 0;
@@ -379,13 +382,13 @@ class Core_Sitemap extends Core_Servant_Properties
 				->from('informationsystem_items')
 				->where('informationsystem_items.informationsystem_id', '=', $oInformationsystem->id)
 				->where('informationsystem_items.deleted', '=', 0);
-			
+
 			$oDataBase = $oCore_QueryBuilder_Select->execute();
-			
+
 			$aRow = $oDataBase->asAssoc()->current();
-			
+
 			$oDataBase->free();
-			
+
 			$maxId = $aRow['max_id'];
 
 			$iFrom = 0;
@@ -469,9 +472,9 @@ class Core_Sitemap extends Core_Servant_Properties
 			$oDataBase = $oCore_QueryBuilder_Select->execute();
 
 			$aRow = $oDataBase->asAssoc()->current();
-			
+
 			$oDataBase->free();
-			
+
 			$maxId = $aRow['max_id'];
 
 			$iFrom = 0;
@@ -550,13 +553,13 @@ class Core_Sitemap extends Core_Servant_Properties
 			->where('shop_groups.shop_id', '=', $oShop->id)
 			->where('shop_groups.shortcut_id', '=', 0)
 			->where('shop_groups.deleted', '=', 0);
-		
+
 		$oDataBase = $oCore_QueryBuilder_Select->execute();
-		
+
 		$aRow = $oDataBase->asAssoc()->current();
-		
+
 		$oDataBase->free();
-		
+
 		$maxId = $aRow['max_id'];
 
 		$iFrom = 0;
@@ -619,13 +622,13 @@ class Core_Sitemap extends Core_Servant_Properties
 				->from('shop_items')
 				->where('shop_items.shop_id', '=', $oShop->id)
 				->where('shop_items.deleted', '=', 0);
-			
+
 			$oDataBase = $oCore_QueryBuilder_Select->execute();
-			
+
 			$aRow = $oDataBase->asAssoc()->current();
-			
+
 			$oDataBase->free();
-			
+
 			$maxId = $aRow['max_id'];
 
 			$iFrom = 0;
@@ -713,9 +716,9 @@ class Core_Sitemap extends Core_Servant_Properties
 			$oDataBase = $oCore_QueryBuilder_Select->execute();
 
 			$aRow = $oDataBase->asAssoc()->current();
-			
+
 			$oDataBase->free();
-			
+
 			$maxId = $aRow['max_id'];
 
 			$iFrom = 0;
@@ -776,13 +779,13 @@ class Core_Sitemap extends Core_Servant_Properties
 				->from('shop_filter_seos')
 				->where('shop_filter_seos.shop_id', '=', $oShop->id)
 				->where('shop_filter_seos.deleted', '=', 0);
-			
+
 			$oDataBase = $oCore_QueryBuilder_Select->execute();
-			
+
 			$aRow = $oDataBase->asAssoc()->current();
-			
+
 			$oDataBase->free();
-			
+
 			$maxId = $aRow['max_id'];
 
 			$iFrom = 0;

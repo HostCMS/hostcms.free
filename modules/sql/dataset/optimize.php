@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Sql
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Sql_Dataset_Optimize extends Admin_Form_Dataset
 {
@@ -48,42 +48,57 @@ class Sql_Dataset_Optimize extends Admin_Form_Dataset
 	 */
 	public function load()
 	{
-		$aTables = $this->_database->getTables();
-
-		foreach ($aTables as $key => $sTable)
+		if (!$this->_loaded)
 		{
-			$aTables[$key] = $this->_database->quoteTableName($sTable);
-		}
+			$aTables = $this->_database->getTables();
 
-		try
-		{
-			$this->_database->setQueryType(0)
-				->query("OPTIMIZE TABLE " . implode(',', $aTables));
-		}
-		catch (Exception $e)
-		{
-			Core_Message::show($e->getMessage(), 'error');
-		}
-
-		$this->_objects = $this->_database->asObject(NULL)->result();
-
-		foreach ($aTables as $sTable)
-		{
-			// Сбрасывать для этих таблиц AUTO_INCREMENT нельзя
-			if (strpos($sTable, 'admin_form') === FALSE
-				&& strpos($sTable, 'admin_language') === FALSE
-				&& strpos($sTable, 'admin_word') === FALSE)
+			foreach ($aTables as $key => $sTable)
 			{
-				try
+				$aTables[$key] = $this->_database->quoteTableName($sTable);
+			}
+
+			try
+			{
+				$this->_database->setQueryType(0)
+					->query("OPTIMIZE TABLE " . implode(',', $aTables));
+					
+				if (!is_null(Core_Array::getRequest('debug')))
 				{
-					$this->_database->setQueryType(5)
-						->query("ALTER TABLE {$sTable} AUTO_INCREMENT = 1");
-				}
-				catch (Exception $e)
-				{
-					Core_Message::show($e->getMessage(), 'error');
+					echo '<p><b>Select Query</b>: <pre>', Core_DataBase::instance()->getLastQuery(), '</pre></p>';
 				}
 			}
+			catch (Exception $e)
+			{
+				Core_Message::show($e->getMessage(), 'error');
+			}
+
+			$this->_objects = $this->_database->asObject(NULL)->result();
+
+			foreach ($aTables as $sTable)
+			{
+				// Сбрасывать для этих таблиц AUTO_INCREMENT нельзя
+				if (strpos($sTable, 'admin_form') === FALSE
+					&& strpos($sTable, 'admin_language') === FALSE
+					&& strpos($sTable, 'admin_word') === FALSE)
+				{
+					try
+					{
+						$this->_database->setQueryType(5)
+							->query("ALTER TABLE {$sTable} AUTO_INCREMENT = 1");
+
+						if (!is_null(Core_Array::getRequest('debug')))
+						{
+							echo '<p><b>Reset AUTO_INCREMENT</b>: <pre>', Core_DataBase::instance()->getLastQuery(), '</pre></p>';
+						}
+					}
+					catch (Exception $e)
+					{
+						Core_Message::show($e->getMessage(), 'error');
+					}
+				}
+			}
+			
+			$this->_loaded = TRUE;
 		}
 
 		return $this->_objects;

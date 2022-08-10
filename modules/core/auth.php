@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Auth
 {
@@ -132,12 +132,22 @@ class Core_Auth
 				$oCore_Response = new Core_Response();
 
 				$oCore_Response
-					->status(401)
-					->header('Pragma', 'no-cashe')
-					->header('WWW-authenticate', "basic realm='HostCMS'")
 					->header('Content-Type', "text/html; charset=UTF-8")
 					->header('Last-Modified', gmdate('D, d M Y H:i:s', time()) . ' GMT')
 					->header('X-Powered-By', 'HostCMS');
+
+				// Not 'cgi', 'cgi-fcgi'
+				if (substr(php_sapi_name(), 0, 3) != 'cgi')
+				{
+					$oCore_Response
+						->status(401)
+						->header('Pragma', 'no-cashe')
+						->header('WWW-authenticate', "basic realm='HostCMS'");
+				}
+				else
+				{
+					$oCore_Response->status(403);
+				}
 
 				// Выводим страницу, которая отобразится, если пользователь нажмет "Отмена"
 				$title = Core::_('Core.error_log_access_was_denied', $sModuleName);
@@ -148,9 +158,9 @@ class Core_Auth
 					->setMode('authorization')
 					->header();
 
-				Core::factory('Core_Html_Entity_Div')
+				Core_Html_Entity::factory('Div')
 					->class('indexMessage')
-					->add(Core::factory('Core_Html_Entity_H1')->value($title))
+					->add(Core_Html_Entity::factory('H1')->value($title))
 					->execute();
 
 				$oSkin->footer();
@@ -167,6 +177,12 @@ class Core_Auth
 			// Флаг того, что окно авторизации было выведено удаляем
 			$_SESSION['HOSTCMS_HTTP_AUTH_FLAG'] = FALSE;
 			unset($_SESSION['HOSTCMS_HTTP_AUTH_FLAG']);
+		}
+
+		// Сбросим все уровни буферов PHP, созданные на данный момент
+		while (ob_get_level() > 0)
+		{
+			ob_end_flush();
 		}
 
 		try
@@ -200,11 +216,11 @@ class Core_Auth
 
 				$oAdmin_Answer = Core_Skin::instance()->answer();
 				$oAdmin_Answer
-						->ajax(Core_Array::getRequest('_', FALSE))
-						->content(Core_Message::get($sMessage, 'error'))
-						//->message($sMessage)
-						->title($sMessage)
-						->execute();
+					->ajax(Core_Array::getRequest('_', FALSE))
+					->content(Core_Message::get($sMessage, 'error'))
+					//->message($sMessage)
+					->title($sMessage)
+					->execute();
 
 				exit();
 			}
@@ -419,7 +435,7 @@ class Core_Auth
 				{
 					exit('User does not exist!');
 				}
-				
+
 				$domain = strtolower(Core_Array::get($_SERVER, 'HTTP_HOST'));
 
 				$oSite_Alias = Core_Entity::factory('Site_Alias')->findAlias($domain);

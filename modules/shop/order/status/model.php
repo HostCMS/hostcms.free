@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Status_Model extends Core_Entity
 {
@@ -104,7 +104,7 @@ class Shop_Order_Status_Model extends Core_Entity
 			str_replace(array('"'), array('&quot;'), $oAdmin_Form_Controller->additionalParams)
 		);
 
-		Core::factory('Core_Html_Entity_Span')
+		Core_Html_Entity::factory('Span')
 			->class('padding-left-10')
 			->add(
 				$oCore_Html_Entity_Dropdownlist
@@ -168,7 +168,7 @@ class Shop_Order_Status_Model extends Core_Entity
 					? $oBot->Bot_Dir->dirPathWithSeparator() . ' → '
 					: '';
 
-				Core::factory('Core_Html_Entity_Span')
+				Core_Html_Entity::factory('Span')
 					->class('badge badge-square badge-hostcms')
 					->value('<i class="fa fa-android"></i> ' . $sParents . htmlspecialchars($oBot->name))
 					->execute();
