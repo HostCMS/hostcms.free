@@ -117,7 +117,7 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 		}
 
 		Core_Event::notify($this->_modelName . '.onAfterGetReserved', $this, array($reserved));
-		
+
 		$eventResult = Core_Event::getLastReturn();
 
 		return !is_null($eventResult)
@@ -273,7 +273,7 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 			? Core_Entity::factory('Shop_Item', $this->Shop_Item->shortcut_id)
 			: $this->Shop_Item;
 
-		return htmlspecialchars($oShop_Item->Shop_Measure->name);
+		return htmlspecialchars((string) $oShop_Item->Shop_Measure->name);
 	}
 
 	/**
@@ -341,7 +341,7 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 			? Core_Entity::factory('Shop_Item', $this->Shop_Item->shortcut_id)
 			: $this->Shop_Item;
 
-		return htmlspecialchars($oShopItem->marking);
+		return htmlspecialchars((string) $oShopItem->marking);
 	}
 
 	/**

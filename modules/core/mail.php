@@ -438,7 +438,7 @@ abstract class Core_Mail
 	/**
 	 * Send mail
 	 *
-	 * @return mixed
+	 * @return self
 	 * @hostcms-event Core_Mail.onBeforeSend
 	 * @hostcms-event Core_Mail.onAfterPrepareSend
 	 */

@@ -346,6 +346,11 @@ class Crm_Project_Model extends Core_Entity
 		return parent::delete($primaryKey);
 	}
 
+	/**
+	 * Show kanban line
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return self
+	 */
 	public function showKanbanLine($oAdmin_Form_Controller)
 	{
 		$color = strlen($this->color)

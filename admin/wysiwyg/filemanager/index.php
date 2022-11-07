@@ -30,7 +30,7 @@ $oAdmin_Form_Controller
 $oUser = Core_Auth::getCurrentUser();
 $root_dir = ltrim(Core_File::pathCorrection($oUser->root_dir), DIRECTORY_SEPARATOR);
 
-$cdir = Core_Array::getRequest('cdir', '');
+$cdir = Core_Array::getRequest('cdir', '', 'str');
 
 Core_Session::start();
 
@@ -44,10 +44,10 @@ if ($cdir == '')
 $cdir = Core_File::pathCorrection($cdir);
 $cdir = substr($cdir, 0, strrpos($cdir, DIRECTORY_SEPARATOR)) . DIRECTORY_SEPARATOR;
 
-if (strlen(Core_Array::getRequest('dir')))
+if (strlen(Core_Array::getRequest('dir', '', 'str')))
 {
 	$cdir = Core_File::pathCorrection($cdir)
-		. trim(Core_File::pathCorrection(Core_Array::getRequest('dir')), DIRECTORY_SEPARATOR)
+		. trim(Core_File::pathCorrection(Core_Array::getRequest('dir', '', 'str')), DIRECTORY_SEPARATOR)
 		. DIRECTORY_SEPARATOR;
 }
 elseif (is_null($cdir)/* || $cdir == DIRECTORY_SEPARATOR*/) // при выборе на главной теряется слэш
@@ -185,6 +185,10 @@ if (!$oUser->read_only)
 								window.opener.HostCMSFileManager.insertFile("' . rawurlencode(DIRECTORY_SEPARATOR . ltrim($cdir, DIRECTORY_SEPARATOR)) . '" + file.name); return false;
 								});
 							});
+
+							this.on("queuecomplete", function() {
+								$("#' . $windowId . ' #admin_forms_apply_button").click();
+							});
 						}
 					});
 				});
@@ -287,7 +291,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'createDirect
 
 	$oWysiwyg_Filemanager_Controller_Create_Directory
 		->cdir($cdir)
-		->name(Core_Array::getPost('dir_name'));
+		->name(Core_Array::getPost('dir_name', '', 'str'));
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($oWysiwyg_Filemanager_Controller_Create_Directory);

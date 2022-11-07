@@ -25,14 +25,26 @@ class Sql_Table_View_Dataset extends Admin_Form_Dataset
 	 */
 	protected $_count = NULL;
 
+	/**
+	 * Table name
+	 * @var mixed
+	 */
 	protected $_tableName = NULL;
 
+	/**
+	 * Set table
+	 * @param string $tableName
+	 * @return self
+	 */
 	public function table($tableName)
 	{
 		$this->_tableName = $tableName;
 		return $this;
 	}
 
+	/**
+	 * Constructor
+	 */
 	public function __construct()
 	{
 		$this->_entity = new Sql_Table_View_Entity;
@@ -262,8 +274,16 @@ class Sql_Table_View_Dataset extends Admin_Form_Dataset
 		}
 	}
 
+	/**
+	 * Primary key name
+	 * @var mixed
+	 */
 	protected $_primaryKeyName = NULL;
 
+	/**
+	 * Get primary key name
+	 * @return string
+	 */
 	protected function _getPrimaryKeyName()
 	{
 		if (is_null($this->_primaryKeyName))

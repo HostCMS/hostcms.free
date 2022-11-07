@@ -23,7 +23,7 @@ class Benchmark_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2022-08-05';
+	public $date = '2022-11-01';
 
 	/**
 	 * Module name
@@ -31,6 +31,10 @@ class Benchmark_Module extends Core_Module
 	 */
 	protected $_moduleName = 'benchmark';
 
+	/**
+	 * Module options
+	 * @var array
+	 */
 	protected $_options = array(
 		'database_table_name' => array(
 			'type' => 'string',

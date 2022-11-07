@@ -12,9 +12,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Favorite_Controller extends Core_Servant_Properties
 {
@@ -24,7 +24,8 @@ class Shop_Favorite_Controller extends Core_Servant_Properties
 	 */
 	protected $_allowedProperties = array(
 		'shop_item_id',
-		'siteuser_id'
+		'siteuser_id',
+		'shop_favorite_list_id'
 	);
 
 	/**
@@ -44,6 +45,8 @@ class Shop_Favorite_Controller extends Core_Servant_Properties
 			!is_null($oSiteuser)
 				&& $this->siteuser_id = $oSiteuser->id;
 		}
+
+		$this->shop_favorite_list_id = 0;
 	}
 
 	/**
@@ -353,6 +356,7 @@ class Shop_Favorite_Controller extends Core_Servant_Properties
 
 				// Вставляем данные в таблицу избранного
 				$oShop_Favorite->shop_id = $oShop_Item->shop_id;
+				$oShop_Favorite->shop_favorite_list_id = $this->shop_favorite_list_id;
 				$oShop_Favorite->save();
 			}
 			else

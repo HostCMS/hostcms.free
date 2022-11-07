@@ -23,7 +23,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Tabs extends Skin_Default_Admin_Form_Enti
 		// Tab-ы выводим только если их больше 1-го.
 		if (count($this->_children) > 1)
 		{
-			?><ul id="tab" class="nav nav-tabs <?php echo htmlspecialchars($this->class)?>"><?php
+			?><ul id="tab" class="nav nav-tabs <?php echo htmlspecialchars((string) $this->class)?>"><?php
 			$tab_id = 0;
 			foreach ($this->_children as $oAdmin_Form_Tab_Entity)
 			{
@@ -33,7 +33,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Tabs extends Skin_Default_Admin_Form_Enti
 					$tab_id == $this->current
 						&& $oAdmin_Form_Tab_Entity->class .= ' active';
 
-					$tabId = strlen($oAdmin_Form_Tab_Entity->id)
+					$tabId = $oAdmin_Form_Tab_Entity->id != ''
 						? $oAdmin_Form_Tab_Entity->id
 						: $windowId . '-tab-' . $tab_id;
 
@@ -42,22 +42,22 @@ class Skin_Bootstrap_Admin_Form_Entity_Tabs extends Skin_Default_Admin_Form_Enti
 						->getAttrsString();
 
 					?><li <?php echo implode(' ', $aAttr)?>>
-					<a href="#<?php echo htmlspecialchars($tabId)?>" data-toggle="tab"><?php
+					<a href="#<?php echo htmlspecialchars((string) $tabId)?>" data-toggle="tab"><?php
 
-					echo htmlspecialchars($oAdmin_Form_Tab_Entity->caption);
+					echo htmlspecialchars((string) $oAdmin_Form_Tab_Entity->caption);
 
-					if (strlen($oAdmin_Form_Tab_Entity->icon))
+					if ($oAdmin_Form_Tab_Entity->icon != '')
 					{
-						echo '<i class="' . htmlspecialchars($oAdmin_Form_Tab_Entity->icon) . '" title="' . htmlspecialchars($oAdmin_Form_Tab_Entity->iconTitle) . '"></i>';
+						echo '<i class="' . htmlspecialchars((string) $oAdmin_Form_Tab_Entity->icon) . '" title="' . htmlspecialchars((string)$oAdmin_Form_Tab_Entity->iconTitle) . '"></i>';
 					}
 
 					if (!is_null($oAdmin_Form_Tab_Entity->badge))
 					{
-						$badgeColor = strlen($oAdmin_Form_Tab_Entity->badgeColor)
+						$badgeColor = $oAdmin_Form_Tab_Entity->badgeColor != ''
 							? $oAdmin_Form_Tab_Entity->badgeColor
 							: 'default';
 
-						?><span class="badge badge-<?php echo htmlspecialchars($badgeColor)?> margin-left-5"><?php echo htmlspecialchars($oAdmin_Form_Tab_Entity->badge)?></span><?php
+						?><span class="badge badge-<?php echo htmlspecialchars((string) $badgeColor)?> margin-left-5"><?php echo htmlspecialchars((string) $oAdmin_Form_Tab_Entity->badge)?></span><?php
 					}
 					?></a>
 					</li><?php
@@ -70,15 +70,15 @@ class Skin_Bootstrap_Admin_Form_Entity_Tabs extends Skin_Default_Admin_Form_Enti
 
 		$tab_id = 0;
 		?>
-		<div class="tab-content <?php echo htmlspecialchars($this->class)?>">
+		<div class="tab-content <?php echo htmlspecialchars((string) $this->class)?>">
 		<?php
 		foreach ($this->_children as $oAdmin_Form_Tab_Entity)
 		{
-			$tabId = strlen($oAdmin_Form_Tab_Entity->id)
+			$tabId = $oAdmin_Form_Tab_Entity->id != ''
 				? $oAdmin_Form_Tab_Entity->id
 				: $windowId . '-tab-' . $tab_id;
 
-			?><div class="tab-pane fade <?php echo $tab_id == $this->current ? 'in active' : ''?>" id="<?php echo htmlspecialchars($tabId)?>">
+			?><div class="tab-pane fade <?php echo $tab_id == $this->current ? 'in active' : ''?>" id="<?php echo htmlspecialchars((string) $tabId)?>">
 			<?php
 			$oAdmin_Form_Tab_Entity->execute();
 			?></div><?php

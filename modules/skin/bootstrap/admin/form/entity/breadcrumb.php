@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Breadcrumb extends Admin_Form_Entity
 {
@@ -39,6 +39,6 @@ class Skin_Bootstrap_Admin_Form_Entity_Breadcrumb extends Admin_Form_Entity
 	 */
 	public function execute()
 	{
-		?><li><a href="<?php echo htmlspecialchars($this->href)?>" onclick="<?php echo htmlspecialchars($this->onclick)?>"><?php echo htmlspecialchars($this->name)?></a></li><?php
+		?><li><a href="<?php echo htmlspecialchars((string) $this->href)?>" onclick="<?php echo htmlspecialchars((string) $this->onclick)?>"><?php echo htmlspecialchars((string) $this->name)?></a></li><?php
 	}
 }

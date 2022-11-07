@@ -21,7 +21,7 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 	public function setObject($object)
 	{
 		$modelName = $object->getModelName();
-		
+
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		switch ($modelName)
@@ -134,7 +134,7 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 
 				<script>
 				$(function() {
-					$('#<?php echo $windowId?>-conditionsModal').on('show.bs.modal', function () {
+					$('#<?php echo $windowId?>-conditionsModal').on('show.bs.modal', function (e) {
 						var shop_group_id = $('#<?php echo $windowId?> :input[name = "shop_group_id"]').val(),
 							shop_id = $('#<?php echo $windowId?> input[name = "shop_id"]').val();
 

@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Report
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'menu' => 'Reports',
@@ -78,4 +78,11 @@ return array(
 	'axis_count_paid' => 'Paid count',
 	'axis_total_amount' => 'Total amount',
 	'popular_quantity' => 'Quantity: ',
+	'select_price' => 'Select purchase price',
+	'order_paid_costs' => 'Paid',
+	'order_costs_profit' => 'Expected Profit',
+	'order_paid_profit' => 'Profit',
+	'label_profit' => 'Profit',
+	'label_previuos_profit' => 'Profit for the previous period',
+	'table_profit' => 'Profit',
 );

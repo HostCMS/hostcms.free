@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Http
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Http_Socket extends Core_Http
 {
@@ -111,7 +111,7 @@ class Core_Http_Socket extends Core_Http
 			$socketStatus = stream_get_meta_data($fp);
 			if ($socketStatus['timed_out'])
 			{
-				throw new Exception("HostCMS: Timed Out, socket closed by the server!");
+				throw new Core_Exception("HostCMS: Timed Out, socket closed by the server!");
 			}
 
 			// Explode header until data is short

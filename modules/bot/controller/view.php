@@ -13,6 +13,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  */
 class Bot_Controller_View extends Admin_Form_Controller_View
 {
+	/**
+	 * Execute
+	 * @return self
+	 */
 	public function execute()
 	{
 		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
@@ -142,7 +146,7 @@ class Bot_Controller_View extends Admin_Form_Controller_View
 								//$('#<?php echo $windowId?> #settingsModal' + bot_module_id).modal('show');
 
 								//$('#<?php echo $windowId?> #settingsModal' + bot_module_id).on('hide.bs.modal', function (event) {
-									
+
 								$('#<?php echo $windowId?> #settingsModal' + bot_module_id)
 									.modal('show')
 									.on('hide.bs.modal', function (event) {

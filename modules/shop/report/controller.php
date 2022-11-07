@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Report_Controller
 {
@@ -22,6 +22,7 @@ class Shop_Report_Controller
 
 	// Orders
 	static protected $_shop_id = NULL;
+	static protected $_shop_price_id = NULL;
 	static protected $_order_parameter_y = NULL;
 	static protected $_order_parameter_x = NULL;
 	static protected $_order_segment = NULL;
@@ -471,16 +472,16 @@ class Shop_Report_Controller
 		self::$_debug && $fBeginTime = Core::getmicrotime();
 
 		// Default zeros
-		$aOrderedAmount
-			= $byParams = $byParamSegments
-			= $aTotalOrders = $aTotalOrderItems = array();
+		$aOrderedAmount = $aProfitAmount
+			= $aTotalOrders = $aTotalOrderItems
+			= $byParams = $byParamSegments = array();
 
 		for ($iTmp = Core_Date::sql2timestamp($startDatetime . ' 00:00:00'); $iTmp <= Core_Date::sql2timestamp($endDatetime . ' 23:59:59'); $iTmp = strtotime('+1 day', $iTmp))
 		{
 			$sDate = date($groupDate, $iTmp);
 			if (!isset($aOrderedAmount[$sDate]))
 			{
-				$aOrderedAmount[$sDate] = $aTotalOrders[$sDate] = $aTotalOrderItems[$sDate] = 0;
+				$aOrderedAmount[$sDate] = $aProfitAmount[$sDate] = $aTotalOrders[$sDate] = $aTotalOrderItems[$sDate] = 0;
 			}
 		}
 
@@ -577,6 +578,12 @@ class Shop_Report_Controller
 
 		$itemsFunctionName = $functionName . 'Items';
 
+		// string(13) "_selectOrders" string(17) "_selectPaidOrders"
+
+		$oShop_Price = self::$_shop_price_id
+			? Core_Entity::factory('Shop_Price')->getById(self::$_shop_price_id, FALSE)
+			: NULL;
+
 		do {
 			self::$_debug && $fBeginTime1 = Core::getmicrotime();
 
@@ -591,15 +598,47 @@ class Shop_Report_Controller
 			foreach ($aShop_Order_Items as $aShop_Order_Item)
 			{
 				// Статус товара не отказной
-				if (!$aShop_Order_Item['shop_order_item_status_id'] || !Core_Entity::factory('Shop_Order_Item_Status', $aShop_Order_Item['shop_order_item_status_id'])->canceled)
+				if (!$aShop_Order_Item['shop_order_item_status_id']
+					|| !Core_Entity::factory('Shop_Order_Item_Status', $aShop_Order_Item['shop_order_item_status_id'])->canceled
+				)
 				{
 					$sDate = date($groupDate, Core_Date::sql2timestamp($aShop_Order_Item['datetime']));
 
-					$tax = Shop_Controller::instance()->round($aShop_Order_Item['price'] * $aShop_Order_Item['rate'] / 100);
+					$tax = $oShop_Controller->round($aShop_Order_Item['price'] * $aShop_Order_Item['rate'] / 100);
 
 					$fAmount = self::$_allow_delivery || $aShop_Order_Item['type'] != 1
-						? Shop_Controller::instance()->round(Shop_Controller::instance()->round($aShop_Order_Item['price'] + $tax) * $aShop_Order_Item['quantity'])
+						? $oShop_Controller->round($oShop_Controller->round($aShop_Order_Item['price'] + $tax) * $aShop_Order_Item['quantity'])
 						: 0;
+
+					// Закупочная цена
+					$fAmountProfit = 0;
+					if ($aShop_Order_Item['shop_item_id'] && !is_null($oShop_Price))
+					{
+						$oShop_Item = Core_Entity::factory('Shop_Item', $aShop_Order_Item['shop_item_id']);
+
+						$oShop_Item_Price = $oShop_Item->Shop_Item_Prices->getByPriceId($oShop_Price->id, FALSE);
+
+						if ($oShop_Item_Price && $oShop_Item_Price->value > 0)
+						{
+							$fAmountProfit = $oShop_Item_Price->value;
+
+							// Выбираем информацию о налогах
+							if ($oShop_Item->shop_tax_id)
+							{
+								// Извлекаем информацию о налоге
+								$oShop_Tax = $oShop_Item->Shop_Tax;
+
+								if ($oShop_Tax->id)
+								{
+									// Если он не входит в цену
+									if ($oShop_Tax->tax_is_included == 0)
+									{
+										$fAmountProfit += $oShop_Tax->rate / 100 * $fAmountProfit;
+									}
+								}
+							}
+						}
+					}
 
 					// Учитываем только товары, не доставки, не скидки, не пополнения
 					$aShop_Order_Item['type'] == 0
@@ -607,6 +646,9 @@ class Shop_Report_Controller
 
 					!isset($aOrderedAmount[$sDate]) && $aOrderedAmount[$sDate] = 0;
 					$aOrderedAmount[$sDate] += $oShop_Controller->round($fAmount);
+
+					!isset($aProfitAmount[$sDate]) && $aProfitAmount[$sDate] = 0;
+					$aProfitAmount[$sDate] += $oShop_Controller->round($fAmount - $fAmountProfit);
 
 					list($yAxisName, $color) = self::_getYAxisName($aShop_Order_Item);
 
@@ -653,12 +695,30 @@ class Shop_Report_Controller
 		}
 		while ($fromId < $iMaxId);
 
+		// Накладные расходы из кассы
+		if (self::$_shop_id)
+		{
+			$oShop_Warrants = Core_Entity::factory('Shop_Warrant');
+			$oShop_Warrants->queryBuilder()
+				->where('shop_warrants.shop_id', '=', self::$_shop_id)
+				->where('shop_warrants.active', '=', 1);
+
+			$aShop_Warrants = $oShop_Warrants->findAll(FALSE);
+			foreach ($aShop_Warrants as $oShop_Warrant)
+			{
+				$sDate = date($groupDate, Core_Date::sql2timestamp($oShop_Warrant->datetime));
+
+				!isset($aProfitAmount[$sDate]) && $aProfitAmount[$sDate] = 0;
+				$aProfitAmount[$sDate] -= $oShop_Warrant->amount;
+			}
+		}
+
 		// Расчет среднего чека
 		if (self::$_order_parameter_x == 'avg_amount')
 		{
 			foreach ($byParams as $yAxisName => $amount)
 			{
-				$byParams[$yAxisName] = Shop_Controller::instance()->round($byParams[$yAxisName] / $aAvgCount[$yAxisName]);
+				$byParams[$yAxisName] = $oShop_Controller->round($byParams[$yAxisName] / $aAvgCount[$yAxisName]);
 			}
 		}
 
@@ -666,6 +726,7 @@ class Shop_Report_Controller
 
 		return array(
 			'orderedAmount' => $aOrderedAmount,
+			'profitAmount' => $aProfitAmount,
 			'byParams' => $byParams,
 			'yAxisColor' => $yAxisColor,
 			'byParamSegments' => $byParamSegments,
@@ -705,9 +766,9 @@ class Shop_Report_Controller
 				$aPopularItems[$iId] = array(
 					'name' => $oShop_Order_Item->name,
 					'marking' => $oShop_Order_Item->marking,
-					'avgPrice' => number_format($oShop_Order_Item->dataAvgPrice, 2, '.', ' '),
+					'avgPrice' => number_format((float) $oShop_Order_Item->dataAvgPrice, 2, '.', ' '),
 					'quantityAmount' => $oShop_Order_Item->dataQuantityAmount,
-					'totalAmount' => number_format($oShop_Order_Item->dataTotalAmount, 2, '.', ' ')
+					'totalAmount' => number_format((float) $oShop_Order_Item->dataTotalAmount, 2, '.', ' ')
 				);
 
 				$oShop_Item = $oShop_Order_Item->Shop_Item->modification_id
@@ -853,8 +914,8 @@ class Shop_Report_Controller
 							<td><a href="<?php echo $sItemUrl?>" target="_blank"  data-titleclass="bordered-palegreen" data-toggle="popover" data-container="body" data-trigger="hover" data-html="true" data-placement="top" data-title="<?php echo htmlspecialchars(htmlspecialchars($aTmp['name']))?>" data-content="<div class='text-align-center'><img src='<?php echo $imgSrc?>' /></div>"><?php echo htmlspecialchars($aTmp['name'])?></a></td>
 							<td><?php echo htmlspecialchars($aTmp['marking'])?></td>
 							<td><?php echo round($aTmp['quantityAmount'])?></td>
-							<td><?php echo $aTmp['totalAmount']?> <?php echo htmlspecialchars(self::$_oDefault_Currency->name)?></td>
-							<td><?php echo $aTmp['avgPrice']?> <?php echo htmlspecialchars(self::$_oDefault_Currency->name)?></td>
+							<td><?php echo htmlspecialchars(self::$_oDefault_Currency->formatWithCurrency($aTmp['totalAmount']))?></td>
+							<td><?php echo htmlspecialchars(self::$_oDefault_Currency->formatWithCurrency($aTmp['avgPrice']))?></td>
 						</tr>
 						<?php
 					}
@@ -866,10 +927,12 @@ class Shop_Report_Controller
 	}
 
 	static protected $_aOrderedAmount = NULL;
+	static protected $_aProfitAmount = NULL;
 	static protected $_aOrderedByParams = NULL;
 	static protected $_aOrderedByParamSegments = NULL;
 
 	static protected $_aOrderedPreviousAmount = NULL;
+	static protected $_aProfitPreviousAmount = NULL;
 
 	static protected function _prepareOrders($functionName, $aOptions)
 	{
@@ -878,6 +941,10 @@ class Shop_Report_Controller
 
 		self::$_shop_id = isset($_SESSION['report']['shop_id'])
 			? intval($_SESSION['report']['shop_id'])
+			: 0;
+
+		self::$_shop_price_id = isset($_SESSION['report']['shop_price_id'])
+			? intval($_SESSION['report']['shop_price_id'])
 			: 0;
 
 		self::$_allow_delivery = isset($_SESSION['report']['allow_delivery'])
@@ -939,6 +1006,7 @@ class Shop_Report_Controller
 
 			$aTmp = self::_getOrders($functionName, self::$_startDatetime, self::$_endDatetime, $groupDate, $groupInc);
 			self::$_aOrderedAmount = $aTmp['orderedAmount'];
+			self::$_aProfitAmount = $aTmp['profitAmount'];
 			self::$_aOrderedByParams = $aTmp['byParams'];
 			arsort(self::$_aOrderedByParams);
 			self::$_aOrderedByParamSegments = $aTmp['byParamSegments'];
@@ -950,6 +1018,7 @@ class Shop_Report_Controller
 			{
 				$aTmp = self::_getOrders($functionName, self::$_previousStartDatetime, self::$_previousEndDatetime, $groupDate, $groupInc);
 				self::$_aOrderedPreviousAmount = $aTmp['orderedAmount'];
+				self::$_aProfitPreviousAmount = $aTmp['profitAmount'];
 
 				self::$_previous_total_orders = $aTmp['totalOrders'];
 				self::$_previous_total_order_items = $aTmp['totalOrderItems'];
@@ -986,7 +1055,7 @@ class Shop_Report_Controller
 		}
 		?>
 		<div class="row">
-			<div class="form-group col-xs-12 col-sm-6 col-lg-5">
+			<div class="form-group col-xs-12 col-sm-4">
 				<?php
 				$aShopOptions = array(0 => Core::_('Report.all_shops'));
 
@@ -1006,7 +1075,38 @@ class Shop_Report_Controller
 					->execute();
 				?>
 			</div>
-			<div class="form-group col-xs-12 col-sm-6 margin-top-5">
+			<?php
+			if (self::$_shop_id)
+			{
+				$aPriceOptions = array(0 => Core::_('Report.select_price'));
+
+				$oShop = Core_Entity::factory('Shop')->getById(self::$_shop_id);
+
+				if (!is_null($oShop))
+				{
+					$aShop_Prices = Core_Entity::factory('Shop_Price')->getAllByShop_id($oShop->id, FALSE);
+					foreach ($aShop_Prices as $oShop_Price)
+					{
+						$aPriceOptions[$oShop_Price->id] = $oShop_Price->name;
+					}
+				}
+				?>
+				<div class="col-xs-12 col-sm-4">
+					<?php
+					Admin_Form_Entity::factory('Select')
+						->id('shop_price_id')
+						->options($aPriceOptions)
+						->value(self::$_shop_price_id)
+						->name('shop_price_id')
+						->divAttr(array('class' => ''))
+						->onchange('sendRequest({tab: $(\'.report-tabs .nav-tabs li.active\'), data: {shop_id: ' . self::$_shop_id . ', shop_price_id: $(this).val()}});')
+						->execute();
+					?>
+				</div>
+			<?php
+			}
+			?>
+			<div class="form-group col-xs-12 col-sm-4 margin-top-5">
 				<div class="pull-left text margin-right-10"><?php echo Core::_('Report.allow_delivery')?></div>
 				<label>
 					<input class="checkbox-slider toggle colored-success" name="allow_delivery" onchange="$(this).val(+this.checked); sendRequest({tab: $('.report-tabs .nav-tabs li.active'), data: {allow_delivery: $(this).val()}});" type="checkbox" value="<?php echo self::$_allow_delivery?>" <?php echo $checked?>/>
@@ -1145,14 +1245,14 @@ class Shop_Report_Controller
 				<div class="col-xs-12 col-sm-3">
 					<div class="report-name"><?php echo Core::_('Report.widget_orders_by_client')?></div>
 					<div class="report-description">
-						<?php echo number_format($avgOrders, 2, '.', ' ')?>
+						<?php echo number_format((float) $avgOrders, 2, '.', ' ')?>
 						<?php echo $avgOrdersDeltaPercent?>
 					</div>
 				</div>
 				<div class="col-xs-12 col-sm-3">
 					<div class="report-name"><?php echo Core::_('Report.widget_client_avg_price')?></div>
 					<div class="report-description">
-						<?php echo number_format($avgOrdersAmount, 2, '.', ' ')?> <?php echo htmlspecialchars(self::$_oDefault_Currency->name)?>
+						<?php echo htmlspecialchars(self::$_oDefault_Currency->formatWithCurrency($avgOrdersAmount))?>
 						<?php echo $avgOrdersAmountDeltaPercent?>
 					</div>
 				</div>
@@ -1168,14 +1268,14 @@ class Shop_Report_Controller
 				<div class="col-xs-12 col-sm-3">
 					<div class="report-name"><?php echo Core::_('Report.widget_avg_price')?></div>
 					<div class="report-description">
-						<?php echo number_format($avgCommonOrdersAmount, 2, '.', ' ')?> <?php echo htmlspecialchars(self::$_oDefault_Currency->name)?>
+						<?php echo htmlspecialchars(self::$_oDefault_Currency->formatWithCurrency($avgCommonOrdersAmount))?>
 						<?php echo $avgCommonOrdersAmountDeltaPercent?>
 					</div>
 				</div>
 				<div class="col-xs-12 col-sm-3">
 					<div class="report-name"><?php echo Core::_('Report.widget_avg_order_items')?></div>
 					<div class="report-description">
-						<?php echo number_format($avgCountOrdersItem, 2, '.', ' ')?>
+						<?php echo number_format((float) $avgCountOrdersItem, 2, '.', ' ')?>
 						<?php echo $avgCountOrdersItemDeltaPercent?>
 					</div>
 				</div>
@@ -1199,10 +1299,19 @@ class Shop_Report_Controller
 					<div class="show-table-button margin-top-20 padding-10">
 						<div class="row">
 							<div class="col-xs-12 col-sm-3">
-								<div class="report-name"><?php echo Core::_('Report.order_costs');?></div>
+								<div class="report-name"><?php echo $functionName == '_selectOrders' ? Core::_('Report.order_costs') : Core::_('Report.order_paid_costs');?></div>
 								<div class="amount"></div>
 							</div>
-							<div class="col-xs-12 col-sm-9 margin-top-10">
+							<?php
+							if (self::$_shop_price_id)
+							{
+								?><div class="col-xs-12 col-sm-3">
+									<div class="report-name"><?php echo $functionName == '_selectOrders' ? Core::_('Report.order_costs_profit') : Core::_('Report.order_paid_profit');?></div>
+									<div class="amount-profit"></div>
+								</div><?php
+							}
+							?>
+							<div class="col-xs-12 col-sm-6 margin-top-10">
 								<a onclick="$('.data-table').toggleClass('hidden')" class="btn btn-primary"><?php echo Core::_('Report.show_table')?></a>
 							</div>
 						</div>
@@ -1218,6 +1327,7 @@ class Shop_Report_Controller
 										<th><?php echo Core::_('Report.table_orders')?></th>
 										<th><?php echo Core::_('Report.table_items')?></th>
 										<th><?php echo Core::_('Report.table_amount')?></th>
+										<th><?php echo Core::_('Report.table_profit')?></th>
 									</tr>
 								</thead>
 								<tbody>
@@ -1256,9 +1366,17 @@ class Shop_Report_Controller
 									);
 								}
 
-								$totalPeriodAmount = $totalPeriodOrders = $totalPeriodOrderItems = 0;
+								$totalPeriodAmount = $totalPeriodOrders = $totalPeriodOrderItems = $totalPeriodProfit = 0;
 								foreach (self::$_aOrderedAmount as $date => $amount)
 								{
+									$profit = isset(self::$_aProfitAmount[$date])
+										? self::$_aProfitAmount[$date]
+										: 0;
+
+									$profitClass = $profit < 0
+										? 'darkorange'
+										: '';
+
 									$ordersCount = isset(self::$_total_orders[$date])? self::$_total_orders[$date] : 0;
 									$orderItemsCount = isset(self::$_total_order_items[$date])? self::$_total_order_items[$date] : 0;
 									?>
@@ -1279,20 +1397,27 @@ class Shop_Report_Controller
 										</td>
 										<td><?php echo $ordersCount?></td>
 										<td><?php echo $orderItemsCount?></td>
-										<td class="text-align-left"><?php echo number_format($amount, 2, '.', ' ')?> <?php echo htmlspecialchars(self::$_oDefault_Currency->name)?></td>
+										<td class="text-align-left"><?php echo htmlspecialchars(self::$_oDefault_Currency->formatWithCurrency($amount))?></td>
+										<td class="text-align-left <?php echo $profitClass?>"><?php echo htmlspecialchars(self::$_oDefault_Currency->formatWithCurrency($profit))?></td>
 									</tr>
 									<?php
 
 									$totalPeriodOrders += $ordersCount;
 									$totalPeriodOrderItems += $orderItemsCount;
 									$totalPeriodAmount += $amount;
+									$totalPeriodProfit += $profit;
 								}
+
+								$totalProfitClass = $totalPeriodProfit < 0
+									? 'darkorange'
+									: '';
 								?>
 								<tr class="semi-bold">
 									<td class="text-align-right">∑</td>
 									<td><?php echo $totalPeriodOrders?></td>
 									<td><?php echo $totalPeriodOrderItems?></td>
-									<td class="text-align-left"><?php echo number_format($totalPeriodAmount, 2, '.', ' ')?> <?php echo htmlspecialchars(self::$_oDefault_Currency->name)?></td>
+									<td class="text-align-left"><?php echo htmlspecialchars(self::$_oDefault_Currency->formatWithCurrency($totalPeriodAmount))?></td>
+									<td class="text-align-left <?php echo $totalProfitClass?>"><?php echo htmlspecialchars(self::$_oDefault_Currency->formatWithCurrency($totalPeriodProfit))?></td>
 								</tr>
 								</tbody>
 							</table>
@@ -1395,10 +1520,13 @@ class Shop_Report_Controller
 					tickLabelsX = [], // Setup labels for use on the Y-axis
 					previousDataArr = [],
 					totalOrdersArr = [],
-					totalOrdersItemsArr = [];
+					totalOrdersItemsArr = [],
+					dataProfitArr = [],
+					previousDataProfitArr = []
+					;
 
 				<?php
-				$totalAmount = $previousTotalAmount = 0;
+				$totalAmount = $previousTotalAmount = $totalProfit = $previousTotalProfit = 0;
 
 				$i = 0;
 				foreach (self::$_aOrderedAmount as $date => $amount)
@@ -1427,6 +1555,30 @@ class Shop_Report_Controller
 				}
 
 				$i = 0;
+				foreach (self::$_aProfitAmount as $date => $profit)
+				{
+					?>
+					dataProfitArr.push([<?php echo $i?>, <?php echo $profit?>]);
+					<?php
+					$totalProfit += $profit;
+					$i++;
+				}
+
+				if ($compare_previous_period)
+				{
+					$i = 0;
+					foreach (self::$_aProfitPreviousAmount as $date => $profit)
+					{
+						?>
+						// Bar
+						previousDataProfitArr.push([<?php echo $i?>, <?php echo $profit?>]);
+						<?php
+						$previousTotalProfit += $profit;
+						$i++;
+					}
+				}
+
+				$i = 0;
 				foreach (self::$_total_order_items as $date => $count)
 				{
 					?>
@@ -1446,11 +1598,17 @@ class Shop_Report_Controller
 					$i++;
 				}
 
-				$deltaPercent = '';
+				$deltaPercent = $deltaPercentProfit = '';
 				if ($compare_previous_period && $totalAmount && $previousTotalAmount)
 				{
 					$percent = 100 - round($previousTotalAmount * 100 / $totalAmount);
 					$deltaPercent = '<span class="' . ($percent > 0 ? 'palegreen' : 'darkorange') . '">' . ($percent > 0 ? '+' : '') . $percent . '%</span>';
+				}
+
+				if ($compare_previous_period && $totalProfit && $previousTotalProfit)
+				{
+					$percentProfit = 100 - round($previousTotalProfit * 100 / $totalProfit);
+					$deltaPercent = '<span class="' . ($percentProfit > 0 ? 'palegreen' : 'darkorange') . '">' . ($percentProfit > 0 ? '+' : '') . $percentProfit . '%</span>';
 				}
 				?>
 
@@ -1479,6 +1637,46 @@ class Shop_Report_Controller
 							color: "#fb7863",
 							data: previousDataArr,
 							label: '<?php echo Core::_("Report.label_previuos_amount")?>',
+							lines: {
+								show: true,
+								fill: true,
+								lineWidth: .1,
+								fillColor: {
+									colors: [{
+										opacity: 0.2
+									}, {
+										opacity: 0.6
+									}]
+								}
+							},
+							points: {show: false},
+							shadowSize: 0
+						},
+					<?php
+					}
+					?>
+					{ // profit
+						color: '#53a93f',
+						data: dataProfitArr,
+						label: '<?php echo Core::_("Report.label_profit")?>',
+						bars: {
+							show: true,
+							fillColor: { colors: [{ opacity: 0.8 }, { opacity: 1 }] },
+							barWidth: 0.4,
+							align: 'center',
+							lineWidth: 1,
+							fill: true,
+							zero: true
+						}
+					},
+					<?php
+					if ($compare_previous_period)
+					{
+					?>
+						{ // previous preiod profit
+							color: "#53a93f",
+							data: previousDataProfitArr,
+							label: '<?php echo Core::_("Report.label_previuos_profit")?>',
 							lines: {
 								show: true,
 								fill: true,
@@ -1857,13 +2055,24 @@ class Shop_Report_Controller
 						currentContentId = currentTab.find('a').attr('href'),
 						currentContent = $(currentContentId);
 
-					currentContent.find('div.amount').text('<?php echo number_format($totalAmount, 0, '.', ' ')?> <?php echo htmlspecialchars(self::$_oDefault_Currency->name)?>');
+					currentContent.find('div.amount').text('<?php echo htmlspecialchars(self::$_oDefault_Currency->formatWithCurrency($totalAmount))?>');
 
 					<?php
 					if ($compare_previous_period && strlen($deltaPercent))
 					{
 						?>
 						currentContent.find('div.amount').append('<?php echo $deltaPercent?>');
+						<?php
+					}
+					?>
+
+					currentContent.find('div.amount-profit').text('<?php echo htmlspecialchars(self::$_oDefault_Currency->formatWithCurrency($totalProfit))?>');
+
+					<?php
+					if ($compare_previous_period && strlen($deltaPercentProfit))
+					{
+						?>
+						currentContent.find('div.amount').append('<?php echo $deltaPercentProfit?>');
 						<?php
 					}
 					?>
@@ -2040,7 +2249,7 @@ class Shop_Report_Controller
 									if (!self::$_group_modifications)
 									{
 										?>
-										<?php echo Core::_('Report.popular_total_modifications', number_format($totalItemsModificationsCount, 0, '.', ' '))?>
+										<?php echo Core::_('Report.popular_total_modifications', number_format((float) $totalItemsModificationsCount, 0, '.', ' '))?>
 										<?php
 									}
 									else
@@ -2711,7 +2920,7 @@ class Shop_Report_Controller
 				}
 			}
 
-			$aReturn['captionHTML'] = '<div class="tab-description">' . number_format($totalAmount, 0, '.', ' ') . ' ' . htmlspecialchars(self::$_oDefault_Currency->name) . $deltaPercent . '</div>';
+			$aReturn['captionHTML'] = '<div class="tab-description">' . htmlspecialchars(self::$_oDefault_Currency->formatWithCurrency($totalAmount)) . $deltaPercent . '</div>';
 		}
 
 		if (in_array('content', $aFields))
@@ -2769,7 +2978,7 @@ class Shop_Report_Controller
 				}
 			}
 
-			$aReturn['captionHTML'] = '<div class="tab-description">' . number_format($totalAmount, 0, '.', ' ') . ' ' . htmlspecialchars(self::$_oDefault_Currency->name) . $deltaPercent . '</div>';
+			$aReturn['captionHTML'] = '<div class="tab-description">' . htmlspecialchars(self::$_oDefault_Currency->formatWithCurrency($totalAmount)) . $deltaPercent . '</div>';
 		}
 
 		if (in_array('content', $aFields))

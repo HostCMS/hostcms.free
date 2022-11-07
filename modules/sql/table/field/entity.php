@@ -15,6 +15,10 @@ class Sql_Table_Field_Entity
 {
 	//public $view = NULL;
 
+	/**
+	 * Fields
+	 * @var array
+	 */
 	protected $_fields = array(
 		'Field' => array(
 			'datatype' => 'string',
@@ -110,6 +114,10 @@ class Sql_Table_Field_Entity
 		return 'Field';
 	}
 
+	/**
+	 * Get model name
+	 * @return void
+	 */
 	public function getModelName()
 	{
 		return 'sql_table_field';
@@ -162,7 +170,7 @@ class Sql_Table_Field_Entity
 		}
 		else
 		{
-			return htmlspecialchars($this->Default);
+			return htmlspecialchars((string) $this->Default);
 		}
 	}
 
@@ -205,19 +213,36 @@ class Sql_Table_Field_Entity
 		}
 	}
 
+	/**
+	 * Table name
+	 * @var mixed
+	 */
 	protected $_tableName = NULL;
 
+	/**
+	 * Set table name
+	 * @param string $tableName
+	 * @return self
+	 */
 	public function setTableName($tableName)
 	{
 		$this->_tableName = $tableName;
 		return $this;
 	}
 
+	/**
+	 * Get table name
+	 * @return string
+	 */
 	public function getTableName()
 	{
 		return $this->_tableName;
 	}
 
+	/**
+	 * Delete
+	 * @return self
+	 */
 	public function delete()
 	{
 		$table_name = $this->getTableName();

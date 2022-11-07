@@ -9,4 +9,6 @@ return array(
 	'device3' => 'Телевизор',
 	'device4' => 'Часы',
 	'destroy_success' => 'Сессия пользователя уничтожена!',
+	'destroyAll_success' => 'Все сессии уничтожены!',
+	'destroy_all' => 'Уничтожить все',
 );

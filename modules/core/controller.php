@@ -26,9 +26,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Controller extends Core_Servant_Properties
 {
@@ -287,7 +287,7 @@ class Core_Controller extends Core_Servant_Properties
 	protected $_vars = array();
 
 	/**
-	 * assign variables/objects to the TPL-template
+	 * Assign variables/objects to the TPL-template
 	 * @return self
 	 */
 	public function assign($varname, $var)
@@ -298,7 +298,7 @@ class Core_Controller extends Core_Servant_Properties
 	}
 
 	/**
-	 * append an element to an assigned array
+	 * Append an element to an assigned array
 	 * @return self
 	 */
 	public function append($varname, $var)
@@ -392,6 +392,7 @@ class Core_Controller extends Core_Servant_Properties
 	/**
 	 * List of cache signatures
 	 * @var array
+	 * @ignore
 	 */
 	protected $_cacheSignatures = array();
 
@@ -465,6 +466,7 @@ class Core_Controller extends Core_Servant_Properties
 	/**
 	 * Convert object to string
 	 * @return string
+	 * @ignore
 	 */
 	public function __toString()
 	{

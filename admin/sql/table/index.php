@@ -3,9 +3,9 @@
  * SQL.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -25,6 +25,25 @@ $oAdmin_Form_Controller
 	->path($sAdminFormAction)
 	->title(Core::_('Sql.manage_title'))
 	->pageTitle(Core::_('Sql.manage_title'));
+
+// Меню формы
+$oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
+
+// Элементы меню
+$oAdmin_Form_Entity_Menus->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Admin_Form.add'))
+		->icon('fa fa-plus')
+		->href(
+			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
+		)
+);
+
+// Добавляем все меню контроллеру
+$oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
@@ -51,6 +70,23 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 );
 
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
+
+// Действие редактирования
+$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('edit');
+
+if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
+{
+	$oSql_Table_Controller_Edit = Admin_Form_Action_Controller::factory(
+		'Sql_Table_Controller_Edit', $oAdmin_Form_Action
+	);
+
+	$oSql_Table_Controller_Edit->addEntity($oAdmin_Form_Entity_Breadcrumbs);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oSql_Table_Controller_Edit);
+}
 
 // Источник данных 0
 $oAdmin_Form_Dataset = new Sql_Table_Dataset();

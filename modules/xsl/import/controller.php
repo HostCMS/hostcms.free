@@ -37,15 +37,18 @@ class Xsl_Import_Controller extends Admin_Form_Action_Controller
 
 		$aContent = json_decode($this->content, TRUE);
 
-		if (isset($aContent['name']))
+		if (is_array($aContent))
 		{
-			$this->_import($aContent);
-		}
-		else
-		{
-			foreach ($aContent as $aXsl)
+			if (isset($aContent['name']))
 			{
-				$this->_import($aXsl);
+				$this->_import($aContent);
+			}
+			else
+			{
+				foreach ($aContent as $aXsl)
+				{
+					$this->_import($aXsl);
+				}
 			}
 		}
 

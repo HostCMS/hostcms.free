@@ -14,6 +14,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  */
 class Printlayout_Driver_Libreoffice extends Printlayout_Driver_Controller
 {
+	/**
+	 * Extension
+	 * @var string|NULL
+	 */
 	protected $_extension = 'pdf';
 
 	/**

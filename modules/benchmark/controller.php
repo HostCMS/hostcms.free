@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Benchmark
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк"(Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк"(Hostmake LLC), http://www.hostcms.ru
  */
 class Benchmark_Controller
 {
@@ -333,12 +333,7 @@ class Benchmark_Controller
 	 */
 	static public function getStorageEngines()
 	{
-		$aResult = Core_DataBase::instance()->setQueryType(9)
-			->query("SHOW ENGINES")
-			->asAssoc()
-			->result();
-
-		return $aResult;
+		return Core_DataBase::instance()->getEngines();
 	}
 
 	/**

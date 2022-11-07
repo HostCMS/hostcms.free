@@ -145,8 +145,8 @@ class Property_Value_Datetime_Model extends Core_Entity
 		if ($this->value != '0000-00-00 00:00:00')
 		{
 			$value = $oProperty->type == 8
-				? strftime($this->_dateFormat, Core_Date::sql2timestamp($this->value))
-				: strftime($this->_dateTimeFormat, Core_Date::sql2timestamp($this->value));
+				? Core_Date::strftime($this->_dateFormat, Core_Date::sql2timestamp($this->value))
+				: Core_Date::strftime($this->_dateTimeFormat, Core_Date::sql2timestamp($this->value));
 		}
 
 		$this->addXmlTag('value', $value);

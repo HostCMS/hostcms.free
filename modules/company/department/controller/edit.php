@@ -166,7 +166,7 @@ class Company_Department_Controller_Edit extends Admin_Form_Action_Controller
 												->type('hidden')
 												->name('company_id')
 												->value($iCompanyId)
-										)										
+										)
 								)
 								->add(
 									Admin_Form_Entity::factory('Div')
@@ -195,7 +195,7 @@ class Company_Department_Controller_Edit extends Admin_Form_Action_Controller
 					<script>
 						var depatmentId = ' . ($oDepartment->id ? $oDepartment->id : 0) . ';
 
-						bootbox.dialog({
+						var dialog = bootbox.dialog({
 							//message: $("#editDepartmentModal").html(),
 							message: \'' . $seditDepartmentFormContent . '\',
 							title: depatmentId ? "' . Core::_('Company_Department.edit_form_title') . '" : "' . Core::_('Company_Department.add_form_title') . '",
@@ -213,10 +213,24 @@ class Company_Department_Controller_Edit extends Admin_Form_Action_Controller
 								cancel: {
 									label: "' . Core::_('Company_Department.cancel') . '",
 									className: "btn-default",
-									//callback: function() {}
+									callback: function() {
+										if (confirm("' . Core::_('Company_Department.close_modal_confirm') . '"))
+										{
+											dialog.modal(\'hide\');
+										}
+
+										return false;
+									}
 								}
 							},
-							onEscape: true
+							onEscape: function() {
+								if (confirm("' . Core::_('Company_Department.close_modal_confirm') . '"))
+								{
+									dialog.modal(\'hide\');
+								}
+
+								return false;
+							}
 						});
 					</script>'
 				)

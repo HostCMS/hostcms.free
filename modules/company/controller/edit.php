@@ -107,7 +107,7 @@ class Company_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				array(
 					'max_width' => $aConfig['max_width'],
 					'max_height' => $aConfig['max_height'],
-					'path' => is_file($this->_object->getImageFilePath())
+					'path' => $this->_object->image != '' && is_file($this->_object->getImageFilePath())
 						? $this->_object->getImageFileHref()
 						: '',
 					'show_params' => TRUE,
@@ -124,7 +124,7 @@ class Company_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					'show' => FALSE
 				)
 			)
-			->divAttr(array('class' => 'form-group col-xs-12 col-md-6 col-lg-3'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-md-6 col-lg-3 no-padding-xs no-padding-sm'))
 			;
 
 		$oMainTabRow1->add($oImageField);

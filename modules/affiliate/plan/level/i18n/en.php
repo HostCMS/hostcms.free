@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Affiliate
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'affiliate_values_form_title' => 'Levels of affiliate program "%s"',
@@ -28,4 +28,5 @@ return array(
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
 	'error_level' => 'Level already exist!',
+	'markDeleted_success' => 'Level information deleted successfully',
 );

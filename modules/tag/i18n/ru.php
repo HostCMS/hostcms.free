@@ -1,18 +1,10 @@
 <?php
-/**
- * Tags.
- *
- * @package HostCMS
- * @subpackage Tag
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'Метки',
-	'menu' => 'Метки (теги)',
-	'main_form_caption_h1' => 'Метки (теги)',
-	'title' => 'Метки (теги)',
+	'menu' => 'Метки',
+	'main_form_caption_h1' => 'Метки',
+	'title' => 'Метки',
 	'main_menu' => 'Метка',
 	'menu_add' => 'Добавить',
 	'markDeleted_success' => 'Метка успешно удалена!',

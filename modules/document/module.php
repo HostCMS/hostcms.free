@@ -23,7 +23,7 @@ class Document_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2022-08-05';
+	public $date = '2022-11-01';
 
 	/**
 	 * Module name
@@ -79,13 +79,13 @@ class Document_Module extends Core_Module
 
 		$aDocuments = $oDocuments->findAll(FALSE);
 
-		$result = array();
+		$aPages = array();
 		foreach ($aDocuments as $oDocument)
 		{
-			$result[] = $oDocument->indexing();
+			$aPages[] = $oDocument->indexing();
 		}
 
-		return $result;
+		return array('pages' => $aPages, 'indexed' => count($aPages), 'finished' => count($aPages) < $limit);
 	}
 
 	/**

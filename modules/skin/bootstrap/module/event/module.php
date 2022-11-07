@@ -353,7 +353,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 												}
 											}
 										?>
-										<span class="task-description" style="display: block; color: #999; font-size: 11px; line-height: 17px"><?php echo htmlspecialchars($oEvent->description);?></span>
+										<span class="task-description" style="display: block; color: #999; font-size: 11px; line-height: 17px"><?php echo htmlspecialchars((string) $oEvent->description);?></span>
 										<?php
 										if (strlen($oEvent->place))
 										{

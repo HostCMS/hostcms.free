@@ -13,10 +13,12 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  */
 class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_View
 {
+	/**
+	 * Is filter necessary
+	 * @return self
+	 */
 	protected function _isFilterNecessary()
 	{
-		$oAdmin_Form = $this->_Admin_Form_Controller->getAdminForm();
-
 		// Is filter necessary
 		$aAdmin_Form_Fields = $this->_Admin_Form_Controller->getAdminFormFields();
 		foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
@@ -26,7 +28,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 			$aDatasets = $this->_Admin_Form_Controller->getDatasets();
 
-			foreach ($aDatasets as $datasetKey => $oTmpAdmin_Form_Dataset)
+			foreach ($aDatasets as $oTmpAdmin_Form_Dataset)
 			{
 				$oAdmin_Form_Field_Changed = $this->_Admin_Form_Controller->changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
 			}
@@ -41,6 +43,9 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 		return $this;
 	}
 
+	/**
+	 * Top menu bar
+	 */
 	protected function _topMenuBar()
 	{
 		?><div class="table-toolbar">
@@ -57,6 +62,10 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 		<?php
 	}
 
+	/**
+	 * Execute
+	 * @return self
+	 */
 	public function execute()
 	{
 		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
@@ -126,7 +135,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
  		$path = Core_Str::escapeJavascriptVariable($oAdmin_Form_Controller->getPath());
 
 		// TOP FILTER
-		if ($this->showFilter)
+		if ($this->_filterAvailable())
 		{
 			$oCore_Html_Entity_Span = Core_Html_Entity::factory('Span')
 				->class('btn btn-sm btn-default margin-right-10')
@@ -154,7 +163,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 		// CSV Export
 		$oCore_Html_Entity_Span = Core_Html_Entity::factory('A')
 			->class('btn btn-sm btn-default margin-right-10')
-			->id('showTopFilterButton')
+			->id('exportCsvButton')
 			->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath()) . '&hostcms[export]=csv')
 			->title(Core::_('Admin_Form.export_csv'))
 			->target('_blank')
@@ -173,12 +182,10 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 	 */
 	public function _showFooter()
 	{
-		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
-
 		$bShowNavigation = $this->showPageNavigation
-			&& $oAdmin_Form_Controller->getTotalCount() > $oAdmin_Form_Controller->limit;
+			&& $this->_Admin_Form_Controller->getTotalCount() > $this->_Admin_Form_Controller->limit;
 
-		Core_Event::notify('Admin_Form_Controller.onBeforeShowFooter', $oAdmin_Form_Controller, array($this));
+		Core_Event::notify('Admin_Form_Controller.onBeforeShowFooter', $this->_Admin_Form_Controller, array($this));
 
 		?><div class="DTTTFooter">
 			<div class="row">
@@ -189,7 +196,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 				if ($bShowNavigation)
 				{
 					?><div class="col-xs-12 col-sm-6 col-md-5 col-lg-4">
-						<?php $oAdmin_Form_Controller->pageNavigation()?>
+						<?php $this->_Admin_Form_Controller->pageNavigation()?>
 					</div><?php
 				}
 				?>
@@ -215,9 +222,40 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 		</script>
 		<?php
 
-		Core_Event::notify('Admin_Form_Controller.onAfterShowFooter', $oAdmin_Form_Controller, array($this));
+		Core_Event::notify('Admin_Form_Controller.onAfterShowFooter', $this->_Admin_Form_Controller, array($this));
 
 		return $this;
+	}
+
+
+	/**
+	 * Check filter availability
+	 * @return boolean
+	 */
+	protected function _filterAvailable()
+	{
+		if ($this->showFilter)
+		{
+			$aAdmin_Form_Fields = $this->_Admin_Form_Controller->getAdminFormFields();
+			foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
+			{
+				// Перекрытие параметров для данного поля
+				$oAdmin_Form_Field_Changed = $oAdmin_Form_Field;
+
+				$aDatasets = $this->_Admin_Form_Controller->getDatasets();
+				foreach ($aDatasets as $datasetKey => $oTmpAdmin_Form_Dataset)
+				{
+					$oAdmin_Form_Field_Changed = $this->_Admin_Form_Controller->changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
+				}
+
+				if ($oAdmin_Form_Field_Changed->allow_filter && $oAdmin_Form_Field_Changed->view != 2 || $oAdmin_Form_Field_Changed->view == 1)
+				{
+					return TRUE;
+				}
+			}
+		}
+
+		return FALSE;
 	}
 
 	/**
@@ -251,7 +289,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 			return FALSE;
 		}
 
-		if ($this->showFilter)
+		if ($this->_filterAvailable())
 		{
 			$aHide = array();
 			$path = Core_Str::escapeJavascriptVariable($oAdmin_Form_Controller->getPath());
@@ -443,12 +481,12 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 								$oAdmin_Form_Field_Changed = $oAdmin_Form_Controller->changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
 							}
 
-							$width = htmlspecialchars($oAdmin_Form_Field_Changed->width);
-							$class = htmlspecialchars($oAdmin_Form_Field_Changed->class);
+							$width = htmlspecialchars((string) $oAdmin_Form_Field_Changed->width);
+							$class = htmlspecialchars((string) $oAdmin_Form_Field_Changed->class);
 
 							$fieldName = $oAdmin_Form_Field->getCaption($oAdmin_Language->id);
 
-							$fieldName = $fieldName != ''
+							$fieldName = $fieldName !== ''
 								? htmlspecialchars($fieldName)
 								: '—';
 
@@ -457,7 +495,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 								&& $oAdmin_Form_Field->id == $oSortingField->id
 								&& $class .= ' highlight';
 
-							$sSortingClass = $sSortingOnClick = '';
+							$sSortingOnClick = '';
 
 							if ($oAdmin_Form_Field_Changed->allow_sorting)
 							{
@@ -484,9 +522,9 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 								}
 							}
 							?><th title="<?php echo $fieldName?>" class="<?php echo trim($class)?>" <?php echo !empty($width) ? "width=\"{$width}\"" : ''?> onclick="if (event.target != event.currentTarget) return false; <?php echo $sSortingOnClick?>"><?php
-								if (strlen($oAdmin_Form_Field_Changed->ico))
+								if ($oAdmin_Form_Field_Changed->ico !='')
 								{
-									echo '<i class="' . htmlspecialchars($oAdmin_Form_Field_Changed->ico) . '" title="' . $fieldName . '"></i>';
+									echo '<i class="' . htmlspecialchars((string) $oAdmin_Form_Field_Changed->ico) . '" title="' . $fieldName . '"></i>';
 								}
 								else
 								{
@@ -535,8 +573,8 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 						$oAdmin_Form_Field_Changed = $oAdmin_Form_Controller->changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
 					}
 
-					$width = htmlspecialchars($oAdmin_Form_Field_Changed->width);
-					$class = htmlspecialchars($oAdmin_Form_Field_Changed->class);
+					$width = htmlspecialchars((string) $oAdmin_Form_Field_Changed->width);
+					$class = htmlspecialchars((string) $oAdmin_Form_Field_Changed->class);
 
 					// Подсвечивать
 					$oAdmin_Form_Field_Changed->allow_sorting
@@ -650,8 +688,8 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 								$oAdmin_Form_Field_Changed = $oAdmin_Form_Controller->changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field);
 
 								// Параметры поля.
-								$width = htmlspecialchars(trim($oAdmin_Form_Field_Changed->width));
-								$class = htmlspecialchars($oAdmin_Form_Field_Changed->class);
+								$width = htmlspecialchars(trim((string) $oAdmin_Form_Field_Changed->width));
+								$class = htmlspecialchars((string) $oAdmin_Form_Field_Changed->class);
 
 								$oAdmin_Form_Field->allow_sorting
 									&& is_object($oSortingField)
@@ -684,12 +722,12 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 										if (isset($oEntity->$fieldName))
 										{
 											// значение свойства
-											$value = htmlspecialchars($oEntity->$fieldName);
+											$value = htmlspecialchars((string) $oEntity->$fieldName);
 										}
 										elseif ($oAdmin_Form_Controller->isCallable($oEntity, $fieldName))
 										{
 											// Выполним функцию обратного вызова
-											$value = htmlspecialchars($oEntity->$fieldName($oAdmin_Form_Field_Changed, $oAdmin_Form_Controller));
+											$value = htmlspecialchars((string) $oEntity->$fieldName($oAdmin_Form_Field_Changed, $oAdmin_Form_Controller));
 										}
 										else
 										{
@@ -856,7 +894,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 														// Если указано альтернативное значение для картинки - добавим его в alt и title
 														if (isset($str_explode[2])
-															&& trim($value) == $mIndex)
+															&& trim((string) $value) == $mIndex)
 														{
 															$sTmp = trim($str_explode[2]);
 

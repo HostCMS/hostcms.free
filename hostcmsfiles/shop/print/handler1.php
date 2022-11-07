@@ -120,7 +120,7 @@ class Shop_Print_Form_Handler1 extends Shop_Print_Form_Handler
 					?>
 					<tr>
 						<td><?php echo htmlspecialchars($oShopOrderItem->name)?></td>
-						<td><?php echo htmlspecialchars($oShopOrderItem->Shop_Item->Shop_Measure->name)?></td>
+						<td><?php echo htmlspecialchars((string) $oShopOrderItem->Shop_Item->Shop_Measure->name)?></td>
 						<td class="text_align_right"><?php echo sprintf('%.3f', $oShopOrderItem->quantity)?></td>
 						<td class="text_align_right"><?php echo number_format($oShopOrderItem->price, 2, '-', '')?></td>
 						<td class="text_align_right"><?php echo number_format($oShopOrderItem->price * $oShopOrderItem->quantity, 2, '-', '')?></td>

@@ -14,11 +14,15 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
 	/**
-	 *
+	 * Dir tree
 	 * @var array
 	 */
 	static protected $_aDirTree = array();
 
+	/**
+	 * Types
+	 * @var array
+	 */
 	protected $_types = array();
 
 	/**
@@ -492,11 +496,6 @@ class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		return $this;
 	}
-
-	/*public function execute($operation = NULL)
-	{
-		return parent::execute($operation);
-	}*/
 
 	/**
 	 * Create visual tree of the directories

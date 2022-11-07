@@ -22,7 +22,7 @@ class Notification_Module extends Core_Module{
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2022-08-05';
+	public $date = '2022-11-01';
 
 
 	/**

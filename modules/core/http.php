@@ -18,7 +18,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - port(80) порт соединения, по умолчанию 80
  * - contentType('application/x-www-form-urlencoded') Content-type запроса, по умолчанию 'application/x-www-form-urlencoded'
  * - rawData($data) все данные, передаваемые в HTTP POST-запросе (передача массива закодирует данные в виде multipart/form-data)
- * - userAgent($userAgent) установить пользовательский агент, по умолчанию 'Mozilla/5.0 (compatible; HostCMS/6.x; +https://www.hostcms.ru)'
+ * - userAgent($userAgent) установить пользовательский агент, по умолчанию 'Mozilla/5.0 (compatible; HostCMS/7.x; +https://www.hostcms.ru)'
  * - url($url) адрес загружаемого ресурса
  * - referer($referer) содержимое заголовка Referer, если NULL, то будет установлен в "{схема}://{запрошенный домен}"
  * - data($key, $value) добавить POST-данные
@@ -199,7 +199,7 @@ abstract class Core_Http
 	protected function _init()
 	{
 		$this
-			->userAgent('Mozilla/5.0 (compatible; HostCMS/6.x; +https://www.hostcms.ru)')
+			->userAgent('Mozilla/5.0 (compatible; HostCMS/7.x; +https://www.hostcms.ru)')
 			->method('GET')
 			->timeout(10)
 			->port(80)

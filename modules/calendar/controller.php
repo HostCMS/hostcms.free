@@ -7,12 +7,15 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Calendar
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Calendar_Controller
 {
+	/**
+	 * Create context menu
+	 */
 	static public function createContextMenu()
 	{
 		// Формируем контекстное меню календаря
@@ -55,6 +58,12 @@ class Calendar_Controller
 		}
 	}
 
+	/**
+	 * Get calendar entities
+	 * @param string $start
+	 * @param string $end
+	 * @return array
+	 */
 	static public function getCalendarEntities($start, $end)
 	{
 		$aReturn = array();
@@ -72,5 +81,55 @@ class Calendar_Controller
 		}
 
 		return $aReturn;
+	}
+
+	/**
+	 * Get upload calendar entities
+	 * @param string $last_modified
+	 * @return array
+	 */
+	static public function getUploadCalendarEntities($last_modified)
+	{
+		$aReturn = array();
+
+		$aModules = Core_Entity::factory('Module')->getAllByActive(1);
+
+		// Для каждого модуля получаем события для отображения в календаре
+		foreach ($aModules as $oModule)
+		{
+			$oModule->loadModule();
+			if (!is_null($oModule->Core_Module) && method_exists($oModule->Core_Module, 'getUploadCalendarEvents'))
+			{
+				$aReturn = array_merge($aReturn, $oModule->Core_Module->getUploadCalendarEvents($last_modified));
+			}
+		}
+
+		return $aReturn;
+	}
+
+	/**
+	 * Sync all user calendars
+	 */
+	static public function sync(User_Model $oUser)
+	{
+		$aCalendar_Caldav_Users = $oUser->Calendar_Caldav_Users->findAll(FALSE);
+
+		foreach ($aCalendar_Caldav_Users as $oCalendar_Caldav_User)
+		{
+			if ($oCalendar_Caldav_User->Calendar_Caldav->active)
+			{
+				$synchronized_datetime = Core_Date::sql2timestamp($oCalendar_Caldav_User->synchronized_datetime);
+
+				if (strtotime('+1 minutes', $synchronized_datetime) < time())
+				{
+					try {
+						$oCalendar_Caldav_User->Calendar_Caldav->sync($oCalendar_Caldav_User);
+					}
+					catch (Exception $e){
+						//Core_Message::show($e->getMessage(), 'error');
+					}
+				}
+			}
+		}
 	}
 }

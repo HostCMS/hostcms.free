@@ -153,4 +153,6 @@ return array(
 
 	'event_files' => 'Files',
 	'tabDmsDocuments' => 'Documents',
+	'guid' => 'GUID',
+	'last_modified' => 'Last modified',
 );

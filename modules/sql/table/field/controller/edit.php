@@ -193,7 +193,7 @@ class Sql_Table_Field_Controller_Edit extends Admin_Form_Action_Controller_Type_
 		{
 			$defaultValue = 'CURRENT_TIMESTAMP';
 		}
-		elseif (strlen($this->_object->Default))
+		elseif ($this->_object->Default != '')
 		{
 			$defaultValue = 'USER_DEFINED';
 		}

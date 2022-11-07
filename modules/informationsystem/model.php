@@ -320,7 +320,7 @@ class Informationsystem_Model extends Core_Entity
 		parent::save();
 
 		// Создание директории для Watermark
-		$sWatermarkDirPath = dirname($this->getWatermarkFilePath());
+		$sWatermarkDirPath = dirname((string) $this->getWatermarkFilePath());
 
 		if ($sWatermarkDirPath && !is_dir($sWatermarkDirPath))
 		{
@@ -338,7 +338,7 @@ class Informationsystem_Model extends Core_Entity
 	{
 		try
 		{
-			is_file($this->getWatermarkFilePath()) && Core_File::delete($this->getWatermarkFilePath());
+			$this->getWatermarkFilePath() != '' && is_file($this->getWatermarkFilePath()) && Core_File::delete($this->getWatermarkFilePath());
 		} catch (Exception $e) {}
 
 		$this->watermark_file = '';
@@ -409,7 +409,9 @@ class Informationsystem_Model extends Core_Entity
 
 		try
 		{
-			is_file($this->getWatermarkFilePath()) && Core_File::copy($this->getWatermarkFilePath(), $newObject->getWatermarkFilePath());
+			$this->watermark_file != ''
+				&& is_file($this->getWatermarkFilePath())
+				&& Core_File::copy($this->getWatermarkFilePath(), $newObject->getWatermarkFilePath());
 		} catch (Exception $e) {}
 
 		// Копирование доп. свойств и разделов доп. свойств информационных элементов

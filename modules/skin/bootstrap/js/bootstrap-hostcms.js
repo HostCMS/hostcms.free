@@ -267,6 +267,87 @@ function isEmpty(str) {
 				}
 			});
 		},
+		sqlRenameTab: function(event)
+		{
+			if (event.type == "touchend")
+			{
+				var now = new Date().getTime(),
+					timeSince = now - $(this).data('latestTap');
+
+				$(this).data({'latestTap': new Date().getTime()});
+
+				if (!timeSince || timeSince > 600)
+				{
+					return;
+				}
+			}
+
+			var $item = $(this), $ae, $editor;
+
+			$ae = $('<a>');
+
+			$editor = $('<input>').prop('type', 'text').width('95%');
+
+			$item.css('display', 'none');
+
+			$editor.on('blur', function() {
+				var _t = jQuery(this),
+					item = _t.parent().prev();
+				;
+
+				item.html(_t.val() + '<i class="fa-solid fa-xmark"></i>').css('display', '');
+				$editor.parent().remove();
+
+				settings = { path: '/admin/sql/index.php', windowId: '#id_content' };
+
+				var data = jQuery.getData(settings);
+
+				data['hostcms[action]'] = 'rename';
+				data['tabid'] = item.attr('href').split('_')[1];
+				data['name'] = item.text().trim();
+
+				jQuery.ajax({
+					url: settings.path,
+					type: 'POST',
+					data: data,
+					dataType: 'json'
+				});
+			})
+			.on('keydown', function(e) {
+				if (e.keyCode == 13) { // Enter
+					e.preventDefault();
+					this.blur();
+				}
+				if (e.keyCode == 27) { // ESC
+					e.preventDefault();
+					var $editor = jQuery(this),
+						item = $editor.parent().prev();
+					item.css('display', '');
+					$editor.parent().remove();
+				}
+			});
+
+			$ae.append($editor);
+
+			$ae.insertAfter($item);
+
+			$editor.focus().val($item.text());
+		},
+		updateCaldav: function() {
+			if ($("#id_content #calendar").length)
+			{
+				$.ajax({
+					url: '/admin/calendar/index.php',
+					type: 'POST',
+					dataType: 'json',
+					data: { 'updateCaldav': 1 },
+					success: function(){
+						$("#id_content #calendar").fullCalendar("refetchEvents");
+					},
+					error: function(){}
+				});
+			}
+		},
 		dealChangeProfit: function(object, windowId)
 		{
 			var amount = $('#' + windowId + ' input[name=amount]').val(),
@@ -340,7 +421,7 @@ function isEmpty(str) {
 		showAutosave: function($form) {
 			var admin_form_id = $form.data('adminformid');
 
-			if (admin_form_id)
+			if ($form.data('autosave') && admin_form_id)
 			{
 				var dataset = $form.data('datasetid'),
 					entity_id = $('input[name = id]', $form).val();
@@ -500,6 +581,15 @@ function isEmpty(str) {
 					}
 				}
 			});
+		},
+		saveApplySeoFilterCondition: function (e, windowId)
+		{
+			var key = 'which' in e ? e.which : e.keyCode;
+			if (key == 13) {
+				$.applySeoFilterConditions($('#' + windowId + '-conditionsModal'));
+
+				return false;
+			}
 		},
 		applySeoFilterConditions: function(modalWindow) {
 			var property_id = modalWindow.find('select[name = "modal_property_id"]').val(),
@@ -1050,6 +1140,13 @@ function isEmpty(str) {
 			});
 		},
 		showAttachmentModal: function(id, name, oActions) {
+			var evt = window.event;
+
+			if ($(evt.target).hasClass('file-sign'))
+			{
+				return false;
+			}
+
 			var message = '';
 
 			$.each(oActions, function (i, oAction){
@@ -2711,12 +2808,12 @@ function isEmpty(str) {
 				});
 
 				// Keyboard buttons
-				$(window).on('keydown', function (e) {
+				/*$(window).on('keydown', function (e) {
 					if (scrolls[e.which]) {
 						scrolls[e.which]();
 						e.preventDefault();
 					}
-				});
+				});*/
 
 				showButtons($.fn.horizon.defaults.interval);
 			};
@@ -2781,7 +2878,7 @@ function isEmpty(str) {
 			};
 
 			// Keyboard buttons array
-			var scrolls = {
+			/*var scrolls = {
 				'right': scrollRight,
 				'down': scrollRight,
 				'left': scrollLeft,
@@ -2790,7 +2887,7 @@ function isEmpty(str) {
 				38: scrollRight,
 				39: scrollRight,
 				40: scrollLeft
-			};
+			};*/
 
 			$kanban.horizon();
 		},
@@ -3182,7 +3279,7 @@ function isEmpty(str) {
 							}
 						}
 
-						console.log('addItem2ReadMessagesStorage storageObj', storageObj);
+						//console.log('addItem2ReadMessagesStorage storageObj', storageObj);
 				}
 				catch (e) {
 					if (e.name == "NS_ERROR_FILE_CORRUPTED") {
@@ -3194,11 +3291,11 @@ function isEmpty(str) {
 
 		readChatMessages: function(aMessagesId)
 		{
-			console.log('readChatMessage');
+			//console.log('readChatMessage');
 
 			if (aMessagesId && aMessagesId.length)
 			{
-				console.log('readChatMessage aMessagesId.length', aMessagesId.length);
+				//console.log('readChatMessage aMessagesId.length', aMessagesId.length);
 
 				var jMessagesList = $('.chatbar-messages .messages-list'),
 					path = '/admin/index.php?ajaxWidgetLoad&moduleId=' + jMessagesList.data('moduleId') + '&type=83',
@@ -3226,7 +3323,7 @@ function isEmpty(str) {
 
 						if (result['answer'] /* && (readMessageId = +result['answer'][0]) */)
 						{
-							console.log('result', result);
+							//console.log('result', result);
 
 							var iCountReadMessages = result['answer'].length;
 
@@ -3244,7 +3341,7 @@ function isEmpty(str) {
 							for (var i = 0; i < iCountReadMessages; i++)
 							{
 								// Добавляем в хранилище идентификатор прочитанного сообщения
-								//$.addItem2ReadMessagesStorage(readMessageId);
+								//$.1(readMessageId);
 								$.addItem2ReadMessagesStorage(result['answer'][i]);
 							}
 
@@ -3256,7 +3353,7 @@ function isEmpty(str) {
 
 							$.changeTitleNewMessages();
 
-							console.log('readChatMessages after countUnreadMessages', jMessagesList.data('countUnreadMessages'));
+							//console.log('readChatMessages after countUnreadMessages', jMessagesList.data('countUnreadMessages'));
 						}
 					}
 				});
@@ -3421,7 +3518,7 @@ function isEmpty(str) {
 
 				iCountUnreadMessagesTop = jMessagesList.data('countUnreadMessages') - oCountUnreadLoadedMessages['bottom'] - jMessagesList.data('countNewMessages');
 
-				console.log("oCountUnreadLoadedMessages", oCountUnreadLoadedMessages);
+				//console.log("oCountUnreadLoadedMessages", oCountUnreadLoadedMessages);
 				//console.log('-----oCountUnreadLoadedMessages', oCountUnreadLoadedMessages);
 
 			//if ( +jMessagesList.data('countUnreadMessages') )
@@ -3477,14 +3574,11 @@ function isEmpty(str) {
 
 			var jMessagesList = $(".chatbar-messages .messages-list"), messageId = +object.id;
 
-
 			if ( recipientUserInfo.id != userInfo.id && ( !+jMessagesList.data('lastMessageId') || ( bDirectOrder && messageId > jMessagesList.data('lastMessageId') || !bDirectOrder && messageId < jMessagesList.data('firstMessageId') ) ) )
 			{
-
-				console.log('recipientUserInfo', recipientUserInfo);
+				/* console.log('recipientUserInfo', recipientUserInfo);
 				console.log('userInfo', userInfo);
-				console.log('object', object);
-
+				console.log('object', object); */
 
 				var jClone = $(".message.hidden").eq(0).clone(),
 					//jMessagesList = $(".chatbar-messages .messages-list"),
@@ -3584,33 +3678,36 @@ function isEmpty(str) {
 			var jMessagesList = $('.chatbar-messages .messages-list'),
 			position = readCookie("rtl-support") ? 'right' : 'left',
 
+			// wheelStep = setSlimscrollWheelStep(),
+
 			messagesListSlimscrollOptions = {
-					position: position,
-					size: '4px',
-					start: 'bottom',
-					color: themeprimary,
-					wheelStep: 1,
-					//height: $(window).height() - 250,
-					height: $(window).height() - $('body > .navbar').outerHeight() - $('#chatbar .messages-contact').outerHeight() - $('#chatbar .send-message').outerHeight(),
-					alwaysVisible: true,
-					disableFadeOut: true
-				};
+				position: position,
+				size: '4px',
+				start: 'bottom',
+				color: themeprimary,
+				//wheelStep: setSlimscrollWheelStep(),
+				wheelStep: 16,
+				//height: $(window).height() - 250,
+				height: $(window).height() - $('body > .navbar').outerHeight() - $('#chatbar .messages-contact').outerHeight() - $('#chatbar .send-message').outerHeight(),
+				alwaysVisible: true,
+				disableFadeOut: true
+			};
 
 			jMessagesList.slimscroll(messagesListSlimscrollOptions);
 
 			/* function setSlimscrollWheelStep()
 			{
-				var slimScrollBarHeight = Math.max(jMessagesList.outerHeight() / jMessagesList[0].scrollHeight * jMessagesList.outerHeight(), 30),
+				var //slimScrollBarHeight = Math.max(jMessagesList.outerHeight() / jMessagesList[0].scrollHeight * jMessagesList.outerHeight(), 30),
+					jSlimScrollBar = jMessagesList.next(".slimScrollBar"),
 					delta = 40,
-					wheelStep = 100 / slimScrollBarHeight * ((delta - jMessagesList.outerHeight()) * (jMessagesList.outerHeight() - slimScrollBarHeight) / jMessagesList[0].scrollHeight + slimScrollBarHeight);
+					wheelStep = Math.round(Math.abs(((jMessagesList.scrollTop() - delta) * (jMessagesList.outerHeight() - jSlimScrollBar.outerHeight()) / (jMessagesList[0].scrollHeight - jMessagesList.outerHeight()) - parseInt(jSlimScrollBar.css('top'))) * 100 / jSlimScrollBar.outerHeight()));
 
 					console.log('!!!!!!wheelStep', wheelStep);
 
-					//slimScrollBarTop = jMessagesList.outerHeight() - slimScrollBarHeight();
+					return wheelStep;
+			} */
 
-			}
-
-			setSlimscrollWheelStep(); */
+			//setSlimscrollWheelStep();
 		},
 
 		chatMessagesListScrollDown: function() {
@@ -3766,6 +3863,8 @@ function isEmpty(str) {
 
 						// Меняем высоту полосы прокрутки
 						$.setSlimScrollBarHeight(jMessagesList);
+
+						//$.setSlimScrollBarPositionChat();
 
 						jMessagesList.data(
 							{
@@ -4091,7 +4190,7 @@ function isEmpty(str) {
 			if (storageChatReadMessagesObj && storageChatReadMessagesObj['messages_id'].length
 			&& ((indexOfLastReadMessageId = storageChatReadMessagesObj['messages_id'].indexOf(jMessagesList.data('lastReadMessageId'))) != storageChatReadMessagesObj['messages_id'].length - 1 ))
 			{
-				console.log('--syncReadMessages');
+				// console.log('--syncReadMessages');
 
 				storageLength = storageChatReadMessagesObj['messages_id'].length;
 
@@ -4142,7 +4241,7 @@ function isEmpty(str) {
 					changeTitles = true;
 				}
 
-				console.log("syncReadMessages jMessagesList.data('countUnreadMessages'"), jMessagesList.data('countUnreadMessages');
+				// console.log("syncReadMessages jMessagesList.data('countUnreadMessages'"), jMessagesList.data('countUnreadMessages');
 
 				if (changeTitles)
 				{
@@ -4321,18 +4420,6 @@ function isEmpty(str) {
 			// Обновление статусов
 			$.refreshUserStatuses();
 
-			/* function setSlimscrollWheelStep()
-			{
-				var slimScrollBarHeight = Math.max(jMessagesList.outerHeight() / jMessagesList[0].scrollHeight * jMessagesList.outerHeight(), 30),
-					delta = 40,
-					wheelStep = 100 / slimScrollBarHeight * ((delta - jMessagesList.outerHeight()) * (jMessagesList.outerHeight() - slimScrollBarHeight) / jMessagesList[0].scrollHeight + slimScrollBarHeight);
-
-					console.log('!!!!!!wheelStep', wheelStep);
-
-					//slimScrollBarTop = jMessagesList.outerHeight() - slimScrollBarHeight();
-
-			} */
-
 			var position = readCookie("rtl-support") ? 'right' : 'left',
 				jMessagesList = $('.chatbar-messages .messages-list'),
 				messagesListSlimscrollOptions = {
@@ -4348,9 +4435,8 @@ function isEmpty(str) {
 					disableFadeOut: true
 				};
 
+			//console.log('before jMessagesList.slimscroll()');
 			jMessagesList.slimscroll(messagesListSlimscrollOptions);
-
-			//setSlimscrollWheelStep();
 
 			$('.chatbar-contacts .contacts-list').slimscroll({
 				position: position,
@@ -4497,7 +4583,7 @@ function isEmpty(str) {
 
 				var jMessagesList = $(event.target).parents('.messages-list');
 
-				jMessagesList.length
+				//jMessagesList.length
 				// console.log('document mousewheel event', event);
 			}
 
@@ -5375,7 +5461,12 @@ function isEmpty(str) {
 			var jBox = jBox || $('.navbar-account #notificationsListBox .scroll-notifications > ul'),
 				/*showAlertNotification = showAlertNotification === undefined ? true : showAlertNotification,*/
 				notificationExtra = '',
-				bUnread = oNotification['read'] == 0;
+				bUnread = oNotification['read'] == 0,
+				storageNotifications = $.localStorageGetItem('notifications'),
+				lastAddedNotificationId = storageNotifications['lastAddedNotificationId'] ? storageNotifications['lastAddedNotificationId'] : 0;
+				//bCurrentNotificationIsLast = oNotification['id'] > lastAddedNotificationId;
+
+				//console.log("oNotification['id'] =", oNotification['id'], " lastAddedNotificationId=",  lastAddedNotificationId, bCurrentNotificationIsLast);
 
 			if (oNotification['extra'].length)
 			{
@@ -5383,7 +5474,7 @@ function isEmpty(str) {
 
 				oNotification['extra'].forEach(function(item) {
 					jNotificationExtra.append('<i class="fa ' + $.escapeHtml(item) + ' themeprimary"></i>');
-				})
+				});
 
 				oNotification['extra']['description'].length && jNotificationExtra.append('<span class="description">' + $.escapeHtml(oNotification['extra']['description']) + '</span>')
 
@@ -5410,7 +5501,15 @@ function isEmpty(str) {
 				.html((oNotification['description'].length ? ($.escapeHtml(oNotification['description']) + '<br/>') : '') /* oNotification['datetime']*/ );
 
 			// Показываем всплывающее непрочитанное уведомление
-			bUnread && Notify($.escapeHtml(oNotification['title']), $.escapeHtml(oNotification['description']), 'bottom-left', '7000', oNotification['notification']['background-color'], oNotification['notification']['ico'], true);
+			if (bUnread && oNotification['id'] > lastAddedNotificationId)
+			{
+				Notify($.escapeHtml(oNotification['title']), $.escapeHtml(oNotification['description']), 'bottom-left', '7000', oNotification['notification']['background-color'], oNotification['notification']['ico'], true);
+
+				storageNotifications['lastAddedNotificationId'] = oNotification['id'];
+				$.localStorageSetItem('notifications', storageNotifications);
+				//$.localStorageSetItem('notifications', storageNotifications);
+			}
+
 
 			// Открыт выпадающий список уведомлений
 			if ($('.navbar li#notifications').hasClass('open'))
@@ -5437,13 +5536,13 @@ function isEmpty(str) {
 		},
 		refreshNotificationsCallback: function(resultData)
 		{
-			var jNotificationsListBox = $('.navbar-account #notificationsListBox');
+			var jNotificationsListBox = $('.navbar-account #notificationsListBox'), iLastNotificationId = 0;
 
 			// Есть уведомления для сотрудника
 			if (resultData['userId'] && resultData['userId'] == jNotificationsListBox.data('currentUserId'))
 			{
 				// Массив идентификаторов непрочитанных уведомлений в списке уведомлений
-				/*var unreadNotifications = [];
+				var unreadNotifications = [];
 
 				$('.navbar-account #notificationsListBox .scroll-notifications > ul li.unread').each(function (){
 					unreadNotifications.push($(this).attr('id'));
@@ -5464,7 +5563,9 @@ function isEmpty(str) {
 				// Отмечаем ранее непрочитанные уведомления как прочитанные в соответствии с данными из БД
 				$.each(unreadNotifications, function (index, value){
 					$('.navbar-account #notificationsListBox .scroll-notifications > ul li#' + value + '.unread').removeClass('unread');
-				});*/
+				});
+
+				///////////////////////
 
 				 // Есть новые уведомления
 				if (resultData['newNotifications'].length)
@@ -5475,10 +5576,17 @@ function isEmpty(str) {
 					$.each(resultData['newNotifications'], function(index, notification) {
 						// Добавляем уведомление в список
 						$.addNotification(notification, $('.navbar-account #notificationsListBox .scroll-notifications > ul'));
+
+						if ( iLastNotificationId < notification['id'] )
+						{
+							iLastNotificationId = notification['id'];
+						}
 					});
 
 					// Обновление идентификатора последнего загруженного уведомления
-					jNotificationsListBox.data('lastNotificationId', resultData['newNotifications'][resultData['newNotifications'].length-1]['id']);
+					//jNotificationsListBox.data('lastNotificationId', resultData['newNotifications'][resultData['newNotifications'].length-1]['id']);
+					//jNotificationsListBox.data('lastNotificationId', resultData['newNotifications'][0].length-1]['id']);
+					jNotificationsListBox.data('lastNotificationId', iLastNotificationId);
 
 					// Создаем slimscroll для нового списка, если список уведомлений открыт и при этом пуст
 					if ($('.navbar li#notifications').hasClass('open')
@@ -5578,9 +5686,9 @@ function isEmpty(str) {
 				{
 					bNeedsRequest = true;
 				}
-				else if(lastNotificationId < storageNotifications['lastNotificationId'])
+				else if(lastNotificationId < storageNotifications['lastNotificationId'] || storageNotifications['unreadNotifications'] && storageNotifications['unreadNotifications'].length)
 				{
-					storageNotifications['localStorage'] = true;
+					//storageNotifications['localStorage'] = true;
 					$.refreshNotificationsCallback(storageNotifications);
 				}
 
@@ -5631,6 +5739,8 @@ function isEmpty(str) {
 						if (storageNotifications !== null)
 						{
 							resultData['expired_in'] = ts;
+
+							resultData['lastAddedNotificationId'] = storageNotifications['lastAddedNotificationId'] ? storageNotifications['lastAddedNotificationId'] : 0;
 						}
 
 						$.localStorageSetItem('notifications', resultData);
@@ -6238,6 +6348,14 @@ function isEmpty(str) {
 			jNewObject
 				.find("div[id *='_watermark_small_property_']")
 				.html(jNewObject.find("div[id *='_watermark_small_property_']").html());
+
+			jNewObject
+				.find("input[id ^= 'typograph_']")
+				.attr('name', 'typograph_' + index + '[]');
+
+			jNewObject
+				.find("input[id ^= 'trailing_punctuation_']")
+				.attr('name', 'trailing_punctuation_' + index + '[]');
 
 			// Удаляем элементы просмотра и удаления загруженнного изображения
 			jNewObject
@@ -7469,13 +7587,17 @@ function isEmpty(str) {
 			  alert('Method ' +  method + ' does not exist on jQuery.loadingScreen');
 			}
 		},
+		escapeSelector: function(selector) {
+			selector = selector.replace(/\\/g,'\\\\');
+			return selector.replace(/([ #;&,.+*~\':"@!^$[\]()<=>|\/\{\}\?])/g,'\\$1');
+		},
 		adminCheckObject: function(settings) {
 			settings = jQuery.extend({
 				objectId: '',
 				windowId: 'id_content'
 			}, settings);
 
-			var cbItem = jQuery("#" + settings.windowId + " #" + settings.objectId);
+			var cbItem = jQuery("#" + settings.windowId + " #" + $.escapeSelector(settings.objectId));
 
 			if (cbItem.length > 0)
 			{
@@ -7622,7 +7744,7 @@ function isEmpty(str) {
 				var element_id = jChekedItem.attr('id');
 
 				// Ищем значения записей, ID поля должно начинаться с ID checkbox-а
-				jItemsValue = jQuery("#"+settings.windowId + " :input[id^='apply_"+element_id+"_fv_']"),
+				jItemsValue = jQuery("#" + $.escapeSelector(settings.windowId) + " :input[id^='apply_" + $.escapeSelector(element_id) + "_fv_']"),
 				iItemsValueCount = jItemsValue.length;
 
 				for (var jValueItem, k = 0; k < iItemsValueCount; k++)
@@ -9728,7 +9850,6 @@ $(function(){
 		changeDublicateTables();
 		prepareKanbanBoards();
 	});
-
 });
 
 function prepareKanbanBoard(oKanbanBoard)
@@ -10391,7 +10512,7 @@ function calendarEventClick(event, jsEvent, view)
 		path: event.path,
 		action: 'edit',
 		operation: 'modal',
-		additionalParams: 'hostcms[checked][0][' + eventId + ']=1',
+		additionalParams: 'hostcms[checked][0][' + eventId + ']=1&parentWindowId=id_content',
 		windowId: 'id_content'
 	});
 }

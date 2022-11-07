@@ -372,8 +372,8 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 					$oShop_Item_Import_Cml_Controller->sPicturesPath = Core_Array::getPost('import_price_load_files_path');
 					$oShop_Item_Import_Cml_Controller->importAction = Core_Array::getPost('import_price_action_items');
 
-					$fRoznPrice_name = defined('SHOP_DEFAULT_CML_CURRENCY_NAME')
-						? SHOP_DEFAULT_CML_CURRENCY_NAME
+					$fRoznPrice_name = defined('DEFAULT_CML_PRICE_NAME')
+						? DEFAULT_CML_PRICE_NAME
 						: Core::_('Shop_Item.retail_price');
 
 					$oShop_Item_Import_Cml_Controller->sShopDefaultPriceName = $fRoznPrice_name;

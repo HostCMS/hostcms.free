@@ -32,6 +32,10 @@ class Company_Department_Model extends Core_Entity
 		'dms_document_type_department_access' => array(),
 	);
 
+	/**
+	 * Belongs to relations
+	 * @var array
+	 */
 	protected $_belongsTo = array(
 		'company' => array(),
 		'user' => array(),
@@ -53,16 +57,29 @@ class Company_Department_Model extends Core_Entity
 		}
 	}
 
+	/**
+	 * Get heads
+	 * @return array
+	 */
 	public function getHeads()
 	{
 		return $this->_getHead(1);
 	}
 
+	/**
+	 * Get employees without heads
+	 * @return array
+	 */
 	public function getEmployeesWithoutHeads()
 	{
 		return $this->_getHead(0);
 	}
 
+	/**
+	 * Get head
+	 * @param boolean $isHead
+	 * @return array
+	 */
 	protected function _getHead($isHead)
 	{
 		$oUser = Core_Entity::factory('User');
@@ -75,7 +92,13 @@ class Company_Department_Model extends Core_Entity
 		return $oUser->findAll();
 	}
 
-	public function showDealTemplateStepAccess($deal_template_step_id, $oDeal_Template_Step_Access_Department = null)
+	/**
+	 * Show deal templates step access
+	 * @param int $deal_template_step_id
+	 * @param Deal_Template_Step_Access_Department_Model $oDeal_Template_Step_Access_Department
+	 * @return string
+	 */
+	public function showDealTemplateStepAccess($deal_template_step_id, $oDeal_Template_Step_Access_Department = NULL)
 	{
 		if (is_null($oDeal_Template_Step_Access_Department))
 		{
@@ -224,6 +247,11 @@ class Company_Department_Model extends Core_Entity
 			: NULL;
 	}
 
+	/**
+	 * Get children
+	 * @param boolean $bCache cache
+	 * @return array
+	 */
 	public function getChildren($bCache = TRUE)
 	{
 		$aReturn = $aCompany_Departments = $this->Company_Departments->findAll($bCache);

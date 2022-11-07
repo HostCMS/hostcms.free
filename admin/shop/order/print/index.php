@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -22,7 +22,7 @@ $oAdmin_Form_Controller
 //ob_start();
 $oShopOrder = Core_Entity::factory('Shop_Order', Core_Array::getGet('shop_order_id', 0));
 
-if (CURRENT_SITE == $oShopOrder->Shop->site_id)
+if (CURRENT_SITE == $oShopOrder->Shop->site_id && $oShopOrder->shop_payment_system_id)
 {
 	$oShop_Payment_System_Handler = Shop_Payment_System_Handler::factory($oShopOrder->Shop_Payment_System);
 

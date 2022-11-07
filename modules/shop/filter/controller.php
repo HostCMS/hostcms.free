@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Filter_Controller
 {
@@ -92,9 +92,9 @@ class Shop_Filter_Controller
 		// ALTER TABLE `shop_filter1` ADD `primary` TINYINT(1) NOT NULL AFTER `shop_item_id`;
 		$aColumns = array(
 			"`id` INT(11) NOT NULL AUTO_INCREMENT",
-			"`shop_item_id` INT(11) NOT NULL DEFAULT '0'",
+			"`shop_item_id` INT(11) NOT NULL DEFAULT '0'", // идентификатор товара
 			"`primary` TINYINT(1) NOT NULL DEFAULT '0'",
-			"`modification_id` INT(11) NOT NULL DEFAULT '0'",
+			"`modification_id` INT(11) NOT NULL DEFAULT '0'", // идентификатор родительского товара, которому принадлежит модификация
 			"`shop_group_id` INT(11) NOT NULL DEFAULT '0'",
 			"`shop_producer_id` INT(11) NOT NULL DEFAULT '0'",
 			"`shop_currency_id` INT(11) NOT NULL DEFAULT '0'",
@@ -108,6 +108,7 @@ class Shop_Filter_Controller
 		$aIndexes = array(
 			'PRIMARY KEY (`id`)',
 			'KEY `shop_item_id` (`shop_item_id`)',
+			'KEY `modification_id` (`modification_id`)',
 			'KEY `shop_group_id` (`shop_group_id`,`primary`,`modification_id`)',
 			'KEY `shop_currency_id` (`shop_currency_id`)',
 			'KEY `price` (`price_absolute`,`primary`,`shop_group_id`)',
@@ -136,8 +137,8 @@ class Shop_Filter_Controller
 
 		$sColumns = implode(', ', $aColumns);
 
-		// A table can contain a maximum of 64 secondary indexes, 5 of them already added
-		$sIndexes = implode(', ', array_slice($aIndexes, 0, 59));
+		// A table can contain a maximum of 64 secondary indexes, 6 of them already added
+		$sIndexes = implode(', ', array_slice($aIndexes, 0, 58));
 
 		$oCore_DataBase = Core_DataBase::instance();
 		$aConfig = $oCore_DataBase->getConfig();

@@ -26,6 +26,12 @@ abstract class Admin_Form_Dataset
 	protected $_offset = 0;
 
 	/**
+	 * Items count
+	 * @var int
+	 */
+	protected $_count = NULL;
+
+	/**
 	 * Load status
 	 * @var boolean
 	 */
@@ -143,6 +149,17 @@ abstract class Admin_Form_Dataset
 	public function loaded($loaded)
 	{
 		$this->_loaded = $loaded;
+		return $this;
+	}
+
+	/**
+	 * Set items count
+	 * @param int $count
+	 * @return self
+	 */
+	public function setCount($count)
+	{
+		$this->_count = $count;
 		return $this;
 	}
 

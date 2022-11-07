@@ -23,7 +23,7 @@ class Xsl_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2022-08-05';
+	public $date = '2022-11-01';
 
 	/**
 	 * Module name
@@ -93,13 +93,13 @@ class Xsl_Module extends Core_Module
 
 		$aXsls = $oXsls->findAll(FALSE);
 
-		$result = array();
+		$aPages = array();
 		foreach ($aXsls as $oXsl)
 		{
-			$result[] = $oXsl->indexing();
+			$aPages[] = $oXsl->indexing();
 		}
 
-		return $result;
+		return array('pages' => $aPages, 'indexed' => count($aPages), 'finished' => count($aPages) < $limit);
 	}
 
 	/**

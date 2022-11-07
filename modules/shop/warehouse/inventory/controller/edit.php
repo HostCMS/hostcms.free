@@ -216,9 +216,9 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 						<td>' . htmlspecialchars($oShop_Item->name) . ($sShopUrl
 							? '<a class="margin-left-5" target="_blank" href="' . htmlspecialchars($sShopUrl . $oShop_Item->getPath()) . '"><i class="fa fa-external-link"></i></a>'
 							: '') . '</td>
-						<td>' . htmlspecialchars($oShop_Item->Shop_Measure->name) . '</td>
+						<td>' . htmlspecialchars((string) $oShop_Item->Shop_Measure->name) . '</td>
 						<td><span class="price">' . $aPrices['price_tax'] . '</span></td>
-						<td>' . htmlspecialchars($oShop_Item->Shop_Currency->sign) . '</td>
+						<td>' . htmlspecialchars((string) $oShop_Item->Shop_Currency->sign) . '</td>
 						<td class="calc-warehouse-count">' . $rest . '</td>
 						<td width="80"><input class="set-item-count form-control" name="shop_item_quantity_' . $oShop_Warehouse_Inventory_Item->id . '" value="' . $oShop_Warehouse_Inventory_Item->count . '" /></td>
 						<td class="diff-warehouse-count"></td>

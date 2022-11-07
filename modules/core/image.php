@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Image
 {
@@ -113,6 +113,13 @@ abstract class Core_Image
 		return Core_Image::instance()->resizeImage($sourceFile, $maxWidth, $maxHeight, $targetFile, $quality, $preserveAspectRatio);
 	}
 
+	/**
+	 * Create avatar
+	 * @param string $initials
+	 * @param string $bgColor
+	 * @param integer $width
+	 * @param integer $height
+	 */
 	static public function avatar($initials, $bgColor = '#f44336', $width = 130, $height = 130)
 	{
 		// Create image
@@ -134,7 +141,8 @@ abstract class Core_Image
 
 		// Text
 		$textColor = imagecolorallocate($image, 255, 255, 255);
-		imagettftext($image, $fontSize, 0, ($width - $bbox[4]) / 2, ($height - $bbox[5]) / 2, $textColor, $font, $initials);
+
+		imagettftext($image, $fontSize, 0, intval(($width - $bbox[4]) / 2), intval(($height - $bbox[5]) / 2), $textColor, $font, $initials);
 
 		// Output the image.
 		header('Pragma: public');

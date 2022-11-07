@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Wysiwyg
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Wysiwyg_Filemanager_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -121,6 +121,11 @@ class Wysiwyg_Filemanager_Controller_Edit extends Admin_Form_Action_Controller_T
 		if (!is_null($content))
 		{
 			Core_File::write($filePath, $content);
+			
+			if (function_exists('opcache_reset'))
+			{
+				opcache_reset();
+			}
 		}
 
 		//parent::_applyObjectProperty();

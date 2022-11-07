@@ -23,7 +23,7 @@ class Event_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2022-08-05';
+	public $date = '2022-11-01';
 
 	/**
 	 * Module name
@@ -171,17 +171,13 @@ class Event_Module extends Core_Module
 
 	public function getCalendarContextMenuActions()
 	{
-		// Идентификатор формы "Дела"
-		// $iAdmin_Form_Id = 220;
-		// $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
-
-		return array('<a href="javascript:void(0);" onclick="$.modalLoad({path: \'/admin/event/index.php\', action: \'edit\', operation: \'modal\', additionalParams: \'hostcms[checked][0][0]=1&date=\' + $(this).parents(\'ul\').data(\'timestamp\'), windowId: \'id_content\'}); return false">' . Core::_('Event.add_event') . '</a>');
+		return array('<a href="javascript:void(0);" onclick="$.modalLoad({path: \'/admin/event/index.php\', action: \'edit\', operation: \'modal\', additionalParams: \'hostcms[checked][0][0]=1&date=\' + $(this).parents(\'ul\').data(\'timestamp\') + \'&parentWindowId=id_content\', windowId: \'id_content\'}); return false">' . Core::_('Event.add_event') . '</a>');
 	}
 
 	/**
 	 * Get List of Events
-	 * @param int $start timestamp of period start
-	 * @param int $end timestamp of period end
+	 * @param int $start datetime of period start
+	 * @param int $end datetime of period end
 	 * @return array
 	 */
 	public function getCalendarEvents($start, $end)
@@ -189,9 +185,6 @@ class Event_Module extends Core_Module
 		$oUser = Core_Auth::getCurrentUser();
 
 		$oEvents = $oUser->Events;
-
-		$start = date('Y-m-d H:i:s', $start);
-		$end = date('Y-m-d H:i:s', $end);
 
 		$oEvents
 			->queryBuilder()
@@ -215,10 +208,12 @@ class Event_Module extends Core_Module
 			$oEvent_User = $oEvent->Event_Users->getByUser_id($oUser->id);
 
 			$oTmpEvent->id = $oEvent->id . '_' . $oModule->id;
+			$oTmpEvent->guid = $oEvent->guid;
+			$oTmpEvent->last_modified = $oEvent->last_modified;
 			$oTmpEvent->title = $oEvent->name;
 			$oTmpEvent->path = '/admin/event/index.php';
 
-			$oTmpEvent->description = Core_Str::cut($oEvent->description, 100);
+			$oTmpEvent->description = $oEvent->description;
 			$oTmpEvent->place = $oEvent->place;
 
 			if (!$oEvent_User->creator)
@@ -237,6 +232,56 @@ class Event_Module extends Core_Module
 				$oTmpEvent->textColor = '#2dc3e8';
 				$oTmpEvent->borderColor = '#2dc3e8';
 			}
+
+			$oTmpEvent->start = date('c', Core_Date::sql2timestamp($oEvent->start));
+
+			$oTmpEvent->allDay = $oEvent->all_day ? TRUE : FALSE;
+
+			if (!is_null($oEvent->deadline) && $oEvent->deadline != '0000-00-00 00:00:00')
+			{
+				$oTmpEvent->end = $oEvent->all_day
+					// Добавляем минуту потому как при показе в FullCalerndar события, продолжительностью весь день,
+					// в качестве конечной даты используется начало суток, следующих за завершающим днем события
+					? date('Y-m-dT00:00:00', Core_Date::sql2timestamp($oEvent->deadline) + 60)
+					: date('c', Core_Date::sql2timestamp($oEvent->deadline));
+			}
+
+			$aReturnEvents[] = $oTmpEvent;
+		}
+
+		return $aReturnEvents;
+	}
+
+	/**
+	 * Get List of Events
+	 * @param int $last_modified datetime of period start
+	 * @return array
+	 */
+	public function getUploadCalendarEvents($last_modified)
+	{
+		$oUser = Core_Auth::getCurrentUser();
+
+		$oEvents = $oUser->Events;
+
+		$oEvents
+			->queryBuilder()
+			->where('last_modified', '>', $last_modified)
+			->where('completed', '=', 0);
+
+		$aEvents = $oEvents->findAll();
+
+		$aReturnEvents = array();
+
+		foreach ($aEvents as $oEvent)
+		{
+			$oTmpEvent = new StdClass();
+
+			$oTmpEvent->guid = $oEvent->guid;
+			$oTmpEvent->last_modified = $oEvent->last_modified;
+			$oTmpEvent->title = $oEvent->name;
+
+			$oTmpEvent->description = $oEvent->description;
+			$oTmpEvent->place = $oEvent->place;
 
 			// c - дата в формате стандарта ISO 8601 (добавлено в PHP 5), например 2004-02-12T15:19:21+00:00
 			$oTmpEvent->start = date('c', Core_Date::sql2timestamp($oEvent->start));
@@ -307,6 +352,8 @@ class Event_Module extends Core_Module
 				$oEvent->deadline = Core_Date::timestamp2sql($startTimestamp + $eventDurationSeconds);
 			}
 		}
+
+		$oEvent->last_modified = Core_Date::timestamp2sql(time());
 
 		$oEvent->all_day = intval($allDay);
 		$oEvent->save();

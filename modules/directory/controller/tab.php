@@ -13,12 +13,27 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  */
 abstract class Directory_Controller_Tab extends Core_Servant_Properties
 {
+	/**
+	 * Allowed object properties
+	 * @var array
+	 */
 	protected $_allowedProperties = array(
 		'title',
 		'relation',
 		'showPublicityControlElement',
 		'prefix'
 	);
+
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct()
+	{
+		parent::__construct();
+		
+		$this->prefix = '';
+	}
 
 	/**
 	 * The singleton instances.
@@ -47,8 +62,16 @@ abstract class Directory_Controller_Tab extends Core_Servant_Properties
 		return self::$instance[$name];
 	}
 
+	/**
+	 * Directory relations
+	 * @var array|NULL
+	 */
 	protected $_aDirectory_Relations = NULL;
 
+	/**
+	 * Execute
+	 * @return Admin_Form_Entity
+	 */
 	public function execute()
 	{
 		$oPersonalDataInnerWrapper = Admin_Form_Entity::factory('Div')
@@ -65,6 +88,10 @@ abstract class Directory_Controller_Tab extends Core_Servant_Properties
 		return $oPersonalDataInnerWrapper;
 	}
 
+	/**
+	 * Publicity control element
+	 * @return Admin_Form_Entity
+	 */
 	protected function _publicityControlElement()
 	{
 		return Admin_Form_Entity::factory('Checkbox')
@@ -72,16 +99,29 @@ abstract class Directory_Controller_Tab extends Core_Servant_Properties
 			->caption('<acronym title="" data-original-title="' . Core::_('Core.data_show_title') . '">' . Core::_('Core.show_title') . '</acronym>');
 	}
 
+	/**
+	 * Buttons
+	 * @param string $className
+	 * @return Admin_Form_Entity
+	 */
 	protected function _buttons($className = '')
 	{
+		$margin_top_23 = $this->showPublicityControlElement
+			? 'margin-top-23-lg'
+			: 'margin-top-23';
+
 		return Admin_Form_Entity::factory('Div') // div с кноками + и -
-			->class('add-remove-property margin-top-23-lg pull-left' . (count($this->_aDirectory_Relations) ? ' btn-group' : '') . ($className ? ' ' . $className : ''))
+			->class('add-remove-property ' . $margin_top_23 . ' pull-left' . (count($this->_aDirectory_Relations) ? ' btn-group' : '') . ($className ? ' ' . $className : ''))
 			->add(
 				Admin_Form_Entity::factory('Code')
 					->html('<div class="btn btn-palegreen inverted" onclick="$.cloneFormRow(this); event.stopPropagation();"><i class="fa fa-plus-circle close"></i></div><div class="btn btn-darkorange btn-delete inverted' . (count($this->_aDirectory_Relations) ? '' : ' hide') . '" onclick="$.deleteFormRow(this); event.stopPropagation();"><i class="fa fa-minus-circle close"></i></div>')
 			);
 	}
 
+	/**
+	 * Get directory types
+	 * @return array
+	 */
 	protected function _getDirectoryTypes()
 	{
 		$aDirectory_Types = Core_Entity::factory($this->_directoryTypeName)->findAll();

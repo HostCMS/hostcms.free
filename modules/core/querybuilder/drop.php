@@ -16,9 +16,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Querybuilder
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_QueryBuilder_Drop extends Core_QueryBuilder_Statement
 {
@@ -34,7 +34,7 @@ class Core_QueryBuilder_Drop extends Core_QueryBuilder_Statement
 	 */
 	protected $_queryType = 6;
 
-	/** 
+	/**
 	 * Constructor.
 	 * @param array $args list of arguments
 	 * <code>
@@ -71,7 +71,7 @@ class Core_QueryBuilder_Drop extends Core_QueryBuilder_Statement
 	 * @var boolean
 	 */
 	protected $_temporary = FALSE;
-	
+
 	/**
 	 * Set TEMPORARY
 	 * @param boolean $temporary TEMPORARY mode
@@ -84,13 +84,13 @@ class Core_QueryBuilder_Drop extends Core_QueryBuilder_Statement
 		$this->_temporary = $temporary;
 		return $this;
 	}
-	
+
 	/**
 	 * Use IF EXISTS
 	 * @var boolean
 	 */
 	protected $_ifExists = FALSE;
-	
+
 	/**
 	 * Set IF EXISTS
 	 * @param boolean $ifExists IF EXISTS mode
@@ -103,7 +103,13 @@ class Core_QueryBuilder_Drop extends Core_QueryBuilder_Statement
 		$this->_ifExists = $ifExists;
 		return $this;
 	}
-	
+
+	/**
+	 * Use RESTRICT
+	 * @var boolean
+	 */
+	protected $_restrict = FALSE;
+
 	/**
 	 * Set RESTRICT
 	 * @param boolean $restrict RESTRICT mode
@@ -117,7 +123,13 @@ class Core_QueryBuilder_Drop extends Core_QueryBuilder_Statement
 		$this->_restrict = $restrict;
 		return $this;
 	}
-	
+
+	/**
+	 * Use CASCADE
+	 * @var boolean
+	 */
+	protected $_cascade = FALSE;
+
 	/**
 	 * Set CASCADE
 	 * @param boolean $cascade CASCADE mode
@@ -131,10 +143,10 @@ class Core_QueryBuilder_Drop extends Core_QueryBuilder_Statement
 		$this->_cascade = $cascade;
 		return $this;
 	}
-	
+
 	/**
 	 * Build table drop list
-	 * 
+	 *
 	 * @param array $tables tables list
 	 * @return string The SQL query
 	 */
@@ -158,21 +170,21 @@ class Core_QueryBuilder_Drop extends Core_QueryBuilder_Statement
 	public function build()
 	{
 		$query = array('DROP');
-		
+
 		if ($this->_temporary)
 		{
 			$query[] = 'TEMPORARY';
 		}
-	
+
 		$query[] = 'TABLE';
-	
+
 		if ($this->_ifExists)
 		{
 			$query[] = 'IF EXISTS';
 		}
-	
+
 		$query[] = $this->_buildDrop($this->_table);
-	
+
 		if ($this->_restrict)
 		{
 			$query[] = 'RESTRICT';
@@ -181,7 +193,7 @@ class Core_QueryBuilder_Drop extends Core_QueryBuilder_Statement
 		{
 			$query[] = 'CASCADE';
 		}
-	
+
 		return implode(" ", $query);
 	}
 }

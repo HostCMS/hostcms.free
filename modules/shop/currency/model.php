@@ -143,7 +143,18 @@ class Shop_Currency_Model extends Core_Entity
 	 */
 	public function formatNumberBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		return $this->formatWithCurrency(345);
+		return '<span class="darkgray">' . htmlspecialchars($this->formatWithCurrency(345)) . '</span>';
+	}
+	
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return $this->default
+			? '<span class="semi-bold">' . htmlspecialchars($this->name) . '</span>'
+			: htmlspecialchars($this->name);
 	}
 
 	/**
@@ -153,7 +164,7 @@ class Shop_Currency_Model extends Core_Entity
 	 */
 	public function format($decimal)
 	{
-		$return = number_format($decimal, 2, $this->decimal_separator, $this->thousands_separator);
+		$return = number_format(floatval($decimal), 2, $this->decimal_separator, $this->thousands_separator);
 
 		$this->hide_zeros && $this->decimal_separator != ''
 			&& $return = str_replace($this->decimal_separator . '00', '', $return);

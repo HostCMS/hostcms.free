@@ -232,7 +232,9 @@ class Shop_Item_Controller extends Core_Servant_Properties
 				}
 
 				// Определяем суммарную величину скидки в %
-				$this->_aPrice['discount'] = $this->_aPrice['price'] * $discountPercent / 100;
+				$this->_aPrice['discount'] = $discountPercent > 0 && $discountPercent <= 100
+					? $this->_aPrice['price'] * $discountPercent / 100
+					: 0;
 
 				// Если оставшаяся цена > скидки в фиксированном размере, то применяем скидку в фиксированном размере
 				($this->_aPrice['price'] - $this->_aPrice['discount']) > $discountAmount
@@ -359,14 +361,14 @@ class Shop_Item_Controller extends Core_Servant_Properties
 			$aSiteuser_Groups = $this->siteuser->Siteuser_Groups->findAll();
 			foreach ($aSiteuser_Groups as $oSiteuser_Group)
 			{
-				// Может быть создано несколько цен для одной группы пользователей
+				// Может быть создано несколько цен для одной группы клиентов
 				$aShop_Prices = Core_Entity::factory('Shop_Price')->getAllBySiteuserGroupAndShop(
 					$oSiteuser_Group->id, $oShop->id
 				);
 
 				foreach ($aShop_Prices as $oShop_Price)
 				{
-					// Если есть цена для группы
+					// Если есть цена для группы клиентов
 					if ($oShop_Price)
 					{
 						// Смотрим, определена ли такая цена для данного товара

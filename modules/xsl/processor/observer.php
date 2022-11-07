@@ -44,15 +44,10 @@ class Xsl_Processor_Observer
 		{
 			$oXslPanel = Core_Html_Entity::factory('Div')
 				->class('hostcmsPanel')
-				->style('display: none');
+				->style('margin-top: 40px; display: none');
 
 			$oXslSubPanel = Core_Html_Entity::factory('Div')
-				->class('hostcmsSubPanel hostcmsXsl')
-				->add(
-					Core_Html_Entity::factory('Img')
-						->width(3)->height(16)
-						->src('/hostcmsfiles/images/drag_bg.gif')
-				);
+				->class('hostcmsSubPanel hostcmsXsl');
 
 			$oXsl = $object->getXsl();
 
@@ -66,11 +61,9 @@ class Xsl_Processor_Observer
 					->href("{$sPath}?{$sAdditional}")
 					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "'}); return false")
 					->add(
-						Core_Html_Entity::factory('Img')
-							->width(16)->height(16)
-							->src('/hostcmsfiles/images/xsl_edit.gif')
+						Core_Html_Entity::factory('I')
 							->id('hostcmsEditXsl')
-							->alt($sTitle)
+							->class('fa-regular fa-file-code fa-fw')
 							->title($sTitle)
 					)
 			);
@@ -91,12 +84,10 @@ class Xsl_Processor_Observer
 				Core_Html_Entity::factory('A')
 					->onclick("hQuery.showWindow('xmlWindow{$iCount}', '" . Core_Str::escapeJavascriptVariable($form_content) . "', {width: 600, height: 450, title: '{$sTitle}'})")
 					->add(
-						Core_Html_Entity::factory('Img')
-							->src('/hostcmsfiles/images/xml.gif')
+						Core_Html_Entity::factory('I')
 							->id('hostcmsShowXml')
-							->alt($sTitle)
 							->title($sTitle)
-							->class('pointer')
+							->class('fa-solid fa-code fa-fw pointer')
 					)
 			);
 
@@ -104,9 +95,13 @@ class Xsl_Processor_Observer
 				Core_Html_Entity::factory('Div')
 					->class('hostcmsButton')
 					->add(
-						Core_Html_Entity::factory('Img')
-							->src('/hostcmsfiles/images/time.png')
+						Core_Html_Entity::factory('Div')
+							->value("{$oXsl->id}")
+							->title('ID')
 					)
+			)->add(
+				Core_Html_Entity::factory('Div')
+					->class('hostcmsButton')
 					->add(
 						Core_Html_Entity::factory('Div')
 							->value(
@@ -118,21 +113,10 @@ class Xsl_Processor_Observer
 				Core_Html_Entity::factory('Div')
 					->class('hostcmsButton')
 					->add(
-						Core_Html_Entity::factory('Img')
-							->src('/hostcmsfiles/images/size.png')
-					)
-					->add(
 						Core_Html_Entity::factory('Div')
 							->value(
 								Core::_('Xsl.panel_xsl_size', number_format(mb_strlen($object->getXml()), 0, ',', ' '))
 							)
-					)
-			)->add(
-				Core_Html_Entity::factory('Div')
-					->class('hostcmsButton')
-					->add(
-						Core_Html_Entity::factory('Div')
-							->value("ID {$oXsl->id}")
 					)
 			);
 

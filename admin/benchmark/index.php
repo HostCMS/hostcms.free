@@ -47,7 +47,6 @@ $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Benchmark.menu_rate'))
 		->icon('fa fa-rocket')
-		->img('/admin/images/ip_add.gif')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'check', NULL, 0, 0)
 		)
@@ -58,7 +57,6 @@ $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Benchmark.menu_site_speed'))
 		->icon('fa fa-tachometer')
-		->img('/admin/images/ip_add.gif')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/admin/benchmark/url/index.php', NULL, NULL, '')
 		)
@@ -723,11 +721,11 @@ function benchmarkShow($oAdmin_Form_Controller)
 
 				$aAvailabledEngines = array();
 
-				foreach ($aResult as $aRow)
+				foreach ($aResult as $row)
 				{
-					if (in_array($aRow['Engine'], $aAllowedEngines))
+					if (in_array($row, $aAllowedEngines))
 					{
-						$aAvailabledEngines[] = $aRow['Engine'];
+						$aAvailabledEngines[] = $row;
 					}
 				}
 

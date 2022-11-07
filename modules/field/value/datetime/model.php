@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Field
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Field_Value_Datetime_Model extends Core_Entity
 {
@@ -141,8 +141,8 @@ class Field_Value_Datetime_Model extends Core_Entity
 		if ($this->value != '0000-00-00 00:00:00')
 		{
 			$value = $this->Field->type == 8
-				? strftime($this->_dateFormat, Core_Date::sql2timestamp($this->value))
-				: strftime($this->_dateTimeFormat, Core_Date::sql2timestamp($this->value));
+				? Core_Date::strftime($this->_dateFormat, Core_Date::sql2timestamp($this->value))
+				: Core_Date::strftime($this->_dateTimeFormat, Core_Date::sql2timestamp($this->value));
 		}
 
 		$this->addXmlTag('value', $value);

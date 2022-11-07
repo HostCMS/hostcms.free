@@ -134,6 +134,16 @@ abstract class Xsl_Processor
 	 */
 	protected function _clearXmlns($sXsl)
 	{
+		return self::clearXmlns($sXsl);
+	}
+	
+	/**
+	 * Clear XMLNS attribute
+	 * @param string source data
+	 * @return string
+	 */
+	static public function clearXmlns($sXsl)
+	{
 		/*$sXsl = str_replace('exclude-result-prefixes="hostcms"', '', $sXsl);
 		$sXsl = preg_replace('/xmlns:hostcms="[^"]*"/', '', $sXsl);*/
 		$sXsl = preg_replace('/hostcms:[a-zA-Z]*="[^"]*"/', '', $sXsl);

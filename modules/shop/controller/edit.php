@@ -738,8 +738,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oYandexMarketBlock->add($oDeliveryOption);
 
-				$watermarkPath =
-					is_file($this->_object->getWatermarkFilePath())
+				$watermarkPath = $this->_object->watermark_file != '' && is_file($this->_object->getWatermarkFilePath())
 					? $this->_object->getWatermarkFileHref()
 					: '';
 

@@ -14,8 +14,17 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  */
 class Field_Controller_Delete_Value extends Admin_Form_Action_Controller
 {
+	/**
+	 * Model
+	 * @var mixed
+	 */
 	protected $_model = NULL;
 
+	/**
+	 * Set model
+	 * @param string $model
+	 * @return self
+	 */
 	public function model($model)
 	{
 		$this->_model = $model;

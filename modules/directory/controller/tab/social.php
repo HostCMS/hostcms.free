@@ -59,14 +59,15 @@ class Directory_Controller_Tab_Social extends Directory_Controller_Tab
 					->name($this->prefix . 'social' . $sNameSuffix)
 					->value($oUser_Directory_Social ? $oUser_Directory_Social->Directory_Social->directory_social_type_id : '')
 					->caption(Core::_('Directory_Social.social'))
-					->divAttr(array('class' => 'form-group col-xs-6 col-lg-4'))
+					// ->divAttr(array('class' => 'form-group col-xs-6 col-lg-4'))
+					->divAttr(array('class' => 'form-group col-lg-4 ' . ($this->showPublicityControlElement ? 'col-xs-6' : 'col-xs-5')))
 			)
 			->add(
 				Admin_Form_Entity::factory('Input')
 					->name($this->prefix . 'social_address' . ($oUser_Directory_Social ? '#' . $oUser_Directory_Social->Directory_Social->id : '[]'))
 					->value($oUser_Directory_Social ? $oUser_Directory_Social->Directory_Social->value : '')
 					->caption(Core::_('Directory_Social.social_address'))
-					->divAttr(array('class' => 'form-group no-padding-left ' . ($this->showPublicityControlElement ? 'col-lg-4 col-xs-6' : 'col-lg-5 col-sm-6 col-xs-5')))
+					->divAttr(array('class' => 'form-group no-padding-left ' . ($this->showPublicityControlElement ? 'col-lg-4 col-xs-6' : 'col-lg-5 col-sm-5 col-xs-5')))
 			);
 
 		if ($this->showPublicityControlElement)

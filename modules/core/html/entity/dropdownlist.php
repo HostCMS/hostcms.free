@@ -116,6 +116,12 @@ class Core_Html_Entity_Dropdownlist extends Core_Html_Entity
 		<?php
 	}
 
+	/**
+	 * Get item info
+	 * @param int $itemIndex
+	 * @return array|NULL
+	 * @ignore
+	 */
 	protected function _getItemInfo($itemIndex)
 	{
 		$aOptions = $this->options;

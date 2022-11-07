@@ -249,8 +249,8 @@ class Shop_Print_Form_Handler4 extends Shop_Print_Form_Handler
 										?>
 										<tr>
 											<th scope="row"><?php echo $key + 1?></th>
-											<td><?php echo htmlspecialchars($oShopOrderItem->name)?></td>
-											<td><?php echo htmlspecialchars($oShopOrderItem->marking)?></td>
+											<td><?php echo htmlspecialchars((string) $oShopOrderItem->name)?></td>
+											<td><?php echo htmlspecialchars((string) $oShopOrderItem->marking)?></td>
 											<td><?php echo sprintf('%.0f', $oShopOrderItem->quantity)?></td>
 											<td><?php echo number_format(Shop_Controller::instance()->round($oShopOrderItem->price), 2, '.', '')?></td>
 											<td><?php echo $sShopTaxRate != 0 ? "{$sShopTaxRate}%" : '-'?></td>

@@ -23,7 +23,8 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 	{
 		$aMasDirectoryTypes = $this->_getDirectoryTypes();
 
-		$oButtons = $this->_buttons('address-buttons');
+		// $oButtons = $this->_buttons('address-buttons');
+		$oButtons = $this->_buttons('');
 
 		if (count($this->_aDirectory_Relations))
 		{
@@ -58,7 +59,7 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 					->name($this->prefix . 'address_type' . $sNameSuffix)
 					->value($oUser_Directory_Address ? $oUser_Directory_Address->Directory_Address->directory_address_type_id : '')
 					->caption(Core::_('Directory_Address.type_address'))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-3'))
+					->divAttr(array('class' => 'form-group col-xs-6 col-lg-3'))
 			)
 			->add(
 				Admin_Form_Entity::factory('Input')
@@ -66,7 +67,7 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 					->value($oUser_Directory_Address ? $oUser_Directory_Address->Directory_Address->country : '')
 					->caption(Core::_('Directory_Address.address_country'))
 					// ->divAttr(array('class' => 'form-group no-padding-left ' . ($this->showPublicityControlElement ? 'col-xs-3' : 'col-lg-5 col-sm-6 col-xs-5')))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4'))
+					->divAttr(array('class' => 'form-group no-padding-left col-xs-6 col-lg-4'))
 			)
 			->add(
 				Admin_Form_Entity::factory('Input')
@@ -74,7 +75,7 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 					->value($oUser_Directory_Address ? $oUser_Directory_Address->Directory_Address->postcode : '')
 					->caption(Core::_('Directory_Address.address_postcode'))
 					// ->divAttr(array('class' => 'form-group no-padding-left ' . ($this->showPublicityControlElement ? 'col-xs-3' : 'col-lg-5 col-sm-6 col-xs-5')))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-2'))
+					->divAttr(array('class' => 'form-group col-xs-6 col-lg-2'))
 			)
 			->add(
 				Admin_Form_Entity::factory('Input')
@@ -82,7 +83,7 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 					->value($oUser_Directory_Address ? $oUser_Directory_Address->Directory_Address->city : '')
 					->caption(Core::_('Directory_Address.address_city'))
 					// ->divAttr(array('class' => 'form-group no-padding-left ' . ($this->showPublicityControlElement ? 'col-xs-3' : 'col-lg-5 col-sm-6 col-xs-5')))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-3'))
+					->divAttr(array('class' => 'form-group no-padding-left col-xs-6 col-lg-3'))
 			)
 			->add(
 				Admin_Form_Entity::factory('Input')
@@ -90,21 +91,21 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 					->value($oUser_Directory_Address ? $oUser_Directory_Address->Directory_Address->value : '')
 					->caption(Core::_('Directory_Address.address'))
 					// ->divAttr(array('class' => 'form-group ' . ($this->showPublicityControlElement ? 'col-sm-8 col-xs-3' : 'col-lg-5 col-sm-6 col-xs-5')))
-					->divAttr(array('class' => 'form-group col-xs-12 col-lg-7'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-lg-5'))
 			)
 			->add(
 				Admin_Form_Entity::factory('Input')
 					->name($this->prefix . 'latitude' . $sNameSuffix)
 					->value($oUser_Directory_Address ? $oUser_Directory_Address->Directory_Address->latitude : '')
 					->caption(Core::_('Directory_Address.latitude'))
-					->divAttr(array('class' => 'form-group col-xs-6 col-sm-6 col-lg-2'))
+					->divAttr(array('class' => 'form-group col-xs-5 col-lg-2'))
 			)
 			->add(
 				Admin_Form_Entity::factory('Input')
 					->name($this->prefix . 'longitude' . $sNameSuffix)
 					->value($oUser_Directory_Address ? $oUser_Directory_Address->Directory_Address->longitude : '')
 					->caption(Core::_('Directory_Address.longitude'))
-					->divAttr(array('class' => 'form-group col-xs-6 col-sm-6 col-lg-2'))
+					->divAttr(array('class' => 'form-group col-xs-5 col-lg-2 no-padding-left-sm no-padding-left-xs'))
 			);
 
 		if ($this->showPublicityControlElement)
@@ -113,7 +114,8 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 
 			$oRowElements->add(
 				Admin_Form_Entity::factory('Checkbox')
-					->divAttr(array('class' => 'col-xs-6 col-lg-3 address-public'))
+					// ->divAttr(array('class' => 'col-xs-6 col-lg-2 margin-top-23-lg address-public'))
+					->divAttr(array('class' => 'col-xs-5 col-lg-2 margin-top-23-lg no-padding-lg'))
 					->name($this->prefix . 'address_public' . $sNameSuffix)
 					->value(1)
 					->checked($iAddressPublic ? $iAddressPublic : FALSE)
@@ -137,8 +139,12 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 
 	protected function _buttons($className = '')
 	{
+		$margin_top_23 = $this->showPublicityControlElement
+			? 'margin-top-23-lg no-padding-left-lg'
+			: 'margin-top-23 no-padding-left';
+
 		return Admin_Form_Entity::factory('Div') // div с кноками + и -
-			->class('add-remove-property pull-left' . (count($this->_aDirectory_Relations) ? ' btn-group' : '') . ($className ? ' ' . $className : ''))
+			->class('add-remove-property ' . $margin_top_23 . ' pull-left' . (count($this->_aDirectory_Relations) ? ' btn-group' : '') . ($className ? ' ' . $className : ''))
 			->add(
 				Admin_Form_Entity::factory('Code')
 					->html('<div class="btn btn-palegreen inverted" onclick="$.cloneFormRow(this); event.stopPropagation();"><i class="fa fa-plus-circle close"></i></div><div class="btn btn-darkorange btn-delete inverted' . (count($this->_aDirectory_Relations) ? '' : ' hide') . '" onclick="$.deleteFormRow(this); event.stopPropagation();"><i class="fa fa-minus-circle close"></i></div>')

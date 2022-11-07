@@ -43,6 +43,21 @@ class Core_Tar
 	protected $_temp_tarname = '';
 
 	/**
+	 * Exclude dir
+	 * @var array
+	 */
+	protected $_excludeDir = array();
+
+	/**
+	 * Add Excluding Dir
+	 */
+	public function excludeDir($dirPath)
+	{
+		$this->_excludeDir[] = rtrim($dirPath, '\/');
+		return $this;
+	}
+
+	/**
 	* Archive_Tar Class constructor. This flavour of the constructor only
 	* declare a new Archive_Tar object, identifying it by the name of the
 	* tar file.
@@ -58,11 +73,6 @@ class Core_Tar
 	*/
 	public function __construct($p_tarname, $p_compress = NULL)
 	{
-		/*
-		$this->_compress = false;
-		$this->_compress_type = 'none';
-		*/
-
 		if (($p_compress === NULL) || ($p_compress == ''))
 		{
 
@@ -741,7 +751,7 @@ class Core_Tar
 	 */
 	protected function _addList($p_list, $p_add_dir, $p_remove_dir)
 	{
-		$v_result=true;
+		$v_result = true;
 		$v_header = array();
 
 		// ----- Remove potential windows directory separator
@@ -774,9 +784,18 @@ class Core_Tar
 			$v_filename = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $v_filename);
 
 			// Не архивируем папку, в которой располагаем архив
-			if (strpos($v_filename, rtrim(BACKUP_DIR, DIRECTORY_SEPARATOR), 0) === 0)
+			if (strpos($v_filename, rtrim(BACKUP_DIR, DIRECTORY_SEPARATOR)) === 0)
 			{
 				continue;
+			}
+
+			// Skip set dirs
+			foreach ($this->_excludeDir as $excludeDir)
+			{
+				if (strpos($v_filename, $excludeDir) === 0)
+				{
+					continue;
+				}
 			}
 
 			$extension = Core_File::getExtension($v_filename);

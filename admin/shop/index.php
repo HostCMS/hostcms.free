@@ -249,7 +249,6 @@ $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop.header_admin_forms'))
 		->icon('fa fa-plus')
-		->img('/admin/images/shop_add.gif')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
 		)
@@ -260,7 +259,6 @@ $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Dir.shop_dir_top_menu_title'))
 		->icon('fa fa-plus')
-		->img('/admin/images/folder_page_add.gif')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
@@ -297,7 +295,6 @@ $oAdmin_Form_Entity_Menus->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Measure.mesures'))
 				->icon('fa fa-tachometer')
-				->img('/admin/images/mesures.gif')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref($sMeasuresFormPath = '/admin/shop/measure/index.php', NULL, NULL, $sAdditionalParam = "&shop_dir_id=" . intval(Core_Array::getGet('shop_dir_id', 0)))
 				)
@@ -309,7 +306,6 @@ $oAdmin_Form_Entity_Menus->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Country.shop_form_menu_countries'))
 				->icon('fa fa-flag')
-				->img('/admin/images/country.gif')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref($sCountriesFormPath = '/admin/shop/country/index.php', NULL, NULL, $sAdditionalParam = "&shop_dir_id=" . intval(Core_Array::getGet('shop_dir_id', 0)))
 				)
@@ -336,7 +332,6 @@ $oAdmin_Form_Entity_Menus->add(
 		Admin_Form_Entity::factory('Menu')
 			->name(Core::_('Shop_Tax.show_tax_link'))
 			->icon('fa fa-money')
-			->img('/admin/images/coins.gif')
 			->href(
 				$oAdmin_Form_Controller->getAdminLoadHref($sTaxFormPath = '/admin/shop/tax/index.php', NULL, NULL, '')
 			)
@@ -347,12 +342,22 @@ $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Currency.show_currency_link'))
 		->icon('fa fa-eur')
-		->img('/admin/images/money_euro.gif')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($sCurrenciesFormPath = '/admin/shop/currency/index.php', NULL, NULL, '')
 		)
 		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($sCurrenciesFormPath, NULL, NULL, '')
+		)
+	)
+	->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Shop_Cashflow.title'))
+		->icon('fa-solid fa-arrow-right-arrow-left')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref($sCashflowsFormPath = '/admin/shop/cashflow/index.php', NULL, NULL, '')
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax($sCashflowsFormPath, NULL, NULL, '')
 		)
 	)
 );

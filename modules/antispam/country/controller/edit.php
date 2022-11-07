@@ -84,16 +84,14 @@ class Antispam_Country_Controller_Edit extends Admin_Form_Action_Controller_Type
 		{
 			$oAntispam_Country_Language = $this->_object->Antispam_Country_Languages->getByAdmin_language_id($oAdmin_Language->id);
 
-			$name = Core_Array::getPost('name_lng_' . $oAdmin_Language->id);
-
-			if (is_null($oAntispam_Country_Language->id))
+			if (is_null($oAntispam_Country_Language))
 			{
 				$oAntispam_Country_Language = Core_Entity::factory('Antispam_Country_Language');
 				$oAntispam_Country_Language->admin_language_id = $oAdmin_Language->id;
 				$oAntispam_Country_Language->antispam_country_id = $this->_object->id;
 			}
 
-			$oAntispam_Country_Language->name = $name;
+			$oAntispam_Country_Language->name = Core_Array::getPost('name_lng_' . $oAdmin_Language->id, '', 'trim');
 			$oAntispam_Country_Language->save();
 		}
 

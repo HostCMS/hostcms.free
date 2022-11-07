@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Exception extends Exception
 {
@@ -27,6 +27,7 @@ class Core_Exception extends Exception
 	{
 		if (!is_null($message) && !empty($values))
 		{
+			$values = array_map('strval', $values);
 			$values = array_map('htmlspecialchars', $values);
 			$message = str_replace(array_keys($values), array_values($values), $message);
 		}
@@ -34,14 +35,16 @@ class Core_Exception extends Exception
 		if ($bShowDebugTrace)
 		{
 			$aDebugTrace = Core::debugBacktrace();
-
 			foreach ($aDebugTrace as $aTrace)
 			{
 				$message .= "\n<br />{$aTrace['file']}:{$aTrace['line']} {$aTrace['function']}";
 			}
 		}
 
-		$log && Core_Log::instance()->clear()->status($status)->write(strip_tags($message));
+		$log && Core_Log::instance()
+			->clear()
+			->status($status)
+			->write(strip_tags($message));
 
 		// Fix bug with PDO text codes, e.g. '42S21'. Code should be integer
 		$bIsNumeric = is_numeric($code);

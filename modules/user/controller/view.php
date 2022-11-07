@@ -96,10 +96,10 @@ class User_Controller_View extends Admin_Form_Action_Controller
 							<img class="header-avatar" src="<?php echo $this->_object->getAvatar()?>" alt="">
 						</div>
 						<div class="col-lg-5 col-md-8 col-sm-12 profile-info">
-							<div class="header-fullname"><?php echo htmlspecialchars($this->_object->getFullName())?></div>
-							<div class="header-information"><?php echo htmlspecialchars($this->_object->description)?></div>
+							<div class="header-fullname"><?php echo htmlspecialchars((string) $this->_object->getFullName())?></div>
+							<div class="header-information"><?php echo htmlspecialchars((string) $this->_object->description)?></div>
 							<?php
-							if (strlen($this->_object->address))
+							if (strlen((string) $this->_object->address))
 							{
 							?>
 								<div class="header-information"><i class="glyphicon glyphicon-map-marker margin-right-5 red"></i><?php echo htmlspecialchars($this->_object->address)?></div>
@@ -124,7 +124,7 @@ class User_Controller_View extends Admin_Form_Action_Controller
 										{
 											?>
 											<div class="h5 user-view-h5 semi-bold">
-												<?php echo htmlspecialchars($oCompany->name)?>
+												<?php echo htmlspecialchars((string) $oCompany->name)?>
 											</div>
 											<?php
 
@@ -132,7 +132,7 @@ class User_Controller_View extends Admin_Form_Action_Controller
 											{
 												?>
 												<div class="user-view-posts">
-													<span><?php echo htmlspecialchars($oCompany_Department_Post_User->Company_Department->name)?></span> <span class="gray"><?php echo htmlspecialchars($oCompany_Department_Post_User->Company_Post->name)?></span>
+													<span><?php echo htmlspecialchars((string) $oCompany_Department_Post_User->Company_Department->name)?></span> <span class="gray"><?php echo htmlspecialchars((string) $oCompany_Department_Post_User->Company_Post->name)?></span>
 												</div>
 												<?php
 											}

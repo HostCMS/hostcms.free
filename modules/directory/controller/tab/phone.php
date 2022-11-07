@@ -59,14 +59,15 @@ class Directory_Controller_Tab_Phone extends Directory_Controller_Tab
 					->name($this->prefix . 'phone_type' . $sNameSuffix)
 					->value($oUser_Directory_Phone ? $oUser_Directory_Phone->Directory_Phone->directory_phone_type_id : '')
 					->caption(Core::_('Directory_Phone.type_phone'))
-					->divAttr(array('class' => 'form-group col-xs-6 col-lg-4'))
+					// ->divAttr(array('class' => 'form-group col-xs-5 col-lg-4'))
+					->divAttr(array('class' => 'form-group col-lg-4 ' . ($this->showPublicityControlElement ? 'col-xs-6' : 'col-xs-5')))
 			)
 			->add(
 				Admin_Form_Entity::factory('Input')
 					->name($this->prefix . 'phone' . $sNameSuffix)
 					->value($oUser_Directory_Phone ? $oUser_Directory_Phone->Directory_Phone->value : '')
 					->caption(Core::_('Directory_Phone.phone'))
-					->divAttr(array('class' => 'form-group no-padding-left ' . ($this->showPublicityControlElement ? 'col-lg-4 col-xs-6' : 'col-lg-5 col-sm-6 col-xs-5')))
+					->divAttr(array('class' => 'form-group no-padding-left ' . ($this->showPublicityControlElement ? 'col-lg-4 col-xs-6' : 'col-lg-5 col-sm-5 col-xs-5')))
 			);
 
 		if ($this->showPublicityControlElement)

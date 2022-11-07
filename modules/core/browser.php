@@ -7,16 +7,16 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Browser
 {
 	/**
 	 * Get device type by User Agent
 	 * @param string $userAgent
-	 * @return 0 - desktop, 1 - tablet, 2 - phone, 3 - tv, 4 - watch
+	 * @return int 0 - desktop, 1 - tablet, 2 - phone, 3 - tv, 4 - watch
 	 */
 	static public function getDevice($userAgent)
 	{
@@ -203,7 +203,7 @@ class Core_Browser
 
 		return $browser;
 	}
-	
+
 	/**
 	 * Get browser ICO
 	 * @param string $browser Browser name
@@ -231,7 +231,7 @@ class Core_Browser
 		{
 			$return = NULL;
 		}
-		
+
 		return $return;
 	}
 

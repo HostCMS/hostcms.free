@@ -80,11 +80,10 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 	 */
 	public function dataManagerBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		ob_start();
-
-		$this->User->id && $this->User->showAvatarWithName();
-
-		return ob_get_clean();
+		$oUser = $this->User;
+		return $oUser->id
+			? $oUser->showAvatarWithName()
+			: '';
 	}
 
 	public function date()
@@ -412,8 +411,8 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 			$node = new stdClass();
 			$node->position = $position++;
 			$node->item = $oShop_Item;
-			$node->name = htmlspecialchars($oShop_Item->name);
-			$node->measure = htmlspecialchars($oShop_Item->Shop_Measure->name);
+			$node->name = htmlspecialchars((string) $oShop_Item->name);
+			$node->measure = htmlspecialchars((string) $oShop_Item->Shop_Measure->name);
 			$node->price = $aPrices['price_tax'];
 			$node->quantity = $rest;
 			$node->amount = Shop_Controller::instance()->round($node->quantity * $node->price);

@@ -140,7 +140,7 @@ class Template_Model extends Core_Entity
 	{
 		$this->save();
 		$this->_createDir();
-		Core_File::write($this->getTemplateFilePath(), trim($content));
+		Core_File::write($this->getTemplateFilePath(), trim((string) $content));
 		return $this;
 	}
 
@@ -212,7 +212,7 @@ class Template_Model extends Core_Entity
 		$this->save();
 		$this->_createDir();
 
-		Core_File::write($this->getTemplateCssFilePath(), trim($content));
+		Core_File::write($this->getTemplateCssFilePath(), trim((string) $content));
 
 		return $this;
 	}
@@ -258,7 +258,7 @@ class Template_Model extends Core_Entity
 		$this->save();
 		$this->_createDir();
 
-		Core_File::write($this->getTemplateLessFilePath(), trim($content));
+		Core_File::write($this->getTemplateLessFilePath(), trim((string) $content));
 
 		if ($this->type == 1 && strlen($content))
 		{
@@ -311,7 +311,7 @@ class Template_Model extends Core_Entity
 		$this->save();
 		$this->_createDir();
 
-		Core_File::write($this->getTemplateScssFilePath(), trim($content));
+		Core_File::write($this->getTemplateScssFilePath(), trim((string) $content));
 
 		if ($this->type == 2 && strlen($content))
 		{
@@ -362,7 +362,7 @@ class Template_Model extends Core_Entity
 	{
 		$this->save();
 		$this->_createDir();
-		Core_File::write($this->getTemplateJsFilePath(), trim($content));
+		Core_File::write($this->getTemplateJsFilePath(), trim((string) $content));
 		return $this;
 	}
 
@@ -409,7 +409,7 @@ class Template_Model extends Core_Entity
 	{
 		$this->save();
 
-		$content = trim($content);
+		$content = trim((string) $content);
 		Core_File::write($this->getManifestPath(), $content);
 	}
 
@@ -465,7 +465,7 @@ class Template_Model extends Core_Entity
 	{
 		$this->save();
 		$this->_createLngDir($lng);
-		$content = trim($content);
+		$content = trim((string) $content);
 		Core_File::write($this->getLngPath($lng), $content);
 	}
 
@@ -780,29 +780,28 @@ class Template_Model extends Core_Entity
 
 			if ($bUserAccess)
 			{
-				// Настройки секции
-				$sPath = '/admin/template/section/index.php';
-				$sAdditionalSectionSettings = "hostcms[action]=edit&template_id={$this->id}&template_dir_id={$this->Template_Dir->id}&hostcms[checked][0][{$oTemplate_Section->id}]=1";
-				$sOnclickSectionSettings = "hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditionalSectionSettings}', dialogClass: 'hostcms6'}); return false";
-				$sTitleSectionSettings = htmlspecialchars(Core::_('Template_Section.section_settings', $oTemplate_Section->name));
-
-				// Добавление виджета в секцию
-				$sPathAddWidget = '/admin/template/section/lib/index.php';
-				$sAdditionalAddWidget = "hostcms[action]=edit&template_section_id={$oTemplate_Section->id}&hostcms[checked][0][0]=1";
-				$sOnclickAddWidget = "hQuery.openWindow({path: '{$sPathAddWidget}', additionalParams: '{$sAdditionalAddWidget}', dialogClass: 'hostcms6'}); return false";
-				$sTitleAddWidget = Core::_('Template_Section.add_widget');
-				?>
-
-				<div class="hostcmsSection" id="hostcmsSection<?php echo $oTemplate_Section->id?>" style="border-color: <?php echo Core_Str::hex2rgba($oTemplate_Section->color, 0.8)?>">
+				?><div class="hostcmsSection" id="hostcmsSection<?php echo $oTemplate_Section->id?>" style="border-color: <?php echo Core_Str::hex2rgba($oTemplate_Section->color, 0.8)?>">
 					<div class="hostcmsSectionPanel" style="display: none">
 						<div class="draggable-indicator">
 							<svg width="16px" height="16px" viewBox="0 0 32 32"><rect height="4" width="4" y="4" x="4" /><rect height="4" width="4" y="12" x="4" /><rect height="4" width="4" y="4" x="12"/><rect height="4" width="4" y="12" x="12"/><rect height="4" width="4" y="4" x="20"/><rect height="4" width="4" y="12" x="20"/><rect height="4" width="4" y="4" x="28"/><rect height="4" width="4" y="12" x="28"/></svg>
 						</div>
-						<div><a href="<?php echo "{$sPathAddWidget}?{$sAdditionalAddWidget}"?>" onclick="<?php echo $sOnclickAddWidget ?>" alt="<?php echo $sTitleAddWidget?>" title="<?php echo $sTitleAddWidget?>"><i class="fa fa-fw fa-plus"></i></a></div>
-
-						<div><a href="<?php echo "{$sPath}?{$sAdditionalSectionSettings}"?>" onclick="<?php echo $sOnclickSectionSettings ?>" alt="<?php echo $sTitleSectionSettings ?>" title="<?php echo $sTitleSectionSettings ?>"><i class="fa fa-fw fa-cog"></i></a></div>
-					</div>
-				<?php
+						<?php
+						// Добавление виджета в секцию
+						$sPathAddWidget = '/admin/template/section/lib/index.php';
+						$sTitleAddWidget = Core::_('Template_Section.add_widget');
+						$sAdditionalAddWidget = "hostcms[action]=edit&template_section_id={$oTemplate_Section->id}&hostcms[checked][0][0]=1";
+						$sOnclickAddWidget = "hQuery.openWindow({path: '{$sPathAddWidget}', additionalParams: '{$sAdditionalAddWidget}', title: '" . Core_Str::escapeJavascriptVariable($sTitleAddWidget) . "', dialogClass: 'hostcms6'}); return false";
+						?>
+						<div><a href="<?php echo "{$sPathAddWidget}?{$sAdditionalAddWidget}"?>" onclick="<?php echo $sOnclickAddWidget ?>" alt="<?php echo $sTitleAddWidget?>" title="<?php echo $sTitleAddWidget?>"><i class="fa-solid fa-fw fa-plus"></i></a></div>
+						<?php
+						// Настройки секции
+						$sPath = '/admin/template/section/index.php';
+						$sTitleSectionSettings = Core::_('Template_Section.section_settings', $oTemplate_Section->name);
+						$sAdditionalSectionSettings = "hostcms[action]=edit&template_id={$this->id}&template_dir_id={$this->Template_Dir->id}&hostcms[checked][0][{$oTemplate_Section->id}]=1";
+						$sOnclickSectionSettings = "hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditionalSectionSettings}', title: '" . Core_Str::escapeJavascriptVariable($sTitleSectionSettings) . "', dialogClass: 'hostcms6'}); return false";
+						?>
+						<div><a href="<?php echo "{$sPath}?{$sAdditionalSectionSettings}"?>" onclick="<?php echo $sOnclickSectionSettings ?>" alt="<?php echo $sTitleSectionSettings?>" title="<?php echo $sTitleSectionSettings?>"><i class="fa-solid fa-fw fa-gear"></i></a></div>
+					</div><?php
 			}
 
 			echo $oTemplate_Section->prefix;
@@ -973,7 +972,7 @@ class Template_Model extends Core_Entity
 									<?php
 								break;
 								default:
-									?><input type="text" class="form-control <?php echo $fieldType == 'color' ? 'colorpicker' : ''?>" name="<?php echo htmlspecialchars($fieldName)?>" value="<?php echo htmlspecialchars($lessFieldValue)?>" <?php echo $fieldType == 'color' && ($lessFieldType == 'rgb' || $lessFieldType == 'rgba') ? 'data-format="rgb"' : '' ?> <?php echo $fieldType == 'color' && $lessFieldType == 'rgba' ? 'data-rgba="true"' : '' ?> data-template="<?php echo $this->id?>" /><?php
+									?><input type="text" class="form-control <?php echo $fieldType == 'color' ? 'colorpicker' : ''?>" name="<?php echo htmlspecialchars((string) $fieldName)?>" value="<?php echo htmlspecialchars((string) $lessFieldValue)?>" <?php echo $fieldType == 'color' && ($lessFieldType == 'rgb' || $lessFieldType == 'rgba') ? 'data-format="rgb"' : '' ?> <?php echo $fieldType == 'color' && $lessFieldType == 'rgba' ? 'data-rgba="true"' : '' ?> data-template="<?php echo $this->id?>" /><?php
 							}
 							?>
 						</div>

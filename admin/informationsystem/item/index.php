@@ -296,7 +296,6 @@ $oAdmin_Form_Entity_Menus->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Informationsystem_Item.show_information_groups_link2'))
-				->img('/admin/images/page_add.gif')
 				->icon('fa fa-plus')
 				->href(
 					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
@@ -308,7 +307,6 @@ $oAdmin_Form_Entity_Menus->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Informationsystem_Item.show_information_groups_link3'))
-				->img('/admin/images/page_gear.gif')
 				->icon('fa fa-gears')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref($sInformationsystemItemProperties, NULL, NULL, $additionalParamsItemProperties)
@@ -321,7 +319,6 @@ $oAdmin_Form_Entity_Menus->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Informationsystem_Item.export'))
 				->icon('fa fa-upload')
-				->img('/admin/images/export.gif')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/admin/informationsystem/item/export/index.php', NULL, NULL, $additionalParamsItemProperties)
 				)
@@ -333,7 +330,6 @@ $oAdmin_Form_Entity_Menus->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Informationsystem_Item.import'))
 				->icon('fa fa-download')
-				->img('/admin/images/import.gif')
 				->href(
           $oAdmin_Form_Controller->getAdminLoadHref('/admin/informationsystem/item/import/index.php', NULL, NULL, $additionalParamsItemProperties)
 				)
@@ -349,7 +345,6 @@ $oAdmin_Form_Entity_Menus->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Informationsystem_Group.show_information_groups_link1'))
-				->img('/admin/images/folder_add.gif')
 				->icon('fa fa-plus')
 				->href(
 					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
@@ -361,7 +356,6 @@ $oAdmin_Form_Entity_Menus->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Informationsystem_Group.show_information_groups_link4'))
-				->img('/admin/images/folder_gear.gif')
 				->icon('fa fa-gears')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref($sInformationsystemGroupProperties, NULL, NULL, $additionalParamsItemProperties)
@@ -374,7 +368,6 @@ $oAdmin_Form_Entity_Menus->add(
 ->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Informationsystem_Item.show_all_comments_top_menu'))
-		->img('/admin/images/comments.gif')
 		->icon('fa fa-comments')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($sInformationsystemComments, NULL, NULL, $additionalParamsComments)

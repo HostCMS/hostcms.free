@@ -34,7 +34,6 @@ $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Company.company_show_title_add'))
 		->icon('fa fa-plus')
-		->img('/admin/images/company_add.gif')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
@@ -47,7 +46,6 @@ $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Company.show_posts'))
 		->icon('fa fa-user')
-		->img('/admin/images/company_add.gif')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($sCompanyPostsFormPath = '/admin/company/post/index.php', NULL, NULL, '', 0)
 		)
@@ -59,7 +57,6 @@ $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Company.show_email_types'))
 		->icon('fa fa-envelope')
-		->img('/admin/images/company_add.gif')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($sCompanyEmailTypesFormPath = '/admin/directory/email/type/index.php', NULL, NULL, '', 0)
 		)
@@ -71,7 +68,6 @@ $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Company.show_phone_types'))
 		->icon('fa fa-phone')
-		->img('/admin/images/company_add.gif')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($sCompanyAddressTypesFormPath = '/admin/directory/phone/type/index.php', NULL, NULL, '', 0)
 		)
@@ -83,7 +79,6 @@ $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Company.show_address_types'))
 		->icon('fa fa-map-marker')
-		->img('/admin/images/company_add.gif')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($sCompanyPhoneTypesFormPath = '/admin/directory/address/type/index.php', NULL, NULL, '', 0)
 		)
@@ -95,7 +90,6 @@ $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Company.show_socials'))
 		->icon('fa fa-share-alt')
-		->img('/admin/images/company_add.gif')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($sCompanySocialsFormPath = '/admin/directory/social/type/index.php', NULL, NULL, '', 0)
 		)
@@ -107,7 +101,6 @@ $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Company.show_messengers'))
 		->icon('fa fa-comments')
-		->img('/admin/images/company_add.gif')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($sCompanyMessengersFormPath = '/admin/directory/messenger/type/index.php', NULL, NULL, '', 0)
 		)

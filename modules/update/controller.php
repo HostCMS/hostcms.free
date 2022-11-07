@@ -30,6 +30,7 @@ class Update_Controller extends Core_Servant_Properties
 		'install_beta',
 		'keys',
 		'modules',
+		'protocol'
 	);
 
 	/**
@@ -84,12 +85,22 @@ class Update_Controller extends Core_Servant_Properties
 		return $this;
 	}
 
+	/**
+	 * Xml
+	 * @var mixed
+	 */
 	protected $_xml = NULL;
 
+	/**
+	 * Get xml
+	 * @return string
+	 */
 	protected function _getXml()
 	{
 		if (is_null($this->_xml))
 		{
+			$this->_xml = '';
+
 			$updateFilePath = $this->getFilePath();
 
 			if (!file_exists($updateFilePath) || time() >= filemtime($updateFilePath) + 4 * 60 * 60)
@@ -117,7 +128,8 @@ class Update_Controller extends Core_Servant_Properties
 			{
 				$xml = Core_File::read($updateFilePath);
 
-				$this->_xml = @simplexml_load_string($xml);
+				!empty($xml)
+				    && $this->_xml = @simplexml_load_string($xml);
 			}
 			else
 			{
@@ -186,7 +198,8 @@ class Update_Controller extends Core_Servant_Properties
 			->update_server(HOSTCMS_UPDATE_SERVER)
 			->install_beta(defined('INSTALL_BETA_UPDATE') && INSTALL_BETA_UPDATE ? 1 : 0)
 			->keys($aSite_Alias_Names)
-			->modules($aTmpModules);
+			->modules($aTmpModules)
+			->protocol($oSite->https ? 'https' : 'http');
 
 		return $this;
 	}
@@ -199,8 +212,8 @@ class Update_Controller extends Core_Servant_Properties
 	public function getUpdates()
 	{
 		// Формируем строку запроса
-		$url = 'https://' . $this->update_server . '/hostcmsupdate/?action=get_listupdate&domain='.rawurlencode($this->domain) .
-			'&protocol=' . (Core::httpsUses() ? 'https' : 'http') .
+		$url = 'https://' . $this->update_server . '/hostcmsupdate/?action=get_listupdate&domain=' . rawurlencode($this->domain) .
+			'&protocol=' . rawurlencode($this->protocol) .
 			'&login=' . rawurlencode($this->login) .
 			'&contract=' . rawurlencode(md5($this->contract)) .
 			'&pin=' . rawurlencode(md5($this->pin)) .
@@ -236,15 +249,24 @@ class Update_Controller extends Core_Servant_Properties
 			->referer(Core_Array::get($_SERVER, 'HTTP_HOST'))
 			->execute();
 
-		$aHeaders = $Core_Http->parseHeaders();
+		$sBody = $Core_Http->getDecompressedBody();
 
-		if (isset($aHeaders['status']) && $Core_Http->parseHttpStatusCode($aHeaders['status']) == 200)
+		if (!empty($sBody))
 		{
-			Core_File::write($this->getFilePath(), $Core_Http->getDecompressedBody());
+			$aHeaders = $Core_Http->parseHeaders();
+
+			if (isset($aHeaders['status']) && $Core_Http->parseHttpStatusCode($aHeaders['status']) == 200)
+			{
+				Core_File::write($this->getFilePath(), $sBody);
+			}
+			else
+			{
+				throw new Core_Exception('Wrong server answer, code "%code"!', array('%code' => Core_Array::get($aHeaders, 'status', 'undefined')), 0, FALSE);
+			}
 		}
 		else
 		{
-			throw new Core_Exception('Wrong server answer, code "%code"!', array('%code' => Core_Array::get($aHeaders, 'status', 'undefined')), 0, FALSE);
+			throw new Core_Exception('Request error code %code: %message', array('%code' => $Core_Http->getErrno(), '%message' => $Core_Http->getError()), 0, FALSE);
 		}
 
 		return $this;
@@ -259,7 +281,7 @@ class Update_Controller extends Core_Servant_Properties
 	public function getUpdate($update_key_id)
 	{
 		$url = 'https://' . $this->update_server . "/hostcmsupdate/?action=get_update&domain=".rawurlencode($this->domain) .
-			'&protocol=' . (Core::httpsUses() ? 'https' : 'http') .
+			'&protocol=' . rawurlencode($this->protocol) .
 			"&login=" . rawurlencode($this->login) .
 			"&contract=" . rawurlencode(md5($this->contract)) .
 			"&pin=" . rawurlencode(md5($this->pin)) .
@@ -283,14 +305,12 @@ class Update_Controller extends Core_Servant_Properties
 	 */
 	public function parseUpdates()
 	{
-		$oXml = $this->_getXml();
-
 		// Дата окончания поддержки
 		$return = array(
 			'error' => 0,
 			'expiration_of_support' => FALSE,
 			'datetime' => NULL,
-			'entities' => array(),
+			'entities' => array()
 		);
 
 		$oXml = $this->_getXml();
@@ -352,7 +372,7 @@ class Update_Controller extends Core_Servant_Properties
 				));
 
 				$oUpdate_Module_Entity->id = $id;
-				$oUpdate_Module_Entity->name = (string)$value->number;
+				$oUpdate_Module_Entity->name = (string)$value->name;
 				$oUpdate_Module_Entity->beta = (int)$value->beta;
 				$oUpdate_Module_Entity->number = (string)$value->number;
 				$oUpdate_Module_Entity->path = (string)$value->path;
@@ -373,7 +393,7 @@ class Update_Controller extends Core_Servant_Properties
 	public function getUpdateFile($path)
 	{
 		$url = 'https://' . $this->update_server . $path . "&domain=".rawurlencode($this->domain) .
-			'&protocol=' . (Core::httpsUses() ? 'https' : 'http') .
+			'&protocol=' . rawurlencode($this->protocol) .
 			"&login=" . rawurlencode($this->login) .
 			"&contract=" . rawurlencode(md5($this->contract)) .
 			"&pin=" . rawurlencode(md5($this->pin)) .

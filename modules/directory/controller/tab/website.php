@@ -55,14 +55,14 @@ class Directory_Controller_Tab_Website extends Directory_Controller_Tab
 					->name($this->prefix . 'website_address' . $sNameSuffix)
 					->value($oUser_Directory_Website ? $oUser_Directory_Website->Directory_Website->value : '')
 					->caption(Core::_('Directory_Website.site'))
-					->divAttr(array('class' => 'form-group ' . ($this->showPublicityControlElement ? 'col-xs-6 col-lg-4' : 'col-lg-4 col-xs-5')))
+					->divAttr(array('class' => 'form-group ' . ($this->showPublicityControlElement ? 'col-xs-5 col-lg-4' : 'col-lg-4 col-xs-5')))
 			)
 			->add(
 				Admin_Form_Entity::factory('Input')
 					->name($this->prefix . 'website_description' . $sNameSuffix)
 					->value($oUser_Directory_Website ? $oUser_Directory_Website->Directory_Website->description : '')
 					->caption(Core::_('Directory_Website.name'))
-					->divAttr(array('class' => 'form-group no-padding-left ' . ($this->showPublicityControlElement ? 'col-lg-4 col-xs-6' : 'col-lg-5 col-sm-6 col-xs-5')))
+					->divAttr(array('class' => 'form-group no-padding-left ' . ($this->showPublicityControlElement ? 'col-lg-4 col-xs-6' : 'col-lg-5 col-sm-5 col-xs-5')))
 			);
 
 		if ($this->showPublicityControlElement)
@@ -71,7 +71,7 @@ class Directory_Controller_Tab_Website extends Directory_Controller_Tab
 
 			$oRowElements->add(
 				Admin_Form_Entity::factory('Checkbox')
-					->divAttr(array('class' => 'col-xs-6 col-lg-2 no-padding-lg margin-top-23-lg margin-right-5-lg'))
+					->divAttr(array('class' => 'col-xs-5 col-lg-2 no-padding-lg margin-top-23-lg margin-right-5-lg'))
 					->name($this->prefix . 'website_public' . $sNameSuffix)
 					->value(1)
 					->checked($iWebsitePublic ? $iWebsitePublic : FALSE)

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Textarea extends Skin_Default_Admin_Form_Entity_Textarea
 {
@@ -58,7 +58,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Textarea extends Skin_Default_Admin_Form_
 			? 'div'
 			: 'textarea';
 
-		?><<?php echo $tagName?> <?php echo implode(' ', $aAttr) ?>><?php echo htmlspecialchars($this->value)?></<?php echo $tagName?>><?php
+		?><<?php echo $tagName?> <?php echo implode(' ', $aAttr) ?>><?php echo htmlspecialchars((string) $this->value)?></<?php echo $tagName?>><?php
 
 		$this->_format();
 

@@ -117,6 +117,7 @@ class Core_Servant_Properties
 	 * Utilized for reading data from inaccessible properties
 	 * @param string $property property name
 	 * @return mixed
+	 * @ignore
 	 */
 	public function __get($property)
 	{
@@ -139,6 +140,7 @@ class Core_Servant_Properties
 	 * @param string $property property name
 	 * @param string $value property value
 	 * @return self
+	 * @ignore
 	 */
 	public function __set($property, $value)
 	{
@@ -164,6 +166,7 @@ class Core_Servant_Properties
 	 * @param string $name method name
 	 * @param array $arguments arguments
 	 * @return mixed
+	 * @ignore
 	 */
 	public function __call($name, $arguments)
 	{
@@ -194,6 +197,7 @@ class Core_Servant_Properties
 	 * Triggered by calling isset() or empty() on inaccessible properties
 	 * @param string $property property name
 	 * @return boolean
+	 * @ignore
 	 */
 	public function __isset($property)
 	{
@@ -203,6 +207,7 @@ class Core_Servant_Properties
 	/**
 	 * Convert object to string
 	 * @return string
+	 * @ignore
 	 */
 	public function __toString()
 	{

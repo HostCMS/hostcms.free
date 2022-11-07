@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Module
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Module_Model extends Core_Entity
 {
@@ -83,6 +83,11 @@ class Module_Model extends Core_Entity
 		return $this->_moduleName;
 	}
 
+	/**
+	 * __isset
+	 * @param string $property
+	 * @return boolean
+	 */
 	public function __isset($property)
 	{
 		if ($property == 'version' || $property == 'date')
@@ -93,6 +98,11 @@ class Module_Model extends Core_Entity
 		return parent::__isset($property);
 	}
 
+	/**
+	 * __get
+	 * @param string $property
+	 * @return string
+	 */
 	public function __get($property)
 	{
 		if ($property == 'version' || $property == 'date')

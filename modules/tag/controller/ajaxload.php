@@ -8,9 +8,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Tag
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Tag_Controller_Ajaxload extends Admin_Form_Action_Controller
 {
@@ -18,7 +18,8 @@ class Tag_Controller_Ajaxload extends Admin_Form_Action_Controller
 	 * Tag filter
 	 * @var string
 	 */
-	protected $_tagFilter = null;
+	protected $_tagFilter = NULL;
+
 	/**
 	 * Set tag filter
 	 * @param string $tagFilter tag filter
@@ -29,6 +30,7 @@ class Tag_Controller_Ajaxload extends Admin_Form_Action_Controller
 		$this->_tagFilter = $tagFilter;
 		return $this;
 	}
+
 	/**
 	 * Execute business logic
 	 * @param string $operation operation

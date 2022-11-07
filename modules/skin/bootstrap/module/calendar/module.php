@@ -176,6 +176,10 @@ class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 		return TRUE;
 	}
 
+	/**
+	 * Content
+	 * @return self
+	 */
 	protected function _content()
 	{
 		$oModule = Core_Entity::factory('Module')->getByPath($this->_moduleName);

@@ -199,7 +199,6 @@ $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Order.shops_link_order_add'))
 		->icon('fa fa-plus')
-		->img('/admin/images/order_add.gif')
 		->href($href)
 		->onclick($onclick)
 );
@@ -210,7 +209,6 @@ if (!$siteuser_id)
 		Admin_Form_Entity::factory('Menu')
 			->name(Core::_('Shop_Order.property_menu'))
 			->icon('fa fa-gears')
-			->img('/admin/images/page_gear.gif')
 			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$shop_group_id}"))
 			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$shop_group_id}"))
 	);

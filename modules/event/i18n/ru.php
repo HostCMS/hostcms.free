@@ -161,4 +161,6 @@ return array(
 	'history_change_completed-1' => '<span class="darkorange">Дело завершено неуспешно</span>',
 
 	'event_files' => 'Файлы',
+	'guid' => 'GUID',
+	'last_modified' => 'Последнее изменение',
 );

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -200,8 +200,10 @@ if ($oShop_Tab_Dir->id)
 	{
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 			->name($oShop_Tab_Dir_Breadcrumbs->name)
-			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/tab/index.php', NULL, NULL, "shortcode_dir_id={$oShop_Tab_Dir_Breadcrumbs->id}"))
-			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/tab/index.php', NULL, NULL, "shortcode_dir_id={$oShop_Tab_Dir_Breadcrumbs->id}"));
+			/* ->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/tab/index.php', NULL, NULL, "shortcode_dir_id={$oShop_Tab_Dir_Breadcrumbs->id}"))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/tab/index.php', NULL, NULL, "shortcode_dir_id={$oShop_Tab_Dir_Breadcrumbs->id}")); */
+			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/tab/index.php', NULL, NULL, $sAdditionalParams = "shop_id={$oShop->id}&shop_tab_dir_id={$oShop_Tab_Dir_Breadcrumbs->id}"))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/tab/index.php', NULL, NULL, $sAdditionalParams));
 	}
 	while ($oShop_Tab_Dir_Breadcrumbs = $oShop_Tab_Dir_Breadcrumbs->getParent());
 

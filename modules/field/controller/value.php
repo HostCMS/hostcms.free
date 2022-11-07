@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Field
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Field_Controller_Value
 {
@@ -28,6 +28,10 @@ class Field_Controller_Value
 		return new $fieldValueName();
 	}
 
+	/**
+	 * Cache fields
+	 * @var array
+	 */
 	static protected $_cacheGetField = array();
 
 	/**

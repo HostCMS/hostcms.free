@@ -568,7 +568,7 @@ class Shop_Group_Model extends Core_Entity
 
 		if (is_null($sPath))
 		{
-			$sPath = rawurlencode($this->path) . '/';
+			$sPath = rawurlencode((string) $this->path) . '/';
 
 			if (!is_null($oParentGroup = $this->getParent()))
 			{
@@ -725,9 +725,9 @@ class Shop_Group_Model extends Core_Entity
 			return $eventResult;
 		}
 
-		$oSearch_Page->text = htmlspecialchars($this->name) . ' ' . $this->description . ' ' . $this->id . ' ' . htmlspecialchars($this->seo_title) . ' ' . htmlspecialchars($this->seo_description) . ' ' . htmlspecialchars($this->seo_keywords) . ' ' . htmlspecialchars($this->path) . ' ';
+		$oSearch_Page->text = htmlspecialchars((string) $this->name) . ' ' . $this->description . ' ' . $this->id . ' ' . htmlspecialchars((string) $this->seo_title) . ' ' . htmlspecialchars((string) $this->seo_description) . ' ' . htmlspecialchars((string) $this->seo_keywords) . ' ' . htmlspecialchars((string) $this->path) . ' ';
 
-		$oSearch_Page->title = $this->name;
+		$oSearch_Page->title = (string) $this->name;
 
 		$aPropertyValues = $this->getPropertyValues();
 		foreach ($aPropertyValues as $oPropertyValue)
@@ -740,7 +740,7 @@ class Shop_Group_Model extends Core_Entity
 					if ($oPropertyValue->value != 0)
 					{
 						$oList_Item = $oPropertyValue->List_Item;
-						$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ' . htmlspecialchars($oList_Item->description) . ' ';
+						$oList_Item->id && $oSearch_Page->text .= htmlspecialchars((string) $oList_Item->value) . ' ' . htmlspecialchars((string) $oList_Item->description) . ' ';
 					}
 				}
 				// Informationsystem
@@ -751,7 +751,7 @@ class Shop_Group_Model extends Core_Entity
 						$oInformationsystem_Item = $oPropertyValue->Informationsystem_Item;
 						if ($oInformationsystem_Item->id)
 						{
-							$oSearch_Page->text .= htmlspecialchars($oInformationsystem_Item->name) . ' ' . $oInformationsystem_Item->description . ' ' . $oInformationsystem_Item->text . ' ';
+							$oSearch_Page->text .= htmlspecialchars((string) $oInformationsystem_Item->name) . ' ' . $oInformationsystem_Item->description . ' ' . $oInformationsystem_Item->text . ' ';
 						}
 					}
 				}
@@ -763,19 +763,19 @@ class Shop_Group_Model extends Core_Entity
 						$oShop_Item = $oPropertyValue->Shop_Item;
 						if ($oShop_Item->id)
 						{
-							$oSearch_Page->text .= htmlspecialchars($oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
+							$oSearch_Page->text .= htmlspecialchars((string) $oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
 						}
 					}
 				}
 				// Wysiwyg
 				elseif ($oPropertyValue->Property->type == 6)
 				{
-					$oSearch_Page->text .= htmlspecialchars(strip_tags($oPropertyValue->value)) . ' ';
+					$oSearch_Page->text .= htmlspecialchars(strip_tags((string) $oPropertyValue->value)) . ' ';
 				}
 				// Other type
 				elseif ($oPropertyValue->Property->type != 2)
 				{
-					$oSearch_Page->text .= htmlspecialchars($oPropertyValue->value) . ' ';
+					$oSearch_Page->text .= htmlspecialchars((string) $oPropertyValue->value) . ' ';
 				}
 			}
 		}
@@ -791,7 +791,7 @@ class Shop_Group_Model extends Core_Entity
 					if ($oField_Value->value != 0)
 					{
 						$oList_Item = $oField_Value->List_Item;
-						$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ' . htmlspecialchars($oList_Item->description) . ' ';
+						$oList_Item->id && $oSearch_Page->text .= htmlspecialchars((string) $oList_Item->value) . ' ' . htmlspecialchars((string) $oList_Item->description) . ' ';
 					}
 				}
 				// Informationsystem
@@ -802,7 +802,7 @@ class Shop_Group_Model extends Core_Entity
 						$oInformationsystem_Item = $oField_Value->Informationsystem_Item;
 						if ($oInformationsystem_Item->id)
 						{
-							$oSearch_Page->text .= htmlspecialchars($oInformationsystem_Item->name) . ' ' . $oInformationsystem_Item->description . ' ' . $oInformationsystem_Item->text . ' ';
+							$oSearch_Page->text .= htmlspecialchars((string) $oInformationsystem_Item->name) . ' ' . $oInformationsystem_Item->description . ' ' . $oInformationsystem_Item->text . ' ';
 						}
 					}
 				}
@@ -814,19 +814,19 @@ class Shop_Group_Model extends Core_Entity
 						$oShop_Item = $oField_Value->Shop_Item;
 						if ($oShop_Item->id)
 						{
-							$oSearch_Page->text .= htmlspecialchars($oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
+							$oSearch_Page->text .= htmlspecialchars((string) $oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
 						}
 					}
 				}
 				// Wysiwyg
 				elseif ($oField_Value->Field->type == 6)
 				{
-					$oSearch_Page->text .= htmlspecialchars(strip_tags($oField_Value->value)) . ' ';
+					$oSearch_Page->text .= htmlspecialchars(strip_tags((string) $oField_Value->value)) . ' ';
 				}
 				// Other type
 				elseif ($oField_Value->Field->type != 2)
 				{
-					$oSearch_Page->text .= htmlspecialchars($oField_Value->value) . ' ';
+					$oSearch_Page->text .= htmlspecialchars((string) $oField_Value->value) . ' ';
 				}
 			}
 		}
@@ -920,6 +920,7 @@ class Shop_Group_Model extends Core_Entity
 				Core_Html_Entity::factory('Span')
 					->class('badge badge-hostcms badge-square')
 					->value($object->items_total_count)
+					->title(Core::_('Shop_Group.items_total_count'))
 			);
 
 		$oCore_Html_Entity_Div->execute();
@@ -1430,10 +1431,10 @@ class Shop_Group_Model extends Core_Entity
 						$aTmp[] = $oProperty_Value->value;
 					break;
 					case 8: // Date
-						$aTmp[] = strftime($this->Shop->format_date, Core_Date::sql2timestamp($oProperty_Value->value));
+						$aTmp[] = Core_Date::strftime($this->Shop->format_date, Core_Date::sql2timestamp($oProperty_Value->value));
 					break;
 					case 9: // Datetime
-						$aTmp[] = strftime($this->Shop->format_datetime, Core_Date::sql2timestamp($oProperty_Value->value));
+						$aTmp[] = Core_Date::strftime($this->Shop->format_datetime, Core_Date::sql2timestamp($oProperty_Value->value));
 					break;
 					case 3: // List
 						if ($oProperty_Value->value)

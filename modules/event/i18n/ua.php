@@ -154,4 +154,6 @@ return array(
 
 	'event_files' => 'Файли',
 	'tabDmsDocuments' => 'Документи',
+	'guid' => 'GUID',
+	'last_modified' => 'Востаннє змінено',
 );

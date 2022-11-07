@@ -19,6 +19,10 @@ class Sql_Table_Field_Dataset extends Admin_Form_Dataset
 	 */
 	protected $_database = NULL;
 
+	/**
+	 * Table name
+	 * @var mixed
+	 */
 	protected $_tableName = NULL;
 
 	/**

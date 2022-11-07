@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Querybuilder
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 {
@@ -1191,8 +1191,8 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * // LIMIT 10 OFFSET 0
 	 * $Core_QueryBuilder_Select->limit(0, 10);
 	 * </code>
-	 * @param int $arg1 offset
-	 * @param int $arg2 limit
+	 * @param int $arg1
+	 * @param int $arg2
 	 * @return self
 	 */
 	public function limit($arg1, $arg2 = NULL)
@@ -1203,7 +1203,9 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 			return $this->offset($arg1);
 		}
 
-		$this->_limit = intval($arg1);
+		$this->_limit = is_null($arg1)
+			? NULL
+			: intval($arg1);
 
 		return $this;
 	}
@@ -1215,12 +1217,15 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * // OFFSET 10
 	 * $Core_QueryBuilder_Select->offset(10);
 	 * </code>
-	 * @param int $offset offset
+	 * @param int|NULL $offset offset
 	 * @return self
 	 */
 	public function offset($offset)
 	{
-		$this->_offset = intval($offset);
+		$this->_offset = is_null($offset)
+			? NULL
+			: intval($offset);
+			
 		return $this;
 	}
 

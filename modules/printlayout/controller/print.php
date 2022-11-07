@@ -26,14 +26,34 @@ abstract class Printlayout_Controller_Print extends Admin_Form_Action_Controller
 		'send'
 	);
 
+	/**
+	 * Core_Meta object
+	 * @var mixed
+	 */
 	protected $_oMeta = NULL;
 
+	/**
+	 * Object
+	 * @var mixed
+	 */
 	protected $_object = NULL;
 
+	/**
+	 * Email
+	 * @var mixed
+	 */
 	protected $_email = NULL;
 
+	/**
+	 * Printlayout_Controller
+	 * @var mixed
+	 */
 	protected $_oPrintlayout_Controller = NULL;
 
+	/**
+	 * New window id
+	 * @var string
+	 */
 	protected $_newWindowId = 'id_content';
 
 	/**
@@ -146,16 +166,16 @@ abstract class Printlayout_Controller_Print extends Admin_Form_Action_Controller
 				->class('btn btn-warning white mail-button')
 				->href('javascript:void(0);')
 				->onclick('
-					$("#' . $windowId . ' .modal-dialog").width("60%");
-					$("#' . $windowId . ' .modal-body").height(500);
+					$(".modal-dialog").width("60%");
+					$(".modal-body").height(550);
 
-					$("#' . $windowId . ' .control-group").addClass("printlayout-radio-inline");
+					$(".control-group").addClass("printlayout-radio-inline");
 
-					$("#' . $windowId . ' .download-button").addClass("hidden");
-					$("#' . $windowId . ' .mail-button").addClass("hidden");
-					$("#' . $windowId . ' .message-address, .message-text, .message-button, .deal-siteuser, .message-subject, .message-emails").removeClass("hidden");
+					$(".download-button").addClass("hidden");
+					$(".mail-button").addClass("hidden");
+					$(".message-address, .message-text, .message-button, .deal-siteuser, .message-subject, .message-emails").removeClass("hidden");
 
-					$("#' . $windowId . ' .email-select").select2({
+					$(".email-select").select2({
 						language: "' . Core_I18n::instance()->getLng() . '",
 						minimumInputLength: 2,
 						placeholder: "' . Core::_('Informationsystem_Item.type_tag') . '",
@@ -165,8 +185,8 @@ abstract class Printlayout_Controller_Print extends Admin_Form_Action_Controller
 						width: "100%"
 					});
 
-					$("#' . $windowId . ' input[name*=\"action\"]").val("sendMail");
-					$("#' . $windowId . ' input[name*=\"operation\"]").val("send");
+					$("input[name*=\"action\"]").val("sendMail");
+					$("input[name*=\"operation\"]").val("send");
 
 					$(this).closest("form").removeAttr("target");
 				')
@@ -222,10 +242,21 @@ abstract class Printlayout_Controller_Print extends Admin_Form_Action_Controller
 		return $this;
 	}
 
+	/**
+	 * Print
+	 * @return self
+	 */
 	abstract protected function _print();
 
+	/**
+	 * Prepare
+	 * @return self
+	 */
 	abstract protected function _prepare();
 
+	/**
+	 * Send
+	 */
 	protected function _send()
 	{
 		$oUser = Core_Auth::getCurrentUser();
@@ -334,6 +365,10 @@ abstract class Printlayout_Controller_Print extends Admin_Form_Action_Controller
 		}
 	}
 
+	/**
+	 * Row count
+	 * @var integer
+	 */
 	protected $_rowsCount = 0;
 
 	/**

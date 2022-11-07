@@ -10,7 +10,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - menu($menuId) вывод узлов структуры меню $menu, по умолчанию NULL (вывод из всех меню)
  * - parentId($parentId) идентификатор родительского узла, по умолчанию 0
  * - level($level) выводить узлы структуры только до уровня вложенности $level
- * - showProperties(TRUE|FALSE) выводить значения дополнительных свойств усзлов структуры, по умолчанию FALSE
+ * - showProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств узлов структуры, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
+ * - structurePropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств узлов структуры, по умолчанию FALSE.
  * - sortPropertiesValues(TRUE|FALSE) сортировать значения дополнительных свойств, по умолчанию TRUE.
  * - showInformationsystemGroups(TRUE|FALSE) выводить связанные с узлом структуры группы информационной системы, по умолчанию FALSE
  * - showInformationsystemItems(TRUE|FALSE) выводить связанные с узлом структуры информационные элементы, по умолчанию FALSE
@@ -59,6 +60,7 @@ class Structure_Controller_Show extends Core_Controller
 		'parentId',
 		'level',
 		'showProperties',
+		'structurePropertiesList',
 		'sortPropertiesValues',
 		'showInformationsystemGroups',
 		'showInformationsystemItems',
@@ -132,7 +134,9 @@ class Structure_Controller_Show extends Core_Controller
 			->orderBy('structures.sorting')
 			->orderBy('structures.name');
 
-		$this->showProperties = $this->showInformationsystemGroups = $this->showInformationsystemItems = $this->showShopGroups = $this->showShopItems = $this->showInformationsystemGroupProperties = $this->showInformationsystemItemProperties = $this->showShopGroupProperties = $this->showShopItemProperties = $this->showShopItemAssociated = FALSE;
+		$this->showProperties = $this->structurePropertiesList = $this->showInformationsystemGroups = $this->showInformationsystemItems
+			= $this->showShopGroups = $this->showShopItems = $this->showInformationsystemGroupProperties = $this->showInformationsystemItemProperties
+			= $this->showShopGroupProperties = $this->showShopItemProperties = $this->showShopItemAssociated = FALSE;
 
 		$this->showPanel = $this->cache = $this->sortPropertiesValues = TRUE;
 
@@ -169,7 +173,7 @@ class Structure_Controller_Show extends Core_Controller
 
 	/**
 	 * Structure object
-	 * @var array
+	 * @var object
 	 */
 	protected $_Structure = NULL;
 
@@ -253,6 +257,7 @@ class Structure_Controller_Show extends Core_Controller
 	 * Show built data
 	 * @return self
 	 * @hostcms-event Structure_Controller_Show.onBeforeRedeclaredShow
+	 * @hostcms-event Structure_Controller_Show.onBeforeAddStructurePropertiesList
 	 */
 	public function show()
 	{
@@ -305,11 +310,18 @@ class Structure_Controller_Show extends Core_Controller
 		}
 
 		// Показывать дополнительные свойства
-		if ($this->showProperties)
+		if ($this->structurePropertiesList)
 		{
 			$oStructure_Property_List = Core_Entity::factory('Structure_Property_List', $oSite->id);
 
-			$aProperties = $oStructure_Property_List->Properties->findAll(FALSE);
+			$oProperties = $oStructure_Property_List->Properties;
+			if (is_array($this->structurePropertiesList) && count($this->structurePropertiesList))
+			{
+				$oProperties->queryBuilder()
+					->where('properties.id', 'IN', $this->structurePropertiesList);
+			}
+			$aProperties = $oProperties->findAll(FALSE);
+
 			foreach ($aProperties as $oProperty)
 			{
 				$this->_aProperties[$oProperty->property_dir_id][] = $oProperty;
@@ -324,6 +336,8 @@ class Structure_Controller_Show extends Core_Controller
 				$oProperty_Dir->clearEntities();
 				$this->_aProperty_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
 			}
+
+			Core_Event::notify(get_class($this) . '.onBeforeAddStructurePropertiesList', $this);
 
 			$this->_addPropertyList(0, $this);
 		}
@@ -422,7 +436,8 @@ class Structure_Controller_Show extends Core_Controller
 				$this->_aTags[] = 'structure_' . $oStructure->id;
 
 				// Properties for structure entity
-				$oStructure->showXmlProperties($this->showProperties, $this->sortPropertiesValues);
+				$this->showProperties
+					&& $oStructure->showXmlProperties($this->showProperties, $this->sortPropertiesValues);
 
 				if (is_null($this->level) || $level < $this->level)
 				{
@@ -1101,6 +1116,7 @@ class Structure_Controller_Show extends Core_Controller
 	/**
 	 * Show frontend panel
 	 * @return $this
+	 * @hostcms-event Structure_Controller_Show.onBeforeShowPanel
 	 */
 	protected function _showPanel()
 	{
@@ -1110,12 +1126,7 @@ class Structure_Controller_Show extends Core_Controller
 			->style('display: none');
 
 		$oXslSubPanel = Core_Html_Entity::factory('Div')
-			->class('hostcmsSubPanel hostcmsXsl')
-			->add(
-				Core_Html_Entity::factory('Img')
-					->width(3)->height(16)
-					->src('/hostcmsfiles/images/drag_bg.gif')
-			);
+			->class('hostcmsSubPanel hostcmsXsl');
 
 		$sPath = '/admin/structure/index.php';
 		$sAdditional = "hostcms[action]=edit&hostcms[checked][0][0]=1";
@@ -1124,15 +1135,16 @@ class Structure_Controller_Show extends Core_Controller
 		$oXslSubPanel->add(
 			Core_Html_Entity::factory('A')
 				->href("{$sPath}?{$sAdditional}")
-				->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
+				->class('m0')
+				->onclick("hQuery.openWindow({path: '{$sPath}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
 				->add(
-					Core_Html_Entity::factory('Img')
-						->width(16)->height(16)
-						->src('/admin/images/structure_add.gif')
-						->alt($sTitle)
+					Core_Html_Entity::factory('I')
+						->class('fa-solid fa-sitemap fa-fw')
 						->title($sTitle)
 				)
 		);
+
+		Core_Event::notify(get_class($this) . '.onBeforeShowPanel', $this, array($oXslSubPanel));
 
 		$oXslPanel
 			->add($oXslSubPanel)

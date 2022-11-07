@@ -136,8 +136,8 @@ class Site_Alias_Model extends Core_Entity
 			$update_id = HOSTCMS_UPDATE_NUMBER;
 
 			// Формируем строку запроса
-			$url = 'http://' . HOSTCMS_UPDATE_SERVER . "/hostcmsupdate/key/?domain=".rawurlencode($this->alias_name_without_mask) .
-				'&protocol=' . (Core::httpsUses() ? 'https' : 'http') .
+			$url = 'https://' . HOSTCMS_UPDATE_SERVER . "/hostcmsupdate/key/?domain=".rawurlencode($this->alias_name_without_mask) .
+				'&protocol=' . ($oSite->https ? 'https' : 'http') .
 				"&login=" . rawurlencode($login) .
 				"&contract=" . rawurlencode($contract) .
 				"&pin=" . rawurlencode($pin) .
@@ -149,7 +149,7 @@ class Site_Alias_Model extends Core_Entity
 			$Core_Http = Core_Http::instance()
 				->url($url)
 				->port(80)
-				->timeout(5)
+				->timeout(10)
 				->execute();
 
 			$xml = $Core_Http->getDecompressedBody();
@@ -164,7 +164,7 @@ class Site_Alias_Model extends Core_Entity
 			else
 			{
 				$keyValue = NULL;
-				$error = 0;
+				$error = 99;
 			}
 
 			// Была передана ошибка
@@ -190,11 +190,12 @@ class Site_Alias_Model extends Core_Entity
 					throw new Core_Exception(Core::_('Site_Alias.server_error_respond_6'), array(), 0, FALSE);
 				break;
 				default:
+					Core_Message::show(sprintf('Error %d: %s', $Core_Http->getErrno(), $Core_Http->getError()), 'error');
 					throw new Core_Exception(Core::_('Site_Alias.server_error_respond_0'), array(), 0, FALSE);
 				break;
 			}
 
-			$aKeys = explode("\n", $oSite->key);
+			$aKeys = explode("\n", (string) $oSite->key);
 
 			// Ключа в массиве нет
 			if (!in_array($keyValue, $aKeys))

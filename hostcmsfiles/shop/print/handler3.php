@@ -136,7 +136,7 @@ class Shop_Print_Form_Handler3 extends Shop_Print_Form_Handler
 							<?php echo htmlspecialchars($oShopOrderItem->name)?>
 							</td>
 							<td class="text_align_center">
-							<?php echo htmlspecialchars($oShopOrderItem->Shop_Item->Shop_Measure->name)?>
+							<?php echo htmlspecialchars((string) $oShopOrderItem->Shop_Item->Shop_Measure->name)?>
 							</td>
 							<td class="text_align_center">
 							<?php echo $oShopOrderItem->quantity?>

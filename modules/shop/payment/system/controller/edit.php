@@ -123,7 +123,7 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 		// Добавляем новое поле типа файл
 		$oImageField = Admin_Form_Entity::factory('File');
 
-		$oLargeFilePath = is_file($this->_object->getPaymentSystemImageFilePath())
+		$oLargeFilePath = $this->_object->image != '' && is_file($this->_object->getPaymentSystemImageFilePath())
 			? $this->_object->getPaymentSystemImageFileHref()
 			: '';
 

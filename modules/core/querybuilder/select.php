@@ -660,14 +660,9 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 			$query[] = 'SQL_CALC_FOUND_ROWS';
 		}
 
-		if (!empty($this->_select))
-		{
-			$query[] = implode(', ', $this->_quoteColumns($this->_select));
-		}
-		else
-		{
-			$query[] = '*';
-		}
+		$query[] = !empty($this->_select)
+			? implode(', ', $this->_quoteColumns($this->_select))
+			: '*';
 
 		if (!empty($this->_from))
 		{

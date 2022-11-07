@@ -52,7 +52,7 @@ class Shop_Item_Digital_Controller_Edit extends Admin_Form_Action_Controller_Typ
 
 		$oImageField = Admin_Form_Entity::factory('File');
 
-		$sFilePath = is_file($this->_object->getFullFilePath())
+		$sFilePath = $this->_object->getFullFilePath() != '' && is_file($this->_object->getFullFilePath())
 			? $this->_object->getFullFilePath()
 			: '';
 

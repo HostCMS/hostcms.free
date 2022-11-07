@@ -32,7 +32,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - parentItem(123) идентификатор родительского товара для отображаемой модификации
  * - modifications(TRUE|FALSE) показывать модификации для выбранных товаров, по умолчанию FALSE
  * - modificationsList(TRUE|FALSE) показывать модификации товаров текущей группы на уровне товаров группы, по умолчанию FALSE
- * - modificationsGroup(TRUE|FALSE) группировать и показывать родительский товар вместо модификаций, по умолчанию FALSE
+ * - modificationsGroup(TRUE|FALSE) группировать и показывать родительский товар вместо модификаций, необходимо использовать совместно с modificationsList(TRUE), по умолчанию FALSE
  * - filterShortcuts(TRUE|FALSE) выбирать ярлыки товаров текущей группы на уровне товаров группы, по умолчанию FALSE. Используется для фильтрации по дополнительным свойствам
  * - addFilter() добавить условие отобра товаров, может задавать условие отобра по цене ->addFilter('price', '>', 100), по значению свойства ->addFilter('property', 17, '=', 1) или по основному свойству, например, ->addFilter('weight', '>=', 50)
  * - filterCounts(TRUE|FALSE) производить подсчет количества соответсвующих свойству значений в текущей группе при использовании быстрого фильтра, по умолчанию FALSE
@@ -920,9 +920,11 @@ class Shop_Controller_Show extends Core_Controller
 	 * Show built data
 	 * @return self
 	 * @hostcms-event Shop_Controller_Show.onBeforeRedeclaredShow
+	 * @hostcms-event Shop_Controller_Show.onBeforeSelectShopItems
 	 * @hostcms-event Shop_Controller_Show.onBeforeAddGroupsPropertiesList
 	 * @hostcms-event Shop_Controller_Show.onBeforeAddShopItems
 	 * @hostcms-event Shop_Controller_Show.onAfterAddShopItems
+	 * @hostcms-event Shop_Controller_Show.onBeforeAddCartItem
 	 * @hostcms-event Shop_Controller_Show.onBeforeAddShortcut
 	 */
 	public function show()
@@ -1086,12 +1088,17 @@ class Shop_Controller_Show extends Core_Controller
 						$oShop_Item = Core_Entity::factory('Shop_Item')->find($oShop_Cart->shop_item_id);
 						if (!is_null($oShop_Item->id) && $oShop_Item->active)
 						{
-							$this->applyItemsForbiddenTags($oShop_Item->clearEntities());
+							$oShop_Item_Into_Cart = clone $oShop_Item;
+							$oShop_Item_Into_Cart->id($oShop_Item->id);
 
-							$this->itemsProperties && $oShop_Item->showXmlProperties($this->itemsProperties, $this->sortPropertiesValues);
-							!$this->sets && $oShop_Item->showXmlSets($this->sets);
+							Core_Event::notify(get_class($this).'.onBeforeAddCartItem', $this, array($oShop_Item_Into_Cart));
 
-							$oCartEntity->addEntity($oShop_Item);
+							$this->applyItemsForbiddenTags($oShop_Item_Into_Cart->clearEntities());
+
+							$this->itemsProperties && $oShop_Item_Into_Cart->showXmlProperties($this->itemsProperties, $this->sortPropertiesValues);
+							!$this->sets && $oShop_Item_Into_Cart->showXmlSets($this->sets);
+
+							$oCartEntity->addEntity($oShop_Item_Into_Cart);
 						}
 					}
 				}
@@ -1179,6 +1186,8 @@ class Shop_Controller_Show extends Core_Controller
 
 			// Apply $this->warehouseMode
 			$this->_applyWarehouseConditions($this->_Shop_Items);
+
+			Core_Event::notify(get_class($this) . '.onBeforeSelectShopItems', $this, array($this->_Shop_Items));
 
 			// Disable cache (objectWatcher) while modificationsGroup because we use dataTmpId
 			$aShop_Items = $this->_Shop_Items->findAll(!$this->modificationsGroup);
@@ -1597,7 +1606,7 @@ class Shop_Controller_Show extends Core_Controller
 
 					$oQueryBuilder = $this->prepareFastfilterQbForProperty($oProperty, $distinctField, $columnName);
 
-					// от и до
+					// Не "от и до"
 					if ($oShop_Item_Property->filter != 6)
 					{
 						if ($this->itemsPropertiesListJustAvailable
@@ -1680,20 +1689,20 @@ class Shop_Controller_Show extends Core_Controller
 							{
 								case 8: // date
 									$min = $aRow['min'] != '0000-00-00 00:00:00'
-										? strftime($oShop->format_date, Core_Date::sql2timestamp($aRow['min']))
+										? Core_Date::strftime($oShop->format_date, Core_Date::sql2timestamp($aRow['min']))
 										: '';
 
 									$max = $aRow['max'] != '0000-00-00 00:00:00'
-										? strftime($oShop->format_date, Core_Date::sql2timestamp($aRow['max']))
+										? Core_Date::strftime($oShop->format_date, Core_Date::sql2timestamp($aRow['max']))
 										: '';
 								break;
 								case 9: //datetime
 									$min = $aRow['min'] != '0000-00-00 00:00:00'
-										? strftime($oShop->format_datetime, Core_Date::sql2timestamp($aRow['min']))
+										? Core_Date::strftime($oShop->format_datetime, Core_Date::sql2timestamp($aRow['min']))
 										: '';
 
 									$max = $aRow['max'] != '0000-00-00 00:00:00'
-										? strftime($oShop->format_datetime, Core_Date::sql2timestamp($aRow['max']))
+										? Core_Date::strftime($oShop->format_datetime, Core_Date::sql2timestamp($aRow['max']))
 										: '';
 								break;
 								default:
@@ -1761,8 +1770,7 @@ class Shop_Controller_Show extends Core_Controller
 			//->columns($args)
 			//->clearSelect()
 			->from($tableName)
-			//->open()
-				->whereRaw(1);
+			->whereRaw(1);
 
 		call_user_func_array(array($oQueryBuilder, 'columns'), $args);
 
@@ -1790,27 +1798,10 @@ class Shop_Controller_Show extends Core_Controller
 			}
 
 			// Если не было дополнительных ограничений выше (1 - это whereRaw), то и не имеет смысла использовать OR subquery, работа ведется и так по всей таблице
-			if (count($oQueryBuilder->getWhere()) > 1)
+			// $this->filterCounts при получении количества для списков, ограничения на свойства заданы не будут и условие count($oQueryBuilder->getWhere()) > 1 не выполнится
+			if (count($oQueryBuilder->getWhere()) > 1 || $this->filterCounts)
 			{
-				$oCore_QueryBuilder_Select_Shortcuts = Core_QueryBuilder::select()
-					//->columns($args)
-					->from($tableName)
-					->join('shop_items', $tableName . '.shop_item_id', '=', 'shop_items.shortcut_id')
-					->where('shop_items.deleted', '=', 0)
-					->where('shop_items.shortcut_id', '>', 0);
-
-				call_user_func_array(array($oCore_QueryBuilder_Select_Shortcuts, 'columns'), $args);
-
-				$this->applyFilterGroupCondition($oCore_QueryBuilder_Select_Shortcuts, 'shop_items.shop_group_id');
-
-				// Стандартные ограничения для товаров
-				$this->_applyItemConditionsQueryBuilder($oCore_QueryBuilder_Select_Shortcuts);
-
-				// Ограничения на активность товаров
-				$this->_setItemsActivity($oCore_QueryBuilder_Select_Shortcuts);
-
-				$this->producer
-					&& $oCore_QueryBuilder_Select_Shortcuts->where($tableName . '.shop_producer_id', is_array($this->producer) ? 'IN' : '=', $this->producer);
+				$oCore_QueryBuilder_Select_Shortcuts = $this->_subquerySelectShortcuts('shop_item_id', $args);
 
 				// Filter by properties
 				$this->applyFastFilterProperties($oCore_QueryBuilder_Select_Shortcuts, array($oProperty->id));
@@ -1819,13 +1810,50 @@ class Shop_Controller_Show extends Core_Controller
 				$this->applyFastFilterPrices($oCore_QueryBuilder_Select_Shortcuts);
 
 				$oQueryBuilder->unionAll($oCore_QueryBuilder_Select_Shortcuts);
+
+				if ($this->modificationsList)
+				{
+					$oCore_QueryBuilder_Select_Shortcuts = $this->_subquerySelectShortcuts('modification_id', $args);
+
+					// Filter by properties
+					$this->applyFastFilterProperties($oCore_QueryBuilder_Select_Shortcuts, array($oProperty->id));
+
+					// Filter by prices
+					$this->applyFastFilterPrices($oCore_QueryBuilder_Select_Shortcuts);
+
+					$oQueryBuilder->unionAll($oCore_QueryBuilder_Select_Shortcuts);
+				}
 			}
 		}
 
-		//$oQueryBuilder->close();
-
-		//return $oQueryBuilder;
 		return Core_QueryBuilder::select()->from(array($oQueryBuilder, 'filterProperty'));
+	}
+
+	protected function _subquerySelectShortcuts($fieldName, $columns)
+	{
+		$tableName = $this->getFilterTableName();
+
+		$oCore_QueryBuilder_Select_Shortcuts = Core_QueryBuilder::select()
+			//->columns($args) // see below
+			->from($tableName)
+			->join('shop_items', $tableName . '.' . $fieldName, '=', 'shop_items.shortcut_id') // $fieldName is `shop_item_id` OR `modification_id`
+			->where('shop_items.deleted', '=', 0)
+			->where('shop_items.shortcut_id', '>', 0);
+
+		call_user_func_array(array($oCore_QueryBuilder_Select_Shortcuts, 'columns'), $columns);
+
+		$this->applyFilterGroupCondition($oCore_QueryBuilder_Select_Shortcuts, 'shop_items.shop_group_id');
+
+		// Стандартные ограничения для товаров
+		$this->_applyItemConditionsQueryBuilder($oCore_QueryBuilder_Select_Shortcuts);
+
+		// Ограничения на активность товаров
+		$this->_setItemsActivity($oCore_QueryBuilder_Select_Shortcuts);
+
+		$this->producer
+			&& $oCore_QueryBuilder_Select_Shortcuts->where($tableName . '.shop_producer_id', is_array($this->producer) ? 'IN' : '=', $this->producer);
+
+		return $oCore_QueryBuilder_Select_Shortcuts;
 	}
 
 	/**
@@ -2626,7 +2654,7 @@ class Shop_Controller_Show extends Core_Controller
 								elseif ($oShop_Item_Property->filter != 5 && $oShop_Item_Property->filter != 6)
 								{
 									$step = 'filterValue';
-									
+
 									// Значений для этого фильтра еще не было, сохраняем NULL
 									$aPropertyValuesToSet = NULL;
 								}
@@ -2799,7 +2827,7 @@ class Shop_Controller_Show extends Core_Controller
 						return $this->error404();
 				}
 			}
-			
+
 			// Был указан фильтр, требующий значений, но значения заданы не были
 			if ($step == 'filterValue' && !is_null($oProperty) && is_null($aPropertyValuesToSet))
 			{
@@ -3048,7 +3076,7 @@ class Shop_Controller_Show extends Core_Controller
 						$oCore_Meta
 							->addObject('shop', $oShop)
 							->addObject('this', $this);
-							
+
 						if ($oShop->seo_root_title_template != '')
 						{
 							$seo_title = $oCore_Meta->apply($oShop->seo_root_title_template);
@@ -3360,25 +3388,35 @@ class Shop_Controller_Show extends Core_Controller
 			$oShortcut_Group = $oShop_Group;
 			$oOriginal_Shop_Group = $oShop_Group->Shortcut;
 
-			$oShop_Group = clone $oOriginal_Shop_Group;
+			if ($oOriginal_Shop_Group->active
+				&& (!$oOriginal_Shop_Group->parent_id || $oOriginal_Shop_Group->getParent()->active)
+			)
+			{
+				$oShop_Group = clone $oOriginal_Shop_Group;
 
-			$oShop_Group
-				->id($oOriginal_Shop_Group->id)
-				->addForbiddenTag('parent_id')
-				->addForbiddenTag('shortcut_id')
-				->addEntity(
-					Core::factory('Core_Xml_Entity')
-						->name('shortcut_id')
-						->value($oShortcut_Group->id)
-				)
-				->addEntity(
-					Core::factory('Core_Xml_Entity')
-						->name('parent_id')
-						->value($oShortcut_Group->parent_id)
-				);
+				$oShop_Group
+					->id($oOriginal_Shop_Group->id)
+					->addForbiddenTag('parent_id')
+					->addForbiddenTag('shortcut_id')
+					->addEntity(
+						Core::factory('Core_Xml_Entity')
+							->name('shortcut_id')
+							->value($oShortcut_Group->id)
+					)
+					->addEntity(
+						Core::factory('Core_Xml_Entity')
+							->name('parent_id')
+							->value($oShortcut_Group->parent_id)
+					);
+			}
+			else
+			{
+				$oShop_Group = NULL;
+			}
 		}
 
-		$this->_aShop_Groups[$parent_id][] = $oShop_Group;
+		!is_null($oShop_Group)
+			&& $this->_aShop_Groups[$parent_id][] = $oShop_Group;
 
 		return $this;
 	}
@@ -3727,6 +3765,7 @@ class Shop_Controller_Show extends Core_Controller
 	/**
 	 * Show frontend panel
 	 * @return $this
+	 * @hostcms-event Shop_Controller_Show.onBeforeShowPanel
 	 */
 	protected function _showPanel()
 	{
@@ -3738,12 +3777,7 @@ class Shop_Controller_Show extends Core_Controller
 			->style('display: none');
 
 		$oXslSubPanel = Core_Html_Entity::factory('Div')
-			->class('hostcmsSubPanel hostcmsXsl')
-			->add(
-				Core_Html_Entity::factory('Img')
-					->width(3)->height(16)
-					->src('/hostcmsfiles/images/drag_bg.gif')
-			);
+			->class('hostcmsSubPanel hostcmsXsl');
 
 		if ($this->item == 0 && !is_array($this->group))
 		{
@@ -3754,13 +3788,11 @@ class Shop_Controller_Show extends Core_Controller
 			$oXslSubPanel->add(
 				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
-					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
+					->onclick("hQuery.openWindow({path: '{$sPath}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
 					->add(
-						Core_Html_Entity::factory('Img')
-							->width(16)->height(16)
-							->src('/admin/images/page_add.gif')
-							->alt($sTitle)
+						Core_Html_Entity::factory('I')
 							->title($sTitle)
+							->class("fa-solid fa-file-circle-plus fa-fw")
 					)
 			);
 
@@ -3771,13 +3803,11 @@ class Shop_Controller_Show extends Core_Controller
 			$oXslSubPanel->add(
 				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
-					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
+					->onclick("hQuery.openWindow({path: '{$sPath}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
 					->add(
-						Core_Html_Entity::factory('Img')
-							->width(16)->height(16)
-							->src('/admin/images/folder_add.gif')
-							->alt($sTitle)
+						Core_Html_Entity::factory('I')
 							->title($sTitle)
+							->class('fa-solid fa-folder-plus fa-fw')
 					)
 			);
 
@@ -3793,13 +3823,11 @@ class Shop_Controller_Show extends Core_Controller
 				$oXslSubPanel->add(
 					Core_Html_Entity::factory('A')
 						->href("{$sPath}?{$sAdditional}")
-						->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
+						->onclick("hQuery.openWindow({path: '{$sPath}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
 						->add(
-							Core_Html_Entity::factory('Img')
-								->width(16)->height(16)
-								->src('/admin/images/folder_edit.gif')
-								->alt($sTitle)
+							Core_Html_Entity::factory('I')
 								->title($sTitle)
+								->class('fa-solid fa-pen folder fa-fw')
 						)
 				);
 			}
@@ -3812,13 +3840,11 @@ class Shop_Controller_Show extends Core_Controller
 			$oXslSubPanel->add(
 				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
-					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
+					->onclick("hQuery.openWindow({path: '{$sPath}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
 					->add(
-						Core_Html_Entity::factory('Img')
-							->width(16)->height(16)
-							->src('/admin/images/folder.gif')
-							->alt($sTitle)
+						Core_Html_Entity::factory('I')
 							->title($sTitle)
+							->class('fa-solid fa-folder fa-fw')
 					)
 			);
 
@@ -3832,33 +3858,14 @@ class Shop_Controller_Show extends Core_Controller
 				$oXslSubPanel->add(
 					Core_Html_Entity::factory('A')
 						->href("{$sPath}?{$sAdditional}")
-						->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'});} return false")
+						->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { hQuery.openWindow({path: '{$sPath}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'});} return false")
 						->add(
-							Core_Html_Entity::factory('Img')
-								->width(16)->height(16)
-								->src('/admin/images/delete.gif')
-								->alt($sTitle)
+							Core_Html_Entity::factory('I')
 								->title($sTitle)
+								->class('fa-solid fa-trash-can fa-fw')
 						)
 				);
 			}
-
-			$sPath = '/admin/shop/index.php';
-			$sAdditional = "hostcms[action]=edit&shop_dir_id={$oShop->shop_dir_id}&hostcms[checked][1][{$oShop->id}]=1";
-			$sTitle = Core::_('Shop.edit_title', $oShop->name);
-
-			$oXslSubPanel->add(
-				Core_Html_Entity::factory('A')
-					->href("{$sPath}?{$sAdditional}")
-					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
-					->add(
-						Core_Html_Entity::factory('Img')
-							->width(16)->height(16)
-							->src('/admin/images/folder_page_edit.gif')
-							->alt($sTitle)
-							->title($sTitle)
-					)
-			);
 		}
 		elseif ($this->item)
 		{
@@ -3872,13 +3879,11 @@ class Shop_Controller_Show extends Core_Controller
 			$oXslSubPanel->add(
 				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
-					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
+					->onclick("hQuery.openWindow({path: '{$sPath}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
 					->add(
-						Core_Html_Entity::factory('Img')
-							->width(16)->height(16)
-							->src('/admin/images/edit.gif')
-							->alt($sTitle)
+						Core_Html_Entity::factory('I')
 							->title($sTitle)
+							->class('fa-solid fa-pen item fa-fw')
 					)
 			);
 
@@ -3890,13 +3895,11 @@ class Shop_Controller_Show extends Core_Controller
 			$oXslSubPanel->add(
 				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
-					->onclick("res = confirm('".Core::_('Admin_Form.confirm_dialog', htmlspecialchars($sTitle))."'); if (res) { hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false } else { return false } ")
+					->onclick("res = confirm('".Core::_('Admin_Form.confirm_dialog', htmlspecialchars($sTitle))."'); if (res) { hQuery.openWindow({path: '{$sPath}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false } else { return false } ")
 					->add(
-						Core_Html_Entity::factory('Img')
-							->width(16)->height(16)
-							->src('/admin/images/copy.gif')
-							->alt($sTitle)
+						Core_Html_Entity::factory('I')
 							->title($sTitle)
+							->class('fa-solid fa-copy fa-fw')
 					)
 			);
 
@@ -3908,13 +3911,11 @@ class Shop_Controller_Show extends Core_Controller
 			$oXslSubPanel->add(
 				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
-					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
+					->onclick("hQuery.openWindow({path: '{$sPath}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
 					->add(
-						Core_Html_Entity::factory('Img')
-							->width(16)->height(16)
-							->src('/admin/images/folder.gif')
-							->alt($sTitle)
+						Core_Html_Entity::factory('I')
 							->title($sTitle)
+							->class('fa-solid fa-folder fa-fw')
 					)
 			);
 
@@ -3926,13 +3927,11 @@ class Shop_Controller_Show extends Core_Controller
 			$oXslSubPanel->add(
 				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
-					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
+					->onclick("hQuery.openWindow({path: '{$sPath}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
 					->add(
-						Core_Html_Entity::factory('Img')
-							->width(16)->height(16)
-							->src('/admin/images/comments.gif')
-							->alt($sTitle)
+						Core_Html_Entity::factory('I')
 							->title($sTitle)
+							->class('fa-solid fa-comments fa-fw')
 					)
 			);
 
@@ -3944,16 +3943,16 @@ class Shop_Controller_Show extends Core_Controller
 			$oXslSubPanel->add(
 				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
-					->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'});} return false")
+					->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { hQuery.openWindow({path: '{$sPath}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'});} return false")
 					->add(
-						Core_Html_Entity::factory('Img')
-							->width(16)->height(16)
-							->src('/admin/images/delete.gif')
-							->alt($sTitle)
+						Core_Html_Entity::factory('I')
 							->title($sTitle)
+							->class('fa-solid fa-trash-can fa-fw')
 					)
 			);
 		}
+
+		Core_Event::notify(get_class($this) . '.onBeforeShowPanel', $this, array($oXslSubPanel));
 
 		$oXslPanel
 			->add($oXslSubPanel)
@@ -4183,11 +4182,11 @@ class Shop_Controller_Show extends Core_Controller
 		$this->addEntity(
 			Core::factory('Core_Xml_Entity')
 				->name('min_price')
-				->value(floor($min))
+				->value(floor(floatval($min)))
 		)->addEntity(
 			Core::factory('Core_Xml_Entity')
 				->name('max_price')
-				->value(ceil($max))
+				->value(ceil(floatval($max)))
 		);
 
 		return $this;

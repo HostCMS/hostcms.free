@@ -92,7 +92,8 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		"YANDEX_MARKET",
 		"ПРОДАВЕЦ",
 		"ПРОИЗВОДИТЕЛЬ",
-		"АКТИВНОСТЬ");
+		"АКТИВНОСТЬ"
+	);
 
 	/**
 	 * List of predefined base properties (ЗначениеРеквизита)

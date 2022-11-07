@@ -174,6 +174,13 @@ abstract class Core_Html_Entity extends Core_Servant_Properties
 		return $this;
 	}
 
+	/**
+	 * Find
+	 * @param object $haystack
+	 * @param object $object
+	 * @return array|FALSE
+	 * @ignore
+	 */
 	protected function _find($haystack, $object)
 	{
 		$aChildren = $haystack->getChildren();
@@ -200,6 +207,13 @@ abstract class Core_Html_Entity extends Core_Servant_Properties
 		return FALSE;
 	}
 
+	/**
+	 * Add before
+	 * @param int $key
+	 * @param Core_Html_Entity $oCore_Html_Entity
+	 * @return self
+	 * @ignore
+	 */
 	protected function _addBefore($key, $oCore_Html_Entity)
 	{
 		array_splice($this->_children, $key, 0, array($oCore_Html_Entity));
@@ -235,6 +249,13 @@ abstract class Core_Html_Entity extends Core_Servant_Properties
 		);
 	}
 
+	/**
+	 * Add after
+	 * @param int $key
+	 * @param Core_Html_Entity $oCore_Html_Entity
+	 * @return self
+	 * @ignore
+	 */
 	protected function _addAfter($key, $oCore_Html_Entity)
 	{
 		array_splice($this->_children, $key + 1, 0, array($oCore_Html_Entity));
@@ -271,6 +292,13 @@ abstract class Core_Html_Entity extends Core_Servant_Properties
 		);
 	}
 
+	/**
+	 * Delete object
+	 * @param object $oSource_Object
+	 * @param Core_Html_Entity $oCore_Html_Entity
+	 * @return boolean
+	 * @ignore
+	 */
 	protected function _deleteObject($oSource_Object, $Core_Html_Entity)
 	{
 		$haystack = $oSource_Object->getChildren();

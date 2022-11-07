@@ -1,6 +1,8 @@
 <?php
 
 return array(
+	'copy_success' => 'Група шорткодов успішно скопійована!',
+	'model_name' => 'Групи шорткодов',
 	'shortcode_dir_add_form_title' => 'Додавання групи шорткодів',
 	'shortcode_dir_edit_form_title' => 'Редагування групи шорткодів "%s"',
 	'name' => 'Назва',

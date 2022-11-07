@@ -327,7 +327,7 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$lng = $this->_object->loadLngFile($sLng);
 
-					!strlen($lng) && $lng = <<<EOD
+					$lng == '' && $lng = <<<EOD
 <?php
 /**
  * Template i18n

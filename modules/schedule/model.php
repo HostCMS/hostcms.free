@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Schedule
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Schedule_Model extends Core_Entity
 {
@@ -92,10 +92,10 @@ class Schedule_Model extends Core_Entity
 	 */
 	public function actionNameBackend()
 	{
-		$return = htmlspecialchars($this->getActionName());
+		$return = htmlspecialchars((string) $this->getActionName());
 
 		$this->entity_id
-			&& $return .= ' <span class="badge badge-square badge-info">' . htmlspecialchars($this->entity_id) . '</span>';
+			&& $return .= ' <span class="badge badge-square badge-info">' . htmlspecialchars((string) $this->entity_id) . '</span>';
 
 		return $return;
 	}

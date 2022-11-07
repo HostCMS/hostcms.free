@@ -7,21 +7,70 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Calendar
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Calendar_Caldav_Controller extends Core_Servant_Properties
 {
+	/**
+	 * Error code
+	 * @var mixed
+	 */
 	protected $_errno = NULL;
+
+	/**
+	 * Error
+	 * @var mixed
+	 */
 	protected $_error = NULL;
+
+	/**
+	 * Client
+	 * @var mixed
+	 */
 	protected $_client = NULL;
+
+	/**
+	 * Calendar url
+	 * @var mixed
+	 */
 	protected $_calendar_url = NULL;
+
+	/**
+	 * Url
+	 * @var mixed
+	 */
 	protected $_url = NULL;
+
+	/**
+	 * Username
+	 * @var mixed
+	 */
 	protected $_username = NULL;
+
+	/**
+	 * Password
+	 * @var mixed
+	 */
 	protected $_password = NULL;
+
+	/**
+	 * Host
+	 * @var mixed
+	 */
 	protected $_host = NULL;
+
+	/**
+	 * Data
+	 * @var mixed
+	 */
 	protected $_data = NULL;
+
+	/**
+	 * Events list
+	 * @var array
+	 */
 	protected $_list_events = array();
 
 	/**
@@ -33,11 +82,11 @@ abstract class Calendar_Caldav_Controller extends Core_Servant_Properties
 	/**
 	 * Get full driver name
 	 * @param string $driver driver name
-	 * @return srting
+	 * @return string
 	 */
 	static protected function _getDriverName($driver)
 	{
-		return 'Calendar_Caldav_' . ucfirst($driver) . '_Controller';
+		return 'Calendar_Caldav_Handler_' . ucfirst($driver);
 	}
 
 	/**
@@ -112,7 +161,7 @@ abstract class Calendar_Caldav_Controller extends Core_Servant_Properties
 
 		return $this;
 	}
-	
+
 	/**
 	 * Get calendar data
 	 */
@@ -160,35 +209,42 @@ abstract class Calendar_Caldav_Controller extends Core_Servant_Properties
 	}
 
 	/**
-	 * XML to array
-	 * @param SimpleXMLElement $xmlObject XML
-	 * @return array
+	 * Connect
 	 */
-	public function xml2array($xmlObject)
-	{
-		$aReturn = array();
-
-		foreach ((array)$xmlObject as $index => $node)
-		{
-			$aReturn[$index] = (is_object($node))
-				? $this->xml2array($node)
-				: $node;
-		}
-
-		return $aReturn;
-	}
-
 	abstract public function connect();
 
+	/**
+	 * Find calendar
+	 */
 	abstract public function findCalendars();
 
+	/**
+	 * Set calendar
+	 * @param array $aCalendar
+	 */
 	abstract public function setCalendar(array $aCalendar);
 
+	/**
+	 * Save
+	 * @param string $sCalendar
+	 */
 	abstract public function save($sCalendar);
 
+	/**
+	 * Delete
+	 * @param string $sUrl
+	 */
 	abstract public function delete($sUrl);
-	
+
+	/**
+	 * applyObjectProperty
+	 * @param Calendar_Caldav_User_Controller_Edit $oCalendar_Caldav_User_Controller_Edit
+	 */
 	abstract public function applyObjectProperty($oCalendar_Caldav_User_Controller_Edit);
-	
+
+	/**
+	 * Show second window
+	 * @param Calendar_Caldav_User_Controller_Edit $oCalendar_Caldav_User_Controller_Edit
+	 */
 	abstract public function showSecondWindow($oCalendar_Caldav_User_Controller_Edit);
 }

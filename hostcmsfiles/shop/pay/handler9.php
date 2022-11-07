@@ -399,7 +399,7 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 	}
 
 	// Вывод сообщения об успешности/неуспешности оплаты
-	function ShowResultMessage()
+	public function ShowResultMessage()
 	{
 		$oShop_Order = $this->_shopOrder;
 

@@ -4,11 +4,13 @@
  *
  * @package HostCMS
  * @subpackage Shortcode
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
+	'copy_success' => 'Shortcode group copied successfully!',
+	'model_name' => 'Shortcode groups',
 	'shortcode_dir_add_form_title' => 'Shortcode Sections',
 	'shortcode_dir_edit_form_title' => 'Edit Shortcode Sections',
 	'name' => 'Name',

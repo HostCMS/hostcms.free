@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Benchmark
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Benchmark_Model extends Core_Entity
 {
@@ -128,6 +128,10 @@ class Benchmark_Model extends Core_Entity
 		return 100 - ($this->mail - $this->etalon_mail) * 100;
 	}
 
+	/**
+	 * Get benchmark
+	 * @return int
+	 */
 	public function getBenchmark()
 	{
 		return ceil(

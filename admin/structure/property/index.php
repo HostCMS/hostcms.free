@@ -3,9 +3,9 @@
  * Structure.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -36,7 +36,6 @@ $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Property.menu'))
 		->icon('fa fa-plus')
-		->img('/admin/images/page_gear_add.gif')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
 		)
@@ -48,7 +47,6 @@ $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Property_Dir.menu'))
 		->icon('fa fa-plus')
-		->img('/admin/images/folder_gear_add.gif')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
@@ -218,6 +216,61 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($oControllerCopy);
+}
+
+// Действие "Перенести"
+$oAdminFormActionMove = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('move');
+
+if ($oAdminFormActionMove && $oAdmin_Form_Controller->getAction() == 'move')
+{
+	$Admin_Form_Action_Controller_Type_Move = Admin_Form_Action_Controller::factory(
+		'Admin_Form_Action_Controller_Type_Move', $oAdminFormActionMove
+	);
+
+	$Admin_Form_Action_Controller_Type_Move
+		->title(Core::_('Property.move_title'))
+		->selectCaption(Core::_('Property.move_dir_id'))
+		->value($property_dir_id);
+
+	$linkedObject = Core_Entity::factory('Structure_Property_List', CURRENT_SITE);
+
+	$aExclude = array();
+
+	$aChecked = $oAdmin_Form_Controller->getChecked();
+
+	foreach ($aChecked as $datasetKey => $checkedItems)
+	{
+		// Exclude just dirs
+		if ($datasetKey == 0)
+		{
+			foreach ($checkedItems as $key => $value)
+			{
+				$aExclude[] = $key;
+			}
+		}
+	}
+
+	$Admin_Form_Action_Controller_Type_Move
+		// Список директорий генерируется другим контроллером
+		->selectOptions(array(' … ') + Property_Controller_Edit::fillPropertyDir($linkedObject, 0, $aExclude));
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($Admin_Form_Action_Controller_Type_Move);
+}
+
+// Действие "Объединить"
+$oAdminFormActionMerge = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('merge');
+
+if ($oAdminFormActionMerge && $oAdmin_Form_Controller->getAction() == 'merge')
+{
+	$oAdmin_Form_Action_Controller_Type_Merge = new Admin_Form_Action_Controller_Type_Merge($oAdminFormActionMerge);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oAdmin_Form_Action_Controller_Type_Merge);
 }
 
 // Источник данных 0

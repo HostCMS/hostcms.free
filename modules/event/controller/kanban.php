@@ -13,6 +13,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  */
 class Event_Controller_Kanban extends Admin_Form_Controller_View
 {
+
+	/**
+	 * Executes the business logic.
+	 * @return self
+	 */
 	public function execute()
 	{
 		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
@@ -203,7 +208,7 @@ class Event_Controller_Kanban extends Admin_Form_Controller_View
 											<a class="evetn-title name" onclick="$.modalLoad({path: '/admin/event/index.php', action: 'edit',operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oEntity->id?>]=1&parentWindowId=id_content', windowId: 'id_content', width: '90%'});"><?php echo htmlspecialchars($oEntity->name)?></a>
 										</div>
 										<?php
-										if (strlen($oEntity->description))
+										if ($oEntity->description != '')
 										{
 											?><div class="crm-description">
 												<span><?php echo htmlspecialchars($oEntity->description)?></span>

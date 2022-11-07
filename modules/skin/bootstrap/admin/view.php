@@ -78,6 +78,10 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 		return $this;
 	}
 
+	/**
+	 * Show title
+	 * @return self
+	 */
 	public function showTitle()
 	{
 		$title = !is_null($this->module)
@@ -87,7 +91,7 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 				: $this->pageTitle;
 
 		// Заголовок
-		if (strlen($title))
+		if ($title != '')
 		{
 			?><div class="page-header position-relative">
 			<div class="header-title">
@@ -134,6 +138,9 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 		return $this;
 	}
 
+	/**
+	 * Show
+	 */
 	public function show()
 	{
 		$this->showFormBreadcrumbs();
@@ -144,7 +151,7 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 			// Заголовок формы
 			//$this->showH5($this->pageTitle, $this->module);
 
-			if (is_object($this->pageTitle) || strlen($this->pageTitle))
+			if (is_object($this->pageTitle) || strlen((string) $this->pageTitle))
 			{
 				$ico = !is_null($this->module)
 					&& ($aMenu = $this->module->getMenu())

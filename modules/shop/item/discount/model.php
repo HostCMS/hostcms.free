@@ -174,12 +174,14 @@ class Shop_Item_Discount_Model extends Core_Entity
 
 				foreach ($aSiteuserCompanies as $oSiteuserCompany)
 				{
-					$sResult .= $oSiteuserCompany->getProfileBlock();
+					$oSiteuserCompany->id
+						&& $sResult .= $oSiteuserCompany->getProfileBlock();
 				}
 
 				foreach ($aSiteuserPersons as $oSiteuserPerson)
 				{
-					$sResult .= $oSiteuserPerson->getProfileBlock();
+					$oSiteuserPerson->id
+						&& $sResult .= $oSiteuserPerson->getProfileBlock();
 				}
 
 				$sResult .= '</ul></div>';

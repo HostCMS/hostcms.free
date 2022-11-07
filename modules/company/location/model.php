@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Company
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Company_Location_Model extends Core_Entity
 {
@@ -104,7 +104,7 @@ class Company_Location_Model extends Core_Entity
 	 */
  	public function company_department_idBackend()
 	{
-		return htmlspecialchars($this->Company_Department->name);
+		return htmlspecialchars((string) $this->Company_Department->name);
 	}
 
 	/**
@@ -118,6 +118,11 @@ class Company_Location_Model extends Core_Entity
 			: '';
 	}
 
+	/**
+	 * Get path name to root
+	 * @param string $sGlue separator
+	 * @return string
+	 */
 	public function getPathName2Root($sGlue = ' / ')
 	{
 		$sReturn = $this->name;

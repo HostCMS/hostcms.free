@@ -189,6 +189,17 @@ class Property_Model extends Core_Entity
 
 		return $this;
 	}
+	
+	/**
+	 * Get all values for property
+	 * @return array
+	 */
+	public function getAllValues()
+	{
+		$this->loadAllValues();
+		
+		return $this->_aAllValues;
+	}
 
 	/**
 	 * Получить значение свойства объекта по идентификатору $valueId в таблице значений
@@ -442,6 +453,10 @@ class Property_Model extends Core_Entity
 			{
 				$newObject->add(clone $this->Shop_Order_Property);
 			}
+			elseif (Core::moduleIsActive('deal') && !is_null($this->Deal_Template_Property->id))
+			{
+				$newObject->add(clone $this->Deal_Template_Property);
+			}
 		}
 
 		return $newObject;
@@ -604,7 +619,7 @@ class Property_Model extends Core_Entity
 				$this->List->clearEntities()
 			);
 
-			if (!isset($this->_forbiddenTags['list_items']) && 
+			if (!isset($this->_forbiddenTags['list_items']) &&
 				(is_bool($this->_config['add_list_items']) && $this->_config['add_list_items']
 					|| is_array($this->_config['add_list_items']) && in_array($this->id, $this->_config['add_list_items'])
 				)
@@ -685,6 +700,12 @@ class Property_Model extends Core_Entity
 		return $this;
 	}
 
+	/**
+	 * Add list items
+	 * @param int $parentId
+	 * @param object $oObject
+	 * @return self
+	 */
 	protected function _addListItems($parentId, $oObject)
 	{
 		if (isset($this->_aListItemsTree[$parentId]))
@@ -700,11 +721,19 @@ class Property_Model extends Core_Entity
 		return $this;
 	}
 
+	/**
+	 * Type backend
+	 * @return string
+	 */
 	public function typeBackend()
 	{
 		return Core::_('Property.type' . $this->type);
 	}
 
+	/**
+	 * Descroption backend
+	 * @return string
+	 */
 	public function descriptionBackend()
 	{
 		return Core_Str::cut(strip_tags($this->description), 100);

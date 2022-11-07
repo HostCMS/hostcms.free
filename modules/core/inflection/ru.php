@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Inflection
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Inflection_Ru extends Core_Inflection
 {
@@ -164,6 +164,10 @@ class Core_Inflection_Ru extends Core_Inflection
 		return $word;
 	}
 
+	/**
+	 * Units
+	 * @var array
+	 */
 	static protected $_aUnits = array(
 		array(), //array('копейка', 'копейки', 'копеек', 1),
 		array(), //array('рубль', 'рубля', 'рублей', 0),
@@ -176,6 +180,12 @@ class Core_Inflection_Ru extends Core_Inflection
 		array('секстиллион', 'секстиллиона', 'секстиллионов', 0),
 	);
 
+	/**
+	 * Currency in word
+	 * @param float $float
+	 * @param string $currencyCode
+	 * @return string
+	 */
 	public function currencyInWords($float, $currencyCode)
 	{
 		switch ($currencyCode)
@@ -300,7 +310,7 @@ class Core_Inflection_Ru extends Core_Inflection
 		{
 			isset($aUnits[0]) && count($aUnits[0]) == 4
 				&& $fractional .= ' ' . $this->_morph(intval($fractional), $aUnits[0]);
-				
+
 			$out[] = $fractional;
 		}
 

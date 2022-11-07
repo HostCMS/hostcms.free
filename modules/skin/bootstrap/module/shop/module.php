@@ -88,7 +88,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 
 		foreach ($aAdmin_Form_Actions as $oAdmin_Form_Action)
 		{
-			if ($oAdmin_Form_Action->name == 'edit')
+			if ($oAdmin_Form_Action->name == 'edit' && $oAdmin_Form_Action->name == 'showWidget')
 			{
 				$access = TRUE;
 				break;

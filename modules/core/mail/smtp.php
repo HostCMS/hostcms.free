@@ -7,12 +7,16 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Mail
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Mail_Smtp extends Core_Mail
 {
+	/**
+	 * Stream
+	 * @var mixed
+	 */
 	protected $_fp = NULL;
 
 	/**
@@ -186,7 +190,11 @@ class Core_Mail_Smtp extends Core_Mail
 			$aRecipients = explode(',', $to);
 			foreach ($aRecipients as $sTo)
 			{
-				$this->_serverFputs("RCPT TO: {$sTo}\r\n");
+				preg_match('/<(.*?)>/', $sTo, $match);
+				
+				$sTo = isset($match[1]) ? $match[1] : '';
+				
+				$this->_serverFputs("RCPT TO: <{$sTo}>\r\n");
 				$server_response = $this->_serverFgets();
 				if (!$this->_serverParse($server_response, "250"))
 				{
@@ -232,6 +240,11 @@ class Core_Mail_Smtp extends Core_Mail
 		return $this;
 	}
 
+	/**
+	 * Server fputs
+	 * @param string $str
+	 * @return int|FALSE
+	 */
 	protected function _serverFputs($str)
 	{
 		$this->_config['log']

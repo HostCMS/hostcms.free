@@ -111,6 +111,8 @@
 			</div>
 
 			<?php
+			$this->showSection('top');
+
 			// Если модуль пользователей сайта доступен
 			if (Core::moduleIsActive('siteuser'))
 			{?><div id="authorization"><?php
@@ -232,7 +234,9 @@
 
 		$Structure_Controller_Show
 			->xsl(Core_Entity::factory('Xsl')
-				->getByName('НижнееМеню'))
+			->getByName('НижнееМеню'))
+			//->showProperties(array(7451))
+			->structurePropertiesList(array(7451))
 			->show();
 	?>
 	<div class="left_block footer">

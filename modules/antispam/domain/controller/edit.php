@@ -110,6 +110,12 @@ class Antispam_Domain_Controller_Edit extends Admin_Form_Action_Controller_Type_
 		return $this;
 	}
 
+	/**
+	 * Sanitize domain
+	 * @param string $domain
+	 * @return string
+	 * @ignore
+	 */
 	protected function _sanitizeDomain($domain)
 	{
 		return preg_replace('(^https?://)', '', $domain);

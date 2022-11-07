@@ -50,7 +50,7 @@ class Skin_Default_Admin_Form_Entity_Tabs extends Admin_Form_Entity
 		{
 			// Добавим отступ сверху и снизу
 			?><div id="tab"><?php
-				?><img src="/admin/images/tab_top_fon_4_form_end.gif" style="position: absolute; right: 0px; bottom: 0px"><?php
+				?><img src="/modules/skin/default/images/tab_top_fon_4_form_end.gif" style="position: absolute; right: 0px; bottom: 0px"><?php
 				?><ul class="<?php echo htmlspecialchars($this->class)?>"><?php
 				$tab_id = 0;
 				foreach ($this->_children as $oAdmin_Form_Tab_Entity)

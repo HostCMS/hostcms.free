@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Template
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Section_Lib_Model extends Core_Entity
 {
@@ -118,43 +118,32 @@ class Template_Section_Lib_Model extends Core_Entity
 				!is_object(Core_Page::instance()->template)
 					&& Core_Page::instance()->template = $this->Template_Section->Template;
 
-				// Настройки виджета
-				$sPath = '/admin/template/section/lib/index.php';
-				$sAdditional = "hostcms[action]=edit&template_section_id={$oTemplate_Section->id}&hostcms[checked][0][{$this->id}]=1{$sSettings}";
-				$sOnclick = "hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false";
-				$sTitleWidgetSettings = htmlspecialchars(Core::_('Template_Section_Lib.widget_settings', $this->Lib->name));
-
-				// Изменение активности
-				$sActiveUrl = "hQuery.changeActive({path: '/template-section-lib.php?template_section_lib_id={$this->id}{$sSettings}&active=' + (1 - hQuery(this).children('i').hasClass('active')), goal: hQuery('#hostcmsSectionWidget-{$this->id}')}); return false";
-
-				$sTitleWidgetActive = htmlspecialchars(Core::_('Template_Section_Lib.widget_active', $this->Lib->name));
-
-				$widgetActiveIcon = 'fa-lightbulb-o';
-				$this->active && $widgetActiveIcon .= ' active';
-
-				// Удаление виджета
-				$sDeleteUrl = "hQuery.deleteWidget({path: '/template-section-lib.php?template_section_lib_id={$this->id}&delete=1{$sSettings}', goal: hQuery('#hostcmsSection{$oTemplate_Section->id}')}); return false";
-
-				$sTitleWidgetDelete = htmlspecialchars(Core::_('Template_Section_Lib.widget_delete', $this->Lib->name));
-
 				?><div class="hostcmsSectionWidgetPanel" style="display: none">
 					<div class="draggable-indicator">
-						<svg width="16px" height="16px" viewBox="0 0 32 32">
-							<rect height="4" width="4" y="4" x="4" />
-							<rect height="4" width="4" y="12" x="4" />
-							<rect height="4" width="4" y="4" x="12"/>
-							<rect height="4" width="4" y="12" x="12"/>
-							<rect height="4" width="4" y="4" x="20"/>
-							<rect height="4" width="4" y="12" x="20"/>
-							<rect height="4" width="4" y="4" x="28"/>
-							<rect height="4" width="4" y="12" x="28"/>
-						</svg>
+						<svg width="16px" height="16px" viewBox="0 0 32 32"><rect height="4" width="4" y="4" x="4" /><rect height="4" width="4" y="12" x="4" /><rect height="4" width="4" y="4" x="12"/><rect height="4" width="4" y="12" x="12"/><rect height="4" width="4" y="4" x="20"/><rect height="4" width="4" y="12" x="20"/><rect height="4" width="4" y="4" x="28"/><rect height="4" width="4" y="12" x="28"/></svg>
 					</div>
-					<div><a href="<?php echo "{$sPath}?{$sAdditional}"?>" onclick="<?php echo $sOnclick ?>" alt="<?php echo $sTitleWidgetSettings ?>" title="<?php echo $sTitleWidgetSettings ?>"><i class="fa fa-fw fa-cog"></i></a></div>
-
-					<div><span onclick="<?php echo $sActiveUrl ?>" alt="<?php echo $sTitleWidgetActive ?>" title="<?php echo $sTitleWidgetActive ?>"><i class="fa fa-fw <?php echo $widgetActiveIcon ?>"></i></span></div>
-
-					<div><span onclick="<?php echo $sDeleteUrl ?>" alt="<?php echo $sTitleWidgetDelete ?>" title="<?php echo $sTitleWidgetDelete ?>"><i class="fa fa-fw fa-times"></i></span></div>
+					<?php
+					// Настройки виджета
+					$sPath = '/admin/template/section/lib/index.php';
+					$sAdditional = "hostcms[action]=edit&template_section_id={$oTemplate_Section->id}&hostcms[checked][0][{$this->id}]=1{$sSettings}";
+					$sTitleWidgetSettings = Core::_('Template_Section_Lib.widget_settings', $this->Lib->name);
+					$sOnclick = "hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', title: '" . Core_Str::escapeJavascriptVariable($sTitleWidgetSettings) . "', dialogClass: 'hostcms6'}); return false";
+					?>
+					<div><a href="<?php echo "{$sPath}?{$sAdditional}"?>" onclick="<?php echo $sOnclick ?>" alt="<?php echo $sTitleWidgetSettings ?>" title="<?php echo $sTitleWidgetSettings ?>"><i class="fa-solid fa-fw fa-gear"></i></a></div>
+					<?php
+					// Изменение активности
+					$sActiveUrl = "hQuery.changeActive({path: '/template-section-lib.php?template_section_lib_id={$this->id}{$sSettings}&active=' + (1 - hQuery(this).children('i').hasClass('active')), goal: hQuery('#hostcmsSectionWidget-{$this->id}')}); return false";
+					$sTitleWidgetActive = Core::_('Template_Section_Lib.widget_active', $this->Lib->name);
+					$widgetActiveIcon = 'fa-lightbulb';
+					$this->active && $widgetActiveIcon .= ' active';
+					?>
+					<div><span onclick="<?php echo $sActiveUrl ?>" alt="<?php echo $sTitleWidgetActive ?>" title="<?php echo $sTitleWidgetActive ?>"><i class="fa-solid fa-fw <?php echo $widgetActiveIcon ?>"></i></span></div>
+					<?php
+					// Удаление виджета
+					$sTitleWidgetDelete = htmlspecialchars(Core::_('Template_Section_Lib.widget_delete', $this->Lib->name));
+					$sDeleteUrl = "hQuery.deleteWidget({path: '/template-section-lib.php?template_section_lib_id={$this->id}&delete=1{$sSettings}', goal: hQuery('#hostcmsSection{$oTemplate_Section->id}')}); return false";
+					?>
+					<div><span onclick="<?php echo $sDeleteUrl ?>" alt="<?php echo $sTitleWidgetDelete ?>" title="<?php echo $sTitleWidgetDelete ?>"><i class="fa-solid fa-fw fa-trash-can"></i></span></div>
 				</div><?php
 			}
 
@@ -169,7 +158,7 @@ class Template_Section_Lib_Model extends Core_Entity
 
 			if ($bUserAccess)
 			{
-				?><div class="drag-handle" style="display: none"><i class="fa fa-hand-grab-o fa-fw"></i></div><?php
+				?><div class="drag-handle" style="display: none"><i class="fa-regular fa-hand-back-fist fa-fw"></i></div><?php
 			}
 
 			if ($bCreateDiv)

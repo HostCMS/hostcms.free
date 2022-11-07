@@ -92,6 +92,7 @@ return array(
 	'copy_success' => "Product copied successfully!",
 	'shops_add_form_link_properties' => "Properties",
 	'show_list_of_properties_title' => "Properties list of online store product \"%s\"",
+	'show_list_of_item_comments_properties_title' => "List of online store product reviews properties \"%s\"",
 	'tab_properties' => "Additional properties",
 	'items_catalog_add_form_comment_link' => 'Comments',
 	'properties_item_for_groups_link' => 'Properties for group',
@@ -359,4 +360,5 @@ return array(
 	'attribute_item_price_tab' => 'Prices',
 	'attribute_item_warehouse_tab' => 'Warehouses',
 	'shop_discount_siteuser_title' => 'Personal discounts',
+	'main_menu_warrants' => 'Warrant',
 );

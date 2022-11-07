@@ -59,8 +59,8 @@ if (strlen($tableName))
 				if (is_numeric($aRow['defined_max_length'])
 					&& $aRow['defined_max_length'] <= 10)
 				{
-					$oAdmin_Form_Field->width = $aRow['defined_max_length'] < 3
-						? '25px'
+					$oAdmin_Form_Field->width = $aRow['defined_max_length'] <= 3
+						? '35px'
 						: ($aRow['defined_max_length'] * 10) . 'px';
 				}
 			break;

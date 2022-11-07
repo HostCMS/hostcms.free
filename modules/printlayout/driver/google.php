@@ -12,10 +12,22 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  */
 class Printlayout_Driver_Google extends Printlayout_Driver_Controller
 {
+	/**
+	 * Extension
+	 * @var string|NULL
+	 */
 	protected $_extension = 'pdf';
 
+	/**
+	 * File path
+	 * @var string|NULL
+	 */
 	protected $_filePath = NULL;
 
+	/**
+	 * Get cloud
+	 * @return object
+	 */
 	protected function _getCloud()
 	{
 		$oClouds = Core_Entity::factory('Site', CURRENT_SITE)->Clouds;
@@ -43,7 +55,7 @@ class Printlayout_Driver_Google extends Printlayout_Driver_Controller
 				$fileId = $oCloud_Controller->upload($this->_sourceDocx, time() . '-' . rand(0, 99999) . '.docx', array('mimeType' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'));
 
 				$this->_filePath = tempnam(CMS_FOLDER . TMP_DIR, 'GGL');
-				
+
 				if (!$oCloud_Controller->download($fileId, $this->_filePath, array('mimeType' => 'application/pdf')))
 				{
 					Core_Log::instance()->clear()

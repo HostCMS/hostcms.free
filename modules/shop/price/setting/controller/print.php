@@ -65,8 +65,8 @@ class Shop_Price_Setting_Controller_Print extends Printlayout_Controller_Print
 						$node = new stdClass();
 
 						$node->position = $position++;
-						$node->name = htmlspecialchars($oShop_Item->name);
-						$node->measure = htmlspecialchars($oShop_Item->Shop_Measure->name);
+						$node->name = htmlspecialchars((string) $oShop_Item->name);
+						$node->measure = htmlspecialchars((string) $oShop_Item->Shop_Measure->name);
 						$node->price = $oShop_Price_Setting_Item->new_price;
 
 						$aReplace['Items'][] = $node;

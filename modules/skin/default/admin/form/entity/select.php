@@ -226,7 +226,7 @@ class Skin_Default_Admin_Form_Entity_Select extends Admin_Form_Entity
 	protected function _filter()
 	{
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
-		
+
 		$filterName = !is_null($this->filterName)
 			? $this->filterName
 			: "oSelectFilter" . (self::$iFilterCount++);
@@ -235,7 +235,7 @@ class Skin_Default_Admin_Form_Entity_Select extends Admin_Form_Entity
 			->style("float: left; opacity: 0.7")
 			->add(
 				Core_Html_Entity::factory('Img')
-					->src('/admin/images/filter.gif')
+					->src('/modules/skin/default/images/filter.gif')
 					->class('img_line')
 					->style('margin-left: 10px')
 			)

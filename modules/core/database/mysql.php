@@ -629,14 +629,14 @@ class Core_DataBase_Mysql extends Core_DataBase
 	{
 		$this->connect();
 
-		$query = 'SELECT TABLE_NAME as name, ENGINE as engine, VERSION as version, ROW_FORMAT as row_format, TABLE_ROWS as table_rows, AVG_ROW_LENGTH as avg_row_legth, DATA_LENGTH as data_length, INDEX_LENGTH as index_length, DATA_FREE as fragmented, TABLE_COLLATION as collation
+		$query = 'SELECT TABLE_NAME as name, AUTO_INCREMENT as auto_increment, ENGINE as engine, VERSION as version, ROW_FORMAT as row_format, TABLE_ROWS as table_rows, AVG_ROW_LENGTH as avg_row_legth, DATA_LENGTH as data_length, INDEX_LENGTH as index_length, DATA_FREE as fragmented, TABLE_COLLATION as collation
 		FROM `INFORMATION_SCHEMA`.`TABLES`
 		WHERE `table_schema` = ' . $this->quote($this->_config['database']);
 
 		!is_null($selectionCondition)
 			&& $query .= ' AND `TABLE_NAME` LIKE ' . $this->quote($selectionCondition);
 
-		$query .= 'ORDER BY `name` ASC';
+		$query .= ' ORDER BY `name` ASC';
 
 		$result = mysql_query($query, $this->_connection);
 

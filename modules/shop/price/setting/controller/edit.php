@@ -286,7 +286,7 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 					? $oShop_Item->Shop_Item
 					: $oShop_Item;
 
-				$currencyName = strlen($oShop_Item->Shop_Currency->sign)
+				$currencyName = $oShop_Item->Shop_Currency->sign != ''
 					? htmlspecialchars($oShop_Item->Shop_Currency->sign)
 					: '<i class="fa fa-exclamation-triangle darkorange" title="' . Core::_('Shop_Item.shop_item_not_currency') . '"></i>';
 
@@ -310,8 +310,8 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 				$itemTable .= '
 						<tr id="shop-item-' . $oShop_Item->id . '" data-item-id="' . $oShop_Item->id . '">
 							<td class="index">' . $i . '</td>
-							<td>' . htmlspecialchars($oShop_Item->name) . $externalLink . '</td>
-							<td>' . htmlspecialchars($measureName) . '</td>
+							<td>' . htmlspecialchars((string) $oShop_Item->name) . $externalLink . '</td>
+							<td>' . htmlspecialchars((string) $measureName) . '</td>
 							<td>' . $currencyName . '</td>
 				';
 

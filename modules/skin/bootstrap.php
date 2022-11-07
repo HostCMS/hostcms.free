@@ -1118,9 +1118,9 @@ class Skin_Bootstrap extends Core_Skin
 
 										$bSubmenu = isset($aTmpMenu['submenu']) && count($aTmpMenu['submenu']);
 										?><li id="menu-<?php echo $oCore_Module->getModuleName()?>">
-											<a <?php if ($bSubmenu) { echo 'class="menu-dropdown" '; }?>href="<?php echo htmlspecialchars($aTmpMenu['href'])?>" onclick="<?php echo htmlspecialchars($aTmpMenu['onclick'])?>">
-												<i class="menu-icon <?php echo htmlspecialchars($aTmpMenu['ico'])?>"></i>
-												<span class="menu-text"><?php echo htmlspecialchars($aTmpMenu['name'])?></span>
+											<a <?php if ($bSubmenu) { echo 'class="menu-dropdown" '; }?>href="<?php echo htmlspecialchars((string) $aTmpMenu['href'])?>" onclick="<?php echo htmlspecialchars((string) $aTmpMenu['onclick'])?>">
+												<i class="menu-icon <?php echo htmlspecialchars((string) $aTmpMenu['ico'])?>"></i>
+												<span class="menu-text"><?php echo htmlspecialchars((string) $aTmpMenu['name'])?></span>
 
 												<?php if ($bSubmenu) {?>
 													<i class="menu-expand"></i>
@@ -1133,15 +1133,15 @@ class Skin_Bootstrap extends Core_Skin
 												foreach ($aTmpMenu['submenu'] as $aSubmenu)
 												{
 													$aSubmenu += array(
-														'name' => NULL,
-														'href' => NULL,
-														'onclick' => NULL,
+														'name' => '',
+														'href' => '',
+														'onclick' => '',
 														'ico' => 'fa-file-o'
 													);
 													?><li id="menu-<?php echo $oCore_Module->getModuleName()?>">
-														<a href="<?php echo htmlspecialchars($aSubmenu['href'])?>" onclick="<?php echo htmlspecialchars($aSubmenu['onclick'])?>">
-															<i class="menu-icon <?php echo htmlspecialchars($aSubmenu['ico'])?>"></i>
-															<span class="menu-text"><?php echo htmlspecialchars($aSubmenu['name'])?></span>
+														<a href="<?php echo htmlspecialchars((string) $aSubmenu['href'])?>" onclick="<?php echo htmlspecialchars((string) $aSubmenu['onclick'])?>">
+															<i class="menu-icon <?php echo htmlspecialchars((string) $aSubmenu['ico'])?>"></i>
+															<span class="menu-text"><?php echo htmlspecialchars((string) $aSubmenu['name'])?></span>
 														</a>
 													</li><?php
 												}
@@ -1240,7 +1240,7 @@ class Skin_Bootstrap extends Core_Skin
 <link rel="icon" type="image/png" href="/modules/skin/bootstrap/ico/favicon.png" />
 <?php $this->showHead()?>
 </head>
-<body class="body-<?php echo htmlspecialchars($this->_mode)?> hostcms-bootstrap1">
+<body class="body-<?php echo htmlspecialchars((string) $this->_mode)?> hostcms-bootstrap1">
 		<?php
 		if ($this->_mode != 'install')
 		{
@@ -1767,7 +1767,7 @@ class Skin_Bootstrap extends Core_Skin
 		}
 
 		?><link rel="stylesheet" type="text/css" href="/modules/skin/default/frontend/frontend.css?<?php echo $iTimestamp?>" /><?php
-		?><link rel="stylesheet" type="text/css" href="/modules/skin/default/frontend/fontawesome/css/font-awesome.min.css?<?php echo $iTimestamp?>" /><?php
+		?><link rel="stylesheet" type="text/css" href="/modules/skin/bootstrap/fonts/fontawesome/6/css/all.min.css?<?php echo $iTimestamp?>" /><?php
 		?><script src="/modules/skin/default/frontend/jquery.min.js"></script><?php
 		?><script src="/modules/skin/default/frontend/jquery-ui.min.js"></script><?php
 		?><script src="/admin/wysiwyg/jquery.tinymce.min.js"></script><?php
@@ -1835,19 +1835,50 @@ class Skin_Bootstrap extends Core_Skin
 			<?php
 		}
 
+		$locked = Core_Array::getCookie('lock-panel', 0, 'int')
+			? 'fa-lock'
+			: 'fa-lock-open';
+
+		$classLocked = Core_Array::getCookie('lock-panel', 0, 'int')
+			? ' opened'
+			: ' closed';
+
 		$oHostcmsTopPanel = Core_Html_Entity::factory('Div')
-			->class('hostcmsPanel hostcmsTopPanel')
-			->style('display: none');
+			->class('hostcmsInformationPanel' . $classLocked);
 
 		$oHostcmsSubPanel = Core_Html_Entity::factory('Div')
-			->class('hostcmsSubPanel')
-			->add(
-				Core_Html_Entity::factory('Img')
-					->width(3)->height(16)
-					->src('/hostcmsfiles/images/drag_bg.gif')
-			);
+			->class('hostcmsSubPanel');
 
-		$oHostcmsTopPanel->add($oHostcmsSubPanel);
+		$oHostcmsTopPanel
+			->add(
+				Core_Html_Entity::factory('Div')
+					->class('hostcmsInformationPanelLeft')
+			)
+			->add($oHostcmsSubPanel)
+			->add(
+				Core_Html_Entity::factory('Div')
+					->class('hostcmsInformationPanelRight')
+					->add(Core_Html_Entity::factory('A')
+						->onclick("hQuery.lockPanel(this)")
+						->add(
+							Core_Html_Entity::factory('I')
+								->id('hostcmsLock')
+								->class('fa-solid ' . $locked . ' fa-fw')
+								->title(Core::_('Core.lock'))
+						)
+					)
+					->add(
+						Core_Html_Entity::factory('A')
+							->href('/admin/logout.php')
+							->onclick("hQuery.ajax({url: '/admin/logout.php', dataType: 'html', success: function() {location.reload()}}); return false;")
+							->add(
+								Core_Html_Entity::factory('I')
+									->id('hostcmsLogout')
+									->class('fa-solid fa-arrow-right-from-bracket fa-fw')
+									->title(Core::_('Core.logout'))
+							)
+					)
+			);
 
 		if (defined('CURRENT_STRUCTURE_ID'))
 		{
@@ -1864,11 +1895,9 @@ class Skin_Bootstrap extends Core_Skin
 						->href("{$sPath}?{$sAdditional}")
 						->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6', title: '" . Core_Str::escapeJavascriptVariable(Core::_('Structure.edit_title', $oStructure->name)) . "'}); return false")
 						->add(
-							Core_Html_Entity::factory('Img')
-								->width(16)->height(16)
-								->src('/hostcmsfiles/images/structure_edit.gif')
+							Core_Html_Entity::factory('I')
+								->class('fa-solid fa-sitemap fa-fw')
 								->id('hostcmsEditStructure')
-								->alt(Core::_('Structure.edit_title', $oStructure->name))
 								->title(Core::_('Structure.edit_title', $oStructure->name))
 						)
 				);
@@ -1896,11 +1925,9 @@ class Skin_Bootstrap extends Core_Skin
 						->href("{$sPath}?{$sAdditional}")
 						->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6', title: '" . Core_Str::escapeJavascriptVariable(Core::_('Template.title_edit', $oTemplate->name)) . "'}); return false")
 						->add(
-							Core_Html_Entity::factory('Img')
-								->width(16)->height(16)
-								->src('/hostcmsfiles/images/template_edit.gif')
+							Core_Html_Entity::factory('I')
 								->id('hostcmsEditTemplate')
-								->alt(Core::_('Template.title_edit', $oTemplate->name))
+								->class('fa-solid fa-table-cells fa-fw')
 								->title(Core::_('Template.title_edit', $oTemplate->name))
 						)
 					);
@@ -1918,11 +1945,9 @@ class Skin_Bootstrap extends Core_Skin
 						->href("{$sPath}?{$sAdditional}")
 						->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6', title: '" . Core_Str::escapeJavascriptVariable(Core::_('Document.edit', $oStructure->Document->name)) . "'}); return false")
 						->add(
-							Core_Html_Entity::factory('Img')
-								->width(16)->height(16)
-								->src('/hostcmsfiles/images/page_edit.gif')
+							Core_Html_Entity::factory('I')
 								->id('hostcmsEditDocument')
-								->alt(Core::_('Document.edit', $oStructure->Document->name))
+								->class('fa-regular fa-file-lines fa-fw')
 								->title(Core::_('Document.edit', $oStructure->Document->name))
 						)
 				);
@@ -1942,13 +1967,11 @@ class Skin_Bootstrap extends Core_Skin
 					$oHostcmsSubPanel->add(
 						Core_Html_Entity::factory('A')
 							->href("{$sPath}?{$sAdditional}")
-							->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6', title: '" . Core_Str::escapeJavascriptVariable(Core::_('Informationsystem.edit_title')) . "'}); return false")
+							->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6', title: '" . Core_Str::escapeJavascriptVariable(Core::_('Informationsystem.edit_title', $oInformationsystem->name)) . "'}); return false")
 							->add(
-								Core_Html_Entity::factory('Img')
-									->width(16)->height(16)
-									->src('/hostcmsfiles/images/folder_page_edit.gif')
+								Core_Html_Entity::factory('I')
 									->id('hostcmsEditInformationsystem')
-									->alt(Core::_('Informationsystem.edit_title', $oInformationsystem->name))
+									->class('fa-regular fa-newspaper fa-fw')
 									->title(Core::_('Informationsystem.edit_title', $oInformationsystem->name))
 							)
 					);
@@ -1969,14 +1992,12 @@ class Skin_Bootstrap extends Core_Skin
 					$oHostcmsSubPanel->add(
 						Core_Html_Entity::factory('A')
 							->href("{$sPath}?{$sAdditional}")
-							->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6', title: '" . Core_Str::escapeJavascriptVariable(Core::_('Shop.edit_title')) . "'}); return false")
+							->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6', title: '" . Core_Str::escapeJavascriptVariable(Core::_('Shop.edit_title', $oShop->name)) . "'}); return false")
 							->add(
-								Core_Html_Entity::factory('Img')
-									->width(16)->height(16)
-									->src('/hostcmsfiles/images/shop_edit.gif')
+								Core_Html_Entity::factory('I')
 									->id('hostcmsEditShop')
-									->alt(Core::_('Shop.edit_title'))
-									->title(Core::_('Shop.edit_title'))
+									->class('fa-solid fa-cart-shopping fa-fw')
+									->title(Core::_('Shop.edit_title', $oShop->name))
 							)
 					);
 				}
@@ -1986,18 +2007,16 @@ class Skin_Bootstrap extends Core_Skin
 		// Separator
 		$oHostcmsSubPanel->add(
 			Core_Html_Entity::factory('Span')
-				->style('padding-left: 10px')
+				->style('margin-left: 15px')
 		)
 		->add(
 			Core_Html_Entity::factory('A')
 				->href('/admin/')
 				->target('_blank')
 				->add(
-					Core_Html_Entity::factory('Img')
-						->width(16)->height(16)
-						->src('/hostcmsfiles/images/system.gif')
+					Core_Html_Entity::factory('I')
 						->id('hostcmsAdministrationCenter')
-						->alt(Core::_('Core.administration_center'))
+						->class('fa-solid fa-screwdriver-wrench fa-fw')
 						->title(Core::_('Core.administration_center'))
 				)
 		);
@@ -2107,10 +2126,9 @@ class Skin_Bootstrap extends Core_Skin
 			Core_Html_Entity::factory('A')
 				->onclick("hQuery.showWindow('debugWindow', '" . Core_Str::escapeJavascriptVariable($form_content) . "', {width: 400, height: 220, title: '" . Core::_('Core.debug_information') . "', Maximize: false})")
 				->add(
-					Core_Html_Entity::factory('Img')
-						->src('/hostcmsfiles/images/chart_bar.gif')
+					Core_Html_Entity::factory('I')
 						->id('hostcmsShowDebugWindow')
-						->alt(Core::_('Core.debug_information'))
+						->class('fa-solid fa-chart-simple fa-fw')
 						->title(Core::_('Core.debug_information'))
 				)
 		);
@@ -2146,8 +2164,8 @@ class Skin_Bootstrap extends Core_Skin
 					$iCrc32 = crc32($aQueryLog['trimquery']);
 
 					$sClassName = in_array($iCrc32, $aTmp)
-						? 'sql_qd'
-						: 'sql_q';
+						? 'sqlQueryDuplicate'
+						: 'sqlQuery';
 
 					$aTmp[] = $iCrc32;
 
@@ -2174,14 +2192,14 @@ class Skin_Bootstrap extends Core_Skin
 
 						$oSqlWindow->add(
 							Core_Html_Entity::factory('Div')
-								->class('sql_db')
+								->class('sqlStack')
 								->id("sql_h{$key}")
 								->value($sdebugBacktrace)
 						);
 					}
 
 					$oSqlDivDescription = Core_Html_Entity::factory('Div')
-						->class('sql_t')
+						->class('sqlDesc')
 						->value(Core::_('Core.sql_statistics', $aQueryLog['time'], $key));
 
 					if (isset($aQueryLog['explain']) && count($aQueryLog['explain']) > 0)
@@ -2193,7 +2211,7 @@ class Skin_Bootstrap extends Core_Skin
 							);
 
 						$oExplainTable = Core_Html_Entity::factory('Table')
-							->class('sql_explain');
+							->class('sqlExplain');
 
 						$oExplainTableTr = Core_Html_Entity::factory('Tr');
 						$oExplainTable->add($oExplainTableTr);
@@ -2248,10 +2266,9 @@ class Skin_Bootstrap extends Core_Skin
 				Core_Html_Entity::factory('A')
 				->onclick("hQuery.showWindow('sqlWindow', '" . Core_Str::escapeJavascriptVariable($form_content) . "', {width: '70%', height: 500, title: '" . Core::_('Core.sql_queries') . "'})")
 				->add(
-					Core_Html_Entity::factory('Img')
-						->src('/hostcmsfiles/images/sql.gif')
+					Core_Html_Entity::factory('I')
 						->id('hostcmsShowSql')
-						->alt(Core::_('Core.sql_queries'))
+						->class('fa-solid fa-database fa-fw')
 						->title(Core::_('Core.sql_queries'))
 				)
 			);
@@ -2259,6 +2276,10 @@ class Skin_Bootstrap extends Core_Skin
 
 		if (defined('ALLOW_SHOW_XML') && ALLOW_SHOW_XML && $oUser->checkModuleAccess(array('xsl'), $oSite))
 		{
+			$activeXml = Core_Type_Conversion::toBool($_SESSION['HOSTCMS_SHOW_XML'])
+				? ' active-xml'
+				: '';
+
 			$oHostcmsSubPanel->add(
 				Core_Html_Entity::factory('A')
 					->href(
@@ -2267,15 +2288,9 @@ class Skin_Bootstrap extends Core_Skin
 						: 'SHOW_XML')
 					)
 					->add(
-						Core_Html_Entity::factory('Img')
-							->width(16)->height(16)
-							->src('/hostcmsfiles/images/xsl.gif')
+						Core_Html_Entity::factory('I')
 							->id('hostcmsXml')
-							->alt(Core::_(
-								Core_Type_Conversion::toBool($_SESSION['HOSTCMS_SHOW_XML'])
-									? 'Core.hide_xml'
-									: 'Core.show_xml'
-							))
+							->class('fa-solid fa-code fa-fw' . $activeXml)
 							->title(Core::_(
 								Core_Type_Conversion::toBool($_SESSION['HOSTCMS_SHOW_XML'])
 									? 'Core.hide_xml'
@@ -2284,25 +2299,6 @@ class Skin_Bootstrap extends Core_Skin
 					)
 			);
 		}
-
-		$oHostcmsSubPanel->add(
-			// Separator
-			Core_Html_Entity::factory('Span')
-				->style('padding-left: 10px')
-		)
-		->add(
-			Core_Html_Entity::factory('A')
-				->href('/admin/logout.php')
-				->onclick("hQuery.ajax({url: '/admin/logout.php', dataType: 'html', success: function() {location.reload()}}); return false;")
-				->add(
-					Core_Html_Entity::factory('Img')
-						->width(16)->height(16)
-						->src('/hostcmsfiles/images/exit.gif')
-						->id('hostcmsLogout')
-						->alt(Core::_('Core.logout'))
-						->title(Core::_('Core.logout'))
-				)
-		);
 
 		$aCoreConfig = Core_Config::instance()->get('core_wysiwyg');
 
@@ -2327,9 +2323,9 @@ class Skin_Bootstrap extends Core_Skin
 					->value(
 						'var backendLng = "' . htmlspecialchars(Core_I18n::instance()->getLng()) . '";' . PHP_EOL .
 						'(function($){' . PHP_EOL .
-						'$("body").addClass("backendBody");' .
-						'$(".hostcmsPanel,.hostcmsSectionPanel,.hostcmsSectionWidgetPanel").draggable({containment: "document"});' .
-						'$.sortWidget();' .
+						'$("body").addClass("backendBody");' . PHP_EOL .
+						'$(".hostcmsPanel,.hostcmsSectionPanel,.hostcmsSectionWidgetPanel").draggable({containment: "window"});' . PHP_EOL .
+						'$.sortWidget();' . PHP_EOL .
 						'$.hostcmsEditable({path: "/edit-in-place.php", wysiwygConfig: {' . implode(",\n", $aConfig) . '} });' . PHP_EOL .
 						'})(hQuery);'
 					)

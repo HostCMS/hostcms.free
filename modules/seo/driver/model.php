@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Seo
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Seo_Driver_Model extends Core_Entity
 {
@@ -73,7 +73,7 @@ class Seo_Driver_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
 
-		$oSite = $this->Seo_Site->Site;
+		$oSite = NULL;
 
 		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
 

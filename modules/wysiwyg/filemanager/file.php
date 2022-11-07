@@ -155,7 +155,7 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 
 		return $this;
 	}
-	
+
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
@@ -165,7 +165,7 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 	{
 		$filePath = $this->_getFullPath();
 		$dirname = dirname($filePath);
-		
+
 		$Core_Tar = new Core_Tar($filePath);
 		$Core_Tar->extractModify($dirname, $dirname);
 
@@ -269,23 +269,8 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 		{
 			$aExt = array('JPG', 'JPEG', 'GIF', 'PNG');
 
-			// Ассоциированные иконки
-			/*$ext = Core_File::getExtension($this->name);
-
-			if (isset(Core::$mainConfig['fileIcons'][$ext]))
-			{
-				$oChild = Core_Html_Entity::factory('Img')
-					->src('/admin/images/icons/' . Core::$mainConfig['fileIcons'][$ext]);
-			}*/
-
 			$oChild = Core_Html_Entity::factory('I')
 				->class(Core_File::getIcon($this->name));
-
-			/*$icon_file = '/admin/images/icons/' . (
-				isset(Core::$mainConfig['fileIcons'][$ext])
-					? Core::$mainConfig['fileIcons'][$ext]
-					: 'file.gif'
-			);*/
 
 			try
 			{
@@ -295,9 +280,7 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 
 					$filePath = $this->_getFullPath();
 
-					/// ------
-					$maxWidth = 48;
-					$maxHeight = 48;
+					$maxWidth = $maxHeight = 48;
 
 					$picsize = Core_Image::instance()->getImageSize($filePath);
 
@@ -457,7 +440,7 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 	{
 		return Core_Date::sql2datetime($this->datetime);
 	}
-	
+
 	/**
 	 * Check user access to admin form action
 	 * @param string $actionName admin form action name
@@ -470,6 +453,16 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 		{
 			case 'extract':
 				return substr($this->name, -7) === '.tar.gz';
+			break;
+			case 'edit':
+				$ext = Core_File::getExtension($this->name);
+
+				$aForbiddenExtensions = array('gif', 'png', 'jpg', 'jpeg', 'bmp', 'webp', 'exe', 'pdf', 'odt', 'xls', 'xslx', 'doc', 'docx', 'ppt', 'pptx', 'rtf', 'rar', 'zip', 'gz', 'tar', 'sig');
+
+				if (in_array(mb_strtolower($ext), $aForbiddenExtensions))
+				{
+					return FALSE;
+				}
 			break;
 		}
 

@@ -591,14 +591,16 @@ class Core_DataBase_Pdo extends Core_DataBase
 
 		// MAX_DATA_LENGTH as max_data_length, DATA_FREE, AUTO_INCREMENT, CREATE_TIME, UPDATE_TIME, CHECK_TIME, CHECKSUM, CREATE_OPTIONS, TABLE_COMMENT
 
-		$query = 'SELECT TABLE_NAME as name, ENGINE as engine, VERSION as version, ROW_FORMAT as row_format, TABLE_ROWS as table_rows, AVG_ROW_LENGTH as avg_row_legth, DATA_LENGTH as data_length, INDEX_LENGTH as index_length, DATA_FREE as fragmented, TABLE_COLLATION as collation
+		$query = 'SELECT TABLE_NAME as name, ENGINE as engine, AUTO_INCREMENT as auto_increment, VERSION as version, ROW_FORMAT as row_format, TABLE_ROWS as table_rows, AVG_ROW_LENGTH as avg_row_legth, DATA_LENGTH as data_length, INDEX_LENGTH as index_length, DATA_FREE as fragmented, TABLE_COLLATION as collation
 		FROM `INFORMATION_SCHEMA`.`TABLES`
 		WHERE `table_schema` = ' . $this->quote($this->_config['database']);
 
 		!is_null($selectionCondition)
 			&& $query .= ' AND `TABLE_NAME` LIKE ' . $this->quote($selectionCondition);
 
-		$query .= 'ORDER BY `name` ASC';
+		$query .= ' ORDER BY `name` ASC';
+
+		// echo htmlspecialchars($query);
 
 		$result = $this->_connection->query($query);
 

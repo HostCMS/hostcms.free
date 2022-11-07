@@ -23,7 +23,7 @@ class Trash_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2022-08-05';
+	public $date = '2022-11-01';
 
 	/**
 	 * Module name
@@ -31,6 +31,10 @@ class Trash_Module extends Core_Module
 	 */
 	protected $_moduleName = 'trash';
 
+	/**
+	 * Options
+	 * @var array
+	 */
 	protected $_options = array(
 		'maxExactCount' => array(
 			'type' => 'int',

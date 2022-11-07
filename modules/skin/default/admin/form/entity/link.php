@@ -64,8 +64,8 @@ class Skin_Default_Admin_Form_Entity_Link extends Admin_Form_Entity
 		{
 			?><div class="input-group"><?php
 		}
-		
-		if (strlen($this->caption))
+
+		if ($this->caption != '')
 		{
 			$this->div->add(
 				Core_Html_Entity::factory('Span')
@@ -73,18 +73,18 @@ class Skin_Default_Admin_Form_Entity_Link extends Admin_Form_Entity
 					->value(htmlspecialchars($this->caption))
 			);
 		}
-		
+
 		$this->div
 			->add($this->a
 				->add($this->icon)
 				->add(
 					Core_Html_Entity::factory('Code')
-						->value(htmlspecialchars($this->a->value))
+						->value(htmlspecialchars((string) $this->a->value))
 				)
 				->value('')
 			)
 			->execute();
-			
+
 		// Могут быть дочерние элементы элементы
 		$this->executeChildren();
 

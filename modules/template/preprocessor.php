@@ -13,13 +13,21 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  */
 abstract class Template_Preprocessor
 {
+	/**
+	 * Preprocessor
+	 * @var string
+	 */
 	protected $_preprocessor = NULL;
-	
+
+	/**
+	 * Get preprocessor
+	 * @return string
+	 */
 	public function getPreprocessor()
 	{
 		return $this->_preprocessor;
 	}
-	
+
 	/**
 	 * Get full driver name
 	 * @param string $driver driver name

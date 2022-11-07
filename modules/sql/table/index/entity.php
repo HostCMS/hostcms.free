@@ -15,6 +15,10 @@ class Sql_Table_Index_Entity
 {
 	//public $view = NULL;
 
+	/**
+	 * Fields
+	 * @var array
+	 */
 	protected $_fields = array(
 		'name' => array(
 			'datatype' => 'string',
@@ -85,19 +89,36 @@ class Sql_Table_Index_Entity
 		}
 	}
 
+	/**
+	 * Table name
+	 * @var mixed
+	 */
 	protected $_tableName = NULL;
 
+	/**
+	 * Set table name
+	 * @param string $tableName
+	 * @return self
+	 */
 	public function setTableName($tableName)
 	{
 		$this->_tableName = $tableName;
 		return $this;
 	}
 
+	/**
+	 * Get table name
+	 * @return string
+	 */
 	public function getTableName()
 	{
 		return $this->_tableName;
 	}
 
+	/**
+	 * Delete
+	 * @return self
+	 */
 	public function delete()
 	{
 		$table_name = $this->getTableName();

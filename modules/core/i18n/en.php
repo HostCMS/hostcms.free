@@ -5,9 +5,9 @@
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'error_file_write' => 'Error while opening file to write %s; check your access rights to folder.',
@@ -29,10 +29,11 @@ return array(
 	'administration_center' => 'Administration center',
 	'debug_information' => 'Debug information',
 	'sql_queries' => 'SQL queries',
-	'sql_statistics' => 'Time: <strong>%.3f</strong> s. <a onclick="hQuery(\'#sql_h%d\').toggle()" class="pointer">Backtrace</a>',
+	'sql_statistics' => 'Time: <strong>%.3f</strong> s. <a onclick="hQuery(\'#sql_h%d\').toggle()" class="sqlShowStack">Backtrace</a>',
 	'sql_debug_backtrace' => '%s, line %d<br/>',
 	'show_xml' => 'Show XML/XSL',
 	'hide_xml' => 'Hide XML/XSL',
+	'lock' => 'Lock panel',
 	'logout' => 'Logout',
 
 	'total_time' => 'Execution time: <strong>%.3f</strong> sec, including',

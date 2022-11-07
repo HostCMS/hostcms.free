@@ -17,6 +17,7 @@ if (isset($_REQUEST['payment'])
 	|| isset($_GET['action']) && ($_GET['action'] == 'PaymentSuccess' || $_GET['action'] == 'PaymentFail')
 	|| isset($_REQUEST['pg_order_id'])
 	|| isset($_REQUEST['result'])
+	|| isset($_REQUEST['_payform_order_id'])
 )
 {
 	if (isset($_SESSION['last_order_id']))

@@ -61,14 +61,14 @@ class Skin_Bootstrap_Admin_Form_Entity_Menu extends Admin_Form_Entity
 		$index = $this->position % $count;
 
 		$bHasSubmenu = !empty($this->_children);
-		$bHasName = strlen($this->name) > 0;
+		$bHasName = strlen((string) $this->name) > 0;
 
 		$oCore_Html_Entity_A = Core_Html_Entity::factory('A');
 
-		strlen($this->href) && $oCore_Html_Entity_A->href($this->href);
-		strlen($this->onclick) && $oCore_Html_Entity_A->onclick($this->onclick);
+		strlen((string) $this->href) && $oCore_Html_Entity_A->href($this->href);
+		strlen((string) $this->onclick) && $oCore_Html_Entity_A->onclick($this->onclick);
 		!is_null($this->target) && $oCore_Html_Entity_A->target($this->target);
-		strlen($this->icon) && $oCore_Html_Entity_A->add(
+		strlen((string) $this->icon) && $oCore_Html_Entity_A->add(
 			Core_Html_Entity::factory('I')->class($this->icon . ($bHasName ? ' icon-separator' : ' fa-fw no-margin'))
 		);
 

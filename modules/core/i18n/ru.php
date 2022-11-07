@@ -5,9 +5,9 @@
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'error_file_write' => 'Ошибка открытия файла для записи %s, проверьте права доступа к директории.',
@@ -30,10 +30,11 @@ return array(
 	'administration_center' => 'Центр администрирования',
 	'debug_information' => 'Отладочная информация',
 	'sql_queries' => 'SQL-запросы',
-	'sql_statistics' => 'Время: <strong>%.3f</strong> сек. <a onclick="hQuery(\'#sql_h%d\').toggle()" class="pointer">Вызовы</a>',
+	'sql_statistics' => 'Время: <strong>%.3f</strong> сек. <a onclick="hQuery(\'#sql_h%d\').toggle()" class="sqlShowStack">Вызовы</a>',
 	'sql_debug_backtrace' => '%s, строка %d<br/>',
 	'show_xml' => 'Показать XML/XSL',
 	'hide_xml' => 'Скрыть XML/XSL',
+	'lock' => 'Зафиксировать панель',
 	'logout' => 'Выход',
 
 	'total_time' => 'Время выполнения: <strong>%.3f</strong> с, из них',

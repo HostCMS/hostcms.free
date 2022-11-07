@@ -924,4 +924,34 @@ abstract class Core_DataBase
 
 		return $this->_collations;
 	}
+
+	/**
+	 * Cache for getEngines()
+	 * @var NULL|array
+	 */
+	protected $_engines = NULL;
+
+	/**
+	 * Get engines
+	 * @return array
+	 */
+	public function getEngines()
+	{
+		if (is_null($this->_engines))
+		{
+			$query = 'SHOW ENGINES';
+
+			$aResult = $this->query($query)->asAssoc()->result();
+
+			$this->_engines = array();
+			foreach ($aResult as $row)
+			{
+				($row['Support'] === 'YES' || $row['Support'] === 'DEFAULT') && $row['Engine'] != 'PERFORMANCE_SCHEMA'
+					&& $this->_engines[] = $row['Engine'];
+			}
+			$this->free();
+		}
+
+		return $this->_engines;
+	}
 }

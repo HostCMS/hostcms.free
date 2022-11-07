@@ -99,6 +99,8 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 		return $this->_aShop_Warehouse_Inventory[$shop_warehouse_id];
 	}
 
+	protected $_itemsCount = 0;
+
 	/**
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name
@@ -722,11 +724,18 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				break;
 			}
 
-			// Проводки, если есть
-			!is_null($this->_oShop_Price_Setting) && $this->_oShop_Price_Setting->post();
-			foreach ($this->_aShop_Warehouse_Inventory as $shop_warehouse_id => $oShop_Warehouse_Inventory)
+			$this->_itemsCount++;
+
+			$aChecked = $this->_Admin_Form_Controller->getChecked();
+
+			if ($this->_itemsCount == count($aChecked[$this->_datasetId]))
 			{
-				$oShop_Warehouse_Inventory->post();
+				// Проводки, если есть
+				!is_null($this->_oShop_Price_Setting) && $this->_oShop_Price_Setting->post();
+				foreach ($this->_aShop_Warehouse_Inventory as $oShop_Warehouse_Inventory)
+				{
+					$oShop_Warehouse_Inventory->post();
+				}
 			}
 		}
 

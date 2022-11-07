@@ -9,4 +9,6 @@ return array(
 	'device3' => 'TV',
 	'device4' => 'Watch',
 	'destroy_success' => 'User session destroy!',
+	'destroyAll_success' => 'All sessions are destroyed!',
+	'destroy_all' => 'Destroy all',
 );

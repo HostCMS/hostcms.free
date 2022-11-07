@@ -8,9 +8,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Admin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Type_Apply extends Admin_Form_Action_Controller
 {
@@ -51,6 +51,13 @@ class Admin_Form_Action_Controller_Type_Apply extends Admin_Form_Action_Controll
 		return $this;
 	}
 
+
+	/**
+	 * Apply
+	 *
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
+	 * @return boolean
+	 */
 	protected function _apply($oAdmin_Form_Field)
 	{
 		$bChanged = FALSE;

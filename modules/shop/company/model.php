@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Company_Model extends Company_Model
 {
@@ -90,6 +90,7 @@ class Shop_Company_Model extends Company_Model
 				$aDirectory_Addresses[0]->value
 			);
 
+			$aCompanyAddress = array_map('strval', $aCompanyAddress);
 			$aCompanyAddress = array_filter($aCompanyAddress, 'strlen');
 			$sFullCompanyAddress = implode(', ', $aCompanyAddress);
 

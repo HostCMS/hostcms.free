@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Admin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Admin_Form_Action_Controller_Type_Edit_Show extends Core_Servant_Properties
 {
@@ -26,17 +26,22 @@ abstract class Admin_Form_Action_Controller_Type_Edit_Show extends Core_Servant_
 		'buttons',
 	);
 
+	/**
+	 * Admin form entity form
+	 * @var Admin_Form_Entity_Form_Model
+	 */
 	protected $_Admin_Form_Entity_Form = NULL;
 
 	/**
-	 * Constructor.
+	 * Constructor
+	 * @param Admin_Form_Entity_Form_Model $oAdmin_Form_Entity_Form
 	 */
 	public function __construct($oAdmin_Form_Entity_Form)
 	{
 		parent::__construct();
 
 		$this->children = array();
-		
+
 		$this->_Admin_Form_Entity_Form = $oAdmin_Form_Entity_Form;
 	}
 

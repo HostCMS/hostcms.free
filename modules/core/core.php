@@ -261,13 +261,13 @@ class Core
 
 		// List of modules
 		$aModules = Core_Entity::factory('Module')->findAll();
-		
+
 		// First of all load the list of modules
 		foreach ($aModules as $oModule)
 		{
 			self::$modulesList[$oModule->path] = $oModule;
 		}
-		
+
 		// Then load each module
 		foreach ($aModules as $oModule)
 		{
@@ -435,7 +435,7 @@ class Core
 	 */
 	static public function cutRootPath($path)
 	{
-		if (strpos($path, dirname(CMS_FOLDER)) === 0)
+		if (strpos((string) $path, dirname(CMS_FOLDER)) === 0)
 		{
 			$path = substr($path, strlen(CMS_FOLDER));
 		}
@@ -604,7 +604,7 @@ class Core
 			{
 				foreach ($args as $argKey => $argValue)
 				{
-					$argKey > 0 && $args[$argKey] = htmlspecialchars($argValue);
+					$argKey > 0 && $args[$argKey] = htmlspecialchars(strval($argValue));
 				}
 			}
 
@@ -810,7 +810,7 @@ class Core
 
 	/**
 	 * Parse URL and set controller properties
-	 * @return Core::$url
+	 * @return array Core::$url
 	 * @hostcms-event Core.onAfterParseUrl
 	 */
 	static public function parseUrl()
@@ -989,5 +989,27 @@ class Core
 		}
 
 		return Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1');
+	}
+
+	/**
+	* Проверка user-agent на принадлежность к ботам
+	*
+	* @param string $agent user-agent
+	* @return bool true, если это бот, false в противном случае
+	*
+	* <code>
+	* <?php
+	* $agent = 'YANDEX';
+	*
+	* $is_bot = Core::checkBot($agent);
+	*
+	* // Распечатаем результат
+	* var_dump($is_bot);
+	* ?>
+	* </code>
+	*/
+	static public function checkBot($agent)
+	{
+		return preg_match('/http|bot|spide|craw|finder|curl|mail|yandex|rambler|seach|seek|site|sogou|yahoo|msnbot|snoopy|google|bing/iu', $agent);
 	}
 }

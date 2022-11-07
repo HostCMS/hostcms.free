@@ -112,7 +112,9 @@ if (Core_Array::getPost('load_modal') && Core_Array::getPost('shop_order_item_id
 							?>
 						</div>
 						<div class="modal-footer">
-							<button type="button" class="btn btn-primary" onclick="mainFormLocker.unlock(); <?php echo $oAdmin_Form_Controller->checked(array(0 => array($oShop_Order_Item->id => 1)))->getAdminSendForm('setCodes', NULL)?>"><?php echo Core::_('Admin_Form.apply')?></button>
+							<button type="button" class="btn btn-primary" onclick="mainFormLocker.unlock(); <?php echo $oAdmin_Form_Controller
+								->checked(array(0 => array($oShop_Order_Item->id => 1)))
+								->getAdminSendForm('setCodes', NULL, 'shop_order_id=' . Core_Array::getRequest('shop_order_id', 0, 'int'))?>"><?php echo Core::_('Admin_Form.apply')?></button>
 						</div>
 					</form>
 				</div>

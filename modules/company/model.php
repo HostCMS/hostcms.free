@@ -105,7 +105,7 @@ class Company_Model extends Core_Entity
 	/**
 	 * Company departments tree with users and users posts
 	 *
-	 * @return array('departments' => array(
+	 * @return array array('departments' => array(
 				array(
 					'department' => $oDepartment,
 					'users' => array(),
@@ -857,6 +857,11 @@ class Company_Model extends Core_Entity
 	{
 		// Create Company
 		if (!$this->id)
+		{
+			return TRUE;
+		}
+
+		if ($oUser->superuser)
 		{
 			return TRUE;
 		}

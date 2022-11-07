@@ -108,11 +108,19 @@ class Crm_Project_Attachment_Controller_Edit extends Admin_Form_Action_Controlle
 		return $this;
 	}
 
+	/**
+	 * Get save button
+	 * @return Admin_Form_Entity_Buttons
+	 */
 	protected function _getSaveButton()
 	{
 		return NULL;
 	}
 
+	/**
+	 * Get apply button
+	 * @return Admin_Form_Entity_Buttons
+	 */
 	protected function _getApplyButton()
 	{
 		$oButton = parent::_getApplyButton();

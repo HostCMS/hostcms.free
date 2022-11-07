@@ -44,7 +44,7 @@ class Skin_Default_Admin_Form_Entity_Span extends Admin_Form_Entity
 		}
 
 		?><div <?php echo implode(' ', $aDivAttr)?>><?php
-		?><span <?php echo implode(' ', $aAttr) ?>><?php echo htmlspecialchars($this->value)?><?php
+		?><span <?php echo implode(' ', $aAttr) ?>><?php echo htmlspecialchars((string) $this->value)?><?php
 		$this->executeChildren();
 		?></span><?php
 		?></div><?php

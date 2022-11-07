@@ -248,14 +248,14 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 					$itemTable .= '
 						<tr id="' . $oShop_Warehouse_Regrade_Item->id . '" data-item-id="' . $oShop_Item_Writeoff->id . ',' . $oShop_Item_Incoming->id . '">
 							<td class="index">' . ++$index . '</td>
-							<td><input class="writeoff-item-autocomplete form-control" data-type="writeoff" value="' . htmlspecialchars($oShop_Item_Writeoff->name) . '" /></td>
-							<td>' . htmlspecialchars($oShop_Item_Writeoff->Shop_Measure->name) . '</td>
-							<td><span class="writeoff-price">' . htmlspecialchars($oShop_Warehouse_Regrade_Item->writeoff_price) . '</span></td>
-							<td>' . htmlspecialchars($oShop_Item_Writeoff->Shop_Currency->sign) . '</td>
-							<td><input class="incoming-item-autocomplete form-control" data-type="incoming" value="' . htmlspecialchars($oShop_Item_Incoming->name) . '" /></td>
-							<td>' . htmlspecialchars($oShop_Item_Incoming->Shop_Measure->name) . '</td>
-							<td><span class="incoming-price">' . htmlspecialchars($oShop_Warehouse_Regrade_Item->incoming_price) . '</span></td>
-							<td>' . htmlspecialchars($oShop_Item_Incoming->Shop_Currency->sign) . '</td>
+							<td><input class="writeoff-item-autocomplete form-control" data-type="writeoff" value="' . htmlspecialchars((string) $oShop_Item_Writeoff->name) . '" /></td>
+							<td>' . htmlspecialchars((string) $oShop_Item_Writeoff->Shop_Measure->name) . '</td>
+							<td><span class="writeoff-price">' . htmlspecialchars((string) $oShop_Warehouse_Regrade_Item->writeoff_price) . '</span></td>
+							<td>' . htmlspecialchars((string) $oShop_Item_Writeoff->Shop_Currency->sign) . '</td>
+							<td><input class="incoming-item-autocomplete form-control" data-type="incoming" value="' . htmlspecialchars((string) $oShop_Item_Incoming->name) . '" /></td>
+							<td>' . htmlspecialchars((string) $oShop_Item_Incoming->Shop_Measure->name) . '</td>
+							<td><span class="incoming-price">' . htmlspecialchars((string) $oShop_Warehouse_Regrade_Item->incoming_price) . '</span></td>
+							<td>' . htmlspecialchars((string) $oShop_Item_Incoming->Shop_Currency->sign) . '</td>
 							<td width="80"><input class="set-item-count form-control" name="shop_item_quantity_' . $oShop_Warehouse_Regrade_Item->id . '" value="' . $oShop_Warehouse_Regrade_Item->count . '" /></td>
 							<td><a class="delete-associated-item" onclick="mainFormLocker.unlock(); res = confirm(\'' . Core::_('Shop_Warehouse_Regrade.delete_dialog') . '\'); if (res) { var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next); ' . $onclick . ' } return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
 						</tr>

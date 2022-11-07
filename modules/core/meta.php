@@ -154,7 +154,7 @@ class Core_Meta
 					$object = $return;
 				}
 
-				$return = strip_tags($return);
+				$return = strip_tags((string) $return);
 
 				return is_null($functionName)
 					? $return
@@ -196,6 +196,11 @@ class Core_Meta
 		}
 	}
 
+	/**
+	 * Parse args
+	 * @param string $str
+	 * @return array
+	 */
 	protected function _parseArgs($str)
 	{
 		preg_match_all('/\s*(?:(?:"([^"]*)")|(?:\'([^\']*)\')|([^"\'\s]+))/', $str, $matchesAttr);

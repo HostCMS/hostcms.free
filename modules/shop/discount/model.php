@@ -258,11 +258,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 		$this->addXmlTag('start_datetime', $this->start_datetime == '0000-00-00 00:00:00'
 			? $this->start_datetime
-			: strftime($oShop->format_datetime, Core_Date::sql2timestamp($this->start_datetime)));
+			: Core_Date::strftime($oShop->format_datetime, Core_Date::sql2timestamp($this->start_datetime)));
 
 		$this->addXmlTag('end_datetime', $this->end_datetime == '0000-00-00 00:00:00'
 			? $this->end_datetime
-			: strftime($oShop->format_datetime, Core_Date::sql2timestamp($this->end_datetime)));
+			: Core_Date::strftime($oShop->format_datetime, Core_Date::sql2timestamp($this->end_datetime)));
 
 		$this->type == 0
 			? $this->addXmlTag('percent', $this->value)

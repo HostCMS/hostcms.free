@@ -312,7 +312,7 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 			->orderBy('shop_warehouses.sorting')
 			->orderBy('shop_warehouses.id');
 
-		if (strlen($like))
+		if ($like != '')
 		{
 			$like = Core_DataBase::instance()->escapeLike($like);
 
