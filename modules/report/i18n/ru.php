@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Report
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'menu' => 'Отчеты',
@@ -21,7 +21,7 @@ return array(
 	'all_shops' => 'Все магазины',
 	'applyLabel' => 'Принять',
 	'cancelLabel' => 'Отмена',
-	'order_costs' => 'Стоимость заказов',
+	'order_costs' => 'Заказано',
 	'order_paid' => 'Оплата',
 	'popular_items' => 'Популярные товары',
 	'popular_producers' => 'Популярные производители',
@@ -78,4 +78,11 @@ return array(
 	'axis_count_paid' => 'Число продаж',
 	'axis_total_amount' => 'Общая стоимость',
 	'popular_quantity' => 'Количество: ',
+	'select_price' => 'Выберите закупочную цену',
+	'order_paid_costs' => 'Оплачено',
+	'order_costs_profit' => 'Ожидаемая прибыль',
+	'order_paid_profit' => 'Прибыль',
+	'label_profit' => 'Прибыль',
+	'label_previuos_profit' => 'Прибыль за предыдущий период',
+	'table_profit' => 'Прибыль',
 );

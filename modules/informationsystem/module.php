@@ -23,7 +23,7 @@ class Informationsystem_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2022-08-05';
+	public $date = '2022-11-01';
 
 	/**
 	 * Module name
@@ -94,22 +94,14 @@ class Informationsystem_Module extends Core_Module
 	 */
 	public function indexing($offset, $limit)
 	{
-		/**
-		 * $_SESSION['search_block'] - номер блока индексации
-		 */
 		if (!isset($_SESSION['search_block']))
 		{
 			$_SESSION['search_block'] = 0;
 		}
 
-		if (!isset($_SESSION['last_limit']))
-		{
-			$_SESSION['last_limit'] = 0;
-		}
+		$initialLimit = $limit;
 
-		$limit_orig = $limit;
-
-		$result = array();
+		$aPages = array();
 
 		switch ($_SESSION['search_block'])
 		{
@@ -118,23 +110,21 @@ class Informationsystem_Module extends Core_Module
 					->notify(FALSE)
 					->status(Core_Log::$MESSAGE)
 					->write("indexingInformationsystemGroups({$offset}, {$limit})");
-				
-				$aTmpResult = $this->indexingInformationsystemGroups($offset, $limit);
 
-				$_SESSION['last_limit'] = count($aTmpResult);
+				$aPages = $this->indexingInformationsystemGroups($offset, $limit);
 
-				$result = array_merge($result, $aTmpResult);
-				$count = count($result);
+				$currentStepCount = count($aPages);
 
-				if ($count < $limit_orig)
+				if ($currentStepCount < $initialLimit)
 				{
+					// Next block
 					$_SESSION['search_block']++;
-					$limit = $limit_orig - $count;
+					$limit = $initialLimit - $currentStepCount;
 					$offset = 0;
 				}
 				else
 				{
-					return $result;
+					break;
 				}
 
 			case 1:
@@ -142,30 +132,15 @@ class Informationsystem_Module extends Core_Module
 					->notify(FALSE)
 					->status(Core_Log::$MESSAGE)
 					->write("indexingInformationsystemItems({$offset}, {$limit})");
-					
+
 				$aTmpResult = $this->indexingInformationsystemItems($offset, $limit);
+				
+				$currentStepCount = count($aTmpResult);
 
-				$_SESSION['last_limit'] = count($aTmpResult);
-
-				$result = array_merge($result, $aTmpResult);
-				$count = count($result);
-
-				// Закончена индексация
-				if ($count < $limit_orig)
-				{
-					$_SESSION['search_block']++;
-					$limit = $limit_orig - $count;
-					$offset = 0;
-				}
-				else
-				{
-					return $result;
-				}
+				$aPages = array_merge($aPages, $aTmpResult);
 		}
 
-		$_SESSION['search_block'] = 0;
-
-		return $result;
+		return array('pages' => $aPages, 'indexed' => $currentStepCount, 'finished' => count($aPages) < $initialLimit);
 	}
 
 	/**

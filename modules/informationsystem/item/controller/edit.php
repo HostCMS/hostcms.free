@@ -280,11 +280,11 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				$oImageField = Admin_Form_Entity::factory('File')
 					->divAttr(array('class' => ''));
 
-				$oLargeFilePath = is_file($this->_object->getLargeFilePath())
+				$oLargeFilePath = $this->_object->image_large != '' && is_file($this->_object->getLargeFilePath())
 					? $this->_object->getLargeFileHref()
 					: '';
 
-				$oSmallFilePath = is_file($this->_object->getSmallFilePath())
+				$oSmallFilePath = $this->_object->image_small != '' && is_file($this->_object->getSmallFilePath())
 					? $this->_object->getSmallFileHref()
 					: '';
 
@@ -727,7 +727,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				if (Core::moduleIsActive('typograph'))
 				{
 					$aTypographConfig = Typograph_Controller::instance()->getConfig();
-					
+
 					$this->getField('description')->value(
 						Typograph_Controller::instance()->eraseOpticalAlignment($this->getField('description')->value)
 					);
@@ -757,11 +757,11 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				$oImageField = Admin_Form_Entity::factory('File')
 					->divAttr(array('class' => ''));;
 
-				$oLargeFilePath = is_file($this->_object->getLargeFilePath())
+				$oLargeFilePath = $this->_object->image_large != '' && is_file($this->_object->getLargeFilePath())
 					? $this->_object->getLargeFileHref()
 					: '';
 
-				$oSmallFilePath = is_file($this->_object->getSmallFilePath())
+				$oSmallFilePath = $this->_object->image_small != '' && is_file($this->_object->getSmallFilePath())
 					? $this->_object->getSmallFileHref()
 					: '';
 

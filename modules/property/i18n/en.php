@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Property
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Properties',
@@ -98,4 +98,6 @@ return array(
 	'indexing' => 'Index',
 	'changeIndexing_success' => 'Property indexing status changed successfully.',
 	'changeIndexing_error' => 'An error occurred while changing the indexing status of a property.',
+	'use_trailing_punctuation' => '<acronym title="Optical text alignment function moves punctuation characters beyond the typing borders">Optical alignment</acronym>',
+	'use_typograph' => 'Prepress',
 );

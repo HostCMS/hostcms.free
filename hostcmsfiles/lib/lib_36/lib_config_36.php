@@ -177,8 +177,8 @@ elseif ($sType == 'catalog' && $sMode == 'file' && ($sFileName = Core_Array::get
 	if (is_file($sFullFileName))
 	{
 		$filesize = filesize($sFullFileName);
-		$blocks = $iFileLimit / $filesize;
-		$blocksDelta = $blocks - intval($blocks);
+		$blocks = $filesize / $iFileLimit;
+		$blocksDelta = ceil($blocks) - $blocks;
 
 		// Накопленная разница между размером файла и размерами блока больше, чем 10% или прошло 5 минут с даты последнего изменения
 		if ($blocksDelta > 0.1 || (filemtime($sFullFileName) + 60 * 5) < time())

@@ -153,6 +153,24 @@ class Field_Model extends Core_Entity
 	}
 
 	/**
+	 * Get property by tag name
+	 * @param string $tag_name tag name
+	 * @return Property_Model|NULL
+	 */
+	public function getByTagName($tag_name)
+	{
+		$this->queryBuilder()
+			->where('tag_name', '=', $tag_name)
+			->limit(1);
+
+		$aObjects = $this->findAll();
+
+		return isset($aObjects[0])
+			? $aObjects[0]
+			: NULL;
+	}
+
+	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return self

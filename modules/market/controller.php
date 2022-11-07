@@ -39,7 +39,8 @@ class Market_Controller extends Core_Servant_Properties
 		'controller',
 		'options',
 		'tmpDir',
-		'order'
+		'order',
+		'protocol'
 	);
 
 	/**
@@ -134,13 +135,24 @@ class Market_Controller extends Core_Servant_Properties
 			->update_id($update_id)
 			->domain($domain)
 			->update_server(HOSTCMS_UPDATE_SERVER)
-			->keys($aSite_Alias_Names);
+			->keys($aSite_Alias_Names)
+			->protocol($oSite->https ? 'https' : 'http');
 
 		return $this;
 	}
 
+	/**
+	 * Shop groups
+	 * @var array
+	 */
 	protected $_aShop_Groups = array();
 
+	/**
+	 * Parse group
+	 * @param object $oXmlGroup
+	 * @param integer $parentId
+	 * @return array
+	 */
 	protected function _parseGroup($oXmlGroup, $parentId = 0)
 	{
 		foreach ($oXmlGroup as $value)
@@ -181,7 +193,7 @@ class Market_Controller extends Core_Servant_Properties
 		$md5_pin = md5($this->pin);
 
 		$url = 'https://' . $this->update_server . "/hostcmsupdate/market/?action=load_market&domain=" . rawurlencode($this->domain) .
-			'&protocol=' . (Core::httpsUses() ? 'https' : 'http') .
+			'&protocol=' . rawurlencode($this->protocol) .
 			"&login=" . rawurlencode($this->login) .
 			"&contract=" . rawurlencode($md5_contract) .
 			"&pin=" . rawurlencode($md5_pin) .
@@ -192,7 +204,7 @@ class Market_Controller extends Core_Servant_Properties
 			"&current=" . intval($this->page) .
 			"&limit=" . intval($this->limit);
 
-		if (strlen($this->search))
+		if ($this->search != '')
 		{
 			$url .= "&search=" . rawurlencode($this->search);
 		}
@@ -312,7 +324,7 @@ class Market_Controller extends Core_Servant_Properties
 		Core_Database::instance()->query('SET SESSION wait_timeout = 600');
 
 		$url = 'https://' . $this->update_server . "/hostcmsupdate/market/?action=get_module&domain=" . rawurlencode($this->domain) .
-			'&protocol=' . (Core::httpsUses() ? 'https' : 'http') .
+			'&protocol=' . rawurlencode($this->protocol) .
 			'&login=' . rawurlencode($this->login) .
 			'&contract=' . rawurlencode(md5($this->contract)) .
 			'&pin=' . rawurlencode(md5($this->pin)) .
@@ -424,9 +436,9 @@ class Market_Controller extends Core_Servant_Properties
 
 								// Сохраняем tar.gz
 								$source_file = $this->tmpDir . DIRECTORY_SEPARATOR . 'tmpfile.tar.gz';
-								
+
 								Core_File::write($source_file, $Core_Http->getDecompressedBody());
-								
+
 								if (Core_File::filesize($source_file))
 								{
 									// Распаковываем файлы
@@ -476,6 +488,10 @@ class Market_Controller extends Core_Servant_Properties
 		return NULL;
 	}
 
+	/**
+	 * Show module options
+	 * @return self
+	 */
 	public function showModuleOptions()
 	{
 		// Читаем modules.xml
@@ -524,6 +540,11 @@ class Market_Controller extends Core_Servant_Properties
 		return $this;
 	}
 
+	/**
+	 * Get form field
+	 * @param array $aFieldsValue
+	 * @return Form_Field_Model
+	 */
 	public function getFormField($aFieldsValue)
 	{
 		$sFieldCaption = htmlspecialchars($aFieldsValue['Caption']);
@@ -687,8 +708,16 @@ class Market_Controller extends Core_Servant_Properties
 		return $oForm_Field;
 	}
 
+	/**
+	 * Module xml
+	 * @var mixed
+	 */
 	protected $_ModuleXml = NULL;
 
+	/**
+	 * Parse module xml
+	 * @return string
+	 */
 	public function parseModuleXml()
 	{
 		$sModuleXmlPath = $this->tmpDir . DIRECTORY_SEPARATOR . 'module.xml';
@@ -771,6 +800,9 @@ class Market_Controller extends Core_Servant_Properties
 		return $this;
 	}
 
+	/**
+	 * Install
+	 */
 	public function install()
 	{
 		// Копируем файлы из ./files/ в папку системы
@@ -780,7 +812,7 @@ class Market_Controller extends Core_Servant_Properties
 			Core_Log::instance()->clear()
 				->status(Core_Log::$MESSAGE)
 				->write(sprintf('Market, copy `files` directory'));
-							
+
 			Core_File::copyDir($sFilesDir, CMS_FOLDER);
 		}
 
@@ -816,7 +848,7 @@ class Market_Controller extends Core_Servant_Properties
 			Core_Log::instance()->clear()
 				->status(Core_Log::$MESSAGE)
 				->write(sprintf('Market, execute module.sql'));
-				
+
 			$sSqlCode = Core_File::read($sSqlModuleFilename);
 			Sql_Controller::instance()->execute($sSqlCode);
 		}
@@ -828,7 +860,7 @@ class Market_Controller extends Core_Servant_Properties
 			Core_Log::instance()->clear()
 				->status(Core_Log::$MESSAGE)
 				->write(sprintf('Market, execute module.php'));
-				
+
 			include($sPhpModuleFilename);
 		}
 
@@ -843,7 +875,7 @@ class Market_Controller extends Core_Servant_Properties
 				Core_Log::instance()->clear()
 					->status(Core_Log::$MESSAGE)
 					->write(sprintf('Market, create module'));
-				
+
 				$oAdminModule = Core_Entity::factory('Module');
 				$oAdminModule
 					->name($this->_Module->name)
@@ -942,7 +974,7 @@ class Market_Controller extends Core_Servant_Properties
 	public function getModuleFile($path)
 	{
 		$url = 'https://' . $this->update_server . $path . "&domain=".rawurlencode($this->domain) .
-		'&protocol=' . (Core::httpsUses() ? 'https' : 'http') .
+		'&protocol=' . rawurlencode($this->protocol) .
 		"&login=" . rawurlencode($this->login) .
 		"&contract=" . rawurlencode(md5($this->contract)) .
 		"&pin=" . rawurlencode(md5($this->pin)) .
@@ -964,8 +996,17 @@ class Market_Controller extends Core_Servant_Properties
 		return $Core_Http;
 	}
 
+	/**
+	 * Options
+	 * @var array
+	 */
 	protected $_aTmpOptions = array();
 
+	/**
+	 * Get category options
+	 * @param integer $parentId
+	 * @param integer $level
+	 */
 	protected function _getCategoryOptions($parentId, $level = 0)
 	{
 		if (isset($this->_categories[$parentId]))
@@ -984,6 +1025,9 @@ class Market_Controller extends Core_Servant_Properties
 		}
 	}
 
+	/**
+	 * Show items list
+	 */
 	public function showItemsList()
 	{
 		$oMainTab = Admin_Form_Entity::factory('Tab')->name('main');
@@ -1050,7 +1094,7 @@ class Market_Controller extends Core_Servant_Properties
 			$aReturn = Update_Controller::instance()->parseUpdates();
 
 			$sDatetime = !is_null($aReturn['datetime'])
-				? strftime(DATE_TIME_FORMAT, strtotime($aReturn['datetime']))
+				? Core_Date::strftime(DATE_TIME_FORMAT, strtotime($aReturn['datetime']))
 				: '';
 
 			throw new Core_Exception(
@@ -1079,6 +1123,10 @@ class Market_Controller extends Core_Servant_Properties
 			->execute();
 	}
 
+	/**
+	 * Get market items html
+	 * @return string
+	 */
 	public function getMarketItemsHtml()
 	{
 		$sHtml = '<div class="market">';
@@ -1091,6 +1139,11 @@ class Market_Controller extends Core_Servant_Properties
 		return $sHtml;
 	}
 
+	/**
+	 * Get market item html
+	 * @param object $object
+	 * @return string
+	 */
 	protected function _getMarketItemHtml($object)
 	{
 		$sWindowId = $this->controller

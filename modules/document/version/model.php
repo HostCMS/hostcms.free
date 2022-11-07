@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Document
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Document_Version_Model extends Core_Entity
 {
@@ -82,6 +82,10 @@ class Document_Version_Model extends Core_Entity
 		return $this;
 	}
 
+	/**
+	 * Execute
+	 * @return self
+	 */
 	public function execute()
 	{
 		$this->Document->execute();

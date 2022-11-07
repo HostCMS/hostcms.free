@@ -400,8 +400,7 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 				// Изображение
 				$oWatermarkFileField = Admin_Form_Entity::factory('File');
 
-				$watermarkPath =
-					is_file($this->_object->getWatermarkFilePath())
+				$watermarkPath = $this->_object->watermark_file != '' && is_file($this->_object->getWatermarkFilePath())
 					? $this->_object->getWatermarkFileHref()
 					: '';
 

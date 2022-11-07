@@ -13,8 +13,16 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  */
 class Core_Zip
 {
+	/**
+	 * Zip object
+	 * @var mixed
+	 */
 	protected $_Zip = NULL;
 
+	/**
+	 * Exclude dir
+	 * @var array
+	 */
 	protected $_excludeDir = array();
 
 	/**
@@ -47,6 +55,10 @@ class Core_Zip
 		return new $name();
 	}
 
+	/**
+	 * Files
+	 * @var integer
+	 */
 	protected $_iFiles = 0;
 
 	/**
@@ -111,6 +123,7 @@ class Core_Zip
 				{
 					$use = TRUE;
 
+					// Skip set dirs
 					foreach ($this->_excludeDir as $excludeDir)
 					{
 						if (strpos($filePath, $excludeDir) === 0)
@@ -133,6 +146,10 @@ class Core_Zip
 		closedir($dh);
 	}
 
+	/**
+	 * Output path
+	 * @var mixed
+	 */
 	protected $_outputPath = NULL;
 
 	/**

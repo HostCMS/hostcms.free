@@ -21,6 +21,7 @@ return array(
 	'edit_success' => 'Информация изменена успешно!',
 	'apply_success' => "Информация успешно изменена",
 	'delete_success' => 'Элемент удален!',
+	'markDeleted_success' => 'Драйвер был успешно удален!',
 	'undelete_success' => 'Элемент восстановлен!',
 	'changeActive_success' => 'Активность изменена!',
 );

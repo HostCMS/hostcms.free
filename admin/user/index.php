@@ -949,7 +949,7 @@ if (Core_Auth::logged())
 		$oUser = Core_Entity::factory('User')->getById($id);
 		if ($oUser)
 		{
-			$name = strlen($oUser->name) && strlen($oUser->surname)
+			$name = $oUser->name != '' && $oUser->surname != ''
 				? $oUser->name . ' ' . $oUser->surname
 				: $oUser->login;
 		}

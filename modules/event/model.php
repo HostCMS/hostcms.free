@@ -60,6 +60,15 @@ class Event_Model extends Core_Entity
 	);
 
 	/**
+	 * Belongs to relations
+	 * @var array
+	 */
+	protected $_hasOne = array(
+		'lead_event' => array(),
+		'deal_event' => array(),
+	);
+
+	/**
 	 * Forbidden tags. If list of tags is empty, all tags will show.
 	 * @var array
 	 */
@@ -88,6 +97,21 @@ class Event_Model extends Core_Entity
 	 * @var mixed
 	 */
 	public $group = NULL;
+
+	/**
+	 * Constructor.
+	 * @param int $id entity ID
+	 */
+	public function __construct($id = NULL)
+	{
+		parent::__construct($id);
+
+		if (is_null($id) && !$this->loaded())
+		{
+			$this->_preloadValues['guid'] = Core_Guid::get();
+			$this->_preloadValues['last_modified'] = Core_Date::timestamp2sql(time());
+		}
+	}
 
 	/**
 	 * Check deadline
@@ -128,22 +152,39 @@ class Event_Model extends Core_Entity
 			? '<i class="fa fa-clock-o event-title-deadline"></i>'
 			: '';*/
 
+		?><div class="d-flex align-items-center"><?php
 		if ($this->Event_Attachments->getCount(FALSE))
 		{
 			?><i class="fa fa-paperclip name-attachments"></i><?php
 		}
 
-		?><div class="semi-bold editable" style="display: inline-block;" id="apply_check_0_<?php echo $this->id?>_fv_1226"><?php echo htmlspecialchars($this->name)?></div>
+		?><div class="semi-bold editable" style="display: inline-block;" id="apply_check_0_<?php echo $this->id?>_fv_1226"><?php echo htmlspecialchars((string) $this->name)?></div></div>
 		<?php
 		if ($this->parent_id)
 		{
+			$oEvent = $this->Event;
 			?>
-			<span class="small gray"> → <?php echo htmlspecialchars($this->Event->name)?></span>
+			<span class="small gray"> → <a class="gray" href="/admin/event/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $oEvent->id?>]=1" onclick="$.modalLoad({path: '/admin/event/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oEvent->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>', width: '90%'}); return false"><?php echo htmlspecialchars((string) $this->Event->name)?></a></span>
 			<?php
 		}
+		elseif(Core::moduleIsActive('lead') && $this->Lead_Event->id)
+		{
+			$oLead = $this->Lead_Event->Lead;
+			?>
+			<span class="small gray"> → <a class="gray" href="/admin/lead/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $oLead->id?>]=1" onclick="$.modalLoad({path: '/admin/lead/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oLead->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>', width: '90%'}); return false"><?php echo htmlspecialchars((string) $this->Lead_Event->Lead->getFullName())?></a></span>
+			<?php
+		}
+		elseif(Core::moduleIsActive('deal') && $this->Deal_Event->id)
+		{
+			$oDeal = $this->Deal_Event->Deal;
+			?>
+			<span class="small gray"> → <a class="gray" href="/admin/deal/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $oDeal->id?>]=1" onclick="$.modalLoad({path: '/admin/deal/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oDeal->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>', width: '90%'}); return false"><?php echo htmlspecialchars((string) $this->Deal_Event->Deal->name)?></a></span>
+			<?php
+		}
+
 		if ($this->description != '')
 		{
-			?><div class="event-description"><?php echo nl2br(htmlspecialchars($this->description))?></div><?php
+			?><div class="event-description"><?php echo nl2br(htmlspecialchars((string) $this->description))?></div><?php
 		}
 		?><div class="event-creator-wrapper"><div class="small2"><?php
 
@@ -302,7 +343,7 @@ class Event_Model extends Core_Entity
 			{
 				?><div class="related-events-wrapper">
 					<div class="related-events" style="color: <?php echo $oDeal->Deal_Template->color?>; background-color:<?php echo Core_Str::hex2lighter($oDeal->Deal_Template->color, 0.88)?>"><i class="fa fa-handshake-o"></i></div>
-					<div><a style="color: <?php echo $oDeal->Deal_Template->color?>" href="/admin/deal/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $oDeal->id?>]=1" onclick="$.modalLoad({path: '/admin/deal/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oDeal->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>'}); return false"><?php echo htmlspecialchars($oDeal->name)?></a></div>
+					<div><a style="color: <?php echo $oDeal->Deal_Template->color?>" href="/admin/deal/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $oDeal->id?>]=1" onclick="$.modalLoad({path: '/admin/deal/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oDeal->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>', width: '90%'}); return false"><?php echo htmlspecialchars($oDeal->name)?></a></div>
 				</div><?php
 			}
 		}
@@ -325,7 +366,7 @@ class Event_Model extends Core_Entity
 			{
 				?><div class="related-events-wrapper">
 					<div class="related-events" style="color: <?php echo $oLead->Lead_Status->color?>; background-color:<?php echo Core_Str::hex2lighter($oLead->Lead_Status->color, 0.88)?>"><i class="fa fa-user-circle-o"></i></div>
-					<div><a style="color: <?php echo $oLead->Lead_Status->color?>;" href="/admin/lead/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $oLead->id?>]=1" onclick="$.modalLoad({path: '/admin/lead/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oLead->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>'}); return false"><?php echo htmlspecialchars($oLead->getFullName())?></a></div>
+					<div><a style="color: <?php echo $oLead->Lead_Status->color?>;" href="/admin/lead/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $oLead->id?>]=1" onclick="$.modalLoad({path: '/admin/lead/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oLead->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>', width: '90%'}); return false"><?php echo htmlspecialchars($oLead->getFullName())?></a></div>
 				</div><?php
 			}
 		}
@@ -366,7 +407,7 @@ class Event_Model extends Core_Entity
 				{
 					?><div class="related-events-wrapper">
 						<div class="related-events" style="color: <?php echo $oDms_Document->Dms_Document_Type->color?>; background-color:<?php echo Core_Str::hex2lighter($oDms_Document->Dms_Document_Type->color, 0.88)?>"><i class="fa fa-columns"></i></div>
-						<div><a style="color: <?php echo $oDms_Document->Dms_Document_Type->color?>;" href="/admin/dms/document/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $oDms_Document->id?>]=1" onclick="$.modalLoad({path: '/admin/dms/document/index.php', action: '<?php echo $action?>', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oDms_Document->id?>]=1', windowId: 'modal<?php echo $oDms_Document->id?>'}); return false"><?php echo htmlspecialchars($name)?></a></div>
+						<div><a style="color: <?php echo $oDms_Document->Dms_Document_Type->color?>;" href="/admin/dms/document/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $oDms_Document->id?>]=1" onclick="$.modalLoad({path: '/admin/dms/document/index.php', action: '<?php echo $action?>', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oDms_Document->id?>]=1', windowId: 'modal<?php echo $oDms_Document->id?>', width: '90%'}); return false"><?php echo htmlspecialchars($name)?></a></div>
 					</div><?php
 				}
 			}
@@ -441,13 +482,15 @@ class Event_Model extends Core_Entity
 					{
 						$oSiteuser_Company = $oEvent_Siteuser->Siteuser_Company;
 
-						$sResult .= $oSiteuser_Company->getProfileBlock($class);
+						$oSiteuser_Company->id
+							&& $sResult .= $oSiteuser_Company->getProfileBlock($class);
 					}
 					elseif ($oEvent_Siteuser->siteuser_person_id)
 					{
 						$oSiteuser_Person = $oEvent_Siteuser->Siteuser_Person;
 
-						$sResult .= $oSiteuser_Person->getProfileBlock($class);
+						$oSiteuser_Person->id
+							&& $sResult .= $oSiteuser_Person->getProfileBlock($class);
 					}
 				}
 
@@ -533,11 +576,11 @@ class Event_Model extends Core_Entity
 	{
 		$oEvent_Type = $this->Event_Type;
 
-		$successfully = strlen(trim($oEvent_Type->successfully))
+		$successfully = $oEvent_Type->id && $oEvent_Type->successfully != ''
 			? htmlspecialchars($oEvent_Type->successfully)
 			: Core::_('Admin_Form.successfully');
 
-		$failed = strlen(trim($oEvent_Type->failed))
+		$failed = $oEvent_Type->id && $oEvent_Type->failed != ''
 			? htmlspecialchars($oEvent_Type->failed)
 			: Core::_('Admin_Form.failed');
 
@@ -1009,7 +1052,7 @@ class Event_Model extends Core_Entity
 	 */
 	public function showType()
 	{
-		?><span class="badge badge-square margin-right-10" style="color: <?php echo $this->Event_Type->color?>; background-color:<?php echo Core_Str::hex2lighter($this->Event_Type->color, 0.88)?>"><i class="<?php echo htmlspecialchars($this->Event_Type->icon)?>"></i> <?php echo htmlspecialchars($this->Event_Type->name)?></span><?php
+		?><span class="badge badge-square margin-right-10" style="color: <?php echo $this->Event_Type->color?>; background-color:<?php echo Core_Str::hex2lighter($this->Event_Type->color, 0.88)?>"><i class="<?php echo htmlspecialchars((string) $this->Event_Type->icon)?>"></i> <?php echo htmlspecialchars((string) $this->Event_Type->name)?></span><?php
 	}
 
 	/**
@@ -1285,10 +1328,10 @@ class Event_Model extends Core_Entity
 						{
 							$Calendar_Caldav_Controller->setCalendar(array_shift($aCalendars));
 
-							$oModule = Core_Entity::factory('Module')->getByPath('event');
+							// $oModule = Core_Entity::factory('Module')->getByPath('event');
+							// $sUid = $this->id . '_' . $oModule->id;
 
-							$sUid = $this->id . '_' . $oModule->id;
-							$sUrl = $Calendar_Caldav_Controller->getCalendar() . $sUid . '.ics';
+							$sUrl = $Calendar_Caldav_Controller->getCalendar() . $this->guid . '.ics';
 
 							$Calendar_Caldav_Controller->delete($sUrl);
 						}
@@ -1587,16 +1630,16 @@ class Event_Model extends Core_Entity
 			->clearXmlTags()
 			->addXmlTag('start', $this->start == '0000-00-00 00:00:00'
 				? $this->start
-				: strftime($oSite->date_time_format, Core_Date::sql2timestamp($this->start)))
+				: Core_Date::strftime($oSite->date_time_format, Core_Date::sql2timestamp($this->start)))
 			->addXmlTag('deadline', $this->deadline == '0000-00-00 00:00:00'
 				? $this->deadline
-				: strftime($oSite->date_time_format, Core_Date::sql2timestamp($this->deadline)))
+				: Core_Date::strftime($oSite->date_time_format, Core_Date::sql2timestamp($this->deadline)))
 			->addXmlTag('datetime', $this->datetime == '0000-00-00 00:00:00'
 				? $this->datetime
-				: strftime($oSite->date_time_format, Core_Date::sql2timestamp($this->datetime)))
+				: Core_Date::strftime($oSite->date_time_format, Core_Date::sql2timestamp($this->datetime)))
 			->addXmlTag('date', $this->datetime == '0000-00-00 00:00:00'
 				? $this->datetime
-				: strftime($oSite->date_format, Core_Date::sql2timestamp($this->datetime)));
+				: Core_Date::strftime($oSite->date_format, Core_Date::sql2timestamp($this->datetime)));
 
 		$this->event_group_id
 			&& $this->addEntity($this->Event_Group);

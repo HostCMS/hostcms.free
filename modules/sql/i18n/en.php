@@ -24,4 +24,6 @@ return array(
 	'manage' => 'Manage',
 	'manage_title' => 'Manage database',
 	'processlist' => 'Process List',
+	'limit' => 'Limit',
+	'page' => 'Page',
 );

@@ -215,6 +215,31 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$oMainRow2->add($resultItem);
 				}
 
+				$oMainTab
+					->delete($this->getField('typograph'))
+					->delete($this->getField('trailing_punctuation'));
+
+				if (Core::moduleIsActive('typograph'))
+				{
+					$oUseTypograph = Admin_Form_Entity::factory('Checkbox')
+						->name("typograph")
+						->caption(Core::_('Property.use_typograph'))
+						->value(1)
+						->divAttr(array('class' => 'form-group col-sm-12 col-md-6 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'))
+						->checked($this->_object->typograph);
+
+					$oUseTrailingPunctuation = Admin_Form_Entity::factory('Checkbox')
+						->name("trailing_punctuation")
+						->caption(Core::_('Property.use_trailing_punctuation'))
+						->value(1)
+						->divAttr(array('class' => 'form-group col-sm-12 col-md-6 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'))
+						->checked($this->_object->trailing_punctuation);
+
+					$oMainRow3
+						->add($oUseTypograph)
+						->add($oUseTrailingPunctuation);
+				}
+
 				// Список
 				if (Core::moduleIsActive('list'))
 				{
@@ -633,10 +658,10 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				{
 					Core::$mainConfig['translate'] && $sTranslated = Core_Str::translate($this->_object->name);
 
-					$this->_object->tag_name = Core::$mainConfig['translate'] && strlen($sTranslated)
+					$this->_object->tag_name = Core::$mainConfig['translate'] && strlen((string) $sTranslated)
 						? $sTranslated
 						: $this->_object->name;
-					
+
 					$this->_object->tag_name = Core_Str::transliteration($this->_object->tag_name);
 				}
 
@@ -646,12 +671,12 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						$this->_object->default_value = Core_Array::getPost('default_value_checked', 0);
 					break;
 					case 8: // Дата
-						$this->_object->default_value = strlen(Core_Array::getPost('default_value_date'))
+						$this->_object->default_value = strlen(Core_Array::getPost('default_value_date', '', 'strval'))
 							? Core_Date::date2sql(Core_Array::getPost('default_value_date'))
 							: '0000-00-00 00:00:00';
 					break;
 					case 9: // Дата-время
-						$this->_object->default_value = strlen(Core_Array::getPost('default_value_datetime'))
+						$this->_object->default_value = strlen(Core_Array::getPost('default_value_datetime', '', 'strval'))
 							? Core_Date::datetime2sql(Core_Array::getPost('default_value_datetime'))
 							: '0000-00-00 00:00:00';
 					break;

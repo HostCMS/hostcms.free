@@ -79,8 +79,8 @@ return array(
 	'sort_by_date' => 'Дата',
 	'sort_by_name' => 'Название',
 	'sort_by_order' => 'Порядок сортировки',
-	'sort_to_increase' => 'По-возрастанию',
-	'sort_to_decrease' => 'По-убыванию',
+	'sort_to_increase' => 'По возрастанию',
+	'sort_to_decrease' => 'По убыванию',
 	'id' => 'Идентификатор',
 	'site_id' => 'Идентификатор сайта',
 	'markDeleted_success' => "Данные об интернет-магазине успешно удалены!",
@@ -180,7 +180,7 @@ return array(
 	'seo_template_filter_producer' => 'Производитель',
 
 	'all_groups_count' => 'Всего групп: %s',
-	'all_items_count' => 'Всего товаров: %s',
+	'all_items_count' => 'Всего товаров, включая модификации и ярлыки: %s',
 
 	'create_small_image' => 'Создавать малое изображение из большого',
 
@@ -210,5 +210,5 @@ return array(
 	'option_itemSmallImage' => 'Шаблон именования малого изображения товара',
 	'option_groupLargeImage' => 'Шаблон именования большого изображения группы',
 	'option_groupSmallImage' => 'Шаблон именования малого изображения группы',
-	'option_shop_item_card_xsl' => 'XSL-шаблон ценников'
+	'option_shop_item_card_xsl' => 'XSL-шаблон ценников',
 );

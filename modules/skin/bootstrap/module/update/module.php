@@ -113,7 +113,7 @@ class Skin_Bootstrap_Module_Update_Module extends Update_Module
 							if ($error > 0)
 							{
 								$sDatetime = !is_null($aUpdates['datetime'])
-									? strftime(DATE_TIME_FORMAT, strtotime($aUpdates['datetime']))
+									? Core_Date::strftime(DATE_TIME_FORMAT, strtotime($aUpdates['datetime']))
 									: '';
 
 								echo Core_Str::cutSentences(

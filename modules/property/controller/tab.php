@@ -161,57 +161,29 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		return $this;
 	}
 
-	public function imgBox($oAdmin_Form_Entity, $oProperty, $addFunction = '$.cloneProperty', $deleteOnclick = '$.deleteNewProperty(this)')
-	{
-		$oAdmin_Form_Entity
-			->add($this->getImgAdd($oProperty, $addFunction))
-			->add($this->getImgDelete($deleteOnclick));
-
-		return $this;
-	}
+	/**
+	* Show buttons
+	* @param Property_Model $oProperty property
+	* @param string $addFunction function name
+	* @param string $deleteOnclick onclick attribute value
+	* @return string
+	*/
+	public function imgBox($oAdmin_Form_Entity, $oProperty, $addFunction = '$.cloneProperty', $deleteOnclick = '$.deleteNewProperty(this)') {}
 
 	/**
 	* Show plus button
 	* @param Property_Model $oProperty property
-	* @param string $function function name
+	* @param string $addFunction function name
 	* @return string
 	*/
-	public function getImgAdd($oProperty, $addFunction = '$.cloneProperty')
-	{
-		$windowId = $this->_Admin_Form_Controller->getWindowId();
-
-		ob_start();
-		Core_Html_Entity::factory('Img')
-			->src('/admin/images/action_add.gif')
-			->id('add')
-			->class('pointer left5px img_line')
-			->onclick("{$addFunction}('{$windowId}', '{$oProperty->id}')")
-			->execute();
-		$oAdmin_Form_Entity_Code = Admin_Form_Entity::factory('Code')->html(ob_get_clean());
-
-		return $oAdmin_Form_Entity_Code;
-	}
+	public function getImgAdd($oProperty, $addFunction = '$.cloneProperty') {}
 
 	/**
 	* Show minus button
 	* @param string $onclick onclick attribute value
 	* @return string
 	*/
-	public function getImgDelete($onclick = '$.deleteNewProperty(this)')
-	{
-		ob_start();
-		Core_Html_Entity::factory('Img')
-			->src('/admin/images/action_delete.gif')
-			->id('delete')
-			->class('pointer left5px img_line')
-			->onclick($onclick)
-			->execute();
-
-		$oAdmin_Form_Entity_Code = Admin_Form_Entity::factory('Code')
-			->html(ob_get_clean());
-
-		return $oAdmin_Form_Entity_Code;
-	}
+	public function getImgDelete($onclick = '$.deleteNewProperty(this)') {}
 
 	/**
 	* Get path to delete image
@@ -460,11 +432,36 @@ class Property_Controller_Tab extends Core_Servant_Properties
 							->add($oAdmin_Form_Entity);
 
 						$oAdmin_Form_Entity_Section->add(
-							Admin_Form_Entity::factory('Div')
+							$oSectionRow = Admin_Form_Entity::factory('Div')
 								->class('row')
 								->id("property_{$oProperty->id}")
 								->add($oDiv_Group)
 						);
+
+						if ($oProperty->type == 6 && Core::moduleIsActive('typograph'))
+						{
+							$oUseTypograph = Admin_Form_Entity::factory('Checkbox')
+								// ->name("typograph")
+								->name("typograph_{$oProperty->id}[]")
+								->id("id_typograph_{$oProperty->id}_00{$iPropertyCounter}")
+								->caption(Core::_('Property.use_typograph'))
+								->value(1)
+								->divAttr(array('class' => 'form-group col-sm-12 col-md-6'))
+								->checked($oProperty->typograph);
+
+							$oUseTrailingPunctuation = Admin_Form_Entity::factory('Checkbox')
+								// ->name("trailing_punctuation")
+								->name("trailing_punctuation_{$oProperty->id}[]")
+								->id("id_trailing_punctuation_{$oProperty->id}_00{$iPropertyCounter}")
+								->caption(Core::_('Property.use_trailing_punctuation'))
+								->value(1)
+								->divAttr(array('class' => 'form-group col-sm-12 col-md-6'))
+								->checked($oProperty->trailing_punctuation);
+
+							$oSectionRow
+								->add($oUseTypograph)
+								->add($oUseTrailingPunctuation);
+						}
 
 						$oProperty->multiple && $this->imgBox($oDiv_Group, $oProperty);
 					}
@@ -545,11 +542,37 @@ class Property_Controller_Tab extends Core_Servant_Properties
 								->add($oNewAdmin_Form_Entity);
 
 							$oAdmin_Form_Entity_Section->add(
-								Admin_Form_Entity::factory('Div')
+								$oSectionRow = Admin_Form_Entity::factory('Div')
 									->class('row')
 									->id("property_{$oProperty->id}")
 									->add($oDiv_Group)
 							);
+
+
+							if ($oProperty->type == 6 && Core::moduleIsActive('typograph'))
+							{
+								$oUseTypograph = Admin_Form_Entity::factory('Checkbox')
+									// ->name("typograph")
+									->name("typograph_{$oProperty->id}_{$oProperty_Value->id}")
+									->id("id_typograph_{$oProperty->id}_{$oProperty_Value->id}")
+									->caption(Core::_('Property.use_typograph'))
+									->value(1)
+									->divAttr(array('class' => 'form-group col-sm-12 col-md-6'))
+									->checked($oProperty->typograph);
+
+								$oUseTrailingPunctuation = Admin_Form_Entity::factory('Checkbox')
+									// ->name("trailing_punctuation")
+									->name("trailing_punctuation_{$oProperty->id}_{$oProperty_Value->id}")
+									->id("id_trailing_punctuation_{$oProperty->id}_{$oProperty_Value->id}")
+									->caption(Core::_('Property.use_trailing_punctuation'))
+									->value(1)
+									->divAttr(array('class' => 'form-group col-sm-12 col-md-6'))
+									->checked($oProperty->trailing_punctuation);
+
+								$oSectionRow
+									->add($oUseTypograph)
+									->add($oUseTrailingPunctuation);
+							}
 
 							// Визуальный редактор клонировать запрещено
 							$oProperty->multiple /*&& $oProperty->type != 6*/
@@ -883,12 +906,31 @@ class Property_Controller_Tab extends Core_Servant_Properties
 							.addClass('ghost-item')
 							.css('opacity', .5)
 							.show();
+
+						if (typeof tinyMCE != 'undefined')
+						{
+							var tinyTextarea = $(ui.item).find('textarea'),
+								elementId = tinyTextarea.attr('id'),
+								editor = tinyMCE.get(elementId);
+
+							if (editor != null)
+							{
+								tinyMCE.remove('#' + elementId);
+							}
+						}
 					},
 					stop: function(event, ui) {
 						// Ghost hide
 						$('.section-" . $oProperty->id . "').find('div.ghost-item')
 							.removeClass('ghost-item')
 							.css('opacity', 1);
+
+						if (typeof tinyMCE != 'undefined')
+						{
+							var tinyTextarea = $(ui.item).find('textarea'),
+								script = tinyTextarea.next('script').text();
+							eval(script);
+						}
 					}
 				}).disableSelection();
 
@@ -1766,6 +1808,12 @@ class Property_Controller_Tab extends Core_Servant_Properties
 					// 000227947
 					if (!is_null($value))
 					{
+						// Wysiwyg
+						if ($oProperty->type == 6 && Core::moduleIsActive('typograph') && Core_Array::getPost("typograph_{$oProperty->id}_{$oProperty_Value->id}"))
+						{
+							$value = Typograph_Controller::instance()->process($value, Core_Array::getPost("trailing_punctuation_{$oProperty->id}_{$oProperty_Value->id}"));
+						}
+
 						$value === ''
 							? $oProperty_Value->delete()
 							: $this->_setValue($oProperty_Value, $value);
@@ -1840,6 +1888,12 @@ class Property_Controller_Tab extends Core_Servant_Properties
 							if ($newValue !== '')
 							{
 								$oNewProperty_Value = $oProperty->createNewValue($this->_object->id);
+
+								// Wysiwyg
+								if ($oProperty->type == 6 && Core::moduleIsActive('typograph') && Core_Array::getPost("typograph_{$oProperty->id}"))
+								{
+									$newValue = Typograph_Controller::instance()->process($newValue, Core_Array::getPost("trailing_punctuation_{$oProperty->id}"));
+								}
 
 								$this->_setValue($oNewProperty_Value, $newValue);
 

@@ -59,7 +59,7 @@ class User_Wallpaper_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 				array(
 					'max_width' => 3840,
 					'max_height' => 2160,
-					'path' => is_file($this->_object->getLargeImageFilePath())
+					'path' => $this->_object->image_large != '' && is_file($this->_object->getLargeImageFilePath())
 						? $this->_object->getLargeImageFileHref()
 						: '',
 					'show_params' => FALSE,

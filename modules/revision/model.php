@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Revision
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Revision_Model extends Core_Entity
 {
@@ -195,7 +195,9 @@ class Revision_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
 
-		$oSite = $this->getModel()->getRelatedSite();
+		$oSite = isset($this->entity_id)
+			? $this->getModel()->getRelatedSite()
+			: NULL; // List of revisions doesn't have entity_id
 
 		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
 

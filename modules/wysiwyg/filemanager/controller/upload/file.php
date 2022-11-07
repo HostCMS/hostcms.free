@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Wysiwyg
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Wysiwyg_Filemanager_Controller_Upload_File extends Admin_Form_Action_Controller
 {
@@ -61,10 +61,20 @@ class Wysiwyg_Filemanager_Controller_Upload_File extends Admin_Form_Action_Contr
 			{
 				$this->_uploadFile($this->file['tmp_name'], $this->file['name']);
 			}
+			
+			if (function_exists('opcache_reset'))
+			{
+				opcache_reset();
+			}
 		}
 		return FALSE;
 	}
 
+	/**
+	 * Upload file
+	 * @param string $tmpFile
+	 * @param string $fileName
+	 */
 	protected function _uploadFile($tmpFile, $fileName)
 	{
 		$target = CMS_FOLDER . $this->cdir . Core_File::filenameCorrection(

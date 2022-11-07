@@ -78,6 +78,7 @@ return array(
 
 	'show_comments_title' => 'Comments to information item "%s"',
 	'show_information_propertys_title' => 'Additional properties of information system items "%s"',
+	'show_information_item_comments_propertys_title' => 'Additional comment properties of information system items "%s"',
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
 	'root' => 'Root dir',

@@ -77,32 +77,41 @@ class Core_Image_Gd extends Core_Image
 			if ($sourceResource)
 			{
 				// Image Rotate
-				if ($iImagetype == IMAGETYPE_JPEG && function_exists('exif_read_data'))
+				if ($iImagetype == IMAGETYPE_JPEG)
 				{
-					$aEXIF = @exif_read_data($sourceFile, 'IFD0');
-
-					if (isset($aEXIF['Orientation']))
+					if (function_exists('exif_read_data'))
 					{
-						switch ($aEXIF['Orientation'])
+						$aEXIF = @exif_read_data($sourceFile, 'IFD0');
+
+						if (isset($aEXIF['Orientation']))
 						{
-							case 3: // Поворот на 180 градусов
-								$sourceResource = imagerotate($sourceResource, 180, 0);
-							break;
-							case 6: // Поворот вправо на 90 градусов
-								$sourceResource = imagerotate($sourceResource, -90, 0);
+							switch ($aEXIF['Orientation'])
+							{
+								case 3: // Поворот на 180 градусов
+									$sourceResource = imagerotate($sourceResource, 180, 0);
+								break;
+								case 6: // Поворот вправо на 90 градусов
+									$sourceResource = imagerotate($sourceResource, -90, 0);
 
-								$tmp = $sourceX;
-								$sourceX = $sourceY;
-								$sourceY = $tmp;
-							break;
-							case 8: // Поворот влево на 90 градусов
-								$sourceResource = imagerotate($sourceResource, 90, 0);
+									$tmp = $sourceX;
+									$sourceX = $sourceY;
+									$sourceY = $tmp;
+								break;
+								case 8: // Поворот влево на 90 градусов
+									$sourceResource = imagerotate($sourceResource, 90, 0);
 
-								$tmp = $sourceX;
-								$sourceX = $sourceY;
-								$sourceY = $tmp;
-							break;
+									$tmp = $sourceX;
+									$sourceX = $sourceY;
+									$sourceY = $tmp;
+								break;
+							}
 						}
+					}
+					else
+					{
+						Core_Log::instance()->clear()
+							->status(Core_Log::$MESSAGE)
+							->write('Required PHP extension EXIF not found!');
 					}
 				}
 			}
@@ -345,7 +354,7 @@ class Core_Image_Gd extends Core_Image
 	 * Core_Image::instance()->addWatermark($source, $target, $watermark);
 	 * ?>
 	 * </code>
-	 * @return
+	 * @return bool
 	 */
 	static public function addWatermark($source, $target, $watermark, $watermarkX = NULL, $watermarkY = NULL)
 	{
@@ -497,7 +506,7 @@ class Core_Image_Gd extends Core_Image
 		$watermarkY < 0 && $watermarkY = 0;
 
 		imagealphablending($sourceResource, TRUE);
-		imagecopy($sourceResource, $watermarkResource, $watermarkX, $watermarkY, 0, 0, $watermarkResource_w, $watermarkResource_h);
+		imagecopy($sourceResource, $watermarkResource, (int) $watermarkX, (int) $watermarkY, 0, 0, $watermarkResource_w, $watermarkResource_h);
 
 		return $sourceResource;
 	}

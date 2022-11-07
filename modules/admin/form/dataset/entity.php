@@ -20,12 +20,6 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 	protected $_entity = NULL;
 
 	/**
-	 * Items count
-	 * @var int
-	 */
-	protected $_count = NULL;
-
-	/**
 	 * Restrict access to entities
 	 * @var FALSE|int
 	 */
@@ -78,7 +72,7 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 		// Warning
 		if (!is_null(Core_Array::getRequest('debug')))
 		{
-			echo '<p><b>Query FOUND_ROWS</b>.</p>';
+			echo '<p><b>Call getFoundRows()</b>.</p>';
 		}
 
 		return Core_QueryBuilder::select()->getFoundRows();
@@ -101,6 +95,11 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 	 */
 	protected function _getTotalCountByCount()
 	{
+		$bDebug = !is_null(Core_Array::getRequest('debug'));
+
+		$bDebug
+			&& $fBeginTime = Core::getmicrotime();
+
 		$queryBuilder = $this->_entity->queryBuilder()
 			->clearSelect()
 			->clearOrderBy()
@@ -112,30 +111,18 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 
 		//$this->_applyRestrictAccess($queryBuilder);
 
-		$Core_DataBase = $queryBuilder->execute();
+		$oCore_DataBase = $queryBuilder->execute();
 
-		$row = $Core_DataBase->current();
-		
-		$Core_DataBase->free();
+		$row = $oCore_DataBase->current();
 
-		// Warning
-		if (!is_null(Core_Array::getRequest('debug')))
+		$oCore_DataBase->free();
+
+		if ($bDebug)
 		{
-			echo '<p><b>getCount Query</b>: <pre>', $Core_DataBase->getLastQuery(), '</pre></p>';
+			echo '<p><b>getCount Query</b> (' . sprintf('%.3f', Core::getmicrotime() - $fBeginTime) . ' s.): <pre>', $oCore_DataBase->getLastQuery(), '</pre></p>';
 		}
 
 		return $row['count'];
-	}
-
-	/**
-	 * Set items count
-	 * @param int $count
-	 * @return self
-	 */
-	public function setCount($count)
-	{
-		$this->_count = $count;
-		return $this;
 	}
 
 	/**
@@ -159,6 +146,11 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 			}
 			else
 			{
+				$bDebug = !is_null(Core_Array::getRequest('debug'));
+
+				$bDebug
+					&& $fBeginTime = Core::getmicrotime();
+
 				$queryBuilder = $this->_entity->queryBuilder()
 					//->clearSelect()
 					->clearOrderBy()
@@ -173,12 +165,11 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 				$oCore_DataBase = $queryBuilder->execute();
 				$oCore_DataBase->free();
 
-				// Warning
-				if (!is_null(Core_Array::getRequest('debug')))
+				if ($bDebug)
 				{
-					echo '<p><b>Query</b>: sqlCalcFoundRows before FOUND_ROWS()</p>';
+					echo '<p><b>Query sqlCalcFoundRows() before FOUND_ROWS()</b> (' . sprintf('%.3f', Core::getmicrotime() - $fBeginTime) . ' s.): <pre>', $oCore_DataBase->getLastQuery(), '</pre></p>';
 				}
-				
+
 				$this->_count = $this->_getFoundRows();
 			}
 
@@ -205,6 +196,11 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 	{
 		if (!$this->_loaded)
 		{
+			$bDebug = !is_null(Core_Array::getRequest('debug'));
+
+			$bDebug
+				&& $fBeginTime = Core::getmicrotime();
+
 			// Применение внесенных условий отбора
 			$this->_setConditions();
 
@@ -229,10 +225,9 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 
 			$this->_objects = $this->_entity->findAll(FALSE);
 
-			// Warning
-			if (!is_null(Core_Array::getRequest('debug')))
+			if ($bDebug)
 			{
-				echo '<p><b>Select Query</b>: <pre>', Core_DataBase::instance()->getLastQuery(), '</pre></p>';
+				echo '<p><b>Select Query</b> (' . sprintf('%.3f', Core::getmicrotime() - $fBeginTime) . ' s.): <pre>', Core_DataBase::instance()->getLastQuery(), '</pre></p>';
 			}
 
 			$this->_loaded = TRUE;

@@ -9,9 +9,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Image_Imagick extends Core_Image
 {
@@ -222,7 +222,7 @@ class Core_Image_Imagick extends Core_Image
 	 * Core_Image::instance()->addWatermark($source, $target, $watermark);
 	 * ?>
 	 * </code>
-	 * @return
+	 * @return bool
 	 */
 	static public function addWatermark($source, $target, $watermark, $watermarkX = NULL, $watermarkY = NULL)
 	{

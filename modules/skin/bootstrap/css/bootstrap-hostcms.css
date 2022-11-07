@@ -11,6 +11,10 @@ body {padding-right: 0 !important; /*Fix bug with bootbox modal window */ min-he
 	border: 1px solid #eaeaea;
 }
 
+@media (min-width:547px) {
+	.no-padding-left-xs { padding-left: 0 !important; }
+	.no-padding-xs { padding: 0 !important }
+}
 @media (min-width:768px) {
 	.no-padding-sm { padding: 0 !important }
 	.margin-top-23-sm { margin-top: 24px !important; }
@@ -28,6 +32,7 @@ body {padding-right: 0 !important; /*Fix bug with bootbox modal window */ min-he
 	.margin-top-23-lg { margin-top: 24px !important; }
 	.margin-right-5-lg { margin-right: 5px !important; }
 	.no-padding-left-lg { padding-left: 0 !important; }
+	.no-padding-right-lg { padding-right: 0 !important; }
 }
 
 @media (max-width:1199.98px) {
@@ -1320,15 +1325,18 @@ td.importantField a {
 .dropdown-menu > li > a i.fa,
 .dropdown-menu > li > a i.fas,
 .dropdown-menu > li > a i.fa-solid,
+.dropdown-menu > li > a i.fa-brands,
 .dropdown-menu > li > a i.fa-regular { font-size: 14px; min-width: 20px }
 
 .actions-dropdown-menu > li > a i.fa,
 .actions-dropdown-menu > li > a i.fas,
 .actions-dropdown-menu > li > a i.fa-solid,
+.actions-dropdown-menu > li > a i.fa-brands,
 .actions-dropdown-menu > li > a i.fa-regular,
 .dataTables_actions .dropdown-menu > li > a i.fa,
 .dataTables_actions .dropdown-menu > li > a i.fas,
 .dataTables_actions .dropdown-menu > li > a i.fa-solid,
+.dataTables_actions .dropdown-menu > li > a i.fa-brands,
 .dataTables_actions .dropdown-menu > li > a i.fa-regular { font-size: 12px; min-width: 30px; width: 30px }
 
 .padd .eventsjournal{
@@ -2723,7 +2731,7 @@ div.message-info div.contact-name { display: block; overflow: hidden; text-overf
 #dropzone {
 	margin-bottom: 2rem;
 	background: white none repeat scroll 0 0;
-	border: 1px dashed #dedede !important;
+	border: 1px dashed #ccc !important;
 	padding: 0 !important;
 	user-select: none;
 	display: flex;
@@ -3241,7 +3249,16 @@ table.table.table-popular-queries tr td:last-child {
 .control-buttons i { font-size: 11px }
 
 a[data-toggle="dropdown"] { user-select: none }
-.dropdown-menu .fa, .dropdown-menu .fas, .dropdown-menu .fa-solid, .dropdown-menu .fa-regular, [data-toggle="dropdown"] .fa, [data-toggle="dropdown"] .fas, [data-toggle="dropdown"] .fa-solid, [data-toggle="dropdown"] .fa-regular { margin-right: 4px }
+.dropdown-menu .fa,
+.dropdown-menu .fas,
+.dropdown-menu .fa-solid,
+.dropdown-menu .fa-brands,
+.dropdown-menu .fa-regular,
+[data-toggle="dropdown"] .fa,
+[data-toggle="dropdown"] .fas,
+[data-toggle="dropdown"] .fa-solid,
+[data-toggle="dropdown"] .fa-brands,
+[data-toggle="dropdown"] .fa-regular { margin-right: 4px }
 
 .btn-group [data-toggle="dropdown"] .fa /*, .btn-group ul.dropdown-menu > li > a i.fa */{
 	color: inherit !important;
@@ -5936,8 +5953,8 @@ input[type=checkbox].checkbox-slider { left: -9999px }
 .report-tabs .report-popular-tab .tab-content { padding-left: 0 !important; padding-right: 0 !important }
 .report-tabs .show-table-button .report-name { padding: 0 }
 .report-tabs .nav-tabs li:hover a { color: #9b9b9b !important }
-.report-tabs .nav-tabs li a div, .report-tabs .show-table-button .amount, .report-tabs .report-title { font-size: 20px; margin-top: 5px; color: #333; position: relative }
-.report-tabs .nav-tabs li a div span, .report-tabs .show-table-button .amount span { position: absolute; font-size: 10px; top: -5px; margin-left: 5px }
+.report-tabs .nav-tabs li a div, .report-tabs .show-table-button .amount, .report-tabs .report-title, .report-tabs .show-table-button .amount-profit { font-size: 20px; margin-top: 5px; color: #333; position: relative }
+.report-tabs .nav-tabs li a div span, .report-tabs .show-table-button .amount span, .report-tabs .show-table-button .amount-profit span { position: absolute; font-size: 10px; top: -5px; margin-left: 5px }
 .report-tabs .show-table-button { background-color: #f5f5f5 }
 .report-tabs .show-table-button a { margin-left: 40px }
 .report-tabs .segmentation div { display: inline-block }
@@ -6755,7 +6772,7 @@ input[type="text"] + .input-group-btn > select {
 
 .overflow-hidden { overflow: hidden !important; }
 
-.page-sidebar, .navbar, .page-breadcrumbs, .page-header, .noselect, .nav {
+.page-sidebar, .navbar, .noselect, .nav {
 	-webkit-touch-callout: none; /* iOS Safari */
 	-webkit-user-select: none; /* Safari */
 	-khtml-user-select: none; /* Konqueror HTML */
@@ -7400,6 +7417,26 @@ a[data-popover="hover"]:not([href]) { cursor: help; }
 	cursor: pointer;
 }
 .fa-medal.palegreen:hover {
+	cursor: pointer;
+}
+
+.printlayout-wrapper .modal-body, .helpdesk-flag-wrapper .modal-body {
+	overflow: auto;
+}
+
+.dz-file-remove {
+	position: absolute;
+	right: 5px;
+	top: 5px;
+	z-index: 100;
+	cursor: pointer !important;
+}
+
+ul.sql-user-tabs .fa-xmark {
+	font-size: 10px;
+	margin-left: 5px;
+}
+ul.sql-user-tabs .fa-xmark:hover {
 	cursor: pointer;
 }
 

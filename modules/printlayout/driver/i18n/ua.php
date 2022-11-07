@@ -15,4 +15,5 @@ return array(
 	'delete_success' => 'Елемент видалений!',
 	'undelete_success' => 'Елемент відновлено!',
 	'changeActive_success' => 'Активність змінена!',
+	'markDeleted_success' => 'Драйвер успішно видалено!',
 );

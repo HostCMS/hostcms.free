@@ -2,9 +2,9 @@
 
 return array(
 	'model_name' => 'Мітки',
-	'menu' => 'Мітки (теги)',
-	'main_form_caption_h1' => 'Мітки (теги)',
-	'title' => 'Мітки (теги)',
+	'menu' => 'Мітки',
+	'main_form_caption_h1' => 'Мітки',
+	'title' => 'Мітки',
 	'main_menu' => 'Мітка',
 	'menu_add' => 'Додати',
 	'markDeleted_success' => 'Мітка успішно видалена!',

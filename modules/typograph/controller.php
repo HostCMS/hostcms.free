@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Typograph
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Typograph_Controller
 {
@@ -33,6 +33,10 @@ class Typograph_Controller
 		return self::$instance;
 	}
 
+	/**
+	 * Get config
+	 * @return array
+	 */
 	public function getConfig()
 	{
 		return (array)Core::$config->get('typograph_config', array()) + array(
@@ -41,7 +45,16 @@ class Typograph_Controller
 		);
 	}
 
+	/**
+	 * Left span
+	 * @var mixed
+	 */
 	protected $_left_span = NULL;
+
+	/**
+	 * Right span
+	 * @var mixed
+	 */
 	protected $_right_span = NULL;
 
 	/**
@@ -109,26 +122,51 @@ class Typograph_Controller
 		return $str;
 	}
 
+	/**
+	 * Quotes tag callback
+	 * @param array $matches
+	 * @return string
+	 */
 	protected function _quotesTagCallback($matches)
 	{
 		return "<" . str_replace("\"", "¬", $matches[1]) . ">";
 	}
 
+	/**
+	 * Quotes square brackets callback
+	 * @param array $matches
+	 * @return string
+	 */
 	protected function _quotesSquareBracketsCallback($matches)
 	{
 		return "[" . str_replace("\"", "¬", $matches[1]) . "]";
 	}
 
+	/**
+	 * Quotes brackets callback
+	 * @param array $matches
+	 * @return string
+	 */
 	protected function _quotesBracketsCallback($matches)
 	{
 		return "<" . str_replace("(", chr(0x01), $matches[1]) . ">";
 	}
 
+	/**
+	 * Herringbone quotes callback
+	 * @param array $matches
+	 * @return string
+	 */
 	protected function _herringboneQuotesCallback($matches)
 	{
 		return "<" . str_replace("«", chr(0x02), $matches[1]) . ">";
 	}
 
+	/**
+	 * German quotes callback
+	 * @param array $matches
+	 * @return string
+	 */
 	protected function _germanQuotesCallback($matches)
 	{
 		return "<" . str_replace("„", chr(0x03), $matches[1]) . ">";
@@ -540,11 +578,21 @@ class Typograph_Controller
 		return $str;
 	}
 
+	/**
+	 * Trailing punctuation brackets
+	 * @param array $matches
+	 * @return string
+	 */
 	protected function _trailingPunctuationBrackets($matches)
 	{
 		return "{$this->_right_span} </span> {$this->_left_span}" . str_replace('(', chr(0x01), $matches[2]) . '</span>';
 	}
 
+	/**
+	 * Trailing punctuation french quotes
+	 * @param array $matches
+	 * @return string
+	 */
 	protected function _trailingPunctuationFrenchQuotes($matches)
 	{
 		return "{$this->_right_span} </span> " . $matches[2] . $this->_left_span . str_replace('«', chr(0x02), $matches[4]) . '</span>';

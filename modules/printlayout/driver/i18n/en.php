@@ -21,6 +21,7 @@ return array(
 	'edit_success' => "Product information added successfully!",
 	'apply_success' => "Information has been successfully changed",
 	'delete_success' => 'Item deleted successfully!',
+	'markDeleted_success' => 'Driver deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
 	'changeActive_success' => 'Status changed successfully!',
 );

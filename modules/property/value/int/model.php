@@ -208,7 +208,7 @@ class Property_Value_Int_Model extends Core_Entity
 					foreach ($aItemProperties as $oItemProperty)
 					{
 						// Зацикленность через Св-во типа ИЭ/Товар, у которого св-во ИЭ/Товар
-						($oItemProperty->type != 5 && $oItemProperty->type != 12
+						($oItemProperty->type != 5 && $oItemProperty->type != 12 && $oItemProperty->type != 13 && $oItemProperty->type != 14
 							|| self::$aConfig['recursive_properties'] && $oItemProperty->informationsystem_id != $oProperty->informationsystem_id
 						) && $aTmp[] = $oItemProperty->id;
 					}

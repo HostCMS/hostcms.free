@@ -7,12 +7,16 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Admin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Admin_View extends Core_Servant_Properties
 {
+	/**
+	 * Allowed object properties
+	 * @var array
+	 */
 	protected $_allowedProperties = array(
 		'pageTitle',
 		'module',
@@ -20,8 +24,17 @@ abstract class Admin_View extends Core_Servant_Properties
 		'content'
 	);
 
+	/**
+	 * Children
+	 * @var array
+	 */
 	protected $_children = array();
 
+	/**
+	 * Set children
+	 * @param array $children
+	 * @return self
+	 */
 	public function children(array $children)
 	{
 		$this->_children = $children;
@@ -44,7 +57,7 @@ abstract class Admin_View extends Core_Servant_Properties
 
 		return new $className();
 	}
-	
+
 	/**
 	 * Get class name depends on skin
 	 * @return string
@@ -76,5 +89,8 @@ abstract class Admin_View extends Core_Servant_Properties
 		return $this;
 	}
 
+	/**
+	 * Abstract show
+	 */
 	abstract public function show();
 }

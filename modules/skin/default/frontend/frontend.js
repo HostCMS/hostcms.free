@@ -37,8 +37,78 @@
 		}
 	});*/
 
+	/**
+	 * jQuery Cookie plugin
+	 *
+	 * Copyright (c) 2010 Klaus Hartl (stilbuero.de)
+	 * Dual licensed under the MIT and GPL licenses:
+	 * http://www.opensource.org/licenses/mit-license.php
+	 * http://www.gnu.org/licenses/gpl.html
+	 *
+	 */
+	 hQuery.cookie = function (key, value, options) {
+		// key and at least value given, set cookie...
+		if (arguments.length > 1 && String(value) !== "[object Object]") {
+			options = hQuery.extend({}, options);
+
+			if (value === null || value === undefined) {
+				options.expires = -1;
+			}
+
+			if (typeof options.expires === 'number') {
+				var days = options.expires, t = options.expires = new Date();
+				t.setDate(t.getDate() + days);
+			}
+
+			value = String(value);
+
+			return (document.cookie = [
+				encodeURIComponent(key), '=',
+				options.raw ? value : cookie_encode(value),
+				options.expires ? '; expires=' + options.expires.toUTCString() : '', // use expires attribute, max-age is not supported by IE
+				options.path ? '; path=' + options.path : '',
+				options.domain ? '; domain=' + options.domain : '',
+				options.secure ? '; secure' : ''
+			].join(''));
+		}
+
+		// key and possibly options given, get cookie...
+		options = value || {};
+		var result, decode = options.raw ? function (s) { return s; } : decodeURIComponent;
+		return (result = new RegExp('(?:^|; )' + encodeURIComponent(key) + '=([^;]*)').exec(document.cookie)) ? decode(result[1]) : null;
+	};
+
+	function cookie_encode(string){
+		//full uri decode not only to encode ",; =" but to save uicode charaters
+		var decoded = encodeURIComponent(string);
+		//encod back common and allowed charaters {}:"#[] to save space and make the cookies more human readable
+		var ns = decoded.replace(/(%7B|%7D|%3A|%22|%23|%5B|%5D)/g,function(charater){return decodeURIComponent(charater);});
+		return ns;
+	}
+	/* /jQuery Cookie plugin */
+
 	hQuery.extend({
-		hostcmsEditable: function(settings){
+		lockPanel: function(object) {
+			var $object = hQuery(object),
+			$parentDiv = $object.parents('.hostcmsInformationPanel'),
+			$icon = $object.find('i#hostcmsLock'),
+			$locked = parseInt(hQuery.cookie(('lock-panel')));
+
+			if (!$locked && $icon.hasClass('fa-lock-open'))
+			{
+				// console.log('lock');
+				hQuery.cookie('lock-panel', 1, { expires: 365 });
+			}
+			else if ($locked && $icon.hasClass('fa-lock'))
+			{
+				// console.log('unlock');
+				hQuery.cookie('lock-panel', 0, { expires: 365 });
+			}
+
+			$icon.toggleClass('fa-lock-open fa-lock');
+			$parentDiv.toggleClass('opened closed');
+		},
+		hostcmsEditable: function(settings) {
 			settings = hQuery.extend({
 				save: function(item, settings){
 					var value;
@@ -149,7 +219,7 @@
 								break;
 								case 'input':
 								default:
-									jEditInPlace = hQuery('<input>').prop('type', 'text');
+									jEditInPlace = hQuery('<input class="hostcmsEditableInput">').prop('type', 'text');
 							}
 
 							if (type != 'wysiwyg')

@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Div extends Skin_Default_Admin_Form_Entity_Div {
 	/**
@@ -19,7 +19,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Div extends Skin_Default_Admin_Form_Entit
 	{
 		$aAttr = $this->getAttrsString();
 
-		?><div <?php echo implode(' ', $aAttr) ?>><?php echo htmlspecialchars($this->value)?><?php
+		?><div <?php echo implode(' ', $aAttr) ?>><?php echo htmlspecialchars((string) $this->value)?><?php
 		$this->executeChildren();
 		?></div><?php
 	}

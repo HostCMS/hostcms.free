@@ -23,7 +23,7 @@ class Shop_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2022-08-05';
+	public $date = '2022-11-01';
 
 	/**
 	 * Module name
@@ -108,23 +108,14 @@ class Shop_Module extends Core_Module
 	 */
 	public function indexing($offset, $limit)
 	{
-		/**
-		 * $_SESSION['search_block'] - номер блока индексации
-		 * $_SESSION['last_limit'] - количество проиндексированных последним блоком
-		 */
 		if (!isset($_SESSION['search_block']))
 		{
 			$_SESSION['search_block'] = 0;
 		}
 
-		if (!isset($_SESSION['last_limit']))
-		{
-			$_SESSION['last_limit'] = 0;
-		}
+		$initialLimit = $limit;
 
-		$limit_orig = $limit;
-
-		$result = array();
+		$aPages = array();
 
 		switch ($_SESSION['search_block'])
 		{
@@ -134,26 +125,23 @@ class Shop_Module extends Core_Module
 					->status(Core_Log::$MESSAGE)
 					->write("indexingShopGroups({$offset}, {$limit})");
 
-				$aTmpResult = $this->indexingShopGroups($offset, $limit);
+				$aPages = $this->indexingShopGroups($offset, $limit);
 
-				$_SESSION['last_limit'] = count($aTmpResult);
+				$currentStepCount = count($aPages);
 
-				$result = array_merge($result, $aTmpResult);
-				$count = count($result);
-
-				if ($count < $limit_orig)
+				if ($currentStepCount < $initialLimit)
 				{
+					// Next block
 					$_SESSION['search_block']++;
-					$limit = $limit_orig - $count;
+					$limit = $initialLimit - $currentStepCount;
 					$offset = 0;
 				}
 				else
 				{
-					return $result;
+					break;
 				}
 
 			case 1:
-				// Следующая индексация
 				Core_Log::instance()->clear()
 					->notify(FALSE)
 					->status(Core_Log::$MESSAGE)
@@ -161,25 +149,24 @@ class Shop_Module extends Core_Module
 
 				$aTmpResult = $this->indexingShopItems($offset, $limit);
 
-				$_SESSION['last_limit'] = count($aTmpResult);
+				$aPages = array_merge($aPages, $aTmpResult);
 
-				$result = array_merge($result, $aTmpResult);
-				$count = count($result);
+				$count = count($aPages);
 
-				// Закончена индексация
-				if ($count < $limit_orig)
+				if ($count < $initialLimit)
 				{
+					// Next block
 					$_SESSION['search_block']++;
-					$limit = $limit_orig - $count;
+					$limit = $initialLimit - $count;
 					$offset = 0;
 				}
 				else
 				{
-					return $result;
+					$currentStepCount = count($aTmpResult);
+					break;
 				}
 
 			case 2:
-				// Следующая индексация
 				Core_Log::instance()->clear()
 					->notify(FALSE)
 					->status(Core_Log::$MESSAGE)
@@ -187,25 +174,24 @@ class Shop_Module extends Core_Module
 
 				$aTmpResult = $this->indexingShopSellers($offset, $limit);
 
-				$_SESSION['last_limit'] = count($aTmpResult);
+				$aPages = array_merge($aPages, $aTmpResult);
 
-				$result = array_merge($result, $aTmpResult);
-				$count = count($result);
+				$count = count($aPages);
 
-				// Закончена индексация
-				if ($count < $limit_orig)
+				if ($count < $initialLimit)
 				{
+					// Next block
 					$_SESSION['search_block']++;
-					$limit = $limit_orig - $count;
+					$limit = $initialLimit - $count;
 					$offset = 0;
 				}
 				else
 				{
-					return $result;
+					$currentStepCount = count($aTmpResult);
+					break;
 				}
 
 			case 3:
-				// Следующая индексация
 				Core_Log::instance()->clear()
 					->notify(FALSE)
 					->status(Core_Log::$MESSAGE)
@@ -213,25 +199,24 @@ class Shop_Module extends Core_Module
 
 				$aTmpResult = $this->indexingShopProducers($offset, $limit);
 
-				$_SESSION['last_limit'] = count($aTmpResult);
+				$aPages = array_merge($aPages, $aTmpResult);
 
-				$result = array_merge($result, $aTmpResult);
-				$count = count($result);
+				$count = count($aPages);
 
-				// Закончена индексация
-				if ($count < $limit_orig)
+				if ($count < $initialLimit)
 				{
+					// Next block
 					$_SESSION['search_block']++;
-					$limit = $limit_orig - $count;
+					$limit = $initialLimit - $count;
 					$offset = 0;
 				}
 				else
 				{
-					return $result;
+					$currentStepCount = count($aTmpResult);
+					break;
 				}
 
 			case 4:
-				// Следующая индексация
 				Core_Log::instance()->clear()
 					->notify(FALSE)
 					->status(Core_Log::$MESSAGE)
@@ -239,28 +224,12 @@ class Shop_Module extends Core_Module
 
 				$aTmpResult = $this->indexingShopFilterSeos($offset, $limit);
 
-				$_SESSION['last_limit'] = count($aTmpResult);
+				$currentStepCount = count($aTmpResult);
 
-				$result = array_merge($result, $aTmpResult);
-				$count = count($result);
-
-				// Закончена индексация
-				if ($count < $limit_orig)
-				{
-					$_SESSION['search_block']++;
-					$limit = $limit_orig - $count;
-					$offset = 0;
-				}
-				else
-				{
-					return $result;
-				}
+				$aPages = array_merge($aPages, $aTmpResult);
 		}
 
-		// По окончанию индексации сбрасываем сессии в 0
-		$_SESSION['search_block'] = 0;
-
-		return $result;
+		return array('pages' => $aPages, 'indexed' => $currentStepCount, 'finished' => count($aPages) < $initialLimit);
 	}
 
 	/**

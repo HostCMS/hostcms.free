@@ -13,6 +13,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  */
 class Event_Controller_Timeline extends Admin_Form_Controller_View
 {
+	/**
+	 * Executes the business logic.
+	 * @return self
+	 */
 	public function execute()
 	{
 		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
@@ -86,7 +90,7 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 			return FALSE;
 		}
 
-		$parentWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('parentWindowId'));
+		$parentWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('parentWindowId', '', 'str'));
 		$windowId = $parentWindowId ? $parentWindowId : $oAdmin_Form_Controller->getWindowId();
 
 		// Устанавливаем ограничения на источники
@@ -136,9 +140,8 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 		{
 			?>
 			<div>
-				<form action="/admin/event/timeline/index.php?hostcms[action]=addNote&_=<?php echo time()?>&hostcms[checked][0][1-0]=1&event_id=<?php echo $event_id?>" method="POST" enctype='multipart/form-data' class="padding-bottom-10 dropzone-form dropzone-form-timeline">
+				<form action="/admin/event/timeline/index.php?hostcms[action]=addNote&_=<?php echo time()?>&hostcms[checked][0][1-0]=1&event_id=<?php echo $event_id?>&parentWindowId=<?php echo htmlspecialchars($windowId)?>" method="POST" enctype='multipart/form-data' class="padding-bottom-10 dropzone-form dropzone-form-timeline">
 					<div class="timeline-comment-wrapper">
-						<!-- <textarea rows="3" name="text_note" type="text" class="form-control" placeholder="<?php echo Core::_('Event_Note.note_placeholder')?>"></textarea>-->
 						<?php
 							Admin_Form_Entity::factory('Textarea')
 								->name('text_note')
@@ -157,7 +160,7 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 						?>
 						<div class="margin-top-10 crm-note-attachments-dropzone hidden">
 							<!-- <div class="previews"></div> -->
-							<div id="dropzone">
+							<div id="dropzone" class="dropzone-previews">
 								<div class="dz-message needsclick"><i class="fa fa-arrow-circle-o-up"></i> <?php echo Core::_('Admin_Form.upload_file')?></div>
 							</div>
 						</div>
@@ -258,115 +261,6 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 									$badge = 'fa fa-tasks';
 
 									$oEvent = Core_Entity::factory('Event', $oTmpEntity->id);
-
-									// $title = htmlspecialchars($oEvent->name);
-									$title = '';
-
-									/*ob_start();
-
-									$path = $oAdmin_Form_Controller->getPath();
-
-									$oEventCreator = $oEvent->getCreator();
-
-									// Сотрудник - создатель дела
-									$userIsEventCreator = !is_null($oEventCreator) && $oEventCreator->id == $oUser->id;
-
-									$oEvent->event_type_id && $oEvent->showType();
-
-									// Менять статус дела может только его создатель
-									if ($userIsEventCreator)
-									{
-										// Список статусов дел
-										$aEvent_Statuses = Core_Entity::factory('Event_Status')->findAll();
-
-										$aMasEventStatuses = array(array('value' => Core::_('Event.notStatus'), 'color' => '#aebec4'));
-
-										foreach ($aEvent_Statuses as $oEvent_Status)
-										{
-											$aMasEventStatuses[$oEvent_Status->id] = array('value' => $oEvent_Status->name, 'color' => $oEvent_Status->color);
-										}
-
-										$oCore_Html_Entity_Dropdownlist = new Core_Html_Entity_Dropdownlist();
-
-										$oCore_Html_Entity_Dropdownlist
-											->value($oEvent->event_status_id)
-											->options($aMasEventStatuses)
-											//->class('btn-group event-status')
-											->onchange("$.adminLoad({path: '/admin/event/index.php', additionalParams: 'hostcms[checked][0][{$oEvent->id}]=0&eventStatusId=' + $(this).find('li[selected]').prop('id'), action: 'changeStatus', windowId: '{$oAdmin_Form_Controller->getWindowId()}'});")
-											->execute();
-									}
-									else
-									{
-										if ($oEvent->event_status_id)
-										{
-											$oEvent_Status = Core_Entity::factory('Event_Status', $oEvent->event_status_id);
-
-											$sEventStatusName = htmlspecialchars($oEvent_Status->name);
-											$sEventStatusColor = htmlspecialchars($oEvent_Status->color);
-										}
-										else
-										{
-											$sEventStatusName = Core::_('Event.notStatus');
-											$sEventStatusColor = '#aebec4';
-										}
-										?>
-										<div class="event-status">
-											<i class="fa fa-circle" style="margin-right: 5px; color: <?php echo $sEventStatusColor?>"></i><span style="color: <?php echo $sEventStatusColor?>"><?php echo $sEventStatusName?></span>
-										</div>
-										<?php
-									}
-
-									$nameColorClass = $oEvent->deadline()
-										? 'event-title-deadline'
-										: '';
-
-									$deadlineIcon = $oEvent->deadline()
-										? '<i class="fa fa-clock-o event-title-deadline"></i>'
-										: '';
-
-									?>
-									<div class="event-title <?php echo $nameColorClass?>"><?php echo $deadlineIcon, htmlspecialchars($oEvent->name)?></div>
-
-									<div class="event-description"><?php echo Core_Str::cutSentences(strip_tags($oEvent->description), 250)?></div>
-
-									<div class="crm-date"><?php
-
-									if ($oEvent->all_day)
-									{
-										echo Event_Controller::getDate($oEvent->start);
-									}
-									else
-									{
-										if (!is_null($oEvent->start) && $oEvent->start != '0000-00-00 00:00:00')
-										{
-											echo Event_Controller::getDateTime($oEvent->start);
-										}
-
-										if (!is_null($oEvent->start) && $oEvent->start != '0000-00-00 00:00:00'
-											&& !is_null($oEvent->deadline) && $oEvent->deadline != '0000-00-00 00:00:00'
-										)
-										{
-											echo ' — ';
-										}
-
-										if (!is_null($oEvent->deadline) && $oEvent->deadline != '0000-00-00 00:00:00')
-										{
-											?><strong><?php echo Event_Controller::getDateTime($oEvent->deadline);?></strong><?php
-										}
-									}
-
-									// $iDeltaTime = time() - $iEventCreationTimestamp;
-
-									// ФИО создателя дела, если оным не является текущий сотрудник
-									if (!$userIsEventCreator && !is_null($oEventCreator))
-									{
-										?><div class="<?php echo $oEventCreator->isOnline() ? 'online margin-left-20' : 'offline margin-left-20'?>"></div><?php
-										$oEventCreator->showLink($oAdmin_Form_Controller->getWindowId());
-									}
-									?>
-									</div><?php
-
-									$text = ob_get_clean();*/
 
 									$text = $oEvent->showContent($oAdmin_Form_Controller);
 
@@ -549,6 +443,7 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 					previewsContainer: '#<?php echo $windowId?> .dropzone-form-timeline #dropzone',
 					autoProcessQueue: false,
 					autoDiscover: false,
+					previewTemplate:'<div class="dz-preview dz-file-preview"> <i class="fa fa-times darkorange dz-file-remove" data-dz-remove></i><div class="dz-image"><img data-dz-thumbnail/></div> <div class="dz-details"> <div class="dz-size"><span data-dz-size></span></div> <div class="dz-filename"><span data-dz-name></span></div> </div> <div class="dz-progress"> <span class="dz-upload" data-dz-uploadprogress></span> </div> <div class="dz-error-message"><span data-dz-errormessage></span></div> <div class="dz-success-mark"> <svg width="54px" height="54px" viewBox="0 0 54 54" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"> <title>Check</title> <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <path d="M23.5,31.8431458 L17.5852419,25.9283877 C16.0248253,24.3679711 13.4910294,24.366835 11.9289322,25.9289322 C10.3700136,27.4878508 10.3665912,30.0234455 11.9283877,31.5852419 L20.4147581,40.0716123 C20.5133999,40.1702541 20.6159315,40.2626649 20.7218615,40.3488435 C22.2835669,41.8725651 24.794234,41.8626202 26.3461564,40.3106978 L43.3106978,23.3461564 C44.8771021,21.7797521 44.8758057,19.2483887 43.3137085,17.6862915 C41.7547899,16.1273729 39.2176035,16.1255422 37.6538436,17.6893022 L23.5,31.8431458 Z M27,53 C41.3594035,53 53,41.3594035 53,27 C53,12.6405965 41.3594035,1 27,1 C12.6405965,1 1,12.6405965 1,27 C1,41.3594035 12.6405965,53 27,53 Z" stroke-opacity="0.198794158" stroke="#747474" fill-opacity="0.816519475" fill="#FFFFFF"></path> </g> </svg> </div> <div class="dz-error-mark"> <svg width="54px" height="54px" viewBox="0 0 54 54" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"> <title>Error</title> <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g stroke="#747474" stroke-opacity="0.198794158" fill="#FFFFFF" fill-opacity="0.816519475"> <path d="M32.6568542,29 L38.3106978,23.3461564 C39.8771021,21.7797521 39.8758057,19.2483887 38.3137085,17.6862915 C36.7547899,16.1273729 34.2176035,16.1255422 32.6538436,17.6893022 L27,23.3431458 L21.3461564,17.6893022 C19.7823965,16.1255422 17.2452101,16.1273729 15.6862915,17.6862915 C14.1241943,19.2483887 14.1228979,21.7797521 15.6893022,23.3461564 L21.3431458,29 L15.6893022,34.6538436 C14.1228979,36.2202479 14.1241943,38.7516113 15.6862915,40.3137085 C17.2452101,41.8726271 19.7823965,41.8744578 21.3461564,40.3106978 L27,34.6568542 L32.6538436,40.3106978 C34.2176035,41.8744578 36.7547899,41.8726271 38.3137085,40.3137085 C39.8758057,38.7516113 39.8771021,36.2202479 38.3106978,34.6538436 L32.6568542,29 Z M27,53 C41.3594035,53 53,41.3594035 53,27 C53,12.6405965 41.3594035,1 27,1 C12.6405965,1 1,12.6405965 1,27 C1,41.3594035 12.6405965,53 27,53 Z"></path> </g> </g> </svg> </div> </div>',
 					init: function() {
 						var dropzone = this;
 
@@ -564,12 +459,24 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 
 							if (dropzone.getQueuedFiles().length)
 							{
-								$form.append('<input type="hidden" name="hostcms[window]" value="<?php echo $windowId?>-event-timeline">');
+								$form.append('<input type="hidden" name="hostcms[window]" value="<?php echo htmlspecialchars($windowId)?>-event-timeline">');
+								//$form.append('<input type="hidden" name="parentWindowId" value="<?php echo htmlspecialchars($windowId)?>">');
 								dropzone.processQueue();
 							}
 							else
 							{
 								<?php echo $oAdmin_Form_Controller->checked(array(0 => array('1-0')))->getAdminSendForm(array('action' => 'addNote', 'additionalParams' => $additionalParams))?>
+							}
+						});
+
+						dropzone.on('addedfile', function(file){
+							$(dropzone.previewsContainer).addClass('dz-started');
+						});
+
+						dropzone.on('removedfile', function(file){
+							if (dropzone.getQueuedFiles().length == 0)
+							{
+								$(dropzone.previewsContainer).removeClass('dz-started');
 							}
 						});
 					},

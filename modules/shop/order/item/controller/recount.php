@@ -31,6 +31,11 @@ class Shop_Order_Item_Controller_Recount extends Admin_Form_Action_Controller
 
 		$quantityPurchaseDiscount = $amountPurchaseDiscount = $quantity = $amount = $weight = 0;
 
+		$oShop = $this->shopOrder->Shop;
+
+		// Есть скидки на N-й товар, доступные для текущей даты
+		$bPositionDiscount = $oShop->Shop_Purchase_Discounts->checkAvailableWithPosition();
+
 		// Удаляем существующие скидки
 		$oShop_Order_Items = $this->shopOrder->Shop_Order_Items;
 		$oShop_Order_Items->queryBuilder()
@@ -46,6 +51,8 @@ class Shop_Order_Item_Controller_Recount extends Admin_Form_Action_Controller
 
 		$aDiscountPrices = array();
 
+		$oShop_Item_Controller = new Shop_Item_Controller();
+
 		$aShop_Order_Items = $this->shopOrder->Shop_Order_Items->findAll(FALSE);
 		foreach ($aShop_Order_Items as $oShop_Order_Item)
 		{
@@ -56,27 +63,65 @@ class Shop_Order_Item_Controller_Recount extends Admin_Form_Action_Controller
 				// Товару заказа задана связь с товаров, при этому у товара заказа не задан статус, либо задан статус и он не отмененный
 				if ($oShop_Item->id && !$oShop_Order_Item->isCanceled())
 				{
+					//$bSkipItem = $oShop_Item->type == 4;
+
 					$quantity += $oShop_Order_Item->quantity;
 
+					// Prices
+					if (Core::moduleIsActive('siteuser') && $this->shopOrder->siteuser_id)
+					{
+						$oShop_Item_Controller->siteuser(
+							$this->shopOrder->Siteuser
+						);
+					}
+
+					$oShop_Item_Controller->count($oShop_Order_Item->quantity);
+					$aPrices = $oShop_Item_Controller->getPrices($oShop_Item);
+
 					// Количество для скидок от суммы заказа рассчитывается отдельно
-					$oShop_Item->apply_purchase_discount
-						&& $quantityPurchaseDiscount += $oShop_Order_Item->quantity;
+					/*$oShop_Item->apply_purchase_discount
+						&& $quantityPurchaseDiscount += $oShop_Order_Item->quantity;*/
 
 					// Prices
 					$price = $oShop_Order_Item->getPrice();
 					$amount += $price * $oShop_Order_Item->quantity;
-					
+
 					$weight += $oShop_Item->weight * $oShop_Order_Item->quantity;
 
-					// По каждой единице товара добавляем цену в массив, т.к. может быть N единиц одого товара
-					for ($i = 0; $i < $oShop_Order_Item->quantity; $i++)
+					if ($bPositionDiscount /*&& !$bSkipItem*/)
 					{
-						$aDiscountPrices[] = $price;
+						// По каждой единице товара добавляем цену в массив, т.к. может быть N единиц одого товара
+						for ($i = 0; $i < $oShop_Order_Item->quantity; $i++)
+						{
+							$aDiscountPrices[] = $price;
+						}
 					}
 
 					// Сумма для скидок от суммы заказа рассчитывается отдельно
-					$oShop_Item->apply_purchase_discount
-						&& $amountPurchaseDiscount += $price * $oShop_Order_Item->quantity;
+					/*$oShop_Item->apply_purchase_discount
+						&& $amountPurchaseDiscount += $price * $oShop_Order_Item->quantity;*/
+
+					if ($oShop_Item->apply_purchase_discount /*&& !$bSkipItem*/)
+					{
+						$bApplyPurchaseDiscount = TRUE;
+						foreach ($aPrices['discounts'] as $oShop_Discount)
+						{
+							if ($oShop_Discount->not_apply_purchase_discount)
+							{
+								$bApplyPurchaseDiscount = FALSE;
+								break;
+							}
+						}
+
+						if ($bApplyPurchaseDiscount)
+						{
+							// Сумма для скидок от суммы заказа рассчитывается отдельно
+							$amountPurchaseDiscount += $aPrices['price_discount'] * $oShop_Order_Item->quantity;
+
+							// Количество для скидок от суммы заказа рассчитывается отдельно
+							$quantityPurchaseDiscount += $oShop_Order_Item->quantity;
+						}
+					}
 				}
 			}
 			// 3 - Скидка от суммы заказа
@@ -89,8 +134,8 @@ class Shop_Order_Item_Controller_Recount extends Admin_Form_Action_Controller
 
 		$this->shopOrder->addPurchaseDiscount(
 			array(
-				'amount' => $amount,
-				'quantity' => $quantity,
+				'amount' => $amountPurchaseDiscount,
+				'quantity' => $quantityPurchaseDiscount,
 				'weight' => $weight,
 				'prices' => $aDiscountPrices,
 				'applyDiscounts' => TRUE,

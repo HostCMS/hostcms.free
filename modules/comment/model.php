@@ -575,8 +575,8 @@ class Comment_Model extends Core_Entity
 	protected function _prepareData()
 	{
 		$this->clearXmlTags()
-			->addXmlTag('date', strftime($this->_dateFormat, Core_Date::sql2timestamp($this->datetime)))
-			->addXmlTag('datetime', strftime($this->_dateTimeFormat, Core_Date::sql2timestamp($this->datetime)));
+			->addXmlTag('date', Core_Date::strftime($this->_dateFormat, Core_Date::sql2timestamp($this->datetime)))
+			->addXmlTag('datetime', Core_Date::strftime($this->_dateTimeFormat, Core_Date::sql2timestamp($this->datetime)));
 
 		!isset($this->_forbiddenTags['dir'])
 			&& $this->addXmlTag('dir', $this->getHref());

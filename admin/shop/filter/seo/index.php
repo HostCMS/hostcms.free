@@ -3,9 +3,9 @@
  * Online shop.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -92,6 +92,8 @@ if (Core_Array::getPost('get_values') /*&& Core_Array::getPost('property_id')*/)
 		'html' => ''
 	);
 
+	$windowId = $oAdmin_Form_Controller->getWindowId();
+
 	$property_id = intval(Core_Array::getPost('property_id'));
 
 	$oProperty = Core_Entity::factory('Property')->getById($property_id);
@@ -145,12 +147,12 @@ if (Core_Array::getPost('get_values') /*&& Core_Array::getPost('property_id')*/)
 				->name('modal_property_value')
 				->divAttr(array('class' => $divAttr))
 				->controller($oAdmin_Form_Controller)
+				->onkeydown("return $.saveApplySeoFilterCondition(event, '{$windowId}')")
 				->execute();
 
 			// от-до
 			if ($oProperty->Shop_Item_Property->filter == 6)
 			{
-
 				$oAdmin_Form_Entity
 					->name('modal_property_value_to')
 					->divAttr(array('class' => $divAttr))

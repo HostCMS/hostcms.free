@@ -723,11 +723,11 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oImageField = Admin_Form_Entity::factory('File')
 					->divAttr(array('class' => ''));
 
-				$oLargeFilePath = is_file($this->_object->getLargeFilePath())
+				$oLargeFilePath = $this->_object->image_large != '' && is_file($this->_object->getLargeFilePath())
 					? $this->_object->getLargeFileHref()
 					: '';
 
-				$oSmallFilePath = is_file($this->_object->getSmallFilePath())
+				$oSmallFilePath = $this->_object->image_small != '' && is_file($this->_object->getSmallFilePath())
 					? $this->_object->getSmallFileHref()
 					: '';
 
@@ -771,7 +771,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->add(
 						Core_Html_Entity::factory('Span')
 							->class('input-group-addon dimension_patch')
-							->value(htmlspecialchars($oShop->Shop_Measure->name))
+							->value(htmlspecialchars((string) $oShop->Shop_Measure->name))
 					);
 
 				$oMainTab->move($this->getField('weight'), $oMainRow7);
@@ -1251,7 +1251,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 											?>
 										</select>
 									</td>
-									<td width="10%"><?php echo htmlspecialchars($this->_object->Shop_Measure->name)?></td>
+									<td width="10%"><?php echo htmlspecialchars((string) $this->_object->Shop_Measure->name)?></td>
 								</tr>
 								<?php
 							}
@@ -1698,11 +1698,11 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oImageField = Admin_Form_Entity::factory('File')
 					->divAttr(array('class' => ''));
 
-				$oLargeFilePath = is_file($this->_object->getLargeFilePath())
+				$oLargeFilePath = $this->_object->image_large != '' && is_file($this->_object->getLargeFilePath())
 					? $this->_object->getLargeFileHref()
 					: '';
 
-				$oSmallFilePath = is_file($this->_object->getSmallFilePath())
+				$oSmallFilePath = $this->_object->image_small != '' && is_file($this->_object->getSmallFilePath())
 					? $this->_object->getSmallFileHref()
 					: '';
 
@@ -3448,7 +3448,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->orderBy('sorting')
 			->orderBy('name');
 
-		strlen($like)
+		$like != ''
 			? $oQB->where('shop_items.name', 'LIKE', '%' . $like . '%')->limit(10)
 			: $oQB->where('shop_group_id', '=', $iShopGroupId);
 

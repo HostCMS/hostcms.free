@@ -4,11 +4,12 @@
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
+	'model_name' => 'Warehouse types',
 	'title' => 'Warehouse types',
 	'add_form_title' => 'Add warehouse type',
 	'edit_form_title' => 'Edit warehouse type "%s"',

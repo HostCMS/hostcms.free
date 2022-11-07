@@ -6,6 +6,21 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * IMAP, POP3 and NNTP
  * http://php.net/manual/en/book.imap.php
  *
+ * Доступные методы:
+ *
+ * - offset(0) смещение, по умолчанию 0
+ * - limit(50) ограничение на количество получаемых писем, по умолчанию 50
+ * - server($str) сервер для соединения (IMAP, POP3)
+ * - port($int) порт для соединения, может быть также указан у server через двоеточие, либо получен в зависимости от типа (110, 143) и ssl (995, 993)
+ * - type('imap'|'pop3') тип соединения
+ * - login($str) логин для соединения
+ * - password($str) пароль для соединения
+ * - search($str) строка поиска для imap_search(), если не указана, то в зависимости от опции delete значение будет 'ALL' или 'UNSEEN'
+ * - folder($str) папка для поиска, по умолчанию INBOX
+ * - move($str) папка для перемещения, например Trash
+ * - ssl($str) SSL соединение
+ * - delete(TRUE|FALSE) удалять сообщения после получения, по умолчанияю FALSE
+ *
  * @package HostCMS
  * @subpackage Core\Mail
  * @version 7.x
@@ -21,13 +36,16 @@ class Core_Mail_Imap extends Core_Servant_Properties
 	protected $_allowedProperties = array(
 		'offset',
 		'limit',
-		'server', // сервер для соединения (IMAP, POP3)
+		'server',
 		'port',
-		'type', // imap, pop3
+		'type',
 		'login',
 		'password',
-		'ssl', // SSL соединение
-		'delete', // Удалять сообщения после получения
+		'search',
+		'folder',
+		'move',
+		'ssl',
+		'delete'
 	);
 
 	/**
@@ -37,8 +55,9 @@ class Core_Mail_Imap extends Core_Servant_Properties
 	{
 		parent::__construct();
 
-		$this->delete = FALSE;
-		$this->ssl = FALSE;
+		$this->delete = $this->ssl = FALSE;
+
+		$this->folder = 'INBOX';
 
 		$this->offset = 0;
 		$this->limit = 50;
@@ -141,7 +160,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 
 		$protocol .= '/novalidate-cert/notls';
 
-		$mailbox = '{' . $this->server . ':' . intval($this->port) . $protocol . '}INBOX';
+		$mailbox = '{' . $this->server . ':' . intval($this->port) . $protocol . '}' . $this->folder;
 
 		$aParam = $this->ssl
 			? array('DISABLE_AUTHENTICATOR' => 'GSSAPI') // PLAIN
@@ -171,8 +190,14 @@ class Core_Mail_Imap extends Core_Servant_Properties
 		$this->_aMessages = array();
 
 		// POP3 has no concept of read and unread messages
-		$aMailIds = imap_search($this->_stream, 'UNSEEN');
-		$aMailIds = array_slice($aMailIds, $this->offset, $this->limit);
+		$aMailIds = imap_search($this->_stream, !is_null($this->search)
+			? $this->search
+			: ($this->delete ? 'ALL' : 'UNSEEN')
+		); // return array|false
+
+		$aMailIds = is_array($aMailIds)
+			? array_slice($aMailIds, $this->offset, $this->limit)
+			: array();
 
 		foreach ($aMailIds as $i)
 		{
@@ -221,7 +246,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 			$header_message = imap_headerinfo($this->_stream, $i);
 
 			// Дата письма
-			$this->_aMessages[$i]['date'] = strftime("%d.%m.%Y %H:%M:%S", strtotime(
+			$this->_aMessages[$i]['date'] = Core_Date::strftime("%d.%m.%Y %H:%M:%S", strtotime(
 				isset($header_message->date) ? $header_message->date : $header_message->MailDate
 			));
 
@@ -264,19 +289,23 @@ class Core_Mail_Imap extends Core_Servant_Properties
 			//$i++;
 		}
 
-		// Удалить письма после просмотра
-		if ($this->delete)
+		// Пометить сообщения прочитанными
+		if ($this->type == 'imap')
+		{
+			// Пометить просмотренными
+			imap_setflag_full($this->_stream, implode(',', array_keys($this->_aMessages)), '\\Seen');
+			imap_expunge($this->_stream);
+		}
+
+		// Переместить (копия + удалить) или удалить
+		if (!is_null($this->move))
+		{
+			imap_mail_move($this->_stream, implode(',', array_keys($this->_aMessages)), $this->move);
+			imap_expunge($this->_stream);
+		}
+		elseif ($this->delete)
 		{
 			$this->_deleteMessages($this->_stream);
-		}
-		// Пометить сообщения прочитанными
-		elseif ($this->type == 'imap')
-		{
-			// Пометить прочитанными
-			imap_setflag_full($this->_stream, implode(',', array_keys($this->_aMessages)), '\\Seen');
-
-			// Применить установку флагов
-			imap_expunge($this->_stream);
 		}
 
 		// imap_errors() для пресечения вывода сообщений об ошибках, в том числе, если ящик пуст
@@ -284,6 +313,22 @@ class Core_Mail_Imap extends Core_Servant_Properties
 		imap_alerts();
 
 		imap_close($this->_stream);
+
+		return $this;
+	}
+
+	/**
+	 * Удаление полученных писем из почтового ящика
+	 * @param resource $stream идентификатор открытого соединения с почтовым сервером
+	 * @return self
+	 */
+	protected function _deleteMessages($stream)
+	{
+		// Помечаем на удаление полученные
+		imap_delete($stream, implode(',', array_keys($this->_aMessages)));
+
+		// Удаляем письма
+		imap_expunge($stream);
 
 		return $this;
 	}
@@ -556,22 +601,6 @@ class Core_Mail_Imap extends Core_Servant_Properties
 				}
 			}
 		}
-
-		return $this;
-	}
-
-	/**
-	 * Удаление всех писем из почтового ящика
-	 * @param resource $stream Идентификатор открытого соединения с почтовым сервером
-	 * @return self
-	 */
-	protected function _deleteMessages($stream)
-	{
-		// Помечаем на удаление полученные
-		imap_delete($stream, implode(',', array_keys($this->_aMessages)));
-
-		// Удаляем письма
-		imap_expunge($stream);
 
 		return $this;
 	}

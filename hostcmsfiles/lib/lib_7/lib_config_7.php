@@ -20,7 +20,7 @@ $oShop_Cart_Controller = Shop_Cart_Controller::instance();
 $oShop_Cart_Controller->checkStock($bCheckStock);
 
 // Добавление товара в корзину
-if (Core_Array::getRequest('add'))
+if (!is_null(Core_Array::getRequest('add')))
 {
 	// Core_Session::start();
 	// Core_Session::setMaxLifeTime(86400, TRUE);
@@ -37,7 +37,7 @@ if (Core_Array::getRequest('add'))
 
 	foreach ($add as $key => $shop_item_id)
 	{
-		$oShop_Cart_Controller
+		$shop_item_id && $oShop_Cart_Controller
 			->clear()
 			->shop_item_id(intval($shop_item_id))
 			->quantity(floatval(Core_Array::get($count, $key, 1)))
@@ -47,7 +47,8 @@ if (Core_Array::getRequest('add'))
 
 // Ajax
 if (Core_Array::getRequest('_', FALSE)
-	&& (Core_Array::getRequest('add') || Core_Array::getRequest('loadCart')))
+	&& (!is_null(Core_Array::getRequest('add')) || !is_null(Core_Array::getRequest('loadCart')))
+)
 {
 	ob_start();
 

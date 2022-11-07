@@ -99,13 +99,13 @@ class Skin_Default_Admin_Form_Entity_Dropdownlist extends Admin_Form_Entity
 		{
 			foreach ($this->divAttr as $attrName => $attrValue)
 			{
-				$aDivAttr[] = "{$attrName}=\"" . htmlspecialchars($attrValue) . "\"";
+				$aDivAttr[] = "{$attrName}=\"" . htmlspecialchars((string) $attrValue) . "\"";
 			}
 		}
 
 		?><div <?php echo implode(' ', $aDivAttr)?>><?php
 
-		if (strlen($this->caption))
+		if ($this->caption != '')
 		{
 			?><span class="caption"><?php echo $this->caption?></span><?php
 		}

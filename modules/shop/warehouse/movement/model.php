@@ -81,11 +81,10 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 	 */
 	public function dataManagerBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		ob_start();
-
-		$this->User->id && $this->User->showAvatarWithName();
-
-		return ob_get_clean();
+		$oUser = $this->User;
+		return $oUser->id
+			? $oUser->showAvatarWithName()
+			: '';
 	}
 
 	public function date()
@@ -448,7 +447,7 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 			$node->position = $position++;
 			$node->item = $oShop_Item;
 			$node->name = htmlspecialchars($oShop_Item->name);
-			$node->measure = htmlspecialchars($oShop_Item->Shop_Measure->name);
+			$node->measure = htmlspecialchars((string) $oShop_Item->Shop_Measure->name);
 			$node->currency = htmlspecialchars($oShop_Item->Shop_Currency->sign);
 			$node->price = $aPrices['price_tax'];
 			$node->quantity = $oShop_Warehouse_Movement_Item->count;

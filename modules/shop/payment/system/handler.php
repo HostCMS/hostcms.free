@@ -405,16 +405,19 @@ abstract class Shop_Payment_System_Handler
 		}
 
 		// Номер заказа
-		$bInvoice = strlen($this->_orderParams['invoice']) > 0;
-		$bInvoice && $this->_shopOrder->invoice = Core_Array::get($this->_orderParams, 'invoice');
+		$sInvoice = Core_Array::get($this->_orderParams, 'invoice', '', 'str');
+		$bInvoice = strlen($sInvoice) > 0;
+		$bInvoice && $this->_shopOrder->invoice = $sInvoice;
 
 		// Номер акта
-		$bAcceptance_report = strlen($this->_orderParams['acceptance_report']) > 0;
-		$bAcceptance_report && $this->_shopOrder->acceptance_report = Core_Array::get($this->_orderParams, 'acceptance_report');
+		$sAcceptanceReport = Core_Array::get($this->_orderParams, 'acceptance_report', '', 'str');
+		$bAcceptance_report = strlen($sAcceptanceReport) > 0;
+		$bAcceptance_report && $this->_shopOrder->acceptance_report = $sAcceptanceReport;
 
 		// Номер с/ф
-		$bVat_invoice = strlen($this->_orderParams['vat_invoice']) > 0;
-		$bVat_invoice && $this->_shopOrder->vat_invoice = Core_Array::get($this->_orderParams, 'vat_invoice');
+		$sVatInvoice = Core_Array::get($this->_orderParams, 'vat_invoice', '', 'str');
+		$bVat_invoice = strlen($sVatInvoice) > 0;
+		$bVat_invoice && $this->_shopOrder->vat_invoice = $sVatInvoice;
 
 		$oShop->add($this->_shopOrder);
 
@@ -551,17 +554,22 @@ abstract class Shop_Payment_System_Handler
 		// Create new order
 		$this->createOrder();
 
-		$this->_quantityPurchaseDiscount = $this->_amountPurchaseDiscount = $this->_quantity = $this->_amount = $this->_weight = 0;
+		$this->_quantityPurchaseDiscount = $this->_amountPurchaseDiscount
+			= $this->_quantity = $this->_amount = $this->_weight = 0;
 
-		$Shop_Cart_Controller = Shop_Cart_Controller::instance();
-
-		Core::moduleIsActive('siteuser') && $oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
+		Core::moduleIsActive('siteuser')
+			&& $oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
 
 		// Массив цен для расчета скидок каждый N-й со скидкой N%
 		$this->_aDiscountPrices = array();
 
 		// Есть скидки на N-й товар, доступные для текущей даты
 		$bPositionDiscount = $oShop->Shop_Purchase_Discounts->checkAvailableWithPosition();
+
+		// Prices
+		$oShop_Item_Controller = new Shop_Item_Controller();
+
+		$Shop_Cart_Controller = Shop_Cart_Controller::instance();
 
 		$aShop_Cart = $Shop_Cart_Controller->getAll($oShop);
 		foreach ($aShop_Cart as $oShop_Cart)
@@ -572,20 +580,13 @@ abstract class Shop_Payment_System_Handler
 				{
 					$oShop_Item = $oShop_Cart->Shop_Item;
 
-					$this->_quantity += $oShop_Cart->quantity;
-
-					// Количество для скидок от суммы заказа рассчитывается отдельно
-					$oShop_Item->apply_purchase_discount && $oShop_Item->type != 4
-						&& $this->_quantityPurchaseDiscount += $oShop_Cart->quantity;
+					$bSkipItem = $oShop_Item->type == 4;
 
 					$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
 					$oShop_Order_Item->quantity = $oShop_Cart->quantity;
 					$oShop_Order_Item->shop_measure_id = $oShop_Item->shop_measure_id;
 					$oShop_Order_Item->shop_item_id = $oShop_Cart->shop_item_id;
 					$oShop_Order_Item->shop_warehouse_id = intval($oShop_Cart->shop_warehouse_id);
-
-					// Prices
-					$oShop_Item_Controller = new Shop_Item_Controller();
 
 					Core::moduleIsActive('siteuser') && $oSiteuser
 						&& $oShop_Item_Controller->siteuser($oSiteuser);
@@ -594,11 +595,13 @@ abstract class Shop_Payment_System_Handler
 
 					$aPrices = $oShop_Item_Controller->getPrices($oShop_Item, $this->_round);
 
+					$this->_quantity += $oShop_Cart->quantity;
+
 					$this->_amount += $aPrices['price_discount'] * $oShop_Cart->quantity;
 
 					$this->_weight += $oShop_Item->weight * $oShop_Cart->quantity;
 
-					if ($bPositionDiscount)
+					if ($bPositionDiscount && !$bSkipItem)
 					{
 						// По каждой единице товара добавляем цену в массив, т.к. может быть N единиц одого товара
 						for ($i = 0; $i < $oShop_Cart->quantity; $i++)
@@ -607,15 +610,33 @@ abstract class Shop_Payment_System_Handler
 						}
 					}
 
-					// Сумма для скидок от суммы заказа рассчитывается отдельно
-					$oShop_Item->apply_purchase_discount && $oShop_Item->type != 4
-						&& $this->_amountPurchaseDiscount += $aPrices['price_discount'] * $oShop_Cart->quantity;
+					if ($oShop_Item->apply_purchase_discount && !$bSkipItem)
+					{
+						$bApplyPurchaseDiscount = TRUE;
+						foreach ($aPrices['discounts'] as $oShop_Discount)
+						{
+							if ($oShop_Discount->not_apply_purchase_discount)
+							{
+								$bApplyPurchaseDiscount = FALSE;
+								break;
+							}
+						}
+
+						if ($bApplyPurchaseDiscount)
+						{
+							// Сумма для скидок от суммы заказа рассчитывается отдельно
+							$this->_amountPurchaseDiscount += $aPrices['price_discount'] * $oShop_Cart->quantity;
+
+							// Количество для скидок от суммы заказа рассчитывается отдельно
+							$this->_quantityPurchaseDiscount += $oShop_Cart->quantity;
+						}
+					}
 
 					$oShop_Order_Item->price = $aPrices['price_discount'] - $aPrices['tax'];
 					$oShop_Order_Item->rate = $aPrices['rate'];
 					$oShop_Order_Item->name = $oShop_Item->name;
 					$oShop_Order_Item->type = 0;
-					$oShop_Order_Item->marking = strlen($oShop_Cart->marking)
+					$oShop_Order_Item->marking = strlen((string) $oShop_Cart->marking)
 						? $oShop_Cart->marking
 						: $oShop_Item->marking;
 
@@ -956,8 +977,8 @@ abstract class Shop_Payment_System_Handler
 	{
 		$this->_shopOrder->addPurchaseDiscount(
 			array(
-				'amount' => $this->_amount,
-				'quantity' => $this->_quantity,
+				'amount' => $this->_amountPurchaseDiscount,
+				'quantity' => $this->_quantityPurchaseDiscount,
 				'weight' => $this->_weight,
 				'prices' => $this->_aDiscountPrices,
 				'applyDiscounts' => $this->_applyDiscounts,
@@ -1539,6 +1560,27 @@ abstract class Shop_Payment_System_Handler
 				if (Core_Valid::email($sEmail))
 				{
 					$oCore_Mail->to($sEmail)->send();
+				}
+			}
+
+			// Ответственные сотрудники
+			if (Core::moduleIsActive('siteuser') && $this->_shopOrder->siteuser_id)
+			{
+				$aUsers = $this->_shopOrder->Siteuser->Users->findAll(FALSE);
+				foreach ($aUsers as $key => $oUser)
+				{
+					$aDirectory_Emails = $oUser->Directory_Emails->findAll(FALSE);
+					foreach ($aDirectory_Emails as $oDirectory_Email)
+					{
+						// Delay 0.350s for second mail and others
+						$key > 0 && usleep(350000);
+
+						$sEmail = trim($oDirectory_Email->value);
+						if (Core_Valid::email($sEmail))
+						{
+							$oCore_Mail->to($sEmail)->send();
+						}
+					}
 				}
 			}
 		}

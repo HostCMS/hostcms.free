@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Currency_Driver_Cbrf extends Shop_Currency_Driver
 {
@@ -35,14 +35,14 @@ class Shop_Currency_Driver_Cbrf extends Shop_Currency_Driver
 		if (is_object($oXml))
 		{
 			$aExchangeRate = array();
-			
+
 			$sDate = Core_Date::date2sql($oXml->attributes()->Date);
 
 			$oDefaultCurrency = Core_Entity::factory('Shop_Currency')->getBydefault(1);
 
 			if (is_null($oDefaultCurrency))
 			{
-				throw new Exception('Default currency does not exist!');
+				throw new Core_Exception('Default currency does not exist!');
 			}
 
 			foreach ($oXml->Valute as $Valute)
@@ -55,7 +55,7 @@ class Shop_Currency_Driver_Cbrf extends Shop_Currency_Driver
 				&& !isset($aExchangeRate[$oDefaultCurrency->code])
 			)
 			{
-				throw new Exception('Default currency does not exist in inner XML');
+				throw new Core_Exception('Default currency does not exist in inner XML');
 			}
 
 			if ($oDefaultCurrency->code == 'RUB' || $oDefaultCurrency->code == 'RUR')
@@ -73,7 +73,7 @@ class Shop_Currency_Driver_Cbrf extends Shop_Currency_Driver
 				}
 				else
 				{
-					throw new Exception('Default currency does not exist in inner XML');
+					throw new Core_Exception('Default currency does not exist in inner XML');
 				}
 			}
 
@@ -99,7 +99,7 @@ class Shop_Currency_Driver_Cbrf extends Shop_Currency_Driver
 		}
 		else
 		{
-			throw new Exception('Wrong answer');
+			throw new Core_Exception('Wrong answer');
 		}
 
 		return $this;

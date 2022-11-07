@@ -123,6 +123,7 @@ class Core_ORM
 
 	/**
 	 * List of all relations are created by _relations() based on _hasOne, _hasMany and _belongsTo
+	 * <code>
 	 * array('field_name' =>
 			array(
 				'type' => Type of relation: one|many
@@ -134,7 +135,9 @@ class Core_ORM
 				'dependent_key' => Dependent child's key in "through" table
 			)
 	* )
+	* </code>
 	* @var array
+	* @ignore
 	*/
 	protected $_relations = array();
 
@@ -226,48 +229,56 @@ class Core_ORM
 	/**
 	 * ORM cache
 	 * @var Core_Cache
+	 * @ignore
 	 */
 	static public $cache = NULL;
 
 	/**
 	 * ORM column cache
 	 * @var Core_Cache
+	 * @ignore
 	 */
 	static public $columnCache = NULL;
 
 	/**
 	 * ORM relation cache
 	 * @var Core_Cache
+	 * @ignore
 	 */
 	static public $relationCache = NULL;
 
 	/**
 	 * Objects cache for _hasOne and _belongsTo
 	 * @var array
+	 * @ignore
 	 */
 	protected $_relationCache = array();
 
 	/**
 	 * Relations cache for models
 	 * @var array
+	 * @ignore
 	 */
 	static protected $_relationModelCache = array();
 
 	/**
 	 * Columns cache for models
 	 * @var array
+	 * @ignore
 	 */
 	static protected $_columnCache = array();
 
 	/**
 	 * Columns cache for models default values
 	 * @var array
+	 * @ignore
 	 */
 	static protected $_columnCacheDefaultValues = array();
 
 	/**
 	 * Core_DataBase object
 	 * @var array
+	 * @ignore
 	 */
 	protected $_database = array();
 
@@ -279,23 +290,30 @@ class Core_ORM
 
 	/**
 	 * Preload values have been set
+	 * @var boolean
+	 * @ignore
 	 */
 	protected $_bSetPreloadValues = FALSE;
 
 	/**
 	 * Model has already been loaded from database
+	 * @var boolean
+	 * @ignore
 	 */
 	protected $_loaded = FALSE;
 
 	/**
 	 * Model has already been saved into database
 	 * NULL value used in the __set() for separate value settings through mysql_fetch_object()
+	 * @var boolean
+	 * @ignore
 	 */
 	protected $_saved = NULL;
 
 	/**
 	 * Init has already been called
 	 * @var boolean
+	 * @ignore
 	 */
 	private $_init = FALSE;
 
@@ -349,7 +367,7 @@ class Core_ORM
 	 * Core_ORM::factory('Book')->delete(1);
 	 * </code>
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return Core_ORM
+	 * @return self
 	 * @hostcms-event modelname.onBeforeDelete
 	 * @hostcms-event modelname.onAfterDelete
 	 */
@@ -414,7 +432,7 @@ class Core_ORM
 	 * // If an object is not found, primary key sets NULL
 	 * $oBook = Core_ORM::factory('Book')->find(1);
 	 * </code>
-	 * @return Core_ORM
+	 * @return self
 	 */
 	public function find($primaryKey = NULL, $bCache = TRUE)
 	{
@@ -570,7 +588,7 @@ class Core_ORM
 	 * <code>
 	 * Core_ORM::factory('Book')->Comments->deleteAll();
 	 * </code>
-	 * @return Core_ORM
+	 * @return self
 	 */
 	public function deleteAll($bCache = TRUE, $limit = 100)
 	{
@@ -676,7 +694,7 @@ class Core_ORM
 	 * Add related object. If main object does not save, it will save.
 	 * @param Core_ORM $model
 	 * @param string $relation
-	 * @return Core_ORM
+	 * @return self
 	 * @hostcms-event modelname.onBeforeAdd
 	 * @hostcms-event modelname.onAfterAdd
 	 *
@@ -764,7 +782,7 @@ class Core_ORM
 	 * Remove related object. If main object does not save, it will save.
 	 * @param Core_ORM $model
 	 * @param string $relation
-	 * @return Core_ORM
+	 * @return self
 	 * @hostcms-event modelname.onBeforeRemove
 	 * @hostcms-event modelname.onAfterRemove
 	 */
@@ -856,6 +874,7 @@ class Core_ORM
 	/**
 	 * Constructor.
 	 * @param string $primaryKey
+	 * @ignore
 	 */
 	public function __construct($primaryKey = NULL)
 	{
@@ -894,6 +913,7 @@ class Core_ORM
 	 * @return self
 	 * @hostcms-event modelname.onAfterLoadModelCache
 	 * @hostcms-event modelname.onAfterRelations
+	 * @ignore
 	 */
 	protected function _relations()
 	{
@@ -1020,6 +1040,7 @@ class Core_ORM
 	/**
 	 * Database driver's name, default is 'default'
 	 * @var string
+	 * @ignore
 	 */
 	static protected $_databaseDriver = 'default';
 
@@ -1057,7 +1078,8 @@ class Core_ORM
 
 	/**
 	 * Model initialization
-	 * @return Core_ORM
+	 * @return self
+	 * @ignore
 	 */
 	protected function _init()
 	{
@@ -1102,7 +1124,8 @@ class Core_ORM
 
 	/**
 	 * Check if model is loaded
-	 * @return Core_ORM
+	 * @return self
+	 * @ignore
 	 */
 	public function loaded()
 	{
@@ -1111,7 +1134,8 @@ class Core_ORM
 
 	/**
 	 * Load values from database
-	 * @return Core_ORM
+	 * @return self
+	 * @ignore
 	 */
 	public function load()
 	{
@@ -1120,7 +1144,8 @@ class Core_ORM
 
 	/**
 	 * Load values from database
-	 * @return Core_ORM
+	 * @return self
+	 * @ignore
 	 */
 	protected function _load()
 	{
@@ -1156,11 +1181,13 @@ class Core_ORM
 
 	/**
 	 * Run before loading of the object
+	 * @ignore
 	 */
 	protected function _onBeforeLoad(){}
 
 	/**
 	 * Run after loading of the object
+	 * @ignore
 	 */
 	protected function _onAfterLoad(){}
 
@@ -1183,6 +1210,7 @@ class Core_ORM
 
 	/**
 	 * Clear self::$_columnCache and Core_ORM_ColumnCache
+	 * @ignore
 	 */
 	static public function clearColumnCache()
 	{
@@ -1197,6 +1225,7 @@ class Core_ORM
 	/**
 	 * Clear self::$_relationModelCache and Core_ORM_RelationCache
 	 * @param mixed $modelName default NULL
+	 * @ignore
 	 */
 	static public function clearRelationModelCache($modelName = NULL)
 	{
@@ -1221,6 +1250,7 @@ class Core_ORM
 	/**
 	 * Load self::$_columnCacheDefaultValues for current model
 	 * @return self
+	 * @ignore
 	 */
 	protected function _loadColumnCacheDefaultValues()
 	{
@@ -1255,7 +1285,8 @@ class Core_ORM
 
 	/**
 	 * Load columns list for model
-	 * @return Core_ORM
+	 * @return self
+	 * @ignore
 	 */
 	protected function _loadColumns()
 	{
@@ -1294,7 +1325,8 @@ class Core_ORM
 
 	/**
 	 * Set preload values from _preloadValues
-	 * @return Core_ORM
+	 * @return self
+	 * @ignore
 	 */
 	protected function _setPreloadValues()
 	{
@@ -1327,7 +1359,8 @@ class Core_ORM
 
 	/**
 	 * Set unidentified values as NULL
-	 * @return Core_ORM
+	 * @return self
+	 * @ignore
 	 */
 	protected function _setDefaultValues()
 	{
@@ -1341,7 +1374,8 @@ class Core_ORM
 	 * Set model values
 	 * @param array $values list of values
 	 * @param boolean $changed default FALSE
-	 * @return Core_ORM
+	 * @return self
+	 * @ignore
 	 */
 	protected function setValues(array $values, $changed = FALSE)
 	{
@@ -1359,6 +1393,7 @@ class Core_ORM
 
 	/**
 	 * Check is primary key NULL
+	 * @return boolean
 	 */
 	public function isEmptyPrimaryKey()
 	{
@@ -1369,6 +1404,7 @@ class Core_ORM
 	 * Get relation by $lowerProperty
 	 * @param string $lowerProperty
 	 * @return object
+	 * @ignore
 	 */
 	protected function _getRelation($lowerProperty)
 	{
@@ -1495,6 +1531,7 @@ class Core_ORM
 	 * Utilized for reading data from inaccessible properties
 	 * @param string $property property name
 	 * @return mixed
+	 * @ignore
 	 */
 	public function __get($property)
 	{
@@ -1503,7 +1540,7 @@ class Core_ORM
 		if (isset($this->_relationCache[$lowerProperty]))
 		{
 			$foreign_key = $this->_relations[$lowerProperty]['foreign_key'];
-			
+
 			// Related field has been changed
 			if (isset($this->_changedColumns[$foreign_key])
 				&& $this->_relationCache[$lowerProperty]->getPrimaryKey() != $this->$foreign_key)
@@ -1562,6 +1599,7 @@ class Core_ORM
 	/**
 	 * Verify that the contents of a variable can be called as a function
 	 * @param string $methodName method name
+	 * @return boolean
 	 */
 	public function isCallable($methodName)
 	{
@@ -1573,6 +1611,7 @@ class Core_ORM
 	 * Triggered by calling isset() or empty() on inaccessible properties
 	 * @param string $property property name
 	 * @return boolean
+	 * @ignore
 	 */
 	public function __isset($property)
 	{
@@ -1613,6 +1652,7 @@ class Core_ORM
 	 * @param string $property property name
 	 * @param string $value property value
 	 * @return self
+	 * @ignore
 	 */
 	public function __set($property, $value)
 	{
@@ -1672,6 +1712,7 @@ class Core_ORM
 	 * @param array $arguments arguments
 	 * @return mixed
 	 * @hostcms-event modelname.onCall
+	 * @ignore
 	 */
 	public function __call($name, $arguments)
 	{
@@ -1689,7 +1730,7 @@ class Core_ORM
 		if (isset($this->_relationCache[$lowerProperty]))
 		{
 			$foreign_key = $this->_relations[$lowerProperty]['foreign_key'];
-			
+
 			// Related field has been changed
 			if (isset($this->_changedColumns[$foreign_key])
 				&& $this->_relationCache[$lowerProperty]->getPrimaryKey() != $this->$foreign_key)
@@ -1747,6 +1788,7 @@ class Core_ORM
 	 * @param string $property Property name
 	 * @param mixed $value Property value
 	 * @return mixed converted value
+	 * @ignore
 	 */
 	protected function _convertPropertyValue($property, $value)
 	{
@@ -1854,7 +1896,7 @@ class Core_ORM
 					}
 				break;
 				case 'string':
-					$strlen = mb_strlen($value);
+					$strlen = is_string($value) ? mb_strlen($value) : 0;
 
 					if (!is_null($aField['max_length'])
 						&& $aField['datatype'] != 'enum'
@@ -1884,7 +1926,7 @@ class Core_ORM
 	 * $object->check(TRUE)->save();
 	 * </code>
 	 * @param boolean $exception Call exception (TRUE) or correct value (FALSE). Default FALSE.
-	 * @return Core_ORM
+	 * @return self
 	 */
 	public function check($exception = FALSE)
 	{
@@ -1963,7 +2005,7 @@ class Core_ORM
 
 	/**
 	 * Insert new object data into database
-	 * @return Core_ORM
+	 * @return self
 	 * @hostcms-event modelname.onBeforeCreate
 	 * @hostcms-event modelname.onAfterCreate
 	 */
@@ -2019,7 +2061,7 @@ class Core_ORM
 
 	/**
 	 * Update object data into database
-	 * @return Core_ORM
+	 * @return self
 	 * @hostcms-event modelname.onBeforeUpdate
 	 * @hostcms-event modelname.onAfterUpdate
 	 */
@@ -2060,7 +2102,7 @@ class Core_ORM
 	/**
 	 * Save object. Uses self::update() or self::create()
 	 *
-	 * @return Core_ORM
+	 * @return self
 	 * @hostcms-event modelname.onBeforeSave
 	 * @hostcms-event modelname.onAfterSave
 	 */
@@ -2116,6 +2158,7 @@ class Core_ORM
 	/**
 	 * Clone entity
 	 * @return void
+	 * @ignore
 	 */
 	public function __clone()
 	{
@@ -2137,6 +2180,7 @@ class Core_ORM
 	/**
 	 * Convert object to string
 	 * @return string
+	 * @ignore
 	 */
 	public function __toString()
 	{
@@ -2147,13 +2191,13 @@ class Core_ORM
 			// Model data
 			foreach ($this->_modelColumns as $key => $value)
 			{
-				$return[] = htmlspecialchars($key) . '=' . htmlspecialchars($value);
+				$return[] = htmlspecialchars((string) $key) . '=' . htmlspecialchars((string) $value);
 			}
 
 			// 'dataXXX' values
 			foreach ($this->_dataValues as $key => $value)
 			{
-				$return[] = htmlspecialchars($key) . '=' . htmlspecialchars($value);
+				$return[] = htmlspecialchars((string) $key) . '=' . htmlspecialchars((string) $value);
 			}
 
 			return "Model '" . $this->_modelName . "',\nfields: " . implode(",\n", $return);
@@ -2186,7 +2230,8 @@ class Core_ORM
 
 	/**
 	 * Clear relation cache
-	 * @return Core_ORM
+	 * @return self
+	 * @ignore
 	 */
 	public function clearRelationCache()
 	{
@@ -2196,7 +2241,7 @@ class Core_ORM
 
 	/**
 	 * Clear object
-	 * @return Core_ORM
+	 * @return self
 	 */
 	public function clear()
 	{

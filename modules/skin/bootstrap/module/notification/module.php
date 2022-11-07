@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 {
@@ -92,7 +92,7 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 						->limit(30);
 
 					// При наличии ранее загруженных уведомлений загружаем новые и непрочитанные
-					if ($iLastNotificationId)
+					/* if ($iLastNotificationId)
 					{
 						$oNotifications->queryBuilder()
 							->where('notifications.id', '>', $iLastNotificationId)
@@ -102,13 +102,18 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 					{
 						$oNotifications->queryBuilder()
 							->where('notification_users.read', '=', 0);
-					}
+					} */
+					
+					$oNotifications->queryBuilder()
+						->where('notification_users.read', '=', 0);
 
 					$current = 0;
 					$steps = 4;
 
 					do {
-						$aNotifications = $oNotifications->findAll(FALSE);
+						$aNotifications = array_reverse($oNotifications->findAll(FALSE));
+						
+						
 
 						// Уведомления пользователя
 						foreach ($aNotifications as $oNotification)
@@ -164,6 +169,7 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 
 					$aJson['lastNotificationId'] = count($aJson['newNotifications'])
 						? intval($aJson['newNotifications'][count($aJson['newNotifications']) - 1]['id'])
+						//? intval($aJson['newNotifications'][0]['id'])
 						: $iLastNotificationId;
 
 					// Данные о продолжительности рабочего дня

@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Inflection
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Inflection
 {
@@ -30,7 +30,7 @@ abstract class Core_Inflection
 	 * @var array
 	 */
 	static protected $_drivers = array();
-	
+
 	/**
 	 * Get driver instance
 	 * @param string $lng language
@@ -46,11 +46,11 @@ abstract class Core_Inflection
 
 		return self::$_drivers[$lng];
 	}
-	
+
 	/**
 	 * Get class name
 	 * @param string $lng language
-	 * @return string, e.g. Core_Inflection_En
+	 * @return string e.g. Core_Inflection_En
 	 */
 	static public function getClassName($lng)
 	{
@@ -96,13 +96,18 @@ abstract class Core_Inflection
 	 */
 	static public function getPlural($word, $count = NULL, $lng = 'en')
 	{
-		$aWord = explode('_', $word);
+		if (is_string($word))
+		{
+			$aWord = explode('_', $word);
 
-		$last = self::instance($lng)->plural(array_pop($aWord), $count);
+			$last = self::instance($lng)->plural(array_pop($aWord), $count);
 
-		return isset($aWord[0])
-			? implode('_', $aWord) . '_' . $last
-			: $last;
+			return isset($aWord[0])
+				? implode('_', $aWord) . '_' . $last
+				: $last;
+		}
+
+		return $word;
 	}
 
 	/**
@@ -114,13 +119,18 @@ abstract class Core_Inflection
 	 */
 	static public function getSingular($word, $count = NULL, $lng = 'en')
 	{
-		$aWord = explode('_', $word);
+		if (is_string($word))
+		{
+			$aWord = explode('_', $word);
 
-		$last = self::instance($lng)->singular(array_pop($aWord), $count);
+			$last = self::instance($lng)->singular(array_pop($aWord), $count);
 
-		return isset($aWord[0])
-			? implode('_', $aWord) . '_' . $last
-			: $last;
+			return isset($aWord[0])
+				? implode('_', $aWord) . '_' . $last
+				: $last;
+		}
+
+		return $word;
 	}
 
 	/**
@@ -200,6 +210,6 @@ abstract class Core_Inflection
 	{
 		return self::instance($lng)->numberInWords($float);
 	}
-	
+
 	abstract public function currencyInWords($float, $currencyCode);
 }

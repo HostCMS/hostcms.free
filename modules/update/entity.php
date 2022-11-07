@@ -105,9 +105,9 @@ class Update_Entity extends Core_Entity
 				'[*]',
 				'[!]',
 			), array(
-				'<img src="/admin/images/add.gif" class="img_line" />',
-				'<img src="/admin/images/edited.gif" class="img_line" />',
-				'<img src="/admin/images/error.gif" class="img_line" />',
+				'<i class="fa-solid fa-circle-plus success"></i>',
+				'<i class="fa-solid fa-circle-check warning"></i>',
+				'<i class="fa-solid fa-circle-exclamation danger"></i>',
 			), htmlspecialchars($this->description))
 		);
 	}

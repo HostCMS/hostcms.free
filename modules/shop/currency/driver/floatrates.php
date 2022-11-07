@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Currency_Driver_Floatrates extends Shop_Currency_Driver
 {
@@ -42,7 +42,7 @@ class Shop_Currency_Driver_Floatrates extends Shop_Currency_Driver
 
 			if (is_null($oDefaultCurrency))
 			{
-				throw new Exception('Default currency does not exist!');
+				throw new Core_Exception('Default currency does not exist!');
 			}
 
 			// получаем данные о котировках их XML
@@ -66,7 +66,7 @@ class Shop_Currency_Driver_Floatrates extends Shop_Currency_Driver
 				}
 				else
 				{
-					throw new Exception('Default currency does not exist in inner XML');
+					throw new Core_Exception('Default currency does not exist in inner XML');
 				}
 			}
 

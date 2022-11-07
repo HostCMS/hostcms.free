@@ -36,7 +36,7 @@ class Field_Controller_Tab
 
 	/**
 	* Constructor.
-	* @param Admin_Form_Controller $Admin_Form_Controller controller
+	* @param Admin_Form_Controller $Admin_Form_Controller
 	*/
 	public function __construct(Admin_Form_Controller $Admin_Form_Controller)
 	{
@@ -48,6 +48,7 @@ class Field_Controller_Tab
 
 	/**
 	* Create and return an object of Field_Controller_Tab for current skin
+	* @param Admin_Form_Controller $Admin_Form_Controller
 	* @return object
 	*/
 	static public function factory(Admin_Form_Controller $Admin_Form_Controller)
@@ -65,7 +66,7 @@ class Field_Controller_Tab
 
 	/**
 	* Object
-	* @var object
+	* @var object|NULL
 	*/
 	protected $_object = NULL;
 
@@ -114,7 +115,7 @@ class Field_Controller_Tab
 
 	/**
 	* Set tab
-	* @param Skin_Default_Admin_Form_Entity_Tab $tab tab
+	* @param Skin_Default_Admin_Form_Entity_Tab $tab
 	* @return self
 	*/
 	public function setTab(Skin_Default_Admin_Form_Entity_Tab $tab)
@@ -131,7 +132,7 @@ class Field_Controller_Tab
 	*/
 	public function fillTab()
 	{
-		$aTmp_Field_Values = $this->_object->id
+		$aTmp_Field_Values = $this->_object->getPrimaryKey()
 			? $this->getFieldValues(FALSE)
 			: array();
 
@@ -149,8 +150,8 @@ class Field_Controller_Tab
 
 	/**
 	* Get field values
-	* @param bool $bCache cache
-	* @param array $aFieldsId field ids
+	* @param bool $bCache cache, default TRUE
+	* @param array $aFieldsId field ids, default array()
 	* @return array
 	*/
 	public function getFieldValues($bCache = TRUE, $aFieldsId = array())
@@ -166,7 +167,7 @@ class Field_Controller_Tab
 			}
 		}
 
-		$aReturn = Field_Controller_Value::getFieldsValues($aFieldsId, $this->_object->id, $bCache);
+		$aReturn = Field_Controller_Value::getFieldsValues($aFieldsId, $this->_object->getPrimaryKey(), $bCache);
 
 		// setHref()
 		/*foreach ($aReturn as $oField_Value)
@@ -179,57 +180,30 @@ class Field_Controller_Tab
 		return $aReturn;
 	}
 
-	public function imgBox($oAdmin_Form_Entity, $oField, $addFunction = '$.cloneField', $deleteOnclick = '$.deleteNewField(this)')
-	{
-		$oAdmin_Form_Entity
-			->add($this->getImgAdd($oField, $addFunction))
-			->add($this->getImgDelete($deleteOnclick));
-
-		return $this;
-	}
+	/**
+	 * Show add/delete buttons
+	 * @param Admin_Form_Entity $oAdmin_Form_Entity
+	 * @param Field_Model $oField field
+	 * @param string $addFunction add function name
+	 * @param string $deleteOnclick delete onclick attribute value
+	 * @return self
+	 */
+	public function imgBox($oAdmin_Form_Entity, $oField, $addFunction = '$.cloneField', $deleteOnclick = '$.deleteNewField(this)') {}
 
 	/**
 	* Show plus button
 	* @param Field_Model $oField field
-	* @param string $function function name
+	* @param string $addFunction function name
 	* @return string
 	*/
-	public function getImgAdd($oField, $addFunction = '$.cloneField')
-	{
-		$windowId = $this->_Admin_Form_Controller->getWindowId();
-
-		ob_start();
-		Core_Html_Entity::factory('Img')
-			->src('/admin/images/action_add.gif')
-			->id('add')
-			->class('pointer left5px img_line')
-			->onclick("{$addFunction}('{$windowId}', '{$oField->id}')")
-			->execute();
-		$oAdmin_Form_Entity_Code = Admin_Form_Entity::factory('Code')->html(ob_get_clean());
-
-		return $oAdmin_Form_Entity_Code;
-	}
+	public function getImgAdd($oField, $addFunction = '$.cloneField') {}
 
 	/**
 	* Show minus button
 	* @param string $onclick onclick attribute value
 	* @return string
 	*/
-	public function getImgDelete($onclick = '$.deleteNewField(this)')
-	{
-		ob_start();
-		Core_Html_Entity::factory('Img')
-			->src('/admin/images/action_delete.gif')
-			->id('delete')
-			->class('pointer left5px img_line')
-			->onclick($onclick)
-			->execute();
-
-		$oAdmin_Form_Entity_Code = Admin_Form_Entity::factory('Code')
-			->html(ob_get_clean());
-
-		return $oAdmin_Form_Entity_Code;
-	}
+	public function getImgDelete($onclick = '$.deleteNewField(this)') {}
 
 	/**
 	* Get path to delete image
@@ -454,12 +428,22 @@ class Field_Controller_Tab
 						->value(
 							$this->_correctPrintValue($oField, $oField->default_value)
 						)
-						->divAttr(array(
+						/*->divAttr(array(
 							'class' => ($oField->type != 2 ? 'form-group' : 'input-group')
 								. (
 									($oField->type == 7 || $oField->type == 8 || $oField->type == 9)
 									? ' col-xs-12 col-sm-7 col-md-6 col-lg-5'
 									: ' col-xs-12'
+								)
+								. ($oField->type == 7 ? ' margin-top-21' : '')
+						))*/
+						->divAttr(array(
+							'class' => //($oField->type != 2 ? 'form-group' : 'input-group')
+								'form-group'
+								. (
+									($oField->type == 7 || $oField->type == 8 || $oField->type == 9)
+									? ' col-xs-12 col-sm-7 col-md-6 col-lg-5'
+									: ' col-xs-12' // ' col-xs-12'
 								)
 								. ($oField->type == 7 ? ' margin-top-21' : '')
 						));
@@ -474,14 +458,18 @@ class Field_Controller_Tab
 					{
 						Core_Event::notify('Field_Controller_Tab.onBeforeAddFormEntity', $this, array($oAdmin_Form_Entity, $oAdmin_Form_Entity_Section, $oField));
 
+						$oDiv_Group = Admin_Form_Entity::factory('Div')
+							->class($oField->multiple ? 'input-group' : '')
+							->add($oAdmin_Form_Entity);
+
 						$oAdmin_Form_Entity_Section->add(
 							Admin_Form_Entity::factory('Div')
 								->class('row')
 								->id("field_{$oField->id}")
-								->add($oAdmin_Form_Entity)
+								->add($oDiv_Group)
 						);
 
-						$oField->multiple && $this->imgBox($oAdmin_Form_Entity, $oField);
+						$oField->multiple && $this->imgBox($oDiv_Group, $oField);
 					}
 					else
 					{
@@ -557,16 +545,20 @@ class Field_Controller_Tab
 
 							Core_Event::notify('Field_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity, $oAdmin_Form_Entity_Section, $oField, $oField_Value));
 
+							$oDiv_Group = Admin_Form_Entity::factory('Div')
+								->class($oField->multiple ? 'input-group' : '')
+								->add($oNewAdmin_Form_Entity);
+
 							$oAdmin_Form_Entity_Section->add(
 								Admin_Form_Entity::factory('Div')
 									->class('row')
 									->id("field_{$oField->id}")
-									->add($oNewAdmin_Form_Entity)
+									->add($oDiv_Group)
 							);
 
 							// Визуальный редактор клонировать запрещено
 							$oField->multiple /*&& $oField->type != 6*/
-								&& $this->imgBox($oNewAdmin_Form_Entity, $oField, '$.cloneField', $this->getImgDeletePath($oField_Value));
+								&& $this->imgBox($oDiv_Group, $oField, '$.cloneField', $this->getImgDeletePath($oField_Value));
 						}
 					}
 				}

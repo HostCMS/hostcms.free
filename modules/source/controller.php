@@ -51,7 +51,7 @@ class Source_Controller extends Core_Servant_Properties
 
 				foreach ($this->_allowedProperties as $propertyName)
 				{
-					!is_null($this->$propertyName)
+					!is_null($this->$propertyName) && !is_array($this->$propertyName)
 						&& Core_Cookie::set('hostcms_source_' . $propertyName, $this->$propertyName, array('expires' => $expired, 'path' => '/', 'domain' => $domain));
 				}
 			}

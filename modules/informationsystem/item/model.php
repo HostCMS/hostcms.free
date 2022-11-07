@@ -469,7 +469,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	}
 
 	/**
-	 * Get item href
+	 * Get href to the item dir
 	 * @return string
 	 */
 	public function getItemHref()
@@ -951,7 +951,7 @@ class Informationsystem_Item_Model extends Core_Entity
 			);
 		}
 
-		$oCore_Html_Entity_Div->value(htmlspecialchars($object->name));
+		$oCore_Html_Entity_Div->value(htmlspecialchars((string) $object->name));
 
 		$bRightTime =
 			($this->start_datetime == '0000-00-00 00:00:00' || time() > Core_Date::sql2timestamp($this->start_datetime))
@@ -1018,16 +1018,16 @@ class Informationsystem_Item_Model extends Core_Entity
 			return $eventResult;
 		}
 
-		$oSearch_Page->text = $this->text . ' ' . $this->description . ' ' . htmlspecialchars($this->name) . ' ' . $this->id . ' ' . htmlspecialchars($this->seo_title) . ' ' . htmlspecialchars($this->seo_description) . ' ' . htmlspecialchars($this->seo_keywords) . ' ' . htmlspecialchars($this->path) . ' ';
+		$oSearch_Page->text = $this->text . ' ' . $this->description . ' ' . htmlspecialchars((string) $this->name) . ' ' . $this->id . ' ' . htmlspecialchars((string) $this->seo_title) . ' ' . htmlspecialchars((string) $this->seo_description) . ' ' . htmlspecialchars((string) $this->seo_keywords) . ' ' . htmlspecialchars((string) $this->path) . ' ';
 
-		$oSearch_Page->title = $this->name;
+		$oSearch_Page->title = (string) $this->name;
 
 		if (Core::moduleIsActive('comment'))
 		{
 			$aComments = $this->Comments->getAllByActive(1, FALSE);
 			foreach ($aComments as $oComment)
 			{
-				$oSearch_Page->text .= htmlspecialchars($oComment->author) . ' ' . $oComment->text . ' ';
+				$oSearch_Page->text .= htmlspecialchars((string)$oComment->author) . ' ' . $oComment->text . ' ';
 			}
 		}
 
@@ -1036,7 +1036,7 @@ class Informationsystem_Item_Model extends Core_Entity
 			$aTags = $this->Tags->findAll(FALSE);
 			foreach ($aTags as $oTag)
 			{
-				$oSearch_Page->text .= htmlspecialchars($oTag->name) . ' ';
+				$oSearch_Page->text .= htmlspecialchars((string) $oTag->name) . ' ';
 			}
 		}
 
@@ -1051,7 +1051,7 @@ class Informationsystem_Item_Model extends Core_Entity
 					if ($oPropertyValue->value != 0)
 					{
 						$oList_Item = $oPropertyValue->List_Item;
-						$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ' . htmlspecialchars($oList_Item->description) . ' ';
+						$oList_Item->id && $oSearch_Page->text .= htmlspecialchars((string) $oList_Item->value) . ' ' . htmlspecialchars((string) $oList_Item->description) . ' ';
 					}
 				}
 				// Informationsystem
@@ -1062,7 +1062,7 @@ class Informationsystem_Item_Model extends Core_Entity
 						$oInformationsystem_Item = $oPropertyValue->Informationsystem_Item;
 						if ($oInformationsystem_Item->id)
 						{
-							$oSearch_Page->text .= htmlspecialchars($oInformationsystem_Item->name) . ' ' . $oInformationsystem_Item->description . ' ' . $oInformationsystem_Item->text . ' ';
+							$oSearch_Page->text .= htmlspecialchars((string) $oInformationsystem_Item->name) . ' ' . $oInformationsystem_Item->description . ' ' . $oInformationsystem_Item->text . ' ';
 						}
 					}
 				}
@@ -1074,19 +1074,19 @@ class Informationsystem_Item_Model extends Core_Entity
 						$oShop_Item = $oPropertyValue->Shop_Item;
 						if ($oShop_Item->id)
 						{
-							$oSearch_Page->text .= htmlspecialchars($oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
+							$oSearch_Page->text .= htmlspecialchars((string) $oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
 						}
 					}
 				}
 				// Wysiwyg
 				elseif ($oPropertyValue->Property->type == 6)
 				{
-					$oSearch_Page->text .= htmlspecialchars(strip_tags($oPropertyValue->value)) . ' ';
+					$oSearch_Page->text .= htmlspecialchars(strip_tags((string) $oPropertyValue->value)) . ' ';
 				}
 				// Other type
 				elseif ($oPropertyValue->Property->type != 2)
 				{
-					$oSearch_Page->text .= htmlspecialchars($oPropertyValue->value) . ' ';
+					$oSearch_Page->text .= htmlspecialchars((string) $oPropertyValue->value) . ' ';
 				}
 			}
 		}
@@ -1102,7 +1102,7 @@ class Informationsystem_Item_Model extends Core_Entity
 					if ($oField_Value->value != 0)
 					{
 						$oList_Item = $oField_Value->List_Item;
-						$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ' . htmlspecialchars($oList_Item->description) . ' ';
+						$oList_Item->id && $oSearch_Page->text .= htmlspecialchars((string) $oList_Item->value) . ' ' . htmlspecialchars((string) $oList_Item->description) . ' ';
 					}
 				}
 				// Informationsystem
@@ -1113,7 +1113,7 @@ class Informationsystem_Item_Model extends Core_Entity
 						$oInformationsystem_Item = $oField_Value->Informationsystem_Item;
 						if ($oInformationsystem_Item->id)
 						{
-							$oSearch_Page->text .= htmlspecialchars($oInformationsystem_Item->name) . ' ' . $oInformationsystem_Item->description . ' ' . $oInformationsystem_Item->text . ' ';
+							$oSearch_Page->text .= htmlspecialchars((string) $oInformationsystem_Item->name) . ' ' . $oInformationsystem_Item->description . ' ' . $oInformationsystem_Item->text . ' ';
 						}
 					}
 				}
@@ -1125,19 +1125,19 @@ class Informationsystem_Item_Model extends Core_Entity
 						$oShop_Item = $oField_Value->Shop_Item;
 						if ($oShop_Item->id)
 						{
-							$oSearch_Page->text .= htmlspecialchars($oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
+							$oSearch_Page->text .= htmlspecialchars((string) $oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
 						}
 					}
 				}
 				// Wysiwyg
 				elseif ($oField_Value->Field->type == 6)
 				{
-					$oSearch_Page->text .= htmlspecialchars(strip_tags($oField_Value->value)) . ' ';
+					$oSearch_Page->text .= htmlspecialchars(strip_tags((string) $oField_Value->value)) . ' ';
 				}
 				// Other type
 				elseif ($oField_Value->Field->type != 2)
 				{
-					$oSearch_Page->text .= htmlspecialchars($oField_Value->value) . ' ';
+					$oSearch_Page->text .= htmlspecialchars((string) $oField_Value->value) . ' ';
 				}
 			}
 		}
@@ -1375,7 +1375,7 @@ class Informationsystem_Item_Model extends Core_Entity
 
 	public function getParts()
 	{
-		return explode('<!-- pagebreak -->', $this->text);
+		return explode('<!-- pagebreak -->', (string) $this->text);
 	}
 
 	/**
@@ -1420,20 +1420,20 @@ class Informationsystem_Item_Model extends Core_Entity
 			&& $this->addXmlTag('url', $this->Informationsystem->Structure->getPath() . $this->getPath());
 
 		!isset($this->_forbiddenTags['date'])
-			&& $this->addXmlTag('date', strftime($oInformationsystem->format_date, Core_Date::sql2timestamp($this->datetime)));
+			&& $this->addXmlTag('date', Core_Date::strftime($oInformationsystem->format_date, Core_Date::sql2timestamp($this->datetime)));
 
 		/*!isset($this->_forbiddenTags['datetime'])
-			&& */$this->addXmlTag('datetime', strftime($oInformationsystem->format_datetime, Core_Date::sql2timestamp($this->datetime)));
+			&& */$this->addXmlTag('datetime', Core_Date::strftime($oInformationsystem->format_datetime, Core_Date::sql2timestamp($this->datetime)));
 
 		/*!isset($this->_forbiddenTags['start_datetime'])
 			&& */$this->addXmlTag('start_datetime', $this->start_datetime == '0000-00-00 00:00:00'
 				? $this->start_datetime
-				: strftime($oInformationsystem->format_datetime, Core_Date::sql2timestamp($this->start_datetime)));
+				: Core_Date::strftime($oInformationsystem->format_datetime, Core_Date::sql2timestamp($this->start_datetime)));
 
 		/*!isset($this->_forbiddenTags['end_datetime'])
 			&& */$this->addXmlTag('end_datetime', $this->end_datetime == '0000-00-00 00:00:00'
 				? $this->end_datetime
-				: strftime($oInformationsystem->format_datetime, Core_Date::sql2timestamp($this->end_datetime)));
+				: Core_Date::strftime($oInformationsystem->format_datetime, Core_Date::sql2timestamp($this->end_datetime)));
 
 		!isset($this->_forbiddenTags['dir'])
 			&& $this->addXmlTag('dir', Core_Page::instance()->informationsystemCDN . $this->getItemHref());
@@ -1885,10 +1885,10 @@ class Informationsystem_Item_Model extends Core_Entity
 						$aTmp[] = $oProperty_Value->value;
 					break;
 					case 8: // Date
-						$aTmp[] = strftime($this->Informationsystem->format_date, Core_Date::sql2timestamp($oProperty_Value->value));
+						$aTmp[] = Core_Date::strftime($this->Informationsystem->format_date, Core_Date::sql2timestamp($oProperty_Value->value));
 					break;
 					case 9: // Datetime
-						$aTmp[] = strftime($this->Informationsystem->format_datetime, Core_Date::sql2timestamp($oProperty_Value->value));
+						$aTmp[] = Core_Date::strftime($this->Informationsystem->format_datetime, Core_Date::sql2timestamp($oProperty_Value->value));
 					break;
 					case 3: // List
 						if ($oProperty_Value->value)

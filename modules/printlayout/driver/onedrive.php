@@ -12,10 +12,22 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  */
 class Printlayout_Driver_Onedrive extends Printlayout_Driver_Controller
 {
+	/**
+	 * Extension
+	 * @var string|NULL
+	 */
 	protected $_extension = 'pdf';
 
+	/**
+	 * File path
+	 * @var string|NULL
+	 */
 	protected $_filePath = NULL;
 
+	/**
+	 * Get cloud
+	 * @return object
+	 */
 	protected function _getCloud()
 	{
 		$oClouds = Core_Entity::factory('Site', CURRENT_SITE)->Clouds;

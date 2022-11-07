@@ -80,11 +80,10 @@ class Shop_Warehouse_Regrade_Model extends Core_Entity
 	 */
 	public function dataManagerBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		ob_start();
-
-		$this->User->id && $this->User->showAvatarWithName();
-
-		return ob_get_clean();
+		$oUser = $this->User;
+		return $oUser->id
+			? $oUser->showAvatarWithName()
+			: '';
 	}
 
 	public function date()
@@ -458,13 +457,13 @@ class Shop_Warehouse_Regrade_Model extends Core_Entity
 				$node->position = $position++;
 				$node->writeoff_item = $oShop_Item_Writeoff;
 				$node->writeoff_name = htmlspecialchars($oShop_Item_Writeoff->name);
-				$node->writeoff_measure = htmlspecialchars($oShop_Item_Writeoff->Shop_Measure->name);
+				$node->writeoff_measure = htmlspecialchars((string) $oShop_Item_Writeoff->Shop_Measure->name);
 				$node->writeoff_currency = htmlspecialchars($oShop_Item_Writeoff->Shop_Currency->sign);
 				$node->writeoff_price = $oShop_Warehouse_Regrade_Item->writeoff_price;
 				$node->writeoff_barcodes = implode(', ', $aWriteoffBarcodes);
 				$node->incoming_item = $oShop_Item_Incoming;
 				$node->incoming_name = htmlspecialchars($oShop_Item_Incoming->name);
-				$node->incoming_measure = htmlspecialchars($oShop_Item_Incoming->Shop_Measure->name);
+				$node->incoming_measure = htmlspecialchars((string) $oShop_Item_Incoming->Shop_Measure->name);
 				$node->incoming_currency = htmlspecialchars($oShop_Item_Incoming->Shop_Currency->sign);
 				$node->incoming_price = $oShop_Warehouse_Regrade_Item->incoming_price;
 				$node->incoming_barcodes = implode(', ', $aIncomingBarcodes);

@@ -70,4 +70,11 @@ return array(
 	'axis_count_paid' => 'Число продажів',
 	'axis_total_amount' => 'Загальна вартість',
 	'popular_quantity' => 'Кількість: ',
+	'select_price' => 'Виберіть закупівельну ціну',
+	'order_paid_costs' => 'Оплачено',
+	'order_costs_profit' => 'Очікуваний прибуток',
+	'order_paid_profit' => 'Прибуток',
+	'label_profit' => 'Прибуток',
+	'label_previuos_profit' => 'Прибуток за попередній період',
+	'table_profit' => 'Прибуток',
 );

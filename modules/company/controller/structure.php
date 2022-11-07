@@ -19,9 +19,22 @@ class Company_Controller_Structure extends Admin_Form_Controller_View
 	 */
 	protected $_oCompany = NULL;
 
+	/**
+	 * Company departments
+	 * @var array
+	 */
 	protected $_aCompany_Departmens = array();
+
+	/**
+	 * Company users
+	 * @var array
+	 */
 	protected $_aCompany_Users = array();
 
+	/**
+	 * Execute
+	 * @return self
+	 */
 	public function execute()
 	{
 		$company_id = Core_Array::getRequest('company_id');
@@ -456,6 +469,12 @@ class Company_Controller_Structure extends Admin_Form_Controller_View
 		return $this;
 	}
 
+	/**
+	 * Show level
+	 * @param int $parent_id
+	 * @param array $aAllowedActions
+	 * @return string
+	 */
 	protected function _showLevel($parent_id, $aAllowedActions = array())
 	{
 		// $aHeadIds = array();

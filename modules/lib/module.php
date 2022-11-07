@@ -23,7 +23,7 @@ class Lib_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2022-08-05';
+	public $date = '2022-11-01';
 
 	/**
 	 * Module name
@@ -86,13 +86,13 @@ class Lib_Module extends Core_Module
 
 		$aLibs = $oLibs->findAll(FALSE);
 
-		$result = array();
+		$aPages = array();
 		foreach ($aLibs as $oLib)
 		{
-			$result[] = $oLib->indexing();
+			$aPages[] = $oLib->indexing();
 		}
 
-		return $result;
+		return array('pages' => $aPages, 'indexed' => count($aPages), 'finished' => count($aPages) < $limit);
 	}
 
 	/**

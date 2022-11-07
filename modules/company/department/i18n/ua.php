@@ -49,4 +49,5 @@ return array(
 	'addUser_error' => 'Співробітник вже працює на цій посаді в цьому відділі.',
 	'deleteUserFromDepartment_success' => "Співробітник %s видалений з посади %s в %s",
 	'departmentExistence_error' => 'Помилка! Такого відділу не існує.',
+	'close_modal_confirm' => 'Ви впевнені, що хочете скасувати?',
 );

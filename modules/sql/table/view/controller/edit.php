@@ -25,6 +25,16 @@ class Sql_Table_View_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 	}
 
 	/**
+	 * Add user_id field
+	 * @param Admin_Form_Entity_Model $oAdmin_Form_Entity
+	 * @param string $sTabName
+	 */
+	protected function _addUserIdField($oAdmin_Form_Entity, $sTabName)
+	{
+		// Nothing to do
+	}
+
+	/**
 	 * Prepare backend item's edit form
 	 *
 	 * @return self

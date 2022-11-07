@@ -3,9 +3,9 @@
  * Online shop.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -73,7 +73,6 @@ if (!is_null($oShop_Item->id) || $comment_parent_id)
 		Admin_Form_Entity::factory('Menu')
 			->name(Core::_('Shop.items_catalog_add_form_comment_link'))
 			->icon('fa fa-plus')
-			->img('/admin/images/comment_add.gif')
 			->href(
 				$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 			)
@@ -90,7 +89,6 @@ if ($oShop->id)
 	$oAdmin_Form_Entity_Menus->add(
 		Admin_Form_Entity::factory('Menu')
 			->name(Core::_('Shop_Item.property_header'))
-			->img('/admin/images/page_gear.gif')
 			->icon('fa fa-gears')
 			->href(
 				$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/comment/property/index.php', NULL, NULL, $additionalParamsProperties)

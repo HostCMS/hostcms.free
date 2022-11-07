@@ -102,6 +102,7 @@ class Directory_Address_Model extends Core_Entity
 			$this->value
 		);
 
+		$aFullAddress = array_map('strval', $aFullAddress);
 		$aFullAddress = array_filter($aFullAddress, 'strlen');
 		return implode(', ', $aFullAddress);
 	}

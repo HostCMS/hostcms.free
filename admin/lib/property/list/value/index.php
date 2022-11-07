@@ -30,11 +30,10 @@ $oAdmin_Form_Controller
 $oAdminFormEntityMenus = Admin_Form_Entity::factory('Menus');
 
 // Элементы меню
-$oAdminFormEntityMenus->add(	
+$oAdminFormEntityMenus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Lib_Property_List_Value.menu_add'))
 		->icon('fa fa-plus')
-		->img('/admin/images/list_add.gif')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)

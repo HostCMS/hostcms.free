@@ -16,9 +16,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Xsl
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Xsl_Stream_Import
 {
@@ -79,7 +79,12 @@ class Xsl_Stream_Import
 
 		if (!isset(self::$_aXSL[$this->_xslName]))
 		{
-			self::$_aXSL[$this->_xslName] = $this->_oXsl->loadXslFile();
+			$sXsl = $this->_oXsl->loadXslFile();
+
+			// Cut 'hostcms:' attributes in source XSL file
+			!Core::checkPanel() && $sXsl = Xsl_Processor::clearXmlns($sXsl);
+
+			self::$_aXSL[$this->_xslName] = $sXsl;
 		}
 
 		return TRUE;

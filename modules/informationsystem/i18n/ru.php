@@ -39,8 +39,8 @@ return array(
 	'copy_success' => 'Информационная система успешно скопирована!',
 
 	'information_systems_add_form_order_type' => 'Направление сортировки элементов',
-	'sort_to_increase' => 'По-возрастанию',
-	'sort_to_decrease' => 'По-убыванию',
+	'sort_to_increase' => 'По возрастанию',
+	'sort_to_decrease' => 'По убыванию',
 
 	'is_sort_field_group_title' => 'Поле сортировки групп',
 	'is_sort_order_group_type' => 'Направление сортировки групп',

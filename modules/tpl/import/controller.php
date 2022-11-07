@@ -37,15 +37,18 @@ class Tpl_Import_Controller extends Admin_Form_Action_Controller
 
 		$aContent = json_decode($this->content, TRUE);
 
-		if (isset($aContent['name']))
+		if (is_array($aContent))
 		{
-			$this->_import($aContent);
-		}
-		else
-		{
-			foreach ($aContent as $aTpl)
+			if (isset($aContent['name']))
 			{
-				$this->_import($aTpl);
+				$this->_import($aContent);
+			}
+			else
+			{
+				foreach ($aContent as $aTpl)
+				{
+					$this->_import($aTpl);
+				}
 			}
 		}
 

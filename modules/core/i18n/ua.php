@@ -20,10 +20,11 @@ return array(
 	'administration_center' => 'Центр адміністрування',
 	'debug_information' => 'Налагоджувальна інформація',
 	'sql_queries' => 'SQL-запити',
-	'sql_statistics' => 'Час: <strong>%.3f</strong> сек. <a onclick="hQuery(\'#sql_h%d\').toggle()" class="pointer">Виклики</a>',
+	'sql_statistics' => 'Час: <strong>%.3f</strong> сек. <a onclick="hQuery(\'#sql_h%d\').toggle()" class="sqlShowStack">Виклики</a>',
 	'sql_debug_backtrace' => '%s, рядок %d<br/>',
 	'show_xml' => 'Показати XML/XSL',
 	'hide_xml' => 'Приховати XML/XSL',
+	'lock' => 'Зафіксувати панель',
 	'logout' => 'Вихід',
 
 	'total_time' => 'Час виконання: <strong>%.3f</strong> с, із них',

@@ -10,6 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - itemsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств товаров, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
  * - itemsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств товаров, по умолчанию TRUE
  * - sortPropertiesValues(TRUE|FALSE) сортировать значения дополнительных свойств, по умолчанию TRUE.
+ * - favoriteList(TRUE|FALSE) показывать списки избранных товаров, по умолчанию TRUE.
  * - modifications(TRUE|FALSE) показывать модификации для выбранных товаров, по умолчанию FALSE
  * - specialprices(TRUE|FALSE) показывать специальные цены для выбранных товаров, по умолчанию FALSE
  * - commentsRating(TRUE|FALSE) показывать оценки комментариев для выбранных товаров, по умолчанию FALSE
@@ -36,7 +37,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Favorite_Controller_Show extends Core_Controller
 {
@@ -49,6 +50,7 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 		'itemsProperties',
 		'itemsPropertiesList',
 		'sortPropertiesValues',
+		'favoriteList',
 		'modifications',
 		'specialprices',
 		'commentsRating',
@@ -99,7 +101,7 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 		);
 
 		$this->itemsProperties = $this->modifications = $this->specialprices = $this->commentsRating = FALSE;
-		$this->itemsPropertiesList = $this->sortPropertiesValues = TRUE;
+		$this->itemsPropertiesList = $this->sortPropertiesValues = $this->favoriteList = TRUE;
 		$this->limit = 10;
 
 		$this->offset = $this->page = 0;
@@ -197,6 +199,12 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 			$this->addEntity($Shop_Item_Properties);
 
 			$this->_addItemsPropertiesList(0, $Shop_Item_Properties);
+		}
+
+		if ($this->favoriteList && $this->_oSiteuser)
+		{
+			$aShop_Favorite_Lists = $oShop->Shop_Favorite_Lists->getAllBySiteuser_id($this->_oSiteuser->id, FALSE);
+			$this->addEntities($aShop_Favorite_Lists);
 		}
 
 		$this->total = 0;

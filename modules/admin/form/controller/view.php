@@ -13,8 +13,17 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  */
 class Admin_Form_Controller_View extends Core_Servant_Properties
 {
+	/**
+	 * Form controller
+	 * @var Admin_Form_Controller
+	 * @ignore
+	 */
 	protected $_Admin_Form_Controller = NULL;
 
+	/**
+	 * Constructor
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 */
 	public function __construct($oAdmin_Form_Controller)
 	{
 		parent::__construct();
@@ -24,6 +33,10 @@ class Admin_Form_Controller_View extends Core_Servant_Properties
 		$this->showFilter = $this->showChangeViews = $this->showPageSelector = $this->showPageNavigation = TRUE;
 	}
 
+	/**
+	 * Allowed object properties
+	 * @var array
+	 */
 	protected $_allowedProperties = array(
 		'showFilter',
 		'showChangeViews',

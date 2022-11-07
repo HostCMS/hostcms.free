@@ -1055,7 +1055,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				'caption' => Core::_('Shop_Exchange.order_order_status'),
 				'attr' => array('style' => 'background-color: #E6BFDB')
 			),
-			'order_shop_currency_id' => array(
+			'order_currency' => array(
 				'caption' => Core::_('Shop_Exchange.order_currency'),
 				'attr' => array('style' => 'background-color: #E6BFDB')
 			),
@@ -1222,8 +1222,25 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		return $oShop_Group;
 	}
 
+	/**
+	 * Convert url to Punycode
+	 * @param string $url
+	 * @return string
+	 */
+	protected function _convertToPunycode($url)
+	{
+		return preg_replace_callback('~(https?://)([^/]*)~', function($a) {
+			return preg_match('/[А-Яа-яЁё]/u', $a[0])
+				? $a[1] . Core_Str::idnToAscii($a[2])
+				: $a[0];
+			}, $url
+		);
+	}
+
 	protected function _uploadHttpFile($sSourceFile)
 	{
+		$sSourceFile = $this->_convertToPunycode($sSourceFile);
+
 		$Core_Http = Core_Http::instance()
 			->clear()
 			->url($sSourceFile)
@@ -1528,7 +1545,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 								}
 							}
 						break;
-						case 'order_shop_currency_id':
+						case 'order_currency':
 							if (!is_null($this->_oCurrentOrder))
 							{
 								$oShop_Currency = Core_Entity::factory('Shop_Currency')->getByName($sData);
@@ -4055,6 +4072,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						$aPicturesParam['small_image_target'] = $sDestinationFolder . "small_{$sTargetFileName}";
 
 						$sSourceFileSmall = NULL;
+						$sTargetFileNameSmall = "small_{$sTargetFileName}";
 					}
 
 					$aPicturesParam['small_image_max_width'] = $oProperty->image_small_max_width;
@@ -4111,7 +4129,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 					if ($aResult['small_image'])
 					{
-						$oProperty_Value->file_small = "small_{$sTargetFileName}";
+						$oProperty_Value->file_small = $sTargetFileNameSmall;
 						$oProperty_Value->file_small_name = '';
 					}
 

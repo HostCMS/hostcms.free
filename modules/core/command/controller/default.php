@@ -86,6 +86,16 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 					->setQueryType(2)
 					->query($sQuery);
 
+				if ($aShortlinks[0]->log && !Core::checkBot(Core_Array::get($_SERVER, 'HTTP_USER_AGENT', '', 'str')))
+				{
+					$oShortlink_Stat = Core_Entity::factory('Shortlink_Stat');
+					$oShortlink_Stat->ip = Core::getClientIp();
+					$oShortlink_Stat->referrer = Core_Array::get($_SERVER, 'HTTP_REFERER', '', 'str');
+					$oShortlink_Stat->useragent = Core_Array::get($_SERVER, 'HTTP_USER_AGENT', '', 'str');
+
+					$aShortlinks[0]->add($oShortlink_Stat);
+				}
+
 				$oCore_Response
 					->status($aShortlinks[0]->type)
 					->header('Location', $aShortlinks[0]->source);
@@ -204,10 +214,10 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 
 		if (((~Core::convert64b32(Core_Array::get(Core::$config->get('core_hostcms'), 'hostcms'))) & 1176341605))
 		{
-			$b = explode('.', Core::$url[base64_decode('aG9zdA==')]);
+			$b = explode('.', Core_Array::get(Core::$url, base64_decode('aG9zdA=='), '', 'str'));
 
 			do {
-				$a = explode('-', Core_Array::get(Core::$url, base64_decode('a2V5'))) + array(0, 0, 0, 0);
+				$a = explode('-', Core_Array::get(Core::$url, base64_decode('a2V5'), '', 'str')) + array(0, 0, 0, 0);
 				$c = implode('.', $b);
 
 				if (!(Core::convert64b32(hexdec($a[3]) ^ abs(Core::crc32($c))) ^ ~(Core::convert64b32(Core_Array::get(Core::$config->get('core_hostcms'), 'hostcms')) & abs(Core::crc32($c)) ^ Core::convert64b32(hexdec($a[2])))))
@@ -483,7 +493,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 			if (!is_null($hostcmsAction))
 			{
 				Core_Session::start();
-				
+
 				$oUser = Core_Auth::getCurrentUser();
 
 				if ($hostcmsAction == 'SHOW_XML'
@@ -722,12 +732,6 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 	}
 
 	/**
-	 * Flag for _safeEmailCallback
-	 * @var boolean
-	 */
-	static protected $_safeEmailCallbackAddedFuncion = FALSE;
-
-	/**
 	 * Safe Email Callback Function
 	 * @param array $matches matches
 	 * @return string
@@ -736,11 +740,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 	{
 		ob_start();
 		?><a <?php echo $matches[1]?>href="<?php echo str_rot13($matches[2])?>"<?php echo $matches[3]?>><?php echo str_rot13($matches[4])?></a><script><?php
-		if (!self::$_safeEmailCallbackAddedFuncion)
-		{
-			?>function hostcmsEmail(c){return c.replace(/[a-zA-Z]/g, function(c){return String.fromCharCode((c <= "Z" ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c-26);})}<?php
-			self::$_safeEmailCallbackAddedFuncion = TRUE;
-		}
+		?>function hostcmsEmail(c){return c.replace(/[a-zA-Z]/g, function(c){return String.fromCharCode((c <= "Z" ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c-26);})}<?php
 		?>var o = document.currentScript.previousElementSibling; o.href = hostcmsEmail(o.href); o.innerHTML = hostcmsEmail(o.innerHTML);</script><?php
 		return ob_get_clean();
 	}

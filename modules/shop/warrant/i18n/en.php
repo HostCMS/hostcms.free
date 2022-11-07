@@ -1,0 +1,27 @@
+<?php
+
+return array(
+	'model_name' => 'Warrant',
+	'title' => 'Warrant',
+	'add_account_cash_warrant' => 'Account Cash Warrant',
+	'form_add' => 'Adding an outgoing cash order',
+	'form_edit' => 'Editing an outgoing cash order %s',
+	'number' => 'Number',
+	'datetime' => 'Created date',
+	'description' => 'Description',
+	'active' => 'Activity',
+	'reason' => 'Reason',
+	'siteuser_id' => 'Account',
+	'shop_id' => 'Shop ID',
+	'user_id' => 'Employee',
+	'id' => 'Identifier',
+	'amount' => 'Amount',
+	'type0' => 'Cash voucher',
+	'type1' => 'Incoming cash order',
+	'tax' => 'Tax',
+	'shop_cashflow_id' => 'Cash flow',
+	'changeActive_success' => "Information changed successfully",
+	'apply_success' => "Information changed successfully",
+	'markDeleted_success' => "Order information successfully deleted!",
+	'edit_success' => "Information changed successfully!",
+);

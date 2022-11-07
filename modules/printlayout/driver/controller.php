@@ -13,15 +13,31 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  */
 abstract class Printlayout_Driver_Controller
 {
+	/**
+	 * Extension
+	 * @var string|NULL
+	 */
 	protected $_extension = NULL;
 
+	/**
+	 * Title
+	 * @var mixed
+	 */
 	protected $_title = NULL;
 
+	/**
+	 * Get extension
+	 * @return string
+	 */
 	public function getExtension()
 	{
 		return $this->_extension;
 	}
 
+	/**
+	 * Source DOCX
+	 * @var mixed
+	 */
 	protected $_sourceDocx = NULL;
 
 	/**

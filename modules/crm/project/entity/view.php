@@ -13,6 +13,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  */
 class Crm_Project_Entity_View extends Admin_Form_Controller_View
 {
+	/**
+	 * Execute
+	 * @return self
+	 */
 	public function execute()
 	{
 		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;

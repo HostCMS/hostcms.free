@@ -99,7 +99,7 @@ class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 		// Идентификаторы скидок для переданного купона
 		$aShop_Purchase_Discount_IDs = array();
 
-		if (strlen($this->couponText))
+		if ($this->couponText != '')
 		{
 			// Все скидки, связанные с этим купоном
 			$aShop_Purchase_Discounts_For_Coupons = $this->_shop->Shop_Purchase_Discounts->getAllByCouponText($this->couponText);

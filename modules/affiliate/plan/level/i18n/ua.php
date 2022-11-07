@@ -20,4 +20,5 @@ return array(
 	'delete_success' => 'Елемент видалений!',
 	'undelete_success' => 'Елемент відновлено!',
 	'error_level' => 'Рівень вже існує!',
+	'markDeleted_success' => 'Інформацію про рівень успішно видалено',
 );

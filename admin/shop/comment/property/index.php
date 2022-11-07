@@ -29,8 +29,8 @@ $oAdmin_Form_Controller
 	->module(Core_Module::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
-	->title(Core::_('Shop_Item.show_list_of_properties_title', $oShop->name))
-	->pageTitle(Core::_('Shop_Item.show_list_of_properties_title', $oShop->name));
+	->title(Core::_('Shop_Item.show_list_of_item_comments_properties_title', $oShop->name))
+	->pageTitle(Core::_('Shop_Item.show_list_of_item_comments_properties_title', $oShop->name));
 
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
@@ -40,7 +40,6 @@ $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Property.menu'))
 		->icon('fa fa-plus')
-		->img('/admin/images/page_gear_add.gif')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
 		)
@@ -52,7 +51,6 @@ $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Property_Dir.menu'))
 		->icon('fa fa-plus')
-		->img('/admin/images/folder_gear_add.gif')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)

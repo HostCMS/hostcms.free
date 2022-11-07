@@ -176,9 +176,68 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 				$this->_init['language'] = '"' . $lng . '"';
 				$this->_init['language_url'] = "'/admin/wysiwyg/langs/{$lng}.js'";
 				$this->_init['cache_suffix'] = "'?v=" . HOSTCMS_UPDATE_NUMBER  . "'";
+				$this->_init['promotion'] = "false";
 				//$this->_init['elements'] = '"' . $this->id . '"';
 
-				$this->_init['init_instance_callback'] = 'function(editor) { $(\'body\').trigger(\'afterTinyMceInit\', [editor]);}';
+				$this->_init['init_instance_callback'] = 'function(editor) { $(\'body\').trigger(\'afterTinyMceInit\', [editor]); }';
+
+				if (Core::moduleIsActive('shortcode'))
+				{
+					$aShortcodes = Core_Entity::factory('Shortcode')->getAllByActive(1);
+
+					$aTmpShortcodes = array();
+
+					foreach ($aShortcodes as $oShortcode)
+					{
+						$aTmpShortcodes[] = "{ text: '" . Core_Str::escapeJavascriptVariable($oShortcode->name) . " [" . $oShortcode->id . "]', value: '" . Core_Str::escapeJavascriptVariable($oShortcode->example) . "' }";
+					}
+
+					$sShortcodes = implode(',', $aTmpShortcodes);
+
+					$this->_init['setup'] = 'function(editor) {
+						editor.ui.registry.addButton(\'insertShortcode\', {
+							text: "' . Core::_('Shortcode.title') . '",
+							type: \'button\',
+							onAction: function (_) {
+								tinymce.activeEditor.windowManager.open({
+									width: 320,
+									height: 240,
+									title: "' . Core::_('Shortcode.title') . '",
+									body: {
+										type: \'panel\',
+										items: [
+											{
+												type: \'listbox\', // component type
+												name: \'shortcode\', // identifier
+												enabled: true, // enabled state
+												items: [' . $sShortcodes . ']
+											}
+										]
+									},
+									buttons: [
+										{
+										  type: \'custom\',
+										  name: \'applyShortcode\',
+										  enabled: true,
+										  text: \'OK\',
+										  buttonType: \'primary\',
+										}
+									],
+									onAction: (api, details) => {
+										const data = api.getData();
+
+										if (data.shortcode !== \'\')
+										{
+											tinymce.activeEditor.execCommand(\'mceInsertContent\', false, data.shortcode);
+										}
+
+										api.close();
+									}
+								});
+							}
+						});
+					}';
+				}
 
 				!isset($this->_init['height'])
 					&& $this->_init['height'] = '"' . ($this->rows * 30) . 'px"';

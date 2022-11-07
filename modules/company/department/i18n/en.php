@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Company
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Departments',
@@ -57,4 +57,5 @@ return array(
 	'deleteDepartment_success' => 'Department deleted successfully.',
 	'deleteDepartment_error' => 'Department not deleted',
 	'undelete_success' => 'Department restored successfully.',
+	'close_modal_confirm' => 'Are you sure you want to cancel?',
 );

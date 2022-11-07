@@ -38,13 +38,25 @@ abstract class Core_Session
 		return self::$_started;
 	}
 
+	/**
+	 * Debug
+	 * @var boolean
+	 */
 	static protected $_debug = FALSE;
 
+	/**
+	 * Set debug
+	 * @param boolean $debug
+	 */
 	static public function debug($debug = TRUE)
 	{
 		self::$_debug = $debug;
 	}
 
+	/**
+	 * Log
+	 * @param string $actionName
+	 */
 	static protected function _log($actionName)
 	{
 		$aDebugTrace = Core::debugBacktrace();
@@ -272,6 +284,10 @@ abstract class Core_Session
 		}
 	}
 
+	/**
+	 * Handler
+	 * @var mixed
+	 */
 	static protected $_handler = NULL;
 
 	/**
@@ -376,6 +392,10 @@ abstract class Core_Session
 		return self::$_handler->sessionDestroyer($id);
 	}
 
+	/**
+	 * Error
+	 * @var mixed
+	 */
 	static protected $_error = NULL;
 
 	/**

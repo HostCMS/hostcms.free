@@ -93,6 +93,7 @@ return array(
 	'copy_success' => "Товар успішно скопійований!",
 	'shops_add_form_link_properties' => "Властивості товару",
 	'show_list_of_properties_title' => "Список властивостей товару інтернет-магазину \"%s\"",
+	'show_list_of_item_comments_properties_title' => "Список властивостей відгуків про товари інтернет-магазину \"%s\"",
 	'tab_properties' => "Додаткові властивості",
 	'items_catalog_add_form_comment_link' => 'Відгуки',
 	'properties_item_for_groups_link' => 'Властивості товарів для групи',
@@ -360,4 +361,5 @@ return array(
 	'attribute_item_price_tab' => 'Ціни',
 	'attribute_item_warehouse_tab' => 'Склади',
 	'shop_discount_siteuser_title' => 'Персональні знижки',
+	'main_menu_warrants' => 'Каса',
 );

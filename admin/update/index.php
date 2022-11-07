@@ -34,7 +34,6 @@ $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Update.submenu'))
 		->icon('fa-solid fa-rotate')
-		->img('/admin/images/refresh.gif')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'loadUpdates', NULL, 0, 0)
 		)

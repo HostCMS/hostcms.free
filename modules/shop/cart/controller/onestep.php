@@ -208,7 +208,7 @@ class Shop_Cart_Controller_Onestep extends Core_Controller
 
 			// Total order amount
 			$total_amount = $aTotal['amount'] - $totalDiscount;
-			
+
 			$this->addEntity(
 				Core::factory('Core_Xml_Entity')
 					->name('total_amount')
@@ -233,7 +233,7 @@ class Shop_Cart_Controller_Onestep extends Core_Controller
 		}
 
 		$this->taxes && $oShop->showXmlTaxes(TRUE);
-		
+
 		// Свойства заказа
 		if ($this->orderProperties)
 		{
@@ -274,7 +274,7 @@ class Shop_Cart_Controller_Onestep extends Core_Controller
 			Core_Entity::factory('Shop_Country')->findAll(FALSE)
 		);
 
-		if (!is_null($this->_oSiteuser) && strlen($this->_oSiteuser->country))
+		if (!is_null($this->_oSiteuser) && $this->_oSiteuser->country != '')
 		{
 			$oCurrent_Shop_Country = Core_Entity::factory('Shop_Country')->getByName($this->_oSiteuser->country);
 			if (!is_null($oCurrent_Shop_Country))
@@ -448,7 +448,7 @@ class Shop_Cart_Controller_Onestep extends Core_Controller
 		foreach ($aShop_Deliveries as $oShop_Delivery)
 		{
 			$aShop_Delivery_Condition = array();
-					
+
 			if ($oShop_Delivery->type == 0)
 			{
 				$oShop_Delivery_Condition_Controller = new Shop_Delivery_Condition_Controller();

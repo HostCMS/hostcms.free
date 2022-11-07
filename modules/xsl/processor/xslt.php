@@ -9,9 +9,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Xsl
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Xsl_Processor_Xslt extends Xsl_Processor
 {
@@ -34,7 +34,8 @@ class Xsl_Processor_Xslt extends Xsl_Processor
 
 		$sXsl = $this->_xsl->loadXslFile();
 
-		!Core::checkPanel() && $sXsl = $this->_clearXmlns($sXsl);
+		// Cut 'hostcms:' attributes in source XSL file
+		!Core::checkPanel() && $sXsl = self::clearXmlns($sXsl);
 
 		if ($xsl->loadXML($sXsl))
 		{
@@ -47,7 +48,7 @@ class Xsl_Processor_Xslt extends Xsl_Processor
 
 				$XsltProcessor->registerPHPFunctions();
 				$XsltProcessor->importStylesheet($xsl);
-				$XsltProcessor->setParameter(NULL, "titles", "Titles");
+				$XsltProcessor->setParameter('', "titles", "Titles");
 
 				libxml_use_internal_errors(TRUE);
 				// Transform and output the xml document

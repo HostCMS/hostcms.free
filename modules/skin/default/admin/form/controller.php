@@ -201,19 +201,19 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 					{
 						if ($this->sortingDirection == 0)
 						{
-							?><img src="/admin/images/arrow_up.gif" alt="&uarr" /> <?php
-							?><a href="<?php echo $hrefDown?>" onclick="<?php echo $onclickDown?>"><img src="/admin/images/arrow_down_gray.gif" alt="&darr" /></a><?php
+							?><img src="/modules/skin/default/arrow_up.gif" alt="&uarr" /> <?php
+							?><a href="<?php echo $hrefDown?>" onclick="<?php echo $onclickDown?>"><img src="/modules/skin/default/images/arrow_down_gray.gif" alt="&darr" /></a><?php
 						}
 						else
 						{
-							?><a href="<?php echo $hrefUp?>" onclick="<?php echo $onclickUp?>"><img src="/admin/images/arrow_up_gray.gif" alt="&uarr" /></a> <?php
-							?><img src="/admin/images/arrow_down.gif" alt="&darr" /><?php
+							?><a href="<?php echo $hrefUp?>" onclick="<?php echo $onclickUp?>"><img src="/modules/skin/default/images/arrow_up_gray.gif" alt="&uarr" /></a> <?php
+							?><img src="/modules/skin/default/arrow_down.gif" alt="&darr" /><?php
 						}
 					}
 					else
 					{
-						?><a href="<?php echo $hrefUp?>" onclick="<?php echo $onclickUp?>"><img src="/admin/images/arrow_up_gray.gif" alt="&uarr" /></a> <?php
-						?><a href="<?php echo $hrefDown?>" onclick="<?php echo $onclickDown?>"><img src="/admin/images/arrow_down_gray.gif" alt="&darr" /></a><?php
+						?><a href="<?php echo $hrefUp?>" onclick="<?php echo $onclickUp?>"><img src="/modules/skin/default/arrow_up_gray.gif" alt="&uarr" /></a> <?php
+						?><a href="<?php echo $hrefDown?>" onclick="<?php echo $onclickDown?>"><img src="/modules/skin/default/arrow_down_gray.gif" alt="&darr" /></a><?php
 					}
 				}
 				?></nobr><?php
@@ -343,7 +343,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 		{
 			$onclick = $this->getAdminLoadAjax($this->getPath());
 			?><td><?php
-				?><input title="<?php echo Core::_('Admin_Form.button_to_filter')?>" type="image" src="/admin/images/filter.gif" id="admin_forms_apply_button" type="button" value="<?php echo Core::_('Admin_Form.button_to_filter')?>" onclick="<?php echo $onclick?>" /> <input title="<?php echo Core::_('Admin_Form.clear')?>" type="image" src="/admin/images/clear.png" type="button" value="<?php echo Core::_('Admin_Form.clear')?>" onclick="$.clearFilter('<?php echo $windowId?>')" /><?php
+				?><input title="<?php echo Core::_('Admin_Form.button_to_filter')?>" type="image" src="/modules/skin/default/images/filter.gif" id="admin_forms_apply_button" type="button" value="<?php echo Core::_('Admin_Form.button_to_filter')?>" onclick="<?php echo $onclick?>" /> <input title="<?php echo Core::_('Admin_Form.clear')?>" type="image" src="/modules/skin/default/images/clear.png" type="button" value="<?php echo Core::_('Admin_Form.clear')?>" onclick="$.clearFilter('<?php echo $windowId?>')" /><?php
 			?></td><?php
 		}
 		?></tr>

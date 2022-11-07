@@ -46,7 +46,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Select extends Skin_Default_Admin_Form_En
 		}
 
 		// Не показывать <span>, если пустой. Используется при сдвоенных селекторах
-		if (strlen($this->caption))
+		if ($this->caption != '' && strlen($this->caption))
 		{
 			?><span class="caption"><?php echo $this->caption; $this->invertor && $this->_invertor();?></span><?php
 		}
@@ -125,7 +125,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Select extends Skin_Default_Admin_Form_En
 			->class($this->caseSensitive ? 'col-xs-10 col-sm-5' : 'col-xs-5 col-sm-4 no-padding-left')
 			->add(
 				Admin_Form_Entity::factory('Div')
-					->class('input-group' . (strlen($this->caption) ? ' margin-top-21' : ''))
+					->class('input-group' . ($this->caption != '' ? ' margin-top-21' : ''))
 					->add(
 						Admin_Form_Entity::factory('Code')
 							->html('<span class="input-group-addon"><i class="fa-solid fa-magnifying-glass"></i></span>
@@ -139,7 +139,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Select extends Skin_Default_Admin_Form_En
 			if ($this->caseSensitive)
 			{
 				Admin_Form_Entity::factory('Div')
-					->class('col-xs-2 col-sm-1 no-padding-left' . (strlen($this->caption) ? ' margin-top-25' : ''))
+					->class('col-xs-2 col-sm-1 no-padding-left' . ($this->caption != '' ? ' margin-top-25' : ''))
 					->add(
 						Admin_Form_Entity::factory('Code')
 							->html('<label class="checkbox-inline" title="' . Core::_('Admin_Form.case_sensitive') . '">' .

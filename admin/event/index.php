@@ -104,6 +104,7 @@ if (Core_Array::getPost('id') && (Core_Array::getPost('target_id') || Core_Array
 				// При отмене удаленного явно возвращаем в 0
 				$oEvent->deleted = 0;
 				$oEvent->event_status_id = $iTargetStatusId;
+				$oEvent->last_modified = Core_Date::timestamp2sql(time());
 				$oEvent->save();
 
 				if ($previousStatusId != $oEvent->event_status_id)
@@ -179,7 +180,6 @@ if (!$siteuser_id && is_null(Core_Array::getGet('hideMenu')))
 				Admin_Form_Entity::factory('Menu')
 					->name(Core::_('Event.events_menu_types'))
 					->icon('fa fa-bars')
-					->img('/admin/images/add.gif')
 					->href(
 						$oAdmin_Form_Controller->getAdminLoadHref(array('path' => $sPath = '/admin/event/type/index.php'))
 					)
@@ -191,7 +191,6 @@ if (!$siteuser_id && is_null(Core_Array::getGet('hideMenu')))
 				Admin_Form_Entity::factory('Menu')
 					->name(Core::_('Event.events_menu_groups'))
 					->icon('fa fa-folder-o')
-					->img('/admin/images/add.gif')
 					->href(
 						$oAdmin_Form_Controller->getAdminLoadHref(array('path' => $sPath = '/admin/event/group/index.php'))
 					)
@@ -203,7 +202,6 @@ if (!$siteuser_id && is_null(Core_Array::getGet('hideMenu')))
 				Admin_Form_Entity::factory('Menu')
 					->name(Core::_('Event.events_menu_statuses'))
 					->icon('fa fa-circle')
-					->img('/admin/images/add.gif')
 					->href(
 						$oAdmin_Form_Controller->getAdminLoadHref(array('path' => $sPath = '/admin/event/status/index.php'))
 					)

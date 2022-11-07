@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Company
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Company_Department_User_Controller_Edit extends Admin_Form_Action_Controller
 {
@@ -184,7 +184,7 @@ class Company_Department_User_Controller_Edit extends Admin_Form_Action_Controll
 				Admin_Form_Entity::factory('Code')
 					->html('
 						<script>
-							bootbox.dialog({
+							var dialog = bootbox.dialog({
 								message: \'' . $sAddEditUserFormContent . '\',
 								title: "' . ($iUserId ? Core::_('Company_Department.edit_user_title') : Core::_('Company_Department.add_user_title')) . '",
 								className: "modal-darkorange",
@@ -200,10 +200,24 @@ class Company_Department_User_Controller_Edit extends Admin_Form_Action_Controll
 									cancel: {
 										label: "' . Core::_('Company_Department.cancel') . '",
 										className: "btn-default",
-										//callback: function() {}
+										callback: function() {
+											if (confirm("' . Core::_('Company_Department.close_modal_confirm') . '"))
+											{
+												dialog.modal(\'hide\');
+											}
+
+											return false;
+										}
 									}
 								},
-								onEscape: true
+								onEscape: function (){
+									if (confirm("' . Core::_('Company_Department.close_modal_confirm') . '"))
+									{
+										dialog.modal(\'hide\');
+									}
+
+									return false;
+								}
 							});
 
 						</script>'

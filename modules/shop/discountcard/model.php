@@ -308,9 +308,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		$oShop = $this->Shop;
 
 		!isset($this->_forbiddenTags['date'])
-			&& $this->addXmlTag('date', strftime($oShop->format_date, Core_Date::sql2timestamp($this->datetime)));
+			&& $this->addXmlTag('date', Core_Date::strftime($oShop->format_date, Core_Date::sql2timestamp($this->datetime)));
 
-		$this->addXmlTag('datetime', strftime($oShop->format_datetime, Core_Date::sql2timestamp($this->datetime)));
+		$this->addXmlTag('datetime', Core_Date::strftime($oShop->format_datetime, Core_Date::sql2timestamp($this->datetime)));
 
 		if ($this->shop_discountcard_level_id)
 		{

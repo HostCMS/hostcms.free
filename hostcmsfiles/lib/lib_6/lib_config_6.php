@@ -153,7 +153,7 @@ if (!is_null(Core_Array::getRequest('favorite')))
 
 // Обработка скачивания файла электронного товара
 $guid = Core_Array::getGet('download_file');
-if (strlen($guid))
+if ($guid != '')
 {
 	$oShop_Order_Item_Digital = Core_Entity::factory('Shop_Order_Item_Digital')->getByGuid($guid);
 

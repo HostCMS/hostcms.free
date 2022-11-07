@@ -47,12 +47,7 @@ class Tpl_Processor_Observer
 				->style('display: none');
 
 			$oTplSubPanel = Core_Html_Entity::factory('Div')
-				->class('hostcmsSubPanel hostcmsXsl')
-				->add(
-					Core_Html_Entity::factory('Img')
-						->width(3)->height(16)
-						->src('/hostcmsfiles/images/drag_bg.gif')
-				);
+				->class('hostcmsSubPanel hostcmsXsl');
 
 			$oTpl = $object->getTpl();
 
@@ -66,11 +61,9 @@ class Tpl_Processor_Observer
 					->href("{$sPath}?{$sAdditional}")
 					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "'}); return false")
 					->add(
-						Core_Html_Entity::factory('Img')
-							->width(16)->height(16)
-							->src('/hostcmsfiles/images/xsl_edit.gif')
+						Core_Html_Entity::factory('I')
 							->id('hostcmsEditXsl')
-							->alt($sTitle)
+							->class('fa-regular fa-file-code fa-fw')
 							->title($sTitle)
 					)
 			);
@@ -87,22 +80,16 @@ class Tpl_Processor_Observer
 				Core_Html_Entity::factory('A')
 					->onclick("hQuery.showWindow('xmlWindow{$iCount}', '" . Core_Str::escapeJavascriptVariable($content) . "', {width: 600, height: 350, title: '{$sTitle}'})")
 					->add(
-						Core_Html_Entity::factory('Img')
-							->src('/hostcmsfiles/images/xml.gif')
+						Core_Html_Entity::factory('I')
 							->id('hostcmsShowXml')
-							->alt($sTitle)
+							->class('fa-solid fa-code fa-fw pointer')
 							->title($sTitle)
-							->class('pointer')
 					)
 			);
 
 			$oTplSubPanel->add(
 				Core_Html_Entity::factory('Div')
 					->class('hostcmsButton')
-					->add(
-						Core_Html_Entity::factory('Img')
-							->src('/hostcmsfiles/images/time.png')
-					)
 					->add(
 						Core_Html_Entity::factory('Div')
 							->value(
@@ -114,7 +101,8 @@ class Tpl_Processor_Observer
 					->class('hostcmsButton')
 					->add(
 						Core_Html_Entity::factory('Div')
-							->value("ID {$oTpl->id}")
+							->value("{$oTpl->id}")
+							->title('ID')
 					)
 			);
 

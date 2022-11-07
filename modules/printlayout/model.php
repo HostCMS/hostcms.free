@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Printlayout
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Printlayout_Model extends Core_Entity
 {
@@ -95,6 +95,10 @@ class Printlayout_Model extends Core_Entity
 		return CMS_FOLDER . "hostcmsfiles/printlayout/";
 	}
 
+	/**
+	 * Get copy file path
+	 * @return string
+	 */
 	public function getCopyFilePath()
 	{
 		return tempnam(CMS_FOLDER . TMP_DIR, 'PLO');

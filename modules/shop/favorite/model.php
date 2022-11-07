@@ -9,10 +9,16 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Favorite_Model extends Core_Entity
 {
+	/**
+	 * Callback property_id
+	 * @var int
+	 */
+	public $img = 1;
+
 	/**
 	 * Disable markDeleted()
 	 * @var mixed
@@ -24,7 +30,9 @@ class Shop_Favorite_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_belongsTo = array(
+		'shop_favorite_list' => array(),
 		'shop_item' => array(),
+		'shop' => array(),
 		'siteuser' => array()
 	);
 
@@ -180,6 +188,50 @@ class Shop_Favorite_Model extends Core_Entity
 			->addEntity($oShop_Item);
 
 		return $this;
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function dataNameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return $this->shop_item_id
+			? htmlspecialchars((string) $this->Shop_Item->name)
+			: '';
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function dataPriceBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return htmlspecialchars(
+			$this->Shop->Shop_Currency->formatWithCurrency($this->dataPrice)
+		);
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function shopBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return $this->shop_id
+			? htmlspecialchars((string) $this->Shop->name)
+			: '';
+	}
+
+	/**
+	 * Delete Favorite Item
+	 * @return self
+	 */
+	public function markDeleted()
+	{
+		return $this->delete();
 	}
 
 	/**

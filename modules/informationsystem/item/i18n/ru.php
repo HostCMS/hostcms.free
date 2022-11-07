@@ -81,6 +81,7 @@ return array(
 	'show_comments_title' => 'Комментарии к информационному элементу "%s"',
 
 	'show_information_propertys_title' => 'Дополнительные свойства элементов информационной системы "%s"',
+	'show_information_item_comments_propertys_title' => 'Дополнительные свойства комментариев элементов информационной системы "%s"',
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
 	'root' => 'Корень информационной системы',

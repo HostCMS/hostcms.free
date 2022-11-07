@@ -73,7 +73,7 @@ class Document_Model extends Core_Entity
 			->where('site_id', '=', $site_id)
 			->orderBy('name');
 
-		return $this->findAll();
+		return $this->findAll(FALSE);
 	}
 
 	/**

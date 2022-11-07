@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Printlayout
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Printlayout_Controller extends Core_Controller
 {
@@ -41,11 +41,34 @@ class Printlayout_Controller extends Core_Controller
 	 */
 	protected $_documentXml = NULL;
 
+	/**
+	 * Replace array
+	 * @var array
+	 */
 	protected $_arrayReplace = array();
+
+	/**
+	 * Scalar replace
+	 * @var array
+	 */
 	protected $_scalarReplace = array();
+
+	/**
+	 * tr to replace
+	 * @var array
+	 */
 	protected $_trToReplace = array();
 
+	/**
+	 * File path
+	 * @var string|NULL
+	 */
 	protected $_filePath = NULL;
+
+	/**
+	 * File name
+	 * @var string|NULL
+	 */
 	protected $_fileName = NULL;
 
 	/**
@@ -178,6 +201,11 @@ class Printlayout_Controller extends Core_Controller
 		return $copyFilePath;
 	}
 
+	/**
+	 * Get array by RPR
+	 * @param object $object
+	 * @return array
+	 */
 	protected function _getArrayByRpr($object)
 	{
 		$aReturn = array();
@@ -192,6 +220,11 @@ class Printlayout_Controller extends Core_Controller
 		return $aReturn;
 	}
 
+	/**
+	 * Union nodes
+	 * @param object $oXml
+	 * @return array
+	 */
 	protected function _unionNodes($oXml)
 	{
 		$aRPR = $aPrevRPR = $prevNode = NULL;
@@ -291,16 +324,27 @@ class Printlayout_Controller extends Core_Controller
 		return $this;
 	}
 
+	/**
+	 * Get file path
+	 * @return string
+	 */
 	public function getFilePath()
 	{
 		return $this->_filePath;
 	}
 
+	/**
+	 * Get file name
+	 * @return string
+	 */
 	public function getFileName()
 	{
 		return $this->_fileName;
 	}
 
+	/**
+	 * Download file
+	 */
 	public function downloadFile()
 	{
 		if (!is_null($this->_filePath))
@@ -315,6 +359,9 @@ class Printlayout_Controller extends Core_Controller
 		}
 	}
 
+	/**
+	 * Print file
+	 */
 	public function printFile()
 	{
 		if (!is_null($this->_filePath))
@@ -327,6 +374,10 @@ class Printlayout_Controller extends Core_Controller
 		}
 	}
 
+	/**
+	 * Delete file
+	 * @return self
+	 */
 	public function deleteFile()
 	{
 		if (is_file($this->getFilePath()))
@@ -416,6 +467,15 @@ class Printlayout_Controller extends Core_Controller
 		}
 	}
 
+	/**
+	 * Get print button
+	 * @param Admin_Form_Controller $Admin_Form_Controller
+	 * @param int $module_id
+	 * @param int $type
+	 * @param string $additionalParam
+	 * @param boolean $divider
+	 * @return string
+	 */
 	static public function getPrintButtonHtml($Admin_Form_Controller, $module_id, $type, $additionalParam, $divider = FALSE)
 	{
 		$printlayoutsButton = '';
@@ -441,6 +501,13 @@ class Printlayout_Controller extends Core_Controller
 		return $printlayoutsButton;
 	}
 
+	/**
+	 * Get backend print button
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @param int $id
+	 * @param int $type
+	 * @return Admin_Form_Entity
+	 */
 	static public function getBackendPrintButton($oAdmin_Form_Controller, $id, $type)
 	{
 		$printlayoutsButton = '';
@@ -462,20 +529,25 @@ class Printlayout_Controller extends Core_Controller
 
 		if (!is_null($oModule))
 		{
-			// Печать
-			$printlayoutsButton = '
-				<div class="btn-group">
-					<a class="btn btn-default" href="javascript:void(0);"><i class="fa fa-print"></i></a>
-					<a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
-					<ul class="dropdown-menu dropdown-default">
-			';
+			$buttons = self::getPrintButtonHtml($oAdmin_Form_Controller, $oModule->id, $type, 'hostcms[checked][0][' . $id . ']=1' . $additionalParam);
 
-			$printlayoutsButton .= self::getPrintButtonHtml($oAdmin_Form_Controller, $oModule->id, $type, 'hostcms[checked][0][' . $id . ']=1' . $additionalParam);
+			if ($buttons != '')
+			{
+				// Печать
+				$printlayoutsButton = '
+					<div class="btn-group">
+						<a class="btn btn-default" href="javascript:void(0);"><i class="fa fa-print"></i></a>
+						<a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
+						<ul class="dropdown-menu dropdown-default">
+				';
 
-			$printlayoutsButton .= '
-					</ul>
-				</div>
-			';
+				$printlayoutsButton .= $buttons;
+
+				$printlayoutsButton .= '
+						</ul>
+					</div>
+				';
+			}
 		}
 
 		return Admin_Form_Entity::factory('Code')

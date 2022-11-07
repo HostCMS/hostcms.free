@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Antispam
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Antispam_Controller extends Core_Servant_Properties
 {
@@ -45,9 +45,23 @@ class Antispam_Controller extends Core_Servant_Properties
 		$this->closeGeoIp();
 	}
 
+	/**
+	 * GeoIP controller
+	 * @var Antispam_GeoIP_Controller
+	 */
 	protected $_antispam_GeoIP_Controller = NULL;
+
+	/**
+	 * GeoIP
+	 * @var object|NULL
+	 */
 	protected $_geoip = NULL;
 
+	/**
+	 * Get country code
+	 * @param string $ip
+	 * @return string
+	 */
 	public function getCountryCode($ip)
 	{
 		if (is_null($this->_antispam_GeoIP_Controller))
@@ -69,6 +83,10 @@ class Antispam_Controller extends Core_Servant_Properties
 		return $countryCode;
 	}
 
+	/**
+	 * Close GeoIP
+	 * @return self
+	 */
 	public function closeGeoIp()
 	{
 		if (!is_null($this->_geoip))

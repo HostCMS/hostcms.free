@@ -101,6 +101,8 @@ class User_Model extends Core_Entity
 		'user_workday' => array(),
 		'user_absence' => array('foreign_key' => 'employee_id', 'model' => 'user_absence'),
 		'lead_step' => array(),
+		'sql_user_tab' => array(),
+		'shop_cashflow' => array(),
 	);
 
 	/**
@@ -272,40 +274,49 @@ class User_Model extends Core_Entity
 			return TRUE;
 		}
 
-		// Доступ только к своим
-		if ($this->only_access_my_own)
+		// Exists object
+		if ($oObject->getPrimaryKey() != 0)
 		{
-			$aTableColumns = $oObject->getTableColumns();
-
-			// Объект имеет поле user_id
-			if (isset($aTableColumns['user_id']))
+			// Доступ только к своим
+			if ($this->only_access_my_own)
 			{
-				return ($oObject->user_id == 0 || $oObject->user_id == $this->id);
-			}
-		}
-		// Проверка на право доступа пользователя к сайту, которому принадлежит элемент
-		else
-		{
-			$oRelatedSite = $oObject->getRelatedSite();
+				$aTableColumns = $oObject->getTableColumns();
 
-			if ($oRelatedSite)
-			{
-				$aSites = $this->getSites();
-
-				foreach ($aSites as $oSites)
+				// Объект имеет поле user_id
+				if (isset($aTableColumns['user_id']))
 				{
-					if ($oRelatedSite->id == $oSites->id)
-					{
-						return TRUE;
-					}
+					return ($oObject->user_id == 0 || $oObject->user_id == $this->id);
 				}
-
-				return FALSE;
 			}
+			// Проверка на право доступа пользователя к сайту, которому принадлежит элемент
 			else
 			{
-				return TRUE;
+				$oRelatedSite = $oObject->getRelatedSite();
+
+				if ($oRelatedSite)
+				{
+					$aSites = $this->getSites();
+
+					foreach ($aSites as $oSites)
+					{
+						if ($oRelatedSite->id == $oSites->id)
+						{
+							return TRUE;
+						}
+					}
+
+					return FALSE;
+				}
+				else
+				{
+					return TRUE;
+				}
 			}
+		}
+		else
+		{
+			// New object
+			return TRUE;
 		}
 
 		return FALSE;
@@ -392,7 +403,7 @@ class User_Model extends Core_Entity
 	 */
 	public function getAvatar()
 	{
-		return strlen($this->image)
+		return $this->image != '' && strlen($this->image)
 			? $this->getImageHref()
 			: "/admin/user/index.php?loadUserAvatar={$this->id}";
 	}
@@ -578,6 +589,11 @@ class User_Model extends Core_Entity
 		if (Core::moduleIsActive('lead'))
 		{
 			$this->Lead_Steps->deleteAll(FALSE);
+		}
+
+		if (Core::moduleIsActive('sql'))
+		{
+			$this->Sql_User_Tabs->deleteAll(FALSE);
 		}
 
 		$this->User_Bookmarks->deleteAll(FALSE);

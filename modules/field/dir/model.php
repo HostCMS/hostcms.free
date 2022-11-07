@@ -18,7 +18,7 @@ class Field_Dir_Model extends Core_Entity
 	 * @var mixed
 	 */
 	public $img = 0;
-	
+
 	/**
 	 * One-to-many or many-to-many relations
 	 * @var array
@@ -35,7 +35,7 @@ class Field_Dir_Model extends Core_Entity
 	protected $_belongsTo = array(
 		'field_dir' => array('foreign_key' => 'parent_id')
 	);
-	
+
 	/**
 	 * List of preloaded values
 	 * @var array
@@ -43,8 +43,8 @@ class Field_Dir_Model extends Core_Entity
 	protected $_preloadValues = array(
 		'parent_id' => 0
 	);
-	
-		/**
+
+	/**
 	 * Get parent comment
 	 * @return Field_Dir_Model|NULL
 	 */
@@ -54,12 +54,18 @@ class Field_Dir_Model extends Core_Entity
 		{
 			return Core_Entity::factory('Field_Dir', $this->parent_id);
 		}
-		else	
+		else
 		{
 			return NULL;
 		}
 	}
-	
+
+	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
 	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 
@@ -77,8 +83,15 @@ class Field_Dir_Model extends Core_Entity
 			->title(Core::_('Informationsystem.all_items_count', $countFields))
 			->execute();
 	}
-	
-		public function move($iFieldDirId)
+
+	/**
+	 * Move group to another group
+	 * @param int $iFieldDirId field dir id
+	 * @return self
+	 * @hostcms-event field_dir.onBeforeMove
+	 * @hostcms-event field_dir.onAfterMove
+	 */
+	public function move($iFieldDirId)
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($iFieldDirId));
 
@@ -89,8 +102,8 @@ class Field_Dir_Model extends Core_Entity
 
 		return $this;
 	}
-	
-		/**
+
+	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return self
@@ -112,7 +125,4 @@ class Field_Dir_Model extends Core_Entity
 
 		return parent::delete($primaryKey);
 	}
-
-
-
 }

@@ -28,8 +28,8 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		if (!$object->id)
 		{
-			$object->parent_id = intval(Core_Array::getGet('parent_id', 0));
-			$object->crm_project_id = intval(Core_Array::getGet('crm_project_id', 0));
+			$object->parent_id = Core_Array::getGet('parent_id', 0, 'int');
+			$object->crm_project_id = Core_Array::getGet('crm_project_id', 0, 'int');
 
 			if (!is_null(Core_Array::getGet('event_status_id')))
 			{
@@ -54,7 +54,9 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oAdditionalTab
 			->add($oAdditionalRow1 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oAdditionalRow2 = Admin_Form_Entity::factory('Div')->class('row'));
+			->add($oAdditionalRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oAdditionalRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oAdditionalRow4 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		if ($this->_object->id)
 		{
@@ -150,6 +152,10 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->add($oCore_Html_Entity_Script_Crm_Project);
 			}
 		}
+
+		$oMainTab
+			->move($this->getField('guid')->divAttr(array('class' => 'form-group col-xs-12')), $oAdditionalRow3)
+			->move($this->getField('last_modified')->divAttr(array('class' => 'form-group col-xs-12')), $oAdditionalRow4);
 
 		$oSite = Core_Entity::factory('Site', CURRENT_SITE);
 
@@ -2089,14 +2095,14 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		return $this;
 	}
 
-	/*
+	/**
 	 * Add related events
 	 * @return Admin_Form_Entity
 	 */
 	protected function _addEvents()
 	{
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
-		$modalWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('modalWindowId'));
+		$modalWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('modalWindowId', '', 'str'));
 
 		$targetWindowId = $modalWindowId ? $modalWindowId : $windowId;
 
@@ -2106,14 +2112,14 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			});");
 	}
 
-	/*
+	/**
 	 * Add timeline
 	 * @return Admin_Form_Entity
 	 */
 	protected function _addEventTimeline()
 	{
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
-		$modalWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('modalWindowId'));
+		$modalWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('modalWindowId', '', 'str'));
 
 		$targetWindowId = $modalWindowId ? $modalWindowId : $windowId;
 
@@ -2123,6 +2129,10 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			});");
 	}
 
+	/**
+	 * Add dms documents
+	 * @return Admin_Form_Entity
+	 */
 	protected function _addEventDmsDocuments()
 	{
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
@@ -2133,14 +2143,14 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			});");
 	}
 
-	/*
+	/**
 	 * Add event notes
 	 * @return Admin_Form_Entity
 	 */
 	protected function _addEventNotes()
 	{
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
-		$modalWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('modalWindowId'));
+		$modalWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('modalWindowId', '', 'str'));
 
 		$targetWindowId = $modalWindowId ? $modalWindowId : $windowId;
 
@@ -2150,6 +2160,10 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			});");
 	}
 
+	/**
+	 * Call dms execution
+	 * @return self
+	 */
 	protected function _callDmsExecution()
 	{
 		if (Core::moduleIsActive('dms') && $this->_object->completed != 0)
@@ -2173,7 +2187,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	{
 		$oCurrentUser = Core_Auth::getCurrentUser();
 
-		$modalWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('modalWindowId'));
+		$modalWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('modalWindowId', '', 'str'));
 		$windowId = $modalWindowId ? $modalWindowId : $this->_Admin_Form_Controller->getWindowId();
 
 		$bAddEvent = is_null($this->_object->id);
@@ -2219,6 +2233,8 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			$this->_formValues['deadline'] = $this->_formValues['deadline'] . ' 23:59:59';
 		}
+
+		$this->_formValues['last_modified'] = Core_Date::timestamp2sql(time());
 
 		if ($iEventStatusId = intval(Core_Array::getPost('event_status_id', 0)))
 		{
@@ -2607,15 +2623,16 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	{
 		$oUser = Core_Auth::getCurrentUser();
 
-		$parent_id = Core_Array::getGet('parent_id', 0);
+		//$parent_id = Core_Array::getGet('parent_id', 0);
 		$siteuser_id = Core_Array::getGet('siteuser_id', 0);
+		$bShow_subs = !is_null(Core_Array::getGet('show_subs'));
 
 		// $windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		// Всегда id_content
 		$sJsRefresh = '<script>
 
-		$("#id_content #calendar").length && $("#id_content #calendar").fullCalendar("refetchEvents");
+		$.updateCaldav();
 
 		if ($("#id_content .kanban-board").length && typeof _windowSettings != \'undefined\') {
 			$(\'#id_content #refresh-toggler\').click();
@@ -2625,7 +2642,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		if ($("#id_content .timeline-crm").length && typeof _windowSettings != \'undefined\') {
 			$.adminLoad({ path: \'/admin/crm/project/entity/index.php\', additionalParams: \'crm_project_id=' . $this->_object->crm_project_id . '\', windowId: \'id_content\' });
 		}
-		// CRM-Projects
+		// /CRM-Projects
 
 		var jA = $("li[data-type=timeline] a");
 		if (jA.length)
@@ -2633,7 +2650,8 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$.adminLoad({ path: jA.eq(0).data("path"), additionalParams: jA.eq(0).data("additional"), windowId: jA.eq(0).data("window-id") });
 		}';
 
-		if (!$parent_id && !$siteuser_id)
+		//if (!$parent_id && !$siteuser_id)
+		if (!$bShow_subs && !$siteuser_id)
 		{
 			$sJsRefresh .= 'var jAEvents = $("li[data-type=event] a");
 			if (jAEvents.length)

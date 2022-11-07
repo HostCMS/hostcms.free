@@ -121,9 +121,11 @@ class Site_Model extends Core_Entity
 		'poll_group' => array(),
 		'search_log' => array(),
 		'search_page' => array(),
+		'search_link' => array(),
 		'seo_site' => array(),
 		'shop' => array(),
 		'shop_dir' => array(),
+		'shop_cashflow' => array(),
 		'shortlink' => array(),
 		'shortlink_dir' => array(),
 		'siteuser' => array(),
@@ -321,6 +323,7 @@ class Site_Model extends Core_Entity
 		{
 			$this->Search_Logs->deleteAll(FALSE);
 			$this->Search_Pages->deleteAll(FALSE);
+			$this->Search_Links->deleteAll(FALSE);
 		}
 
 		if (Core::moduleIsActive('seo'))
@@ -332,6 +335,7 @@ class Site_Model extends Core_Entity
 		{
 			$this->Shops->deleteAll(FALSE);
 			$this->Shop_Dirs->deleteAll(FALSE);
+			$this->Shop_Cashflows->deleteAll(FALSE);
 		}
 
 		if (Core::moduleIsActive('siteuser'))
@@ -1318,6 +1322,17 @@ class Site_Model extends Core_Entity
 			}
 		}
 
+		if (Core::moduleIsActive('webhook'))
+		{
+			$aWebhooks = $this->Webhooks->findAll(FALSE);
+
+			foreach ($aWebhooks as $oWebhook)
+			{
+				$oNewWebhook = $oWebhook->copy();
+				$newObject->add($oNewWebhook);
+			}
+		}
+
 		if (Core::moduleIsActive('helpdesk'))
 		{
 			$aHelpdesks = $this->Helpdesks->findAll(FALSE);
@@ -1622,8 +1637,13 @@ class Site_Model extends Core_Entity
 	 */
 	public function getFirstEmail()
 	{
-		$aEmails = array_map('trim', explode(',', $this->admin_email));
-		return $aEmails[0];
+		if ($this->admin_email != '')
+		{
+			$aEmails = array_map('trim', explode(',', $this->admin_email));
+			return $aEmails[0];
+		}
+
+		return '';
 	}
 
 	/**
@@ -1632,8 +1652,13 @@ class Site_Model extends Core_Entity
 	 */
 	public function getErrorEmail()
 	{
-		$aEmails = array_map('trim', explode(',', $this->error_email));
-		return $aEmails[0];
+		if ($this->error_email != '')
+		{
+			$aEmails = array_map('trim', explode(',', $this->error_email));
+			return $aEmails[0];
+		}
+
+		return '';
 	}
 
 	/**
@@ -1642,7 +1667,7 @@ class Site_Model extends Core_Entity
 	 */
 	public function getKeys()
 	{
-		$sKeys = trim(str_replace(array("\n", "\r", "\0", "\t", ), '', $this->key));
+		$sKeys = trim(str_replace(array("\n", "\r", "\0", "\t", ), '', (string) $this->key));
 		return str_split($sKeys, 29);
 	}
 
@@ -1764,7 +1789,7 @@ class Site_Model extends Core_Entity
 				->execute();
 		}
 
-		if (strlen($this->csp))
+		if ($this->csp != '')
 		{
 			Core_Html_Entity::factory('Span')
 				->class('badge badge-square badge-maroon')
@@ -1810,7 +1835,7 @@ class Site_Model extends Core_Entity
 			$oDiv->execute();
 		}
 	}
-	
+
 	public function timezoneBackend()
 	{
 		return $this->timezone == ''

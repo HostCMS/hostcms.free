@@ -13,6 +13,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  */
 class Sql_Table_View_Entity
 {
+	/**
+	 * __isset
+	 * @param string $property
+	 * @return boolean
+	 */
 	public function __isset($property)
 	{
 		$this->getTableColumns();
@@ -72,8 +77,16 @@ class Sql_Table_View_Entity
 		return $this->$pr;
 	}
 
+	/**
+	 * Primary key name
+	 * @var mixed
+	 */
 	protected $_primaryKeyName = NULL;
 
+	/**
+	 * Get primary key name
+	 * @return string
+	 */
 	public function getPrimaryKeyName()
 	{
 		if (is_null($this->_primaryKeyName))
@@ -115,26 +128,51 @@ class Sql_Table_View_Entity
 		return $this->_queryBuilder;
 	}
 
+	/**
+	 * Table name
+	 * @var mixed
+	 */
 	protected $_tableName = NULL;
 
+	/**
+	 * Set table name
+	 * @param string $tableName
+	 * @return self
+	 */
 	public function setTableName($tableName)
 	{
 		$this->_tableName = $tableName;
 		return $this;
 	}
 
+	/**
+	 * Get table name
+	 * @return string
+	 */
 	public function getTableName()
 	{
 		return $this->_tableName;
 	}
 
+	/**
+	 * Get model name
+	 * @return string
+	 */
 	public function getModelName()
 	{
 		return 'sql_table_view';
 	}
 
+	/**
+	 * Columns
+	 * @var mixed
+	 */
 	protected $_columns = NULL;
 
+	/**
+	 * Get table columns
+	 * @return array
+	 */
 	public function getTableColumns()
 	{
 		if (is_null($this->_columns))
@@ -145,6 +183,10 @@ class Sql_Table_View_Entity
 		return $this->_columns;
 	}
 
+	/**
+	 * Delete
+	 * @return self
+	 */
 	public function delete()
 	{
 		$primaryKeyName = $this->getPrimaryKeyName();

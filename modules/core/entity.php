@@ -28,6 +28,7 @@ class Core_Entity extends Core_ORM
 	/**
 	 * Name of the tag in XML
 	 * @var string
+	 * @ignore
 	 */
 	protected $_tagName = NULL;
 
@@ -144,6 +145,7 @@ class Core_Entity extends Core_ORM
 	 * External XML tags for entity.
 	 *
 	 * @var array
+	 * @ignore
 	 */
 	protected $_xmlTags = array();
 
@@ -185,6 +187,7 @@ class Core_Entity extends Core_ORM
 	 * Children entities
 	 *
 	 * @var array
+	 * @ignore
 	 */
 	protected $_childrenEntities = array();
 
@@ -219,13 +222,13 @@ class Core_Entity extends Core_ORM
 
 	/**
 	 * Has revisions
-	 *
 	 * @param boolean
 	 */
 	protected $_hasRevisions = FALSE;
 
 	/**
 	 * Get column name for marks deleted
+	 * @return string
 	 */
 	public function getMarksDeleted()
 	{
@@ -235,6 +238,7 @@ class Core_Entity extends Core_ORM
 	/**
 	 * Set column name for marks deleted
 	 * @param mixed $marksDeleted
+	 * @return self
 	 */
 	public function setMarksDeleted($marksDeleted = 'deleted')
 	{
@@ -245,18 +249,21 @@ class Core_Entity extends Core_ORM
 	/**
 	 * Cache for $this->_allowedTags
 	 * @var array
+	 * @ignore
 	 */
 	static protected $_cacheAllowedTags = array();
 
 	/**
 	 * Cache for $this->_forbiddenTags
 	 * @var array
+	 * @ignore
 	 */
 	static protected $_cacheForbiddenTags = array();
 
 	/**
 	 * Cache for $this->_shortcodeTags
 	 * @var array
+	 * @ignore
 	 */
 	static protected $_cacheShortcodeTags = array();
 
@@ -319,6 +326,7 @@ class Core_Entity extends Core_ORM
 	 * Create and return an object of model
 	 * @param string $modelName Entity name
 	 * @param mixed $primaryKey Primary key
+	 * @retrun self
 	 */
 	static public function factory($modelName, $primaryKey = NULL)
 	{
@@ -531,7 +539,7 @@ class Core_Entity extends Core_ORM
 	 * Find object in database and load one
 	 * @param mixed $primaryKey default NULL
 	 * @param boolean $bCache use cache
-	 * @return Core_ORM
+	 * @return self
 	 */
 	public function find($primaryKey = NULL, $bCache = TRUE)
 	{
@@ -622,13 +630,13 @@ class Core_Entity extends Core_ORM
 	}
 
 	/**
-	 * Attributes
+	 * Entity Attributes
 	 * @var array
 	 */
 	protected $_attributes = array();
 
 	/**
-	 * Add attribute
+	 * Add entity attribute
 	 *
 	 * @param string $name
 	 * @param string $value
@@ -643,6 +651,7 @@ class Core_Entity extends Core_ORM
 	/**
 	 * Clear all entities after XML generation
 	 * @var boolean
+	 * @ignore
 	 */
 	protected $_clearEntitiesAfterGetXml = TRUE;
 
@@ -657,6 +666,11 @@ class Core_Entity extends Core_ORM
 		return $this;
 	}
 
+	/**
+	 * Cache of fields set by the model
+	 * @var array
+	 * @ignore
+	 */
 	static protected $_cacheFieldIDs = array();
 
 	/**
@@ -920,6 +934,7 @@ class Core_Entity extends Core_ORM
 	/**
 	 * Check model values. If model has incorrect value, one will correct or call exception.
 	 * @var boolean
+	 * @ignore
 	 */
 	protected $_check = FALSE;
 
@@ -936,7 +951,7 @@ class Core_Entity extends Core_ORM
 
 	/**
 	 * Insert new object data into database
-	 * @return Core_ORM
+	 * @return self
 	 */
 	public function create()
 	{
@@ -946,7 +961,7 @@ class Core_Entity extends Core_ORM
 
 	/**
 	 * Update object data into database
-	 * @return Core_ORM
+	 * @return self
 	 */
 	public function update()
 	{
@@ -990,7 +1005,8 @@ class Core_Entity extends Core_ORM
 		}
 
 		$nameColumn = $this->_nameColumn;
-		return htmlspecialchars($this->$nameColumn);
+
+		return htmlspecialchars((string) $this->$nameColumn);
 	}
 
 	/**
@@ -1009,10 +1025,10 @@ class Core_Entity extends Core_ORM
 			return $eventResult;
 		}
 
-		$text = isset($this->description) && strlen($this->description)
+		$text = isset($this->description) && $this->description != ''
 			? $this->description
 			: (
-				isset($this->text) && strlen($this->text)
+				isset($this->text) && $this->text != ''
 					? $this->text
 					: NULL
 			);

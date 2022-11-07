@@ -106,11 +106,11 @@ class Shop_Seller_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		// Добавляем новое поле типа файл
 		$oImageField = Admin_Form_Entity::factory('File');
 
-		$oLargeFilePath = is_file($this->_object->getLargeFilePath())
+		$oLargeFilePath = $this->_object->image_large != '' && is_file($this->_object->getLargeFilePath())
 			? $this->_object->getLargeFileHref()
 			: '';
 
-		$oSmallFilePath = is_file($this->_object->getSmallFilePath())
+		$oSmallFilePath = $this->_object->image_small != '' && is_file($this->_object->getSmallFilePath())
 			? $this->_object->getSmallFileHref()
 			: '';
 

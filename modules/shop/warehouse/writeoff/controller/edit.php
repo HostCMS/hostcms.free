@@ -238,10 +238,10 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 					$itemTable .= '
 						<tr id="' . $oShop_Warehouse_Writeoff_Item->id . '" data-item-id="' . $oShop_Item->id . '">
 							<td class="index">' . ++$index . '</td>
-							<td>' . htmlspecialchars($oShop_Item->name) . $externalLink . '</td>
-							<td>' . htmlspecialchars($oShop_Item->Shop_Measure->name) . '</td>
-							<td><span class="price">' . htmlspecialchars($oShop_Warehouse_Writeoff_Item->price) . '</span></td>
-							<td>' . htmlspecialchars($oShop_Item->Shop_Currency->sign) . '</td>
+							<td>' . htmlspecialchars((string) $oShop_Item->name) . $externalLink . '</td>
+							<td>' . htmlspecialchars((string) $oShop_Item->Shop_Measure->name) . '</td>
+							<td><span class="price">' . htmlspecialchars((string) $oShop_Warehouse_Writeoff_Item->price) . '</span></td>
+							<td>' . htmlspecialchars((string) $oShop_Item->Shop_Currency->sign) . '</td>
 							<td width="80"><input class="set-item-count form-control" name="shop_item_quantity_' . $oShop_Warehouse_Writeoff_Item->id . '" value="' . $oShop_Warehouse_Writeoff_Item->count . '" /></td>
 							<td><span class="calc-warehouse-sum">' . $sum . '</span></td>
 							<td><a class="delete-associated-item" onclick="mainFormLocker.unlock(); res = confirm(\'' . Core::_('Shop_Warehouse_Writeoff.delete_dialog') . '\'); if (res) { var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next); ' . $onclick . ' } return res;"><i class="fa fa-times-circle darkorange"></i></a></td>

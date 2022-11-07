@@ -168,7 +168,7 @@ if (defined('SHOP_ORDER_CARD_XSL'))
 else
 {
 	$oShop_Order_Currency = $oShop_Order->Shop_Currency;
-	
+
 	?>
 	<!-- <p style="margin-bottom: 40px"><img src="/admin/images/logo.gif" alt="(^) HostCMS" title="HostCMS"></p> -->
 
@@ -322,7 +322,7 @@ else
 			</td>
 			<td valign="top">
 				<b>
-					<?php echo htmlspecialchars($oShop_Order->Siteuser->login) . " (" . Core::_("Shop_Order.order_card_site_user_id") . " " . $oShop_Order->Siteuser->id . ")"?>
+					<?php echo htmlspecialchars((string) $oShop_Order->Siteuser->login) . " (" . Core::_("Shop_Order.order_card_site_user_id") . " " . $oShop_Order->Siteuser->id . ")"?>
 				</b>
 			</td>
 		</tr>
@@ -442,13 +442,13 @@ else
 				?>
 			</td>
 			<td class="td_main_2">
-			<?php echo htmlspecialchars($oShop_Order_Item->marking)?>
+			<?php echo htmlspecialchars((string) $oShop_Order_Item->marking)?>
 			</td>
 			<td class="td_main_2">
-			<?php echo htmlspecialchars($oShop_Order_Item->Shop_Item->Shop_Measure->name)?>
+			<?php echo htmlspecialchars((string) $oShop_Order_Item->Shop_Item->Shop_Measure->name)?>
 			</td>
 			<td style="text-align: center"  class="td_main_2">
-			<?php echo htmlspecialchars($oShop_Order_Item->Shop_Warehouse->name)?><br/><?php echo htmlspecialchars($oShop_Order_Item->getCellName())?>
+			<?php echo htmlspecialchars((string) $oShop_Order_Item->Shop_Warehouse->name)?><br/><?php echo htmlspecialchars((string) $oShop_Order_Item->getCellName())?>
 			</td>
 			<td class="td_main_2">
 			<?php echo $oShop_Order_Currency->format(Shop_Controller::instance()->round($oShop_Order_Item->price), 2, '.', '')?>
@@ -495,7 +495,7 @@ else
 			<?php echo Core::_("Shop_Order.order_card_system_of_pay") . ": "?>
 		</td>
 		<td valign="top">
-			<b><?php echo htmlspecialchars($oShop_Order->Shop_Payment_System->name)?></b>
+			<b><?php echo htmlspecialchars((string) $oShop_Order->Shop_Payment_System->name)?></b>
 		</td>
 	</tr>
 	<tr>

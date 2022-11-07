@@ -534,7 +534,7 @@ class Structure_Model extends Core_Entity
 	 * Get active structure node by path and parent_id
 	 * @param string $path
 	 * @param int $parent_id
-	 * @return
+	 * @return int|NULL
 	 */
 	public function getByPathAndParentId($path, $parent_id)
 	{
@@ -569,7 +569,7 @@ class Structure_Model extends Core_Entity
 				return $this->path;
 			}
 
-			$path = rawurlencode($this->path) . '/';
+			$path = rawurlencode((string) $this->path) . '/';
 
 			$path = $this->parent_id == 0
 				? '/' . $path
@@ -774,7 +774,11 @@ class Structure_Model extends Core_Entity
 	 */
 	public function showXmlProperties($showXmlProperties = TRUE, $xmlSortPropertiesValues = TRUE)
 	{
-		$this->_showXmlProperties = $showXmlProperties;
+		// $this->_showXmlProperties = $showXmlProperties;
+
+		$this->_showXmlProperties = is_array($showXmlProperties)
+			? array_combine($showXmlProperties, $showXmlProperties)
+			: $showXmlProperties;
 
 		$this->_xmlSortPropertiesValues = $xmlSortPropertiesValues;
 
@@ -824,7 +828,19 @@ class Structure_Model extends Core_Entity
 
 		if ($this->_showXmlProperties)
 		{
-			$this->addEntities($this->getPropertyValues(TRUE, array(), $this->_xmlSortPropertiesValues));
+			// $this->addEntities($this->getPropertyValues(TRUE, array(), $this->_xmlSortPropertiesValues));
+
+			$aProperty_Values = is_array($this->_showXmlProperties)
+				? Property_Controller_Value::getPropertiesValues($this->_showXmlProperties, $this->id, FALSE, $this->_xmlSortPropertiesValues)
+				: $this->getPropertyValues(TRUE, array(), $this->_xmlSortPropertiesValues);
+
+			foreach ($aProperty_Values as $oProperty_Value)
+			{
+				$this->_preparePropertyValue($oProperty_Value);
+			}
+
+			// Add all values
+			$this->addEntities($aProperty_Values);
 		}
 
 		return $this;

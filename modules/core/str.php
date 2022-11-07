@@ -62,6 +62,11 @@ class Core_Str
 	 */
 	static public function deleteIllegalCharacters($string)
 	{
+		if (!is_string($string))
+		{
+			return (string) $string;
+		}
+
 		$string = strtr($string, self::getXmlIllegalCharacters());
 		return @iconv("UTF-8", "UTF-8//IGNORE//TRANSLIT",
 			//str_replace(self::getXmlIllegalCharacters(), '', $string)
@@ -424,6 +429,8 @@ class Core_Str
 	 */
 	static public function getHashes($text, $param = array())
 	{
+		$text = strval($text);
+
 		$aConfig = Core::$config->get('core_str', array()) + array(
 			'stopWords' => '/ (и|в|во|не|что|он|на|я|с|со|как|а|то|все|всё|она|так|его|но|да|ты|к|у|же|вы|за|бы|по|только|её|ее|мне|было|вот|от|меня|ещё|еще|нет|о|из|то|ему|теперь|когда|даже|ну|вдруг|ли|если|уже|или|ни|быть|был|него|до|вас|нибудь|опять|уж|вам|сказал|ведь|там|потом|себя|ничего|ей|может|они|тут|где|есть|надо|ней|для|мы|тебя|их|чем|была|сам|чтоб|без|будто|человек|чего|раз|тоже|себе|под|будет|ж|тогда|кто|этот|говорил|того|потому|этого|какой|совсем|ним|здесь|этом|один|почти|мой|тем|чтобы|нее|кажется|сейчас|были|куда|зачем|сказать|всех|никогда|сегодня|можно|при|наконец|два|об|другой|хоть|после|над|больше|тот|через|эти|нас|про|всего|них|какая|много|разве|сказала|три|эту|моя|впрочем|хорошо|свою|этой|перед|иногда|лучше|чуть|том|нельзя|такой|им|более|всегда|конечно|всю|между) /u',
 			// 0xC2A0 (C2 A0) - NO-BREAK SPACE, http://www.utf8-chartable.de/
@@ -562,6 +569,8 @@ class Core_Str
 	 */
 	static public function declension($int, $word, $aEndings)
 	{
+		$int = intval($int);
+
 		$lastInt = $int % 100;
 
 		$lastInt = $lastInt > 10 && $lastInt < 20
@@ -720,7 +729,6 @@ class Core_Str
 		return self::ltrimUri(self::rtrimUri($uri));
 	}
 
-
 	/**
 	 * Cut first slash
 	 * @param string URI
@@ -788,7 +796,7 @@ class Core_Str
 		$crc32 = abs(Core::crc32($id));
 
 		return self::rgb2hex(
-			Core_Array::randomShuffle(array($crc32 % ($maxColor / 4), $maxColor, $crc32 % $maxColor), $id % 6)
+			Core_Array::randomShuffle(array($crc32 % intval($maxColor / 4), $maxColor, $crc32 % $maxColor), $id % 6)
 		);
 	}
 
@@ -1042,7 +1050,7 @@ class Core_Str
 
 	static public function getInitials($fullName, $length = 2)
 	{
-		$fullName = mb_strtoupper(trim($fullName));
+		$fullName = mb_strtoupper(trim((string) $fullName));
 		$aFullName = explode(' ', $fullName);
 
 		$initials = array_reduce(str_replace(array('*', '"'), '', $aFullName), array('Core_Str', '_getInitialsReduce'));
@@ -1054,6 +1062,12 @@ class Core_Str
 		return $initials;
 	}
 
+	/**
+	 * Get initial reduce
+	 * @param string $str
+	 * @param string $item
+	 * @return string
+	 */
 	static protected function _getInitialsReduce($str, $item)
 	{
 		return $str . mb_substr($item, 0, 1);
@@ -1326,14 +1340,14 @@ class Core_Str
 							break;
 						}
 
-						$tmp_int = $t + (($q - $t) % (36 - $t));
+						$tmp_int = $t + (intval($q - $t) % intval(36 - $t));
 
 						$aOutput[] = chr($tmp_int + 22 + 75 * ($tmp_int < 26));
 
 						$q = ($q - $t) / (36 - $t);
 					}
 
-					$aOutput[] = chr($q + 22 + 75 * ($q < 26));
+					$aOutput[] = chr(intval($q + 22 + 75 * ($q < 26)));
 
 					$delta = $iPrev == $iBasicSymbols ? $delta / 700 : $delta >> 1;
 
@@ -1362,6 +1376,10 @@ class Core_Str
 
 	/**
 	 * for idnToAscii()
+	 * @param string $char
+	 * @param integer $index
+	 * @param int $iBytes
+	 * @return boolean
 	 */
 	static protected function _idnOrd($char, $index = 0, &$iBytes = NULL)
 	{
@@ -1601,6 +1619,6 @@ class Core_Str
 	 */
 	public static function hideZeros($str)
 	{
-		return str_replace(self::getDecimalSeparator() . '00', '', $str);
+		return str_replace(array(self::getDecimalSeparator() . '00', self::getDecimalSeparator() . '000'), '', strval($str));
 	}
 }

@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Sql
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Sql_Table_Dataset extends Admin_Form_Dataset
 {
@@ -99,7 +99,8 @@ class Sql_Table_Dataset extends Admin_Form_Dataset
 			}
 		}
 
-		return NULL;
+		// return NULL;
+		return $this->getEntity();
 	}
 
 	/**

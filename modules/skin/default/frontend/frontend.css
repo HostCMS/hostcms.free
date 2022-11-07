@@ -1,26 +1,163 @@
 @charset "UTF-8";
+.hostcmsInformationPanel { box-sizing: border-box }
+.hostcmsInformationPanel *::after, .hostcmsInformationPanel *::before { box-sizing: border-box }
+.hostcmsInformationPanel {
+	position: fixed;
+	right: 0;
+	width: 100%;
+	/* background-color: #fff; */
+	/* opacity: .9; */
+	background-color: rgba(255,255,255,.95);
+	box-shadow: 0 0 5px rgba(100, 100, 100, 0.60);
+	z-index: 10002;
+	font-size: 16px;
+	display: flex;
+	align-items: center;
+	/* border: 1px solid red; */
+	transition: all ease .3s;
+}
+.hostcmsInformationPanel.opened {
+	top: 0;
+}
+.hostcmsInformationPanel.closed {
+	top: -35px;
+}
+.hostcmsInformationPanel.closed:hover {
+	top: 0;
+	cursor: pointer;
+}
+.hostcmsInformationPanel .hostcmsSubPanel {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 40px;
+	flex-grow: 1;
+}
+.hostcmsInformationPanel .hostcmsInformationPanelLeft, .hostcmsInformationPanel .hostcmsInformationPanelRight { width: 100px; }
+.hostcmsInformationPanel .hostcmsInformationPanelRight { margin-right: 10px; }
+.hostcmsInformationPanel a {
+	color: #777;
+	padding: 5px;
+	border-radius: 5px;
+	margin-right: 10px;
+}
+.hostcmsInformationPanel a:hover {
+	/* color: #000; */
+	cursor: pointer;
+	background-color: #f5f5f5;
+}
+.hostcmsInformationPanel i.fa-lock, .hostcmsInformationPanel i.active-xml { color: #000; }
+.hostcmsInformationPanel i.fa-lock:hover, .hostcmsInformationPanel i.active-xml:hover {
+	color: #777;
+}
+.hostcmsInformationPanel i.fa-code.active-xml { text-decoration: underline; text-underline-offset: 5px; }
+.hostcmsInformationPanel i.fa-code { color: #1d99e3 !important; }
+.hostcmsInformationPanel i.fa-database { color: #a161d7 !important; }
+.hostcmsInformationPanel i.fa-chart-simple { color: #ff7f62 !important; }
+.hostcmsInformationPanel i.fa-sitemap { color: #54bb45  !important; }
+.hostcmsInformationPanel i.fa-file-lines { color: #1dbee3 !important; }
+.hostcmsInformationPanel i.fa-table-cells { color: #fdd456 !important; }
+.hostcmsInformationPanel i.fa-screwdriver-wrench { color: #777 !important; }
+.hostcmsInformationPanel i.fa-newspaper { color: #1dbee3 !important; }
+.hostcmsInformationPanel i.fa-cart-shopping { color: #1dbee3 !important; }
 
+/* .hostcmsInformationPanel i.fa-lock-open { color: #ccc; }
+.hostcmsInformationPanel i.fa-lock-open:hover {
+	color: #000;
+} */
+
+--------------------------------------------------------------------------
 /* Панель в клиентском разделе */
 .hostcmsPanel *, .hostcmsSection, .hostcmsSection * { box-sizing: border-box }
 .hostcmsPanel *::after, .hostcmsPanel *::before { box-sizing: border-box }
-.hostcmsPanel{ display: block !important; padding: 10px; box-shadow: 0 0 5px rgba(100, 100, 100, 0.60); border-radius: 10px; zoom: 1; z-index: 10001; position: absolute; margin-top: 5px; background-color: #FFF; cursor: move; opacity: .9; line-height: normal; font-family: Arial,sans-serif; font-size: 10pt; user-select: none }
+/* .hostcmsPanel{ display: block !important; padding: 10px; box-shadow: 0 0 5px rgba(100, 100, 100, 0.60); border-radius: 10px; zoom: 1; z-index: 10001; position: absolute; margin-top: 5px; background-color: #FFF; cursor: move; opacity: .9; line-height: normal; font-family: Arial,sans-serif; font-size: 10pt; user-select: none } */
+.hostcmsPanel {
+	display: block !important;
+	padding: 7px 10px;
+	box-shadow: 0 0 4px rgba(0, 0, 0, .4);
+	border-radius: 5px;
+	/* zoom: 1;  */
+	z-index: 10001;
+	position: absolute;
+	/* margin-top: 5px;  */
+	/* background-color: #FFF;  */
+	background-color: rgba(255,255,255,.97);
+	cursor: move;
+	/* opacity: .9;  */
+	line-height: normal;
+	font-family: Arial,sans-serif;
+	font-size: 14px;
+	user-select: none;
+	/* opacity: .5; */
+}
+/* .hostcmsPanel:hover { opacity: 1; } */
 .hostcmsPanel img { vertical-align: baseline; display: inline-block !important; }
 .hostcmsPanel a:link,.hostcmsPanel a:visited,.hostcmsPanel a:hover{color:#0070BD;text-decoration:underline}
-.hostcmsPanel .hostcmsSubPanel{ margin-bottom: -4px; white-space: nowrap}
-.hostcmsPanel .hostcmsSubPanel a { display: inline !important; }
-.hostcmsPanel .hostcmsSubPanel a img {margin: 0 2px !important; cursor: pointer; max-width: 16px !important; max-height: 16px !important }
+.hostcmsPanel .hostcmsSubPanel {
+	/* margin-bottom: -4px; */
+	white-space: nowrap;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+a.m0 { margin-right: 0 !important; }
+/* .hostcmsPanel .hostcmsSubPanel a { display: inline !important; } */
+.hostcmsPanel .hostcmsSubPanel a { display: flex !important; align-items: center; text-decoration: none; margin-right: 5px; padding: 5px; border-radius: 5px; }
+.hostcmsPanel .hostcmsSubPanel a:hover { background-color: #f5f5f5 }
+.hostcmsPanel .hostcmsSubPanel a i { color: #777 }
+.hostcmsPanel .hostcmsSubPanel a i:hover { color: #000; cursor: pointer; }
 .hostcmsTopPanel{left:50%;margin-left:-110px;top:0}
 /* Панель для XSL */
-.hostcmsXsl {margin: 3px 0}
-.hostcmsXsl div.hostcmsButton {border-top: 1px solid #DFDDD8; border-right: 1px solid #D1D0CB;
-	border-bottom: 1px solid #ACAAA6; border-left: 1px solid #D1D0CB;
-	color: #5A6973; font-size: 8pt; text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.7);
-	border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px;
-	background: -moz-linear-gradient(90deg, #EFEEEA, #F6F5F3) repeat scroll 0 0 transparent;
-	background: -webkit-gradient(linear, center top, center bottom, from(#EFEEEA), to(#F6F5F3));
-	box-shadow: 0 1px 0 #EFEEEA; display: inline-block; margin: -1px 2px 0; padding: 0 3px 0 2px; vertical-align: top; height: 17px;
+/* .hostcmsSubPanel {margin: 3px 0} */
+.hostcmsSubPanel div.hostcmsButton {
+	display: flex;
+	align-items: center;
+	padding: 0 5px;
 }
-.hostcmsXsl div.hostcmsButton div {margin-top: 1px; font-weight: bold; vertical-align: top; display: inline-block; }
+.hostcmsSubPanel div.hostcmsButton > div {
+	border-radius: 3px;
+	color: #777;
+	/* border-top: 1px solid #DFDDD8; border-right: 1px solid #D1D0CB; */
+	/* border-bottom: 1px solid #ACAAA6; border-left: 1px solid #D1D0CB; */
+	/* color: #5A6973;  */
+	font-size: 8pt; /*text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.7);*/
+	/* border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; */
+	background: -moz-linear-gradient(180deg, #f1f1f1, #f9f9f9) repeat scroll 0 0 transparent;
+	background: -webkit-gradient(linear, center top, center bottom, from(#f1f1f1), to(#f9f9f9));
+	/* box-shadow: 0 1px 0 #EFEEEA;  */
+	display: inline-block;
+	/*margin: -1px 2px 0;*/
+	padding: 3px 4px;
+	vertical-align: top;
+	/* height: 17px; */
+	/* background: #eaeff0; */
+	border: none !important;
+	box-shadow: none !important;
+	/* margin-left: 10px;	 */
+}
+.hostcmsPanel i {
+  width: auto !important;
+  height: auto !important;
+  border: 0 !important;
+  background: none  !important;
+}
+
+.hostcmsSubPanel i.fa-trash-can { color: #f55555 !important; }
+.hostcmsSubPanel i.fa-file-circle-plus { color: #54bb45 !important; }
+.hostcmsSubPanel i.fa-pen.item { color: #54bb45 !important; }
+.hostcmsSubPanel i.fa-sitemap { color: #54bb45 !important; }
+.hostcmsSubPanel i.fa-folder-plus { color: #ffbc40 !important; }
+.hostcmsSubPanel i.fa-folder { color: #ffbc40 !important; }
+.hostcmsSubPanel i.fa-pen.folder { color: #ffbc40 !important; }
+.hostcmsSubPanel i.fa-comments { color: #1dbee3 !important; }
+.hostcmsSubPanel i.fa-copy { color: #a161d7 !important; }
+
+/* .hostcmsSubPanel div.hostcmsButton i { margin-right: 3px; } */
+/* .hostcmsSubPanel div.hostcmsButton:not(:last-child) { margin-right: 10px; } */
+.hostcmsSubPanel div.hostcmsButton div {/*margin-top: 2px;*/ font-weight: bold; vertical-align: top; display: inline-block; }
+
+.hostcmsSubPanel #hostcmsEditXsl { color: #47a8e3 }
+.hostcmsSubPanel #hostcmsShowXml { color: #f55555 }
 
 ul.tpl-template-variables { list-style-type: none; padding-left: 20px;}
 ul.tpl-template-variables span.bold { font-weight: bold; }
@@ -30,22 +167,31 @@ ul.tpl-template-variables span.bold { font-weight: bold; }
 .hostcmsWindow, .hostcmsWindow textarea {font-family:Arial,Verdana,'MS Sans Serif'; line-height: normal }
 .hostcmsWindow iframe { box-sizing: border-box; width: 100%; height: 100%; border: 0 }
 .hostcmsWindow .hostcmsModalWindow { line-height: 110%; font-size: 10pt; color:#000; padding: 5px 10px }
-.hostcmsWindow .hostcmsModalWindow ul { margin: 0; padding: 0 0 0 3em }
-.hostcmsWindow .hostcmsModalWindow ul li {list-style: initial; width: initial; }
-.hostcmsWindow textarea { box-sizing: border-box; resize: none; white-space:pre; font-size: 10pt !important; margin: 0; padding: 2px; overflow: auto; width: 99%; height: 100%; border: 0; line-height: 1em !important }
+.hostcmsWindow .hostcmsModalWindow ul { margin: 0; padding: 0 0 0 3em; font-size: inherit; }
+.hostcmsWindow .hostcmsModalWindow ul li {list-style: initial; width: initial; font-size: inherit; }
+.hostcmsWindow textarea { box-sizing: border-box; resize: none; white-space:pre-wrap; font-size: 13px !important; margin: 0; padding: 2px; overflow: auto; width: 99%; height: 100%; border: 0; line-height: 1em !important }
 
 /* SQL */
 #sqlWindow, #debugWindow { overflow: auto !important; }
-.hostcmsWindow .sql_q,.hostcmsWindow .sql_qd{font-size:8pt;background-color:#F6F7EF;border:1px dashed #98D800;white-space:pre-wrap;color:#000;padding:5px}
-.hostcmsWindow .sql_qd{background-color:#F8EEE7;border:1px dashed #D80000}
-.hostcmsWindow .sql_t,.hostcmsWindow .sql_t a,.hostcmsWindow .sql_t a:link,.hostcmsWindow .sql_t a:hover,.hostcmsWindow .sql_t a:visited{font-size:8pt;color:#555; cursor: pointer}
-.hostcmsWindow .sql_db{font-size:8pt;color:#777;white-space:pre-wrap;display:none}
-.hostcmsWindow table.sql_explain{empty-cells:show;margin:1px}
-.hostcmsWindow table.sql_explain,.hostcmsWindow table.sql_explain td{border:1px solid #AAA;border-collapse:collapse}
-.hostcmsWindow table.sql_explain td{font-size:8pt;color:#333;padding:0 2px}
+.hostcmsWindow .sqlQuery,
+.hostcmsWindow .sqlQueryDuplicate {font-size:8pt;background-color:#F6F7EF;border:1px solid #dfe8a8;white-space:pre-wrap;color:#000;padding:5px;border-radius:5px;}
+.hostcmsWindow .sqlQueryDuplicate {background-color:#F8EEE7;border:1px solid #EEC7C7}
+
+.hostcmsWindow .sqlDesc,
+	.hostcmsWindow .sqlDesc a,
+	.hostcmsWindow .sqlDesc a:link,
+	.hostcmsWindow .sqlDesc a:hover,
+	.hostcmsWindow .sqlDesc a:visited{font-size:8pt;color:#555; margin-bottom: 5px;}
+
+.hostcmsWindow .sqlDesc .sqlShowStack { cursor: pointer; }
+.hostcmsWindow .sqlStack {font-size:8pt;color:#777;white-space:pre-wrap;padding: 1px;display:none}
+.hostcmsWindow table.sqlExplain{empty-cells:show;margin:1px}
+.hostcmsWindow table.sqlExplain,.hostcmsWindow table.sqlExplain td{border:1px solid #AAA;border-collapse:collapse}
+.hostcmsWindow table.sqlExplain td{font-size:8pt;color:#333;padding:0 2px}
 
 /* Editable */
-.hostcmsEditable {border: 1px dashed #E83531 !important; border-radius: 5px !important; box-shadow: 1px 1px 1px 0px rgba(100, 100, 100, 0.1) !important; cursor: pointer !important }
+.hostcmsEditable {border: 1px dashed #E83531 !important; border-radius: 3px !important; box-shadow: 1px 1px 1px 0px rgba(100, 100, 100, 0.1) !important; cursor: pointer !important }
+.hostcmsEditableInput { border: 1px dashed #aaa !important; transition: none !important; box-shadow: none !important; padding: initial !important; border-radius: 3px !important; color: #000 !important; }
 
 /*! jQuery UI - v1.11.4
 * http://jqueryui.com
@@ -379,20 +525,20 @@ button.backendBody .ui-button::-moz-focus-inner {
 }
 
 /* -- Added -- */
-.backendBody .ui-dialog {background-color: #FFF; border: 1px solid #D8D8D8; border-radius: 9px; box-shadow: 0 2px 2px rgba(204, 204, 204, 0.7); padding: 0; z-index: 11000 }
+.backendBody .ui-dialog {background-color: #FFF; border: 1px solid #D8D8D8; border-radius: 5px; box-shadow: 0 2px 2px rgba(204, 204, 204, 0.7); padding: 0; z-index: 11000 }
 .backendBody .ui-dialog-content-transparent{ background: #FFF; padding-top: 2px; background: url("images/transparent_bg_white.png") repeat scroll 0 0 transparent
 }
 .backendBody .ui-dialog .ui-dialog-titlebar { box-sizing: border-box; user-select: none; padding: .4em .5em !important;
-	background: #F2F2F2 !important; font-size: 10pt !important;
+	background: none !important; font-size: 10pt !important;
 	font-family: Arial, Verdana, 'MS Sans Serif', sans-serif !important;
 	border-width: 0px 0px 1px 0px  !important; border-color: #F2F2F2  !important;
-	text-align: center  !important; border-radius: 9px 9px 0 0  !important; outline: 0;
+	text-align: center  !important; border-radius: 5px 5px 0 0  !important; outline: 0;
 }
 .backendBody .ui-dialog .ui-dialog-title { background: initial !important; display: initial !important; text-transform: none !important;
-	font-size: inherit !important; color: #000 !important; font-weight: bold !important;
-	margin: .1em 16px .2em 0 !important; text-shadow: 1px 1px 0 rgba(255,255,255,0.8) !important; white-space: nowrap
+	font-size: 12px !important; color: #000 !important; font-weight: bold !important;
+	/*margin: .1em 16px .2em 0 !important;*/ /*text-shadow: 1px 1px 0 rgba(255,255,255,0.8) !important;*/ white-space: nowrap; text-align: left;
 }
-.backendBody .ui-dialog .ui-dialog-content { /*display: initial !important;*/ box-sizing: border-box; background: #FFF !important; border-radius: 0 0 9px 9px !important; padding: 0 0 0 0 !important; overflow: hidden !important; width: 100% !important; }
+.backendBody .ui-dialog .ui-dialog-content { /*display: initial !important;*/ box-sizing: border-box; background: #FFF !important; border-radius: 0 0 5px 5px !important; padding: 0 0 0 0 !important; overflow: hidden !important; width: 100% !important; scrollbar-width: thin; }
 
 .backendBody .ui-dialog .ui-dialog-titlebar .ui-button-icon-only { background: none; border: 0; outline: 0 }
 .backendBody .ui-dialog .ui-dialog-content iframe { box-sizing: border-box; }
@@ -400,7 +546,7 @@ button.backendBody .ui-button::-moz-focus-inner {
 .backendBody .ui-draggable-dragging .ui-dialog-content {display: none !important}
 
 /* states and images */
-.backendBody .ui-icon { width: 16px; height: 16px; background-image: url(images/ui-icons_222222_256x240.png) !important }
+.backendBody .ui-icon { width: 16px; height: 16px; background-image: url(images/ui-icons_777777_256x240.png) !important }
 .backendBody .ui-icon-closethick { background-position: -96px -128px; }
 
 /* Sections */
@@ -420,7 +566,7 @@ button.backendBody .ui-button::-moz-focus-inner {
 .backendBody .hostcmsSection .hostcmsSectionPanel, .backendBody .hostcmsSection .hostcmsSectionWidgetPanel {
 	display: block !important;
 	background: rgba(255, 255, 255, 0.85) none repeat scroll 0 0;
-	border-radius: 8px;
+	border-radius: 5px;
 	box-shadow: 0 0 5px rgba(100, 100, 100, 0.6);
 	left: -15px;
 	padding: 5px;
@@ -430,7 +576,16 @@ button.backendBody .ui-button::-moz-focus-inner {
 	font-size: 10pt;
 	line-height: 1em;
 }
-.backendBody .hostcmsSection .hostcmsSectionPanel div, .backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel div { padding: 5px 5px 0 5px; }
+
+.backendBody .hostcmsSection .hostcmsSectionWidgetPanel {
+	position: absolute;
+	right: 25px;
+	top: 0;
+	left: unset;
+	width: max-content;
+}
+
+.backendBody .hostcmsSection .hostcmsSectionPanel div, .backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel div { padding: 5px; }
 .backendBody .hostcmsSection .hostcmsSectionPanel i, .backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel i { color: #5a636a; font-size: 14px; }
 .backendBody .hostcmsSection .hostcmsSectionPanel .draggable-indicator, .backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel .draggable-indicator {
 	width: 16px;
@@ -445,20 +600,22 @@ button.backendBody .ui-button::-moz-focus-inner {
 	fill: #ccc;
 }
 .backendBody .hostcmsSection .hostcmsSectionPanel .fa-plus { color: #5eba16 }
-.backendBody .hostcmsSection .hostcmsSectionPanel .fa-cog, .backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel .fa-cog, .backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel .fa-lightbulb-o { color: #a2a2a2 }
-.backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel .fa-times { color: #f55555 }
-.backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel .fa-lightbulb-o.active { color: #fabb00 }
+.backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel .fa-lightbulb { color: #a2a2a2 }
+.backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel .fa-trash-can { color: #f55555 }
+.backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel .fa-lightbulb.active { color: #fabb00 }
+.backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel .fa-lightbulb.active { color: #fabb00 }
+.backendBody .hostcmsSection .hostcmsSectionPanel .fa-gear, .backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel .fa-gear { color: #cae648 !important; }
 
 /* Section Widgets */
 .backendBody .hostcmsSection .hostcmsSectionWidget { border: 1px dashed #ccc; }
 .backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel span { cursor: pointer }
 
 .backendBody .hostcmsSection .hostcmsSectionWidget .drag-handle {
- display: block !important;
+	display: block !important;
 	background-color: #ccc;
- position: absolute;
- right: 0;
- top: 0;
+	position: absolute;
+	right: 0;
+	top: 0;
 	cursor: grab;
 	background: rgba(255, 255, 255, 0.9) none repeat scroll 0 0;
 	border-radius: 5px;
@@ -808,5 +965,15 @@ button.backendBody .ui-button::-moz-focus-inner {
 }
 .backendBody.bodyMaximize { overflow: hidden; }
 .backendBody.bodyMaximize #debugWindow, .backendBody.bodyMaximize #sqlWindow { height: 100vh !important; }
-.xmlWindow textarea { width: 100% !important; padding: 5px; outline: 0; }
+.xmlWindow textarea { width: 100% !important; padding: 5px; outline: 0; scrollbar-width: thin; color: #555; }
 .hostcms6 .ui-dialog-titlebar button { outline: 0; }
+
+@media (max-width: 566.99px)
+{
+	.hostcmsInformationPanel { font-size: 12px; }
+	.hostcmsInformationPanel .hostcmsInformationPanelLeft { width: 40px; }
+}
+@media (max-width: 359.99px)
+{
+	.hostcmsInformationPanel .hostcmsInformationPanelLeft { width: 0; }
+}

@@ -52,6 +52,9 @@ class Crm_Project_Entity_Dataset extends Admin_Form_Dataset
 		return Core_QueryBuilder::select()->getFoundRows();
 	}
 
+	/**
+	 * Load items
+	 */
 	protected function _loadItems()
 	{
 		$oQB = Core_QueryBuilder::select(array(2, 'type'), 'crm_notes.id', 'datetime')

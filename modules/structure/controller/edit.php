@@ -254,9 +254,15 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$aDocumentForDir = array(' … ');
 		// intval() because $oDocument->document_dir_id can be NULL
-		$aDocuments = Core_Entity::factory('Document_Dir', intval($oDocument->document_dir_id))
-			->Documents->getBySiteId($this->_object->site_id);
 
+		$oDocuments = Core_Entity::factory('Document_Dir', intval($oDocument->document_dir_id))->Documents;
+		$oDocuments->queryBuilder()
+			->select('id', 'name')
+			->where('documents.site_id', '=', $this->_object->site_id)
+			->clearOrderBy()
+			->orderBy('documents.name');
+
+		$aDocuments = $oDocuments->findAll(FALSE);
 		foreach ($aDocuments as $oTmpDocument)
 		{
 			$aDocumentForDir[$oTmpDocument->id] = $oTmpDocument->name;

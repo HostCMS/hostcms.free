@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Buttons extends Skin_Default_Admin_Form_Entity_Buttons {
 	/**
@@ -28,11 +28,10 @@ class Skin_Bootstrap_Admin_Form_Entity_Buttons extends Skin_Default_Admin_Form_E
 			// Указываем таймаут для узлов структуры (подгрузка xsl)
 			setTimeout(function() {
 				$form.on('keyup change paste', ':input', function(e) { mainFormLocker.lock(e) });
-				//$form.find(':hidden').on('keyup change paste', function(e) { mainFormLocker.lock(e) });
-				//$form.find('input[type="hidden"]').on('change', function(e) { mainFormLocker.lock(e) });
+				/*$form.find(':hidden').on('keyup change paste', function(e) { mainFormLocker.lock(e) });*/
 				$form.find('input.hasDatetimepicker').parent().on('dp.change', function(e) { mainFormLocker.lock(e) });
-				
-				if ($form.data('adminformid'))
+
+				if ($form.data('adminformid') && $form.data('autosave'))
 				{
 					$form.on('keyup change paste', ':input', function(e) { mainFormAutosave.changed($form, e, '<?php echo $windowId?>') });
 					$form.find('input.hasDatetimepicker').parent().on('dp.change', function(e) { mainFormAutosave.changed($form, e, '<?php echo $windowId?>') });

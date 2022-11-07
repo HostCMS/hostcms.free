@@ -33,7 +33,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 	/**
 	 * Current language in administrator's center
-	 * @var string
+	 * @var object
 	 */
 	protected $_Admin_Language = NULL;
 
@@ -171,9 +171,15 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	 */
 	public function jQueryEscape($str)
 	{
-		return str_replace('%', '\\%', $str);
+		return str_replace(array('%', "'"), array('\\%', "\\'"), strval($str));
 	}
 
+	/**
+	 * Add view
+	 * @param string $name
+	 * @param string $className
+	 * @return self
+	 */
 	public function addView($name, $className = NULL)
 	{
 		$viewList = $this->viewList;
@@ -200,6 +206,10 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	 */
 	protected $_oAdmin_Form_Setting = NULL;
 
+	/**
+	 * Allowed object properties
+	 * @var array
+	 */
 	protected $_allowedProperties = array(
 		//'request', // Нельзя, т.к. к request используется прямой доступ в различных index.php
 		// Page title <h1>
@@ -639,11 +649,19 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		return $this;
 	}
 
+	/**
+	 * Get module
+	 * @return object
+	 */
 	public function getModule()
 	{
 		return $this->module;
 	}
 
+	/**
+	 * Get sorting field
+	 * @return Admin_Form_Field_Model
+	 */
 	public function getSortingField()
 	{
 		// Set sorting field
@@ -691,6 +709,10 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		$this->path($_SERVER['PHP_SELF']);
 	}
 
+	/**
+	 * Get filter json
+	 * @return array
+	 */
 	public function getFilterJson()
 	{
 		return $this->_oAdmin_Form_Setting->filter != ''
@@ -754,7 +776,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	 */
 	public function pageTitle($pageTitle)
 	{
-		$this->pageTitle = html_entity_decode($pageTitle);
+		$this->pageTitle = html_entity_decode((string) $pageTitle);
 		return $this;
 	}
 
@@ -1359,6 +1381,10 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 					$aData[] = $this->prepareString($fieldName);
 				}
 			}
+
+			// BOM
+			echo "\xEF\xBB\xBF";
+
 			$this->_printRow($aData);
 
 			$this->setDatasetConditions();
@@ -1579,7 +1605,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	{
 		foreach ($this->_externalReplace as $replace_key => $replace_value)
 		{
-			$subject = str_replace($replace_key, $replace_value, $subject);
+			$subject = str_replace($replace_key, strval($replace_value), $subject);
 		}
 
 		$aColumns = $oEntity->getTableColumns();
@@ -1588,7 +1614,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 			$subject = str_replace(
 				'{' . $columnName . '}',
 				$mode == 'link'
-					? htmlspecialchars($oEntity->$columnName)
+					? htmlspecialchars((string) $oEntity->$columnName)
 					: Core_Str::escapeJavascriptVariable($this->jQueryEscape($oEntity->$columnName)),
 				$subject
 			);
@@ -1763,10 +1789,9 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			: $this->getWindowId()
 		);
 		$datasetKey = intval($options['datasetKey']);
-		$datasetValue = Core_Str::escapeJavascriptVariable($this->jQueryEscape($options['datasetValue']));
 
-		return "$('#{$windowId} #row_{$datasetKey}_{$datasetValue}').toggleHighlight(); "
-			. "$.adminCheckObject({objectId: 'check_{$datasetKey}_{$datasetValue}', windowId: '{$windowId}'}); "
+		return "$('#{$windowId} #row_{$datasetKey}_" . Core_Str::escapeJavascriptVariable($this->jQueryEscape($options['datasetValue'])) . "').toggleHighlight(); "
+			. "$.adminCheckObject({objectId: 'check_{$datasetKey}_" . Core_Str::escapeJavascriptVariable($options['datasetValue']) . "', windowId: '{$windowId}'}); "
 			. $this->getAdminLoadAjax($options);
 	}
 
@@ -1925,7 +1950,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		}
 
 		$additionalParams = Core_Str::escapeJavascriptVariable(
-			str_replace(array('"'), array('&quot;'), Core_Array::get($options, 'additionalParams', ''))
+			str_replace(array('"'), array('&quot;'), Core_Array::get($options, 'additionalParams', '', 'str'))
 		);
 		$aData[] = "additionalParams: '{$additionalParams}'";
 
@@ -1951,7 +1976,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		$sortingDirection = intval($sortingDirection);
 		$aData[] = "sortingDirection: '{$sortingDirection}'";
 
-		$view = Core_Array::get($options, 'view');
+		$view = Core_Array::get($options, 'view', '', 'str');
 		//is_null($view) && $view = $this->view;
 		if (strlen($view))
 		{
@@ -2043,7 +2068,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		);
 		strlen($windowId) && $aData[] = "hostcms[window]={$windowId}";
 
-		$view = Core_Array::get($options, 'view');
+		$view = Core_Array::get($options, 'view', '', 'str');
 		//is_null($view) && $view = $this->view;
 		if (strlen($view))
 		{
@@ -2117,7 +2142,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 				foreach ($checkedItems as $checkedItemId => $v1)
 				{
 					$options['additionalParams'] .= empty($options['additionalParams']) ? '' : '&';
-					$options['additionalParams'] .= 'hostcms[checked][' . intval($datasetKey) . '][' . htmlspecialchars($checkedItemId) . ']=1';
+					$options['additionalParams'] .= 'hostcms[checked][' . intval($datasetKey) . '][' . Core_Str::escapeJavascriptVariable($checkedItemId) . ']=1';
 				}
 			}
 		}
@@ -2141,6 +2166,13 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		return $fieldName;
 	}
 
+	/**
+	 * Filter input callback
+	 * @param string $value
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
+	 * @param string $filterPrefix
+	 * @param string $tabName
+	 */
 	protected function _filterCallbackInput($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
 	{
 		$value = strval($value);
@@ -2148,6 +2180,13 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		?><input type="text" name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" value="<?php echo $value?>" style="width: 100%" class="form-control input-sm" /><?php
 	}
 
+	/**
+	 * Filter checkbox callback
+	 * @param string $value
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
+	 * @param string $filterPrefix
+	 * @param string $tabName
+	 */
 	protected function _filterCallbackCheckbox($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
 	{
 		$value = intval($value);
@@ -2158,10 +2197,17 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		</select><?php
 	}
 
+	/**
+	 * Filter datetime callback
+	 * @param string $value
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
+	 * @param string $filterPrefix
+	 * @param string $tabName
+	 */
 	protected function _filterCallbackDatetime($date_from, $date_to, $oAdmin_Form_Field, $filterPrefix, $tabName)
 	{
-		$date_from = htmlspecialchars($date_from);
-		$date_to = htmlspecialchars($date_to);
+		$date_from = htmlspecialchars((string) $date_from);
+		$date_to = htmlspecialchars((string) $date_to);
 
 		$divClass = is_null($tabName) ? 'col-xs-12' : 'col-xs-6 col-sm-4';
 
@@ -2190,8 +2236,8 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 	 */
 	protected function _filterCallbackDate($date_from, $date_to, $oAdmin_Form_Field, $filterPrefix, $tabName)
 	{
-		$date_from = htmlspecialchars($date_from);
-		$date_to = htmlspecialchars($date_to);
+		$date_from = htmlspecialchars((string) $date_from);
+		$date_to = htmlspecialchars((string) $date_to);
 
 		$divClass = is_null($tabName) ? 'col-xs-12' : 'col-xs-6 col-sm-4 col-md-3';
 
@@ -2241,6 +2287,13 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		<?php
 	}
 
+	/**
+	 * Filter select callback
+	 * @param string $value
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
+	 * @param string $filterPrefix
+	 * @param string $tabName
+	 */
 	protected function _filterCallbackSelect($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
 	{
 		$value = strval($value);
@@ -2280,6 +2333,13 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			->execute();
 	}
 
+	/**
+	 * Filter user callback
+	 * @param string $value
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
+	 * @param string $filterPrefix
+	 * @param string $tabName
+	 */
 	protected function _filterCallbackUser($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
 	{
 		$iUserId = $value
@@ -2318,6 +2378,13 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		</script><?php
 	}
 
+	/**
+	 * Filter siteuser callback
+	 * @param string $value
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
+	 * @param string $filterPrefix
+	 * @param string $tabName
+	 */
 	protected function _filterCallbackSiteuser($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
 	{
 		if (Core::moduleIsActive('siteuser'))
@@ -2353,6 +2420,13 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		}
 	}
 
+	/**
+	 * Filter counterparty callback
+	 * @param string $value
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
+	 * @param string $filterPrefix
+	 * @param string $tabName
+	 */
 	protected function _filterCallbackCounterparty($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
 	{
 		$value = strval($value);
@@ -2432,7 +2506,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 	{
 		if (is_null($tabName))
 		{
-			$mValue = trim(Core_Array::get($this->request, "{$filterPrefix}{$oAdmin_Form_Field->id}"));
+			$mValue = Core_Array::get($this->request, "{$filterPrefix}{$oAdmin_Form_Field->id}", '', 'trim');
 		}
 		else
 		{
@@ -2518,12 +2592,23 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		return $this;
 	}
 
+	/**
+	 * Check is callable method
+	 * @param object $oEntity
+	 * @param string $fieldName
+	 * @return boolean
+	 */
 	public function isCallable($oEntity, $fieldName)
 	{
 		return method_exists($oEntity, $fieldName)
 			|| method_exists($oEntity, 'isCallable') && $oEntity->isCallable($fieldName);
 	}
 
+	/**
+	 * Convert %LIKE%
+	 * @param string $str
+	 * @return string
+	 */
 	public function convertLike($str)
 	{
 		return str_replace(array('*', '?'), array('%', '_'), Core_DataBase::instance()->escapeLike(trim($str)));
@@ -2783,7 +2868,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			if (count($this->_datasets) == 1)
 			{
 				reset($this->_datasets);
-				
+
 				try {
 					$oAdmin_Form_Dataset = current($this->_datasets);
 

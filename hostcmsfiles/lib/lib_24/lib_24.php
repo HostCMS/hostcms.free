@@ -817,10 +817,9 @@ if (!is_null(Core_Array::getPost('apply')))
 if (!is_null(Core_Array::getRequest('fast')))
 {
 	$Siteuser_Controller_Show->fastRegistration(TRUE);
-	$location = Core_Array::getRequest('location');
+	$location = Core_Array::getRequest('location', '', 'str');
 	!is_null($location)
 		&& strlen($location)
-		&& is_string($location)
 		&& $Siteuser_Controller_Show->location($location);
 }
 

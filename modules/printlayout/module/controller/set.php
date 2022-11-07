@@ -23,6 +23,10 @@ class Printlayout_Module_Controller_Set extends Admin_Form_Action_Controller
 		'buttonName',
 	);
 
+	/**
+	 * Printlayout id
+	 * @var mixed
+	 */
 	protected $_printlayout_id = NULL;
 
 	/**
@@ -127,7 +131,7 @@ class Printlayout_Module_Controller_Set extends Admin_Form_Action_Controller
 
 				Core_Html_Entity::factory('Script')
 					->value("$(function() {
-						$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . Core_Str::escapeJavascriptVariable($this->title) . "', AppendTo: '#{$windowId}', width: 500, height: {$iHeight}, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
+						$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . Core_Str::escapeJavascriptVariable($this->title) . "', AppendTo: '#{$windowId}', width: 500, height: {$iHeight}, className: 'printlayout-wrapper', addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
 					->execute();
 
 				$this->addMessage(ob_get_clean());
@@ -186,6 +190,10 @@ class Printlayout_Module_Controller_Set extends Admin_Form_Action_Controller
 		return $this;
 	}
 
+	/**
+	 * Get module printlayouts
+	 * @return array
+	 */
 	protected function _getModulesPrintlayouts()
 	{
 		$aResult = array();
@@ -207,6 +215,10 @@ class Printlayout_Module_Controller_Set extends Admin_Form_Action_Controller
 		return $aResult;
 	}
 
+	/**
+	 * Rows count
+	 * @var integer
+	 */
 	protected $_rowsCount = 0;
 
 	/**
@@ -275,6 +287,12 @@ class Printlayout_Module_Controller_Set extends Admin_Form_Action_Controller
 		return ob_get_clean();
 	}
 
+	/**
+	 * Get printlayout module
+	 * @param int $module_id
+	 * @param int $type
+	 * @return array|NULL
+	 */
 	protected function _getPrintlayoutModule($module_id, $type)
 	{
 		$oPrintlayout_Modules = Core_Entity::factory('Printlayout_Module');

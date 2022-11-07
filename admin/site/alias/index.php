@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -22,7 +22,7 @@ $iSiteId = intval(Core_Array::getRequest('site_id', 0));
 
 $oSite = Core_Entity::factory('Site')->find($iSiteId);
 
-$pageTitle = Core::_('Site_Alias.site_show_domen_title', $oSite->name);
+$pageTitle = Core::_('Site_Alias.site_show_domen_title', $oSite->name, FALSE);
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
@@ -40,7 +40,6 @@ $oAdminFormEntityMenus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Site_Alias.site_link_domens'))
 		->icon('fa fa-plus')
-		->img('/admin/images/add.gif')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)

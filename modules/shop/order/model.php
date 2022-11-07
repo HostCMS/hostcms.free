@@ -894,16 +894,16 @@ class Shop_Order_Model extends Core_Entity
 		$this
 			->addXmlTag('payment_datetime', $this->payment_datetime == '0000-00-00 00:00:00'
 				? $this->payment_datetime
-				: strftime($this->Shop->format_datetime, Core_Date::sql2timestamp($this->payment_datetime)))
+				: Core_Date::strftime($this->Shop->format_datetime, Core_Date::sql2timestamp($this->payment_datetime)))
 			->addXmlTag('status_datetime', $this->status_datetime == '0000-00-00 00:00:00'
 				? $this->status_datetime
-				: strftime($this->Shop->format_datetime, Core_Date::sql2timestamp($this->status_datetime)))
+				: Core_Date::strftime($this->Shop->format_datetime, Core_Date::sql2timestamp($this->status_datetime)))
 			->addXmlTag('date', $this->datetime == '0000-00-00 00:00:00'
 				? $this->datetime
-				: strftime($this->Shop->format_date, Core_Date::sql2timestamp($this->datetime)))
+				: Core_Date::strftime($this->Shop->format_date, Core_Date::sql2timestamp($this->datetime)))
 			->addXmlTag('datetime', $this->datetime == '0000-00-00 00:00:00'
 				? $this->datetime
-				: strftime($this->Shop->format_datetime, Core_Date::sql2timestamp($this->datetime)));
+				: Core_Date::strftime($this->Shop->format_datetime, Core_Date::sql2timestamp($this->datetime)));
 
 		!isset($this->_forbiddenTags['dir'])
 			&& $this->addXmlTag('dir', Core_Page::instance()->shopCDN . $this->getOrderHref());
@@ -2582,7 +2582,7 @@ class Shop_Order_Model extends Core_Entity
 									?>
 								</td>
 								<td>
-									<?php echo htmlspecialchars($oShop_Order_Item->marking)?>
+									<?php echo htmlspecialchars((string) $oShop_Order_Item->marking)?>
 								</td>
 								<td>
 									<?php echo number_format(Shop_Controller::instance()->round($oShop_Order_Item->price), 2, '.', '')?>
@@ -2725,6 +2725,7 @@ class Shop_Order_Model extends Core_Entity
 			$this->flat
 		);
 
+		$aAddress = array_map('strval', $aAddress);
 		$aAddress = array_map('trim', $aAddress);
 		$aAddress = array_filter($aAddress, 'strlen');
 		$sFullAddress = implode(', ', $aAddress);
@@ -3038,9 +3039,9 @@ class Shop_Order_Model extends Core_Entity
 			$node->position = $position++;
 			$node->item = $oShop_Item;
 			$node->id = $oShop_Item->id;
-			$node->name = htmlspecialchars($oShop_Order_Item->name);
-			$node->measure = htmlspecialchars($oShop_Item->Shop_Measure->name);
-			$node->okei = htmlspecialchars($oShop_Item->Shop_Measure->okei);
+			$node->name = htmlspecialchars((string) $oShop_Order_Item->name);
+			$node->measure = htmlspecialchars((string) $oShop_Item->Shop_Measure->name);
+			$node->okei = htmlspecialchars((string) $oShop_Item->Shop_Measure->okei);
 			$node->price = $oShop_Order_Item->price;
 			$node->quantity = $oShop_Order_Item->quantity;
 			$node->rate = $oShop_Order_Item->rate;
@@ -3116,10 +3117,10 @@ class Shop_Order_Model extends Core_Entity
 						$aTmp[] = $oProperty_Value->value;
 					break;
 					case 8: // Date
-						$aTmp[] = strftime($this->Shop->format_date, Core_Date::sql2timestamp($oProperty_Value->value));
+						$aTmp[] = Core_Date::strftime($this->Shop->format_date, Core_Date::sql2timestamp($oProperty_Value->value));
 					break;
 					case 9: // Datetime
-						$aTmp[] = strftime($this->Shop->format_datetime, Core_Date::sql2timestamp($oProperty_Value->value));
+						$aTmp[] = Core_Date::strftime($this->Shop->format_datetime, Core_Date::sql2timestamp($oProperty_Value->value));
 					break;
 					case 3: // List
 						if ($oProperty_Value->value)

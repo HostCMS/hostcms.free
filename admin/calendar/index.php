@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Calendar
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -137,7 +137,7 @@ if (!is_null(Core_Array::getRequest('loadEvents')))
 	$start = intval(Core_Array::getPost('start'));
 	$end = intval(Core_Array::getPost('end'));
 
-	$aJson['events'] = Calendar_Controller::getCalendarEntities($start, $end);
+	$aJson['events'] = Calendar_Controller::getCalendarEntities(Core_Date::timestamp2sql($start), Core_Date::timestamp2sql($end));
 	$aJson['countEvents'] = count($aJson['events']);
 
 	Core::showJson($aJson);
@@ -148,26 +148,7 @@ if (!is_null(Core_Array::getPost('updateCaldav')))
 {
 	Core_Session::close();
 
-	$aCalendar_Caldavs = Core_Entity::factory('Calendar_Caldav')->getAllByActive(1);
-	foreach ($aCalendar_Caldavs as $oCalendar_Caldav)
-	{
-		$oCalendar_Caldav_User = $oCalendar_Caldav->Calendar_Caldav_Users->getByUser_id($oUser->id);
-
-		if (!is_null($oCalendar_Caldav_User))
-		{
-			$synchronized_datetime = Core_Date::sql2timestamp($oCalendar_Caldav_User->synchronized_datetime);
-
-			if (strtotime('+10 minutes', $synchronized_datetime) < time())
-			{
-				try {
-					$oCalendar_Caldav->sync($oCalendar_Caldav_User);
-				}
-				catch (Exception $e){
-					//Core_Message::show($e->getMessage(), 'error');
-				}
-			}
-		}
-	}
+	Calendar_Controller::sync($oUser);
 
 	Core::showJson('OK');
 }
@@ -215,16 +196,6 @@ $(function () {
 
 	$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/fullcalendar/').done(function() {
 		// all scripts loaded
-
-		// ajax sync caldav
-		$.ajax({
-			url: '/admin/calendar/index.php',
-			type: 'POST',
-			dataType: 'json',
-			data: {'updateCaldav': 1},
-			error: function(){}
-		});
-
 		/* initialize the external events
 		-----------------------------------------------------------------*/
 		$('#external-events .external-event').each(function () {
@@ -241,7 +212,6 @@ $(function () {
 				revert: true,      // will cause the event to go back to its
 				revertDuration: 0  //  original position after the drag
 			});
-
 		});
 		/* initialize the calendar
 		-----------------------------------------------------------------*/
@@ -307,6 +277,9 @@ $(function () {
 			eventDestroy: calendarEventDestroy,
 			defaultDate: date
 		});
+
+		// ajax sync caldav
+		$.updateCaldav();
 	});
 });
 </script>

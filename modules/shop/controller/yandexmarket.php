@@ -567,7 +567,8 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		$iFrom = 0;
 
 		do {
-			$this->_setShopGroups();
+			// moved to __construct
+			//$this->_setShopGroups();
 
 			$this->mode == 'between'
 				? $this->_Shop_Groups->queryBuilder()->where('shop_groups.id', 'BETWEEN', array($iFrom + 1, $iFrom + $this->onStep))
@@ -715,7 +716,9 @@ class Shop_Controller_YandexMarket extends Core_Controller
 					}
 
 					// Если отключена группировка groupModifications или нет модификаций, то основной товар показывается
-					if ($oShop_Item->price > 0 && (!$this->groupModifications || $oShop_Item->Modifications->getCount(FALSE) == 0))
+					if ($this->_checkPrice($oShop_Item)
+						&& (!$this->groupModifications || $oShop_Item->Modifications->getCount(FALSE) == 0)
+					)
 					{
 						$this->_showOffer($oShop_Item);
 					}
@@ -752,7 +755,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 							foreach ($aModifications as $oModification)
 							{
-								if ($oModification->price > 0)
+								if ($this->_checkPrice($oModification))
 								{
 									$this->_showOffer($oModification);
 								}
@@ -782,6 +785,16 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		$this->write('</offers>'. "\n");
 
 		return $this;
+	}
+
+	/**
+	 * Check Item Price
+	 * @param Shop_Item_Model $oShop_Item
+	 * @return boolean
+	 */
+	protected function _checkPrice(Shop_Item_Model $oShop_Item)
+	{
+		return $oShop_Item->price > 0;
 	}
 
 	/**
@@ -1619,7 +1632,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		Core_Event::notify(get_class($this) . '.onBeforeParseUrl', $this);
 
 		// Поле URL API https://www.site.com/shop/yandex_market/?action=
-		$action = Core_Array::getGet('action');
+		$action = Core_Array::getGet('action', '', 'str');
 
 		$path = NULL;
 
@@ -2607,7 +2620,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 		$this->write('<?xml version="1.0" encoding="' . $oSite->coding . '"?>' . "\n");
 		$this->write('<!DOCTYPE yml_catalog SYSTEM "shops.dtd">' . "\n");
-		$this->write('<yml_catalog date="' . date("Y-m-d H:i") . '">' . "\n");
+		$this->write('<yml_catalog date="' . date('c') . '">' . "\n");
 		$this->write("<shop>\n");
 
 		// Название магазина
@@ -2690,6 +2703,18 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	{
 		$this->stdOut->write($str);
 
+		return $this;
+	}
+	
+	/**
+	 * Set mode
+	 * @param string $mode
+	 * @return self
+	 * @see Core_Controller::mode
+	 */
+	public function mode($mode)
+	{
+		$this->mode = $mode;
 		return $this;
 	}
 }

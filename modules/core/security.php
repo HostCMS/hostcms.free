@@ -7,12 +7,17 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Security
 {
+	/**
+	 * Check XSS
+	 * @param String $string
+	 * @return boolean
+	 */
 	static public function checkXSS($string)
 	{
 		if (!is_string($string))

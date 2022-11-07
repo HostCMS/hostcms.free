@@ -79,6 +79,7 @@ return array(
 	'move_success' => 'Інформаційні елементи перенесені.',
 	'show_comments_title' => 'Коментарі до інформаційного елементу "%s"',
 	'show_information_propertys_title' => 'Додаткові властивості елементів інформаційної системи "%s"',
+	'show_information_item_comments_propertys_title' => 'Додаткові властивості коментарів елементів інформаційної системи "%s"',
 	'delete_success' => 'Елемент видалений!',
 	'undelete_success' => 'Елемент відновлено!',
 	'root' => 'Корінь інформаційної системи',

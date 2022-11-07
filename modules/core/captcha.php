@@ -11,7 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @author Kruglov Sergei
  * @author Hostmake LLC
  * @copyright © 2006, 2007, 2008, 2011 Kruglov Sergei, http://www.captcha.ru
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Captcha
 {
@@ -158,17 +158,20 @@ class Core_Captcha
 	 */
 	static public function valid($captchaId, $value)
 	{
-		$captchaId = strval($captchaId);
-		$value = strval($value);
-
-		Core_Session::start();
-
-		if (isset($_SESSION['captcha_' . $captchaId]))
+		if (!is_array($captchaId) && !is_array($value))
 		{
-			$return = $value == $_SESSION['captcha_' . $captchaId];
+			$captchaId = strval($captchaId);
+			$value = strval($value);
 
-			unset($_SESSION['captcha_' . $captchaId]);
-			return $return;
+			Core_Session::start();
+
+			if (isset($_SESSION['captcha_' . $captchaId]))
+			{
+				$return = $value == $_SESSION['captcha_' . $captchaId];
+
+				unset($_SESSION['captcha_' . $captchaId]);
+				return $return;
+			}
 		}
 
 		return FALSE;
@@ -440,8 +443,8 @@ class Core_Captcha
 		{
 			for ($y = 0; $y < $height; $y++)
 			{
-				$sx = $x + (sin($x * $rand1 + $rand5) + sin($y * $rand3 + $rand6)) * $rand9 - $width / 2 + $center +1;
-				$sy = $y + (sin($x * $rand2 + $rand7) + sin($y * $rand4 + $rand8)) * $rand10;
+				$sx = intval($x + (sin($x * $rand1 + $rand5) + sin($y * $rand3 + $rand6)) * $rand9 - $width / 2 + $center + 1);
+				$sy = intval($y + (sin($x * $rand2 + $rand7) + sin($y * $rand4 + $rand8)) * $rand10);
 
 				if ($sx < 0 || $sy < 0 || $sx >= $width - 1 || $sy >= $height - 1)
 				{
@@ -483,8 +486,8 @@ class Core_Captcha
 					$newblue = $newcolor0 * $foreground_color[2] + $newcolor * $backgroundColor[2];
 				}
 
-				imagesetpixel($img2, $x, $y,
-					imagecolorallocate($img2, $newred, $newgreen, $newblue)
+				imagesetpixel($img2, intval($x), intval($y),
+					intval(imagecolorallocate($img2, intval($newred), intval($newgreen), intval($newblue)))
 				);
 			}
 		}
@@ -574,7 +577,7 @@ class Core_Captcha
 
 	/**
 	 * Рисование многоугольника на фоне для CAPTCHA
-	 * @param resource $image
+	 * @param GDImage $image
 	 * @param int $center_x координата х центра многоугольника
 	 * @param int $center_y координата у центра многоугольника
 	 * @param int $radius радиус
@@ -614,8 +617,14 @@ class Core_Captcha
 
 		$background = imagecolorallocate($image, $backgroundColor[0], $backgroundColor[1], $backgroundColor[2]);
 		$foreground = imagecolorallocate($image, $color[0], $color[1], $color[2]);
-		imagefilledpolygon($image, $point, $corners, $background);
-		imagepolygon($image, $point, $corners, $foreground);
+
+		PHP_VERSION_ID < 80100
+			? imagefilledpolygon($image, $point, $corners, $background)
+			: imagefilledpolygon($image, $point, $background);
+
+		PHP_VERSION_ID < 80100
+			? imagepolygon($image, $point, $corners, $foreground)
+			: imagepolygon($image, $point, $foreground);
 
 		return TRUE;
 	}

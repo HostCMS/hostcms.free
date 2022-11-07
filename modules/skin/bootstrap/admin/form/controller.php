@@ -311,6 +311,10 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 		return $this;
 	}
 
+	/**
+	 * Page navigation delta
+	 * @var integer
+	 */
 	protected $_pageNavigationDelta = 2;
 
 	/**
@@ -545,6 +549,13 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 		return $this;
 	}
 
+	/**
+	 * Get title edit icon
+	 * @param string $href
+	 * @param string $onclick
+	 * @param string $class
+	 * @return Admin_Form_Entity
+	 */
 	public function getTitleEditIcon($href, $onclick, $class = 'fa fa-pencil-square-o h5-edit-icon palegreen')
 	{
 		// .attr("onclick", "' . $onclick . '")
@@ -561,6 +572,12 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 		');
 	}
 
+	/**
+	 * Get title path icon
+	 * @param string $href
+	 * @param string $class
+	 * @return Admin_Form_Entity
+	 */
 	public function getTitlePathIcon($href, $class = 'fa fa-external-link h5-edit-icon azure')
 	{
 		return Admin_Form_Entity::factory('Code')

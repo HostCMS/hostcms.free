@@ -311,7 +311,7 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$this->getField('robots')->rows(15)->divAttr(array('class' => 'form-group col-xs-12'));
 		$oMainTab->move($this->getField('robots'), $oSiteTabRobotsRow1);
 
-		$aTmpCSP = explode(';', $this->_object->csp);
+		$aTmpCSP = explode(';', strval($this->_object->csp));
 		$aTmpCSP = array_map('trim', $aTmpCSP);
 
 		$aSCP = array();
@@ -586,6 +586,10 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		return $aReturn;
 	}
 
+	/**
+	 * CSP list
+	 * @var array
+	 */
 	protected $_aCSPList = array(
 		'default-src' => array(
 			"'none'" => 'none',

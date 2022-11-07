@@ -7,8 +7,10 @@ $oShop = Core_Entity::factory('Shop', Core_Array::get(Core_Page::instance()->lib
 
 $Shop_Controller_YandexMarket = new Shop_Controller_YandexMarket($oShop);
 // $Shop_Controller_YandexMarket->stdOut($oCore_Out_File);
+$Shop_Controller_YandexMarket->mode('111');
+
 $Shop_Controller_YandexMarket
-	->token(Core_Array::get(Core_Page::instance()->libParams, 'token', ''))
+	//->token(Core_Array::get(Core_Page::instance()->libParams, 'token', ''))
 	// ->outlets(TRUE)
 	->parseUrl()
 	//->surcharge('20%')
@@ -20,6 +22,7 @@ $Shop_Controller_YandexMarket
 	// ->itemsForbiddenProperties(array(7431, 7493))
 	// ->additionalTagNames(array('expiry' => 8365))
 	// ->checkRest(TRUE)
+	->mode('offset')
 	->show();
 
 exit();

@@ -72,7 +72,6 @@ if (!is_null($oInformationsystem_Item->id) || $comment_parent_id)
 		Admin_Form_Entity::factory('Menu')
 			->name(Core::_('Admin_Form.add'))
 			->icon('fa fa-plus')
-			->img('/admin/images/comment_add.gif')
 			->href(
 				$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 			)
@@ -89,7 +88,6 @@ if ($oInformationsystem->id)
 	$oAdmin_Form_Entity_Menus->add(
 		Admin_Form_Entity::factory('Menu')
 			->name(Core::_('Informationsystem_Item.show_information_groups_link3'))
-			->img('/admin/images/page_gear.gif')
 			->icon('fa fa-gears')
 			->href(
 				$oAdmin_Form_Controller->getAdminLoadHref('/admin/informationsystem/comment/property/index.php', NULL, NULL, $additionalParamsProperties)

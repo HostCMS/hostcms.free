@@ -19,8 +19,16 @@ use Zend\Escaper;
  */
 class Printlayout_Driver_Html extends Printlayout_Driver_Controller
 {
+	/**
+	 * Extension
+	 * @var string|NULL
+	 */
 	protected $_extension = 'html';
 
+	/**
+	 * File path
+	 * @var string|NULL
+	 */
 	protected $_filePath = NULL;
 
 	/**

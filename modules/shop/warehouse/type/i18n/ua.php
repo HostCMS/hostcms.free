@@ -1,6 +1,7 @@
 <?php
 
 return array(
+	'model_name' => 'Типи складів',
 	'title' => 'Типи складів',
 	'add_form_title' => 'Додавання типу складу',
 	'edit_form_title' => 'Редагування типу складу "%s"',

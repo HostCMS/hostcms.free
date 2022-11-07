@@ -827,6 +827,7 @@ class Core_Sitemap extends Core_Servant_Properties
 
 	/**
 	 * Is it necessary to rebuild sitemap?
+	 * @var boolean
 	 */
 	protected $_bRebuild = TRUE;
 
@@ -1061,6 +1062,10 @@ class Core_Sitemap extends Core_Servant_Properties
 		return CMS_FOLDER . Core::$mainConfig['sitemapDirectory'] . sprintf($this->fileName, $this->_oSite->id);
 	}
 
+	/**
+	 * Create sitemap dir
+	 * @return self
+	 */
 	public function createSitemapDir()
 	{
 		clearstatcache();
@@ -1071,11 +1076,19 @@ class Core_Sitemap extends Core_Servant_Properties
 		return $this;
 	}
 
+	/**
+	 * Get sitemap dir
+	 * @return string
+	 */
 	public function getSitemapDir()
 	{
 		return CMS_FOLDER . Core::$mainConfig['sitemapDirectory'];
 	}
 
+	/**
+	 * Get sitemap href
+	 * @return string
+	 */
 	public function getSitemapHref()
 	{
 		return '/' . Core::$mainConfig['sitemapDirectory'];

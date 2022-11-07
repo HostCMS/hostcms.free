@@ -13,6 +13,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  */
 class Crm_Note_Controller extends Core_Servant_Properties
 {
+	/**
+	 * Get completed dropdown
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
 	static public function getCompletedDropdown($oAdmin_Form_Controller)
 	{
 		$aCompleted = array(

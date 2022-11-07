@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Update
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Update_Dataset extends Admin_Form_Dataset
 {
@@ -67,7 +67,7 @@ class Update_Dataset extends Admin_Form_Dataset
 		$this->_objects = $aReturn['entities'];
 
 		$sDatetime = !is_null($aReturn['datetime'])
-			? strftime(DATE_TIME_FORMAT, strtotime($aReturn['datetime']))
+			? Core_Date::strftime(DATE_TIME_FORMAT, strtotime($aReturn['datetime']))
 			: '';
 
 		if ($error > 0 && $error != 5)

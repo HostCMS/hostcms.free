@@ -56,14 +56,12 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow5 = Admin_Form_Entity::factory('Div')->id('lib_properties'))
-			;
+			->add($oMainRow5 = Admin_Form_Entity::factory('Div')->id('lib_properties'));
 
 		$oAdditionalTab
 			->add($oAdditionalRow1 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		$oAdditionalTab->delete($this->getField('lib_id'));
-		// $oMainTab->delete($this->getField('options'));
 
 		$oMainTab
 			->move($this->getField('class')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow1)
@@ -76,7 +74,7 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 		$Select_LibDir = Admin_Form_Entity::factory('Select')
 			->name('lib_dir_id')
 			->caption(Core::_('Template_Section_Lib.lib_dir_id'))
-			->divAttr(array('id' => 'lib_dir', 'class' => 'form-group col-xs-12 col-lg-6'))
+			->divAttr(array('id' => 'lib_dir', 'class' => 'form-group col-xs-12 col-sm-4 col-md-6'))
 			->options(
 				array(' … ') + $Lib_Controller_Edit->fillLibDir(0)
 			)
@@ -84,9 +82,8 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 			->onchange("$.ajaxRequest({path: '/admin/structure/index.php',context: 'lib_id', callBack: $.loadSelectOptionsCallback, action: 'loadLibList',additionalParams: 'lib_dir_id=' + this.value,windowId: '{$windowId}'}); return false");
 
 		$aLibForDir = array(' … ');
-		$aLibs = Core_Entity::factory('Lib_Dir', intval($oLib->lib_dir_id)) // Может быть NULL
-			->Libs
-			->findAll();
+		 // lib_dir_id может быть NULL
+		$aLibs = Core_Entity::factory('Lib_Dir', intval($oLib->lib_dir_id))->Libs->findAll(FALSE);
 
 		foreach ($aLibs as $oTmpLib)
 		{
@@ -97,11 +94,10 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 			->name('lib_id')
 			->id('lib_id')
 			->caption(Core::_('Template_Section_Lib.lib_id'))
-			->divAttr(array('id' => 'lib', 'class' => 'form-group col-xs-12 col-lg-6'))
+			->divAttr(array('id' => 'lib', 'class' => 'form-group col-xs-12 col-sm-8 col-md-6'))
 			->options($aLibForDir)
 			->value($this->_object->lib_id)
-			->onchange("$.ajaxRequest({path: '/admin/template/section/lib/index.php', context: '{$this->_formId}', callBack: $.loadDivContentAjaxCallback, objectId: {$objectId}, action: 'loadLibProperties',additionalParams: 'lib_id=' + this.value,windowId: '{$windowId}'}); return false")
-			;
+			->onchange("$.ajaxRequest({path: '/admin/template/section/lib/index.php', context: '{$this->_formId}', callBack: $.loadDivContentAjaxCallback, objectId: {$objectId}, action: 'loadLibProperties',additionalParams: 'lib_id=' + this.value,windowId: '{$windowId}'}); return false");
 
 		$Select_Lib
 			->add(
@@ -128,15 +124,15 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 		$Div_Lib_Properties
 			->html(ob_get_clean());
 
-		$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2);
+		$oMainTab->move($this->getField('description')->rows(2)->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2);
 
 		$oMainRow3->add($Select_LibDir);
 		$oMainRow4->add($Select_Lib);
 		$oMainRow5->add($Div_Lib_Properties);
 
 		$oMainTab
-			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3')), $oMainRow3)
-			->move($this->getField('active')->divAttr(array('class' => 'margin-top-21 form-group col-xs-12 col-sm-6 col-md-3')), $oMainRow3);
+			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-md-3')), $oMainRow3)
+			->move($this->getField('active')->divAttr(array('class' => 'margin-top-21 form-group col-xs-12 col-sm-4 col-md-3')), $oMainRow3);
 
 		return $this;
 	}

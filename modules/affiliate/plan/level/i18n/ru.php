@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Affiliate
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'affiliate_values_form_title' => 'Уровни партнерской программы "%s"',
@@ -26,6 +26,7 @@ return array(
 	'edit_success' => 'Информация об уровне успешно добавлена',
 	'edit_error' => 'Ошибка добавления информации об уровне',
 	'delete_success' => 'Элемент удален!',
+	'markDeleted_success' => 'Информация об уровне успешно удалена',
 	'undelete_success' => 'Элемент восстановлен!',
 	'error_level' => 'Уровень уже существует!',
 );

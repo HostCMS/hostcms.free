@@ -147,7 +147,6 @@ $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Admin_Form.show_form_menu_admin_forms_top2'))
 		->icon('fa fa-flag')
-		->img('/admin/images/languages.gif')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($sLanguagePath, '', NULL, 0, 0)
 

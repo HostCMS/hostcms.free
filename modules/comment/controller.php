@@ -7,14 +7,22 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Comment
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Comment_Controller
 {
+	/**
+	 * Config
+	 * @var array|NULL
+	 */
 	static protected $_config = NULL;
-	
+
+	/**
+	 * Get confgi
+	 * @return array|NULL
+	 */
 	static public function getConfig()
 	{
 		if (is_null(self::$_config))
@@ -24,7 +32,7 @@ class Comment_Controller
 				'gradeLimit' => 5,
 			);
 		}
-		
+
 		return self::$_config;
 	}
 }

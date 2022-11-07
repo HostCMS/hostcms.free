@@ -75,7 +75,7 @@ class Trash_Dataset extends Admin_Form_Dataset
 	public function fillTables()
 	{
 		$this->_loaded = TRUE;
-		
+
 		$this->_objects = array();
 
 		//$aTables = $this->_dataBase->getTables();
@@ -103,7 +103,7 @@ class Trash_Dataset extends Admin_Form_Dataset
 
 		foreach ($aTables as $key => $aTableRow)
 		{
-			$sEngine = strtoupper(Core_Array::get($aTableRow, 'Engine'));
+			$sEngine = strtoupper(Core_Array::get($aTableRow, 'Engine', '', 'str'));
 			$sComment = Core_Array::get($aTableRow, 'Comment');
 
 			if ($sEngine != '' && $sComment != 'VIEW')

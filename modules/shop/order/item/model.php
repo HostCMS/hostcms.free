@@ -6,10 +6,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * Shop_Order_Item_Model
  *
  * Типы товаров:
- * 0 - Товар,
- * 1 - Доставка,
- * 2 - Пополнение лицевого счета,
- * 3 - Списание бонусов в счет оплаты счета.
+ * 0 - Товар
+ * 1 - Доставка
+ * 2 - Пополнение лицевого счета
+ * 3 - Списание бонусов в счет оплаты счета
  *
  * @package HostCMS
  * @subpackage Shop
@@ -110,7 +110,7 @@ class Shop_Order_Item_Model extends Core_Entity
 		if (!$this->shop_order_item_status_id || !$this->Shop_Order_Item_Status->canceled)
 		{
 			return htmlspecialchars(
-				$this->Shop_Order->Shop_Currency->formatWithCurrency($this->getAmount())
+				(string) $this->Shop_Order->Shop_Currency->formatWithCurrency($this->getAmount())
 			);
 		}
 	}
@@ -134,7 +134,7 @@ class Shop_Order_Item_Model extends Core_Entity
 	 */
 	public function priceBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		$price = htmlspecialchars($this->Shop_Order->Shop_Currency->format($this->price));
+		$price = htmlspecialchars((string) $this->Shop_Order->Shop_Currency->format($this->price));
 
 		return $oAdmin_Form_Field->editable
 			? '<span id="apply_check_0_' . $this->id . '_fv_' . $oAdmin_Form_Field->id .'" class="editable">' . $price . '</span>'
@@ -158,7 +158,7 @@ class Shop_Order_Item_Model extends Core_Entity
 	{
 		if ($this->shop_measure_id)
 		{
-			return htmlspecialchars($this->Shop_Measure->name);
+			return htmlspecialchars((string) $this->Shop_Measure->name);
 		}
 	}
 
@@ -667,7 +667,7 @@ class Shop_Order_Item_Model extends Core_Entity
 						$.ajax({
 							url: '/admin/shop/order/item/index.php',
 							type: "POST",
-							data: {'load_modal': 1, 'shop_order_item_id': <?php echo $this->id?>},
+							data: {'load_modal': 1, 'shop_order_item_id': <?php echo $this->id?>, 'shop_order_id': <?php echo $this->shop_order_id?>},
 							dataType: 'json',
 							error: function(){},
 							success: function (result) {

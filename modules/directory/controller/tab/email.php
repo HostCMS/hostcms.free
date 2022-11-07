@@ -60,14 +60,15 @@ class Directory_Controller_Tab_Email extends Directory_Controller_Tab
 					->name($this->prefix . 'email_type' . $sNameSuffix)
 					->value($oUser_Directory_Email ? $oUser_Directory_Email->Directory_Email->directory_email_type_id : '')
 					->caption(Core::_('Directory_Email.type_email'))
-					->divAttr(array('class' => 'form-group col-xs-6 col-lg-4'))
+					// ->divAttr(array('class' => 'form-group col-xs-6 col-lg-4'))
+					->divAttr(array('class' => 'form-group col-lg-4 ' . ($this->showPublicityControlElement ? 'col-xs-6' : 'col-xs-5')))
 			)
 			->add(
 				Admin_Form_Entity::factory('Input')
 					->name($this->prefix . 'email' . $sNameSuffix)
 					->value($oUser_Directory_Email ? $oUser_Directory_Email->Directory_Email->value : '')
 					->caption(Core::_('Directory_Email.email'))
-					->divAttr(array('class' => 'form-group no-padding-left ' . ($this->showPublicityControlElement ? 'col-lg-4 col-xs-6' : 'col-lg-5 col-sm-6 col-xs-5')))
+					->divAttr(array('class' => 'form-group no-padding-left ' . ($this->showPublicityControlElement ? 'col-lg-4 col-xs-6' : 'col-lg-5 col-sm-5 col-xs-5')))
 			);
 
 		if ($this->showPublicityControlElement)

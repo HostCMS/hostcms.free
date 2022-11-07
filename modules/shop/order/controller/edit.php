@@ -252,7 +252,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->add(
 				Core_Html_Entity::factory('Span')
 					->class('input-group-addon dimension_patch')
-					->value(htmlspecialchars($this->_object->Shop->Shop_Measure->name))
+					->value(htmlspecialchars((string) $this->_object->Shop->Shop_Measure->name))
 			)
 		);
 
@@ -564,7 +564,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					<td width="10%"><input class="form-control" name="shop_order_item_price_' . $oShop_Order_Item->id . '" value="' . $oShop_Order_Item->price . '" /></td>
 					<td width="5%" class="hidden-xs hidden-sm"><input class="form-control" name="shop_order_item_rate_' . $oShop_Order_Item->id . '" value="' . $oShop_Order_Item->rate . '" /></td>
 					<td width="10%" class="hidden-xs hidden-sm">' . $type_select . '</td>
-					<td width="10%" class="hidden-xs"><input class="form-control" name="shop_order_item_marking_' . $oShop_Order_Item->id . '" value="' . htmlspecialchars($oShop_Order_Item->marking) . '" /></td>
+					<td width="10%" class="hidden-xs"><input class="form-control" name="shop_order_item_marking_' . $oShop_Order_Item->id . '" value="' . htmlspecialchars((string) $oShop_Order_Item->marking) . '" /></td>
 					<td width="10%" class="hidden-xs hidden-sm hidden-md">' . $warehouse_select . '</td>
 					<td width="10%" class="hidden-xs hidden-sm hidden-md">' . ($oShop_Order_Item->type == 0 ? $status_select : '') . '</td>
 					<td width="10%" class="hidden-xs hidden-sm hidden-md"><input readonly="readonly" class="form-control" name="shop_order_item_id_' . $oShop_Order_Item->id . '" value="' . $oShop_Order_Item->shop_item_id . '" /></td>

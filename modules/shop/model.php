@@ -46,6 +46,7 @@ class Shop_Model extends Core_Entity
 		'shop_affiliate_plan' => array(),
 		'shop_cart' => array(),
 		'shop_favorite' => array(),
+		'shop_favorite_list' => array(),
 		'shop_compare' => array(),
 		'shop_delivery' => array(),
 		'shop_bonus' => array(),
@@ -340,6 +341,7 @@ class Shop_Model extends Core_Entity
 		$this->Shop_Affiliate_Plans->deleteAll(FALSE);
 		$this->Shop_Carts->deleteAll(FALSE);
 		$this->Shop_Favorites->deleteAll(FALSE);
+		$this->Shop_Favorite_Lists->deleteAll(FALSE);
 		$this->Shop_Compares->deleteAll(FALSE);
 		$this->Shop_Deliveries->deleteAll(FALSE);
 		$this->Shop_Bonuses->deleteAll(FALSE);
@@ -473,7 +475,9 @@ class Shop_Model extends Core_Entity
 
 		try
 		{
-			is_file($this->getWatermarkFilePath()) && Core_File::copy($this->getWatermarkFilePath(), $newObject->getWatermarkFilePath());
+			$this->watermark_file != ''
+				&& is_file($this->getWatermarkFilePath())
+				&& Core_File::copy($this->getWatermarkFilePath(), $newObject->getWatermarkFilePath());
 		} catch (Exception $e) {}
 
 		// Копирование доп. свойств и разделов доп. свойств товаров
@@ -650,7 +654,7 @@ class Shop_Model extends Core_Entity
 		foreach ($aShop_Bonuses as $oShop_Bonus)
 		{
 			$newObject->add(
-				$oShop_Bonus->copy()
+				$oShop_Bonus->copy()->shop_bonus_dir_id(0)
 			);
 		}
 
@@ -675,7 +679,16 @@ class Shop_Model extends Core_Entity
 		foreach ($aShop_Discounts as $oShop_Discount)
 		{
 			$newObject->add(
-				$oShop_Discount->copy()
+				$oShop_Discount->copy()->shop_discount_dir_id(0)
+			);
+		}
+
+		// Копирование скидок от суммы заказа
+		$aShop_Purchase_Discounts = $this->Shop_Purchase_Discounts->findAll();
+		foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
+		{
+			$newObject->add(
+				$oShop_Purchase_Discount->copy()->shop_purchase_discount_dir_id(0)
 			);
 		}
 
@@ -698,13 +711,6 @@ class Shop_Model extends Core_Entity
 		foreach ($aShop_Producers as $oShop_Producer)
 		{
 			$newObject->add($oShop_Producer->copy());
-		}
-
-		// Копирование скидок от суммы заказа
-		$aShop_Purchase_Discounts = $this->Shop_Purchase_Discounts->findAll();
-		foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
-		{
-			$newObject->add($oShop_Purchase_Discount->copy());
 		}
 
 		// Копирование продавцов

@@ -19,6 +19,10 @@ class Core_File
 	 */
 	static public $resizeExtensions = array('JPG', 'JPEG', 'GIF', 'PNG');
 
+	/**
+	 * Get resize extensions
+	 * @return array
+	 */
 	static public function getResizeExtensions()
 	{
 		$aReturn = self::$resizeExtensions;
@@ -72,7 +76,7 @@ class Core_File
 	 */
 	static public function copy($source, $destination, $mode = CHMOD_FILE)
 	{
-		if (is_file($source))
+		if ($source !== '' && is_file($source))
 		{
 			// Create destination dir
 			self::mkdir(dirname($destination), CHMOD, TRUE);
@@ -432,19 +436,22 @@ class Core_File
 	 */
 	static public function filenameCorrection($fileName)
 	{
-		$fileName = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $fileName);
+		if (is_string($fileName) && $fileName != '')
+		{
+			$fileName = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $fileName);
 
-		do {
-			$fileName = str_replace(array(
-				'..' . DIRECTORY_SEPARATOR,
-				'.' . DIRECTORY_SEPARATOR,
-				DIRECTORY_SEPARATOR
-				), '', $fileName, $count);
-		} while ($count);
+			do {
+				$fileName = str_replace(array(
+					'..' . DIRECTORY_SEPARATOR,
+					'.' . DIRECTORY_SEPARATOR,
+					DIRECTORY_SEPARATOR
+					), '', $fileName, $count);
+			} while ($count);
 
-		$fileName = ($fileName == '.') ? '' : $fileName;
+			$fileName = ($fileName == '.') ? '' : $fileName;
+		}
 
-		return $fileName;
+		return (string) $fileName;
 	}
 
 	/**
@@ -454,28 +461,31 @@ class Core_File
 	 */
 	static public function pathCorrection($path)
 	{
-		$path = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $path);
-		$path = str_replace(array("\r", "\n", "\0"), '', $path);
+		if (is_string($path) && $path != '')
+		{
+			$path = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $path);
+			$path = str_replace(array("\r", "\n", "\0"), '', $path);
 
-		do {
-			$path = str_replace(array(
-				DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR,
-				DIRECTORY_SEPARATOR . '.' . DIRECTORY_SEPARATOR,
-				DIRECTORY_SEPARATOR . DIRECTORY_SEPARATOR,
-				//DIRECTORY_SEPARATOR . '..',
-				//DIRECTORY_SEPARATOR . '.'
-				), array(
-				DIRECTORY_SEPARATOR, //'',
-				DIRECTORY_SEPARATOR, //'',
-				DIRECTORY_SEPARATOR,
-				//DIRECTORY_SEPARATOR,
-				//DIRECTORY_SEPARATOR
-				), $path, $count);
-		} while ($count);
+			do {
+				$path = str_replace(array(
+					DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR,
+					DIRECTORY_SEPARATOR . '.' . DIRECTORY_SEPARATOR,
+					DIRECTORY_SEPARATOR . DIRECTORY_SEPARATOR,
+					//DIRECTORY_SEPARATOR . '..',
+					//DIRECTORY_SEPARATOR . '.'
+					), array(
+					DIRECTORY_SEPARATOR, //'',
+					DIRECTORY_SEPARATOR, //'',
+					DIRECTORY_SEPARATOR,
+					//DIRECTORY_SEPARATOR,
+					//DIRECTORY_SEPARATOR
+					), $path, $count);
+			} while ($count);
 
-		$path = ($path == '.') ? '' : $path;
+			$path = ($path == '.') ? '' : $path;
+		}
 
-		return $path;
+		return (string) $path;
 	}
 
 	/**
@@ -485,7 +495,7 @@ class Core_File
 	 */
 	static public function getExtension($path)
 	{
-		return strtolower(substr(strrchr($path, '.'), 1));
+		return strtolower(substr(strrchr((string) $path, '.'), 1));
 	}
 
 	/**
@@ -1134,6 +1144,11 @@ class Core_File
 		return $result;
 	}
 
+	/**
+	 * Get icon
+	 * @param string $originalName
+	 * @return string
+	 */
 	static public function getIcon($originalName)
 	{
 		$ext = self::getExtension($originalName);

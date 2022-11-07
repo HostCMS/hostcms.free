@@ -76,7 +76,6 @@ $oAdmin_Form_Entity_Menus->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Admin_Form.add'))
-				->img('/admin/images/structure_add.gif')
 				->icon('fa fa-plus')
 				->href(
 					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
@@ -87,7 +86,6 @@ $oAdmin_Form_Entity_Menus->add(
 		)->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Structure.properties'))
-				->img('/admin/images/structure_gear.gif')
 				->icon('fa fa-gears')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref($sPropertyPath, NULL, NULL, $additionalParamsProperties)
@@ -100,7 +98,6 @@ $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Structure_Menu.menus'))
 		->icon('fa fa-list-ul')
-		->img('/admin/images/menu.gif')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($sMenuPath, NULL, NULL, '')
 		)
@@ -260,6 +257,12 @@ if ($oAdminFormActionLoadDocumentList && $oAdmin_Form_Controller->getAction() ==
 			array('where' => array('document_dir_id', '=', Core_Array::getGet('document_dir_id')))
 		)->addCondition(
 			array('where' => array('site_id', '=', CURRENT_SITE))
+		)
+		->addCondition(
+			array('clearOrderBy' => array())
+		)
+		->addCondition(
+			array('orderBy' => array('name'))
 		);
 
 	$oAdmin_Form_Controller->addAction($oStructureControllerLoadDocumentList);

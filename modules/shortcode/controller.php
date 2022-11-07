@@ -140,31 +140,34 @@ class Shortcode_List
 	 */
 	public function applyShortcodes($string)
 	{
-		preg_match_all('/\[([^\s\[\]]++)/', $string, $matches);
-
-		$aIntersect = array_intersect($this->_shortcodeNames, $matches[1]);
-		foreach ($aIntersect as $sShortcodeName)
+		if (is_string($string) && $string != '')
 		{
-			$sShortcodeNameQuoted = preg_quote($sShortcodeName);
+			preg_match_all('/\[([^\s\[\]]++)/', $string, $matches);
 
-			$pattern = '/(\[{1,2})'
-				// Shortcode's name
-				. '(' . $sShortcodeNameQuoted . ')(?![A-Za-z0-9А-Яа-яёЁ_-])'
-				// Shortcode's options
-				. '([^\]]*)'
-				// Close Shortcode
-				. '(\]{1,2})'
-				// Body
-				. '(?:'
-					. '([^\[]*+(?:\[(?!\/' . $sShortcodeNameQuoted . '\])[^\[]*+)*+)'
+			$aIntersect = array_intersect($this->_shortcodeNames, $matches[1]);
+			foreach ($aIntersect as $sShortcodeName)
+			{
+				$sShortcodeNameQuoted = preg_quote($sShortcodeName);
+
+				$pattern = '/(\[{1,2})'
+					// Shortcode's name
+					. '(' . $sShortcodeNameQuoted . ')(?![A-Za-z0-9А-Яа-яёЁ_-])'
+					// Shortcode's options
+					. '([^\]]*)'
 					// Close Shortcode
-					. '\[\/' . $sShortcodeNameQuoted . '\]'
-				. ')?/';
+					. '(\]{1,2})'
+					// Body
+					. '(?:'
+						. '([^\[]*+(?:\[(?!\/' . $sShortcodeNameQuoted . '\])[^\[]*+)*+)'
+						// Close Shortcode
+						. '\[\/' . $sShortcodeNameQuoted . '\]'
+					. ')?/';
 
-			$string = preg_replace_callback($pattern, array('Shortcode_Controller', 'prepareCallShortcode'), $string);
+				$string = preg_replace_callback($pattern, array('Shortcode_Controller', 'prepareCallShortcode'), $string);
+			}
 		}
 
-		return $string;
+		return (string) $string;
 	}
 
 	/**

@@ -52,6 +52,11 @@ class Event_Timeline_Dataset extends Admin_Form_Dataset
 		return Core_QueryBuilder::select()->getFoundRows();
 	}
 
+	/**
+	 * Get event history
+	 * @param int $id
+	 * @return object
+	 */
 	protected function _getQb0($id = NULL)
 	{
 		// Load model columns BEFORE FOUND_ROWS()
@@ -66,6 +71,11 @@ class Event_Timeline_Dataset extends Admin_Form_Dataset
 		return $oQb;
 	}
 
+	/**
+	 * Get crm note
+	 * @param int $id
+	 * @return object
+	 */
 	protected function _getQb1($id = NULL)
 	{
 		// Load model columns BEFORE FOUND_ROWS()
@@ -82,6 +92,11 @@ class Event_Timeline_Dataset extends Admin_Form_Dataset
 		return $oQb;
 	}
 
+	/**
+	 * Get events
+	 * @param int $id
+	 * @return object
+	 */
 	protected function _getQb2($id = NULL)
 	{
 		// Load model columns BEFORE FOUND_ROWS()
@@ -97,6 +112,11 @@ class Event_Timeline_Dataset extends Admin_Form_Dataset
 		return $oQb;
 	}
 
+	/**
+	 * Get dms document
+	 * @param int $id
+	 * @return object
+	 */
 	protected function _getQb3($id = NULL)
 	{
 		// Load model columns BEFORE FOUND_ROWS()
@@ -113,6 +133,9 @@ class Event_Timeline_Dataset extends Admin_Form_Dataset
 		return $oQb;
 	}
 
+	/**
+	 * Load items
+	 */
 	protected function _loadItems()
 	{
 		if ($this->_limit)
@@ -121,10 +144,11 @@ class Event_Timeline_Dataset extends Admin_Form_Dataset
 				->sqlCalcFoundRows()
 				->union($this->_getQb1())
 				->union($this->_getQb2())
-				->union($this->_getQb3())
 				->unionOrderBy('datetime', 'DESC')
 				->unionLimit($this->_limit)
 				->unionOffset($this->_offset);
+
+			Core::moduleIsActive('dms') && $oQB->union($this->_getQb3());
 
 			$oCore_DataBase = $oQB->execute();
 
@@ -155,6 +179,11 @@ class Event_Timeline_Dataset extends Admin_Form_Dataset
 		}
 	}
 
+	/**
+	 * Get object by type
+	 * @param object $object
+	 * @return object
+	 */
 	protected function _getObjectByType($object)
 	{
 		switch ($object->type)

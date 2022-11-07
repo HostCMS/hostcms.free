@@ -101,6 +101,7 @@ return array(
 	'copy_success' => "Товар успешно скопирован!",
 	'shops_add_form_link_properties' => "Свойства товара",
 	'show_list_of_properties_title' => "Список свойств товара интернет-магазина \"%s\"",
+	'show_list_of_item_comments_properties_title' => "Список свойств отзывов о товарах интернет-магазина \"%s\"",
 	'tab_properties' => "Дополнительные свойства",
 	'items_catalog_add_form_comment_link' => 'Отзывы',
 	'properties_item_for_groups_link' => 'Свойства товаров для группы',
@@ -364,4 +365,5 @@ return array(
 	'attribute_item_price_tab' => 'Цены',
 	'attribute_item_warehouse_tab' => 'Склады',
 	'shop_discount_siteuser_title' => 'Персональные скидки',
+	'main_menu_warrants' => 'Касса',
 );

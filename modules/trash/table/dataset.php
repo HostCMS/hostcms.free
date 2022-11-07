@@ -84,7 +84,7 @@ class Trash_Table_Dataset extends Admin_Form_Dataset
 
 			$aObjects = $this->_getItems();
 
-			foreach ($aObjects as $key => $oObject)
+			foreach ($aObjects as $oObject)
 			{
 				$this->_objects[$oObject->id] = $oObject;
 			}
@@ -176,6 +176,7 @@ class Trash_Table_Dataset extends Admin_Form_Dataset
 	 */
 	public function clear()
 	{
+		$this->_loaded = FALSE;
 		$this->_objects = NULL;
 		return $this;
 	}

@@ -13,6 +13,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  */
 class Crm_Note_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
+	/**
+	 * Related object
+	 * @var mixed
+	 */
 	protected $_relatedObject = NULL;
 
 	/**

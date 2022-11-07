@@ -252,9 +252,9 @@ if (Core::moduleIsActive('siteuser'))
 		}
 		else
 		{
-			$error = Core_Array::get($aResult, 'error');
-			$error_description = Core_Array::get($aResult, 'error_description');
-			throw new Exception("Error: {$error} - {$error_description}");
+			$error = Core_Array::get($aResult, 'error', 'str');
+			$error_description = Core_Array::get($aResult, 'error_description', 'str');
+			throw new Core_Exception("Error '%error' %error_description", array('%error' => $error, '%error_description' => $error_description), 0, FALSE);
 		}
 	}
 

@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Benchmark_Module extends Benchmark_Module
 {
@@ -25,6 +25,9 @@ class Skin_Bootstrap_Module_Benchmark_Module extends Benchmark_Module
 		);
 	}
 
+	/**
+	 * Widget
+	 */
 	public function widget()
 	{
 		$oBenchmark = Core_Entity::factory('Benchmark');
