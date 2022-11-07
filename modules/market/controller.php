@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Market
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Market_Controller extends Core_Servant_Properties
 {
@@ -180,7 +180,7 @@ class Market_Controller extends Core_Servant_Properties
 		$md5_contract = md5($this->contract);
 		$md5_pin = md5($this->pin);
 
-		$url = 'http://' . $this->update_server . "/hostcmsupdate/market/?action=load_market&domain=" . rawurlencode($this->domain) .
+		$url = 'https://' . $this->update_server . "/hostcmsupdate/market/?action=load_market&domain=" . rawurlencode($this->domain) .
 			'&protocol=' . (Core::httpsUses() ? 'https' : 'http') .
 			"&login=" . rawurlencode($this->login) .
 			"&contract=" . rawurlencode($md5_contract) .
@@ -212,9 +212,11 @@ class Market_Controller extends Core_Servant_Properties
 		!is_null($this->installMode) && $this->installMode && $url .= '&installMode';
 		!is_null($this->order) && $url .= "&order=" . rawurlencode($this->order);
 
+		$maxExecutionTime = intval(ini_get('max_execution_time'));
+
 		$Core_Http = Core_Http::instance()
 			->url($url)
-			->timeout(5)
+			->timeout($maxExecutionTime > 0 ? $maxExecutionTime - 3 : 20)
 			->referer(Core_Array::get($_SERVER, 'HTTP_HOST'))
 			->execute();
 
@@ -307,7 +309,9 @@ class Market_Controller extends Core_Servant_Properties
 	 */
 	public function getModule($module_id)
 	{
-		$url = 'http://' . $this->update_server . "/hostcmsupdate/market/?action=get_module&domain=" . rawurlencode($this->domain) .
+		Core_Database::instance()->query('SET SESSION wait_timeout = 600');
+
+		$url = 'https://' . $this->update_server . "/hostcmsupdate/market/?action=get_module&domain=" . rawurlencode($this->domain) .
 			'&protocol=' . (Core::httpsUses() ? 'https' : 'http') .
 			'&login=' . rawurlencode($this->login) .
 			'&contract=' . rawurlencode(md5($this->contract)) .
@@ -336,9 +340,11 @@ class Market_Controller extends Core_Servant_Properties
 
 		//echo htmlspecialchars($url);
 
+		$maxExecutionTime = intval(ini_get('max_execution_time'));
+
 		$Core_Http = Core_Http::instance()
 			->url($url)
-			->timeout(5)
+			->timeout($maxExecutionTime > 0 ? $maxExecutionTime - 3 : 20)
 			->referer(Core_Array::get($_SERVER, 'HTTP_HOST'))
 			->execute();
 
@@ -364,7 +370,7 @@ class Market_Controller extends Core_Servant_Properties
 					(!defined('DENY_INI_SET') || !DENY_INI_SET)
 						&& function_exists('set_time_limit')
 						&& ini_get('safe_mode') != 1
-						&& @set_time_limit(3600);
+						&& @set_time_limit(120);
 
 					// Объект с данными о модуле
 					$this->_Module = new StdClass();
@@ -400,8 +406,7 @@ class Market_Controller extends Core_Servant_Properties
 						// CMS_FOLDER . 'hostcmsfiles/tmp/install/{id}/'
 						$this->tmpDir = $this->getPath() . DIRECTORY_SEPARATOR . $this->_Module->shop_item_id;
 
-						// Удаляем директорию с данными предыдущей установки
-						// 20 mins
+						// Удаляем директорию с данными предыдущей установки (20 mins)
 						$bExists = is_dir($this->tmpDir)
 							&& is_file($this->tmpDir . DIRECTORY_SEPARATOR . 'module.xml')
 							&& filemtime($this->tmpDir) + 60*20 > time();
@@ -419,15 +424,25 @@ class Market_Controller extends Core_Servant_Properties
 
 								// Сохраняем tar.gz
 								$source_file = $this->tmpDir . DIRECTORY_SEPARATOR . 'tmpfile.tar.gz';
+								
 								Core_File::write($source_file, $Core_Http->getDecompressedBody());
-
-								// Распаковываем файлы
-								$Core_Tar = new Core_Tar($source_file);
-								if (!$Core_Tar->extractModify($this->tmpDir, $this->tmpDir))
+								
+								if (Core_File::filesize($source_file))
 								{
-									// Возникла ошибка распаковки
+									// Распаковываем файлы
+									$Core_Tar = new Core_Tar($source_file);
+									if (!$Core_Tar->extractModify($this->tmpDir, $this->tmpDir))
+									{
+										// Возникла ошибка распаковки
+										throw new Core_Exception(
+											Core::_('Update.update_files_error')
+										);
+									}
+								}
+								else
+								{
 									throw new Core_Exception(
-										Core::_('Update.update_files_error')
+										Core::_('Market.server_error_respond_15'), array(), 0, FALSE
 									);
 								}
 							}
@@ -850,8 +865,8 @@ class Market_Controller extends Core_Servant_Properties
 		}
 
 		Core_Log::instance()->clear()
-				->status(Core_Log::$MESSAGE)
-				->write(sprintf('Market, module installation is complete'));
+			->status(Core_Log::$MESSAGE)
+			->write(sprintf('Market, module installation is complete'));
 
 		clearstatcache();
 
@@ -926,7 +941,7 @@ class Market_Controller extends Core_Servant_Properties
 	 */
 	public function getModuleFile($path)
 	{
-		$url = 'http://' . $this->update_server . $path . "&domain=".rawurlencode($this->domain) .
+		$url = 'https://' . $this->update_server . $path . "&domain=".rawurlencode($this->domain) .
 		'&protocol=' . (Core::httpsUses() ? 'https' : 'http') .
 		"&login=" . rawurlencode($this->login) .
 		"&contract=" . rawurlencode(md5($this->contract)) .
@@ -938,9 +953,11 @@ class Market_Controller extends Core_Servant_Properties
 
 		!is_null($this->installMode) && $this->installMode && $url .= '&installMode';
 
+		$maxExecutionTime = intval(ini_get('max_execution_time'));
+
 		$Core_Http = Core_Http::instance()
 			->url($url)
-			->timeout(5)
+			->timeout($maxExecutionTime > 0 ? $maxExecutionTime - 3 : 20)
 			->referer(Core_Array::get($_SERVER, 'HTTP_HOST'))
 			->execute();
 
@@ -992,7 +1009,7 @@ class Market_Controller extends Core_Servant_Properties
 						->placeholder(Core::_('Market.search_placeholder'))
 						->divAttr(array('class' => 'col-xs-12 col-sm-6 search-query-input'))
 						->add(
-							Admin_Form_Entity::factory('Code')->html('<span class="input-group-btn"><button class="btn btn-default" type="submit" onclick="$.adminSendForm({buttonObject: $(this), action: \'sendSearchQuery\', windowId: \'id_content\'}); return false"><i class="fa fa-search fa-fw"></i></button></span>')
+							Admin_Form_Entity::factory('Code')->html('<span class="input-group-btn"><button class="btn btn-default" type="submit" onclick="$.adminSendForm({buttonObject: $(this), action: \'sendSearchQuery\', windowId: \'id_content\'}); return false"><i class="fa-solid fa-magnifying-glass fa-fw"></i></button></span>')
 					)
 					->value(Core_Array::getRequest('search_query'))
 				)

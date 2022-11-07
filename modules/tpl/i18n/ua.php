@@ -29,4 +29,8 @@ return array(
 	'delete_success' => 'Елемент видалений!',
 	'undelete_success' => 'Елемент відновлено!',
 	'panel_tpl_array' => 'Елементів: %s',
+	'import' => 'Імпорт',
+	'import_file' => "Виберіть файл з комп/'ютера",
+	'import_button' => 'Завантажити',
+	'importTpls_success' => 'Імпорт завершено!',
 );

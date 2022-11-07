@@ -23,7 +23,7 @@ class Tpl_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2022-04-29';
+	public $date = '2022-08-05';
 
 	/**
 	 * Module name
@@ -63,6 +63,11 @@ class Tpl_Module extends Core_Module
 	{
 		$offset = intval($offset);
 		$limit = intval($limit);
+
+		Core_Log::instance()->clear()
+			->notify(FALSE)
+			->status(Core_Log::$MESSAGE)
+			->write("tpl indexing({$offset}, {$limit})");
 
 		$oTpls = Core_Entity::factory('Tpl');
 		$oTpls

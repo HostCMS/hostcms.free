@@ -30,7 +30,17 @@ class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 			}
 		}
 
-		parent::setObject($object);
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
 
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
@@ -244,7 +254,7 @@ class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 			->caption(Core::_("Shop_Warehouse.warehouse_default_count"))
 			->name("warehouse_default_count")
 			->value(1)
-			->checked(is_null($object->id));
+			->checked(is_null($this->_object->id));
 
 		$oMainRow11->add($oShopItemCountCheckBox);
 

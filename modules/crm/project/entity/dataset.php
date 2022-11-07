@@ -91,6 +91,16 @@ class Crm_Project_Entity_Dataset extends Admin_Form_Dataset
 
 		$oQB->union($attachments);
 
+		if (Core::moduleIsActive('dms'))
+		{
+			$dms_documents = Core_QueryBuilder::select(array(4, 'type'), 'id', array('created', 'datetime'))
+				->from('dms_documents')
+				->where('dms_documents.crm_project_id', '=', $this->_crm_project->id)
+				->where('dms_documents.deleted', '=', 0);
+
+			$oQB->union($dms_documents);
+		}
+
 		$queryBuilder = $oQB->execute();
 
 		$this->_objects = $queryBuilder->asObject()->result();

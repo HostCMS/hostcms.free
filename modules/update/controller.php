@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Update
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Update_Controller extends Core_Servant_Properties
 {
@@ -199,7 +199,7 @@ class Update_Controller extends Core_Servant_Properties
 	public function getUpdates()
 	{
 		// Формируем строку запроса
-		$url = 'http://' . $this->update_server . '/hostcmsupdate/?action=get_listupdate&domain='.rawurlencode($this->domain) .
+		$url = 'https://' . $this->update_server . '/hostcmsupdate/?action=get_listupdate&domain='.rawurlencode($this->domain) .
 			'&protocol=' . (Core::httpsUses() ? 'https' : 'http') .
 			'&login=' . rawurlencode($this->login) .
 			'&contract=' . rawurlencode(md5($this->contract)) .
@@ -258,7 +258,7 @@ class Update_Controller extends Core_Servant_Properties
 	 */
 	public function getUpdate($update_key_id)
 	{
-		$url = 'http://' . $this->update_server . "/hostcmsupdate/?action=get_update&domain=".rawurlencode($this->domain) .
+		$url = 'https://' . $this->update_server . "/hostcmsupdate/?action=get_update&domain=".rawurlencode($this->domain) .
 			'&protocol=' . (Core::httpsUses() ? 'https' : 'http') .
 			"&login=" . rawurlencode($this->login) .
 			"&contract=" . rawurlencode(md5($this->contract)) .
@@ -372,7 +372,7 @@ class Update_Controller extends Core_Servant_Properties
 	 */
 	public function getUpdateFile($path)
 	{
-		$url = 'http://' . $this->update_server . $path . "&domain=".rawurlencode($this->domain) .
+		$url = 'https://' . $this->update_server . $path . "&domain=".rawurlencode($this->domain) .
 			'&protocol=' . (Core::httpsUses() ? 'https' : 'http') .
 			"&login=" . rawurlencode($this->login) .
 			"&contract=" . rawurlencode(md5($this->contract)) .
@@ -384,7 +384,7 @@ class Update_Controller extends Core_Servant_Properties
 
 		$Core_Http = Core_Http::instance()
 			->url($url)
-			->timeout(15)
+			->timeout(20)
 			->referer(Core_Array::get($_SERVER, 'HTTP_HOST'))
 			->execute();
 

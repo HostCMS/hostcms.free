@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 {
@@ -20,6 +20,7 @@ class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 	protected $_allowedProperties = array(
 		'amount', // сумма заказа
 		'quantity', // количество товаров в заказе
+		'weight', // масса товаров в заказе
 		'couponText', // текст купона, если есть
 		'siteuserId', // Идентификатор пользователя сайта, нужен для расчета накопительных скидок
 		'prices', // массив цен товаров, используется при расчете скидки на N-й товар
@@ -81,6 +82,7 @@ class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 	{
 		$amount = floatval($this->amount);
 		$quantity = floatval($this->quantity);
+		$weight = floatval($this->weight);
 
 		$this->_aReturn = array();
 
@@ -128,10 +130,10 @@ class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 				)
 				: 0;
 
-			// Нижний предел скидки
+			// Нижний предел суммы
 			$min_amount = $fCoefficient * $oShop_Purchase_Discount->min_amount;
 
-			// Верхний предел скидки
+			// Верхний предел суммы
 			$max_amount = $fCoefficient * $oShop_Purchase_Discount->max_amount;
 
 			$bCheckAmount = $amount >= $min_amount
@@ -141,6 +143,11 @@ class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 			$bCheckQuantity = $quantity >= $oShop_Purchase_Discount->min_count
 				&& ($quantity < $oShop_Purchase_Discount->max_count || $oShop_Purchase_Discount->max_count == 0)
 				&& (!$oShop_Purchase_Discount->coupon || in_array($oShop_Purchase_Discount->id, $aShop_Purchase_Discount_IDs));
+
+			$bCheckWeight = $weight >= $oShop_Purchase_Discount->min_weight
+				&& ($weight < $oShop_Purchase_Discount->max_weight || $oShop_Purchase_Discount->max_weight == 0)
+				&& (!$oShop_Purchase_Discount->coupon || in_array($oShop_Purchase_Discount->id, $aShop_Purchase_Discount_IDs))
+				;
 
 			$bCheckOrdersSum = FALSE;
 
@@ -158,16 +165,19 @@ class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 					}
 
 					$bCheckOrdersSum = $fSum >= $min_amount
-					&& ($fSum < $max_amount || $max_amount == 0)
-					&& (!$oShop_Purchase_Discount->coupon || in_array($oShop_Purchase_Discount->id, $aShop_Purchase_Discount_IDs));
+						&& ($fSum < $max_amount || $max_amount == 0)
+						&& (!$oShop_Purchase_Discount->coupon || in_array($oShop_Purchase_Discount->id, $aShop_Purchase_Discount_IDs));
 				}
 			}
 
-			// И
-			if ($oShop_Purchase_Discount->mode == 0 && $bCheckAmount && $bCheckQuantity
-			// ИЛИ
-			|| $oShop_Purchase_Discount->mode == 1 && ($bCheckAmount || $bCheckQuantity)
-			|| $oShop_Purchase_Discount->mode == 2 && $bCheckOrdersSum)
+			if (
+				// И
+				$oShop_Purchase_Discount->mode == 0 && $bCheckAmount && $bCheckQuantity && $bCheckWeight
+				// ИЛИ
+				|| $oShop_Purchase_Discount->mode == 1 && ($bCheckAmount || $bCheckQuantity || $bCheckWeight)
+				// Накопленная сумма
+				|| $oShop_Purchase_Discount->mode == 2 && $bCheckOrdersSum
+			)
 			{
 				$fTmpAmount = $amount;
 

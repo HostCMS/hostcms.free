@@ -17,6 +17,7 @@ else
 		->limit(Core_Page::instance()->libParams['count'])
 		// Экспорт в Яндекс.Новости
 		->yandex(Core_Page::instance()->libParams['yandexFullText'])
+		//->itemProperties(array(8372 => 'testFeild'))
 		// Выгрузка для Яндекс.Турбо
 		//->turbo(TRUE)
 		// Счетчик системы статистики для учета посещаемости Турбо-страниц

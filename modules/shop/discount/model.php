@@ -177,6 +177,25 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	}
 
 	/**
+	 * Move discount to another dir
+	 * @param int $iShopDiscountDirId target dir id
+	 * @return Core_Entity
+	 * @hostcms-event shop_discount.onBeforeMove
+	 * @hostcms-event shop_discount.onAfterMove
+	 */
+	public function move($iShopDiscountDirId)
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($iShopDiscountDirId));
+
+		$this->shop_discount_dir_id = $iShopDiscountDirId;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
+
+		return $this;
+	}
+
+	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return self
@@ -288,7 +307,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		{
 			$oCore_Html_Entity_Div->add(
 				Core_Html_Entity::factory('Span')
-					->class('badge badge-square badge-sky badge-sm')
+					->class('badge badge-square badge-sky inverted badge-sm')
 					->value(htmlspecialchars($this->coupon_text))
 			);
 		}
@@ -297,7 +316,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		{
 			$oCore_Html_Entity_Div->add(
 				Core_Html_Entity::factory('Span')
-					->class('badge badge-square badge-orange badge-sm')
+					->class('badge badge-square badge-orange inverted badge-sm')
 					->value($this->start_time . ' – ' . $this->end_time)
 			);
 		}
@@ -329,7 +348,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		{
 			$oCore_Html_Entity_Div->add(
 				Core_Html_Entity::factory('Span')
-					->class('badge badge-square badge-palegreen badge-sm')
+					->class('badge badge-square badge-palegreen inverted badge-sm')
 					->value(Core::_('Shop_Discount.all_days'))
 				);
 		}
@@ -343,7 +362,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 				{
 					$oCore_Html_Entity_Div->add(
 						Core_Html_Entity::factory('Span')
-							->class('badge badge-square badge-palegreen badge-sm')
+							->class('badge badge-square badge-palegreen inverted badge-sm')
 							->value(Core::_('Shop_Discount.' . $fieldName))
 						);
 				}
@@ -420,9 +439,23 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 */
 	public function valueBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		return $this->type == 0
+		if ($this->value > 80 && $this->type == 0)
+		{
+			$return = '<i class="fa fa-exclamation-triangle warning" title="More than 80%"></i> ';
+		}
+		elseif($this->value == 0)
+		{
+			$return = '<i class="fa fa-exclamation-triangle warning" title="Zero Discount"></i> ';
+		}
+		else
+		{
+			$return = '';
+		}
+
+		return $return . ($this->type == 0
 			? Core_Str::hideZeros($this->value) . '%'
-			: htmlspecialchars($this->Shop->Shop_Currency->formatWithCurrency($this->value));
+			: htmlspecialchars($this->Shop->Shop_Currency->formatWithCurrency($this->value))
+		);
 	}
 
 	/**

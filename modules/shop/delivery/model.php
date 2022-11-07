@@ -435,6 +435,15 @@ class Shop_Delivery_Model extends Core_Entity
 		{
 			?><span class="label label-orange margin-left-5"><?php echo Core::_('Shop_Delivery.payment_systems_not_specified')?></span><?php
 		}
+
+		$aShop_Delivery_Intervals = $this->Shop_Delivery_Intervals->findAll(FALSE);
+		foreach ($aShop_Delivery_Intervals as $oShop_Delivery_Interval)
+		{
+			if ($oShop_Delivery_Interval->from_time != '00:00:00' || $oShop_Delivery_Interval->to_time != '00:00:00')
+			{
+				?><span class="badge badge-square badge-pink inverted margin-left-5 small"><i class="fas fa-stopwatch"></i> <?php echo date("H:i", strtotime($oShop_Delivery_Interval->from_time)), ' — ', date("H:i", strtotime($oShop_Delivery_Interval->to_time))?></span><?php
+			}
+		}
 	}
 
 	/**

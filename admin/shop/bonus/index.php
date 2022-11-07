@@ -34,6 +34,75 @@ $oAdmin_Form_Controller
 	->title($sFormTitle)
 	->pageTitle($sFormTitle);
 
+if (!is_null(Core_Array::getGet('autocomplete'))
+	&& !is_null(Core_Array::getGet('show_move_dirs'))
+	&& !is_null(Core_Array::getGet('queryString'))
+	&& Core_Array::getGet('entity_id')
+)
+{
+	$sQuery = trim(Core_DataBase::instance()->escapeLike(Core_Str::stripTags(strval(Core_Array::getGet('queryString')))));
+	$entity_id = intval(Core_Array::getGet('entity_id'));
+	$mode = intval(Core_Array::getGet('mode'));
+
+	$oShop = Core_Entity::factory('Shop', $entity_id);
+
+	$aExclude = strlen(Core_Array::getGet('exclude'))
+		? json_decode(Core_Array::getGet('exclude'), TRUE)
+		: array();
+
+	$aJSON = array();
+
+	if (strlen($sQuery))
+	{
+		$aJSON[0] = array(
+			'id' => 0,
+			'label' => Core::_('Shop_Bonus.root') . ' [0]'
+		);
+
+		$oShop_Bonus_Dirs = $oShop->Shop_Bonus_Dirs;
+		$oShop_Bonus_Dirs->queryBuilder()
+			->limit(Core::$mainConfig['autocompleteItems']);
+
+		switch ($mode)
+		{
+			// Вхождение
+			case 0:
+			default:
+				$oShop_Bonus_Dirs->queryBuilder()->where('shop_bonus_dirs.name', 'LIKE', '%' . str_replace(' ', '%', $sQuery) . '%');
+			break;
+			// Вхождение с начала
+			case 1:
+				$oShop_Bonus_Dirs->queryBuilder()->where('shop_bonus_dirs.name', 'LIKE', $sQuery . '%');
+			break;
+			// Вхождение с конца
+			case 2:
+				$oShop_Bonus_Dirs->queryBuilder()->where('shop_bonus_dirs.name', 'LIKE', '%' . $sQuery);
+			break;
+			// Точное вхождение
+			case 3:
+				$oShop_Bonus_Dirs->queryBuilder()->where('shop_bonus_dirs.name', '=', $sQuery);
+			break;
+		}
+
+		count($aExclude) && $oShop_Bonus_Dirs->queryBuilder()
+			->where('shop_bonus_dirs.id', 'NOT IN', $aExclude);
+
+		$aShop_Bonus_Dirs = $oShop_Bonus_Dirs->findAll();
+
+		foreach ($aShop_Bonus_Dirs as $oShop_Bonus_Dir)
+		{
+			$sParents = $oShop_Bonus_Dir->groupPathWithSeparator();
+
+			$aJSON[] = array(
+				'id' => $oShop_Bonus_Dir->id,
+				'label' => $sParents . ' [' . $oShop_Bonus_Dir->id . ']'
+			);
+		}
+	}
+
+	Core::showJson($aJSON);
+}
+
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
@@ -213,6 +282,57 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($oControllerCopy);
+}
+
+// Действие "Перенести"
+$oAdminFormActionMove = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('move');
+
+if ($oAdminFormActionMove && $oAdmin_Form_Controller->getAction() == 'move')
+{
+	$Admin_Form_Action_Controller_Type_Move = Admin_Form_Action_Controller::factory(
+		'Admin_Form_Action_Controller_Type_Move', $oAdminFormActionMove
+	);
+
+	$Admin_Form_Action_Controller_Type_Move
+		->title(Core::_('Shop_Bonus.move_dirs_title'))
+		->selectCaption(Core::_('Shop_Bonus.move_items_dirs'))
+		->value($oShop_Bonus_Dir->id)
+		->autocompletePath('/admin/shop/bonus/index.php?autocomplete=1&show_move_dirs=1')
+		->autocompleteEntityId($oShop->id);
+
+	$iCount = $oShop->Shop_Bonus_Dirs->getCount();
+
+	if ($iCount < Core::$mainConfig['switchSelectToAutocomplete'])
+	{
+		$aExclude = array();
+
+		$aChecked = $oAdmin_Form_Controller->getChecked();
+
+		foreach ($aChecked as $datasetKey => $checkedItems)
+		{
+			// Exclude just dirs
+			if ($datasetKey == 0)
+			{
+				foreach ($checkedItems as $key => $value)
+				{
+					$aExclude[] = $key;
+				}
+			}
+		}
+
+		$Admin_Form_Action_Controller_Type_Move
+			// Список директорий генерируется другим контроллером
+			->selectOptions(array(' … ') + Shop_Bonus_Controller_Edit::fillShopBonusDir($oShop->id, 0, $aExclude));
+	}
+	else
+	{
+		$Admin_Form_Action_Controller_Type_Move->autocomplete(TRUE);
+	}
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($Admin_Form_Action_Controller_Type_Move);
 }
 
 // Источник данных 0

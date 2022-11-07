@@ -441,7 +441,7 @@ $oAdmin_Form_Controller->addEntity(
 							<div class="col-xs-6 col-md-10">
 								<input type="text" name="globalSearch" class="form-control w-100" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
 								<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParamsItemProperties) . '"></i>
-								<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParamsItemProperties) . '"><i class="fa fa-search fa-fw"></i></button>
+								<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParamsItemProperties) . '"><i class="fa-solid fa-magnifying-glass fa-fw"></i></button>
 							</div>
 						</div>
 					</form>

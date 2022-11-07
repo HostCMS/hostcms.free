@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Admin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -28,7 +28,17 @@ class Admin_Form_Action_Controller_Edit extends Admin_Form_Action_Controller_Typ
 			$object->admin_form_id = Core_Array::getGet('admin_form_id', 0);
 		}
 
-		parent::setObject($object);
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
 
 		$oMainTab = $this->getTab('main');
 
@@ -128,7 +138,7 @@ class Admin_Form_Action_Controller_Edit extends Admin_Form_Action_Controller_Typ
 		$oMainTab->move($this->getField('single'), $oMainRow3);
 		$oMainTab->move($this->getField('group'), $oMainRow4);
 		$oMainTab->move($this->getField('modal'), $oMainRow5);
-		
+
 
 		$this->getField('sorting')
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));

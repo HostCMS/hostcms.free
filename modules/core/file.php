@@ -619,16 +619,16 @@ class Core_File
 
 		$fileName = str_replace(array("\r", "\n", "\0"), '', $fileName);
 
-		header("Pragma: public");
-		header("Content-Type: " . Core_Mime::getFileMime($file));
+		header('Pragma: public');
+		header('Content-Type: ' . Core_Mime::getFileMime($file));
 
 		$contentDisposition = isset($param['content_disposition']) && strtolower($param['content_disposition']) == 'attachment'
 			? 'attachment'
 			: 'inline';
 
-		header("Content-Disposition: {$contentDisposition}; fileName = \"{$fileName}\";");
-		header("Content-Transfer-Encoding: binary");
-		header("Content-Length: " . filesize($file));
+		header("Content-Disposition: {$contentDisposition}; filename=\"" . rawurlencode($fileName) . "\";");
+		header('Content-Transfer-Encoding: binary');
+		header('Content-Length: ' . filesize($file));
 
 		self::flush();
 
@@ -1140,43 +1140,106 @@ class Core_File
 
 		switch ($ext)
 		{
+			case 'htaccess':
+			case 'ini':
+			case 'buildpath':
+			case 'gitignore':
+			case 'project':
+				$class = 'fa-solid fa-wrench default-color';
+			break;
 			case 'jpg':
 			case 'jpeg':
+				$class = 'fa-regular fa-file-image jpg-color';
+			break;
 			case 'png':
+			case 'raw':
+				$class = 'fa-regular fa-file-image image-color';
+			break;
 			case 'gif':
 			case 'bmp':
 			case 'webp':
-				$class = 'fa fa-file-image-o image-color';
+				$class = 'fa-regular fa-file-image gif-color';
+			break;
+			case 'ai':
+			case 'ps':
+			case 'eps':
+			case 'svg':
+				$class = 'fa-regular fa-file-image svg-color';
 			break;
 			case 'pdf':
-				$class = 'fa fa-file-pdf-o pdf-color';
+				$class = 'fa-regular fa-file-pdf pdf-color';
 			break;
 			case 'xls':
 			case 'xlsx':
+				$class = 'fa-regular fa-file-excel excel-color';
+			break;
 			case 'csv':
-				$class = 'fa fa-file-excel-o excel-color';
+				$class = 'fa-solid fa-file-csv excel-color';
 			break;
 			case 'doc':
 			case 'docx':
-				$class = 'fa fa-file-word-o word-color';
+				$class = 'fa-regular fa-file-word word-color';
+			break;
+			case 'ppt':
+			case 'pptx':
+				$class = 'fa-regular fa-file-powerpoint powerpoint-color';
 			break;
 			case 'txt':
 			case 'rtf':
-				$class = 'fa fa-file-text-o text-color';
+			case 'md':
+			case 'sh':
+				$class = 'fa-regular fa-file-lines text-color';
 			break;
 			case 'zip':
 			case 'gz':
 			case 'rar':
 			case 'tar':
-				$class = 'fa fa-file-archive-o archive-color';
+			case 'tgz':
+				$class = 'fa-regular fa-file-zipper archive-color';
+			break;
+			case 'php':
+				$class = 'fa-brands fa-php php-color';
+			break;
+			case 'js':
+				$class = 'fa-brands fa-js-square js-color';
+			break;
+			case 'less':
+				$class = 'fa-brands fa-less less-color';
+			break;
+			case 'scss':
+				$class = 'fa-brands fa-saas saas-color';
+			break;
+			case 'css':
+				$class = 'fa-brands fa-css3 css-color';
+			break;
+			case 'html':
+			case 'htm':
+				$class = 'fa-brands fa-html5 html-color';
+			break;
+			case 'xml':
+			case 'yml':
+			case 'iml':
+				$class = 'fa-regular fa-file-code xml-color';
+			break;
+			case 'xsl':
+				$class = 'fa-regular fa-file-code xsl-color';
+			break;
+			case 'sql':
+				$class = 'fa-solid fa-database sql-color';
+			break;
+			case 'eot':
+			case 'woff':
+			case 'woff2':
+			case 'ttf':
+				$class = 'fa-brands fa-fonticons font-color';
 			break;
 			default:
-				$class = 'fa fa-file-o default-color';
+				$class = 'fa-regular fa-file default-color';
 		}
 
 		return $class;
 	}
-	
+
 	/**
 	 * Get Upload Error by code
 	 * @param int $errorCode
@@ -1210,7 +1273,7 @@ class Core_File
 			default:
 				$error = NULL;
 		}
-		
+
 		return $error;
 	}
 }

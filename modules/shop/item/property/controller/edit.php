@@ -84,7 +84,8 @@ class Shop_Item_Property_Controller_Edit extends Property_Controller_Edit
 							4 => array('value' => Core::_('Shop_Item.properties_show_kind_checkbox'), 'attr' => array('class' => 'shown-3')),
 							7 => array('value' => Core::_('Shop_Item.properties_show_kind_listbox'), 'attr' => array('class' => 'shown-3')),
 							5 => array('value' => Core::_('Shop_Item.properties_show_kind_checkbox_one'), 'attr' => array('class' => 'shown-7')),
-							6 => array('value' => Core::_('Shop_Item.properties_show_kind_from_to'), 'attr' => array('class' => 'shown-0 shown-11 shown-8 shown-9'))
+							6 => array('value' => Core::_('Shop_Item.properties_show_kind_from_to'), 'attr' => array('class' => 'shown-0 shown-11 shown-8 shown-9')),
+							99 => array('value' => Core::_('Shop_Item.properties_show_seo_filter'), 'attr' => array('class' => 'shown-0 shown-11 shown-1 shown-3 shown-4 shown-6 shown-8 shown-9')),
 						)
 					)
 					->name('filter')
@@ -191,7 +192,11 @@ class Shop_Item_Property_Controller_Edit extends Property_Controller_Edit
 						->select(
 							Core_QueryBuilder::select(intval($this->_object->id), 'shop_items.id', Core_QueryBuilder::raw(Core_DataBase::instance()->quote($defaultValue)))
 								->from('shop_items')
-								->leftJoin($tableName, $tableName . '.entity_id', '=', 'shop_items.id')
+								->leftJoin($tableName, $tableName . '.entity_id', '=', 'shop_items.id',
+									array(
+										array('AND' => array($tableName . '.property_id', '=', intval($this->_object->id)))
+									)
+								)
 								->where($tableName . '.entity_id', 'IS', NULL)
 								->where('shop_items.shop_id', '=', $Shop_Item_Property->shop_id)
 								->where('shop_items.deleted', '=', 0)

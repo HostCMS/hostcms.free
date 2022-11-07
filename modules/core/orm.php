@@ -1502,7 +1502,19 @@ class Core_ORM
 
 		if (isset($this->_relationCache[$lowerProperty]))
 		{
-			return $this->_relationCache[$lowerProperty];
+			$foreign_key = $this->_relations[$lowerProperty]['foreign_key'];
+			
+			// Related field has been changed
+			if (isset($this->_changedColumns[$foreign_key])
+				&& $this->_relationCache[$lowerProperty]->getPrimaryKey() != $this->$foreign_key)
+			{
+				// deletes the cached object
+				unset($this->_relationCache[$lowerProperty]);
+			}
+			else
+			{
+				return $this->_relationCache[$lowerProperty];
+			}
 		}
 
 		if (isset($this->_relations[$lowerProperty]))
@@ -1676,7 +1688,19 @@ class Core_ORM
 
 		if (isset($this->_relationCache[$lowerProperty]))
 		{
-			return $this->_relationCache[$lowerProperty];
+			$foreign_key = $this->_relations[$lowerProperty]['foreign_key'];
+			
+			// Related field has been changed
+			if (isset($this->_changedColumns[$foreign_key])
+				&& $this->_relationCache[$lowerProperty]->getPrimaryKey() != $this->$foreign_key)
+			{
+				// deletes the cached object
+				unset($this->_relationCache[$lowerProperty]);
+			}
+			else
+			{
+				return $this->_relationCache[$lowerProperty];
+			}
 		}
 
 		if (isset($this->_relations[$lowerProperty]))
@@ -1838,6 +1862,9 @@ class Core_ORM
 					{
 						$value = mb_substr($value, 0, $aField['max_length']);
 					}
+				break;
+				case 'geometry':
+					// nothing to do
 				break;
 				default:
 					throw new Core_Exception("Unchecked property '%property' type '%type' in the model '%model'",

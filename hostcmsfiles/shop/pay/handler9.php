@@ -437,7 +437,7 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 	/*
 	 * Обработка статуса оплаты
 	*/
-	function ProcessResult()
+	public function ProcessResult()
 	{
 		$oShop_Order = $this->_shopOrder;
 

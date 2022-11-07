@@ -291,7 +291,7 @@ class Bot_Controller_View extends Admin_Form_Controller_View
 			{
 				foreach ($this->_aBot_Dirs[$iBotDirParentId] as $oBot_Dir)
 				{
-					$return .= '<li class="' . (isset($this->_aBots[$oBot_Dir->id]) || isset($this->_aBot_Dirs[$oBot_Dir->id]) ? 'dropdown-submenu' : '') . '"><a href="#"><i class="fa fa-folder-o"></i>' . htmlspecialchars($oBot_Dir->name) . '</a>';
+					$return .= '<li class="' . (isset($this->_aBots[$oBot_Dir->id]) || isset($this->_aBot_Dirs[$oBot_Dir->id]) ? 'dropdown-submenu' : '') . '"><a href="#"><i class="fa-regular fa-folder-open"></i>' . htmlspecialchars($oBot_Dir->name) . '</a>';
 					$return .= $this->_showBotsTree($oBot_Dir->id, $iLevel + 1);
 					$return .= '</li>';
 				}

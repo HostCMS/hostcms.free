@@ -156,7 +156,7 @@ $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Event.events_menu_add_event'))
 		->icon('fa fa-plus')
-		->img('/admin/images/add.gif')
+		->class($bShow_subs && $parent_id ? 'btn btn-white' : NULL)
 		->href(
 			$bShow_subs
 				? NULL
@@ -568,7 +568,7 @@ $oAdmin_Form_Dataset
 	->changeField('event_status_id', 'list', $aList);
 
 Core_Event::attach('Admin_Form_Controller.onAfterShowContent', array('User_Controller', 'onAfterShowContentPopover'), array($oAdmin_Form_Controller));
-Core_Event::attach('Admin_Form_Action_Controller_Type_Edit.onAfterRedeclaredPrepareForm', array('User_Controller', 'onAfterShowContentPopover'), array($oAdmin_Form_Controller));
+Core_Event::attach('Admin_Form_Action_Controller_Type_Edit.onAfterRedeclaredPrepareForm', array('User_Controller', 'onAfterRedeclaredPrepareForm'));
 
 if (Core::moduleIsActive('siteuser'))
 {

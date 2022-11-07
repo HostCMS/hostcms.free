@@ -319,6 +319,7 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 			$oShop_Purchase_Discount_Controller
 				->amount($amountPurchaseDiscount)
 				->quantity($quantityPurchaseDiscount)
+				->weight($this->totalWeight)
 				->couponText($this->couponText)
 				->siteuserId($this->_oSiteuser ? $this->_oSiteuser->id : 0)
 				->prices($aDiscountPrices);

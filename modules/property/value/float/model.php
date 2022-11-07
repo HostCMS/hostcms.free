@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Property
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Value_Float_Model extends Core_Entity
 {
@@ -108,8 +108,10 @@ class Property_Value_Float_Model extends Core_Entity
 	{
 		$oProperty = $this->Property;
 
+		!$oProperty->multiple && $this->addForbiddenTag('sorting');
+
 		$this->clearXmlTags()
-			->addXmlTag('property_dir_id', $this->Property->property_dir_id)
+			->addXmlTag('property_dir_id', $oProperty->property_dir_id)
 			->addXmlTag('tag_name', $oProperty->tag_name);
 
 		return $this;

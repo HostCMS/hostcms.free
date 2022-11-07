@@ -49,7 +49,7 @@ class Skin_Default_Admin_Form_Entity_Dropdownlist extends Admin_Form_Entity
 
 	/**
 	 * Counter of Admin_Form_Entity_Select used in the form
-	 * @var int
+	 * @var object
 	 */
 	//static $iFilterCount = 0;
 
@@ -105,11 +105,14 @@ class Skin_Default_Admin_Form_Entity_Dropdownlist extends Admin_Form_Entity
 
 		?><div <?php echo implode(' ', $aDivAttr)?>><?php
 
-		?><span class="caption"><?php echo $this->caption?></span><?php
+		if (strlen($this->caption))
+		{
+			?><span class="caption"><?php echo $this->caption?></span><?php
+		}
 
 		if (count($this->_children))
 		{
-		?><div class="input-group"><?php
+			?><div class="input-group"><?php
 		}
 
 		$this->_oCore_Html_Entity_Dropdownlist->_data = $this->_data;

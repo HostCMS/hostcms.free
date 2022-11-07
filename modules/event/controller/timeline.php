@@ -114,7 +114,7 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 		{
 			foreach ($aEntities as $key => $oEntity)
 			{
-				$aTmp[Core_Date::sql2date($oEntity->datetime)][$key] = $oEntity;
+				$aTmp[Core_Date::sql2date($oEntity->dataDatetime)][$key] = $oEntity;
 			}
 		}
 
@@ -148,7 +148,7 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 									'menubar' => 'false',
 									'statusbar' => 'false',
 									'plugins' => '"advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table code wordcount"',
-									'toolbar1' => '"bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | removeformat"',
+									'toolbar1' => '"bold italic underline alignleft aligncenter alignright alignjustify bullist numlist removeformat"',
 									// 'statusbar' => true
 								))
 								->divAttr(array('class' => ''))
@@ -166,10 +166,13 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 								<span class="margin-right-20" onclick="$.showDropzone(this, '<?php echo $windowId?>');"><i class="fa fa-paperclip fa-fw"></i> <?php echo Core::_('Crm_Note.file')?></span>
 								<div class="checkbox">
 									<label>
-										<input name="result" type="checkbox" class="colored-blue" value="1"/>
+										<input name="result" type="checkbox" class="colored-blue" value="1" onclick="$('#<?php echo $windowId?> .event-completed').toggleClass('hidden')"/>
 										<span class="text"><?php echo Core::_('Crm_Note.result')?></span>
 									</label>
 								</div>
+								<?php
+									echo $oEventParent->getCompletedDropdown($this->_Admin_Form_Controller);
+								?>
 							</div>
 							<button id="sendForm" class="btn btn-palegreen btn-sm" type="submit">
 								<?php echo Core::_('Crm_Note.send')?>
@@ -205,8 +208,8 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 							$additionalParams = '';
 							$class = '';
 
-							$iDatetime = Core_Date::sql2timestamp($oTmpEntity->datetime);
-							$time = date('H:i', Core_Date::sql2timestamp($oTmpEntity->datetime));
+							$iDatetime = Core_Date::sql2timestamp($oTmpEntity->dataDatetime);
+							$time = date('H:i', Core_Date::sql2timestamp($oTmpEntity->dataDatetime));
 
 							switch (get_class($oTmpEntity))
 							{
@@ -224,14 +227,25 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 									//$oCrm_Note = Core_Entity::factory('Crm_Note', $oTmpEntity->id);
 
 									$text = $oTmpEntity->text;
-									$files = $oTmpEntity->getFilesBlock($oTmpEntity->Event);
 
-									if (!is_null($files))
+									if (Core::moduleIsActive('crm'))
 									{
-										$text .= '<div class="crm-note-attachment-wrapper">' . $files . '</div>';
+										$files = $oTmpEntity->getFilesBlock($oTmpEntity->Event);
+
+										if (!is_null($files))
+										{
+											$text .= '<div class="crm-note-attachment-wrapper">' . $files . '</div>';
+										}
 									}
 
-									$oTmpEntity->result && $class = 'timeline-crm-note-result';
+									if ($oTmpEntity->result == 1)
+									{
+										$class = 'timeline-crm-note-result';
+									}
+									elseif ($oTmpEntity->result == -1)
+									{
+										$class = 'timeline-crm-note-result-unsuccessfull';
+									}
 
 									$iEntityAdminFormId = 324;
 
@@ -362,6 +376,54 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 									$additionalParams = "";
 									// $datasetId = 0;
 								break;
+								case 'Dms_Document_Model':
+									$badge = 'fa fa-columns';
+
+									// $color = 'danger';
+
+									// $oObject = Core_Entity::factory('Dms_Document', $oTmpEntity->id);
+
+									ob_start();
+									?>
+									<div class="semi-bold">
+										<span><?php echo htmlspecialchars($oTmpEntity->name)?></span><?php
+
+										if (strlen($oTmpEntity->numberBackend()))
+										{
+											?><span class="margin-left-5">№ <?php echo $oTmpEntity->numberBackend()?></span><?php
+										}
+
+										if ($oTmpEntity->classify)
+										{
+											?><i class="fa fa-lock margin-left-5" style="color: #ed4e2a" title="<?php echo Core::_('Dms_Document.classify_1')?>"></i><?php
+										}
+									?></div><?php
+
+									if (strlen($oTmpEntity->description))
+									{
+										?><div class="small gray"><?php echo nl2br(htmlspecialchars($oTmpEntity->description))?></div><?php
+									}
+
+									?><div>
+										<?php
+										if ($oTmpEntity->dms_document_type_id)
+										{
+											?><span class="margin-right-10"><?php echo $oTmpEntity->dms_document_type_idBackend()?></span><?php
+										}
+										echo $oTmpEntity->showDmsCommunication() . $oTmpEntity->showDmsWorkflowExecutions($oAdmin_Form_Controller)?>
+									</div><?php
+
+									if ($oTmpEntity->crm_project_id)
+									{
+										$oTmpEntity->showCrmProjects($oAdmin_Form_Controller);
+									}
+
+									$text = ob_get_clean();
+
+									$iEntityAdminFormId = 278;
+
+									$path = '/admin/event/timeline/index.php';
+								break;
 							}
 							?>
 							<li class="timeline-inverted <?php echo $class?>">
@@ -467,7 +529,7 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 		}
 		else
 		{
-			Core_Message::show(Core::_('Siteuser.timeline_empty'), 'warning');
+			Core_Message::show(Core::_('Admin_Form.timeline_empty'), 'warning');
 		}
 		?>
 

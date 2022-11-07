@@ -50,6 +50,13 @@ class Crm_Project_Entity_Controller_Delete extends Admin_Form_Action_Controller
 				case 3:
 					Core_Entity::factory('Crm_Project_Attachment', $entity_id)->delete();
 				break;
+				// Dms_Documents
+				case 4:
+					if (Core::moduleIsActive('dms'))
+					{
+						Core_Entity::factory('Dms_Document', $entity_id)->markDeleted();
+					}
+				break;
 			}
 		}
 

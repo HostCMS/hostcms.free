@@ -181,7 +181,9 @@ if (!is_null(Core_Array::getGet('ajaxLoad')))
 		$oCurrent_Shop_Country_Location_Cities = Core_Entity::factory('Shop_Country_Location_City');
 		$oCurrent_Shop_Country_Location_Cities->queryBuilder()
 			->join('shop_country_locations', 'shop_country_locations.id', '=', 'shop_country_location_cities.shop_country_location_id')
-			->where('shop_country_locations.shop_country_id', '=', $shop_country_id);
+			->where('shop_country_locations.shop_country_id', '=', $shop_country_id)
+			->where('shop_country_locations.active', '=', 1)
+			->where('shop_country_location_cities.active', '=', 1);
 
 		$oCurrent_Shop_Country_Location_City = $oCurrent_Shop_Country_Location_Cities->getByName(strval(Core_Array::getGet('city_name')));
 
@@ -213,24 +215,30 @@ if (!is_null(Core_Array::getGet('ajaxLoad')))
 		$oShop_Country_Location = Core_Entity::factory('Shop_Country_Location');
 		$oShop_Country_Location
 			->queryBuilder()
-			->where('shop_country_id', '=', intval(Core_Array::getGet('shop_country_id')));
-		$aObjects = $oShop_Country_Location->findAll();
+			->where('shop_country_id', '=', Core_Array::getGet('shop_country_id', 0, 'int'))
+			->where('shop_country_locations.active', '=', 1);
+			
+		$aObjects = $oShop_Country_Location->findAll(FALSE);
 	}
 	elseif (Core_Array::getGet('shop_country_location_id'))
 	{
 		$oShop_Country_Location_City = Core_Entity::factory('Shop_Country_Location_City');
 		$oShop_Country_Location_City
 			->queryBuilder()
-			->where('shop_country_location_id', '=', intval(Core_Array::getGet('shop_country_location_id')));
-		$aObjects = $oShop_Country_Location_City->findAll();
+			->where('shop_country_location_id', '=', Core_Array::getGet('shop_country_location_id', 0, 'int'))
+			->where('shop_country_location_cities.active', '=', 1);
+			
+		$aObjects = $oShop_Country_Location_City->findAll(FALSE);
 	}
 	elseif (Core_Array::getGet('shop_country_location_city_id'))
 	{
 		$oShop_Country_Location_City_Area = Core_Entity::factory('Shop_Country_Location_City_Area');
 		$oShop_Country_Location_City_Area
 			->queryBuilder()
-			->where('shop_country_location_city_id', '=', intval(Core_Array::getGet('shop_country_location_city_id')));
-		$aObjects = $oShop_Country_Location_City_Area->findAll();
+			->where('shop_country_location_city_id', '=', Core_Array::getGet('shop_country_location_city_id', 0, 'int'))
+			->where('shop_country_location_city_areas.active', '=', 1);
+			
+		$aObjects = $oShop_Country_Location_City_Area->findAll(FALSE);
 	}
 
 	$aArray = array('…');
@@ -298,7 +306,7 @@ if (Core_Array::getPost('change_postpone'))
 if (!is_null(Core_Array::getRequest('coupon_text')))
 {
 	Core_Session::start();
-	$_SESSION['hostcmsOrder']['coupon_text'] = trim(strval(Core_Array::getRequest('coupon_text')));
+	$_SESSION['hostcmsOrder']['coupon_text'] = Core_Array::getRequest('coupon_text', '', 'trim');
 }
 
 // Запоминаем количество списываемых бонусов

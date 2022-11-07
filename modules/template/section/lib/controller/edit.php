@@ -14,15 +14,6 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
 	/**
-	 * Constructor.
-	 * @param Admin_Form_Action_Model $oAdminFormAction action
-	 */
-	public function __construct(Admin_Form_Action_Model $oAdminFormAction)
-	{
-		parent::__construct($oAdminFormAction);
-	}
-
-	/**
 	 * Set object
 	 * @param object $object object
 	 * @return self
@@ -38,7 +29,17 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 			$object->template_section_id = Core_Array::getGet('template_section_id');
 		}
 
-		parent::setObject($object);
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
 
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 

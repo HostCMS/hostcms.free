@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Xsl
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'XSL templates',
@@ -37,5 +37,9 @@ return array(
 	'XSL_root_dir' => 'XSL templates',
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
-	'option_formatOutput' => 'Format output'
+	'option_formatOutput' => 'Format output',
+	'import' => 'Import',
+	'import_file' => 'Choose file to upload',
+	'import_button' => 'Upload',
+	'importXsls_success' => 'Import completed successfully!',
 );

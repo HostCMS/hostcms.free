@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Discountcard_Bonus_Type_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -25,7 +25,17 @@ class Shop_Discountcard_Bonus_Type_Controller_Edit extends Admin_Form_Action_Con
 			$object->shop_id = Core_Array::getGet('shop_id');
 		}
 
-		parent::setObject($object);
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
 
 		$oMainTab = $this->getTab('main');
 

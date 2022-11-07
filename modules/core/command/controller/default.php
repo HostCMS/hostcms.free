@@ -629,36 +629,12 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 			 * @param string $text text
 			 * @return string
 			 */
-			function strip_nl($text)
+			/*function stripNl($text)
 			{
-				$text = str_replace("\n", "", $text);
-				$text = str_replace("\r", "", $text);
-				$text = str_replace("'", "\'", $text);
+				return str_replace(array("\n", "\r", "'"), array('', '', "\'"), $text);
+			}*/
 
-				return $text;
-			}
-
-			/**
-			 * Callback function
-			 * функция обратного вызова
-			 * @param array $matches matches
-			 * @return string
-			 */
-			function safe_email_callback($matches)
-			{
-				ob_start();
-				?><script><?php
-				echo "//<![CDATA[\n";
-				?><?php
-				?>function hostcmsEmail(c){return c.replace(/[a-zA-Z]/g, function (c){return String.fromCharCode((c <= "Z" ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c-26);})}<?php
-				?>document.write ('<a <?php echo strip_nl($matches[1])?> href="mailto:' + hostcmsEmail('<?php echo strip_nl(str_rot13($matches[2]))?>') + '"<?php echo strip_nl($matches[3])?>>' + hostcmsEmail('<?php echo strip_nl(str_rot13($matches[4]))?>') + '</a>');<?php
-				echo "//]]>\n";
-				?></script><?php
-
-				return ob_get_clean();
-			}
-
-			$sTmpContent = preg_replace_callback('/<a\s([^>]*)?href=[\'|\"]?mailto:([^\"|\']*)[\"|\']?([^>]*)?>(.*?)<\/a>/is', "safe_email_callback", $sContent); // без /u
+			$sTmpContent = preg_replace_callback('/<a\s([^>]*)?href=[\'|\"]?(mailto:[^\"|\']*)[\"|\']?([^>]*)?>(.*?)<\/a>/is', 'self::_safeEmailCallback', $sContent); // без /u
 
 			strlen($sTmpContent) && $sContent = $sTmpContent;
 		}
@@ -743,6 +719,30 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 		Core_Event::notify(get_class($this) . '.onAfterShowAction', $this, array($oCore_Response));
 
 		return $oCore_Response;
+	}
+
+	/**
+	 * Flag for _safeEmailCallback
+	 * @var boolean
+	 */
+	static protected $_safeEmailCallbackAddedFuncion = FALSE;
+
+	/**
+	 * Safe Email Callback Function
+	 * @param array $matches matches
+	 * @return string
+	 */
+	static protected function _safeEmailCallback($matches)
+	{
+		ob_start();
+		?><a <?php echo $matches[1]?>href="<?php echo str_rot13($matches[2])?>"<?php echo $matches[3]?>><?php echo str_rot13($matches[4])?></a><script><?php
+		if (!self::$_safeEmailCallbackAddedFuncion)
+		{
+			?>function hostcmsEmail(c){return c.replace(/[a-zA-Z]/g, function(c){return String.fromCharCode((c <= "Z" ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c-26);})}<?php
+			self::$_safeEmailCallbackAddedFuncion = TRUE;
+		}
+		?>var o = document.currentScript.previousElementSibling; o.href = hostcmsEmail(o.href); o.innerHTML = hostcmsEmail(o.innerHTML);</script><?php
+		return ob_get_clean();
 	}
 
 	/**

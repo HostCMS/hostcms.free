@@ -18,6 +18,7 @@ class Core_Html_Entity_Td extends Core_Html_Entity
 	 * @var array
 	 */
 	protected $_allowedProperties = array(
+		'value',
 		'abbr',
 		'align',
 		'axis',

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 {
@@ -297,7 +297,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 							<i class="fa fa-expand gray"></i>
 						</a>
 						<a data-toggle="refresh" onclick="$(this).find('i').addClass('fa-spin'); $.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#shopCommentsAdminPage'), 'button': $(this).find('i') });">
-							<i class="fa fa-refresh gray"></i>
+							<i class="fa-solid fa-rotate gray"></i>
 						</a>
 					</div>
 				</div>

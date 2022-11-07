@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Company
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Company_Department_Controller_Edit extends Admin_Form_Action_Controller
 {
@@ -45,29 +45,6 @@ class Company_Department_Controller_Edit extends Admin_Form_Action_Controller
 			}
 
 			$aCompany_Department_Directory_Emails = $oDepartment->Company_Department_Directory_Emails->findAll();
-
-			/* Admin_Form_Entity::factory('Div')
-				->class('well with-header')
-				->add(
-					Admin_Form_Entity::factory('Div')
-						->class('header bordered-magenta bg-palegreen')
-						->add(Admin_Form_Entity::factory('Code')
-								->html('<i class="widget-icon fa fa-envelope icon-separator"></i>' . Core::_('Directory_Email.emails'))
-						)
-				);
-
-			Admin_Form_Entity::factory('Div') // div с кноками + и -
-				->class('no-padding add-remove-property margin-top-23 pull-left')
-				->add(
-					Admin_Form_Entity::factory('Code')
-						->html('<div class="btn btn-palegreen" onclick="$.cloneFormRow(this); event.stopPropagation();">
-									<i class="fa fa-plus-circle close"></i>
-								</div>
-								<div class="btn btn-darkorange btn-delete' . (count($aCompany_Department_Directory_Emails) ? '' : ' hide') . '" onclick="$.deleteFormRow(this); event.stopPropagation();">
-									<i class="fa fa-minus-circle close"></i>
-								</div>')
-				);
-				*/
 
 			// Email'ы сотрудника
 			$oDepartmentEmailsRow = Directory_Controller_Tab::instance('email')

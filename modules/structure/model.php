@@ -1264,7 +1264,7 @@ class Structure_Model extends Core_Entity
 				$icon = 'fa fa-list-alt';
 			break;
 			case 3:
-				$icon = 'fa fa-link';
+				$icon = 'fa-solid fa-link';
 			break;
 			default:
 				$icon = '—';

@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Set prices',
@@ -43,4 +43,5 @@ return array(
 	'unpost_success' => 'Document unposted successfully!',
 	'convolution' => 'Convolution',
 	'include_modifications' => 'Add product modifications and set prices',
+	'apply_item_change_attributes' => "Set price via attribute change",
 );

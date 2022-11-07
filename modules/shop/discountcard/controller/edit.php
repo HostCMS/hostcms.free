@@ -26,7 +26,17 @@ class Shop_Discountcard_Controller_Edit extends Admin_Form_Action_Controller_Typ
 			// $object->number = $object->generate();
 		}
 
-		parent::setObject($object);
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
 
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');

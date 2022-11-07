@@ -66,7 +66,7 @@ class Field_Dir_Model extends Core_Entity
 		$countField_Dirs = $this->Field_Dirs->getCount();
 		$countField_Dirs && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
-			->value('<i class="fa fa-folder-open-o"></i> ' . $countField_Dirs)
+			->value('<i class="fa-regular fa-folder-open"></i> ' . $countField_Dirs)
 			->title(Core::_('Informationsystem.all_groups_count', $countField_Dirs))
 			->execute();
 

@@ -25,10 +25,20 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 			$object->shop_id = Core_Array::getGet('shop_id');
 		}
 
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
+
 		$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0));
 		$oShop_Group = Core_Entity::factory('Shop_Group', Core_Array::getGet('shop_group_id', 0));
-
-		parent::setObject($object);
 
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');

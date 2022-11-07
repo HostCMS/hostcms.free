@@ -371,7 +371,7 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 	{
 		if ($this->Shop_Item->shortcut_id)
 		{
-			return '<i class="fa fa-link"></i>';
+			return '<i class="fa-solid fa-link"></i>';
 		}
 		elseif (strlen($this->Shop_Item->image_small))
 		{

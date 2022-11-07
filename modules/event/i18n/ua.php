@@ -10,7 +10,7 @@ return array(
 	'events_menu_statuses' => 'Статуси',
 	'events_menu_meeting_places' => 'Місця зустрічей',
 	'add_title' => 'Додавання справи',
-	'edit_title' => 'Редагування справи "%s"',
+	'edit_title' => '%s',
 	'complete' => 'Завершити',
 	'resume' => 'Відновити',
 	'id' => 'Ідентифікатор',
@@ -153,4 +153,5 @@ return array(
 	'history_change_completed-1' => '<span class="darkorange">Справа завершена неуспішно</span>',
 
 	'event_files' => 'Файли',
+	'tabDmsDocuments' => 'Документи',
 );

@@ -57,6 +57,7 @@ return array(
 	'properties_show_kind_checkbox_one' => 'Checkbox',
 	'properties_show_kind_from_to' => 'From.. to..',
 	'properties_show_kind_listbox' => 'List by list of multiple choice',
+	'properties_show_seo_filter' => 'Just for SEO filter',
 
 	'warehouse_header' => "Quantity of products in stocks",
 	'property_header' => "Shop properties",
@@ -354,4 +355,8 @@ return array(
 	'attribute_item_tab' => 'Items',
 	'attribute_group_tab' => 'Groups',
 	'include_subgroups' => 'Include subgroups',
+	'attribute_item_main_tab' => 'Main',
+	'attribute_item_price_tab' => 'Prices',
+	'attribute_item_warehouse_tab' => 'Warehouses',
+	'shop_discount_siteuser_title' => 'Personal discounts',
 );

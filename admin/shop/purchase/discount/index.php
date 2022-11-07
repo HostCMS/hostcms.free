@@ -34,6 +34,75 @@ $oAdmin_Form_Controller
 	->title($sFormTitle)
 	->pageTitle($sFormTitle);
 
+if (!is_null(Core_Array::getGet('autocomplete'))
+	&& !is_null(Core_Array::getGet('show_move_dirs'))
+	&& !is_null(Core_Array::getGet('queryString'))
+	&& Core_Array::getGet('entity_id')
+)
+{
+	$sQuery = trim(Core_DataBase::instance()->escapeLike(Core_Str::stripTags(strval(Core_Array::getGet('queryString')))));
+	$entity_id = intval(Core_Array::getGet('entity_id'));
+	$mode = intval(Core_Array::getGet('mode'));
+
+	$oShop = Core_Entity::factory('Shop', $entity_id);
+
+	$aExclude = strlen(Core_Array::getGet('exclude'))
+		? json_decode(Core_Array::getGet('exclude'), TRUE)
+		: array();
+
+	$aJSON = array();
+
+	if (strlen($sQuery))
+	{
+		$aJSON[0] = array(
+			'id' => 0,
+			'label' => Core::_('Shop_Purchase_Discount.root') . ' [0]'
+		);
+
+		$oShop_Purchase_Discount_Dirs = $oShop->Shop_Purchase_Discount_Dirs;
+		$oShop_Purchase_Discount_Dirs->queryBuilder()
+			->limit(Core::$mainConfig['autocompleteItems']);
+
+		switch ($mode)
+		{
+			// Вхождение
+			case 0:
+			default:
+				$oShop_Purchase_Discount_Dirs->queryBuilder()->where('shop_purchase_discount_dirs.name', 'LIKE', '%' . str_replace(' ', '%', $sQuery) . '%');
+			break;
+			// Вхождение с начала
+			case 1:
+				$oShop_Purchase_Discount_Dirs->queryBuilder()->where('shop_purchase_discount_dirs.name', 'LIKE', $sQuery . '%');
+			break;
+			// Вхождение с конца
+			case 2:
+				$oShop_Purchase_Discount_Dirs->queryBuilder()->where('shop_purchase_discount_dirs.name', 'LIKE', '%' . $sQuery);
+			break;
+			// Точное вхождение
+			case 3:
+				$oShop_Purchase_Discount_Dirs->queryBuilder()->where('shop_purchase_discount_dirs.name', '=', $sQuery);
+			break;
+		}
+
+		count($aExclude) && $oShop_Purchase_Discount_Dirs->queryBuilder()
+			->where('shop_purchase_discount_dirs.id', 'NOT IN', $aExclude);
+
+		$aShop_Purchase_Discount_Dirs = $oShop_Purchase_Discount_Dirs->findAll();
+
+		foreach ($aShop_Purchase_Discount_Dirs as $oShop_Purchase_Discount_Dir)
+		{
+			$sParents = $oShop_Purchase_Discount_Dir->groupPathWithSeparator();
+
+			$aJSON[] = array(
+				'id' => $oShop_Purchase_Discount_Dir->id,
+				'label' => $sParents . ' [' . $oShop_Purchase_Discount_Dir->id . ']'
+			);
+		}
+	}
+
+	Core::showJson($aJSON);
+}
+
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
 // Меню формы
@@ -157,8 +226,8 @@ if ($oShop_Purchase_Discount_Dir->id)
 	{
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 			->name($oShop_Purchase_Discount_Dir_Breadcrumbs->name)
-			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/discount/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&shop_purchase_discount_dir_id={$oShop_Purchase_Discount_Dir_Breadcrumbs->id}"))
-			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/discount/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&shop_purchase_discount_dir_id={$oShop_Purchase_Discount_Dir_Breadcrumbs->id}"));
+			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/purchase/discount/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&shop_purchase_discount_dir_id={$oShop_Purchase_Discount_Dir_Breadcrumbs->id}"))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/purchase/discount/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&shop_purchase_discount_dir_id={$oShop_Purchase_Discount_Dir_Breadcrumbs->id}"));
 	}
 	while ($oShop_Purchase_Discount_Dir_Breadcrumbs = $oShop_Purchase_Discount_Dir_Breadcrumbs->getParent());
 
@@ -208,6 +277,57 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($oControllerCopy);
+}
+
+// Действие "Перенести"
+$oAdminFormActionMove = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('move');
+
+if ($oAdminFormActionMove && $oAdmin_Form_Controller->getAction() == 'move')
+{
+	$Admin_Form_Action_Controller_Type_Move = Admin_Form_Action_Controller::factory(
+		'Admin_Form_Action_Controller_Type_Move', $oAdminFormActionMove
+	);
+
+	$Admin_Form_Action_Controller_Type_Move
+		->title(Core::_('Shop_Purchase_Discount.move_dirs_title'))
+		->selectCaption(Core::_('Shop_Purchase_Discount.move_items_dirs'))
+		->value($oShop_Purchase_Discount_Dir->id)
+		->autocompletePath('/admin/shop/purchase/discount/index.php?autocomplete=1&show_move_dirs=1')
+		->autocompleteEntityId($oShop->id);
+
+	$iCount = $oShop->Shop_Purchase_Discount_Dirs->getCount();
+
+	if ($iCount < Core::$mainConfig['switchSelectToAutocomplete'])
+	{
+		$aExclude = array();
+
+		$aChecked = $oAdmin_Form_Controller->getChecked();
+
+		foreach ($aChecked as $datasetKey => $checkedItems)
+		{
+			// Exclude just dirs
+			if ($datasetKey == 0)
+			{
+				foreach ($checkedItems as $key => $value)
+				{
+					$aExclude[] = $key;
+				}
+			}
+		}
+
+		$Admin_Form_Action_Controller_Type_Move
+			// Список директорий генерируется другим контроллером
+			->selectOptions(array(' … ') + Shop_Purchase_Discount_Controller_Edit::fillShopPurchaseDiscountDir($oShop->id, 0, $aExclude));
+	}
+	else
+	{
+		$Admin_Form_Action_Controller_Type_Move->autocomplete(TRUE);
+	}
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($Admin_Form_Action_Controller_Type_Move);
 }
 
 // Источник данных 0

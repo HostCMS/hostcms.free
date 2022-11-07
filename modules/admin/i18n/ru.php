@@ -102,6 +102,7 @@ return array(
 	'sound' => 'Звук',
 	'phone' => 'Телефония',
 	'placeholderGlobalSearch' => 'Поиск',
-	
+
 	'none' => 'Отсутствует',
+	'no_title' => '<Без названия>',
 );

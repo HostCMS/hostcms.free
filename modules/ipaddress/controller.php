@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Ipaddress
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Ipaddress_Controller
 {
@@ -135,7 +135,7 @@ class Ipaddress_Controller
 	{
 		list($sNet, $iMask) = explode('/', $cidr);
 
-		if (!is_numeric($iMask))
+		if (!is_numeric($iMask) || $iMask > 32)
 		{
 			Core_Log::instance()->clear()
 				->status(Core_Log::$ERROR)

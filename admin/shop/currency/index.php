@@ -3,9 +3,9 @@
  * Online shop.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -45,7 +45,7 @@ $oAdmin_Form_Entity_Menus->add(
 
 $oCurrenciesMenu = Admin_Form_Entity::factory('Menu')
 	->name(Core::_('Shop_Currency.update_currency'))
-	->icon('fa fa-refresh');
+	->icon('fa-solid fa-rotate');
 
 $aConfig = Core_Config::instance()->get('shop_currency_config')
 	+ array(
@@ -67,7 +67,7 @@ foreach ($aConfig as $key => $aCurrencyConfig)
 			Admin_Form_Entity::factory('Menu')
 				->name($aCurrencyConfig['name'])
 				->icon('fa fa-shopping-cart')
-				->href( 
+				->href(
 					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'update', $key, 0, 0)
 				)
 				->onclick(

@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Property
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Property_Controller_Value_Type
 {
@@ -64,13 +64,18 @@ abstract class Property_Controller_Value_Type
 	 * @param boolean $bCache cache mode
 	 * @return array
 	 */
-	public function getValues($entityId, $bCache = TRUE)
+	public function getValues($entityId, $bCache = TRUE, $bSorting = FALSE)
 	{
 		$oProperty_Values = $this->getPropertyValueObject();
 
 		$oProperty_Values
 			->queryBuilder()
 			->where('entity_id', '=', $entityId);
+
+		$bSorting && $oProperty_Values
+			->queryBuilder()
+			->clearOrderBy()
+			->orderBy('sorting', 'ASC');
 
 		return $oProperty_Values->findAll($bCache);
 	}

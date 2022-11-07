@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Market
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'menu' => 'Магазин приложений',
@@ -19,6 +19,7 @@ return array(
 	'server_error_respond_12' => 'Неверный ответ сервера, обратитесь в поддержку.',
 	'server_error_respond_13' => 'Данные о модуле не переданы.',
 	'server_error_respond_14' => 'Файл модуля не найден.',
+	'server_error_respond_15' => 'Ошибка загрузки файла модуля, вероятно он слишком велик.',
 	'install' => 'Установить',
 	'installed' => 'Установлен',
 	'free' => 'Бесплатно',

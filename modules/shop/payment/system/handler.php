@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Shop_Payment_System_Handler
 {
@@ -77,6 +77,36 @@ abstract class Shop_Payment_System_Handler
 			}
 		}
 	}
+
+	/**
+	 * @var array
+	 */
+	protected $_aDiscountPrices = array();
+
+	/**
+	 * @var array
+	 */
+	protected $_quantityPurchaseDiscount = NULL;
+
+	/**
+	 * @var array
+	 */
+	protected $_amountPurchaseDiscount = NULL;
+
+	/**
+	 * @var array
+	 */
+	protected $_quantity = NULL;
+
+	/**
+	 * @var array
+	 */
+	protected $_amount = NULL;
+
+	/**
+	 * @var array
+	 */
+	protected $_weight = NULL;
 
 	/**
 	 * List of properties
@@ -323,35 +353,37 @@ abstract class Shop_Payment_System_Handler
 		$oShop = $this->_Shop_Payment_System_Model->Shop;
 
 		$this->_shopOrder = Core_Entity::factory('Shop_Order');
-		$this->_shopOrder->shop_country_id = intval(Core_Array::get($this->_orderParams, 'shop_country_id', 0));
-		$this->_shopOrder->shop_country_location_id = intval(Core_Array::get($this->_orderParams, 'shop_country_location_id', 0));
-		$this->_shopOrder->shop_country_location_city_id = intval(Core_Array::get($this->_orderParams, 'shop_country_location_city_id', 0));
-		$this->_shopOrder->shop_country_location_city_area_id = intval(Core_Array::get($this->_orderParams, 'shop_country_location_city_area_id', 0));
-		$this->_shopOrder->postcode = trim(strval(Core_Array::get($this->_orderParams, 'postcode', '')));
-		$this->_shopOrder->address = trim(strval(Core_Array::get($this->_orderParams, 'address', '')));
-		$this->_shopOrder->house = trim(strval(Core_Array::get($this->_orderParams, 'house', '')));
-		$this->_shopOrder->flat = trim(strval(Core_Array::get($this->_orderParams, 'flat', '')));
-		$this->_shopOrder->surname = trim(strval(Core_Array::get($this->_orderParams, 'surname', '')));
-		$this->_shopOrder->name = trim(strval(Core_Array::get($this->_orderParams, 'name', '')));
-		$this->_shopOrder->patronymic = trim(strval(Core_Array::get($this->_orderParams, 'patronymic', '')));
-		$this->_shopOrder->company = trim(strval(Core_Array::get($this->_orderParams, 'company', '')));
-		$this->_shopOrder->phone = trim(strval(Core_Array::get($this->_orderParams, 'phone', '')));
-		$this->_shopOrder->fax = trim(strval(Core_Array::get($this->_orderParams, 'fax', '')));
-		$this->_shopOrder->email = trim(strval(Core_Array::get($this->_orderParams, 'email', '')));
-		$this->_shopOrder->description = trim(strval(Core_Array::get($this->_orderParams, 'description', '')));
+		$this->_shopOrder->shop_country_id = Core_Array::get($this->_orderParams, 'shop_country_id', 0, 'int');
+		$this->_shopOrder->shop_country_location_id = Core_Array::get($this->_orderParams, 'shop_country_location_id', 0, 'int');
+		$this->_shopOrder->shop_country_location_city_id = Core_Array::get($this->_orderParams, 'shop_country_location_city_id', 0, 'int');
+		$this->_shopOrder->shop_country_location_city_area_id = Core_Array::get($this->_orderParams, 'shop_country_location_city_area_id', 0, 'int');
+		$this->_shopOrder->postcode = Core_Array::get($this->_orderParams, 'postcode', '', 'trim');
+		$this->_shopOrder->address = Core_Array::get($this->_orderParams, 'address', '', 'trim');
+		$this->_shopOrder->house = Core_Array::get($this->_orderParams, 'house', '', 'trim');
+		$this->_shopOrder->flat = Core_Array::get($this->_orderParams, 'flat', '', 'trim');
+		$this->_shopOrder->surname = Core_Array::get($this->_orderParams, 'surname', '', 'trim');
+		$this->_shopOrder->name = Core_Array::get($this->_orderParams, 'name', '', 'trim');
+		$this->_shopOrder->patronymic = Core_Array::get($this->_orderParams, 'patronymic', '', 'trim');
+		$this->_shopOrder->company = Core_Array::get($this->_orderParams, 'company', '', 'trim');
+		$this->_shopOrder->phone = Core_Array::get($this->_orderParams, 'phone', '', 'trim');
+		$this->_shopOrder->fax = Core_Array::get($this->_orderParams, 'fax', '', 'trim');
+		$this->_shopOrder->email = Core_Array::get($this->_orderParams, 'email', '', 'trim');
+		$this->_shopOrder->description = Core_Array::get($this->_orderParams, 'description', '', 'trim');
+		$this->_shopOrder->system_information = Core_Array::get($this->_orderParams, 'system_information', '', 'trim');
+		$this->_shopOrder->delivery_information = Core_Array::get($this->_orderParams, 'delivery_information', '', 'trim');
 
-		$shop_delivery_condition_id = intval(Core_Array::get($this->_orderParams, 'shop_delivery_condition_id', 0));
+		$shop_delivery_condition_id = Core_Array::get($this->_orderParams, 'shop_delivery_condition_id', 0, 'int');
 		$this->_shopOrder->shop_delivery_condition_id = $shop_delivery_condition_id;
 
-		$shop_delivery_id = intval(Core_Array::get($this->_orderParams, 'shop_delivery_id', 0));
+		$shop_delivery_id = Core_Array::get($this->_orderParams, 'shop_delivery_id', 0, 'int');
 		!$shop_delivery_id && $shop_delivery_condition_id && $shop_delivery_id = Core_Entity::factory('Shop_Delivery_Condition', $shop_delivery_condition_id)->shop_delivery_id;
 		$this->_shopOrder->shop_delivery_id = intval($shop_delivery_id);
 
-		$this->_shopOrder->shop_payment_system_id = intval(Core_Array::get($this->_orderParams, 'shop_payment_system_id', 0));
+		$this->_shopOrder->shop_payment_system_id = Core_Array::get($this->_orderParams, 'shop_payment_system_id', 0, 'int');
 		$this->_shopOrder->shop_currency_id = intval($oShop->shop_currency_id);
 		$this->_shopOrder->shop_order_status_id = intval($oShop->shop_order_status_id);
-		$this->_shopOrder->tin = trim(strval(Core_Array::get($this->_orderParams, 'tin', '')));
-		$this->_shopOrder->kpp = trim(strval(Core_Array::get($this->_orderParams, 'kpp', '')));
+		$this->_shopOrder->tin = Core_Array::get($this->_orderParams, 'tin', '', 'trim');
+		$this->_shopOrder->kpp = Core_Array::get($this->_orderParams, 'kpp', '', 'trim');
 
 		if (isset($this->_orderParams['company_id']))
 		{
@@ -519,14 +551,14 @@ abstract class Shop_Payment_System_Handler
 		// Create new order
 		$this->createOrder();
 
-		$quantityPurchaseDiscount = $amountPurchaseDiscount = $quantity = $amount = 0;
+		$this->_quantityPurchaseDiscount = $this->_amountPurchaseDiscount = $this->_quantity = $this->_amount = $this->_weight = 0;
 
 		$Shop_Cart_Controller = Shop_Cart_Controller::instance();
 
 		Core::moduleIsActive('siteuser') && $oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
 
 		// Массив цен для расчета скидок каждый N-й со скидкой N%
-		$aDiscountPrices = array();
+		$this->_aDiscountPrices = array();
 
 		// Есть скидки на N-й товар, доступные для текущей даты
 		$bPositionDiscount = $oShop->Shop_Purchase_Discounts->checkAvailableWithPosition();
@@ -540,11 +572,11 @@ abstract class Shop_Payment_System_Handler
 				{
 					$oShop_Item = $oShop_Cart->Shop_Item;
 
-					$quantity += $oShop_Cart->quantity;
+					$this->_quantity += $oShop_Cart->quantity;
 
 					// Количество для скидок от суммы заказа рассчитывается отдельно
 					$oShop_Item->apply_purchase_discount && $oShop_Item->type != 4
-						&& $quantityPurchaseDiscount += $oShop_Cart->quantity;
+						&& $this->_quantityPurchaseDiscount += $oShop_Cart->quantity;
 
 					$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
 					$oShop_Order_Item->quantity = $oShop_Cart->quantity;
@@ -562,20 +594,22 @@ abstract class Shop_Payment_System_Handler
 
 					$aPrices = $oShop_Item_Controller->getPrices($oShop_Item, $this->_round);
 
-					$amount += $aPrices['price_discount'] * $oShop_Cart->quantity;
+					$this->_amount += $aPrices['price_discount'] * $oShop_Cart->quantity;
+
+					$this->_weight += $oShop_Item->weight * $oShop_Cart->quantity;
 
 					if ($bPositionDiscount)
 					{
 						// По каждой единице товара добавляем цену в массив, т.к. может быть N единиц одого товара
 						for ($i = 0; $i < $oShop_Cart->quantity; $i++)
 						{
-							$aDiscountPrices[] = $aPrices['price_discount'];
+							$this->_aDiscountPrices[] = $aPrices['price_discount'];
 						}
 					}
 
 					// Сумма для скидок от суммы заказа рассчитывается отдельно
 					$oShop_Item->apply_purchase_discount && $oShop_Item->type != 4
-						&& $amountPurchaseDiscount += $aPrices['price_discount'] * $oShop_Cart->quantity;
+						&& $this->_amountPurchaseDiscount += $aPrices['price_discount'] * $oShop_Cart->quantity;
 
 					$oShop_Order_Item->price = $aPrices['price_discount'] - $aPrices['tax'];
 					$oShop_Order_Item->rate = $aPrices['rate'];
@@ -623,7 +657,7 @@ abstract class Shop_Payment_System_Handler
 		$oShop->reserve && !$this->_shopOrder->paid
 			&& $this->_shopOrder->reserveItems();
 
-		if ($amount > 0)
+		if ($this->_amount > 0)
 		{
 			// Add a discount to the purchase
 			if (!is_null($this->_orderParams['coupon_text']))
@@ -631,7 +665,7 @@ abstract class Shop_Payment_System_Handler
 				$this->_shopOrder->coupon = $this->_orderParams['coupon_text'];
 			}
 
-			$this->_addPurchaseDiscount($amountPurchaseDiscount, $quantityPurchaseDiscount, $aDiscountPrices);
+			$this->_addPurchaseDiscount();
 		}
 
 		$this->_addDelivery();
@@ -916,18 +950,16 @@ abstract class Shop_Payment_System_Handler
 
 	/**
 	 * Add a discount to the purchase
-	 * @param float $amount amount
-	 * @param float $quantity quantity
-	 * @param array $discountPrices array of item's prices
 	 * @return self
 	 */
-	protected function _addPurchaseDiscount($amount, $quantity, $aDiscountPrices = array())
+	protected function _addPurchaseDiscount()
 	{
 		$this->_shopOrder->addPurchaseDiscount(
 			array(
-				'amount' => $amount,
-				'quantity' => $quantity,
-				'prices' => $aDiscountPrices,
+				'amount' => $this->_amount,
+				'quantity' => $this->_quantity,
+				'weight' => $this->_weight,
+				'prices' => $this->_aDiscountPrices,
 				'applyDiscounts' => $this->_applyDiscounts,
 				'applyDiscountCards' => $this->_applyDiscountCards
 			)

@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Заказы магазина',
@@ -168,4 +168,5 @@ return array(
 	'warehouse' => 'Склад',
 	'date' => 'Дата',
 	'change_user' => 'Изменение ответственного: "%s"',
+	'shop_order_status_deadline' => 'Время жизни статуса',
 );

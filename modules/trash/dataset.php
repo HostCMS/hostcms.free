@@ -41,7 +41,7 @@ class Trash_Dataset extends Admin_Form_Dataset
 	{
 		if (is_null($this->_count))
 		{
-			$this->fillTables();
+			!$this->_loaded && $this->fillTables();
 			$this->_count = count($this->_objects);
 		}
 
@@ -63,7 +63,7 @@ class Trash_Dataset extends Admin_Form_Dataset
 	 */
 	public function load()
 	{
-		!is_array($this->_objects) && $this->fillTables();
+		!$this->_loaded && $this->fillTables();
 
 		return array_slice($this->_objects, $this->_offset, $this->_limit);
 	}
@@ -74,6 +74,8 @@ class Trash_Dataset extends Admin_Form_Dataset
 	 */
 	public function fillTables()
 	{
+		$this->_loaded = TRUE;
+		
 		$this->_objects = array();
 
 		//$aTables = $this->_dataBase->getTables();
@@ -179,7 +181,7 @@ class Trash_Dataset extends Admin_Form_Dataset
 	 */
 	public function getObject($primaryKey)
 	{
-		!is_array($this->_objects) && $this->fillTables();
+		!$this->_loaded && $this->fillTables();
 
 		return isset($this->_objects[$primaryKey])
 			? $this->_objects[$primaryKey]

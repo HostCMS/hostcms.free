@@ -80,6 +80,18 @@ if (Core::moduleIsActive('deal'))
 	);
 }
 
+if (Core::moduleIsActive('dms'))
+{
+	$oAdmin_Form_Entity_Menus->add(
+		Admin_Form_Entity::factory('Menu')
+			->name(Core::_('Crm_Project.add_document'))
+			->icon('fa fa-plus')
+			->onclick(
+				"$.modalLoad({path: '/admin/dms/document/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&{$additionalParams}', windowId: '{$windowId}'}); return false"
+			)
+	);
+}
+
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Crm_Project.add_note'))

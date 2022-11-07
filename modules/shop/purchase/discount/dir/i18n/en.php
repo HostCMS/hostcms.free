@@ -18,4 +18,5 @@ return array(
 	'undelete_success' => 'Item restored!',
 	'edit_success' => "Discount section edited successfully!",
 	'copy_success' => "Item copied successfully!",
+	'move_success' => 'Discount sections moved',
 );

@@ -14,13 +14,21 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 class Core_Html_Entity_Strong extends Core_Html_Entity
 {
 	/**
+	 * Allowed object properties
+	 * @var array
+	 */
+	protected $_allowedProperties = array(
+		'value',
+	);
+
+	/**
 	 * Skip properties
 	 * @var array
 	 */
 	protected $_skipProperties = array(
 		'value' // идет в значение <strong>
 	);
-	
+
 	/**
 	 * Executes the business logic.
 	 */
@@ -29,7 +37,7 @@ class Core_Html_Entity_Strong extends Core_Html_Entity
 		$aAttr = $this->getAttrsString();
 
 		echo PHP_EOL;
-		
+
 		?><strong <?php echo implode(' ', $aAttr) ?>><?php echo $this->value?><?php
 		parent::execute();
 		?></strong><?php

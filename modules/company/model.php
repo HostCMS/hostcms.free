@@ -133,7 +133,6 @@ class Company_Model extends Core_Entity
 
 			if (is_null($oUser) || $bUserIsHeader)
 			{
-
 				$aCompanyDepartmentInfo['department'] = $oCompany_Department;
 				$aCompanyDepartmentInfo += $this->getDepartmentUsersPostsTree($oCompany_Department->id, $oUser, $bUserIsHeader);
 
@@ -275,7 +274,7 @@ class Company_Model extends Core_Entity
 										if (in_array($aUserInfo['user']->id, $aHeadIds))
 										{
 										?>
-											<i class="fa fa-star margin-left-5 gold"></i>
+											<i class="fas fa-crown margin-left-5 gold"></i>
 										<?php
 										}
 										?>

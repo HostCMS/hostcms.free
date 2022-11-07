@@ -12,7 +12,7 @@ return array(
 	'description' => 'Опис',
 	'module_id' => 'Модуль',
 	'action' => 'Дія',
-	'entity_id' => 'Ідентифікатор суті',
+	'entity_id' => 'Ідентифікатор елемента',
 	'completed' => 'Активність завдання',
 	'interval' => '<acronym title="Інтервал виконання в секундах">Інтервал, сек.</acronym>',
 	'site_id' => 'Ідентифікатор сайту',

@@ -155,6 +155,48 @@ class Shop_Bonus_Dir_Model extends Core_Entity
 	}
 
 	/**
+	 * Get dir path with separator
+	 * @return string
+	 */
+	public function groupPathWithSeparator($separator = ' → ', $offset = 0)
+	{
+		$aParentGroups = array();
+
+		$aTmpGroup = $this;
+
+		// Добавляем все директории от текущей до родителя.
+		do {
+			$aParentGroups[] = $aTmpGroup->name;
+		} while ($aTmpGroup = $aTmpGroup->getParent());
+
+		$offset > 0
+			&& $aParentGroups = array_slice($aParentGroups, $offset);
+
+		$sParents = implode($separator, array_reverse($aParentGroups));
+
+		return $sParents;
+	}
+
+	/**
+	 * Move dir to another
+	 * @param int $parent_id dir id
+	 * @return self
+	 * @hostcms-event shop_bonus_dir.onBeforeMove
+	 * @hostcms-event shop_bonus_dir.onAfterMove
+	 */
+	public function move($parent_id)
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($parent_id));
+
+		$this->parent_id = $parent_id;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
+
+		return $this;
+	}
+
+	/**
 	 * Get Related Site
 	 * @return Site_Model|NULL
 	 * @hostcms-event shop_bonus_dir.onBeforeGetRelatedSite

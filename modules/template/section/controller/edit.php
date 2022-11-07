@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Template
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Section_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -35,7 +35,17 @@ class Template_Section_Controller_Edit extends Admin_Form_Action_Controller_Type
 			$object->template_id = Core_Array::getGet('template_id');
 		}
 
-		parent::setObject($object);
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
 
 		$this->title($this->_object->id
 			? Core::_('Template_Section.section_form_title_edit', $this->_object->name)

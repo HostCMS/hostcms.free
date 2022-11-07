@@ -7,20 +7,20 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Crm
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Crm_Source_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
 	/**
-	 * Set object
-	 * @param object $object object
+	 * Prepare backend item's edit form
+	 *
 	 * @return self
 	 */
-	public function setObject($object)
+	protected function _prepareForm()
 	{
-		parent::setObject($object);
+		parent::_prepareForm();
 
 		$this->title($this->_object->id
 			? Core::_('Crm_Source.edit_siteuser_sources_title', $this->_object->name)

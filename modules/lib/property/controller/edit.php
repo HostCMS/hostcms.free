@@ -9,19 +9,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Lib
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Lib_Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
-	/**
-	 * Constructor.
-	 * @param Admin_Form_Action_Model $oAdminFormAction action
-	 */
-	public function __construct(Admin_Form_Action_Model $oAdminFormAction)
-	{
-		parent::__construct($oAdminFormAction);
-	}
-
 	/**
 	 * Set object
 	 * @param object $object object
@@ -35,7 +26,17 @@ class Lib_Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 			$object->lib_id = Core_Array::getGet('lib_id');
 		}
 
-		parent::setObject($object);
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
 
 		$this->title($this->_object->id
 			? Core::_('Lib_Property.lib_property_form_title_edit', $this->_object->name)

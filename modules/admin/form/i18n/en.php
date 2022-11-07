@@ -153,5 +153,10 @@ return array(
 
 	'filter_enter_title' => 'Enter filter name',
 
-	'upload_file' => 'Upload file'
+	'upload_file' => 'Upload file',
+
+	'successfully' => 'Successfully',
+	'failed' => 'Failed',
+
+	'timeline_empty' => 'Timeline is empty!'
 );

@@ -97,14 +97,14 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 					->name($this->prefix . 'latitude' . $sNameSuffix)
 					->value($oUser_Directory_Address ? $oUser_Directory_Address->Directory_Address->latitude : '')
 					->caption(Core::_('Directory_Address.latitude'))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-lg-2'))
+					->divAttr(array('class' => 'form-group col-xs-6 col-sm-6 col-lg-2'))
 			)
 			->add(
 				Admin_Form_Entity::factory('Input')
 					->name($this->prefix . 'longitude' . $sNameSuffix)
 					->value($oUser_Directory_Address ? $oUser_Directory_Address->Directory_Address->longitude : '')
 					->caption(Core::_('Directory_Address.longitude'))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-lg-2'))
+					->divAttr(array('class' => 'form-group col-xs-6 col-sm-6 col-lg-2'))
 			);
 
 		if ($this->showPublicityControlElement)
@@ -113,7 +113,7 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 
 			$oRowElements->add(
 				Admin_Form_Entity::factory('Checkbox')
-					->divAttr(array('class' => 'col-xs-3 col-sm-2 address-public'))
+					->divAttr(array('class' => 'col-xs-6 col-lg-3 address-public'))
 					->name($this->prefix . 'address_public' . $sNameSuffix)
 					->value(1)
 					->checked($iAddressPublic ? $iAddressPublic : FALSE)
@@ -133,6 +133,16 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 		}
 
 		return $oRowElements;
+	}
+
+	protected function _buttons($className = '')
+	{
+		return Admin_Form_Entity::factory('Div') // div с кноками + и -
+			->class('add-remove-property pull-left' . (count($this->_aDirectory_Relations) ? ' btn-group' : '') . ($className ? ' ' . $className : ''))
+			->add(
+				Admin_Form_Entity::factory('Code')
+					->html('<div class="btn btn-palegreen inverted" onclick="$.cloneFormRow(this); event.stopPropagation();"><i class="fa fa-plus-circle close"></i></div><div class="btn btn-darkorange btn-delete inverted' . (count($this->_aDirectory_Relations) ? '' : ' hide') . '" onclick="$.deleteFormRow(this); event.stopPropagation();"><i class="fa fa-minus-circle close"></i></div>')
+			);
 	}
 
 	public function applyObjectProperty($Admin_Form_Controller, $object)

@@ -190,7 +190,7 @@ class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 						<i class="fa fa-expand gray"></i>
 					</a>
 					<a data-toggle="upload" onclick="$(this).find('i').addClass('fa-spin'); $.widgetLoad({ path: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oModule->id?>&type=0', context: $('#calendarAdminPage')});">
-						<i class="fa fa-refresh gray"></i>
+						<i class="fa-solid fa-rotate gray"></i>
 					</a>
 				</div>
 			</div><!--Widget Header-->

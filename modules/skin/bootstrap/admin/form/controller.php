@@ -17,7 +17,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 	 * Count of elements on page
 	 * @var array
 	 */
-	protected $_onPage = array (10 => 10, 20 => 20, 30 => 30, 50 => 50, 100 => 100, 500 => 500, 1000 => 1000);
+	protected $_onPage = array(10 => 10, 20 => 20, 30 => 30, 50 => 50, 100 => 100, 500 => 500, 1000 => 1000);
 
 	/**
 	 * Apply form settings
@@ -248,7 +248,6 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 		);
 
 		?><label><?php
-
 		Core_Html_Entity::factory('Select')
 			->class('form-control input-sm')
 			->onchange("mainFormLocker.unlock(); $.adminLoad({path: '{$path}', additionalParams: '{$additionalParams}', limit: this.options[this.selectedIndex].value, view: '{$view}', windowId : '{$windowId}'}); return false")

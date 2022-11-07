@@ -33,4 +33,6 @@ return array(
 	'changeCompleted_success' => 'Завершеність проекту змінена',
 	'files_count' => 'Файли: %s',
 	'add_attachment' => 'Файл',
+	'add_document' => 'Документ',
+	'documents_count' => 'Документи: %s',
 );

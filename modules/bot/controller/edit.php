@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Bot
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Bot_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -20,7 +20,36 @@ class Bot_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	public function setObject($object)
 	{
-		parent::setObject($object);
+		$modelName = $object->getModelName();
+
+		switch ($modelName)
+		{
+			case 'bot':
+				if (!$object->id)
+				{
+					$object->bot_dir_id = Core_Array::getGet('bot_dir_id');
+				}
+			break;
+			case 'bot_dir':
+			default:
+				if (!$object->id)
+				{
+					$object->parent_id = Core_Array::getGet('bot_dir_id');
+				}
+			break;
+		}
+
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
 
 		$modelName = $this->_object->getModelName();
 
@@ -40,11 +69,6 @@ class Bot_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$title = $this->_object->id
 					? Core::_('Bot.edit_title', $this->_object->name)
 					: Core::_('Bot.add_title');
-
-				if (!$this->_object->id)
-				{
-					$this->_object->bot_dir_id = Core_Array::getGet('bot_dir_id');
-				}
 
 				$oMainTab
 					->move($this->getField('name')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1)
@@ -75,12 +99,6 @@ class Bot_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$title = $this->_object->id
 					? Core::_('Bot_Dir.edit_title', $this->_object->name)
 					: Core::_('Bot_Dir.add_title');
-
-				// Значения директории для добавляемого объекта
-				if (!$this->_object->id)
-				{
-					$this->_object->parent_id = Core_Array::getGet('bot_dir_id');
-				}
 
 				// Удаляем стандартный <input>
 				$oAdditionalTab->delete($this->getField('parent_id'));

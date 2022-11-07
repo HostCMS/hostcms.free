@@ -35,4 +35,5 @@ return array(
 	'unpost_success' => 'Документ розпроведено успішно!',
 	'convolution' => 'Згортка бази',
 	'include_modifications' => 'Додати модифікації товару і встановити ціни',
+	'apply_item_change_attributes' => "Встановлення ціни через зміну атрибутів",
 );

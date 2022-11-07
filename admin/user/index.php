@@ -918,20 +918,25 @@ if (Core_Auth::logged())
 		exit();
 	}
 
-	if (!is_null(Core_Array::getPost('loadWallpaper')) && !is_null(Core_Array::getPost('wallpaper_id')))
+	if (!is_null(Core_Array::getPost('loadWallpaper')))
 	{
 		$aJSON = array();
 
-		$wallpaper_id = intval(Core_Array::getPost('wallpaper_id'));
-		$oUser_Wallpaper = Core_Entity::factory('User_Wallpaper')->getById($wallpaper_id);
+		$wallpaper_id = Core_Array::getPost('loadWallpaper', 0, 'int');
 
-		if (!is_null($oUser_Wallpaper))
+		if ($wallpaper_id)
 		{
-			$aJSON = array(
-				'id' => $oUser_Wallpaper->id,
-				'original_path' => htmlspecialchars($oUser_Wallpaper->getLargeImageFileHref()),
-				'src' => htmlspecialchars($oUser_Wallpaper->getSmallImageFileHref()),
-			);
+			$oUser_Wallpaper = Core_Entity::factory('User_Wallpaper')->getById($wallpaper_id);
+
+			if (!is_null($oUser_Wallpaper))
+			{
+				$aJSON = array(
+					'id' => $oUser_Wallpaper->id,
+					'original_path' => $oUser_Wallpaper->image_large != '' ? htmlspecialchars($oUser_Wallpaper->getLargeImageFileHref()) : '',
+					'src' => $oUser_Wallpaper->image_large != '' ? htmlspecialchars($oUser_Wallpaper->getSmallImageFileHref()) : '',
+					'color' => htmlspecialchars($oUser_Wallpaper->color)
+				);
+			}
 		}
 
 		Core::showJson($aJSON);

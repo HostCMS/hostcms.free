@@ -97,13 +97,22 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 					: array($propertyValue);
 			}
 
-			$aNewValues = $oLib_Property->type == 8 && isset($aOptions[$oLib_Property->varible_name])
-				? (
-					is_array($aOptions[$oLib_Property->varible_name])
-						? $aOptions[$oLib_Property->varible_name]
-						: array($aOptions[$oLib_Property->varible_name])
-				)
-				: array();
+
+			$aNewValues = array();
+
+			// Для файлов необходимо сохранить прежние значения, так как они заново не будут переданы из формы
+			if ($oLib_Property->type == 8 && isset($aOptions[$oLib_Property->varible_name]))
+			{
+				$aTmp = is_array($aOptions[$oLib_Property->varible_name])
+					? $aOptions[$oLib_Property->varible_name]
+					: array($aOptions[$oLib_Property->varible_name]);
+
+				foreach ($aTmp as $fileName)
+				{
+					// Сохраняем  только непустые значения
+					$fileName !== '' && $aNewValues[] = $fileName;
+				}
+			}
 
 			foreach ($aPropertyValues as $key => $propertyValue)
 			{
@@ -243,7 +252,16 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 			// Получаем значение параметра
 			$value = isset($LA[$oLib_Property->varible_name])
 				? $LA[$oLib_Property->varible_name]
-				: $oLib_Property->default_value;
+				: ($oLib_Property->type != 8
+					? $oLib_Property->default_value
+					: NULL
+				);
+
+			!is_array($value)
+				&& $value = !is_null($value) ? array($value) : array();
+
+			count($value) > 1 && !$oLib_Property->multivalue
+				&& $value = array_slice($value, 0, 1);
 
 			$acronym = $oLib_Property->description == ''
 				? htmlspecialchars($oLib_Property->name)
@@ -269,11 +287,6 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 			$sFieldName = $oLib_Property->multivalue
 				? "lib_property_{$oLib_Property->id}[]"
 				: "lib_property_{$oLib_Property->id}";
-
-			!is_array($value) && $value = array($value);
-
-			count($value) > 1 && !$oLib_Property->multivalue
-				&& $value = array_slice($value, 0, 1);
 
 			switch ($oLib_Property->type)
 			{
@@ -650,7 +663,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 							$oFileClone->largeImage(
 								array(
 									// 'path' => '/' . $oObject->getLibFileHref() . $valueItem,
-									'id' => "id_{$sFieldName}_{$key}",
+									'id' => "id_libproperty{$oLib_Property->id}_{$key}",
 									'path' => $valueItem,
 									'show_params' => FALSE,
 									'originalName' => basename($valueItem),
@@ -663,7 +676,8 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 
 					if ($oLib_Property->multivalue || !count($value))
 					{
-						$oLib_Property->multivalue && $oDivInputs->add($oDivOpen);
+						$oLib_Property->multivalue
+							&& $oDivInputs->add($oDivOpen);
 
 						$oDivInputs->add(
 							$oFile->largeImage(
@@ -674,12 +688,10 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 							)
 						);
 
-						if ($oLib_Property->multivalue)
-						{
-							$oDivInputs
+						$oLib_Property->multivalue
+							&& $oDivInputs
 								->add($this->imgBox())
 								->add($oDivClose);
-						}
 					}
 				break;
 				default:

@@ -21,7 +21,7 @@ class Directory_Controller_Tab_Email extends Directory_Controller_Tab
 
 	protected function _execute($oPersonalDataInnerWrapper)
 	{
-		$aDirectory_Relations = $this->relation->findAll();
+		// $aDirectory_Relations = $this->relation->findAll();
 
 		$aMasDirectoryTypes = $this->_getDirectoryTypes();
 
@@ -60,14 +60,14 @@ class Directory_Controller_Tab_Email extends Directory_Controller_Tab
 					->name($this->prefix . 'email_type' . $sNameSuffix)
 					->value($oUser_Directory_Email ? $oUser_Directory_Email->Directory_Email->directory_email_type_id : '')
 					->caption(Core::_('Directory_Email.type_email'))
-					->divAttr(array('class' => 'form-group col-xs-4'))
+					->divAttr(array('class' => 'form-group col-xs-6 col-lg-4'))
 			)
 			->add(
 				Admin_Form_Entity::factory('Input')
 					->name($this->prefix . 'email' . $sNameSuffix)
 					->value($oUser_Directory_Email ? $oUser_Directory_Email->Directory_Email->value : '')
 					->caption(Core::_('Directory_Email.email'))
-					->divAttr(array('class' => 'form-group no-padding-left ' . ($this->showPublicityControlElement ? 'col-sm-4 col-xs-3' : 'col-lg-5 col-sm-6 col-xs-5')))
+					->divAttr(array('class' => 'form-group no-padding-left ' . ($this->showPublicityControlElement ? 'col-lg-4 col-xs-6' : 'col-lg-5 col-sm-6 col-xs-5')))
 			);
 
 		if ($this->showPublicityControlElement)
@@ -76,7 +76,7 @@ class Directory_Controller_Tab_Email extends Directory_Controller_Tab
 
 			$oRowElements->add(
 				Admin_Form_Entity::factory('Checkbox')
-					->divAttr(array('class' => 'col-xs-3 col-sm-2 no-padding margin-top-23 margin-right-5'))
+				->divAttr(array('class' => 'col-xs-6 col-lg-2 no-padding-lg margin-top-23-lg margin-right-5-lg'))
 					->name($this->prefix . 'email_public' . $sNameSuffix)
 					->value(1)
 					->checked($iEmailPublic ? $iEmailPublic : FALSE)

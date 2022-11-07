@@ -48,5 +48,8 @@ return array(
 	'move_producers_groups_title' => "Перенесення виробників",
 	'move_producers_groups_id' => "Батьківська група",
 	'move_success' => 'Виробники перенесені',
-	'merge_success' => "Виробники об'єднані",	
+	'merge_success' => "Виробники об'єднані",
+	'changeIndexing_success' => 'Статус індексування успішно змінений.',
+	'changeIndexing_error' => 'Помилка при зміні статусу індексування.',
+	'indexing' =>'Індексувати',
 );

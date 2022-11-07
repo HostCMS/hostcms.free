@@ -832,6 +832,16 @@ abstract class Core_DataBase
 				$binary = TRUE;
 				$fixed = TRUE;
 			break;
+			case 'geometry':
+			case 'point':
+			case 'linestring':
+			case 'polygon':
+			case 'multipoint':
+			case 'multilinestring':
+			case 'multipolygon':
+			case 'geometrycollection':
+				$type = 'geometry';
+			break;
 		}
 
 		return array(

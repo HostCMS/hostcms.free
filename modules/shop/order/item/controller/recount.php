@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Item_Controller_Recount extends Admin_Form_Action_Controller
 {
@@ -29,7 +29,7 @@ class Shop_Order_Item_Controller_Recount extends Admin_Form_Action_Controller
 	{
 		$round = TRUE;
 
-		$quantityPurchaseDiscount = $amountPurchaseDiscount = $quantity = $amount = 0;
+		$quantityPurchaseDiscount = $amountPurchaseDiscount = $quantity = $amount = $weight = 0;
 
 		// Удаляем существующие скидки
 		$oShop_Order_Items = $this->shopOrder->Shop_Order_Items;
@@ -65,6 +65,8 @@ class Shop_Order_Item_Controller_Recount extends Admin_Form_Action_Controller
 					// Prices
 					$price = $oShop_Order_Item->getPrice();
 					$amount += $price * $oShop_Order_Item->quantity;
+					
+					$weight += $oShop_Item->weight * $oShop_Order_Item->quantity;
 
 					// По каждой единице товара добавляем цену в массив, т.к. может быть N единиц одого товара
 					for ($i = 0; $i < $oShop_Order_Item->quantity; $i++)
@@ -89,6 +91,7 @@ class Shop_Order_Item_Controller_Recount extends Admin_Form_Action_Controller
 			array(
 				'amount' => $amount,
 				'quantity' => $quantity,
+				'weight' => $weight,
 				'prices' => $aDiscountPrices,
 				'applyDiscounts' => TRUE,
 				'applyDiscountCards' => TRUE

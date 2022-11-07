@@ -228,8 +228,8 @@ elseif ($sType == 'catalog' && $sMode == 'import' && !is_null($sFileName = Core_
 		$oShop_Item_Import_Cml_Controller->iShopGroupId = 0;
 		$oShop_Item_Import_Cml_Controller->sPicturesPath = $sMonthTemporaryDirectory;
 		$oShop_Item_Import_Cml_Controller->importAction = 1;
-		$oShop_Item_Import_Cml_Controller->sShopDefaultPriceName = defined('SHOP_DEFAULT_CML_CURRENCY_NAME')
-			? SHOP_DEFAULT_CML_CURRENCY_NAME
+		$oShop_Item_Import_Cml_Controller->sShopDefaultPriceName = defined('DEFAULT_CML_PRICE_NAME')
+			? DEFAULT_CML_PRICE_NAME
 			: 'Розничная';
 		//$oShop_Item_Import_Cml_Controller->updateFields = array('marking', 'name', 'shop_group_id', 'text', 'description', 'images', 'taxes', 'shop_producer_id');
 		//$oShop_Item_Import_Cml_Controller->skipProperties = array('Свойство1');

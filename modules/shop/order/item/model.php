@@ -201,7 +201,7 @@ class Shop_Order_Item_Model extends Core_Entity
 			{
 				if ($oShop_Item->shortcut_id)
 				{
-					return '<i class="fa fa-link"></i>';
+					return '<i class="fa-solid fa-link"></i>';
 				}
 				elseif (strlen($oShop_Item->image_small) || strlen($oShop_Item->image_large))
 				{

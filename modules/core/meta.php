@@ -3,13 +3,13 @@
 defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 /**
- * Apply Meta-tags templates
+ * Apply Meta-tags templates, e.g. {uppercaseFirst group.name}, {this.seoFilter ": " ", "}, {date(d.m.Y)}
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Meta
 {
@@ -69,7 +69,8 @@ class Core_Meta
 	public function apply($str)
 	{
 		//$pattern = '/\{([:A-Za-z0-9_-]*\s)?([^\}\.]+)(?:\.([^\}\s]+))?(?:\s+([^\}]+))*\}/';
-		$pattern = '/\{([:A-Za-z0-9_-]*\s)?([^\}\.]+)(?:\.([^\}\s]+))*(?:\s+([^\}]+))*\}/';
+		//$pattern = '/\{([:A-Za-z0-9_\-]*\s)?([^\}\.]+)(?:\.([^\}\s]+))*(?:\s+([^\}]+))*\}/';
+		$pattern = '/\{([:A-Za-z0-9_\-]*\s)?([^\}\s]+)(?:\s+([^\}]+))*\}/';
 
 		$string = preg_replace_callback($pattern, array($this, '_callback'), $str);
 
@@ -107,25 +108,29 @@ class Core_Meta
 			$functionName = NULL;
 		}
 
+		// shop.company.name => objectName = shop, fieldName = company + name
+		$aTmpExplode = explode('.', $matches[2]);
+		$objectName = array_shift($aTmpExplode);
+
 		// object
-		if (isset($this->_objects[$matches[2]]))
+		if (isset($this->_objects[$objectName]))
 		{
 			//if (isset($this->_objects['Items'])) print_r($this->_objects['Items']);
-			$object = $this->_objects[$matches[2]];
+			$object = $this->_objects[$objectName];
 
-			if (isset($matches[3]))
+			if (count($aTmpExplode))
 			{
-				$fieldNames = $matches[3];
+				/*$fieldNames = $matches[3];
 
 				// shop.company.name => object = shop, fieldName = company.name
-				$aTmpExplode = explode('.', $fieldNames);
+				$aTmpExplode = explode('.', $fieldNames);*/
 
 				foreach ($aTmpExplode as $fieldName)
 				{
 					if (is_callable(array($object, $fieldName)))
 					{
-						$attr = isset($matches[4]) && $matches[4] != ''
-							? $this->_parseArgs($matches[4])
+						$attr = isset($matches[3]) && $matches[3] != ''
+							? $this->_parseArgs($matches[3])
 							: array();
 
 						$return = call_user_func_array(array($object, $fieldName), $attr);
@@ -163,8 +168,8 @@ class Core_Meta
 		}
 		elseif (isset($this->_functions[$matches[2]]))
 		{
-			$attr = isset($matches[4]) && $matches[4] != ''
-				? $this->_parseArgs($matches[4])
+			$attr = isset($matches[3]) && $matches[3] != ''
+				? $this->_parseArgs($matches[3])
 				: array();
 
 			return call_user_func_array($this->_functions[$matches[2]], $attr);

@@ -7,44 +7,20 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Tpl
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Tpl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
 	/**
-	 * Get Languages
-	 * @return array
-	 */
-	protected function _getLngs()
-	{
-		$aConfig = Core_Config::instance()->get('tpl_config', array()) + array(
-			'lngs' => array()
-		);
-
-		$aLngs = $aConfig['lngs'];
-
-		$aRows = Site_Controller::instance()->getLngList();
-		foreach ($aRows as $aRow)
-		{
-			if (!in_array($aRow['lng'], $aLngs))
-			{
-				$aLngs[] = $aRow['lng'];
-			}
-		}
-
-		return $aLngs;
-	}
-
-	/**
-	 * Set object
-	 * @param object $object object
+	 * Prepare backend item's edit form
+	 *
 	 * @return self
 	 */
-	public function setObject($object)
+	protected function _prepareForm()
 	{
-		parent::setObject($object);
+		parent::_prepareForm();
 
 		$modelName = $this->_object->getModelName();
 
@@ -89,7 +65,7 @@ class Tpl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				// $oTmpOptions['mode'] = 'smarty';
 				$oTmpOptions['mode'] = 'ace/mode/smarty';
 
-				$tplContent = $object->id
+				$tplContent = $this->_object->id
 					? $this->_object->loadTplFile()
 					: '';
 
@@ -127,7 +103,7 @@ class Tpl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainTab->move($this->getField('description'), $oMainRow6);
 
 				// Config для всех языков
-				$aLngs = $this->_getLngs();
+				$aLngs = Tpl_Controller::getLngs();
 
 				foreach ($aLngs as $sLng)
 				{
@@ -256,7 +232,7 @@ class Tpl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$this->_object->saveTplFile($tpl_value);
 
 				// Config для всех языков
-				$aLngs = $this->_getLngs();
+				$aLngs = Tpl_Controller::getLngs();
 
 				foreach ($aLngs as $sLng)
 				{

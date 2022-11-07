@@ -1,13 +1,5 @@
 <?php
-/**
- * Online shop.
- *
- * @package HostCMS
- * @subpackage Shop
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'Inventory',
 	'title' => 'Inventory',
@@ -41,5 +33,6 @@ return array(
 	'fact' => "Fact",
 	'diff' => "Diff",
 	'post_success' => 'Document posted successfully!',
-	'unpost_success' => 'Document unposted successfully!',	
+	'unpost_success' => 'Document unposted successfully!',
+	'apply_item_change_attributes' => 'Inventory when attributes change',
 );

@@ -169,7 +169,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			$this->namespace = current($aNamespaces);
 		}
 
-		$this->sShopDefaultPriceName = 'РОЗНИЧНАЯ';
+		$this->sShopDefaultPriceName = 'Розничная';
 		$this->sShopDefaultPriceGUID = '';
 		$this->itemDescription = 'text';
 		$this->shortDescription = 'МалоеОписание';
@@ -527,6 +527,11 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 	}
 
 	/**
+	 * @var array
+	 */
+	protected $_propertyNotAList = array();
+
+	/**
 	 * Add property to item
 	 * @param Shop_Item_Model $oShopItem item
 	 * @param Property_Model $oProperty
@@ -550,9 +555,14 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			&& $oProperty->type != 2
 		)
 		{
-			Core_Log::instance()->clear()
-				->status(Core_Log::$MESSAGE)
-				->write(sprintf('1С, свойство "%s" ожидается списочного типа, но справочник не заполнен!', $oProperty->name));
+			if (!isset($this->_propertyNotAList[$oProperty->id]))
+			{
+				Core_Log::instance()->clear()
+					->status(Core_Log::$MESSAGE)
+					->write(sprintf('1С, свойство "%s" ожидается списочного типа, но справочник не заполнен!', $oProperty->name));
+
+				$this->_propertyNotAList[$oProperty->id] = $oProperty->id;
+			}
 
 			return $this;
 		}
@@ -1023,7 +1033,13 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 	 * _getProperty() cache
 	 * @var array
 	 */
-	protected $_cacheProperty = array();
+	protected $_cachePropertyByGuid = array();
+
+	/**
+	 * _getProperty() cache
+	 * @var array
+	 */
+	protected $_cachePropertyByName = array();
 
 	/**
 	 * Получение объекта свойства по CML ID или названию свойства (для схемы 2.0.5)
@@ -1036,9 +1052,15 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		$sPropertyName = strval($oPropertyValue->Наименование);
 
 		if (strlen($sPropertyGUID)
-			&& isset($this->_cacheProperty[$sPropertyGUID]))
+			&& isset($this->_cachePropertyByGuid[$sPropertyGUID]))
 		{
-			return $this->_cacheProperty[$sPropertyGUID];
+			return $this->_cachePropertyByGuid[$sPropertyGUID];
+		}
+
+		if (strlen($sPropertyName)
+			&& isset($this->_cachePropertyByName[$sPropertyName]))
+		{
+			return $this->_cachePropertyByName[$sPropertyName];
 		}
 
 		if ($sPropertyName == '' || !in_array($sPropertyName, $this->skipProperties))
@@ -1060,10 +1082,11 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			$oProperty = NULL;
 		}
 
-		if (strlen($sPropertyGUID))
-		{
-			$this->_cacheProperty[$sPropertyGUID] = $oProperty;
-		}
+		strlen($sPropertyGUID)
+			&& $this->_cachePropertyByGuid[$sPropertyGUID] = $oProperty;
+
+		strlen($sPropertyName)
+			&& $this->_cachePropertyByName[$sPropertyName] = $oProperty;
 
 		return $oProperty;
 	}
@@ -2777,8 +2800,6 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					}
 
 					$oProperty->tag_name = $sTagName;
-
-					// Для вновь создаваемого допсвойства размеры берем из магазина
 					$oProperty->image_large_max_width = $oShop->image_large_max_width;
 					$oProperty->image_large_max_height = $oShop->image_large_max_height;
 					$oProperty->image_small_max_width = $oShop->image_small_max_width;
@@ -2791,7 +2812,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					Core_Event::notify('Shop_Item_Import_Cml_Controller.onAfterCreateProperty', $this, array($oProperty, $oItemProperty));
 				}
 
-				$this->_cacheProperty[$sPropertyGUID] = $oProperty;
+				$this->_cachePropertyByGuid[$sPropertyGUID] = $oProperty;
 
 				if (strval($oItemProperty->ТипЗначений) == 'Справочник')
 				{
@@ -2829,6 +2850,16 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 	}
 
 	/**
+	 * @var array
+	 */
+	protected $_importBaseMeasureCacheByOkei = array();
+
+	/**
+	 * @var array
+	 */
+	protected $_importBaseMeasureCacheByName = array();
+
+	/**
 	 * Импорт "БазоваяЕдиница"
 	 * @param object $oNode
 	 * @param Shop_Item_Model $oShopItem
@@ -2842,10 +2873,15 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 				? intval($oNode->БазоваяЕдиница) // CML 3.x: Товар/БазоваяЕдиница
 				: intval($oNode->БазоваяЕдиница->attributes()->Код);
 
+			$oShop_Measure = NULL;
+
 			// Получаем по коду ОКЕЙ
-			$oShop_Measure = $okei > 0
-				? Core_Entity::factory('Shop_Measure')->getByOkei($okei, FALSE)
-				: NULL;
+			if ($okei > 0)
+			{
+				$oShop_Measure = isset($this->_importBaseMeasureCacheByOkei[$okei])
+					? $this->_importBaseMeasureCacheByOkei[$okei]
+					: Core_Entity::factory('Shop_Measure')->getByOkei($okei, FALSE);
+			}
 
 			// Получаем по названию
 			if (is_null($oShop_Measure))
@@ -2857,7 +2893,9 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 				if ($sMeasure != '')
 				{
-					$oShop_Measure = Core_Entity::factory('Shop_Measure')->getByName($sMeasure, FALSE);
+					$oShop_Measure = isset($this->_importBaseMeasureCacheByName[$sMeasure])
+						? $this->_importBaseMeasureCacheByName[$sMeasure]
+						: Core_Entity::factory('Shop_Measure')->getByName($sMeasure, FALSE);
 
 					if (is_null($oShop_Measure))
 					{
@@ -2867,8 +2905,14 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 						$oShop_Measure->okei = $okei;
 						$oShop_Measure->save();
 					}
+
+					!isset($this->_importBaseMeasureCacheByName[$sMeasure])
+						&& $this->_importBaseMeasureCacheByName[$sMeasure] = $oShop_Measure;
 				}
 			}
+
+			$okei > 0
+				&& $this->_importBaseMeasureCacheByOkei[$okei] = $oShop_Measure;
 
 			!is_null($oShop_Measure)
 				&& $oShopItem->shop_measure_id = $oShop_Measure->id;

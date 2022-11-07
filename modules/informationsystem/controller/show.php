@@ -574,8 +574,6 @@ class Informationsystem_Controller_Show extends Core_Controller
 			$this->_cacheTags[] = 'informationsystem_group_' . intval($this->group);
 		}
 
-
-
 		$oInformationsystem->showXmlCounts($this->calculateCounts);
 
 		$this->addEntity(
@@ -1225,73 +1223,104 @@ class Informationsystem_Controller_Show extends Core_Controller
 				$seo_keywords = $oInformationsystem_Item->name;
 			}
 		}
-		elseif ($this->group)
+		else
 		{
-			$oInformationsystem_Group = Core_Entity::factory('Informationsystem_Group', $this->group);
+			if (is_null($this->tag))
+			{
+				if (is_numeric($this->group) && $this->group)
+				{
+					$oInformationsystem_Group = Core_Entity::factory('Informationsystem_Group', $this->group);
 
-			$oCore_Meta = new Core_Meta();
-			$oCore_Meta
-				->addObject('informationsystem', $oInformationsystem)
-				->addObject('group', $oInformationsystem_Group)
-				->addObject('this', $this);
+					$oCore_Meta = new Core_Meta();
+					$oCore_Meta
+						->addObject('informationsystem', $oInformationsystem)
+						->addObject('group', $oInformationsystem_Group)
+						->addObject('this', $this);
 
-			// Title
-			if ($oInformationsystem_Group->seo_title != '')
-			{
-				$seo_title = $oInformationsystem_Group->seo_title;
-			}
-			elseif ($this->_seoGroupTitle != '')
-			{
-				$seo_title = $oCore_Meta->apply($this->_seoGroupTitle);
-			}
-			else
-			{
-				$seo_title = $oInformationsystem_Group->name;
-			}
+					// Title
+					if ($oInformationsystem_Group->seo_title != '')
+					{
+						$seo_title = $oInformationsystem_Group->seo_title;
+					}
+					elseif ($this->_seoGroupTitle != '')
+					{
+						$seo_title = $oCore_Meta->apply($this->_seoGroupTitle);
+					}
+					else
+					{
+						$seo_title = $oInformationsystem_Group->name;
+					}
 
-			// Description
-			if ($oInformationsystem_Group->seo_description != '')
-			{
-				$seo_description = $oInformationsystem_Group->seo_description;
-			}
-			elseif ($this->_seoGroupDescription != '')
-			{
-				$seo_description = $oCore_Meta->apply($this->_seoGroupDescription);
-			}
-			else
-			{
-				$seo_description = $oInformationsystem_Group->name;
-			}
+					// Description
+					if ($oInformationsystem_Group->seo_description != '')
+					{
+						$seo_description = $oInformationsystem_Group->seo_description;
+					}
+					elseif ($this->_seoGroupDescription != '')
+					{
+						$seo_description = $oCore_Meta->apply($this->_seoGroupDescription);
+					}
+					else
+					{
+						$seo_description = $oInformationsystem_Group->name;
+					}
 
-			// Keywords
-			if ($oInformationsystem_Group->seo_keywords != '')
-			{
-				$seo_keywords = $oInformationsystem_Group->seo_keywords ;
+					// Keywords
+					if ($oInformationsystem_Group->seo_keywords != '')
+					{
+						$seo_keywords = $oInformationsystem_Group->seo_keywords ;
+					}
+					elseif ($this->_seoGroupKeywords != '')
+					{
+						$seo_keywords = $oCore_Meta->apply($this->_seoGroupKeywords);
+					}
+					else
+					{
+						$seo_keywords = $oInformationsystem_Group->name;
+					}
+				}
+				// Корневая группа
+				else
+				{
+					$oCore_Meta = new Core_Meta();
+					$oCore_Meta
+						->addObject('informationsystem', $oInformationsystem)
+						->addObject('this', $this);
+						
+					if ($oInformationsystem->seo_root_title_template != '')
+					{
+						$seo_title = $oCore_Meta->apply($oInformationsystem->seo_root_title_template);
+					}
+
+					// Description
+					if ($oInformationsystem->seo_root_keywords_template != '')
+					{
+						$seo_description = $oCore_Meta->apply($oInformationsystem->seo_root_keywords_template );
+					}
+
+					// Keywords
+					if ($oInformationsystem->seo_root_description_template != '')
+					{
+						$seo_keywords = $oCore_Meta->apply($oInformationsystem->seo_root_description_template );
+					}
+				}
 			}
-			elseif ($this->_seoGroupKeywords != '')
+			elseif (!is_null($this->tag) && Core::moduleIsActive('tag'))
 			{
-				$seo_keywords = $oCore_Meta->apply($this->_seoGroupKeywords);
-			}
-			else
-			{
-				$seo_keywords = $oInformationsystem_Group->name;
+				$seo_title = $oTag->seo_title != ''
+					? $oTag->seo_title
+					: Core::_('Informationsystem.tag', $oTag->name);
+
+				$seo_description = $oTag->seo_description != ''
+					? $oTag->seo_description
+					: $oTag->name;
+
+				$seo_keywords = $oTag->seo_keywords != ''
+					? $oTag->seo_keywords
+					: $oTag->name;
 			}
 		}
-		elseif (!is_null($this->tag) && Core::moduleIsActive('tag'))
-		{
-			$seo_title = $oTag->seo_title != ''
-				? $oTag->seo_title
-				: Core::_('Informationsystem.tag', $oTag->name);
-
-			$seo_description = $oTag->seo_description != ''
-				? $oTag->seo_description
-				: $oTag->name;
-
-			$seo_keywords = $oTag->seo_keywords != ''
-				? $oTag->seo_keywords
-				: $oTag->name;
-		}
-
+	
 		$seo_title != '' && Core_Page::instance()->title($seo_title);
 		$seo_description != '' && Core_Page::instance()->description($seo_description);
 		$seo_keywords != '' && Core_Page::instance()->keywords($seo_keywords);

@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Informationsystem
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properties
 {
@@ -1067,6 +1067,10 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 
 								switch ($oProperty->type)
 								{
+									case 0: // Int
+										$sData = Shop_Controller::convertDecimal($sData);
+										$oProperty_Value->setValue($sData);
+									break;
 									// Файл
 									case 2:
 										// Для гарантии получения идентификатора группы
@@ -1718,9 +1722,12 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 
 					switch ($oProperty->type)
 					{
+						case 0: // Int
+							$sPropertyValue = Shop_Controller::convertDecimal($sPropertyValue);
+							$oProperty_Value->setValue($sPropertyValue);
+						break;
 						// Файл
 						case 2:
-
 							// Папка назначения
 							$sDestinationFolder = $this->_oCurrentItem->getItemPath();
 
@@ -2147,7 +2154,9 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 			setlocale(LC_ALL, ALT_SITE_LOCALE);
 		}
 
-		$aCsvLine = @fgetcsv($fileDescriptor, 0, $this->separator, $this->limiter);
+		$aCsvLine = PHP_VERSION_ID >= 50300
+			? @fgetcsv($fileDescriptor, 0, $this->separator, $this->limiter, '"')
+			: @fgetcsv($fileDescriptor, 0, $this->separator, $this->limiter);
 
 		if ($aCsvLine === FALSE)
 		{
@@ -2166,11 +2175,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 	 */
 	public function clear()
 	{
-		$this->_oCurrentInformationsystem =
-		$this->_oCurrentGroup =
-		$this->_oCurrentItem = NULL;
-
-		$this->_aTags = NULL;
+		$this->_aTags = $this->_oCurrentInformationsystem = $this->_oCurrentGroup = $this->_oCurrentItem = NULL;
 
 		return $this;
 	}

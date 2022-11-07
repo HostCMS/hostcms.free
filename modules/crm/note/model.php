@@ -121,39 +121,56 @@ class Crm_Note_Model extends Core_Entity
 	 */
 	public function getFilesBlock($oObject)
 	{
-		$aCrm_Note_Attachments = $this->Crm_Note_Attachments->findAll(FALSE);
+		$oUser = Core_Auth::getCurrentUser();
+		$oSite = Core_Entity::factory('Site', CURRENT_SITE);
 
+		$bModuleAccess = $oUser->checkModuleAccess(array('crm'), $oSite);
+
+		$aCrm_Note_Attachments = $this->Crm_Note_Attachments->findAll(FALSE);
 		if (count($aCrm_Note_Attachments))
 		{
 			ob_start();
 
 			foreach ($aCrm_Note_Attachments as $oCrm_Note_Attachment)
 			{
-				$file = $oCrm_Note_Attachment->setDir($oObject->getPath())->setHref($oObject->getHref())->getSmallFileHref();
-				$src = '/admin/crm/note/index.php?&' . $oObject->getModelName() . '_id=' . $oObject->id . '&crm_note_attachment_id=' . $oCrm_Note_Attachment->id . '&rand=' . time();
-
-				if (!is_null($file))
+				if ($bModuleAccess)
 				{
-					$src .= '&preview';
-					$image = '<img src="' . htmlspecialchars($src) . '"/>';
-					$onclick = ' onclick="$.showCrmNoteAttachment(this, \'' . $oObject->getModelName() . '\')"';
-					$name = htmlspecialchars($oCrm_Note_Attachment->file_name);
+					$file = $oCrm_Note_Attachment->setDir($oObject->getPath())->setHref($oObject->getHref())->getSmallFileHref();
+					$src = '/admin/crm/note/index.php?&' . $oObject->getModelName() . '_id=' . $oObject->id . '&crm_note_attachment_id=' . $oCrm_Note_Attachment->id . '&rand=' . time();
+
+					if (!is_null($file))
+					{
+						$src .= '&preview';
+						$image = '<img src="' . htmlspecialchars($src) . '"/>';
+						$onclick = ' onclick="$.showCrmNoteAttachment(this, \'' . $oObject->getModelName() . '\')"';
+						$name = htmlspecialchars($oCrm_Note_Attachment->file_name);
+					}
+					else
+					{
+						$src .= '&download';
+						$image = '<a target="_blank" href="' . htmlspecialchars($src) . '"><i class="' . Core_File::getIcon($oCrm_Note_Attachment->file_name) . '"></i></a>';
+						$onclick = '';
+						$name = '<a target="_blank" href="' . htmlspecialchars($src) . '">' . htmlspecialchars($oCrm_Note_Attachment->file_name) . '</a>';
+					}
+
+					?><div class="crm-note-attachment-item" data-id="<?php echo $oCrm_Note_Attachment->id?>" data-<?php echo $oObject->getModelName()?>-id="<?php echo $oObject->id?>" title="<?php echo htmlspecialchars($oCrm_Note_Attachment->file_name)?>"<?php echo $onclick?>>
+						<div class="image">
+							<?php echo $image?>
+							<span class="size"><?php echo $oCrm_Note_Attachment->getTextSize()?></span>
+						</div>
+						<div class="name"><?php echo $name?></div>
+					</div><?php
 				}
 				else
 				{
-					$src .= '&download';
-					$image = '<a target="_blank" href="' . htmlspecialchars($src) . '"><i class="' . Core_File::getIcon($oCrm_Note_Attachment->file_name) . '"></i></a>';
-					$onclick = '';
-					$name = '<a target="_blank" href="' . htmlspecialchars($src) . '">' . htmlspecialchars($oCrm_Note_Attachment->file_name) . '</a>';
-				}
-
-				?><div class="crm-note-attachment-item" data-id="<?php echo $oCrm_Note_Attachment->id?>" data-<?php echo $oObject->getModelName()?>-id="<?php echo $oObject->id?>" title="<?php echo htmlspecialchars($oCrm_Note_Attachment->file_name)?>"<?php echo $onclick?>>
+					?><div class="crm-note-attachment-item" title="<?php echo htmlspecialchars($oCrm_Note_Attachment->file_name)?>">
 					<div class="image">
-						<?php echo $image?>
+						<i class="fa-solid fa-image gray"></i>
 						<span class="size"><?php echo $oCrm_Note_Attachment->getTextSize()?></span>
 					</div>
-					<div class="name"><?php echo $name?></div>
+					<div class="name"><?php echo htmlspecialchars($oCrm_Note_Attachment->file_name)?></div>
 				</div><?php
+				}
 			}
 
 			return ob_get_clean();
@@ -178,7 +195,7 @@ class Crm_Note_Model extends Core_Entity
 
 		return $this;
 	}
-	
+
 	/**
 	 * Check user access to admin form action
 	 * @param string $actionName admin form action name

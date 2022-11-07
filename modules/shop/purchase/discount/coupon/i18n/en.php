@@ -38,4 +38,8 @@ return array(
 	'copy_success' => "Item copied successfully!",
 	'sorting' => "Sort order",
 	'shop_purchase_discount_coupon_dir_id' => 'Section',
+	'root' => "Root",
+	'move_dirs_title' => "Move sections and items",
+	'move_items_dirs' => "Parent section",
+	'move_success' => 'Discounts moved',
 );

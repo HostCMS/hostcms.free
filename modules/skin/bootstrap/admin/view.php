@@ -114,16 +114,16 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 
 				?><div class="header-buttons">
 					<a href="#" class="sidebar-toggler">
-						<i class="fa fa-arrows-h"></i>
+						<i class="fa-solid fa-right-left"></i>
 					</a>
 					<a href="#" id="refresh-toggler" class="refresh">
-						<i class="glyphicon glyphicon-refresh"></i>
+						<i class="fa-solid fa-refresh"></i>
 					</a>
 					<a href="#" id="fullscreen-toggler" class="fullscreen">
-						<i class="glyphicon glyphicon-fullscreen"></i>
+						<i class="fa-solid fa-expand"></i>
 					</a>
 					<a id="bookmark-toggler" class="bookmark <?php echo $class?>" onclick="$.addUserBookmark({title: '<?php echo Core::_("User_Bookmark.title")?>', value: '<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars($title))?>', submit: '<?php echo Core::_("User_Bookmark.submit")?>', cancel: '<?php echo Core::_("User_Bookmark.cancel")?>' , module_id: <?php echo $module_id?>, path: '<?php echo Core_Str::escapeJavascriptVariable($sPagePath)?>'});">
-						<i class="glyphicon glyphicon-star-empty"></i>
+						<i class="fa-regular fa-star"></i>
 					</a>
 				</div><?php
 			}
@@ -143,7 +143,8 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 			<?php
 			// Заголовок формы
 			//$this->showH5($this->pageTitle, $this->module);
-			if (strlen($this->pageTitle))
+
+			if (is_object($this->pageTitle) || strlen($this->pageTitle))
 			{
 				$ico = !is_null($this->module)
 					&& ($aMenu = $this->module->getMenu())
@@ -151,7 +152,16 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 					? Core_Array::get($aMenu[0], 'ico', 'fa fa-barcode')
 					: 'fa fa-barcode';
 
-				?><h5 class="row-title before-pink"><i class="<?php echo htmlspecialchars($ico)?>"></i><?php echo htmlspecialchars(html_entity_decode($this->pageTitle, ENT_COMPAT, 'UTF-8'))?></h5><?php
+				?><h5 class="row-title before-pink"><i class="<?php echo htmlspecialchars($ico)?>"></i><?php
+				if (is_object($this->pageTitle))
+				{
+					$this->pageTitle->execute();
+				}
+				else
+				{
+					echo htmlspecialchars(html_entity_decode($this->pageTitle, ENT_COMPAT, 'UTF-8'));
+				}
+				?></h5><?php
 			}
 			?>
 			<div id="id_message"><?php /*echo $this->message*/?></div>

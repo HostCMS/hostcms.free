@@ -21,11 +21,26 @@ class User_Controller
 	 */
 	static public function onAfterShowContentPopover($object, $args, $options)
 	{
-		//$windowId = $object->getWindowId();
 		$windowId = $options[0]->getWindowId();
 
 		?><script>
 		$('#<?php echo $windowId?> [data-popover="hover"]').showUserPopover('<?php echo $windowId?>');
 		</script><?php
+	}
+
+	/**
+	 * Show popover
+	 * @param object $object
+	 * @param array $args
+	 * @param array $options
+	 */
+	static public function onAfterRedeclaredPrepareForm($controller, $args)
+	{
+		list($object, $Admin_Form_Controller) = $args;
+
+		$windowId = $Admin_Form_Controller->getWindowId();
+
+		$controller->issetTab('main')
+			&& $controller->getTab('main')->add(Admin_Form_Entity::factory('Script')->value("$('#{$windowId} [data-popover=\"hover\"]').showUserPopover('{$windowId}');"));
 	}
 }

@@ -7,19 +7,20 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Event
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
-class Event_Group_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit{
+class Event_Group_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
+{
 	/**
-	 * Set object
-	 * @param object $object object
+	 * Prepare backend item's edit form
+	 *
 	 * @return self
 	 */
-	public function setObject($object)
+	protected function _prepareForm()
 	{
-		parent::setObject($object);
+		parent::_prepareForm();
 
 		$oMainTab = $this->getTab('main');
 
@@ -48,4 +49,5 @@ class Event_Group_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$this->title($title);
 
 		return $this;
-	}}
+	}
+}

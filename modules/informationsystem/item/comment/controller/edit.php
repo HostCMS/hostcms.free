@@ -24,7 +24,7 @@ class Informationsystem_Item_Comment_Controller_Edit extends Comment_Controller_
 		$object = $this->_object;
 
 		$oInformationsystem = is_null($object->id)
-			? Core_Entity::factory('Informationsystem', $object->Comment_Informationsystem_Item->Informationsystem_Item->informationsystem_id)
+			? Core_Entity::factory('Informationsystem_Item', Core_Array::getRequest('informationsystem_item_id', 0, 'int'))->Informationsystem
 			: $object->Comment_Informationsystem_Item->Informationsystem_Item->Informationsystem;
 
 		$oMainTab = $this->getTab('main');
@@ -95,7 +95,7 @@ class Informationsystem_Item_Comment_Controller_Edit extends Comment_Controller_
 				: Core_Array::getGet('informationsystem_item_id'));
 			$Comment_Informationsystem_Item->save();
 		}*/
-		$Comment_Informationsystem_Item->informationsystem_item_id = Core_Array::getRequest('informationsystem_item_id');
+		$Comment_Informationsystem_Item->informationsystem_item_id = Core_Array::getRequest('informationsystem_item_id', 0, 'int');
 		$Comment_Informationsystem_Item->save();
 
 		// Cached tags

@@ -148,12 +148,16 @@ return array(
 	'tab_seo_templates' => 'SEO templates',
 	'seo_group_header' => 'Group templates',
 	'seo_item_header' => 'Item templates',
+	'seo_root_header' => 'Root page templates',
 	'seo_group_title_template' => 'TITLE template',
 	'seo_group_description_template' => 'DESCRIPTION template',
 	'seo_group_keywords_template' => 'KEYWORDS template',
 	'seo_item_title_template' => 'TITLE template',
 	'seo_item_description_template' => 'DESCRIPTION template',
 	'seo_item_keywords_template' => 'KEYWORDS template',
+	'seo_root_title_template' => 'TITLE template',
+	'seo_root_description_template' => 'DESCRIPTION template',
+	'seo_root_keywords_template' => 'KEYWORDS template',
 
 	'seo_template_shop' => 'Shop',
 	'seo_template_shop_name' => 'Shop Name',
@@ -205,5 +209,7 @@ return array(
 	'option_itemSmallImage' => 'Item small image pattern',
 	'option_groupLargeImage' => 'Group large image pattern',
 	'option_groupSmallImage' => 'Group small image pattern',
-	'option_shop_item_card_xsl' => 'XSL pricetag template'
+	'option_shop_item_card_xsl' => 'XSL pricetag template',
+
+	'schedule-checkShopOrderStatusDeadline' => 'Check order status',
 );

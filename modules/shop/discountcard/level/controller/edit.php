@@ -25,7 +25,17 @@ class Shop_Discountcard_Level_Controller_Edit extends Admin_Form_Action_Controll
 			$object->shop_id = Core_Array::getGet('shop_id');
 		}
 
-		parent::setObject($object);
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
 
 		$oMainTab = $this->getTab('main');
 

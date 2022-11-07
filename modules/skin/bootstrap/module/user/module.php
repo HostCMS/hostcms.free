@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_User_Module extends User_Module
 {
@@ -141,6 +141,9 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 						);
 					}
 
+					// Load model columns BEFORE FOUND_ROWS()
+					Core_Entity::factory('User_Message')->getTableColumns();
+
 					$oUser_Messages = Core_Entity::factory('User_Message');
 
 					$iFirstMessageId = Core_Array::getGet('first_message_id', 0);
@@ -148,6 +151,7 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 						->where('user_messages.id', '<', $iFirstMessageId);
 
 					$oUser_Messages->queryBuilder()
+						->sqlCalcFoundRows()
 						->open()
 							->where('user_messages.user_id', '=', $oCurrentUser->id)
 							->where('user_messages.recipient_user_id', '=', $iRecipientUserId)
@@ -162,6 +166,8 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 
 					$aUser_Messages = $oUser_Messages->findAll(FALSE);
 
+					$aJson['total_messages'] = Core_QueryBuilder::select()->getFoundRows();
+
 					foreach ($aUser_Messages as $oUser_Message)
 					{
 						$aJson['messages'][] = array(
@@ -173,12 +179,12 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 							'read' => intval($oUser_Message->read),
 						);
 
-						if ($oUser_Message->recipient_user_id == $oCurrentUser->id && !$oUser_Message->read)
+						/* if ($oUser_Message->recipient_user_id == $oCurrentUser->id && !$oUser_Message->read)
 						{
 							$oUser_Message->read = 1;
 							$oUser_Message->alert = 0;
 							$oUser_Message->save();
-						}
+						} */
 					}
 
 					// Количество непрочитанных пользователем сообщений
@@ -206,6 +212,9 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 					{
 						$iRecipientUserId = intval(Core_Array::getPost('recipient-user-id'));
 
+						/* $dateTime = date("Y-m-d H:i:s");						
+						var_dump($dateTime); */
+
 						$oUser_Message = Core_Entity::factory('User_Message');
 						$oUser_Message->user_id = $oCurrentUser->id;
 						$oUser_Message->recipient_user_id = $iRecipientUserId;
@@ -225,6 +234,7 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 						);
 
 						$aJson['message'] = array(
+							'id'=> $oUser_Message->id,
 							'datetime' => Core_Date::sql2datetime($oUser_Message->datetime),
 						);
 
@@ -324,9 +334,16 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 
 					$oUser_Messages = Core_Entity::factory('User_Message');
 					$oUser_Messages->queryBuilder()
+						->open()
+							->where('user_messages.user_id', '=', $oCurrentUser->id)
+							->where('user_messages.recipient_user_id', '=', $iRecipientUserId)
+							->setOr()
+							->where('user_messages.user_id', '=', $iRecipientUserId)
+							->where('user_messages.recipient_user_id', '=', $oCurrentUser->id)
+						->close()
 						->where('user_messages.id', '>', $iLastMessageId)
-						->where('user_messages.user_id', '=', $iRecipientUserId)
-						->where('user_messages.recipient_user_id', '=', $oCurrentUser->id)
+						//->where('user_messages.user_id', '=', $iRecipientUserId)
+						//->where('user_messages.recipient_user_id', '=', $oCurrentUser->id)
 						->clearOrderBy()
 						->orderBy('user_messages.id', 'ASC');
 
@@ -371,19 +388,28 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 			// "Делаем" сообщение прочитанным
 			case 83:
 
-				$iMessageId = intval(Core_Array::getPost('message-id', 0));
-
-				$oUser_Message = Core_Entity::factory('User_Message')->find($iMessageId);
+				//$iMessageId = intval(Core_Array::getPost('message-id', 0));
 
 				$aJson = array();
 
-				if (!is_null($oUser_Message))
-				{
-					$oUser_Message->read = 1;
-					$oUser_Message->alert = 0;
-					$oUser_Message->save();
+				$aMessagesId = Core_Array::getPost('messagesId', 0);
 
-					$aJson['answer'] = array($oUser_Message->id);
+				if (is_array($aMessagesId))
+				{
+					foreach ($aMessagesId as $iMessageId)
+					{
+						$oUser_Message = Core_Entity::factory('User_Message')->find($iMessageId);
+
+						if (!is_null($oUser_Message))
+						{
+							$oUser_Message->read = 1;
+							$oUser_Message->alert = 0;
+							$oUser_Message->save();
+
+							//$aJson['answer'] = array($oUser_Message->id);
+							$aJson['answer'][] = $oUser_Message->id;
+						}
+					}
 				}
 
 				Core::showJson($aJson);

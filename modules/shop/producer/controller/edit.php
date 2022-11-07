@@ -250,6 +250,7 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 					->move($this->getField('path')->divAttr(array('class' => 'form-group col-xs-12 col-sm-8')), $oMainRow3)
 					->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow3)
 					->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow4)
+					->move($this->getField('indexing')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow4)
 					->move($this->getField('default')->divAttr(array('class' => 'form-group col-xs-12 col-sm-5')), $oMainRow4)
 					->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow5);
 

@@ -18,6 +18,7 @@ class Core_Html_Entity_Script extends Core_Html_Entity
 	 * @var array
 	 */
 	protected $_allowedProperties = array(
+		'value',
 		'defer',
 		'language',
 		'src',
@@ -31,7 +32,7 @@ class Core_Html_Entity_Script extends Core_Html_Entity
 	protected $_skipProperties = array(
 		'value' // идет в значение <script>
 	);
-	
+
 	/**
 	 * Executes the business logic.
 	 */
@@ -40,7 +41,7 @@ class Core_Html_Entity_Script extends Core_Html_Entity
 		$aAttr = $this->getAttrsString();
 
 		echo PHP_EOL;
-		
+
 		?><script <?php echo implode(' ', $aAttr) ?>><?php echo $this->value?><?php
 		parent::execute();
 		?></script><?php

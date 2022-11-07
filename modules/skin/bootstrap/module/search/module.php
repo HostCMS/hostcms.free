@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Search_Module extends Search_Module
 {
@@ -85,16 +85,19 @@ class Skin_Bootstrap_Module_Search_Module extends Search_Module
 								if ($oCore_Module && method_exists($oCore_Module, 'backendSearchCallback'))
 								{
 									$aReturn = $oCore_Module->backendSearchCallback($oSearch_Page);
+									
+									if (isset($aReturn['onclick']))
+									{
+										$aJson[] = array(
+											'id' => $oSearch_Page->id,
+											'label' => strlen($oSearch_Page->title) ? $oSearch_Page->title : Core::_('Admin.no_title'),
+											'href' => Core_Array::get($aReturn, 'href'),
+											'onclick' => Core_Array::get($aReturn, 'onclick'),
+											'icon' => 'fa ' . Core_Array::get($aReturn, 'icon')
+										);
+									}
 								}
 							}
-
-							$aJson[] = array(
-								'id' => $oSearch_Page->id,
-								'label' => $oSearch_Page->title,
-								'href' => Core_Array::get($aReturn, 'href'),
-								'onclick' => Core_Array::get($aReturn, 'onclick'),
-								'icon' => 'fa ' . Core_Array::get($aReturn, 'icon')
-							);
 						}
 					}
 
@@ -111,7 +114,7 @@ class Skin_Bootstrap_Module_Search_Module extends Search_Module
 			<div class="databox radius-bordered databox-shadowed hostcms-widget-databox">
 				<div class="databox-left bg-palegreen">
 					<div class="databox-piechart">
-						<a href="/admin/search/index.php" onclick="$.adminLoad({path: '/admin/search/index.php'}); return false"><i class="fa fa-search fa-3x"></i></a>
+						<a href="/admin/search/index.php" onclick="$.adminLoad({path: '/admin/search/index.php'}); return false"><i class="fa-solid fa-magnifying-glass fa-3x"></i></a>
 					</div>
 				</div>
 				<div class="databox-right">
@@ -121,7 +124,7 @@ class Skin_Bootstrap_Module_Search_Module extends Search_Module
 					<span class="databox-number palegreen"><?php echo number_format($iSearchPagesOnCurrentSite, 0, '.', ' ')?></span>
 					<div class="databox-text"><?php echo Core::_('Search.indexed')?></div>
 					<div class="databox-stat palegreen radius-bordered">
-						<i class="stat-icon icon-lg fa fa-search"></i>
+						<i class="stat-icon icon-lg fa-solid fa-magnifying-glass"></i>
 					</div>
 				</div>
 			</div>

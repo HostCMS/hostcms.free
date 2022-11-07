@@ -14,6 +14,14 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 class Core_Html_Entity_Span extends Core_Html_Entity
 {
 	/**
+	 * Allowed object properties
+	 * @var array
+	 */
+	protected $_allowedProperties = array(
+		'value',
+	);
+
+	/**
 	 * Skip properties
 	 * @var array
 	 */

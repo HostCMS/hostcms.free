@@ -3,9 +3,9 @@
  * Seo
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -523,7 +523,7 @@ if (count($aSearchable))
 if (count($aSeo_Sites))
 {
 	$windowId = $oAdmin_Form_Controller->getWindowId();
-	
+
 ?><script type="text/javascript">
 	$(function(){
 	var aScripts = [
@@ -829,26 +829,33 @@ if (count($aSeo_Sites))
 		};
 
 		// Links
-		var placeholderSeoLinks = $("#<?php echo $windowId?> #seo-links-chart");
+		<?php
+		if (count($aLinks))
+		{
+			?>
+			var placeholderSeoLinks = $("#<?php echo $windowId?> #seo-links-chart");
 
-		placeholderSeoLinks.bind("plotselected", function (event, ranges) {
-			plotSeoLinks = $.plot(placeholderSeoLinks, dataLinks, $.extend(true, {}, options, {
-				xaxis: {
-					min: ranges.xaxis.from,
-					max: ranges.xaxis.to
-				}
-			}));
-		});
+			placeholderSeoLinks.bind("plotselected", function (event, ranges) {
+				plotSeoLinks = $.plot(placeholderSeoLinks, dataLinks, $.extend(true, {}, options, {
+					xaxis: {
+						min: ranges.xaxis.from,
+						max: ranges.xaxis.to
+					}
+				}));
+			});
 
-		$('#<?php echo $windowId?> #seo-links #setOriginalZoom').on('click', function(){
-			plotSeoLinks = $.plot(placeholderSeoLinks, dataLinks, options);
-		});
+			$('#<?php echo $windowId?> #seo-links #setOriginalZoom').on('click', function(){
+				plotSeoLinks = $.plot(placeholderSeoLinks, dataLinks, options);
+			});
 
-		var plotSeoLinks = $.plot(placeholderSeoLinks, dataLinks, options);
+			var plotSeoLinks = $.plot(placeholderSeoLinks, dataLinks, options);
 
-		$("#<?php echo $windowId?> #seo-links #clearSelection").click(function () {
-			plotSeoLinks.clearSelection();
-		});
+			$("#<?php echo $windowId?> #seo-links #clearSelection").click(function () {
+				plotSeoLinks.clearSelection();
+			});
+			<?php
+		}
+		?>
 
 		// Rating
 		<?php

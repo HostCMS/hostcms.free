@@ -140,5 +140,10 @@ return array(
 
 	'filter_enter_title' => 'Введіть назву фільтра',
 
-	'upload_file' => 'Завантажити файл'
+	'upload_file' => 'Завантажити файл',
+
+	'successfully' => 'Успішно',
+	'failed' => 'Не успішно',
+
+	'timeline_empty' => 'Лента дії пуста!'
 );

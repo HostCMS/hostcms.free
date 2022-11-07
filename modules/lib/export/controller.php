@@ -7,32 +7,65 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Lib
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
-class Lib_Export_Controller extends Admin_Form_Action_Controller
+class Lib_Export_Controller extends Core_Servant_Properties
 {
 	/**
-	 * Executes the business logic.
-	 * @param mixed $operation Operation name
+	 * Allowed object properties
+	 * @var array
+	 */
+	protected $_allowedProperties = array(
+		'controller',
+	);
+
+	/**
+	 * Objects array
+	 * @var array
+	 */
+	protected $_aObjects = array();
+
+	/**
+	 * Init
 	 * @return self
 	 */
-	public function execute($operation = NULL)
+	protected function _init()
 	{
-		$oLib = $this->_object;
+		$aChecked = $this->controller->getChecked();
 
-		$sFilename = $oLib->name . '_' . date("Y_m_d_H_i_s") . '.json';
+		// Clear checked list
+		$this->controller->clearChecked();
 
-		header("Pragma: public");
-		header("Content-Description: File Transfer");
-		header("Content-Type: " . Core_Mime::getFileMime($sFilename));
-		header("Content-Disposition: attachment; filename = \"" . str_replace(array("\r", "\n", "\0"), '', $sFilename) . "\";");
-		header("Content-Transfer-Encoding: binary");
+		foreach ($aChecked as $datasetKey => $checkedItems)
+		{
+			foreach ($checkedItems as $key => $value)
+			{
+				if ($datasetKey)
+				{
+					$oLib = Core_Entity::factory('Lib')->getById($key);
 
-		$aReturn = array(
+					!is_null($oLib)
+						&& $this->_setObjects($oLib);
+				}
+			}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Set objects
+	 * @param object Lib_Model $oLib lib
+	 * @return self
+	 */
+	protected function _setObjects(Lib_Model $oLib)
+	{
+		$this->_aObjects[$oLib->name] = array(
 			'version' => CURRENT_VERSION,
 			'name' => $oLib->name,
+			'description' => $oLib->description,
 			'lib' => $oLib->loadLibFile(),
 			'lib_config' => $oLib->loadLibConfigFile(),
 			'options' => array()
@@ -68,10 +101,37 @@ class Lib_Export_Controller extends Admin_Form_Action_Controller
 				);
 			}
 
-			$aReturn['options'][] = $aLibProperty;
+			$this->_aObjects[$oLib->name]['options'][] = $aLibProperty;
 		}
 
-		echo json_encode($aReturn);
+		return $this;
+	}
+
+	/**
+	 * Export
+	 */
+	public function export()
+	{
+		$this->_init();
+
+		$prefix = count($this->_aObjects) == 1
+			? key($this->_aObjects)
+			: 'libs';
+
+		$fileName = $prefix . '_' . date("Y_m_d_H_i_s") . '.json';
+		$fileName = str_replace(array("\r", "\n", "\0"), '', $fileName);
+
+		header("Pragma: public");
+		header("Content-Description: File Transfer");
+		header("Content-Type: " . Core_Mime::getFileMime($fileName));
+		header("Content-Disposition: attachment; filename = \"" . rawurlencode($fileName) . "\";");
+		header("Content-Transfer-Encoding: binary");
+
+		echo json_encode(
+			count($this->_aObjects) == 1
+				? reset($this->_aObjects)
+				: $this->_aObjects
+		);
 
 		exit();
 	}

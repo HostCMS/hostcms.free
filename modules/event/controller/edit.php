@@ -61,91 +61,94 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$oAdditionalTab->move($this->getField('id')->divAttr(array('class' => 'form-group col-xs-12')), $oAdditionalRow1);
 		}
 
-		$oAdditionalTab->delete($this->getField('crm_project_id'));
-
-		$windowId = $this->_Admin_Form_Controller->getWindowId();
-
-		$aCrmProjectsOptions = array(' … ');
-
-		$aCrm_Projects = Core_Entity::factory('Crm_Project')->getAllBySite_id(CURRENT_SITE);
-		foreach ($aCrm_Projects as $oCrm_Project)
+		if (Core::moduleIsActive('crm_project'))
 		{
-			$aCrmProjectsOptions[$oCrm_Project->id] = $oCrm_Project->name;
-		}
+			$oAdditionalTab->delete($this->getField('crm_project_id'));
 
-		if (count($aCrm_Projects) < Core::$mainConfig['switchSelectToAutocomplete'])
-		{
-			$oSelect_Projects = Admin_Form_Entity::factory('Select');
-			$oSelect_Projects
-				->options($aCrmProjectsOptions)
-				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
-				->name('crm_project_id')
-				->value($this->_object->crm_project_id)
-				->caption(Core::_('Event.crm_project_id'));
+			$windowId = $this->_Admin_Form_Controller->getWindowId();
 
-			$oAdditionalRow2->add($oSelect_Projects);
-		}
-		else
-		{
-			$oCrmProjectInput = Admin_Form_Entity::factory('Input')
-				->caption(Core::_('Event.crm_project_id'))
-				->divAttr(array('class' => 'form-group col-xs-12'))
-				->name('crm_project_name');
+			$aCrmProjectsOptions = array(' … ');
 
-			if ($this->_object->crm_project_id)
+			$aCrm_Projects = Core_Entity::factory('Crm_Project')->getAllBySite_id(CURRENT_SITE);
+			foreach ($aCrm_Projects as $oCrm_Project)
 			{
-				$oCrm_Project = $this->_object->Crm_Project;
-				$oCrmProjectInput->value($oCrm_Project->name . ' [' . $oCrm_Project->id . ']');
+				$aCrmProjectsOptions[$oCrm_Project->id] = $oCrm_Project->name;
 			}
 
-			$oCrmProjectInputHidden = Admin_Form_Entity::factory('Input')
-				->divAttr(array('class' => 'form-group col-xs-12 hidden'))
-				->name('crm_project_id')
-				->value($this->_object->crm_project_id)
-				->type('hidden');
+			if (count($aCrm_Projects) < Core::$mainConfig['switchSelectToAutocomplete'])
+			{
+				$oSelect_Projects = Admin_Form_Entity::factory('Select');
+				$oSelect_Projects
+					->options($aCrmProjectsOptions)
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
+					->name('crm_project_id')
+					->value($this->_object->crm_project_id)
+					->caption(Core::_('Event.crm_project_id'));
 
-			$oCore_Html_Entity_Script_Crm_Project = Core_Html_Entity::factory('Script')
-			->value("
-				$('#" . $windowId . " [name = crm_project_name]').autocomplete({
-					source: function(request, response) {
-						$.ajax({
-							url: '/admin/crm/project/index.php?autocomplete=1',
-							dataType: 'json',
-							data: {
-								queryString: request.term
-							},
-							success: function(data) {
-								response(data);
+				$oAdditionalRow2->add($oSelect_Projects);
+			}
+			else
+			{
+				$oCrmProjectInput = Admin_Form_Entity::factory('Input')
+					->caption(Core::_('Event.crm_project_id'))
+					->divAttr(array('class' => 'form-group col-xs-12'))
+					->name('crm_project_name');
+
+				if ($this->_object->crm_project_id)
+				{
+					$oCrm_Project = $this->_object->Crm_Project;
+					$oCrmProjectInput->value($oCrm_Project->name . ' [' . $oCrm_Project->id . ']');
+				}
+
+				$oCrmProjectInputHidden = Admin_Form_Entity::factory('Input')
+					->divAttr(array('class' => 'form-group col-xs-12 hidden'))
+					->name('crm_project_id')
+					->value($this->_object->crm_project_id)
+					->type('hidden');
+
+				$oCore_Html_Entity_Script_Crm_Project = Core_Html_Entity::factory('Script')
+				->value("
+					$('#" . $windowId . " [name = crm_project_name]').autocomplete({
+						source: function(request, response) {
+							$.ajax({
+								url: '/admin/crm/project/index.php?autocomplete=1',
+								dataType: 'json',
+								data: {
+									queryString: request.term
+								},
+								success: function(data) {
+									response(data);
+								}
+							});
+						},
+						minLength: 1,
+						create: function() {
+							$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
+								return $('<li></li>')
+									.data('item.autocomplete', item)
+									.append($('<a>').text(item.label))
+									.appendTo(ul);
 							}
-						});
-					},
-					minLength: 1,
-					create: function() {
-						$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
-							return $('<li></li>')
-								.data('item.autocomplete', item)
-								.append($('<a>').text(item.label))
-								.appendTo(ul);
+
+							$(this).prev('.ui-helper-hidden-accessible').remove();
+						},
+						select: function(event, ui) {
+							$('#" . $windowId . " [name = crm_project_id]').val(ui.item.id);
+						},
+						open: function() {
+							$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
+						},
+						close: function() {
+							$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
 						}
+					});
+				");
 
-						$(this).prev('.ui-helper-hidden-accessible').remove();
-					},
-					select: function(event, ui) {
-						$('#" . $windowId . " [name = crm_project_id]').val(ui.item.id);
-					},
-					open: function() {
-						$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
-					},
-					close: function() {
-						$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
-					}
-				});
-			");
-
-			$oAdditionalRow2
-				->add($oCrmProjectInput)
-				->add($oCrmProjectInputHidden)
-				->add($oCore_Html_Entity_Script_Crm_Project);
+				$oAdditionalRow2
+					->add($oCrmProjectInput)
+					->add($oCrmProjectInputHidden)
+					->add($oCore_Html_Entity_Script_Crm_Project);
+			}
 		}
 
 		$oSite = Core_Entity::factory('Site', CURRENT_SITE);
@@ -240,7 +243,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 				->add($oMainRow3_1 = Admin_Form_Entity::factory('Div')->class('row margin-top-20'))
 				->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row profile-container'))
-				->add($oMainClientsRow = Admin_Form_Entity::factory('Div')->class('event-clients-row'))
+				->add($oMainClientsRow = Admin_Form_Entity::factory('Div')->class('row event-clients-row'))
 				->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
 				->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
 				->add($oMainRow7 = Admin_Form_Entity::factory('Div')->class('row profile-container'))
@@ -275,6 +278,14 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				Admin_Form_Entity::factory('Code')
 					->html('<div class="form-group col-xs-12 semi-bold">' . nl2br(htmlspecialchars($this->_object->description)) . '</div>')
 			);
+
+			if (Core::moduleIsActive('dms'))
+			{
+				$oMainRow1->add(
+					Admin_Form_Entity::factory('Code')
+						->html('<div class="form-group col-xs-12">' . $this->_object->showDocuments($this->_Admin_Form_Controller) . '</div>')
+				);
+			}
 
 			$deadlineClass = $this->_object->deadline()
 				? 'deadline'
@@ -444,7 +455,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							Admin_Form_Entity::factory('Code')
 								->html('
 									<div class="event-status">
-										<i class="fa fa-exclamation-circle darkorange"></i><span class="darkorange"> ' . Core::_('Event.important_view') . '</span>
+										<i class="fa-solid fa-fire fire"></i><span class="darkorange"> ' . Core::_('Event.important_view') . '</span>
 									</div>
 								')
 						)
@@ -545,11 +556,11 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							: 1;
 
 						$imgLink = $oAdmin_Form->Admin_Form_Actions->checkAllowedActionForUser($oAdminUser, 'view')
-							? '<a href="/admin/siteuser/representative/index.php?hostcms[action]=view&hostcms[checked][' . $dataset . '][' . $aObject['id'] . ']=1" onclick="$.modalLoad({path: \'/admin/siteuser/representative/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][' . $dataset . '][' . $aObject['id'] . ']=1\', windowId: \'id_content\'}); return false"><span class="fa fa-eye fa-2x"></span></a>'
+							? '<a href="/admin/siteuser/representative/index.php?hostcms[action]=view&hostcms[checked][' . $dataset . '][' . $aObject['id'] . ']=1" onclick="$.modalLoad({path: \'/admin/siteuser/representative/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][' . $dataset . '][' . $aObject['id'] . ']=1\', windowId: \'id_content\'}); return false"></a>'
 							: '';
 
 						$eventUsers .= '
-							<div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 user-block">
+							<div class="col-xs-12 col-sm-6 user-block">
 								<div class="databox">
 									<div class="databox-left no-padding">
 										<div class="img-wrapper">
@@ -739,9 +750,28 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			return $this;
 		}
 
+		$completedIcon = '';
+
+		if ($this->_object->completed == 1)
+		{
+			$completedIcon = 'fa-solid fa-circle-check palegreen';
+		}
+		elseif ($this->_object->completed == -1)
+		{
+			$completedIcon = 'fa-solid fa-xmark darkorange';
+		}
+
+		$oAdmin_Form_Entity_Code = Admin_Form_Entity::factory('Code');
+		$oAdmin_Form_Entity_Code->html(Core::_('Event.edit_title', $this->_object->name) . '<i class="' . $completedIcon . ' margin-left-5"></i>');
+
+		$this->pageTitle($this->_object->id
+			? $oAdmin_Form_Entity_Code
+			: Core::_('Event.add_title'));
+
 		$this->title($this->_object->id
 			? Core::_('Event.edit_title', $this->_object->name)
-			: Core::_('Event.add_title'));
+			: Core::_('Event.add_title')
+		);
 
 		$bHideAdditionalRow = $this->_object->place == ''
 			&& !$this->_object->reminder_value
@@ -769,7 +799,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row additional-row' . ($bHideAdditionalRow ? ' hidden' : '')))
 			->add($oMainRow7 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow8 = Admin_Form_Entity::factory('Div')->class('row additional-row event-user-id' . ($bHideAdditionalRow ? ' hidden' : '')))
-			->add($oMainRowResultShow = Admin_Form_Entity::factory('Div')->class('row' . ($this->_object->completed ? ' hidden' : '')))
+			// ->add($oMainRowResultShow = Admin_Form_Entity::factory('Div')->class('row' . ($this->_object->completed ? ' hidden' : '')))
 			->add($oMainRow9 = Admin_Form_Entity::factory('Div')->class('row result-row hidden'))
 			->add($oMainRowScripts = Admin_Form_Entity::factory('Div')->class('row'));
 
@@ -1236,14 +1266,22 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->move($this->getField('place')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow6)
 			;
 
-		$oMainRowResultShow->add(Admin_Form_Entity::factory('Span')
-			->divAttr(array('class' => 'form-group col-xs-12'))
-			->add(Admin_Form_Entity::factory('A')
-				->value(Core::_("Event.show_results"))
-				->class('representative-show-link darkgray')
-				->onclick("$.toggleEventFields($(this), '#{$windowId} .result-row')")
-			)
-		);
+		if (Core::moduleIsActive('dms'))
+		{
+			$oMainRow2->add(
+				Admin_Form_Entity::factory('Code')
+					->html('<div class="form-group col-xs-12">' . $this->_object->showDocuments($this->_Admin_Form_Controller) . '</div>')
+			);
+		}
+
+		// $oMainRowResultShow->add(Admin_Form_Entity::factory('Span')
+		// 	->divAttr(array('class' => 'form-group col-xs-12'))
+		// 	->add(Admin_Form_Entity::factory('A')
+		// 		->value(Core::_("Event.show_results"))
+		// 		->class('representative-show-link darkgray')
+		// 		->onclick("$.toggleEventFields($(this), '#{$windowId} .result-row')")
+		// 	)
+		// );
 
 		// Если сотрудник является участником дела, но не его создателем, то возможен только просмотр информации о деле.
 		if ($this->_object->id && $iCreatorUserId != $oUser->id)
@@ -1280,7 +1318,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			$oMainTab->delete($this->getField('completed'));
 
-			$oDivLeft->add($oMainRow10 = Admin_Form_Entity::factory('Div')->class('row result-row' . (!$this->_object->completed ? ' hidden' : '')));
+			/*$oDivLeft->add($oMainRow10 = Admin_Form_Entity::factory('Div')->class('row result-row' . (!$this->_object->completed ? ' hidden' : '')));
 
 			$oEvent_Type = $this->_object->Event_Type;
 
@@ -1316,7 +1354,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							radio.prop('checked', !radio.is(':checked'));
 						});
 					});")
-			);
+			);*/
 		}
 
 		$aEvent_Attachments = $this->_object->Event_Attachments->findAll();
@@ -1357,12 +1395,25 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				<?php
 				if (Core::moduleIsActive('event'))
 				{
+					?>
+					<li data-type="event">
+						<a data-toggle="tab" href="#<?php echo $windowId?>_events" data-path="/admin/event/index.php" data-window-id="<?php echo $windowId?>-related-events" data-additional="show_subs=1&hideMenu=1&parent_id=<?php echo $this->_object->id?>">
+							<?php echo Core::_("Event.tabEvents")?> <?php echo $countEvents?>
+						</a>
+					</li>
+					<?php
+				}
+
+				if (Core::moduleIsActive('dms'))
+				{
 				?>
-				<li data-type="event">
-					<a data-toggle="tab" href="#<?php echo $windowId?>_events" data-path="/admin/event/index.php" data-window-id="<?php echo $windowId?>-related-events" data-additional="show_subs=1&hideMenu=1&parent_id=<?php echo $this->_object->id?>">
-						<?php echo Core::_("Event.tabEvents")?> <?php echo $countEvents?>
-					</a>
-				</li>
+					<li data-type="dms_document">
+						<a data-toggle="tab" href="#<?php echo $windowId?>_documents" data-path="/admin/event/dms/document/index.php" data-window-id="<?php echo $windowId?>-event-dms-documents" data-additional="event_id=<?php echo $this->_object->id?>">
+							<?php echo Core::_("Event.tabDmsDocuments")?> <?php echo ($count = $this->_object->Dms_Documents->getCount())
+								? '<span class="badge badge-purple">' . $count . '</span>'
+								: ''?>
+						</a>
+					</li>
 				<?php
 				}
 				?>
@@ -1431,8 +1482,8 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					}
 
 					$oAdmin_Form_Entity_Code = Admin_Form_Entity::factory('Code');
-					$oAdmin_Form_Entity_Code->html('<div class="input-group-addon no-padding add-remove-property"><div class="no-padding-left col-lg-12"><div class="btn btn-palegreen" onclick="$.cloneFile(\'' . $windowId . '\'); event.stopPropagation();"><i class="fa fa-plus-circle close"></i></div>
-						<div class="btn btn-darkorange" onclick="$(this).parents(\'#file\').remove(); event.stopPropagation();"><i class="fa fa-minus-circle close"></i></div>
+					$oAdmin_Form_Entity_Code->html('<div class="input-group-addon no-padding add-remove-property"><div class="no-padding-left col-lg-12"><div class="btn btn-palegreen inverted" onclick="$.cloneFile(\'' . $windowId . '\'); event.stopPropagation();"><i class="fa fa-plus-circle close"></i></div>
+						<div class="btn btn-darkorange inverted" onclick="$(this).parents(\'#file\').remove(); event.stopPropagation();"><i class="fa fa-minus-circle close"></i></div>
 						</div>
 						</div>');
 
@@ -1459,6 +1510,26 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							->add(
 								$this->_object->id
 									? $this->_addEvents()
+									: Admin_Form_Entity::factory('Code')->html(
+										Core_Message::get(Core::_('Event.enable_after_save'), 'warning')
+									)
+							)
+							->execute();
+					?>
+					</div>
+				<?php
+				}
+
+				if (Core::moduleIsActive('dms'))
+				{
+				?>
+					<div id="<?php echo $windowId?>_documents" class="tab-pane">
+					<?php
+						Admin_Form_Entity::factory('Div')
+							->id("{$windowId}-event-dms-documents")
+							->add(
+								$this->_object->id
+									? $this->_addEventDmsDocuments()
 									: Admin_Form_Entity::factory('Code')->html(
 										Core_Message::get(Core::_('Event.enable_after_save'), 'warning')
 									)
@@ -2052,6 +2123,16 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			});");
 	}
 
+	protected function _addEventDmsDocuments()
+	{
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
+
+		return Admin_Form_Entity::factory('Script')
+			->value("$(function (){
+				$.adminLoad({ path: '/admin/event/dms/document/index.php', additionalParams: 'event_id=" . $this->_object->id . "', windowId: '{$windowId}-event-dms-documents' });
+			});");
+	}
+
 	/*
 	 * Add event notes
 	 * @return Admin_Form_Entity
@@ -2187,6 +2268,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$this->_addEventTimeline()->execute();
 			$this->_addEventNotes()->execute();
 			$this->_addEvents()->execute();
+			Core::moduleIsActive('dms') && $this->_addEventDmsDocuments()->execute();
 			?>
 			<script>
 				$(function(){
@@ -2483,7 +2565,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		if ($previousObject->important != $this->_object->important)
 		{
 			$important_color = $this->_object->important
-				? '#fb6e52'
+				? '#e25822'
 				: '#333333';
 
 			$this->_object->pushHistory(Core::_('Event.history_change_important' . $this->_object->important), $important_color);

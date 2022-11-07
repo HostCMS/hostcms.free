@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Company
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Company_Activity_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -25,7 +25,17 @@ class Company_Activity_Controller_Edit extends Admin_Form_Action_Controller_Type
 			$object->company_id = Core_Array::getGet('company_id', 0);
 		}
 
-		parent::setObject($object);
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
 
 		$this->title($this->_object->id
 			? Core::_('Company_Activity.edit_title', $this->_object->name)

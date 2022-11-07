@@ -104,4 +104,5 @@ return array(
 	'placeholderGlobalSearch' => 'Пошук',
 
 	'none' => 'Відсутній',
+	'no_title' => '<Без назви>',
 );

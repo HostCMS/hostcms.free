@@ -18,6 +18,7 @@ class Core_Html_Entity_H4 extends Core_Html_Entity
 	 * @var array
 	 */
 	protected $_allowedProperties = array(
+		'value',
 		'align'
 	);
 

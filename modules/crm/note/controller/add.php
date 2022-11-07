@@ -25,6 +25,14 @@ class Crm_Note_Controller_Add extends Admin_Form_Action_Controller
 		$oCrm_Note = Core_Entity::factory('Crm_Note');
 		$oCrm_Note->text = $sCommentText;
 		$oCrm_Note->datetime = Core_Date::timestamp2sql(time());
+
+		$result = Core_Array::getPost('result', 0, 'int');
+
+		if ($result)
+		{
+			$oCrm_Note->result = Core_Array::getPost('completed', 0, 'int');
+		}
+
 		$oCrm_Note->save();
 
 		$this->_object = $oCrm_Note;

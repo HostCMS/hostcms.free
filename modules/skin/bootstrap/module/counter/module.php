@@ -5,9 +5,9 @@
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Counter_Module extends Counter_Module
 {
@@ -60,7 +60,7 @@ class Skin_Bootstrap_Module_Counter_Module extends Counter_Module
 
 	protected function _content()
 	{
-		$iMonth = 6;
+		$iMonth = 12;
 		?>
 		<div class="widget counter">
 			<div class="widget-header bordered-bottom bordered-themeprimary">
@@ -71,7 +71,7 @@ class Skin_Bootstrap_Module_Counter_Module extends Counter_Module
 						<i class="fa fa-expand gray"></i>
 					</a>
 					<a data-toggle="refresh" onclick="$(this).find('i').addClass('fa-spin'); $.widgetLoad({ path: '<?php echo Core_Str::escapeJavascriptVariable($this->_path)?>', context: $('#counterAdminPage'), 'button': $(this).find('i') });">
-						<i class="fa fa-refresh gray"></i>
+						<i class="fa-solid fa-rotate gray"></i>
 					</a>
 				</div>
 			</div>
@@ -122,24 +122,28 @@ class Skin_Bootstrap_Module_Counter_Module extends Counter_Module
 
 		<?php
 		$iBeginTimestamp = strtotime("-{$iMonth} month");
-		//$iBeginTimestamp = strtotime('+2 day', $iBeginTimestamp);
+		$iEndTimestamp = Core_Date::date2timestamp(date('Y-m-d 23:59:59'));
+
+		$oCounters = Core_Entity::factory('Site', CURRENT_SITE)->Counters;
+		$oCounters
+			->queryBuilder()
+			->where('date', '>=', date('Y-m-d 00:00:00', $iBeginTimestamp))
+			->clearOrderBy()
+			->orderBy('date', 'ASC');
+
+		$aCounters = $oCounters->findAll(FALSE);
+
+		// Началом периода считается первая найденная дата
+		isset($aCounters[0])
+			&& $iBeginTimestamp = Core_Date::date2timestamp($aCounters[0]->date);
 
 		$aHits = array();
-
-		$iEndTimestamp = Core_Date::date2timestamp(date('Y-m-d 23:59:59'));
 		for ($iTmp = $iBeginTimestamp; $iTmp <= $iEndTimestamp; $iTmp += 86400)
 		{
 			$aHits["'" . date('Y-m-d', $iTmp) . "'"] = 0;
 		}
 
 		$aBots = $aHosts = $aNewUsers = $aSessions = $aHits;
-
-		$oCounters = Core_Entity::factory('Site', CURRENT_SITE)->Counters;
-		$oCounters
-			->queryBuilder()
-			->where('date', '>=', date('Y-m-d 00:00:00', $iBeginTimestamp));
-
-		$aCounters = $oCounters->findAll(FALSE);
 
 		$iHitsCount = $iHostsCount = $iBotsCount = $iSessionsCount = $iNewUsersCount = 0;
 		foreach ($aCounters as $oCounter)

@@ -10,6 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - itemsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств товаров, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
  * - sortPropertiesValues(TRUE|FALSE) сортировать значения дополнительных свойств, по умолчанию TRUE.
  * - itemsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств товаров, по умолчанию TRUE
+ * - orderProperties(TRUE|FALSE|array()) выводить список дополнительных свойств заказа, по умолчанию FALSE.
  * - itemsForbiddenTags(array('description')) массив тегов товаров, запрещенных к передаче в генерируемый XML
  * - warehousesItems(TRUE|FALSE) выводить остаток на каждом складе для товара, по умолчанию TRUE
  * - taxes(TRUE|FALSE) выводить список налогов, по умолчанию FALSE
@@ -55,6 +56,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		'itemsProperties',
 		'itemsPropertiesList',
 		'sortPropertiesValues',
+		'orderProperties',
 		'itemsForbiddenTags',
 		'warehousesItems',
 		'taxes',
@@ -112,6 +114,18 @@ class Shop_Cart_Controller_Show extends Core_Controller
 	protected $_aDiscountPrices = array();
 
 	/**
+	 * List of properties for order
+	 * @var array
+	 */
+	protected $_aOrder_Properties = array();
+
+	/**
+	 * List of property directories for order
+	 * @var array
+	 */
+	protected $_aOrder_Property_Dirs = array();
+
+	/**
 	 * Constructor.
 	 * @param Shop_Model $oShop shop
 	 */
@@ -139,7 +153,8 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		);
 
 		$this->itemsProperties = $this->taxes = $this->specialprices
-			= $this->calculateCounts = $this->associatedItems = FALSE;
+			= $this->calculateCounts = $this->associatedItems
+			= $this->orderProperties = FALSE;
 
 		$this->itemsPropertiesList = $this->warehousesItems
 			= $this->applyDiscounts = $this->applyDiscountCards = $this->sortPropertiesValues = TRUE;
@@ -181,6 +196,41 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		$bTpl = $this->_mode == 'tpl';
 
 		$oShop = $this->getEntity();
+
+		if ($this->orderProperties)
+		{
+			$oShop_Order_Property_List = Core_Entity::factory('Shop_Order_Property_List', $oShop->id);
+
+			$aProperties = $oShop_Order_Property_List->Properties->findAll();
+
+			foreach ($aProperties as $oProperty)
+			{
+				$this->_aOrder_Properties[$oProperty->property_dir_id][] = $oProperty->clearEntities();
+
+				$oShop_Order_Property = $oProperty->Shop_Order_Property;
+				$oProperty->addEntity(
+					Core::factory('Core_Xml_Entity')->name('prefix')->value($oShop_Order_Property->prefix)
+				)
+				->addEntity(
+					Core::factory('Core_Xml_Entity')->name('display')->value($oShop_Order_Property->display)
+				);
+			}
+
+			$aProperty_Dirs = $oShop_Order_Property_List->Property_Dirs->findAll();
+			foreach ($aProperty_Dirs as $oProperty_Dir)
+			{
+				$oProperty_Dir->clearEntities();
+				$this->_aOrder_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir->clearEntities();
+			}
+
+			// Список свойств товаров
+			$Shop_Order_Properties = Core::factory('Core_Xml_Entity')
+				->name('shop_order_properties');
+
+			$this->addEntity($Shop_Order_Properties);
+
+			$this->_addOrdersPropertiesList(0, $Shop_Order_Properties);
+		}
 
 		$oShop->showXmlCounts($this->calculateCounts);
 
@@ -403,6 +453,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 			$oShop_Purchase_Discount_Controller
 				->amount($amountPurchaseDiscount)
 				->quantity($quantityPurchaseDiscount)
+				->weight($this->weight)
 				->couponText($this->couponText)
 				->siteuserId($this->_oSiteuser ? $this->_oSiteuser->id : 0)
 				->prices($this->_aDiscountPrices);
@@ -532,6 +583,31 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		if (isset($this->_aItem_Properties[$parent_id]))
 		{
 			$parentObject->addEntities($this->_aItem_Properties[$parent_id]);
+		}
+
+		return $this;
+	}
+	
+/**
+	 * Add order's properties to XML
+	 * @param int $parent_id
+	 * @param object $parentObject
+	 * @return self
+	 */
+	protected function _addOrdersPropertiesList($parent_id, $parentObject)
+	{
+		if (isset($this->_aOrder_Property_Dirs[$parent_id]))
+		{
+			foreach ($this->_aOrder_Property_Dirs[$parent_id] as $oProperty_Dir)
+			{
+				$parentObject->addEntity($oProperty_Dir);
+				$this->_addOrdersPropertiesList($oProperty_Dir->id, $oProperty_Dir);
+			}
+		}
+
+		if (isset($this->_aOrder_Properties[$parent_id]))
+		{
+			$parentObject->addEntities($this->_aOrder_Properties[$parent_id]);
 		}
 
 		return $this;

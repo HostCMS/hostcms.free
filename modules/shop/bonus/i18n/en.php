@@ -41,4 +41,8 @@ return array(
 	'sorting' => 'Sort order',
 	'copy_success' => "Item copied successfully!",
 	'apply_success' => "Information changed successfully.",
+	'root' => "Root",
+	'move_dirs_title' => "Move sections and items",
+	'move_items_dirs' => "Parent section",
+	'move_success' => 'Bonuses moved',
 );

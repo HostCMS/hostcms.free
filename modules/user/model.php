@@ -223,9 +223,10 @@ class User_Model extends Core_Entity
 
 			if ($oModule->active != 1)
 			{
-				throw new Core_Exception(Core::_('Core.error_log_module_disabled'),
+				/*throw new Core_Exception(Core::_('Core.error_log_module_disabled'),
 					array('%s' => $sModuleName), 0, $bShowDebugTrace = FALSE
-				);
+				);*/
+				return FALSE;
 			}
 
 			// Вынесено после проверки прав доступа, т.к. идет отдельная проверка на активность модуля
@@ -1237,8 +1238,10 @@ class User_Model extends Core_Entity
 			? $this->getFullName()
 			: $content;
 
+		$oUser = Core_Auth::getCurrentUser();
+
 		?><a data-popover="hover" data-user-id="<?php echo $this->id?>" style="color: inherit" <?php
-		if ($this->checkModuleAccess(array('user'), Core_Entity::factory('Site', CURRENT_SITE)))
+		if ($oUser->checkModuleAccess(array('user'), Core_Entity::factory('Site', CURRENT_SITE)))
 		{
 			?>href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][<?php echo $this->id?>]=1" onclick="$.modalLoad({path: '/admin/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $this->id?>]=1', windowId: '<?php echo $windowId?>', width: '<?php echo $width?>'}); return false"<?php
 		}

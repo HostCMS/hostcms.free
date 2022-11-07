@@ -14,13 +14,13 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 class Crm_Project_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
 	/**
-	 * Set object
-	 * @param object $object object
+	 * Prepare backend item's edit form
+	 *
 	 * @return self
 	 */
-	public function setObject($object)
+	protected function _prepareForm()
 	{
-		parent::setObject($object);
+		parent::_prepareForm();
 
 		$title = $this->_object->id
 			? Core::_('Crm_Project.edit_title', $this->_object->name, FALSE)

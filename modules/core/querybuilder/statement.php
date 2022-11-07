@@ -60,6 +60,15 @@ abstract class Core_QueryBuilder_Statement
 		$this->_dataBase = $dataBase;
 		return $this;
 	}
+	
+	/**
+	 * Get DataBase
+	 * @return Core_DataBase
+	 */
+	public function getDataBase()
+	{
+		return $this->_dataBase;
+	}
 
 	/**
 	 * Execute query

@@ -60,4 +60,8 @@ return array(
 	'sorting' => "Sort order",
 	'apply_success' => "Information changed successfully.",
 	'copy_success' => "Item copied successfully!",
+	'root' => "Root",
+	'move_dirs_title' => "Move sections and items",
+	'move_items_dirs' => "Parent section",
+	'move_success' => 'Discounts moved',
 );

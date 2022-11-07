@@ -7,21 +7,20 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Country_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
 	/**
-	 * Load object's fields when object has been set
-	 * После установки объекта загружаются данные о его полях
-	 * @param object $object
-	 * @return Shop_Country_Controller_Edit
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
 	 */
-	public function setObject($object)
+	protected function _prepareForm()
 	{
-		parent::setObject($object);
+		parent::_prepareForm();
 
 		$title = $this->_object->id
 			? Core::_('Shop_Country.country_edit_form_title', $this->_object->name)

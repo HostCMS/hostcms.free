@@ -23,9 +23,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Servant_Properties
 {
@@ -129,8 +129,9 @@ class Core_Servant_Properties
 			return NULL;
 		}
 
-		throw new Core_Exception("The property '%property' does not exist in '%class'.",
-			array('%property' => $property, '%class' => get_class($this)));
+		throw new Core_Exception("The property '%property' does not exist in the '%class'.",
+			array('%property' => $property, '%class' => get_class($this))
+		);
 	}
 
 	/**
@@ -153,8 +154,9 @@ class Core_Servant_Properties
 			return $this;
 		}
 
-		throw new Core_Exception("The property '%property' does not exist in the entity",
-			array('%property' => $property));
+		throw new Core_Exception("The property '%property' does not exist in the '%class'",
+			array('%property' => $property, '%class' => get_class($this))
+		);
 	}
 
 	/**
@@ -179,8 +181,9 @@ class Core_Servant_Properties
 				$this->$name = $arguments[0];
 				return $this;
 			}
-			throw new Core_Exception("The argument for method '%methodName' does not exist in '%class'",
-				array('%methodName' => $name, '%class' => get_class($this)));
+			throw new Core_Exception("The argument for method '%methodName' does not exist in the '%class'. Available methods: %methods.",
+				array('%methodName' => $name, '%class' => get_class($this), '%methods' => implode(', ', array_keys($this->_propertiesValues)))
+			);
 		}
 
 		throw new Core_Exception("The method '%methodName' does not exist in '%class'",

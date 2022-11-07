@@ -23,7 +23,7 @@ class Crm_Project_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2022-04-29';
+	public $date = '2022-08-05';
 
 	/**
 	 * Module name
@@ -41,7 +41,7 @@ class Crm_Project_Module extends Core_Module
 			array(
 				'sorting' => 100,
 				'block' => 0,
-				'ico' => 'fa fa-folder-o',
+				'ico' => 'fas fa-tasks',
 				'name' => Core::_('Crm_Project.menu'),
 				'href' => "/admin/crm/project/index.php",
 				'onclick' => "$.adminLoad({path: '/admin/crm/project/index.php'}); return false"

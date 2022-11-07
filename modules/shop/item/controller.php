@@ -175,8 +175,25 @@ class Shop_Item_Controller extends Core_Servant_Properties
 		if ($this->_aPrice['price'])
 		{
 			// Определены ли скидки на товар
-			$aShop_Item_Discounts = $oShop_Item->Shop_Item_Discounts->findAll();
-			
+			//$aShop_Item_Discounts = $oShop_Item->Shop_Item_Discounts->findAll();
+			$oShop_Item_Discounts = $oShop_Item->Shop_Item_Discounts;
+
+			$bSiteuser = $this->siteuser && Core::moduleIsActive('siteuser');
+
+			// Обычные скидки на товары и персональные скидки для $this->siteuser
+			$bSiteuser && $oShop_Item_Discounts->queryBuilder()
+				->open();
+
+			$oShop_Item_Discounts->queryBuilder()
+				->where('shop_item_discounts.siteuser_id', '=', 0);
+
+			$bSiteuser && $oShop_Item_Discounts->queryBuilder()
+				->setOr()
+				->where('shop_item_discounts.siteuser_id', '=', $this->siteuser->id)
+				->close();
+
+			$aShop_Item_Discounts = $oShop_Item_Discounts->findAll();
+
 			Core_Event::notify(get_class($this) . '.onGetShopItemDiscounts', $this, array($oShop_Item, $aShop_Item_Discounts));
 
 			$eventResult = Core_Event::getLastReturn();
@@ -185,7 +202,7 @@ class Shop_Item_Controller extends Core_Servant_Properties
 			{
 				$aShop_Item_Discounts = $eventResult;
 			}
-			
+
 			if (count($aShop_Item_Discounts))
 			{
 				// Определяем количество скидок на товар
@@ -375,9 +392,19 @@ class Shop_Item_Controller extends Core_Servant_Properties
 	 * @param float $price price
 	 * @param boolean $bCache cache mode status
 	 * @return float
+	 * @hostcms-event Shop_Item_Controller.onBeforeGetSpecialprice
 	 */
 	public function getSpecialprice($price, Shop_Item_Model $oShop_Item, $bCache = TRUE)
 	{
+		Core_Event::notify(get_class($this) . '.onBeforeGetSpecialprice', $this, array($price, $oShop_Item, $bCache));
+
+		$eventResult = Core_Event::getLastReturn();
+
+		if (!is_null($eventResult))
+		{
+			return $eventResult;
+		}
+
 		// Цены в зависимости от количества самого товара в корзине (а не всей корзины)
 		$aShop_Specialprices = $oShop_Item->Shop_Specialprices->findAll($bCache);
 		foreach ($aShop_Specialprices as $oShop_Specialprice)
@@ -393,7 +420,7 @@ class Shop_Item_Controller extends Core_Servant_Properties
 				break;
 			}
 		}
-		
+
 		return $price;
 	}
 

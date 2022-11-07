@@ -172,9 +172,10 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 				$lng = Core_I18n::instance()->getLng();
 
 				// add
-				$this->_init['script_url'] = "'/admin/wysiwyg/tinymce.min.js'";
+				$this->_init['script_url'] = "'/admin/wysiwyg/tinymce.min.js?v=" . HOSTCMS_UPDATE_NUMBER . "'";
 				$this->_init['language'] = '"' . $lng . '"';
-				$this->_init['language_url'] = '"/admin/wysiwyg/langs/' . $lng . '.js"';
+				$this->_init['language_url'] = "'/admin/wysiwyg/langs/{$lng}.js'";
+				$this->_init['cache_suffix'] = "'?v=" . HOSTCMS_UPDATE_NUMBER  . "'";
 				//$this->_init['elements'] = '"' . $this->id . '"';
 
 				$this->_init['init_instance_callback'] = 'function(editor) { $(\'body\').trigger(\'afterTinyMceInit\', [editor]);}';

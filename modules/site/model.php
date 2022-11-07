@@ -88,7 +88,10 @@ class Site_Model extends Core_Entity
 		'document' => array(),
 		'document_dir' => array(),
 		'document_status' => array(),
+		'dms_document' => array(),
 		'dms_class' => array(),
+		'dms_case_archive' => array(),
+		'dms_case_destruction' => array(),
 		'dms_communication' => array(),
 		'dms_field' => array(),
 		'dms_field_dir' => array(),
@@ -99,6 +102,9 @@ class Site_Model extends Core_Entity
 		'dms_workflow_template_dir' => array(),
 		'dms_workflow_template' => array(),
 		'dms_workflow' => array(),
+		'dms_workflow' => array(),
+		'dms_document_transfer' => array(),
+		'dms_document_checkpoint' => array(),
 		'field' => array(),
 		'form' => array(),
 		'forum' => array(),
@@ -385,6 +391,7 @@ class Site_Model extends Core_Entity
 
 		if (Core::moduleIsActive('dms'))
 		{
+			$this->Dms_Documents->deleteAll(FALSE);
 			$this->Dms_Classes->deleteAll(FALSE);
 			$this->Dms_Communications->deleteAll(FALSE);
 			$this->Dms_Fields->deleteAll(FALSE);
@@ -396,6 +403,10 @@ class Site_Model extends Core_Entity
 			$this->Dms_Workflow_Template_Dirs->deleteAll(FALSE);
 			$this->Dms_Workflow_Templates->deleteAll(FALSE);
 			$this->Dms_Workflows->deleteAll(FALSE);
+			$this->Dms_Document_Transfers->deleteAll(FALSE);
+			$this->Dms_Document_Checkpoints->deleteAll(FALSE);
+			$this->Dms_Case_Archives->deleteAll(FALSE);
+			$this->Dms_Case_Destructions->deleteAll(FALSE);
 		}
 
 		$this->Site_Aliases->deleteAll(FALSE);
@@ -1371,8 +1382,6 @@ class Site_Model extends Core_Entity
 
 				unset($aMatchHelpdesk_Statuses);
 
-				////////////////////
-
 				// Получаем список уровней критичности
 				$aHelpdesk_Criticality_Levels = $oHelpdesk->Helpdesk_Criticality_Levels->findAll(FALSE);
 				foreach ($aHelpdesk_Criticality_Levels as $oHelpdesk_Criticality_Level)
@@ -1800,6 +1809,13 @@ class Site_Model extends Core_Entity
 
 			$oDiv->execute();
 		}
+	}
+	
+	public function timezoneBackend()
+	{
+		return $this->timezone == ''
+			? '—'
+			: $this->timezone;
 	}
 
 	/**

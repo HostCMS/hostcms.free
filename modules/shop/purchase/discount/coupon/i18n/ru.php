@@ -38,4 +38,8 @@ return array(
 	'copy_success' => "Элемент успешно скопирован!",
 	'sorting' => "Порядок сортировки",
 	'shop_purchase_discount_coupon_dir_id' => 'Раздел',
+	'root' => "Корень",
+	'move_dirs_title' => "Перенос разделов и элементов",
+	'move_items_dirs' => "Родительский раздел",
+	'move_success' => 'Скидки перенесены',
 );

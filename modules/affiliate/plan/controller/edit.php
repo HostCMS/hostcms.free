@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Affiliate
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Affiliate_Plan_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -25,7 +25,17 @@ class Affiliate_Plan_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 			$object->site_id = CURRENT_SITE;
 		}
 
-		parent::setObject($object);
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
 
 		$oMainTab = $this->getTab('main');
 
@@ -72,10 +82,10 @@ class Affiliate_Plan_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 
 		$oMainRow3->add($oSiteUserGroupField);
 		$oMainTab->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow3);
-		
+
 		$oMainTab->move($this->getField('min_count_of_items')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow4);
 		$oMainTab->move($this->getField('min_amount_of_items')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow4);
-		
+
 		$oMainTab->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow5);
 		$oMainTab->move($this->getField('include_delivery')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow5);
 

@@ -7,7 +7,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * Доступные методы:
  *
- * - channelEntities(array) массив дополнительных элементов, добавляемых в channel, каждый элемент массив с атрибутами 'name', 'value', 'attributes'.
+ * - channelEntities(array) массив дополнительных элементов, добавляемых в channel, каждый элемент массив с атрибутами 'name', 'value', 'attributes'
+ * - itemProperties(array) массив соответствия для вывода дополнительных свойств в тегах элементов, например, array(3 => 'enclosure', 7 => 'category')
  * - group($id) идентификатор информационной группы, если FALSE, то вывод инофрмационных элементов
  * осуществляется из всех групп
  * - yandex(TRUE|FALSE) экспорт в Яндекс.Новости, по умолчанию FALSE
@@ -30,9 +31,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Informationsystem
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Controller_Rss_Show extends Core_Controller
 {
@@ -46,6 +47,7 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 		'link',
 		'image',
 		'channelEntities',
+		'itemProperties',
 		'group',
 		'tag',
 		'offset',
@@ -161,7 +163,7 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 		$this->stripTags = $this->cache = TRUE;
 		$this->offset = 0;
 
-		$this->channelEntities = array();
+		$this->channelEntities = $this->itemProperties = array();
 
 		$this->_Core_Rss = new Core_Rss();
 	}
@@ -392,29 +394,87 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 
 			if ($oInformationsystem_Item->image_large)
 			{
-				$file_enclosure = $oInformationsystem_Item->getLargeFilePath();
+				$largeFilePath = $oInformationsystem_Item->getLargeFilePath();
 
 				$enclosure = array(
 					'name' => 'enclosure',
 					'value' => NULL,
 					'attributes' => array(
 						'url' => $sitePath . $oInformationsystem_Item->getLargeFileHref(),
-						'type' => Core_Mime::getFileMime($file_enclosure)
+						'type' => Core_Mime::getFileMime($largeFilePath)
 					)
 				);
 
-				if (is_file($file_enclosure))
+				if (is_file($largeFilePath))
 				{
-					$enclosure['attributes']['length'] = filesize($file_enclosure);
+					$enclosure['attributes']['length'] = filesize($largeFilePath);
 				}
 
 				$this->_currentItem[] = $enclosure;
 			}
 
+			if (is_array($this->itemProperties))
+			{
+				foreach ($this->itemProperties as $propertyId => $tagName)
+				{
+					if (is_numeric($propertyId))
+					{
+						$oProperty = Core_Entity::factory('Property', $propertyId);
+						$aProerty_Values = $oProperty->getValues($oInformationsystem_Item->id, FALSE);
+
+						foreach ($aProerty_Values as $oProperty_Value)
+						{
+							$aTmp = NULL;
+
+							switch ($oProperty->type)
+							{
+								case 2: // File
+									$oProperty_Value
+										->setHref('/' . $oInformationsystem_Item->getHref())
+										->setDir($oInformationsystem_Item->getPath());
+
+									if ($oProperty_Value->file_name)
+									{
+										$largeFilePath = $oProperty_Value->getLargeFilePath();
+
+										$aTmp = array(
+											'name' => $tagName,
+											'value' => NULL,
+											'attributes' => array(
+												'url' => $sitePath . $oInformationsystem_Item->getLargeFileHref(),
+												'type' => Core_Mime::getFileMime($largeFilePath)
+											)
+										);
+									}
+								break;
+								case 3: // List
+									if (Core::moduleIsActive('list') && $oProperty_Value->value)
+									{
+										$aTmp = array(
+											'name' => $tagName,
+											'value' => Core_Entity::factory('List_Item', intval($oProperty_Value->value))->value
+										);
+									}
+								break;
+								default:
+									$oProperty_Value->value !== '' && $aTmp = array(
+										'name' => $tagName,
+										'value' => $oProperty_Value->value
+									);
+								break;
+							}
+
+							!is_null($aTmp)
+								&& $this->_currentItem[] = $aTmp;
+						}
+					}
+				}
+			}
+
 			if ($this->turbo)
 			{
 				$attributes['turbo'] = 'true';
-			
+
 				// https://yandex.ru/dev/turbo/doc/rss/elements/header.html
 				$turboContent = PHP_EOL . '<header>' . PHP_EOL;
 

@@ -36,7 +36,8 @@ $Shop_Controller_Show
 	//->groupsProperties(TRUE)
 	// Фильтровать по ярлыкам
 	->filterShortcuts(TRUE)
-	->filterStrictMode(TRUE)
+	// Фильтровать только по существующим значениям (кроме списков и checkbox), отсутствие значения считать неверным значением
+	//->filterStrictMode(TRUE)
 	// Только доступные элементы списков в фильтре
 	//->itemsPropertiesListJustAvailable(TRUE)
 	// ->barcodes(TRUE)

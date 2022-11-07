@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Constant
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Constant_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -20,7 +20,34 @@ class Constant_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	public function setObject($object)
 	{
-		parent::setObject($object);
+		switch ($object->getModelName())
+		{
+			case 'constant':
+
+				if (!$object->id)
+				{
+					$object->constant_dir_id = Core_Array::getGet('constant_dir_id');
+				}
+			break;
+			case 'constant_dir':
+				if (!$object->id)
+				{
+					$object->parent_id = Core_Array::getGet('constant_dir_id');
+				}
+			break;
+		}
+
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
 
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
@@ -28,12 +55,6 @@ class Constant_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		switch ($this->_object->getModelName())
 		{
 			case 'constant':
-
-				if (!$this->_object->id)
-				{
-					$this->_object->constant_dir_id = Core_Array::getGet('constant_dir_id');
-				}
-
 				// Удаляем группу товаров
 				$oAdditionalTab->delete($this->getField('constant_dir_id'));
 
@@ -49,7 +70,7 @@ class Constant_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$this->title(
 					$this->_object->id
-						? Core::_('Constant.edit_title', $object->name)
+						? Core::_('Constant.edit_title', $this->_object->name)
 						: Core::_('Constant.add_title')
 					);
 
@@ -61,12 +82,6 @@ class Constant_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					);
 			break;
 			case 'constant_dir':
-
-				if (!$this->_object->id)
-				{
-					$this->_object->parent_id = Core_Array::getGet('constant_dir_id');
-				}
-
 				// Удаляем группу товаров
 				$oAdditionalTab->delete($this->getField('parent_id'));
 

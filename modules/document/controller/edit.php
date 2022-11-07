@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Document
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -28,6 +28,11 @@ class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			{
 				case 'document':
 					$object->document_dir_id = Core_Array::getGet('document_dir_id');
+
+					$aTypographConfig = Typograph_Controller::instance()->getConfig();
+
+					$object->typograph = $aTypographConfig['typograph'];
+					$object->trailing_punctuation = $aTypographConfig['trailing_punctuation'];
 				break;
 				case 'document_dir':
 					$object->parent_id = Core_Array::getGet('document_dir_id');
@@ -82,27 +87,31 @@ class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oMainRow2->add($oTextarea_Document);
 
+				$oMainTab
+					->delete($this->getField('typograph'))
+					->delete($this->getField('trailing_punctuation'));
+
 				if (Core::moduleIsActive('typograph'))
 				{
-					$aTypographConfig = Typograph_Controller::instance()->getConfig();
+					// $aTypographConfig = Typograph_Controller::instance()->getConfig();
 
 					$oTextarea_Document->value(
 						Typograph_Controller::instance()->eraseOpticalAlignment($oTextarea_Document->value)
 					);
 
 					$oUseTypograph = Admin_Form_Entity::factory('Checkbox')
-						->name("use_typograph")
+						->name("typograph")
 						->caption(Core::_('Document.use_typograph'))
 						->value(1)
 						->divAttr(array('class' => 'form-group col-sm-12 col-md-6'))
-						->checked($aTypographConfig['typograph']);
+						->checked($this->_object->typograph);
 
 					$oUseTrailingPunctuation = Admin_Form_Entity::factory('Checkbox')
-						->name("use_trailing_punctuation")
+						->name("trailing_punctuation")
 						->caption(Core::_('Document.use_trailing_punctuation'))
 						->value(1)
 						->divAttr(array('class' => 'form-group col-sm-12 col-md-6'))
-						->checked($aTypographConfig['trailing_punctuation']);
+						->checked($this->_object->trailing_punctuation);
 
 					$oMainTab
 						->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'));
@@ -169,8 +178,8 @@ class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			case 'document_dir':
 			default:
 				$title = $this->_object->id
-						? Core::_('Document_Dir.edit_title', $this->_object->name)
-						: Core::_('Document_Dir.add_title');
+					? Core::_('Document_Dir.edit_title', $this->_object->name)
+					: Core::_('Document_Dir.add_title');
 
 				// Удаляем стандартный <input>
 				$oAdditionalTab->delete($this->getField('parent_id'));
@@ -214,13 +223,27 @@ class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$this->_object->backupRevision();
 			}
 
-			if (Core::moduleIsActive('typograph') && Core_Array::getPost('use_typograph'))
+			if (Core::moduleIsActive('typograph') && Core_Array::getPost('typograph'))
 			{
-				$this->_formValues['text'] = Typograph_Controller::instance()->process($this->_formValues['text'], Core_Array::getPost('use_trailing_punctuation'));
+				$this->_formValues['text'] = Typograph_Controller::instance()->process($this->_formValues['text'], Core_Array::getPost('trailing_punctuation'));
 			}
 		}
 
 		parent::_applyObjectProperty();
+
+		if ($modelName == 'document' && Core::moduleIsActive('cache'))
+		{
+			$oStructures = Core_Entity::factory('Structure');
+			$oStructures->queryBuilder()
+				->where('structures.document_id', '=',  $this->_object->id);
+
+			$aStructures = $oStructures->findAll(FALSE);
+
+			foreach ($aStructures as $oStructure)
+			{
+				$oStructure->clearCache();
+			}
+		}
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 	}

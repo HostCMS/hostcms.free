@@ -457,6 +457,87 @@ $oMenu = Admin_Form_Entity::factory('Menus');
 
 $additionalParams = "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}";
 
+$oDiscountMenu = Admin_Form_Entity::factory('Menu')
+->name(Core::_('Shop_Item.shop_menu_title'))
+->icon('fa fa-money')
+->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Shop_Item.show_discount_link'))
+		->icon('fa fa-money')
+		->img('/admin/images/money.gif')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/discount/index.php', NULL, NULL, $additionalParams)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/discount/index.php', NULL, NULL, $additionalParams)
+		)
+)
+->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Shop_Item.order_discount_show_title'))
+		->icon('fa fa-money')
+		->img('/admin/images/money.gif')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/purchase/discount/index.php', NULL, NULL, $additionalParams)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/purchase/discount/index.php', NULL, NULL, $additionalParams)
+		)
+);
+
+if (Core::moduleIsActive('siteuser'))
+{
+	$oDiscountMenu->add(
+		Admin_Form_Entity::factory('Menu')
+			->name(Core::_('Shop_Item.shop_discount_siteuser_title'))
+			->icon('fa-solid fa-user-group')
+			->img('/admin/images/money.gif')
+			->href(
+				$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/discount/siteuser/index.php', NULL, NULL, $additionalParams)
+			)
+			->onclick(
+				$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/discount/siteuser/index.php', NULL, NULL, $additionalParams)
+			)
+	);
+}
+
+$oDiscountMenu->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Shop_Item.bonus_link'))
+		->icon('fa fa-star')
+		->img('/admin/images/money.gif')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/bonus/index.php', NULL, NULL, $additionalParams)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/bonus/index.php', NULL, NULL, $additionalParams)
+		)
+)
+->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Shop_Item.coupon_group_link'))
+		->icon('fa fa-ticket')
+		->img('/admin/images/money.gif')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/purchase/discount/coupon/index.php', NULL, NULL, $additionalParams)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/purchase/discount/coupon/index.php', NULL, NULL, $additionalParams)
+		)
+)
+->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Shop_Item.disountcard_link'))
+		->icon('fa fa-credit-card-alt')
+		->img('/admin/images/money.gif')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/discountcard/index.php', NULL, NULL, $additionalParams)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/discountcard/index.php', NULL, NULL, $additionalParams)
+		)
+);
+
 // Элементы меню
 $oMenu->add(
 	Admin_Form_Entity::factory('Menu')
@@ -620,69 +701,7 @@ $oMenu->add(
 			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/index.php', NULL, NULL, $additionalParams)
 		)
 )->add(
-	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Shop_Item.shop_menu_title'))
-		->icon('fa fa-money')
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Item.show_discount_link'))
-				->icon('fa fa-money')
-				->img('/admin/images/money.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/discount/index.php', NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/discount/index.php', NULL, NULL, $additionalParams)
-				)
-		)
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Item.order_discount_show_title'))
-				->icon('fa fa-money')
-				->img('/admin/images/money.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/purchase/discount/index.php', NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/purchase/discount/index.php', NULL, NULL, $additionalParams)
-				)
-		)
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Item.bonus_link'))
-				->icon('fa fa-star')
-				->img('/admin/images/money.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/bonus/index.php', NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/bonus/index.php', NULL, NULL, $additionalParams)
-				)
-		)
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Item.coupon_group_link'))
-				->icon('fa fa-ticket')
-				->img('/admin/images/money.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/purchase/discount/coupon/index.php', NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/purchase/discount/coupon/index.php', NULL, NULL, $additionalParams)
-				)
-		)
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Item.disountcard_link'))
-				->icon('fa fa-credit-card-alt')
-				->img('/admin/images/money.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/discountcard/index.php', NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/discountcard/index.php', NULL, NULL, $additionalParams)
-				)
-		)
+	$oDiscountMenu
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Item.show_prices_title'))
@@ -769,7 +788,7 @@ $oMenu->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.show_producers_link'))
-				->icon('fa fa-building-o')
+				->icon('fa fa-industry')
 				->img('/admin/images/company.gif')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/producer/index.php', NULL, NULL, $additionalParams)
@@ -876,7 +895,7 @@ $oAdmin_Form_Controller->addEntity(
 							<div class="col-xs-6 col-md-10">
 								<input type="text" name="globalSearch" class="form-control w-100" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
 								<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
-								<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '"><i class="fa fa-search fa-fw"></i></button>
+								<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '"><i class="fa-solid fa-magnifying-glass fa-fw"></i></button>
 							</div>
 						</div>
 					</form>

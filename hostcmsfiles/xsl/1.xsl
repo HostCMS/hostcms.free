@@ -39,13 +39,13 @@
 			</xsl:variable>
 			<!-- Menu Node -->
 			<a href="{$link}" title="{name}" hostcms:id="{@id}" hostcms:field="name" hostcms:entity="structure">
-					<!--Highlight current item if current item or has child with id=current -->
-					<xsl:variable name="current_structure_id" select="/site/current_structure_id"/>
-					<xsl:if test="$current_structure_id = @id or count(.//structure[@id=$current_structure_id]) = 1">
-						<xsl:attribute name="style">font-weight: bold</xsl:attribute>
-					</xsl:if>
-					<xsl:value-of select="name"/>
-				</a>
-			</li>
-		</xsl:template>
-	</xsl:stylesheet>
+				<!--Highlight current item if current item or has child with id=current -->
+				<xsl:variable name="current_structure_id" select="/site/current_structure_id"/>
+				<xsl:if test="$current_structure_id = @id or count(.//structure[@id=$current_structure_id]) = 1">
+					<xsl:attribute name="style">font-weight: bold</xsl:attribute>
+				</xsl:if>
+				<xsl:value-of select="name"/>
+			</a>
+		</li>
+	</xsl:template>
+</xsl:stylesheet>

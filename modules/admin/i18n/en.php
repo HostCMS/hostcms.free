@@ -100,8 +100,9 @@ return array(
 	'events' => 'Events',
 	'bookmarks' => 'Bookmarks',
 	'sound' => 'Sound',
-	'phone' => 'Telephony',	
+	'phone' => 'Telephony',
 	'placeholderGlobalSearch' => 'Search',
 
 	'none' => 'None',
+	'no_title' => '<No title>',
 );

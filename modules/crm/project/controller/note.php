@@ -20,7 +20,7 @@ class Crm_Project_Controller_Note extends Admin_Form_Controller_View
 	public function execute()
 	{
 		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
-		$oAdmin_Form = $oAdmin_Form_Controller->getAdminForm();
+		// $oAdmin_Form = $oAdmin_Form_Controller->getAdminForm();
 
 		$oAdmin_View = Admin_View::create($this->_Admin_Form_Controller->Admin_View)
 			->pageTitle($oAdmin_Form_Controller->pageTitle)
@@ -150,7 +150,7 @@ class Crm_Project_Controller_Note extends Admin_Form_Controller_View
 										'menubar' => 'false',
 										'statusbar' => 'false',
 										'plugins' => '"advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table code wordcount"',
-										'toolbar1' => '"bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | removeformat"',
+										'toolbar1' => '"bold italic underline alignleft aligncenter alignright alignjustify bullist numlist removeformat"',
 										// 'statusbar' => true
 									))
 									->divAttr(array('class' => ''))
@@ -168,10 +168,13 @@ class Crm_Project_Controller_Note extends Admin_Form_Controller_View
 									<span class="margin-right-20" onclick="$.showDropzone(this, '<?php echo $windowId?>');"><i class="fa fa-paperclip fa-fw"></i> <?php echo Core::_('Crm_Note.file')?></span>
 									<div class="checkbox">
 										<label>
-											<input name="result" type="checkbox" class="colored-blue" value="1"/>
+											<input name="result" type="checkbox" class="colored-blue" value="1" onclick="$('#<?php echo $windowId?> .crm-note-completed').toggleClass('hidden')"/>
 											<span class="text"><?php echo Core::_('Crm_Note.result')?></span>
 										</label>
 									</div>
+									<?php
+									echo Crm_Note_Controller::getCompletedDropdown($this->_Admin_Form_Controller);
+									?>
 								</div>
 								<button id="sendForm" class="btn btn-palegreen btn-sm" type="submit">
 									<?php echo Core::_('Crm_Note.send')?>
@@ -254,7 +257,15 @@ class Crm_Project_Controller_Note extends Admin_Form_Controller_View
 						$sDate = Core_Date::timestamp2date($iDatetime);
 
 						$class = '';
-						$oEntity->result && $class = 'timeline-crm-note-result';
+						// $oEntity->result && $class = 'timeline-crm-note-result';
+						if ($oEntity->result == 1)
+						{
+							$class = 'timeline-crm-note-result';
+						}
+						elseif ($oEntity->result == -1)
+						{
+							$class = 'timeline-crm-note-result-unsuccessfull';
+						}
 
 						if ($prevDate != $sDate)
 						{
@@ -328,7 +339,7 @@ class Crm_Project_Controller_Note extends Admin_Form_Controller_View
 										echo $text;
 									?>
 
-									<div class="timeline-body-footer small gray"><span class="gray"><?php $oUser->showLink($oAdmin_Form_Controller->getWindowId())?></span><span class="pull-right"><?php echo date('H:i', $iDatetime)?></span></div>
+									<div class="timeline-body-footer small gray"><span class="timeline-user"><?php $oUser->showLink($oAdmin_Form_Controller->getWindowId())?></span><span class="timeline-date pull-right"><?php echo date('H:i', $iDatetime)?></span></div>
 								</div>
 							</div>
 						</li>

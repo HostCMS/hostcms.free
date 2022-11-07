@@ -90,5 +90,8 @@ $oAdmin_Form_Controller->addDataset(
 	$oAdmin_Form_Dataset
 );
 
+Core_Event::attach('Admin_Form_Controller.onAfterShowContent', array('User_Controller', 'onAfterShowContentPopover'), array($oAdmin_Form_Controller));
+Core_Event::attach('Admin_Form_Action_Controller_Type_Edit.onAfterRedeclaredPrepareForm', array('User_Controller', 'onAfterRedeclaredPrepareForm'));
+
 // Показ формы
 $oAdmin_Form_Controller->execute();

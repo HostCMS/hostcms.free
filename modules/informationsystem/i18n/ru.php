@@ -5,9 +5,9 @@
  *
  * @package HostCMS
  * @subpackage Informationsystem
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Информационные системы',
@@ -126,12 +126,16 @@ return array(
 	'tab_seo_templates' => 'Шаблоны SEO',
 	'seo_group_header' => 'Шаблоны информационных групп',
 	'seo_item_header' => 'Шаблоны информационных элементов',
+	'seo_root_header' => 'Шаблоны корневой страницы',
 	'seo_group_title_template' => 'Шаблон title',
 	'seo_group_description_template' => 'Шаблон description',
 	'seo_group_keywords_template' => 'Шаблон keywords',
 	'seo_item_title_template' => 'Шаблон title',
 	'seo_item_description_template' => 'Шаблон description',
 	'seo_item_keywords_template' => 'Шаблон keywords',
+	'seo_root_title_template' => 'Шаблон title',
+	'seo_root_description_template' => 'Шаблон description',
+	'seo_root_keywords_template' => 'Шаблон keywords',
 
 	'seo_template_informationsystem' => 'Информационная система',
 	'seo_template_informationsystem_name' => 'Название системы',
