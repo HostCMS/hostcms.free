@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -45,7 +45,7 @@ if (!is_null(Core_Array::getPost('load_prices')))
 	$aJSON = array();
 
 	$shop_price_id = intval(Core_Array::getPost('shop_price_id'));
-	$aItems = Core_Array::getPost('items');
+	$aItems = Core_Array::getPost('items', array(), 'array');
 
 	$Shop_Item_Controller = new Shop_Item_Controller();
 
@@ -84,53 +84,107 @@ $oAdmin_Form_Entity_Menus->add(
 		)
 )->add(
 	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Shop_Warehouse.inventory'))
+		->name(Core::_('Shop_Warehouse.purchases'))
+		->icon('fa-solid fa-cart-arrow-down')
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Warehouse.purchaseorders'))
+				->icon('fa-solid fa-cart-plus')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/purchaseorder/index.php', NULL, NULL /* , $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}" */)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/purchaseorder/index.php', NULL, NULL, /* $additionalParams */)
+				)
+		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Warehouse.invoices'))
+				->icon('fa-solid fa-fw fa-file-invoice-dollar')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/invoice/index.php', NULL, NULL /* , $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}" */)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/invoice/index.php', NULL, NULL, /* $additionalParams */)
+				)
+		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Warehouse.supplies'))
+				->icon('fa-solid fa-cart-flatbed')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/supply/index.php', NULL, NULL)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/supply/index.php', NULL, NULL)
+				)
+		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Warehouse.purchasereturns'))
+				->icon('fa-solid fa-truck')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/purchasereturn/index.php', NULL, NULL)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/purchasereturn/index.php', NULL, NULL)
+				)
+		)
+)->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Shop_Warehouse.operations'))
 		->icon('fa fa-calendar-check-o')
-		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/inventory/index.php', NULL, NULL, $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}")
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Warehouse.incoming'))
+				->icon('fa fa-calendar-plus-o')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/incoming/index.php', NULL, NULL, $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}")
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/incoming/index.php', NULL, NULL, $additionalParams)
+				)
+		)->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Warehouse.writeoff'))
+				->icon('fa fa-calendar-minus-o')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/writeoff/index.php', NULL, NULL, $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}")
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/writeoff/index.php', NULL, NULL, $additionalParams)
+				)
+		)->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Warehouse.regrade'))
+				->icon('fa fa-calendar-o')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/regrade/index.php', NULL, NULL, $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}")
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/regrade/index.php', NULL, NULL, $additionalParams)
+				)
+		)->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Warehouse.movement'))
+				->icon('fa fa-arrows-h')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/movement/index.php', NULL, NULL, $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}")
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/movement/index.php', NULL, NULL, $additionalParams)
+				)
 		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/inventory/index.php', NULL, NULL, $additionalParams)
-		)
-)->add(
-	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Shop_Warehouse.incoming'))
-		->icon('fa fa-calendar-plus-o')
-		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/incoming/index.php', NULL, NULL, $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}")
-		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/incoming/index.php', NULL, NULL, $additionalParams)
-		)
-)->add(
-	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Shop_Warehouse.writeoff'))
-		->icon('fa fa-calendar-minus-o')
-		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/writeoff/index.php', NULL, NULL, $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}")
-		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/writeoff/index.php', NULL, NULL, $additionalParams)
-		)
-)->add(
-	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Shop_Warehouse.regrade'))
-		->icon('fa fa-calendar-o')
-		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/regrade/index.php', NULL, NULL, $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}")
-		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/regrade/index.php', NULL, NULL, $additionalParams)
-		)
-)->add(
-	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Shop_Warehouse.movement'))
-		->icon('fa fa-arrows-h')
-		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/movement/index.php', NULL, NULL, $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}")
-		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/movement/index.php', NULL, NULL, $additionalParams)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Warehouse.inventory'))
+				->icon('fa fa-calendar-check-o')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/inventory/index.php', NULL, NULL, $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}")
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/inventory/index.php', NULL, NULL, $additionalParams)
+				)
 		)
 )->add(
 	Admin_Form_Entity::factory('Menu')

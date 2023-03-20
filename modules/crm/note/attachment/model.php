@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Crm
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Crm_Note_Attachment_Model extends Core_Entity
 {
@@ -141,7 +141,7 @@ class Crm_Note_Attachment_Model extends Core_Entity
 	 */
 	public function createDir()
 	{
-		if (!is_dir($this->_dir))
+		if (!Core_File::isDir($this->_dir))
 		{
 			try
 			{
@@ -158,7 +158,7 @@ class Crm_Note_Attachment_Model extends Core_Entity
 	 */
 	public function deleteDir()
 	{
-		if (is_dir($this->_dir))
+		if (Core_File::isDir($this->_dir))
 		{
 			try
 			{
@@ -183,10 +183,10 @@ class Crm_Note_Attachment_Model extends Core_Entity
 		if ($this->file != '')
 		{
 			// Delete old file
-			is_file($this->getFilePath()) && $this->deleteFile();
+			Core_File::isFile($this->getFilePath()) && $this->deleteFile();
 
 			// Delete old small file
-			is_file($this->getSmallFilePath()) && $this->deleteSmallFile();
+			Core_File::isFile($this->getSmallFilePath()) && $this->deleteSmallFile();
 		}
 
 		$this->save();
@@ -218,7 +218,7 @@ class Crm_Note_Attachment_Model extends Core_Entity
 		try
 		{
 			$path = $this->getFilePath();
-			is_file($path) && Core_File::delete($path);
+			Core_File::isFile($path) && Core_File::delete($path);
 		} catch (Exception $e) {}
 
 		return $this;
@@ -233,7 +233,7 @@ class Crm_Note_Attachment_Model extends Core_Entity
 		try
 		{
 			$path = $this->getSmallFilePath();
-			is_file($path) && Core_File::delete($path);
+			Core_File::isFile($path) && Core_File::delete($path);
 		} catch (Exception $e) {}
 
 		return $this;

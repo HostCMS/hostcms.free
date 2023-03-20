@@ -63,7 +63,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_ORM
 {
@@ -385,9 +385,11 @@ class Core_ORM
 			self::$_databaseDriver != 'default'
 				&& $oQuery_Builder->setDataBase($this->getDatabase());
 
-			$oQuery_Builder
+			$oDataBase = $oQuery_Builder
 				->where($this->_primaryKey, '=', $primaryKey)
 				->execute();
+
+			$oDataBase->free();
 		}
 
 		Core_Event::notify($this->_modelName . '.onAfterDelete', $this, array($primaryKey));
@@ -466,12 +468,12 @@ class Core_ORM
 
 		$aCurrent = $Core_DataBase->current($bCache);
 
+		$Core_DataBase->free();
+
 		if ($aCurrent !== FALSE)
 		{
 			/* Use clear() before find() with conditions! */
 			$this->setValues($this->_modelColumns + $aCurrent);
-
-			$Core_DataBase->free();
 
 			// Marks saved
 			!$this->changed() && $this->_saved = TRUE;
@@ -538,12 +540,13 @@ class Core_ORM
 		}
 
 		$Core_DataBase = $oSelect->execute($sql);
+
 		$result = $Core_DataBase->result($bCache);
 
 		// Cache
 		$bCache && self::$cache->set($sql, $result, __CLASS__);
 
-		// moved to result()
+		// moved to Core_DataBase::result()
 		//$Core_DataBase->free();
 
 		Core_Event::notify($this->_modelName . '.onAfterFindAll', $this);
@@ -2036,15 +2039,17 @@ class Core_ORM
 			self::$_databaseDriver != 'default'
 				&& $oQuery_Builder->setDataBase($this->getDatabase());
 
-			$oInsert = $oQuery_Builder->execute();
+			$oDataBase = $oQuery_Builder->execute();
 
 			if (!$bPKexists)
 			{
 				// Set primary key
 				$this->setValues(
-					array($this->_primaryKey => $oInsert->getInsertId())
+					array($this->_primaryKey => $oDataBase->getInsertId())
 				);
 			}
+
+			$oDataBase->free();
 
 			$this->_saved = TRUE;
 
@@ -2081,10 +2086,12 @@ class Core_ORM
 			self::$_databaseDriver != 'default'
 				&& $oQuery_Builder->setDataBase($this->getDatabase());
 
-			$oUpdate = $oQuery_Builder
+			$oDataBase = $oQuery_Builder
 				->columns($data)
 				->where($this->_primaryKey, '=', $this->getPrimaryKey())
 				->execute();
+
+			$oDataBase->free();
 
 			$this->_saved = TRUE;
 

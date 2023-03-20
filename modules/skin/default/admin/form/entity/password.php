@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Password extends Admin_Form_Entity_Input
 {
@@ -52,7 +52,7 @@ class Skin_Default_Admin_Form_Entity_Password extends Admin_Form_Entity_Input
 		{
 			foreach ($this->divAttr as $attrName => $attrValue)
 			{
-				$aDivAttr[] = "{$attrName}=\"" . htmlspecialchars($attrValue) . "\"";
+				$aDivAttr[] = "{$attrName}=\"" . htmlspecialchars((string) $attrValue) . "\"";
 			}
 		}
 

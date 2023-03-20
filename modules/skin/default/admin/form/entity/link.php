@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Link extends Admin_Form_Entity
 {
@@ -70,7 +70,7 @@ class Skin_Default_Admin_Form_Entity_Link extends Admin_Form_Entity
 			$this->div->add(
 				Core_Html_Entity::factory('Span')
 					->class('caption')
-					->value(htmlspecialchars($this->caption))
+					->value(htmlspecialchars((string) $this->caption))
 			);
 		}
 

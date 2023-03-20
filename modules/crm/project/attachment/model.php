@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Crm
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Crm_Project_Attachment_Model extends Core_Entity
 {
@@ -76,7 +76,7 @@ class Crm_Project_Attachment_Model extends Core_Entity
 		$this->Crm_Project->createDir();
 
 		// Delete old file
-		if ($this->file != '' && is_file($this->Crm_Project->getPath() . $this->file))
+		if ($this->file != '' && Core_File::isFile($this->Crm_Project->getPath() . $this->file))
 		{
 			$this->deleteFile();
 		}
@@ -100,7 +100,7 @@ class Crm_Project_Attachment_Model extends Core_Entity
 		try
 		{
 			$path = $this->getFilePath();
-			is_file($path) && Core_File::delete($path);
+			Core_File::isFile($path) && Core_File::delete($path);
 		} catch (Exception $e) {}
 
 		return $this;

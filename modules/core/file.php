@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_File
 {
@@ -33,6 +33,39 @@ class Core_File
 		}
 
 		return $aReturn;
+	}
+
+	/**
+	 * Tells whether the filename is a regular file
+	 * @param string $filename Path to the file.
+	 * @return boolean
+	 */
+	static public function isFile($filename)
+	{
+		return (!defined('PHP_MAXPATHLEN') || strlen($filename) < PHP_MAXPATHLEN)
+			&& is_file($filename);
+	}
+
+	/**
+	 * Tells whether the filename is a directory
+	 * @param string $filename Path to the dir.
+	 * @return boolean
+	 */
+	static public function isDir($filename)
+	{
+		return (!defined('PHP_MAXPATHLEN') || strlen($filename) < PHP_MAXPATHLEN)
+			&& is_dir($filename);
+	}
+	
+	/**
+	 * Tells whether the filename is a symbolic link
+	 * @param string $filename Path to the file.
+	 * @return boolean
+	 */
+	static public function isLink($filename)
+	{
+		return (!defined('PHP_MAXPATHLEN') || strlen($filename) < PHP_MAXPATHLEN)
+			&& is_link($filename);
 	}
 
 	/**
@@ -76,7 +109,7 @@ class Core_File
 	 */
 	static public function copy($source, $destination, $mode = CHMOD_FILE)
 	{
-		if ($source !== '' && is_file($source))
+		if ($source !== '' && self::isFile($source))
 		{
 			// Create destination dir
 			self::mkdir(dirname($destination), CHMOD, TRUE);
@@ -114,9 +147,9 @@ class Core_File
 		$source = self::pathCorrection($source);
 		$target = self::pathCorrection($target);
 
-		if (is_dir($source) && !is_link($source))
+		if (self::isDir($source) && !self::isLink($source))
 		{
-			!is_dir($target) && self::mkdir($target, CHMOD, TRUE);
+			!self::isDir($target) && self::mkdir($target, CHMOD, TRUE);
 
 			if ($dh = @opendir($source))
 			{
@@ -126,7 +159,7 @@ class Core_File
 					{
 						clearstatcache();
 
-						is_file($source . DIRECTORY_SEPARATOR . $file)
+						self::isFile($source . DIRECTORY_SEPARATOR . $file)
 							? self::copy($source . DIRECTORY_SEPARATOR . $file, $target . DIRECTORY_SEPARATOR . $file)
 							: self::copyDir($source . DIRECTORY_SEPARATOR . $file, $target . DIRECTORY_SEPARATOR . $file);
 					}
@@ -169,7 +202,7 @@ class Core_File
 	 */
 	static public function rename($oldname, $newname)
 	{
-		if (is_file($oldname) || is_dir($oldname))
+		if (self::isFile($oldname) || self::isDir($oldname))
 		{
 			if (!rename($oldname, $newname))
 			{
@@ -190,7 +223,7 @@ class Core_File
 	 */
 	static public function delete($fileName)
 	{
-		if (is_file($fileName) || is_link($fileName))
+		if (self::isFile($fileName) || self::isLink($fileName))
 		{
 			if (!@unlink($fileName))
 			{
@@ -243,7 +276,7 @@ class Core_File
 			}
 		}
 
-		if (is_dir($dirname) && !is_link($dirname))
+		if (self::isDir($dirname) && !self::isLink($dirname))
 		{
 			if ($dh = @opendir($dirname))
 			{
@@ -254,11 +287,11 @@ class Core_File
 						clearstatcache();
 						$pathName = $dirname . DIRECTORY_SEPARATOR . $file;
 
-						if (is_file($pathName))
+						if (self::isFile($pathName))
 						{
 							self::delete($pathName);
 						}
-						elseif (is_dir($pathName))
+						elseif (self::isDir($pathName))
 						{
 							self::deleteDir($pathName);
 						}
@@ -268,7 +301,7 @@ class Core_File
 				closedir($dh);
 				clearstatcache();
 
-				if (is_dir($dirname) && !@rmdir($dirname))
+				if (self::isDir($dirname) && !@rmdir($dirname))
 				{
 					return FALSE;
 				}
@@ -303,7 +336,7 @@ class Core_File
 
 		$bReturn = TRUE;
 
-		if (is_dir($dirname) && !is_link($dirname))
+		if (self::isDir($dirname) && !self::isLink($dirname))
 		{
 			if ($dh = @opendir($dirname))
 			{
@@ -314,11 +347,11 @@ class Core_File
 						clearstatcache();
 						$pathName = $dirname . DIRECTORY_SEPARATOR . $file;
 
-						if (is_file($pathName))
+						if (self::isFile($pathName))
 						{
 							$bReturn = FALSE;
 						}
-						elseif (is_dir($pathName))
+						elseif (self::isDir($pathName))
 						{
 							self::deleteEmptyDirs($pathName)
 								? self::deleteDir($pathName)
@@ -380,7 +413,7 @@ class Core_File
 	 */
 	static public function read($fileName)
 	{
-		if (is_file($fileName))
+		if (self::isFile($fileName))
 		{
 			return file_get_contents($fileName);
 		}
@@ -398,7 +431,7 @@ class Core_File
 	 */
 	static public function filesize($fileName)
 	{
-		return is_file($fileName)
+		return self::isFile($fileName)
 			? filesize($fileName)
 			: NULL;
 	}
@@ -413,7 +446,7 @@ class Core_File
 	{
 		clearstatcache();
 
-		if (!is_dir($pathname) && !is_link($pathname))
+		if (!self::isDir($pathname) && !self::isLink($pathname))
 		{
 			umask(0);
 
@@ -621,7 +654,7 @@ class Core_File
 			throw new Core_Exception("Forbidden to access directory out of CMS_FOLDER.");
 		}
 
-		if (!is_file($file))
+		if (!self::isFile($file))
 		{
 			throw new Core_Exception("The file '%file' does not exist.",
 				array('%file' => Core::cutRootPath($file)));

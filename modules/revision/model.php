@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Revision
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Revision_Model extends Core_Entity
 {
@@ -135,9 +135,9 @@ class Revision_Model extends Core_Entity
 
 		$aValue = json_decode($oRevision->value, TRUE);
 
-		?><div id="revision<?php echo $this->id?>" class="hidden"><?php
-		$this->_printJson($aValue);
-		?></div>
+		?><div id="revision<?php echo $this->id?>" class="hidden"><div class="revision-details"><?php		
+		$this->_printJson($aValue);		
+		?></div></div>
 		<script>
 		$(function() {
 			$('a#revision<?php echo $this->id?>').on('click', function (){

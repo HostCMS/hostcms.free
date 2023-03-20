@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Form extends Admin_Form_Entity
 {
@@ -46,7 +46,7 @@ class Skin_Default_Admin_Form_Entity_Form extends Admin_Form_Entity
 		?></form>
 		<script>
 		$(function() {
-			var jForm = $("#<?php echo Core_Str::escapeJavascriptVariable($windowId)?> #<?php echo htmlspecialchars($this->id)?>");
+			var jForm = $("#<?php echo Core_Str::escapeJavascriptVariable($windowId)?> #<?php echo htmlspecialchars((string) $this->id)?>");
 			if (jForm.length > 0)
 			{
 				jForm.css('display', 'none');
@@ -57,7 +57,7 @@ class Skin_Default_Admin_Form_Entity_Form extends Admin_Form_Entity
 				}, 500);
 			}
 
-			mainFieldChecker.checkAll('<?php echo Core_Str::escapeJavascriptVariable($windowId)?>', "<?php echo htmlspecialchars($this->id)?>");
+			mainFieldChecker.checkAll('<?php echo Core_Str::escapeJavascriptVariable($windowId)?>', "<?php echo htmlspecialchars((string) $this->id)?>");
 		});
 		</script>
 		</div><?php

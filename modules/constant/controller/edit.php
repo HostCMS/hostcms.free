@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Constant
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Constant_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -70,7 +70,7 @@ class Constant_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$this->title(
 					$this->_object->id
-						? Core::_('Constant.edit_title', $this->_object->name)
+						? Core::_('Constant.edit_title', $this->_object->name, FALSE)
 						: Core::_('Constant.add_title')
 					);
 
@@ -97,7 +97,7 @@ class Constant_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$this->title(
 					$this->_object->id
-						? Core::_('Constant_Dir.edit', $this->_object->name)
+						? Core::_('Constant_Dir.edit', $this->_object->name, FALSE)
 						: Core::_('Constant_Dir.add')
 					);
 			break;

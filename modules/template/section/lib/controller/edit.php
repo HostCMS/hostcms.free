@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Template
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -44,8 +44,9 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		$this->title($this->_object->id
-			? Core::_('Template_Section_Lib.widget_form_title_edit', $this->_object->widget())
-			: Core::_('Template_Section_Lib.widget_form_title_add'));
+			? Core::_('Template_Section_Lib.widget_form_title_edit', $this->_object->widget(), FALSE)
+			: Core::_('Template_Section_Lib.widget_form_title_add')
+		);
 
 		// Получаем основную вкладку
 		$oMainTab = $this->getTab('main');

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Sql
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Sql_Table_View_Dataset extends Admin_Form_Dataset
 {
@@ -205,6 +205,11 @@ class Sql_Table_View_Dataset extends Admin_Form_Dataset
 				->asObject('Sql_Table_View_Entity')
 				->execute()
 				->result();
+
+			foreach ($this->_objects as $oObject)
+			{
+				$oObject->setTableName($this->_tableName);
+			}
 
 			// Warning
 			if (!is_null(Core_Array::getRequest('debug')))

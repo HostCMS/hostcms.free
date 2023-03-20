@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Shop_Delivery_Handler
 {
@@ -42,7 +42,7 @@ abstract class Shop_Delivery_Handler
 	 * @var mixed
 	 */
 	protected $_weight = NULL;
-	
+
 	/**
 	 * Total Amount
 	 * @var mixed
@@ -62,6 +62,40 @@ abstract class Shop_Delivery_Handler
 	protected $_volume = NULL;
 
 	/**
+	 * time from
+	 * @var string
+	 */
+	protected $_timeFrom = NULL;
+
+	/**
+	 * time to
+	 * @var string
+	 */
+	protected $_timeTo = NULL;
+
+	/**
+	 * Set time from
+	 * @param string $time_from
+	 * @return self
+	 */
+	public function timeFrom($time_from)
+	{
+		$this->_timeFrom = $time_from;
+		return $this;
+	}
+
+	/**
+	 * Set time to
+	 * @param string $time_to
+	 * @return self
+	 */
+	public function timeTo($time_to)
+	{
+		$this->_timeTo = $time_to;
+		return $this;
+	}
+
+	/**
 	 * Set Weight
 	 * @param string $weight
 	 * @return self
@@ -71,7 +105,7 @@ abstract class Shop_Delivery_Handler
 		$this->_weight = $weight;
 		return $this;
 	}
-	
+
 	/**
 	 * Set Amount
 	 * @param string $amount

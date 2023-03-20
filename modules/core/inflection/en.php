@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Inflection
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Inflection_En extends Core_Inflection
 {
@@ -277,11 +277,11 @@ class Core_Inflection_En extends Core_Inflection
 	 */
 	protected function numberInWords($float)
 	{
-		return 'numberInWords is undefined';
+		return 'Core_Inflection_En: numberInWords is undefined';
 	}
-	
+
 	public function currencyInWords($float, $currencyCode)
 	{
-		return 'currencyInWords is undefined';
+		return 'Core_Inflection_En: currencyInWords is undefined';
 	}
 }

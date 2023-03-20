@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -69,7 +69,7 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 			case 'informationsystem':
 
 				$title = $object->id
-					? Core::_('Informationsystem.edit_title', $object->name)
+					? Core::_('Informationsystem.edit_title', $object->name, FALSE)
 					: Core::_('Informationsystem.add_title');
 
 				$oInformationsystemTabSorting = Admin_Form_Entity::factory('Tab')
@@ -400,7 +400,7 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 				// Изображение
 				$oWatermarkFileField = Admin_Form_Entity::factory('File');
 
-				$watermarkPath = $this->_object->watermark_file != '' && is_file($this->_object->getWatermarkFilePath())
+				$watermarkPath = $this->_object->watermark_file != '' && Core_File::isFile($this->_object->getWatermarkFilePath())
 					? $this->_object->getWatermarkFileHref()
 					: '';
 
@@ -444,7 +444,7 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 			default:
 
 				$title = $this->_object->id
-					? Core::_('Informationsystem_Dir.information_systems_dir_edit_form_title', $this->_object->name)
+					? Core::_('Informationsystem_Dir.information_systems_dir_edit_form_title', $this->_object->name, FALSE)
 					: Core::_('Informationsystem_Dir.information_systems_dir_add_form_title');
 
 				// Удаляем стандартный <input>

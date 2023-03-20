@@ -18,7 +18,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Xsl
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Xsl_Processor
 {
@@ -136,7 +136,7 @@ abstract class Xsl_Processor
 	{
 		return self::clearXmlns($sXsl);
 	}
-	
+
 	/**
 	 * Clear XMLNS attribute
 	 * @param string source data
@@ -200,7 +200,7 @@ abstract class Xsl_Processor
 	{
 		if ($this->_deleteXmlHeader)
 		{
-			$search = array (
+			$search = array(
 				"/<\?xml .*?\?>/si", // u
 				"/<!DOCTYPE.+?>/si" // u
 			);
@@ -209,6 +209,8 @@ abstract class Xsl_Processor
 			$xsl_result_1024 = preg_replace($search, '', $xsl_result_1024);
 
 			$content = $xsl_result_1024 . mb_substr($content, 1024);
+			
+			//' />'
 		}
 
 		return $content;

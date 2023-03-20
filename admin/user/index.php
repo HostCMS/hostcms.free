@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -519,9 +519,7 @@ if (Core_Auth::logged())
 			{
 				$oModule = Core::$modulesList['user'];
 
-				$name = strlen($oUser->getFullName())
-					? $oUser->getFullName()
-					: $oUser->login;
+				$name = $oUser->getFullName();
 
 				$oUser_Workday = $oUser->User_Workdays->getLast();
 
@@ -536,7 +534,7 @@ if (Core_Auth::logged())
 
 					$aSent = array();
 
-					$aCompany_Department_Post_Users = $oUser->Company_Department_Post_Users->findAll();
+					$aCompany_Department_Post_Users = $oUser->Company_Department_Post_Users->findAll(FALSE);
 					foreach ($aCompany_Department_Post_Users as $oCompany_Department_Post_User)
 					{
 						$oCompany_Department = $oCompany_Department_Post_User->Company_Department;
@@ -550,8 +548,8 @@ if (Core_Auth::logged())
 							{
 								$oNotification = Core_Entity::factory('Notification');
 								$oNotification
-									->title(Core::_('User_Workday.notification_head_request_title', htmlspecialchars($name)))
-									->description(Core::_('User_Workday.notification_head_request_description', $time, $reason))
+									->title(Core::_('User_Workday.notification_head_request_title', $name, FALSE))
+									->description(Core::_('User_Workday.notification_head_request_description', $time, $reason, FALSE))
 									->datetime(Core_Date::timestamp2sql(time()))
 									->module_id($oModule->id)
 									->type(1) // 1 - напоминание о завершении дня с другим временем
@@ -578,15 +576,7 @@ if (Core_Auth::logged())
 				$(function() {
 					 setTimeout(function() {
 						// Close modal window
-						$('.another-time-answer').parents('.modal').remove();
-
-						var month = +$('[name="month"]').val(),
-							year = +$('[name="year"]').val();
-
-						$.adminLoad({path: '/admin/user/timesheet/index.php', additionalParams: 'month=' + month + '&year=' + year, windowId : 'id_content'});
-
-						// Переключение на активную вкладку
-						window.activeTabHref && $('ul#agregate-user-info a[href="' + window.activeTabHref + '"]').click();
+						bootbox.hideAll();
 					}, 1500);
 
 					// Меняем статус дня
@@ -686,7 +676,7 @@ if (Core_Auth::logged())
 			<div class="form-group margin-top-10">
 				<label for="request_send_time" class="col-sm-4 control-label no-padding-right"><?php echo Core::_('User_Workday.request_send_time')?></label>
 				<div class="col-sm-4">
-					<input id="request_send_time" name="request_send_time" value="<?php echo Core_Date::sql2datetime($oUser_Workday->sent_request);?>" class="form-control" type="text" disabled="disabled"/>
+					<input id="request_send_time" name="request_send_time" value="<?php echo !is_null($oUser_Workday->sent_request) ? Core_Date::sql2datetime($oUser_Workday->sent_request) : ''?>" class="form-control" type="text" disabled="disabled"/>
 				</div>
 			</div>
 			<div class="form-group margin-top-10">
@@ -703,32 +693,30 @@ if (Core_Auth::logged())
 			<input type="hidden" name="workday_id" value="<?php echo $oUser_Workday->id?>" />
 		</form>
 		<script>
-			$(function() {
-				$('#workdayEndTimeApproval').wickedpicker({
-						now: '<?php echo $currentTime?>',
-						twentyFour: true,  //Display 24 hour format, defaults to false
-						upArrow: 'wickedpicker__controls__control-up',  //The up arrow class selector to use, for custom CSS
-						downArrow: 'wickedpicker__controls__control-down', //The down arrow class selector to use, for custom CSS
-						close: 'wickedpicker__close', //The close class selector to use, for custom CSS
-						hoverState: 'hover-state', //The hover state class to use, for custom CSS
-						title: '<?php echo Core::_('User_Worktime.time') ?>', //The Wickedpicker's title,
-						showSeconds: false, //Whether or not to show seconds,
-						timeSeparator: ' : ', // The string to put in between hours and minutes (and seconds)
-						secondsInterval: 1, //Change interval for seconds, defaults to 1,
-						minutesInterval: 1, //Change interval for minutes, defaults to 1
-						clearable: false //Make the picker's input clearable (has clickable 'x')
-					});
+		$(function() {
+			$('#workdayEndTimeApproval').wickedpicker({
+				now: '<?php echo $currentTime?>',
+				twentyFour: true,  //Display 24 hour format, defaults to false
+				upArrow: 'wickedpicker__controls__control-up',  //The up arrow class selector to use, for custom CSS
+				downArrow: 'wickedpicker__controls__control-down', //The down arrow class selector to use, for custom CSS
+				close: 'wickedpicker__close', //The close class selector to use, for custom CSS
+				hoverState: 'hover-state', //The hover state class to use, for custom CSS
+				title: '<?php echo Core::_('User_Worktime.time') ?>', //The Wickedpicker's title,
+				showSeconds: false, //Whether or not to show seconds,
+				timeSeparator: ' : ', // The string to put in between hours and minutes (and seconds)
+				secondsInterval: 1, //Change interval for seconds, defaults to 1,
+				minutesInterval: 1, //Change interval for minutes, defaults to 1
+				clearable: false //Make the picker's input clearable (has clickable 'x')
 			});
+		});
 		</script>
-
 		<?php
 		}
 		else // Не существует рабочего дня с переданным id
 		{
-		?>
-			<script>
+			?><script>
 				// Close modal window
-				$('#<?php echo $formSettings['window']?>').parents('.modal').remove();
+				bootbox.hideAll();
 			</script>
 		<?php
 		}
@@ -785,6 +773,7 @@ if (Core_Auth::logged())
 			}
 		}
 
+		/*$('#<?php echo $formSettings['window']?>').parents('.modal').remove();*/
 		?>
 		<div class="row">
 			<div class="col-xs-12 another-time-answer">
@@ -796,7 +785,7 @@ if (Core_Auth::logged())
 		$(function() {
 			 setTimeout(function() {
 				// Close modal window
-				$('#<?php echo $formSettings['window']?>').parents('.modal').remove();
+				bootbox.hideAll();
 
 				var month = +$('[name="month"]').val(),
 					year = +$('[name="year"]').val();
@@ -945,12 +934,12 @@ if (Core_Auth::logged())
 	// Avatar
 	if (!is_null(Core_Array::getGet('loadUserAvatar')))
 	{
-		$id = intval(Core_Array::getGet('loadUserAvatar'));
+		$id = Core_Array::getGet('loadUserAvatar', 0, 'int');
 		$oUser = Core_Entity::factory('User')->getById($id);
 		if ($oUser)
 		{
 			$name = $oUser->name != '' && $oUser->surname != ''
-				? $oUser->name . ' ' . $oUser->surname
+				? trim($oUser->name . ' ' . $oUser->surname)
 				: $oUser->login;
 		}
 		else
@@ -1173,22 +1162,6 @@ if ($oAdminFormActionDeleteImageFile && $oAdmin_Form_Controller->getAction() == 
 	// Добавляем контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($oUserControllerDeleteImageFile);
 }
-
-// Действие "Завершить с другим временем"
-/*
-$oAnotherTimeShowModal = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('showAnotherTimeModal');
-
-if ($oAnotherTimeShowModal && $oAdmin_Form_Controller->getAction() == 'showAnotherTimeModal')
-{
-	$oUser_Workday_Controller_End = Admin_Form_Action_Controller::factory(
-		'User_Workday_Controller_End', $oAnotherTimeShowModal
-	);
-
-	// Добавляем контроллер добавления перехода контроллеру формы
-	$oAdmin_Form_Controller->addAction($oUser_Workday_Controller_End);
-}*/
 
 // Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(

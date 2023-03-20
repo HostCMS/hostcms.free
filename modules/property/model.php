@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Model extends Core_Entity
 {
@@ -727,6 +727,12 @@ class Property_Model extends Core_Entity
 	 */
 	public function typeBackend()
 	{
+		$color = Core_Str::createColor($this->type);
+
+		return '<span class="badge badge-round badge-max-width" style="border-color: ' . $color . '; color: ' . Core_Str::hex2darker($color, 0.2) . '; background-color: ' . Core_Str::hex2lighter($color, 0.88) . '">'
+			. Core::_('Property.type' . $this->type)
+			. '</span>';
+			
 		return Core::_('Property.type' . $this->type);
 	}
 

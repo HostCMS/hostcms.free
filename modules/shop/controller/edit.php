@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -74,7 +74,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			case 'shop_dir':
 				$title = $object->id
-					? Core::_('Shop_Dir.edit_title', $object->name)
+					? Core::_('Shop_Dir.edit_title', $object->name, FALSE)
 					: Core::_('Shop_Dir.add_title');
 
 				$oAdditionalTab->delete($this->getField('parent_id'));
@@ -95,7 +95,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 			case 'shop':
 				$title = $object->id
-					? Core::_('Shop.edit_title', $object->name)
+					? Core::_('Shop.edit_title', $object->name, FALSE)
 					: Core::_('Shop.add_title');
 
 				$oShopTabFormats = Admin_Form_Entity::factory('Tab')
@@ -422,7 +422,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->caption(Core::_('Shop.shop_order_status_id'))
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
 					->options(
-						$this->fillOrderStatuses()
+						$this->fillOrderStatuses($this->_object)
 					)
 					->value($this->_object->shop_order_status_id);
 
@@ -738,7 +738,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oYandexMarketBlock->add($oDeliveryOption);
 
-				$watermarkPath = $this->_object->watermark_file != '' && is_file($this->_object->getWatermarkFilePath())
+				$watermarkPath = $this->_object->watermark_file != '' && Core_File::isFile($this->_object->getWatermarkFilePath())
 					? $this->_object->getWatermarkFileHref()
 					: '';
 
@@ -992,7 +992,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			// Директория цифровых товаров
 			$eitemDir = $this->_object->getPath() . '/eitems';
 
-			if (!is_dir($eitemDir))
+			if (!Core_File::isDir($eitemDir))
 			{
 				Core_File::mkdir($eitemDir, CHMOD, TRUE);
 			}
@@ -1007,7 +1007,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	Require all denied
 </IfModule>';
 
-			if (!is_file($htaccessFile) || Core_File::read($htaccessFile) != $content)
+			if (!Core_File::isFile($htaccessFile) || Core_File::read($htaccessFile) != $content)
 			{
 				Core_File::write($htaccessFile, $content);
 			}
@@ -1039,30 +1039,44 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		return $aTaxArray;
 	}
 
+	static protected $_aStatusesTree = array();
+
 	/**
 	 * Get order statuses array
 	 * @return array
 	 */
-	public function fillOrderStatuses($iParentId = 0, $iLevel = 0)
+	public function fillOrderStatuses(Shop_Model $oShop, $iParentId = 0, $iLevel = 0)
 	{
-		$aReturn = array('...');
-
 		$iLevel = intval($iLevel);
 
-		$oShop_Order_Status_Parent = Core_Entity::factory('Shop_Order_Status', $iParentId);
-
-		// Дочерние элементы
-		$childrenStatuses = $oShop_Order_Status_Parent->Shop_Order_Statuses;
-		$childrenStatuses = $childrenStatuses->findAll();
-
-		if (count($childrenStatuses))
+		if ($iLevel == 0)
 		{
-			foreach ($childrenStatuses as $childrenStatus)
+			$aTmp = Core_QueryBuilder::select('id', 'parent_id', 'name')
+				->from('shop_order_statuses')
+				->where('shop_id', '=', $oShop->id)
+				->where('deleted', '=', 0)
+				->orderBy('sorting')
+				->orderBy('name')
+				->execute()->asAssoc()->result();
+
+			foreach ($aTmp as $aStatus)
 			{
-				$aReturn[$childrenStatus->id] = str_repeat('  ', $iLevel) . $childrenStatus->name;
-				$aReturn += $this->fillOrderStatuses($childrenStatus->id, $iLevel + 1);
+				self::$_aStatusesTree[$aStatus['parent_id']][] = $aStatus;
 			}
 		}
+
+		$aReturn = array();
+
+		if (isset(self::$_aStatusesTree[$iParentId]))
+		{
+			foreach (self::$_aStatusesTree[$iParentId] as $childrenStatus)
+			{
+				$aReturn[$childrenStatus['id']] = str_repeat('  ', $iLevel) . $childrenStatus['name'] . ' [' . $childrenStatus['id'] . ']';
+				$aReturn += self::fillOrderStatuses($oShop, $childrenStatus['id'], $iLevel + 1);
+			}
+		}
+
+		$iLevel == 0 && self::$_aStatusesTree = array();
 
 		return $aReturn;
 	}

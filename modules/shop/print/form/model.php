@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Print_Form_Model extends Core_Entity
 {
@@ -70,7 +70,7 @@ class Shop_Print_Form_Model extends Core_Entity
 	public function loadPrintFormFile()
 	{
 		$path = $this->getPrintFormFilePath();
-		return is_file($path) ? Core_File::read($path) : NULL;
+		return Core_File::isFile($path) ? Core_File::read($path) : NULL;
 	}
 
 	/**

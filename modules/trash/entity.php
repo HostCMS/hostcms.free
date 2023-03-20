@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Trash
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Trash_Entity
 {
@@ -174,14 +174,14 @@ class Trash_Entity
 			$offset = 0;
 			$limit = 100;
 
+			$oUser = Core_Auth::getCurrentUser();
+
 			do {
 				$aTrash_Table_Items = $Trash_Table_Dataset
 					->offset($offset)
 					->limit($limit)
 					->clear()
 					->getObjects();
-
-				$oUser = Core_Auth::getCurrentUser();
 
 				foreach ($aTrash_Table_Items as $oTrash_Table_Item)
 				{

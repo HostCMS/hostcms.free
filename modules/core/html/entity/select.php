@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Html
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Html_Entity_Select extends Core_Html_Entity
 {
@@ -65,7 +65,7 @@ class Core_Html_Entity_Select extends Core_Html_Entity
 				?><option value="<?php echo htmlspecialchars($key)?>"<?php echo ($this->value == $key)
 				? ' selected="selected"'
 				: ''?>><?php
-				?><?php echo htmlspecialchars($value)?><?php
+				?><?php echo htmlspecialchars((string) $value)?><?php
 				?></option><?php
 			} */
 		}
@@ -112,7 +112,7 @@ class Core_Html_Entity_Select extends Core_Html_Entity
 		{
 			foreach ($oOptgroup->attributes as $attrKey => $attrValue)
 			{
-				echo ' ', $attrKey, '=', '"', htmlspecialchars($attrValue, ENT_COMPAT, 'UTF-8'), '"';
+				echo ' ', $attrKey, '=', '"', htmlspecialchars((string) $attrValue, ENT_COMPAT, 'UTF-8'), '"';
 			}
 		}
 		?>><?php
@@ -134,8 +134,8 @@ class Core_Html_Entity_Select extends Core_Html_Entity
 		?><option value="<?php echo htmlspecialchars($key)?>"<?php
 		foreach ($aAttr as $attrKey => $attrValue)
 		{
-			echo ' ', $attrKey, '=', '"', htmlspecialchars($attrValue, ENT_COMPAT, 'UTF-8'), '"';
+			echo ' ', $attrKey, '=', '"', htmlspecialchars((string) $attrValue, ENT_COMPAT, 'UTF-8'), '"';
 		}
-		?>><?php echo htmlspecialchars($value, ENT_COMPAT, 'UTF-8')?></option><?php
+		?>><?php echo htmlspecialchars((string) $value, ENT_COMPAT, 'UTF-8')?></option><?php
 	}
 }

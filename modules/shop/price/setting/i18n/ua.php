@@ -36,4 +36,5 @@ return array(
 	'convolution' => 'Згортка бази',
 	'include_modifications' => 'Додати модифікації товару і встановити ціни',
 	'apply_item_change_attributes' => "Встановлення ціни через зміну атрибутів",
+	'apply_item_recount_sets' => "Установка ціни через пересчет комплектів"
 );

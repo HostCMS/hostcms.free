@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Xsl
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Xsl_Model extends Core_Entity
 {
@@ -101,7 +101,7 @@ class Xsl_Model extends Core_Entity
 	{
 		$path = $this->getLngDtdPath($lng);
 
-		return is_file($path)
+		return Core_File::isFile($path)
 			? Core_File::read($path)
 			: NULL;
 	}
@@ -149,7 +149,7 @@ class Xsl_Model extends Core_Entity
 			{
 				$sDtdPath = $this->getLngDtdPath($sLng);
 
-				if (is_file($sDtdPath))
+				if (Core_File::isFile($sDtdPath))
 				{
 					Core_File::delete($sDtdPath);
 				}
@@ -179,7 +179,7 @@ class Xsl_Model extends Core_Entity
 	{
 		$path = $this->getXslFilePath();
 
-		return is_file($path)
+		return Core_File::isFile($path)
 			? Core_File::read($path)
 			: NULL;
 	}

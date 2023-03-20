@@ -6,6 +6,15 @@ return array(
 	'group_name' => 'Назва розділу',
 	'group_path' => 'Шлях для розділу',
 	'group_sorting' => "Порядок сортування розділу",
+
+	'group_seo_group_title_template' => 'Шаблон title групи',
+	'group_seo_group_description_template' => 'Шаблон description групи',
+	'group_seo_group_keywords_template' => 'Шаблон keywords групи',
+
+	'group_seo_item_title_template' => 'Шаблон title товару',
+	'group_seo_item_description_template' => 'Шаблон description товару',
+	'group_seo_item_keywords_template' => 'Шаблон keywords товару',
+
 	'group_description' => 'Опис розділу',
 	'group_seo_title' => "Заголовок розділу(title)",
 	'group_seo_description' => "Опис розділу(description)",

@@ -30,7 +30,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Select extends Admin_Form_Entity
 {
@@ -110,7 +110,7 @@ class Skin_Default_Admin_Form_Entity_Select extends Admin_Form_Entity
 		{
 			foreach ($this->divAttr as $attrName => $attrValue)
 			{
-				$aDivAttr[] = "{$attrName}=\"" . htmlspecialchars($attrValue) . "\"";
+				$aDivAttr[] = "{$attrName}=\"" . htmlspecialchars((string) $attrValue) . "\"";
 			}
 		}
 
@@ -149,22 +149,22 @@ class Skin_Default_Admin_Form_Entity_Select extends Admin_Form_Entity
 
 	protected function _showOptions($aOptions)
 	{
-		foreach ($aOptions as $key => $aValue)
+		foreach ($aOptions as $key => $mValue)
 		{
-			if (is_object($aValue))
+			if (is_object($mValue))
 			{
-				$this->_showOptgroup($aValue);
+				$this->_showOptgroup($mValue);
 			}
 			else
 			{
-				if (is_array($aValue))
+				if (is_array($mValue))
 				{
-					$value = Core_Array::get($aValue, 'value');
-					$attr = Core_Array::get($aValue, 'attr', array());
+					$value = Core_Array::get($mValue, 'value');
+					$attr = Core_Array::get($mValue, 'attr', array());
 				}
 				else
 				{
-					$value = $aValue;
+					$value = $mValue;
 					$attr = array();
 				}
 
@@ -192,7 +192,7 @@ class Skin_Default_Admin_Form_Entity_Select extends Admin_Form_Entity
 		{
 			foreach ($oOptgroup->attributes as $attrKey => $attrValue)
 			{
-				echo ' ', $attrKey, '=', '"', htmlspecialchars($attrValue, ENT_COMPAT, 'UTF-8'), '"';
+				echo ' ', $attrKey, '=', '"', htmlspecialchars((string) $attrValue, ENT_COMPAT, 'UTF-8'), '"';
 			}
 		}
 		?>><?php
@@ -214,9 +214,9 @@ class Skin_Default_Admin_Form_Entity_Select extends Admin_Form_Entity
 		?><option value="<?php echo htmlspecialchars($key)?>"<?php
 		foreach ($aAttr as $attrKey => $attrValue)
 		{
-			echo ' ', $attrKey, '=', '"', htmlspecialchars($attrValue, ENT_COMPAT, 'UTF-8'), '"';
+			echo ' ', $attrKey, '=', '"', htmlspecialchars((string) $attrValue, ENT_COMPAT, 'UTF-8'), '"';
 		}
-		?>><?php echo htmlspecialchars($value, ENT_COMPAT, 'UTF-8')?></option><?php
+		?>><?php echo htmlspecialchars((string) $value, ENT_COMPAT, 'UTF-8')?></option><?php
 	}
 
 	/**

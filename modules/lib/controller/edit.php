@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Lib
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -35,7 +35,7 @@ class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			case 'lib':
 				$title = $this->_object->id
-					? Core::_('Lib.lib_form_title_edit', $this->_object->name)
+					? Core::_('Lib.lib_form_title_edit', $this->_object->name, FALSE)
 					: Core::_('Lib.lib_form_title_add');
 
 				if (!$this->_object->id)
@@ -121,7 +121,7 @@ class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			case 'lib_dir':
 			default:
 				$title = $this->_object->id
-					? Core::_('Lib_Dir.lib_form_title_edit_dir', $this->_object->name)
+					? Core::_('Lib_Dir.lib_form_title_edit_dir', $this->_object->name, FALSE)
 					: Core::_('Lib_Dir.lib_form_title_add_dir');
 
 				// Значения директории для добавляемого объекта

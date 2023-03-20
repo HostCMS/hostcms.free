@@ -56,4 +56,5 @@ return array(
 	'move_dirs_title' => "Перенесення розділів та елементів",
 	'move_items_dirs' => "Батьківський розділ",
 	'move_success' => 'Знижки перенесені',
+	'color' => 'Колір',
 );

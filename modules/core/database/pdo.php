@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Database
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_DataBase_Pdo extends Core_DataBase
 {
@@ -659,11 +659,14 @@ class Core_DataBase_Pdo extends Core_DataBase
 		$this->connect();
 
 		Core_Event::notify('Core_DataBase.onBeforeQuery', $this, array($sql));
-
+//if (!is_null($this->_result)) { echo '+'; var_dump($this->_lastQuery);}
 		$this->_lastQuery = $sql;
 
 		try
 		{
+			// Free result memory if exists previous unbuffered query
+			//$this->_free($this->_result);
+
 			$this->_result = $this->_connection->query($sql);
 		}
 		catch (PDOException $e)

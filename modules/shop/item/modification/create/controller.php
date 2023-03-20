@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Modification_Create_Controller extends Admin_Form_Action_Controller
 {
@@ -146,10 +146,6 @@ class Shop_Item_Modification_Create_Controller extends Admin_Form_Action_Control
 					$oShopItem->description = $oShopItemParent->description;
 					$oShopItem->text = $oShopItemParent->text;
 
-					// Изображения
-					$oShopItem->image_large = $oShopItemParent->image_large;
-					$oShopItem->image_small = $oShopItemParent->image_small;
-
 					// Размеры
 					$oShopItem->length = $oShopItemParent->length;
 					$oShopItem->width = $oShopItemParent->width;
@@ -160,16 +156,26 @@ class Shop_Item_Modification_Create_Controller extends Admin_Form_Action_Control
 					$oShopItem->min_quantity = $oShopItemParent->min_quantity;
 					$oShopItem->max_quantity = $oShopItemParent->max_quantity;
 					$oShopItem->quantity_step = $oShopItemParent->quantity_step;
+				}
+
+				// Копировать основные изображения товара
+				if (!is_null(Core_Array::getPost('copy_main_images')))
+				{
+					// Изображения
+					$oShopItem->image_large = $oShopItemParent->image_large;
+					$oShopItem->image_small = $oShopItemParent->image_small;
 
 					try
 					{
-						Core_File::copy($oShopItemParent->getLargeFilePath(), $oShopItem->getLargeFilePath());
+						$oShopItem->image_large != ''
+							&& Core_File::copy($oShopItemParent->getLargeFilePath(), $oShopItem->getLargeFilePath());
 					}
 					catch (Exception $e) {}
 
 					try
 					{
-						Core_File::copy($oShopItemParent->getSmallFilePath(), $oShopItem->getSmallFilePath());
+						$oShopItem->image_small != ''
+							&& Core_File::copy($oShopItemParent->getSmallFilePath(), $oShopItem->getSmallFilePath());
 					}
 					catch (Exception $e) {}
 				}
@@ -238,8 +244,12 @@ class Shop_Item_Modification_Create_Controller extends Admin_Form_Action_Control
 						}
 				}
 
+
+				$bCopyProperties = !is_null(Core_Array::getPost('copy_external_property'));
+				$bCopyPropertyFiles = !is_null(Core_Array::getPost('copy_external_property_files'));
+
 				// Копировать дополнительные свойства
-				if (!is_null(Core_Array::getPost('copy_external_property')))
+				if ($bCopyProperties || $bCopyPropertyFiles)
 				{
 					$aPropertyValues = $oShopItemParent->getPropertyValues();
 					foreach ($aPropertyValues as $oPropertyValue)
@@ -247,23 +257,30 @@ class Shop_Item_Modification_Create_Controller extends Admin_Form_Action_Control
 						// Не копируем св-во, по которому создается модификация
 						if (!in_array($oPropertyValue->property_id, $aPropertiesId))
 						{
-							$oNewPropertyValue = clone $oPropertyValue;
-							$oNewPropertyValue->entity_id = $oShopItem->id;
-							$oNewPropertyValue->save();
-
-							if ($oNewPropertyValue->Property->type == 2)
+							if ($bCopyProperties && $oPropertyValue->Property->type != 2
+								|| $bCopyPropertyFiles && $oPropertyValue->Property->type == 2
+							)
 							{
-								try
-								{
-									Core_File::copy($oShopItemParent->getItemPath() . $oPropertyValue->file, $oShopItem->getItemPath() . $oPropertyValue->file);
-								}
-								catch (Exception $e) {}
+								$oNewPropertyValue = clone $oPropertyValue;
+								$oNewPropertyValue->entity_id = $oShopItem->id;
+								$oNewPropertyValue->save();
 
-								try
+								if ($oNewPropertyValue->Property->type == 2)
 								{
-									Core_File::copy($oShopItemParent->getItemPath() . $oPropertyValue->file_small, $oShopItem->getItemPath() . $oPropertyValue->file_small);
+									try
+									{
+										$oPropertyValue->file != ''
+											&& Core_File::copy($oShopItemParent->getItemPath() . $oPropertyValue->file, $oShopItem->getItemPath() . $oPropertyValue->file);
+									}
+									catch (Exception $e) {}
+
+									try
+									{
+										$oPropertyValue->file_small != ''
+											&& Core_File::copy($oShopItemParent->getItemPath() . $oPropertyValue->file_small, $oShopItem->getItemPath() . $oPropertyValue->file_small);
+									}
+									catch (Exception $e) {}
 								}
-								catch (Exception $e) {}
 							}
 						}
 					}

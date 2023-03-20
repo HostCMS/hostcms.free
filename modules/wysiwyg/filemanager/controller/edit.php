@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Wysiwyg
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Wysiwyg_Filemanager_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -42,11 +42,9 @@ class Wysiwyg_Filemanager_Controller_Edit extends Admin_Form_Action_Controller_T
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'));
 
-		$title = Core::_('Wysiwyg_Filemanager.edit_file', $this->_object->name);
-
 		$filePath = $this->_getFilePath();
 
-		if (!is_file($filePath))
+		if (!Core_File::isFile($filePath))
 		{
 			throw new Core_Exception('File %file not found', array('%file' => $this->_object->name));
 		}
@@ -104,7 +102,9 @@ class Wysiwyg_Filemanager_Controller_Edit extends Admin_Form_Action_Controller_T
 
 		$oMainRow1->add($oFile_Content);
 
-		$this->title($title);
+		$this->title(
+			Core::_('Wysiwyg_Filemanager.edit_file', $this->_object->name, FALSE)
+		);
 
 		return $this;
 	}
@@ -121,7 +121,7 @@ class Wysiwyg_Filemanager_Controller_Edit extends Admin_Form_Action_Controller_T
 		if (!is_null($content))
 		{
 			Core_File::write($filePath, $content);
-			
+
 			if (function_exists('opcache_reset'))
 			{
 				opcache_reset();

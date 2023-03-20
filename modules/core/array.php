@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Array
 {
@@ -30,7 +30,7 @@ class Core_Array
 	 * @param array $array array
 	 * @param string $key key
 	 * @param mixed $defaultValue default value
-	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim'
+	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim', 'array'
 	 * @return mixed
 	 */
 	static public function get($array, $key, $defaultValue = NULL, $filter = NULL)
@@ -46,7 +46,7 @@ class Core_Array
 	/**
 	 * Filter Value
 	 * @param mixed $value
-	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim'
+	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim', 'array'
 	 * @return mixed
 	 */
 	static protected function _filter($value, $filter)
@@ -124,7 +124,7 @@ class Core_Array
 	 * Get value for $key in array $_REQUEST. If value does not exist will return defaultValue.
 	 * @param $key key
 	 * @param $defaultValue default value
-	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim'
+	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim', 'array'
 	 * <code>
 	 * // Return value for 'foo' or NULL if $key does not exist
 	 * $value = Core_Array::getRequest('foo');
@@ -144,7 +144,7 @@ class Core_Array
 	 * Get value for $key in array $_POST. If value does not exist will return defaultValue.
 	 * @param $key key
 	 * @param $defaultValue default value
-	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim'
+	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim', 'array'
 	 * <code>
 	 * // Return value for 'foo' or NULL if $key does not exist
 	 * $value = Core_Array::getPost('foo');
@@ -178,7 +178,7 @@ class Core_Array
 	 *
 	 * @param string $key key
 	 * @param mixed $defaultValue default value
-	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim'
+	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim', 'array'
 	 * @return mixed
 	 */
 	static public function getGet($key, $defaultValue = NULL, $filter = NULL)
@@ -200,7 +200,7 @@ class Core_Array
 	 *
 	 * @param string $key key
 	 * @param mixed $defaultValue default value
-	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim'
+	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim', 'array'
 	 * @return mixed
 	 */
 	static public function getCookie($key, $defaultValue = NULL, $filter = NULL)
@@ -222,7 +222,7 @@ class Core_Array
 	 *
 	 * @param string $key key
 	 * @param mixed $defaultValue default value
-	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim'
+	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim', 'array'
 	 * @return mixed
 	 */
 	static public function getSession($key, $defaultValue = NULL, $filter = NULL)

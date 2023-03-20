@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -36,11 +36,10 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 
 				parent::setObject($object);
 
-				$title = $this->_object->id
-					? Core::_('Shop_Filter_Seo.edit_form_title', $this->_object->name)
-					: Core::_('Shop_Filter_Seo.add_form_title');
-
-				$this->title($title);
+				$this->title($this->_object->id
+					? Core::_('Shop_Filter_Seo.edit_form_title', $this->_object->name, FALSE)
+					: Core::_('Shop_Filter_Seo.add_form_title')
+				);
 
 				$oMainTab = $this->getTab('main');
 				$oAdditionalTab = $this->getTab('additional');
@@ -340,11 +339,10 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 				$oMainTab
 					->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow2);
 
-				$title = $this->_object->id
-					? Core::_('Shop_Filter_Seo_Dir.edit', $this->_object->name)
-					: Core::_('Shop_Filter_Seo_Dir.add');
-
-				$this->title($title);
+				$this->title($this->_object->id
+					? Core::_('Shop_Filter_Seo_Dir.edit', $this->_object->name, FALSE)
+					: Core::_('Shop_Filter_Seo_Dir.add')
+				);
 			break;
 		}
 

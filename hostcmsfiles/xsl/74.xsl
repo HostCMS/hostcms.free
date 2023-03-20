@@ -128,9 +128,9 @@
 				</xsl:otherwise>
 			</xsl:choose>
 
-			<xsl:text> </xsl:text><a href="{/shop/url}cart/?action=repeat&amp;guid={guid}" onclick="return confirm('&labelRepeatAlert;')">&labelRepeat;</a>.
+			<xsl:text> </xsl:text><a href="{/shop/url}cart/?action=repeat&amp;guid={guid}" onclick="return confirm('Вы действительно хотите повторить заказ?')">&labelRepeat;</a>.
 
-			<!-- Блок для смены статуса оплаты -->
+			<!-- Блок для смены платежной системы -->
 			<xsl:if test="paid = 0 and canceled = 0">
 				<div class="orderListChangePaymentSystem" id="change_payment_system{@id}">
 					<form method="post">

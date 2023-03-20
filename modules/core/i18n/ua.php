@@ -8,6 +8,7 @@ return array(
 	'error_log_message_stack' => "Файл: %s, рядок %s",
 	'error_log_message_short' => "<strong>%s:</strong> %s у файлі %s (рядок %s)",
 	'error_log_message' => "<strong>%s:</strong> %s у файлі %s (рядок %s)\nСтек виклик:\n%s",
+	'error_log_add_message' => "<strong>Помилка!</strong> Повідомлення про помилку занесено в журнал.",
 
 	'info_cms' => 'Система управління сайтом',
 	'info_cms_site_support' => 'Технічна підтримка сайту: ',
@@ -29,7 +30,8 @@ return array(
 
 	'total_time' => 'Час виконання: <strong>%.3f</strong> с, із них',
 	'time_load_modules' => "завантаження модулів: <strong>%.3f</strong> с",
-	'time_page' => "макета і сторінки: <strong>%.3f</strong> с",
+	'time_template' => "макета і сторінки: <strong>%.3f</strong> с",
+	'time_page' => "сторінки: <strong>%.3f</strong> с",
 	'time_page_config' => "налаштувань сторінки: <strong>%.3f</strong> с",
 	'time_database_connection' => "з'єднання із СУБД: <strong>%.3f</strong> с",
 	'time_database_select' => "вибору БД: <strong>%.3f</strong> с",
@@ -59,14 +61,14 @@ return array(
 	'error_log_access_was_denied' => "Доступ до модуля %s заборонений",
 	'error_log_module_disabled' => "Модуль %s відключений",
 	'error_log_module_access_allowed' => "Доступ до модуля \"%s\" дозволений",
-	'error_log_action_access_allowed' => "Виконано дію \"%s\", форми \"%s\"",
+	'error_log_action_access_allowed' => "Дію \"%s\" форми \"%s\"",
 	'error_log_logged' => "Вхід в систему управління",
 	'error_log_authorization_error' => 'Невірні дані для аутентифікації',
 	'error_log_exit' => 'Вихід із системи управління',
 	'session_destroy_error' => 'Помилка закриття сеансу',
-	'error_log_add_message' => "<strong>Помилка!</strong> Повідомлення про помилку занесено в журнал.",
+	'session_change_ip' => 'Спроба використання сесії %s з IP %s',
 
-	'error_message' => "Вітаємо!\n"
+	'error_message' => "Вітаємо!\n\n"
 	. "Тільки що на сайті відбулася подія, інформація про яку представлена ​​нижче:\n"
 	. "Дата: %s\n"
 	. "Подія: %s\n"
@@ -74,9 +76,10 @@ return array(
 	. "Користувач: %s\n"
 	. "Сайт: %s\n"
 	. "Сторінка: %s\n"
-	. "IP-адреса: %s\n"
-	. "Система управління сайтом %s,\n"
-	. "http://%s/\n",
+	. "User Agent: %s\n"
+	. "IP-адреса: %s\n\n"
+	. "Система управління сайтом HostCMS,\n"
+	. "https://www.hostcms.ru",
 
 	'E_ERROR' => "Помилка",
 	'E_WARNING' => "Попередження",
@@ -111,7 +114,7 @@ return array(
 	<img src="//www.hostcms.ru/images/documentation/guide/site/licenses-list.png" class="img-responsive" />
 	</p>
 
-	<p>Комерційні користувачі можуть дізнатися свій номер ліцензії та PIN-код з таблиці в розділі «Ліцензії» особистого кабінету, користувачі HostCMS.Халява можуть додати нову ліцензію.</p>
+	<p>Комерційні користувачі можуть дізнатися свій номер ліцензії та PIN-код з таблиці в розділі «Ліцензії» особистого кабінету, користувачі HostCMS.Старт можуть додати нову ліцензію.</p>
 	<p>Дізнавшись номер ліцензії та PIN-код можна повернутися в <a href="/admin/" target="_blank">центр адміністрування</a> і ввести ці дані в розділі «Система» → «Сайти» → пункт меню «Налаштування» → «Реєстраційні дані».</p>
 
 	<h2>Отримання ключа <a href="https://www.hostcms.ru/documentation/introduction/key/key/" target="_blank"><i class="fa fa-external-link"></i></a></h2>
@@ -137,7 +140,7 @@ return array(
 	'extension_does_not_allow' => 'Завантажувати файл з розширенням "%s" заборонено.',
 	'delete_success' => 'Елемент видалений!',
 	'undelete_success' => 'Елемент відновлено!',
-	'redaction0' => 'Халява',
+	'redaction0' => 'Старт',
 	'redaction1' => 'Мій сайт',
 	'redaction3' => 'Малий бізнес',
 	'redaction5' => 'Бізнес',
@@ -210,6 +213,8 @@ return array(
 	'day' => 'День',
 	'month' => 'Місяц',
 	'year' => 'Рік',
+	'quarter' => 'Квартал',
+
 	'random' => 'Випадковий',
 	'generateChars' => 'Символи',
 
@@ -234,4 +239,12 @@ return array(
 
 	'show_title' => 'Показувати',
 	'data_show_title' => 'Показувати на сайті',
+
+	'unpack_wrong_crc' => 'Помилка розрахунку контрольної суми %s: %d розрахована, %d фактично вказана',
+	'unpack_file_already_exists_and_directory' => 'Файл %s вже існує і є директорією',
+	'unpack_dir_already_exists_and_file' => 'Директорія %s вже існує і є файлом',
+	'unpack_file_already_exists_and_protected' => 'Файл %s вже існує та захищений від запису! Встановіть права доступу до файлу відповідно до посібника зі встановлення.',
+	'unpack_error_creating_dir' => 'Помилка створення директорії для %s',
+	'unpack_error_opening_binary_mode' => 'Помилка відкриття файлу %s у бінарному режимі',
+	'unpack_file_incorrect_size' => 'Вийнятий файл %s має некоректний розмір %d, очікується %d. Архів може бути пошкоджений.',
 );

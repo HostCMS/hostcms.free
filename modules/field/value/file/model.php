@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Field
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Field_Value_File_Model extends Core_Entity
 {
@@ -151,7 +151,7 @@ class Field_Value_File_Model extends Core_Entity
 
 		if ($this->file != '')
 		{
-			if (is_file($path))
+			if (Core_File::isFile($path))
 			{
 				try
 				{
@@ -195,7 +195,7 @@ class Field_Value_File_Model extends Core_Entity
 
 		if ($this->file_small != '')
 		{
-			if (is_file($path))
+			if (Core_File::isFile($path))
 			{
 				try
 				{
@@ -263,7 +263,7 @@ class Field_Value_File_Model extends Core_Entity
 			{
 				$path = $this->getLargeFilePath();
 
-				if (is_file($path) && is_readable($path))
+				if (Core_File::isFile($path) && is_readable($path))
 				{
 					$fileSize = filesize($path);
 					$oFile_Entity->addAttribute('size', $fileSize);
@@ -289,7 +289,7 @@ class Field_Value_File_Model extends Core_Entity
 			{
 				$path = $this->getSmallFilePath();
 
-				if (is_file($path) && is_readable($path))
+				if (Core_File::isFile($path) && is_readable($path))
 				{
 					$fileSize = filesize($path);
 					$oFile_Small_Entity->addAttribute('size', $fileSize);

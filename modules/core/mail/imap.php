@@ -25,7 +25,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Mail
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Mail_Imap extends Core_Servant_Properties
 {
@@ -71,7 +71,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 
 	/**
 	 * IMAP stream
-	 * @var resource|NULL
+	 * @var IMAP\Connection
 	 */
 	protected $_stream = NULL;
 
@@ -278,15 +278,10 @@ class Core_Mail_Imap extends Core_Servant_Properties
 				}
 			}
 
-			/*$this->_aMessages[$i]['subject'] = isset($header_message->subject)
-				? iconv_mime_decode($header_message->subject, ICONV_MIME_DECODE_CONTINUE_ON_ERROR, 'UTF-8')
-				: '';*/
-
+			// mb_decode_mimeheader() keeps underscores _ in the string! // ? mb_decode_mimeheader($header_message->subject)
 			$this->_aMessages[$i]['subject'] = isset($header_message->subject)
-				? mb_decode_mimeheader($header_message->subject)
+				? iconv_mime_decode($header_message->subject, 0, 'UTF-8')
 				: '';
-
-			//$i++;
 		}
 
 		// Пометить сообщения прочитанными
@@ -319,7 +314,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 
 	/**
 	 * Удаление полученных писем из почтового ящика
-	 * @param resource $stream идентификатор открытого соединения с почтовым сервером
+	 * @param IMAP\Connection $stream идентификатор открытого соединения с почтовым сервером
 	 * @return self
 	 */
 	protected function _deleteMessages($stream)

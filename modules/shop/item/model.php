@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Model extends Core_Entity
 {
@@ -127,6 +127,9 @@ class Shop_Item_Model extends Core_Entity
 		'shop_item_certificate' => array(),
 		'lead_shop_item' => array(),
 		'deal_shop_item' => array(),
+		'shop_warehouse_purchaseorder_item' => array(),
+		'shop_warehouse_invoice_item' => array(),
+		'shop_warehouse_supply_item' => array(),
 	);
 
 	/**
@@ -171,6 +174,7 @@ class Shop_Item_Model extends Core_Entity
 		'shop' => array(),
 		'shop_producer' => array(),
 		'siteuser' => array(),
+		'shop_item_type' => array(),
 		'shop_item' => array('foreign_key' => 'shortcut_id'),
 		'modification' => array('model' => 'Shop_Item', 'foreign_key' => 'modification_id'),
 		'user' => array()
@@ -751,7 +755,7 @@ class Shop_Item_Model extends Core_Entity
 	{
 		$path = $this->getLargeFilePath();
 
-		if (is_file($path))
+		if (Core_File::isFile($path))
 		{
 			$aSizes = Core_Image::instance()->getImageSize($path);
 			if ($aSizes)
@@ -790,7 +794,7 @@ class Shop_Item_Model extends Core_Entity
 	{
 		$path = $this->getSmallFilePath();
 
-		if (is_file($path))
+		if (Core_File::isFile($path))
 		{
 			$aSizes = Core_Image::instance()->getImageSize($path);
 			if ($aSizes)
@@ -882,7 +886,7 @@ class Shop_Item_Model extends Core_Entity
 			try {
 				Core::$mainConfig['translate'] && $sTranslated = Core_Str::translate($this->name);
 
-				$this->path = Core::$mainConfig['translate'] && strlen($sTranslated)
+				$this->path = Core::$mainConfig['translate'] && strlen((string) $sTranslated)
 					? $sTranslated
 					: $this->name;
 
@@ -941,7 +945,7 @@ class Shop_Item_Model extends Core_Entity
 	{
 		clearstatcache();
 
-		if (!is_dir($this->getItemPath()))
+		if (!Core_File::isDir($this->getItemPath()))
 		{
 			try
 			{
@@ -965,7 +969,7 @@ class Shop_Item_Model extends Core_Entity
 		$newObject->guid = Core_Guid::get();
 		$newObject->save();
 
-		if (is_file($this->getLargeFilePath()))
+		if (Core_File::isFile($this->getLargeFilePath()))
 		{
 			try
 			{
@@ -975,7 +979,7 @@ class Shop_Item_Model extends Core_Entity
 			catch (Exception $e) {}
 		}
 
-		if (is_file($this->getSmallFilePath()))
+		if (Core_File::isFile($this->getSmallFilePath()))
 		{
 			try
 			{
@@ -1014,7 +1018,7 @@ class Shop_Item_Model extends Core_Entity
 				$oPropertyValue->setDir($this->getItemPath());
 				$oNewPropertyValue->setDir($newObject->getItemPath());
 
-				if (is_file($oPropertyValue->getLargeFilePath()))
+				if (Core_File::isFile($oPropertyValue->getLargeFilePath()))
 				{
 					try
 					{
@@ -1022,7 +1026,7 @@ class Shop_Item_Model extends Core_Entity
 					} catch (Exception $e) {}
 				}
 
-				if (is_file($oPropertyValue->getSmallFilePath()))
+				if (Core_File::isFile($oPropertyValue->getSmallFilePath()))
 				{
 					try
 					{
@@ -1276,7 +1280,7 @@ class Shop_Item_Model extends Core_Entity
 	public function deleteLargeImage()
 	{
 		$fileName = $this->getLargeFilePath();
-		if ($this->image_large != '' && is_file($fileName))
+		if ($this->image_large != '' && Core_File::isFile($fileName))
 		{
 			try
 			{
@@ -1296,7 +1300,7 @@ class Shop_Item_Model extends Core_Entity
 	public function deleteSmallImage()
 	{
 		$fileName = $this->getSmallFilePath();
-		if ($this->image_small != '' && is_file($fileName))
+		if ($this->image_small != '' && Core_File::isFile($fileName))
 		{
 			try
 			{
@@ -1643,7 +1647,7 @@ class Shop_Item_Model extends Core_Entity
 		// Удаляем файл малого изображения элемента
 		$this->deleteSmallImage();
 
-		if (is_dir($this->getItemPath()))
+		if (Core_File::isDir($this->getItemPath()))
 		{
 			try
 			{
@@ -1851,7 +1855,7 @@ class Shop_Item_Model extends Core_Entity
 		}
 
 		$oCore_Html_Entity_Div->value(
-			htmlspecialchars($object->name)
+			htmlspecialchars((string) $object->name)
 		);
 
 		if ($object->modification_id)

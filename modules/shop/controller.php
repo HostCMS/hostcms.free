@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Controller
 {
@@ -473,5 +473,109 @@ class Shop_Controller
 		}
 
 		return $aReturn;
+	}
+
+	/**
+	 * Get uniq document ID
+	 * @param int $id document ID
+	 * @param int $type document type
+	 * @return int
+	 */
+	static public function getDocumentId($id, $type)
+	{
+		return ($id << 8) | $type;
+	}
+
+	/**
+	 * Get document type
+	 * @return int|NULL
+	 */
+	static public function getDocumentType($document_id)
+	{
+		return $document_id
+			? Core_Bit::extractBits($document_id, 8, 1)
+			: NULL;
+	}
+
+	/**
+	 * Get document
+	 * @return object|NULL
+	 */
+	static public function getDocument($document_id)
+	{
+		$type = self::getDocumentType($document_id);
+
+		$id = $document_id >> 8;
+
+		$model = self::getDocumentModel($type);
+
+		return !is_null($model)
+			? Core_Entity::factory($model)->getById($id, FALSE)
+			: NULL;
+	}
+
+	/**
+	 * Get Model Name By Type Id
+	 * @param int $type
+	 *
+	 */
+	static public function getDocumentModel($type)
+	{
+		/* Типы документов:
+		* 0 - Shop_Warehouse_Inventory_Model
+		* 1 - Shop_Warehouse_Incoming_Model
+		* 2 - Shop_Warehouse_Writeoff_Model
+		* 3 - Shop_Warehouse_Regrade_Model
+		* 4 - Shop_Warehouse_Movement_Model
+		* 5 - Shop_Order_Model
+		* 6 - Shop_Warehouse_Purchaseorder_Model
+		* 7 - Shop_Warehouse_Invoice_Model
+		* 8 - Shop_Warehouse_Supply
+		* 9 - Shop_Warehouse_Purchasereturn
+		* 30 - Shop_Warrant_Model
+		* 31 - Shop_Warrant_Model
+		* 32 - Shop_Warrant_Model
+		* 33 - Shop_Warrant_Model
+		*/
+		switch ($type)
+		{
+			case 0:
+				$model = 'Shop_Warehouse_Inventory';
+			break;
+			case 1:
+				$model = 'Shop_Warehouse_Incoming';
+			break;
+			case 2:
+				$model = 'Shop_Warehouse_Writeoff';
+			break;
+			case 3:
+				$model = 'Shop_Warehouse_Regrade';
+			break;
+			case 5:
+				$model = 'Shop_Order';
+			break;
+			case 6:
+				$model = 'Shop_Warehouse_Purchaseorder';
+			break;
+			case 7:
+				$model = 'Shop_Warehouse_Invoice';
+			break;
+			case 8:
+				$model = 'Shop_Warehouse_Supply';
+			break;
+			case 9:
+				$model = 'Shop_Warehouse_Purchasereturn';
+			break;
+			case 30:
+			case 31:
+			case 32:
+			case 33:
+				$model = 'Shop_Warrant';
+			break;
+			default:
+				$model = NULL;
+		}
+
+		return $model;
 	}
 }

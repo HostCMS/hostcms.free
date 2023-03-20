@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Controller_Tab extends Core_Servant_Properties
 {
@@ -883,15 +883,17 @@ class Property_Controller_Tab extends Core_Servant_Properties
 			$oAdmin_Form_Entity_Section->add(Core_Html_Entity::factory('Script')->value("
 				$('.section-" . $oProperty->id . "').sortable({
 					connectWith: '.section-" . $oProperty->id . "',
-					items: '> div#property_" . $oProperty->id . "',
+					items: '> div#property_" . $oProperty->id . ":not(\'.new-property\')',
 					scroll: false,
 					placeholder: 'placeholder',
+					cancel: '.add-remove-property, .form-control',
 					tolerance: 'pointer',
 					// appendTo: 'body',
 					// helper: 'clone',
 					helper: function(event, ui) {
 						var jUi = $(ui),
-							clone = jUi.clone();
+							clone = jUi.clone(true);
+							// clone.css('border', '1px solid red');
 
 						// установить актуальные выбранные элементы у склонированных списков
 						jUi.find('select').each(function(index, object){
@@ -911,23 +913,27 @@ class Property_Controller_Tab extends Core_Servant_Properties
 						{
 							var tinyTextarea = $(ui.item).find('textarea'),
 								elementId = tinyTextarea.attr('id'),
+								elementName = tinyTextarea.attr('name'),
 								editor = tinyMCE.get(elementId);
 
 							if (editor != null)
 							{
 								tinyMCE.remove('#' + elementId);
+								tinyTextarea.attr('name', elementName);
 							}
 						}
 					},
 					stop: function(event, ui) {
 						// Ghost hide
-						$('.section-" . $oProperty->id . "').find('div.ghost-item')
+						var ghostItem = $('.section-" . $oProperty->id . "').find('div.ghost-item');
+
+						ghostItem
 							.removeClass('ghost-item')
 							.css('opacity', 1);
 
 						if (typeof tinyMCE != 'undefined')
 						{
-							var tinyTextarea = $(ui.item).find('textarea'),
+							var tinyTextarea = ghostItem.find('textarea'),
 								script = tinyTextarea.next('script').text();
 							eval(script);
 						}
@@ -1899,7 +1905,8 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 								ob_start();
 								Core_Html_Entity::factory('Script')
-									->value("$(\"#{$windowId} *[name='property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'property_{$oProperty->id}_{$oNewProperty_Value->id}')")
+									->value("$(\"#{$windowId} div#property_{$oProperty->id}.new-property\").eq(0).removeClass('new-property');" .
+									"$(\"#{$windowId} *[name='property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'property_{$oProperty->id}_{$oNewProperty_Value->id}')")
 									->execute();
 
 								$this->_Admin_Form_Controller->addMessage(ob_get_clean());
@@ -1967,7 +1974,8 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 							ob_start();
 							Core_Html_Entity::factory('Script')
-								->value("$(\"#{$windowId} div[id^='file_large'] input[name='property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'property_{$oProperty->id}_{$oProperty_Value->id}');" .
+								->value("$(\"#{$windowId} div#property_{$oProperty->id}.new-property\").eq(0).removeClass('new-property');" .
+								"$(\"#{$windowId} div[id^='file_large'] input[name='property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'property_{$oProperty->id}_{$oProperty_Value->id}');" .
 								"$(\"#{$windowId} div[id^='file_small'] input[name='small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_property_{$oProperty->id}_{$oProperty_Value->id}');" .
 								// Description
 								"$(\"#{$windowId} input[name='description_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'description_property_{$oProperty->id}_{$oProperty_Value->id}');" .
@@ -2001,6 +2009,13 @@ class Property_Controller_Tab extends Core_Servant_Properties
 					Core_Event::notify('Property_Controller_Tab.onApplyObjectProperty', $this, array($oProperty, $aProperty_Values));
 			}
 		}
+
+		ob_start();
+		Core_Html_Entity::factory('Script')
+			->value("if($('div.ui-sortable').length) { $('div.ui-sortable').each(function(index, object) { $(object).sortable('refresh'); }); }")
+			->execute();
+
+		$this->_Admin_Form_Controller->addMessage(ob_get_clean());
 
 		Core_Event::notify('Property_Controller_Tab.onAfterApplyObjectProperty', $this, array($this->_Admin_Form_Controller, $aProperties));
 	}
@@ -2187,8 +2202,6 @@ class Property_Controller_Tab extends Core_Servant_Properties
 				);
 			}
 		}
-
-
 
 		if ($bLargeImageIsCorrect || $bSmallImageIsCorrect)
 		{

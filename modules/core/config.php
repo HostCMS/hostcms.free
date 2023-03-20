@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Config
 {
@@ -69,7 +69,7 @@ class Core_Config
 		{
 			$path = $this->getPath($name);
 
-			$this->_values[$name] = is_file($path)
+			$this->_values[$name] = Core_File::isFile($path)
 				? require_once($path)
 				: $defaultValue;
 		}
@@ -158,7 +158,7 @@ class Core_Config
 			return $this->_escape($value);
 		}
 	}
-	
+
 	/**
 	 * Escape key or value
 	 * @param mixed
@@ -182,7 +182,7 @@ class Core_Config
 		{
 			return $value === TRUE ? 'TRUE' : 'FALSE';
 		}
-		
+
 		return "''";
 	}
 }

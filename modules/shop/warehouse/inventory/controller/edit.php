@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -61,7 +61,7 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 
 			if (!is_null($oModule))
 			{
-				$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, 3, 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
+				$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, $this->_object->getEntityType(), 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
 			}
 
 			$printlayoutsButton .= '
@@ -257,28 +257,50 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 		);
 
 		$oCore_Html_Entity_Script = Core_Html_Entity::factory('Script')
-			->value("$('#{$windowId} .add-shop-item').autocompleteShopItem({ shop_id: {$oShop->id}, price_mode: 'item', shop_currency_id: 0, datetime: '{$this->_object->datetime}' }, function(event, ui) {
-					var warehouseId = $('#{$windowId} select.select-warehouse').val(),
+			->value("var jAddShopItem = $('#{$windowId} .add-shop-item'); jAddShopItem.autocompleteShopItem({ shop_id: {$oShop->id}, price_mode: 'item', shop_currency_id: 0, datetime: '{$this->_object->datetime}' }, function(event, ui) {
+					var jShopItemsTable = $('#{$windowId} .shop-item-table > tbody'),
+						newShopItemId = ui.item.id,
+						addedShopItemTr = jShopItemsTable.find('tr[data-item-id=' + newShopItemId +']'),
+						newRow,
+						warehouseId = $('#{$windowId} select.select-warehouse').val(),
 						foundRest = ui.item.aWarehouses.find(x => x.id === warehouseId);
 
-					if (typeof foundRest == 'undefined')
+
+					if (!addedShopItemTr.length)
 					{
-						foundRest = {count: 0};
+						if (typeof foundRest == 'undefined')
+						{
+							foundRest = {count: 0};
+						}
+
+						var newRow = $('<tr data-item-id=\"' + ui.item.id + '\"><td class=\"index\"></td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td><span class=\"price\">' + ui.item.price_with_tax + '</span></td><td>' + $.escapeHtml(ui.item.currency) + '</td><td><span class=\"calc-warehouse-count\">' + foundRest.count + '</span></td><td width=\"80\"><input class=\"set-item-count form-control\" name=\"shop_item_quantity[]\" value=\"\"/></td><td class=\"diff-warehouse-count\"></td><td><span class=\"calc-warehouse-sum\"></span></td><td><span class=\"warehouse-inv-sum\"></span></td><td><span class=\"diff-warehouse-sum\"></span></td><td><a class=\"delete-associated-item\" onclick=\"var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>'),
+						jNewItemCount = newRow.find('.set-item-count');
+
+						//$('#{$windowId} .shop-item-table > tbody').append(
+						jShopItemsTable.append(
+							newRow
+						);
+
+						//ui.item.value = '';
+						//$.changeWarehouseCounts($('#{$windowId} .set-item-count'), 0);
+
+						$.changeWarehouseCounts(jNewItemCount, 0);
+						//$('#{$windowId} .set-item-count').change();
+						jNewItemCount.change();
+						//$('#{$windowId} .shop-item-table tr:last-child').find('.set-item-count').focus();
+						jNewItemCount.focus();
+
+						$.focusAutocomplete(jNewItemCount, jAddShopItem);
+
+						$.recountIndexes(newRow);
+					}
+					else
+					{
+						addedShopItemTr.find('.set-item-count').focus();
 					}
 
-					var newRow = $('<tr data-item-id=\"' + ui.item.id + '\"><td class=\"index\"></td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td><span class=\"price\">' + ui.item.price_with_tax + '</span></td><td>' + $.escapeHtml(ui.item.currency) + '</td><td><span class=\"calc-warehouse-count\">' + foundRest.count + '</span></td><td width=\"80\"><input class=\"set-item-count form-control\" name=\"shop_item_quantity[]\" value=\"\"/></td><td class=\"diff-warehouse-count\"></td><td><span class=\"calc-warehouse-sum\"></span></td><td><span class=\"warehouse-inv-sum\"></span></td><td><span class=\"diff-warehouse-sum\"></span></td><td><a class=\"delete-associated-item\" onclick=\"var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>');
-
-					$('#{$windowId} .shop-item-table > tbody').append(
-						newRow
-					);
-
 					ui.item.value = '';
-					$.changeWarehouseCounts($('#{$windowId} .set-item-count'), 0);
-					$('#{$windowId} .set-item-count').change();
-					$('#{$windowId} .shop-item-table tr:last-child').find('.set-item-count').focus();
-					$.focusAutocomplete($('#{$windowId} .set-item-count'));
 
-					$.recountIndexes(newRow);
 				});
 
 				$.each($('#{$windowId} .shop-item-table > tbody tr[data-item-id]'), function (index, item) {
@@ -286,9 +308,11 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 
 					$.changeWarehouseCounts(jInput, 0);
 					jInput.change();
+
+					$.focusAutocomplete(jInput, jAddShopItem);
 				});
 
-				$.focusAutocomplete($('#{$windowId} .set-item-count'));
+				//$.focusAutocomplete($('#{$windowId} .set-item-count'), jAddShopItem);
 
 				$('#{$windowId} select.select-warehouse').change(function() {
 					$.updateWarehouseCounts($(this).val());
@@ -297,11 +321,10 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 
 		$oShopItemRow2->add($oCore_Html_Entity_Script);
 
-		$title = $this->_object->id
-			? Core::_('Shop_Warehouse_Inventory.form_edit', $this->_object->number)
-			: Core::_('Shop_Warehouse_Inventory.form_add');
-
-		$this->title($title);
+		$this->title($this->_object->id
+			? Core::_('Shop_Warehouse_Inventory.form_edit', $this->_object->number, FALSE)
+			: Core::_('Shop_Warehouse_Inventory.form_add')
+		);
 
 		return $this;
 	}
@@ -362,7 +385,81 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 		// Новые товары
 		$aAddShopItems = Core_Array::getPost('shop_item_id', array());
 
-		count($aAddShopItems) && $bNeedsRePost = TRUE;
+		//////////////////////////
+		//count($aAddShopItems) && $bNeedsRePost = TRUE;
+
+		if (count($aAddShopItems))
+		{
+			$bNeedsRePost = TRUE;
+
+			$script = "var jShopItemId = $(\"#{$windowId} input[name='shop_item_id\\[\\]']\"),
+						//jShopItemPrice = $(\"#{$windowId} input[name='shop_item_price\\[\\]']\"),
+						jShopItemQuantity = $(\"#{$windowId} input[name='shop_item_quantity\\[\\]']\"),
+						aMapShopItemId = {};";
+
+			$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
+
+			ob_start();
+
+			foreach ($aAddShopItems as $key => $shop_item_id)
+			{
+				$oShop_Item = Core_Entity::factory('Shop_Item')->getById($shop_item_id);
+
+				//ob_start();
+
+				//$script = "$(\"#{$windowId} input[name='shop_item_id\\[\\]']\").eq(0).remove();";
+
+				if (!is_null($oShop_Item))
+				{
+					$iCount = $this->_object->Shop_Warehouse_Inventory_Items->getCountByshop_item_id($shop_item_id);
+
+					if (!$iCount)
+					{
+						$oShop_Warehouse_Inventory_Item = Core_Entity::factory('Shop_Warehouse_Inventory_Item');
+						$oShop_Warehouse_Inventory_Item
+							->shop_warehouse_inventory_id($this->_object->id)
+							->shop_item_id($shop_item_id)
+							->count(
+								isset($_POST['shop_item_quantity'][$key]) ? $_POST['shop_item_quantity'][$key] : 1
+							)
+							->save();
+
+						$onclick = 'mainFormLocker.unlock(); res = confirm(\'' . Core::_('Shop_Warehouse_Inventory.delete_dialog') . '\'); if (res) { var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next); ' . $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'deleteShopItem', NULL, 0, $oShop_Item->id, "shop_warehouse_inventory_item_id={$oShop_Warehouse_Inventory_Item->id}") . ' } return res;';
+
+						$script .= "aMapShopItemId['{$shop_item_id}'] = {
+							id: {$oShop_Warehouse_Inventory_Item->id},
+							onClickValue: \"{$onclick}\"
+						};";
+
+						//$script .= "$(\"#{$windowId} input[name='shop_item_quantity\\[\\]']\").eq(0).attr('name', 'shop_item_quantity_{$oShop_Warehouse_Inventory_Item->id}');";
+						$script .= "jShopItemQuantity.eq({$key}).attr('name', 'shop_item_quantity_{$oShop_Warehouse_Inventory_Item->id}');";
+					}
+				}
+				else
+				{
+					//$script .= "$(\"#{$windowId} input[name='shop_item_quantity\\[\\]']\").eq(0).remove();";
+					$script .= "jShopItemQuantity.eq({$key}).remove();";
+				}
+			}
+
+			$script .= "jShopItemId.remove();
+
+			$.each(aMapShopItemId, function(index, element){
+
+				var jShopItemTr = $(\"#{$windowId} tr[data-item-id =\" + index + \"]\"),
+					jDeleteA = jShopItemTr.find('a.delete-associated-item');
+
+				jShopItemTr.attr('id', element.id);
+				jDeleteA.attr('onclick', element.onClickValue);
+			})";
+
+			Core_Html_Entity::factory('Script')
+					->value($script)
+					->execute();
+			$this->_Admin_Form_Controller->addMessage(ob_get_clean());
+		}
+
+		/* count($aAddShopItems) && $bNeedsRePost = TRUE;
 
 		foreach ($aAddShopItems as $key => $shop_item_id)
 		{
@@ -399,7 +496,7 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 				->value($script)
 				->execute();
 			$this->_Admin_Form_Controller->addMessage(ob_get_clean());
-		}
+		} */
 
 		// Было изменение склада
 		$iOldWarehouse != $this->_object->shop_warehouse_id

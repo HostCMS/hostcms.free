@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -38,7 +38,7 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 // Глобальный поиск
 $additionalParams = 'document_dir_id=' . $oDocumentDir->id;
 
-$sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
+$sGlobalSearch = Core_Array::getGet('globalSearch', '', 'trim');
 
 $oAdmin_Form_Controller->addEntity(
 	Admin_Form_Entity::factory('Code')
@@ -55,7 +55,7 @@ $oAdmin_Form_Controller->addEntity(
 		')
 );
 
-$sGlobalSearch = Core_DataBase::instance()->escapeLike($sGlobalSearch);
+$sGlobalSearch = str_replace(' ', '%', Core_DataBase::instance()->escapeLike($sGlobalSearch));
 
 $sStatusPath = '/admin/document/status/index.php';
 

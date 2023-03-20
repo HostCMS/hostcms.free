@@ -166,4 +166,5 @@ return array(
 	'change_user' => 'Change responsible user: "%s"',
 	'merge_success' => 'Measure merged successfully!',
 	'shop_order_status_deadline' => 'Status deadline',
+	'company_account_id' => 'Current account',
 );

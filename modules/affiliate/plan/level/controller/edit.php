@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Affiliate
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Affiliate_Plan_Level_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -82,12 +82,10 @@ class Affiliate_Plan_Level_Controller_Edit extends Admin_Form_Action_Controller_
 
 		$oMainRow2->add($oAffiliatePlanField);
 
-		// Заголовок формы
-		$title = $this->_object->id
+		$this->title($this->_object->id
 			? Core::_('Affiliate_Plan_Level.edit_affiliate_value')
-			: Core::_('Affiliate_Plan_Level.add_affiliate_value');
-
-		$this->title($title);
+			: Core::_('Affiliate_Plan_Level.add_affiliate_value')
+		);
 
 		$oAdmin_Form_Entity_Code = Admin_Form_Entity::factory('Code');
 		$oAdmin_Form_Entity_Code->html(

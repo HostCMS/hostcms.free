@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Digital_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -52,7 +52,7 @@ class Shop_Item_Digital_Controller_Edit extends Admin_Form_Action_Controller_Typ
 
 		$oImageField = Admin_Form_Entity::factory('File');
 
-		$sFilePath = $this->_object->getFullFilePath() != '' && is_file($this->_object->getFullFilePath())
+		$sFilePath = $this->_object->getFullFilePath() != '' && Core_File::isFile($this->_object->getFullFilePath())
 			? $this->_object->getFullFilePath()
 			: '';
 
@@ -79,11 +79,10 @@ class Shop_Item_Digital_Controller_Edit extends Admin_Form_Action_Controller_Typ
 
 		$oMainTab->move($this->getField('count')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 col-md-2')), $oMainRow3);
 
-		$title = $this->_object->id
-			? Core::_('Shop_Item_Digital.eitems_edit_title', $this->_object->name)
-			: Core::_('Shop_Item_Digital.eitems_add_title');
-
-		$this->title($title);
+		$this->title($this->_object->id
+			? Core::_('Shop_Item_Digital.eitems_edit_title', $this->_object->name, FALSE)
+			: Core::_('Shop_Item_Digital.eitems_add_title')
+		);
 
 		return $this;
 	}

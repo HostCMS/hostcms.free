@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Structure
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Structure_Menu_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -41,11 +41,10 @@ class Structure_Menu_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 			->move($this->getField('color')->set('data-control', 'hue')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-md-3')), $oMainRow2)
 			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-md-3')), $oMainRow2);
 
-		$title = is_null($this->_object->id)
+		$this->title(is_null($this->_object->id)
 			? Core::_('Structure_Menu.add_title')
-			: Core::_('Structure_Menu.edit_title', $this->_object->name);
-
-		$this->title($title);
+			: Core::_('Structure_Menu.edit_title', $this->_object->name, FALSE)
+		);
 
 		return $this;
 	}

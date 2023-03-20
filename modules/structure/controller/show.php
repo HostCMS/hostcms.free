@@ -47,7 +47,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Structure
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Structure_Controller_Show extends Core_Controller
 {
@@ -429,6 +429,25 @@ class Structure_Controller_Show extends Core_Controller
 		{
 			foreach ($this->_aStructures[$parent_id] as $oStructure)
 			{
+				// Shortcut
+				if ($oStructure->shortcut_id
+					&& $oStructure->shortcut_id != $oStructure->parent_id)
+				{
+					$oShortcut_Structure = $oStructure;
+					$oOriginal_Structure = $oStructure->Shortcut;
+
+					$oStructure = clone $oOriginal_Structure;
+
+					$oStructure
+						->id($oOriginal_Structure->id)
+						->parent_id($oShortcut_Structure->parent_id)
+						->shortcut_id($oShortcut_Structure->id);
+				}
+				else
+				{
+					$oOriginal_Structure = $oStructure;
+				}
+
 				$this->applyForbiddenTags($oStructure);
 
 				$parentObject->addEntity($oStructure);
@@ -436,8 +455,7 @@ class Structure_Controller_Show extends Core_Controller
 				$this->_aTags[] = 'structure_' . $oStructure->id;
 
 				// Properties for structure entity
-				$this->showProperties
-					&& $oStructure->showXmlProperties($this->showProperties, $this->sortPropertiesValues);
+				$oStructure->showXmlProperties($this->showProperties, $this->sortPropertiesValues);
 
 				if (is_null($this->level) || $level < $this->level)
 				{

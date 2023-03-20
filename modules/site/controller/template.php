@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Site
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Site_Controller_Template extends Core_Servant_Properties
 {
@@ -66,7 +66,7 @@ class Site_Controller_Template extends Core_Servant_Properties
 	{
 		$template_content_filepath = $this->templatePath . $this->templateSelectedFilename;
 
-		if (is_file($template_content_filepath) && ($sTemplateContentXml = Core_File::read($template_content_filepath)))
+		if (Core_File::isFile($template_content_filepath) && ($sTemplateContentXml = Core_File::read($template_content_filepath)))
 		{
 			return simplexml_load_string($sTemplateContentXml);
 		}
@@ -84,7 +84,7 @@ class Site_Controller_Template extends Core_Servant_Properties
 	{
 		$template_content_filepath = $this->templatePath . $this->templateSelectedFilename;
 
-		if (is_file($template_content_filepath) && ($sTemplateContentXml = Core_File::read($template_content_filepath)))
+		if (Core_File::isFile($template_content_filepath) && ($sTemplateContentXml = Core_File::read($template_content_filepath)))
 		{
 			if ($aTemplateContentXml = Core_XML::xml2array($sTemplateContentXml))
 			{
@@ -96,7 +96,7 @@ class Site_Controller_Template extends Core_Servant_Properties
 	}
 
 	/**
-	 * Get name of the driver 
+	 * Get name of the driver
 	 * @return string
 	 */
 	static public function getDriverName()
@@ -282,7 +282,7 @@ class Site_Controller_Template extends Core_Servant_Properties
 
 		$extension = '';
 
-		if (is_dir($dirname) && !is_link($dirname) && $handle = @opendir($dirname))
+		if (Core_File::isDir($dirname) && !Core_File::isLink($dirname) && $handle = @opendir($dirname))
 		{
 			// Шаблон сравнения
 			$str = "/^" . $filename . ".([[:alpha:]]*)$/";

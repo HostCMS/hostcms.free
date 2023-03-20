@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_I18n
 {
@@ -255,7 +255,7 @@ class Core_I18n
 
 		$path = Core_File::pathCorrection($path);
 
-		return is_file($path)
+		return Core_File::isFile($path)
 			? require($path)
 			: array();
 

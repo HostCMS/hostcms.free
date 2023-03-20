@@ -15,7 +15,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Item_Model extends Core_Entity
 {
@@ -197,7 +197,7 @@ class Shop_Order_Item_Model extends Core_Entity
 		{
 			$oShop_Item = Core_Entity::factory('Shop_Item')->find($this->shop_item_id);
 
-			if (!is_null($oShop_Item))
+			if (!is_null($oShop_Item->id))
 			{
 				if ($oShop_Item->shortcut_id)
 				{
@@ -246,7 +246,7 @@ class Shop_Order_Item_Model extends Core_Entity
 				->add(
 					$oCore_Html_Entity_Dropdownlist
 						->value($this->shop_order_item_status_id)
-						->options(Shop_Order_Item_Status_Controller_Edit::getDropdownlistOptions())
+						->options(Shop_Order_Item_Status_Controller_Edit::getDropdownlistOptions($this->Shop_Order->shop_id))
 						->onchange("$.adminLoad({path: '{$path}', additionalParams: '{$additionalParams}', action: 'apply', post: { 'hostcms[checked][0][{$this->id}]': 0, apply_check_0_{$this->id}_fv_{$oAdmin_Form_Field->id}: $(this).find('li[selected]').prop('id') }, windowId: '{$oAdmin_Form_Controller->getWindowId()}'});")
 						->data('change-context', 'true')
 					)

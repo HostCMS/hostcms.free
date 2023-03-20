@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Event
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Event_Note_Controller_Edit extends Crm_Note_Controller_Edit
 {
@@ -41,11 +41,10 @@ class Event_Note_Controller_Edit extends Crm_Note_Controller_Edit
 	{
 		parent::_prepareForm();
 
-		//$object = $this->_object;
-
 		$this->title($this->_object->id
 			? Core::_('Event_Note.edit_title')
-			: Core::_('Event_Note.add_title'));
+			: Core::_('Event_Note.add_title')
+		);
 
 		$oMainTab = $this->getTab('main');
 		$oMainTab

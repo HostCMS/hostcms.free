@@ -1,6 +1,8 @@
 <?php
 
 return array(
+	'model_name' => 'Товари зі знижками',
+	'title' => 'Товари знижки "%s"',
 	'delete_success' => 'Елемент видалено!',
 	'merge_success' => 'Елементи об\'єднані!',
 	'undelete_success' => 'Елемент відновлений!',

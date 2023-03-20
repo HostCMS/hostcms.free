@@ -40,7 +40,7 @@ if (!is_null(Core_Array::getRequest('add')))
 		$shop_item_id && $oShop_Cart_Controller
 			->clear()
 			->shop_item_id(intval($shop_item_id))
-			->quantity(floatval(Core_Array::get($count, $key, 1)))
+			->quantity(Core_Array::get($count, $key, 1, 'float'))
 			->add();
 	}
 }
@@ -88,7 +88,7 @@ if (!is_null(Core_Array::getRequest('oneStepCheckout')))
 
 		$oneStepXslName = Core_Array::get(Core_Page::instance()->libParams, 'oneStepXsl');
 
-		$iQuantity = floatval(Core_Array::getRequest('count', 1));
+		$iQuantity = Core_Array::getRequest('count', 1, 'float');
 
 		$Shop_Cart_Controller_Onestep
 			->xsl(
@@ -112,15 +112,17 @@ if (!is_null(Core_Array::getRequest('oneStepCheckout')))
 	// Список доставок
 	if (!is_null(Core_Array::getRequest('showDelivery')))
 	{
-		$shop_country_id = Core_Array::getRequest('shop_country_id', 0);
-		$shop_country_location_id = Core_Array::getRequest('shop_country_location_id', 0);
-		$shop_country_location_city_id = Core_Array::getRequest('shop_country_location_city_id', 0);
-		$shop_country_location_city_area_id = Core_Array::getRequest('shop_country_location_city_area_id', 0);
+		$shop_country_id = Core_Array::getRequest('shop_country_id', 0, 'int');
+		$shop_country_location_id = Core_Array::getRequest('shop_country_location_id', 0, 'int');
+		$shop_country_location_city_id = Core_Array::getRequest('shop_country_location_city_id', 0, 'int');
+		$shop_country_location_city_area_id = Core_Array::getRequest('shop_country_location_city_area_id', 0, 'int');
 
 		$oShop_Item = Core_Entity::factory('Shop_Item')->find($shop_item_id);
 		if (!is_null($oShop_Item->id))
 		{
-			$aTotal = $Shop_Cart_Controller_Onestep->quantity(Core_Array::getRequest('count', 1))->calculatePrice($oShop_Item);
+			$aTotal = $Shop_Cart_Controller_Onestep
+				->quantity(Core_Array::getRequest('count', 1, 'float'))
+				->calculatePrice($oShop_Item);
 
 			$aDelivery = $Shop_Cart_Controller_Onestep->showDelivery($shop_country_id, $shop_country_location_id, $shop_country_location_city_id, $shop_country_location_city_area_id, $aTotal['weight'], $aTotal['amount']);
 
@@ -133,7 +135,7 @@ if (!is_null(Core_Array::getRequest('oneStepCheckout')))
 	// Список платежных систем
 	if (!is_null(Core_Array::getRequest('showPaymentSystem')))
 	{
-		$shop_delivery_condition_id = strval(Core_Array::getGet('shop_delivery_condition_id', 0));
+		$shop_delivery_condition_id = Core_Array::getGet('shop_delivery_condition_id', 0, 'str');
 
 		$aPaymentSystems = array();
 		if (is_numeric($shop_delivery_condition_id))
@@ -147,9 +149,9 @@ if (!is_null(Core_Array::getRequest('oneStepCheckout')))
 	}
 }
 
-if (Core_Array::getGet('action') == 'repeat')
+if (Core_Array::getGet('action', '', 'str') === 'repeat')
 {
-	$guid = Core_Array::getGet('guid');
+	$guid = Core_Array::getGet('guid', '', 'str');
 	if (strlen($guid))
 	{
 		$oShop_Order = $oShop->Shop_Orders->getByGuid($guid);
@@ -175,7 +177,7 @@ if (!is_null(Core_Array::getGet('ajaxLoad')))
 {
 	if (!is_null(Core_Array::getGet('city_name')))
 	{
-		$shop_country_id = intval(Core_Array::getGet('shop_country_id'));
+		$shop_country_id = Core_Array::getGet('shop_country_id', 0, 'int');
 
 		$aArray = array('…');
 
@@ -186,7 +188,7 @@ if (!is_null(Core_Array::getGet('ajaxLoad')))
 			->where('shop_country_locations.active', '=', 1)
 			->where('shop_country_location_cities.active', '=', 1);
 
-		$oCurrent_Shop_Country_Location_City = $oCurrent_Shop_Country_Location_Cities->getByName(strval(Core_Array::getGet('city_name')));
+		$oCurrent_Shop_Country_Location_City = $oCurrent_Shop_Country_Location_Cities->getByName(Core_Array::getGet('city_name', '', 'str'));
 
 		if (!is_null($oCurrent_Shop_Country_Location_City))
 		{
@@ -218,7 +220,7 @@ if (!is_null(Core_Array::getGet('ajaxLoad')))
 			->queryBuilder()
 			->where('shop_country_id', '=', Core_Array::getGet('shop_country_id', 0, 'int'))
 			->where('shop_country_locations.active', '=', 1);
-			
+
 		$aObjects = $oShop_Country_Location->findAll(FALSE);
 	}
 	elseif (Core_Array::getGet('shop_country_location_id'))
@@ -228,7 +230,7 @@ if (!is_null(Core_Array::getGet('ajaxLoad')))
 			->queryBuilder()
 			->where('shop_country_location_id', '=', Core_Array::getGet('shop_country_location_id', 0, 'int'))
 			->where('shop_country_location_cities.active', '=', 1);
-			
+
 		$aObjects = $oShop_Country_Location_City->findAll(FALSE);
 	}
 	elseif (Core_Array::getGet('shop_country_location_city_id'))
@@ -238,7 +240,7 @@ if (!is_null(Core_Array::getGet('ajaxLoad')))
 			->queryBuilder()
 			->where('shop_country_location_city_id', '=', Core_Array::getGet('shop_country_location_city_id', 0, 'int'))
 			->where('shop_country_location_city_areas.active', '=', 1);
-			
+
 		$aObjects = $oShop_Country_Location_City_Area->findAll(FALSE);
 	}
 
@@ -255,7 +257,7 @@ if (!is_null(Core_Array::getGet('ajaxLoad')))
 // Удаление товара из корзины
 if (Core_Array::getGet('delete'))
 {
-	$shop_item_id = intval(Core_Array::getGet('delete'));
+	$shop_item_id = Core_Array::getGet('delete', 0, 'int');
 
 	if ($shop_item_id)
 	{
@@ -289,14 +291,13 @@ if (Core_Array::getGet('delete'))
 
 if (Core_Array::getPost('change_postpone'))
 {
-	$shop_item_id = intval(Core_Array::getPost('shop_item_id'));
-	$postpone = intval(Core_Array::getPost('postpone'));
+	$shop_item_id = Core_Array::getPost('shop_item_id', 0, 'int');
 
 	if ($shop_item_id)
 	{
 		$oShop_Cart_Controller
 			->shop_item_id($shop_item_id)
-			->postpone($postpone ? 0 : 1)
+			->postpone(Core_Array::getPost('postpone', 0, 'int') ? 0 : 1)
 			->update();
 
 		Core::showJson(array('status' => 'success'));
@@ -316,7 +317,7 @@ if (!is_null(Core_Array::getRequest('bonuses')))
 	Core_Session::start();
 	if (!is_null(Core_Array::getRequest('apply_bonuses')))
 	{
-		$_SESSION['hostcmsOrder']['bonuses'] = trim(strval(Core_Array::getRequest('bonuses')));
+		$_SESSION['hostcmsOrder']['bonuses'] = Core_Array::getRequest('bonuses', '', 'trim');
 	}
 	elseif (isset($_SESSION['hostcmsOrder']['bonuses']))
 	{
@@ -349,7 +350,7 @@ if (Core_Array::getPost('recount') || Core_Array::getPost('step') == 1)
 				->quantity($quantity)
 				->postpone(is_null(Core_Array::getPost('postpone_' . $oShop_Cart->shop_item_id)) ? 0 : 1)
 				->shop_warehouse_id(
-					Core_Array::getPost('warehouse_' . $oShop_Cart->shop_item_id, !is_null($oShop_Warehouse) ? $oShop_Warehouse->id : 0)
+					Core_Array::getPost('warehouse_' . $oShop_Cart->shop_item_id, !is_null($oShop_Warehouse) ? $oShop_Warehouse->id : 0, 'int')
 				)
 				->update();
 		}

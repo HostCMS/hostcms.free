@@ -156,7 +156,7 @@ elseif ($Forum_Controller_Show->category && !$Forum_Controller_Show->topic)
 			{
 				$status = -1;
 			}
-			elseif (is_null($oSiteuser) && $oForum_Category->use_captcha && !Core_Captcha::valid(Core_Array::getPost('captcha_id'), Core_Array::getPost('captcha')))
+			elseif (is_null($oSiteuser) && $oForum_Category->use_captcha && !Core_Captcha::valid(Core_Array::getPost('captcha_id', '', 'str'), Core_Array::getPost('captcha', '', 'str')))
 			{
 				$status = -3;
 			}
@@ -601,7 +601,7 @@ elseif ($Forum_Controller_Show->topic)
 	}
 
 	// Подписка на тему
-	if (Core_Array::getGet('action') == 'topic_subscribe' && !is_null($oSiteuser)
+	if (Core_Array::getGet('action', '', 'str') === 'topic_subscribe' && !is_null($oSiteuser)
 		&& ($oForum_Topic = Core_Entity::factory('Forum_Topic', $Forum_Controller_Show->topic))
 		&& !$oForum_Topic->isSubscribed($oSiteuser))
 	{
@@ -611,7 +611,7 @@ elseif ($Forum_Controller_Show->topic)
 	}
 
 	// Удаление подписки
-	if (Core_Array::getGet('action') == 'topic_unsubscribe' && !is_null($oSiteuser)
+	if (Core_Array::getGet('action', '', 'str') == 'topic_unsubscribe' && !is_null($oSiteuser)
 		&& ($oForum_Topic = Core_Entity::factory('Forum_Topic', $Forum_Controller_Show->topic))
 		&& $oForum_Topic->isSubscribed($oSiteuser))
 	{
@@ -650,7 +650,7 @@ elseif ($Forum_Controller_Show->topic)
 			{
 				$status = -1;
 			}
-			elseif (is_null($oSiteuser) && $oForum_Category->use_captcha && !Core_Captcha::valid(Core_Array::getPost('captcha_id'), Core_Array::getPost('captcha')))
+			elseif (is_null($oSiteuser) && $oForum_Category->use_captcha && !Core_Captcha::valid(Core_Array::getPost('captcha_id', '', 'str'), Core_Array::getPost('captcha', '', 'str')))
 			{
 				$status = -3;
 			}

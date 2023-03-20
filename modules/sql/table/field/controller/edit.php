@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Sql
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Sql_Table_Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -265,7 +265,7 @@ class Sql_Table_Field_Controller_Edit extends Admin_Form_Action_Controller_Type_
 			);
 
 		$this->title($this->_object->Field != ''
-			? Core::_('Sql_Table_Field.edit_title', $this->_object->Field)
+			? Core::_('Sql_Table_Field.edit_title', $this->_object->Field, FALSE)
 			: Core::_('Sql_Table_Field.add_title')
 		);
 

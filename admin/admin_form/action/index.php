@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -36,16 +36,18 @@ $oAdmin_Form_Controller
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
+// array('path' => $oAdmin_Form_Controller->getPath(), 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => 0, 'additionalParams' => $additionalParams)
+
 // Элементы меню
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Admin_Form_Action.show_form_action_menu_add_new_top'))
 		->icon('fa fa-plus')
 		->href(
-			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
+			$oAdmin_Form_Controller->getAdminActionLoadHref(array('path' => $oAdmin_Form_Controller->getPath(), 'action' => 'edit', 'datasetKey' => 0, 'datasetValue' => 0))
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
+			$oAdmin_Form_Controller->getAdminActionLoadAjax(array('path' => $oAdmin_Form_Controller->getPath(), 'action' => 'edit', 'datasetKey' => 0, 'datasetValue' => 0))
 		)
 );
 
@@ -61,19 +63,19 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Admin_Form.show_form_fields_menu_admin_forms'))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref($sAdminFormPath, NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadHref(array('path' => $sAdminFormPath))
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax($sAdminFormPath, NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadAjax(array('path' => $sAdminFormPath))
 	)
 )->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($form_name)
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, "admin_form_id={$admin_forms_id}")
+			$oAdmin_Form_Controller->getAdminLoadHref(array('path' => $oAdmin_Form_Controller->getPath(), 'additionalParams' => "admin_form_id={$admin_forms_id}"))
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, "admin_form_id={$admin_forms_id}")
+			$oAdmin_Form_Controller->getAdminLoadAjax(array('path' => $oAdmin_Form_Controller->getPath(), 'additionalParams' => "admin_form_id={$admin_forms_id}"))
 	)
 );
 

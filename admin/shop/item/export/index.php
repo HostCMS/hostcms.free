@@ -5,7 +5,7 @@
 * @package HostCMS
 * @version 7.x
 * @author Hostmake LLC
-* @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -70,7 +70,7 @@ if (Core_Array::getPost('action') == 'export')
 					ob_get_clean();
 
 					$aSeparator = array(",", ";");
-					$iSeparator = Core_Array::getPost('export_price_separator', 0);
+					$iSeparator = Core_Array::getPost('export_price_separator', 1, 'int');
 					$oShop_Item_Export_Csv_Controller = new Shop_Item_Export_Csv_Controller(
 						Core_Array::getPost('shop_id', 0)
 					);
@@ -79,7 +79,7 @@ if (Core_Array::getPost('action') == 'export')
 						->exportGroupExternalProperties(!is_null(Core_Array::getPost('export_external_properties_allow_groups')))
 						->exportItemModifications(!is_null(Core_Array::getPost('export_modifications_allow')))
 						->exportItemShortcuts(!is_null(Core_Array::getPost('export_shortcuts_allow')))
-						->separator($iSeparator > 1 ? "" : $aSeparator[$iSeparator])
+						->separator($iSeparator > 1 ? '' : $aSeparator[$iSeparator])
 						->encoding(Core_Array::getPost('import_price_encoding', "UTF-8"))
 						->parentGroup($shop_groups_parent_id)
 						->producer(Core_Array::getPost('shop_producer_id', 0))
@@ -103,13 +103,13 @@ if (Core_Array::getPost('action') == 'export')
 					ob_get_clean();
 
 					$aSeparator = array(",", ";");
-					$iSeparator = Core_Array::getPost('export_price_separator', 0);
+					$iSeparator = Core_Array::getPost('export_price_separator', 1, 'int');
 					$oShop_Item_Export_Csv_Controller = new Shop_Item_Export_Csv_Controller(
 						Core_Array::getPost('shop_id', 0), FALSE, FALSE, FALSE, TRUE
 					);
 					$oShop_Item_Export_Csv_Controller
 						->exportOrders(TRUE)
-						->separator($iSeparator > 1 ? "" : $aSeparator[$iSeparator])
+						->separator($iSeparator > 1 ? '' : $aSeparator[$iSeparator])
 						->startOrderDate(Core_Array::getPost('order_begin_date', '01.01.1970'))
 						->endOrderDate(Core_Array::getPost('order_end_date', '01.01.1970'))
 						->encoding(Core_Array::getPost('import_price_encoding', "UTF-8"))
@@ -311,6 +311,7 @@ $oMainTab->add(
 				'fa-bolt'
 			))
 			->name('export_price_separator')
+			->value(1)
 			->divAttr(array('class' => 'form-group col-xs-12 hidden-2 hidden-3'))
 			->caption(Core::_('Shop_Item.import_price_list_separator'))))
 	->add(

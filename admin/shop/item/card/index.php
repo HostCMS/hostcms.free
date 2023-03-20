@@ -5,7 +5,7 @@
 * @package HostCMS
 * @version 7.x
 * @author Hostmake LLC
-* @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -30,7 +30,7 @@ $aOptions = array();
 $oModule = Core_Entity::factory('Module')->getByPath($sModule);
 if (!is_null($oModule) && Core::moduleIsActive('printlayout'))
 {
-	$aPrintlayouts = Core_Entity::factory('Printlayout')->getAvailable($oModule->id, 15);
+	$aPrintlayouts = Core_Entity::factory('Printlayout')->getAvailable($oModule->id, 60);
 
 	foreach($aPrintlayouts as $oPrintlayout)
 	{

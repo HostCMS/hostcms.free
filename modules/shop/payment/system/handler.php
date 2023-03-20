@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Shop_Payment_System_Handler
 {
@@ -28,7 +28,7 @@ abstract class Shop_Payment_System_Handler
 	{
 		$path = $oShop_Payment_System_Model->getPaymentSystemFilePath();
 
-		if (is_file($path))
+		if (Core_File::isFile($path))
 		{
 			require_once($path);
 
@@ -389,6 +389,16 @@ abstract class Shop_Payment_System_Handler
 		{
 			$this->_shopOrder->company_id = intval($this->_orderParams['company_id']);
 		}
+		elseif ($oShop->shop_company_id)
+		{
+			$oCompany = $oShop->Company;
+			$oCompany_Account = $oCompany->Company_Accounts->getDefault();
+
+			$this->_shopOrder->company_id = $oCompany->id;
+			$this->_shopOrder->company_account_id = !is_null($oCompany_Account)
+				? $oCompany_Account->id
+				: 0;
+		}
 
 		if (Core::moduleIsActive('siteuser'))
 		{
@@ -428,7 +438,7 @@ abstract class Shop_Payment_System_Handler
 		{
 			foreach ($aOrderParamProperties as $aTmp)
 			{
-				if (count($aTmp) == 2)
+				if (is_array($aTmp) && count($aTmp) == 2)
 				{
 					$iProperty_id = $aTmp[0];
 					$value = $aTmp[1];
@@ -537,6 +547,7 @@ abstract class Shop_Payment_System_Handler
 	/**
 	 * Создание нового заказа на основе данных, указанных в orderParams
 	 * @hostcms-event Shop_Payment_System_Handler.onBeforeProcessOrder
+	 * @hostcms-event Shop_Payment_System_Handler.onAfterItemGetPrices
 	 * @hostcms-event Shop_Payment_System_Handler.onAfterProcessOrder
 	 * @hostcms-event Shop_Payment_System_Handler.onAfterAddShopOrderItem
 	 */
@@ -594,6 +605,11 @@ abstract class Shop_Payment_System_Handler
 					$oShop_Item_Controller->count($oShop_Cart->quantity);
 
 					$aPrices = $oShop_Item_Controller->getPrices($oShop_Item, $this->_round);
+
+					Core_Event::notify('Shop_Payment_System_Handler.onAfterItemGetPrices', $this, array($aPrices, $oShop_Cart));
+
+					$eventResult = Core_Event::getLastReturn();
+					is_array($eventResult) && $aPrices = $eventResult;
 
 					$this->_quantity += $oShop_Cart->quantity;
 
@@ -756,6 +772,8 @@ abstract class Shop_Payment_System_Handler
 			}
 
 			// Ответственные сотрудники
+			!in_array($this->_shopOrder->user_id, $aUserIDs) && $aUserIDs[] = $this->_shopOrder->user_id;
+
 			if (Core::moduleIsActive('siteuser') && $this->_shopOrder->siteuser_id)
 			{
 				$aSiteuser_Users = $this->_shopOrder->Siteuser->Siteuser_Users->findAll(FALSE);
@@ -1231,7 +1249,9 @@ abstract class Shop_Payment_System_Handler
 
 		$sXml = $this->_prepareXml()->getXml();
 
-		//echo "<pre>" . htmlspecialchars($sXml) . "</pre>";
+		// debug xml
+		// echo "<pre>" . htmlspecialchars($sXml) . "</pre>";
+
 		$return = Xsl_Processor::instance()
 			->xml($sXml)
 			->xsl($this->_xsl)
@@ -1540,7 +1560,7 @@ abstract class Shop_Payment_System_Handler
 				{
 					$sPath = $oProperty_Value->getLargeFilePath();
 
-					if (is_file($sPath))
+					if (Core_File::isFile($sPath))
 					{
 						$oCore_Mail->attach(array(
 							'filepath' => $sPath,
@@ -1550,8 +1570,8 @@ abstract class Shop_Payment_System_Handler
 				}
 			}
 
-			$aEmails = array_map('trim', $this->getAdminEmails());
-			foreach ($aEmails as $key => $sEmail)
+			$aAdminEmails = array_map('trim', $this->getAdminEmails());
+			foreach ($aAdminEmails as $key => $sEmail)
 			{
 				// Delay 0.350s for second mail and others
 				$key > 0 && usleep(350000);
@@ -1572,13 +1592,17 @@ abstract class Shop_Payment_System_Handler
 					$aDirectory_Emails = $oUser->Directory_Emails->findAll(FALSE);
 					foreach ($aDirectory_Emails as $oDirectory_Email)
 					{
-						// Delay 0.350s for second mail and others
-						$key > 0 && usleep(350000);
-
 						$sEmail = trim($oDirectory_Email->value);
-						if (Core_Valid::email($sEmail))
+
+						if (!in_array($sEmail, $aAdminEmails))
 						{
-							$oCore_Mail->to($sEmail)->send();
+							// Delay 0.350s for second mail and others
+							$key > 0 && usleep(350000);
+
+							if (Core_Valid::email($sEmail))
+							{
+								$oCore_Mail->to($sEmail)->send();
+							}
 						}
 					}
 				}
@@ -1610,7 +1634,7 @@ abstract class Shop_Payment_System_Handler
 			{
 				$oShop_Item_Digital = $oShop_Order_Item_Digital->Shop_Item_Digital;
 
-				if ($oShop_Item_Digital->filename != '' && is_file($oShop_Item_Digital->getFullFilePath()))
+				if ($oShop_Item_Digital->filename != '' && Core_File::isFile($oShop_Item_Digital->getFullFilePath()))
 				{
 					$oCore_Mail->attach(array(
 						'filepath' => $oShop_Item_Digital->getFullFilePath(),

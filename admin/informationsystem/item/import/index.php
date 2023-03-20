@@ -5,7 +5,7 @@
 * @package HostCMS
 * @version 7.x
 * @author Hostmake LLC
-* @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -126,42 +126,41 @@ Admin_Form_Entity::factory('Breadcrumb')
 
 // Формируем массивы данных
 $aLangConstNames = array(
-	Core::_('Informationsystem_Item_Import.!download'),
-	Core::_('Informationsystem_Item_Import.group_id'),
-	Core::_('Informationsystem_Item_Import.group_name'),
-	Core::_('Informationsystem_Item_Import.group_path'),
-	Core::_('Informationsystem_Item_Import.group_sorting'),
-	Core::_('Informationsystem_Item_Import.group_description'),
-	Core::_('Informationsystem_Item_Import.group_seo_title'),
-	Core::_('Informationsystem_Item_Import.group_seo_description'),
-	Core::_('Informationsystem_Item_Import.group_seo_keywords'),
-	Core::_('Informationsystem_Item_Import.group_image_large'),
-	Core::_('Informationsystem_Item_Import.group_image_small'),
-	Core::_('Informationsystem_Item_Import.group_guid'),
-	Core::_('Informationsystem_Item_Import.parent_group_guid'),
+	Core::_('Informationsystem_Exchange.!download'),
+	Core::_('Informationsystem_Exchange.group_id'),
+	Core::_('Informationsystem_Exchange.group_name'),
+	Core::_('Informationsystem_Exchange.group_path'),
+	Core::_('Informationsystem_Exchange.group_sorting'),
+	Core::_('Informationsystem_Exchange.group_description'),
+	Core::_('Informationsystem_Exchange.group_seo_title'),
+	Core::_('Informationsystem_Exchange.group_seo_description'),
+	Core::_('Informationsystem_Exchange.group_seo_keywords'),
+	Core::_('Informationsystem_Exchange.group_image_large'),
+	Core::_('Informationsystem_Exchange.group_image_small'),
+	Core::_('Informationsystem_Exchange.group_active'),
+	Core::_('Informationsystem_Exchange.group_guid'),
+	Core::_('Informationsystem_Exchange.group_parent_guid'),
 
-	Core::_('Informationsystem_Item_Import.item_id'),
-	Core::_('Informationsystem_Item_Import.item_name'),
-	Core::_('Informationsystem_Item_Import.item_datetime'),
-	Core::_('Informationsystem_Item_Import.item_description'),
-	Core::_('Informationsystem_Item_Import.item_text'),
-	Core::_('Informationsystem_Item_Import.item_image_large'),
-	Core::_('Informationsystem_Item_Import.item_image_small'),
-	Core::_('Informationsystem_Item_Import.item_tags'),
-	Core::_('Informationsystem_Item_Import.item_active'),
-	Core::_('Informationsystem_Item_Import.item_sorting'),
-	Core::_('Informationsystem_Item_Import.item_path'),
-	Core::_('Informationsystem_Item_Import.item_seo_title'),
-	Core::_('Informationsystem_Item_Import.item_seo_description'),
-	Core::_('Informationsystem_Item_Import.item_seo_keywords'),
-	Core::_('Informationsystem_Item_Import.item_indexing'),
-	Core::_('Informationsystem_Item_Import.item_end_datetime'),
-	Core::_('Informationsystem_Item_Import.item_start_datetime'),
-	Core::_('Informationsystem_Item_Import.item_additional_group'),
-	Core::_('Informationsystem_Item_Import.item_guid'),
-
-	Core::_('Informationsystem_Item_Import.group_active'),
-	Core::_('Informationsystem_Item_Import.siteuser_id'),
+	Core::_('Informationsystem_Exchange.item_id'),
+	Core::_('Informationsystem_Exchange.item_name'),
+	Core::_('Informationsystem_Exchange.item_datetime'),
+	Core::_('Informationsystem_Exchange.item_description'),
+	Core::_('Informationsystem_Exchange.item_text'),
+	Core::_('Informationsystem_Exchange.item_image_large'),
+	Core::_('Informationsystem_Exchange.item_image_small'),
+	Core::_('Informationsystem_Exchange.item_tags'),
+	Core::_('Informationsystem_Exchange.item_active'),
+	Core::_('Informationsystem_Exchange.item_sorting'),
+	Core::_('Informationsystem_Exchange.item_path'),
+	Core::_('Informationsystem_Exchange.item_seo_title'),
+	Core::_('Informationsystem_Exchange.item_seo_description'),
+	Core::_('Informationsystem_Exchange.item_seo_keywords'),
+	Core::_('Informationsystem_Exchange.item_indexing'),
+	Core::_('Informationsystem_Exchange.item_end_datetime'),
+	Core::_('Informationsystem_Exchange.item_start_datetime'),
+	Core::_('Informationsystem_Exchange.item_additional_group'),
+	Core::_('Informationsystem_Exchange.item_guid'),
+	Core::_('Informationsystem_Exchange.item_siteuser_id'),
 );
 
 $aColors = array(
@@ -178,6 +177,7 @@ $aColors = array(
 	'#E7A1B0',
 	'#E7A1B0',
 	'#E7A1B0',
+	'#E7A1B0',
 
 	'#92C7C7',
 	'#92C7C7',
@@ -198,9 +198,7 @@ $aColors = array(
 	'#92C7C7',
 	'#92C7C7',
 	'#92C7C7',
-
-	'#E18B6B',
-	'#E18B6B',
+	'#92C7C7',
 );
 
 $aEntities = array(
@@ -215,6 +213,7 @@ $aEntities = array(
 	'informationsystem_groups_seo_keywords',
 	'informationsystem_groups_image',
 	'informationsystem_groups_small_image',
+	'informationsystem_groups_activity',
 	'informationsystem_groups_guid',
 	'informationsystem_groups_parent_guid',
 
@@ -237,8 +236,6 @@ $aEntities = array(
 	'informationsystem_items_putoff_date',
 	'additional_group',
 	'informationsystem_items_guid',
-
-	'informationsystem_groups_activity',
 	'site_users_id',
 );
 
@@ -247,7 +244,7 @@ foreach ($aGroupProperties as $oGroupProperty)
 {
 	$oPropertyDir = $oGroupProperty->Property_Dir;
 
-	$aLangConstNames[] = $oGroupProperty->name . "&nbsp;[" . ($oPropertyDir->id ? $oPropertyDir->name : Core::_('Informationsystem_Item.root_folder')) . "]";
+	$aLangConstNames[] = $oGroupProperty->name . " [" . ($oPropertyDir->id ? $oPropertyDir->name : Core::_('Informationsystem_Item.root_folder')) . "]";
 	$aColors[] = "#E6E6FA";
 	$aEntities[] = 'prop_group-' . $oGroupProperty->id;
 
@@ -310,7 +307,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 			? $_FILES['csv_file']['tmp_name']
 			: CMS_FOLDER . Core_Array::getPost('alternative_file_pointer');
 
-		if (is_file($sFileName) && is_readable($sFileName))
+		if (Core_File::isFile($sFileName) && is_readable($sFileName))
 		{
 			Core_Event::notify('Informationsystem_Item_Import.oBeforeImportCSV', NULL, array($sFileName));
 

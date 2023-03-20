@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Sql
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Sql_Controller
 {
@@ -123,8 +123,13 @@ class Sql_Controller
 					$query = '';
 				}
 			}
-
 		} while ($position < $len);
+
+		// Last line
+		if ($query !== '')
+		{
+			$this->_executeQuery($query) && $iQuery++;
+		}
 
 		return $iQuery;
 	}

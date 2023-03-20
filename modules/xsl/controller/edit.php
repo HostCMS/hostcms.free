@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Xsl
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Xsl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -37,7 +37,7 @@ class Xsl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			case 'xsl':
 				$title = $this->_object->id
-					? Core::_('Xsl.edit_title', $this->_object->name)
+					? Core::_('Xsl.edit_title', $this->_object->name, FALSE)
 					: Core::_('Xsl.add_title');
 
 				if (!$this->_object->id)
@@ -161,7 +161,7 @@ class Xsl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			case 'xsl_dir':
 			default:
 				$title = $this->_object->id
-					? Core::_('Xsl_Dir.edit_title', $this->_object->name)
+					? Core::_('Xsl_Dir.edit_title', $this->_object->name, FALSE)
 					: Core::_('Xsl_Dir.add_title');
 
 				// Значения директории для добавляемого объекта

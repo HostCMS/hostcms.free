@@ -1,0 +1,25 @@
+<?php
+
+return array(
+	'model_name' => 'Closure period',
+	'title' => 'Closure period',
+	'menu' => 'Regulations',
+	'add_title' => 'Adding closure period',
+	'edit_title' => 'Editing closure period',
+	'edit_success' => 'Closure period information has been changed!',
+	'markDeleted_success' => 'Closure period deleted successfully!',
+	'apply_success' => 'Information changed!',
+	'delete_success' => 'Item deleted!',
+	'undelete_success' => 'Item restored!',
+	'id' => 'ID',
+	'number' => 'Number',
+	'datetime' => 'Date',
+	'company_id' => 'Company',
+	'posted' => 'Posted',
+	'сlosure_cost_accounting' => 'Closing cost accounts',
+	'financial_result' => 'Financial result definition',
+	'balance_reformation' => 'Balance reformation',
+	'description' => 'Description',
+	'post_success' => 'Document posted successfully!',
+	'unpost_success' => 'Document unposted successfully!',
+);

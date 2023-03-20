@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Radiogroup extends Admin_Form_Entity_Input
 {
@@ -63,7 +63,7 @@ class Skin_Default_Admin_Form_Entity_Radiogroup extends Admin_Form_Entity_Input
 		{
 			foreach ($this->divAttr as $attrName => $attrValue)
 			{
-				$aDivAttr[] = "{$attrName}=\"" . htmlspecialchars($attrValue) . "\"";
+				$aDivAttr[] = "{$attrName}=\"" . htmlspecialchars((string) $attrValue) . "\"";
 			}
 		}
 
@@ -73,7 +73,7 @@ class Skin_Default_Admin_Form_Entity_Radiogroup extends Admin_Form_Entity_Input
 		{
 			foreach ($this->labelAttr as $attrName => $attrValue)
 			{
-				$aLabelAttr[] = "{$attrName}=\"" . htmlspecialchars($attrValue) . "\"";
+				$aLabelAttr[] = "{$attrName}=\"" . htmlspecialchars((string) $attrValue) . "\"";
 			}
 		}
 
@@ -99,7 +99,7 @@ class Skin_Default_Admin_Form_Entity_Radiogroup extends Admin_Form_Entity_Input
 			$tmpAttr[] = 'value="' . htmlspecialchars($key) . '"';
 
 			?><input <?php echo implode(' ', $tmpAttr) ?>/><?php
-			?><span class="caption" style="display: inline"><label for="<?php echo htmlspecialchars($this->id . $key)?>"<?php echo implode(' ', $aLabelAttr)?>><?php echo htmlspecialchars($value)?></label></span><?php
+			?><span class="caption" style="display: inline"><label for="<?php echo htmlspecialchars($this->id . $key)?>"<?php echo implode(' ', $aLabelAttr)?>><?php echo htmlspecialchars((string) $value)?></label></span><?php
 
 			echo $this->separator;
 		}

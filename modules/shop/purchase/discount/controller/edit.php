@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -187,7 +187,7 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 				);
 
 				$title = $this->_object->id
-					? Core::_('Shop_Purchase_Discount.edit_order_discount_form_title', $this->_object->name)
+					? Core::_('Shop_Purchase_Discount.edit_order_discount_form_title', $this->_object->name, FALSE)
 					: Core::_('Shop_Purchase_Discount.add_order_discount_form_title');
 			break;
 			case 'shop_purchase_discount_dir':
@@ -216,7 +216,7 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 				$oMainTab->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow3);
 
 				$title = $this->_object->id
-					? Core::_('Shop_Purchase_Discount_Dir.edit_title', $this->_object->name)
+					? Core::_('Shop_Purchase_Discount_Dir.edit_title', $this->_object->name, FALSE)
 					: Core::_('Shop_Purchase_Discount_Dir.add_title');
 			break;
 		}

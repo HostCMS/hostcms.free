@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Delivery_Model extends Core_Entity
 {
@@ -130,7 +130,7 @@ class Shop_Delivery_Model extends Core_Entity
 	 */
 	public function createDir()
 	{
-		if (!is_dir($this->getPath()))
+		if (!Core_File::isDir($this->getPath()))
 		{
 			try
 			{
@@ -149,7 +149,7 @@ class Shop_Delivery_Model extends Core_Entity
 	{
 		$path = $this->getDeliveryFilePath();
 
-		if (is_file($path))
+		if (Core_File::isFile($path))
 		{
 			$aSizes = Core_Image::instance()->getImageSize($path);
 			if ($aSizes)
@@ -160,6 +160,29 @@ class Shop_Delivery_Model extends Core_Entity
 			}
 		}
 
+		return $this;
+	}
+
+	/**
+	 * Specify large image for group
+	 * @param string $fileSourcePath source file
+	 * @param string $fileName target file name
+	 * @return self
+	 */
+	public function saveImageFile($fileSourcePath, $fileName)
+	{
+		$fileName = Core_File::filenameCorrection($fileName);
+
+		// Определяем расширение файла
+		$ext = Core_File::getExtension($fileName);
+
+		$image = 'shop_type_of_delivery_image' . $this->id . '.' . ($ext == '' ? '' : $ext);
+
+		$this->createDir();
+
+		$this->image = $image;
+		$this->save();
+		Core_File::upload($fileSourcePath, $this->getPath() . $image);
 		return $this;
 	}
 
@@ -177,16 +200,18 @@ class Shop_Delivery_Model extends Core_Entity
 
 		try
 		{
-			if (is_file($this->getDeliveryFilePath()))
+			if (Core_File::isFile($this->getDeliveryFilePath()))
 			{
-				Core_File::copy($this->getDeliveryFilePath(), $newObject->getDeliveryFilePath());
+				// Core_File::copy($this->getDeliveryFilePath(), $newObject->getDeliveryFilePath());
+
+				$newObject->saveImageFile($this->getDeliveryFilePath(), $this->image);
 			}
 		}
 		catch (Exception $e) {}
 
 		try
 		{
-			if (is_file($this->getHandlerFilePath()))
+			if (Core_File::isFile($this->getHandlerFilePath()))
 			{
 				$content = str_replace("Shop_Delivery_Handler" . $this->id, "Shop_Delivery_Handler" . $newObject->id, $this->loadHandlerFile());
 
@@ -261,7 +286,7 @@ class Shop_Delivery_Model extends Core_Entity
 		$this->deleteImage();
 
 		// Удаляем обработчик
-		if (is_file($this->getHandlerFilePath()))
+		if (Core_File::isFile($this->getHandlerFilePath()))
 		{
 			try
 			{
@@ -292,7 +317,7 @@ class Shop_Delivery_Model extends Core_Entity
 	public function loadHandlerFile()
 	{
 		$path = $this->getHandlerFilePath();
-		return is_file($path) ? Core_File::read($path) : NULL;
+		return Core_File::isFile($path) ? Core_File::read($path) : NULL;
 	}
 
 	/**

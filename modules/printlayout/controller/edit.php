@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Printlayout
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Printlayout_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -35,7 +35,7 @@ class Printlayout_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				}
 
 				$title = $this->_object->id
-					? Core::_('Printlayout.edit_title', $this->_object->name)
+					? Core::_('Printlayout.edit_title', $this->_object->name, FALSE)
 					: Core::_('Printlayout.add_title');
 
 				$oMainTab = $this->getTab('main');
@@ -77,7 +77,7 @@ class Printlayout_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$windowId = $this->_Admin_Form_Controller->getWindowId();
 
-				$oFilePath = $this->_object->file_name != '' && is_file($this->_object->getFilePath())
+				$oFilePath = $this->_object->file_name != '' && Core_File::isFile($this->_object->getFilePath())
 					? '/admin/printlayout/index.php?downloadFile=' . $this->_object->id
 					: '';
 
@@ -120,7 +120,7 @@ class Printlayout_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				}
 
 				$title = $this->_object->id
-					? Core::_('Printlayout_Dir.edit_title', $this->_object->name)
+					? Core::_('Printlayout_Dir.edit_title', $this->_object->name, FALSE)
 					: Core::_('Printlayout_Dir.add_title');
 
 				$oMainTab = $this->getTab('main');
@@ -212,7 +212,7 @@ class Printlayout_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			if (Core_File::isValidExtension($aFileData['name'], array('DOCX', 'XLSX')))
 			{
 				// Удаление файла
-				if ($this->_object->file_name != '' && is_file($this->_object->getFilePath()))
+				if ($this->_object->file_name != '' && Core_File::isFile($this->_object->getFilePath()))
 				{
 					$this->_object->deleteFile();
 				}

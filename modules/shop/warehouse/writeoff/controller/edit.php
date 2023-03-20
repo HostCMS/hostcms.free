@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -62,7 +62,7 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 
 			if (!is_null($oModule))
 			{
-				$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, 2, 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
+				$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, $this->_object->getEntityType(), 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
 			}
 
 			$printlayoutsButton .= '
@@ -160,14 +160,14 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 
 		$oRecalcPriceLink = Admin_Form_Entity::factory('Link');
 		$oRecalcPriceLink
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 margin-top-21'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 margin-top-21 recalc-button'))
 			->a
-				->class('btn btn-default')
-				->onclick('$.recalcPrice()')
+				->class('btn btn-labeled btn-default')
+				->onclick("$.recalcPrice('{$windowId}')")
 				->value(Core::_('Shop_Warehouse_Writeoff.recalc_price'));
 		$oRecalcPriceLink
 			->icon
-				->class('fa fa-recycle');
+				->class('btn-label fa fa-recycle');
 
 		$oMainRow3->add($oRecalcPriceLink);
 
@@ -277,19 +277,23 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 		);
 
 		$oCore_Html_Entity_Script = Core_Html_Entity::factory('Script')
-			->value("$('#{$windowId} .add-shop-item').autocompleteShopItem({ shop_id: '{$oShop->id}', price_mode: 'item', shop_currency_id: 0 }, function(event, ui) {
-				var newRow = $('<tr data-item-id=\"' + ui.item.id + '\"><td class=\"index\">' + $('#{$windowId} .index_value').val() + '</td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td><span class=\"price\">' + ui.item.price_with_tax + '</span><input type=\"hidden\" name=\"shop_item_price[]\" value=\"0.00\"/></td><td>' + $.escapeHtml(ui.item.currency) + '</td><td width=\"80\"><input class=\"set-item-count form-control\" onsubmit=\"$(\'.add-shop-item\').focus();return false;\" name=\"shop_item_quantity[]\" value=\"\"/></td><td><span class=\"calc-warehouse-sum\"></span></td><td><a class=\"delete-associated-item\" onclick=\"var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>');
+			->value("var jAddShopItem = $('#{$windowId} .add-shop-item'); jAddShopItem.autocompleteShopItem({ shop_id: '{$oShop->id}', price_mode: 'item', shop_currency_id: 0 }, function(event, ui) {
+				var newRow = $('<tr data-item-id=\"' + ui.item.id + '\"><td class=\"index\">' + $('#{$windowId} .index_value').val() + '</td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td><span class=\"price\">' + ui.item.price_with_tax + '</span><input type=\"hidden\" name=\"shop_item_price[]\" value=\"0.00\"/></td><td>' + $.escapeHtml(ui.item.currency) + '</td><td width=\"80\"><input class=\"set-item-count form-control\" onsubmit=\"$(\'.add-shop-item\').focus();return false;\" name=\"shop_item_quantity[]\" value=\"\"/></td><td><span class=\"calc-warehouse-sum\"></span></td><td><a class=\"delete-associated-item\" onclick=\"var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>'),
+
+				jNewItemCount = newRow.find('.set-item-count');
 
 				$('#{$windowId} .shop-item-table > tbody').append(
 					newRow
 				);
 				ui.item.value = '';
-				$.changeWarehouseCounts($('#{$windowId} .set-item-count'), 2);
-				$('#{$windowId} .set-item-count').change();
-				$('#{$windowId} .shop-item-table tr:last-child').find('.set-item-count').focus();
-				$.focusAutocomplete($('#{$windowId} .set-item-count'));
 
+
+				$.changeWarehouseCounts(jNewItemCount, 2);
+				jNewItemCount.change();
+				jNewItemCount.focus();
+				$.focusAutocomplete(jNewItemCount, jAddShopItem);
 				$.recountIndexes(newRow);
+
 			});
 
 			$.each($('#{$windowId} .shop-item-table > tbody tr[data-item-id]'), function (index, item) {
@@ -297,18 +301,18 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 
 				$.changeWarehouseCounts(jInput, 2);
 				jInput.change();
+				$.focusAutocomplete(jInput, jAddShopItem);
 			});
 
-			$.focusAutocomplete($('#{$windowId} .set-item-count'));"
+			//$.focusAutocomplete($('#{$windowId} .set-item-count'), $('#{$windowId} .add-shop-item'));"
 		);
 
 		$oShopItemRow2->add($oCore_Html_Entity_Script);
 
-		$title = $this->_object->id
-			? Core::_('Shop_Warehouse_Writeoff.form_edit', $this->_object->number)
-			: Core::_('Shop_Warehouse_Writeoff.form_add');
-
-		$this->title($title);
+		$this->title($this->_object->id
+			? Core::_('Shop_Warehouse_Writeoff.form_edit', $this->_object->number, FALSE)
+			: Core::_('Shop_Warehouse_Writeoff.form_add')
+		);
 
 		return $this;
 	}

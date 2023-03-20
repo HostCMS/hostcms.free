@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Module
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Module_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -21,10 +21,6 @@ class Module_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	protected function _prepareForm()
 	{
 		parent::_prepareForm();
-
-		$title = $this->_object->id
-			? Core::_('Module.modules_edit_form_title', $this->_object->name)
-			: Core::_('Module.modules_add_form_title');
 
 		$oMainTab = $this->getTab('main');
 
@@ -132,7 +128,19 @@ class Module_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								$oAdmin_Form_Entity = Admin_Form_Entity::factory('Separator');
 							break;
 							case 'code':
-								$oAdmin_Form_Entity = Admin_Form_Entity::factory('Code');
+								$oAdmin_Form_Entity = Admin_Form_Entity::factory('Code')
+									->html($value);
+							break;
+							case 'color':
+								if (is_null($value))
+								{
+									$value = '#aebec4';
+								}
+
+								$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input')
+									->colorpicker(TRUE)
+									->set('data-control', 'hue')
+									->value($value);
 							break;
 						}
 
@@ -152,7 +160,10 @@ class Module_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			}
 		}
 
-		$this->title($title);
+		$this->title($this->_object->id
+			? Core::_('Module.modules_edit_form_title', $this->_object->name, FALSE)
+			: Core::_('Module.modules_add_form_title')
+		);
 
 		return $this;
 	}

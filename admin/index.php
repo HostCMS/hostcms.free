@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once ('../bootstrap.php');
 
@@ -74,11 +74,20 @@ if (!is_null(Core_Array::getPost('submit')))
 	$bDeviceTracking = isset($_POST['ip']);
 
 	$_COOKIE['hostcms_device_tracking'] = $bDeviceTracking ? 'on' : 'off';
-	setcookie('hostcms_device_tracking', $_COOKIE['hostcms_device_tracking'], time() + 31536000, '/');
+	Core_Cookie::set('hostcms_device_tracking', $_COOKIE['hostcms_device_tracking'], array('expires' => time() + 31536000, 'path' => '/'));
 
 	try {
+		/*$aConfig = Core_Session::getConfig();
+		Core_Cookie::set(session_name(), '', array(
+			'expires' => 0,
+			'path' => '/',
+			'domain' => Core_Session::correctDomain(Core_Session::getDomain()),
+			'secure' => $aConfig['secure'],
+			'httponly' => $aConfig['httponly'])
+		);*/
+		
 		$authResult = Core_Auth::login(
-			Core_Array::getPost('login'), Core_Array::getPost('password'), $bDeviceTracking
+			Core_Array::getPost('login', '', 'str'), Core_Array::getPost('password', '', 'str'), $bDeviceTracking
 		);
 
 		Core_Auth::setCurrentSite();

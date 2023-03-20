@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 {
@@ -19,6 +19,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 	 */
 	protected $_allowedProperties = array(
 		'title',
+		'modifications',
 		'Shop',
 		'buttonName',
 		'skipColumns'
@@ -33,6 +34,8 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 		parent::__construct($oAdmin_Form_Action);
 
 		$this->buttonName(Core::_('Admin_Form.apply'));
+
+		$this->modifications = FALSE;
 	}
 
 	/**
@@ -343,7 +346,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				->add(
 					Core_Html_Entity::factory('Span')
 						->class('input-group-addon dimension_patch')
-						->value(htmlspecialchars($oShop->Shop_Measure->name))
+						->value($oShop->shop_measure_id ? htmlspecialchars((string) $oShop->Shop_Measure->name) : '')
 				);
 
 			$oAdmin_Form_Entity_Select_Order_Discount = Admin_Form_Entity::factory('Select')
@@ -513,18 +516,21 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 						->add($oAdmin_Form_Entity_Input_Quantity_Step)
 				);
 
-			$oAdmin_Form_Entity_Modification_Checkbox = Admin_Form_Entity::factory('Checkbox')
-				->name("include_modifications")
-				->class('form-control')
-				->caption(Core::_('Shop_Item.include_modifications'))
-				->divAttr(array('class' => 'form-group col-xs-12'));
+			if (!$this->modifications)
+			{
+				$oAdmin_Form_Entity_Modification_Checkbox = Admin_Form_Entity::factory('Checkbox')
+					->name("include_modifications")
+					->class('form-control')
+					->caption(Core::_('Shop_Item.include_modifications'))
+					->divAttr(array('class' => 'form-group col-xs-12'));
 
-			$oItemMainTab
-				->add(
-					Admin_Form_Entity::factory('Div')
-						->class('row')
-						->add($oAdmin_Form_Entity_Modification_Checkbox)
-				);
+				$oItemMainTab
+					->add(
+						Admin_Form_Entity::factory('Div')
+							->class('row')
+							->add($oAdmin_Form_Entity_Modification_Checkbox)
+					);
+			}
 
 			$oItemPriceTab->add($oPricesRow1 = Admin_Form_Entity::factory('Div')->class('row'));
 
@@ -553,7 +559,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				foreach ($aShop_Prices as $oShop_Price)
 				{
 					$oItemPriceDiv = Admin_Form_Entity::factory('Span')
-						->value(htmlspecialchars($oShop_Price->name))
+						->value(htmlspecialchars((string) $oShop_Price->name))
 						->id("item_price_id_{$oShop_Price->id}")
 						->divAttr(array('class' => 'form-group margin-top-10 col-xs-8 col-md-4'))
 						->controller($window_Admin_Form_Controller);
@@ -579,7 +585,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				foreach ($aWarehouses as $oWarehouse)
 				{
 					$oItemWarehouseDiv = Admin_Form_Entity::factory('Span')
-						->value(htmlspecialchars($oWarehouse->name))
+						->value(htmlspecialchars((string) $oWarehouse->name))
 						->id("item_warehouse_id_{$oWarehouse->id}")
 						->divAttr(array('class' => 'form-group margin-top-10 col-xs-8 col-md-4'))
 						->controller($window_Admin_Form_Controller);

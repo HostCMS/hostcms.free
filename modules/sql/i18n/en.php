@@ -26,4 +26,7 @@ return array(
 	'processlist' => 'Process List',
 	'limit' => 'Limit',
 	'page' => 'Page',
+	'clear' => 'Clear request',
+	'clear_success' => 'Request cleared successfully!',
+	'clearButton' => 'Are you sure you want to clear this request?',
 );

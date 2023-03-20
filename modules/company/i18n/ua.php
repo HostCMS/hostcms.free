@@ -14,11 +14,6 @@ return array(
 	'psrn' => 'ЄДРПОУ',
 	'okpo' => 'ОПФ',
 	'okved' => 'КВЕД',
-	'bic' => 'МФО',
-	'current_account' => 'Номер рахунку',
-	'correspondent_account' => 'Номер кор. рахунку',
-	'bank_name' => 'Назва банку',
-	'bank_address' => 'Адреса банку',
 	'legal_name' => 'ПІБ директора',
 	'accountant_legal_name' => 'ПІБ главного бухгалтера',
 	'address' => 'Адреса',
@@ -48,4 +43,5 @@ return array(
 	'sorting' => 'Сортування',
 	'apply_success' => 'Елемент успішно змінено!',
 	'image' => 'Зображення',
+	'tin_list' => 'ІНН: %s',
 );

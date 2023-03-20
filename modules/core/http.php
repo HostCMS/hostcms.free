@@ -50,7 +50,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Http
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Http
 {
@@ -375,6 +375,15 @@ abstract class Core_Http
 	{
 		$this->_data[$key] = $value;
 		return $this;
+	}
+	
+	/**
+	 * Get POST-data
+	 * @return array
+	 */
+	public function getData()
+	{
+		return $this->_data;
 	}
 
 	/**

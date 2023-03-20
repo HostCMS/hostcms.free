@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Structure
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Structure_Property_List_Model extends Site_Model
 {
@@ -118,7 +118,7 @@ class Structure_Property_List_Model extends Site_Model
 	public function createPropertyDir(Core_Entity $object)
 	{
 		$path = $this->getDirPath($object);
-		if (!is_dir($path))
+		if (!Core_File::isDir($path))
 		{
 			try
 			{

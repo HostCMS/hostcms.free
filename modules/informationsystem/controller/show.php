@@ -69,7 +69,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Controller_Show extends Core_Controller
 {
@@ -528,6 +528,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 	 * @hostcms-event Informationsystem_Controller_Show.onBeforeAddItemsPropertiesList
 	 * @hostcms-event Informationsystem_Controller_Show.onBeforeAddCommentsPropertiesList
 	 * @hostcms-event Informationsystem_Controller_Show.onBeforeAddInformationsystemItems
+	 * @hostcms-event Informationsystem_Controller_Show.onAfterAddInformationsystemItems
 	 * @hostcms-event Informationsystem_Controller_Show.onBeforeAddShortcut
 	 */
 	public function show()
@@ -891,6 +892,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 					$this->append('aInformationsystem_Items', $oInformationsystem_Item);
 				}
 			}
+			
+			Core_Event::notify(get_class($this) . '.onAfterAddInformationsystemItems', $this, array($aInformationsystem_Items));
 
 			unset($aInformationsystem_Items);
 		}
@@ -1312,7 +1315,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			{
 				$seo_title = $oTag->seo_title != ''
 					? $oTag->seo_title
-					: Core::_('Informationsystem.tag', $oTag->name);
+					: Core::_('Informationsystem.tag', $oTag->name, FALSE);
 
 				$seo_description = $oTag->seo_description != ''
 					? $oTag->seo_description
@@ -1755,7 +1758,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 				$sPath = '/admin/informationsystem/item/index.php';
 				$sAdditional = "hostcms[action]=edit&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystem_Group->parent_id}&hostcms[checked][0][{$this->group}]=1";
-				$sTitle = Core::_('Informationsystem_Group.information_groups_edit_form_title', $oInformationsystem_Group->name);
+				$sTitle = Core::_('Informationsystem_Group.information_groups_edit_form_title', $oInformationsystem_Group->name, FALSE);
 
 				$oXslSubPanel->add(
 					Core_Html_Entity::factory('A')
@@ -1826,7 +1829,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			// Edit
 			$sPath = '/admin/informationsystem/item/index.php';
 			$sAdditional = "hostcms[action]=edit&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$this->group}&hostcms[checked][1][{$this->item}]=1";
-			$sTitle = Core::_('Informationsystem_Item.information_items_edit_form_title', $oInformationsystem_Item->name);
+			$sTitle = Core::_('Informationsystem_Item.information_items_edit_form_title', $oInformationsystem_Item->name, FALSE);
 
 			$oXslSubPanel->add(
 				Core_Html_Entity::factory('A')

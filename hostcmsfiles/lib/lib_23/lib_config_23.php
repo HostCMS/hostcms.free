@@ -13,15 +13,17 @@ if (Core::moduleIsActive('siteuser'))
 	);
 
 	// Авторизация OAuth
-	if (!is_null($oauth_provider = Core_Array::getGet('oauth_provider')))
+	$oauth_provider = Core_Array::getGet('oauth_provider');
+	if (is_string($oauth_provider))
 	{
 		try
 		{
 			Core_Session::start();
 			Core_Array::set($_SESSION, 'oauth_provider', $oauth_provider);
 
-			$sLocation = Core_Array::getGet('location');
-			!is_null($sLocation) && Core_Array::set($_SESSION, 'oauth_location', $sLocation);
+			$sLocation = Core_Array::getGet('location', '', 'str');
+			strlen($sLocation)
+				&& Core_Array::set($_SESSION, 'oauth_location', $sLocation);
 
 			$oSiteuser_Oauth_Controller = Siteuser_Oauth_Controller::factory($oauth_provider);
 			if (is_null($oSiteuser_Oauth_Controller))
@@ -34,227 +36,230 @@ if (Core::moduleIsActive('siteuser'))
 		catch (Exception $e){}
 	}
 
-	$bTwitter = !is_null($oauth_token = Core_Array::getGet('oauth_token')) && !is_null($oauth_verifier = Core_Array::getGet('oauth_verifier'));
+	$bTwitter = is_string($oauth_token = Core_Array::getGet('oauth_token')) && is_string($oauth_verifier = Core_Array::getGet('oauth_verifier'));
 
 	// Встречаем ответ Вконтакте/Facebook/Одноклассники/Google+/Яндекс/Mail.ru/Twitter
-	if (!is_null($code = Core_Array::getGet('code')) || $bTwitter)
+	if (is_string($code = Core_Array::getGet('code')) || $bTwitter)
 	{
 		Core_Session::start();
 		$oauth_provider = Core_Array::get($_SESSION, 'oauth_provider');
 
-		$oSiteuser_Oauth_Controller = Siteuser_Oauth_Controller::factory($oauth_provider);
-
-		if (is_null($oSiteuser_Oauth_Controller))
+		if (!is_null($oauth_provider))
 		{
-			throw new Exception('Class does not exist');
-		}
+			$oSiteuser_Oauth_Controller = Siteuser_Oauth_Controller::factory($oauth_provider);
 
-		if ($bTwitter)
-		{
-			$oSiteuser_Oauth_Controller->oauth_token_secret = Core_Array::get($_SESSION, 'oauth_data');
-			$oSiteuser_Oauth_Controller->oauth_token = $oauth_token;
-			$oSiteuser_Oauth_Controller->oauth_verifier = $oauth_verifier;
-		}
-		else
-		{
-			$oSiteuser_Oauth_Controller->code = $code;
-		}
-
-		$aResult = $oSiteuser_Oauth_Controller->execute();
-
-		if (is_null(Core_Array::get($aResult, 'error')))
-		{
-			if (!is_null($user_id = Core_Array::get($aResult, 'user_id')))
+			if (is_null($oSiteuser_Oauth_Controller))
 			{
-				$oSiteuser_Identity_Provider = Core_Entity::factory('Siteuser_Identity_Provider', $oauth_provider);
+				throw new Exception('Class does not exist');
+			}
 
-				$oFoundSiteuser = $oSiteuser_Identity_Provider->getSiteuserByIdentity($user_id);
+			if ($bTwitter)
+			{
+				$oSiteuser_Oauth_Controller->oauth_token_secret = Core_Array::get($_SESSION, 'oauth_data');
+				$oSiteuser_Oauth_Controller->oauth_token = $oauth_token;
+				$oSiteuser_Oauth_Controller->oauth_verifier = $oauth_verifier;
+			}
+			else
+			{
+				$oSiteuser_Oauth_Controller->code = $code;
+			}
 
-				// Пользователь через oAuth не найден и текущий пользователь не авторизован
-				if (is_null($oFoundSiteuser) && !$oSiteuser->id)
+			$aResult = $oSiteuser_Oauth_Controller->execute();
+
+			if (is_null(Core_Array::get($aResult, 'error')))
+			{
+				if (!is_null($user_id = Core_Array::get($aResult, 'user_id')))
 				{
-					$oSite = Core_Entity::factory('Site', CURRENT_SITE);
+					$oSiteuser_Identity_Provider = Core_Entity::factory('Siteuser_Identity_Provider', $oauth_provider);
 
-					if (!is_null($user_login = Core_Array::get($aResult, 'login')))
+					$oFoundSiteuser = $oSiteuser_Identity_Provider->getSiteuserByIdentity($user_id);
+
+					// Пользователь через oAuth не найден и текущий пользователь не авторизован
+					if (is_null($oFoundSiteuser) && !$oSiteuser->id)
 					{
-						// Replace '/' to '-'
-						$user_login = str_replace('/', '-', $user_login);
+						$oSite = Core_Entity::factory('Site', CURRENT_SITE);
 
-						$oSiteuser = $oSite->Siteusers->getByLogin($user_login, FALSE);
-						$sUserLogin = is_null($oSiteuser) ? $user_login : '';
-					}
-					else
-					{
-						$sUserLogin = '';
-					}
-
-					if (!is_null($user_email = Core_Array::get($aResult, 'email')))
-					{
-						$oSiteuser = $oSite->Siteusers->getByEmail($user_email, FALSE);
-						$sUserEmail = is_null($oSiteuser) ? $user_email : '';
-					}
-					else
-					{
-						$sUserEmail = '';
-					}
-
-					// Create new siteuser
-					$oSiteuser = Core_Entity::factory('Siteuser');
-					$oSiteuser->login = Core_Str::stripTags($sUserLogin);
-					$oSiteuser->password = Core_Hash::instance()->hash(Core_Password::get(12));
-					$oSiteuser->email = $sUserEmail;
-					$oSiteuser->name = Core_Str::stripTags(Core_Array::get($aResult, 'name', ''));
-					$oSiteuser->surname = Core_Str::stripTags(Core_Array::get($aResult, 'surname', ''));
-					$oSiteuser->company = Core_Str::stripTags(Core_Array::get($aResult, 'company', ''));
-					$oSiteuser->save();
-
-					if (!is_null($sPicture = Core_Array::get($aResult, 'picture')) && $sPicture != '')
-					{
-						// Ищем свойство аватара
-						$oSiteuser_Property_List = Core_Entity::factory('Siteuser_Property_List', CURRENT_SITE);
-						$oProperty = $oSiteuser_Property_List->Properties->getByname('Аватар', FALSE);
-
-						if (!is_null($oProperty))
+						if (!is_null($user_login = Core_Array::get($aResult, 'login')))
 						{
-							// Папка назначения
-							$sDestinationFolder = $oSiteuser->getDirPath();
+							// Replace '/' to '-'
+							$user_login = str_replace('/', '-', $user_login);
 
-							// Файл-источник
-							$sSourceFile = $sPicture;
+							$oSiteuser = $oSite->Siteusers->getByLogin($user_login, FALSE);
+							$sUserLogin = is_null($oSiteuser) ? $user_login : '';
+						}
+						else
+						{
+							$sUserLogin = '';
+						}
 
-							// Создаем папку назначения
-							$oSiteuser->createDir();
+						if (!is_null($user_email = Core_Array::get($aResult, 'email')))
+						{
+							$oSiteuser = $oSite->Siteusers->getByEmail($user_email, FALSE);
+							$sUserEmail = is_null($oSiteuser) ? $user_email : '';
+						}
+						else
+						{
+							$sUserEmail = '';
+						}
 
-							// Файл из WEB'а, создаем временный файл
-							$sTempFileName = tempnam(CMS_FOLDER . TMP_DIR, "CMS");
-							// Копируем содержимое WEB-файла в локальный временный файл
-							file_put_contents($sTempFileName, file_get_contents($sSourceFile));
+						// Create new siteuser
+						$oSiteuser = Core_Entity::factory('Siteuser');
+						$oSiteuser->login = Core_Str::stripTags($sUserLogin);
+						$oSiteuser->password = Core_Hash::instance()->hash(Core_Password::get(12));
+						$oSiteuser->email = $sUserEmail;
+						$oSiteuser->name = Core_Str::stripTags(Core_Array::get($aResult, 'name', '', 'str'));
+						$oSiteuser->surname = Core_Str::stripTags(Core_Array::get($aResult, 'surname', '', 'str'));
+						$oSiteuser->company = Core_Str::stripTags(Core_Array::get($aResult, 'company', '', 'str'));
+						$oSiteuser->save();
 
-							// Файл-источник равен временному файлу
-							$sSourceFile = $sTempFileName;
+						if (!is_null($sPicture = Core_Array::get($aResult, 'picture')) && $sPicture != '')
+						{
+							// Ищем свойство аватара
+							$oSiteuser_Property_List = Core_Entity::factory('Siteuser_Property_List', CURRENT_SITE);
+							$oProperty = $oSiteuser_Property_List->Properties->getByname('Аватар', FALSE);
 
-							switch(Core_Image::exifImagetype($sSourceFile))
+							if (!is_null($oProperty))
 							{
-								case 1:
-									$sExt = 'gif';
-								break;
-								case 2:
-									$sExt = 'jpeg';
-								break;
-								case 3:
-									$sExt = 'png';
-								break;
-								default:
-									$sExt = 'jpeg';
-								break;
-							}
+								// Папка назначения
+								$sDestinationFolder = $oSiteuser->getDirPath();
 
-							$aPropertyValues = $oProperty->getValues($oSiteuser->id, FALSE);
+								// Файл-источник
+								$sSourceFile = $sPicture;
 
-							$oProperty_Value = count($aPropertyValues)
-								? $aPropertyValues[0]
-								: $oProperty->createNewValue($oSiteuser->id)->save();
+								// Создаем папку назначения
+								$oSiteuser->createDir();
 
-							// Удаляем старое большое изображение
-							if ($oProperty_Value->file != '')
-							{
+								// Файл из WEB'а, создаем временный файл
+								$sTempFileName = tempnam(CMS_FOLDER . TMP_DIR, "CMS");
+								// Копируем содержимое WEB-файла в локальный временный файл
+								file_put_contents($sTempFileName, file_get_contents($sSourceFile));
+
+								// Файл-источник равен временному файлу
+								$sSourceFile = $sTempFileName;
+
+								switch(Core_Image::exifImagetype($sSourceFile))
+								{
+									case 1:
+										$sExt = 'gif';
+									break;
+									case 2:
+										$sExt = 'jpeg';
+									break;
+									case 3:
+										$sExt = 'png';
+									break;
+									default:
+										$sExt = 'jpeg';
+									break;
+								}
+
+								$aPropertyValues = $oProperty->getValues($oSiteuser->id, FALSE);
+
+								$oProperty_Value = count($aPropertyValues)
+									? $aPropertyValues[0]
+									: $oProperty->createNewValue($oSiteuser->id)->save();
+
+								// Удаляем старое большое изображение
+								if ($oProperty_Value->file != '')
+								{
+									try
+									{
+										Core_File::delete($sDestinationFolder . $oProperty_Value->file);
+									} catch (Exception $e) {}
+								}
+
+								$sTargetFileName = "property_{$oProperty_Value->id}.{$sExt}";
+
+								// Создаем массив параметров для загрузки картинок элементу
+								$aPicturesParam = array();
+								$aPicturesParam['large_image_isset'] = TRUE;
+								$aPicturesParam['large_image_source'] = $sSourceFile;
+								$aPicturesParam['large_image_name'] = "avatar.{$sExt}";
+								$aPicturesParam['large_image_target'] = $sDestinationFolder . $sTargetFileName;
+								$aPicturesParam['large_image_preserve_aspect_ratio'] = TRUE;
+								$aPicturesParam['large_image_max_width'] = $oProperty->image_large_max_width;
+								$aPicturesParam['large_image_max_height'] = $oProperty->image_large_max_height;
+								$aPicturesParam['large_image_watermark'] = FALSE;
+								$aPicturesParam['create_small_image_from_large'] = FALSE;
+
 								try
 								{
-									Core_File::delete($sDestinationFolder . $oProperty_Value->file);
+									$aResult = Core_File::adminUpload($aPicturesParam);
+								}
+								catch (Exception $exc)
+								{
+									Core_Message::show($exc->getMessage(), 'error');
+									$aResult = array('large_image' => FALSE);
+								}
+
+								if ($aResult['large_image'])
+								{
+									$oProperty_Value->file = $sTargetFileName;
+									$oProperty_Value->file_name = '';
+								}
+
+								$oProperty_Value->save();
+
+								// Файл временный, подлежит удалению
+								try
+								{
+									Core_File::delete($sSourceFile);
 								} catch (Exception $e) {}
 							}
-
-							$sTargetFileName = "property_{$oProperty_Value->id}.{$sExt}";
-
-							// Создаем массив параметров для загрузки картинок элементу
-							$aPicturesParam = array();
-							$aPicturesParam['large_image_isset'] = TRUE;
-							$aPicturesParam['large_image_source'] = $sSourceFile;
-							$aPicturesParam['large_image_name'] = "avatar.{$sExt}";
-							$aPicturesParam['large_image_target'] = $sDestinationFolder . $sTargetFileName;
-							$aPicturesParam['large_image_preserve_aspect_ratio'] = TRUE;
-							$aPicturesParam['large_image_max_width'] = $oProperty->image_large_max_width;
-							$aPicturesParam['large_image_max_height'] = $oProperty->image_large_max_height;
-							$aPicturesParam['large_image_watermark'] = FALSE;
-							$aPicturesParam['create_small_image_from_large'] = FALSE;
-
-							try
-							{
-								$aResult = Core_File::adminUpload($aPicturesParam);
-							}
-							catch (Exception $exc)
-							{
-								Core_Message::show($exc->getMessage(), 'error');
-								$aResult = array('large_image' => FALSE);
-							}
-
-							if ($aResult['large_image'])
-							{
-								$oProperty_Value->file = $sTargetFileName;
-								$oProperty_Value->file_name = '';
-							}
-
-							$oProperty_Value->save();
-
-							// Файл временный, подлежит удалению
-							try
-							{
-								Core_File::delete($sSourceFile);
-							} catch (Exception $e) {}
 						}
+
+						if ($sUserLogin == '')
+						{
+							$oSiteuser->login = 'id' . $oSiteuser->id;
+							$oSiteuser->save();
+						}
+
+						// Add into default group
+						$oSiteuser_Group = $oSiteuser->Site->Siteuser_Groups->getDefault();
+						if (!is_null($oSiteuser_Group))
+						{
+							$oSiteuser_Group->add($oSiteuser);
+						}
+						$oSiteuser->activate();
+
+						// Только для нового пользователя
+						$Siteuser_Controller_Show
+							->setEntity($oSiteuser)
+							->applyAffiliate(Core_Array::get($_COOKIE, 'affiliate_name'));
 					}
 
-					if ($sUserLogin == '')
+					// Пользователь через oAuth не найден
+					if (is_null($oFoundSiteuser))
 					{
-						$oSiteuser->login = 'id' . $oSiteuser->id;
-						$oSiteuser->save();
+						// Add siteuser's identity
+						$oSiteuser_Identity = Core_Entity::factory('Siteuser_Identity');
+						$oSiteuser_Identity->siteuser_identity_provider_id = $oauth_provider;
+						$oSiteuser_Identity->identity = $user_id;
+						$oSiteuser->add($oSiteuser_Identity);
 					}
-
-					// Add into default group
-					$oSiteuser_Group = $oSiteuser->Site->Siteuser_Groups->getDefault();
-					if (!is_null($oSiteuser_Group))
+					// Авторизация через соцсеть, текущим является тот, которого вернул oAuth контроллер
+					elseif (!$oSiteuser->id)
 					{
-						$oSiteuser_Group->add($oSiteuser);
+						$oSiteuser = $oFoundSiteuser;
 					}
-					$oSiteuser->activate();
 
-					// Только для нового пользователя
-					$Siteuser_Controller_Show
-						->setEntity($oSiteuser)
-						->applyAffiliate(Core_Array::get($_COOKIE, 'affiliate_name'));
+					$oSiteuser
+						// Привязывать ли сессию пользователя к IP
+						->attachSessionToIp($attachSessionToIp)
+						->setCurrent();
+
+					$Siteuser_Controller_Show->setEntity($oSiteuser);
+
+					$oauth_location = Core_Array::get($_SESSION, 'oauth_location');
+					!is_null($oauth_location) && $Siteuser_Controller_Show->go(strval($oauth_location));
 				}
-
-				// Пользователь через oAuth не найден
-				if (is_null($oFoundSiteuser))
-				{
-					// Add siteuser's identity
-					$oSiteuser_Identity = Core_Entity::factory('Siteuser_Identity');
-					$oSiteuser_Identity->siteuser_identity_provider_id = $oauth_provider;
-					$oSiteuser_Identity->identity = $user_id;
-					$oSiteuser->add($oSiteuser_Identity);
-				}
-				// Авторизация через соцсеть, текущим является тот, которого вернул oAuth контроллер
-				elseif (!$oSiteuser->id)
-				{
-					$oSiteuser = $oFoundSiteuser;
-				}
-
-				$oSiteuser
-					// Привязывать ли сессию пользователя к IP
-					->attachSessionToIp($attachSessionToIp)
-					->setCurrent();
-
-				$Siteuser_Controller_Show->setEntity($oSiteuser);
-
-				$oauth_location = Core_Array::get($_SESSION, 'oauth_location');
-				!is_null($oauth_location) && $Siteuser_Controller_Show->go(strval($oauth_location));
 			}
-		}
-		else
-		{
-			$error = Core_Array::get($aResult, 'error', 'str');
-			$error_description = Core_Array::get($aResult, 'error_description', 'str');
-			throw new Core_Exception("Error '%error' %error_description", array('%error' => $error, '%error_description' => $error_description), 0, FALSE);
+			else
+			{
+				$error = Core_Array::get($aResult, 'error', 'str');
+				$error_description = Core_Array::get($aResult, 'error_description', 'str');
+				throw new Core_Exception("Error '%error' %error_description", array('%error' => $error, '%error_description' => $error_description), 0, FALSE);
+			}
 		}
 	}
 
@@ -321,7 +326,7 @@ if (Core::moduleIsActive('siteuser'))
 		}
 		else
 		{
-			$sLogin = Core_Array::getPost('openid_login');
+			$sLogin = Core_Array::getPost('openid_login', '', 'str');
 
 			$sIdentityURL = sprintf($oSiteuser_Identity_Provider->url, $sLogin);
 

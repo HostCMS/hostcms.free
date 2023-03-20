@@ -33,7 +33,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Controller_Rss_Show extends Core_Controller
 {
@@ -60,9 +60,9 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 
 	/**
 	 * Information system's items object
-	 * @var array
+	 * @var Informationsystem_Item_Model
 	 */
-	protected $_Informationsystem_Items = array();
+	protected $_Informationsystem_Items = NULL;
 
 	/**
 	 * RSS
@@ -86,8 +86,6 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 
 		$this->_Informationsystem_Items = $oInformationsystem->Informationsystem_Items;
 
-		$siteuser_id = 0;
-
 		$aSiteuserGroups = array(0, -1);
 		if (Core::moduleIsActive('siteuser'))
 		{
@@ -95,8 +93,6 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 
 			if ($oSiteuser)
 			{
-				$siteuser_id = $oSiteuser->id;
-
 				$aSiteuser_Groups = $oSiteuser->Siteuser_Groups->findAll();
 				foreach ($aSiteuser_Groups as $oSiteuser_Group)
 				{
@@ -170,7 +166,7 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 
 	/**
 	 * Get information items
-	 * @return array
+	 * @return object
 	 */
 	public function informationsystemItems()
 	{
@@ -405,7 +401,7 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 					)
 				);
 
-				if (is_file($largeFilePath))
+				if (Core_File::isFile($largeFilePath))
 				{
 					$enclosure['attributes']['length'] = filesize($largeFilePath);
 				}

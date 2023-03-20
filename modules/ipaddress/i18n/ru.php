@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Ipaddress
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'IP-адреса',
@@ -39,4 +39,5 @@ return array(
 	'allowAllAccess_success' => 'Доступ успешно изменен!',
 	'denyAllBackendAccess_success' => 'Доступ успешно изменен!',
 	'allowAllBackendAccess_success' => 'Доступ успешно изменен!',
+	'useragent_menu' => 'Useragent',
 );

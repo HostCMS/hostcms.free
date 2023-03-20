@@ -28,7 +28,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Seller_Controller_Show extends Core_Controller
 {
@@ -201,14 +201,13 @@ class Shop_Seller_Controller_Show extends Core_Controller
 					{
 						$oStructure = Core_Entity::factory('Structure')->find($oSite->error404);
 
-						$oCore_Page = Core_Page::instance();
-
 						// страница с 404 ошибкой не найдена
 						if (is_null($oStructure->id))
 						{
 							throw new Core_Exception('Group not found');
 						}
 
+						$oCore_Page = Core_Page::instance();
 						$oCore_Page->addChild($oStructure->getRelatedObjectByType());
 						$oStructure->setCorePageSeo($oCore_Page);
 					}

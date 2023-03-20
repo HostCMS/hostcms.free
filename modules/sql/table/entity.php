@@ -9,11 +9,23 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Sql
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Sql_Table_Entity
 {
 	//public $view = NULL;
+
+	public $name = NULL;
+	public $engine = NULL;
+	public $auto_increment = NULL;
+	public $version = NULL;
+	public $row_format = NULL;
+	public $table_rows = NULL;
+	public $avg_row_legth = NULL;
+	public $data_length = NULL;
+	public $index_length = NULL;
+	public $fragmented = NULL;
+	public $collation = NULL;
 
 	protected $_fields = array(
 		'name' => array(

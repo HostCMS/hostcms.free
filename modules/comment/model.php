@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Comment
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Comment_Model extends Core_Entity
 {
@@ -363,7 +363,7 @@ class Comment_Model extends Core_Entity
 	{
 		clearstatcache();
 
-		if (!is_dir($this->getPath()))
+		if (!Core_File::isDir($this->getPath()))
 		{
 			try
 			{
@@ -380,7 +380,7 @@ class Comment_Model extends Core_Entity
 	 */
 	public function deleteDir()
 	{
-		if (is_dir($this->getPath()))
+		if (Core_File::isDir($this->getPath()))
 		{
 			try
 			{

@@ -3,9 +3,9 @@
  * Online shop.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../../bootstrap.php');
 
@@ -15,9 +15,13 @@ Core_Auth::authorization($sModule = 'shop');
 $iAdmin_Form_Id = 317;
 $sAdminFormAction = '/admin/shop/order/item/status/index.php';
 
-// Идентификатор родительской группы
-$iShopDirId = intval(Core_Array::getGet('shop_dir_id', 0));
-$parent_id = intval(Core_Array::getGet('parent_id', 0));
+$shop_id = Core_Array::getGet('shop_id', 0, 'int');
+
+$oShop = Core_Entity::factory('Shop', intval(Core_Array::getRequest('shop_id', 0)));
+$oShop_Group = Core_Entity::factory('Shop_Group', intval(Core_Array::getRequest('shop_group_id', 0)));
+
+$iShopDirId = Core_Array::getGet('shop_dir_id', 0, 'int');
+$parent_id = Core_Array::getGet('parent_id', 0, 'int');
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -85,10 +89,41 @@ if ($iShopDirId)
 	}
 }
 
+// Крошка на список товаров и групп товаров магазина
+$oAdmin_Form_Entity_Breadcrumbs->add(
+	Admin_Form_Entity::factory('Breadcrumb')
+		->name($oShop->name)
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"))
+);
+
+// Крошки по группам товаров
+if ($oShop_Group->id)
+{
+	$oShopGroupBreadcrumbs = $oShop_Group;
+
+	$aBreadcrumbs = array();
+
+	do
+	{
+		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
+			->name($oShopGroupBreadcrumbs->name)
+			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShop_Group->id}"))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShop_Group->id}"));
+	} while ($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
+
+	$aBreadcrumbs = array_reverse($aBreadcrumbs);
+
+	foreach ($aBreadcrumbs as $oBreadcrumb)
+	{
+		$oAdmin_Form_Entity_Breadcrumbs->add($oBreadcrumb);
+	}
+}
+
 // Добавляем крошку на текущую форму
 $oAdmin_Form_Entity_Breadcrumbs->add(Admin_Form_Entity::factory('Breadcrumb')
 	->name(Core::_('Shop_Order_Item_Status.title'))
-	->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParam = "&shop_dir_id=" . intval(Core_Array::getGet('shop_dir_id', 0))))
+	->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParam = "&shop_dir_id={$iShopDirId}&shop_id={$shop_id}&shop_group_id={$oShop_Group->id}"))
 	->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParam)));
 
 if ($parent_id)
@@ -101,7 +136,7 @@ if ($parent_id)
 
 		do
 		{
-			$additionalParams = "&shop_dir_id={$iShopDirId}&parent_id={$oParentStatus->id}";
+			$additionalParams = "&shop_id={$shop_id}&shop_dir_id={$iShopDirId}&shop_group_id={$oShop_Group->id}&parent_id={$oParentStatus->id}";
 
 			$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 				->name($oParentStatus->name)
@@ -188,6 +223,7 @@ $oUser = Core_Auth::getCurrentUser();
 	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
 
 $oAdmin_Form_Dataset
+	->addCondition(array('where' => array('shop_id', '=', $shop_id)))
 	->addCondition(array('where' => array('parent_id', '=', $parent_id)));
 
 // Добавляем источник данных контроллеру формы
@@ -195,7 +231,9 @@ $oAdmin_Form_Controller->addDataset(
 	$oAdmin_Form_Dataset
 );
 
+$oAdmin_Form_Controller->addExternalReplace('{shop_id}', $shop_id);
 $oAdmin_Form_Controller->addExternalReplace('{shop_dir_id}', $iShopDirId);
+$oAdmin_Form_Controller->addExternalReplace('{shop_group_id}', $oShop_Group->id);
 
 // Показ формы
 $oAdmin_Form_Controller->execute();

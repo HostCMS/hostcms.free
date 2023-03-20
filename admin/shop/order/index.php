@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -222,7 +222,7 @@ if (!$siteuser_id)
 {
 	$additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}";
 
-	$sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
+	$sGlobalSearch = Core_Array::getGet('globalSearch', '', 'trim');
 
 	$oAdmin_Form_Controller->addEntity(
 		Admin_Form_Entity::factory('Code')
@@ -239,7 +239,7 @@ if (!$siteuser_id)
 			')
 	);
 
-	$sGlobalSearch = Core_DataBase::instance()->escapeLike($sGlobalSearch);
+	$sGlobalSearch = str_replace(' ', '%', Core_DataBase::instance()->escapeLike($sGlobalSearch));
 }
 
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
@@ -402,6 +402,26 @@ if ($oAdminFormActionloadDeliveryConditionsList && $oAdmin_Form_Controller->getA
 		);
 
 	$oAdmin_Form_Controller->addAction($oControllerloadDeliveryConditionsList);
+}
+
+// Действие "Загрузка списка условий доставки"
+$oAdminFormActionloadCompanyAccountList = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('loadCompanyAccountList');
+
+if ($oAdminFormActionloadCompanyAccountList && $oAdmin_Form_Controller->getAction() == 'loadCompanyAccountList')
+{
+	$oControllerloadCompanyAccountList = Admin_Form_Action_Controller::factory(
+		'Admin_Form_Action_Controller_Type_Load_Select_Options', $oAdminFormActionloadCompanyAccountList
+	);
+	$oControllerloadCompanyAccountList
+		->model(Core_Entity::factory('Company_Account'))
+		->defaultValue(' … ')
+		->addCondition(
+			array('where' => array('company_accounts.company_id', '=', Core_Array::getGet('company_id')))
+		);
+
+	$oAdmin_Form_Controller->addAction($oControllerloadCompanyAccountList);
 }
 
 // Действие "Загрузка списка местоположений"

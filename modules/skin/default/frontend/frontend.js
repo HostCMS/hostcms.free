@@ -106,7 +106,7 @@
 			}
 
 			$icon.toggleClass('fa-lock-open fa-lock');
-			$parentDiv.toggleClass('opened closed');
+			$parentDiv.toggleClass('hostcms-panel-opened hostcms-panel-closed');
 		},
 		hostcmsEditable: function(settings) {
 			settings = hQuery.extend({

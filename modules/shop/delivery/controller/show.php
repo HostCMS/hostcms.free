@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Delivery_Controller_Show extends Core_Controller
 {
@@ -26,6 +26,8 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 		'totalAmount',
 		'couponText',
 		'postcode',
+		'timeFrom',
+		'timeTo',
 		'volume',
 		'paymentSystems',
 		'applyDiscounts',
@@ -213,6 +215,8 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 				->shop_country_location_id($this->shop_country_location_id)
 				->shop_country_location_city_id($this->shop_country_location_city_id)
 				->shop_country_location_city_area_id($this->shop_country_location_city_area_id)
+				->timeFrom($this->timeFrom)
+				->timeTo($this->timeTo)
 				->totalWeight($this->totalWeight)
 				->totalAmount($this->totalAmount);
 
@@ -234,6 +238,8 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 					->amount($this->totalAmount)
 					->postcode($this->postcode)
 					->volume($this->volume)
+					->timeFrom($this->timeFrom)
+					->timeTo($this->timeTo)
 					->execute();
 
 				if (!is_null($aPrice))

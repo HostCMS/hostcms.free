@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Event
 {
@@ -39,7 +39,7 @@ class Core_Event
 	{
 		self::$_attached[$eventName][] = array($function, $options);
 	}
-	
+
 	/**
 	 * Attach observer to the beginning of the queue
 	 * @param string $eventName event name
@@ -62,7 +62,7 @@ class Core_Event
 	{
 		!isset(self::$_attached[$eventName])
 			&& self::$_attached[$eventName] = array();
-			
+
 		array_unshift(self::$_attached[$eventName], array($function, $options));
 	}
 

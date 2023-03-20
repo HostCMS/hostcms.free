@@ -1,6 +1,7 @@
 <?php
 
 return array(
+	'model_name' => 'Раздел вкладок',
 	'dir_add_form_title' => 'Добавление раздела вкладок',
 	'dir_edit_form_title' => 'Редактирование раздела вкладок "%s"',
 	'name' => 'Название',

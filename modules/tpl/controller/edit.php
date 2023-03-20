@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Tpl
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Tpl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -37,7 +37,7 @@ class Tpl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			case 'tpl':
 				$title = $this->_object->id
-					? Core::_('Tpl.edit_title', $this->_object->name)
+					? Core::_('Tpl.edit_title', $this->_object->name, FALSE)
 					: Core::_('Tpl.add_title');
 
 				if (!$this->_object->id)
@@ -139,7 +139,7 @@ class Tpl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			case 'tpl_dir':
 			default:
 				$title = $this->_object->id
-					? Core::_('Tpl_Dir.edit_title', $this->_object->name)
+					? Core::_('Tpl_Dir.edit_title', $this->_object->name, FALSE)
 					: Core::_('Tpl_Dir.add_title');
 
 				// Значения директории для добавляемого объекта

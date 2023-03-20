@@ -17,7 +17,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Tpl
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Tpl_Processor
 {
@@ -65,9 +65,10 @@ class Tpl_Processor
 
 		$this->_smarty->loadPlugin('smarty_compiler_switch');
 		$this->_smarty->registerFilter('post', 'smarty_postfilter_switch');
+		//$this->_smarty->enableSecurity();
 
 		// escape php-tags as entities
-		$this->_smarty->php_handling = Smarty::PHP_QUOTE;
+		//$this->_smarty->php_handling = Smarty::PHP_QUOTE;
 	}
 
 	/**
@@ -113,7 +114,7 @@ class Tpl_Processor
 		// Config
 		$lng = Core::getLng();
 		$configPath = $this->_tpl->getLngConfigPath($lng);
-		if (is_file($configPath))
+		if (Core_File::isFile($configPath))
 		{
 			// load config variables and assign them
 			$this->_smarty->configLoad($configPath);
@@ -137,7 +138,7 @@ class Tpl_Processor
 		$return = $this->_smarty->fetch($this->_tpl->getTplFilePath());
 
 		Core_Event::notify('Tpl_Processor.onAfterProcess', $this);
-		
+
 		return $return;
 	}
 

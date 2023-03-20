@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -229,7 +229,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			)
 			->add(
 				Admin_Form_Entity::factory('Select')
-					->class('form-control no-padding-left no-padding-right')
+					->class('form-control')
 					// ->caption(Core::_('Shop_Order.order_currency'))
 					->divAttr(array('class' => ''))
 					->options(
@@ -339,7 +339,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			Admin_Form_Entity::factory('Select')
 				->caption(Core::_('Shop_Order.show_order_status'))
 				->options(
-					$Shop_Controller_Edit->fillOrderStatuses(/*Core_Array::getGet('shop_id', 0)*/)
+					$Shop_Controller_Edit->fillOrderStatuses($this->_object->Shop)
 				)
 				->name('shop_order_status_id')
 				->value($this->_object->shop_order_status_id)
@@ -366,10 +366,23 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->options($aTmpCompanies)
 				->name('company_id')
 				->value($this->_object->company_id)
+				->onchange("$.ajaxRequest({path: '/admin/shop/order/index.php',context: 'company_account_id', callBack: $.loadSelectOptionsCallback, objectId: {$objectId}, action: 'loadCompanyAccountList',additionalParams: 'company_id=' + this.value,windowId: '{$windowId}'}); return false")
 		);
 
-		$oMainTab->move($this->getField('ip')
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3')), $oMainRow4);
+		$oAdditionalTab->delete(
+			$this->getField('company_account_id')
+		);
+
+
+		$oMainRow4->add(
+			Admin_Form_Entity::factory('Select')
+				->caption(Core::_('Shop_Order.company_account_id'))
+				->id('company_account_id')
+				->options($this->_fillCompanyAccounts($this->_object->company_id))
+				->name('company_account_id')
+				->value($this->_object->company_account_id)
+				->divAttr(array('class' => 'form-group col-xs-6 col-sm-6 col-md-3'))
+		);
 
 		$Shop_Delivery_Controller_Edit = new Shop_Delivery_Controller_Edit($this->_Admin_Form_Action);
 
@@ -427,8 +440,9 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oMainRow5->add($oRecalcDeliveryPriceLink);
 
-		$oAdditionalTab->move($this->getField('user_id'), $oMainRow6);
+		$oAdditionalTab->move($this->getField('user_id')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3')), $oMainRow6);
 		$oMainTab->move($this->getField('coupon')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3')), $oMainRow6);
+		$oMainTab->move($this->getField('ip')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3')), $oMainRow6);
 
 		$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oDescriptionTabRow1);
 		$oMainTab->move($this->getField('system_information')->divAttr(array('class' => 'form-group col-xs-12')), $oDescriptionTabRow2);
@@ -874,7 +888,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0));
 			$oShop_Group = Core_Entity::factory('Shop_Group', Core_Array::getGet('shop_group_id', 0));
 
-			$printButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, 0, 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id, TRUE);
+			$printButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, $this->_object->getEntityType(), 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id, TRUE);
 		}
 
 		$printButton .= '
@@ -1152,11 +1166,10 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			);
 		}
 
-		$title = $this->_object->id
-			? Core::_('Shop_Order.order_edit_form_title', $this->_object->invoice)
-			: Core::_('Shop_Order.order_add_form_title');
-
-		$this->title($title);
+		$this->title($this->_object->id
+			? Core::_('Shop_Order.order_edit_form_title', $this->_object->invoice, FALSE)
+			: Core::_('Shop_Order.order_add_form_title')
+		);
 
 		return $this;
 	}
@@ -1399,6 +1412,35 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	}
 
 	/**
+	 * Fill company accounts list
+	 * @param int $company_id company ID
+	 * @return array
+	 */
+	protected function _fillCompanyAccounts($company_id)
+	{
+		$company_id = intval($company_id);
+
+		$aReturn = array(" … ");
+
+		if ($company_id)
+		{
+			$oCompany = Core_Entity::factory('Company')->getById($company_id);
+
+			if (!is_null($oCompany))
+			{
+				$aCompany_Accounts = $oCompany->Company_Accounts->findAll(FALSE);
+
+				foreach ($aCompany_Accounts as $oCompany_Account)
+				{
+					$aReturn[$oCompany_Account->id] = $oCompany_Account->name;
+				}
+			}
+		}
+
+		return $aReturn;
+	}
+
+	/**
 	 * Fill payment systems list
 	 * @param int $iShopId shop ID
 	 * @return array
@@ -1490,7 +1532,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		// Печать
 		$printButton = '
 			<div class="btn-group' . $up . '">
-				<a class="btn' . $btnClass . '" href="javascript:void(0);"><i class="btn-label fa fa-print"></i>' . $caption . '</a>
+				<a class="btn' . $btnClass . '" data-toggle="dropdown" href="javascript:void(0);"><i class="btn-label fa fa-print"></i>' . $caption . '</a>
 				<a class="btn' . $dropdownClass . ' dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
 				<ul class="dropdown-menu dropdown-palegreen">
 		';
@@ -1516,7 +1558,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0));
 			$oShop_Group = Core_Entity::factory('Shop_Group', Core_Array::getGet('shop_group_id', 0));
 
-			$printButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, 0, 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id, TRUE);
+			$printButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, $this->_object->getEntityType(), 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id, TRUE);
 		}
 
 		$printButton .= '
@@ -1529,7 +1571,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			: 'padding-left-15 padding-bottom-15';
 
 		return Admin_Form_Entity::factory('Div')
-			->class($class)
+			->class($class . ' hidden-xs')
 			->add(
 				Admin_Form_Entity::factory('Code')->html($printButton)
 			);

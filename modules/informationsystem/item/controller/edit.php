@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -107,7 +107,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				}
 
 				$title = $object->id
-					? Core::_('Informationsystem_Item.information_items_edit_form_title', $object->name)
+					? Core::_('Informationsystem_Item.information_items_edit_form_title', $object->name, FALSE)
 					: Core::_('Informationsystem_Item.information_items_add_form_title');
 
 				$template_id = $this->_object->Informationsystem->Structure->template_id
@@ -280,11 +280,11 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				$oImageField = Admin_Form_Entity::factory('File')
 					->divAttr(array('class' => ''));
 
-				$oLargeFilePath = $this->_object->image_large != '' && is_file($this->_object->getLargeFilePath())
+				$oLargeFilePath = $this->_object->image_large != '' && Core_File::isFile($this->_object->getLargeFilePath())
 					? $this->_object->getLargeFileHref()
 					: '';
 
-				$oSmallFilePath = $this->_object->image_small != '' && is_file($this->_object->getSmallFilePath())
+				$oSmallFilePath = $this->_object->image_small != '' && Core_File::isFile($this->_object->getSmallFilePath())
 					? $this->_object->getSmallFileHref()
 					: '';
 
@@ -612,7 +612,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					->fillTab();
 
 				$title = $object->id
-					? Core::_('Informationsystem_Group.information_groups_edit_form_title', $object->name)
+					? Core::_('Informationsystem_Group.information_groups_edit_form_title', $object->name, FALSE)
 					: Core::_('Informationsystem_Group.information_groups_add_form_title');
 
 				$oMainTab
@@ -757,11 +757,11 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				$oImageField = Admin_Form_Entity::factory('File')
 					->divAttr(array('class' => ''));;
 
-				$oLargeFilePath = $this->_object->image_large != '' && is_file($this->_object->getLargeFilePath())
+				$oLargeFilePath = $this->_object->image_large != '' && Core_File::isFile($this->_object->getLargeFilePath())
 					? $this->_object->getLargeFileHref()
 					: '';
 
-				$oSmallFilePath = $this->_object->image_small != '' && is_file($this->_object->getSmallFilePath())
+				$oSmallFilePath = $this->_object->image_small != '' && Core_File::isFile($this->_object->getSmallFilePath())
 					? $this->_object->getSmallFileHref()
 					: '';
 

@@ -5,11 +5,24 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 /**
  * Shop Module.
  *
+ * Типы документов:
+ * 0 - Shop_Warehouse_Inventory_Model
+ * 1 - Shop_Warehouse_Incoming_Model
+ * 2 - Shop_Warehouse_Writeoff_Model
+ * 3 - Shop_Warehouse_Regrade_Model
+ * 4 - Shop_Warehouse_Movement_Model
+ * 5 - Shop_Order_Model
+ * 6 - Shop_Warehouse_Purchaseorder_Model
+ * 7 - Shop_Warehouse_Invoice_Model
+ * 8 - Shop_Warehouse_Supply
+ * 9 - Shop_Warehouse_Purchasereturn
+ * 30 - Shop_Warrant_Model
+ *
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Module extends Core_Module
 {
@@ -23,7 +36,7 @@ class Shop_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2022-11-01';
+	public $date = '2023-03-01';
 
 	/**
 	 * Module name
@@ -32,21 +45,54 @@ class Shop_Module extends Core_Module
 	protected $_moduleName = 'shop';
 
 	/**
-	 * List of Schedule Actions
-	 * @var array
+	 * Get List of Schedule Actions
+	 * @return array
 	 */
-	protected $_scheduleActions = array(
-		0 => 'searchIndexItem',
-		1 => 'searchIndexGroup',
-		2 => 'searchUnindexItem',
-		3 => 'recountShop',
-		4 => 'rebuildFastfilter',
-		5 => 'unsetApplyPurchaseDiscounts',
-		6 => 'setApplyPurchaseDiscounts',
-		7 => 'recountSets',
-		8 => 'updateCurrency',
-		9 => 'checkShopOrderStatusDeadline'
-	);
+	public function getScheduleActions()
+	{
+		return array(
+			0 => array(
+				'name' => 'searchIndexItem',
+				'entityCaption' => Core::_('Shop.searchIndexItem')
+			),
+			1 => array(
+				'name' => 'searchIndexGroup',
+				'entityCaption' => Core::_('Shop.searchIndexGroup')
+			),
+			2 => array(
+				'name' => 'searchUnindexItem',
+				'entityCaption' => Core::_('Shop.searchUnindexItem')
+			),
+			3 => array(
+				'name' => 'recountShop',
+				'entityCaption' => Core::_('Shop.shop_id')
+			),
+			4 => array(
+				'name' => 'rebuildFastfilter',
+				'entityCaption' => Core::_('Shop.shop_id')
+			),
+			5 => array(
+				'name' => 'unsetApplyPurchaseDiscounts',
+				'entityCaption' => Core::_('Shop.shop_id')
+			),
+			6 => array(
+				'name' => 'setApplyPurchaseDiscounts',
+				'entityCaption' => Core::_('Shop.shop_id')
+			),
+			7 => array(
+				'name' => 'recountSets',
+				'entityCaption' => Core::_('Shop.shop_id')
+			),
+			8 => array(
+				'name' => 'updateCurrency',
+				'entityCaption' => Core::_('Shop.updateCurrency')
+			),
+			9 => array(
+				'name' => 'checkShopOrderStatusDeadline',
+				'entityCaption' => Core::_('Shop.shop_id')
+			)
+		);
+	}
 
 	protected $_options = array(
 		'itemEditWarehouseLimit' => array(
@@ -116,6 +162,8 @@ class Shop_Module extends Core_Module
 		$initialLimit = $limit;
 
 		$aPages = array();
+
+		$currentStepCount = 0;
 
 		switch ($_SESSION['search_block'])
 		{
@@ -253,6 +301,7 @@ class Shop_Module extends Core_Module
 			->join('structures', 'shops.structure_id', '=', 'structures.id')
 			->where('structures.active', '=', 1)
 			->where('structures.indexing', '=', 1)
+			->where('structures.shortcut_id', '=', 0)
 			->where('shop_groups.indexing', '=', 1)
 			->where('shop_groups.shortcut_id', '=', 0)
 			->where('shop_groups.active', '=', 1)
@@ -300,6 +349,7 @@ class Shop_Module extends Core_Module
 			->leftJoin('shop_groups', 'shop_items.shop_group_id', '=', 'shop_groups.id')
 			->where('structures.active', '=', 1)
 			->where('structures.indexing', '=', 1)
+			->where('structures.shortcut_id', '=', 0)
 			->where('shop_items.indexing', '=', 1)
 			->where('shop_items.shortcut_id', '=', 0)
 			->where('shop_items.active', '=', 1)
@@ -362,6 +412,7 @@ class Shop_Module extends Core_Module
 			->join('structures', 'shops.structure_id', '=', 'structures.id')
 			->where('structures.active', '=', 1)
 			->where('structures.indexing', '=', 1)
+			->where('structures.shortcut_id', '=', 0)
 			->where('shop_sellers.deleted', '=', 0)
 			->where('shops.deleted', '=', 0)
 			->where('structures.deleted', '=', 0)
@@ -402,6 +453,7 @@ class Shop_Module extends Core_Module
 			->join('structures', 'shops.structure_id', '=', 'structures.id')
 			->where('structures.active', '=', 1)
 			->where('structures.indexing', '=', 1)
+			->where('structures.shortcut_id', '=', 0)
 			->where('shop_producers.indexing', '=', 1)
 			->where('shop_producers.active', '=', 1)
 			->where('shop_producers.deleted', '=', 0)
@@ -636,11 +688,6 @@ class Shop_Module extends Core_Module
 				break;
 				// Rebuild fastfilter
 				case 4:
-					if (!$entityId)
-					{
-						throw new Core_Exception('callSchedule:: entityId expected as shop_id, fill in the form', array(), 0, FALSE);
-					}
-
 					$oShop = Core_Entity::factory('Shop', $entityId);
 
 					// Groups
@@ -681,10 +728,6 @@ class Shop_Module extends Core_Module
 				break;
 				case 5:
 					// Не применять скидки от суммы заказа и карты к товарам со скидками
-					if (!$entityId)
-					{
-						throw new Core_Exception('callSchedule:: entityId expected as shop_id, fill in the form', array(), 0, FALSE);
-					}
 
 					$dayFieldName = 'day' . date('N');
 					$time = time();
@@ -707,10 +750,6 @@ class Shop_Module extends Core_Module
 				break;
 				case 6:
 					// Применять скидки от суммы заказа и карты к товарам без скидкок
-					if (!$entityId)
-					{
-						throw new Core_Exception('callSchedule:: entityId expected as shop_id, fill in the form', array(), 0, FALSE);
-					}
 
 					$dayFieldName = 'day' . date('N');
 					$time = time();
@@ -736,29 +775,14 @@ class Shop_Module extends Core_Module
 				break;
 				// Recount sets
 				case 7:
-					if (!$entityId)
-					{
-						throw new Core_Exception('callSchedule:: entityId expected as shop_id, fill in the form', array(), 0, FALSE);
-					}
-
 					Core_Entity::factory('Shop', $entityId)->recountSets();
 				break;
 				// update currencies
 				case 8:
-					if (!strlen($entityId))
-					{
-						throw new Core_Exception('callSchedule:: entityId expected as `cbrf` or `floatrates`, fill in the form', array(), 0, FALSE);
-					}
-
 					$oShop_Currency_Driver = Shop_Currency_Driver::instance($entityId);
 					$oShop_Currency_Driver->execute();
 				break;
 				case 9:
-					if (!$entityId)
-					{
-						throw new Core_Exception('callSchedule:: entityId expected as shop_id, fill in the form', array(), 0, FALSE);
-					}
-
 					$oShop = Core_Entity::factory('Shop', $entityId);
 
 					$limit = 1000;
@@ -870,18 +894,31 @@ class Shop_Module extends Core_Module
 					3 => array('name' => Core::_('Shop_Warehouse_Inventory.title')),
 					4 => array('name' => Core::_('Shop_Warehouse_Regrade.title')),
 					5 => array('name' => Core::_('Shop_Warehouse_Movement.title')),
+					6 => array('name' => Core::_('Shop_Warehouse_Purchaseorder.title')),
+					7 => array('name' => Core::_('Shop_Warehouse_Invoice.title')),
+					8 => array('name' => Core::_('Shop_Warehouse_Supply.title')),
+					9 => array('name' => Core::_('Shop_Warehouse_Purchasereturn.title')),
+				)
+			),
+			array(
+				'dir' => Core::_('Shop_Warrant.title'),
+				'items' => array(
+					30 => array('name' => Core::_('Shop_Warrant.type0')),
+					31 => array('name' => Core::_('Shop_Warrant.type1')),
+					32 => array('name' => Core::_('Shop_Warrant.type2')),
+					33 => array('name' => Core::_('Shop_Warrant.type3')),
 				)
 			),
 			array(
 				'dir' => Core::_('Shop_Price.show_prices_title'),
 				'items' => array(
-					10 => array('name' => Core::_('Shop_Price_Setting.title')),
+					50 => array('name' => Core::_('Shop_Price_Setting.title')),
 				)
 			),
 			array(
 				'dir' => Core::_('Shop_Item.model_name'),
 				'items' => array(
-					15 => array('name' => Core::_('Shop_Item.item_cards')),
+					60 => array('name' => Core::_('Shop_Item.item_cards')),
 				)
 			)
 		);

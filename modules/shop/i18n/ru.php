@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Интернет-магазины',
@@ -211,4 +211,9 @@ return array(
 	'option_groupLargeImage' => 'Шаблон именования большого изображения группы',
 	'option_groupSmallImage' => 'Шаблон именования малого изображения группы',
 	'option_shop_item_card_xsl' => 'XSL-шаблон ценников',
+	'searchIndexItem' => 'Идентификатор элемента',
+	'searchIndexGroup' => 'Идентификатор группы',
+	'searchUnindexItem' => 'Идентификатор элемента',
+	'shop_id' => 'Идентификатор магазина',
+	'updateCurrency' => 'Название драйвера',
 );

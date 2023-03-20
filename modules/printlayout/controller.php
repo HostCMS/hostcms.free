@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Printlayout
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Printlayout_Controller extends Core_Controller
 {
@@ -97,7 +97,7 @@ class Printlayout_Controller extends Core_Controller
 
 		$copyFilePath = $this->_oPrintlayout->getCopyFilePath();
 
-		if (is_file($copyFilePath))
+		if (Core_File::isFile($copyFilePath))
 		{
 			// Удаляем файл в /tmp/
 			Core_File::delete($copyFilePath);
@@ -238,7 +238,7 @@ class Printlayout_Controller extends Core_Controller
 					$aRPR = $this->_getArrayByRpr($child->rPr);
 				}
 
-				if (!isset($child->br))
+				if (!isset($child->br) && !isset($child->tab))
 				{
 					if ($aPrevRPR == $aRPR)
 					{
@@ -380,7 +380,7 @@ class Printlayout_Controller extends Core_Controller
 	 */
 	public function deleteFile()
 	{
-		if (is_file($this->getFilePath()))
+		if (Core_File::isFile($this->getFilePath()))
 		{
 			Core_File::delete($this->getFilePath());
 		}

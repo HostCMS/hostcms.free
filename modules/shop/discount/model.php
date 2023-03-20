@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
  class Shop_Discount_Model extends Core_Entity
 {
@@ -67,6 +67,12 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 * @var int
 	 */
 	public $img = 0;
+
+	/**
+	 * Callback property_id
+	 * @var int
+	 */
+	public $shop_items = 0;
 
 	/**
 	 * Constructor.
@@ -281,6 +287,12 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 		$oCore_Html_Entity_Div->add(
 			$Core_Html_Entity_Span = Core_Html_Entity::factory('Span')->value(
+				'<i class="fa fa-circle" style="color: ' . ($this->color ? htmlspecialchars($this->color) : '#aebec4') . '"></i> '
+			)
+		);
+
+		$oCore_Html_Entity_Div->add(
+			$Core_Html_Entity_Span = Core_Html_Entity::factory('Span')->value(
 				htmlspecialchars($this->name)
 			)
 		);
@@ -369,7 +381,13 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 			}
 		}
 
-		$aShop_Discount_Siteuser_Groups = $this->Shop_Discount_Siteuser_Groups->findAll(FALSE);
+		$oShop_Discount_Siteuser_Groups = $this->Shop_Discount_Siteuser_Groups;
+		
+		$oShop_Discount_Siteuser_Groups->queryBuilder()
+			->clearOrderBy()
+			->orderBy('siteuser_group_id', 'ASC');
+		
+		$aShop_Discount_Siteuser_Groups = $oShop_Discount_Siteuser_Groups->findAll(FALSE);
 		if (count($aShop_Discount_Siteuser_Groups))
 		{
 			foreach ($aShop_Discount_Siteuser_Groups as $oShop_Discount_Siteuser_Group)
@@ -383,6 +401,12 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 						->class('badge badge-square badge-hostcms')
 						->value('<i class="fa fa-users darkgray"></i> ' . $siteuserGroupName)
 					);
+				
+				// Если "Все", то прерываем формирование списка
+				if (!$oShop_Discount_Siteuser_Group->siteuser_group_id)
+				{
+					break;
+				}
 			}
 		}
 		else
@@ -456,6 +480,62 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 			? Core_Str::hideZeros($this->value) . '%'
 			: htmlspecialchars($this->Shop->Shop_Currency->formatWithCurrency($this->value))
 		);
+	}
+
+	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function shop_itemsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$count = $this->Shop_Item_Discounts->getCount(FALSE);
+		$count && Core_Html_Entity::factory('Span')
+			->class('badge badge-ico badge-darkorange white')
+			->value($count < 100 ? $count : '∞')
+			->title($count)
+			->execute();
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function siteuser_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$sResult = '';
+
+		if (Core::moduleIsActive('siteuser') && $this->siteuser_id)
+		{
+			$oSiteuser = $this->Siteuser;
+
+			$aSiteuserCompanies = $oSiteuser->Siteuser_Companies->findAll();
+			$aSiteuserPersons = $oSiteuser->Siteuser_People->findAll();
+
+			if (count($aSiteuserCompanies) || count($aSiteuserPersons))
+			{
+				$sResult .= '<div class="profile-container tickets-container"><ul class="tickets-list">';
+
+				foreach ($aSiteuserCompanies as $oSiteuserCompany)
+				{
+					$oSiteuserCompany->id
+						&& $sResult .= $oSiteuserCompany->getProfileBlock();
+				}
+
+				foreach ($aSiteuserPersons as $oSiteuserPerson)
+				{
+					$oSiteuserPerson->id
+						&& $sResult .= $oSiteuserPerson->getProfileBlock();
+				}
+
+				$sResult .= '</ul></div>';
+			}
+		}
+
+		return $sResult;
 	}
 
 	/**

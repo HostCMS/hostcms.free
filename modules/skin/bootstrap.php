@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap extends Core_Skin
 {
@@ -62,7 +62,6 @@ class Skin_Bootstrap extends Core_Skin
 
 			->addJs('/modules/skin/' . $this->_skinName . '/js/ui/jquery.ui.touch-punch.min.js')
 
-
 			->addJs('/modules/skin/' . $this->_skinName . '/js/jquery.mousewheel.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/select2/select2.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/select2/i18n/' . $lng . '.js')
@@ -72,6 +71,8 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/wickedpicker/wickedpicker.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/cropper/cropper.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/cropper/jquery-cropper.min.js')
+
+			->addJs('/modules/skin/' . $this->_skinName . '/js/bootstrap-editable/js/bootstrap-editable.min.js')
 
 
 			//->addJs('/modules/skin/' . $this->_skinName . '/js/timeslider/timeslider.js')
@@ -98,6 +99,8 @@ class Skin_Bootstrap extends Core_Skin
 			->addCss('/modules/skin/' . $this->_skinName . '/css/wickedpicker.min.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/cropper/cropper.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/cropper/jquery-cropper.css')
+
+			->addCss('/modules/skin/' . $this->_skinName . '/js/bootstrap-editable/css/bootstrap-editable.css')
 
 			//->addCss('/modules/skin/' . $this->_skinName . '/css/timeslider.css')
 			//->addCss('/modules/skin/' . $this->_skinName . '/js/jRange/jquery.range.css')
@@ -1381,7 +1384,7 @@ class Skin_Bootstrap extends Core_Skin
 <div class="container">
 	<div class="row">
 		<div class="col-xs-12">
-			<p class="copy pull-left copyright">Copyright © 2005–2022 <?php echo Core::_('Admin.company')?></p>
+			<p class="copy pull-left copyright">Copyright © 2005–2023 <?php echo Core::_('Admin.company')?></p>
 			<p class="copy text-right contacts">
 				<?php echo Core::_('Admin.website')?> <a href="http://<?php echo Core::_('Admin.company-website')?>" target="_blank"><?php echo Core::_('Admin.company-website')?></a>
 				<br/>
@@ -1754,8 +1757,9 @@ class Skin_Bootstrap extends Core_Skin
 			$aTemplates[] = $oTemplate;
 
 			$oTemplate->type == 1
-				&& strlen($oTemplate->loadManifestFile())
+				&& $oTemplate->loadManifestFile() != ''
 				&& $bLess = TRUE;
+
 		} while ($oTemplate = $oTemplate->getParent());
 
 		$aTemplates = array_reverse($aTemplates);
@@ -1840,8 +1844,8 @@ class Skin_Bootstrap extends Core_Skin
 			: 'fa-lock-open';
 
 		$classLocked = Core_Array::getCookie('lock-panel', 0, 'int')
-			? ' opened'
-			: ' closed';
+			? ' hostcms-panel-opened'
+			: ' hostcms-panel-closed';
 
 		$oHostcmsTopPanel = Core_Html_Entity::factory('Div')
 			->class('hostcmsInformationPanel' . $classLocked);

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Delivery_Condition_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -60,7 +60,7 @@ class Shop_Delivery_Condition_Controller_Edit extends Admin_Form_Action_Controll
 					->add($oConditionsTabRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oConditionsTabRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oConditionsTabRow3 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oConditionsTabRow4 = Admin_Form_Entity::factory('Div')->class('row'))
+					// ->add($oConditionsTabRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 				;
 
 				$oAdditionalTab = $this->getTab('additional');
@@ -239,18 +239,24 @@ class Shop_Delivery_Condition_Controller_Edit extends Admin_Form_Action_Controll
 				// Добавляем группу товаров
 				$oMainRow1->add($oGroupSelect);
 
-				$oMainTab->move($this->getField('marking')->divAttr(array('class' => 'form-group col-xs-12 col-md-4')), $oMainRow5);
-				$oMainTab->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-md-4')), $oMainRow5);
-				$oMainTab->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-md-4 margin-top-21')), $oMainRow5);
+				$oMainTab
+					->move($this->getField('marking')->divAttr(array('class' => 'form-group col-xs-12 col-md-4')), $oMainRow5)
+					->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-md-4')), $oMainRow5)
+					->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-md-4 margin-top-21')), $oMainRow5);
 
-				$oConditionsTab->move($oMinWeightField->divAttr(array('class' => 'form-group col-xs-12')), $oConditionsTabRow1);
-				$oConditionsTab->move($oMaxWeightField->divAttr(array('class' => 'form-group col-xs-12')), $oConditionsTabRow2);
-				$oConditionsTab->move($oMinPriceField->divAttr(array('class' => 'form-group col-xs-12')), $oConditionsTabRow3);
-				$oConditionsTab->move($oMaxPriceField->divAttr(array('class' => 'form-group col-xs-12')), $oConditionsTabRow4);
+				$oConditionsTab
+					->move($oMinWeightField->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oConditionsTabRow1)
+					->move($oMaxWeightField->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oConditionsTabRow1)
+					->move($oMinPriceField->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oConditionsTabRow2)
+					->move($oMaxPriceField->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oConditionsTabRow2);
+
+				$oMainTab
+					->move($this->getField('time_from')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oConditionsTabRow3)
+					->move($this->getField('time_to')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oConditionsTabRow3);
 
 				// Заголовок формы
 				$title = $this->_object->id
-					? Core::_('Shop_Delivery_Condition.cond_of_delivery_edit_form_title', $this->_object->name)
+					? Core::_('Shop_Delivery_Condition.cond_of_delivery_edit_form_title', $this->_object->name, FALSE)
 					: Core::_('Shop_Delivery_Condition.cond_of_delivery_add_form_title');
 
 				$this->title($title);
@@ -266,7 +272,7 @@ class Shop_Delivery_Condition_Controller_Edit extends Admin_Form_Action_Controll
 
 				// Заголовок формы
 				$title = $this->_object->id
-					? Core::_('Shop_Delivery_Condition_Dir.edit_form_title', $this->_object->name)
+					? Core::_('Shop_Delivery_Condition_Dir.edit_form_title', $this->_object->name, FALSE)
 					: Core::_('Shop_Delivery_Condition_Dir.add_form_title');
 
 				$this->title($title);

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage User
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Wallpaper_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -59,7 +59,7 @@ class User_Wallpaper_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 				array(
 					'max_width' => 3840,
 					'max_height' => 2160,
-					'path' => $this->_object->image_large != '' && is_file($this->_object->getLargeImageFilePath())
+					'path' => $this->_object->image_large != '' && Core_File::isFile($this->_object->getLargeImageFilePath())
 						? $this->_object->getLargeImageFileHref()
 						: '',
 					'show_params' => FALSE,
@@ -92,11 +92,10 @@ class User_Wallpaper_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 			->move($this->getField('color')->set('data-control', 'hue')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow2)
 			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow2);
 
-		$title = $this->_object->id
-			? Core::_('User_Wallpaper.edit_title', $this->_object->name)
-			: Core::_('User_Wallpaper.add_title');
-
-		$this->title($title);
+		$this->title($this->_object->id
+			? Core::_('User_Wallpaper.edit_title', $this->_object->name, FALSE)
+			: Core::_('User_Wallpaper.add_title')
+		);
 
 		return $this;
 	}

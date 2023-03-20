@@ -1,3 +1,34 @@
+$(function() {
+    $("#datepicker_cart_time_from").wickedpicker({
+		twentyFour: true, //Display 24 hour format, defaults to false
+		upArrow: 'wickedpicker__controls__control-up', //The up arrow class selector to use, for custom CSS
+		downArrow: 'wickedpicker__controls__control-down', //The down arrow class selector to use, for custom CSS
+		close: 'wickedpicker__close', //The close class selector to use, for custom CSS
+		hoverState: 'hover-state', //The hover state class to use, for custom CSS
+		title: 'Время', //The Wickedpicker's title,
+		showSeconds: false, //Whether or not to show seconds,
+		timeSeparator: ' : ', // The string to put in between hours and minutes (and seconds)
+		secondsInterval: 1, //Change interval for seconds, defaults to 1,
+		minutesInterval: 1, //Change interval for minutes, defaults to 1
+		clearable: false //Make the picker's input clearable (has clickable 'x')        
+    });
+    
+    $("#datepicker_cart_time_to").wickedpicker({
+        now: new Date(new Date().getTime() + 2 * 60 * 60 * 1000).toLocaleTimeString(), // + 2 hours
+		twentyFour: true, //Display 24 hour format, defaults to false
+		upArrow: 'wickedpicker__controls__control-up', //The up arrow class selector to use, for custom CSS
+		downArrow: 'wickedpicker__controls__control-down', //The down arrow class selector to use, for custom CSS
+		close: 'wickedpicker__close', //The close class selector to use, for custom CSS
+		hoverState: 'hover-state', //The hover state class to use, for custom CSS
+		title: 'Время', //The Wickedpicker's title,
+		showSeconds: false, //Whether or not to show seconds,
+		timeSeparator: ' : ', // The string to put in between hours and minutes (and seconds)
+		secondsInterval: 1, //Change interval for seconds, defaults to 1,
+		minutesInterval: 1, //Change interval for minutes, defaults to 1
+		clearable: false //Make the picker's input clearable (has clickable 'x')        
+    });    
+});
+
 function AddIntoCart(shop_path, item_id, item_count)
 {
 	cmsrequest = shop_path + 'cart/?add=' + item_id + '&count=' + item_count;

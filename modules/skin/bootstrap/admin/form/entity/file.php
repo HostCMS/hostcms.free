@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Entity_File
 {
@@ -71,7 +71,9 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 			'show_description' => FALSE,
 
 			// Описания файла
-			'description' => ''
+			'description' => '',
+
+			'windowTitle' => Core::_('Admin_Form.window_large_image')
 		);
 
 		// image_watermark_position_x_show - показывать поле задания положения "водяного" знака по оси X
@@ -136,7 +138,9 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 			'show_description' => FALSE,
 
 			// Описания файла
-			'description' => ''
+			'description' => '',
+
+			'windowTitle' => Core::_('Admin_Form.window_small_image')
 		);
 
 		// Объединяем с типовыми параметрами
@@ -424,7 +428,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 							->id('file_large_settings_' . $iAdmin_Form_Count)
 							->class('input-group-addon control-item')
 							->addAllowedProperty('data-title')
-							->set('data-title', '<b>' . Core::_('Admin_Form.window_large_image') . '</b>')
+							->set('data-title', '<b>' . htmlspecialchars($this->largeImage['windowTitle']) . '</b>')
 							->add(
 								Admin_Form_Entity::factory('Code')->html('<i class="fa fa-cog"></i>')
 							)
@@ -438,17 +442,20 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 		{
 			$pathForExt = $this->largeImage['originalName'] != '' ? $this->largeImage['originalName'] : $this->largeImage['path'];
 
-			if (Core_File::isValidExtension($pathForExt, array('jpg', 'jpeg', 'gif', 'png', 'webp')))
+			if (Core_File::isValidExtension($pathForExt, array('jpg', 'jpeg', 'gif', 'png', 'webp', 'svg')))
 			{
 				$prefixRand = strpos($this->largeImage['path'], '?') === FALSE ? '?' : '&';
+
+				$style = Core_File::getExtension($pathForExt) === 'svg'
+					? 'height:100px'
+					: 'max-height:200px';
 
 				$oLarge_Input_Group_Div->add(Core_Html_Entity::factory('Script')
 					->value('$(function(){
 							$("#' . $windowId . ' #file_preview_large_' . $this->largeImage['id'] . '").popover({
-								content: \'<img src="' . htmlspecialchars($this->largeImage['path']) . $prefixRand . 'rnd=' . rand() .'" style="max-width:200px" />\',
+								content: \'<img src="' . htmlspecialchars($this->largeImage['path']) . $prefixRand . 'rnd=' . rand() .'" style="' . $style . '" />\',
 								html: true,
 								placement: \'top\',
-								// container: $(\'#' . $windowId . ' #file_large_' . $iAdmin_Form_Count . '\'),
 								container: "body",
 								trigger: "hover"
 							});
@@ -718,7 +725,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 								->id('file_small_settings_' . $iAdmin_Form_Count)
 								->class('input-group-addon control-item')
 								->addAllowedProperty('data-title')
-								->set('data-title', '<b>' . Core::_('Admin_Form.window_small_image') . '</b>')
+								->set('data-title', '<b>' . htmlspecialchars($this->smallImage['windowTitle']) . '</b>')
 								->add(
 									Admin_Form_Entity::factory('Code')->html('<i class="fa fa-cog"></i>')
 								)
@@ -731,17 +738,20 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 				{
 					$pathForExt = $this->smallImage['originalName'] != '' ? $this->smallImage['originalName'] : $this->smallImage['path'];
 
-					if (Core_File::isValidExtension($pathForExt, array('jpg', 'jpeg', 'gif', 'png', 'webp')))
+					if (Core_File::isValidExtension($pathForExt, array('jpg', 'jpeg', 'gif', 'png', 'webp', 'svg')))
 					{
 						$prefixRand = strpos($this->smallImage['path'], '?') === FALSE ? '?' : '&';
+
+						$style = Core_File::getExtension($pathForExt) === 'svg'
+							? 'height:100px'
+							: 'max-height:200px';
 
 						$oSmall_Input_Group_Div->add(Core_Html_Entity::factory('Script')
 							->value('$(function(){
 								$("#' . $windowId . ' #file_preview_' . $this->smallImage['id'] . '").popover({
-									content: \'<img src="' . $this->smallImage['path'] . $prefixRand . 'rnd=' . rand() . '" style="max-width:200px" />\',
+									content: \'<img src="' . $this->smallImage['path'] . $prefixRand . 'rnd=' . rand() . '" style="' . $style . '" />\',
 									html: true,
 									placement: \'top\',
-									// container: $(\'#' . $windowId . ' #file_small_' . $iAdmin_Form_Count . '\'),
 									container: "body",
 									trigger: "hover"
 								});

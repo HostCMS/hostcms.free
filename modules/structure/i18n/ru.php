@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Structure
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Структура сайта',
@@ -90,4 +90,7 @@ return array(
 	'save_lib_file_error' => 'Невозможно сохранить lib-файл, проверьте права доступа.',
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
+	'add_shortcut_title' => 'Создание ярлыка',
+	'add_item_shortcut_structure_id' => 'Родительский узел',
+	'shortcut_success' => "Ярлык успешно добавлен",
 );

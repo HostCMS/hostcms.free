@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Country_Location_Model extends Core_Entity
 {
@@ -123,11 +123,18 @@ class Shop_Country_Location_Model extends Core_Entity
 	 * Backend callback method
 	 * @return string
 	 */
-	public function nameBackend()
+	public function nameBackend($oAdmin_Form_Field)
 	{
 		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')->value(
 			htmlspecialchars($this->name)
 		);
+
+		if ($oAdmin_Form_Field->editable)
+		{
+			$oCore_Html_Entity_Div
+				->class('editable')
+				->id('apply_check_0_' . $this->id . '_fv_226');
+		}
 
 		if (!$this->active)
 		{

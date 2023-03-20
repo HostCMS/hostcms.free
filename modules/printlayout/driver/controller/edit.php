@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Printlayout
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Printlayout_Driver_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -22,10 +22,6 @@ class Printlayout_Driver_Controller_Edit extends Admin_Form_Action_Controller_Ty
 	{
 		parent::_prepareForm();
 
-		$title = $this->_object->id
-			? Core::_('Printlayout_Driver.edit_title', $this->_object->name)
-			: Core::_('Printlayout_Driver.add_title');
-
 		$oMainTab = $this->getTab('main');
 
 		$oMainTab
@@ -36,10 +32,12 @@ class Printlayout_Driver_Controller_Edit extends Admin_Form_Action_Controller_Ty
 			->move($this->getField('name')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1)
 			->move($this->getField('driver')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow2)
 			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow2)
-			->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 margin-top-21')), $oMainRow2)
-			;
+			->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 margin-top-21')), $oMainRow2);
 
-		$this->title($title);
+		$this->title($this->_object->id
+			? Core::_('Printlayout_Driver.edit_title', $this->_object->name, FALSE)
+			: Core::_('Printlayout_Driver.add_title')
+		);
 
 		return $this;
 	}

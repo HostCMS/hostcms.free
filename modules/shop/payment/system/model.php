@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Payment_System_Model extends Core_Entity
 {
@@ -176,7 +176,7 @@ class Shop_Payment_System_Model extends Core_Entity
 	public function loadPaymentSystemFile()
 	{
 		$path = $this->getPaymentSystemFilePath();
-		return is_file($path) ? Core_File::read($path) : NULL;
+		return Core_File::isFile($path) ? Core_File::read($path) : NULL;
 	}
 
 	/**
@@ -291,7 +291,7 @@ class Shop_Payment_System_Model extends Core_Entity
 	 */
 	public function createDir()
 	{
-		if (!is_dir($this->getPath()))
+		if (!Core_File::isDir($this->getPath()))
 		{
 			try
 			{
@@ -310,7 +310,7 @@ class Shop_Payment_System_Model extends Core_Entity
 	{
 		$path = $this->getPaymentSystemImageFilePath();
 
-		if (is_file($path))
+		if (Core_File::isFile($path))
 		{
 			$aSizes = Core_Image::instance()->getImageSize($path);
 			if ($aSizes)
@@ -325,6 +325,30 @@ class Shop_Payment_System_Model extends Core_Entity
 	}
 
 	/**
+	 * Specify large image for group
+	 * @param string $fileSourcePath source file
+	 * @param string $fileName target file name
+	 * @return self
+	 */
+	public function saveImageFile($fileSourcePath, $fileName)
+	{
+		$fileName = Core_File::filenameCorrection($fileName);
+
+		// Определяем расширение файла
+		$ext = Core_File::getExtension($fileName);
+
+		$image = 'shop_payment' . $this->id . '.' . ($ext == '' ? '' : $ext);
+
+		$this->createDir();
+
+		$this->image = $image;
+		$this->save();
+		Core_File::upload($fileSourcePath, $this->getPath() . $image);
+		return $this;
+	}
+
+
+	/**
 	 * Copy object
 	 * @return Core_Entity
 	 * @hostcms-event shop_payment_system.onAfterRedeclaredCopy
@@ -335,7 +359,16 @@ class Shop_Payment_System_Model extends Core_Entity
 
 		try
 		{
-			if (is_file($this->getPaymentSystemFilePath()))
+			if (Core_File::isFile($this->getPaymentSystemImageFilePath()))
+			{
+				$newObject->saveImageFile($this->getPaymentSystemImageFilePath(), $this->image);
+			}
+		}
+		catch (Exception $e) {}
+
+		try
+		{
+			if (Core_File::isFile($this->getPaymentSystemFilePath()))
 			{
 				$content = str_replace("Shop_Payment_System_Handler" . $this->id, "Shop_Payment_System_Handler" . $newObject->id, $this->loadPaymentSystemFile());
 

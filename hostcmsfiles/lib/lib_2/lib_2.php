@@ -56,14 +56,14 @@ if ($Informationsystem_Controller_Show->item == 0)
 		$oInformationsystem_Item->active = Core_Page::instance()->libParams['addedItemActive'];
 		$oInformationsystem_Item->path = '';
 
-		$subject = nl2br(strip_tags(Core_Array::getPost('subject')));
-		$text = strip_tags(Core_Array::getPost('text'));
+		$subject = nl2br(strip_tags(Core_Array::getPost('subject', '', 'str')));
+		$text = strip_tags(Core_Array::getPost('text', '', 'str'));
 		$oInformationsystem_Item->name = strlen($subject) > 0 ? $subject : '<Без темы>';
 		$oInformationsystem_Item->text = nl2br($text);
 		$oInformationsystem_Item->siteuser_id = $siteuser_id;
 
-		$author = strip_tags(Core_Array::getPost('author'));
-		$email = strip_tags(Core_Array::getPost('email'));
+		$author = strip_tags(Core_Array::getPost('author', '', 'str'));
+		$email = strip_tags(Core_Array::getPost('email', '', 'str'));
 
 		$oInformationsystem = $Informationsystem_Controller_Show->getEntity();
 		$oInformationsystemItems = $oInformationsystem->Informationsystem_Items;
@@ -76,7 +76,7 @@ if ($Informationsystem_Controller_Show->item == 0)
 
 		if (!isset($aLastInformationsystemItem[0]) || time() < Core_Date::sql2timestamp($oInformationsystem_Item->datetime) + ADD_COMMENT_DELAY)
 		{
-			if ($oInformationsystem->use_captcha == 0 || $siteuser_id > 0 || Core_Captcha::valid(Core_Array::getPost('captcha_id'), Core_Array::getPost('captcha')))
+			if ($oInformationsystem->use_captcha == 0 || $siteuser_id > 0 || Core_Captcha::valid(Core_Array::getPost('captcha_id', '', 'str'), Core_Array::getPost('captcha', '', 'str')))
 			{
 				$oInformationsystem->add($oInformationsystem_Item);
 
@@ -143,7 +143,7 @@ if ($Informationsystem_Controller_Show->item == 0)
 				$message .= "Вопрос: " . $oInformationsystem_Item->text;
 
 				$aFrom = array_map('trim', explode(',', EMAIL_TO));
-				
+
 				Core_Mail::instance()
 					->to(EMAIL_TO)
 					->from($aFrom[0])
@@ -214,11 +214,11 @@ else
 		$allowable_tags = '<b><strong><i><em><br><p><u><strike><ul><ol><li>';
 		$oComment->parent_id = Core_Array::getPost('parent_id', 0, 'int');
 		$oComment->active = Core_Array::get(Core_Page::instance()->libParams, 'addedCommentActive', 1) == 1 ? 1 : 0;
-		$oComment->author = Core_Str::stripTags(Core_Array::getPost('author'));
-		$oComment->email = Core_Str::stripTags(Core_Array::getPost('email'));
+		$oComment->author = Core_Str::stripTags(Core_Array::getPost('author', '', 'str'));
+		$oComment->email = Core_Str::stripTags(Core_Array::getPost('email', '', 'str'));
 		$oComment->grade = Core_Array::getPost('grade', 0, 'int');
-		$oComment->subject = Core_Str::stripTags(Core_Array::getPost('subject'));
-		$oComment->text = nl2br(Core_Str::stripTags(Core_Array::getPost('text'), $allowable_tags));
+		$oComment->subject = Core_Str::stripTags(Core_Array::getPost('subject', '', 'str'));
+		$oComment->text = nl2br(Core_Str::stripTags(Core_Array::getPost('text', '', 'str'), $allowable_tags));
 		$oComment->siteuser_id = $siteuser_id;
 
 		$oInformationsystem_Item = Core_Entity::factory('Informationsystem_Item', $Informationsystem_Controller_Show->item);
@@ -231,16 +231,16 @@ else
 		{
 			$oInformationsystem = $Informationsystem_Controller_Show->getEntity();
 
-			if ($oInformationsystem->use_captcha == 0 || $siteuser_id > 0 || Core_Captcha::valid(Core_Array::getPost('captcha_id'), Core_Array::getPost('captcha')))
+			if ($oInformationsystem->use_captcha == 0 || $siteuser_id > 0 || Core_Captcha::valid(Core_Array::getPost('captcha_id', '', 'str'), Core_Array::getPost('captcha', '', 'str')))
 			{
 				$oComment->save();
 
 				$oComment
 					->dateFormat($oInformationsystem->format_date)
 					->dateTimeFormat($oInformationsystem->format_datetime);
-				
+
 				$oInformationsystem_Item->add($oComment)->clearCache();
-				
+
 				$oXmlCommentTag->addEntity($oInformationsystem);
 
 				// Отправка письма администратору

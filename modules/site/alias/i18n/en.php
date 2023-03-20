@@ -1,13 +1,5 @@
 <?php
-/**
- * Sites.
- *
- * @package HostCMS
- * @subpackage Site
- * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'Domains',
 	'markDeleted_success' => 'Information about domain successfully deleted',
@@ -37,7 +29,9 @@ return array(
 	'server_error_respond_1' => 'Server configuration has been changed; you cannot get a key. Please contact administrator.',
 	'server_error_respond_2' => 'User not found. Please ensure that you specified a correct login in your registration data in section Websites.',
 	'server_error_respond_3' => 'Order not found. This order may belong to another user. Please ensure that you specified a correct login in your registration data in section Websites.',
-	'server_error_respond_4' => 'HostCMS system not found. Please try to request key once more. Please pay attention &mdash; that the management system should be available on the main domain of the current website. Specify a main domain in the domains list.',
+	'server_error_respond_4' => 'HostCMS system not found. Please try to request key once more.
+	<br />Please pay attention &mdash; that the management system should be available on the main domain of the current website. Specify a main domain in the domains list.
+	<br /><b>If your site is running over HTTPS, then the site must have the HTTPS option set</b>.',
 	'server_error_respond_5' => 'Invalid domain name.',
 	'server_error_respond_6' => 'You cannot get keys, please contact administrator.',
 	'server_error_respond_10' => 'Error 10. Please contact the support.',

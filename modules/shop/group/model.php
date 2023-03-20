@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Group_Model extends Core_Entity
 {
@@ -333,7 +333,7 @@ class Shop_Group_Model extends Core_Entity
 	 */
 	public function createDir()
 	{
-		if (!is_dir($this->getGroupPath()))
+		if (!Core_File::isDir($this->getGroupPath()))
 		{
 			try
 			{
@@ -419,7 +419,7 @@ class Shop_Group_Model extends Core_Entity
 	public function deleteLargeImage()
 	{
 		$fileName = $this->getLargeFilePath();
-		if ($this->image_large != '' && is_file($fileName))
+		if ($this->image_large != '' && Core_File::isFile($fileName))
 		{
 			try
 			{
@@ -439,7 +439,7 @@ class Shop_Group_Model extends Core_Entity
 	public function deleteSmallImage()
 	{
 		$fileName = $this->getSmallFilePath();
-		if ($this->image_small != '' && is_file($fileName))
+		if ($this->image_small != '' && Core_File::isFile($fileName))
 		{
 			try
 			{
@@ -460,7 +460,7 @@ class Shop_Group_Model extends Core_Entity
 	{
 		$path = $this->getLargeFilePath();
 
-		if (is_file($path))
+		if (Core_File::isFile($path))
 		{
 			$aSizes = Core_Image::instance()->getImageSize($path);
 			if ($aSizes)
@@ -481,7 +481,7 @@ class Shop_Group_Model extends Core_Entity
 	{
 		$path = $this->getSmallFilePath();
 
-		if (is_file($path))
+		if (Core_File::isFile($path))
 		{
 			$aSizes = Core_Image::instance()->getImageSize($path);
 			if ($aSizes)
@@ -969,7 +969,7 @@ class Shop_Group_Model extends Core_Entity
 			try {
 				Core::$mainConfig['translate'] && $sTranslated = Core_Str::translate($this->name);
 
-				$this->path = Core::$mainConfig['translate'] && strlen($sTranslated)
+				$this->path = Core::$mainConfig['translate'] && strlen((string) $sTranslated)
 					? $sTranslated
 					: $this->name;
 
@@ -1073,13 +1073,13 @@ class Shop_Group_Model extends Core_Entity
 		$newObject->save();
 
 		// Существует файл большого изображения для оригинального элемента
-		if (is_file($this->getLargeFilePath()))
+		if (Core_File::isFile($this->getLargeFilePath()))
 		{
 			$newObject->saveLargeImageFile($this->getLargeFilePath(), $this->image_large);
 		}
 
 		// Существует файл малого изображения для оригинального элемента
-		if (is_file($this->getSmallFilePath()))
+		if (Core_File::isFile($this->getSmallFilePath()))
 		{
 			$newObject->saveSmallImageFile($this->getSmallFilePath(), $this->image_small);
 		}
@@ -1113,7 +1113,7 @@ class Shop_Group_Model extends Core_Entity
 				$oPropertyValue->setDir($this->getGroupPath());
 				$oNewPropertyValue->setDir($newObject->getGroupPath());
 
-				if (is_file($oPropertyValue->getLargeFilePath()))
+				if (Core_File::isFile($oPropertyValue->getLargeFilePath()))
 				{
 					try
 					{
@@ -1121,7 +1121,7 @@ class Shop_Group_Model extends Core_Entity
 					} catch (Exception $e) {}
 				}
 
-				if (is_file($oPropertyValue->getSmallFilePath()))
+				if (Core_File::isFile($oPropertyValue->getSmallFilePath()))
 				{
 					try
 					{

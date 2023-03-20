@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Schedule
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Schedule_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -22,10 +22,9 @@ class Schedule_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	{
 		parent::_prepareForm();
 
-		$this->title(
-			$this->_object->id
-				? Core::_('Schedule.edit_title', $this->_object->getActionName())
-				: Core::_('Schedule.add_title')
+		$this->title($this->_object->id
+			? Core::_('Schedule.edit_title', $this->_object->getActionName(), FALSE)
+			: Core::_('Schedule.add_title')
 		);
 
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
@@ -99,15 +98,26 @@ class Schedule_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$aModuleActions = $oSchedule_Controller->getModuleActions($this->_object->module_id);
 
 		// Добавляем список действий
-		$oMainRow2->add(Admin_Form_Entity::factory('Select')
-			->id('scheduleAction')
-			->name('action')
-			->caption(Core::_('Schedule.action'))
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
-			->options(is_array($aModuleActions) && count($aModuleActions) ? $aModuleActions : array(' … '))
-			->value($this->_object->action));
+		$oMainRow2->add(
+			Admin_Form_Entity::factory('Select')
+				->id('scheduleAction')
+				->name('action')
+				->caption(Core::_('Schedule.action'))
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+				->options(is_array($aModuleActions) && count($aModuleActions) ? $aModuleActions : array(' … '))
+				->value($this->_object->action)
+				->onchange("$.scheduleLoadEntityCaption(this)")
+		);
 
-		$oMainTab->move($this->getField('entity_id')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow2);
+		$caption = isset($aModuleActions[$this->_object->action]['attr']['data-entityCaption'])
+			? $aModuleActions[$this->_object->action]['attr']['data-entityCaption']
+			: Core::_('Schedule.entity_id');
+
+		$hidden = $caption == ''
+			? ' hidden'
+			: '';
+
+		$oMainTab->move($this->getField('entity_id')->id('entity_id')->caption($caption !== '' ? $caption : Core::_('Schedule.entity_id'))->divAttr(array('class' => 'form-group col-xs-12 col-sm-4' . $hidden)), $oMainRow2);
 
 		$oMainTab->move($this->getField('description'), $oMainRow3);
 

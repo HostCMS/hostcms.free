@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Seller_Model extends Core_Entity
 {
@@ -248,7 +248,7 @@ class Shop_Seller_Model extends Core_Entity
 	{
 		$path = $this->getLargeFilePath();
 
-		if (is_file($path))
+		if (Core_File::isFile($path))
 		{
 			$aSizes = Core_Image::instance()->getImageSize($path);
 			if ($aSizes)
@@ -288,7 +288,7 @@ class Shop_Seller_Model extends Core_Entity
 	{
 		$path = $this->getSmallFilePath();
 
-		if (is_file($path))
+		if (Core_File::isFile($path))
 		{
 			$aSizes = Core_Image::instance()->getImageSize($path);
 			if ($aSizes)
@@ -326,7 +326,7 @@ class Shop_Seller_Model extends Core_Entity
 	 */
 	public function createDir()
 	{
-		if (!is_dir($this->getSellerPath()))
+		if (!Core_File::isDir($this->getSellerPath()))
 		{
 			try
 			{

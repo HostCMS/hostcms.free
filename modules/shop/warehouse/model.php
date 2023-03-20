@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Model extends Core_Entity
 {
@@ -40,6 +40,10 @@ class Shop_Warehouse_Model extends Core_Entity
 		'shop_warehouse_cell_item' => array(),
 		'tag' => array('through' => 'tag_shop_warehouse'),
 		'tag_shop_warehouse' => array(),
+		'shop_warehouse_purchaseorder' => array(),
+		'shop_warehouse_invoice' => array(),
+		'shop_warehouse_supply' => array(),
+		'shop_warehouse_purchasereturn' => array(),
 	);
 
 	/**
@@ -219,16 +223,19 @@ class Shop_Warehouse_Model extends Core_Entity
 			->execute();
 
 		$this->shop_warehouse_type_id && Core_Html_Entity::factory('Code')
-			->value('<span class="badge badge-square badge-max-width margin-left-5" title="' . htmlspecialchars($this->Shop_Warehouse_Type->name) . '" style="background-color: ' . htmlspecialchars($this->Shop_Warehouse_Type->color) . '">' . htmlspecialchars($this->Shop_Warehouse_Type->name) . '</span>')
+			->value('<span class="badge badge-round badge-max-width margin-left-5" title="' . htmlspecialchars($this->Shop_Warehouse_Type->name) . '" style="border-color: ' . $this->Shop_Warehouse_Type->color . '; color: ' . Core_Str::hex2darker($this->Shop_Warehouse_Type->color, 0.2) . '; background-color: ' . Core_Str::hex2lighter($this->Shop_Warehouse_Type->color, 0.88) . '">' . htmlspecialchars($this->Shop_Warehouse_Type->name) . '</span>')
 			->execute();
 
-		$aTags = $this->Tags->findAll(FALSE);
-
-		foreach ($aTags as $oTag)
+		if (Core::moduleIsActive('tag'))
 		{
-			Core_Html_Entity::factory('Code')
-				->value('<span class="badge badge-square badge-max-width badge-lightgray margin-left-5" title="' . htmlspecialchars($oTag->name) . '"><i class="fa fa-tag"></i> ' . htmlspecialchars($oTag->name) . '</span>')
-				->execute();
+			$aTags = $this->Tags->findAll(FALSE);
+
+			foreach ($aTags as $oTag)
+			{
+				Core_Html_Entity::factory('Code')
+					->value('<span class="badge badge-square badge-max-width badge-lightgray margin-left-5" title="' . htmlspecialchars($oTag->name) . '"><i class="fa fa-tag"></i> ' . htmlspecialchars($oTag->name) . '</span>')
+					->execute();
+			}
 		}
 	}
 

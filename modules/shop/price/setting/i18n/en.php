@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Set prices',
@@ -44,4 +44,5 @@ return array(
 	'convolution' => 'Convolution',
 	'include_modifications' => 'Add product modifications and set prices',
 	'apply_item_change_attributes' => "Set price via attribute change",
+	'apply_item_recount_sets' => "Setting the price by recounting sets"
 );

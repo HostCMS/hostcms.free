@@ -175,7 +175,7 @@ function applyDirectoryValues($objectId, $oObject, $relationName)
 	foreach ($aEntities as $oEntity)
 	{
 		$directoryValue = Core_Array::getPost("{$prefix}_{$objectId}_{$type}{$oEntity->id}");
-		$bPublic = (boolean)Core_Array::getPost("{$prefix}_{$objectId}_{$type}_public{$oEntity->id}");
+		$bPublic = Core_Array::getPost("{$prefix}_{$objectId}_{$type}_public{$oEntity->id}", '', 'bool');
 
 		if (!is_null($directoryValue))
 		{
@@ -195,7 +195,7 @@ function applyDirectoryValues($objectId, $oObject, $relationName)
 		$aNewTypes = Core_Array::getPost("{$prefix}_{$objectId}_directory_{$type}_type");
 		$aNewPublic = Core_Array::getPost("{$prefix}_{$objectId}_{$type}_public");
 
-		foreach($aNewValues as $key => $value)
+		foreach ($aNewValues as $key => $value)
 		{
 			if (strlen($value))
 			{
@@ -282,9 +282,9 @@ if (!is_null($delete_property_value) && !$bNewUser)
 // Обновление данных или регистрация нового пользователя
 if (!is_null(Core_Array::getPost('apply')))
 {
-	$login = trim(Core_Array::getPost('login', '', 'str'));
+	$login = Core_Array::getPost('login', '', 'trim');
 	$password = Core_Array::getPost('password', '', 'str');
-	$email = trim(Core_Array::getPost('email', '', 'str'));
+	$email = Core_Array::getPost('email', '', 'trim');
 
 	// Replace '/' to '-'
 	$login = str_replace('/', '-', $login);
@@ -297,11 +297,10 @@ if (!is_null(Core_Array::getPost('apply')))
 	if (Core_Valid::email($email))
 	{
 		// Check captcha
-		if ($oSiteuser->id > 0 || Core_Captcha::valid(Core_Array::getPost('captcha_id'), Core_Array::getPost('captcha')))
+		if ($oSiteuser->id > 0 || Core_Captcha::valid(Core_Array::getPost('captcha_id', '', 'str'), Core_Array::getPost('captcha', '', 'str')))
 		{
 			// Пароль необязателен при обновлении данных о пользователе
-			if (strlen($login) > 0 && ($oSiteuser->id > 0 || strlen($password) > 0) && strlen($email) > 0
-			&& mb_strpos($login, 'http://') === FALSE)
+			if (strlen($login) > 0 && ($oSiteuser->id > 0 || strlen($password) > 0) && strlen($email) > 0 && mb_strpos($login, 'http://') === FALSE)
 			{
 				// Проверка совпадения логина
 				$oTmpSiteuser = $oSiteuser->Site->Siteusers->getByLogin($login);
@@ -314,7 +313,7 @@ if (!is_null(Core_Array::getPost('apply')))
 						// При быстрой регистрации password2 не передается
 						$bQuickRegistration = is_null(Core_Array::getPost('password2'));
 
-						if ($bQuickRegistration || $password == Core_Array::getPost('password2'))
+						if ($bQuickRegistration || $password === Core_Array::getPost('password2', '', 'str'))
 						{
 							// Новому пользователю устанавливаем сразу активность при быстрой регистрации
 							$bNewUser && $oSiteuser->active = $bQuickRegistration ? 1 : 0;
@@ -410,7 +409,8 @@ if (!is_null(Core_Array::getPost('apply')))
 										if (Core_Array::getPost("maillist_{$oMaillists->id}"))
 										{
 											// Пользователь не был подписан
-											is_null($oMaillist_Siteuser) && $oMaillist_Siteuser = Core_Entity::factory('Maillist_Siteuser')->siteuser_id($oSiteuser->id)->maillist_id($oMaillists->id);
+											is_null($oMaillist_Siteuser)
+												&& $oMaillist_Siteuser = Core_Entity::factory('Maillist_Siteuser')->siteuser_id($oSiteuser->id)->maillist_id($oMaillists->id);
 
 											$oMaillist_Siteuser->type = Core_Array::getPost("type_{$oMaillists->id}") == 0 ? 0 : 1;
 											$oMaillist_Siteuser->save();
@@ -824,8 +824,8 @@ if (!is_null(Core_Array::getRequest('fast')))
 }
 
 $Siteuser_Controller_Show->xsl(
-	Core_Entity::factory('Xsl')->getByName($xslUserRegistration)
-)
+		Core_Entity::factory('Xsl')->getByName($xslUserRegistration)
+	)
 	->properties(TRUE)
 	->showMaillists(TRUE)
 	->show();

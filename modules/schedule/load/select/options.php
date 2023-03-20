@@ -8,9 +8,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Schedule
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Schedule_Load_Select_Options extends Admin_Form_Action_Controller
 {
@@ -78,7 +78,25 @@ class Schedule_Load_Select_Options extends Admin_Form_Action_Controller
 
 		$aActions = $oSchedule_Controller->getModuleActions($this->_moduleId);
 
-		count($aActions) && $this->_values = $aActions;
+		// count($aActions) && $this->_values = $aActions;
+
+		if (count($aActions))
+		{
+			$this->_values = array();
+
+			foreach ($aActions as $key => $aAction)
+			{
+				$aTmp = array(
+					'value' => $key,
+					'name' => $aAction['value']
+				);
+
+				isset($aAction['attr'])
+					&& $aTmp['attr'] = $aAction['attr'];
+
+				$this->_values[] = $aTmp;
+			}
+		}
 
 		return $this;
 	}

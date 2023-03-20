@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Document
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -69,7 +69,7 @@ class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			case 'document':
 				$title = $this->_object->id
-					? Core::_('Document.edit', $this->_object->name)
+					? Core::_('Document.edit', $this->_object->name, FALSE)
 					: Core::_('Document.add');
 
 				$oMainTab->move($this->getField('name'), $oMainRow1);
@@ -178,7 +178,7 @@ class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			case 'document_dir':
 			default:
 				$title = $this->_object->id
-					? Core::_('Document_Dir.edit_title', $this->_object->name)
+					? Core::_('Document_Dir.edit_title', $this->_object->name, FALSE)
 					: Core::_('Document_Dir.add_title');
 
 				// Удаляем стандартный <input>

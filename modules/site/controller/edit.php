@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Site
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -236,7 +236,7 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->id("icofile")
 			->largeImage(
 				array(
-					'path' => $this->_object->favicon != '' && is_file($this->_object->getFaviconPath())
+					'path' => $this->_object->favicon != '' && Core_File::isFile($this->_object->getFaviconPath())
 						? $this->_object->getFaviconHref()
 						: '',
 					'show_params' => FALSE,
@@ -466,8 +466,9 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		);
 
 		$this->title($this->_object->id
-			? Core::_('Site.site_edit_site_form_title', $this->_object->name)
-			: Core::_('Site.site_add_site_form_title'));
+			? Core::_('Site.site_edit_site_form_title', $this->_object->name, FALSE)
+			: Core::_('Site.site_add_site_form_title')
+		);
 
 		return $this;
 	}

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 {
@@ -86,7 +86,7 @@ class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 
 		$this->_aReturn = array();
 
-		Core_Event::notify(get_class($this) . '.onBeforeGetDiscounts', $this);
+		Core_Event::notify(get_class($this) . '.onBeforeGetDiscounts', $this, array($this->_shop));
 
 		if ($amount <= 0 || $quantity <= 0)
 		{
@@ -154,7 +154,7 @@ class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 			if ($oShop_Purchase_Discount->mode == 2 && $this->siteuserId)
 			{
 				$oSiteuser = Core_Entity::factory('Siteuser')->find($this->siteuserId);
-				if (!is_null($oSiteuser))
+				if (!is_null($oSiteuser->id))
 				{
 					$fSum = 0.0;
 
@@ -213,7 +213,7 @@ class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 			}
 		}
 
-		Core_Event::notify(get_class($this) . '.onAfterGetDiscounts', $this);
+		Core_Event::notify(get_class($this) . '.onAfterGetDiscounts', $this, array($this->_shop));
 
 		return $this->_aReturn;
 	}

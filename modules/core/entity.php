@@ -21,7 +21,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Entity extends Core_ORM
 {
@@ -315,7 +315,7 @@ class Core_Entity extends Core_ORM
 
 		/*$primaryKey = $this->getPrimaryKey();
 		// Заменяет уже существующий объект при mysql_fetch_object()
-		if ($primaryKey)
+		if ($primaryKey && is_scalar($primaryKey))
 		{
 			Core_ObjectWatcher::instance()->add($this);
 		}
@@ -331,7 +331,7 @@ class Core_Entity extends Core_ORM
 	static public function factory($modelName, $primaryKey = NULL)
 	{
 		// May be NULL or 0
-		if ($primaryKey)
+		if ($primaryKey && is_scalar($primaryKey))
 		{
 			$Core_ObjectWatcher = Core_ObjectWatcher::instance();
 			$realModelName = ucfirst($modelName) . '_Model';
@@ -346,7 +346,8 @@ class Core_Entity extends Core_ORM
 		$object = parent::factory($modelName, $primaryKey);
 
 		// Add into ObjectWatcher
-		$primaryKey && $Core_ObjectWatcher->add($object);
+		$primaryKey && is_scalar($primaryKey)
+			&& $Core_ObjectWatcher->add($object);
 
 		return $object;
 	}
@@ -502,7 +503,7 @@ class Core_Entity extends Core_ORM
 					$oField_Value->delete();
 				}
 
-				if (is_dir($fieldDir))
+				if (Core_File::isDir($fieldDir))
 				{
 					try {
 						Core_File::deleteDir($fieldDir);
@@ -544,7 +545,7 @@ class Core_Entity extends Core_ORM
 	public function find($primaryKey = NULL, $bCache = TRUE)
 	{
 		// May be NULL or 0
-		if ($bCache && $primaryKey)
+		if ($bCache && $primaryKey && is_scalar($primaryKey))
 		{
 			$Core_ObjectWatcher = Core_ObjectWatcher::instance();
 			$object = $Core_ObjectWatcher->exists(get_class($this), $primaryKey);
@@ -573,7 +574,8 @@ class Core_Entity extends Core_ORM
 		$object = parent::find(NULL, $bCache);
 
 		// Add into ObjectWatcher
-		$bCache && $primaryKey && $Core_ObjectWatcher->add($object);
+		$bCache && $primaryKey && is_scalar($primaryKey)
+			&& $Core_ObjectWatcher->add($object);
 
 		return $object;
 	}

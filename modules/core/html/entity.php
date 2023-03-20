@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Html
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Html_Entity extends Core_Servant_Properties
 {
@@ -371,7 +371,7 @@ abstract class Core_Html_Entity extends Core_Servant_Properties
 
 		foreach ($this->_data as $key => $value)
 		{
-			$aAttr[] = "data-{$key}=\"" . htmlspecialchars($value) . "\"";
+			$aAttr[] = "data-{$key}=\"" . htmlspecialchars((string) $value) . "\"";
 		}
 
 		return $aAttr;

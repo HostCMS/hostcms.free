@@ -11,7 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Image_Imagick extends Core_Image
 {
@@ -228,7 +228,7 @@ class Core_Image_Imagick extends Core_Image
 	{
 		$return = FALSE;
 
-		if (is_file($watermark))
+		if (Core_File::isFile($watermark))
 		{
 			$sourceImage = new Imagick($source);
 			$watermarkImage = new Imagick($watermark);
@@ -316,7 +316,7 @@ class Core_Image_Imagick extends Core_Image
 	 */
 	static public function getImageSize($path)
 	{
-		if (is_file($path) && is_readable($path) && filesize($path) > 12 && self::exifImagetype($path))
+		if (Core_File::isFile($path) && is_readable($path) && filesize($path) > 12 && self::exifImagetype($path))
 		{
 			$oImagick = new Imagick($path);
 

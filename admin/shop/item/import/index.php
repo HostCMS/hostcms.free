@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -23,8 +23,7 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 $oAdmin_Form_Controller
 	->module(Core_Module::factory($sModule))
 	->setUp()
-	->path('/admin/shop/item/import/index.php')
-;
+	->path('/admin/shop/item/import/index.php');
 
 ob_start();
 
@@ -104,7 +103,6 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
 );
 
-
 $oUserCurrent = Core_Auth::getCurrentUser();
 
 $oAdmin_Form_Entity_Form = Admin_Form_Entity::factory('Form')
@@ -166,7 +164,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 			? $_FILES['csv_file']['tmp_name']
 			: CMS_FOLDER . Core_Array::getPost('alternative_file_pointer');*/
 
-		if (is_file($sFileName) && is_readable($sFileName))
+		if (Core_File::isFile($sFileName) && is_readable($sFileName))
 		{
 			if (Core_Array::getPost('import_price_type') == 0)
 			{
@@ -180,7 +178,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 					Core_File::upload($sFileName, $sTmpFileFullpath);
 
 					// Delete uploaded by cURL file
-					if (!is_null($sTmpPath) && is_file($sTmpPath))
+					if (!is_null($sTmpPath) && Core_File::isFile($sTmpPath))
 					{
 						Core_File::delete($sTmpPath);
 					}
@@ -250,8 +248,13 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 								);
 
 								// spase and non-breaking space // trim non-breaking space broke utf-8!
-								//$aAllCaptions[] = ltrim($aTmpOptions['caption'], '  ');
-								$aAllCaptions[] = mb_strtolower(str_replace('  ', '', $aTmpOptions['caption']));
+								//$caption = ltrim($aTmpOptions['caption'], '  ');
+								$sCaption = mb_strtolower(str_replace('  ', '', $aTmpOptions['caption']));
+
+								// cut "... [47]"
+								$sCaption = preg_replace('/\s*\[\d+\]/', '', $sCaption);
+
+								$aAllCaptions[] = $sCaption;
 							}
 
 							$oMainTab = Admin_Form_Entity::factory('Tab')->name('main');
@@ -277,6 +280,9 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 
 									//$sCaption = $oShop_Item_Import_Csv_Controller->aCaptions[$j];
 									$sCaption = trim(mb_strtolower(str_replace('  ', '', $aTmpOptions['caption'])));
+
+									// cut "... [47]"
+									$sCaption = preg_replace('/\s*\[\d+\]/', '', $sCaption);
 
 									if (!$aAlreadySelected && ($aCsvLine[$i] == $sCaption
 										|| (strlen($sCaption) > 0 && strlen($aCsvLine[$i]) > 0

@@ -1,14 +1,5 @@
 <?php
 
-/**
- * Core.
- *
- * @package HostCMS
- * @subpackage Core
- * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
 return array(
 	'error_file_write' => 'Error while opening file to write %s; check your access rights to folder.',
 	'error_resize' => 'Error while minimizing small image to maximum permissible size. Image size you specified is probably less than 0.',
@@ -17,6 +8,7 @@ return array(
 	'error_log_message_stack' => "File: %s, line %s",
 	'error_log_message_short' => "<strong>%s:</strong> %s in file %s (line %s)",
 	'error_log_message' => "<strong>%s:</strong> %s in file %s (line %s)\nRequests stack:\n%s",
+	'error_log_add_message' => "<strong>Error!</strong> Message error add into log",
 
 	'info_cms' => 'Content management system',
 	'info_cms_site_support' => 'Support service website: ',
@@ -38,7 +30,8 @@ return array(
 
 	'total_time' => 'Execution time: <strong>%.3f</strong> sec, including',
 	'time_load_modules' => "load modules: <strong>%.3f</strong> sec",
-	'time_page' => "templates and content: <strong>%.3f</strong> sec",
+	'time_template' => "templates and content: <strong>%.3f</strong> sec",
+	'time_page' => "page: <strong>%.3f</strong> sec",
 	'time_page_config' => "page config: <strong>%.3f</strong> sec",
 	'time_database_connection' => "database connection: <strong>%.3f</strong> sec",
 	'time_database_select' => "database select: <strong>%.3f</strong> sec",
@@ -73,9 +66,9 @@ return array(
 	'error_log_authorization_error' => 'Incorrect authentication data',
 	'error_log_exit' => 'Logout',
 	'session_destroy_error' => 'Error session closing',
-	'error_log_add_message' => "<strong>Error!</strong> Message error add into log",
+	'session_change_ip' => 'Trying to use session %s with IP %s',
 
-	'error_message' => "Hello!\n"
+	'error_message' => "Hello!\n\n"
 	. "This event was occurred on site:\n"
 	. "Date: %s\n"
 	. "Event: %s\n"
@@ -83,9 +76,10 @@ return array(
 	. "User login: %s\n"
 	. "Site: %s\n"
 	. "Page: %s\n"
-	. "IP: %s\n"
-	. "Content management system %s,\n"
-	. "http://%s/\n",
+	. "User Agent: %s\n"
+	. "IP: %s\n\n"
+	. "Content management system HostCMS,\n"
+	. "http://www.hostcms.org",
 
 	'E_ERROR' => "Error",
 	'E_WARNING' => "Warning",
@@ -215,8 +209,10 @@ return array(
 	'day' => 'Day',
 	'month' => 'Month',
 	'year' => 'Year',
+	'quarter' => 'Quarter',
+
 	'random' => 'Random',
-	'generateChars' => 'Symbols',	
+	'generateChars' => 'Symbols',
 
 	'title_no_access_to_page' => 'You are not allowed to access this page!',
 	'message_more_info' => 'For more information, contact the site administrator.',
@@ -239,4 +235,12 @@ return array(
 
 	'show_title' => 'Show',
 	'data_show_title' => 'Show on site',
+
+	'unpack_wrong_crc' => 'Error calculating checksum %s: %d calculated, %d actually specified',
+	'unpack_file_already_exists_and_directory' => 'File %s already exists and is a directory',
+	'unpack_dir_already_exists_and_file' => 'Directory %s already exists and is a file',
+	'unpack_file_already_exists_and_protected' => 'File %s already exists and is write protected! Set file permissions according to the installation manual.',
+	'unpack_error_creating_dir' => 'Error creating directory for %s',
+	'unpack_error_opening_binary_mode' => 'Error opening file %s in binary mode',
+	'unpack_file_incorrect_size' => 'Extracted file %s has incorrect size %d, expected %d. The archive may be corrupted.',
 );

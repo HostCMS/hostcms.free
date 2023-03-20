@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Core_Module extends Core_Module
 {
@@ -24,6 +24,12 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 	 * @var string
 	 */
 	protected $_moduleName = 'core';
+
+	/**
+	 * Widget path
+	 * @var string|NULL
+	 */
+	protected $_path = NULL;
 
 	/**
 	 * Constructor.
@@ -153,7 +159,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 					<div class="tickets-container">
 					<!--<ul class="eventsjournal timeline fadeInDown">-->
 					<?php
-					if (is_file($file_name))
+					if (Core_File::isFile($file_name))
 					{
 						if ($fp = @fopen($file_name, 'r'))
 						{
@@ -339,7 +345,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 										<span class="user-company"><?php echo $dbVersion ?></span>
 									</div>
 									<?php
-									if (version_compare($dbVersion, '5.0.0', '>=') )
+									if (version_compare($dbVersion, '5.1.0', '>='))
 									{
 										$divClass = ' bg-palegreen';
 										$iClass = ' fa-check';
@@ -755,35 +761,36 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 
 				$oMainTab
 					->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+					->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$oMainRow1->add(Admin_Form_Entity::factory('Input')
 					->caption(Core::_("Site.accountinfo_login"))
-					->divAttr(array('class'=>'form-group col-lg-12 col-md-6'))
+					->divAttr(array('class'=>'form-group col-xs-12'))
 					->name("HOSTCMS_USER_LOGIN")
 					->value(defined('HOSTCMS_USER_LOGIN')
 						? HOSTCMS_USER_LOGIN
 						: ''
-					));
+					)
+				);
 
 				$oMainRow2->add(Admin_Form_Entity::factory('Input')
 					->caption(Core::_("Site.accountinfo_contract_number"))
-					->divAttr(array('class'=>'form-group col-lg-12 col-md-6'))
+					->divAttr(array('class'=>'form-group col-xs-12 col-sm-6'))
 					->name("HOSTCMS_CONTRACT_NUMBER")
 					->value(defined('HOSTCMS_CONTRACT_NUMBER')
 						? HOSTCMS_CONTRACT_NUMBER
 						: ''
-					));
-
-				$oMainRow3->add(Admin_Form_Entity::factory('Input')
+					)
+				)->add(Admin_Form_Entity::factory('Input')
 					->caption(Core::_("Site.accountinfo_pin_code"))
-					->divAttr(array('class'=>'form-group col-lg-12 col-md-6'))
+					->divAttr(array('class'=>'form-group col-xs-12 col-sm-6'))
 					->name("HOSTCMS_PIN_CODE")
 					->value(defined('HOSTCMS_PIN_CODE')
 						? HOSTCMS_PIN_CODE
 						: ''
-					));
+					)
+					->placeholder('XXXX')
+				);
 
 				?><!-- Core License -->
 				<div id="note-license" class="hidden">

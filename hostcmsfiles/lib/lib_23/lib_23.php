@@ -192,4 +192,5 @@ $Siteuser_Controller_Show->xsl(
 	)
 	->showGroups(TRUE)
 	// ->showDiscountcards(TRUE)
+	//->showResponsible(TRUE)
 	->show();

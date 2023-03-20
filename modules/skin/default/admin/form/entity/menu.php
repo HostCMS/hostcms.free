@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Menu extends Admin_Form_Entity
 {
@@ -36,7 +36,7 @@ class Skin_Default_Admin_Form_Entity_Menu extends Admin_Form_Entity
 
 		if ($href && $onclick)
 		{
-			?><a href="<?php echo htmlspecialchars($href)?>" onclick="<?php echo htmlspecialchars($onclick)?>"><?php
+			?><a href="<?php echo htmlspecialchars((string) $href)?>" onclick="<?php echo htmlspecialchars((string) $onclick)?>"><?php
 		}
 		else
 		{
@@ -45,10 +45,10 @@ class Skin_Default_Admin_Form_Entity_Menu extends Admin_Form_Entity
 
 		if ($this->img)
 		{
-			?><img align="absmiddle" src="<?php echo htmlspecialchars($this->img)?>" /><?php
+			?><img align="absmiddle" src="<?php echo htmlspecialchars((string) $this->img)?>" /><?php
 		}
 
-		echo htmlspecialchars($this->name);
+		echo htmlspecialchars((string) $this->name);
 
 		if ($href && $onclick)
 		{

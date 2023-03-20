@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Update
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Update_Entity extends Core_Entity
 {
@@ -30,6 +30,12 @@ class Update_Entity extends Core_Entity
 	 * @var int
 	 */
 	public $name = NULL;
+
+	/**
+	 * Backend property
+	 * @var int
+	 */
+	public $number = NULL;
 
 	/**
 	 * Backend property
@@ -142,7 +148,7 @@ class Update_Entity extends Core_Entity
 		/*$wysiwyg_path = CMS_FOLDER . 'admin/wysiwyg/';
 
 		// Удаление gz-файлов с кэшем виз. редактора
-		if (is_dir($wysiwyg_path) && !is_link($wysiwyg_path))
+		if (Core_File::isDir($wysiwyg_path) && !Core_File::isLink($wysiwyg_path))
 		{
 			clearstatcache();
 
@@ -183,7 +189,7 @@ class Update_Entity extends Core_Entity
 		if (is_object($oXml))
 		{
 			$update_dir = Update_Controller::instance()->getPath();
-			!is_dir($update_dir) && Core_File::mkdir($update_dir);
+			!Core_File::isDir($update_dir) && Core_File::mkdir($update_dir);
 
 			$error = (int)$oXml->error;
 
@@ -206,7 +212,7 @@ class Update_Entity extends Core_Entity
 					$error_update = FALSE;
 
 					$current_update_dir = $update_dir . '/' . $current_update_id;
-					!is_dir($current_update_dir) && Core_File::mkdir($current_update_dir);
+					!Core_File::isDir($current_update_dir) && Core_File::mkdir($current_update_dir);
 
 					$aUpdateItems = array();
 
@@ -296,7 +302,7 @@ class Update_Entity extends Core_Entity
 					{
 						if (isset($aTmpUpdateItem['tar']))
 						{
-							$Core_Tar = new Core_Tar($aTmpUpdateItem['tar']);
+							$Core_Tar = new Core_Tar($aTmpUpdateItem['tar'], 'gz');
 
 							Core_Log::instance()->clear()
 								->status(Core_Log::$MESSAGE)
@@ -351,14 +357,20 @@ class Update_Entity extends Core_Entity
 					}
 
 					// Удаляем папку с файлами
-					is_dir($current_update_dir) && Core_File::deleteDir($current_update_dir);
+					Core_File::isDir($current_update_dir) && Core_File::deleteDir($current_update_dir);
 					// Удаляем XML обновления
 					$update_file = Update_Controller::instance()->getFilePath();
-					is_file($update_file) && Core_File::delete($update_file);
+					Core_File::isFile($update_file) && Core_File::delete($update_file);
 
 					// Clear Core_ORM_ColumnCache, Core_ORM_RelationCache
 					Core_ORM::clearColumnCache();
 					Core_ORM::clearRelationModelCache();
+
+					// Rebuild Shortcodes
+					if (Core::moduleIsActive('shortcode'))
+					{
+						Shortcode_Controller::instance()->rebuild();
+					}
 
 					// Если не было ошибок
 					if (!$error_update)

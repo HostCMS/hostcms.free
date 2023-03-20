@@ -1,6 +1,7 @@
 <?php
 
 return array(
+	'model_name' => 'Tab section',
 	'dir_add_form_title' => 'Add a tab section',
 	'dir_edit_form_title' => 'Editing tab section "% s"',
 	'name' => 'Name',

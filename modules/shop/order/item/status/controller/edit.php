@@ -9,13 +9,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Item_Status_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
-	/* Type of bot module */
-	//const TYPE = 0;
-
 	/**
 	 * Set object
 	 * @param object $object object
@@ -25,6 +22,7 @@ class Shop_Order_Item_Status_Controller_Edit extends Admin_Form_Action_Controlle
 	{
 		if (!$object->id)
 		{
+			$object->shop_id = Core_Array::getGet('shop_id', 0);
 			$object->parent_id = Core_Array::getGet('parent_id', 0);
 		}
 
@@ -55,7 +53,7 @@ class Shop_Order_Item_Status_Controller_Edit extends Admin_Form_Action_Controlle
 		$oSelect_Statuses = Admin_Form_Entity::factory('Select');
 		$oSelect_Statuses
 			->options(
-				array(' … ') + self::getSelectOptions(0, $this->_object->id)
+				array(' … ') + self::getSelectOptions($this->_object->shop_id, 0, $this->_object->id)
 			)
 			->name('parent_id')
 			->value($this->_object->parent_id)
@@ -83,7 +81,7 @@ class Shop_Order_Item_Status_Controller_Edit extends Admin_Form_Action_Controlle
 		$oMainTab->delete($this->getField('shop_order_status_id'));
 
 		$oDropdownlistStatuses = Admin_Form_Entity::factory('Dropdownlist')
-			->options(Shop_Order_Status_Controller_Edit::getDropdownlistOptions())
+			->options(Shop_Order_Status_Controller_Edit::getDropdownlistOptions($this->_object->shop_id))
 			->name('shop_order_status_id')
 			->value($this->_object->shop_order_status_id)
 			->caption(Core::_('Shop_Order_Item_Status.shop_order_status_id'))
@@ -93,20 +91,10 @@ class Shop_Order_Item_Status_Controller_Edit extends Admin_Form_Action_Controlle
 
 		$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow5);
 
-		/*if ($this->_object->id && Core::moduleIsActive('bot'))
-		{
-			$oModule = Core_Entity::factory('Module')->getByPath('shop');
-
-			$this->addTabAfter(
-				Bot_Controller::getBotTab($oModule, $this->_object->id, self::TYPE), $oMainTab
-			);
-		}*/
-
-		$title = $this->_object->id
-			? Core::_('Shop_Order_Item_Status.edit_title', $this->_object->name)
-			: Core::_('Shop_Order_Item_Status.add_title');
-
-		$this->title($title);
+		$this->title($this->_object->id
+			? Core::_('Shop_Order_Item_Status.edit_title', $this->_object->name, FALSE)
+			: Core::_('Shop_Order_Item_Status.add_title')
+		);
 
 		return $this;
 	}
@@ -117,13 +105,15 @@ class Shop_Order_Item_Status_Controller_Edit extends Admin_Form_Action_Controlle
 	 */
 	static protected $_statusesTree = NULL;
 
-	static protected function _getStatusesTree($parent_id)
+	static protected function _getStatusesTree($iShopId, $parent_id)
 	{
+		$oShop = Core_Entity::factory('Shop', $iShopId);
+
 		if (is_null(self::$_statusesTree))
 		{
 			self::$_statusesTree = array();
 
-			$oShop_Order_Item_Statuses = Core_Entity::factory('Shop_Order_Item_Status')->findAll(FALSE);
+			$oShop_Order_Item_Statuses = $oShop->Shop_Order_Item_Statuses->findAll(FALSE);
 			foreach ($oShop_Order_Item_Statuses as $oShop_Order_Item_Status)
 			{
 				self::$_statusesTree[$oShop_Order_Item_Status->parent_id][] = $oShop_Order_Item_Status;
@@ -142,20 +132,20 @@ class Shop_Order_Item_Status_Controller_Edit extends Admin_Form_Action_Controlle
 	 * @param int $iLevel current nesting level
 	 * @return array
 	 */
-	static public function getSelectOptions($iParentId = 0, $bExclude = FALSE, $iLevel = 0)
+	static public function getSelectOptions($iShopId, $iParentId = 0, $bExclude = FALSE, $iLevel = 0)
 	{
 		$iLevel = intval($iLevel);
 
 		$aReturn = array();
 
 		// Дочерние элементы
-		$aShop_Order_Item_Statuses = self::_getStatusesTree($iParentId);
+		$aShop_Order_Item_Statuses = self::_getStatusesTree($iShopId, $iParentId);
 		foreach ($aShop_Order_Item_Statuses as $childrenType)
 		{
 			if ($bExclude != $childrenType->id)
 			{
 				$aReturn[$childrenType->id] = str_repeat('  ', $iLevel) . $childrenType->name;
-				$aReturn += self::getSelectOptions($childrenType->id, $bExclude, $iLevel + 1);
+				$aReturn += self::getSelectOptions($iShopId, $childrenType->id, $bExclude, $iLevel + 1);
 			}
 		}
 
@@ -168,16 +158,16 @@ class Shop_Order_Item_Status_Controller_Edit extends Admin_Form_Action_Controlle
 	 * @param int $iLevel current nesting level
 	 * @return array
 	 */
-	static public function getDropdownlistOptions($iParentId = 0, $iLevel = 0)
+	static public function getDropdownlistOptions($iShopId, $iParentId = 0, $iLevel = 0)
 	{
 		$iLevel = intval($iLevel);
 
 		$aReturn = array(array('value' => Core::_('Shop_Order.notStatus'), 'color' => '#aebec4'));
 
-		$oShop_Order_Item_Status_Parent = Core_Entity::factory('Shop_Order_Item_Status', $iParentId);
+		// $oShop_Order_Item_Status_Parent = Core_Entity::factory('Shop_Order_Item_Status', $iParentId);
 
 		// Дочерние элементы
-		$aShop_Order_Item_Statuses = self::_getStatusesTree($iParentId);
+		$aShop_Order_Item_Statuses = self::_getStatusesTree($iShopId, $iParentId);
 
 		foreach ($aShop_Order_Item_Statuses as $childrenStatus)
 		{
@@ -188,7 +178,7 @@ class Shop_Order_Item_Status_Controller_Edit extends Admin_Form_Action_Controlle
 				'level' => $iLevel
 			);
 
-			$aReturn += self::getDropdownlistOptions($childrenStatus->id, $iLevel + 1);
+			$aReturn += self::getDropdownlistOptions($iShopId, $childrenStatus->id, $iLevel + 1);
 		}
 
 		return $aReturn;

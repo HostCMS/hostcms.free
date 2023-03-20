@@ -16,13 +16,13 @@
 	/* border: 1px solid red; */
 	transition: all ease .3s;
 }
-.hostcmsInformationPanel.opened {
+.hostcmsInformationPanel.hostcms-panel-opened {
 	top: 0;
 }
-.hostcmsInformationPanel.closed {
+.hostcmsInformationPanel.hostcms-panel-closed {
 	top: -35px;
 }
-.hostcmsInformationPanel.closed:hover {
+.hostcmsInformationPanel.hostcms-panel-closed:hover {
 	top: 0;
 	cursor: pointer;
 }

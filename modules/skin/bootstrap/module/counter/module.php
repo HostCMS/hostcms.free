@@ -7,7 +7,7 @@
  * @subpackage Skin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Counter_Module extends Counter_Module
 {
@@ -24,8 +24,8 @@ class Skin_Bootstrap_Module_Counter_Module extends Counter_Module
 	}
 
 	/**
-	 * Path
-	 * @var string
+	 * Widget path 
+	 * @var string|NULL
 	 */
 	protected $_path = NULL;
 

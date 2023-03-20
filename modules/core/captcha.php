@@ -11,7 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @author Kruglov Sergei
  * @author Hostmake LLC
  * @copyright © 2006, 2007, 2008, 2011 Kruglov Sergei, http://www.captcha.ru
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Captcha
 {
@@ -229,7 +229,7 @@ class Core_Captcha
 		/*$fonts = array();
 		$_fontsDir = CMS_FOLDER . $this->_fontsDir;
 
-		if (is_dir($_fontsDir) && !is_link($_fontsDir))
+		if (Core_File::isDir($_fontsDir) && !Core_File::isLink($_fontsDir))
 		{
 			// Открываем директорию со шрифтами
 			if ($handle = opendir($_fontsDir))
@@ -319,6 +319,11 @@ class Core_Captcha
 
 		for ($i = 0; $i < $length; $i++)
 		{
+			if (!isset($font_metrics[$value[$i]]))
+			{
+				throw new Core_Exception('Wrong Font Metric, check "hostcmsfiles/captcha/fonts"!');
+			}
+
 			$m = $font_metrics[$value[$i]];
 
 			/*if (!$this->_spaces)

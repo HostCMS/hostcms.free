@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -31,6 +31,8 @@ $oShop = Core_Entity::factory('Shop')->find($shop_id);
 // Текущая группа магазинов
 $oShopDir = $oShop->Shop_Dir;
 
+$printlayout_id = intval(Core_Array::getGet('printlayout_id', 0));
+
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
@@ -44,15 +46,57 @@ $oAdmin_Form_Controller
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
 // Элементы меню
-$oAdmin_Form_Entity_Menus->add(
+$oAdmin_Form_Entity_Menus
+->add(
 	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Shop_Warrant.add_account_cash_warrant'))
-		->icon('fa fa-plus')
-		->href(
-			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
+		->name(Core::_('Shop_Warrant.warrant_menu'))
+		->icon('fa-solid fa-cash-register')
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Warrant.add_incoming_cash_warrant'))
+				->icon('fa fa-plus')
+				->href(
+					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0, "shop_id={$shop_id}&shop_group_id={$shop_group_id}&type=1")
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0, "shop_id={$shop_id}&shop_group_id={$shop_group_id}&type=1")
+				)
+		)->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Warrant.add_account_cash_warrant'))
+				->icon('fa fa-plus')
+				->href(
+					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0, "shop_id={$shop_id}&shop_group_id={$shop_group_id}&type=0")
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0, "shop_id={$shop_id}&shop_group_id={$shop_group_id}&type=0")
+				)
 		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
+)
+->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Shop_Warrant.pays_menu'))
+		->icon('fa-solid fa-building-columns')
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Warrant.add_incoming_pay'))
+				->icon('fa fa-plus')
+				->href(
+					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0, "shop_id={$shop_id}&shop_group_id={$shop_group_id}&type=2")
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0, "shop_id={$shop_id}&shop_group_id={$shop_group_id}&type=2")
+				)
+		)->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Warrant.add_writeoff_pay'))
+				->icon('fa fa-plus')
+				->href(
+					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0, "shop_id={$shop_id}&shop_group_id={$shop_group_id}&type=3")
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0, "shop_id={$shop_id}&shop_group_id={$shop_group_id}&type=3")
+				)
 		)
 );
 
@@ -172,6 +216,21 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 	$oAdmin_Form_Controller->addAction($oControllerApply);
 }
 
+// Действие "Пересчитать"
+$oAdminFormActionRecount = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('recountAmount');
+
+if ($oAdminFormActionRecount && $oAdmin_Form_Controller->getAction() == 'recountAmount')
+{
+	$oShop_Warrant_Controller_Recount = Admin_Form_Action_Controller::factory(
+		'Shop_Warrant_Controller_Recount', $oAdminFormActionRecount
+	);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oShop_Warrant_Controller_Recount);
+}
+
 $oAdminFormActionChangeDefaultStatus = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 	->Admin_Form_Actions
 	->getByName('apply');
@@ -184,6 +243,42 @@ if ($oAdminFormActionChangeDefaultStatus && $oAdmin_Form_Controller->getAction()
 
 	// Добавляем контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($Admin_Form_Action_Controller_Type_Apply);
+}
+
+$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('print');
+
+if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'print')
+{
+	$Shop_Warrant_Controller_Print = Admin_Form_Action_Controller::factory(
+		'Shop_Warrant_Controller_Print', $oAdmin_Form_Action
+	);
+
+	$Shop_Warrant_Controller_Print
+		->title(Core::_('Shop_Warrant.title'))
+		->printlayout($printlayout_id);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($Shop_Warrant_Controller_Print);
+}
+
+$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('sendMail');
+
+if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'sendMail')
+{
+	$Shop_Warrant_Controller_Print = Admin_Form_Action_Controller::factory(
+		'Shop_Warrant_Controller_Print', $oAdmin_Form_Action
+	);
+
+	$Shop_Warrant_Controller_Print
+		->printlayout($printlayout_id)
+		->send(TRUE);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($Shop_Warrant_Controller_Print);
 }
 
 // Источник данных 0
@@ -207,55 +302,90 @@ $oAdmin_Form_Controller
 	->addExternalReplace('{shop_id}', $shop_id)
 	;
 
-if (isset($oAdmin_Form_Controller->request['admin_form_filter_2007'])
-&& $oAdmin_Form_Controller->request['admin_form_filter_2007'] != ''
-|| isset($oAdmin_Form_Controller->request['topFilter_2007'])
-&& $oAdmin_Form_Controller->request['topFilter_2007'] != '')
+if (isset($oAdmin_Form_Controller->request['admin_form_filter_2007']) && $oAdmin_Form_Controller->request['admin_form_filter_2007'] != ''
+	|| isset($oAdmin_Form_Controller->request['topFilter_2007']) && $oAdmin_Form_Controller->request['topFilter_2007'] != ''
+)
 {
-	$oAdmin_Form_Dataset->addCondition(
-		array(
-			'select' => array(
-				'shop_warrants.*', array(Core_QueryBuilder::expression('CONCAT_WS(" ", GROUP_CONCAT(`siteuser_companies`.`name`), GROUP_CONCAT(CONCAT_WS(" ", `siteuser_people`.`surname`, `siteuser_people`.`name`, `siteuser_people`.`patronymic`)))'), 'counterparty'),
+	$value = isset($oAdmin_Form_Controller->request['admin_form_filter_2007'])
+		? $oAdmin_Form_Controller->request['admin_form_filter_2007']
+		: $oAdmin_Form_Controller->request['topFilter_2007'];
+
+	// var_dump($oAdmin_Form_Controller->request['admin_form_filter_2007']);
+
+	$aTmpValue = explode('_', $value);
+
+	if (isset($aTmpValue[1]))
+	{
+		$value = intval($aTmpValue[1]);
+
+		$oAdmin_Form_Dataset->addCondition(
+			array(
+				'select' => array(
+					'shop_warrants.*'
+				)
+			)
+		)->addCondition(
+			array('join' => array('chartaccounts', 'shop_warrants.chartaccount_id', '=', 'chartaccounts.id', array(
+					array('AND' => array('chartaccounts.deleted', '=', 0))
+				))
 			)
 		)
-	)
-	->addCondition(
-		array('leftJoin' => array('siteusers', 'shop_warrants.siteuser_id', '=', 'siteusers.id', array(
-				array('AND' => array('siteusers.deleted', '=', 0))
-			))
+		->addCondition(
+			array('open' => array())
 		)
-	)
-	->addCondition(
-		array('leftJoin' => array('siteuser_companies', 'siteusers.id', '=', 'siteuser_companies.siteuser_id', array(
-				array('AND' => array('siteuser_companies.deleted', '=', 0))
-			))
-		)
-	)
-	->addCondition(
-		array('leftJoin' => array('siteuser_people', 'siteusers.id', '=', 'siteuser_people.siteuser_id',
-			array(
-				array('AND' => array('siteuser_people.deleted', '=', 0))
-			))
-		)
-	)
-	->addCondition(
-		array('groupBy' => array('siteusers.id'))
-	)
-	// ->addCondition(
-	// 	array('clearOrderBy' => array())
-	// )
-	// ->addCondition(
-	// 	array('orderBy' => array('shop_warrants.id'))
-	// )
-	;
+			->addCondition(
+				array('where' => array('shop_warrants.sc0', '=', $value))
+			)
+			->addCondition(
+				array('where' => array('chartaccounts.sc0', '=', 2))
+			)
+			->addCondition(
+				array('setOr' => array())
+			)
+			->addCondition(
+				array('where' => array('shop_warrants.sc1', '=', $value))
+			)
+			->addCondition(
+				array('where' => array('chartaccounts.sc1', '=', 2))
+			)
+			->addCondition(
+				array('setOr' => array())
+			)
+			->addCondition(
+				array('where' => array('shop_warrants.sc2', '=', $value))
+			)
+			->addCondition(
+				array('where' => array('chartaccounts.sc2', '=', 2))
+			)
+		->addCondition(
+			array('close' => array())
+		);
+	}
 }
+
+// Только если идет фильтрация, Договор, фильтр по тексту
+/*if (isset($oAdmin_Form_Controller->request['admin_form_filter_2062']) && $oAdmin_Form_Controller->request['admin_form_filter_2062'] != '')
+{
+	$oAdmin_Form_Dataset->addCondition(
+		array('select' => array('shop_warrants.*', array('siteuser_company_contracts.name', 'siteuserCompanyContract')))
+	)
+	->addCondition(
+		array(
+			'leftJoin' => array('siteuser_company_contracts', 'siteuser_company_contracts.id', '=', 'shop_warrants.siteuser_company_contract_id')
+		)
+	);
+}*/
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(
 	$oAdmin_Form_Dataset
 );
 
-$oAdmin_Form_Controller->addFilter('user_id', array($oAdmin_Form_Controller, '_filterCallbackUser'));
+// $oAdmin_Form_Controller->addFilterCallback('dataSiteuserCompanyName', 'dataSiteuserCompanyName');
+// $oAdmin_Form_Controller->addFilter('user_id', array($oAdmin_Form_Controller, '_filterCallbackUser'));
+
+$oAdmin_Form_Controller->addFilter('counterparty', array($oAdmin_Form_Controller, '_filterCallbackSiteuserCompany'));
+$oAdmin_Form_Controller->addFilter('dataCounterparty', array($oAdmin_Form_Controller, '_filterCallbackSiteuserCompany'));
 
 Core_Event::attach('Admin_Form_Controller.onAfterShowContent', array('User_Controller', 'onAfterShowContentPopover'), array($oAdmin_Form_Controller));
 Core_Event::attach('Admin_Form_Action_Controller_Type_Edit.onAfterRedeclaredPrepareForm', array('User_Controller', 'onAfterRedeclaredPrepareForm'));

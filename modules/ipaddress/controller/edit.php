@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Ipaddress
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Ipaddress_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -22,15 +22,12 @@ class Ipaddress_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	{
 		parent::_prepareForm();
 
-		$this->title(
-			$this->_object->id
-				? Core::_('Ipaddress.edit_title', $this->_object->ip)
-				: Core::_('Ipaddress.add_title')
+		$this->title($this->_object->id
+			? Core::_('Ipaddress.edit_title', $this->_object->ip, FALSE)
+			: Core::_('Ipaddress.add_title')
 		);
 
-
 		$oMainTab = $this->getTab('main');
-		// $oAdditionalTab = $this->getTab('additional');
 
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))

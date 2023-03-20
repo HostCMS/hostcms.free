@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО 'Хостмэйк' (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО 'Хостмэйк' (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Warehouses',
@@ -47,6 +47,12 @@ return array(
 	'writeoff' => 'Writeoff',
 	'regrade' => 'Regrade',
 	'movement' => 'Movement',
+	'purchaseorders' => 'Purcase orders',
+	'invoices' => 'Invoices',
+	'supplies' => 'Supplies',
+	'purchasereturns' => 'Purcase returns',
+	'purchases' => 'Purchases',
+	'operations' => 'Operations',
 	'types' => 'Types',
 	'shop_warehouse_type' => 'Warehouse type',
 	'separator' => 'Cell separator',

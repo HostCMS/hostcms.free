@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -17,18 +17,34 @@ $sFormAction = '/admin/shop/item/modification/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
-$oShopItemParent = Core_Entity::factory('Shop_Item', intval(Core_Array::getRequest('shop_item_id', 0)));
+$shop_item_id = Core_Array::getRequest('shop_item_id', 0, 'int');
+
+$oShopItemParent = Core_Entity::factory('Shop_Item', $shop_item_id);
 
 if ($oShopItemParent->shortcut_id)
 {
 	$oShopItemParent = $oShopItemParent->Shop_Item;
 }
 
-$oShop = $oShopItemParent->Shop;
-$oShopGroup = $oShopItemParent->Shop_Group;
+if ($shop_item_id)
+{
+	$oShop = $oShopItemParent->Shop;
+	$oShopGroup = $oShopItemParent->Shop_Group;
+}
+else
+{
+	$shop_id = Core_Array::getRequest('shop_id', 0, 'int');
+	$shop_group_id = Core_Array::getRequest('shop_group_id', 0, 'int');
+
+	$oShopGroup = Core_Entity::factory('Shop_Group', $shop_group_id);
+	$oShop = Core_Entity::factory('Shop', $shop_id);
+}
+
 $oShopDir = $oShop->Shop_Dir;
 
-$sFormTitle = Core::_("Shop_Item.item_modification_title", $oShopItemParent->name, FALSE);
+$sFormTitle = $shop_item_id
+	? Core::_("Shop_Item.item_modification_title", $oShopItemParent->name, FALSE)
+	: Core::_("Shop_Item.modifications_menu");
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
@@ -44,28 +60,31 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
 $additionalParams = "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}";
 
-// Элементы меню
-$oAdmin_Form_Entity_Menus->add(
-	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Shop_Item.show_groups_modification'))
-		->icon('fa fa-code-fork')
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Item.item_modification_add_item'))
-				->icon('fa fa-plus')
-				->href($oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0))
-				->onclick($oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0))
+if ($shop_item_id)
+{
+	// Элементы меню
+	$oAdmin_Form_Entity_Menus->add(
+		Admin_Form_Entity::factory('Menu')
+			->name(Core::_('Shop_Item.show_groups_modification'))
+			->icon('fa fa-code-fork')
+			->add(
+				Admin_Form_Entity::factory('Menu')
+					->name(Core::_('Shop_Item.item_modification_add_item'))
+					->icon('fa fa-plus')
+					->href($oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0))
+					->onclick($oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0))
+			)
+			->add
+			(
+				Admin_Form_Entity::factory('Menu')
+					->name(Core::_('Shop_Item.create_modification'))
+					->icon('fa fa-magic')
+					->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/modification/create/index.php', NULL, NULL, "shop_item_id={$oShopItemParent->id}"))
+					->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/modification/create/index.php', NULL, NULL, "shop_item_id={$oShopItemParent->id}"))
+			)
 		)
-		->add
-		(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Item.create_modification'))
-				->icon('fa fa-magic')
-				->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/modification/create/index.php', NULL, NULL, "shop_item_id={$oShopItemParent->id}"))
-				->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/modification/create/index.php', NULL, NULL, "shop_item_id={$oShopItemParent->id}"))
-		)
-	)
-;
+	;
+}
 
 if ($oShopItemParent->id)
 {
@@ -151,12 +170,16 @@ if ($oShopGroup->id)
 	}
 }
 
+$additionalParams = $shop_item_id
+	? "shop_item_id={$oShopItemParent->id}"
+	: "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}";
+
 // Последняя крошка на текущую форму
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($sFormTitle)
-		->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_item_id={$oShopItemParent->id}"))
-		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_item_id={$oShopItemParent->id}"))
+		->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams))
 );
 
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
@@ -320,6 +343,26 @@ if ($oAdminFormActionDeleteSet && $oAdmin_Form_Controller->getAction() == 'delet
 	$oAdmin_Form_Controller->addAction($Shop_Item_Set_Controller_Delete);
 }
 
+// Действие "Изменить атрибуты"
+$oAdminFormActionChangeAttribute = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('change_attributes');
+
+if ($oAdminFormActionChangeAttribute && $oAdmin_Form_Controller->getAction() == 'change_attributes')
+{
+	$oShop_Item_Controller_Change_Attribute = Admin_Form_Action_Controller::factory(
+		'Shop_Item_Controller_Change_Attribute', $oAdminFormActionChangeAttribute
+	);
+
+	$oShop_Item_Controller_Change_Attribute
+		->title(Core::_('Shop_Item.change_attributes_items_title'))
+		->modifications(TRUE)
+		->Shop($oShop);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oShop_Item_Controller_Change_Attribute);
+}
+
 // Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Shop_Item')
@@ -337,10 +380,20 @@ $oAdmin_Form_Dataset
 	->addCondition(
 		array('leftJoin' => array('shop_warehouse_items', 'shop_items.id', '=', 'shop_warehouse_items.shop_item_id'))
 	)
-	->addCondition(
-		array('where' => array('modification_id', '=', $oShopItemParent->id))
-	)
 	->addCondition(array('groupBy' => array('shop_items.id')));
+
+if ($shop_item_id)
+{
+	$oAdmin_Form_Dataset->addCondition(
+		array('where' => array('modification_id', '=', $oShopItemParent->id))
+	);
+}
+else
+{
+	$oAdmin_Form_Dataset->addCondition(
+		array('where' => array('modification_id', '>', 0))
+	);
+}
 
 // Change field type
 if (Core_Entity::factory('Shop', $oShop->id)->Shop_Warehouses->getCount() == 1)

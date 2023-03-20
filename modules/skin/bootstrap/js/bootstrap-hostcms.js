@@ -267,6 +267,100 @@ function isEmpty(str) {
 				}
 			});
 		},
+		scheduleLoadEntityCaption: function(object) {
+			var $option = $(object).find(":selected"),
+				entityCaption = $option.attr('data-entitycaption') || '';
+
+			$('#entity_id').parents('.form-group').removeClass('hidden');
+
+			if (entityCaption != '')
+			{
+				$('#entity_id').prev().text(entityCaption);
+			}
+			else
+			{
+				$('#entity_id').parents('.form-group').addClass('hidden');
+			}
+		},
+		selectShopDocumentRelated: function(object, windowId, modalWindowId) {
+			var $object = $(object),
+				id = $object.data('id'),
+				type = $object.data('type'),
+				document_id = $object.data('document-id'),
+				shop_id = $object.data('shop-id'),
+				amount = parseFloat($('input[name = amount]').val()),
+				dataAmount = parseFloat($object.data('amount'));
+
+			console.log(windowId);
+
+			$.ajax({
+				url: '/admin/shop/document/relation/add/index.php',
+				type: "POST",
+				data: { 'add_shop_document': 1, 'id': id, 'type': type, 'document_id': document_id },
+				dataType: 'json',
+				error: function(){},
+				success: function (result) {
+					// bootbox.hideAll();
+					$('#' + modalWindowId).parents('.modal').modal('hide');
+
+					if (result.related_document_id)
+					{
+						$.adminLoad({ path: '/admin/shop/document/relation/index.php', additionalParams: 'document_id=' + document_id + '&shop_id=' +  shop_id +'&parentWindowId=' + windowId + '&_module=0', windowId: windowId, loadingScreen: false });
+
+						var total_amount = amount + dataAmount;
+
+						$('input[name = amount]').val($.mathRound(total_amount, 2));
+					}
+				}
+			});
+		},
+		loadChartaccounts: function(windowId, chartaccount_id, prefix) {
+			$.ajax({
+				url: '/admin/chartaccount/operation/index.php',
+				type: "POST",
+				data: { 'load_chartaccounts': 1, 'chartaccount_id': chartaccount_id, 'prefix': prefix },
+				dataType: 'json',
+				error: function(){},
+				success: function (result) {
+					switch (prefix)
+					{
+						case 'd':
+							prefix = 'c';
+						break;
+						case 'c':
+							prefix = 'd';
+						break;
+					}
+
+					// console.log($('#' + windowId + ' select[name = ' + prefix + 'chartaccount_id]'));
+
+					var old_value = $('#' + windowId + ' select[name = ' + prefix + 'chartaccount_id]').val();
+
+					$('#' + windowId + ' select[name = ' + prefix + 'chartaccount_id]').appendOptions(result);
+					$('#' + windowId + ' select[name = ' + prefix + 'chartaccount_id]').find('option[value = ' + old_value + ']').attr('selected', true);
+				}
+			});
+		},
+		/*addChartaccountOperationItem: function (company_id)
+		{
+			$.ajax({
+				url: '/admin/chartaccount/operation/index.php',
+				data: { 'showAddItem': 1, 'company_id': company_id },
+				dataType: 'json',
+				type: 'POST',
+				success: function(response){
+					$('body').append(response.html);
+
+					// $('#crmNoteAttachmentModal' + crm_note_attachment_id).modal('show');
+					$('#chartaccountOperationModal').modal('show');
+
+					// $('#crmNoteAttachmentModal' + crm_note_attachment_id).on('hidden.bs.modal', function () {
+					$('#chartaccountOperationModal').on('hidden.bs.modal', function () {
+						$(this).remove();
+					});
+				}
+			});
+		},*/
 		sqlRenameTab: function(event)
 		{
 			if (event.type == "touchend")
@@ -295,7 +389,7 @@ function isEmpty(str) {
 					item = _t.parent().prev();
 				;
 
-				item.html(_t.val() + '<i class="fa-solid fa-xmark"></i>').css('display', '');
+				item.html($.escapeHtml(_t.val()) + '<i class="fa-solid fa-xmark" onclick="$.sqlDeleteTab(this);"></i>').css('display', '');
 				$editor.parent().remove();
 
 				settings = { path: '/admin/sql/index.php', windowId: '#id_content' };
@@ -332,6 +426,22 @@ function isEmpty(str) {
 			$ae.insertAfter($item);
 
 			$editor.focus().val($item.text());
+		},
+		sqlDeleteTab: function(object)
+		{
+			var _t = typeof object.data !== 'undefined' && typeof object.data.elm !== 'undefined'
+				? $(object.data.elm)
+				: $(object),
+			_a = _t.parents('a');
+
+			res = confirm(i18n['confirm_delete']);
+			if (res)
+			{
+				id = _a.attr('href').split('_')[1];
+				$.adminLoad({ path: '/admin/sql/index.php', action: 'delete', additionalParams: 'tabid=' + id, windowId: 'id_content' });
+			}
+
+			return false;
 		},
 		updateCaldav: function() {
 			if ($("#id_content #calendar").length)
@@ -2969,6 +3079,9 @@ function isEmpty(str) {
 			dialog.on('shown.bs.modal', function () {
 				$('html').css('overflow', 'hidden');
 			});
+
+			// after show:
+			settings.onShown && dialog.on('shown.bs.modal', settings.onShown);
 
 			// before remove:
 			settings.onHide && dialog.on('hide.bs.modal', settings.onHide);
@@ -6325,6 +6438,8 @@ function isEmpty(str) {
 				.attr('value', '')
 				.val('');
 
+			jNewObject.addClass('new-property');
+
 			jNewObject.insertAfter(jProperies.eq(-1));
 
 			jNewObject.find("textarea")
@@ -7211,6 +7326,7 @@ function isEmpty(str) {
 		changeWarehouseCounts: function(jInput, type)
 		{
 			jInput.change(function() {
+
 				// Replace ',' on '.'
 				var replace = $(this).val().replace(',', '.');
 				$(this).val(replace);
@@ -7224,10 +7340,29 @@ function isEmpty(str) {
 					quantity = $.isNumeric($(this).val()) && $(this).val() > 0
 						? parseFloat($(this).val())
 						: 0,
-					price = $.isNumeric(parentTr.find('.price').text())
+					price, sum;
+					/* price = $.isNumeric(parentTr.find('.price').text())
 						? parseFloat(parentTr.find('.price').text())
 						: 0,
-					sum = $.mathRound(quantity * price, 2);
+					sum = $.mathRound(quantity * price, 2); */
+
+				switch (type)
+				{
+					// Заказ поставщику
+					case 6:
+						price = parentTr.find('input.price').val();
+						price = $.isNumeric(price)
+							? parseFloat(price)
+							: 0;
+					break;
+
+					default:
+						price = $.isNumeric(parentTr.find('.price').text())
+						? parseFloat(parentTr.find('.price').text())
+						: 0;
+				}
+
+				sum = $.mathRound(quantity * price, 2);
 
 				switch (type)
 				{
@@ -7311,9 +7446,43 @@ function isEmpty(str) {
 					case 5:
 						parentTr.find('.calc-warehouse-sum').text(sum);
 					break;
+					// Заказ поставщику
+					case 6:
+						parentTr.find('.calc-warehouse-sum').text(sum);
+					break;
+
 				}
 			});
 		},
+
+		changeWarehousePrices: function(jInput)
+		{
+			jInput.change(function() {
+
+				var $this = $(this),
+					parentTr = $this.parents('tr'),
+					price = $.isNumeric($this.val())
+							? parseFloat($this.val())
+							: 0,
+					oQuantity = parentTr.find('input.set-item-count'),
+					replace = oQuantity.val().replace(',', '.'), // Replace ',' on '.'
+					quantity,
+					sum;
+
+					oQuantity.val(replace);
+
+					replace < 0 && oQuantity.val(0);
+
+					quantity = $.isNumeric(oQuantity.val()) && oQuantity.val() > 0
+						? parseFloat(oQuantity.val())
+						: 0,
+
+					sum = $.mathRound(quantity * price, 2);
+
+					parentTr.find('.calc-warehouse-sum').text(sum);
+			});
+		},
+
 		recountIndexes: function($tr)
 		{
 			var $prev = $tr.prev(),
@@ -7389,15 +7558,15 @@ function isEmpty(str) {
 					Number.isFinite(diffPercentValue) && newPrice && diffPersentSpan.text(percent + '%');
 			});
 		},
-		recalcPrice: function()
+		recalcPrice: function(windowId)
 		{
 			// $.loadingScreen('show');
 
-			var jSelect = $('select.select-price'),
+			var jSelect = $('#' + windowId + ' select.select-price'),
 				shop_price_id = jSelect.val(),
 				aItems = [];
 
-			$.each($('.shop-item-table > tbody tr[data-item-id]'), function (index, item) {
+			$.each($('#' + windowId + ' .shop-item-table > tbody tr[data-item-id]'), function (index, item) {
 				var id = $(this).data('item-id').toString();
 
 				if (id.includes(','))
@@ -7420,7 +7589,7 @@ function isEmpty(str) {
 				dataType: 'json',
 				error: function(){},
 				success: function (answer) {
-					$.each($('.shop-item-table > tbody tr[data-item-id]'), function (index, item) {
+					$.each($('#' + windowId + ' .shop-item-table > tbody tr[data-item-id]'), function (index, item) {
 						var container = $(this),
 							id = container.data('item-id').toString();
 
@@ -7445,12 +7614,25 @@ function isEmpty(str) {
 						{
 							if (answer[id])
 							{
-								container.find('.price').text(answer[id]['price']);
+								//container.find('.price').text(answer[id]['price']);
 
-								var jInput = container.find('.set-item-count');
+								var jInput = container.find('.set-item-count'),
+									jPrice = container.find('.price');
 
-								jInput.change();
-								$.changeWarehouseCounts(jInput, 1);
+								//jInput.change();
+
+								if (jPrice.is(':input[type="text"]'))
+								{
+									jPrice.val(answer[id]['price']);
+									//$.changeWarehousePrices(jPrice);
+									jPrice.change();
+								}
+								else
+								{
+									jPrice.text(answer[id]['price']);
+									//$.changeWarehouseCounts(jInput, 1);
+									jInput.change();
+								}
 							}
 						}
 					});
@@ -7508,12 +7690,13 @@ function isEmpty(str) {
 
 			return aItemIds;
 		},
-		focusAutocomplete: function(object)
+		focusAutocomplete: function(jObject, jFocusedElement)
 		{
-			$(object).keydown(function(event){
+			jObject.keydown(function(event){
 				if(event.keyCode == 13){
 					event.preventDefault();
-					$('.add-shop-item').focus();
+					//$('#' + windowId + ' .add-shop-item').focus();
+					jFocusedElement.focus();
 					return false;
 				}
 			});
@@ -8389,6 +8572,145 @@ function isEmpty(str) {
 			((path) ? "; path=" + path : "") +
 			((domain) ? "; domain=" + domain : "") +
 			((secure) ? "; secure" : "");
+		},
+		fillSiteuserCompanyContract: function(windowId, siteuserCompanyContractId, siteuserCompanyName, siteuserCompanyContractName)
+		{
+			siteuserCompanyName = siteuserCompanyName || 'siteuser_company_id';
+			siteuserCompanyContractName = siteuserCompanyContractName || 'siteuser_company_contract_id';
+
+			//console.log("fillSiteuserCompanyContract");
+			var companyId = parseInt($("#" + windowId + " #company_id").val()),
+				oSiteuserCompany = $("#" + windowId + " [name=" + siteuserCompanyName + "]"),
+				siteuserCompanyId = oSiteuserCompany.val();
+
+			siteuserCompanyId = siteuserCompanyId ? parseInt(siteuserCompanyId.split("_")[1]) : 0;
+
+			// console.log(companyId, siteuserCompanyId);
+
+			if (companyId && siteuserCompanyId)
+			{
+				$.ajax({
+					url: '/admin/siteuser/company/contract/index.php?getSiteuserCompanyContracts',
+					dataType: 'json',
+					data: {
+						companyId: companyId,
+						siteuserCompanyId: siteuserCompanyId
+					},
+					success: function(data) {
+						$("#" + windowId + " #" + siteuserCompanyContractName).empty();
+
+						if (data.contracts)
+						{
+							var oSiteuserCompanyContract = $("#" + windowId + " #" + siteuserCompanyContractName)
+								countContracts = data.contracts.length;
+
+								//siteuserCompanyContractId = ' . intval($this->_object->siteuser_company_contract_id) . ';
+
+							for (var i = 0; i < countContracts; i++ )
+							{
+								oSiteuserCompanyContract.append("<option " + (siteuserCompanyContractId == data.contracts[i]["id"] ? "selected=\"selected\" " : "")  + "value=\"" + data.contracts[i]["id"] + "\">" + data.contracts[i]["name"] + "</option>");
+
+								//oSiteuserCompanyContract.append('<option value="' + data.contracts[i]["id"] + '">' + data.contracts[i]["name"] + '</option>');
+							}
+						}
+					}
+				});
+			}
+		},
+		loadSubcounts: function(windowId, chartaccount_id, data, container, prefix)
+		{
+			if (chartaccount_id)
+			{
+				container = container || '.chartaccount-subcounts';
+				prefix = prefix || '';
+
+				var $sc0 = $("#" + windowId + " #" + prefix + "sc0"),
+					$sc1 = $("#" + windowId + " #" + prefix + "sc1"),
+					$sc2 = $("#" + windowId + " #" + prefix + "sc2");
+
+				data = $.extend({
+					'load_subcounts': 1,
+					'hostcms[window]': windowId,
+					'chartaccount_id': chartaccount_id,
+					'prefix': prefix,
+					'sc0': $sc0.val(),
+					'sc1': $sc1.val(),
+					'sc2': $sc2.val(),
+					'sc0_type': $sc0.data('type'),
+					'sc1_type': $sc1.data('type'),
+					'sc2_type': $sc2.data('type')
+				}, data);
+
+				$.ajax({
+					url: '/admin/chartaccount/index.php',
+					data: data,
+					dataType: 'json',
+					type: 'POST',
+					success: function(answer){
+						$(container)
+							.empty()
+							.html(answer.html);
+					}
+				});
+			}
+		},
+		//fillCompanyCashbox: function(windowId, companyCashboxId, companyName, companyCashboxName)
+		fillCompanyCashbox: function($select, companyId, currentValue)
+		{
+			/*companyName = companyName || 'company_id';
+			companyCashboxName = companyCashboxName || 'company_cashbox_id';
+
+			var companyId = parseInt($("#" + windowId + " #" + companyName).val());*/
+
+			if (companyId)
+			{
+				$.ajax({
+					url: '/admin/company/cashbox/index.php?getCashboxes',
+					dataType: 'json',
+					data: {
+						companyId: companyId
+					},
+					success: function(data) {
+						$select.empty();
+
+						if (data.cashboxes)
+						{
+							var countCashboxes = data.cashboxes.length;
+
+							for (var i = 0; i < countCashboxes; i++ )
+							{
+								$select.append("<option " + (currentValue == data.cashboxes[i]["id"] ? "selected=\"selected\" " : "")  + "value=\"" + data.cashboxes[i]["id"] + "\">" + data.cashboxes[i]["name"] + "</option>");
+							}
+						}
+					}
+				});
+			}
+		},
+		fillCompanyAccount: function($select, companyId, currentValue)
+		{
+			if (companyId)
+			{
+				$.ajax({
+					url: '/admin/company/account/index.php?getAccounts',
+					dataType: 'json',
+					data: {
+						companyId: companyId
+					},
+					success: function(data) {
+						$select.empty();
+
+						if (data.accounts)
+						{
+							var countAccounts = data.accounts.length;
+
+							for (var i = 0; i < countAccounts; i++ )
+							{
+								$select.append("<option " + (currentValue == data.accounts[i]["id"] ? "selected=\"selected\" " : "")  + "value=\"" + data.accounts[i]["id"] + "\">" + data.accounts[i]["name"] + "</option>");
+							}
+						}
+					}
+				});
+			}
 		}
 	});
 
@@ -8397,7 +8719,7 @@ function isEmpty(str) {
 			if (typeof tinyMCE != 'undefined')
 			{
 				this.each(function() {
-					$(this).find('textarea').each(function(){
+					$(this).find('textarea, div[wysiwyg = "1"]').each(function(){
 						var elementId = this.id;
 						// if (tinyMCE.getInstanceById(elementId) != null)
 						if (tinyMCE.get(elementId) != null)
@@ -8435,6 +8757,13 @@ function isEmpty(str) {
 						{
 							$.each(array[key].data, function (name, value) {
 								$option.attr('data-' + name, value);
+							});
+						}
+
+						if (typeof array[key].attr !== 'undefined')
+						{
+							$.each(array[key].attr, function (name, value) {
+								$option.attr(name, value);
 							});
 						}
 
@@ -8606,14 +8935,30 @@ function isEmpty(str) {
 									? item.count
 									: '';
 
-							return $('<li class="autocomplete-suggestion"></li>')
+							var li = $('<li class="autocomplete-suggestion"></li>').data('item.autocomplete', item);
+
+							li.append($('<div class="image">' + (image_small.length ? '<img class="backend-thumbnail" src="' + image_small + '">' : '') + '</div>'));
+
+							if (item.marking != '')
+							{
+								li.append($('<div class="marking">').text(item.marking));
+							}
+
+							li
+								.append($('<div class="name"><a>' + $.escapeHtml(item.label) + '</a></div>'))
+								.append($('<div class="price">').text(item.price_with_tax_formatWithCurrency))
+								.append($('<div class="count">' + (count.toString().length ? '<span class="badge ' + color + ' badge-round white">' + item.count + '</span>' : '') + '</div>'));
+
+							return li.appendTo(ul);
+
+							/*return $('<li class="autocomplete-suggestion"></li>')
 								.data('item.autocomplete', item)
 								.append($('<div class="image">' + (image_small.length ? '<img class="backend-thumbnail" src="' + image_small + '">' : '') + '</div>'))
-								.append($('<div class="name"><a>' + $.escapeHtml(item.label) + '</a></div>'))
-								.append($('<div class="count">' + (count.length ? '<span class="label label-' + color + ' white">' + item.count + '</span>' : '') + '</div>'))
-								.append($('<div class="price">').text(item.price_with_tax_formatWithCurrency))
 								.append($('<div class="marking">').text(item.marking))
-								.appendTo(ul);
+								.append($('<div class="name"><a>' + $.escapeHtml(item.label) + '</a></div>'))
+								.append($('<div class="price">').text(item.price_with_tax_formatWithCurrency))
+								.append($('<div class="count">' + (count.toString().length ? '<span class="badge badge-' + color + ' white">' + item.count + '</span>' : '') + '</div>'))
+								.appendTo(ul);*/
 						}
 
 						 $(this).prev('.ui-helper-hidden-accessible').remove();
@@ -8669,7 +9014,7 @@ function isEmpty(str) {
 				this.disabled = !this.disabled;
 			});
 		},
-		editable: function(settings){
+		hostcmsEditable: function(settings){
 			settings = jQuery.extend({
 				save: function(item, settings){
 
@@ -8871,6 +9216,64 @@ function isEmpty(str) {
 								$.ajax({
 									url: '/admin/siteuser/index.php',
 									data: { showPopover: 1, person_id: $(this).data('person-id'), company_id: $(this).data('company-id') },
+									dataType: 'json',
+									type: 'POST',
+									async: false,
+									success: function(response) {
+										content = response.html;
+									}
+								});
+
+								return content;
+							},
+							container: "#" + windowId
+						});
+
+						$this.attr('data-popoverAttached', true);
+
+						$this.on('hide.bs.popover', function(e) {
+							$this.attr('data-popoverAttached')
+								? $this.removeAttr('data-popoverAttached')
+								: e.preventDefault();
+						})
+						.on('show.bs.popover', function(e) {
+							!$this.attr('data-popoverAttached') && e.preventDefault();
+						})
+						.on('shown.bs.popover', function(e) {
+							$('#' + $this.attr('aria-describedby')).on('mouseleave', function(e) {
+								!$this.parent().find(e.relatedTarget).length && $this.popover('destroy');
+							});
+						})
+						.on('mouseleave', function(e) {
+							!$(e.relatedTarget).parent('#' + $this.attr('aria-describedby')).length
+							&& $this.attr('data-popoverAttached')
+							&& $this.popover('destroy');
+						});
+
+						$this.popover('show');
+					}
+				});
+			});
+		},
+		showCompanyPopover: function(windowId)
+		{
+			return this.each(function(){
+				var object = jQuery(this);
+				object.on('mouseenter', function(event) {
+					var $this = $(this);
+
+					if (!$this.data("bs.popover") && $(this).data('company-id'))
+					{
+						$this.popover({
+							placement:'top',
+							trigger:'manual',
+							html:true,
+							content: function() {
+								var content = '';
+
+								$.ajax({
+									url: '/admin/company/index.php',
+									data: { showPopover: 1, company_id: $(this).data('company-id') },
 									dataType: 'json',
 									type: 'POST',
 									async: false,
@@ -10409,9 +10812,15 @@ function setResizableAdminTableTh()
 document.addEventListener("DOMContentLoaded", function() {
 	var lazyloadThrottleTimeout;
 
-	function lazyload()
+	function lazyload(event)
 	{
-		if(lazyloadThrottleTimeout)
+		// console.log('lazy');
+		// if (typeof event !== 'undefined')
+		// {
+		// 	console.log(event.data);
+		// }
+
+		if (lazyloadThrottleTimeout)
 		{
 			clearTimeout(lazyloadThrottleTimeout);
 		}
@@ -10422,8 +10831,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
 			lazyloadImages.forEach(function(img) {
 				// if(img.offsetTop < (window.innerHeight + scrollTop))
-				if(img.getBoundingClientRect().top < (window.innerHeight + scrollTop))
+				if (typeof event !== 'undefined' && typeof event.data !== 'undefined' && event.data.modal
+					|| img.getBoundingClientRect().top < (window.innerHeight + scrollTop))
 				{
+					// console.log(1);
 					img.src = img.dataset.src;
 					img.classList.remove('lazy');
 				}
@@ -10443,7 +10854,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	window.addEventListener("orientationChange", lazyload);
 
 	$('#id_content').on('adminLoadSuccess', lazyload);
-	$(document).on("shown.bs.modal", lazyload);
+	$(document).on("shown.bs.modal", {modal: true}, lazyload);
 
 	lazyload();
 }, false);
@@ -11251,13 +11662,13 @@ function radiogroupOnChange(windowId, value, values)
 	for (var x in values) {
 		if (value != values[x])
 		{
-			$("#"+windowId+" .hidden-"+values[x]).show();
-			$("#"+windowId+" .shown-"+values[x]).hide();
+			$("#" + windowId + " .hidden-" + values[x]).show();
+			$("#" + windowId + " .shown-" + values[x]).hide();
 		}
 	}
 
-	$("#"+windowId+" .hidden-"+value).hide();
-	$("#"+windowId+" .shown-"+value).show();
+	$("#" + windowId + " .hidden-" + value).hide();
+	$("#" + windowId + " .shown-" + value).show();
 }
 
 function fieldChecker()

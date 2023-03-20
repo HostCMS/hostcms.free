@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Document
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Document_Version_Model extends Core_Entity
 {
@@ -120,7 +120,7 @@ class Document_Version_Model extends Core_Entity
 	{
 		$path = $this->getPath();
 
-		return is_file($path)
+		return Core_File::isFile($path)
 			? Core_File::read($path)
 			: NULL;
 	}

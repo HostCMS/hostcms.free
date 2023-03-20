@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Structure
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -21,8 +21,14 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	public function setObject($object)
 	{
 		$this
+			->addSkipColumn('shortcut_id')
 			->addSkipColumn('data_template_id')
 			->addSkipColumn('options');
+
+		if ($object->shortcut_id != 0)
+		{
+			$object = $object->Shortcut;
+		}
 
 		if (!$object->id)
 		{
@@ -40,6 +46,11 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	protected function _prepareForm()
 	{
 		parent::_prepareForm();
+
+		if ($this->_object->shortcut_id != 0)
+		{
+			$this->_object = $this->_object->Shortcut;
+		}
 
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
@@ -533,7 +544,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->fillTab();
 
 		$this->title($this->_object->id
-			? Core::_('Structure.edit_title', $this->_object->name)
+			? Core::_('Structure.edit_title', $this->_object->name, FALSE)
 			: Core::_('Structure.add_title')
 		);
 
@@ -629,7 +640,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 			// Backward compatibility
 			$datFile = $oLib->getLibDatFilePath($this->_object->id);
-			if (is_file($datFile))
+			if (Core_File::isFile($datFile))
 			{
 				try
 				{
@@ -696,7 +707,14 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$aReturn = array();
 
 		// Дочерние разделы
-		$aChildren = $oStructure->Structures->getBySiteId($iSiteId);
+
+		$oStructures = $oStructure->Structures;
+		$oStructures->queryBuilder()
+			->where('structures.site_id', '=', $iSiteId)
+			->where('structures.shortcut_id', '=', 0);
+
+		// $aChildren = $oStructure->Structures->getBySiteId($iSiteId);
+		$aChildren = $oStructures->findAll(FALSE);
 
 		if (count($aChildren))
 		{

@@ -19,4 +19,5 @@ return array(
 	'apply_success' => 'Status information modified successfully!',
 	'color' => 'Color',
 	'parent_id' => 'Parent status',
+	'shop_id' => 'Shop ID',
 );

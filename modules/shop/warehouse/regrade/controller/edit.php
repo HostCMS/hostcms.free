@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -62,7 +62,7 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 
 			if (!is_null($oModule))
 			{
-				$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, 4, 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
+				$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, $this->_object->getEntityType(), 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
 			}
 
 			$printlayoutsButton .= '
@@ -156,14 +156,14 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 
 		$oRecalcPriceLink = Admin_Form_Entity::factory('Link');
 		$oRecalcPriceLink
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 margin-top-21'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 margin-top-21 recalc-button'))
 			->a
-				->class('btn btn-default')
-				->onclick("$.recalcPrice()")
+				->class('btn btn-labeled btn-default')
+				->onclick("$.recalcPrice('{$windowId}')")
 				->value(Core::_('Shop_Warehouse_Regrade.recalc_price'));
 		$oRecalcPriceLink
 			->icon
-				->class('fa fa-recycle');
+				->class('btn-label fa fa-recycle');
 
 		$oMainRow3->add($oRecalcPriceLink);
 
@@ -285,11 +285,10 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 				)
 		);
 
-		$title = $this->_object->id
-			? Core::_('Shop_Warehouse_Regrade.form_edit', $this->_object->number)
-			: Core::_('Shop_Warehouse_Regrade.form_add');
-
-		$this->title($title);
+		$this->title($this->_object->id
+			? Core::_('Shop_Warehouse_Regrade.form_edit', $this->_object->number, FALSE)
+			: Core::_('Shop_Warehouse_Regrade.form_add')
+		);
 
 		return $this;
 	}

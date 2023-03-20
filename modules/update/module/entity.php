@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Update
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Update_Module_Entity extends Core_Entity
 {
@@ -132,7 +132,7 @@ class Update_Module_Entity extends Core_Entity
 			$oMarket_Controller->setMarketOptions();
 			$oMarket_Controller->tmpDir = CMS_FOLDER . 'hostcmsfiles/tmp/install' . DIRECTORY_SEPARATOR . $this->id;
 
-			is_dir($oMarket_Controller->tmpDir)
+			Core_File::isDir($oMarket_Controller->tmpDir)
 				&& Core_File::deleteDir($oMarket_Controller->tmpDir);
 
 			// Создаем директорию снова
@@ -145,7 +145,7 @@ class Update_Module_Entity extends Core_Entity
 			Core_File::write($source_file, $Core_Http->getDecompressedBody());
 
 			// Распаковываем файлы
-			$Core_Tar = new Core_Tar($source_file);
+			$Core_Tar = new Core_Tar($source_file, 'gz');
 			if (!$Core_Tar->extractModify($oMarket_Controller->tmpDir, $oMarket_Controller->tmpDir))
 			{
 				// Возникла ошибка распаковки
@@ -156,14 +156,14 @@ class Update_Module_Entity extends Core_Entity
 
 			// Копируем файлы из ./files/ в папку системы
 			$sFilesDir = $oMarket_Controller->tmpDir . DIRECTORY_SEPARATOR . 'files';
-			if (is_dir($sFilesDir))
+			if (Core_File::isDir($sFilesDir))
 			{
 				Core_File::copyDir($sFilesDir, CMS_FOLDER);
 			}
 
 			// Размещаем SQL из описания обновления
 			$sSqlFilename = $oMarket_Controller->tmpDir . '/update.sql';
-			if (is_file($sSqlFilename))
+			if (Core_File::isFile($sSqlFilename))
 			{
 				Core_Log::instance()->clear()
 					->status(Core_Log::$MESSAGE)
@@ -176,7 +176,7 @@ class Update_Module_Entity extends Core_Entity
 
 			// Размещаем PHP из описания обновления
 			$sPhpFilename = $oMarket_Controller->tmpDir . '/update.php';
-			if (is_file($sPhpFilename))
+			if (Core_File::isFile($sPhpFilename))
 			{
 				Core_Log::instance()->clear()
 					->status(Core_Log::$MESSAGE)
@@ -188,7 +188,7 @@ class Update_Module_Entity extends Core_Entity
 			clearstatcache();
 
 			// Удаляем папку с файлами в случае с успешной установкой
-			is_dir($oMarket_Controller->tmpDir) && Core_File::deleteDir($oMarket_Controller->tmpDir);
+			Core_File::isDir($oMarket_Controller->tmpDir) && Core_File::deleteDir($oMarket_Controller->tmpDir);
 
 			$message = Core::_('Update.install_success', $this->name);
 

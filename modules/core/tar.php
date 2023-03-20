@@ -20,12 +20,12 @@ class Core_Tar
 	/**
 	* @var boolean if true, the Tar file will be gzipped
 	*/
-	protected $_compress = TRUE;
+	protected $_compress = NULL;
 
 	/**
 	* @var string Type of compression : 'none', 'gz' or 'bz2'
 	*/
-	protected $_compress_type = 'gz';
+	protected $_compress_type = 'none';
 
 	/**
 	* @var string Explode separator
@@ -66,16 +66,16 @@ class Core_Tar
 	*
 	* @param	string $p_tarname The name of the tar archive to create
 	* @param	string $p_compress can be null, 'gz' or 'bz2'. This
-	* parameter indicates if gzip or bz2 compression
-	* is required. For compatibility reason the
-	* boolean value 'true' means 'gz'.
+	* parameter indicates if gzip or bz2 compression is required. For compatibility reason the boolean value 'true' means 'gz'.
 	* @access public
 	*/
 	public function __construct($p_tarname, $p_compress = NULL)
 	{
+		$this->_compress = false;
+		$this->_compress_type = 'none';
+
 		if (($p_compress === NULL) || ($p_compress == ''))
 		{
-
 			if (@file_exists($p_tarname))
 			{
 				if ($fp = @fopen($p_tarname, "rb"))
@@ -89,6 +89,10 @@ class Core_Tar
 						$this->_compress_type = 'gz';
 						// No sure it's enought for a magic code ....
 					}
+					elseif ($data == "BZ") {
+						$this->_compress = true;
+						$this->_compress_type = 'bz2';
+					}
 				}
 			} else {
 				// probably a remote file or some file accessible
@@ -98,6 +102,12 @@ class Core_Tar
 					$this->_compress = true;
 					$this->_compress_type = 'gz';
 				}
+				elseif ((substr($p_tarname, -3) == 'bz2') ||
+					(substr($p_tarname, -2) == 'bz')
+				) {
+					$this->_compress = true;
+					$this->_compress_type = 'bz2';
+				}
 			}
 		}
 		else
@@ -106,15 +116,49 @@ class Core_Tar
 				$this->_compress = true;
 				$this->_compress_type = 'gz';
 			}
+			else {
+				if ($p_compress == 'bz2') {
+					$this->_compress = true;
+					$this->_compress_type = 'bz2';
+				} else {
+					$this->_error(
+						"Unsupported compression type '$p_compress'\n" .
+						"Supported types are 'gz', 'bz2' and 'lzma2'.\n"
+					);
+					return false;
+				}
+			}
 		}
 
 		$this->_tarname = $p_tarname;
+
+		// assert zlib or bz2 extension support
 		if ($this->_compress)
 		{
-			// assert zlib or bz2 extension support
 			if ($this->_compress_type == 'gz')
 			{
 				$extname = 'zlib';
+			}
+			else
+			{
+				if ($this->_compress_type == 'bz2')
+				{
+					$extname = 'bz2';
+				}
+				else
+				{
+					$extname = NULL;
+				}
+			}
+
+			if (!extension_loaded($extname))
+			{
+				$this->_error(
+					"The extension '$extname' couldn't be found.\n" .
+					"Please make sure your version of PHP was built " .
+					"with '$extname' support.\n"
+				);
+				return false;
 			}
 		}
 	}
@@ -304,7 +348,6 @@ class Core_Tar
 			else {
 				$this->_error('Tar: File List Error!');
 				return false;
-
 			}
 
 			$v_result = $this->_append($v_list, $p_add_dir, $p_remove_dir);
@@ -759,7 +802,7 @@ class Core_Tar
 		$p_remove_dir = $this->_translateWinPath($p_remove_dir, false);
 
 		if (!$this->_file) {
-			$this->_error('Неправильный дескриптор файла');
+			$this->_error('_addList: Invalid file descriptor');
 			return false;
 		}
 
@@ -872,12 +915,12 @@ class Core_Tar
 	protected function _addFile($p_filename, &$p_header, $p_add_dir, $p_remove_dir)
 	{
 		if (!$this->_file) {
-			$this->_error('Неправильный дескриптор файла');
+			$this->_error('_addFile: Invalid file descriptor');
 			return false;
 		}
 
 		if ($p_filename == '') {
-			$this->_error('Неправильное имя файла');
+			$this->_error('_addFile: Wrong file name');
 			return false;
 		}
 
@@ -943,12 +986,12 @@ class Core_Tar
 	protected function _addString($p_filename, $p_string)
 	{
 		if (!$this->_file) {
-			$this->_error('Неправильный дескриптор файла');
+			$this->_error('_addString: Invalid file descriptor');
 			return false;
 		}
 
 		if ($p_filename == '') {
-			$this->_error('Неправильно имя файла');
+			$this->_error('_addString: Wrong file name');
 			return false;
 		}
 
@@ -1233,13 +1276,13 @@ class Core_Tar
 		$v_checksum = 0;
 		// ..... First part of the header
 		for ($i=0; $i<148; $i++)
-		$v_checksum+=ord(substr($v_binary_data,$i,1));
+		$v_checksum += ord(substr($v_binary_data, $i, 1));
 		// ..... Ignore the checksum value and replace it by ' ' (space)
 		for ($i=148; $i<156; $i++)
 		$v_checksum += ord(' ');
 		// ..... Last part of the header
 		for ($i=156; $i<512; $i++)
-		$v_checksum+=ord(substr($v_binary_data,$i,1));
+		$v_checksum += ord(substr($v_binary_data, $i, 1));
 
 		$v_data = unpack("a100filename/a8mode/a8uid/a8gid/a12size/a12mtime/"
 		."a8checksum/a1typeflag/a100link/a6magic/a2version/"
@@ -1257,9 +1300,8 @@ class Core_Tar
 			return true;
 			}
 
-			$this->_error('Ошибка расчета контрольной суммы "'.$v_data['filename']
-			.'" : '.$v_checksum.' рассчитана, '
-			.$v_header['checksum'].' фактически указана');
+			$this->_error(Core::_('Core.unpack_wrong_crc', $v_data['filename'], $v_checksum, $v_header['checksum']));
+
 			return false;
 		}
 
@@ -1310,7 +1352,7 @@ class Core_Tar
 		if (!$this->_readHeader($v_binary_data, $v_header))
 		return false;
 
-		$v_header['filename'] = $v_filename;
+		$v_header['filename'] = trim($v_filename);
 
 		return true;
 	}
@@ -1342,7 +1384,7 @@ class Core_Tar
 
 			if ($v_header['filename'] == $p_filename) {
 				if ($v_header['typeflag'] == "5") {
-					$this->_error('Не удается извлечь строку в каталоге {'.$v_header['filename'].'}');
+					$this->_error('Can\'t extract string in directory ' . $v_header['filename']);
 					return NULL;
 				} else {
 					$n = floor($v_header['size']/512);
@@ -1406,7 +1448,7 @@ class Core_Tar
 				$v_listing = TRUE;
 				break;
 			default :
-				$this->_error('Неправильный режим извелечения ('.$p_mode.')');
+				$this->_error('Wrong extraction mode: ' . $p_mode);
 				return false;
 		}
 
@@ -1439,8 +1481,8 @@ class Core_Tar
 					if (substr($p_file_list[$i], -1) == '/') {
 						// ----- Look if the directory is in the filename path
 						if ((strlen($v_header['filename']) > strlen($p_file_list[$i]))
-						&& (substr($v_header['filename'], 0, strlen($p_file_list[$i]))
-						== $p_file_list[$i])) {
+							&& (substr($v_header['filename'], 0, strlen($p_file_list[$i])) == $p_file_list[$i]))
+						{
 							$v_extract_file = TRUE;
 							break;
 						}
@@ -1459,19 +1501,18 @@ class Core_Tar
 			// ----- Look if this file need to be extracted
 			if (($v_extract_file) && (!$v_listing))
 			{
-				if (($p_remove_path != '')
-				&& (substr($v_header['filename'], 0, $p_remove_path_size)
-				== $p_remove_path))
-				$v_header['filename'] = substr($v_header['filename'],
-				$p_remove_path_size);
+				if (($p_remove_path != '') && (substr($v_header['filename'], 0, $p_remove_path_size) == $p_remove_path))
+				{
+					$v_header['filename'] = substr($v_header['filename'], $p_remove_path_size);
+				}
+
 				if (($p_path != './') && ($p_path != '/')) {
 					while (substr($p_path, -1) == '/')
 					$p_path = substr($p_path, 0, strlen($p_path)-1);
 
-					if (substr($v_header['filename'], 0, 1) == '/')
-					$v_header['filename'] = $p_path.$v_header['filename'];
-					else
-					$v_header['filename'] = $p_path.'/'.$v_header['filename'];
+					$v_header['filename'] = substr($v_header['filename'], 0, 1) == '/'
+						? $p_path . $v_header['filename']
+						: $p_path . '/' . $v_header['filename'];
 				}
 
 				$v_header['filename'] = trim($v_header['filename']);
@@ -1479,16 +1520,16 @@ class Core_Tar
 				if (file_exists($v_header['filename'])) {
 					if ((@is_dir($v_header['filename']) && !is_link($v_header['filename']))
 					&& ($v_header['typeflag'] == '')) {
-						$this->_error("Файл {$v_header['filename']} уже существует и является директорией");
+						$this->_error(Core::_('Core.unpack_file_already_exists_and_directory', $v_header['filename']));
 						return false;
 					}
 					if (($this->_isArchive($v_header['filename']))
 					&& ($v_header['typeflag'] == "5")) {
-						$this->_error('Директория '.$v_header['filename'].' уже существует и является файлом');
+						$this->_error(Core::_('Core.unpack_dir_already_exists_and_file', $v_header['filename']));
 						return false;
 					}
 					if (!is_writeable($v_header['filename'])) {
-						$this->_error('Файл '.$v_header['filename'].' уже существует и защищен от записи! Установите права доступа к файлу в соответствии с руководством по установке.');
+						$this->_error(Core::_('Core.unpack_file_already_exists_and_protected', $v_header['filename']));
 						return false;
 					}
 					if (filemtime($v_header['filename']) > $v_header['mtime']) {
@@ -1500,7 +1541,7 @@ class Core_Tar
 				? $v_header['filename']
 				: dirname($v_header['filename'])), Core_Array::get($v_header, 'mode', CHMOD))) != 1)
 				{
-					$this->_error('Ошибка создания пути для ' . $v_header['filename']);
+					$this->_error(Core::_('Core.unpack_error_creating_dir', $v_header['filename']));
 					return false;
 				}
 
@@ -1509,12 +1550,11 @@ class Core_Tar
 						if (!@file_exists($v_header['filename'])) {
 
 							$chmod = Core_Array::get($v_header, 'mode', CHMOD);
-
 							$chmod > CHMOD && $chmod = CHMOD;
 
 							if (!@mkdir($v_header['filename'], $chmod))
 							{
-								$this->_error('Ошибка создания директории "'.$v_header['filename'].'"');
+								$this->_error(Core::_('Core.unpack_error_creating_dir', $v_header['filename']));
 								return false;
 							}
 
@@ -1523,16 +1563,18 @@ class Core_Tar
 					} else {
 						if (($v_dest_file = @fopen($v_header['filename'], "wb")) == 0)
 						{
-							$this->_error('Ошибка открытия на запись "'.$v_header['filename'].'" в бинарном режиме');
+							$this->_error(Core::_('Core.unpack_error_opening_binary_mode', $v_header['filename']));
 							return false;
 						}
 						else
 						{
-							$n = floor($v_header['size']/512);
-							for ($i=0; $i<$n; $i++) {
+							$n = floor($v_header['size'] / 512);
+							for ($i = 0; $i < $n; $i++)
+							{
 								$v_content = $this->_readBlock();
 								fwrite($v_dest_file, $v_content, 512);
 							}
+
 							if (($v_header['size'] % 512) != 0) {
 								$v_content = $this->_readBlock();
 								fwrite($v_dest_file, $v_content, ($v_header['size'] % 512));
@@ -1544,7 +1586,6 @@ class Core_Tar
 							@touch($v_header['filename'], $v_header['mtime']);
 
 							$chmod = Core_Array::get($v_header, 'mode', CHMOD_FILE);
-
 							$chmod > CHMOD_FILE && $chmod = CHMOD_FILE;
 
 							@chmod($v_header['filename'], $chmod);
@@ -1553,8 +1594,7 @@ class Core_Tar
 						// ----- Check the file size
 						clearstatcache();
 						if (filesize($v_header['filename']) != $v_header['size']) {
-							$this->_error('Извлеченный файл '.$v_header['filename'].' имеет некорректный размер \''
-							.filesize($v_header['filename']).'\' (должен быть '.$v_header['size'].'). Архив может быть поврежден.');
+							$this->_error(Core::_('Core.unpack_file_incorrect_size', $v_header['filename'], filesize($v_header['filename']), $v_header['size']));
 							return false;
 						}
 					}
@@ -1599,8 +1639,7 @@ class Core_Tar
 			$this->_close();
 
 			if (!@rename($this->_tarname, $this->_tarname.".tmp")) {
-				$this->_error('Ошибка при переименовании \''.$this->_tarname
-				.'\' во временный файл \''.$this->_tarname.'.tmp\'');
+				$this->_error("Can't rename {$this->_tarname} => {$this->_tarname}.tmp");
 				return false;
 			}
 
@@ -1610,8 +1649,7 @@ class Core_Tar
 			$v_temp_tar = bzopen($this->_tarname.".tmp", "rb");
 
 			if ($v_temp_tar == 0) {
-				$this->_error('Ошибка открытия файла \''.$this->_tarname
-				.'.tmp\' в бинарном режиме');
+				$this->_error(Core::_('Core.unpack_error_opening_binary_mode', $this->_tarname));
 				@rename($this->_tarname.".tmp", $this->_tarname);
 				return false;
 			}
@@ -1651,9 +1689,9 @@ class Core_Tar
 				@bzclose($v_temp_tar);
 			}
 
-			if (!@unlink($this->_tarname.".tmp")) {
-				$this->_error('Ошибка при удалении временного файла \''
-				.$this->_tarname.'.tmp\'');
+			if (!@unlink($this->_tarname . '.tmp'))
+			{
+				$this->_error("Can't delete {$this->_tarname}.tmp");
 			}
 
 		} else {
@@ -1724,7 +1762,7 @@ class Core_Tar
 
 		if (!@mkdir($p_dir, $chmod))
 		{
-			$this->_error("Ошибка при создании директории '{$p_dir}'");
+			$this->_error("Error creating directory '{$p_dir}'");
 			return FALSE;
 		}
 

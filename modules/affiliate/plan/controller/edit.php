@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Affiliate
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Affiliate_Plan_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -89,12 +89,10 @@ class Affiliate_Plan_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 		$oMainTab->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow5);
 		$oMainTab->move($this->getField('include_delivery')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow5);
 
-		// Заголовок формы
-		$title = $this->_object->id
+		$this->title($this->_object->id
 			? Core::_('Affiliate_Plan.affiliate_form_edit')
-			: Core::_('Affiliate_Plan.affiliate_form_add');
-
-		$this->title($title);
+			: Core::_('Affiliate_Plan.affiliate_form_add')
+		);
 
 		return $this;
 	}

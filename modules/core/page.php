@@ -9,6 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * - fileTimestamp(TRUE|FALSE) использовать в качестве временной метки дату файла, а не дату изменения макета, по умолчанию FALSE.
  * - compress(TRUE|FALSE) использовать компрессию, по умолчанию TRUE. Требует модуль "Компрессия страниц".
+ * - doctype('html'|'xhtml') используемый DOCTYPE, влияет на формирование мета-тегов.
  *
  * <code>
  * // Get Title
@@ -78,9 +79,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Page extends Core_Servant_Properties
 {
@@ -89,6 +90,7 @@ class Core_Page extends Core_Servant_Properties
 	 * @var array
 	 */
 	protected $_allowedProperties = array(
+		'doctype',
 		'title',
 		'description',
 		'keywords',
@@ -188,6 +190,7 @@ class Core_Page extends Core_Servant_Properties
 		$this->libParams = array();
 		$this->buildingPage = $this->fileTimestamp = FALSE;
 		$this->compress = TRUE;
+		$this->doctype = 'html';
 	}
 
 	/**
@@ -282,16 +285,16 @@ class Core_Page extends Core_Servant_Properties
 		{
 			if ($bExternal)
 			{
-				$timestamp = $this->fileTimestamp && is_file($sPath = CMS_FOLDER . ltrim($css, DIRECTORY_SEPARATOR))
+				$timestamp = $this->fileTimestamp && Core_File::isFile($sPath = CMS_FOLDER . ltrim($css, DIRECTORY_SEPARATOR))
 					? filemtime($sPath)
 					: Core_Date::sql2timestamp($this->template->timestamp);
 
-				$sReturn .= '<link rel="stylesheet" type="text/css" href="' . $this->cssCDN . $css . '?' . $timestamp . '" />' . "\n";
+				$sReturn .= '<link rel="stylesheet" type="text/css" href="' . $this->cssCDN . $css . '?' . $timestamp . '"' . ($this->doctype === 'xhtml' ? ' />' : '>') . "\n";
 			}
 			else
 			{
 				$sPath = CMS_FOLDER . ltrim($css, DIRECTORY_SEPARATOR);
-				is_file($sPath)
+				Core_File::isFile($sPath)
 					&& $sReturn .= Core_File::read($sPath);
 			}
 		}
@@ -320,7 +323,7 @@ class Core_Page extends Core_Servant_Properties
 			}
 
 			$sReturn = $bExternal
-				? '<link rel="stylesheet" type="text/css" href="' . $this->cssCDN . $oCompression_Controller->getPath() . '?' . Core_Date::sql2timestamp($this->template->timestamp) . '" />' . "\n"
+				? '<link rel="stylesheet" type="text/css" href="' . $this->cssCDN . $oCompression_Controller->getPath() . '?' . Core_Date::sql2timestamp($this->template->timestamp) . '"' . ($this->doctype === 'xhtml' ? ' />' : '>') . "\n"
 				: "<style type=\"text/css\">\n" . $oCompression_Controller->getContent() . "\n</style>\n";
 		}
 		catch (Exception $e)
@@ -429,7 +432,7 @@ class Core_Page extends Core_Servant_Properties
 
 		foreach ($this->js as $aJs)
 		{
-			$timestamp = $this->fileTimestamp && is_file($sPath = CMS_FOLDER . ltrim($aJs[0], DIRECTORY_SEPARATOR))
+			$timestamp = $this->fileTimestamp && Core_File::isFile($sPath = CMS_FOLDER . ltrim($aJs[0], DIRECTORY_SEPARATOR))
 				? filemtime($sPath)
 				: NULL;
 
@@ -483,7 +486,7 @@ class Core_Page extends Core_Servant_Properties
 
 			$sPath = $oCompression_Controller->getPath();
 
-			$timestamp = $this->fileTimestamp && is_file(CMS_FOLDER . $sPath)
+			$timestamp = $this->fileTimestamp && Core_File::isFile(CMS_FOLDER . $sPath)
 				? filemtime(CMS_FOLDER . $sPath)
 				: NULL;
 
@@ -577,7 +580,7 @@ class Core_Page extends Core_Servant_Properties
 
 			$LibConfig = $oStructure->Lib->getLibConfigFilePath();
 
-			if (is_file($LibConfig) && is_readable($LibConfig))
+			if (Core_File::isFile($LibConfig) && is_readable($LibConfig))
 			{
 				include $LibConfig;
 			}

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -46,7 +46,7 @@ if (!is_null(Core_Array::getPost('update_warehouse_counts')) && Core_Array::getP
 
 	$shop_warehouse_id = intval(Core_Array::getPost('shop_warehouse_id'));
 	$datetime = Core_Date::datetime2sql(Core_Array::getPost('datetime'));
-	$aItems = Core_Array::getPost('items');
+	$aItems = Core_Array::getPost('items', array(), 'array');
 
 	foreach ($aItems as $shop_item_id)
 	{

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Update
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Update_Controller extends Core_Servant_Properties
 {
@@ -75,7 +75,7 @@ class Update_Controller extends Core_Servant_Properties
 	{
 		$filePath = $this->getFilePath();
 
-		if (is_file($filePath))
+		if (Core_File::isFile($filePath))
 		{
 			Core_File::delete($filePath);
 		}
@@ -325,15 +325,17 @@ class Update_Controller extends Core_Servant_Properties
 				$oUpdate_Entity->setTableColums(array(
 					'id' => array(),
 					'name' => array(),
-					'description' => array(),
 					'beta' => array(),
+					'number' => array(),
+					'description' => array()
 				));
 
 				$oUpdate_Entity->id = $id;
 				$oUpdate_Entity->name = (string)$value->update_name;
+				$oUpdate_Entity->beta = (int)$value->beta;
+				$oUpdate_Entity->number = (string)$value->update_name;
 				//$oUpdate_Entity->description = html_entity_decode((string)$value->update_description, ENT_COMPAT, 'UTF-8');
 				$oUpdate_Entity->description = (string)$value->update_description;
-				$oUpdate_Entity->beta = (int)$value->beta;
 			}
 
 			$return['error'] = (int)$oXml->error;
@@ -365,8 +367,8 @@ class Update_Controller extends Core_Servant_Properties
 					'id' => array(),
 					'name' => array(),
 					'beta' => array(),
-					'path' => array(),
 					'number' => array(),
+					'path' => array(),
 					'description' => array(),
 					'file' => array(),
 				));

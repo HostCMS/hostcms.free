@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shortcode
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shortcode_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -33,7 +33,7 @@ class Shortcode_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				parent::setObject($object);
 
 				$title = $this->_object->id
-					? Core::_('Shortcode.shortcode_edit_form_title', $this->_object->name)
+					? Core::_('Shortcode.shortcode_edit_form_title', $this->_object->name, FALSE)
 					: Core::_('Shortcode.shortcode_add_form_title');
 
 				$oMainTab = $this->getTab('main');
@@ -50,7 +50,8 @@ class Shortcode_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->move($this->getField('name')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1)
 					->move($this->getField('shortcode')->divAttr(array('class' => 'form-group col-xs-12'))->format(
 						array(
-							'reg' => array('value' => '^[A-Za-z0-9_]+$')
+							'minlen' => array('value' => 1),
+							'reg' => array('value' => '^[A-Za-z_]+[A-Za-z0-9_]*$')
 						)
 					), $oMainRow2)
 					->move($this->getField('example')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2);
@@ -104,7 +105,7 @@ class Shortcode_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				parent::setObject($object);
 
 				$title = $this->_object->id
-					? Core::_("Shortcode_Dir.shortcode_dir_edit_form_title", $this->_object->name)
+					? Core::_("Shortcode_Dir.shortcode_dir_edit_form_title", $this->_object->name, FALSE)
 					: Core::_("Shortcode_Dir.shortcode_dir_add_form_title");
 
 				// Получаем стандартные вкладки

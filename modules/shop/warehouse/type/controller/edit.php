@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Type_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -42,11 +42,10 @@ class Shop_Warehouse_Type_Controller_Edit extends Admin_Form_Action_Controller_T
 			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-5 col-md-4 ')), $oMainRow2)
 			->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow3);
 
-		$title = $this->_object->id
-			? Core::_('Shop_Warehouse_Type.edit_form_title', $this->_object->name)
-			: Core::_('Shop_Warehouse_Type.add_form_title');
-
-		$this->title($title);
+		$this->title($this->_object->id
+			? Core::_('Shop_Warehouse_Type.edit_form_title', $this->_object->name, FALSE)
+			: Core::_('Shop_Warehouse_Type.add_form_title')
+		);
 
 		return $this;
 	}

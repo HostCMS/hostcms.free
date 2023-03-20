@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Bot
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Bot_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -67,7 +67,7 @@ class Bot_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			case 'bot':
 				$title = $this->_object->id
-					? Core::_('Bot.edit_title', $this->_object->name)
+					? Core::_('Bot.edit_title', $this->_object->name, FALSE)
 					: Core::_('Bot.add_title');
 
 				$oMainTab
@@ -97,7 +97,7 @@ class Bot_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			case 'bot_dir':
 			default:
 				$title = $this->_object->id
-					? Core::_('Bot_Dir.edit_title', $this->_object->name)
+					? Core::_('Bot_Dir.edit_title', $this->_object->name, FALSE)
 					: Core::_('Bot_Dir.add_title');
 
 				// Удаляем стандартный <input>

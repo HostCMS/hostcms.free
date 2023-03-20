@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -199,7 +199,7 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 		$oAdditionalTab->delete($this->getField('shop_order_item_status_id'));
 
 		$oDropdownlistStatuses = Admin_Form_Entity::factory('Dropdownlist')
-			->options(Shop_Order_Item_Status_Controller_Edit::getDropdownlistOptions())
+			->options(Shop_Order_Item_Status_Controller_Edit::getDropdownlistOptions($oShop->id))
 			->name('shop_order_item_status_id')
 			->value($this->_object->shop_order_item_status_id)
 			->caption(Core::_('Shop_Order_Item.shop_order_item_status_id'))
@@ -220,11 +220,11 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 		$oMainTab->add($oCore_Html_Entity_Script);
 
 		$oShop_Order = $this->_object->Shop_Order;
-		$title = $this->_object->id
-			? Core::_('Shop_Order_Item.order_items_edit_form_title', $oShop_Order->invoice)
-			: Core::_('Shop_Order_Item.order_items_add_form_title', $oShop_Order->invoice);
 
-		$this->title($title);
+		$this->title($this->_object->id
+			? Core::_('Shop_Order_Item.order_items_edit_form_title', $oShop_Order->invoice, FALSE)
+			: Core::_('Shop_Order_Item.order_items_add_form_title', $oShop_Order->invoice, FALSE)
+		);
 
 		return $this;
 	}

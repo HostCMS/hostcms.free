@@ -10,7 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Controller_Delete_Value extends Admin_Form_Action_Controller
 {
@@ -46,7 +46,7 @@ class Property_Controller_Delete_Value extends Admin_Form_Action_Controller
 
 			$oProperty = Core_Entity::factory('Property')->find($propertyId);
 
-			if (!is_null($oProperty))
+			if (!is_null($oProperty->id))
 			{
 				$oValue = $oProperty->getValueById($valueId);
 

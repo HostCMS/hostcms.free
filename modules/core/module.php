@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Module
 {
@@ -554,6 +554,9 @@ abstract class Core_Module
 					case 'checkbox':
 						$value = $value == 1;
 					break;
+					case 'color':
+						$value = strval($value);
+					break;
 				}
 
 				$aConfig[$option_name] = $value;
@@ -564,7 +567,7 @@ abstract class Core_Module
 
 		return $this;
 	}
-	
+
 	/**
 	 * Module's webhooks
 	 * @var array

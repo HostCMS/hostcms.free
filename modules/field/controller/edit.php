@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Field
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -169,7 +169,7 @@ class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			case 'field':
 				$title = $object->id
-					? Core::_('Field.edit_title', $object->name)
+					? Core::_('Field.edit_title', $object->name, FALSE)
 					: Core::_('Field.add_title');
 
 				$oMainTab
@@ -460,7 +460,7 @@ class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			case 'field_dir':
 			default:
 				$title = $this->_object->id
-					? Core::_('Field_Dir.field_dir_edit_form_title', $this->_object->name)
+					? Core::_('Field_Dir.field_dir_edit_form_title', $this->_object->name, FALSE)
 					: Core::_('Field_Dir.field_dir_add_form_title');
 
 				$oMainTab

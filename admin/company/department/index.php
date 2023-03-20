@@ -3,11 +3,10 @@
  * Department.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
-
 require_once('../../../bootstrap.php');
 
 Core_Auth::authorization($sModule = 'company');

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Template
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Section_Lib_Model extends Core_Entity
 {
@@ -141,7 +141,7 @@ class Template_Section_Lib_Model extends Core_Entity
 					<?php
 					// Удаление виджета
 					$sTitleWidgetDelete = htmlspecialchars(Core::_('Template_Section_Lib.widget_delete', $this->Lib->name));
-					$sDeleteUrl = "hQuery.deleteWidget({path: '/template-section-lib.php?template_section_lib_id={$this->id}&delete=1{$sSettings}', goal: hQuery('#hostcmsSection{$oTemplate_Section->id}')}); return false";
+					$sDeleteUrl = "res = confirm('" . Core::_('Admin_Form.confirm_dialog', Core::_('Admin_Form.delete')) . "'); if (res) { hQuery.deleteWidget({path: '/template-section-lib.php?template_section_lib_id={$this->id}&delete=1{$sSettings}', goal: hQuery('#hostcmsSection{$oTemplate_Section->id}')}); return false }else { return false }";
 					?>
 					<div><span onclick="<?php echo $sDeleteUrl ?>" alt="<?php echo $sTitleWidgetDelete ?>" title="<?php echo $sTitleWidgetDelete ?>"><i class="fa-solid fa-fw fa-trash-can"></i></span></div>
 				</div><?php

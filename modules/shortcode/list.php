@@ -108,11 +108,6 @@ class Shortcode_List
 		return ob_get_clean();
 	}
 
-	static public function ($args, $body)
-	{
-		
-	}
-
 	static public function shop($args, $body)
 	{
 		$args += array(

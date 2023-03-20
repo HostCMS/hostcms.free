@@ -18,10 +18,16 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Xsl
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Xsl_Stream_Import
 {
+	/**
+	 * The current context, or null if no context was passed to the caller function.
+	 * @var resource|NULL
+	 */
+	public $context;
+
 	/**
 	 * Current position of a stream
 	 * @var int
@@ -147,22 +153,15 @@ class Xsl_Stream_Import
 					$this->position = $offset;
 					return TRUE;
 				}
-				else
-				{
-					return FALSE;
-				}
+				return FALSE;
 			break;
-
 			case SEEK_CUR:
 				if ($offset >= 0)
 				{
 					$this->position += $offset;
 					return TRUE;
 				}
-				else
-				{
-					return FALSE;
-				}
+				return FALSE;
 			break;
 			case SEEK_END:
 				if (strlen(self::$_aXSL[$this->_xslName]) + $offset >= 0)
@@ -170,10 +169,7 @@ class Xsl_Stream_Import
 					$this->position = strlen(self::$_aXSL[$this->_xslName]) + $offset;
 					return TRUE;
 				}
-				else
-				{
-					 return FALSE;
-				}
+				return FALSE;
 			break;
 			default:
 			return FALSE;

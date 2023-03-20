@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -186,7 +186,6 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 
 // Источник данных 0
 $oAdmin_Form_Dataset = new Sql_Table_View_Dataset();
-
 $oAdmin_Form_Dataset->table($tableName);
 
 // Добавляем источник данных контроллеру формы

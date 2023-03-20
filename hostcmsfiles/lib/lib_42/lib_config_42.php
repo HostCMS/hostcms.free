@@ -20,9 +20,9 @@ if (Core::moduleIsActive('siteuser'))
 		// Создание топика
 		if (!$Message_Controller_Show->topic && !is_null(Core_Array::getPost('login')))
 		{
-			$login = Core_Array::getPost('login');
-			$subject = Core_Array::getPost('subject');
-			$text = Core_Array::getPost('text');
+			$login = Core_Array::getPost('login', '', 'str');
+			$subject = Core_Array::getPost('subject', '', 'str');
+			$text = Core_Array::getPost('text', '', 'str');
 			$result = $Message_Controller_Show->createTopic($login, $subject, $text);
 
 			if ($result == 'wrong-login')
@@ -45,9 +45,9 @@ if (Core::moduleIsActive('siteuser'))
 					);
 			}
 		}
-		elseif (Core_Array::getPost('text'))
+		elseif (!is_null(Core_Array::getPost('text')))
 		{
-			$text = Core_Array::getPost('text');
+			$text = Core_Array::getPost('text', '', 'str');
 			$result = $Message_Controller_Show->addMessage($text);
 
 			if ($result == 'empty-text')

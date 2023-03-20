@@ -9,21 +9,15 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 {
 	/**
-	 * Name of the skin
-	 * @var string
+	 * Widget path
+	 * @var string|NULL
 	 */
-	//protected $_skinName = 'bootstrap';
-
-	/**
-	 * Name of the module
-	 * @var string
-	 */
-	//protected $_moduleName = 'shop';
+	protected $_path = NULL;
 
 	/**
 	 * Constructor.

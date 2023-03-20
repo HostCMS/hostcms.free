@@ -12,9 +12,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Compare_Controller extends Core_Servant_Properties
 {
@@ -166,7 +166,7 @@ class Shop_Compare_Controller extends Core_Servant_Properties
 		{
 			$oShop_Item = Core_Entity::factory('Shop_Item')->find($oShop_Compare->shop_item_id);
 
-			if (!is_null($oShop_Item) && $oShop_Item->active)
+			if (!is_null($oShop_Item->id) && $oShop_Item->active)
 			{
 				$aTmp_Shop_Compares[] = $oShop_Compare;
 			}
@@ -197,7 +197,7 @@ class Shop_Compare_Controller extends Core_Servant_Properties
 			{
 				$oShop_Item = Core_Entity::factory('Shop_Item')->find($shop_item_id);
 
-				if (!is_null($oShop_Item) && $oShop_Item->active)
+				if (!is_null($oShop_Item->id) && $oShop_Item->active)
 				{
 					// Temporary object
 					$oShop_Compare = Core_Entity::factory('Shop_Compare');
@@ -280,10 +280,10 @@ class Shop_Compare_Controller extends Core_Servant_Properties
 
 			$oShop_Item = Core_Entity::factory('Shop_Item')->find($this->shop_item_id);
 
-			$oShop = $oShop_Item->Shop;
-
 			if (!is_null($oShop_Item->id))
 			{
+				$oShop = $oShop_Item->Shop;
+
 				if (isset($_SESSION['hostcmsCompare'][$oShop->id][$this->shop_item_id]))
 				{
 					unset($_SESSION['hostcmsCompare'][$oShop->id][$this->shop_item_id]);
@@ -328,10 +328,10 @@ class Shop_Compare_Controller extends Core_Servant_Properties
 
 		$oShop_Item = Core_Entity::factory('Shop_Item')->find($this->shop_item_id);
 
-		$oShop = $oShop_Item->Shop;
-
 		if (!is_null($oShop_Item->id))
 		{
+			$oShop = $oShop_Item->Shop;
+			
 			// Проверяем наличие данных о пользователе
 			if ($this->siteuser_id)
 			{

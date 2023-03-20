@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Module extends Core_Module
 {
@@ -23,7 +23,7 @@ class Informationsystem_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2022-11-01';
+	public $date = '2023-03-01';
 
 	/**
 	 * Module name
@@ -32,15 +32,30 @@ class Informationsystem_Module extends Core_Module
 	protected $_moduleName = 'informationsystem';
 
 	/**
-	 * List of Schedule Actions
-	 * @var array
+	 * Get List of Schedule Actions
+	 * @return array
 	 */
-	protected $_scheduleActions = array(
-		0 => 'searchIndexItem',
-		1 => 'searchIndexGroup',
-		2 => 'searchUnindexItem',
-		3 => 'recountInformationsystem',
-	);
+	public function getScheduleActions()
+	{
+		return array(
+			0 => array(
+				'name' => 'searchIndexItem',
+				'entityCaption' => Core::_('Informationsystem.searchIndexItem')
+			),
+			1 => array(
+				'name' => 'searchIndexGroup',
+				'entityCaption' => Core::_('Informationsystem.searchIndexGroup')
+			),
+			2 => array(
+				'name' => 'searchUnindexItem',
+				'entityCaption' => Core::_('Informationsystem.searchUnindexItem')
+			),
+			3 => array(
+				'name' => 'recountInformationsystem',
+				'entityCaption' => Core::_('Informationsystem.recountInformationsystem')
+			)
+		);
+	}
 
 	protected $_options = array(
 		'smallImagePrefix' => array(
@@ -103,6 +118,8 @@ class Informationsystem_Module extends Core_Module
 
 		$aPages = array();
 
+		$currentStepCount = 0;
+
 		switch ($_SESSION['search_block'])
 		{
 			case 0:
@@ -134,7 +151,7 @@ class Informationsystem_Module extends Core_Module
 					->write("indexingInformationsystemItems({$offset}, {$limit})");
 
 				$aTmpResult = $this->indexingInformationsystemItems($offset, $limit);
-				
+
 				$currentStepCount = count($aTmpResult);
 
 				$aPages = array_merge($aPages, $aTmpResult);
@@ -164,6 +181,7 @@ class Informationsystem_Module extends Core_Module
 			->join('structures', 'informationsystems.structure_id', '=', 'structures.id')
 			->where('structures.active', '=', 1)
 			->where('structures.indexing', '=', 1)
+			->where('structures.shortcut_id', '=', 0)
 			->where('informationsystem_groups.indexing', '=', 1)
 			->where('informationsystem_groups.shortcut_id', '=', 0)
 			->where('informationsystem_groups.active', '=', 1)
@@ -211,6 +229,7 @@ class Informationsystem_Module extends Core_Module
 			->leftJoin('informationsystem_groups', 'informationsystem_items.informationsystem_group_id', '=', 'informationsystem_groups.id')
 			->where('structures.active', '=', 1)
 			->where('structures.indexing', '=', 1)
+			->where('structures.shortcut_id', '=', 0)
 			->where('informationsystem_items.indexing', '=', 1)
 			->where('informationsystem_items.active', '=', 1)
 			->where('informationsystem_items.closed', '=', 0)

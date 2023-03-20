@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Producer_Model extends Core_Entity
 {
@@ -296,7 +296,7 @@ class Shop_Producer_Model extends Core_Entity
 			try {
 				Core::$mainConfig['translate'] && $sTranslated = Core_Str::translate($this->name);
 
-				$this->path = Core::$mainConfig['translate'] && strlen($sTranslated)
+				$this->path = Core::$mainConfig['translate'] && strlen((string) $sTranslated)
 					? $sTranslated
 					: $this->name;
 
@@ -316,6 +316,29 @@ class Shop_Producer_Model extends Core_Entity
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function imgBackend()
+	{
+		if (strlen($this->image_small) || strlen($this->image_large))
+		{
+			$srcImg = htmlspecialchars(strlen($this->image_small)
+				? $this->getSmallFileHref()
+				: $this->getLargeFileHref()
+			);
+
+			$dataContent = '<img class="backend-preview" src="' . $srcImg . '" />';
+
+			return '<img data-toggle="popover" data-trigger="hover" data-html="true" data-placement="top" data-content="' . htmlspecialchars($dataContent) . '" class="backend-thumbnail" src="' . $srcImg . '" />';
+		}
+		else
+		{
+			return '<i class="fa-regular fa-image"></i>';
+		}
 	}
 
 	/**
@@ -361,7 +384,7 @@ class Shop_Producer_Model extends Core_Entity
 	 */
 	public function createDir()
 	{
-		if (!is_dir($this->getProducerPath()))
+		if (!Core_File::isDir($this->getProducerPath()))
 		{
 			try
 			{
@@ -412,13 +435,21 @@ class Shop_Producer_Model extends Core_Entity
 
 		try
 		{
-			Core_File::copy($this->getLargeFilePath(), $newObject->getLargeFilePath());
-		} catch (Exception $e) {}
+			if (Core_File::isFile($this->getLargeFilePath()))
+			{
+				$newObject->saveLargeImageFile($this->getLargeFilePath(), $this->image_large);
+			}
+		}
+		catch (Exception $e) {}
 
 		try
 		{
-			Core_File::copy($this->getSmallFilePath(), $newObject->getSmallFilePath());
-		} catch (Exception $e) {}
+			if (Core_File::isFile($this->getSmallFilePath()))
+			{
+				$newObject->saveSmallImageFile($this->getSmallFilePath(), $this->image_small);
+			}
+		}
+		catch (Exception $e) {}
 
 		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
