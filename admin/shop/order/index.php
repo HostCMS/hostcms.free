@@ -17,18 +17,16 @@ $sAdminFormAction = '/admin/shop/order/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
-$shop_id = intval(Core_Array::getGet('shop_id'));
+$shop_id = Core_Array::getGet('shop_id', 0, 'int');
 
 // Идентификатор группы товаров
-$shop_group_id = intval(Core_Array::getGet('shop_group_id', 0));
+$shop_group_id = Core_Array::getGet('shop_group_id', 0, 'int');
 
 // Текущий магазин
 $oShop = Core_Entity::factory('Shop')->find($shop_id);
 
 // Текущая группа магазинов
 $oShopDir = Core_Entity::factory('Shop_Dir', $oShop->shop_dir_id);
-
-$printlayout_id = intval(Core_Array::getGet('printlayout_id', 0));
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
@@ -45,8 +43,6 @@ $siteuser_id = intval(Core_Array::getGet('siteuser_id'));
 $siteuser_id && $windowId != 'id_content' && $oAdmin_Form_Controller->Admin_View(
 	Admin_View::getClassName('Admin_Internal_View')
 );
-
-$oUser = Core_Auth::getCurrentUser();
 
 // Shop Order Print Forms
 $shop_print_form_id = intval(Core_Array::getGet('shop_print_form_id'));
@@ -65,6 +61,8 @@ if ($shop_print_form_id)
 	}
 	exit();
 }
+
+$oUser = Core_Auth::getCurrentUser();
 
 if (!is_null(Core_Array::getPost('showPopover')))
 {
@@ -538,6 +536,8 @@ $oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'print')
 {
+	$printlayout_id = Core_Array::getGet('printlayout_id', 0, 'int');
+
 	$Shop_Order_Controller_Print = Admin_Form_Action_Controller::factory(
 		'Shop_Order_Controller_Print', $oAdmin_Form_Action
 	);
@@ -556,6 +556,8 @@ $oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'sendMail')
 {
+	$printlayout_id = Core_Array::getGet('printlayout_id', 0, 'int');
+
 	$Shop_Order_Controller_Print = Admin_Form_Action_Controller::factory(
 		'Shop_Order_Controller_Print', $oAdmin_Form_Action
 	);
@@ -663,7 +665,7 @@ else
 }
 
 // Список значений для фильтра и поля
-$aShop_Order_Statuses = Core_Entity::factory('Shop_Order_Status')->findAll();
+$aShop_Order_Statuses = Core_Entity::factory('Shop_Order_Status')->getAllByShop_id($shop_id);
 $aList = array('0' => '—');
 foreach ($aShop_Order_Statuses as $oShop_Order_Status)
 {

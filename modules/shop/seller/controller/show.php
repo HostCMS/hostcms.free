@@ -10,6 +10,13 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - seller($id) идентификатор продавца
  * - offset($offset) смещение, по умолчанию 0
  * - limit($limit) количество
+ * - addAllowedTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, разрешенных к передаче в генерируемый XML
+ * - addForbiddenTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, запрещенных к передаче в генерируемый XML
+ *
+ * Доступные пути для методов addAllowedTags/addForbiddenTags:
+ *
+ * - '/' или '/shop' Магазин
+ * - '/shop/shop_seller' Продавец
  *
  * <code>
  * $Shop_Seller_Controller_Show = new Shop_Seller_Controller_Show(
@@ -48,9 +55,9 @@ class Shop_Seller_Controller_Show extends Core_Controller
 
 	/**
 	 * Shop's items object
-	 * @var array
+	 * @var Shop_Seller_Model
 	 */
-	protected $_Shop_Sellers = array();
+	protected $_Shop_Sellers;
 
 	/**
 	 * Constructor.
@@ -145,9 +152,8 @@ class Shop_Seller_Controller_Show extends Core_Controller
 		{
 			foreach ($aShop_Sellers as $oShop_Seller)
 			{
-				//echo "<br>=", $oShop_Seller->id;
 				$oShop_Seller->clearEntities();
-
+				$this->applyForbiddenAllowedTags('/shop/shop_seller', $oShop_Seller);
 				$this->addEntity($oShop_Seller);
 			}
 		}

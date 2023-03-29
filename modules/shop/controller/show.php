@@ -16,7 +16,6 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	none — не показывать группы,
 	tree — показывать дерево групп и все группы на текущем уровне (по умолчанию),
 	all — показывать все группы.
- * - groupsForbiddenTags(array('description')) массив тегов групп, запрещенных к передаче в генерируемый XML
  * - item(123) идентификатор показываемого товара
  * - itemsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств товаров, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
  * - itemsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств товаров, по умолчанию TRUE. Ограничения на список свойств в виде массива влияет и на выборку значений свойств товара.
@@ -24,7 +23,6 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - commentsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств комментариев, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
  * - commentsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств комментариев, по умолчанию TRUE. Ограничения на список свойств в виде массива влияет и на выборку значений свойств товара.
  * - itemsPropertiesListJustAvailable(TRUE|FALSE) выводить только доступные значения у свойства. При использовании быстрого фильтра и включенном filterCounts(TRUE) будут выводиться доступные значения с учетом заданных фильтру ограничений, в противном случае будут выбираться значения, доступные товарам группы без учета заданных фильтру ограничений, по умолчанию FALSE
- * - itemsForbiddenTags(array('description')) массив тегов товаров, запрещенных к передаче в генерируемый XML
  * - warehouseMode('all'|'in-stock'|'in-stock-modification') режим вывода товаров:
 	'all' — все (по умолчанию),
 	'in-stock' — на складе,
@@ -75,6 +73,13 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - commentsActivity('active'|'inactive'|'all') отображать комментарии: active — только активные, inactive — только неактивные, all — все, по умолчанию - active
  * - calculateTotal(TRUE|FALSE) вычислять общее количество найденных, по умолчанию TRUE
  * - showPanel(TRUE|FALSE) показывать панель быстрого редактирования, по умолчанию TRUE
+ * - addAllowedTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, разрешенных к передаче в генерируемый XML
+ * - addForbiddenTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, запрещенных к передаче в генерируемый XML
+ *
+ * Устаревшие методы:
+ *
+ * - groupsForbiddenTags(array('description')) массив тегов групп, запрещенных к передаче в генерируемый XML
+ * - itemsForbiddenTags(array('description')) массив тегов товаров, запрещенных к передаче в генерируемый XML
  *
  * Доступные свойства:
  *
@@ -82,6 +87,25 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - patternParams массив данных, извелеченных из URI при применении pattern
  * - filterSeo примененный Shop_Filter_Seo
  * - getShownIDs() получить идентификаторы показанных товаров
+ *
+ * Доступные пути для методов addAllowedTags/addForbiddenTags:
+ *
+ * - '/' или '/shop' Магазин
+ * - '/shop/shop_group' Группы магазина
+ * - '/shop/shop_item' Товары магазина
+ * - '/shop/comparing/shop_item' Сравниваемые товары, если не указаны, используются правила для '/shop/shop_item'
+ * - '/shop/favorite/shop_item' Избранные товары, если не указаны, используются правила для '/shop/shop_item'
+ * - '/shop/viewed/shop_item' Просмотренные товары, если не указаны, используются правила для '/shop/shop_item'
+ * - '/shop/items_in_cart/shop_item' Товары в корзине, если не указаны, используются правила для '/shop/shop_item'
+ * - '/shop/shop_item/shop_item' Родительский товар модификации, если не указаны, используются правила для '/shop/shop_item'
+ * - '/shop/shop_filter_seos/shop_filter_seo' Доступные SEO-фильтры
+ * - '/shop/tag' Примененный Tag для фильтрации
+ * - '/shop/shop_producer' Примененный производитель для фильтрации
+ * - '/shop/shop_filter_seo' Примененный SEO-фильтр
+ * - '/shop/shop_group_properties/property' Свойство в списке свойств группы
+ * - '/shop/shop_group_properties/property_dir' Раздел свойств в списке свойств группы
+ * - '/shop/shop_item_properties/property' Свойство в списке свойств товара
+ * - '/shop/shop_item_properties/property_dir' Раздел свойств в списке свойств товара
  *
  * <code>
  * $Shop_Controller_Show = new Shop_Controller_Show(
@@ -707,7 +731,8 @@ class Shop_Controller_Show extends Core_Controller
 
 						!$this->sets && $oShop_Item->showXmlSets($this->sets);
 
-						$this->applyItemsForbiddenTags($oCompare_Shop_Item);
+						//$this->applyItemsForbiddenTags($oCompare_Shop_Item);
+						$this->applyForbiddenAllowedTags('/shop/comparing/shop_item|/shop/shop_item', $oCompare_Shop_Item);
 
 						Core_Event::notify(get_class($this) . '.onBeforeAddCompareEntity', $this, array($oCompare_Shop_Item));
 
@@ -784,7 +809,8 @@ class Shop_Controller_Show extends Core_Controller
 
 						!$this->sets && $oFavorite_Shop_Item->showXmlSets($this->sets);
 
-						$this->applyItemsForbiddenTags($oFavorite_Shop_Item);
+						//$this->applyItemsForbiddenTags($oFavorite_Shop_Item);
+						$this->applyForbiddenAllowedTags('/shop/favorite/shop_item|/shop/shop_item', $oFavorite_Shop_Item);
 
 						Core_Event::notify(get_class($this) . '.onBeforeAddFavoriteEntity', $this, array($oFavorite_Shop_Item));
 
@@ -863,7 +889,8 @@ class Shop_Controller_Show extends Core_Controller
 							->showXmlBonuses($this->bonuses)
 							->showXmlSpecialprices($this->specialprices);
 
-						$this->applyItemsForbiddenTags($oViewed_Shop_Item);
+						//$this->applyItemsForbiddenTags($oViewed_Shop_Item);
+						$this->applyForbiddenAllowedTags('/shop/viewed/shop_item|/shop/shop_item', $oViewed_Shop_Item);
 
 						!$this->sets && $oViewed_Shop_Item->showXmlSets($this->sets);
 
@@ -972,7 +999,21 @@ class Shop_Controller_Show extends Core_Controller
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeRedeclaredShow', $this);
 
+		// Backward compatible
+		is_array($this->groupsForbiddenTags) && count($this->groupsForbiddenTags)
+			&& $this->addForbiddenTags('/shop/shop_group', $this->groupsForbiddenTags);
+
+		is_array($this->itemsForbiddenTags) && count($this->itemsForbiddenTags)
+			&& $this->addForbiddenTags('/shop/shop_item', $this->itemsForbiddenTags);
+
 		$oShop = $this->getEntity();
+
+		// Move rules from '/shop' to the root
+		$aAllowedTags = $this->getAllowedTags();
+		isset($aAllowedTags['/shop']) && $this->addAllowedTags('/', $aAllowedTags['/shop']);
+
+		$aForbiddenTags = $this->getForbiddenTags();
+		isset($aForbiddenTags['/shop']) && $this->addForbiddenTags('/', $aForbiddenTags['/shop']);
 
 		// Load user BEFORE FOUND_ROWS()
 		$oUser = Core_Auth::getCurrentUser();
@@ -1134,7 +1175,8 @@ class Shop_Controller_Show extends Core_Controller
 
 							Core_Event::notify(get_class($this).'.onBeforeAddCartItem', $this, array($oShop_Item_Into_Cart));
 
-							$this->applyItemsForbiddenTags($oShop_Item_Into_Cart->clearEntities());
+							//$this->applyItemsForbiddenTags($oShop_Item_Into_Cart->clearEntities());
+							$this->applyForbiddenAllowedTags('/shop/items_in_cart/shop_item|/shop/shop_item', $oShop_Item_Into_Cart);
 
 							$this->itemsProperties && $oShop_Item_Into_Cart->showXmlProperties($this->itemsProperties, $this->sortPropertiesValues);
 							!$this->sets && $oShop_Item_Into_Cart->showXmlSets($this->sets);
@@ -1167,8 +1209,11 @@ class Shop_Controller_Show extends Core_Controller
 			// Заново получаем $this->_oTag, т.к. он может быть изменен между parseUrl() и show()
 			$this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
 
-			$this->_oTag
-				&& $this->addEntity($this->_oTag);
+			if ($this->_oTag)
+			{
+				$this->applyForbiddenAllowedTags('/shop/tag', $this->_oTag);
+				$this->addEntity($this->_oTag);
+			}
 		}
 
 		// Независимо от limit, т.к. может использоваться отдельно для фильтра
@@ -1268,13 +1313,17 @@ class Shop_Controller_Show extends Core_Controller
 
 			foreach ($aProperties as $oProperty)
 			{
+				$oProperty->clearEntities();
+				$this->applyForbiddenAllowedTags('/shop/shop_group_properties/property', $oProperty);
 				$this->_aGroup_Properties[$oProperty->property_dir_id][] = $oProperty;
 			}
 
 			$aProperty_Dirs = $oShop_Group_Property_List->Property_Dirs->findAll();
 			foreach ($aProperty_Dirs as $oProperty_Dir)
 			{
-				$this->_aGroup_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir->clearEntities();
+				$oProperty_Dir->clearEntities();
+				$this->applyForbiddenAllowedTags('/shop/shop_group_properties/property_dir', $oProperty_Dir);
+				$this->_aGroup_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
 			}
 
 			if (!$bTpl)
@@ -1338,11 +1387,16 @@ class Shop_Controller_Show extends Core_Controller
 
 			$aShop_Filter_Seos = $oShop_Filter_Seos->findAll(FALSE);
 
-			count($aShop_Filter_Seos) && $this->addEntity(
-				Core::factory('Core_Xml_Entity')
-					->name('shop_filter_seos')
-					->addEntities($aShop_Filter_Seos)
-			);
+			if (count($aShop_Filter_Seos))
+			{
+				$this->applyForbiddenAllowedTags('/shop/shop_filter_seos/shop_filter_seo', $aShop_Filter_Seos);
+
+				$this->addEntity(
+					Core::factory('Core_Xml_Entity')
+						->name('shop_filter_seos')
+						->addEntities($aShop_Filter_Seos)
+				);
+			}
 		}
 
 		if ($this->limit > 0)
@@ -1485,8 +1539,9 @@ class Shop_Controller_Show extends Core_Controller
 						$this->addEntity($oShop_Item);
 
 						// Parent item for modification
-						$this->parentItem && $oShop_Item->addEntity(
-							Core_Entity::factory('Shop_Item', $this->parentItem)
+						if ($this->parentItem)
+						{
+							$oParentItem = Core_Entity::factory('Shop_Item', $this->parentItem)
 								->showXmlProperties($mShowPropertyIDs, $this->sortPropertiesValues)
 								->showXmlCommentProperties($mShowCommentPropertyIDs)
 								->showXmlTags($this->tags)
@@ -1495,8 +1550,12 @@ class Shop_Controller_Show extends Core_Controller
 								->showXmlModifications($this->modifications)
 								->showXmlSpecialprices($this->specialprices)
 								->showXmlVotes($this->votes)
-								->showXmlSets($this->sets)
-						);
+								->showXmlSets($this->sets);
+
+							$this->applyForbiddenAllowedTags('/shop/shop_item/shop_item|/shop/shop_item', $oParentItem);
+
+							$oShop_Item->addEntity($oParentItem);
+						}
 					}
 				}
 				else
@@ -1626,6 +1685,9 @@ class Shop_Controller_Show extends Core_Controller
 
 		foreach ($aProperties as $oProperty)
 		{
+			$oProperty->clearEntities();
+			$this->applyForbiddenAllowedTags('/shop/shop_item_properties/property', $oProperty);
+
 			$oShop_Item_Property = $oProperty->Shop_Item_Property;
 
 			if ($oShop_Item_Property->show_in_item && $this->item
@@ -1635,7 +1697,7 @@ class Shop_Controller_Show extends Core_Controller
 				$aShowPropertyIDs[] = $oProperty->id;
 			}
 
-			$this->_aItem_Properties[$oProperty->property_dir_id][] = $oProperty->clearEntities();
+			$this->_aItem_Properties[$oProperty->property_dir_id][] = $oProperty;
 
 			if (!$bTpl)
 			{
@@ -1795,6 +1857,7 @@ class Shop_Controller_Show extends Core_Controller
 			foreach ($aProperty_Dirs as $oProperty_Dir)
 			{
 				$oProperty_Dir->clearEntities();
+				$this->applyForbiddenAllowedTags('/shop/shop_item_properties/property_dir', $oProperty_Dir);
 				$this->_aItem_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
 			}
 
@@ -1959,8 +2022,9 @@ class Shop_Controller_Show extends Core_Controller
 
 		foreach ($aProperties as $oProperty)
 		{
+			$oProperty->clearEntities();
 			$aShowPropertyIDs[] = $oProperty->id;
-			$this->_aComment_Properties[$oProperty->property_dir_id][] = $oProperty->clearEntities();
+			$this->_aComment_Properties[$oProperty->property_dir_id][] = $oProperty;
 		}
 
 		// Список свойств комментариев
@@ -2180,7 +2244,7 @@ class Shop_Controller_Show extends Core_Controller
 			foreach ($aProducers as $producer_id)
 			{
 				$oShop_Producer = Core_Entity::factory('Shop_Producer', $producer_id);
-
+				$this->applyForbiddenAllowedTags('/shop/shop_producer', $oShop_Producer);
 				$this->addEntity($oShop_Producer);
 			}
 
@@ -3108,6 +3172,8 @@ class Shop_Controller_Show extends Core_Controller
 			{
 				$this->filterSeo = $oShop_Filter_Seo;
 
+				$this->applyForbiddenAllowedTags('/shop/shop_filter_seo', $oShop_Filter_Seo);
+
 				$this->addEntity($oShop_Filter_Seo);
 
 				$seo_title = $oShop_Filter_Seo->seo_title != ''
@@ -3389,13 +3455,10 @@ class Shop_Controller_Show extends Core_Controller
 	 */
 	public function applyGroupsForbiddenTags($oShop_Group)
 	{
-		if (!is_null($this->groupsForbiddenTags))
-		{
-			foreach ($this->groupsForbiddenTags as $forbiddenTag)
-			{
-				$oShop_Group->addForbiddenTag($forbiddenTag);
-			}
-		}
+		/*!is_null($this->groupsForbiddenTags)
+			&& $oShop_Group->addForbiddenTags($this->groupsForbiddenTags);*/
+
+		$this->applyForbiddenAllowedTags('/shop/shop_group', $oShop_Group);
 
 		return $this;
 	}
@@ -3407,13 +3470,10 @@ class Shop_Controller_Show extends Core_Controller
 	 */
 	public function applyItemsForbiddenTags($oShop_Item)
 	{
-		if (!is_null($this->itemsForbiddenTags))
-		{
-			foreach ($this->itemsForbiddenTags as $forbiddenTag)
-			{
-				$oShop_Item->addForbiddenTag($forbiddenTag);
-			}
-		}
+		/*!is_null($this->itemsForbiddenTags)
+			&& $oShop_Item->addForbiddenTags($this->itemsForbiddenTags);*/
+
+		$this->applyForbiddenAllowedTags('/shop/shop_item', $oShop_Item);
 
 		return $this;
 	}
@@ -4243,7 +4303,7 @@ class Shop_Controller_Show extends Core_Controller
 				!is_null($rows['min']) && $aMin[] = $rows['min'];
 				$aMax[] = $rows['max'];
 			}
-			
+
 			$min = count($aMin) ? min($aMin) : 0;
 			$max = count($aMax) ? max($aMax) : 0;
 		}

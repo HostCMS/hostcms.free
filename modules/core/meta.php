@@ -36,6 +36,16 @@ class Core_Meta
 		'lowercaseFirst' => 'Core_Str::lcfirst',
 	);
 
+
+	/**
+	 * Constructor.
+	 * @hostcms-event Core_Meta.onAfterConstruct
+	 */
+	public function __construct()
+	{
+		Core_Event::notify('Core_Meta.onAfterConstruct', $this);
+	}
+
 	/**
 	 * Add object
 	 * @param string $name

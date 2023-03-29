@@ -1253,10 +1253,10 @@ class Shop_Group_Model extends Core_Entity
 	{
 		$this->clearXmlTags();
 
-		!isset($this->_forbiddenTags['url'])
+		$this->_isTagAvailable('url')
 			&& $this->addXmlTag('url', $this->Shop->Structure->getPath() . $this->getPath());
 
-		!isset($this->_forbiddenTags['dir'])
+		$this->_isTagAvailable('dir')
 			&& $this->addXmlTag('dir', Core_Page::instance()->shopCDN . $this->getGroupHref());
 
 		if ($this->_showXmlProperties)

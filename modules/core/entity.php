@@ -53,17 +53,17 @@ class Core_Entity extends Core_ORM
 	}
 
 	/**
+	 * List of Shortcodes tags
+	 * @var array
+	 */
+	protected $_shortcodeTags = array();
+
+	/**
 	 * Allowed tags. If list of tags is empty, all tags will show.
 	 *
 	 * @var array
 	 */
 	protected $_allowedTags = array();
-
-	/**
-	 * List of Shortcodes tags
-	 * @var array
-	 */
-	protected $_shortcodeTags = array();
 
 	/**
 	 * Add tag to allowed tags list
@@ -74,6 +74,41 @@ class Core_Entity extends Core_ORM
 	{
 		$this->_allowedTags[$tag] = $tag;
 		return $this;
+	}
+
+	/**
+	 * Add tags to allowed tags list
+	 * @param array $aTags array of tags
+	 * @return self
+	 */
+	public function addAllowedTags(array $aTags)
+	{
+		$this->_allowedTags = array_merge($this->_allowedTags, array_combine($aTags, $aTags));
+		return $this;
+	}
+
+	/**
+	 * Remove tag from allowed tags list
+	 * @param string $tag tag
+	 * @return self
+	 */
+	public function removeAllowedTag($tag)
+	{
+		if (isset($this->_allowedTags[$tag]))
+		{
+			unset($this->_allowedTags[$tag]);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Get allowed tags list
+	 * @return array
+	 */
+	public function getAllowedTags()
+	{
+		return $this->_allowedTags;
 	}
 
 	/**
@@ -102,6 +137,17 @@ class Core_Entity extends Core_ORM
 	}
 
 	/**
+	 * Add tags to forbidden tags list
+	 * @param array $aTags array of tags
+	 * @return self
+	 */
+	public function addForbiddenTags(array $aTags)
+	{
+		$this->_forbiddenTags = array_merge($this->_forbiddenTags, array_combine($aTags, $aTags));
+		return $this;
+	}
+
+	/**
 	 * Remove tag from forbidden tags list
 	 * @param string $tag tag
 	 * @return self
@@ -112,22 +158,6 @@ class Core_Entity extends Core_ORM
 		{
 			unset($this->_forbiddenTags[$tag]);
 		}
-
-		return $this;
-	}
-
-	/**
-	 * Add tags to forbidden tags list
-	 * @param array $aTags array of tags
-	 * @return self
-	 */
-	public function addForbiddenTags(array $aTags)
-	{
-		/*foreach ($aTags as $tag)
-		{
-			$this->_forbiddenTags[$tag] = $tag;
-		}*/
-		$this->_forbiddenTags = array_merge($this->_forbiddenTags, array_combine($aTags, $aTags));
 
 		return $this;
 	}
@@ -814,6 +844,17 @@ class Core_Entity extends Core_ORM
 		Core_Event::notify($this->_modelName . '.onAfterGetXml', $this);
 
 		return $xml;
+	}
+
+	/**
+	 * Is $tagName Available
+	 * @param $tagName Tag Name
+	 * @return bool
+	 */
+	protected function _isTagAvailable($tagName)
+	{
+		return (count($this->_allowedTags) == 0 || isset($this->_allowedTags[$tagName]))
+			&& !isset($this->_forbiddenTags[$tagName]);
 	}
 
 	/**

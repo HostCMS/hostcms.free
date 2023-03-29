@@ -3,9 +3,9 @@
  * Trash.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -68,6 +68,36 @@ $oAdmin_Form_Dataset = new Trash_Table_Dataset($tableName);
 $oAdmin_Form_Controller->addDataset(
 	$oAdmin_Form_Dataset
 );
+
+// Фильтр по дебету
+if (isset($oAdmin_Form_Controller->request['admin_form_filter_1015']) && ($oAdmin_Form_Controller->request['admin_form_filter_1015'] != '')
+	|| isset($oAdmin_Form_Controller->request['topFilter_1015']) && $oAdmin_Form_Controller->request['topFilter_1015'] != ''
+)
+{
+	$value = isset($oAdmin_Form_Controller->request['topFilter_1015'])
+		? $oAdmin_Form_Controller->request['topFilter_1015']
+		: $oAdmin_Form_Controller->request['admin_form_filter_1015'];
+
+	if ($value !== '')
+	{
+		$mFilterValue = $oAdmin_Form_Controller->convertLike(strval($value));
+
+		$oEntity = $oAdmin_Form_Dataset->getEntity();
+
+		$oAdmin_Form_Dataset->addCondition(
+			array(
+				'where' => array($tableName . '.' . $oEntity->getNameColumn(), 'LIKE', $mFilterValue)
+			)
+		);
+	}
+	
+	function getName($value, $oAdmin_Form_Field)
+	{
+		return '';
+	}
+
+	$oAdmin_Form_Controller->addFilterCallback('getName', 'getName');
+}
 
 // Показ формы
 $oAdmin_Form_Controller->execute();

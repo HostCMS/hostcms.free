@@ -8711,7 +8711,51 @@ function isEmpty(str) {
 					}
 				});
 			}
-		}
+		},
+
+		/* fillProductionProcessDir: function(windowId, productionProcessDirId , productionProcessDirFieldName, excludeProductionProcessDirId = 0 )
+		{
+			var shopId = parseInt($("#" + windowId + " [name='shop_id']").val());
+				
+			console.log('change shop shopId=', shopId);
+
+				
+			if (shopId)
+			{
+				$.ajax({
+					url: '/admin/production/process/index.php?getProductionProcessDirs',
+					dataType: 'json',
+					data: {
+						shopId: shopId,
+						excludeProductionProcessDirId: excludeProductionProcessDirId						
+					},
+					success: function(data) {
+
+						var oProductionProcessDir = $("#" + windowId + " [name='" + productionProcessDirFieldName + "']").empty();
+
+						console.log(data);						
+						console.log(oProductionProcessDir);
+
+						if (data.dirs)
+						{
+							var //oSiteuserCompanyContract = $("#" + windowId + " #" + siteuserCompanyContractName)
+								countDirs = data.dirs.length;
+
+								//siteuserCompanyContractId = ' . intval($this->_object->siteuser_company_contract_id) . ';
+							
+							for (var i = 0; i < countDirs; i++)
+							{
+								oProductionProcessDir.append("<option " + (productionProcessDirId == data.dirs[i]["id"] ? "selected=\"selected\" " : "")  + "value=\"" + data.dirs[i]["id"] + "\">" + data.dirs[i]["name"] + "</option>");
+								
+								//oProductionProcessDir.append("<option " + (productionProcessDirId == i ? "selected=\"selected\" " : "")  + "value=\"" + i + "\">" + data.dirs[i]["name"] + "</option>");
+
+								//oSiteuserCompanyContract.append('<option value="' + data.contracts[i]["id"] + '">' + data.contracts[i]["name"] + '</option>');
+							}
+						}
+					}
+				});
+			}
+		} */
 	});
 
 	$.fn.extend({

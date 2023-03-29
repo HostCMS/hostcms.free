@@ -578,7 +578,7 @@ class Comment_Model extends Core_Entity
 			->addXmlTag('date', Core_Date::strftime($this->_dateFormat, Core_Date::sql2timestamp($this->datetime)))
 			->addXmlTag('datetime', Core_Date::strftime($this->_dateTimeFormat, Core_Date::sql2timestamp($this->datetime)));
 
-		!isset($this->_forbiddenTags['dir'])
+		$this->_isTagAvailable('dir')
 			&& $this->addXmlTag('dir', $this->getHref());
 
 		if ($this->siteuser_id && Core::moduleIsActive('siteuser'))

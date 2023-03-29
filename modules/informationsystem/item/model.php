@@ -1416,30 +1416,30 @@ class Informationsystem_Item_Model extends Core_Entity
 
 		$this->clearXmlTags();
 
-		!isset($this->_forbiddenTags['url'])
+		$this->_isTagAvailable('url')
 			&& $this->addXmlTag('url', $this->Informationsystem->Structure->getPath() . $this->getPath());
 
-		!isset($this->_forbiddenTags['date'])
+		$this->_isTagAvailable('date')
 			&& $this->addXmlTag('date', Core_Date::strftime($oInformationsystem->format_date, Core_Date::sql2timestamp($this->datetime)));
 
-		/*!isset($this->_forbiddenTags['datetime'])
+		/*$this->_isTagAvailable('datetime')
 			&& */$this->addXmlTag('datetime', Core_Date::strftime($oInformationsystem->format_datetime, Core_Date::sql2timestamp($this->datetime)));
 
-		/*!isset($this->_forbiddenTags['start_datetime'])
+		/*$this->_isTagAvailable('start_datetime')
 			&& */$this->addXmlTag('start_datetime', $this->start_datetime == '0000-00-00 00:00:00'
 				? $this->start_datetime
 				: Core_Date::strftime($oInformationsystem->format_datetime, Core_Date::sql2timestamp($this->start_datetime)));
 
-		/*!isset($this->_forbiddenTags['end_datetime'])
+		/*$this->_isTagAvailable('end_datetime')
 			&& */$this->addXmlTag('end_datetime', $this->end_datetime == '0000-00-00 00:00:00'
 				? $this->end_datetime
 				: Core_Date::strftime($oInformationsystem->format_datetime, Core_Date::sql2timestamp($this->end_datetime)));
 
-		!isset($this->_forbiddenTags['dir'])
+		$this->_isTagAvailable('dir')
 			&& $this->addXmlTag('dir', Core_Page::instance()->informationsystemCDN . $this->getItemHref());
 
 		// Отображается часть текста
-		if ($this->_showXmlPart > 0 && !isset($this->_forbiddenTags['text']))
+		if ($this->_showXmlPart > 0 && $this->_isTagAvailable('text'))
 		{
 			$aParts = $this->getParts();
 			$iPartsCount = count($aParts);
@@ -1545,25 +1545,25 @@ class Informationsystem_Item_Model extends Core_Entity
 				$avgGrade += 1;
 			}
 
-			!isset($this->_forbiddenTags['comments_count']) && $this->addEntity(
+			$this->_isTagAvailable('comments_count') && $this->addEntity(
 				Core::factory('Core_Xml_Entity')
 					->name('comments_count')
 					->value(count($aComments))
 			);
 
-			!isset($this->_forbiddenTags['comments_grade_sum']) && $this->addEntity(
+			$this->_isTagAvailable('comments_grade_sum') && $this->addEntity(
 				Core::factory('Core_Xml_Entity')
 					->name('comments_grade_sum')
 					->value($gradeSum)
 			);
 
-			!isset($this->_forbiddenTags['comments_grade_count']) && $this->addEntity(
+			$this->_isTagAvailable('comments_grade_count') && $this->addEntity(
 				Core::factory('Core_Xml_Entity')
 					->name('comments_grade_count')
 					->value($gradeCount)
 			);
 
-			!isset($this->_forbiddenTags['comments_average_grade']) && $this->addEntity(
+			$this->_isTagAvailable('comments_average_grade') && $this->addEntity(
 				Core::factory('Core_Xml_Entity')
 					->name('comments_average_grade')
 					->value($avgGrade)

@@ -1159,15 +1159,17 @@ abstract class Shop_Payment_System_Handler
 		$aProperties = $oShop_Order_Property_List->Properties->findAll();
 		foreach ($aProperties as $oProperty)
 		{
-			$this->_aProperties[$oProperty->property_dir_id][] = $oProperty->clearEntities();
+			$oProperty->clearEntities();
+			$this->_aProperties[$oProperty->property_dir_id][] = $oProperty;
 
 			$oShop_Order_Property = $oProperty->Shop_Order_Property;
-			$oProperty->addEntity(
-				Core::factory('Core_Xml_Entity')->name('prefix')->value($oShop_Order_Property->prefix)
-			)
-			->addEntity(
-				Core::factory('Core_Xml_Entity')->name('display')->value($oShop_Order_Property->display)
-			);
+			$oProperty
+				->addEntity(
+					Core::factory('Core_Xml_Entity')->name('prefix')->value($oShop_Order_Property->prefix)
+				)
+				->addEntity(
+					Core::factory('Core_Xml_Entity')->name('display')->value($oShop_Order_Property->display)
+				);
 		}
 
 		$this->_aProperty_Dirs = array();
@@ -1175,7 +1177,7 @@ abstract class Shop_Payment_System_Handler
 		foreach ($aProperty_Dirs as $oProperty_Dir)
 		{
 			$oProperty_Dir->clearEntities();
-			$this->_aProperty_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir->clearEntities();
+			$this->_aProperty_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
 		}
 
 		// Список свойств

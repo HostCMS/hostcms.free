@@ -12,6 +12,14 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - producer($id) идентификатор производителя
  * - offset($offset) смещение, по умолчанию 0
  * - limit($limit) количество
+ * - addAllowedTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, разрешенных к передаче в генерируемый XML
+ * - addForbiddenTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, запрещенных к передаче в генерируемый XML
+ *
+ * Доступные пути для методов addAllowedTags/addForbiddenTags:
+ *
+ * - '/' или '/shop' Магазин
+ * - '/shop/shop_producer' Производитель
+ * - '/shop/shop_producer_dir' Раздел производителей
  *
  * <code>
  * $oShop_Producer_Controller_Show = new Shop_Producer_Controller_Show(
@@ -53,9 +61,9 @@ class Shop_Producer_Controller_Show extends Core_Controller
 
 	/**
 	 * Shop's items object
-	 * @var array
+	 * @var Shop_Producer_Model
 	 */
-	protected $_Shop_Producers = array();
+	protected $_Shop_Producers;
 
 	/**
 	 * List of dirs of producers
@@ -264,9 +272,9 @@ class Shop_Producer_Controller_Show extends Core_Controller
 			{
 				if (!$bTpl)
 				{
-					$this->addEntity(
-						$oShop_Producer->clearEntities()
-					);
+					$oShop_Producer->clearEntities();
+					$this->applyForbiddenAllowedTags('/shop/shop_producer', $oShop_Producer);
+					$this->addEntity($oShop_Producer);
 				}
 				else
 				{
@@ -367,6 +375,7 @@ class Shop_Producer_Controller_Show extends Core_Controller
 		foreach ($aShop_Producer_Dirs as $oShop_Producer_Dir)
 		{
 			$oShop_Producer_Dir->clearEntities();
+			$this->applyForbiddenAllowedTags('/shop/shop_producer_dir', $oShop_Producer_Dir);
 			$this->_aShop_Producer_Dirs[$oShop_Producer_Dir->parent_id][] = $oShop_Producer_Dir;
 		}
 
@@ -388,7 +397,6 @@ class Shop_Producer_Controller_Show extends Core_Controller
 			foreach ($this->_aShop_Producer_Dirs[$parent_id] as $oShop_Producer_Dir)
 			{
 				$parentObject->addEntity($oShop_Producer_Dir);
-
 				$this->_addDirsByParentId($oShop_Producer_Dir->id, $oShop_Producer_Dir);
 			}
 		}

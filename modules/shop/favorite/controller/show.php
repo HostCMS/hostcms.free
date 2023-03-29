@@ -15,10 +15,20 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - specialprices(TRUE|FALSE) показывать специальные цены для выбранных товаров, по умолчанию FALSE
  * - commentsRating(TRUE|FALSE) показывать оценки комментариев для выбранных товаров, по умолчанию FALSE
  * - limit($limit) количество
+ * - addAllowedTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, разрешенных к передаче в генерируемый XML
+ * - addForbiddenTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, запрещенных к передаче в генерируемый XML
  *
  * Доступные свойства:
  *
  * - total количество товаров в избранном
+ *
+ * Доступные пути для методов addAllowedTags/addForbiddenTags:
+ *
+ * - '/' или '/shop' Магазин
+ * - '/shop/shop_item_properties/property' Свойство в списке свойств товара
+ * - '/shop/shop_item_properties/property_dir' Раздел свойств в списке свойств товара
+ * - '/shop/shop_favorite_list' Списки избранного
+ * - '/shop/shop_favorite' Избранное
  *
  * <code>
  * $Shop_Favorite_Controller_Show = new Shop_Favorite_Controller_Show(
@@ -37,7 +47,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Favorite_Controller_Show extends Core_Controller
 {
@@ -177,7 +187,10 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 
 			foreach ($aProperties as $oProperty)
 			{
-				$this->_aItem_Properties[$oProperty->property_dir_id][] = $oProperty->clearEntities();
+				$oProperty->clearEntities();
+				$this->_aItem_Properties[$oProperty->property_dir_id][] = $oProperty;
+
+				$this->applyForbiddenAllowedTags('/shop/shop_item_properties/property', $oProperty);
 
 				$oShop_Item_Property = $oProperty->Shop_Item_Property;
 
@@ -190,7 +203,8 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 			foreach ($aProperty_Dirs as $oProperty_Dir)
 			{
 				$oProperty_Dir->clearEntities();
-				$this->_aItem_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir->clearEntities();
+				$this->applyForbiddenAllowedTags('/shop/shop_item_properties/property_dir', $oProperty_Dir);
+				$this->_aItem_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
 			}
 
 			$Shop_Item_Properties = Core::factory('Core_Xml_Entity')
@@ -204,7 +218,13 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 		if ($this->favoriteList && $this->_oSiteuser)
 		{
 			$aShop_Favorite_Lists = $oShop->Shop_Favorite_Lists->getAllBySiteuser_id($this->_oSiteuser->id, FALSE);
-			$this->addEntities($aShop_Favorite_Lists);
+
+			foreach ($aShop_Favorite_Lists as $oShop_Favorite_List)
+			{
+				$oShop_Favorite_List->clearEntities();
+				$this->applyForbiddenAllowedTags('/shop/shop_favorite_list', $oShop_Favorite_List);
+				$this->addEntity($oShop_Favorite_List);
+			}
 		}
 
 		$this->total = 0;
@@ -231,12 +251,15 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 				if (!is_null($oShop_Item->id))
 				{
 					$oShop_Favorite
+						->clearEntities()
 						->showXmlProperties($this->itemsProperties, $this->sortPropertiesValues)
 						->showXmlModifications($this->modifications)
 						->showXmlSpecialprices($this->specialprices)
 						->showXmlCommentsRating($this->commentsRating);
 
-					$this->addEntity($oShop_Favorite->clearEntities());
+					$this->applyForbiddenAllowedTags('/shop/shop_favorite', $oShop_Favorite);
+
+					$this->addEntity($oShop_Favorite);
 				}
 				else
 				{

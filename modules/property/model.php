@@ -619,7 +619,7 @@ class Property_Model extends Core_Entity
 				$this->List->clearEntities()
 			);
 
-			if (!isset($this->_forbiddenTags['list_items']) &&
+			if ($this->_isTagAvailable('list_items') &&
 				(is_bool($this->_config['add_list_items']) && $this->_config['add_list_items']
 					|| is_array($this->_config['add_list_items']) && in_array($this->id, $this->_config['add_list_items'])
 				)

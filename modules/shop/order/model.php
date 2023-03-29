@@ -919,7 +919,7 @@ class Shop_Order_Model extends Core_Entity
 				? $this->datetime
 				: Core_Date::strftime($this->Shop->format_datetime, Core_Date::sql2timestamp($this->datetime)));
 
-		!isset($this->_forbiddenTags['dir'])
+		$this->_isTagAvailable('dir')
 			&& $this->addXmlTag('dir', Core_Page::instance()->shopCDN . $this->getOrderHref());
 
 		$this->source_id && $this->addEntity(

@@ -19,6 +19,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - calculateCounts(TRUE|FALSE) вычислять общее количество товаров и групп в корневой группе, по умолчанию FALSE
  * - applyDiscounts(TRUE|FALSE) применять скидки от суммы заказа, по умолчанию TRUE
  * - applyDiscountCards(TRUE|FALSE) применять дисконтные карты, по умолчанию TRUE
+ * - addAllowedTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, разрешенных к передаче в генерируемый XML
+ * - addForbiddenTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, запрещенных к передаче в генерируемый XML
  *
  * Доступные свойства:
  *
@@ -26,6 +28,15 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - tax сумма налога
  * - quantity количество товаров в корзине
  * - weight вес товаров в корзине
+ *
+ * Доступные пути для методов addAllowedTags/addForbiddenTags:
+ *
+ * - '/' или '/shop' Магазин
+ * - '/shop/shop_order_properties/property' Свойство в списке свойств заказов
+ * - '/shop/shop_order_properties/property_dir' Раздел свойств в списке свойств заказов
+ * - '/shop/shop_item_properties/property' Свойство в списке свойств товара
+ * - '/shop/shop_item_properties/property_dir' Раздел свойств в списке свойств товара
+ * - '/shop/shop_cart' Корзина магазина
  *
  * <code>
  * $Shop_Cart_Controller_Show = new Shop_Cart_Controller_Show(
@@ -43,7 +54,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Cart_Controller_Show extends Core_Controller
 {
@@ -205,22 +216,26 @@ class Shop_Cart_Controller_Show extends Core_Controller
 
 			foreach ($aProperties as $oProperty)
 			{
-				$this->_aOrder_Properties[$oProperty->property_dir_id][] = $oProperty->clearEntities();
+				$oProperty->clearEntities();
+				$this->applyForbiddenAllowedTags('/shop/shop_order_properties/property', $oProperty);
+				$this->_aOrder_Properties[$oProperty->property_dir_id][] = $oProperty;
 
 				$oShop_Order_Property = $oProperty->Shop_Order_Property;
-				$oProperty->addEntity(
-					Core::factory('Core_Xml_Entity')->name('prefix')->value($oShop_Order_Property->prefix)
-				)
-				->addEntity(
-					Core::factory('Core_Xml_Entity')->name('display')->value($oShop_Order_Property->display)
-				);
+				$oProperty
+					->addEntity(
+						Core::factory('Core_Xml_Entity')->name('prefix')->value($oShop_Order_Property->prefix)
+					)
+					->addEntity(
+						Core::factory('Core_Xml_Entity')->name('display')->value($oShop_Order_Property->display)
+					);
 			}
 
 			$aProperty_Dirs = $oShop_Order_Property_List->Property_Dirs->findAll();
 			foreach ($aProperty_Dirs as $oProperty_Dir)
 			{
 				$oProperty_Dir->clearEntities();
-				$this->_aOrder_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir->clearEntities();
+				$this->applyForbiddenAllowedTags('/shop/shop_order_properties/property_dir', $oProperty_Dir);
+				$this->_aOrder_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
 			}
 
 			// Список свойств товаров
@@ -267,7 +282,9 @@ class Shop_Cart_Controller_Show extends Core_Controller
 
 			foreach ($aProperties as $oProperty)
 			{
-				$this->_aItem_Properties[$oProperty->property_dir_id][] = $oProperty->clearEntities();
+				$oProperty->clearEntities();
+				$this->applyForbiddenAllowedTags('/shop/shop_item_properties/property', $oProperty);
+				$this->_aItem_Properties[$oProperty->property_dir_id][] = $oProperty;
 
 				$oShop_Item_Property = $oProperty->Shop_Item_Property;
 
@@ -280,7 +297,8 @@ class Shop_Cart_Controller_Show extends Core_Controller
 			foreach ($aProperty_Dirs as $oProperty_Dir)
 			{
 				$oProperty_Dir->clearEntities();
-				$this->_aItem_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir->clearEntities();
+				$this->applyForbiddenAllowedTags('/shop/shop_item_properties/property_dir', $oProperty_Dir);
+				$this->_aItem_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
 			}
 
 			if (!$bTpl)
@@ -309,15 +327,17 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		{
 			if (!$bTpl)
 			{
-				$this->addEntity(
-					$oShop_Cart
-						->clearEntities()
-						->showXmlWarehousesItems($this->warehousesItems)
-						->showXmlProperties($this->itemsProperties, $this->sortPropertiesValues)
-						->showXmlSpecialprices($this->specialprices)
-						->showXmlAssociatedItems($this->associatedItems)
-						->setItemsForbiddenTags($this->itemsForbiddenTags)
-				);
+				$oShop_Cart
+					->clearEntities()
+					->showXmlWarehousesItems($this->warehousesItems)
+					->showXmlProperties($this->itemsProperties, $this->sortPropertiesValues)
+					->showXmlSpecialprices($this->specialprices)
+					->showXmlAssociatedItems($this->associatedItems)
+					->setItemsForbiddenTags($this->itemsForbiddenTags);
+
+				$this->applyForbiddenAllowedTags('/shop/shop_cart', $oShop_Cart);
+
+				$this->addEntity($oShop_Cart);
 			}
 			else
 			{
@@ -587,7 +607,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 
 		return $this;
 	}
-	
+
 /**
 	 * Add order's properties to XML
 	 * @param int $parent_id

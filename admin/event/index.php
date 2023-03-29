@@ -500,8 +500,8 @@ if ($siteuser_id)
 }
 
 // Список значений для фильтра и поля
+$aList = array(0 => '—');
 $aEvent_Groups = Core_Entity::factory('Event_Group')->findAll();
-$aList[0] = "—";
 foreach ($aEvent_Groups as $oEvent_Group)
 {
 	$aList[$oEvent_Group->id] = $oEvent_Group->name;

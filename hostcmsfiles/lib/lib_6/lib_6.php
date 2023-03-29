@@ -314,4 +314,8 @@ $Shop_Controller_Show
 	)
 	->addMinMaxWidth()
 	->addMinMaxLength()
+	//->groupsForbiddenTags(array('name'))
+	/*->addAllowedTags('/shop/shop_group', array('name'))
+	->addAllowedTags('/shop', array('name'))
+	->addAllowedTags('/shop/shop_item', array('name'))*/
 	->show();

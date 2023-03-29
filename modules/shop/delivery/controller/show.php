@@ -5,6 +5,17 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 /**
  * Выбор способа доставки.
  *
+ * Доступные методы:
+ *
+ * - addAllowedTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, разрешенных к передаче в генерируемый XML
+ * - addForbiddenTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, запрещенных к передаче в генерируемый XML
+ *
+ * Доступные пути для методов addAllowedTags/addForbiddenTags:
+ *
+ * - '/' или '/shop' Магазин
+ * - '/shop/shop_delivery' Доставка
+ * - '/shop/shop_delivery_condition' Условие доставки
+ *
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
@@ -183,14 +194,18 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 					{
 						$oShop_Delivery_Clone = clone $oShop_Delivery;
 
-						$this->paymentSystems && $oShop_Delivery_Clone->showXmlShopPaymentSystems($this->paymentSystems);
+						$this->paymentSystems
+							&& $oShop_Delivery_Clone->showXmlShopPaymentSystems($this->paymentSystems);
 
-						$this->addEntity(
-							$oShop_Delivery_Clone
-								->id($oShop_Delivery->id)
-								->clearEntities()
-								->addEntity($oShop_Delivery_Condition)
-						);
+						$oShop_Delivery_Clone
+							->id($oShop_Delivery->id)
+							->clearEntities()
+							->addEntity($oShop_Delivery_Condition);
+
+						$this->applyForbiddenAllowedTags('/shop/shop_delivery', $oShop_Delivery_Clone);
+						$this->applyForbiddenAllowedTags('/shop/shop_delivery_condition', $oShop_Delivery_Condition);
+
+						$this->addEntity($oShop_Delivery_Clone);
 
 						Core_Event::notify(get_class($this) . '.onAfterAddShopDeliveryCondition', $this, array($oShop_Delivery_Condition));
 					}
@@ -417,5 +432,4 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 
 		return $this;
 	}
-
 }

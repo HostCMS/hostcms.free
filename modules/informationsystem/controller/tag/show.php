@@ -12,6 +12,14 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - group($id) идентификатор информационной группы или массив идентификаторов
  * - offset($offset) смещение, с которого выводить метки. По умолчанию 0
  * - limit($limit) количество выводимых меток
+ * - addAllowedTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, разрешенных к передаче в генерируемый XML
+ * - addForbiddenTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, запрещенных к передаче в генерируемый XML
+ *
+ * Доступные пути для методов addAllowedTags/addForbiddenTags:
+ *
+ * - '/' или '/informationsystem' Информационная система
+ * - '/informationsystem/tag' Тег
+ * - '/informationsystem/tag_dir' Раздел тегов
  *
  * <code>
  * $Informationsystem_Controller_Tag_Show = new Informationsystem_Controller_Tag_Show(
@@ -28,9 +36,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Informationsystem
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Controller_Tag_Show extends Core_Controller
 {
@@ -196,7 +204,12 @@ class Informationsystem_Controller_Tag_Show extends Core_Controller
 
 		$aTags = $this->_tags->findAll(FALSE);
 
-		$this->addEntities($aTags);
+		foreach ($aTags as $oTag)
+		{
+			$oTag->clearEntities();
+			$this->applyForbiddenAllowedTags('/informationsystem/tag', $oTag);
+			$this->addEntity($oTag);
+		}
 
 		echo $content = $this->get();
 		$this->cache && Core::moduleIsActive('cache') && $oCore_Cache->set($cacheKey, $content, $cacheName);
@@ -216,7 +229,9 @@ class Informationsystem_Controller_Tag_Show extends Core_Controller
 		{
 			foreach ($this->_aTag_Dirs[$parent_id] as $oTag_Dir)
 			{
-				$parentObject->addEntity($oTag_Dir->clearEntities());
+				$oTag_Dir->clearEntities();
+				$this->applyForbiddenAllowedTags('/informationsystem/tag_dir', $oTag_Dir);
+				$parentObject->addEntity($oTag_Dir);
 
 				$this->_addDirsByParentId($oTag_Dir->id, $oTag_Dir);
 			}

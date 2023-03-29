@@ -16,14 +16,12 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	none - не показывать группы,
 	tree - показывать дерево групп и все группы на текущем уровне (по умолчанию),
 	all - показывать все группы.
- * - groupsForbiddenTags(array('description')) массив тегов групп, запрещенных к передаче в генерируемый XML
- * - item(123) идентификатор показываемого информационного элемента
+  * - item(123) идентификатор показываемого информационного элемента
  * - itemsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств информационных элементов, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
  * - sortPropertiesValues(TRUE|FALSE) сортировать значения дополнительных свойств, по умолчанию TRUE.
  * - itemsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств информационных элементов, по умолчанию TRUE
  * - commentsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств комментариев, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
  * - commentsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств комментариев, по умолчанию TRUE.
- * - itemsForbiddenTags(array('description')) массив тегов информационных элементов, запрещенных к передаче в генерируемый XML
  * - addFilter() добавить условие отобра информационных элементов, может задавать условие отобра по значению свойства ->addFilter('property', 17, '=', 1)
  * - comments(TRUE|FALSE) показывать комментарии для выбранных информационных элементов, по умолчанию FALSE
  * - commentsRating(TRUE|FALSE) показывать оценки комментариев для выбранных информационных элементов, по умолчанию FALSE
@@ -46,11 +44,29 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - commentsActivity('active'|'inactive'|'all') отображать комментарии: active - только активные, inactive - только неактивные, all - все, по умолчанию - active
  * - calculateTotal(TRUE|FALSE) вычислять общее количество найденных, по умолчанию TRUE
  * - showPanel(TRUE|FALSE) показывать панель быстрого редактирования, по умолчанию TRUE
+ * - addAllowedTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, разрешенных к передаче в генерируемый XML
+ * - addForbiddenTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, запрещенных к передаче в генерируемый XML
+ *
+ * Устаревшие методы:
+ *
+ * - groupsForbiddenTags(array('description')) массив тегов групп, запрещенных к передаче в генерируемый XML
+ * - itemsForbiddenTags(array('description')) массив тегов информационных элементов, запрещенных к передаче в генерируемый XML
  *
  * Доступные свойства:
  *
  * - total общее количество доступных для отображения записей
  * - patternParams массив данных, извелеченных из URI при применении pattern
+ *
+ * Доступные пути для методов addAllowedTags/addForbiddenTags:
+ *
+ * - '/' или '/informationsystem' Информационная система
+ * - '/informationsystem/informationsystem_group' Группы информационной системы
+ * - '/informationsystem/informationsystem_item' Информационные элементы
+ * - '/informationsystem/tag' Примененный Tag для фильтрации
+ * - '/informationsystem/informationsystem_group_properties/property' Свойство в списке свойств группы
+ * - '/informationsystem/informationsystem_group_properties/property_dir' Раздел свойств в списке свойств группы
+ * - '/informationsystem/informationsystem_item_properties/property' Свойство в списке свойств информационного элемента
+ * - '/informationsystem/informationsystem_item_properties/property_dir' Раздел свойств в списке свойств информационного элемента
  *
  * <code>
  * $Informationsystem_Controller_Show = new Informationsystem_Controller_Show(
@@ -535,7 +551,21 @@ class Informationsystem_Controller_Show extends Core_Controller
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeRedeclaredShow', $this);
 
+		// Backward compatible
+		is_array($this->groupsForbiddenTags) && count($this->groupsForbiddenTags)
+			&& $this->addForbiddenTags('/shop/shop_group', $this->groupsForbiddenTags);
+
+		is_array($this->itemsForbiddenTags) && count($this->itemsForbiddenTags)
+			&& $this->addForbiddenTags('/shop/shop_item', $this->itemsForbiddenTags);
+
 		$oInformationsystem = $this->getEntity();
+
+		// Move rules from '/informationsystem' to the root
+		$aAllowedTags = $this->getAllowedTags();
+		isset($aAllowedTags['/informationsystem']) && $this->addAllowedTags('/', $aAllowedTags['/informationsystem']);
+
+		$aForbiddenTags = $this->getForbiddenTags();
+		isset($aForbiddenTags['/informationsystem']) && $this->addForbiddenTags('/', $aForbiddenTags['/informationsystem']);
 
 		// Load user BEFORE FOUND_ROWS()
 		$oUser = Core_Auth::getCurrentUser();
@@ -657,6 +687,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 			$aProperties = $oProperties->findAll();
 			foreach ($aProperties as $oProperty)
 			{
+				$oProperty->clearEntities();
+				$this->applyForbiddenAllowedTags('/informationsystem/informationsystem_group_properties/property', $oProperty);
 				$this->_aGroup_Properties[$oProperty->property_dir_id][] = $oProperty;
 			}
 
@@ -664,6 +696,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			foreach ($aProperty_Dirs as $oProperty_Dir)
 			{
 				$oProperty_Dir->clearEntities();
+				$this->applyForbiddenAllowedTags('/informationsystem/informationsystem_group_properties/property_dir', $oProperty_Dir);
 				$this->_aGroup_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
 			}
 
@@ -718,14 +751,17 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 			foreach ($aProperties as $oProperty)
 			{
-				$this->_aItem_Properties[$oProperty->property_dir_id][] = $oProperty->clearEntities();
+				$oProperty->clearEntities();
+				$this->applyForbiddenAllowedTags('/informationsystem/informationsystem_item_properties/property', $oProperty);
+				$this->_aItem_Properties[$oProperty->property_dir_id][] = $oProperty;
 			}
 
 			$aProperty_Dirs = $oInformationsystem_Item_Property_List->Property_Dirs->findAll();
 			foreach ($aProperty_Dirs as $oProperty_Dir)
 			{
 				$oProperty_Dir->clearEntities();
-				$this->_aItem_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir->clearEntities();
+				$this->applyForbiddenAllowedTags('/informationsystem/informationsystem_item_properties/property_dir', $oProperty_Dir);
+				$this->_aItem_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
 			}
 
 			if (!$bTpl)
@@ -756,14 +792,15 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 			foreach ($aProperties as $oProperty)
 			{
-				$this->_aComment_Properties[$oProperty->property_dir_id][] = $oProperty->clearEntities();
+				$oProperty->clearEntities();
+				$this->_aComment_Properties[$oProperty->property_dir_id][] = $oProperty;
 			}
 
 			$aProperty_Dirs = $oInformationsystem_Comment_Property_List->Property_Dirs->findAll();
 			foreach ($aProperty_Dirs as $oProperty_Dir)
 			{
 				$oProperty_Dir->clearEntities();
-				$this->_aComment_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir->clearEntities();
+				$this->_aComment_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
 			}
 
 			if (!$bTpl)
@@ -892,7 +929,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 					$this->append('aInformationsystem_Items', $oInformationsystem_Item);
 				}
 			}
-			
+
 			Core_Event::notify(get_class($this) . '.onAfterAddInformationsystemItems', $this, array($aInformationsystem_Items));
 
 			unset($aInformationsystem_Items);
@@ -974,6 +1011,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 			if ($oTag)
 			{
+				$this->applyForbiddenAllowedTags('/informationsystem/tag', $oTag);
 				$this->addEntity($oTag);
 
 				$this->_Informationsystem_Items
@@ -1420,13 +1458,10 @@ class Informationsystem_Controller_Show extends Core_Controller
 	 */
 	public function applyGroupsForbiddenTags($oInformationsystem_Group)
 	{
-		if (!is_null($this->groupsForbiddenTags))
-		{
-			foreach ($this->groupsForbiddenTags as $forbiddenTag)
-			{
-				$oInformationsystem_Group->addForbiddenTag($forbiddenTag);
-			}
-		}
+		/*!is_null($this->groupsForbiddenTags)
+			&& $oInformationsystem_Group->addForbiddenTags($this->groupsForbiddenTags);*/
+
+		$this->applyForbiddenAllowedTags('/informationsystem/informationsystem_group', $oInformationsystem_Group);
 
 		return $this;
 	}
@@ -1438,13 +1473,10 @@ class Informationsystem_Controller_Show extends Core_Controller
 	 */
 	public function applyItemsForbiddenTags($oInformationsystem_Item)
 	{
-		if (!is_null($this->itemsForbiddenTags))
-		{
-			foreach ($this->itemsForbiddenTags as $forbiddenTag)
-			{
-				$oInformationsystem_Item->addForbiddenTag($forbiddenTag);
-			}
-		}
+		/*!is_null($this->itemsForbiddenTags)
+			&& $oInformationsystem_Item->addForbiddenTags($this->itemsForbiddenTags);*/
+
+		$this->applyForbiddenAllowedTags('/informationsystem/informationsystem_item', $oInformationsystem_Item);
 
 		return $this;
 	}
