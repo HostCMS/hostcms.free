@@ -11,6 +11,8 @@
 return array(
 	'model_name' => 'Скидки',
 	'show_item_discount_title' => "Скидки на товар \"%s\"",
+	'show_group_discount_title' => "Скидки на группу товаров \"%s\"",
+	'show_producer_discount_title' => "Скидки на товары производителя \"%s\"",
 	'discount_add_form_link' => 'Справочник "Скидки"',
 	'show_groups_discount' => "Скидка",
 	'show_groups_discount_add' => "Добавить",

@@ -170,4 +170,36 @@ abstract class Core_Image
 
 		exit();
 	}
+	
+	/**
+	 * Get IMAGETYPE_xxx by $outputFormat
+	 * @param string $outputFormat Output Format, e.g. 'webp'
+	 * @return int|NULL
+	 */
+	static public function getImagetypeByFormat($outputFormat)
+	{
+		$iImagetype = NULL;
+		
+		if (!is_null($outputFormat))
+		{
+			switch (strtolower($outputFormat))
+			{
+				case 'jpg':
+				case 'jpeg':
+					$iImagetype = IMAGETYPE_JPEG;
+				break;
+				case 'png':
+					$iImagetype = IMAGETYPE_GIF;
+				break;
+				case 'webp':
+					if (defined('IMAGETYPE_WEBP') && function_exists('imagecreatefromwebp'))
+					{
+						$iImagetype = IMAGETYPE_WEBP;
+					}
+				break;
+			}
+		}
+		
+		return $iImagetype;
+	}
 }

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Online stores',
@@ -24,7 +24,7 @@ return array(
 	'shop_dir_id' => "Section",
 	'description' => "Description of online store",
 	'structure_id' => "Structure node",
-	'siteuser_group_id' => 'Access group',
+	'siteuser_group_id' => 'Customer Group',
 	'shop_company_id' => 'Company',
 	'shop_currency_id' => "Default currency",
 	'email' => "<acronym title=\"E-mail (e-mail group, separated by commas) for notification on received orders\">E-mail of online store supervisor</acronym>",
@@ -212,4 +212,15 @@ return array(
 	'option_shop_item_card_xsl' => 'XSL pricetag template',
 
 	'schedule-checkShopOrderStatusDeadline' => 'Check order status',
+
+	'seo_group_h1_template' => 'H1 Template',
+	'seo_item_h1_template' => 'H1 Template',
+	'seo_root_h1_template' => 'H1 Template',
+
+	'searchIndexItem' => 'Item ID',
+	'searchIndexGroup' => 'Group ID',
+	'searchUnindexItem' => 'Item ID',
+
+	'shop_id' => 'Shop ID',
+	'updateCurrency' => 'Driver name',
 );

@@ -105,4 +105,6 @@ return array(
 
 	'none' => 'None',
 	'no_title' => '<No title>',
+
+	'root' => "Root",
 );

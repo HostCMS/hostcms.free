@@ -96,6 +96,7 @@ class Shop_Item_Model extends Core_Entity
 		'shop_item_digital' => array(),
 		'shop_item' => array('foreign_key' => 'shortcut_id'),
 		'modification' => array('model' => 'Shop_Item', 'foreign_key' => 'modification_id'),
+		'media_shop_item' => array(),
 		'shop_price' => array('through' => 'shop_item_price'),
 		'shop_item_price' => array(),
 		'item_associated' => array('through' => 'shop_item_associated', 'through_table_name' => 'shop_item_associated', 'model' => 'Shop_Item', 'dependent_key' => 'shop_item_associated_id'),
@@ -130,6 +131,8 @@ class Shop_Item_Model extends Core_Entity
 		'shop_warehouse_purchaseorder_item' => array(),
 		'shop_warehouse_invoice_item' => array(),
 		'shop_warehouse_supply_item' => array(),
+		'production_process_stage_material' => array(),
+		'production_process_stage_manufacture' => array()
 	);
 
 	/**
@@ -454,7 +457,7 @@ class Shop_Item_Model extends Core_Entity
 	public function getBonuses($aPrices)
 	{
 		$this->setShop_Item_Controller();
-		// Bonuses
+
 		$aBonuses = $this->_Shop_Item_Controller->getBonuses($this, $aPrices['price_discount']);
 
 		return $aBonuses;
@@ -828,6 +831,7 @@ class Shop_Item_Model extends Core_Entity
 	/**
 	 * Check and correct duplicate path
 	 * @return self
+	 * @hostcms-event shop_item.onAfterCheckDuplicatePath
 	 */
 	public function checkDuplicatePath()
 	{
@@ -870,6 +874,8 @@ class Shop_Item_Model extends Core_Entity
 				}
 			}
 		}
+
+		Core_Event::notify($this->_modelName . '.onAfterCheckDuplicatePath', $this);
 
 		return $this;
 	}
@@ -1771,6 +1777,11 @@ class Shop_Item_Model extends Core_Entity
 			$this->Lead_Shop_Items->deleteAll(FALSE);
 		}
 
+		if (Core::moduleIsActive('media'))
+		{
+			$this->Media_Shop_Items->deleteAll(FALSE);
+		}
+
 		$this->Shop_Item_Certificate->delete();
 
 		// Fast filter
@@ -2295,14 +2306,15 @@ class Shop_Item_Model extends Core_Entity
 
 	/**
 	 * Prepare entity and children entities
+	 * @return self
 	 * @hostcms-event shop_item.onBeforeShowXmlModifications
 	 * @hostcms-event shop_item.onBeforeSelectModifications
 	 * @hostcms-event shop_item.onBeforeAddModification
 	 * @hostcms-event shop_item.onBeforeSelectAssociatedItems
 	 * @hostcms-event shop_item.onBeforeAddAssociatedEntity
+	 * @hostcms-event shop_item.onBeforeSelectComments
 	 * @hostcms-event shop_item.onBeforeSelectShopWarehouseItems
 	 * @hostcms-event shop_item.onAfterAddSetEntity
-	 * @return self
 	 */
 	protected function _prepareData()
 	{
@@ -2704,6 +2716,8 @@ class Shop_Item_Model extends Core_Entity
 					->where('active', '=', $this->_commentsActivity == 'inactive' ? 0 : 1);
 			}
 
+			Core_Event::notify($this->_modelName . '.onBeforeSelectComments', $this, array($oComments));
+
 			$aComments = $oComments->findAll();
 			foreach ($aComments as $oComment)
 			{
@@ -2839,6 +2853,16 @@ class Shop_Item_Model extends Core_Entity
 
 					$oList_Items->findAll(TRUE);
 				}
+			}
+		}
+
+		if (Core::moduleIsActive('media'))
+		{
+			$aEntities = Media_Item_Controller::getValues($this);
+			foreach ($aEntities as $oEntity)
+			{
+				$oMedia_Item = $oEntity->Media_Item;
+				$this->addEntity($oMedia_Item);
 			}
 		}
 

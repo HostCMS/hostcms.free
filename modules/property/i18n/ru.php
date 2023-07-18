@@ -6,7 +6,7 @@
  * @subpackage Property
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Дополнительные свойства',
@@ -95,4 +95,8 @@ return array(
 	'changeIndexing_error' => 'Ошибка при изменении статуса индексирования свойства.',
 	'use_trailing_punctuation' => '<acronym title="Оптическое выравнивание текста перемещает символы пунктуации за границу набора">Оптическое выравнивание</acronym>',
 	'use_typograph' => 'Типографировать',
+
+	'move_to_list' => 'Перейти в список',
+	'add_to_list' => 'Добавить элемент в список',
+	'insert_value' => 'Введите значение',
 );

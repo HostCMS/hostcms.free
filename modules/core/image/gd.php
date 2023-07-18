@@ -22,6 +22,7 @@ class Core_Image_Gd extends Core_Image
 	 * @param string $targetFile путь к результирующему файлу
 	 * @param int $quality качество JPEG/PNG файла, если не передано, то берется из констант
 	 * @param int $preserveAspectRatio сохранять пропорции изображения
+	 * @param string|NULL $outputFormat формат, в котором сохранять изображение, по умолчанию NULL равен формату исходного
 	 * <code>
 	 * <?php
 	 * $sourceFile = CMS_FOLDER . 'file1.jpg';
@@ -32,7 +33,7 @@ class Core_Image_Gd extends Core_Image
 	 * </code>
 	 * @return bool
 	 */
-	static public function resizeImage($sourceFile, $maxWidth, $maxHeight, $targetFile, $quality = NULL, $preserveAspectRatio = TRUE)
+	static public function resizeImage($sourceFile, $maxWidth, $maxHeight, $targetFile, $quality = NULL, $preserveAspectRatio = TRUE, $outputFormat = NULL)
 	{
 		$maxWidth = intval($maxWidth);
 		$maxHeight = intval($maxHeight);
@@ -170,6 +171,9 @@ class Core_Image_Gd extends Core_Image
 				}
 			}
 
+			$destX = intval($destX);
+			$destY = intval($destY);
+
 			// в $destX и $destY теперь хранятся размеры оригинального изображения после уменьшения
 			// от них рассчитываем размеры для обрезания на втором шаге
 			$destX_step2 = $maxWidth;
@@ -209,6 +213,12 @@ class Core_Image_Gd extends Core_Image
 					return FALSE;
 				}
 				$targetResourceStep2 = imagecreatetruecolor($destX_step2, $destY_step2);
+			}
+
+			// Change output format
+			if (!is_null($outputFormat))
+			{
+				$iImagetype = self::getImagetypeByFormat($outputFormat);
 			}
 
 			if ($iImagetype == IMAGETYPE_JPEG)
@@ -352,6 +362,7 @@ class Core_Image_Gd extends Core_Image
 	 * @param string $watermark путь к файлу watermark в формате PNG
 	 * @param string $watermarkX позиция по оси X (в пикселях или процентах)
 	 * @param string $watermarkY позиция по оси Y (в пикселях или процентах)
+	 * @param string|NULL $outputFormat формат, в котором сохранять изображение, по умолчанию NULL равен формату исходного
 	 * <code>
 	 * <?php
 	 * $source = CMS_FOLDER . 'file1.jpg';
@@ -363,7 +374,7 @@ class Core_Image_Gd extends Core_Image
 	 * </code>
 	 * @return bool
 	 */
-	static public function addWatermark($source, $target, $watermark, $watermarkX = NULL, $watermarkY = NULL)
+	static public function addWatermark($source, $target, $watermark, $watermarkX = NULL, $watermarkY = NULL, $outputFormat = NULL)
 	{
 		if (!Core_File::isFile($source))
 		{
@@ -377,22 +388,19 @@ class Core_Image_Gd extends Core_Image
 		{
 			$watermarkResource = imagecreatefrompng($watermark);
 
-			$ext = Core_File::getExtension($target);
+			//$ext = Core_File::getExtension($target);
+			$iImagetype = self::exifImagetype($source);
 
-			if ($ext == 'jpg' || $ext == 'jpeg')
+			if ($iImagetype == IMAGETYPE_JPEG)
 			{
-				$sourceResource = imageCreateFromJPEG($source);
+				$sourceResource = imagecreatefromjpeg($source);
 
 				if ($sourceResource)
 				{
 					$sourceResource = self::_addWatermark($sourceResource, $watermarkResource, $watermarkX, $watermarkY);
-					$return = imagejpeg($sourceResource, $target, intval(JPG_QUALITY));
-					@chmod($target, CHMOD_FILE);
-
-					imagedestroy($sourceResource);
 				}
 			}
-			elseif ($ext == 'png')
+			elseif ($iImagetype == IMAGETYPE_PNG)
 			{
 				$sourceResource = imagecreatefrompng($source);
 
@@ -402,13 +410,9 @@ class Core_Image_Gd extends Core_Image
 					imagesavealpha($sourceResource, TRUE);
 
 					$sourceResource = self::_addWatermark($sourceResource, $watermarkResource, $watermarkX, $watermarkY);
-					$return = imagepng($sourceResource, $target, intval(PNG_QUALITY));
-					@chmod($target, CHMOD_FILE);
-
-					imagedestroy($sourceResource);
 				}
 			}
-			elseif ($ext == 'webp' && function_exists('imagecreatefromwebp'))
+			elseif (defined('IMAGETYPE_WEBP') && $iImagetype == IMAGETYPE_WEBP && function_exists('imagecreatefromwebp'))
 			{
 				$sourceResource = imagecreatefromwebp($source);
 
@@ -418,41 +422,64 @@ class Core_Image_Gd extends Core_Image
 					imagesavealpha($sourceResource, TRUE);
 
 					$sourceResource = self::_addWatermark($sourceResource, $watermarkResource, $watermarkX, $watermarkY);
-					$return = imagewebp($sourceResource, $target, defined('WEBP_QUALITY') ? WEBP_QUALITY : 80);
-					@chmod($target, CHMOD_FILE);
-
-					imagedestroy($sourceResource);
 				}
 			}
-			elseif ($ext == 'gif')
+			elseif ($iImagetype == IMAGETYPE_GIF)
 			{
-				$sourceResource = imagecreatefromgif($source);
+				$sourceResourceTmp = imagecreatefromgif($source);
 
-				if ($sourceResource)
+				if ($sourceResourceTmp)
 				{
 					$picsize = self::getImageSize($source);
 					$width = $picsize['width'];
 					$height = $picsize['height'];
 
-					$new_image = imagecreatetruecolor($width, $height);
-					self::setTransparency($new_image, $sourceResource);
+					// New Image
+					$sourceResource = imagecreatetruecolor($width, $height);
+					self::setTransparency($sourceResource, $sourceResourceTmp);
 
-					imagecopyresampled($new_image, $sourceResource, 0, 0, 0, 0, $width, $height, $width, $height);
+					imagecopyresampled($sourceResource, $sourceResourceTmp, 0, 0, 0, 0, $width, $height, $width, $height);
+					imagedestroy($sourceResourceTmp);
 
-					$new_image = self::_addWatermark($new_image, $watermarkResource, $watermarkX, $watermarkY);
-					$return = imagegif($new_image, $target);
-					@chmod($target, CHMOD_FILE);
-
-					imagedestroy($new_image);
-					imagedestroy($sourceResource);
+					$sourceResource = self::_addWatermark($sourceResource, $watermarkResource, $watermarkX, $watermarkY);
 				}
 			}
 			else
 			{
-				$return = FALSE;
+				//$return = FALSE;
+				$sourceResource = NULL;
 			}
 
 			imagedestroy($watermarkResource);
+
+			if ($sourceResource)
+			{
+				// Change output format
+				if (!is_null($outputFormat))
+				{
+					$iImagetype = self::getImagetypeByFormat($outputFormat);
+				}
+
+				if ($iImagetype == IMAGETYPE_JPEG)
+				{
+					$return = imagejpeg($sourceResource, $target, intval(JPG_QUALITY));
+				}
+				elseif ($iImagetype == IMAGETYPE_PNG)
+				{
+					$return = imagepng($sourceResource, $target, intval(PNG_QUALITY));
+				}
+				elseif (defined('IMAGETYPE_WEBP') && $iImagetype == IMAGETYPE_WEBP && function_exists('imagecreatefromwebp'))
+				{
+					$return = imagewebp($sourceResource, $target, defined('WEBP_QUALITY') ? WEBP_QUALITY : 80);
+				}
+				elseif ($iImagetype == IMAGETYPE_GIF)
+				{
+					$return = imagegif($sourceResource, $target);
+				}
+
+				@chmod($target, CHMOD_FILE);
+				imagedestroy($sourceResource);
+			}
 		}
 		else
 		{
@@ -509,13 +536,50 @@ class Core_Image_Gd extends Core_Image
 			}
 		}
 
+		$watermarkX = intval($watermarkX);
+		$watermarkY = intval($watermarkY);
+
 		$watermarkX < 0 && $watermarkX = 0;
 		$watermarkY < 0 && $watermarkY = 0;
 
 		imagealphablending($sourceResource, TRUE);
+
+		// Convert source image to true-color image
+		if (!imageistruecolor($sourceResource))
+		{
+			self::imagepalettetotruecolor($sourceResource);
+		}
+
 		imagecopy($sourceResource, $watermarkResource, (int) $watermarkX, (int) $watermarkY, 0, 0, $watermarkResource_w, $watermarkResource_h);
 
 		return $sourceResource;
+	}
+
+	/**
+	 * Function imagepalettetotruecolor() (PHP 5 >= 5.5.0, PHP 7, PHP 8)
+	 * @param GdImage $src
+	 * @return bool
+	 */
+	static public function imagepalettetotruecolor(&$src)
+	{
+		if (function_exists('imagepalettetotruecolor'))
+		{
+			return imagepalettetotruecolor($src);
+		}
+
+		if (imageistruecolor($src))
+		{
+			return TRUE;
+		}
+
+		$dst = imagecreatetruecolor(imagesx($src), imagesy($src));
+
+		imagecopy($dst, $src, 0, 0, 0, 0, imagesx($src), imagesy($src));
+		imagedestroy($src);
+
+		$src = $dst;
+
+		return TRUE;
 	}
 
 	/**

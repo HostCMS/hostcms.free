@@ -250,6 +250,18 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$oSite = Core_Entity::factory('Site', CURRENT_SITE);
 					$iCountLists = $oSite->Lists->getCount();
 
+					$pathLink = Admin_Form_Entity::factory('A')
+						->id('pathLink')
+						->class('input-group-addon bg-blue bordered-blue')
+						->value('<i class="fa fa-external-link"></i>');
+
+					if ($this->_object->id && $this->_object->list_id)
+					{
+						$pathLink
+							->target('_blank')
+							->href('/admin/list/item/index.php?list_id=' . $this->_object->list_id);
+					}
+
 					if ($iCountLists < Core::$mainConfig['switchSelectToAutocomplete'])
 					{
 						// Селектор с группой
@@ -260,7 +272,9 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							->name('list_id')
 							->value($this->_object->list_id)
 							->caption(Core::_('Property.list_id'))
-							->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'));
+							->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'))
+							->add($pathLink)
+							->onchange("$('#{$windowId} #pathLink').attr('href', '/admin/list/item/index.php?list_id=' + this.value); return false");
 
 						$oMainRow3->add($oSelect_Lists);
 					}
@@ -271,7 +285,8 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						$oListInput = Admin_Form_Entity::factory('Input')
 							->caption(Core::_('Property.list_id'))
 							->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'))
-							->name('list_name');
+							->name('list_name')
+							->add($pathLink);
 
 						$this->_object->list_id
 							&& $oListInput->value($oList->name . ' [' . $oList->id . ']');
@@ -300,15 +315,17 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 									minLength: 1,
 									create: function() {
 										$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
-											return $('<li></li>')
+											return $('<li class=\"autocomplete-suggestion\"></li>')
 												.data('item.autocomplete', item)
-												.append($('<a>').text(item.label))
+												.append($('<div class=\"name\">').text(item.label))
 												.appendTo(ul);
 										}
 										$(this).prev('.ui-helper-hidden-accessible').remove();
 									},
 									select: function(event, ui) {
 										$('#{$windowId} [name = list_id]').val(ui.item.id);
+
+										$('#{$windowId} #pathLink').attr('href', '/admin/list/item/index.php?list_id=' + ui.item.id);
 									},
 									open: function() {
 										$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
@@ -667,6 +684,17 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				switch ($this->_object->type)
 				{
+					case 3: // Список
+						if ($bNewProperty && !$this->_object->list_id && $this->_object->name != '')
+						{
+							$oList = Core_Entity::factory('List');
+							$oList->name = $this->_object->name;
+							$oList->site_id = CURRENT_SITE;
+							$oList->save();
+
+							$this->_object->list_id = $oList->id;
+						}
+					break;
 					case 7: // Флажок
 						$this->_object->default_value = Core_Array::getPost('default_value_checked', 0);
 					break;

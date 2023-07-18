@@ -53,6 +53,29 @@ class Xsl_Stream_Import
 	protected static $_aXSL = array();
 
 	/**
+	 * Array of ID's imported XSL templates
+	 * @var array
+	 */
+	protected static $_aImported = array();
+
+	/**
+	 * Get list of imported templates
+	 * @return array
+	 */
+	static public function getImported()
+	{
+		return self::$_aImported;
+	}
+
+	/**
+	 * Clear list of imported templates
+	 */
+	static public function clearImported()
+	{
+		self::$_aImported = array();
+	}
+
+	/**
 	 * Opens file or URL
 	 * @param string $path Specifies the URL that was passed to the original function.
 	 * @param string $mode The mode used to open the file, as detailed for fopen().
@@ -82,6 +105,9 @@ class Xsl_Stream_Import
 		{
 			$this->_oXsl = Core_Entity::factory('Xsl', intval($this->_xslName));
 		}
+
+		// List of used import://, see Xsl_Processor_Observer::onAfterProcess
+		self::$_aImported[$this->_oXsl->id] = $this->_oXsl;
 
 		if (!isset(self::$_aXSL[$this->_xslName]))
 		{

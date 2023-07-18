@@ -1026,4 +1026,30 @@ class Core
 			? (bool) preg_match('/http|bot|spide|craw|finder|curl|mail|yandex|rambler|seach|seek|site|sogou|yahoo|msnbot|snoopy|google|bing/iu', $agent)
 			: FALSE;
 	}
+
+	/**
+	 * Get callable name
+	 * @param callable $callable
+	 * @return string
+	 */
+	static public function getCallableName($callable)
+	{
+		switch (TRUE)
+		{
+			case is_string($callable) && strpos($callable, '::'):
+				return '[static] ' . $callable;
+			case is_string($callable):
+				return '[function] ' . $callable;
+			case is_array($callable) && is_object($callable[0]):
+				return '[method] ' . get_class($callable[0])  . '->' . $callable[1];
+			case is_array($callable):
+				return '[static] ' . $callable[0]  . '::' . $callable[1];
+			case $callable instanceof Closure:
+				return '[closure]';
+			case is_object($callable):
+				return '[invokable] ' . get_class($callable);
+			default:
+				return '[unknown]';
+		}
+	}
 }

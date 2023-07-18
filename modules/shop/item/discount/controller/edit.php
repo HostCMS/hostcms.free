@@ -58,11 +58,19 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 				$caption = Core::_('Shop_Discount.item_discount_name');
 				$options = $this->_fillDiscounts($this->_object->shop_id);
 				$name = 'shop_discount_id';
+
+				$title = $this->_object->id
+					? Core::_('Shop_Discount.item_discount_edit_form_title', $this->_object->name, FALSE)
+					: Core::_('Shop_Discount.item_discount_add_form_title');
 			break;
 			case 'shop_bonus':
 				$caption = Core::_('Shop_Bonus.item_bonus_name');
 				$options = $this->_fillBonuses($this->_object->shop_id);
 				$name = 'shop_bonus_id';
+
+				$title = $this->_object->id
+					? Core::_('Shop_Bonus.edit_title', $this->_object->name, FALSE)
+					: Core::_('Shop_Bonus.add_title');
 			break;
 		}
 
@@ -89,10 +97,7 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 			->divAttr(array('class' => 'form-group col-xs-12'))
 		);
 
-		$this->title($this->_object->id
-			? Core::_('Shop_Discount.item_discount_edit_form_title', $this->_object->name, FALSE)
-			: Core::_('Shop_Discount.item_discount_add_form_title')
-		);
+		$this->title($title);
 
 		return $this;
 	}

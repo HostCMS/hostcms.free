@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Order items',
@@ -34,6 +34,7 @@ return array(
 	'order_item_type_caption4' => 'Discount on discount card',
 	'order_item_type_caption5' => 'Write off bonuses',
 	'order_item_type_caption6' => 'Partial payment from personal account',
+	'order_item_type_caption7' => 'Service',
 	'edit_success' => "Product information in order added successfully",
 	'markDeleted_success' => "Product information in order deleted successfully!",
 	'replenishment_account' => 'Replenishment of "%s" account in shop "%s"',

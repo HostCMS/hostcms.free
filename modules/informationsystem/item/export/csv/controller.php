@@ -386,7 +386,7 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 	public function execute()
 	{
 		$oUser = Core_Auth::getCurrentUser();
-		if ($oUser->only_access_my_own)
+		if (!$oUser->superuser && $oUser->only_access_my_own)
 		{
 			return FALSE;
 		}

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -295,7 +295,12 @@ $oAdmin_Form_Dataset
 	)
 	->addCondition(array('where' => array('shop_item_bonuses.shop_item_id', '=', $oShopItem->id)));
 
+$oAdmin_Form_Dataset->changeField('name', 'type', 1);
+
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
+
+$oAdmin_Form_Controller->deleteAdminFormActionById(1334);
+$oAdmin_Form_Controller->deleteAdminFormActionById(1338);
 
 // Показ формы
 $oAdmin_Form_Controller->execute();

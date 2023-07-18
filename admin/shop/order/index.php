@@ -88,33 +88,41 @@ if (Core_Array::getPost('recalcFormula'))
 		'status' => 'error'
 	);
 
-	$shop_order_id = intval(Core_Array::getPost('shop_order_id'));
-
-	$oShop_Order = Core_Entity::factory('Shop_Order')->getById($shop_order_id);
-
-	if (!is_null($oShop_Order) && $oUser->checkObjectAccess($oShop_Order))
+	$price = Core_Array::getPost('shop_delivery_condition_price');
+	
+	if (!is_null($price))
 	{
-		$shop_delivery_condition_name = Core_Array::getPost('shop_delivery_condition_name');
-		$price = Core_Array::getPost('shop_delivery_condition_price');
-
-		$oShop_Order_Item_Delivery = $oShop_Order->Shop_Order_Items->getByType(1);
-		if (is_null($oShop_Order_Item_Delivery))
+		$shop_order_id = Core_Array::getPost('shop_order_id', 0, 'int');
+		$oShop_Order = Core_Entity::factory('Shop_Order')->getById($shop_order_id);
+		
+		if (!is_null($oShop_Order) && $oUser->checkObjectAccess($oShop_Order))
 		{
-			$oShop_Order_Item_Delivery = Core_Entity::factory('Shop_Order_Item');
-			$oShop_Order_Item_Delivery->shop_order_id = $oShop_Order->id;
-			$oShop_Order_Item_Delivery->type = 1;
+			$shop_delivery_condition_name = Core_Array::getPost('shop_delivery_condition_name');
+			
+
+			$oShop_Order_Item_Delivery = $oShop_Order->Shop_Order_Items->getByType(1);
+			if (is_null($oShop_Order_Item_Delivery))
+			{
+				$oShop_Order_Item_Delivery = Core_Entity::factory('Shop_Order_Item');
+				$oShop_Order_Item_Delivery->shop_order_id = $oShop_Order->id;
+				$oShop_Order_Item_Delivery->type = 1;
+			}
+
+			$oShop_Order_Item_Delivery->price = $price;
+			$oShop_Order_Item_Delivery->quantity = 1;
+			$oShop_Order_Item_Delivery->name = Core::_('Shop_Delivery.delivery_with_condition', $oShop_Order->Shop_Delivery->name, $shop_delivery_condition_name);
+			$oShop_Order_Item_Delivery->save();
+
+			$aJSON = array(
+				'status' => 'success',
+				'shop_order_item_id' => $oShop_Order_Item_Delivery->id,
+				'message' => Core::_('Shop_Order.recalc_delivery_success')
+			);
 		}
-
-		$oShop_Order_Item_Delivery->price = $price;
-		$oShop_Order_Item_Delivery->quantity = 1;
-		$oShop_Order_Item_Delivery->name = Core::_('Shop_Delivery.delivery_with_condition', $oShop_Order->Shop_Delivery->name, $shop_delivery_condition_name);
-		$oShop_Order_Item_Delivery->save();
-
-		$aJSON = array(
-			'status' => 'success',
-			'shop_order_item_id' => $oShop_Order_Item_Delivery->id,
-			'message' => Core::_('Shop_Order.recalc_delivery_success')
-		);
+	}
+	else
+	{
+		$aJSON['message'] = 'Delivery cost has not been calculated!';
 	}
 
 	Core::showJson($aJSON);

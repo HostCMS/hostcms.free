@@ -894,7 +894,10 @@ abstract class Shop_Payment_System_Handler
 	}
 
 	/**
-	 *
+	 * Добавление транзакции со списанием бонусов, используется для возврата бонусов при отмене оплаты заказа
+	 * @param int $shop_discountcard_bonus_id
+	 * @param float $amount
+	 * @return self
 	 */
 	protected function _addShopDiscountcardBonusTransaction($shop_discountcard_bonus_id, $amount)
 	{

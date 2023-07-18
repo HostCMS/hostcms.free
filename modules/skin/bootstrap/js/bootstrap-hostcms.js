@@ -291,7 +291,7 @@ function isEmpty(str) {
 				amount = parseFloat($('input[name = amount]').val()),
 				dataAmount = parseFloat($object.data('amount'));
 
-			console.log(windowId);
+			//console.log(windowId);
 
 			$.ajax({
 				url: '/admin/shop/document/relation/add/index.php',
@@ -311,6 +311,126 @@ function isEmpty(str) {
 
 						$('input[name = amount]').val($.mathRound(total_amount, 2));
 					}
+				}
+			});
+		},
+		selectMediaFile: function(object, windowId, modalWindowId) {
+			var $object = $(object),
+				id = $object.data('id'),
+				type = $object.data('type'),
+				entity_id = $object.data('entity-id');
+
+			$.ajax({
+				url: '/admin/media/index.php',
+				type: "POST",
+				data: { 'add_media_file': 1, 'id': id, 'type': type, 'entity_id': entity_id },
+				dataType: 'json',
+				error: function(){},
+				success: function (result) {
+					// bootbox.hideAll();
+					$('#' + modalWindowId).parents('.modal').modal('hide');
+
+					mainFormLocker.unlock();
+					$.adminLoad({ path: '/admin/media/index.php', additionalParams: 'entity_id=' + entity_id +  '&type=' + type + '&parentWindowId=' + windowId + '&_module=0', windowId: windowId, loadingScreen: false });
+				}
+			});
+		},
+		removeMediaFile: function(id, entity_id, type, windowId) {
+			$.ajax({
+				url: '/admin/media/index.php',
+				type: "POST",
+				data: { 'remove_media_file': 1, 'id': id, 'type': type, 'entity_id': entity_id },
+				dataType: 'json',
+				error: function(){},
+				success: function (result) {
+					res = confirm(i18n['confirm_delete']);
+					if (res)
+					{
+						mainFormLocker.unlock();
+						$.adminLoad({ path: '/admin/media/index.php', additionalParams: 'entity_id=' + entity_id +  '&type=' + type + '&parentWindowId=' + windowId + '&_module=0', windowId: windowId, loadingScreen: false });
+					}
+				}
+			});
+		},
+		addPropertyListItem: function(object, windowId) {
+			event.preventDefault();
+
+			var $object = $(object),
+				list_id = $object.data('list-id');
+
+			$.ajax({
+				url: '/admin/list/item/index.php',
+				data: { 'showAddListItemModal': 1, 'list_id': list_id },
+				dataType: 'json',
+				type: 'POST',
+				success: function(response){
+					$('body').append(response.html);
+
+					$('#listItemModal' + list_id).modal('show');
+
+					$('#listItemModal' + list_id).on('hidden.bs.modal', function () {
+						$(this).remove();
+					});
+				}
+			});
+		},
+		savePropertyListItem: function(windowId, list_id, value) {
+			$.ajax({
+				url: '/admin/list/item/index.php',
+				data: { 'addListItem': 1, 'list_id': list_id, 'value': value },
+				dataType: 'json',
+				type: 'POST',
+				success: function(response){
+					$('#listItemModal' + list_id).modal('hide');
+
+					if (response.status = 'success')
+					{
+						$('#' + windowId + ' select[data-list-id = ' + list_id + ']').append($('<option>', {
+							value: response.list_item_id,
+							text: response.value
+						}));
+					}
+				}
+			});
+		},
+		selectProductionStage: function(object, windowId, modalWindowId) {
+
+			//console.log('selectProductionStage');
+			var $object = $(object),
+				id = $object.data('id'),
+				production_process_id = $object.data('production-process-id');
+				/* type = $object.data('type'),
+				document_id = $object.data('document-id'),
+				shop_id = $object.data('shop-id'),
+				amount = parseFloat($('input[name = amount]').val()),
+				dataAmount = parseFloat($object.data('amount')) */
+
+			$.ajax({
+				url: '/admin/production/process/stage/index.php',
+				type: "POST",
+				data: { 'add_production_stage': 1, 'production_stage_id': id, 'production_process_id': production_process_id },
+				dataType: 'json',
+				error: function(){},
+				success: function (result) {
+
+					//console.log(result);
+					// bootbox.hideAll();
+					$('#' + modalWindowId).parents('.modal').modal('hide');
+
+					if (result.production_process_stage_id)
+					{
+						$.adminLoad({ path: '/admin/production/process/stage/index.php', additionalParams: 'production_process_id=' + production_process_id + '&parentWindowId=' + windowId + '&_module=0', windowId: windowId, loadingScreen: false });
+					}
+					/*
+
+					if (result.related_document_id)
+					{
+						$.adminLoad({ path: '/admin/production/process/stage/index.php', additionalParams: 'parentWindowId=' + windowId + '&_module=0', windowId: windowId, loadingScreen: false });
+
+						//var total_amount = amount + dataAmount;
+
+						//$('input[name = amount]').val($.mathRound(total_amount, 2));
+					} */
 				}
 			});
 		},
@@ -1050,7 +1170,12 @@ function isEmpty(str) {
 					};
 					reader.readAsDataURL(file);
 				}
+
+				// console.log(file);
+				// console.log(file['type'].split('/')[0]=='image');
 			}
+
+			// console.log(imagePath);
 
 			$parent.append(
 				'<div class="modal fade crop-image-modal" id="modal_' + id + '" tabindex="-1" role="dialog" aria-labelledby="' + id + 'ModalLabel">\
@@ -8391,6 +8516,7 @@ function isEmpty(str) {
 		setCheckbox: function(windowId, checkboxId)
 		{
 			jQuery("#"+windowId+" input[type='checkbox'][id='"+checkboxId+"']").attr('checked', true);
+			//jQuery("#"+windowId+" input[type='checkbox'][id='"+checkboxId+"']").prop('checked', true);
 		},
 		cloneSpecialPrice: function(windowId, cloneDelete)
 		{
@@ -8716,10 +8842,10 @@ function isEmpty(str) {
 		/* fillProductionProcessDir: function(windowId, productionProcessDirId , productionProcessDirFieldName, excludeProductionProcessDirId = 0 )
 		{
 			var shopId = parseInt($("#" + windowId + " [name='shop_id']").val());
-				
+
 			console.log('change shop shopId=', shopId);
 
-				
+
 			if (shopId)
 			{
 				$.ajax({
@@ -8727,13 +8853,13 @@ function isEmpty(str) {
 					dataType: 'json',
 					data: {
 						shopId: shopId,
-						excludeProductionProcessDirId: excludeProductionProcessDirId						
+						excludeProductionProcessDirId: excludeProductionProcessDirId
 					},
 					success: function(data) {
 
 						var oProductionProcessDir = $("#" + windowId + " [name='" + productionProcessDirFieldName + "']").empty();
 
-						console.log(data);						
+						console.log(data);
 						console.log(oProductionProcessDir);
 
 						if (data.dirs)
@@ -8742,11 +8868,11 @@ function isEmpty(str) {
 								countDirs = data.dirs.length;
 
 								//siteuserCompanyContractId = ' . intval($this->_object->siteuser_company_contract_id) . ';
-							
+
 							for (var i = 0; i < countDirs; i++)
 							{
 								oProductionProcessDir.append("<option " + (productionProcessDirId == data.dirs[i]["id"] ? "selected=\"selected\" " : "")  + "value=\"" + data.dirs[i]["id"] + "\">" + data.dirs[i]["name"] + "</option>");
-								
+
 								//oProductionProcessDir.append("<option " + (productionProcessDirId == i ? "selected=\"selected\" " : "")  + "value=\"" + i + "\">" + data.dirs[i]["name"] + "</option>");
 
 								//oSiteuserCompanyContract.append('<option value="' + data.contracts[i]["id"] + '">' + data.contracts[i]["name"] + '</option>');

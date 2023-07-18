@@ -42,9 +42,14 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 	{
 		parent::_prepareForm();
 
-		$this->addMessage(
-			Core_Message::get(Core::_('Shop_Payment_System.attention'), 'error')
-		);
+		$fileContent = $this->_object->loadPaymentSystemFile();
+
+		if (!$this->_object->id || strpos($fileContent, 'Shop_Payment_System_Handler' . $this->_object->id) === FALSE)
+		{
+			$this->addMessage(
+				Core_Message::get(Core::_('Shop_Payment_System.attention'), 'error')
+			);
+		}
 
 		$oMainTab = $this->getTab('main');
 
@@ -151,7 +156,6 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 
 		$oMainRow4->add($oImageField);
 
-
 		$oMainTab->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow5);
 
 		$Admin_Form_Entity_Textarea = Admin_Form_Entity::factory('Textarea');
@@ -161,9 +165,7 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 		$oTmpOptions['mode'] = 'ace/mode/php';
 
 		$Admin_Form_Entity_Textarea
-			->value(
-				$this->_object->loadPaymentSystemFile()
-			)
+			->value($fileContent)
 			->rows(30)
 			->divAttr(array('class' => 'form-group col-xs-12'))
 			->caption(Core::_('Shop_Payment_System.system_of_pay_add_form_handler'))
@@ -197,7 +199,14 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 
 		$oShop = $this->_object->Shop;
 
-		$this->_object->savePaymentSystemFile(Core_Array::getRequest('system_of_pay_add_form_handler'));
+		$fileContent = Core_Array::getRequest('system_of_pay_add_form_handler', '');
+
+		if (strpos($fileContent, 'Shop_Payment_System_Handler' . $this->_object->id) === FALSE)
+		{
+			$fileContent = preg_replace('/(class Shop_Payment_System_Handler)\d* /i', '${1}' . $this->_object->id . ' ', $fileContent);
+		}
+
+		$this->_object->savePaymentSystemFile($fileContent);
 
 		// Обработка картинок
 		$param = array();

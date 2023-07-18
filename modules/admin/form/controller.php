@@ -1505,6 +1505,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 			$this->_printRow($aData);
 
 			$this->setDatasetConditions();
+
 			foreach ($this->_datasets as $datasetKey => $oAdmin_Form_Dataset)
 			{
 				$offset = 0;
@@ -2798,6 +2799,12 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 	{
 		return str_replace(array('*', '?'), array('%', '_'), Core_DataBase::instance()->escapeLike(trim($str)));
 	}
+	
+	/**
+	 * setDatasetConditions() has been called
+	 * @var boolean
+	 */
+	protected $_setDatasetConditions = FALSE;
 
 	/**
 	 * Set dataset conditions
@@ -2805,6 +2812,11 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 	 */
 	public function setDatasetConditions()
 	{
+		if ($this->_setDatasetConditions)
+		{
+			return $this;
+		}
+		
 		$aAdmin_Form_Fields = $this->getAdminFormFields();
 
 		$oAdmin_Form_Field_Sorting = $this->getAdminFormFieldById($this->sortingFieldId);
@@ -3030,6 +3042,8 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 				Core_Message::show($e->getMessage(), 'error');
 			}
 		}
+		
+		$this->_setDatasetConditions = TRUE;
 
 		return $this;
 	}

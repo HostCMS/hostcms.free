@@ -128,7 +128,8 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					)
 					->add($oInformationsystemGroupBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oInformationsystemGroupBlockRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oInformationsystemGroupBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+					->add($oInformationsystemGroupBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oInformationsystemGroupBlockRow4 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$oInformationsystemGroupHeaderDiv
 					->add(Admin_Form_Entity::factory('Code')->html(
@@ -142,7 +143,8 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					)
 					->add($oInformationsystemItemBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oInformationsystemItemBlockRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oInformationsystemItemBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+					->add($oInformationsystemItemBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oInformationsystemItemBlockRow4 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$oInformationsystemItemHeaderDiv
 					->add(Admin_Form_Entity::factory('Code')->html(
@@ -156,7 +158,8 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					)
 					->add($oInformationsystemRootBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oInformationsystemRootBlockRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oInformationsystemRootBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+					->add($oInformationsystemRootBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oInformationsystemRootBlockRow4 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$oInformationsystemRootHeaderDiv
 					->add(Admin_Form_Entity::factory('Code')->html(
@@ -390,12 +393,15 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					->move($this->getField('seo_group_title_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oInformationsystemGroupBlockRow1)
 					->move($this->getField('seo_group_description_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oInformationsystemGroupBlockRow2)
 					->move($this->getField('seo_group_keywords_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oInformationsystemGroupBlockRow3)
+					->move($this->getField('seo_group_h1_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oInformationsystemGroupBlockRow4)
 					->move($this->getField('seo_item_title_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oInformationsystemItemBlockRow1)
 					->move($this->getField('seo_item_description_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oInformationsystemItemBlockRow2)
 					->move($this->getField('seo_item_keywords_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oInformationsystemItemBlockRow3)
+					->move($this->getField('seo_item_h1_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oInformationsystemItemBlockRow4)
 					->move($this->getField('seo_root_title_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oInformationsystemRootBlockRow1)
 					->move($this->getField('seo_root_description_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oInformationsystemRootBlockRow2)
-					->move($this->getField('seo_root_keywords_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oInformationsystemRootBlockRow3);
+					->move($this->getField('seo_root_keywords_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oInformationsystemRootBlockRow3)
+					->move($this->getField('seo_root_h1_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oInformationsystemRootBlockRow4);
 
 				// Изображение
 				$oWatermarkFileField = Admin_Form_Entity::factory('File');

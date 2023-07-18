@@ -1,13 +1,5 @@
 <?php
-/**
- * Information systems.
- *
- * @package HostCMS
- * @subpackage Informationsystem
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'Информационные группы',
 	'information_system_top_menu_groups' => 'Информационная группа',
@@ -34,7 +26,7 @@ return array(
 	'active' => 'Активна',
 	'siteuser_id' => 'Клиент',
 
-	'siteuser_group_id' => 'Группа доступа',
+	'siteuser_group_id' => 'Группа клиентов',
 	'information_parent' => 'Как у родителя',
 
 
@@ -69,9 +61,11 @@ return array(
 	'seo_group_title_template' => 'Шаблон title',
 	'seo_group_description_template' => 'Шаблон description',
 	'seo_group_keywords_template' => 'Шаблон keywords',
+	'seo_group_h1_template' => 'Шаблон H1',
 	'seo_item_title_template' => 'Шаблон title',
 	'seo_item_description_template' => 'Шаблон description',
 	'seo_item_keywords_template' => 'Шаблон keywords',
+	'seo_item_h1_template' => 'Шаблон H1',
 	'markDeleted' => 'Удалить группу',
 	'shortcut_success' => "Ярлык группы успешно добавлен",
 );

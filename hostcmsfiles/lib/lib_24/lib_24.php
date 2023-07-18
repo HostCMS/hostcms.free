@@ -323,8 +323,8 @@ if (!is_null(Core_Array::getPost('apply')))
 							{
 								$Antispam_Controller = new Antispam_Controller();
 								$Antispam_Controller
-									->addText($oSiteuser->login)
-									->addText($oSiteuser->email);
+									->addText($oSiteuser->login, 'login')
+									->addText($oSiteuser->email, 'email');
 
 								if (!is_null(Core_Array::getPost("company_name")))
 								{

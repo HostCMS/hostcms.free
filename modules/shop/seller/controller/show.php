@@ -77,6 +77,7 @@ class Shop_Seller_Controller_Show extends Core_Controller
 		$this->offset = 0;
 		$this->page = 0;
 
+		// Named subpatterns {name} can consist of up to 32 alphanumeric characters and underscores, but must start with a non-digit.
 		$this->pattern = rawurldecode($this->getEntity()->Structure->getPath()) . 'sellers/({path})(page-{page}/)';
 	}
 

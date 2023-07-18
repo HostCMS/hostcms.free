@@ -263,9 +263,9 @@ if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
 		->addCondition(array('open' => array()))
-		->addCondition(array('where' => array('xsl_dirs.id', '=', $sGlobalSearch)))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('xsl_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('where' => array('xsl_dirs.id', '=', $sGlobalSearch)))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('xsl_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
 }
 else
@@ -292,9 +292,9 @@ if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
 		->addCondition(array('open' => array()))
-		->addCondition(array('where' => array('xsls.id', '=', $sGlobalSearch)))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('xsls.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('where' => array('xsls.id', '=', $sGlobalSearch)))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('xsls.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
 }
 else

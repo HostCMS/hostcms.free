@@ -109,6 +109,8 @@ class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 			}
 		}
 
+		$oShop_Controller = Shop_Controller::instance();
+
 		// Извлекаем все активные скидки, доступные для текущей даты
 		$oShop_Purchase_Discounts = $this->_shop->Shop_Purchase_Discounts;
 		$oShop_Purchase_Discounts->queryBuilder()
@@ -118,8 +120,6 @@ class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 			->where('end_datetime', '>=', $this->dateTime);
 
 		$aShop_Purchase_Discounts = $oShop_Purchase_Discounts->findAll();
-
-		$oShop_Controller = Shop_Controller::instance();
 
 		foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
 		{
@@ -213,7 +213,13 @@ class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 			}
 		}
 
-		Core_Event::notify(get_class($this) . '.onAfterGetDiscounts', $this, array($this->_shop));
+		Core_Event::notify(get_class($this) . '.onAfterGetDiscounts', $this, array($this->_shop, $this->_aReturn));
+
+		$eventResult = Core_Event::getLastReturn();
+		if (is_array($eventResult))
+		{
+			$this->_aReturn = $eventResult;
+		}
 
 		return $this->_aReturn;
 	}

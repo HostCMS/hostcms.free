@@ -44,5 +44,5 @@ return array(
 	'root' => "Корень",
 	'move_dirs_title' => "Перенос разделов и элементов",
 	'move_items_dirs' => "Родительский раздел",
-	'move_success' => 'Бонусы перенесены',
+	'move_success' => 'Бонусы перенесены'
 );

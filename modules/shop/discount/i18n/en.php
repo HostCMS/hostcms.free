@@ -11,6 +11,8 @@
 return array(
 	'model_name' => 'Discounts',
 	'show_item_discount_title' => "Discounts for product \"%s\"",
+	'show_group_discount_title' => "Group discounts \"%s\"",
+	'show_producer_discount_title' => "Producer discounts \"%s\"",
 	'discount_add_form_link' => 'Product discounts',
 	'show_groups_discount' => 'Discount',
 	'show_groups_discount_add' => 'Add',

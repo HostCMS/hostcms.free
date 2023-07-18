@@ -543,6 +543,21 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->template_id($template_id)
 			->fillTab();
 
+		if (Core::moduleIsActive('media'))
+		{
+			$oMediaTab = Admin_Form_Entity::factory('Tab')
+				->caption(Core::_("Admin_Form.tabMedia"))
+				->name('Media');
+
+			$this->addTabAfter($oMediaTab, $oPropertyTab);
+
+			Media_Controller_Tab::factory($this->_Admin_Form_Controller)
+				->setObject($this->_object)
+				->setDatasetId($this->getDatasetId())
+				->setTab($oMediaTab)
+				->fillTab();
+		}
+
 		$this->title($this->_object->id
 			? Core::_('Structure.edit_title', $this->_object->name, FALSE)
 			: Core::_('Structure.add_title')
@@ -665,6 +680,13 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			Search_Controller::indexingSearchPages(array(
 				$this->_object->indexing()
 			));
+		}
+
+		if (Core::moduleIsActive('media'))
+		{
+			Media_Controller_Tab::factory($this->_Admin_Form_Controller)
+				->setObject($this->_object)
+				->applyObjectProperty();
 		}
 
 		$this->_object->clearCache();

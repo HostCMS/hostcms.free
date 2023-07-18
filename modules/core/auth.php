@@ -632,7 +632,6 @@ class Core_Auth
 
 		if ($oUser)
 		{
-
 			// Сессия может быть уже запущена и при повторном отправке данных POST-ом при авторизации
 			//if (!isset($_SESSION['valid_user']))
 			if (@session_id() == '')
@@ -662,15 +661,15 @@ class Core_Auth
 				->write(Core::_('Core.error_log_logged'));
 
 			// Удаление всех неудачных попыток входа систему за период ранее 24 часов с момента успешного входа
-			$oUser_Accessdenied = Core_Entity::factory('User_Accessdenied');
-			$oUser_Accessdenied->queryBuilder()
+			$oUser_Accessdenieds = Core_Entity::factory('User_Accessdenied');
+			$oUser_Accessdenieds->queryBuilder()
 				->clear()
 				->where('datetime', '<', Core_Date::timestamp2sql(time() - 86400))
 				// Удаляем все попытки доступа с текущего IP
 				->setOr()
 				->where('ip', '=', $ip);
 
-			$aUser_Accessdenieds = $oUser_Accessdenied->findAll(FALSE);
+			$aUser_Accessdenieds = $oUser_Accessdenieds->findAll(FALSE);
 			foreach ($aUser_Accessdenieds as $oUser_Accessdenied)
 			{
 				$oUser_Accessdenied->delete();

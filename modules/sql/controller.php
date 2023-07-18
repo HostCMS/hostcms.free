@@ -165,12 +165,7 @@ class Sql_Controller
 				if ($i == 0)
 				{
 					// BOM
-					// вернуть в 7.0.1
-					//$sql = Core_Str::removeBOM($sql);
-					if (substr($sql, 0, 3) === "\xEF\xBB\xBF")
-					{
-						$sql = substr($sql, 3);
-					}
+					$sql = Core_Str::removeBOM($sql);
 				}
 
 				do {

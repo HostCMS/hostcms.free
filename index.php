@@ -43,9 +43,10 @@ if (!((~Core::convert64b32(Core_Array::get(Core::$config->get('core_hostcms'), '
 }
 
 // XSLT not found
-if (!function_exists('xslt_create')
-	&& !function_exists('domxml_xslt_stylesheet')
-	&& !class_exists('DomDocument') && !class_exists('XsltProcessor'))
+if (!class_exists('DomDocument') && !class_exists('XsltProcessor')
+	//&& !function_exists('xslt_create')
+	//&& !function_exists('domxml_xslt_stylesheet')
+)
 {
 	Core_Router::add('xslt_not_found', '()')
 		->controller('Core_Command_Controller_Xslt')

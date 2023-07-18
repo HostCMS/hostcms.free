@@ -59,6 +59,72 @@ if (!is_null(Core_Array::getGet('loadDocumentText')) && Core_Array::getGet('docu
 	Core::showJSON($aJson);
 }
 
+if (!is_null(Core_Array::getGet('autocomplete'))
+	&& !is_null(Core_Array::getGet('show_shortcuts'))
+	&& !is_null(Core_Array::getGet('queryString'))
+	&& Core_Array::getGet('entity_id')
+)
+{
+	$sQuery = trim(Core_DataBase::instance()->escapeLike(Core_Str::stripTags(strval(Core_Array::getGet('queryString')))));
+	$entity_id = Core_Array::getGet('entity_id', 0, 'int');
+	$mode = Core_Array::getGet('mode', 0, 'int');
+
+	// $oShop = Core_Entity::factory('Shop', $entity_id);
+
+	$oSite = Core_Entity::factory('Site', CURRENT_SITE);
+
+	$aJSON = array();
+
+	if (strlen($sQuery))
+	{
+		$aJSON[0] = array(
+			'id' => 0,
+			'label' => Core::_('Admin.root') . ' [0]'
+		);
+
+		$oStructures = $oSite->Structures;
+		$oStructures->queryBuilder()
+			->where('structures.shortcut_id', '=', 0)
+			->limit(Core::$mainConfig['autocompleteItems']);
+
+		switch ($mode)
+		{
+			// Вхождение
+			case 0:
+			default:
+				$oStructures->queryBuilder()->where('structures.name', 'LIKE', '%' . str_replace(' ', '%', $sQuery) . '%');
+			break;
+			// Вхождение с начала
+			case 1:
+				$oStructures->queryBuilder()->where('structures.name', 'LIKE', $sQuery . '%');
+			break;
+			// Вхождение с конца
+			case 2:
+				$oStructures->queryBuilder()->where('structures.name', 'LIKE', '%' . $sQuery);
+			break;
+			// Точное вхождение
+			case 3:
+				$oStructures->queryBuilder()->where('structures.name', '=', $sQuery);
+			break;
+		}
+
+		$aStructures = $oStructures->findAll();
+
+		foreach ($aStructures as $oStructure)
+		{
+			// $sParents = $oShop_Group->groupPathWithSeparator();
+
+			$aJSON[] = array(
+				'id' => $oStructure->id,
+				// 'label' => $sParents . ' [' . $oStructure->id . ']'
+				'label' => $oStructure->name . ' [' . $oStructure->id . ']'
+			);
+		}
+	}
+
+	Core::showJson($aJSON);
+}
+
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
@@ -450,17 +516,17 @@ if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
 		->addCondition(array('open' => array()))
-		->addCondition(array('where' => array('structures.id', '=', $sGlobalSearch)))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('structures.name', 'LIKE', '%' . $sGlobalSearch . '%')))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('structures.path', 'LIKE', '%' . $sGlobalSearch . '%')))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('structures.seo_title', 'LIKE', '%' . $sGlobalSearch . '%')))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('structures.seo_description', 'LIKE', '%' . $sGlobalSearch . '%')))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('structures.seo_keywords', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('where' => array('structures.id', '=', $sGlobalSearch)))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('structures.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('structures.path', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('structures.seo_title', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('structures.seo_description', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('structures.seo_keywords', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
 }
 else

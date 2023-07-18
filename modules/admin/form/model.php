@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Model extends Core_Entity
 {
@@ -48,6 +48,7 @@ class Admin_Form_Model extends Core_Entity
 		'admin_form_setting' => array(),
 		'admin_form_field' => array(),
 		'admin_form_action' => array(),
+		'admin_form_action_dir' => array(),
 		'admin_form_autosave' => array()
 	);
 
@@ -99,6 +100,7 @@ class Admin_Form_Model extends Core_Entity
 
 		$this->Admin_Form_Fields->deleteAll(FALSE);
 		$this->Admin_Form_Actions->deleteAll(FALSE);
+		$this->Admin_Form_Action_Dirs->deleteAll(FALSE);
 		$this->Admin_Form_Settings->deleteAll(FALSE);
 		$this->Admin_Form_Autosaves->deleteAll(FALSE);
 

@@ -104,7 +104,8 @@ class Revision_Model extends Core_Entity
 		}
 		elseif (is_string($value) || is_numeric($value))
 		{
-			echo '<span class="pre-wrap">' . htmlspecialchars($value) . '</span>';
+			$iLen = strlen($value);
+			echo '<span class="pre-wrap">' . ($iLen <= 30000 ? htmlspecialchars($value) : Core_Str::getTextSize($iLen)) . '</span>';
 		}
 		elseif (is_object($value))
 		{

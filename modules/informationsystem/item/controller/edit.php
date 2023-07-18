@@ -129,6 +129,21 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					->template_id($template_id)
 					->fillTab();
 
+				if (Core::moduleIsActive('media'))
+				{
+					$oMediaTab = Admin_Form_Entity::factory('Tab')
+						->caption(Core::_("Admin_Form.tabMedia"))
+						->name('Media');
+
+					$this->addTabAfter($oMediaTab, $oPropertyTab);
+
+					Media_Controller_Tab::factory($this->_Admin_Form_Controller)
+						->setObject($this->_object)
+						->setDatasetId($this->getDatasetId())
+						->setTab($oMediaTab)
+						->fillTab();
+				}
+
 				$oMainTab
 					->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -611,6 +626,21 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					->template_id($template_id)
 					->fillTab();
 
+				if (Core::moduleIsActive('media'))
+				{
+					$oMediaTab = Admin_Form_Entity::factory('Tab')
+						->caption(Core::_("Admin_Form.tabMedia"))
+						->name('Media');
+
+					$this->addTabAfter($oMediaTab, $oPropertyTab);
+
+					Media_Controller_Tab::factory($this->_Admin_Form_Controller)
+						->setObject($this->_object)
+						->setDatasetId($this->getDatasetId())
+						->setTab($oMediaTab)
+						->fillTab();
+				}
+
 				$title = $object->id
 					? Core::_('Informationsystem_Group.information_groups_edit_form_title', $object->name, FALSE)
 					: Core::_('Informationsystem_Group.information_groups_add_form_title');
@@ -669,7 +699,8 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					)
 					->add($oInformationsystemGroupBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oInformationsystemGroupBlockRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oInformationsystemGroupBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+					->add($oInformationsystemGroupBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oInformationsystemGroupBlockRow4 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$oInformationsystemGroupHeaderDiv
 					->add(Admin_Form_Entity::factory('Code')->html(
@@ -683,7 +714,8 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					)
 					->add($oInformationsystemItemBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oInformationsystemItemBlockRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oInformationsystemItemBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+					->add($oInformationsystemItemBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oInformationsystemItemBlockRow4 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$oInformationsystemItemHeaderDiv
 					->add(Admin_Form_Entity::factory('Code')->html(
@@ -695,9 +727,11 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					->move($this->getField('seo_group_title_template')->divAttr(array('class' => 'form-group col-xs-12')), $oInformationsystemGroupBlockRow1)
 					->move($this->getField('seo_group_description_template')->divAttr(array('class' => 'form-group col-xs-12')), $oInformationsystemGroupBlockRow2)
 					->move($this->getField('seo_group_keywords_template')->divAttr(array('class' => 'form-group col-xs-12')), $oInformationsystemGroupBlockRow3)
+					->move($this->getField('seo_group_h1_template')->divAttr(array('class' => 'form-group col-xs-12')), $oInformationsystemGroupBlockRow4)
 					->move($this->getField('seo_item_title_template')->divAttr(array('class' => 'form-group col-xs-12')), $oInformationsystemItemBlockRow1)
 					->move($this->getField('seo_item_description_template')->divAttr(array('class' => 'form-group col-xs-12')), $oInformationsystemItemBlockRow2)
-					->move($this->getField('seo_item_keywords_template')->divAttr(array('class' => 'form-group col-xs-12')), $oInformationsystemItemBlockRow3);
+					->move($this->getField('seo_item_keywords_template')->divAttr(array('class' => 'form-group col-xs-12')), $oInformationsystemItemBlockRow3)
+					->move($this->getField('seo_item_h1_template')->divAttr(array('class' => 'form-group col-xs-12')), $oInformationsystemItemBlockRow4);
 
 				// Name
 				$oMainTab
@@ -1324,6 +1358,13 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					->setObject($this->_object)
 					->linkedObject(Core_Entity::factory('Informationsystem_Group_Property_List', $oInformationsystem->id))
 					->applyObjectProperty();
+		}
+
+		if (Core::moduleIsActive('media'))
+		{
+			Media_Controller_Tab::factory($this->_Admin_Form_Controller)
+				->setObject($this->_object)
+				->applyObjectProperty();
 		}
 
 		// Clear tagged cache

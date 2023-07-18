@@ -19,36 +19,49 @@ class Shop_Document_Relation_Controller_Delete extends Admin_Form_Action_Control
 	 */
 	public function execute($operation = NULL)
 	{
-		$oShop_Document_Relation = $this->_object;
+		// $oShop_Document_Relation = $this->_object;
 
-		$sJSUpdate = '';
+		$aChecked = $this->_Admin_Form_Controller->getChecked();
 
-		if (!is_null($oShop_Document_Relation) && $oShop_Document_Relation->document_id)
+		// Clear checked list
+		$this->_Admin_Form_Controller->clearChecked();
+
+		foreach ($aChecked as $datasetKey => $checkedItems)
 		{
-			$oObject = Shop_Controller::getDocument($oShop_Document_Relation->document_id);
-
-			if (!is_null($oObject) && isset($oObject->amount))
+			foreach ($checkedItems as $key => $value)
 			{
-				$currentAmount = $oObject->amount;
-				$newAmount = $currentAmount - $oShop_Document_Relation->paid;
+				$sJSUpdate = '';
 
-				$oObject->amount = $newAmount >= 0
-					? $newAmount
-					: 0;
+				$oShop_Document_Relation = Core_Entity::factory('Shop_Document_Relation')->getById($key, FALSE);
 
-				$oObject->save();
+				if (!is_null($oShop_Document_Relation) && $oShop_Document_Relation->document_id)
+				{
+					$oObject = Shop_Controller::getDocument($oShop_Document_Relation->document_id);
 
-				$oShop_Document_Relation->delete();
+					if (!is_null($oObject) && isset($oObject->amount))
+					{
+						$currentAmount = $oObject->amount;
+						$newAmount = $currentAmount - $oShop_Document_Relation->paid;
 
-				$sJSUpdate = "$('input[name = amount]').val($.mathRound({$oObject->amount}, 2))";
+						$oObject->amount = $newAmount >= 0
+							? $newAmount
+							: 0;
+
+						$oObject->save();
+
+						$oShop_Document_Relation->delete();
+
+						$sJSUpdate = "$('input[name = amount]').val($.mathRound({$oObject->amount}, 2))";
+					}
+				}
+
+				if (strlen($sJSUpdate))
+				{
+					$this->_Admin_Form_Controller->addMessage(
+						"<script>$('.shop-document-relation tr#row_0_{$key}').remove();" . $sJSUpdate . "</script>"
+					);
+				}
 			}
-		}
-
-		if (strlen($sJSUpdate))
-		{
-			$this->_Admin_Form_Controller->addMessage(
-				"<script>$('.shop-document-relation tr#row_0_{$this->_object->id}').remove();" . $sJSUpdate . "</script>"
-			);
 		}
 
 		return TRUE;

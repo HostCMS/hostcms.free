@@ -126,9 +126,15 @@ class Informationsystem_Model extends Core_Entity
 		'seo_group_title_template',
 		'seo_group_keywords_template',
 		'seo_group_description_template',
+		'seo_group_h1_template',
 		'seo_item_title_template',
 		'seo_item_keywords_template',
-		'seo_item_description_template'
+		'seo_item_description_template',
+		'seo_item_h1_template',
+		'seo_root_title_template',
+		'seo_root_description_template',
+		'seo_root_keywords_template',
+		'seo_root_h1_template'
 	);
 
 	/**

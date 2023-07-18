@@ -52,7 +52,7 @@ return array(
 	'dynamic_page' => 'Dynamic page',
 	'link' => 'Link',
 	'document_text' => 'Sample dynamic page text',
-	'siteuser_group_id' => 'Access group',
+	'siteuser_group_id' => 'Customer Group',
 	'https' => 'HTTPS',
 	'structure_source' => 'Dynamic page',
 	'structure_config_source' => '<acronym title="Enables to redefine values of page parameters. E.g., value of parameter «title»">Dynamic page settings</acronym>',

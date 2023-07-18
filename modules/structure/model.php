@@ -75,7 +75,8 @@ class Structure_Model extends Core_Entity
 	 */
 	protected $_hasMany = array(
 		'structure' => array('foreign_key' => 'parent_id'),
-		'shortcut' => array('model' => 'Structure', 'foreign_key' => 'shortcut_id')
+		'shortcut' => array('model' => 'Structure', 'foreign_key' => 'shortcut_id'),
+		'media_structure' => array()
 	);
 
 	/**
@@ -393,6 +394,11 @@ class Structure_Model extends Core_Entity
 		}
 
 		$this->Shortcuts->deleteAll(FALSE);
+
+		if (Core::moduleIsActive('media'))
+		{
+			$this->Media_Structures->deleteAll(FALSE);
+		}
 
 		// Delete proprties values
 		// List of all properties
@@ -1186,6 +1192,7 @@ class Structure_Model extends Core_Entity
 	/**
 	 * Check and correct duplicate path
 	 * @return self
+	 * @hostcms-event structure.onAfterCheckDuplicatePath
 	 */
 	public function checkDuplicatePath()
 	{
@@ -1203,6 +1210,8 @@ class Structure_Model extends Core_Entity
 		{
 			$this->path = Core_Guid::get();
 		}
+
+		Core_Event::notify($this->_modelName . '.onAfterCheckDuplicatePath', $this);
 
 		return $this;
 	}
@@ -1319,6 +1328,7 @@ class Structure_Model extends Core_Entity
 			? $object->parent_id
 			: $structure_id;
 		$oStructureShortcut->shortcut_id = $object->id;
+		$oStructureShortcut->structure_menu_id = $object->structure_menu_id;
 		$oStructureShortcut->type = 0;
 
 		// Ярлык ссылается на группу, в которую помещен
@@ -1332,6 +1342,27 @@ class Structure_Model extends Core_Entity
 		$oStructureShortcut->indexing = 0;
 
 		return $oStructureShortcut->save();
+	}
+
+	/**
+	 * Check user access to admin form action
+	 * @param string $actionName admin form action name
+	 * @param User_Model $oUser user object
+	 * @return bool
+	 */
+	public function checkBackendAccess($actionName, $oUser)
+	{
+		switch ($actionName)
+		{
+			case 'shortcut':
+				if ($this->shortcut_id)
+				{
+					return FALSE;
+				}
+			break;
+		}
+
+		return TRUE;
 	}
 
 	/**

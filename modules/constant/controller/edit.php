@@ -156,8 +156,9 @@ class Constant_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			if (!is_null($oSameConstant) && $oSameConstant->id != $id)
 			{
 				$this->addMessage(
-					Core_Message::get(Core::_('Constant.add_error'))
+					Core_Message::get(Core::_('Constant.add_error'), 'error')
 				);
+
 				return TRUE;
 			}
 		}

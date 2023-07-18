@@ -62,8 +62,7 @@ return array(
 	'warehouse_header' => "Quantity of products in stocks",
 	'property_header' => "Shop properties",
 	'yandex_market_header' => "Yandex.Market export",
-	//'warehouse_item_count' => "Quantity of products in stock \"%s\"",
-	'siteuser_group_id' => 'Access group',
+	'siteuser_group_id' => 'Customer Group',
 	'shop_users_group_parrent' => 'Like parent',
 	'siteuser_id' => 'Client',
 	'exec_typograph_for_text' => 'Use prepress service to text',
@@ -371,4 +370,9 @@ return array(
 	'package_weight' => 'Weight with packaging',
 	'shop_item_type_id' => 'Item type',
 	'recount_sets_success' => 'Recount sets completed!',
+
+	'modifications_menu' => 'Modifications',
+
+	'set_modification_items_title' => 'Set as Modification',
+	'set_modification_success' => 'Modifications applied successfully!',
 );

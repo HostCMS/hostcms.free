@@ -9,10 +9,81 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Zip_Pclzip
 {
+	const CREATE = 1;
+	const EXCL = 2;
+	const CHECKCONS = 4;
+	const OVERWRITE = 8;
+	const FL_NOCASE = 1;
+	const FL_NODIR = 2;
+	const FL_COMPRESSED = 4;
+	const FL_UNCHANGED = 8;
+	const CM_DEFAULT = -1;
+	const CM_STORE = 0;
+	const CM_SHRINK = 1;
+	const CM_REDUCE_1 = 2;
+	const CM_REDUCE_2 = 3;
+	const CM_REDUCE_3 = 4;
+	const CM_REDUCE_4 = 5;
+	const CM_IMPLODE = 6;
+	const CM_DEFLATE = 8;
+	const CM_DEFLATE64 = 9;
+	const CM_PKWARE_IMPLODE = 10;
+	const CM_BZIP2 = 12;
+	const CM_LZMA = 14;
+	const CM_TERSE = 18;
+	const CM_LZ77 = 19;
+	const CM_WAVPACK = 97;
+	const CM_PPMD = 98;
+	const ER_OK = 0;
+	const ER_MULTIDISK = 1;
+	const ER_RENAME = 2;
+	const ER_CLOSE = 3;
+	const ER_SEEK = 4;
+	const ER_READ = 5;
+	const ER_WRITE = 6;
+	const ER_CRC = 7;
+	const ER_ZIPCLOSED = 8;
+	const ER_NOENT = 9;
+	const ER_EXISTS = 10;
+	const ER_OPEN = 11;
+	const ER_TMPOPEN = 12;
+	const ER_ZLIB = 13;
+	const ER_MEMORY = 14;
+	const ER_CHANGED = 15;
+	const ER_COMPNOTSUPP = 16;
+	const ER_EOF = 17;
+	const ER_INVAL = 18;
+	const ER_NOZIP = 19;
+	const ER_INTERNAL = 20;
+	const ER_INCONS = 21;
+	const ER_REMOVE = 22;
+	const ER_DELETED = 23;
+	const OPSYS_DOS = 0;
+	const OPSYS_AMIGA = 1;
+	const OPSYS_OPENVMS = 2;
+	const OPSYS_UNIX = 3;
+	const OPSYS_VM_CMS = 4;
+	const OPSYS_ATARI_ST = 5;
+	const OPSYS_OS_2 = 6;
+	const OPSYS_MACINTOSH = 7;
+	const OPSYS_Z_SYSTEM = 8;
+	const OPSYS_Z_CPM = 9;
+	const OPSYS_WINDOWS_NTFS = 10;
+	const OPSYS_MVS = 11;
+	const OPSYS_VSE = 12;
+	const OPSYS_ACORN_RISC = 13;
+	const OPSYS_VFAT = 14;
+	const OPSYS_ALTERNATE_MVS = 15;
+	const OPSYS_BEOS = 16;
+	const OPSYS_TANDEM = 17;
+	const OPSYS_OS_400 = 18;
+	const OPSYS_OS_X = 19;
+	const OPSYS_DEFAULT = 3;
+	
 	/**
 	 * @var PclZip
 	 */
@@ -60,6 +131,10 @@ class Core_Zip_Pclzip
 		if (method_exists($this->_oPclZip, $zipFunction))
 		{
 			@call_user_func_array(array($this->_oPclZip, $zipFunction), $args);
+		}
+		elseif (strtolower($zipFunction) === 'pclziplocatename')
+		{
+			@call_user_func_array(array($this, 'pclzipLocateName'), $args);
 		}
 		else
 		{

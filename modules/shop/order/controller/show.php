@@ -137,7 +137,9 @@ class Shop_Order_Controller_Show extends Core_Controller
 				->value($sPath)
 		);
 
+		// Named subpatterns {name} can consist of up to 32 alphanumeric characters and underscores, but must start with a non-digit.
 		$this->pattern = rawurldecode($sPath) . '(page-{page}/)';
+
 		$this->patternExpressions = array(
 			'page' => '\d+',
 		);

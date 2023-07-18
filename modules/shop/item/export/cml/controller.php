@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Export_Cml_Controller extends Core_Servant_Properties
 {
@@ -128,7 +128,7 @@ class Shop_Item_Export_Cml_Controller extends Core_Servant_Properties
 	public function exportImport()
 	{
 		$oUser = Core_Auth::getCurrentUser();
-		if ($oUser->only_access_my_own)
+		if (!$oUser->superuser && $oUser->only_access_my_own)
 		{
 			return FALSE;
 		}

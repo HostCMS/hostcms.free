@@ -43,6 +43,7 @@ class Shop_Discountcard_Level_Controller_Edit extends Admin_Form_Action_Controll
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 		;
 
 		$oMainTab
@@ -81,7 +82,8 @@ class Shop_Discountcard_Level_Controller_Edit extends Admin_Form_Action_Controll
 
 		$oMainTab
 			->move($this->getField('color')->set('data-control', 'hue')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow2)
-			->move($this->getField('apply_max_discount')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow3);
+			->move($this->getField('apply_max_discount')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow3)
+			->move($this->getField('round')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow4);
 
 		$this->title($this->_object->id
 			? Core::_('Shop_Discountcard_Level.edit_title', $this->_object->name, FALSE)

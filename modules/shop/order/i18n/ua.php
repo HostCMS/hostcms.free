@@ -53,6 +53,7 @@ return array(
 	'markDeleted_success' => "Інформація про замовлення успішно видалена!",
 	'recalc_order_delivery_sum' => "Перерахувати вартість доставки",
 	'recalc_delivery_success' => "Вартість доставки перерахована успішно!",
+	'recalc_delivery_error' => "Вартість доставки не перерахована, відповідних умов не знайдено!",
 	'order_card_dt' => "Картка замовлення %s від %s",
 	'order_card_supplier' => "Постачальник",
 	'order_card_inn_kpp' => "ІПН/КПП",

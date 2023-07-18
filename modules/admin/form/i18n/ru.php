@@ -7,7 +7,7 @@
  * @subpackage Admin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'save' => 'Сохранить',
@@ -142,6 +142,7 @@ return array(
 	'autocomplete_mode3' => 'Точное совпадение',
 
 	'tabProperties' => 'Дополнительные свойства',
+	'tabMedia' => 'Библиотека',
 	'non_subject' => '<Без темы>',
 
 	'male' => 'Мужской',

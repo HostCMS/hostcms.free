@@ -7,7 +7,7 @@
  * @subpackage Informationsystem
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Information systems',
@@ -63,7 +63,7 @@ return array(
 	'typograph_default_items' => 'Use prepress service to items',
 	'typograph_default_groups' => 'Use prepress service to groups',
 
-	'siteuser_group_id' => 'Access group',
+	'siteuser_group_id' => 'Customer Group',
 	'information_all' => 'All',
 
 	'structure_name' => 'Structure node',
@@ -157,4 +157,13 @@ return array(
 	'option_itemSmallImage' => 'Item small image pattern',
 	'option_groupLargeImage' => 'Group large image pattern',
 	'option_groupSmallImage' => 'Group small image pattern',
+
+	'seo_group_h1_template' => 'H1 Template',
+	'seo_item_h1_template' => 'H1 Template',
+	'seo_root_h1_template' => 'H1 Template',
+
+	'searchIndexItem' => 'Item ID',
+	'searchIndexGroup' => 'Group ID',
+	'searchUnindexItem' => 'Item ID',
+	'recountInformationsystem' => 'Informationsystem ID',
 );

@@ -75,7 +75,7 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 
 				$oBankContactsTab = Admin_Form_Entity::factory('Tab')
 					->caption(Core::_('Shop_Producer.tab3'))
-					->name('Contacts');
+					->name('BankContacts');
 
 				$oBankContactsTab
 					->add($oBankContactsTabRow1 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -91,7 +91,7 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 
 				$oSEOTab = Admin_Form_Entity::factory('Tab')
 					->caption(Core::_('Shop_Producer.tab4'))
-					->name('Contacts');
+					->name('SEO');
 
 				$oSEOTab
 					->add($oSEOTabRow1 = Admin_Form_Entity::factory('Div')->class('row'))

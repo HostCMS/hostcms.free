@@ -171,17 +171,139 @@ class Shop_Item_Controller extends Core_Servant_Properties
 	}
 
 	/**
+	 * Cache for _getShopProducerDiscounts
+	 * @var array
+	 */
+	static protected $_cacheGetShopProducerDiscounts = array();
+
+	/**
+	 * Get array of Shop_Producer_Discounts for producer $shop_producer_id
+	 * @param int $shop_producer_id Shop_Producer id
+	 * @return array
+	 * @hostcms-event Shop_Item_Controller.onGetShopProducerDiscounts
+	 */
+	protected function _getShopProducerDiscounts($shop_producer_id)
+	{
+		if (!isset(self::$_cacheGetShopProducerDiscounts[$shop_producer_id]))
+		{
+			self::$_cacheGetShopProducerDiscounts[$shop_producer_id] = array();
+
+			if ($shop_producer_id)
+			{
+				$oShop_Producer = Core_Entity::factory('Shop_Producer', $shop_producer_id);
+				$oShop_Producer_Discounts = $oShop_Producer->Shop_Producer_Discounts;
+
+				$bSiteuser = $this->siteuser && Core::moduleIsActive('siteuser');
+
+				// Обычные скидки на товары и персональные скидки для $this->siteuser
+				$bSiteuser && $oShop_Producer_Discounts->queryBuilder()
+					->open();
+
+				$oShop_Producer_Discounts->queryBuilder()
+					->where('shop_producer_discounts.siteuser_id', '=', 0);
+
+				$bSiteuser && $oShop_Producer_Discounts->queryBuilder()
+					->setOr()
+					->where('shop_producer_discounts.siteuser_id', '=', $this->siteuser->id)
+					->close();
+
+				$aShop_Producer_Discounts = $oShop_Producer_Discounts->findAll();
+
+				Core_Event::notify(get_class($this) . '.onGetShopProducerDiscounts', $this, array($oShop_Producer, $aShop_Producer_Discounts));
+
+				$eventResult = Core_Event::getLastReturn();
+
+				if (is_array($eventResult))
+				{
+					$aShop_Producer_Discounts = $eventResult;
+				}
+
+				self::$_cacheGetShopProducerDiscounts[$shop_producer_id] = $aShop_Producer_Discounts;
+			}
+		}
+
+		return self::$_cacheGetShopProducerDiscounts[$shop_producer_id];
+	}
+
+	/**
+	 * Cache for _getShopGroupDiscounts
+	 * @var array
+	 */
+	static protected $_cacheGetShopGroupDiscounts = array();
+
+	/**
+	 * Get array of Shop_Group_Discounts for group $shop_group_id
+	 * @param int $shop_group_id Shop_Group id
+	 * @return array
+	 * @hostcms-event Shop_Item_Controller.onGetShopGroupDiscounts
+	 */
+	protected function _getShopGroupDiscounts($shop_group_id)
+	{
+		if (!isset(self::$_cacheGetShopGroupDiscounts[$shop_group_id]))
+		{
+			self::$_cacheGetShopGroupDiscounts[$shop_group_id] = array();
+
+			if ($shop_group_id)
+			{
+				$oShop_Group = Core_Entity::factory('Shop_Group', $shop_group_id);
+				$oShop_Group_Discounts = $oShop_Group->Shop_Group_Discounts;
+
+				$bSiteuser = $this->siteuser && Core::moduleIsActive('siteuser');
+
+				// Обычные скидки на товары и персональные скидки для $this->siteuser
+				$bSiteuser && $oShop_Group_Discounts->queryBuilder()
+					->open();
+
+				$oShop_Group_Discounts->queryBuilder()
+					->where('shop_group_discounts.siteuser_id', '=', 0);
+
+				$bSiteuser && $oShop_Group_Discounts->queryBuilder()
+					->setOr()
+					->where('shop_group_discounts.siteuser_id', '=', $this->siteuser->id)
+					->close();
+
+				$aShop_Group_Discounts = $oShop_Group_Discounts->findAll();
+
+				Core_Event::notify(get_class($this) . '.onGetShopGroupDiscounts', $this, array($oShop_Group, $aShop_Group_Discounts));
+
+				$eventResult = Core_Event::getLastReturn();
+
+				if (is_array($eventResult))
+				{
+					$aShop_Group_Discounts = $eventResult;
+				}
+
+				self::$_cacheGetShopGroupDiscounts[$shop_group_id] = $aShop_Group_Discounts;
+			}
+		}
+
+		return self::$_cacheGetShopGroupDiscounts[$shop_group_id];
+	}
+
+	/**
 	 * Calculate the cost with tax and discounts without currencies
 	 * @param Shop_Item_Model $oShop_Item item
 	 * @return array
+	 * @hostcms-event Shop_Item_Controller.onGetShopProducerDiscounts
+	 * @hostcms-event Shop_Item_Controller.onGetShopGroupDiscounts
 	 * @hostcms-event Shop_Item_Controller.onGetShopItemDiscounts
+	 * @hostcms-event Shop_Item_Controller.onBeforeApplyShopItemDiscount
 	 */
 	protected function _calculatePrice(Shop_Item_Model $oShop_Item)
 	{
 		if ($this->_aPrice['price'])
 		{
-			// Определены ли скидки на товар
-			//$aShop_Item_Discounts = $oShop_Item->Shop_Item_Discounts->findAll();
+			// Скидки на товары группы
+			$aShop_Group_Discounts = $oShop_Item->shop_group_id
+				? self::_getShopGroupDiscounts($oShop_Item->shop_group_id)
+				: array();
+
+			// Скидки на товары производителя
+			$aShop_Producer_Discounts = $oShop_Item->shop_producer_id
+				? self::_getShopProducerDiscounts($oShop_Item->shop_producer_id)
+				: array();
+
+			// Скидки на товар
 			$oShop_Item_Discounts = $oShop_Item->Shop_Item_Discounts;
 
 			$bSiteuser = $this->siteuser && Core::moduleIsActive('siteuser');
@@ -209,30 +331,51 @@ class Shop_Item_Controller extends Core_Servant_Properties
 				$aShop_Item_Discounts = $eventResult;
 			}
 
-			if (count($aShop_Item_Discounts))
+			$aDiscounts = array_merge($aShop_Group_Discounts, $aShop_Item_Discounts, $aShop_Producer_Discounts);
+
+			if (count($aDiscounts))
 			{
-				// Определяем количество скидок на товар
 				$discountPercent = $discountAmount = 0;
 
-				// Цикл по идентификаторам скидок для товара
-				foreach ($aShop_Item_Discounts as $oShop_Item_Discount)
+				// Скидка может повторяться в объединенных массивах
+				$aAppliedDiscounts = array();
+
+				foreach ($aDiscounts as $oRelated_Discount)
 				{
-					$oShop_Discount = $oShop_Item_Discount->Shop_Discount;
-					if ($oShop_Discount->isActive()
-						&& ($oShop_Discount->coupon == 0
-							|| $bCoupon = !is_null(self::$_coupon) && strlen(self::$_coupon) && $oShop_Discount->coupon_text == self::$_coupon
-						)
-					)
+					$oShop_Discount = $oRelated_Discount->Shop_Discount;
+
+					// Одна скидка может быть указана и для товара, и для группы, и для производителя
+					if (!isset($aAppliedDiscounts[$oShop_Discount->id]))
 					{
-						$this->_aPrice['discounts'][] = $oShop_Discount;
+						$aAppliedDiscounts[$oShop_Discount->id] = $oShop_Discount->id;
 
-						$oShop_Discount->type == 0
-							? $discountPercent += $oShop_Discount->value
-							: $discountAmount += $oShop_Discount->value;
-
-						if ($oShop_Discount->coupon == 1 && $bCoupon)
+						if ($oShop_Discount->isActive()
+							&& ($oShop_Discount->coupon == 0
+								|| $bCoupon = !is_null(self::$_coupon) && strlen(self::$_coupon) && $oShop_Discount->coupon_text == self::$_coupon
+							)
+						)
 						{
-							$this->_aPrice['coupon'] = $oShop_Discount->coupon_text;
+							Core_Event::notify(get_class($this) . '.onBeforeApplyShopItemDiscount', $this, array($oShop_Discount));
+
+							$eventResult = Core_Event::getLastReturn();
+							if (is_object($eventResult) || $eventResult === FALSE)
+							{
+								$oShop_Discount = $eventResult;
+							}
+
+							if ($oShop_Discount)
+							{
+								$this->_aPrice['discounts'][] = $oShop_Discount;
+
+								$oShop_Discount->type == 0
+									? $discountPercent += $oShop_Discount->value
+									: $discountAmount += $oShop_Discount->value;
+
+								if ($oShop_Discount->coupon == 1 && $bCoupon)
+								{
+									$this->_aPrice['coupon'] = $oShop_Discount->coupon_text;
+								}
+							}
 						}
 					}
 				}
@@ -296,6 +439,66 @@ class Shop_Item_Controller extends Core_Servant_Properties
 	}
 
 	/**
+	 * Cache for _getShopProducerBonuses
+	 * @var array
+	 */
+	static protected $_cacheGetShopProducerBonuses = array();
+
+	/**
+	 * Get array of Shop_Producer_Bonuses for producer $shop_producer_id
+	 * @param int $shop_producer_id Shop_Producer id
+	 * @return array
+	 * @hostcms-event Shop_Item_Controller.onGetShopProducerBonuses
+	 */
+	protected function _getShopProducerBonuses($shop_producer_id)
+	{
+		if (!isset(self::$_cacheGetShopProducerBonuses[$shop_producer_id]))
+		{
+			self::$_cacheGetShopProducerBonuses[$shop_producer_id] = array();
+
+			if ($shop_producer_id)
+			{
+				$oShop_Producer = Core_Entity::factory('Shop_Producer', $shop_producer_id);
+				$aShop_Producer_Bonuses = $oShop_Producer->Shop_Producer_Bonuses->findAll();
+
+				self::$_cacheGetShopProducerBonuses[$shop_producer_id] = $aShop_Producer_Bonuses;
+			}
+		}
+
+		return self::$_cacheGetShopProducerBonuses[$shop_producer_id];
+	}
+
+	/**
+	 * Cache for _getShopGroupBonuses
+	 * @var array
+	 */
+	static protected $_cacheGetShopGroupBonuses = array();
+
+	/**
+	 * Get array of Shop_Group_Bonuses for group $shop_group_id
+	 * @param int $shop_group_id Shop_Group id
+	 * @return array
+	 * @hostcms-event Shop_Item_Controller.onGetShopGroupBonuses
+	 */
+	protected function _getShopGroupBonuses($shop_group_id)
+	{
+		if (!isset(self::$_cacheGetShopGroupBonuses[$shop_group_id]))
+		{
+			self::$_cacheGetShopGroupBonuses[$shop_group_id] = array();
+
+			if ($shop_group_id)
+			{
+				$oShop_Group = Core_Entity::factory('Shop_Group', $shop_group_id);
+				$aShop_Group_Bonuses = $oShop_Group->Shop_Group_Bonuses->findAll();
+
+				self::$_cacheGetShopGroupBonuses[$shop_group_id] = $aShop_Group_Bonuses;
+			}
+		}
+
+		return self::$_cacheGetShopGroupBonuses[$shop_group_id];
+	}
+
+	/**
 	 * Calculate total bonuses for oShop_Item
 	 * @param Shop_Item_Model $oShop_Item item
 	 * @return array array('total' => Total bonuses, 'bonuses' => array of bonuses)
@@ -317,25 +520,45 @@ class Shop_Item_Controller extends Core_Servant_Properties
 			return $eventResult;
 		}
 
-		// Определены ли скидки на товар
+		// Бонусы на товары группы
+		$aShop_Group_Bonuses = $oShop_Item->shop_group_id
+			? self::_getShopGroupBonuses($oShop_Item->shop_group_id)
+			: array();
+
+		// Бонусы на товары производителя
+		$aShop_Producer_Bonuses = $oShop_Item->shop_producer_id
+			? self::_getShopProducerBonuses($oShop_Item->shop_producer_id)
+			: array();
+
+		// Определены ли бонусы на товар
 		$aShop_Item_Bonuses = $oShop_Item->Shop_Item_Bonuses->findAll();
 
-		if (count($aShop_Item_Bonuses))
+		$aBonusesList = array_merge($aShop_Item_Bonuses, $aShop_Group_Bonuses, $aShop_Producer_Bonuses);
+
+		if (count($aBonusesList))
 		{
-			// Определяем количество скидок на товар
 			$bonusPercent = $bonusAmount = 0;
 
-			// Цикл по идентификаторам скидок для товара
-			foreach ($aShop_Item_Bonuses as $oShop_Item_Bonus)
-			{
-				$oShop_Bonus = $oShop_Item_Bonus->Shop_Bonus;
-				if ($oShop_Bonus->isActive() && $oShop_Bonus->min_amount <= $price)
-				{
-					$aBonuses['bonuses'][] = $oShop_Bonus;
+			// Бонус может повторяться в объединенных массивах
+			$aAppliedBonuses = array();
 
-					$oShop_Bonus->type == 0
-						? $bonusPercent += $oShop_Bonus->value
-						: $bonusAmount += $oShop_Bonus->value;
+			foreach ($aBonusesList as $oRelated_Bonus)
+			{
+				$oShop_Bonus = $oRelated_Bonus->Shop_Bonus;
+
+				// Один бонус может быть указан и для товара, и для группы, и для производителя
+				if (!isset($aAppliedBonuses[$oShop_Bonus->id]))
+				{
+					$aAppliedBonuses[$oShop_Bonus->id] = $oShop_Bonus->id;
+
+					if ($oShop_Bonus->isActive() && $oShop_Bonus->min_amount <= $price)
+					{
+						$aBonuses['bonuses'][] = $oShop_Bonus;
+
+						$oShop_Bonus->type == 0
+							? $bonusPercent += $oShop_Bonus->value
+							: $bonusAmount += $oShop_Bonus->value;
+					}
 				}
 			}
 
@@ -363,7 +586,7 @@ class Shop_Item_Controller extends Core_Servant_Properties
 		if (Core::moduleIsActive('siteuser') && $this->siteuser)
 		{
 			$aPrices = array();
-			
+
 			$aSiteuser_Groups = $this->siteuser->Siteuser_Groups->findAll();
 			foreach ($aSiteuser_Groups as $oSiteuser_Group)
 			{
@@ -371,7 +594,7 @@ class Shop_Item_Controller extends Core_Servant_Properties
 				$aShop_Prices = Core_Entity::factory('Shop_Price')->getAllBySiteuserGroupAndShop(
 					$oSiteuser_Group->id, $oShop->id
 				);
-				
+
 				foreach ($aShop_Prices as $oShop_Price)
 				{
 					// Если есть цена для группы клиентов

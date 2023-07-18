@@ -262,9 +262,9 @@ if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
 		->addCondition(array('open' => array()))
-		->addCondition(array('where' => array('tag_dirs.id', '=', $sGlobalSearch)))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('tag_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('where' => array('tag_dirs.id', '=', $sGlobalSearch)))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('tag_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
 }
 else
@@ -287,11 +287,11 @@ if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
 		->addCondition(array('open' => array()))
-		->addCondition(array('where' => array('tags.id', '=', $sGlobalSearch)))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('tags.name', 'LIKE', '%' . $sGlobalSearch . '%')))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('tags.path', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('where' => array('tags.id', '=', $sGlobalSearch)))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('tags.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('tags.path', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
 }
 else

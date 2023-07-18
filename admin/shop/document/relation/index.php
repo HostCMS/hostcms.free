@@ -87,7 +87,7 @@ if ($oAdminFormActionEdit && $oAdmin_Form_Controller->getAction() == 'edit')
 	$oAdmin_Form_Controller->addAction($oShop_Document_Relation_Controller_Edit);
 }
 
-// Удаление модуля
+// Удаление
 $oAdminFormActionDelete = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 	->Admin_Form_Actions
 	->getByName('delete');

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Xsl
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Xsl_Processor_Observer
 {
@@ -42,6 +42,8 @@ class Xsl_Processor_Observer
 
 		if (Core::checkPanel() && Core_Array::getSession('HOSTCMS_SHOW_XML'))
 		{
+// var_dump('=======', count(Xsl_Stream_Import::getImported()));
+
 			$oXslPanel = Core_Html_Entity::factory('Div')
 				->class('hostcmsPanel')
 				->style('margin-top: 40px; display: none');
@@ -119,6 +121,27 @@ class Xsl_Processor_Observer
 							)
 					)
 			);
+
+			$aImported = Xsl_Stream_Import::getImported();
+
+			foreach ($aImported as $oXsl)
+			{
+				$sAdditional = "hostcms[action]=edit&xsl_dir_id={$oXsl->xsl_dir_id}&hostcms[checked][1][{$oXsl->id}]=1";
+
+				$sTitle = Core::_('Xsl.panel_edit_xsl', $oXsl->name);
+
+				$oXslSubPanel->add(
+					Core_Html_Entity::factory('Div')
+						->class('hostcmsButton hostcmsButtonImported')
+						->add(
+							Core_Html_Entity::factory('A')
+								->href("{$sPath}?{$sAdditional}")
+								->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "'}); return false")
+								->value($oXsl->id)
+								->title($sTitle)
+						)
+				);
+			}
 
 			$oXslPanel
 				->add($oXslSubPanel)

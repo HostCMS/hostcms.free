@@ -17,4 +17,5 @@ return array(
 	'delete_success' => 'Елемент видалений!',
 	'undelete_success' => 'Елемент відновлено!',
 	'markDeleted_success' => "Дані про рівень дисконтної картки успішно видалені!",
+	'round' => 'Округляти'
 );

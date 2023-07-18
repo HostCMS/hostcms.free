@@ -63,7 +63,7 @@ return array(
 	'warehouse_header' => "Кількість товару на складах",
 	'property_header' => "Додаткові властивості",
 	'yandex_market_header' => "Експорт в Яндекс.Маркет",
-	'siteuser_group_id' => 'Група доступу',
+	'siteuser_group_id' => 'Група клієнтів',
 	'shop_users_group_parrent' => 'Як у батька',
 	'siteuser_id' => 'Клієнт',
 	'exec_typograph_for_text' => 'Типографувати текст',
@@ -372,4 +372,9 @@ return array(
 	'package_weight' => 'Вага з упаковкою',
 	'shop_item_type_id' => 'Вигляд номенклатури',
 	'recount_sets_success' => 'Перерахунок комплектів завершено!',
+
+	'modifications_menu' => 'Модифікації',
+
+	'set_modification_items_title' => 'Призначити модифікацією',
+	'set_modification_success' => 'Модифікації призначені успішно!',
 );

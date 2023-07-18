@@ -17,9 +17,12 @@ $sAdminFormAction = '/admin/admin_form/action/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
-$admin_forms_id = intval(Core_Array::getGet('admin_form_id', 0));
-$oAdmin_Form_Current = Core_Entity::factory('Admin_Form', $admin_forms_id);
+$admin_form_id = Core_Array::getGet('admin_form_id', 0, 'int');
+$admin_form_action_dir_id = Core_Array::getGet('admin_form_action_dir_id', 0, 'int');
+
+$oAdmin_Form_Current = Core_Entity::factory('Admin_Form', $admin_form_id);
 $oAdmin_Word_Value = $oAdmin_Form_Current->Admin_Word->getWordByLanguage(CURRENT_LANGUAGE_ID);
+
 $form_name = $oAdmin_Word_Value
 	? $oAdmin_Word_Value->name
 	: '';
@@ -44,12 +47,27 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('Admin_Form_Action.show_form_action_menu_add_new_top'))
 		->icon('fa fa-plus')
 		->href(
-			$oAdmin_Form_Controller->getAdminActionLoadHref(array('path' => $oAdmin_Form_Controller->getPath(), 'action' => 'edit', 'datasetKey' => 0, 'datasetValue' => 0))
+			$oAdmin_Form_Controller->getAdminActionLoadHref(array('path' => $oAdmin_Form_Controller->getPath(), 'action' => 'edit', 'datasetKey' => 1, 'datasetValue' => 0))
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminActionLoadAjax(array('path' => $oAdmin_Form_Controller->getPath(), 'action' => 'edit', 'datasetKey' => 0, 'datasetValue' => 0))
+			$oAdmin_Form_Controller->getAdminActionLoadAjax(array('path' => $oAdmin_Form_Controller->getPath(), 'action' => 'edit', 'datasetKey' => 1, 'datasetValue' => 0))
 		)
 );
+
+if (!$admin_form_action_dir_id)
+{
+	$oAdmin_Form_Entity_Menus->add(
+		Admin_Form_Entity::factory('Menu')
+			->name(Core::_('Admin_Form_Action_Dir.add'))
+			->icon('fa fa-plus')
+			->href(
+				$oAdmin_Form_Controller->getAdminActionLoadHref(array('path' => $oAdmin_Form_Controller->getPath(), 'action' => 'edit', 'datasetKey' => 0, 'datasetValue' => 0))
+			)
+			->onclick(
+				$oAdmin_Form_Controller->getAdminActionLoadAjax(array('path' => $oAdmin_Form_Controller->getPath(), 'action' => 'edit', 'datasetKey' => 0, 'datasetValue' => 0))
+			)
+	);
+}
 
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
@@ -72,10 +90,10 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($form_name)
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref(array('path' => $oAdmin_Form_Controller->getPath(), 'additionalParams' => "admin_form_id={$admin_forms_id}"))
+			$oAdmin_Form_Controller->getAdminLoadHref(array('path' => $oAdmin_Form_Controller->getPath(), 'additionalParams' => "admin_form_id={$admin_form_id}"))
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax(array('path' => $oAdmin_Form_Controller->getPath(), 'additionalParams' => "admin_form_id={$admin_forms_id}"))
+			$oAdmin_Form_Controller->getAdminLoadAjax(array('path' => $oAdmin_Form_Controller->getPath(), 'additionalParams' => "admin_form_id={$admin_form_id}"))
 	)
 );
 
@@ -129,7 +147,44 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 	$oAdmin_Form_Controller->addAction($oControllerCopy);
 }
 
+if (!$admin_form_action_dir_id)
+{
+	// Источник данных 0
+	$oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
+		Core_Entity::factory('Admin_Form_Action_Dir')
+	);
+
+	$oAdmin_Form_Dataset->addCondition(
+		array('select' => array('admin_form_action_dirs.*', array('admin_word_values.name', 'word_name')))
+	)->addCondition(
+		array('leftJoin' => array('admin_words', 'admin_form_action_dirs.admin_word_id', '=', 'admin_words.id'))
+	)->addCondition(
+		array('leftJoin' => array('admin_word_values', 'admin_words.id', '=', 'admin_word_values.admin_word_id'))
+	)->addCondition(
+		array('open' => array())
+	)->addCondition(
+		array('where' => array('admin_word_values.admin_language_id', '=', CURRENT_LANGUAGE_ID))
+	)->addCondition(
+		array('setOr' => array())
+	)->addCondition(
+		array('where' => array('admin_form_action_dirs.admin_word_id', '=', 0))
+	)->addCondition(
+		array('close' => array())
+	)->addCondition(
+		array('where' => array('admin_form_id', '=', $admin_form_id))
+	);
+}
+else
+{
+	$oAdmin_Form_Dataset = new Admin_Form_Dataset_Empty();
+}
+
 // Источник данных 0
+$oAdmin_Form_Controller->addDataset(
+	$oAdmin_Form_Dataset
+);
+
+// Источник данных 1
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Admin_Form_Action')
 );
@@ -156,7 +211,9 @@ $oAdmin_Form_Dataset->addCondition(
 )->addCondition(
 	array('close' => array())
 )->addCondition(
-	array('where' => array('admin_form_id', '=', $admin_forms_id))
+	array('where' => array('admin_form_id', '=', $admin_form_id))
+)->addCondition(
+	array('where' => array('admin_form_action_dir_id', '=', $admin_form_action_dir_id))
 );
 
 // Добавляем источник данных контроллеру формы

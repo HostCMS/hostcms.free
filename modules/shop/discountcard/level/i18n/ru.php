@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Уровни дисконтных карт',
@@ -18,6 +18,7 @@ return array(
 	'color' => 'Цвет',
 	'amount' => 'Сумма, %s',
 	'apply_max_discount' => 'Применять максимальную скидку',
+	'round' => 'Округлять',
 	'shop_id' => 'Идентификатор магазина',
 	'add_title' => 'Добавление уровня дисконтной карты',
 	'edit_title' => 'Добавление уровня дисконтной карты %s',

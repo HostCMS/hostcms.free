@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Products groups',
@@ -61,5 +61,7 @@ return array(
 	'markDeleted' => 'Delete group',
 	'shortcut_success' => "Group shortcut added successfully",
 	'change_attributes_success' => 'Attributes changed successfully!',
-	'items_total_count' => 'Number of active items'
+	'items_total_count' => 'Number of active items',
+	'seo_group_h1_template' => 'H1 Template',
+	'seo_item_h1_template' => 'H1 Template',
 );

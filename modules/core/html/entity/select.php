@@ -35,16 +35,7 @@ class Core_Html_Entity_Select extends Core_Html_Entity
 		'options', // array
 		'value'
 	);
-	
-	// Remove _skipProperies after 7.0.2
-	/**
-	 * Skip properties
-	 * @var array
-	 */
-	protected $_skipProperies = array(
-		'options', // array
-		'value'
-	);
+
 	
 	/**
 	 * Executes the business logic.

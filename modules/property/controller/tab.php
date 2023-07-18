@@ -286,6 +286,13 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 		$iPropertyCounter = 0;
 
+		$sCaption = htmlspecialchars($oProperty->name);
+
+		if ($oProperty->description != '')
+		{
+			$sCaption .= '<acronym title="" data-html="1" data-original-title="' . htmlspecialchars($oProperty->description) . '"><i class="fa-solid fa-circle-info property-info" ></i></acronym>';
+		}
+
 		switch ($oProperty->type)
 		{
 			case 0: // Int
@@ -402,7 +409,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 					$oAdmin_Form_Entity
 						->name("property_{$oProperty->id}[]")
 						->id("id_property_{$oProperty->id}_00{$iPropertyCounter}")
-						->caption(htmlspecialchars($oProperty->name))
+						->caption($sCaption)
 						->value(
 							$this->_correctPrintValue($oProperty, $oProperty->default_value)
 						)
@@ -585,23 +592,34 @@ class Property_Controller_Tab extends Core_Servant_Properties
 			case 3: // List
 				if (Core::moduleIsActive('list'))
 				{
+					if ($oProperty->list_id)
+					{
+						$windowId = $this->_Admin_Form_Controller->getWindowId();
+
+						$sCaption .= '<a href="#" onclick="$.addPropertyListItem(this, \'' . $windowId . '\')" data-list-id=' . $oProperty->list_id . '><i title="' . Core::_('Property.add_to_list') . '" class="fa fa-circle-plus fa-small property-info"></i></a>';
+
+						$sCaption .= '<a href="/admin/list/item/index.php?list_id=' . $oProperty->list_id . '" target="_blank"><i title="' . Core::_('Property.move_to_list') . '" class="fa fa-external-link fa-small property-info"></i></a>';
+					}
+
 					$oAdmin_Form_Entity_ListItems = Admin_Form_Entity::factory('Select')
-						->caption(htmlspecialchars($oProperty->name))
+						->caption($sCaption)
 						->name("property_{$oProperty->id}[]")
 						->value(
 							$this->_correctPrintValue($oProperty, $oProperty->default_value)
 						)
-						->divAttr(array('class' => 'form-group col-xs-12'));
+						->divAttr(array('class' => 'form-group col-xs-12'))
+						->data('list-id', $oProperty->list_id);
 
 					// Перенесно в _fillList()
 					/*$oProperty->obligatory
 						&& $oAdmin_Form_Entity_ListItems->data('required', 1);*/
 
 					$oAdmin_Form_Entity_ListItemsInput = Admin_Form_Entity::factory('Input')
-						->caption(htmlspecialchars($oProperty->name))
+						->caption($sCaption)
 						->divAttr(array('class' => 'form-group col-xs-12 col-sm-8'))
 						->id("id_property_{$oProperty->id}_00{$iPropertyCounter}") // id_property_ !!!
-						->name("input_property_{$oProperty->id}[]");
+						->name("input_property_{$oProperty->id}[]")
+						->data('list-id', $oProperty->list_id);
 
 					$oAdmin_Form_Entity_Autocomplete_Select = Admin_Form_Entity::factory('Select')
 						->id($oAdmin_Form_Entity_ListItemsInput->id . '_mode')
@@ -655,7 +673,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 				{
 					// Группы
 					$oAdmin_Form_Entity_InfGroups = Admin_Form_Entity::factory('Select')
-						->caption(htmlspecialchars($oProperty->name))
+						->caption($sCaption)
 						->divAttr(array('class' => 'form-group col-xs-12'))
 						->id("id_group_{$oProperty->id}_00{$iPropertyCounter}") // id_ should be, see js!
 						->name("group_property_{$oProperty->id}[]")
@@ -715,7 +733,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 				{
 					// Группы
 					$oAdmin_Form_Entity_InfGroups = Admin_Form_Entity::factory('Select')
-						->caption(htmlspecialchars($oProperty->name))
+						->caption($sCaption)
 						->id("id_property_{$oProperty->id}")
 						->name("property_{$oProperty->id}[]")
 						->value(NULL)
@@ -723,7 +741,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 						->filter(TRUE);
 
 					$oAdmin_Form_Entity_InfGroupsInput = Admin_Form_Entity::factory('Input')
-						->caption(htmlspecialchars($oProperty->name))
+						->caption($sCaption)
 						->divAttr(array('class' => 'form-group col-xs-12'))
 						->id("input_property_{$oProperty->id}_00{$iPropertyCounter}")
 						->name("input_property_{$oProperty->id}[]");
@@ -765,7 +783,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 				{
 					// Группы
 					$oAdmin_Form_Entity_Shop_Groups = Admin_Form_Entity::factory('Select')
-						->caption(htmlspecialchars($oProperty->name))
+						->caption($sCaption)
 						->divAttr(array('class' => 'form-group col-xs-12'))
 						->id("id_group_{$oProperty->id}_00{$iPropertyCounter}") // id_ should be, see js!
 						->name("group_property_{$oProperty->id}[]")
@@ -825,7 +843,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 				{
 					// Группы
 					$oAdmin_Form_Entity_Shop_Groups = Admin_Form_Entity::factory('Select')
-						->caption(htmlspecialchars($oProperty->name))
+						->caption($sCaption)
 						->id("id_property_{$oProperty->id}")
 						->name("property_{$oProperty->id}[]")
 						->value(NULL)
@@ -833,7 +851,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 						->filter(TRUE);
 
 					$oAdmin_Form_Entity_Shop_Groups_Input = Admin_Form_Entity::factory('Input')
-						->caption(htmlspecialchars($oProperty->name))
+						->caption($sCaption)
 						->divAttr(array('class' => 'form-group col-xs-12'))
 						->id("input_property_{$oProperty->id}_00{$iPropertyCounter}") // id_ should be, see js!
 						->name("input_property_{$oProperty->id}[]");
@@ -1026,9 +1044,9 @@ class Property_Controller_Tab extends Core_Servant_Properties
 					minLength: 1,
 					create: function() {
 						$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
-							return $('<li></li>')
+							return $('<li class=\"autocomplete-suggestion\"></li>')
 								.data('item.autocomplete', item)
-								.append($('<a>').text(item.label))
+								.append($('<div class=\"name\">').text(item.label))
 								.appendTo(ul);
 						}
 
@@ -1746,6 +1764,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	}
 
 	protected $_aSortings = array();
+
 	protected $_aSortingTree = array();
 
 	protected function _setValue($oProperty_Value, $value)

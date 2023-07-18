@@ -28,6 +28,22 @@ class Admin_Form_Action_Controller_Edit extends Admin_Form_Action_Controller_Typ
 			$object->admin_form_id = Core_Array::getGet('admin_form_id', 0);
 		}
 
+		$modelName = $object->getModelName();
+
+		switch ($modelName)
+		{
+			case 'admin_form_action':
+				if (!$object->id)
+				{
+					$object->admin_form_action_dir_id = Core_Array::getGet('admin_form_action_dir_id');
+				}
+			break;
+			case 'admin_form_action_dir':
+				$this
+					->addSkipColumn('name');
+			break;
+		}
+
 		return parent::setObject($object);
 	}
 
@@ -40,7 +56,10 @@ class Admin_Form_Action_Controller_Edit extends Admin_Form_Action_Controller_Typ
 	{
 		parent::_prepareForm();
 
+		$modelName = $this->_object->getModelName();
+
 		$oMainTab = $this->getTab('main');
+		$oAdditionalTab = $this->getTab('additional');
 
 		$oNameTab = Admin_Form_Entity::factory('Tab')
 			->caption(Core::_('Admin_Form_Action.admin_form_tab_0'))
@@ -118,48 +137,75 @@ class Admin_Form_Action_Controller_Edit extends Admin_Form_Action_Controller_Typ
 			}
 		}
 
-		$this->getField('name')->class('form-control');
-		$oMainTab->move($this->getField('name'), $oMainRow1);
-
-		$this->getField('picture')
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
-
-		$this->getField('icon')
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
-
-		$this->getField('color')
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
-
-		$oMainTab
-			->move($this->getField('picture'), $oMainRow2)
-			->move($this->getField('icon'), $oMainRow2)
-			->move($this->getField('color'), $oMainRow2);
-
-		$oMainTab->move($this->getField('single'), $oMainRow3);
-		$oMainTab->move($this->getField('group'), $oMainRow4);
-		$oMainTab->move($this->getField('modal'), $oMainRow5);
-
-
-		$this->getField('sorting')
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
-
-		$this->getField('dataset')
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
-
-		$oMainTab
-			->move($this->getField('sorting'), $oMainRow6)
-			->move($this->getField('dataset'), $oMainRow6);
-
-		$oMainTab
-			->move($this->getField('confirm'), $oMainRow7);
-
 		$oAdmin_Word_Value = $this->_object->Admin_Word->getWordByLanguage(CURRENT_LANGUAGE_ID);
 		$form_name = $oAdmin_Word_Value ? $oAdmin_Word_Value->name : '';
 
-		$this->title(is_null($this->_object->id)
-			? Core::_('Admin_Form_Action.form_add_forms_event_title')
-			: Core::_('Admin_Form_Action.form_edit_forms_event_title', $form_name, FALSE)
-		);
+		switch ($modelName)
+		{
+			case 'admin_form_action':
+				$this->getField('name')->class('form-control');
+				$oMainTab->move($this->getField('name'), $oMainRow1);
+
+				$this->getField('picture')
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
+
+				$this->getField('icon')
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
+
+				$this->getField('color')
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
+
+				$oMainTab
+					->move($this->getField('picture'), $oMainRow2)
+					->move($this->getField('icon'), $oMainRow2)
+					->move($this->getField('color'), $oMainRow2);
+
+				$oMainTab->move($this->getField('single'), $oMainRow3);
+				$oMainTab->move($this->getField('group'), $oMainRow4);
+				$oMainTab->move($this->getField('modal'), $oMainRow5);
+
+
+				$this->getField('sorting')
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
+
+				$this->getField('dataset')
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
+
+				$oMainTab
+					->move($this->getField('sorting'), $oMainRow6)
+					->move($this->getField('dataset'), $oMainRow6);
+
+				// Удаляем стандартный <input>
+				$oAdditionalTab->delete($this->getField('admin_form_action_dir_id'));
+
+				// Селектор с группой
+				$oSelect_Dirs = Admin_Form_Entity::factory('Select');
+				$oSelect_Dirs
+					->options(
+						array(' … ') + $this->fillAdminFormActionDir($this->_object)
+					)
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+					->name('admin_form_action_dir_id')
+					->value($this->_object->admin_form_action_dir_id)
+					->caption(Core::_('Admin_Form_Action.admin_form_action_dir_id'));
+
+				$oMainRow6->add($oSelect_Dirs);
+
+				$oMainTab
+					->move($this->getField('confirm'), $oMainRow7);
+
+				$this->title(is_null($this->_object->id)
+					? Core::_('Admin_Form_Action.form_add_forms_event_title')
+					: Core::_('Admin_Form_Action.form_edit_forms_event_title', $form_name, FALSE)
+				);
+			break;
+			case 'admin_form_action_dir':
+				$this->title(is_null($this->_object->id)
+					? Core::_('Admin_Form_Action_Dir.form_add_forms_event_title')
+					: Core::_('Admin_Form_Action_Dir.form_edit_forms_event_title', $form_name, FALSE)
+				);
+			break;
+		}
 
 		return $this;
 	}
@@ -211,5 +257,31 @@ class Admin_Form_Action_Controller_Edit extends Admin_Form_Action_Controller_Typ
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 
 		return $this;
+	}
+
+	/**
+	 * Create visual tree of the directories
+	 * @param boolean $bExclude exclude group ID
+	 * @return array
+	 */
+	public function fillAdminFormActionDir($oObject, $bExclude = FALSE)
+	{
+		$aReturn = array();
+
+		$oAdmin_Form_Action_Dirs = Core_Entity::factory('Admin_Form_Action_Dir');
+		$oAdmin_Form_Action_Dirs->queryBuilder()
+			->where('admin_form_id', '=', $oObject->admin_form_id);
+
+		$aAdmin_Form_Action_Dirs = $oAdmin_Form_Action_Dirs->findAll(FALSE);
+
+		foreach ($aAdmin_Form_Action_Dirs as $oAdmin_Form_Action_Dir)
+		{
+			if ($bExclude != $oAdmin_Form_Action_Dir->id)
+			{
+				$aReturn[$oAdmin_Form_Action_Dir->id] = $oAdmin_Form_Action_Dir->getWordName() . ' [' . $oAdmin_Form_Action_Dir->id . ']';
+			}
+		}
+
+		return $aReturn;
 	}
 }

@@ -478,7 +478,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 		{
 			Counter_Controller::instance()
 				->site($oSite)
-				->page('http://' . strtolower(Core_Array::get($_SERVER, 'HTTP_HOST')) . Core_Array::get($_SERVER, 'REQUEST_URI'))
+				->page((Core::httpsUses() ? 'https' : 'http') . '://' . strtolower(Core_Array::get($_SERVER, 'HTTP_HOST')) . Core_Array::get($_SERVER, 'REQUEST_URI'))
 				->ip(Core::getClientIp())
 				->userAgent(Core_Array::get($_SERVER, 'HTTP_USER_AGENT'))
 				->counterId(0)

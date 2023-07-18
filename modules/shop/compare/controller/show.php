@@ -104,6 +104,7 @@ class Shop_Compare_Controller_Show extends Core_Controller
 
 		$this->compareUrl = $oShop->Structure->getPath() . 'compare/';
 
+		// Named subpatterns {name} can consist of up to 32 alphanumeric characters and underscores, but must start with a non-digit.
 		$this->pattern = rawurldecode($this->getEntity()->Structure->getPath()) . '({path})(page-{page}/)';
 	}
 

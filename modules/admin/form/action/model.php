@@ -9,10 +9,22 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Action_Model extends Core_Entity
 {
+	/**
+	 * Name of the table
+	 * @var string
+	 */
+	protected $_tableName = 'admin_form_actions';
+
+	/**
+	 * Name of the model
+	 * @var string
+	 */
+	protected $_modelName = 'admin_form_action';
+
 	/**
 	 * Word name in back-end form
 	 */
@@ -31,6 +43,7 @@ class Admin_Form_Action_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_belongsTo = array(
+		'admin_form_action_dir' => array(),
 		'admin_word' => array(),
 		'admin_form' => array(),
 		'user' => array()

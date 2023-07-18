@@ -141,7 +141,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 
 		$aComments = $oComments->findAll(FALSE);
 
-		if (count($aComments) > 0)
+		if (count($aComments))
 		{
 			?><div class="widget">
 				<div class="widget-header bordered-bottom bordered-themesecondary">
@@ -269,8 +269,6 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 
 	protected function _shopContent()
 	{
-		$oUser = Core_Auth::getCurrentUser();
-
 		$oComments = Core_Entity::factory('Comment');
 		$oComments->queryBuilder()
 			->straightJoin()
@@ -285,6 +283,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 			->limit(5);
 
 		// Права доступа пользователя к комментариям
+		$oUser = Core_Auth::getCurrentUser();
 		if (!$oUser->superuser && $oUser->only_access_my_own)
 		{
 			$oComments

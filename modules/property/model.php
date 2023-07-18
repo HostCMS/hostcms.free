@@ -189,7 +189,7 @@ class Property_Model extends Core_Entity
 
 		return $this;
 	}
-	
+
 	/**
 	 * Get all values for property
 	 * @return array
@@ -197,7 +197,7 @@ class Property_Model extends Core_Entity
 	public function getAllValues()
 	{
 		$this->loadAllValues();
-		
+
 		return $this->_aAllValues;
 	}
 
@@ -729,11 +729,16 @@ class Property_Model extends Core_Entity
 	{
 		$color = Core_Str::createColor($this->type);
 
-		return '<span class="badge badge-round badge-max-width" style="border-color: ' . $color . '; color: ' . Core_Str::hex2darker($color, 0.2) . '; background-color: ' . Core_Str::hex2lighter($color, 0.88) . '">'
-			. Core::_('Property.type' . $this->type)
-			. '</span>';
-			
-		return Core::_('Property.type' . $this->type);
+		$return = '<span class="badge badge-round badge-max-width" style="border-color: ' . $color . '; color: ' . Core_Str::hex2darker($color, 0.2) . '; background-color: ' . Core_Str::hex2lighter($color, 0.88) . '">'
+		. Core::_('Property.type' . $this->type)
+		. '</span>';
+
+		if ($this->type == 3 && $this->list_id && Core::moduleIsActive('list'))
+		{
+			$return .= '<a href="/admin/list/item/index.php?list_id=' . $this->list_id . '" target="_blank"><i title="' . Core::_('Property.move_to_list') . '" class="fa fa-external-link margin-left-5"></i></a>';
+		}
+
+		return $return;
 	}
 
 	/**

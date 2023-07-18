@@ -249,8 +249,8 @@ elseif ($Forum_Controller_Show->category && !$Forum_Controller_Show->topic)
 				{
 					$Antispam_Controller = new Antispam_Controller();
 					$bAntispamAnswer = $Antispam_Controller
-						->addText($topic_subject)
-						->addText($topic_text)
+						->addText($topic_subject, 'subject')
+						->addText($topic_text, 'text')
 						->execute();
 				}
 				else
@@ -711,8 +711,8 @@ elseif ($Forum_Controller_Show->topic)
 				{
 					$Antispam_Controller = new Antispam_Controller();
 					$bAntispamAnswer = $Antispam_Controller
-						->addText($post_title)
-						->addText($post_text)
+						->addText($post_title, 'subject')
+						->addText($post_text, 'text')
 						->execute();
 				}
 				else

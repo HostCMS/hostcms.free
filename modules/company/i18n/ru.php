@@ -32,7 +32,7 @@ return array(
 	'email' => 'E-Mail',
 	'tabManagers' => 'Руководство',
 	'tabContacts' => 'Контактные данные',
-	'tabBankingDetails' => 'Банковские реквизиты',
+	'tabBankingDetails' => 'Реквизиты',
 	'guid' => 'GUID',
 	'edit_success' =>	'Данные о компании успешно обновлены.',
 	'apply_success' =>	'Информация изменена',

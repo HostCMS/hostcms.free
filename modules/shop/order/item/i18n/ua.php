@@ -26,6 +26,7 @@ return array(
 	'order_item_type_caption4' => 'Знижка за дисконтною карткою',
 	'order_item_type_caption5' => 'Cписання бонусів',
 	'order_item_type_caption6' => 'Часткова оплата з особового рахунку',
+	'order_item_type_caption7' => 'Послуга',
 	'edit_success' => "Інформація про товар у замовленні успішно додана",
 	'markDeleted_success' => "Інформація про товар у замовленні успішно видалена!",
 	'replenishment_account' => 'Особовий рахунок поповнюється користувача "%s" в магазині "%s"',

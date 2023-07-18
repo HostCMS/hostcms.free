@@ -47,7 +47,7 @@ class Shop_Group_Model extends Core_Entity
 	 * Backend property
 	 * @var int
 	 */
-	public $discounts = NULL;
+	public $discounts = 1;
 
 	/**
 	 * Backend property
@@ -103,6 +103,11 @@ class Shop_Group_Model extends Core_Entity
 		'shop_filter_seo' => array(),
 		'shop_tab' => array('through' => 'shop_tab_group'),
 		'shop_tab_group' => array(),
+		'media_shop_group' => array(),
+		'shop_bonus' => array('through' => 'shop_group_bonus'),
+		'shop_discount' => array('through' => 'shop_group_discount'),
+		'shop_group_discount' => array(),
+		'shop_group_bonus' => array()
 	);
 
 	/**
@@ -129,9 +134,11 @@ class Shop_Group_Model extends Core_Entity
 		'seo_group_title_template',
 		'seo_group_keywords_template',
 		'seo_group_description_template',
+		'seo_group_h1_template',
 		'seo_item_title_template',
 		'seo_item_keywords_template',
-		'seo_item_description_template'
+		'seo_item_description_template',
+		'seo_item_h1_template',
 	);
 
 	/**
@@ -929,6 +936,7 @@ class Shop_Group_Model extends Core_Entity
 	/**
 	 * Check and correct duplicate path
 	 * @return self
+	 * @hostcms-event shop_group.onAfterCheckDuplicatePath
 	 */
 	public function checkDuplicatePath()
 	{
@@ -955,6 +963,8 @@ class Shop_Group_Model extends Core_Entity
 		{
 			$this->path = Core_Guid::get();
 		}
+
+		Core_Event::notify($this->_modelName . '.onAfterCheckDuplicatePath', $this);
 
 		return $this;
 	}
@@ -1052,6 +1062,14 @@ class Shop_Group_Model extends Core_Entity
 
 		$this->Shop_Filter_Seos->deleteAll(FALSE);
 		$this->Shop_Tab_Groups->deleteAll(FALSE);
+
+		$this->Shop_Group_Discounts->deleteAll(FALSE);
+		$this->Shop_Group_Bonuses->deleteAll(FALSE);
+
+		if (Core::moduleIsActive('media'))
+		{
+			$this->Media_Shop_Groups->deleteAll(FALSE);
+		}
 
 		// Remove from search index
 		$this->unindex();
@@ -1276,6 +1294,16 @@ class Shop_Group_Model extends Core_Entity
 				$aProperty_Values = $this->getPropertyValues(TRUE, array(), $this->_xmlSortPropertiesValues);
 				// Add all values
 				$this->addEntities($aProperty_Values);
+			}
+		}
+
+		if (Core::moduleIsActive('media'))
+		{
+			$aEntities = Media_Item_Controller::getValues($this);
+			foreach ($aEntities as $oEntity)
+			{
+				$oMedia_Item = $oEntity->Media_Item;
+				$this->addEntity($oMedia_Item);
 			}
 		}
 
@@ -1516,6 +1544,56 @@ class Shop_Group_Model extends Core_Entity
 		$oShop_GroupShortcut->indexing = 0;
 
 		return $oShop_GroupShortcut->save()->clearCache();
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function discountsBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$link = '/admin/shop/group/discount/index.php?shop_group_id={id}';
+		$onclick = "$.adminLoad({path: '/admin/shop/group/discount/index.php',additionalParams: 'shop_group_id={id}', windowId: '{windowId}'}); return false";
+
+		$link = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $link);
+		$onclick = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $onclick);
+
+		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div');
+
+		$oCore_Html_Entity_Div
+			->add(
+				Core_Html_Entity::factory('A')
+					->href($link)
+					->onclick($onclick)
+					->add(
+						Core_Html_Entity::factory('I')
+							->class('fa-regular fa-money-bill-1')
+					)
+			);
+
+		$oCore_Html_Entity_Div->execute();
+	}
+
+	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function discountsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$countDiscount = $this->Shop_Group_Discounts->getCountBySiteuser_id(0);
+		$countBonuses = $this->Shop_Group_Bonuses->getCount();
+
+		$count = $countDiscount + $countBonuses;
+
+		$count && Core_Html_Entity::factory('Span')
+			->class('badge badge-ico badge-palegreen white')
+			->value($count < 100 ? $count : '∞')
+			->title($count)
+			->execute();
 	}
 
 	/**

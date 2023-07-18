@@ -16,9 +16,9 @@ return array(
 
 	'copy_success' => 'Action copied successfully!',
 	'copy_error' => 'Error! Form action has not been copied!',
-	
+
 	'show_form_action_menu_add_new_top' => 'Action',
-	
+
 	'form_add_forms_event_title' => 'Add Back-end form action',
 	'form_edit_forms_event_title' => 'Edit Back-end form action "%s"',
 
@@ -44,4 +44,5 @@ return array(
 	'form_event_menu_admin_form_action' => 'Form actions list "%s"',
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
+	'admin_form_action_dir_id' => 'Parent dir',
 );

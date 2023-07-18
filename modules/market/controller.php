@@ -418,10 +418,10 @@ class Market_Controller extends Core_Servant_Properties
 						// CMS_FOLDER . 'hostcmsfiles/tmp/install/{id}/'
 						$this->tmpDir = $this->getPath() . DIRECTORY_SEPARATOR . $this->_Module->shop_item_id;
 
-						// Удаляем директорию с данными предыдущей установки (20 mins)
+						// Удаляем директорию с данными предыдущей установки (3 mins)
 						$bExists = Core_File::isDir($this->tmpDir)
 							&& Core_File::isFile($this->tmpDir . DIRECTORY_SEPARATOR . 'module.xml')
-							&& filemtime($this->tmpDir) + 60*20 > time();
+							&& filemtime($this->tmpDir) + 60 * 3 > time();
 
 						if (!$bExists)
 						{

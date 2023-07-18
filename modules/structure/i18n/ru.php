@@ -52,7 +52,7 @@ return array(
 	'dynamic_page' => 'Динамическая страница',
 	'link' => 'Ссылка',
 	'document_text' => 'Содержимое страницы',
-	'siteuser_group_id' => 'Группа доступа',
+	'siteuser_group_id' => 'Группа клиентов',
 	'https' => 'Доступ через HTTPS',
 	'structure_source' => 'Динамическая страница',
 	'structure_config_source' => '<acronym title="Позволяют переопределять значения параметров страницы. Например значение параметра «title»">Настройки динамической страницы</acronym>',

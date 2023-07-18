@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Price_Setting_Model extends Core_Entity
 {
@@ -41,6 +41,21 @@ class Shop_Price_Setting_Model extends Core_Entity
 	 * @var string
 	 */
 	protected $_nameColumn = 'number';
+
+	/**
+	 * TYPE
+	 * @var int
+	 */
+	const TYPE = 10;
+
+	/**
+	 * Get Entity Type
+	 * @return int
+	 */
+	public function getEntityType()
+	{
+		return self::TYPE;
+	}
 
 	/**
 	 * Constructor.

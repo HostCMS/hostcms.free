@@ -438,7 +438,7 @@ class Shop_Warrant_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 
 		return Admin_Form_Entity::factory('Script')
 			->value("$(function (){
-				mainFormLocker.unlock();
+				mainFormLocker.unlock();				
 				$.adminLoad({ path: '/admin/shop/document/relation/index.php', additionalParams: 'document_id=" . $document_id . "&shop_id=" . $this->_object->shop_id . "&parentWindowId=" . $windowId . "&_module=0', windowId: '{$windowId}-shop-documents', loadingScreen: false });
 			});");
 	}

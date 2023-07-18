@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
  class Shop_Bonus_Model extends Core_Entity
 {
@@ -46,7 +46,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 * Backend property
 	 * @var int
 	 */
-	public $img = 0;
+	public $img = 1;
 
 	/**
 	 * Constructor.

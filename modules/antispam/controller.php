@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Antispam
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Antispam_Controller extends Core_Servant_Properties
 {
@@ -21,8 +21,14 @@ class Antispam_Controller extends Core_Servant_Properties
 		'log',
 		'ip',
 		'userAgent',
-		'text'
+		//'text'
 	);
+
+	/**
+	 * Text
+	 * @var array
+	 */
+	protected $_text = array();
 
 	/**
 	 * Constructor.
@@ -99,17 +105,31 @@ class Antispam_Controller extends Core_Servant_Properties
 	}
 
 	/**
-	 * Add text
+	 * Set text
 	 * @param string $text text
 	 * @return self
 	 */
-	public function addText($text)
+	public function text($text)
+	{
+		$this->_text = array('message' => $text);
+		return $this;
+	}
+
+	/**
+	 * Add text
+	 * @param string $text text
+	 * @param string|NULL $fieldName field name, default NULL
+	 * @return self
+	 */
+	public function addText($text, $fieldName = NULL)
 	{
 		$text = strval($text);
 
 		if ($text != '')
 		{
-			$this->text .= ' ' . htmlspecialchars($text);
+			!is_null($fieldName)
+				? $this->_text[$fieldName] = htmlspecialchars($text)
+				: $this->_text[] = htmlspecialchars($text);
 		}
 
 		return $this;
@@ -138,10 +158,17 @@ class Antispam_Controller extends Core_Servant_Properties
 	/**
 	 * Execute business logic.
 	 * @return boolean FALSE - SPAM, TRUE - regular request
+	 * @hostcms-event Antispam_Controller.onBeforeExecute
+	 * @hostcms-event Antispam_Controller.onAfterExecute
 	 */
 	public function execute()
 	{
-		$countryCode = $this->getCountryCode($this->ip);
+		$result = TRUE;
+
+		Core_Event::notify('Antispam_Controller.onBeforeExecute', $this, array($this->_text));
+
+		$eventResult = Core_Event::getLastReturn();
+		!is_null($eventResult) && $result = $eventResult;
 
 		if ($this->log)
 		{
@@ -150,48 +177,53 @@ class Antispam_Controller extends Core_Servant_Properties
 			$oAntispam_Log->user_agent = $this->userAgent;
 		}
 
-		$oAntispam_Country = strlen($countryCode)
-			? Core_Entity::factory('Antispam_Country')->getByCode($countryCode)
-			: NULL;
-
-		if (!is_null($oAntispam_Country))
+		// Not SPAM
+		if ($result)
 		{
-			$this->log
-				&& $oAntispam_Log->antispam_country_id = $oAntispam_Country->id;
+			$countryCode = $this->getCountryCode($this->ip);
+			$oAntispam_Country = strlen($countryCode)
+				? Core_Entity::factory('Antispam_Country')->getByCode($countryCode)
+				: NULL;
 
-			if (!$oAntispam_Country->allow)
+			if (!is_null($oAntispam_Country))
 			{
-				if ($this->log)
-				{
-					$oAntispam_Log->result = 0;
-					$oAntispam_Log->save();
-				}
+				$this->log
+					&& $oAntispam_Log->antispam_country_id = $oAntispam_Country->id;
 
-				return FALSE;
+				if (!$oAntispam_Country->allow)
+				{
+					$result = FALSE;
+				}
 			}
 		}
 
-		$aAntispam_Stopwords = $this->getAntispamStopword();
-		foreach ($aAntispam_Stopwords as $oAntispam_Stopword)
+		// Not SPAM
+		if ($result)
 		{
-			if ($oAntispam_Stopword->value != '' && strpos($this->text, $oAntispam_Stopword->value) !== FALSE)
-			{
-				if ($this->log)
-				{
-					$oAntispam_Log->result = 0;
-					$oAntispam_Log->save();
-				}
+			$text = implode(' ', $this->_text);
 
-				return FALSE;
+			$aAntispam_Stopwords = $this->getAntispamStopword();
+			foreach ($aAntispam_Stopwords as $oAntispam_Stopword)
+			{
+				if ($oAntispam_Stopword->value != '' && strpos($text, $oAntispam_Stopword->value) !== FALSE)
+				{
+					$result = FALSE;
+					break;
+				}
 			}
 		}
+
+		Core_Event::notify('Antispam_Controller.onAfterExecute', $this, array($this->_text));
+
+		$eventResult = Core_Event::getLastReturn();
+		!is_null($eventResult) && $result = $eventResult;
 
 		if ($this->log)
 		{
-			$oAntispam_Log->result = 1;
+			$oAntispam_Log->result = intval($result); // 0 - SPAM, 1 - Regular Request
 			$oAntispam_Log->save();
 		}
 
-		return TRUE;
+		return $result;
 	}
 }
