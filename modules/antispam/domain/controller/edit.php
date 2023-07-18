@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Antispam
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Antispam_Domain_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -54,7 +54,7 @@ class Antispam_Domain_Controller_Edit extends Admin_Form_Action_Controller_Type_
 
 		$this->title(
 			$this->_object->id
-				? Core::_('Antispam_Stopword.edit_title', $this->_object->domain)
+				? Core::_('Antispam_Stopword.edit_title', $this->_object->domain, FALSE)
 				: Core::_('Antispam_Stopword.add_title')
 		);
 

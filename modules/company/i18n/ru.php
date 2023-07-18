@@ -6,7 +6,7 @@
  * @subpackage Company
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Компании',
@@ -22,13 +22,8 @@ return array(
 	'psrn' => 'ОГРН',
 	'okpo' => 'ОКПО',
 	'okved' => 'ОКВЭД',
-	'bic' => 'БИК',
-	'current_account' => 'Номер счета',
-	'correspondent_account' => 'Номер корр. счета',
-	'bank_name' => 'Название банка',
-	'bank_address' => 'Адрес банка',
-	'legal_name' => 'ФИО директора',
 	'accountant_legal_name' => 'ФИО главного бухгалтера',
+	'legal_name' => 'ФИО директора',
 	'sorting' => 'Порядок сортировки',
 	'address' => 'Адрес',
 	'phone' => 'Телефон',
@@ -56,4 +51,5 @@ return array(
 	'show_socials' => 'Социальные сети',
 	'show_messengers' => 'Мессенджеры',
 	'image' => 'Изображение',
+	'tin_list' => 'ИНН: %s',
 );

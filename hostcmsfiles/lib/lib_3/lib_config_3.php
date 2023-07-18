@@ -57,15 +57,16 @@ if (Core::moduleIsActive('search'))
 
 	$oSite = Core_Entity::factory('Site', CURRENT_SITE);
 
+	$text = Core_Array::getGet('text', '', 'str');
+
 	$Search_Controller_Show = new Search_Controller_Show($oSite);
 
 	$Search_Controller_Show
 		->limit(Core_Page::instance()->libParams['itemsOnPage'])
 		->parseUrl()
 		->len(Core_Page::instance()->libParams['maxlen'])
-		->query(Core_Array::getGet('text'));
+		->query($text);
 
-	$text = Core_Array::getGet('text', '', 'str');
 	if (strlen($text))
 	{
 		Core_Page::instance()->title(

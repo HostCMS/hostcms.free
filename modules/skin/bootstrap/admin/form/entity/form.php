@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Form extends Skin_Default_Admin_Form_Entity_Form {
 	/**
@@ -29,7 +29,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Form extends Skin_Default_Admin_Form_Enti
 		if (!is_null($this->id))
 		{
 		?><script>$(function() {
-			mainFieldChecker.checkAll('<?php echo Core_Str::escapeJavascriptVariable($windowId)?>', "<?php echo htmlspecialchars($this->id)?>"); });
+			mainFieldChecker.checkAll('<?php echo Core_Str::escapeJavascriptVariable($windowId)?>', "<?php echo htmlspecialchars((string) $this->id)?>"); });
 			$.showAutosave($('#<?php echo $windowId?> form.adminForm'));
 		</script><?php
 		}

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -258,11 +258,10 @@ class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 
 		$oMainRow11->add($oShopItemCountCheckBox);
 
-		$title = $this->_object->id
-			? Core::_('Shop_Warehouse.form_warehouses_edit', $this->_object->name)
-			: Core::_('Shop_Warehouse.form_warehouses_add');
-
-		$this->title($title);
+		$this->title($this->_object->id
+			? Core::_('Shop_Warehouse.form_warehouses_edit', $this->_object->name, FALSE)
+			: Core::_('Shop_Warehouse.form_warehouses_add')
+		);
 
 		return $this;
 	}
@@ -296,6 +295,7 @@ class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 				->where('shop_items.shortcut_id', '=', 0);
 
 			Core_QueryBuilder::insert('shop_warehouse_items')
+				->ignore()
 				->columns('shop_warehouse_id', 'shop_item_id', 'count', 'user_id')
 				->select($oCore_QueryBuilder_Select)
 				->execute();

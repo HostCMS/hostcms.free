@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Item_Status_Model extends Core_Entity
 {
@@ -27,6 +27,7 @@ class Shop_Order_Item_Status_Model extends Core_Entity
 	 */
 	protected $_belongsTo = array(
 		'shop_order_status' => array('foreign_key' => 'parent_id'),
+		'shop' => array(),
 		'user' => array()
 	);
 
@@ -83,7 +84,7 @@ class Shop_Order_Item_Status_Model extends Core_Entity
 
 		return $return;
 	}
-	
+
 	/**
 	 * Backend callback method
 	 * @return string
@@ -105,14 +106,14 @@ class Shop_Order_Item_Status_Model extends Core_Entity
 			->add(
 				$oCore_Html_Entity_Dropdownlist
 					->value($this->shop_order_status_id)
-					->options(Shop_Order_Status_Controller_Edit::getDropdownlistOptions())
+					->options(Shop_Order_Status_Controller_Edit::getDropdownlistOptions($this->shop_id))
 					->onchange("$.adminLoad({path: '{$path}', additionalParams: '{$additionalParams}', action: 'apply', post: { 'hostcms[checked][0][{$this->id}]': 0, apply_check_0_{$this->id}_fv_{$oAdmin_Form_Field->id}: $(this).find('li[selected]').prop('id') }, windowId: '{$oAdmin_Form_Controller->getWindowId()}'});")
 					->data('change-context', 'true')
 				)
 			->execute();
 
 		return ob_get_clean();
-	}	
+	}
 
 	/**
 	 * Get parent status

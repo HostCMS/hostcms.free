@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Directory
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Directory_Messenger_Type_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -35,11 +35,10 @@ class Directory_Messenger_Type_Controller_Edit extends Admin_Form_Action_Control
 			->move($this->getField('ico')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow2)
 			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow2);
 
-		$title = $this->_object->id
+		$this->title($this->_object->id
 			? Core::_('Directory_Messenger_Type.edit_title')
-			: Core::_('Directory_Messenger_Type.add_title');
-
-		$this->title($title);
+			: Core::_('Directory_Messenger_Type.add_title')
+		);
 
 		return $this;
 	}

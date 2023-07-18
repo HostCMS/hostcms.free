@@ -82,7 +82,7 @@ else
 
 		if (is_null($oLastComment) || time() > Core_Date::sql2timestamp($oLastComment->datetime) + ADD_COMMENT_DELAY)
 		{
-			if ($oInformationsystem->use_captcha == 0 || $siteuser_id > 0 || Core_Captcha::valid(Core_Array::getPost('captcha_id'), Core_Array::getPost('captcha')))
+			if ($oInformationsystem->use_captcha == 0 || $siteuser_id > 0 || Core_Captcha::valid(Core_Array::getPost('captcha_id', '', 'str'), Core_Array::getPost('captcha', '', 'str')))
 			{
 				// Antispam
 				if (Core::moduleIsActive('antispam'))
@@ -184,7 +184,7 @@ else
 
 				$value = $oProperty->type == 2
 					? Core_Array::getFiles($sFieldName)
-					: Core_Array::getPost($sFieldName);
+					: Core_Array::getPost($sFieldName, '', 'str');
 
 				$oProperty_Value = $oProperty->createNewValue($oComment->id);
 
@@ -274,6 +274,9 @@ $Informationsystem_Controller_Show
 	->xsl(
 		Core_Entity::factory('Xsl')->getByName($xslName)
 	)
+	/*->tpl(
+		'ПоказЭлементаИнформационнойСистемы'
+	)*/
 	->itemsProperties(TRUE)
 	->commentsProperties(TRUE)
 	->show();

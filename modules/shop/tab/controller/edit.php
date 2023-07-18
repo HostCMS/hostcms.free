@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Tab_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -37,7 +37,7 @@ class Shop_Tab_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				parent::setObject($object);
 
 				$title = $this->_object->id
-					? Core::_('Shop_Tab.edit_title', $this->_object->name)
+					? Core::_('Shop_Tab.edit_title', $this->_object->name, FALSE)
 					: Core::_('Shop_Tab.add_title');
 
 				$oMainTab = $this->getTab('main');
@@ -241,7 +241,7 @@ class Shop_Tab_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				parent::setObject($object);
 
 				$title = $this->_object->id
-					? Core::_('Shop_Tab_Dir.dir_edit_form_title', $this->_object->name)
+					? Core::_('Shop_Tab_Dir.dir_edit_form_title', $this->_object->name, FALSE)
 					: Core::_('Shop_Tab_Dir.dir_add_form_title');
 
 				// Получаем стандартные вкладки

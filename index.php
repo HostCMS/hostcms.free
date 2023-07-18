@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 
 if (is_dir('install/') && is_file('install/index.php'))
@@ -56,7 +56,8 @@ if (!function_exists('xslt_create')
 	exit();
 }
 
-if (!((~Core::convert64b32(Core_Array::get(Core::$config->get('core_hostcms'), 'hostcms'))) & (~2983120818)))
+//if (!((~Core::convert64b32(Core_Array::get(Core::$config->get('core_hostcms'), 'hostcms'))) & (~2983120818)))
+if (!((~Core::convert64b32(Core_Array::get(Core::$config->get('core_hostcms'), 'hostcms'))) & (~-1311846478)))
 {
 	$oSite = Core_Entity::factory('Site');
 	$oSite->queryBuilder()
@@ -127,7 +128,7 @@ Core_Router::add('favicon.ico', '/favicon.ico')
 
 Core_Router::add('favicon.png', '/favicon.png')
 	->controller('Core_Command_Controller_Favicon');
-	
+
 Core_Router::add('favicon.svg', '/favicon.svg')
 	->controller('Core_Command_Controller_Favicon');
 
@@ -167,10 +168,11 @@ if ($oSite_Alias->redirect)
 		$oCore_Response
 			->status(301)
 			->header('X-Powered-By', Core::xPoweredBy())
-			->header('Location', ($oSite->https ? 'https' : Core::$url['scheme']) . '://'
-				. $oDefault_Site_Alias->alias_name_without_mask
-				. Core::$url['path']
-				. (isset(Core::$url['query']) ? '?' . Core::$url['query'] : '')
+			->header('Location', str_replace(array("\r", "\n", "\0"), '', ($oSite->https ? 'https' : Core::$url['scheme']) . '://'
+					. $oDefault_Site_Alias->alias_name_without_mask
+					. Core::$url['path']
+					. (isset(Core::$url['query']) ? '?' . Core::$url['query'] : '')
+				)
 			)
 			->sendHeaders();
 
@@ -216,7 +218,7 @@ if (Core::moduleIsActive('ipaddress'))
 {
 	$oIpaddress_Controller = new Ipaddress_Controller();
 
-	$bBlocked = $oIpaddress_Controller->isBlocked($aIp);
+	$bBlocked = $oIpaddress_Controller->isBlocked($aIp) || Ipaddress_Useragent_Controller::isBlocked();
 
 	//$aArray = array();
 

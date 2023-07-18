@@ -25,9 +25,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Structure
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Structure_Controller_Breadcrumbs extends Core_Controller
 {
@@ -560,6 +560,7 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 			$aProperties = $oStructure_Property_List->Properties->findAll();
 			foreach ($aProperties as $oProperty)
 			{
+				$oProperty->clearEntities();
 				$this->_aProperties[$oProperty->property_dir_id][] = $oProperty;
 
 				// Load all values for property

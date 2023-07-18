@@ -35,7 +35,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Compare_Controller_Show extends Core_Controller
 {
@@ -213,7 +213,8 @@ class Shop_Compare_Controller_Show extends Core_Controller
 
 				foreach ($aProperties as $oProperty)
 				{
-					$this->_aItem_Properties[$oProperty->property_dir_id][] = $oProperty->clearEntities();
+					$oProperty->clearEntities();
+					$this->_aItem_Properties[$oProperty->property_dir_id][] = $oProperty;
 
 					$oShop_Item_Property = $oProperty->Shop_Item_Property;
 
@@ -226,7 +227,7 @@ class Shop_Compare_Controller_Show extends Core_Controller
 				foreach ($aProperty_Dirs as $oProperty_Dir)
 				{
 					$oProperty_Dir->clearEntities();
-					$this->_aItem_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir->clearEntities();
+					$this->_aItem_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
 				}
 
 				$Shop_Item_Properties = Core::factory('Core_Xml_Entity')

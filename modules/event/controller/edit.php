@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Event
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -775,7 +775,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			: Core::_('Event.add_title'));
 
 		$this->title($this->_object->id
-			? Core::_('Event.edit_title', $this->_object->name)
+			? Core::_('Event.edit_title', $this->_object->name, FALSE)
 			: Core::_('Event.add_title')
 		);
 

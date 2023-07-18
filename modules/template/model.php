@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Template
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Model extends Core_Entity
 {
@@ -170,7 +170,7 @@ class Template_Model extends Core_Entity
 	{
 		$path = $this->getTemplateFilePath();
 
-		return is_file($path)
+		return Core_File::isFile($path)
 			? Core_File::read($path)
 			: NULL;
 	}
@@ -225,7 +225,7 @@ class Template_Model extends Core_Entity
 	{
 		$path = $this->getTemplateCssFilePath();
 
-		return is_file($path)
+		return Core_File::isFile($path)
 			? Core_File::read($path)
 			: NULL;
 	}
@@ -278,7 +278,7 @@ class Template_Model extends Core_Entity
 	{
 		$path = $this->getTemplateLessFilePath();
 
-		return is_file($path)
+		return Core_File::isFile($path)
 			? Core_File::read($path)
 			: NULL;
 	}
@@ -330,7 +330,7 @@ class Template_Model extends Core_Entity
 	{
 		$path = $this->getTemplateScssFilePath();
 
-		return is_file($path)
+		return Core_File::isFile($path)
 			? Core_File::read($path)
 			: NULL;
 	}
@@ -374,7 +374,7 @@ class Template_Model extends Core_Entity
 	{
 		$path = $this->getTemplateJsFilePath();
 
-		return is_file($path)
+		return Core_File::isFile($path)
 			? Core_File::read($path)
 			: NULL;
 	}
@@ -396,7 +396,7 @@ class Template_Model extends Core_Entity
 	{
 		$path = $this->getManifestPath();
 
-		return is_file($path)
+		return Core_File::isFile($path)
 			? Core_File::read($path)
 			: NULL;
 	}
@@ -421,7 +421,7 @@ class Template_Model extends Core_Entity
 	{
 		$sDirPath = dirname($this->getLngPath($lng));
 
-		if (!is_dir($sDirPath))
+		if (!Core_File::isDir($sDirPath))
 		{
 			try
 			{
@@ -451,7 +451,7 @@ class Template_Model extends Core_Entity
 	{
 		$path = $this->getLngPath($lng);
 
-		return is_file($path)
+		return Core_File::isFile($path)
 			? Core_File::read($path)
 			: NULL;
 	}
@@ -477,7 +477,7 @@ class Template_Model extends Core_Entity
 	{
 		$sDirPath = dirname($this->getTemplateFilePath());
 
-		if (!is_dir($sDirPath))
+		if (!Core_File::isDir($sDirPath))
 		{
 			try
 			{
@@ -543,20 +543,20 @@ class Template_Model extends Core_Entity
 		try
 		{
 			$path = $this->getTemplateFilePath();
-			is_file($path) && Core_File::delete($path);
+			Core_File::isFile($path) && Core_File::delete($path);
 		}
 		catch (Exception $e) {}
 
 		try
 		{
 			$path = $this->getTemplateCssFilePath();
-			is_file($path) && Core_File::delete($path);
+			Core_File::isFile($path) && Core_File::delete($path);
 		}
 		catch (Exception $e) {}
 
 		try
 		{
-			is_dir(CMS_FOLDER . $this->getDir()) && Core_File::deleteDir(CMS_FOLDER . $this->getDir());
+			Core_File::isDir(CMS_FOLDER . $this->getDir()) && Core_File::deleteDir(CMS_FOLDER . $this->getDir());
 		}
 		catch (Exception $e) {}
 
@@ -629,7 +629,7 @@ class Template_Model extends Core_Entity
 	 */
 	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		if (strlen($this->loadTemplateCssFile()))
+		if ($this->loadTemplateCssFile() != '')
 		{
 			switch ($this->type)
 			{
@@ -651,7 +651,7 @@ class Template_Model extends Core_Entity
 				->execute();
 		}
 
-		if (strlen($this->loadTemplateJsFile()))
+		if ($this->loadTemplateJsFile() != '')
 		{
 			Core_Html_Entity::factory('Span')
 				->class('label label-warning')
@@ -849,11 +849,11 @@ class Template_Model extends Core_Entity
 		{
 			$manifest = $this->loadManifestFile();
 
-			if (strlen($manifest))
+			if ($manifest != '')
 			{
 				$less = $this->loadTemplateLessFile();
 
-				if (strlen($less))
+				if ($less != '')
 				{
 					try
 					{
@@ -1069,7 +1069,7 @@ class Template_Model extends Core_Entity
 			$path = CMS_FOLDER . $this->getDir() . DIRECTORY_SEPARATOR . 'i18n' . DIRECTORY_SEPARATOR . $lng . '.php';
 			$path = Core_File::pathCorrection($path);
 
-			if (is_file($path))
+			if (Core_File::isFile($path))
 			{
 				$this->_i18n[$lng] = require($path);
 			}

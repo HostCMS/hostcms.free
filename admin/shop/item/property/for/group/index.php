@@ -3,9 +3,9 @@
  * Online shop.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../../../bootstrap.php');
 
@@ -17,10 +17,13 @@ $sAdminFormAction = '/admin/shop/item/property/for/group/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
-$shop_id = intval(Core_Array::getGet('shop_id'));
-$shop_group_id = intval(Core_Array::getGet('shop_group_id', 0));
+$shop_id = Core_Array::getGet('shop_id', 0, 'int');
+$shop_group_id = Core_Array::getGet('shop_group_id', 0, 'int');
 
 $oShop = Core_Entity::factory('Shop')->find($shop_id);
+$oShop_Group = Core_Entity::factory('Shop_Group')->find($shop_group_id);
+
+$title = Core::_('Shop_Item.properties_item_for_groups_root_title', $shop_group_id ? $oShop_Group->name : Core::_('Shop_Item.root'));
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
@@ -28,14 +31,14 @@ $oAdmin_Form_Controller
 	->module(Core_Module::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
-	->title(Core::_('Shop_Item.properties_item_for_groups_root_title'))
-	->pageTitle(Core::_('Shop_Item.properties_item_for_groups_root_title'));
+	->title($title)
+	->pageTitle($title);
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
 // Строка навигации
-$property_dir_id = intval(Core_Array::getGet('property_dir_id', 0));
+$property_dir_id = Core_Array::getGet('property_dir_id', 0, 'int');
 
 $sShopDirPath = '/admin/shop/index.php';
 

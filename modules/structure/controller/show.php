@@ -22,14 +22,28 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - showShopGroupProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств групп магазина, по умолчанию FALSE
  * - showShopItemProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств товаров, по умолчанию FALSE
  * - showShopItemAssociated(TRUE|FALSE) выводить сопутствующие товары, по умолчанию FALSE
- * - forbiddenTags(array('name')) массив тегов узла структуры, запрещенных к передаче в генерируемый XML
  * - cache(TRUE|FALSE) использовать кэширование, по умолчанию TRUE
  * - showPanel(TRUE|FALSE) показывать панель быстрого редактирования, по умолчанию TRUE
  * - onStep(3000) количество элементов, выбираемых запросом за 1 шаг, по умолчанию 500
+ * - addAllowedTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, разрешенных к передаче в генерируемый XML
+ * - addForbiddenTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, запрещенных к передаче в генерируемый XML
+ *
+ * Устаревшие методы:
+ *
+ * - forbiddenTags(array('name')) массив тегов узла структуры, запрещенных к передаче в генерируемый XML
  *
  * Доступные свойства:
  *
  * - currentStructureId идентификатор узла структуры
+ *
+ * Доступные пути для методов addAllowedTags/addForbiddenTags:
+ *
+ * - '/' или '/site' Сайт
+ * - '/site/structure' Раздел структуры
+ * - '/site/structure/informationsystem_group' Информационная группа, если не указано, то будет применяться '/site/structure'
+ * - '/site/structure/informationsystem_item' Информационный элемент, если не указано, то будет применяться '/site/structure'
+ * - '/site/structure/shop_group' Группа магазина, если не указано, то будет применяться '/site/structure'
+ * - '/site/structure/shop_item' Товар, если не указано, то будет применяться '/site/structure'
  *
  * <code>
  * $Structure_Controller_Show = new Structure_Controller_Show(
@@ -47,7 +61,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Structure
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Structure_Controller_Show extends Core_Controller
 {
@@ -288,6 +302,10 @@ class Structure_Controller_Show extends Core_Controller
 			$this->_aTags = array('structure_' . intval($this->parentId));
 		}
 
+		// Backward compatible
+		is_array($this->forbiddenTags) && count($this->forbiddenTags)
+			&& $this->addForbiddenTags('/site/structure', $this->forbiddenTags);
+
 		$bTpl = $this->_mode == 'tpl';
 
 		$this->addEntity(
@@ -324,6 +342,7 @@ class Structure_Controller_Show extends Core_Controller
 
 			foreach ($aProperties as $oProperty)
 			{
+				$oProperty->clearEntities();
 				$this->_aProperties[$oProperty->property_dir_id][] = $oProperty;
 
 				// Load all values for property
@@ -429,6 +448,25 @@ class Structure_Controller_Show extends Core_Controller
 		{
 			foreach ($this->_aStructures[$parent_id] as $oStructure)
 			{
+				// Shortcut
+				if ($oStructure->shortcut_id
+					&& $oStructure->shortcut_id != $oStructure->parent_id)
+				{
+					$oShortcut_Structure = $oStructure;
+					$oOriginal_Structure = $oStructure->Shortcut;
+
+					$oStructure = clone $oOriginal_Structure;
+
+					$oStructure
+						->id($oOriginal_Structure->id)
+						->parent_id($oShortcut_Structure->parent_id)
+						->shortcut_id($oShortcut_Structure->id);
+				}
+				else
+				{
+					$oOriginal_Structure = $oStructure;
+				}
+
 				$this->applyForbiddenTags($oStructure);
 
 				$parentObject->addEntity($oStructure);
@@ -436,8 +474,7 @@ class Structure_Controller_Show extends Core_Controller
 				$this->_aTags[] = 'structure_' . $oStructure->id;
 
 				// Properties for structure entity
-				$this->showProperties
-					&& $oStructure->showXmlProperties($this->showProperties, $this->sortPropertiesValues);
+				$oStructure->showXmlProperties($this->showProperties, $this->sortPropertiesValues);
 
 				if (is_null($this->level) || $level < $this->level)
 				{
@@ -727,7 +764,8 @@ class Structure_Controller_Show extends Core_Controller
 							->value($oInformationsystem_Group->active)
 					);
 
-				$this->applyForbiddenTags($oInformationsystem_Group);
+				//$this->applyForbiddenTags($oInformationsystem_Group);
+				$this->applyForbiddenAllowedTags('/site/structure/informationsystem_group|/site/structure', $oInformationsystem_Group);
 
 				$parentObject->addEntity($oInformationsystem_Group);
 
@@ -770,7 +808,8 @@ class Structure_Controller_Show extends Core_Controller
 
 				$this->showInformationsystemItemProperties && $oInformationsystem_Item->showXmlProperties($this->showInformationsystemItemProperties);
 
-				$this->applyForbiddenTags($oInformationsystem_Item);
+				//$this->applyForbiddenTags($oInformationsystem_Item);
+				$this->applyForbiddenAllowedTags('/site/structure/informationsystem_item|/site/structure', $oInformationsystem_Item);
 
 				$parentObject->addEntity($oInformationsystem_Item);
 
@@ -1039,7 +1078,8 @@ class Structure_Controller_Show extends Core_Controller
 							->value($oShop_Group->active)
 					);
 
-				$this->applyForbiddenTags($oShop_Group);
+				//$this->applyForbiddenTags($oShop_Group);
+				$this->applyForbiddenAllowedTags('/site/structure/shop_group|/site/structure', $oShop_Group);
 
 				$parentObject->addEntity($oShop_Group);
 
@@ -1085,7 +1125,8 @@ class Structure_Controller_Show extends Core_Controller
 
 				$this->showShopItemAssociated && $oShop_Item->showXmlAssociatedItems($this->showShopItemAssociated);
 
-				$this->applyForbiddenTags($oShop_Item);
+				//$this->applyForbiddenTags($oShop_Item);
+				$this->applyForbiddenAllowedTags('/site/structure/shop_item|/site/structure', $oShop_Item);
 
 				$parentObject->addEntity($oShop_Item);
 
@@ -1105,11 +1146,7 @@ class Structure_Controller_Show extends Core_Controller
 	 */
 	public function applyForbiddenTags($object)
 	{
-		if (!is_null($this->forbiddenTags))
-		{
-			$object->addForbiddenTags($this->forbiddenTags);
-		}
-
+		$this->applyForbiddenAllowedTags('/site/structure', $object);
 		return $this;
 	}
 

@@ -82,4 +82,7 @@ return array(
 	'save_lib_file_error' => 'Неможливо зберегти lib-файл, перевірте права доступу.',
 	'delete_success' => 'Елемент видалено!',
 	'undelete_success' => 'Елемент відновлено!',
+	'add_shortcut_title' => 'Створення ярлика',
+	'add_item_shortcut_structure_id' => 'Батьківський вузол',
+	'shortcut_success' => "Ярлик успішно доданий",
 );

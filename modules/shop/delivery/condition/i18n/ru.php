@@ -3,9 +3,9 @@
  * Online shop.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Условия доставки',
@@ -45,5 +45,7 @@ return array(
 	'marking' => "Артикул доставки",
 	'sorting' => "Порядок сортировки",
 	'apply_success' => "Информация успешно изменена",
-	'inverted' => "Не"
+	'inverted' => "Не",
+	'time_from' => "Время заказа с, при указании 00:00:00 &mdash; время не ограничено",
+	'time_to' => "Время заказа до, при указании 00:00:00 &mdash; время не ограничено",
 );

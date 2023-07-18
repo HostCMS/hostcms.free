@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Http
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Http_Curl extends Core_Http
 {
@@ -105,6 +105,10 @@ class Core_Http_Curl extends Core_Http
 
 		// TLS 1.2
 		//curl_setopt($curl, CURLOPT_SSLVERSION, 6);
+
+		!isset($this->_additionalHeaders['Content-Type'])
+			&& !is_null($this->_contentType)
+			&& $this->_additionalHeaders['Content-Type'] = $this->_contentType;
 
 		// Additional headers
 		if (count($this->_additionalHeaders))

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Price_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -63,16 +63,15 @@ class Shop_Price_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		// Удаляем группу доступа
 		$oAdditionalTab->delete($this->getField('siteuser_group_id'));
 
+		$aSiteuser_Group_Options = array('...');
+
 		if (Core::moduleIsActive('siteuser'))
 		{
-			$oSiteuser_Controller_Edit = new Siteuser_Controller_Edit($this->_Admin_Form_Action);
-			$aSiteuser_Groups = $oSiteuser_Controller_Edit->fillSiteuserGroups(
-				$this->_object->Shop->site_id
-			);
-		}
-		else
-		{
-			$aSiteuser_Groups = array();
+			$aSiteuser_Groups = $this->_object->Shop->Site->Siteuser_Groups->findAll(FALSE);
+			foreach ($aSiteuser_Groups as $oSiteuser_Group)
+			{
+				$aSiteuser_Group_Options[$oSiteuser_Group->id] = $oSiteuser_Group->name;
+			}
 		}
 
 		// Создаем поле групп пользователей сайта как выпадающий список
@@ -80,11 +79,7 @@ class Shop_Price_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oSiteUserGroupSelect
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
 			->caption(Core::_("Shop_Item.siteuser_group_id"))
-			->options(
-				array(
-					-1 => Core::_('Shop_Item.shop_users_group_parrent')
-				) + $aSiteuser_Groups
-			)
+			->options($aSiteuser_Group_Options)
 			->name('siteuser_group_id')
 			->value($this->_object->siteuser_group_id);
 
@@ -92,8 +87,8 @@ class Shop_Price_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainRow2->add($oSiteUserGroupSelect);
 
 		$oMainTab
-			->move($this->getField('percent')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow2)
-			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow2);
+			->move($this->getField('percent')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 col-md-2')), $oMainRow2)
+			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 col-md-2')), $oMainRow2);
 
 		$oApplyForAll = Admin_Form_Entity::factory('Checkbox')
 			->name('apply_for_all')
@@ -114,11 +109,10 @@ class Shop_Price_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$oMainRow3->add($oRecalculatePrice);
 		}
 
-		$title = $this->_object->id
-			? Core::_('Shop_Price.prices_edit_form_title', $this->_object->name)
-			: Core::_('Shop_Price.prices_add_form_title');
-
-		$this->title($title);
+		$this->title($this->_object->id
+			? Core::_('Shop_Price.prices_edit_form_title', $this->_object->name, FALSE)
+			: Core::_('Shop_Price.prices_add_form_title')
+		);
 
 		return $this;
 	}
@@ -130,7 +124,18 @@ class Shop_Price_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	protected function _applyObjectProperty()
 	{
+		$bNewObject = is_null($this->_object->id);
+
 		parent::_applyObjectProperty();
+
+		$oShop = $this->_object->Shop;
+
+		// Fast filter
+		if ($bNewObject && $oShop->filter)
+		{
+			$oShop_Filter_Controller = new Shop_Filter_Controller($oShop);
+			$oShop_Filter_Controller->addPrice($this->_object);
+		}
 
 		if (!is_null(Core_Array::getPost('apply_for_all')))
 		{
@@ -138,7 +143,7 @@ class Shop_Price_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$limit = 100;
 
 			do {
-				$oShop_Items = $this->_object->Shop->Shop_Items;
+				$oShop_Items = $oShop->Shop_Items;
 
 				$oShop_Items->queryBuilder()
 					->offset($offset)

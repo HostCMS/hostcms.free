@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../../bootstrap.php');
 
@@ -266,12 +266,14 @@ $oMainRow3->add(
 $aCheckboxNames = array(
 	'copy_main_properties',
 	'copy_seo',
+	'copy_main_images',
 	'copy_export_import',
-	'copy_prices_to_item',
-	'copy_specials_prices_to_item',
-	'copy_tying_products',
 	'copy_external_property',
 	'copy_tags',
+	'copy_external_property_files',
+	'copy_specials_prices_to_item',
+	'copy_tying_products',
+	'copy_prices_to_item',
 	'copy_warehouse_count'
 );
 

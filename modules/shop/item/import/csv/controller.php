@@ -16,7 +16,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - separator($str) разделитель столбцов в CSV-файле, по умолчанию ';'
  * - limiter() ограничитель строки в CSV-файле, по умолчанию '"'
  * - firstlineheader(TRUE|FALSE) первая строка - название полей
- * - csv_fields(array) массив соответствий полей CSV сущностям системы HostCMS
+ * - csv_fields(array) массив соответствий полей CSV элементам системы
  * - imagesPath($str) путь к импортируемым картинкам, конкатенируется с переденными в файле
  * - importAction($int) действие с существующими товарами: 1 - обновить существующие товары, 2 - не обновлять существующие товары, 3 - удалить содержимое магазина до импорта. По умолчанию 1
  * - searchIndexation(TRUE|FALSE) индексировать импортируемые данные, по умолчанию FALSE
@@ -28,7 +28,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 {
@@ -1285,7 +1285,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 	{
 		$sTmpFileFullpath = $this->getFilePath();
 
-		if (is_file($sTmpFileFullpath))
+		if (Core_File::isFile($sTmpFileFullpath))
 		{
 			Core_File::delete($sTmpFileFullpath);
 			return TRUE;
@@ -1538,7 +1538,8 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						case 'order_shop_order_status_id':
 							if (!is_null($this->_oCurrentOrder))
 							{
-								$oShop_Order_Status = Core_Entity::factory('Shop_Order_Status')->getByName($sData);
+								// $oShop_Order_Status = Core_Entity::factory('Shop_Order_Status')->getByName($sData);
+								$oShop_Order_Status = $this->_oCurrentShop->Shop_Order_Statuses->getByName($sData);
 								if (!is_null($oShop_Order_Status))
 								{
 									$this->_oCurrentOrder->shop_order_status_id = $oShop_Order_Status->id;
@@ -2226,7 +2227,8 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						break;
 						// Штрихкоды, через запятую
 						case 'barcodes':
-							$aBarcodes = explode(',', trim($sData));
+							$sData = trim(str_replace(';', ',', $sData));
+							$aBarcodes = explode(',', $sData);
 							$aBarcodes = array_map('trim', $aBarcodes);
 							$this->_aBarcodes = array_merge($this->_aBarcodes, $aBarcodes);
 						break;
@@ -2702,7 +2704,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				{
 					$this->_incUpdatedGroups($this->_oCurrentGroup->id);
 
-					// Импорт доп. свойств с передачей вызова в метод _addItemPropertyValue
+					// Импорт доп. свойств с передачей вызова в метод _addGroupPropertyValue
 					foreach ($this->_aGroupExternalProperties as $iPropertyID => $aPropertyValue)
 					{
 						$oProperty = Core_Entity::factory('Property')->find($iPropertyID);
@@ -3026,7 +3028,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 					$sSourceFile = CMS_FOLDER . $this->imagesPath . $sAdditionalPath . '/' . $this->_oCurrentShopEItem->filename;
 					$sTargetFile = $this->_oCurrentShop->getPath() . '/eitems/item_catalog_' . $this->_oCurrentItem->id . '/' . $this->_oCurrentShopEItem->id . ($sExtension == '' ? '' : '.' . $sExtension);
 
-					if (is_file($sSourceFile)
+					if (Core_File::isFile($sSourceFile)
 						&& Core_File::isValidExtension($sSourceFile, Core::$mainConfig['availableExtension']))
 					{
 						try
@@ -3234,7 +3236,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 							$sTargetFileName = "small_item_image{$this->_oCurrentItem->id}{$sTargetFileExtension}";
 						}
 
-						if (is_file($sSourceFile) && filesize($sSourceFile))
+						if (Core_File::isFile($sSourceFile) && filesize($sSourceFile))
 						{
 							// Удаляем старое малое изображение
 							if ($this->_oCurrentItem->image_small != '')
@@ -4144,7 +4146,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 					clearstatcache();
 
 					if (strpos(basename($sSourceFile), "CMS") === 0
-						&& is_file($sSourceFile)
+						&& Core_File::isFile($sSourceFile)
 					)
 					{
 						// Файл временный, подлежит удалению
@@ -4152,7 +4154,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 					}
 
 					if (strpos(basename($sSourceFileSmall), "CMS") === 0
-						&& is_file($sSourceFileSmall)
+						&& Core_File::isFile($sSourceFileSmall)
 					)
 					{
 						// Файл временный, подлежит удалению
@@ -4429,7 +4431,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				clearstatcache();
 
 				if (strpos(basename($sSourceFile), "CMS") === 0
-					&& is_file($sSourceFile)
+					&& Core_File::isFile($sSourceFile)
 				)
 				{
 					// Файл временный, подлежит удалению
@@ -4437,7 +4439,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				}
 
 				if (strpos(basename($sSourceFileSmall), "CMS") === 0
-					&& is_file($sSourceFileSmall)
+					&& Core_File::isFile($sSourceFileSmall)
 				)
 				{
 					// Файл временный, подлежит удалению
@@ -4711,7 +4713,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		// Инициализация текущей специальной цены для товара
 		$this->_oCurrentShopSpecialPrice = Core_Entity::factory('Shop_Specialprice');
 
-		if (is_file($this->_jsonPath))
+		if (Core_File::isFile($this->_jsonPath))
 		{
 			$aJSON = json_decode(Core_File::read($this->_jsonPath), TRUE);
 
@@ -4812,7 +4814,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			$oShop_Price_Setting->post();
 		}
 
-		if (is_file($this->_jsonPath))
+		if (Core_File::isFile($this->_jsonPath))
 		{
 			Core_File::delete($this->_jsonPath);
 		}
@@ -4844,7 +4846,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			return TRUE;
 		}
 
-		if (is_file($this->_jsonPath))
+		if (Core_File::isFile($this->_jsonPath))
 		{
 			Core_File::delete($this->_jsonPath);
 		}

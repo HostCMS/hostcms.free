@@ -55,6 +55,7 @@ if (!isset($_SERVER['PHP_AUTH_USER']))
 }
 elseif (isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_AUTH_PW']))
 {
+	Core_Auth::setRegenerateId(FALSE);
 	$answr = Core_Auth::login($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']);
 
 	Core_Auth::setCurrentSite();
@@ -86,8 +87,8 @@ else
 	exit();
 }
 
-$sType = Core_Array::getGet('type');
-$sMode = Core_Array::getGet('mode');
+$sType = Core_Array::getGet('type', '', 'str');
+$sMode = Core_Array::getGet('mode', '', 'str');
 
 if (($sType == 'catalog' || $sType == 'sale') && $sMode == 'checkauth')
 {
@@ -154,6 +155,7 @@ if (($sType == 'catalog' || $sType == 'sale') && $sMode == 'checkauth')
 	}
 
 	Core_Session::start();
+	Core_Session::regenerateId(TRUE);
 	echo sprintf("{$BOM}success\n%s\n%s", session_name(), session_id());
 }
 elseif (($sType == 'catalog' || $sType == 'sale') && $sMode == 'init')
@@ -216,7 +218,7 @@ elseif ($sType == 'catalog' && $sMode == 'import' && !is_null($sFileName = Core_
 {
 	$bDebug && Core_Log::instance()->clear()
 		->status(Core_Log::$MESSAGE)
-		->write('1С, type=catalog, mode=import, file=' . $sFileName);
+		->write('1С, type=catalog, mode=import, file=' . $sFileName . ', session_id=' . session_id());
 
 	try
 	{
@@ -376,6 +378,7 @@ elseif ($sType == 'sale' && $sMode == 'import' && !is_null($sFileName = Core_Arr
 		$oShop_Item_Import_Cml_Controller = new Shop_Item_Import_Cml_Controller($sFullFileName);
 		$oShop_Item_Import_Cml_Controller->iShopId = $oShop->id;
 		$oShop_Item_Import_Cml_Controller->debug = $bDebug;
+		//$oShop_Item_Import_Cml_Controller->itemDescription = 'text';
 		$oShop_Item_Import_Cml_Controller->importOrders();
 
 		is_file($sFullFileName) && Core_File::delete($sFullFileName);

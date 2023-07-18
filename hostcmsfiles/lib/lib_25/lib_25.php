@@ -37,7 +37,7 @@ $Shop_Order_Controller_Show
 
 $xslName = Core_Array::get(Core_Page::instance()->libParams, 'orderXsl');
 
-if (Core_Array::getGet('action', '', 'str') == 'cancel')
+if (Core_Array::getGet('action', '', 'str') === 'cancel')
 {
 	$guid = Core_Array::getGet('guid', '', 'str');
 

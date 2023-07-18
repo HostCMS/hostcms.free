@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -64,7 +64,7 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 		// Добавляем новое поле типа файл
 		$oImageField = Admin_Form_Entity::factory('File');
 
-		$oLargeFilePath = $this->_object->image != '' && is_file($this->_object->getDeliveryFilePath())
+		$oLargeFilePath = $this->_object->image != '' && Core_File::isFile($this->_object->getDeliveryFilePath())
 			? $this->_object->getDeliveryFileHref()
 			: '';
 
@@ -103,11 +103,10 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 		$oMainTab->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow4);
 		$oMainTab->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 margin-top-21')), $oMainRow4);
 
-		$title = $this->_object->id
-			? Core::_('Shop_Delivery.type_of_delivery_edit_form_title', $this->_object->name)
-			: Core::_('Shop_Delivery.type_of_delivery_add_form_title');
-
-		$this->title($title);
+		$this->title($this->_object->id
+			? Core::_('Shop_Delivery.type_of_delivery_edit_form_title', $this->_object->name, FALSE)
+			: Core::_('Shop_Delivery.type_of_delivery_add_form_title')
+		);
 
 		// Создаем вкладку
 		$oShopDeliveryTabPaymentSystems = Admin_Form_Entity::factory('Tab')

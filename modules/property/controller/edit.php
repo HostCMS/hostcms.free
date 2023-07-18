@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -174,7 +174,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->add($oMainRow14 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$title = $this->_object->id
-					? Core::_('Property.edit_title', $this->_object->name)
+					? Core::_('Property.edit_title', $this->_object->name, FALSE)
 					: Core::_('Property.add_title');
 
 				!$this->_object->id && $this->_object->property_dir_id = Core_Array::getGet('property_dir_id');
@@ -477,7 +477,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			case 'property_dir':
 			default:
 				$title = $this->_object->id
-					? Core::_('Property_Dir.edit_title', $this->_object->name)
+					? Core::_('Property_Dir.edit_title', $this->_object->name, FALSE)
 					: Core::_('Property_Dir.add_title');
 
 				// Значения директории для добавляемого объекта

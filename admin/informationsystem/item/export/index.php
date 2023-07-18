@@ -5,7 +5,7 @@
 * @package HostCMS
 * @version 7.x
 * @author Hostmake LLC
-* @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -19,7 +19,7 @@ $oInformationsystem_Group = Core_Entity::factory('Informationsystem_Group', Core
 if (Core_Array::getPost('action') == 'export')
 {
 	$aSeparator = array(",", ";");
-	$iSeparator = Core_Array::getPost('export_separator', 0);
+	$iSeparator = Core_Array::getPost('export_separator', 1, 'int');
 
 	$oInformationsystem_Item_Export_Csv_Controller = new Informationsystem_Item_Export_Csv_Controller(
 		Core_Array::getPost('informationsystem_id', 0),
@@ -169,13 +169,12 @@ $oMainTab
 				'fa-bolt'
 			))
 			->name('export_separator')
+			->value(1)
 			->divAttr(array('class' => 'form-group col-xs-12', 'id' => 'export_separator'))
 			->caption(Core::_('Informationsystem_Item.export_list_separator'))))
-	->add(Admin_Form_Entity::factory('Div')->class('row')->add(
-		Admin_Form_Entity::factory('Code')
-			->html("<script>$(function() {
-				$('#{$windowId} #export_list_separator').buttonset();
-			});</script>")));
+			->add(Admin_Form_Entity::factory('Div')->class('row')->add(
+				Admin_Form_Entity::factory('Code')->html("<script>$(function() { $('#{$windowId} #export_list_separator').buttonset(); });</script>"))
+			);
 
 	$oMainTab->add(
 		Admin_Form_Entity::factory('Div')->class('row')->add(
@@ -219,11 +218,11 @@ $oAdmin_Form_Entity_Form->add(
 		->type('submit')
 		->class('applyButton btn btn-blue')
 	)
-	->add(
-	Core_Html_Entity::factory('Script')
-		->type("text/javascript")
-		->value("ShowExport('{$windowId}', 0)")
-	);
+	/*->add(
+		Core_Html_Entity::factory('Script')
+			->type("text/javascript")
+			->value("ShowExport('{$windowId}', 0)")
+	)*/;
 
 $oAdmin_Form_Entity_Form->execute();
 $content = ob_get_clean();

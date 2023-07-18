@@ -1,6 +1,6 @@
 <?php
 
-return array (
+return array(
 	'database_table_name' => 'performance_test',
 	'database_write_query_count' => 10000,
 	'database_read_query_count' => 10000,

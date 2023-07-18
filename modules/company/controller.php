@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Company
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Company_Controller
 {
@@ -36,5 +36,21 @@ class Company_Controller
 		}
 
 		return $aReturn;
+	}
+
+	/**
+	 * Show popover
+	 * @param object $object
+	 * @param array $args
+	 * @param array $options
+	 */
+	static public function onAfterShowContentPopover($object, $args, $options)
+	{
+		//$windowId = $oAdmin_Form_Controller->getWindowId();
+		$windowId = $options[0]->getWindowId();
+
+		?><script>
+		$('#<?php echo $windowId?> [data-popover="hover"]').showCompanyPopover('<?php echo $windowId?>');
+		</script><?php
 	}
 }

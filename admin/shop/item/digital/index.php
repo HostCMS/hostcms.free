@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -22,7 +22,7 @@ if ($download_digital_file)
 	{
 		$file_path = $oShop_Item_Digital->getFullFilePath();
 
-		if (is_file($file_path))
+		if (Core_File::isFile($file_path))
 		{
 			Core_File::download($file_path, $oShop_Item_Digital->filename);
 			exit ();

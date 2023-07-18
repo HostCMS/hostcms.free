@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Measure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -22,11 +22,10 @@ class Shop_Measure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 	{
 		parent::_prepareForm();
 
-		$title = $this->_object->id
-			? Core::_('Shop_Measure.mesures_edit_form_title', $this->_object->name)
-			: Core::_('Shop_Measure.mesures_add_form_title');
-
-		$this->title($title);
+		$this->title($this->_object->id
+			? Core::_('Shop_Measure.mesures_edit_form_title', $this->_object->name, FALSE)
+			: Core::_('Shop_Measure.mesures_add_form_title')
+		);
 
 		return $this;
 	}

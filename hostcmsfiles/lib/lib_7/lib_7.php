@@ -10,9 +10,7 @@ Shop_Delivery_Handler::checkAfterContent($oShop);
 
 Core_Session::start();
 
-// ------------------------------------------------
 // Вывод информации о статусе платежа после его совершения и перенаправления с платежной системы
-// ------------------------------------------------
 if (isset($_REQUEST['payment'])
 	|| isset($_GET['action']) && ($_GET['action'] == 'PaymentSuccess' || $_GET['action'] == 'PaymentFail')
 	|| isset($_REQUEST['pg_order_id'])
@@ -149,9 +147,12 @@ switch (Core_Array::getPost('recount') ? 0 : Core_Array::getPost('step'))
 		// Сбрасываем информацию о последнем заказе
 		$_SESSION['last_order_id'] = 0;
 
+		$_SESSION['hostcmsOrder']['time_from'] = str_replace(' ', '', Core_Str::stripTags(Core_Array::getPost('time_from', '', 'str')));
+		$_SESSION['hostcmsOrder']['time_to'] = str_replace(' ', '', Core_Str::stripTags(Core_Array::getPost('time_to', '', 'str')));
+
 		if (!is_null(Core_Array::getRequest('apply_bonuses')))
 		{
-			$_SESSION['hostcmsOrder']['bonuses'] = trim(Core_Array::getRequest('bonuses', '', 'str'));
+			$_SESSION['hostcmsOrder']['bonuses'] = Core_Array::getRequest('bonuses', '', 'trim');
 		}
 
 		$Shop_Address_Controller_Show = new Shop_Address_Controller_Show($oShop);
@@ -280,6 +281,8 @@ switch (Core_Array::getPost('recount') ? 0 : Core_Array::getPost('step'))
 				Core_Str::stripTags(Core_Array::get(Core_Array::getSession('hostcmsOrder', array()), 'coupon_text'))
 			)
 			->postcode($_SESSION['hostcmsOrder']['postcode'])
+			->timeFrom($_SESSION['hostcmsOrder']['time_from'])
+			->timeTo($_SESSION['hostcmsOrder']['time_to'])
 			->setUp()
 			->xsl(
 				Core_Entity::factory('Xsl')->getByName(

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Crm
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Crm_Source_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -23,8 +23,9 @@ class Crm_Source_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		parent::_prepareForm();
 
 		$this->title($this->_object->id
-			? Core::_('Crm_Source.edit_siteuser_sources_title', $this->_object->name)
-			: Core::_('Crm_Source.add_siteuser_sources_title'));
+			? Core::_('Crm_Source.edit_siteuser_sources_title', $this->_object->name, FALSE)
+			: Core::_('Crm_Source.add_siteuser_sources_title')
+		);
 
 		$oMainTab = $this->getTab('main');
 

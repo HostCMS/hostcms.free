@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Structure
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Structure_Model extends Core_Entity
 {
@@ -31,6 +31,7 @@ class Structure_Model extends Core_Entity
 	 */
 	protected $_preloadValues = array(
 		'parent_id' => 0,
+		'shortcut_id' => 0,
 		'document_id' => 0,
 		'lib_id' => 0,
 		'type' => 0,
@@ -62,6 +63,7 @@ class Structure_Model extends Core_Entity
 		'user' => array(),
 		'siteuser' => array(),
 		'siteuser_group' => array(),
+		'shortcut' => array('model' => 'Structure', 'foreign_key' => 'shortcut_id'),
 
 		// Warning: Удалить
 		'data_template' => array()
@@ -72,7 +74,8 @@ class Structure_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_hasMany = array(
-		'structure' => array('foreign_key' => 'parent_id')
+		'structure' => array('foreign_key' => 'parent_id'),
+		'shortcut' => array('model' => 'Structure', 'foreign_key' => 'shortcut_id')
 	);
 
 	/**
@@ -185,13 +188,15 @@ class Structure_Model extends Core_Entity
 		}
 	}
 
+
+
 	/**
 	 * Create directory for item
 	 * @return self
 	 */
 	public function createDir()
 	{
-		if (!is_dir($this->getDirPath()))
+		if (!Core_File::isDir($this->getDirPath()))
 		{
 			try
 			{
@@ -237,7 +242,7 @@ class Structure_Model extends Core_Entity
 	{
 		$path = $this->getStructureFilePath();
 
-		return is_file($path)
+		return Core_File::isFile($path)
 			? Core_File::read($path)
 			: NULL;
 	}
@@ -269,7 +274,7 @@ class Structure_Model extends Core_Entity
 	{
 		$path = $this->getStructureConfigFilePath();
 
-		return is_file($path)
+		return Core_File::isFile($path)
 			? Core_File::read($path)
 			: NULL;
 	}
@@ -329,7 +334,7 @@ class Structure_Model extends Core_Entity
 	{
 		try
 		{
-			is_file($this->getStructureConfigFilePath())
+			Core_File::isFile($this->getStructureConfigFilePath())
 				&& Core_File::delete($this->getStructureConfigFilePath());
 		}
 		catch (Exception $e) {}
@@ -345,7 +350,7 @@ class Structure_Model extends Core_Entity
 	{
 		try
 		{
-			is_file($this->getStructureFilePath())
+			Core_File::isFile($this->getStructureFilePath())
 				&& Core_File::delete($this->getStructureFilePath());
 		}
 		catch (Exception $e) {}
@@ -382,8 +387,12 @@ class Structure_Model extends Core_Entity
 		$aStructures = $this->Structures->findAll(FALSE);
 		foreach ($aStructures as $oStructure)
 		{
+			$oStructure->Shortcuts->deleteAll(FALSE);
+
 			$oStructure->delete();
 		}
+
+		$this->Shortcuts->deleteAll(FALSE);
 
 		// Delete proprties values
 		// List of all properties
@@ -403,7 +412,7 @@ class Structure_Model extends Core_Entity
 		$sDirPath = $this->getDirPath();
 		try
 		{
-			is_dir($sDirPath) && Core_File::deleteDir($sDirPath);
+			Core_File::isDir($sDirPath) && Core_File::deleteDir($sDirPath);
 		}
 		catch (Exception $e) {}
 
@@ -413,7 +422,7 @@ class Structure_Model extends Core_Entity
 			$sLibDatFile = $this->Lib->getLibDatFilePath($this->id);
 			try
 			{
-				is_file($sLibDatFile) && Core_File::delete($sLibDatFile);
+				Core_File::isFile($sLibDatFile) && Core_File::delete($sLibDatFile);
 			}
 			catch (Exception $e) {}
 		}
@@ -427,13 +436,58 @@ class Structure_Model extends Core_Entity
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	/*public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$count = $this->getChildCount();
 		$count && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
 			->value($count)
 			->execute();
+	}*/
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$object = $this->shortcut_id
+			? $this->Shortcut
+			: $this;
+
+		$link = $oAdmin_Form_Field->link;
+		$onclick = $oAdmin_Form_Field->onclick;
+
+		$link = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $object, $link);
+		$onclick = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $object, $onclick);
+
+		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div');
+
+		if (!$this->shortcut_id)
+		{
+			$oCore_Html_Entity_Div
+				->add(
+					Core_Html_Entity::factory('A')
+						->href($link)
+						->onclick($onclick)
+						->value(htmlspecialchars($object->name))
+				);
+
+			$iCount = $object->getChildCount();
+
+			$iCount > 0 && $oCore_Html_Entity_Div
+				->add(
+					Core_Html_Entity::factory('Span')
+						->class('badge badge-hostcms badge-square')
+						->value($iCount)
+				);
+		}
+		else
+		{
+			echo htmlspecialchars($object->name);
+		}
+
+		$oCore_Html_Entity_Div->execute();
 	}
 
 	/**
@@ -461,9 +515,13 @@ class Structure_Model extends Core_Entity
 	 */
 	public function pathBackend()
 	{
-		$sPath = $this->getPath();
+		$object = $this->shortcut_id
+			? $this->Shortcut
+			: $this;
 
-		$oSite_Alias = Core_Entity::factory('Site', $this->site_id)->getCurrentAlias();
+		$sPath = $object->getPath();
+
+		$oSite_Alias = Core_Entity::factory('Site', $object->site_id)->getCurrentAlias();
 		if ($oSite_Alias)
 		{
 			$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div');
@@ -472,12 +530,12 @@ class Structure_Model extends Core_Entity
 				->class('hostcms-linkbox')
 				->add(
 					Core_Html_Entity::factory('A')
-						->href(($this->https ? 'https://' : 'http://') . $oSite_Alias->name . $sPath)
+						->href(($object->https ? 'https://' : 'http://') . $oSite_Alias->name . $sPath)
 						->target("_blank")
 						->value(htmlspecialchars(urldecode($sPath)))
 				);
 
-			!$this->active
+			!$object->active
 				&& $oCore_Html_Entity_Div->class($oCore_Html_Entity_Div->class . ' line-through');
 
 			$oCore_Html_Entity_Div->execute();
@@ -542,6 +600,7 @@ class Structure_Model extends Core_Entity
 			->queryBuilder()
 			//->clear()
 			->where('active', '=', 1)
+			->where('shortcut_id', '=', 0)
 			->where('path', 'LIKE', Core_DataBase::instance()->escapeLike($path))
 			->where('parent_id', '=', $parent_id)
 			->limit(1);
@@ -688,7 +747,7 @@ class Structure_Model extends Core_Entity
 				$oPropertyValue->setDir($this->getDirPath());
 				$oNewPropertyValue->setDir($newObject->getDirPath());
 
-				if (is_file($oPropertyValue->getLargeFilePath()))
+				if (Core_File::isFile($oPropertyValue->getLargeFilePath()))
 				{
 					try
 					{
@@ -696,7 +755,7 @@ class Structure_Model extends Core_Entity
 					} catch (Exception $e) {}
 				}
 
-				if (is_file($oPropertyValue->getSmallFilePath()))
+				if (Core_File::isFile($oPropertyValue->getSmallFilePath()))
 				{
 					try
 					{
@@ -710,7 +769,7 @@ class Structure_Model extends Core_Entity
 		// Config file
 		try
 		{
-			is_file($this->getStructureConfigFilePath())
+			Core_File::isFile($this->getStructureConfigFilePath())
 				&& Core_File::copy($this->getStructureConfigFilePath(), $newObject->getStructureConfigFilePath());
 		}
 		catch (Exception $e) {}
@@ -718,7 +777,7 @@ class Structure_Model extends Core_Entity
 		// File
 		try
 		{
-			is_file($this->getStructureFilePath())
+			Core_File::isFile($this->getStructureFilePath())
 				&& Core_File::copy($this->getStructureFilePath(), $newObject->getStructureFilePath());
 		}
 		catch (Exception $e) {}
@@ -729,7 +788,7 @@ class Structure_Model extends Core_Entity
 			$sLibDatFile = $this->Lib->getLibDatFilePath($this->id);
 			try
 			{
-				is_file($sLibDatFile) && Core_File::copy($sLibDatFile, $newObject->Lib->getLibDatFilePath($newObject->id));
+				Core_File::isFile($sLibDatFile) && Core_File::copy($sLibDatFile, $newObject->Lib->getLibDatFilePath($newObject->id));
 			}
 			catch (Exception $e) {}
 		}
@@ -1244,6 +1303,38 @@ class Structure_Model extends Core_Entity
 	}
 
 	/**
+	 * Create shortcut and move into group $group_id
+	 * @param int $structure_id group id
+	 * @return Structure_Model Shortcut
+	 */
+	public function shortcut($structure_id = NULL)
+	{
+		$object = $this->shortcut_id
+			? $this->Shortcut
+			: $this;
+
+		$oStructureShortcut = Core_Entity::factory('Structure');
+		$oStructureShortcut->site_id = CURRENT_SITE;
+		$oStructureShortcut->parent_id = is_null($structure_id)
+			? $object->parent_id
+			: $structure_id;
+		$oStructureShortcut->shortcut_id = $object->id;
+		$oStructureShortcut->type = 0;
+
+		// Ярлык ссылается на группу, в которую помещен
+		if ($oStructureShortcut->parent_id == $oStructureShortcut->shortcut_id)
+		{
+			return NULL;
+		}
+
+		$oStructureShortcut->name = '';
+		$oStructureShortcut->path = '';
+		$oStructureShortcut->indexing = 0;
+
+		return $oStructureShortcut->save();
+	}
+
+	/**
 	 * Get Related Site
 	 * @return Site_Model|NULL
 	 * @hostcms-event structure.onBeforeGetRelatedSite
@@ -1268,6 +1359,11 @@ class Structure_Model extends Core_Entity
 	 */
 	public function typeBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
+		if ($this->shortcut_id)
+		{
+			return '<i class="fa-solid fa-link"></i>';
+		}
+
 		switch($this->type)
 		{
 			case 0:

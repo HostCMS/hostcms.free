@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage User
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Model extends Core_Entity
 {
@@ -102,7 +102,12 @@ class User_Model extends Core_Entity
 		'user_absence' => array('foreign_key' => 'employee_id', 'model' => 'user_absence'),
 		'lead_step' => array(),
 		'sql_user_tab' => array(),
-		'shop_cashflow' => array(),
+		'chartaccount_cashflow' => array(),
+		'siteuser_representative_contract' => array(),
+		'shop_warehouse_purchaseorder' => array(),
+		'shop_warehouse_invoice' => array(),
+		'shop_warehouse_supply' => array(),
+		'shop_warehouse_purchasereturn' => array(),
 	);
 
 	/**
@@ -124,6 +129,17 @@ class User_Model extends Core_Entity
 	protected $_forbiddenTags = array(
 		'deleted',
 		'user_id',
+		'password',
+		'settings',
+		'dismissed',
+		'freelance',
+		'guid',
+		'only_access_my_own',
+		'read_only',
+		'sound',
+		'root_dir',
+		'birthday',
+		'last_activity'
 	);
 
 	/**
@@ -170,11 +186,14 @@ class User_Model extends Core_Entity
 	public function getCurrent()
 	{
 		Core_Session::hasSessionId() && Core_Session::start();
-		if (isset($_SESSION['current_users_id']))
+
+		if (isset($_SESSION['current_users_id']) && isset($_SESSION['valid_user'])
+			&& isset($_SESSION['date_user']) && isset($_SESSION['is_superuser'])
+		)
 		{
 			$oUser = $this->find(intval($_SESSION['current_users_id']));
 
-			if (!is_null($oUser->id))
+			if (!is_null($oUser->id) && $oUser->login === $_SESSION['valid_user'])
 			{
 				return $oUser;
 			}
@@ -425,7 +444,7 @@ class User_Model extends Core_Entity
 	{
 		clearstatcache();
 
-		if (!is_dir($this->getPath()))
+		if (!Core_File::isDir($this->getPath()))
 		{
 			try
 			{
@@ -444,7 +463,7 @@ class User_Model extends Core_Entity
 	{
 		try
 		{
-			is_file($this->getImageFilePath()) && Core_File::delete($this->getImageFilePath());
+			Core_File::isFile($this->getImageFilePath()) && Core_File::delete($this->getImageFilePath());
 		} catch (Exception $e) {}
 
 		$this->image = '';
@@ -461,7 +480,7 @@ class User_Model extends Core_Entity
 	{
 		$this->deleteImageFile();
 
-		if (is_dir($this->getPath()))
+		if (Core_File::isDir($this->getPath()))
 		{
 			try
 			{
@@ -868,7 +887,7 @@ class User_Model extends Core_Entity
 				$sumBreakTimeInSeconds += $endBreak - $beginBreakTimestamp;
 			}
 
-			$durationInMinutes = ($durationInSeconds - $sumBreakTimeInSeconds) / 60;
+			$durationInMinutes = intval(($durationInSeconds - $sumBreakTimeInSeconds) / 60);
 
 			$sDate = sprintf('%02d<span class="colon">:</span>%02d', floor($durationInMinutes / 60), $durationInMinutes % 60);
 		}
@@ -1163,6 +1182,69 @@ class User_Model extends Core_Entity
 	public function showAvatarWithName()
 	{
 		return $this->getAvatarWithName();
+	}
+
+	/**
+	 * Get XML for entity and children entities
+	 * @return string
+	 * @hostcms-event user.onBeforeRedeclaredGetXml
+	 */
+	public function getXml()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
+
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event user.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
+		$oSite = Core_Entity::factory('Site', CURRENT_SITE);
+
+		$this->clearXmlTags()
+			->addXmlTag('dir', '/' . $this->getHref())
+			->addXmlTag('last_activity', $this->last_activity == '0000-00-00 00:00:00'
+				? $this->last_activity
+				: Core_Date::strftime($oSite->date_time_format, Core_Date::sql2timestamp($this->last_activity))
+			)
+			->addXmlTag('birthday', $this->birthday == '0000-00-00'
+				? $this->birthday
+				: Core_Date::strftime($oSite->date_format, Core_Date::sql2timestamp($this->birthday))
+			);
+
+		$aDirectory_Phones = $this->Directory_Phones->findAll();
+		$aDirectory_Websites = $this->Directory_Websites->findAll();
+		$aDirectory_Emails = $this->Directory_Emails->findAll();
+		$aDirectory_Socials = $this->Directory_Socials->findAll();
+		$aDirectory_Messengers = $this->Directory_Messengers->findAll();
+
+		$this
+			->addEntities($aDirectory_Phones)
+			->addEntities($aDirectory_Emails)
+			->addEntities($aDirectory_Websites)
+			->addEntities($aDirectory_Socials)
+			->addEntities($aDirectory_Messengers);
+
+		return $this;
 	}
 
 	/**

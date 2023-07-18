@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Image_Gd extends Core_Image
 {
@@ -297,6 +297,9 @@ class Core_Image_Gd extends Core_Image
 					? (defined('WEBP_QUALITY') ? WEBP_QUALITY : 80)
 					: intval($quality);
 
+				imagealphablending($targetResourceStep1, FALSE);
+				imagesavealpha($targetResourceStep1, TRUE);
+
 				// Изменяем размер оригинальной картинки и копируем в созданую картинку
 				imagecopyresampled($targetResourceStep1, $sourceResource, 0, 0, 0, 0, $destX, $destY, $sourceX, $sourceY);
 
@@ -306,7 +309,11 @@ class Core_Image_Gd extends Core_Image
 				}
 				else
 				{
-					imagecopy($targetResourceStep2, $targetResourceStep1, 0, 0, $src_x, $src_y, $destX_step2, $destY_step2);
+					imagealphablending($targetResourceStep2, FALSE);
+					imagesavealpha($targetResourceStep2, TRUE);
+
+					// imagecopy($targetResourceStep2, $targetResourceStep1, 0, 0, $src_x, $src_y, $destX_step2, $destY_step2);
+					imagecopyresampled($targetResourceStep2, $targetResourceStep1, 0, 0, $src_x, $src_y, $destX_step2, $destY_step2, $destX_step2, $destY_step2);
 
 					imagewebp($targetResourceStep2, $targetFile, $quality);
 					imagedestroy($targetResourceStep2);
@@ -358,7 +365,7 @@ class Core_Image_Gd extends Core_Image
 	 */
 	static public function addWatermark($source, $target, $watermark, $watermarkX = NULL, $watermarkY = NULL)
 	{
-		if (!is_file($source))
+		if (!Core_File::isFile($source))
 		{
 			throw new Core_Exception("The file '%source' does not exist.",
 				array('%source' => Core::cutRootPath($source)));
@@ -366,7 +373,7 @@ class Core_Image_Gd extends Core_Image
 
 		$return = FALSE;
 
-		if (is_file($watermark))
+		if (Core_File::isFile($watermark))
 		{
 			$watermarkResource = imagecreatefrompng($watermark);
 
@@ -538,7 +545,7 @@ class Core_Image_Gd extends Core_Image
 	 */
 	static public function getImageSize($path)
 	{
-		if (is_file($path) && is_readable($path) && filesize($path) > 12 && self::exifImagetype($path))
+		if (Core_File::isFile($path) && is_readable($path) && filesize($path) > 12 && self::exifImagetype($path))
 		{
 			$picsize = @getimagesize($path);
 			if ($picsize)

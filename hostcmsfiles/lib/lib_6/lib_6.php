@@ -99,12 +99,12 @@ else
 		$allowable_tags = '<b><strong><i><em><br><p><u><strike><ul><ol><li>';
 		$oComment->parent_id = Core_Array::getPost('parent_id', 0, 'int');
 		$oComment->active = $oShop->comment_active;
-		$oComment->author = Core_Str::stripTags(Core_Array::getPost('author'));
-		$oComment->email = Core_Str::stripTags(Core_Array::getPost('email'));
-		$oComment->phone = Core_Str::stripTags(Core_Array::getPost('phone'));
+		$oComment->author = Core_Str::stripTags(Core_Array::getPost('author', '', 'str'));
+		$oComment->email = Core_Str::stripTags(Core_Array::getPost('email', '', 'str'));
+		$oComment->phone = Core_Str::stripTags(Core_Array::getPost('phone', '', 'str'));
 		$oComment->grade = Core_Array::getPost('grade', 0, 'int');
-		$oComment->subject = Core_Str::stripTags(Core_Array::getPost('subject'));
-		$oComment->text = nl2br(Core_Str::stripTags(Core_Array::getPost('text'), $allowable_tags));
+		$oComment->subject = Core_Str::stripTags(Core_Array::getPost('subject', '', 'str'));
+		$oComment->text = nl2br(Core_Str::stripTags(Core_Array::getPost('text', '', 'str'), $allowable_tags));
 		$oComment->siteuser_id = $siteuser_id;
 
 		$oShop_Item = Core_Entity::factory('Shop_Item', $Shop_Controller_Show->item);
@@ -115,7 +115,7 @@ else
 
 		if (is_null($oLastComment) || time() > Core_Date::sql2timestamp($oLastComment->datetime) + ADD_COMMENT_DELAY)
 		{
-			if ($oShop->use_captcha == 0 || $siteuser_id > 0 || Core_Captcha::valid(Core_Array::getPost('captcha_id'), Core_Array::getPost('captcha')))
+			if ($oShop->use_captcha == 0 || $siteuser_id > 0 || Core_Captcha::valid(Core_Array::getPost('captcha_id', '', 'str'), Core_Array::getPost('captcha', '', 'str')))
 			{
 				// Antispam
 				if (Core::moduleIsActive('antispam'))
@@ -314,4 +314,8 @@ $Shop_Controller_Show
 	)
 	->addMinMaxWidth()
 	->addMinMaxLength()
+	//->groupsForbiddenTags(array('name'))
+	/*->addAllowedTags('/shop/shop_group', array('name'))
+	->addAllowedTags('/shop', array('name'))
+	->addAllowedTags('/shop/shop_item', array('name'))*/
 	->show();

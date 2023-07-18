@@ -15,12 +15,17 @@ return array (
 		'services' => array(
 			'ico' => 'fa fa-cubes',
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_services'),
-			'modules' => array('helpdesk', 'dms', 'form', 'list', 'forum', 'maillist', 'poll', 'search', 'bot', 'message', 'report'),
+			'modules' => array('helpdesk', 'production',  'dms', 'form', 'list', 'forum', 'maillist', 'poll', 'search', 'bot', 'message'),
 		),
 		'crm' => array(
 			'ico' => 'fa fa-users',
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_crm'),
 			'modules' => array('lead', 'siteuser', 'event', 'deal', 'crm_project', 'user', 'calendar', 'messenger', 'company'),
+		),
+		'finance' => array(
+			'ico' => 'fa-solid fa-coins',
+			'caption' => Core::_('Skin_Bootstrap.admin_menu_finance'),
+			'modules' => array('chartaccount', 'report')
 		),
 		'tools' => array(
 			'ico' => 'fa fa-briefcase',
@@ -45,7 +50,7 @@ return array (
 		'system' => array(
 			'ico' => 'fa fa-gear',
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_system'),
-			'modules' => array('site', 'eventlog', 'certificate', 'notification', 'field', 'benchmark', 'admin_form', 'module', 'constant', 'restapi', 'webhook', 'ipaddress'),
+			'modules' => array('site', 'eventlog', 'certificate', 'notification', 'field', 'benchmark', 'admin_form', 'module', 'mail', 'constant', 'restapi', 'webhook', 'ipaddress'),
 		),
 		'cache' => array(
 			'ico' => 'fa fa-archive',

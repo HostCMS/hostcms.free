@@ -10,7 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Field
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Field_Controller_Delete_Value extends Admin_Form_Action_Controller
 {
@@ -50,7 +50,7 @@ class Field_Controller_Delete_Value extends Admin_Form_Action_Controller
 
 			$oField = Core_Entity::factory('Field')->find($fieldId);
 
-			if (!is_null($oField))
+			if (!is_null($oField->id))
 			{
 				$oValue = $oField->getValueById($fieldValueId);
 

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Site
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Site_Alias_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -69,8 +69,9 @@ class Site_Alias_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		}
 
 		$this->title($this->_object->id
-			? Core::_('Site_Alias.site_edit_domen_form_title', $this->_object->name)
-			: Core::_('Site_Alias.site_add_domen_form_title'));
+			? Core::_('Site_Alias.site_edit_domen_form_title', $this->_object->name, FALSE)
+			: Core::_('Site_Alias.site_add_domen_form_title')
+		);
 
 		return $this;
 	}

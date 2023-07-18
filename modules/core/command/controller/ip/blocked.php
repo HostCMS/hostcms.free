@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Command
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Command_Controller_Ip_Blocked extends Core_Command_Controller
 {
@@ -41,7 +41,7 @@ class Core_Command_Controller_Ip_Blocked extends Core_Command_Controller
 			$oStructure = Core_Entity::factory('Structure')->find($oSite->error403);
 
 			// страница с 403 ошибкой найдена
-			if (!is_null($oStructure))
+			if (!is_null($oStructure->id))
 			{
 				// Текущий узел структуры
 				define('CURRENT_STRUCTURE_ID', $oStructure->id);

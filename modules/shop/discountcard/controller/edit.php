@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Discountcard_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -109,11 +109,10 @@ class Shop_Discountcard_Controller_Edit extends Admin_Form_Action_Controller_Typ
 
 		$oMainTab->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow3);
 
-		$title = $this->_object->id
-			? Core::_('Shop_Discountcard.edit_title', $this->_object->number)
-			: Core::_('Shop_Discountcard.add_title');
-
-		$this->title($title);
+		$this->title($this->_object->id
+			? Core::_('Shop_Discountcard.edit_title', $this->_object->number, FALSE)
+			: Core::_('Shop_Discountcard.add_title')
+		);
 
 		return $this;
 	}

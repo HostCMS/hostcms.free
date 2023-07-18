@@ -13,4 +13,5 @@ return array(
 	'admin_menu_cache' => 'Кешування',
 	'admin_menu_administration' => 'Обслуговування',
 	'admin_menu_trash' => 'Кошик',
+	'admin_menu_finance' => 'Фінанси',
 );

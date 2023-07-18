@@ -7,12 +7,15 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * 2.0.8 - http://v8.1c.ru/edi/edi_stnd/90/CML208.XSD
  * 2.1.0 - http://v8.1c.ru/edi/edi_stnd/90/CML210.XSD
  *
+ * Протокол обмена с сайтом https://v8.1c.ru/tekhnologii/obmen-dannymi-i-integratsiya/standarty-i-formaty/protokol-obmena-s-saytom/
+ *
  * Доступные методы:
  *
  * - importGroups(TRUE|FALSE) импортировать группы товаров, по умолчанию TRUE
  * - createShopItems(TRUE|FALSE) создавать новые товары, по умолчанию TRUE
  * - updateFields(array()) массив полей товара, которые необходимо обновлять при импорте CML товара, если не заполнен, то обновляются все поля. Пример массива array('marking', 'barcode', 'name', 'shop_group_id', 'text', 'description', 'images', 'taxes', 'shop_producer_id', 'prices', 'warehouses')
  * - updateGroupFields(array()) массив полей групп, которые необходимо обновлять при импорте CML группы, если не заполнен, то обновляются все поля. Пример массива array('name', 'description', 'parent_id')
+ * - itemsProperties(TRUE|FALSE|array()) импортировать значения дополнительных свойств товаров, по умолчанию TRUE, может принимать массив с названиями дополнительных свойств
  * - skipProperties(array()) массив названий свойств, которые исключаются из импорта.
  * - searchIndexation(TRUE|FALSE) использовать событийную индексацию, по умолчанию FALSE
  * - itemDescription() имя поля товара, в которое загружать описание товаров, может принимать значения description, text. По умолчанию text
@@ -24,7 +27,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 {
@@ -37,6 +40,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		'createShopItems',
 		'updateFields',
 		'updateGroupFields',
+		'itemsProperties',
 		'skipProperties',
 		'searchIndexation',
 		'itemDescription',
@@ -104,6 +108,10 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		'ДЛИНА' => 'length',
 		'ШИРИНА' => 'width',
 		'ВЫСОТА' => 'height',
+		'ВЕС УПАКОВКИ' => 'package_weight',
+		'ДЛИНА УПАКОВКИ' => 'package_length',
+		'ШИРИНА УПАКОВКИ' => 'package_width',
+		'ВЫСОТА УПАКОВКИ' => 'package_height',
 	);
 
 	/**
@@ -178,7 +186,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 		$this->updateFields = $this->updateGroupFields = $this->skipProperties = array();
 
-		$this->importGroups = $this->createShopItems = TRUE;
+		$this->importGroups = $this->createShopItems = $this->itemsProperties = TRUE;
 
 		$this->searchIndexation = FALSE;
 
@@ -892,7 +900,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					}
 					else
 					{
-						if ($oShopItem->image_large != '' && is_file($sDestinationFolder . $oShopItem->image_large))
+						if ($oShopItem->image_large != '' && Core_File::isFile($sDestinationFolder . $oShopItem->image_large))
 						{
 							try
 							{
@@ -901,7 +909,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 						}
 
 						// Удаляем старое малое изображение
-						if ($oShopItem->image_small != '' && is_file($sDestinationFolder . $oShopItem->image_small))
+						if ($oShopItem->image_small != '' && Core_File::isFile($sDestinationFolder . $oShopItem->image_small))
 						{
 							try
 							{
@@ -921,7 +929,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					// Файл-источник
 					$sSourceFile = CMS_FOLDER . $this->sPicturesPath . ltrim($PictureData, '/\\');
 
-					if (is_file($sSourceFile))
+					if (Core_File::isFile($sSourceFile))
 					{
 						$sSourceFileBaseName = basename($PictureData);
 
@@ -1031,6 +1039,19 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 	}
 
 	/**
+	 * Check if property is available
+	 * @param string $sPropertyName
+	 * @return boolean
+	 */
+	protected function _availablePropertyName($sPropertyName)
+	{
+		return ($this->itemsProperties === TRUE
+				|| is_array($this->itemsProperties) && in_array($sPropertyName, $this->itemsProperties)
+			)
+			&& !in_array($sPropertyName, $this->skipProperties);
+	}
+
+	/**
 	 * _getProperty() cache
 	 * @var array
 	 */
@@ -1064,7 +1085,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			return $this->_cachePropertyByName[$sPropertyName];
 		}
 
-		if ($sPropertyName == '' || !in_array($sPropertyName, $this->skipProperties))
+		if ($sPropertyName == '' || $this->_availablePropertyName($sPropertyName))
 		{
 			$oShop_Item_Property_List = Core_Entity::factory('Shop_Item_Property_List', $this->iShopId);
 
@@ -1073,7 +1094,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 				// В версии 2.0.5 для ХарактеристикиТовара/ХарактеристикаТовара не передается ИД, только Наименование
 				: $oShop_Item_Property_List->Properties->getByName($sPropertyName, FALSE);
 
-			if ($oProperty && in_array($oProperty->name, $this->skipProperties))
+			if ($oProperty && !$this->_availablePropertyName($oProperty->name))
 			{
 				$oProperty = NULL;
 			}
@@ -1263,7 +1284,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 	{
 		$sJsonFilePath = $this->_tmpPath . Core_File::filenameCorrection($classifierId) . '.json';
 
-		if (is_file($sJsonFilePath))
+		if (Core_File::isFile($sJsonFilePath))
 		{
 			$aJSON = json_decode(Core_File::read($sJsonFilePath), TRUE);
 
@@ -1341,6 +1362,11 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			{
 				Core_Session::start();
 				$importPosition = Core_Array::getSession('importPosition', 0);
+
+				$this->debug && Core_Log::instance()->clear()
+					->status(Core_Log::$MESSAGE)
+					->write(sprintf('1С, обработка import.xml, получен importPosition %d', $importPosition));
+
 				Core_Session::close();
 
 				if (isset($this->_oSimpleXMLElement->Классификатор) && $importPosition == 0)
@@ -1748,6 +1774,10 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					{
 						Core_Session::start();
 						$_SESSION['importPosition'] = $importPosition;
+
+						$this->debug && Core_Log::instance()->clear()
+							->status(Core_Log::$MESSAGE)
+							->write(sprintf('1С, обработка import.xml, сохранен importPosition %d', $importPosition));
 						Core_Session::close();
 
 						$this->_aReturn['status'] = 'progress';
@@ -1765,6 +1795,10 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			{
 				Core_Session::start();
 				$importPosition = Core_Array::getSession('importPosition', 0);
+
+				$this->debug && Core_Log::instance()->clear()
+					->status(Core_Log::$MESSAGE)
+					->write(sprintf('1С, обработка offers.xml, получен importPosition %d', $importPosition));
 
 				if ($importPosition > 0)
 				{
@@ -2225,6 +2259,11 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					if ($this->timeout && (Core::getmicrotime() - $timeout + 2 > $this->timeout))
 					{
 						Core_Session::start();
+
+						$this->debug && Core_Log::instance()->clear()
+							->status(Core_Log::$MESSAGE)
+							->write(sprintf('1С, обработка offers.xml, сохранен importPosition %d', $importPosition));
+
 						$_SESSION['importPosition'] = $importPosition;
 						$_SESSION['_aShop_Warehouse_Inventory_Ids'] = $this->_aShop_Warehouse_Inventory_Ids;
 						$_SESSION['_Shop_Price_Setting_Id'] = $this->_Shop_Price_Setting_Id;
@@ -2735,7 +2774,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			$sPropertyGUID = strval($oItemProperty->Ид);
 			$sPropertyName = strval($oItemProperty->Наименование);
 
-			if ($sPropertyName == '' || !in_array($sPropertyName, $this->skipProperties))
+			if ($sPropertyName == '' || $this->_availablePropertyName($sPropertyName))
 			{
 				$oProperty = strlen($sPropertyGUID)
 					? $oShop_Item_Property_List->Properties->getByGuid($sPropertyGUID, FALSE)
@@ -2745,7 +2784,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 				if (is_null($oProperty)
 					&& strlen($sPropertyGUID)
 					// Свойство может быть найдено по GUID
-					&& !in_array($sPropertyName, $this->skipProperties)
+					&& $this->_availablePropertyName($sPropertyName)
 				)
 				{
 					$oProperty = Core_Entity::factory('Property');
@@ -3010,13 +3049,15 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 								if (!$oShop_Order->shop_order_status_id
 									|| $oShop_Order->Shop_Order_Status->name != $sValue)
 								{
-									$oShop_Order_Status = Core_Entity::factory('Shop_Order_Status')->getByName($sValue, FALSE);
+									// $oShop_Order_Status = Core_Entity::factory('Shop_Order_Status')->getByName($sValue, FALSE);
+									$oShop_Order_Status = $oShop->Shop_Order_Statuses->getByName($sValue, FALSE);
 
 									// Create new
 									if (is_null($oShop_Order_Status))
 									{
 										$oShop_Order_Status = Core_Entity::factory('Shop_Order_Status');
 										$oShop_Order_Status->name = $sValue;
+										$oShop_Order_Status->shop_id = $oShop->id;
 										$oShop_Order_Status->save();
 									}
 

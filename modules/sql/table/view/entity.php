@@ -9,10 +9,30 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Sql
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Sql_Table_View_Entity
 {
+	/**
+	 * Columns
+	 * @var mixed
+	 */
+	protected $_columns = NULL;
+
+	/**
+	 * Get table columns
+	 * @return array
+	 */
+	public function getTableColumns()
+	{
+		if (is_null($this->_columns) && !is_null($this->_tableName))
+		{
+			$this->_columns = Core_DataBase::instance()->getColumns($this->_tableName);
+		}
+
+		return $this->_columns;
+	}
+
 	/**
 	 * __isset
 	 * @param string $property
@@ -21,6 +41,7 @@ class Sql_Table_View_Entity
 	public function __isset($property)
 	{
 		$this->getTableColumns();
+
 		return isset($this->_columns[$property]);
 	}
 
@@ -34,6 +55,8 @@ class Sql_Table_View_Entity
 		return Core_Str::endsWith($methodName, 'Backend') && is_null($this->$name);
 	}
 
+	protected $_fields = array();
+
 	/**
 	 * Utilized for reading data from inaccessible properties
 	 * @param string $property property name
@@ -41,10 +64,22 @@ class Sql_Table_View_Entity
 	 */
 	public function __get($property)
 	{
-		if (isset($this->_columns[$property]))
+		if (isset($this->_fields[$property]))
 		{
-			return '';
+			return $this->_fields[$property];
 		}
+	}
+
+	/**
+	 * Run when writing data to inaccessible properties
+	 * @param string $property property name
+	 * @param string $value property value
+	 * @return self
+	 * @ignore
+	 */
+	public function __set($property, $value)
+	{
+		$this->_fields[$property] = $value;
 	}
 
 	/**
@@ -94,6 +129,7 @@ class Sql_Table_View_Entity
 			$this->_primaryKeyName = 'id';
 
 			$aFileds = $this->getTableColumns();
+
 			foreach ($aFileds as $key => $aRow)
 			{
 				// Set temporary key and order field for the Admin_Form
@@ -161,26 +197,6 @@ class Sql_Table_View_Entity
 	public function getModelName()
 	{
 		return 'sql_table_view';
-	}
-
-	/**
-	 * Columns
-	 * @var mixed
-	 */
-	protected $_columns = NULL;
-
-	/**
-	 * Get table columns
-	 * @return array
-	 */
-	public function getTableColumns()
-	{
-		if (is_null($this->_columns))
-		{
-			$this->_columns = Core_DataBase::instance()->getColumns($this->_tableName);
-		}
-
-		return $this->_columns;
 	}
 
 	/**

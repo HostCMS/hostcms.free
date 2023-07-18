@@ -12,6 +12,14 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - producer($id) идентификатор производителя
  * - offset($offset) смещение, по умолчанию 0
  * - limit($limit) количество
+ * - addAllowedTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, разрешенных к передаче в генерируемый XML
+ * - addForbiddenTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, запрещенных к передаче в генерируемый XML
+ *
+ * Доступные пути для методов addAllowedTags/addForbiddenTags:
+ *
+ * - '/' или '/shop' Магазин
+ * - '/shop/shop_producer' Производитель
+ * - '/shop/shop_producer_dir' Раздел производителей
  *
  * <code>
  * $oShop_Producer_Controller_Show = new Shop_Producer_Controller_Show(
@@ -30,7 +38,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Producer_Controller_Show extends Core_Controller
 {
@@ -53,9 +61,9 @@ class Shop_Producer_Controller_Show extends Core_Controller
 
 	/**
 	 * Shop's items object
-	 * @var array
+	 * @var Shop_Producer_Model
 	 */
-	protected $_Shop_Producers = array();
+	protected $_Shop_Producers;
 
 	/**
 	 * List of dirs of producers
@@ -99,7 +107,7 @@ class Shop_Producer_Controller_Show extends Core_Controller
 		$this->_aSiteuserGroups = $this->_getSiteuserGroups();
 
 		$this->pattern = rawurldecode($this->getEntity()->Structure->getPath()) . 'producers/({path})(page-{page}/)';
-		
+
 		$this->patternExpressions = array(
 			'page' => '\d+',
 		);
@@ -264,9 +272,9 @@ class Shop_Producer_Controller_Show extends Core_Controller
 			{
 				if (!$bTpl)
 				{
-					$this->addEntity(
-						$oShop_Producer->clearEntities()
-					);
+					$oShop_Producer->clearEntities();
+					$this->applyForbiddenAllowedTags('/shop/shop_producer', $oShop_Producer);
+					$this->addEntity($oShop_Producer);
 				}
 				else
 				{
@@ -326,14 +334,13 @@ class Shop_Producer_Controller_Show extends Core_Controller
 					{
 						$oStructure = Core_Entity::factory('Structure')->find($oSite->error404);
 
-						$oCore_Page = Core_Page::instance();
-
 						// страница с 404 ошибкой не найдена
 						if (is_null($oStructure->id))
 						{
 							throw new Core_Exception('Group not found');
 						}
 
+						$oCore_Page = Core_Page::instance();
 						$oCore_Page->addChild($oStructure->getRelatedObjectByType());
 						$oStructure->setCorePageSeo($oCore_Page);
 					}
@@ -368,6 +375,7 @@ class Shop_Producer_Controller_Show extends Core_Controller
 		foreach ($aShop_Producer_Dirs as $oShop_Producer_Dir)
 		{
 			$oShop_Producer_Dir->clearEntities();
+			$this->applyForbiddenAllowedTags('/shop/shop_producer_dir', $oShop_Producer_Dir);
 			$this->_aShop_Producer_Dirs[$oShop_Producer_Dir->parent_id][] = $oShop_Producer_Dir;
 		}
 
@@ -389,7 +397,6 @@ class Shop_Producer_Controller_Show extends Core_Controller
 			foreach ($this->_aShop_Producer_Dirs[$parent_id] as $oShop_Producer_Dir)
 			{
 				$parentObject->addEntity($oShop_Producer_Dir);
-
 				$this->_addDirsByParentId($oShop_Producer_Dir->id, $oShop_Producer_Dir);
 			}
 		}

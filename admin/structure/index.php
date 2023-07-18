@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -121,7 +121,7 @@ if ($oParentStructure->id)
 }
 
 // Глобальный поиск
-$sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
+$sGlobalSearch = Core_Array::getGet('globalSearch', '', 'trim');
 
 $oAdmin_Form_Controller->addEntity(
 	Admin_Form_Entity::factory('Code')
@@ -138,7 +138,7 @@ $oAdmin_Form_Controller->addEntity(
 		')
 );
 
-$sGlobalSearch = Core_DataBase::instance()->escapeLike($sGlobalSearch);
+$sGlobalSearch = str_replace(' ', '%', Core_DataBase::instance()->escapeLike($sGlobalSearch));
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
@@ -395,6 +395,45 @@ if ($oAdminFormActionDeleteLibFile && $oAdmin_Form_Controller->getAction() == 'd
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($oLib_Controller_Delete_File);
+}
+
+// Действие "Создать ярлык"
+$oAdminFormActionShortcut = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('shortcut');
+
+if ($oAdminFormActionShortcut && $oAdmin_Form_Controller->getAction() == 'shortcut')
+{
+	$oAdmin_Form_Action_Controller_Type_Shortcut = Admin_Form_Action_Controller::factory(
+		'Admin_Form_Action_Controller_Type_Shortcut', $oAdminFormActionShortcut
+	);
+
+	$oAdmin_Form_Action_Controller_Type_Shortcut
+		->title(Core::_('Structure.add_shortcut_title'))
+		->selectCaption(Core::_('Structure.add_item_shortcut_structure_id'))
+		->value($oParentStructure->id)
+		;
+
+	$oSite = Core_Entity::factory('Site', CURRENT_SITE);
+
+	$iCount = $oSite->Structures->getCount();
+
+	if ($iCount < Core::$mainConfig['switchSelectToAutocomplete'])
+	{
+		$oStructure_Controller_Edit = Admin_Form_Action_Controller::factory(
+			'Structure_Controller_Edit', $oAdmin_Form_Action
+		);
+
+		// Список директорий генерируется другим контроллером
+		$oAdmin_Form_Action_Controller_Type_Shortcut->selectOptions(array(' … ') + $oStructure_Controller_Edit->fillStructureList(CURRENT_SITE));
+	}
+	else
+	{
+		$oAdmin_Form_Action_Controller_Type_Shortcut->autocomplete(TRUE);
+	}
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oAdmin_Form_Action_Controller_Type_Shortcut);
 }
 
 // Источник данных 0

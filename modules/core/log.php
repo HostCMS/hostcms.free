@@ -15,7 +15,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Log
 {
@@ -186,7 +186,7 @@ class Core_Log
 		$fname = $this->getLogName(date('Y-m-d'));
 
 		// Delete old log files
-		if (defined('LOG_DAYS_LIMIT') && !is_file($fname) && is_dir($this->_logDir))
+		if (defined('LOG_DAYS_LIMIT') && !Core_File::isFile($fname) && Core_File::isDir($this->_logDir))
 		{
 			$this->_deleteOldLogs();
 		}
@@ -197,7 +197,7 @@ class Core_Log
 			$sDate, $this->_login, $message, $this->_status, $this->_site, $page, $user_ip
 		);
 
-		if (is_file($fname) && !is_writable($fname))
+		if (Core_File::isFile($fname) && !is_writable($fname))
 		{
 			@unlink($fname);
 		}
@@ -218,10 +218,12 @@ class Core_Log
 		{
 			// Save old error level
 			$iErrorLevel = error_reporting(E_ERROR);
+			
+			$userAgent = Core_Array::get($_SERVER, 'HTTP_USER_AGENT', '', 'str');
 
 			$message_mail = Core::_('Core.error_message', $sDate, $message,
 				Core::_('Core.error_log_level_' . $this->_status),
-				$this->_login, $this->_site, $page, $user_ip, 'HostCMS', 'www.hostcms.ru'
+				$this->_login, $this->_site, $page, $userAgent, $user_ip
 			);
 
 			$to = defined('ERROR_EMAIL')
@@ -288,7 +290,7 @@ class Core_Log
 		}
 
 		// Create .htaccess
-		if (!is_file($this->_logDir . '/.htaccess'))
+		if (!Core_File::isFile($this->_logDir . '/.htaccess'))
 		{
 			try {
 				Core_File::write($this->_logDir . '/.htaccess', '<IfModule !mod_authz_core.c>

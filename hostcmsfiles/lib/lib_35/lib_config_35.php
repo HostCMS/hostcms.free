@@ -63,10 +63,9 @@ if (Core::moduleIsActive('siteuser'))
 	{
 		$oShop_Item = Core_Entity::factory('Shop_Item', $Shop_Controller_Show->item);
 
-		$iPhoto = Core_Array::getGet('photo', 0, 'int');
-
 		if ($oShop_Item->siteuser_id == $oSiteuser->id)
 		{
+			$iPhoto = Core_Array::getGet('photo', 0, 'int');
 			if ($iPhoto)
 			{
 				$aPropertyValues = $oShop_Item->getPropertyValues();

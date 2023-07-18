@@ -28,7 +28,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Controller extends Core_Servant_Properties
 {
@@ -207,6 +207,9 @@ class Core_Controller extends Core_Servant_Properties
 			->clearEntities()
 			->addEntities($this->_entities);
 
+		// Apply Forbidden-Allowed tags for root entity
+		$this->applyForbiddenAllowedTags('/', $this->_entity);
+
 		return $this->_entity->getXml();
 	}
 
@@ -381,6 +384,8 @@ class Core_Controller extends Core_Servant_Properties
 				throw new Core_Exception('Core_Controller::get(), wrong mode: %mode.', array('%mode' => $this->_mode));
 		}
 
+		$this->_cacheApplyForbiddenAllowedTags = array();
+
 		/*echo "<br />Build HTML from XML and XSL '{$this->_xsl->name}'",
 			"<pre>" . htmlspecialchars(
 				Xsl_Processor::instance()->formatXml($sXml)
@@ -460,6 +465,190 @@ class Core_Controller extends Core_Servant_Properties
 	public function clearCacheTag()
 	{
 		$this->_cacheTags = array();
+		return $this;
+	}
+
+	/**
+	 * Allowed tags for specified elements
+	 *
+	 * @var array
+	 */
+	protected $_allowedTags = array();
+
+	/**
+	 * Add tag to allowed tags list
+	 * @param string $path Path to item, e.g. /shop/shop_item
+	 * @param string $tag tag
+	 * @return self
+	 */
+	public function addAllowedTag($path, $tag)
+	{
+		$this->_allowedTags[$path][$tag] = $tag;
+		return $this;
+	}
+
+	/**
+	 * Add tags to allowed tags list
+	 * @param string $path Path to item, e.g. /shop/shop_item
+	 * @param array $aTags array of tags
+	 * @return self
+	 */
+	public function addAllowedTags($path, array $aTags)
+	{
+		$this->_allowedTags[$path] = isset($this->_allowedTags[$path])
+			? array_merge($this->_allowedTags[$path], array_combine($aTags, $aTags))
+			: array_combine($aTags, $aTags);
+		return $this;
+	}
+
+	/**
+	 * Remove tag from allowed tags list
+	 * @param string $path Path to item, e.g. /shop/shop_item
+	 * @param string $tag tag
+	 * @return self
+	 */
+	public function removeAllowedTag($path, $tag)
+	{
+		if (isset($this->_allowedTags[$path][$tag]))
+		{
+			unset($this->_allowedTags[$path][$tag]);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Get allowed tags list
+	 * @return array
+	 */
+	public function getAllowedTags()
+	{
+		return $this->_allowedTags;
+	}
+
+	/**
+	 * Forbidden tags for specified elements
+	 *
+	 * @var array
+	 */
+	protected $_forbiddenTags = array();
+
+	/**
+	 * Add tag to forbidden tags list
+	 * @param string $path Path to item, e.g. /shop/shop_item
+	 * @param string $tag tag
+	 * @return self
+	 */
+	public function addForbiddenTag($path, $tag)
+	{
+		$this->_forbiddenTags[$path][$tag] = $tag;
+		return $this;
+	}
+
+	/**
+	 * Add tags to forbidden tags list
+	 * @param string $path Path to item, e.g. /shop/shop_item
+	 * @param array $aTags array of tags
+	 * @return self
+	 */
+	public function addForbiddenTags($path, array $aTags)
+	{
+		$this->_forbiddenTags[$path] = isset($this->_forbiddenTags[$path])
+			? array_merge($this->_forbiddenTags[$path], array_combine($aTags, $aTags))
+			: array_combine($aTags, $aTags);
+		return $this;
+	}
+
+	/**
+	 * Remove tag from forbidden tags list
+	 * @param string $path Path to item, e.g. /shop/shop_item
+	 * @param string $tag tag
+	 * @return self
+	 */
+	public function removeForbiddenTag($path, $tag)
+	{
+		if (isset($this->_forbiddenTags[$path][$tag]))
+		{
+			unset($this->_forbiddenTags[$path][$tag]);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Get forbidden tags list
+	 * @return array
+	 */
+	public function getForbiddenTags()
+	{
+		return $this->_forbiddenTags;
+	}
+
+	/**
+	 * Cache for applyForbiddenAllowedTags
+	 * @var array
+	 */
+	protected $_cacheApplyForbiddenAllowedTags = array();
+
+	/**
+	 * Apply Forbidden-Allowed Tags for Entity
+	 * @param string $path Path to item, e.g. /shop/shop_item
+	 * @param Core_Entity|array $mEntity
+	 * @return self
+	 */
+	public function applyForbiddenAllowedTags($path, $mEntity)
+	{
+		if (!isset($this->_cacheApplyForbiddenAllowedTags[$path]))
+		{
+			$this->_cacheApplyForbiddenAllowedTags[$path] = array();
+
+			$aPath = explode('|', $path);
+
+			foreach ($aPath as $sTmpPath)
+			{
+				if (isset($this->_allowedTags[$sTmpPath]) || isset($this->_forbiddenTags[$sTmpPath]))
+				{
+					isset($this->_allowedTags[$sTmpPath])
+						&& $this->_cacheApplyForbiddenAllowedTags[$path]['allowed'] = $this->_allowedTags[$sTmpPath];
+
+					isset($this->_forbiddenTags[$sTmpPath])
+						&& $this->_cacheApplyForbiddenAllowedTags[$path]['forbidden'] = $this->_forbiddenTags[$sTmpPath];
+
+					break;
+				}
+			}
+		}
+
+		if (isset($this->_cacheApplyForbiddenAllowedTags[$path]['allowed']))
+		{
+			if (is_array($mEntity))
+			{
+				foreach ($mEntity as $oEntity)
+				{
+					$oEntity->addAllowedTags($this->_cacheApplyForbiddenAllowedTags[$path]['allowed']);
+				}
+			}
+			else
+			{
+				$mEntity->addAllowedTags($this->_cacheApplyForbiddenAllowedTags[$path]['allowed']);
+			}
+		}
+
+		if (isset($this->_cacheApplyForbiddenAllowedTags[$path]['forbidden']))
+		{
+			if (is_array($mEntity))
+			{
+				foreach ($mEntity as $oEntity)
+				{
+					$oEntity->addForbiddenTags($this->_cacheApplyForbiddenAllowedTags[$path]['forbidden']);
+				}
+			}
+			else
+			{
+				$mEntity->addForbiddenTags($this->_cacheApplyForbiddenAllowedTags[$path]['forbidden']);
+			}
+		}
+
 		return $this;
 	}
 

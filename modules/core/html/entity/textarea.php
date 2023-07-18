@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Html
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Html_Entity_Textarea extends Core_Html_Entity
 {
@@ -47,6 +47,6 @@ class Core_Html_Entity_Textarea extends Core_Html_Entity
 
 		echo PHP_EOL;
 		
-		?><textarea <?php echo implode(' ', $aAttr) ?>><?php echo htmlspecialchars($this->value)?></textarea><?php
+		?><textarea <?php echo implode(' ', $aAttr) ?>><?php echo htmlspecialchars((string) $this->value)?></textarea><?php
 	}
 }

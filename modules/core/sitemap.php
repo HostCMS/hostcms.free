@@ -27,7 +27,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Sitemap extends Core_Servant_Properties
 {
@@ -156,7 +156,8 @@ class Core_Sitemap extends Core_Servant_Properties
 			->queryBuilder()
 			->where('structures.parent_id', '=', $structure_id)
 			->where('structures.active', '=', 1)
-			->where('structures.indexing', '=', 1)
+			//->where('structures.indexing', '=', 1) // вынесено в проверку в _structure, чтобы потомки выбирались
+			->where('structures.shortcut_id', '=', 0)
 			->where('structures.siteuser_group_id', 'IN', $this->_aSiteuserGroups)
 			->orderBy('sorting')
 			->orderBy('name');
@@ -253,37 +254,40 @@ class Core_Sitemap extends Core_Servant_Properties
 
 		foreach ($aStructure as $oStructure)
 		{
-			$sProtocol = $this->getProtocol($oStructure);
-
-			$loc = $sProtocol . $this->_siteAlias . $oStructure->getPath();
-			$changefreq = $oStructure->changefreq;
-			$priority = $oStructure->priority;
-			$entity = $oStructure;
-
-			Core_Event::notify('Core_Sitemap.onBeforeAddStructure', $this, array($loc, $changefreq, $priority, $entity));
-
-			$lastReturn = Core_Event::getLastReturn();
-			if (is_array($lastReturn) && count($lastReturn) == 4)
+			if ($oStructure->indexing)
 			{
-				list($loc, $changefreq, $priority, $entity) = $lastReturn;
-			}
+				$sProtocol = $this->getProtocol($oStructure);
 
-			$this->addNode($loc, $changefreq, $priority, $entity);
+				$loc = $sProtocol . $this->_siteAlias . $oStructure->getPath();
+				$changefreq = $oStructure->changefreq;
+				$priority = $oStructure->priority;
+				$entity = $oStructure;
 
-			// Informationsystem
-			if ($this->showInformationsystemGroups && isset($this->_Informationsystems[$oStructure->id]) && Core::moduleIsActive('informationsystem'))
-			{
-				$oInformationsystem = $this->_Informationsystems[$oStructure->id];
+				Core_Event::notify('Core_Sitemap.onBeforeAddStructure', $this, array($loc, $changefreq, $priority, $entity));
 
-				$this->_fillInformationsystem($oStructure, $oInformationsystem);
-			}
+				$lastReturn = Core_Event::getLastReturn();
+				if (is_array($lastReturn) && count($lastReturn) == 4)
+				{
+					list($loc, $changefreq, $priority, $entity) = $lastReturn;
+				}
 
-			// Shop
-			if ($this->showShopGroups && isset($this->_Shops[$oStructure->id]) && Core::moduleIsActive('shop'))
-			{
-				$oShop = $this->_Shops[$oStructure->id];
+				$this->addNode($loc, $changefreq, $priority, $entity);
 
-				$this->_fillShop($oStructure, $oShop);
+				// Informationsystem
+				if ($this->showInformationsystemGroups && isset($this->_Informationsystems[$oStructure->id]) && Core::moduleIsActive('informationsystem'))
+				{
+					$oInformationsystem = $this->_Informationsystems[$oStructure->id];
+
+					$this->_fillInformationsystem($oStructure, $oInformationsystem);
+				}
+
+				// Shop
+				if ($this->showShopGroups && isset($this->_Shops[$oStructure->id]) && Core::moduleIsActive('shop'))
+				{
+					$oShop = $this->_Shops[$oStructure->id];
+
+					$this->_fillShop($oStructure, $oShop);
+				}
 			}
 
 			// Structure
@@ -869,7 +873,7 @@ class Core_Sitemap extends Core_Servant_Properties
 
 		$sIndexFilePath = $this->_getIndexFilePath();
 
-		$this->_bRebuild = !is_file($sIndexFilePath) || time() > filemtime($sIndexFilePath) + $this->rebuildTime;
+		$this->_bRebuild = !Core_File::isFile($sIndexFilePath) || time() > filemtime($sIndexFilePath) + $this->rebuildTime;
 
 		if ($this->_bRebuild)
 		{
@@ -1071,7 +1075,7 @@ class Core_Sitemap extends Core_Servant_Properties
 		clearstatcache();
 
 		$sSitemapDir = $this->getSitemapDir();
-		!is_dir($sSitemapDir) && Core_File::mkdir($sSitemapDir);
+		!Core_File::isDir($sSitemapDir) && Core_File::mkdir($sSitemapDir);
 
 		return $this;
 	}

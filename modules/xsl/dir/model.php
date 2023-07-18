@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Xsl
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Xsl_Dir_Model extends Core_Entity
 {
@@ -97,7 +97,9 @@ class Xsl_Dir_Model extends Core_Entity
 		foreach ($aXsl_Dirs as $oChildrenDir)
 		{
 			$newDir = $oChildrenDir->copy();
-			$newObject->add($newDir);
+			$newDir->parent_id = $newObject->id;
+			$newDir->save();
+			// $newObject->add($newDir);
 		}
 
 		$aXsls = $this->Xsls->findAll();

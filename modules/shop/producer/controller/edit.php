@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -132,11 +132,11 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 				// Добавляем новое поле типа файл
 				$oImageField = Admin_Form_Entity::factory('File');
 
-				$oLargeFilePath = $this->_object->image_large != '' && is_file($this->_object->getLargeFilePath())
+				$oLargeFilePath = $this->_object->image_large != '' && Core_File::isFile($this->_object->getLargeFilePath())
 					? $this->_object->getLargeFileHref()
 					: '';
 
-				$oSmallFilePath = $this->_object->image_small != '' && is_file($this->_object->getSmallFilePath())
+				$oSmallFilePath = $this->_object->image_small != '' && Core_File::isFile($this->_object->getSmallFilePath())
 					? $this->_object->getSmallFileHref()
 					: '';
 
@@ -254,11 +254,11 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 					->move($this->getField('default')->divAttr(array('class' => 'form-group col-xs-12 col-sm-5')), $oMainRow4)
 					->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow5);
 
-				$title = $this->_object->id
-					? Core::_('Shop_Producer.producer_edit_form_title', $this->_object->name)
-					: Core::_('Shop_Producer.producer_add_form_title');
+				$this->title($this->_object->id
+					? Core::_('Shop_Producer.producer_edit_form_title', $this->_object->name, FALSE)
+					: Core::_('Shop_Producer.producer_add_form_title')
+				);
 
-				$this->title($title);
 			break;
 			case 'shop_producer_dir':
 
@@ -287,11 +287,10 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 				// Добавляем группу товаров
 				$oMainTab->addAfter($oGroupSelect, $this->getField('name'));
 
-				$title = $this->_object->id
-					? Core::_('Shop_Producer_Dir.edit', $this->_object->name)
-					: Core::_('Shop_Producer_Dir.add');
-
-				$this->title($title);
+				$this->title($this->_object->id
+					? Core::_('Shop_Producer_Dir.edit', $this->_object->name, FALSE)
+					: Core::_('Shop_Producer_Dir.add')
+				);
 
 			break;
 		}

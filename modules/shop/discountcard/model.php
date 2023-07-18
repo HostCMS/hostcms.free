@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
  class Shop_Discountcard_Model extends Core_Entity
 {
@@ -307,7 +307,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	{
 		$oShop = $this->Shop;
 
-		!isset($this->_forbiddenTags['date'])
+		$this->_isTagAvailable('date')
 			&& $this->addXmlTag('date', Core_Date::strftime($oShop->format_date, Core_Date::sql2timestamp($this->datetime)));
 
 		$this->addXmlTag('datetime', Core_Date::strftime($oShop->format_datetime, Core_Date::sql2timestamp($this->datetime)));

@@ -217,7 +217,7 @@ if ($Helpdesk_Controller_Show->ticket && Core_Array::getPost('send_message'))
 }
 
 // Закрытие тикета
-if (!is_null($ticket_id = Core_Array::getGet('close_ticket')))
+if ($ticket_id = Core_Array::getGet('close_ticket', 0, 'int'))
 {
 	$oHelpdesk_Ticket = Core_Entity::factory('Helpdesk_Ticket', $ticket_id);
 	if ($oHelpdesk_Ticket->siteuser_id == $oSiteuser->id)
@@ -226,7 +226,7 @@ if (!is_null($ticket_id = Core_Array::getGet('close_ticket')))
 	}
 }
 
-if (!is_null($ticket_id = Core_Array::getGet('open_ticket')))
+if ($ticket_id = Core_Array::getGet('open_ticket', 0, 'int'))
 {
 	$oHelpdesk_Ticket = Core_Entity::factory('Helpdesk_Ticket', $ticket_id);
 	if ($oHelpdesk_Ticket->siteuser_id == $oSiteuser->id)
@@ -239,15 +239,18 @@ if (!is_null($ticket_id = Core_Array::getGet('open_ticket')))
 $ticketStatus = Core_Array::getGet('status');
 if (!is_null($ticketStatus) && $ticketStatus != -1)
 {
+	$ticketStatus = intval($ticketStatus);
+
 	$Helpdesk_Controller_Show->addEntity(
 		Core::factory('Core_Xml_Entity')
 			->name('apply_filter')
 			->value($ticketStatus)
 	);
 
-	$Helpdesk_Controller_Show->helpdeskTickets()
+	$Helpdesk_Controller_Show
+		->helpdeskTickets()
 		->queryBuilder()
-		->where('open', '=', intval($ticketStatus));
+		->where('open', '=', $ticketStatus);
 }
 
 $Helpdesk_Controller_Show

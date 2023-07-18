@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Crm_Project
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Crm_Project_Note_Controller_Edit extends Crm_Note_Controller_Edit
 {
@@ -41,11 +41,10 @@ class Crm_Project_Note_Controller_Edit extends Crm_Note_Controller_Edit
 	{
 		parent::_prepareForm();
 
-		//$object = $this->_object;
-
 		$this->title($this->_object->id
 			? Core::_('Crm_Project_Note.edit_title')
-			: Core::_('Crm_Project_Note.add_title'));
+			: Core::_('Crm_Project_Note.add_title')
+		);
 
 		$oMainTab = $this->getTab('main');
 		$oMainTab

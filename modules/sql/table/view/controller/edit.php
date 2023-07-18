@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Sql
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Sql_Table_View_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -31,7 +31,7 @@ class Sql_Table_View_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 	 */
 	protected function _addUserIdField($oAdmin_Form_Entity, $sTabName)
 	{
-		// Nothing to do
+		return $oAdmin_Form_Entity;
 	}
 
 	/**
@@ -44,7 +44,7 @@ class Sql_Table_View_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 		parent::_prepareForm();
 
 		$oMainTab = $this->getTab('main');
-		$oAdditionalTab = $this->getTab('additional');
+		//$oAdditionalTab = $this->getTab('additional');
 
 		$aFields = $this->_object->getTableColumns();
 

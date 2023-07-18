@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Incoming_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -52,40 +52,85 @@ class Shop_Warehouse_Incoming_Controller_Edit extends Admin_Form_Action_Controll
 		{
 			$oAdditionalTab->delete($this->getField('siteuser_id'));
 
-			$oSiteuser = !is_null(Core_Array::getGet('siteuser_id'))
-				? Core_Entity::factory('Siteuser')->find(Core_Array::getGet('siteuser_id'))
-				: $this->_object->Siteuser;
+			$oAdditionalTab->delete($this->getField('siteuser_company_id'));
 
-			$options = !is_null($oSiteuser->id)
-				? array($oSiteuser->id => $oSiteuser->login . ' [' . $oSiteuser->id . ']')
-				: array(0);
+			$aMasSiteusers = array();
 
-			$oSiteuserSelect = Admin_Form_Entity::factory('Select')
+			$oSiteuserCompany = Core_Entity::factory('Siteuser_Company')->getById($this->_object->siteuser_company_id);
+			$oSiteuser = !is_null($oSiteuserCompany)
+				? $oSiteuserCompany->Siteuser
+				: NULL;
+
+			if ($oSiteuser)
+			{
+				$oOptgroupSiteuser = new stdClass();
+				$oOptgroupSiteuser->attributes = array('label' => $oSiteuser->login, 'class' => 'siteuser');
+
+				if ($oSiteuserCompany)
+				{
+					$tin = !empty($oSiteuserCompany->tin)
+						? ' ➤ ' . $oSiteuserCompany->tin
+						: '';
+
+					$oOptgroupSiteuser->children['company_' . $oSiteuserCompany->id] = array(
+						'value' => $oSiteuserCompany->name . $tin . ' 👤 ' . $oSiteuser->login . '%%%' . $oSiteuserCompany->getAvatar(),
+						'attr' => array('class' => 'siteuser-company')
+					);
+				}
+
+				$aMasSiteusers[$oSiteuser->id] = $oOptgroupSiteuser;
+			}
+
+			$oSelectSiteusers = Admin_Form_Entity::factory('Select')
+				->id('siteuser_company_id')
+				->options($aMasSiteusers)
+				->name('siteuser_company_id')
+				->value('company_' . $this->_object->siteuser_company_id)
 				->caption(Core::_('Shop_Warehouse_Incoming.siteuser_id'))
-				->options($options)
-				->name('siteuser_id')
-				->class('siteuser-tag')
-				->style('width: 100%')
-				// ->divAttr(array('class' => 'form-group col-xs-12'));
+				->style("width: 100%")
 				->divAttr(array('class' => 'col-xs-12'));
 
+			$oScriptSiteusers = Admin_Form_Entity::factory('Script')
+				->value('
+					$("#' . $windowId . ' #siteuser_company_id").select2({
+						dropdownParent: $("#' . $windowId . '"),
+						minimumInputLength: 1,
+						placeholder: "",
+						allowClear: true,
+						// multiple: true,
+						ajax: {
+							url: "/admin/siteuser/index.php?loadSiteusers&types[]=company",
+							dataType: "json",
+							type: "GET",
+							processResults: function (data) {
+								var aResults = [];
+								$.each(data, function (index, item) {
+									aResults.push({
+										"id": item.id,
+										"text": item.text
+									});
+								});
+								return {
+									results: aResults
+								};
+							}
+						},
+						templateResult: $.templateResultItemSiteusers,
+						escapeMarkup: function(m) { return m; },
+						templateSelection: $.templateSelectionItemSiteusers,
+						language: "' . Core_I18n::instance()->getLng() . '",
+						width: "100%"
+					})
+					.val("company_' . $this->_object->siteuser_company_id . '")
+					.trigger("change.select2");
+				');
+
 			$oSiteuserRow
 				->add(
 					Admin_Form_Entity::factory('Div')
-						->class('form-group col-xs-6 col-sm-6 col-md-3 no-padding siteuser-select2')
-						->add($oSiteuserSelect)
-				);
-
-			// Show button
-			Siteuser_Controller_Edit::addSiteuserSelect2($oSiteuserSelect, $oSiteuser, $this->_Admin_Form_Controller);
-
-			$icons = Siteuser_Controller_Edit::addSiteuserRepresentativeAvatars($oSiteuser);
-
-			$oSiteuserRow
-				->add(
-					Admin_Form_Entity::factory('Div')
-						->class('form-group col-xs-6 col-sm-6 col-md-3 margin-top-21 siteuser-representative-list')
-						->add(Admin_Form_Entity::factory('Code')->html($icons))
+						->class('form-group col-xs-12 col-sm-6 no-padding')
+						->add($oSelectSiteusers)
+						->add($oScriptSiteusers)
 				);
 		}
 
@@ -160,14 +205,14 @@ class Shop_Warehouse_Incoming_Controller_Edit extends Admin_Form_Action_Controll
 
 		$oRecalcPriceLink = Admin_Form_Entity::factory('Link');
 		$oRecalcPriceLink
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 margin-top-21'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 margin-top-21 recalc-button'))
 			->a
-				->class('btn btn-default')
-				->onclick("$.recalcPrice()")
+				->class('btn btn-labeled btn-default')
+				->onclick("$.recalcPrice('{$windowId}')")
 				->value(Core::_('Shop_Warehouse_Incoming.recalc_price'));
 		$oRecalcPriceLink
 			->icon
-				->class('fa fa-recycle');
+				->class('btn-label fa fa-recycle');
 
 		$oMainRow3->add($oRecalcPriceLink);
 
@@ -187,7 +232,7 @@ class Shop_Warehouse_Incoming_Controller_Edit extends Admin_Form_Action_Controll
 
 			if (!is_null($oModule))
 			{
-				$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, 1, 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
+				$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, $this->_object->getEntityType(), 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
 			}
 
 			$printlayoutsButton .= '
@@ -313,18 +358,25 @@ class Shop_Warehouse_Incoming_Controller_Edit extends Admin_Form_Action_Controll
 		);
 
 		$oCore_Html_Entity_Script = Core_Html_Entity::factory('Script')
-			->value("$('#{$windowId} .add-shop-item').autocompleteShopItem({shop_id: '{$oShop->id}', price_mode: 'item', shop_currency_id: 0}, function(event, ui) {
-				var newRow = $('<tr data-item-id=\"' + ui.item.id + '\"><td class=\"index\">' + $('#{$windowId} .index_value').val() + '</td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td><span class=\"price\">' + ui.item.price_with_tax + '</span><input type=\"hidden\" name=\"shop_item_price[]\" value=\"' + ui.item.price_with_tax +'\"/></td><td>' + $.escapeHtml(ui.item.currency) + '</td><td width=\"80\"><input class=\"set-item-count form-control\" onsubmit=\"$(\'.add-shop-item\').focus();return false;\" name=\"shop_item_quantity[]\" value=\"\"/></td><td><span class=\"calc-warehouse-sum\"></span></td><td><a class=\"delete-associated-item\" onclick=\"var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>');
+			->value("var jAddShopItem = $('#{$windowId} .add-shop-item'); jAddShopItem.autocompleteShopItem({shop_id: '{$oShop->id}', price_mode: 'item', shop_currency_id: 0}, function(event, ui) {
+				var newRow = $('<tr data-item-id=\"' + ui.item.id + '\"><td class=\"index\">' + $('#{$windowId} .index_value').val() + '</td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td><span class=\"price\">' + ui.item.price_with_tax + '</span><input type=\"hidden\" name=\"shop_item_price[]\" value=\"' + ui.item.price_with_tax +'\"/></td><td>' + $.escapeHtml(ui.item.currency) + '</td><td width=\"80\"><input class=\"set-item-count form-control\" onsubmit=\"$(\'.add-shop-item\').focus();return false;\" name=\"shop_item_quantity[]\" value=\"\"/></td><td><span class=\"calc-warehouse-sum\"></span></td><td><a class=\"delete-associated-item\" onclick=\"var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>'),
+
+				jNewItemCount = newRow.find('.set-item-count');
 
 				$('#{$windowId} .shop-item-table > tbody').append(
 					newRow
 				);
 
 				ui.item.value = '';
-				$.changeWarehouseCounts($('#{$windowId} .set-item-count'), 1);
-				$('#{$windowId} .set-item-count').change();
-				$('#{$windowId} .shop-item-table tr:last-child').find('.set-item-count').focus();
-				$.focusAutocomplete($('#{$windowId} .set-item-count'));
+				//$.changeWarehouseCounts($('#{$windowId} .set-item-count'), 1);
+				$.changeWarehouseCounts(jNewItemCount, 1);
+				//$('#{$windowId} .set-item-count').change();
+				jNewItemCount.change();
+				//$('#{$windowId} .shop-item-table tr:last-child').find('.set-item-count').focus();
+				jNewItemCount.focus();
+
+				//$.focusAutocomplete($('#{$windowId} .set-item-count'), $('#{$windowId} .add-shop-item'));
+				$.focusAutocomplete(jNewItemCount, jAddShopItem);
 
 				$.recountIndexes(newRow);
 			});
@@ -334,18 +386,19 @@ class Shop_Warehouse_Incoming_Controller_Edit extends Admin_Form_Action_Controll
 
 				$.changeWarehouseCounts(jInput, 1);
 				jInput.change();
+
+				$.focusAutocomplete(jInput, jAddShopItem);
 			});
 
-			$.focusAutocomplete($('#{$windowId} .set-item-count'));"
+			//$.focusAutocomplete($('#{$windowId} .set-item-count'), $('#{$windowId} .add-shop-item'));"
 		);
 
 		$oShopItemRow1->add($oCore_Html_Entity_Script);
 
-		$title = $this->_object->id
-			? Core::_('Shop_Warehouse_Incoming.form_edit', $this->_object->number)
-			: Core::_('Shop_Warehouse_Incoming.form_add');
-
-		$this->title($title);
+		$this->title($this->_object->id
+			? Core::_('Shop_Warehouse_Incoming.form_edit', $this->_object->number, FALSE)
+			: Core::_('Shop_Warehouse_Incoming.form_add')
+		);
 
 		return $this;
 	}
@@ -366,6 +419,12 @@ class Shop_Warehouse_Incoming_Controller_Edit extends Admin_Form_Action_Controll
 		}
 
 		$this->_formValues['siteuser_id'] = intval(Core_Array::get($this->_formValues, 'siteuser_id'));
+
+		$sSiteuserCompany = Core_Array::getPost('siteuser_company_id', 0, 'strval');
+		$aExplodeCompany = explode('_', $sSiteuserCompany);
+		$siteuser_company_id = isset($aExplodeCompany[1]) ? intval($aExplodeCompany[1]) : 0;
+		$this->_formValues['siteuser_company_id'] = $siteuser_company_id;
+
 		$this->addSkipColumn('posted');
 
 		$iOldWarehouse = intval($this->_object->shop_warehouse_id);

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage User
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Absence_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -90,11 +90,9 @@ class User_Absence_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 			? $oEmployee->getFullName()
 			: $oEmployee->login;
 
-		$title = $this->_object->id
-			? Core::_('User_Absence.edit_title', $name)
-			: Core::_('User_Absence.add_title');
-
-		$this->title($title);
+		$this->title($this->_object->id
+			? Core::_('User_Absence.edit_title', $name, FALSE)
+			: Core::_('User_Absence.add_title'));
 
 		return $this;
 	}

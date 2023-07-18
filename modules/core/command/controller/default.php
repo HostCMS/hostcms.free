@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Command
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Command_Controller_Default extends Core_Command_Controller
 {
@@ -532,7 +532,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 			{
 				$StructureConfig = $oStructure->getStructureConfigFilePath();
 
-				if (is_file($StructureConfig) && is_readable($StructureConfig))
+				if (Core_File::isFile($StructureConfig) && is_readable($StructureConfig))
 				{
 					include $StructureConfig;
 				}
@@ -544,7 +544,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 
 				$LibConfig = $oStructure->Lib->getLibConfigFilePath();
 
-				if (is_file($LibConfig) && is_readable($LibConfig))
+				if (Core_File::isFile($LibConfig) && is_readable($LibConfig))
 				{
 					include $LibConfig;
 				}
@@ -610,7 +610,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 			);
 
 			Core_Page::instance()->addFrontendExecutionTimes(
-				Core::_('Core.time_page', Core::getmicrotime() - $fBeginTime)
+				Core::_('Core.time_template', Core::getmicrotime() - $fBeginTime)
 			);
 		}
 
@@ -644,7 +644,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 				return str_replace(array("\n", "\r", "'"), array('', '', "\'"), $text);
 			}*/
 
-			$sTmpContent = preg_replace_callback('/<a\s([^>]*)?href=[\'|\"]?(mailto:[^\"|\']*)[\"|\']?([^>]*)?>(.*?)<\/a>/is', 'self::_safeEmailCallback', $sContent); // без /u
+			$sTmpContent = preg_replace_callback('/<a\s([^>]*)?href=[\'|\"]?(mailto:[^\"|\']*)[\"|\']?([^>]*)?>(.*?)<\/a>/is', array($this, '_safeEmailCallback'), $sContent); // без /u
 
 			strlen($sTmpContent) && $sContent = $sTmpContent;
 		}
@@ -671,7 +671,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 					<div style="position: absolute; right: 3px; top: 3px; font-family: courier new; font-weight: bold;"><a href="#" onclick="javascript:this.parentNode.parentNode.style.display=\'none\'; return false;"><img src="/admin/images/wclose.gif" style="border: none;" alt="Close this notice"/></a></div>
 					<div style="box-sizing: border-box; width: 740px; margin: 0 auto; text-align: left; padding: 0; overflow: hidden; color: black;"><div style="width: 75px; float: left"><img src="https://www.hostcms.ru/images/free-notice/warning.jpg" alt="Warning!"/></div>
 					<div style="width: 600px; float: left; font-family: Arial, sans-serif"><div style="font-size: 14px; font-weight: bold; margin-top: 12px;">Нарушение п. 3.3 лицензионого договора присоединения</div>
-					<div style="font-size: 12px; margin-top: 6px; line-height: 12px">Пользователь бесплатной редакции HostCMS.Халява обязуется разместить на каждом сайте, работающем с использованием Программного продукта, активную, индексируемую и видимую при просмотре сайта ссылку
+					<div style="font-size: 12px; margin-top: 6px; line-height: 12px">Пользователь бесплатной редакции HostCMS.Старт обязуется разместить на каждом сайте, работающем с использованием Программного продукта, активную, индексируемую и видимую при просмотре сайта ссылку
 					<div><b>' . htmlspecialchars('Система управления сайтом <a href="https://www.hostcms.ru" target="_blank">HostCMS</a>') . '</b></div> на сайт производителя <a href="https://www.hostcms.ru" target="_blank">https://www.hostcms.ru</a>.</div>
 					</div>
 					</div>
@@ -736,7 +736,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 	 * @param array $matches matches
 	 * @return string
 	 */
-	static protected function _safeEmailCallback($matches)
+	protected function _safeEmailCallback($matches)
 	{
 		ob_start();
 		?><a <?php echo $matches[1]?>href="<?php echo str_rot13($matches[2])?>"<?php echo $matches[3]?>><?php echo str_rot13($matches[4])?></a><script><?php

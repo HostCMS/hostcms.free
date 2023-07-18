@@ -1,13 +1,5 @@
 <?php
-/**
- * Market.
- *
- * @package HostCMS
- * @subpackage Market
- * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
 	'menu' => 'Магазин приложений',
 	'title' => 'Магазин приложений',

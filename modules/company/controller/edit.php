@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Company
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Company_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -20,12 +20,18 @@ class Company_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	public function setObject($object)
 	{
-		/*$this
-			->addSkipColumn('~address')
-			->addSkipColumn('~phone')
-			->addSkipColumn('~fax')
-			->addSkipColumn('~site')
-			->addSkipColumn('~email');*/
+		$this
+			->addSkipColumn('~current_account')
+			->addSkipColumn('~correspondent_account')
+			->addSkipColumn('~bank_name')
+			->addSkipColumn('~bank_address')
+			->addSkipColumn('~bic')
+			->addSkipColumn('current_account')
+			->addSkipColumn('correspondent_account')
+			->addSkipColumn('bank_name')
+			->addSkipColumn('bank_address')
+			->addSkipColumn('bic')
+			;
 
 		$this
 			->addSkipColumn('image');
@@ -77,11 +83,11 @@ class Company_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->move($this->getField('psrn'), $oTabBankingDetails)
 			->move($this->getField('okpo'), $oTabBankingDetails)
 			->move($this->getField('okved'), $oTabBankingDetails)
-			->move($this->getField('bic'), $oTabBankingDetails)
+			/*->move($this->getField('bic'), $oTabBankingDetails)
 			->move($this->getField('current_account'), $oTabBankingDetails)
 			->move($this->getField('correspondent_account'), $oTabBankingDetails)
 			->move($this->getField('bank_name'), $oTabBankingDetails)
-			->move($this->getField('bank_address'), $oTabBankingDetails)
+			->move($this->getField('bank_address'), $oTabBankingDetails)*/
 			// GUID
 			->move($this->getField('guid'), $oAdditionalTab);
 
@@ -107,7 +113,7 @@ class Company_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				array(
 					'max_width' => $aConfig['max_width'],
 					'max_height' => $aConfig['max_height'],
-					'path' => $this->_object->image != '' && is_file($this->_object->getImageFilePath())
+					'path' => $this->_object->image != '' && Core_File::isFile($this->_object->getImageFilePath())
 						? $this->_object->getImageFileHref()
 						: '',
 					'show_params' => TRUE,
@@ -199,7 +205,7 @@ class Company_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$oAdmin_Form_Entity_Section->add($oCheckbox = Admin_Form_Entity::factory('Checkbox')
 				->divAttr(array('class' => 'form-group col-xs-12 col-md-6 no-padding-left'))
 				->name('site_' . $oSite->id)
-				->caption($oSite->name)
+				->caption(htmlspecialchars($oSite->name))
 			);
 
 			in_array($oSite->id, $aTmp) && $oCheckbox->checked('checked');
@@ -212,21 +218,13 @@ class Company_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oTabBankingDetails->move($this->getField('okpo')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oTabBankingDetailsRow2);
 
 		$oTabBankingDetails->move($this->getField('okved')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oTabBankingDetailsRow3);
-		$oTabBankingDetails->move($this->getField('bic')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oTabBankingDetailsRow3);
-
-		$oTabBankingDetails->move($this->getField('current_account')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oTabBankingDetailsRow4);
-		$oTabBankingDetails->move($this->getField('correspondent_account')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oTabBankingDetailsRow4);
-
-		$oTabBankingDetails->move($this->getField('bank_name')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oTabBankingDetailsRow5);
-		$oTabBankingDetails->move($this->getField('bank_address')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oTabBankingDetailsRow5);
 
 		$oAdditionalTab->move($this->getField('guid')->divAttr(array('class' => 'form-group col-xs-12')),$oAdditionalTabRow1);
 
-		$title = $this->_object->id
-			? Core::_('Company.company_form_edit_title', $this->_object->name)
-			: Core::_('Company.company_form_add_title');
-
-		$this->title($title);
+		$this->title($this->_object->id
+			? Core::_('Company.company_form_edit_title', $this->_object->name, FALSE)
+			: Core::_('Company.company_form_add_title')
+		);
 
 		return $this;
 	}

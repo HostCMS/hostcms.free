@@ -6,7 +6,7 @@
  * @subpackage Company
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Companies',
@@ -22,11 +22,6 @@ return array(
 	'psrn' => '<acronym title="Primary state registration number of company">PSRN</acronym>',
 	'okpo' => '<acronym title="All-Russia Classifier of Enterprises and Organizations number of company">ARCEO</acronym>',
 	'okved' => '<acronym title="All-Russia Classifier of Economic Activities number of company">ARCEA</acronym>',
-	'bic' => '<acronym title="Russian Central Bank Identification Code of company">RCBIC</acronym>',
-	'current_account' => 'Account number',
-	'correspondent_account' => 'Correspondent account number',
-	'bank_name' => 'Bank name',
-	'bank_address' => 'Bank address',
 	'legal_name' => 'Full name of director',
 	'accountant_legal_name' => 'Full name of general accountant',
 	'address' => 'Address',
@@ -56,4 +51,5 @@ return array(
 	'sorting' => 'Sorting',
 	'apply_success' =>	'Item changed successfully!',
 	'image' => 'Image',
+	'tin_list' => 'TIN: %s',
 );

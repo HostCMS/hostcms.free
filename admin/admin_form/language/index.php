@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -35,10 +35,10 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('Admin_Form.show_form_menu_admin_forms_top2'))
 		->icon('fa fa-plus')
 		->href(
-			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
+			$oAdmin_Form_Controller->getAdminActionLoadHref(array('path' => $oAdmin_Form_Controller->getPath(), 'action' => 'edit', 'datasetKey' => 0, 'datasetValue' => 0))
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
+			$oAdmin_Form_Controller->getAdminActionLoadAjax(array('path' => $oAdmin_Form_Controller->getPath(), 'action' => 'edit', 'datasetKey' => 0, 'datasetValue' => 0))
 		)
 );
 
@@ -54,19 +54,19 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Admin_Form.show_form_fields_menu_admin_forms'))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref($sAdminFormPath, NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadHref(array('path' => $sAdminFormPath))
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax($sAdminFormPath, NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadAjax(array('path' => $sAdminFormPath))
 	)
 )->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Admin_Language.show_form_fields_menu_admin_languages'))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadHref(array('path' => $oAdmin_Form_Controller->getPath()))
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadAjax(array('path' => $oAdmin_Form_Controller->getPath()))
 	)
 );
 

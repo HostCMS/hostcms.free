@@ -19,7 +19,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Session
 {
@@ -102,6 +102,51 @@ abstract class Core_Session
 	}
 
 	/**
+	 * Get domain
+	 * @return string
+	 */
+	static public function getDomain()
+	{
+		is_null(self::$_domain)
+			? list($domain) = explode(':', strtolower(Core_Array::get($_SERVER, 'HTTP_HOST', '', 'str')))
+			: $domain = self::$_domain;
+
+		return $domain;
+	}
+
+	/**
+	 * Correct domain
+	 * @param str domain
+	 * @return string
+	 */
+	static public function correctDomain($domain)
+	{
+		// Cut 'www.'
+		strpos($domain, 'www.') === 0 && $domain = substr($domain, 4);
+
+		// Явное указание domain возможно только для домена второго и более уровня
+		return strpos($domain, '.') !== FALSE && !Core_Valid::ip($domain)
+			? '.' . $domain
+			: '';
+	}
+
+	/**
+	 * Get Session Config
+	 * @rerurn array
+	 */
+	static public function getConfig()
+	{
+		return Core::$mainConfig['session'] + array(
+			'driver' => 'database',
+			'class' => 'Core_Session_Database',
+			'subdomain' => TRUE,
+			'samesite' => 'Lax',
+			'secure' => FALSE,
+			'httponly' => TRUE,
+		);
+	}
+
+	/**
 	 * Start session
 	 * @return boolean
 	 */
@@ -126,25 +171,27 @@ abstract class Core_Session
 				//ini_set('session.gc_maxlifetime', self::$_cookieLifetime);
 			}
 
-			is_null(self::$_domain)
-				? list($domain) = explode(':', strtolower(Core_Array::get($_SERVER, 'HTTP_HOST')))
-				: $domain = self::$_domain;
+			$domain = self::getDomain();
 
 			if (!empty($domain) && !headers_sent())
 			{
-				// Cut 'www.'
-				strpos($domain, 'www.') === 0 && $domain = substr($domain, 4);
+				$aConfig = self::getConfig();
 
-				// Явное указание domain возможно только для домена второго и более уровня
-				$domain = strpos($domain, '.') !== FALSE && !Core_Valid::ip($domain)
-					? '.' . $domain
-					: '';
+				$domain = self::correctDomain($domain);
 
-				$aConfig = Core::$mainConfig['session'] + array(
-					'samesite' => 'Lax',
-					'secure' => FALSE,
-					'httponly' => TRUE
-				);
+				if (!$aConfig['subdomain'])
+				{
+					// Delete old subdomain cookie
+					$domain != '' && Core_Cookie::set(session_name(), '', array(
+						'expires' => 0,
+						'path' => '/',
+						'domain' => $domain,
+						'secure' => $aConfig['secure'],
+						'httponly' => $aConfig['httponly'])
+					);
+
+					$domain = NULL;
+				}
 
 				// SameSite=None; Secure
 				$aConfig['samesite'] == 'None' && $aConfig['secure'] = TRUE;
@@ -202,7 +249,6 @@ abstract class Core_Session
 			//self::$_started = TRUE; // Moved to Read & Lock
 			self::$_hasSessionId = TRUE;
 			//}
-			//self::_setCookie();
 		}
 
 		return TRUE;
@@ -295,27 +341,29 @@ abstract class Core_Session
 	 */
 	static protected function _setSessionHandler()
 	{
-		if (!isset(Core::$mainConfig['session']['driver']))
+		$aConfig = self::getConfig();
+
+		if (!isset($aConfig['driver']))
 		{
 			throw new Core_Exception('Wrong Session config, needs driver');
 		}
 
-		$sessionClass = isset(Core::$mainConfig['session']['class'])
-			? Core::$mainConfig['session']['class']
-			: self::_getDriverName(Core::$mainConfig['session']['driver']);
+		$sessionClass = isset($aConfig['class'])
+			? $aConfig['class']
+			: self::_getDriverName($aConfig['driver']);
 
 		//if (is_null(self::$_handler))
 		//{
-			$oCore_Session = self::$_handler = new $sessionClass();
+		$oCore_Session = self::$_handler = new $sessionClass();
 
-			session_set_save_handler(
-				array($oCore_Session, 'sessionOpen'),
-				array($oCore_Session, 'sessionClose'),
-				array($oCore_Session, 'sessionRead'),
-				array($oCore_Session, 'sessionWrite'),
-				array($oCore_Session, 'sessionDestroyer'),
-				array($oCore_Session, 'sessionGc')
-			);
+		session_set_save_handler(
+			array($oCore_Session, 'sessionOpen'),
+			array($oCore_Session, 'sessionClose'),
+			array($oCore_Session, 'sessionRead'),
+			array($oCore_Session, 'sessionWrite'),
+			array($oCore_Session, 'sessionDestroyer'),
+			array($oCore_Session, 'sessionGc')
+		);
 		//}
 	}
 
@@ -328,35 +376,6 @@ abstract class Core_Session
 	{
 		return __CLASS__ . '_' . ucfirst($driver);
 	}
-
-	/**
-	 * Set cookie with expiration date
-	 */
-	/*static protected function _setCookie()
-	{
-		$domain = strtolower(Core_Array::get($_SERVER, 'HTTP_HOST'));
-		if (!empty($domain) && !headers_sent())
-		{
-			// Обрезаем www у домена
-			strpos($domain, 'www.') === 0 && $domain = substr($domain, 4);
-
-			// Явное указание domain возможно только для домена второго и более уровня
-			// http://wp.netscape.com/newsref/std/cookie_spec.html
-			// http://web-notes.ru/2008/07/cookies_within_local_domains/
-			$domain = strpos($domain, '.') !== FALSE && !Core_Valid::ip($domain)
-				? '.' . $domain
-				: '';
-
-			$expires = self::getMaxLifeTime();
-
-			setcookie(self::getName(), session_id(), time() + $expires, '/', $domain, FALSE, TRUE);
-
-			// Заменяем заголовок ($replace = TRUE)
-			//Core::setcookie(self::getName(), session_id(), time() + $expires, '/', $domain, FALSE, TRUE, $replace = TRUE);
-			//session_set_cookie_params(time() + $expires, '/', $domain);
-			//session_id(session_id());
-		}
-	}*/
 
 	/**
 	 * Close session
@@ -389,6 +408,26 @@ abstract class Core_Session
 	 */
 	static public function destroy($id)
 	{
+		$aConfig = self::getConfig();
+
+		Core_Cookie::set(session_name(), '', array(
+			'expires' => 0,
+			'path' => '/',
+			'domain' => NULL,
+			'secure' => $aConfig['secure'],
+			'httponly' => $aConfig['httponly'])
+		);
+
+		$domain = self::correctDomain(self::getDomain());
+
+		Core_Cookie::set(session_name(), '', array(
+			'expires' => 0,
+			'path' => '/',
+			'domain' => $domain,
+			'secure' => $aConfig['secure'],
+			'httponly' => $aConfig['httponly'])
+		);
+
 		return self::$_handler->sessionDestroyer($id);
 	}
 

@@ -23,17 +23,6 @@ setlocale(LC_NUMERIC, "POSIX");
 if (!defined('DENY_INI_SET') || !DENY_INI_SET)
 {
 	ini_set('display_errors', 1);
-
-	if (version_compare(PHP_VERSION, '5.3', '<'))
-	{
-		/* Решение проблемы trict Standards: Implicit cloning object of class 'kernel' because of 'zend.ze1_compatibility_mode' */
-		ini_set('zend.ze1_compatibility_mode', 0);
-
-		set_magic_quotes_runtime(0);
-		ini_set('magic_quotes_gpc', 0);
-		ini_set('magic_quotes_sybase', 0);
-		ini_set('magic_quotes_runtime', 0);
-	}
 }
 
 //function_exists('date_default_timezone_set') && date_default_timezone_set(date_default_timezone_get());

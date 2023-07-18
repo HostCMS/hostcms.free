@@ -9,11 +9,20 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Sql
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Sql_Processlist_Entity
 {
 	protected $_fields = array('id', 'user', 'host', 'db', 'command', 'time', 'state', 'info');
+
+	public $id = NULL;
+	public $user = NULL;
+	public $host = NULL;
+	public $db = NULL;
+	public $command = NULL;
+	public $time = NULL;
+	public $state = NULL;
+	public $info = NULL;
 
 	/**
 	 * Get tableColumns

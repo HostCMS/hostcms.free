@@ -237,13 +237,13 @@ if ($Shop_Controller_Show->item == 0)
 		$oShop_Item->active = Core_Array::get(Core_Page::instance()->libParams, 'addedItemActive', 0);
 		$oShop_Item->name = Core_Str::stripTags(Core_Array::getPost('name', '', 'str'));
 		$oShop_Item->text = nl2br(Core_Str::stripTags(Core_Array::getPost('text', '', 'str')));
-		$oShop_Item->price = floatval(Core_Array::getPost('price', 0));
+		$oShop_Item->price = Core_Array::getPost('price', 0, 'float');
 		$oShop_Item->path = '';
 
 		$oShop_Item_Property_List = Core_Entity::factory('Shop_Item_Property_List', $oShop->id);
 		$aProperties = $oShop_Item_Property_List->getPropertiesForGroup($Shop_Controller_Show->group);
 
-		if ($oShop->use_captcha == 0 || $siteuser_id > 0 || Core_Captcha::valid(Core_Array::getPost('captcha_id'), Core_Array::getPost('captcha')))
+		if ($oShop->use_captcha == 0 || $siteuser_id > 0 || Core_Captcha::valid(Core_Array::getPost('captcha_id', '', 'str'), Core_Array::getPost('captcha', '', 'str')))
 		{
 			$oShop_Item->shop_id = $oShop->id;
 			$oShop_Item->shop_currency_id = $oShop->shop_currency_id;

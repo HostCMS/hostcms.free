@@ -5,11 +5,23 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 /**
  * Выбор платежной системы.
  *
+ * Доступные методы:
+ *
+ * - addAllowedTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, разрешенных к передаче в генерируемый XML
+ * - addForbiddenTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, запрещенных к передаче в генерируемый XML
+ * - addAllowedTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, разрешенных к передаче в генерируемый XML
+ * - addForbiddenTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, запрещенных к передаче в генерируемый XML
+ *
+ * Доступные пути для методов addAllowedTags/addForbiddenTags:
+ *
+ * - '/' или '/shop' Магазин
+ * - '/shop/shop_payment_system' Платежная система
+ *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Payment_System_Controller_Show extends Core_Controller
 {
@@ -60,7 +72,7 @@ class Shop_Payment_System_Controller_Show extends Core_Controller
 		$this->_Shop_Payment_Systems
 			->queryBuilder()
 			->where('shop_payment_systems.active', '=', 1);
-			
+
 		if (Core_Session::hasSessionId())
 		{
 			Core_Session::start();
@@ -101,9 +113,9 @@ class Shop_Payment_System_Controller_Show extends Core_Controller
 		$aShop_Payment_Systems = $this->_Shop_Payment_Systems->findAll();
 		foreach ($aShop_Payment_Systems as $oShop_Payment_System)
 		{
-			$this->addEntity(
-				$oShop_Payment_System->clearEntities()
-			);
+			$oShop_Payment_System->clearEntities();
+			$this->applyForbiddenAllowedTags('/shop/shop_payment_system', $oShop_Payment_System);
+			$this->addEntity($oShop_Payment_System);
 		}
 
 		return parent::show();

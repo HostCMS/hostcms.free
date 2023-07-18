@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Seo
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Seo_Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -35,10 +35,6 @@ class Seo_Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	protected function _prepareForm()
 	{
 		parent::_prepareForm();
-
-		$title = $this->_object->id
-			? Core::_('Seo_Site.edit_title')
-			: Core::_('Seo_Site.add_title');
 
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
@@ -117,7 +113,10 @@ class Seo_Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->move($this->getField('token')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow3)
 			->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow4);
 
-		$this->title($title);
+		$this->title($this->_object->id
+			? Core::_('Seo_Site.edit_title')
+			: Core::_('Seo_Site.add_title')
+		);
 
 		return $this;
 	}

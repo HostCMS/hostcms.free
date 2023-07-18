@@ -166,7 +166,7 @@
 					</div>
 
 					<div class="row">
-					<div class="caption" style="vertical-align: top; padding-top: 27px"><strong>Представители</strong></div>
+						<div class="caption" style="vertical-align: top; padding-top: 27px"><strong>Представители</strong></div>
 						<!-- <div class="field"> -->
 							<xsl:choose>
 								<xsl:when test="@id > 0 and count(siteuser_person)">
@@ -287,6 +287,7 @@
 		</fieldset>
 	</xsl:template>
 
+	<!-- Строка свойства -->
 	<xsl:template name="property_values_show">
 		<xsl:param name="property" />
 		<xsl:param name="node" select="''"/>
@@ -389,61 +390,6 @@
 					</xsl:call-template>
 				</xsl:otherwise>
 			</xsl:choose>
-		</xsl:if>
-	</xsl:template>
-
-	<!-- Внешние свойства -->
-	<xsl:template match="properties/property" mode="123">
-
-		<xsl:if test="type != 10">
-
-			<xsl:variable name="id" select="@id" />
-			<xsl:variable name="property_value" select="/siteuser/property_value[property_id=$id]" />
-
-			<div class="row">
-				<div class="caption"><xsl:value-of select="name" /></div>
-				<div class="field">
-
-					<xsl:choose>
-						<!-- Отображаем поле ввода -->
-						<xsl:when test="type = 0 or type=1">
-							<br/>
-							<input type="text" name="property_{@id}" value="{$property_value/value}" size="40" />
-						</xsl:when>
-						<!-- Отображаем файл -->
-						<xsl:when test="type = 2">
-							<br/>
-							<input type="file" name="property_{@id}" size="35" />
-
-							<xsl:if test="$property_value/file != ''">
-								<xsl:text> </xsl:text>
-						<a href="{/siteuser/dir}{$property_value/file}" target="_blank"><img src="/hostcmsfiles/images/preview.gif" class="img"/></a><xsl:text> </xsl:text><a href="?delete_property={$property_value/property_id}" onclick="return confirm('&labelDeleteAlert;')"><img src="/hostcmsfiles/images/delete.gif" class="img" /></a>
-							</xsl:if>
-
-						</xsl:when>
-						<!-- Отображаем список -->
-						<xsl:when test="type = 3">
-							<br/>
-							<select name="property_{@id}">
-								<option value="0">...</option>
-								<xsl:apply-templates select="list/list_item"/>
-							</select>
-						</xsl:when>
-						<!-- Большое текстовое поле, Визуальный редактор -->
-						<xsl:when test="type = 4 or type = 6">
-							<br/>
-							<textarea name="property_{@id}" size="40"><xsl:value-of select="$property_value/value" /></textarea>
-						</xsl:when>
-						<!-- Флажок -->
-						<xsl:when test="type = 7">
-							<br/>
-							<input type="checkbox" name="property_{@id}">
-							<xsl:if test="$property_value/value = 1"><xsl:attribute name="checked">checked</xsl:attribute></xsl:if>
-							</input>
-						</xsl:when>
-					</xsl:choose>
-				</div>
-			</div>
 		</xsl:if>
 	</xsl:template>
 

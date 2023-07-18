@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -28,8 +28,7 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 		$this
 			->addSkipColumn('image')
 			->addSkipColumn('image_height')
-			->addSkipColumn('image_width')
-			;
+			->addSkipColumn('image_width');
 
 		return parent::setObject($object);
 	}
@@ -110,7 +109,7 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 		$oAdditionalTab->delete($this->getField('shop_order_status_id'));
 
 		$oDropdownlistStatuses = Admin_Form_Entity::factory('Dropdownlist')
-			->options(Shop_Order_Status_Controller_Edit::getDropdownlistOptions())
+			->options(Shop_Order_Status_Controller_Edit::getDropdownlistOptions($this->_object->shop_id))
 			->name('shop_order_status_id')
 			->value($this->_object->shop_order_status_id)
 			->caption(Core::_('Shop_Payment_System.shop_order_status_id'))
@@ -123,7 +122,7 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 		// Добавляем новое поле типа файл
 		$oImageField = Admin_Form_Entity::factory('File');
 
-		$oLargeFilePath = $this->_object->image != '' && is_file($this->_object->getPaymentSystemImageFilePath())
+		$oLargeFilePath = $this->_object->image != '' && Core_File::isFile($this->_object->getPaymentSystemImageFilePath())
 			? $this->_object->getPaymentSystemImageFileHref()
 			: '';
 
@@ -174,11 +173,10 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 
 		$oMainRow6->add($Admin_Form_Entity_Textarea);
 
-		$title = $this->_object->id
-			? Core::_('Shop_Payment_System.system_of_pay_edit_form_title', $this->_object->name)
-			: Core::_('Shop_Payment_System.system_of_pay_add_form_title');
-
-		$this->title($title);
+		$this->title($this->_object->id
+			? Core::_('Shop_Payment_System.system_of_pay_edit_form_title', $this->_object->name, FALSE)
+			: Core::_('Shop_Payment_System.system_of_pay_add_form_title')
+		);
 
 		return $this;
 	}

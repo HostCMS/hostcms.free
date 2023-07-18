@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Schedule
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Schedule_Model extends Core_Entity
 {
@@ -81,7 +81,7 @@ class Schedule_Model extends Core_Entity
 			$aModuleActions = $oSchedule_Controller->getModuleActions($oModule->id);
 
 			return isset($aModuleActions[$this->action])
-				? $aModuleActions[$this->action]
+				? $aModuleActions[$this->action]['value']
 				: NULL;
 		}
 	}

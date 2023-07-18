@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Printlayout
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Printlayout_Module_Controller_Set extends Admin_Form_Action_Controller
 {
@@ -281,7 +281,6 @@ class Printlayout_Module_Controller_Set extends Admin_Form_Action_Controller
 				</div>
 				<?php
 			}
-
 		}
 
 		return ob_get_clean();

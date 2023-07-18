@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Wysiwyg
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Wysiwyg_Filemanager_File extends Core_Entity
 {
@@ -452,12 +452,21 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 		switch ($actionName)
 		{
 			case 'extract':
-				return substr($this->name, -7) === '.tar.gz';
+				$ext = Core_File::getExtension($this->name);
+
+				return substr($this->name, -7) === '.tar.gz' && extension_loaded('zlib')
+					|| $ext == 'tar'
+					|| $ext = 'bz2' && extension_loaded('bz2');
 			break;
 			case 'edit':
 				$ext = Core_File::getExtension($this->name);
 
-				$aForbiddenExtensions = array('gif', 'png', 'jpg', 'jpeg', 'bmp', 'webp', 'exe', 'pdf', 'odt', 'xls', 'xslx', 'doc', 'docx', 'ppt', 'pptx', 'rtf', 'rar', 'zip', 'gz', 'tar', 'sig');
+				$aForbiddenExtensions = array(
+					'gif', 'png', 'jpg', 'jpeg', 'bmp', 'webp',
+					'pdf', 'odt', 'xls', 'xslx', 'doc', 'docx', 'ppt', 'pptx', 'rtf',
+					'zip', 'gz', 'tar', 'bz2', 'rar',
+					'exe', 'sig'
+				);
 
 				if (in_array(mb_strtolower($ext), $aForbiddenExtensions))
 				{

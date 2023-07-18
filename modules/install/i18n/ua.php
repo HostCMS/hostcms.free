@@ -50,7 +50,7 @@ return array(
 
 	'step_5_warning1' => 'Номер ліцензії і PIN-код можна дізнатися в <a href="https://www.hostcms.ru/users/" target="_blank">особистому кабінеті</a> на нашому сайті в розділі <a href="https://www.hostcms.ru/users/licence/" target="_blank">Ліцензії</a>.',
 	'step_5_warning2' => 'Ви можете не заповнювати ліцензійні дані на цьому етапі, просто натисніть Далі.',
-	'step_5_warning3' => 'У щойно зареєстрованих користувачів список ліцензій буде порожній, ви можете <a href="https://www.hostcms.ru/shop/" target="_blank">придбати ліцензію</a> <i class="fa fa-external-link"></i> або самостійно <a href="https://www.hostcms.ru/users/licence/add-free/" target="_blank">створити ліцензію</a> <i class="fa fa-external-link"></i> для безкоштовної редакції &laquo;Халява&raquo;, натиснувши на кнопку &laquo;+ HostCMS.Халява&raquo;.',
+	'step_5_warning3' => 'У щойно зареєстрованих користувачів список ліцензій буде порожній, ви можете <a href="https://www.hostcms.ru/shop/" target="_blank">придбати ліцензію</a> <i class="fa fa-external-link"></i> або самостійно <a href="https://www.hostcms.ru/users/licence/add-free/" target="_blank">створити ліцензію</a> <i class="fa fa-external-link"></i> для безкоштовної редакції &laquo;Старт&raquo;, натиснувши на кнопку &laquo;+ HostCMS.Старт&raquo;.',
 	
 	'write_error' => 'Помилка запису у файл %s.',
 	'template_data_information' => 'Внесені дані будуть використані в макеті.',

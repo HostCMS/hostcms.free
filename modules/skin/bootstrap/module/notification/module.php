@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 {
@@ -103,7 +103,7 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 						$oNotifications->queryBuilder()
 							->where('notification_users.read', '=', 0);
 					} */
-					
+
 					$oNotifications->queryBuilder()
 						->where('notification_users.read', '=', 0);
 
@@ -112,8 +112,6 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 
 					do {
 						$aNotifications = array_reverse($oNotifications->findAll(FALSE));
-						
-						
 
 						// Уведомления пользователя
 						foreach ($aNotifications as $oNotification)
@@ -165,7 +163,7 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 
 						$current++;
 
-					} while ($current < $steps);
+					} while ($current <= $steps);
 
 					$aJson['lastNotificationId'] = count($aJson['newNotifications'])
 						? intval($aJson['newNotifications'][count($aJson['newNotifications']) - 1]['id'])

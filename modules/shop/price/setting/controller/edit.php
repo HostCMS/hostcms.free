@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -77,7 +77,7 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 
 			if (!is_null($oModule))
 			{
-				$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, 10, 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_price_id=0&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
+				$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, $this->_object->getEntityType(), 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_price_id=0&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
 			}
 
 			$printlayoutsButton .= '
@@ -419,23 +419,22 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 				$.prepareShopPrices();
 
 				$('#{$windowId} .shop-item-table tr:last-child').find('.set-item-new-price').focus();
-				$.focusAutocomplete($('#{$windowId} .set-item-new-price'));
+				$.focusAutocomplete($('#{$windowId} .set-item-new-price'), $('#{$windowId} .add-shop-item'));
 			});
 
 			$.changeShopPrices($('#{$windowId} .set-item-new-price'));
 
 			$.prepareShopPrices();
 
-			$.focusAutocomplete($('#{$windowId} .set-item-new-price'));
+			$.focusAutocomplete($('#{$windowId} .set-item-new-price'), $('#{$windowId} .add-shop-item'));
 		");
 
 		$oShopItemRow2->add($oCore_Html_Entity_Script);
 
-		$title = $this->_object->id
-			? Core::_('Shop_Price_Setting.edit_form_title', $this->_object->number)
-			: Core::_('Shop_Price_Setting.add_form_title');
-
-		$this->title($title);
+		$this->title($this->_object->id
+			? Core::_('Shop_Price_Setting.edit_form_title', $this->_object->number, FALSE)
+			: Core::_('Shop_Price_Setting.add_form_title')
+		);
 
 		return $this;
 	}

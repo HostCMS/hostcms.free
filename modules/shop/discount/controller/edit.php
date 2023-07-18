@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -93,10 +93,19 @@ class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 				$this->getField('description')->rows(7)->wysiwyg(Core::moduleIsActive('wysiwyg'));
 				$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2);
 
-				$oMainTab->move($this->getField('start_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-4')), $oMainRow3);
-				$oMainTab->move($this->getField('end_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-4')), $oMainRow3);
+				$sColorValue = ($this->_object->id && $this->getField('color')->value)
+				? $this->getField('color')->value
+				: '#aebec4';
+
+				$this->getField('color')
+					->colorpicker(TRUE)
+					->value($sColorValue);
+
+				$oMainTab->move($this->getField('start_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-2')), $oMainRow3);
+				$oMainTab->move($this->getField('end_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-2')), $oMainRow3);
 				$oMainTab->move($this->getField('start_time')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-2')), $oMainRow3);
 				$oMainTab->move($this->getField('end_time')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-2')), $oMainRow3);
+				$oMainTab->move($this->getField('color')->set('data-control', 'hue')->divAttr(array('class' => 'form-group col-xs-6 col-sm-4 col-md-3')), $oMainRow3);
 
 				$oDaysBlock
 					->add(Admin_Form_Entity::factory('Div')
@@ -209,7 +218,7 @@ class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 				$oMainTab->move($this->getField('coupon_text')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 col-lg-3' . $hidden)), $oMainRow1);
 
 				$title = $this->_object->id
-					? Core::_('Shop_Discount.item_discount_edit_form_title', $this->_object->name)
+					? Core::_('Shop_Discount.item_discount_edit_form_title', $this->_object->name, FALSE)
 					: Core::_('Shop_Discount.item_discount_add_form_title');
 			break;
 			case 'shop_discount_dir':
@@ -238,7 +247,7 @@ class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 				$oMainTab->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow3);
 
 				$title = $this->_object->id
-					? Core::_('Shop_Discount_Dir.edit_title', $this->_object->name)
+					? Core::_('Shop_Discount_Dir.edit_title', $this->_object->name, FALSE)
 					: Core::_('Shop_Discount_Dir.add_title');
 			break;
 		}

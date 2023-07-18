@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Menu extends Admin_Form_Entity
 {
@@ -81,7 +81,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Menu extends Admin_Form_Entity
 			->set('data-toggle', 'dropdown');
 
 		$bHasName && $oCore_Html_Entity_A->add(
-			Core_Html_Entity::factory('Code')->value(htmlspecialchars($this->name))
+			Core_Html_Entity::factory('Code')->value(htmlspecialchars((string) $this->name))
 		);
 
 		$oCore_Html_Entity_A->execute();

@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Install
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Install_Controller
 {
@@ -125,7 +125,7 @@ class Install_Controller
 
 		$extension = '';
 
-		if (is_dir($dirname) && !is_link($dirname) && $handle = @opendir($dirname))
+		if (Core_File::isDir($dirname) && !Core_File::isLink($dirname) && $handle = @opendir($dirname))
 		{
 			// Шаблон сравнения
 			$str = "/^{$filename}.([a-zA-Z]*)$/";
@@ -183,7 +183,7 @@ class Install_Controller
 		// Путь к директории хранения файлов информационного элемента
 		$item_dir = $oInformationsystem_Item->getItemPath();
 
-		if (is_file($information_item_image_from))
+		if (Core_File::isFile($information_item_image_from))
 		{
 			$information_item_image_to = $item_dir . "item_{$targetInformationsystemItemId}" . $ext;
  			Core_File::copy($information_item_image_from, $information_item_image_to);
@@ -218,7 +218,7 @@ class Install_Controller
 			$ext = '.' . Core_File::getExtension($smallFileName);
 		}
 
-		if (is_file($information_item_small_image_from))
+		if (Core_File::isFile($information_item_small_image_from))
 		{
 			$information_item_small_image_to = $item_dir . "small_item_{$targetInformationsystemItemId}" . $ext;
 			Core_File::copy($information_item_small_image_from, $information_item_small_image_to);
@@ -274,7 +274,7 @@ class Install_Controller
 		// Путь к директории хранения файлов информационной группы
 		$group_dir = $oInformationsystem_Group->getGroupPath();
 
-		if (is_file($information_group_image_from))
+		if (Core_File::isFile($information_group_image_from))
 		{
 			$information_group_image_to = $group_dir . "group_{$targetInformationsystemGroupId}" . $ext;
 
@@ -304,7 +304,7 @@ class Install_Controller
 			$ext = '.' . Core_File::getExtension($smallFileName);
 		}
 
-		if (is_file($information_group_small_image_from))
+		if (Core_File::isFile($information_group_small_image_from))
 		{
 			$information_group_small_image_to = $group_dir . "small_group_{$targetInformationsystemGroupId}" . $ext;
 			Core_File::copy($information_group_small_image_from, $information_group_small_image_to);
@@ -351,7 +351,7 @@ class Install_Controller
 		$oValue = $oProperty->createNewValue($informationsystemItemId);
 		$oValue->save();
 
-		if (is_file($information_item_property_image_from))
+		if (Core_File::isFile($information_item_property_image_from))
 		{
 			$information_item_property_image_to = $item_dir . "information_items_property_{$oValue->id}" . $ext;
 			Core_File::copy($information_item_property_image_from, $information_item_property_image_to);
@@ -369,7 +369,7 @@ class Install_Controller
 		}
 		$information_item_property_small_image_from .= $ext;
 
-		if (is_file($information_item_property_small_image_from))
+		if (Core_File::isFile($information_item_property_small_image_from))
 		{
 			$information_item_property_small_image_to = $item_dir . "small_information_items_property_{$oValue->id}" . $ext;
 			Core_File::copy($information_item_property_small_image_from, $information_item_property_small_image_to);
@@ -417,7 +417,7 @@ class Install_Controller
 		$oValue = $oProperty->createNewValue($informationsystemGroupId);
 		$oValue->save();
 
-		if (is_file($information_group_property_image_from))
+		if (Core_File::isFile($information_group_property_image_from))
 		{
 			$information_group_property_image_to = $group_dir . "information_groups_property_" . $oValue->id . $ext;
 			Core_File::copy($information_group_property_image_from, $information_group_property_image_to);
@@ -435,7 +435,7 @@ class Install_Controller
 		}
 		$information_group_property_small_image_from .= $ext;
 
-		if (is_file($information_group_property_small_image_from))
+		if (Core_File::isFile($information_group_property_small_image_from))
 		{
 			$information_group_property_small_image_to = $group_dir . "small_information_items_property_" . $oValue->id . $ext;
 			Core_File::copy($information_group_property_small_image_from, $information_group_property_small_image_to);
@@ -484,7 +484,7 @@ class Install_Controller
 		// Путь к директории хранения файлов товара
 		$item_dir = $oShop_Item->getItemPath();
 
-		if (is_file($shop_item_image_from))
+		if (Core_File::isFile($shop_item_image_from))
 		{
 			$shop_item_image_to = $item_dir . "item_{$targetShopItemId}" . $ext;
 
@@ -520,7 +520,7 @@ class Install_Controller
 			$ext = '.' . Core_File::getExtension($smallFileName);
 		}
 
-		if (is_file($shop_item_small_image_from))
+		if (Core_File::isFile($shop_item_small_image_from))
 		{
 			$shop_item_small_image_to = $item_dir . "small_item_{$targetShopItemId}" . $ext;
 			Core_File::copy($shop_item_small_image_from, $shop_item_small_image_to);
@@ -574,7 +574,7 @@ class Install_Controller
 
 		$group_dir = $oShop_Group->getGroupPath();
 
-		if (is_file($shop_group_image_from))
+		if (Core_File::isFile($shop_group_image_from))
 		{
 			$shop_group_image_to = $group_dir . "group_{$shopGroupId}" . $ext;
 			Core_File::copy($shop_group_image_from, $shop_group_image_to);
@@ -610,7 +610,7 @@ class Install_Controller
 			$ext = '.' . Core_File::getExtension($smallFileName);
 		}
 
-		if (is_file($shop_group_small_image_from))
+		if (Core_File::isFile($shop_group_small_image_from))
 		{
 			$shop_group_small_image_to = $group_dir . "small_group_{$shopGroupId}" . $ext;
 			Core_File::copy($shop_group_small_image_from, $shop_group_small_image_to);
@@ -660,7 +660,7 @@ class Install_Controller
 		$oValue = $oProperty->createNewValue($shopItemId);
 		$oValue->save();
 
-		if (is_file($shop_item_property_image_from))
+		if (Core_File::isFile($shop_item_property_image_from))
 		{
 			$shop_item_property_image_to = $item_dir . "shop_property_file_{$shopItemId}_{$oValue->id}" . $ext;
 			Core_File::copy($shop_item_property_image_from, $shop_item_property_image_to);
@@ -680,7 +680,7 @@ class Install_Controller
 
 		$shop_item_property_small_image_from .= $ext;
 
-		if (is_file($shop_item_property_small_image_from))
+		if (Core_File::isFile($shop_item_property_small_image_from))
 		{
 			$shop_item_property_small_image_to = $item_dir . "small_shop_property_file_{$shopItemId}_{$oValue->id}" . $ext;
 
@@ -722,7 +722,7 @@ class Install_Controller
 		$oValue = $oProperty->createNewValue($shopGroupId);
 		$oValue->save();
 
-		if (is_file($shop_group_property_image_from))
+		if (Core_File::isFile($shop_group_property_image_from))
 		{
 			$shop_group_property_image_to = $group_dir . "shop_property_file_{$shopGroupId}_{$oValue->id}" . $ext;
 			Core_File::copy($shop_group_property_image_from, $shop_group_property_image_to);
@@ -742,7 +742,7 @@ class Install_Controller
 
 		$shop_group_property_small_image_from .= $ext;
 
-		if (is_file($shop_group_property_small_image_from))
+		if (Core_File::isFile($shop_group_property_small_image_from))
 		{
 			$shop_group_property_small_image_to = $group_dir . "small_shop_property_file_{$shopGroupId}_{$oValue->id}" . $ext;
 
@@ -791,7 +791,7 @@ class Install_Controller
 		$oValue = $oProperty->createNewValue($structureId);
 		$oValue->save();
 
-		if (is_file($structure_file_path_from))
+		if (Core_File::isFile($structure_file_path_from))
 		{
 			$structure_file_path_to = $structure_dir . "structure_property_image_{$oValue->id}" . $ext;
 			Core_File::copy($structure_file_path_from, $structure_file_path_to);
@@ -810,7 +810,7 @@ class Install_Controller
 		}
 		$structure_small_file_path_from .= $ext;
 
-		if (is_file($structure_small_file_path_from))
+		if (Core_File::isFile($structure_small_file_path_from))
 		{
 			$structure_small_file_path_to = $structure_dir . "small_structure_property_image_{$oValue->id}" . $ext;
 			Core_File::copy($structure_small_file_path_from, $structure_small_file_path_to);
@@ -844,7 +844,7 @@ class Install_Controller
 		}
 		$shop_producer_image_from .= $ext;
 
-		if (is_file($shop_producer_image_from))
+		if (Core_File::isFile($shop_producer_image_from))
 		{
 			$shop_producer_image_to = $producer_dir . "shop_producer_image{$shopProducerId}" . $ext;
 			Core_File::copy($shop_producer_image_from, $shop_producer_image_to);
@@ -863,7 +863,7 @@ class Install_Controller
 		}
 		$shop_producer_small_image_from .= $ext;
 
-		if (is_file($shop_producer_small_image_from))
+		if (Core_File::isFile($shop_producer_small_image_from))
 		{
 			$shop_producer_small_image_to = $producer_dir . "small_shop_group_image{$shopProducerId}" . $ext;
 			Core_File::copy($shop_producer_small_image_from, $shop_producer_small_image_to);

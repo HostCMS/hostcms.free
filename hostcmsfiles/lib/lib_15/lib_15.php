@@ -52,74 +52,81 @@ foreach ($aSourcesList as $url)
 
 					if (isset($aItem['enclosure']['url']) && strpos($aItem['enclosure']['url'], 'http') === 0)
 					{
-						$Core_Http = Core_Http::instance()
-							->url($aItem['enclosure']['url'])
-							->port(80)
-							->timeout(5)
-							->execute();
-
 						// Определяем расширение файла
 						$ext = Core_File::getExtension($aItem['enclosure']['url']);
 
 						$temp_file = tempnam(TMP_DIR, 'rss') . '.' . $ext;
-						Core_File::write($temp_file, $Core_Http->getDecompressedBody());
 
-						$param = array();
-
-						// Путь к файлу-источнику большого изображения;
-						$param['large_image_source'] = $temp_file;
-
-						$large_image = 'information_items_' . $oInformationsystem_Item->id . '.' . $ext;
-						$small_image = 'small_' . $large_image;
-
-						// Оригинальное имя файла большого изображения
-						$param['large_image_name'] = $large_image;
-
-						// Оригинальное имя файла малого изображения
-						$param['small_image_name'] = $small_image;
-
-						// Путь к создаваемому файлу большого изображения;
-						$param['large_image_target'] = $oInformationsystem_Item->getItemPath() . $large_image;
-
-						// Путь к создаваемому файлу малого изображения;
-						$param['small_image_target'] = $oInformationsystem_Item->getItemPath() . $small_image;
-
-						// Использовать большое изображение для создания малого
-						$param['create_small_image_from_large'] = TRUE;
-						$param['watermark_file_path'] = $oInformationsystem->getWatermarkFilePath();
-						$param['watermark_position_x'] = $oInformationsystem->watermark_default_position_x;
-						$param['watermark_position_y'] = $oInformationsystem->watermark_default_position_y;
-						$param['large_image_preserve_aspect_ratio'] = $oInformationsystem->preserve_aspect_ratio;
-						$param['small_image_max_width'] = $oInformationsystem->image_small_max_width;
-						$param['small_image_max_height'] = $oInformationsystem->image_small_max_height;
-						$param['small_image_watermark'] = $oInformationsystem->watermark_default_use_small_image;
-						$param['small_image_preserve_aspect_ratio'] = $oInformationsystem->preserve_aspect_ratio_small;
-						$param['large_image_max_width'] = $oInformationsystem->image_large_max_width;
-						$param['large_image_max_height'] = $oInformationsystem->image_large_max_height;
-						$param['large_image_watermark'] = $oInformationsystem->watermark_default_use_large_image;
-
-						$oInformationsystem_Item->createDir();
-
-						$result = Core_File::adminUpload($param);
-
-						if ($result['large_image'])
+						try
 						{
-							$oInformationsystem_Item->image_large = $large_image;
-							$oInformationsystem_Item->setLargeImageSizes();
-						}
+							$Core_Http = Core_Http::instance()
+								->url($aItem['enclosure']['url'])
+								->timeout(10)
+								->execute();
 
-						if ($result['small_image'])
-						{
-							$oInformationsystem_Item->image_small = $small_image;
-							$oInformationsystem_Item->setSmallImageSizes();
+							Core_File::write($temp_file, $Core_Http->getDecompressedBody());
+
+							$param = array();
+
+							// Путь к файлу-источнику большого изображения;
+							$param['large_image_source'] = $temp_file;
+
+							$large_image = 'information_items_' . $oInformationsystem_Item->id . '.' . $ext;
+							$small_image = 'small_' . $large_image;
+
+							// Оригинальное имя файла большого изображения
+							$param['large_image_name'] = $large_image;
+
+							// Оригинальное имя файла малого изображения
+							$param['small_image_name'] = $small_image;
+
+							// Путь к создаваемому файлу большого изображения;
+							$param['large_image_target'] = $oInformationsystem_Item->getItemPath() . $large_image;
+
+							// Путь к создаваемому файлу малого изображения;
+							$param['small_image_target'] = $oInformationsystem_Item->getItemPath() . $small_image;
+
+							// Использовать большое изображение для создания малого
+							$param['create_small_image_from_large'] = TRUE;
+							$param['watermark_file_path'] = $oInformationsystem->getWatermarkFilePath();
+							$param['watermark_position_x'] = $oInformationsystem->watermark_default_position_x;
+							$param['watermark_position_y'] = $oInformationsystem->watermark_default_position_y;
+							$param['large_image_preserve_aspect_ratio'] = $oInformationsystem->preserve_aspect_ratio;
+							$param['small_image_max_width'] = $oInformationsystem->image_small_max_width;
+							$param['small_image_max_height'] = $oInformationsystem->image_small_max_height;
+							$param['small_image_watermark'] = $oInformationsystem->watermark_default_use_small_image;
+							$param['small_image_preserve_aspect_ratio'] = $oInformationsystem->preserve_aspect_ratio_small;
+							$param['large_image_max_width'] = $oInformationsystem->image_large_max_width;
+							$param['large_image_max_height'] = $oInformationsystem->image_large_max_height;
+							$param['large_image_watermark'] = $oInformationsystem->watermark_default_use_large_image;
+
+							$oInformationsystem_Item->createDir();
+
+							$result = Core_File::adminUpload($param);
+
+							if ($result['large_image'])
+							{
+								$oInformationsystem_Item->image_large = $large_image;
+								$oInformationsystem_Item->setLargeImageSizes();
+							}
+
+							if ($result['small_image'])
+							{
+								$oInformationsystem_Item->image_small = $small_image;
+								$oInformationsystem_Item->setSmallImageSizes();
+							}
 						}
+						catch (Exception $e) {
+							Core_Message::show('<p>Error while reading image ' . htmlspecialchars($aItem['enclosure']['url']) . ', ' . $e->getMessage(), 'error');
+						};
 
 						$oInformationsystem_Item->save();
 
-						Core_File::delete($temp_file);
-
-						$iImported++;
+						is_file($temp_file)
+							&& Core_File::delete($temp_file);
 					}
+
+					$iImported++;
 				}
 			}
 		}

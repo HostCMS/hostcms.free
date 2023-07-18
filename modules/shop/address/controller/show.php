@@ -9,12 +9,21 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * - countries(TRUE|FALSE) выводить в XML данные о странах.
  * - orderProperties(TRUE|FALSE|array()) выводить список дополнительных свойств заказа, по умолчанию TRUE.
+ * - addAllowedTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, разрешенных к передаче в генерируемый XML
+ * - addForbiddenTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, запрещенных к передаче в генерируемый XML
+ *
+ * Доступные пути для методов addAllowedTags/addForbiddenTags:
+ *
+ * - '/' или '/shop' Магазин
+ * - '/shop/shop_order_properties/property' Свойство в списке свойств заказов
+ * - '/shop/shop_order_properties/property_dir' Раздел свойств в списке свойств заказов
+ * - '/shop/shop_country' Страна
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Address_Controller_Show extends Core_Controller
 {
@@ -94,22 +103,26 @@ class Shop_Address_Controller_Show extends Core_Controller
 
 			foreach ($aProperties as $oProperty)
 			{
-				$this->_aOrder_Properties[$oProperty->property_dir_id][] = $oProperty->clearEntities();
+				$oProperty->clearEntities();
+				$this->applyForbiddenAllowedTags('/shop/shop_order_properties/property', $oProperty);
+				$this->_aOrder_Properties[$oProperty->property_dir_id][] = $oProperty;
 
 				$oShop_Order_Property = $oProperty->Shop_Order_Property;
-				$oProperty->addEntity(
-					Core::factory('Core_Xml_Entity')->name('prefix')->value($oShop_Order_Property->prefix)
-				)
-				->addEntity(
-					Core::factory('Core_Xml_Entity')->name('display')->value($oShop_Order_Property->display)
-				);
+				$oProperty
+					->addEntity(
+						Core::factory('Core_Xml_Entity')->name('prefix')->value($oShop_Order_Property->prefix)
+					)
+					->addEntity(
+						Core::factory('Core_Xml_Entity')->name('display')->value($oShop_Order_Property->display)
+					);
 			}
 
 			$aProperty_Dirs = $oShop_Order_Property_List->Property_Dirs->findAll();
 			foreach ($aProperty_Dirs as $oProperty_Dir)
 			{
 				$oProperty_Dir->clearEntities();
-				$this->_aOrder_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir->clearEntities();
+				$this->applyForbiddenAllowedTags('/shop/shop_order_properties/property_dir', $oProperty_Dir);
+				$this->_aOrder_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
 			}
 
 			// Список свойств товаров
@@ -121,9 +134,17 @@ class Shop_Address_Controller_Show extends Core_Controller
 			$this->_addOrdersPropertiesList(0, $Shop_Order_Properties);
 		}
 
-		$this->countries && $this->addEntities(
-			Core_Entity::factory('Shop_Country')->getAllByActive(1, FALSE)
-		);
+		if ($this->countries)
+		{
+			$aShop_Countries = Core_Entity::factory('Shop_Country')->getAllByActive(1, FALSE);
+
+			foreach ($aShop_Countries as $oShop_Country)
+			{
+				$oShop_Country->clearEntities();
+				$this->applyForbiddenAllowedTags('/shop/shop_country', $oShop_Country);
+				$this->addEntity($oShop_Country);
+			}
+		}
 
 		/*if (!is_null($this->_Siteuser) && strlen($this->_Siteuser->country))
 		{

@@ -1,14 +1,5 @@
 <?php
 
-/**
- * Core.
- *
- * @package HostCMS
- * @subpackage Core
- * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
 return array(
 	'error_file_write' => 'Ошибка открытия файла для записи %s, проверьте права доступа к директории.',
 	'error_resize' => 'Ошибка уменьшения малого изображения до максимально допустимого размера. Вероятной причиной является указание размера изображения меньше 0.',
@@ -39,7 +30,8 @@ return array(
 
 	'total_time' => 'Время выполнения: <strong>%.3f</strong> с, из них',
 	'time_load_modules' => "загрузки модулей: <strong>%.3f</strong> с",
-	'time_page' => "макета и страницы: <strong>%.3f</strong> с",
+	'time_template' => "макета и страницы: <strong>%.3f</strong> с",
+	'time_page' => "кода страницы: <strong>%.3f</strong> с",
 	'time_page_config' => "настроек страницы: <strong>%.3f</strong> с",
 	'time_database_connection' => "соединения с СУБД: <strong>%.3f</strong> с",
 	'time_database_select' => "выбора БД: <strong>%.3f</strong> с",
@@ -69,13 +61,14 @@ return array(
 	'error_log_access_was_denied' => "Доступ к модулю '%s' запрещен",
 	'error_log_module_disabled' => "Модуль '%s' отключен",
 	'error_log_module_access_allowed' => "Доступ к модулю \"%s\" разрешен",
-	'error_log_action_access_allowed' => "Выполнено действие \"%s\", формы \"%s\"",
+	'error_log_action_access_allowed' => "Действие \"%s\" формы \"%s\"",
 	'error_log_logged' => "Вход в систему управления",
 	'error_log_authorization_error' => 'Неверные данные для аутентификации',
 	'error_log_exit' => 'Выход из системы управления',
 	'session_destroy_error' => 'Ошибка закрытия сеанса',
+	'session_change_ip' => 'Попытка использования сессии %s с IP %s',
 
-	'error_message' => "Здравствуйте!\n"
+	'error_message' => "Здравствуйте!\n\n"
 	. "Только что на сайте произошло событие, информация о котором представлена ниже:\n"
 	. "Дата: %s\n"
 	. "Событие: %s\n"
@@ -83,9 +76,10 @@ return array(
 	. "Пользователь: %s\n"
 	. "Сайт: %s\n"
 	. "Страница: %s\n"
-	. "IP-адрес: %s\n"
-	. "Система управления сайтом %s,\n"
-	. "http://%s/\n",
+	. "User Agent: %s\n"
+	. "IP-адрес: %s\n\n"
+	. "Система управления сайтом HostCMS,\n"
+	. "https://www.hostcms.ru",
 
 	'E_ERROR' => "Ошибка",
 	'E_WARNING' => "Предупреждение",
@@ -120,7 +114,7 @@ return array(
 	<img src="//www.hostcms.ru/images/documentation/guide/site/licenses-list.png" class="img-responsive" />
 	</p>
 
-	<p>Коммерческие пользователи могут узнать свой номер лицензии и PIN-код из таблицы в разделе «Лицензии» личного кабинета, пользователи HostCMS.Халява могут добавить новую лицензию.</p>
+	<p>Коммерческие пользователи могут узнать свой номер лицензии и PIN-код из таблицы в разделе «Лицензии» личного кабинета, пользователи HostCMS.Старт могут добавить новую лицензию.</p>
 	<p>Узнав номер лицензии и PIN-код можно вернуться в <a href="/admin/" target="_blank">центр администрирования</a> и ввести эти данные в разделе «Система» → «Сайты» → пункт меню «Настройки» → «Регистрационные данные».</p>
 
 	<h2>Получение ключа <a href="https://www.hostcms.ru/documentation/introduction/key/key/" target="_blank"><i class="fa fa-external-link"></i></a></h2>
@@ -146,7 +140,7 @@ return array(
 	'extension_does_not_allow' => 'Загружать файл с расширением "%s" запрещено.',
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
-	'redaction0' => 'Халява',
+	'redaction0' => 'Старт',
 	'redaction1' => 'Мой сайт',
 	'redaction3' => 'Малый бизнес',
 	'redaction5' => 'Бизнес',
@@ -219,6 +213,8 @@ return array(
 	'day' => 'День',
 	'month' => 'Месяц',
 	'year' => 'Год',
+	'quarter' => 'Квартал',
+	
 	'random' => 'Случайный',
 	'generateChars' => 'Символы',
 
@@ -243,4 +239,12 @@ return array(
 
 	'show_title' => 'Показывать',
 	'data_show_title' => 'Показывать на сайте',
+	
+	'unpack_wrong_crc' => 'Ошибка расчета контрольной суммы %s: %d рассчитана, %d фактически указана',
+	'unpack_file_already_exists_and_directory' => 'Файл %s уже существует и является директорией',
+	'unpack_dir_already_exists_and_file' => 'Директория %s уже существует и является файлом',
+	'unpack_file_already_exists_and_protected' => 'Файл %s уже существует и защищен от записи! Установите права доступа к файлу в соответствии с руководством по установке.',
+	'unpack_error_creating_dir' => 'Ошибка создания директории для %s',
+	'unpack_error_opening_binary_mode' => 'Ошибка открытия файла %s в бинарном режиме',
+	'unpack_file_incorrect_size' => 'Извлеченный файл %s имеет некорректный размер %d, ожидается %d. Архив может быть поврежден.',
 );

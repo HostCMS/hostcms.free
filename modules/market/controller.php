@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Market
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Market_Controller extends Core_Servant_Properties
 {
@@ -87,7 +87,7 @@ class Market_Controller extends Core_Servant_Properties
 
 		$this->options = $this->items = array();
 		$this->page = 1;
-		$this->limit = 9;
+		$this->limit = 15;
 		$this->error = 0;
 	}
 
@@ -192,14 +192,14 @@ class Market_Controller extends Core_Servant_Properties
 		$md5_contract = md5($this->contract);
 		$md5_pin = md5($this->pin);
 
-		$url = 'https://' . $this->update_server . "/hostcmsupdate/market/?action=load_market&domain=" . rawurlencode($this->domain) .
-			'&protocol=' . rawurlencode($this->protocol) .
-			"&login=" . rawurlencode($this->login) .
+		$url = 'https://' . $this->update_server . "/hostcmsupdate/market/?action=load_market&domain=" . rawurlencode((string) $this->domain) .
+			'&protocol=' . rawurlencode((string) $this->protocol) .
+			"&login=" . rawurlencode((string) $this->login) .
 			"&contract=" . rawurlencode($md5_contract) .
 			"&pin=" . rawurlencode($md5_pin) .
-			"&cms_folder=" . rawurlencode($this->cms_folder) .
-			"&php_version=" . rawurlencode($this->php_version) .
-			"&mysql_version=" . rawurlencode($this->mysql_version) .
+			"&cms_folder=" . rawurlencode((string) $this->cms_folder) .
+			"&php_version=" . rawurlencode((string) $this->php_version) .
+			"&mysql_version=" . rawurlencode((string) $this->mysql_version) .
 			"&update_id=" . $this->update_id .
 			"&current=" . intval($this->page) .
 			"&limit=" . intval($this->limit);
@@ -323,9 +323,9 @@ class Market_Controller extends Core_Servant_Properties
 	{
 		Core_Database::instance()->query('SET SESSION wait_timeout = 600');
 
-		$url = 'https://' . $this->update_server . "/hostcmsupdate/market/?action=get_module&domain=" . rawurlencode($this->domain) .
-			'&protocol=' . rawurlencode($this->protocol) .
-			'&login=' . rawurlencode($this->login) .
+		$url = 'https://' . $this->update_server . "/hostcmsupdate/market/?action=get_module&domain=" . rawurlencode((string) $this->domain) .
+			'&protocol=' . rawurlencode((string) $this->protocol) .
+			'&login=' . rawurlencode((string) $this->login) .
 			'&contract=' . rawurlencode(md5($this->contract)) .
 			'&pin=' . rawurlencode(md5($this->pin)) .
 			'&cms_folder=' . rawurlencode($this->cms_folder) .
@@ -419,15 +419,15 @@ class Market_Controller extends Core_Servant_Properties
 						$this->tmpDir = $this->getPath() . DIRECTORY_SEPARATOR . $this->_Module->shop_item_id;
 
 						// Удаляем директорию с данными предыдущей установки (20 mins)
-						$bExists = is_dir($this->tmpDir)
-							&& is_file($this->tmpDir . DIRECTORY_SEPARATOR . 'module.xml')
+						$bExists = Core_File::isDir($this->tmpDir)
+							&& Core_File::isFile($this->tmpDir . DIRECTORY_SEPARATOR . 'module.xml')
 							&& filemtime($this->tmpDir) + 60*20 > time();
 
 						if (!$bExists)
 						{
 							if ($this->_Module->file != '')
 							{
-								is_dir($this->tmpDir) && Core_File::deleteDir($this->tmpDir);
+								Core_File::isDir($this->tmpDir) && Core_File::deleteDir($this->tmpDir);
 
 								// Создаем директорию снова
 								Core_File::mkdir($this->tmpDir, CHMOD, TRUE);
@@ -442,7 +442,7 @@ class Market_Controller extends Core_Servant_Properties
 								if (Core_File::filesize($source_file))
 								{
 									// Распаковываем файлы
-									$Core_Tar = new Core_Tar($source_file);
+									$Core_Tar = new Core_Tar($source_file, 'gz');
 									if (!$Core_Tar->extractModify($this->tmpDir, $this->tmpDir))
 									{
 										// Возникла ошибка распаковки
@@ -722,7 +722,7 @@ class Market_Controller extends Core_Servant_Properties
 	{
 		$sModuleXmlPath = $this->tmpDir . DIRECTORY_SEPARATOR . 'module.xml';
 
-		if (is_file($sModuleXmlPath))
+		if (Core_File::isFile($sModuleXmlPath))
 		{
 			$sModuleXml = Core_File::read($sModuleXmlPath);
 			$this->_ModuleXml = simplexml_load_string($sModuleXml);
@@ -760,7 +760,7 @@ class Market_Controller extends Core_Servant_Properties
 					if ($sFieldType == 'file')
 					{
 						if (isset($_FILES[$sFieldName]['tmp_name'])
-						&& is_file($_FILES[$sFieldName]['tmp_name'])
+						&& Core_File::isFile($_FILES[$sFieldName]['tmp_name'])
 						&& $_FILES[$sFieldName]['size'] > 0)
 						{
 							$sFieldPath = ltrim($aFieldsValue['Path'], '/');
@@ -807,7 +807,7 @@ class Market_Controller extends Core_Servant_Properties
 	{
 		// Копируем файлы из ./files/ в папку системы
 		$sFilesDir = $this->tmpDir . DIRECTORY_SEPARATOR . 'files';
-		if (is_dir($sFilesDir))
+		if (Core_File::isDir($sFilesDir))
 		{
 			Core_Log::instance()->clear()
 				->status(Core_Log::$MESSAGE)
@@ -843,7 +843,7 @@ class Market_Controller extends Core_Servant_Properties
 
 		// Стандартный файл module.sql из поставки модуля
 		$sSqlModuleFilename = $this->tmpDir . DIRECTORY_SEPARATOR . 'module.sql';
-		if (is_file($sSqlModuleFilename))
+		if (Core_File::isFile($sSqlModuleFilename))
 		{
 			Core_Log::instance()->clear()
 				->status(Core_Log::$MESSAGE)
@@ -855,7 +855,7 @@ class Market_Controller extends Core_Servant_Properties
 
 		// Стандартный файл module.php из поставки модуля
 		$sPhpModuleFilename = $this->tmpDir . DIRECTORY_SEPARATOR . 'module.php';
-		if (is_file($sPhpModuleFilename))
+		if (Core_File::isFile($sPhpModuleFilename))
 		{
 			Core_Log::instance()->clear()
 				->status(Core_Log::$MESSAGE)
@@ -903,7 +903,7 @@ class Market_Controller extends Core_Servant_Properties
 		clearstatcache();
 
 		// Удаляем папку с файлами в случае с успешной установкой
-		is_dir($this->tmpDir) && Core_File::deleteDir($this->tmpDir);
+		Core_File::isDir($this->tmpDir) && Core_File::deleteDir($this->tmpDir);
 	}
 
 	/**
@@ -973,15 +973,15 @@ class Market_Controller extends Core_Servant_Properties
 	 */
 	public function getModuleFile($path)
 	{
-		$url = 'https://' . $this->update_server . $path . "&domain=".rawurlencode($this->domain) .
-		'&protocol=' . rawurlencode($this->protocol) .
-		"&login=" . rawurlencode($this->login) .
-		"&contract=" . rawurlencode(md5($this->contract)) .
-		"&pin=" . rawurlencode(md5($this->pin)) .
-		"&cms_folder=" . rawurlencode($this->cms_folder) .
-		"&php_version=" . rawurlencode($this->php_version) .
-		"&mysql_version=" . rawurlencode($this->mysql_version) .
-		"&update_id=" . $this->update_id;
+		$url = 'https://' . $this->update_server . $path . "&domain=".rawurlencode((string) $this->domain) .
+			'&protocol=' . rawurlencode((string) $this->protocol) .
+			"&login=" . rawurlencode((string) $this->login) .
+			"&contract=" . rawurlencode(md5($this->contract)) .
+			"&pin=" . rawurlencode(md5($this->pin)) .
+			"&cms_folder=" . rawurlencode($this->cms_folder) .
+			"&php_version=" . rawurlencode($this->php_version) .
+			"&mysql_version=" . rawurlencode($this->mysql_version) .
+			"&update_id=" . $this->update_id;
 
 		!is_null($this->installMode) && $this->installMode && $url .= '&installMode';
 

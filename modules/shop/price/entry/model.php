@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Price_Entry_Model extends Core_Entity
 {
@@ -48,7 +48,7 @@ class Shop_Price_Entry_Model extends Core_Entity
 		}
 	}
 
-	/*
+	/**
 	 * Get document id
 	 * @param $document_id document ID
 	 * @param $type document type
@@ -56,10 +56,10 @@ class Shop_Price_Entry_Model extends Core_Entity
 	 */
 	protected function _getDocumentId($document_id, $type)
 	{
-		return ($document_id << 8) | $type;
+		return Shop_Controller::getDocumentId($document_id, $type);
 	}
 
-	/*
+	/**
 	 * Set uniq document ID
 	 * @param $document_id document ID
 	 * @param $type document type
@@ -71,7 +71,7 @@ class Shop_Price_Entry_Model extends Core_Entity
 		return $this;
 	}
 
-	/*
+	/**
 	 * Get entries by document id
 	 * @param $document_id document ID
 	 * @param $type document type
@@ -83,7 +83,7 @@ class Shop_Price_Entry_Model extends Core_Entity
 		return $this->getAllBydocument_id($this->_getDocumentId($document_id, $type), $bCache);
 	}
 
-	/*
+	/**
 	 * Delete entries by document id
 	 * @param $document_id document ID
 	 * @param $type document type
@@ -98,20 +98,13 @@ class Shop_Price_Entry_Model extends Core_Entity
 		return $this;
 	}
 
-	/*
+	/**
 	 * Get document type
 	 * @return int|NULL
 	 */
 	public function getDocumentType()
 	{
-		$return = NULL;
-
-		if ($this->document_id)
-		{
-			$return = Core_Bit::extractBits($this->document_id, 8, 1);
-		}
-
-		return $return;
+		return Shop_Controller::getDocumentType($this->document_id);
 	}
 
 	/**

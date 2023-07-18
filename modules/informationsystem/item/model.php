@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Item_Model extends Core_Entity
 {
@@ -404,13 +404,13 @@ class Informationsystem_Item_Model extends Core_Entity
 		$newObject->save();
 
 		// Существует файл большого изображения для оригинального элемента
-		if (is_file($this->getLargeFilePath()))
+		if (Core_File::isFile($this->getLargeFilePath()))
 		{
 			$newObject->saveLargeImageFile($this->getLargeFilePath(), $this->image_large);
 		}
 
 		// Существует файл малого изображения для оригинального элемента
-		if (is_file($this->getSmallFilePath()))
+		if (Core_File::isFile($this->getSmallFilePath()))
 		{
 			$newObject->saveSmallImageFile($this->getSmallFilePath(), $this->image_small);
 		}
@@ -427,7 +427,7 @@ class Informationsystem_Item_Model extends Core_Entity
 				$oPropertyValue->setDir($this->getItemPath());
 				$oNewPropertyValue->setDir($newObject->getItemPath());
 
-				if (is_file($oPropertyValue->getLargeFilePath()))
+				if (Core_File::isFile($oPropertyValue->getLargeFilePath()))
 				{
 					try
 					{
@@ -435,7 +435,7 @@ class Informationsystem_Item_Model extends Core_Entity
 					} catch (Exception $e) {}
 				}
 
-				if (is_file($oPropertyValue->getSmallFilePath()))
+				if (Core_File::isFile($oPropertyValue->getSmallFilePath()))
 				{
 					try
 					{
@@ -521,7 +521,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	{
 		$path = $this->getLargeFilePath();
 
-		if (is_file($path))
+		if (Core_File::isFile($path))
 		{
 			$aSizes = Core_Image::instance()->getImageSize($path);
 			if ($aSizes)
@@ -561,7 +561,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	{
 		$path = $this->getSmallFilePath();
 
-		if (is_file($path))
+		if (Core_File::isFile($path))
 		{
 			$aSizes = Core_Image::instance()->getImageSize($path);
 			if ($aSizes)
@@ -635,7 +635,7 @@ class Informationsystem_Item_Model extends Core_Entity
 			try {
 				Core::$mainConfig['translate'] && $sTranslated = Core_Str::translate($this->name);
 
-				$this->path = Core::$mainConfig['translate'] && strlen($sTranslated)
+				$this->path = Core::$mainConfig['translate'] && strlen((string) $sTranslated)
 					? $sTranslated
 					: $this->name;
 
@@ -687,7 +687,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	 */
 	public function createDir()
 	{
-		if (!is_dir($this->getItemPath()))
+		if (!Core_File::isDir($this->getItemPath()))
 		{
 			try
 			{
@@ -710,7 +710,7 @@ class Informationsystem_Item_Model extends Core_Entity
 		// Удаляем файл малого изображения элемента
 		$this->deleteSmallImage();
 
-		if (is_dir($this->getItemPath()))
+		if (Core_File::isDir($this->getItemPath()))
 		{
 			try
 			{
@@ -728,7 +728,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	public function deleteLargeImage()
 	{
 		$fileName = $this->getLargeFilePath();
-		if ($this->image_large != '' && is_file($fileName))
+		if ($this->image_large != '' && Core_File::isFile($fileName))
 		{
 			try
 			{
@@ -748,7 +748,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	public function deleteSmallImage()
 	{
 		$fileName = $this->getSmallFilePath();
-		if ($this->image_small != '' && is_file($fileName))
+		if ($this->image_small != '' && Core_File::isFile($fileName))
 		{
 			try
 			{
@@ -1416,30 +1416,30 @@ class Informationsystem_Item_Model extends Core_Entity
 
 		$this->clearXmlTags();
 
-		!isset($this->_forbiddenTags['url'])
+		$this->_isTagAvailable('url')
 			&& $this->addXmlTag('url', $this->Informationsystem->Structure->getPath() . $this->getPath());
 
-		!isset($this->_forbiddenTags['date'])
+		$this->_isTagAvailable('date')
 			&& $this->addXmlTag('date', Core_Date::strftime($oInformationsystem->format_date, Core_Date::sql2timestamp($this->datetime)));
 
-		/*!isset($this->_forbiddenTags['datetime'])
+		/*$this->_isTagAvailable('datetime')
 			&& */$this->addXmlTag('datetime', Core_Date::strftime($oInformationsystem->format_datetime, Core_Date::sql2timestamp($this->datetime)));
 
-		/*!isset($this->_forbiddenTags['start_datetime'])
+		/*$this->_isTagAvailable('start_datetime')
 			&& */$this->addXmlTag('start_datetime', $this->start_datetime == '0000-00-00 00:00:00'
 				? $this->start_datetime
 				: Core_Date::strftime($oInformationsystem->format_datetime, Core_Date::sql2timestamp($this->start_datetime)));
 
-		/*!isset($this->_forbiddenTags['end_datetime'])
+		/*$this->_isTagAvailable('end_datetime')
 			&& */$this->addXmlTag('end_datetime', $this->end_datetime == '0000-00-00 00:00:00'
 				? $this->end_datetime
 				: Core_Date::strftime($oInformationsystem->format_datetime, Core_Date::sql2timestamp($this->end_datetime)));
 
-		!isset($this->_forbiddenTags['dir'])
+		$this->_isTagAvailable('dir')
 			&& $this->addXmlTag('dir', Core_Page::instance()->informationsystemCDN . $this->getItemHref());
 
 		// Отображается часть текста
-		if ($this->_showXmlPart > 0 && !isset($this->_forbiddenTags['text']))
+		if ($this->_showXmlPart > 0 && $this->_isTagAvailable('text'))
 		{
 			$aParts = $this->getParts();
 			$iPartsCount = count($aParts);
@@ -1545,25 +1545,25 @@ class Informationsystem_Item_Model extends Core_Entity
 				$avgGrade += 1;
 			}
 
-			!isset($this->_forbiddenTags['comments_count']) && $this->addEntity(
+			$this->_isTagAvailable('comments_count') && $this->addEntity(
 				Core::factory('Core_Xml_Entity')
 					->name('comments_count')
 					->value(count($aComments))
 			);
 
-			!isset($this->_forbiddenTags['comments_grade_sum']) && $this->addEntity(
+			$this->_isTagAvailable('comments_grade_sum') && $this->addEntity(
 				Core::factory('Core_Xml_Entity')
 					->name('comments_grade_sum')
 					->value($gradeSum)
 			);
 
-			!isset($this->_forbiddenTags['comments_grade_count']) && $this->addEntity(
+			$this->_isTagAvailable('comments_grade_count') && $this->addEntity(
 				Core::factory('Core_Xml_Entity')
 					->name('comments_grade_count')
 					->value($gradeCount)
 			);
 
-			!isset($this->_forbiddenTags['comments_average_grade']) && $this->addEntity(
+			$this->_isTagAvailable('comments_average_grade') && $this->addEntity(
 				Core::factory('Core_Xml_Entity')
 					->name('comments_average_grade')
 					->value($avgGrade)

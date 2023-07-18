@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Image
 {
@@ -137,12 +137,15 @@ abstract class Core_Image
 		// Draw the circle
 		imagefilledellipse($image, $width / 2, $height / 2, $width, $height, imagecolorallocate($image, $r, $g, $b));
 
-		$bbox = imagettfbbox($fontSize, 0, $font, $initials);
+		if (strlen((string) $initials))
+		{
+			$bbox = imagettfbbox($fontSize, 0, $font, $initials);
 
-		// Text
-		$textColor = imagecolorallocate($image, 255, 255, 255);
+			// Text
+			$textColor = imagecolorallocate($image, 255, 255, 255);
 
-		imagettftext($image, $fontSize, 0, intval(($width - $bbox[4]) / 2), intval(($height - $bbox[5]) / 2), $textColor, $font, $initials);
+			imagettftext($image, $fontSize, 0, intval(($width - $bbox[4]) / 2), intval(($height - $bbox[5]) / 2), $textColor, $font, $initials);
+		}
 
 		// Output the image.
 		header('Pragma: public');

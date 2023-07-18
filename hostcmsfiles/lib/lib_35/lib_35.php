@@ -67,15 +67,15 @@ if ($Shop_Controller_Show->item != 0)
 		$oShop = $Shop_Controller_Show->getEntity();
 		$oShop_Item = Core_Entity::factory('Shop_Item', $Shop_Controller_Show->item);
 
-		$oShop_Item->name = strip_tags(Core_Array::getPost('name'));
+		$oShop_Item->name = strip_tags(Core_Array::getPost('name', '', 'str'));
 		
 		!is_null(Core_Array::getPost('description')) && 
-			$oShop_Item->description = Core_Str::stripTags(Core_Array::getPost('description'), $allowable_tags);
+			$oShop_Item->description = Core_Str::stripTags(Core_Array::getPost('description', '', 'str'), $allowable_tags);
 		
 		!is_null(Core_Array::getPost('text')) && 
-			$oShop_Item->text = Core_Str::stripTags(Core_Array::getPost('text'), $allowable_tags);
+			$oShop_Item->text = Core_Str::stripTags(Core_Array::getPost('text', '', 'str'), $allowable_tags);
 			
-		$oShop_Item->price = floatval(Core_Array::getPost('price', 0));
+		$oShop_Item->price = Core_Array::getPost('price', 0, 'float');
 		$oShop_Item->datetime = Core_Date::timestamp2sql(time());
 		$oShop_Item->save();
 

@@ -58,12 +58,12 @@ else
 		$allowable_tags = '<b><strong><i><em><br><p><u><strike><ul><ol><li>';
 		$oComment->parent_id = Core_Array::getPost('parent_id', 0, 'int');
 		$oComment->active = Core_Array::get(Core_Page::instance()->libParams, 'addedCommentActive', 1) == 1 ? 1 : 0;
-		$oComment->author = Core_Str::stripTags(Core_Array::getPost('author'));
-		$oComment->email = Core_Str::stripTags(Core_Array::getPost('email'));
-		$oComment->phone = Core_Str::stripTags(Core_Array::getPost('phone'));
+		$oComment->author = Core_Str::stripTags(Core_Array::getPost('author', '', 'str'));
+		$oComment->email = Core_Str::stripTags(Core_Array::getPost('email', '', 'str'));
+		$oComment->phone = Core_Str::stripTags(Core_Array::getPost('phone', '', 'str'));
 		$oComment->grade = Core_Array::getPost('grade', 0, 'int');
-		$oComment->subject = Core_Str::stripTags(Core_Array::getPost('subject'));
-		$oComment->text = nl2br(Core_Str::stripTags(Core_Array::getPost('text'), $allowable_tags));
+		$oComment->subject = Core_Str::stripTags(Core_Array::getPost('subject', '', 'str'));
+		$oComment->text = nl2br(Core_Str::stripTags(Core_Array::getPost('text', '', 'str'), $allowable_tags));
 		$oComment->siteuser_id = $siteuser_id;
 
 		$oInformationsystem_Item = Core_Entity::factory('Informationsystem_Item', $Informationsystem_Controller_Show->item);
@@ -76,7 +76,7 @@ else
 		{
 			$oInformationsystem = $Informationsystem_Controller_Show->getEntity();
 
-			if ($oInformationsystem->use_captcha == 0 || $siteuser_id > 0 || Core_Captcha::valid(Core_Array::getPost('captcha_id'), Core_Array::getPost('captcha')))
+			if ($oInformationsystem->use_captcha == 0 || $siteuser_id > 0 || Core_Captcha::valid(Core_Array::getPost('captcha_id', '', 'str'), Core_Array::getPost('captcha', '', 'str')))
 			{
 				$oComment->save();
 

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Tpl
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Tpl_Model extends Core_Entity
 {
@@ -101,7 +101,7 @@ class Tpl_Model extends Core_Entity
 	{
 		$path = $this->getLngConfigPath($lng);
 
-		return is_file($path)
+		return Core_File::isFile($path)
 			? Core_File::read($path)
 			: NULL;
 	}
@@ -167,7 +167,7 @@ class Tpl_Model extends Core_Entity
 	{
 		$path = $this->getTplFilePath();
 
-		return is_file($path)
+		return Core_File::isFile($path)
 			? Core_File::read($path)
 			: NULL;
 	}

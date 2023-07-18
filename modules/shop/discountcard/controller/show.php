@@ -9,12 +9,20 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * - showLevels(TRUE|FALSE) выводить список уровней дисконтных карт, по умолчанию TRUE.
  * - showBonuses(60|FALSE) выводить бонусы на указанное количество дней вперед, по умолчанию 60.
+ * - addAllowedTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, разрешенных к передаче в генерируемый XML
+ * - addForbiddenTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, запрещенных к передаче в генерируемый XML
+ *
+ * Доступные пути для методов addAllowedTags/addForbiddenTags:
+ *
+ * - '/' или '/shop' Магазин
+ * - '/shop/shop_discountcard' Дисконтная карта
+ * - '/shop/shop_discountcard_level' Уровень дисконтной карты
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Discountcard_Controller_Show extends Core_Controller
 {
@@ -67,14 +75,15 @@ class Shop_Discountcard_Controller_Show extends Core_Controller
 				->where('shop_discountcards.active', '=', 1);
 
 			$aShop_Discountcards = $oShop_Discountcards->findAll(FALSE);
-
 			foreach ($aShop_Discountcards as $oShop_Discountcard)
 			{
-				$oShop->addEntity(
-					$oShop_Discountcard->clearEntities()
-				);
+				$oShop_Discountcard->clearEntities();
 
-				// Show bonuses for 2 year
+				$this->applyForbiddenAllowedTags('/shop/shop_discountcard', $oShop_Discountcard);
+
+				$oShop->addEntity($oShop_Discountcard);
+
+				// Show bonuses for 2 years
 				if ($this->showBonuses > 0 && $this->showBonuses < 730)
 				{
 					$datetime = Core_Date::timestamp2sql(time());
@@ -93,8 +102,7 @@ class Shop_Discountcard_Controller_Show extends Core_Controller
 					if (count($aShop_Discountcard_Bonuses))
 					{
 						$oShop_Discountcard->addEntity(
-							$oBonusesEntity = Core::factory('Core_Xml_Entity')
-								->name('bonuses')
+							$oBonusesEntity = Core::factory('Core_Xml_Entity')->name('bonuses')
 						);
 
 						$maxBonus = 0;
@@ -137,12 +145,11 @@ class Shop_Discountcard_Controller_Show extends Core_Controller
 			if ($this->showLevels)
 			{
 				$aShop_Discountcard_Levels = $oShop->Shop_Discountcard_Levels->findAll(FALSE);
-
 				foreach ($aShop_Discountcard_Levels as $oShop_Discountcard_Level)
 				{
-					$oShop->addEntity(
-						$oShop_Discountcard_Level->clearEntities()
-					);
+					$oShop_Discountcard_Level->clearEntities();
+					$this->applyForbiddenAllowedTags('/shop/shop_discountcard_level', $oShop_Discountcard_Level);
+					$oShop->addEntity($oShop_Discountcard_Level);
 				}
 			}
 		}

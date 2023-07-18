@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Model extends Core_Entity
 {
@@ -266,7 +266,7 @@ class Informationsystem_Model extends Core_Entity
 	{
 		clearstatcache();
 
-		if (!is_dir($this->getPath()))
+		if (!Core_File::isDir($this->getPath()))
 		{
 			try
 			{
@@ -299,7 +299,7 @@ class Informationsystem_Model extends Core_Entity
 
 		$this->deleteWatermarkFile();
 
-		if (is_dir($this->getPath()))
+		if (Core_File::isDir($this->getPath()))
 		{
 			try
 			{
@@ -322,7 +322,7 @@ class Informationsystem_Model extends Core_Entity
 		// Создание директории для Watermark
 		$sWatermarkDirPath = dirname((string) $this->getWatermarkFilePath());
 
-		if ($sWatermarkDirPath && !is_dir($sWatermarkDirPath))
+		if ($sWatermarkDirPath && !Core_File::isDir($sWatermarkDirPath))
 		{
 			$this->createDir();
 		}
@@ -338,7 +338,7 @@ class Informationsystem_Model extends Core_Entity
 	{
 		try
 		{
-			$this->getWatermarkFilePath() != '' && is_file($this->getWatermarkFilePath()) && Core_File::delete($this->getWatermarkFilePath());
+			$this->getWatermarkFilePath() != '' && Core_File::isFile($this->getWatermarkFilePath()) && Core_File::delete($this->getWatermarkFilePath());
 		} catch (Exception $e) {}
 
 		$this->watermark_file = '';
@@ -410,7 +410,7 @@ class Informationsystem_Model extends Core_Entity
 		try
 		{
 			$this->watermark_file != ''
-				&& is_file($this->getWatermarkFilePath())
+				&& Core_File::isFile($this->getWatermarkFilePath())
 				&& Core_File::copy($this->getWatermarkFilePath(), $newObject->getWatermarkFilePath());
 		} catch (Exception $e) {}
 

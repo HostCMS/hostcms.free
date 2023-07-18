@@ -20,17 +20,18 @@
 							path = jForm.attr('action'),
 							producerOption = jForm.find('select[name = producer_id] option:selected'),
 							sortingOption = jForm.find('select[name = sorting] option:selected'),
-							priceFrom = jForm.find('input[name = price_from]').val(),
-							priceTo = jForm.find('input[name = price_to]').val(),
-							priceFromOriginal = jForm.find('input[name = price_from_original]').val(),
-							priceToOriginal = jForm.find('input[name = price_to_original]').val();
+							priceFrom = parseInt(jForm.find('input[name = price_from]').val()),
+							priceTo = parseInt(jForm.find('input[name = price_to]').val()),
+							priceFromOriginal = parseInt(jForm.find('input[name = price_from_original]').val()),
+							priceToOriginal = parseInt(jForm.find('input[name = price_to_original]').val());
 
 						if (parseInt(producerOption.attr('value')))
 						{
 							path += producerOption.data('producer') + '/';
 						}
 
-						if (typeof priceFrom !== 'undefined' && typeof priceTo !== 'undefined'
+						if (typeof priceFrom !== 'undefined' && !isNaN(priceFrom)
+							&& typeof priceTo !== 'undefined' && !isNaN(priceTo)
 							&& (priceFrom !== priceFromOriginal || priceTo !== priceToOriginal)
 						)
 						{

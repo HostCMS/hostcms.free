@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -25,6 +25,22 @@ $oAdmin_Form_Controller
 	->title(Core::_('sql.title'));
 
 $action = Core_Array::get(Core_Array::getPost('hostcms', array()), 'action');
+
+if ($action == 'clear')
+{
+	$tab_id = Core_Array::getPost('tab_id', 0, 'int');
+
+	if ($tab_id)
+	{
+		$oSql_User_Tab = $oUser->Sql_User_Tabs->getById($tab_id);
+
+		if (!is_null($oSql_User_Tab))
+		{
+			$oSql_User_Tab->content = '';
+			$oSql_User_Tab->save();
+		}
+	}
+}
 
 if ($action == 'delete')
 {
@@ -236,174 +252,181 @@ if ($formSettings['action'] == 'duplicate')
 	}
 }
 
-try
+$bExec = $action == '' || $action == 'exec';
+
+if ($bExec)
 {
-	// Read Only режим
-	if (defined('READ_ONLY') && READ_ONLY || $oUser->read_only && !$oUser->superuser)
+	try
 	{
-		throw new Core_Exception(
-			Core::_('User.demo_mode'), array(), 0, FALSE
-		);
-	}
+		// Read Only режим
+		if (defined('READ_ONLY') && READ_ONLY || $oUser->read_only && !$oUser->superuser)
+		{
+			throw new Core_Exception(
+				Core::_('User.demo_mode'), array(), 0, FALSE
+			);
+		}
 
-	$oSql_User_Tab = $iAffectedRows = $oDiv = NULL;
+		$oSql_User_Tab = $iAffectedRows = $oDiv = NULL;
 
-	$sText = Core_Array::getPost('text');
+		$sText = Core_Array::getPost('text');
 
-	$aFile = Core_Array::getFiles('file');
-	/*!is_null($aFile) && $aFile['size'] > 0
-		&& $sText = Core_File::read($aFile['tmp_name']);*/
+		$aFile = Core_Array::getFiles('file');
+		/*!is_null($aFile) && $aFile['size'] > 0
+			&& $sText = Core_File::read($aFile['tmp_name']);*/
 
-	$iCountQueries = 0;
+		$iCountQueries = 0;
 
-	$bExecuted = FALSE;
+		$bExecuted = FALSE;
 
-	if (!is_null($aFile) && $aFile['size'] > 0)
-	{
-		$startTime = Core::getmicrotime();
-
-		Core_Log::instance()->clear()
-			->status(Core_Log::$MESSAGE)
-			->write('Sql Query From File');
-
-		$iCountQueries = Sql_Controller::instance()->executeByFile($aFile['tmp_name']);
-
-		$bExecuted = TRUE;
-
-		$fTime = Core::getmicrotime() - $startTime;
-
-		$bExecuted = TRUE;
-	}
-	elseif (!is_null($sText))
-	{
-		$iLen = strlen(trim($sText));
-		if ($iLen)
+		if (!is_null($aFile) && $aFile['size'] > 0)
 		{
 			$startTime = Core::getmicrotime();
 
 			Core_Log::instance()->clear()
 				->status(Core_Log::$MESSAGE)
-				->write('Sql Query: ' . substr($sText, 0, 1000));
+				->write('Sql Query From File');
 
-			$tab_id = Core_Array::getPost('tab_id', 0, 'intval');
-
-			$oSql_User_Tab = Core_Entity::factory('Sql_User_Tab')->getById($tab_id);
-			if (!is_null($oSql_User_Tab))
-			{
-				$page = Core_Array::getPost('page');
-				$limit = Core_Array::getPost('limit', 25, 'intval');
-				if (!is_null($page))
-				{
-					$oSql_User_Tab->page = intval($page);
-					$oSql_User_Tab->limit = $limit;
-				}
-
-				$oSql_User_Tab->content = $sText;
-				$oSql_User_Tab->save();
-			}
-
-			$iCountQueries = Sql_Controller::instance()->executeByString($sText);
-
-			$bExecuted = TRUE;
+			$iCountQueries = Sql_Controller::instance()->executeByFile($aFile['tmp_name']);
 
 			$fTime = Core::getmicrotime() - $startTime;
+
+			$bExecuted = TRUE;
 		}
-		else
+		elseif (!is_null($sText))
 		{
-			Core_Message::show(Core::_('Sql.error_message'), 'error');
-		}
-	}
-
-	if ($bExecuted)
-	{
-		$iAffectedRows = Core_DataBase::instance()->getAffectedRows();
-
-		$iColumnCount = Core_DataBase::instance()->getColumnCount();
-
-		// $iCountQueries == 1
-		// 	? Core_Message::show(Core::_('Sql.success_message_with_affected', $iCountQueries, $iAffectedRows))
-		// 	: Core_Message::show(Core::_('Sql.success_message', $iCountQueries));
-
-		// It was Select Query
-		if ($iColumnCount)
-		{
-			// $iLimit = 30;
-			$iLimit = $oSql_User_Tab ? $oSql_User_Tab->limit : 25;
-			$iPage = $oSql_User_Tab ? $oSql_User_Tab->page : 1;
-
-			if ($iAffectedRows && $iCountQueries == 1)
+			$iLen = strlen(trim($sText));
+			if ($iLen)
 			{
-				$oTable = Core_Html_Entity::factory('Table')
-					->class('admin-table table table-bordered table-hover table-striped sql-table')
-					// Top title
-					->add($oTitleTr = Core_Html_Entity::factory('Tr'));
+				$startTime = Core::getmicrotime();
 
-				$oDiv = Core_Html_Entity::factory('Div')
-					->style('height: 250px; resize: vertical; overflow: auto');
+				Core_Log::instance()->clear()
+					->status(Core_Log::$MESSAGE)
+					->write('Sql Query: ' . substr($sText, 0, 1000));
 
-				$oDiv->add($oTable);
+				$tab_id = Core_Array::getPost('tab_id', 0, 'intval');
 
-				// Offset
-				$iLine = 0;
-				do {
-					$row = Core_DataBase::instance()->asAssoc()->current();
-					$iLine++;
-				} while ($row && $iLine < ($iPage - 1) * $iLimit);
-
-				// Lines
-				$iLine = 0;
-				do {
-					$row = Core_DataBase::instance()->asAssoc()->current();
-
-					if ($iLine == 0 && is_array($row) && count($row))
+				$oSql_User_Tab = Core_Entity::factory('Sql_User_Tab')->getById($tab_id);
+				if (!is_null($oSql_User_Tab))
+				{
+					$page = Core_Array::getPost('page');
+					$limit = Core_Array::getPost('limit', 25, 'intval');
+					if (!is_null($page))
 					{
-						foreach ($row as $key => $value)
-						{
-							$oTitleTr->add(
-								Core_Html_Entity::factory('Th')
-									->value(htmlspecialchars($key))
-							);
-						}
+						$oSql_User_Tab->page = intval($page);
+						$oSql_User_Tab->limit = $limit;
 					}
 
-					$oTr = Core_Html_Entity::factory('Tr');
+					$oSql_User_Tab->content = $sText;
+					$oSql_User_Tab->save();
+				}
 
-					if (is_array($row) && count($row))
+				$iCountQueries = Sql_Controller::instance()->executeByString($sText);
+
+				$bExecuted = TRUE;
+
+				$fTime = Core::getmicrotime() - $startTime;
+			}
+			else
+			{
+				Core_Message::show(Core::_('Sql.error_message'), 'error');
+			}
+		}
+
+		if ($bExecuted)
+		{
+			$iAffectedRows = Core_DataBase::instance()->getAffectedRows();
+			$iColumnCount = Core_DataBase::instance()->getColumnCount();
+
+			// $iCountQueries == 1
+			// 	? Core_Message::show(Core::_('Sql.success_message_with_affected', $iCountQueries, $iAffectedRows))
+			// 	: Core_Message::show(Core::_('Sql.success_message', $iCountQueries));
+
+			// It was Select Query
+			if ($iColumnCount)
+			{
+				// $iLimit = 30;
+				$iLimit = $oSql_User_Tab ? $oSql_User_Tab->limit : 25;
+				$iPage = $oSql_User_Tab ? $oSql_User_Tab->page : 1;
+
+				if ($iAffectedRows && $iCountQueries == 1)
+				{
+					$oTable = Core_Html_Entity::factory('Table')
+						->class('admin-table table table-bordered table-hover table-striped sql-table')
+						// Top title
+						->add($oTitleTr = Core_Html_Entity::factory('Tr'));
+
+					$oDiv = Core_Html_Entity::factory('Div')
+						->style('height: 250px; resize: vertical; overflow: auto');
+
+					$oDiv->add($oTable);
+
+					// Offset
+					if ($iPage > 1)
 					{
-						foreach ($row as $value)
-						{
-							is_null($value) && $value = 'NULL';
-
-							$oTr->add(
-								Core_Html_Entity::factory('Td')
-									->value(Core_Str::cut(htmlspecialchars($value), 100))
-							);
-						}
+						$iLine = 0;
+						do {
+							$row = Core_DataBase::instance()->asAssoc()->current();
+							$iLine++;
+						} while ($row && $iLine < ($iPage - 1) * $iLimit);
 					}
-					$oTable->add($oTr);
 
-					$row && $iLine++;
-				} while ($row && $iLine < $iLimit);
+					// Lines
+					$iLine = 0;
+					do {
+						$row = Core_DataBase::instance()->asAssoc()->current();
 
-				// Bottom title
-				$oTable->add($oTitleTr);
+						if ($iLine == 0 && is_array($row) && count($row))
+						{
+							foreach ($row as $key => $value)
+							{
+								$oTitleTr->add(
+									Core_Html_Entity::factory('Th')
+										->value(htmlspecialchars($key))
+								);
+							}
+						}
 
-				// $oDiv->execute();
+						$oTr = Core_Html_Entity::factory('Tr');
 
-				// Core_Html_Entity::factory('P')
-				// 	->value(Core::_('Sql.rows_count', $iAffectedRows, $iLine, $fTime))
-				// 	->execute();
+						if (is_array($row) && count($row))
+						{
+							foreach ($row as $value)
+							{
+								is_null($value) && $value = 'NULL';
+
+								$oTr->add(
+									Core_Html_Entity::factory('Td')
+										->value(Core_Str::cut(htmlspecialchars($value), 100))
+								);
+							}
+						}
+						$oTable->add($oTr);
+
+						$row && $iLine++;
+					} while ($row && $iLine < $iLimit);
+
+					// Bottom title
+					$oTable->add($oTitleTr);
+
+					// $oDiv->execute();
+
+					// Core_Html_Entity::factory('P')
+					// 	->value(Core::_('Sql.rows_count', $iAffectedRows, $iLine, $fTime))
+					// 	->execute();
+				}
 			}
 		}
 	}
-}
-catch (Exception $e)
-{
-	Core_Message::show($e->getMessage(), 'error');
+	catch (Exception $e)
+	{
+		Core_Message::show($e->getMessage(), 'error');
+	}
+
+	is_null($iAffectedRows)
+		&& Core_Message::show(Core::_('sql.warning'), 'warning');
 }
 
-is_null($iAffectedRows)
-	&& Core_Message::show(Core::_('sql.warning'), 'warning');
+$action == 'clear' && Core_Message::show(Core::_('sql.clear_success'), 'success');
 
 // $oMainTab = Admin_Form_Entity::factory('Tab')->name('main');
 
@@ -447,7 +470,7 @@ foreach ($aSql_User_Tabs as $key => $oSql_User_Tab)
 		->rows(25)
 		->divAttr(array('class' => 'form-group col-xs-12'))
 		->value(
-			($iCountQueries == 0 || strlen((string) $oSql_User_Tab->content) < 60000)
+			($bExec && $iCountQueries == 0 || strlen((string) $oSql_User_Tab->content) < 60000)
 				? $oSql_User_Tab->content
 				: NULL
 		);
@@ -459,7 +482,7 @@ foreach ($aSql_User_Tabs as $key => $oSql_User_Tab)
 		->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
 		->syntaxHighlighterOptions($aTmpOptions);
 
-	if ($oSql_User_Tab && $oSql_User_Tab->id == $tab_id)
+	if ($bExec && $oSql_User_Tab && $oSql_User_Tab->id == $tab_id)
 	{
 		$oForm
 			->add(
@@ -492,7 +515,7 @@ foreach ($aSql_User_Tabs as $key => $oSql_User_Tab)
 			)
 		);
 
-	if ($oSql_User_Tab && $oSql_User_Tab->id == $tab_id)
+	if ($bExec && $oSql_User_Tab && $oSql_User_Tab->id == $tab_id)
 	{
 		$aPages = array(1 => 1);
 		if ($oSql_User_Tab->limit > 0)
@@ -561,6 +584,12 @@ foreach ($aSql_User_Tabs as $key => $oSql_User_Tab)
 			->class('applyButton btn btn-blue margin-bottom-10')
 			->onclick("res=confirm('" . Core::_('Sql.warningButton') . "'); if (res){ " . $oAdmin_Form_Controller->getAdminSendForm('exec') . " } return false;"))
 		// ->execute()
+		->add(Admin_Form_Entity::factory('Button')
+			->name('button')
+			->type('submit')
+			->class('applyButton btn btn-darkorange margin-bottom-10')
+			->value(Core::_('Sql.clear'))
+			->onclick("res=confirm('" . Core::_('Sql.clearButton') . "'); if (res){ " . $oAdmin_Form_Controller->getAdminSendForm('clear') . " } return false;"))
 	);
 
 	$oTabs->add($oTab);
@@ -578,20 +607,7 @@ $oTabs
 ?>
 <script>
 $(function(){
-	$('.nav-tabs.sql-user-tabs i.fa-xmark').on('click', function(){
-
-		var _t = $(this),
-			_a = _t.parents('a');
-
-		res = confirm(i18n['confirm_delete']);
-		if (res)
-		{
-			id = _a.attr('href').split('_')[1];
-			$.adminLoad({ path: '/admin/sql/index.php', action: 'delete', additionalParams: 'tabid=' + id, windowId: 'id_content' });
-		}
-
-		return false;
-	});
+	$('.nav-tabs.sql-user-tabs i.fa-xmark').on('click', {elm: $('.nav-tabs.sql-user-tabs i.fa-xmark')}, $.sqlDeleteTab);
 
 	$('.nav-tabs.sql-user-tabs li a').on('dblclick', $.sqlRenameTab);
 
@@ -617,7 +633,7 @@ $(function(){
 
 						$cloneLi.find('a')
 							.attr('href', '#userTab_' + result.id)
-							.html(result.name + '<i class="fa-solid fa-xmark" title=""></i>');
+							.html('<span class="tab-name">' + result.name + '</span><i class="fa-solid fa-xmark" onclick="$.sqlDeleteTab(this);" title=""></i>');
 
 						$cloneDiv.attr('id', 'userTab_' + result.id);
 						$cloneDiv.find('input[name = "file"]').val();
@@ -649,13 +665,11 @@ $(function(){
 						eval(_scriptText);
 
 						$('.nav-tabs.sql-user-tabs li a[href="#userTab_' + result.id + '"]').on('dblclick', $.sqlRenameTab);
-
 						$('.nav-tabs.sql-user-tabs a[href="#userTab_' + result.id + '"]').tab('show');
 					}
 				}
 			});
 		}
-
 		return false;
 	});
 });

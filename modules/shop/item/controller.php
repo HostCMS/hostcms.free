@@ -5,11 +5,17 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 /**
  * Online shop.
  *
+ * Доступные методы:
+ *
+ * - count($int) количество товара в корзине
+ * - siteuser($oSiteuser) рассчитывать цены для указанного клиента
+ *
+ *
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Controller extends Core_Servant_Properties
 {
@@ -120,8 +126,8 @@ class Shop_Item_Controller extends Core_Servant_Properties
 	 * @param Shop_Item_Model $oShop_Item item
 	 * @param boolean $bRound round prices
 	 * @return array
-	 * @hostcms-event Shop_Item_Controller.onBeforeCalculatePrice
-	 * @hostcms-event Shop_Item_Controller.onAfterCalculatePrice
+	 * @hostcms-event Shop_Item_Controller.onBeforeCalculatePriceInItemCurrency
+	 * @hostcms-event Shop_Item_Controller.onAfterCalculatePriceInItemCurrency
 	 */
 	public function calculatePriceInItemCurrency($price, Shop_Item_Model $oShop_Item, $bRound = TRUE)
 	{
@@ -214,7 +220,7 @@ class Shop_Item_Controller extends Core_Servant_Properties
 					$oShop_Discount = $oShop_Item_Discount->Shop_Discount;
 					if ($oShop_Discount->isActive()
 						&& ($oShop_Discount->coupon == 0
-							|| $bCoupon = strlen(self::$_coupon) && $oShop_Discount->coupon_text == self::$_coupon
+							|| $bCoupon = !is_null(self::$_coupon) && strlen(self::$_coupon) && $oShop_Discount->coupon_text == self::$_coupon
 						)
 					)
 					{
@@ -354,10 +360,10 @@ class Shop_Item_Controller extends Core_Servant_Properties
 		$price = $oShop_Item->price;
 
 		// Пользователь задан - цена определяется из таблицы товаров
-		if ($this->siteuser && Core::moduleIsActive('siteuser'))
+		if (Core::moduleIsActive('siteuser') && $this->siteuser)
 		{
 			$aPrices = array();
-
+			
 			$aSiteuser_Groups = $this->siteuser->Siteuser_Groups->findAll();
 			foreach ($aSiteuser_Groups as $oSiteuser_Group)
 			{
@@ -365,7 +371,7 @@ class Shop_Item_Controller extends Core_Servant_Properties
 				$aShop_Prices = Core_Entity::factory('Shop_Price')->getAllBySiteuserGroupAndShop(
 					$oSiteuser_Group->id, $oShop->id
 				);
-
+				
 				foreach ($aShop_Prices as $oShop_Price)
 				{
 					// Если есть цена для группы клиентов
@@ -389,6 +395,21 @@ class Shop_Item_Controller extends Core_Servant_Properties
 	}
 
 	/**
+	 * Last used Shop_Specialprice
+	 * @var Shop_Specialprice_Model|NULL
+	 */
+	protected $_Shop_Specialprice = NULL;
+
+	/**
+	 * Get last used Shop_Specialprice
+	 * @return Shop_Specialprice_Model|NULL
+	 */
+	public function getLastShopSpecialprice()
+	{
+		return $this->_Shop_Specialprice;
+	}
+
+	/**
 	 * Определение цены товара в соответствии с $this->count и специальными ценами
 	 *
 	 * @param float $price price
@@ -399,6 +420,8 @@ class Shop_Item_Controller extends Core_Servant_Properties
 	public function getSpecialprice($price, Shop_Item_Model $oShop_Item, $bCache = TRUE)
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeGetSpecialprice', $this, array($price, $oShop_Item, $bCache));
+
+		$this->_Shop_Specialprice = NULL;
 
 		$eventResult = Core_Event::getLastReturn();
 
@@ -413,6 +436,8 @@ class Shop_Item_Controller extends Core_Servant_Properties
 		{
 			if ($this->count >= $oShop_Specialprice->min_quantity && ($this->count <= $oShop_Specialprice->max_quantity || $oShop_Specialprice->max_quantity == 0))
 			{
+				$this->_Shop_Specialprice = $oShop_Specialprice;
+
 				$price = $oShop_Specialprice->percent != 0
 					? $price * $oShop_Specialprice->percent / 100
 					: ($oShop_Specialprice->price < $price

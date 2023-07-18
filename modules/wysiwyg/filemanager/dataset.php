@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Wysiwyg
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 {
@@ -101,7 +101,6 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 	 */
 	protected function _loadFiles()
 	{
-//echo 777; echo "=", var_dump($this->_objects);
 		$this->_objects = array();
 
 		// Default sorting field
@@ -121,7 +120,7 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 		}
 
 		// Директория существует
-		if (is_dir($this->_path) /*&& !is_link($this->_path)*/)
+		if (Core_File::isDir($this->_path) /*&& !Core_File::isLink($this->_path)*/)
 		{
 			if ($dh = opendir($this->_path))
 			{
@@ -136,7 +135,7 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 						}
 					}
 				}
-										
+
 				// Читаем файлы и каталоги из данного каталога
 				while (($file = readdir($dh)) !== FALSE)
 				{
@@ -166,6 +165,7 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 							$Wysiwyg_Filemanager_File->hash = sha1($Wysiwyg_Filemanager_File->name);
 
 							$bAdd = TRUE;
+
 							foreach ($aConditions as $args)
 							{
 								if ($args[0] == 'name')
@@ -182,17 +182,18 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 										else
 										{
 											$pattern = preg_quote($args[2], '/');
-											$pattern = preg_replace('/([^\\\])(_)/', '\1.', $pattern);
-											$pattern = preg_replace('/([^\\\])(%)/', '\1.*?', $pattern);
+											$pattern = preg_replace('/([^\\\]|^)(_)/', '\1.', $pattern);
+											$pattern = preg_replace('/([^\\\]|^)(%)/', '\1.*?', $pattern);
 											$pattern = str_replace(array('\\\\%', '\\\\_'), array('%', '_'), $pattern);
-											//$pattern = str_replace(array('%', '_'), array('.*?', '.'), $pattern);
+											// $pattern = str_replace(array('%', '_'), array('.*?', '.'), $pattern);
 
-											!preg_match('/^' . $pattern . '$/', $value)
+											!preg_match('/^' . $pattern . '$/ius', $value)
 												&& $bAdd = FALSE;
 										}
 									}
 								}
 							}
+
 							$bAdd && $this->_objects[$Wysiwyg_Filemanager_File->hash] = $Wysiwyg_Filemanager_File;
 						}
 					}

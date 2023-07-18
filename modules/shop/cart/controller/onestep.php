@@ -33,7 +33,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Cart_Controller_Onestep extends Core_Controller
 {
@@ -148,10 +148,11 @@ class Shop_Cart_Controller_Onestep extends Core_Controller
 
 			foreach ($aProperties as $oProperty)
 			{
-				$this->_aItem_Properties[$oProperty->property_dir_id][] = $oProperty->clearEntities();
+				$oProperty->clearEntities();
+
+				$this->_aItem_Properties[$oProperty->property_dir_id][] = $oProperty;
 
 				$oShop_Item_Property = $oProperty->Shop_Item_Property;
-
 				$oShop_Item_Property->shop_measure_id && $oProperty->addEntity(
 					$oShop_Item_Property->Shop_Measure
 				);
@@ -161,7 +162,7 @@ class Shop_Cart_Controller_Onestep extends Core_Controller
 			foreach ($aProperty_Dirs as $oProperty_Dir)
 			{
 				$oProperty_Dir->clearEntities();
-				$this->_aItem_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir->clearEntities();
+				$this->_aItem_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
 			}
 
 			$Shop_Item_Properties = Core::factory('Core_Xml_Entity')
@@ -243,22 +244,25 @@ class Shop_Cart_Controller_Onestep extends Core_Controller
 
 			foreach ($aProperties as $oProperty)
 			{
-				$this->_aOrder_Properties[$oProperty->property_dir_id][] = $oProperty->clearEntities();
+				$oProperty->clearEntities();
+
+				$this->_aOrder_Properties[$oProperty->property_dir_id][] = $oProperty;
 
 				$oShop_Order_Property = $oProperty->Shop_Order_Property;
-				$oProperty->addEntity(
-					Core::factory('Core_Xml_Entity')->name('prefix')->value($oShop_Order_Property->prefix)
-				)
-				->addEntity(
-					Core::factory('Core_Xml_Entity')->name('display')->value($oShop_Order_Property->display)
-				);
+				$oProperty
+					->addEntity(
+						Core::factory('Core_Xml_Entity')->name('prefix')->value($oShop_Order_Property->prefix)
+					)
+					->addEntity(
+						Core::factory('Core_Xml_Entity')->name('display')->value($oShop_Order_Property->display)
+					);
 			}
 
 			$aProperty_Dirs = $oShop_Order_Property_List->Property_Dirs->findAll();
 			foreach ($aProperty_Dirs as $oProperty_Dir)
 			{
 				$oProperty_Dir->clearEntities();
-				$this->_aOrder_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir->clearEntities();
+				$this->_aOrder_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
 			}
 
 			// Список свойств товаров

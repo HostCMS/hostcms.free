@@ -3,9 +3,9 @@
  * Online shop.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Delivery conditions',
@@ -46,4 +46,6 @@ return array(
 	'sorting' => 'Sort',
 	'apply_success' => "Information has been successfully changed",
 	'inverted' => "Not",
+	'time_from' => "Order time from, if you specify 00:00:00 &mdash; time is unlimited",
+	'time_to' => "Order time is until, when 00:00:00 &mdash; is specified, time is unlimited",
 );

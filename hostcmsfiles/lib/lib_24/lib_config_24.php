@@ -59,24 +59,31 @@ if (!is_null(Core_Array::getPost('stealthSubscribe')))
 					{
 						$aMaillists = $oSiteuser->getAllowedMaillists();
 
-						foreach ($aMaillists as $oMaillist)
+						if (count($aMaillists))
 						{
-							$oMaillist_Siteuser = $oSiteuser->Maillist_Siteusers->getByMaillist($oMaillist->id);
-
-							// Пользователь подписан
-							if (is_null($oMaillist_Siteuser))
+							foreach ($aMaillists as $oMaillist)
 							{
-								// Пользователь не был подписан
-								$oMaillist_Siteuser = Core_Entity::factory('Maillist_Siteuser')
-									->siteuser_id($oSiteuser->id)
-									->maillist_id($oMaillist->id)
-									->type(0)
-									->save();
+								$oMaillist_Siteuser = $oSiteuser->Maillist_Siteusers->getByMaillist($oMaillist->id);
 
+								// Пользователь подписан
+								if (is_null($oMaillist_Siteuser))
+								{
+									// Пользователь не был подписан
+									$oMaillist_Siteuser = Core_Entity::factory('Maillist_Siteuser')
+										->siteuser_id($oSiteuser->id)
+										->maillist_id($oMaillist->id)
+										->type(0)
+										->save();
+
+								}
 							}
-						}
 
-						$aReturn['success'] = 'Пользователь подписан успешно!';
+							$aReturn['success'] = 'Пользователь подписан успешно!';
+						}
+						else
+						{
+							$aReturn['error'] = 'Нет доступных рассылок!';
+						}
 					}
 					else
 					{
@@ -86,7 +93,7 @@ if (!is_null(Core_Array::getPost('stealthSubscribe')))
 			}
 			else
 			{
-				$aReturn['error'] = 'Пользователь с указанным электронным адресом невозможно подписать на рассылку!';
+				$aReturn['error'] = 'Пользователя с указанным электронным адресом невозможно подписать на рассылку!';
 			}
 		}
 		else

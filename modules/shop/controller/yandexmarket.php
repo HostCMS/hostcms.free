@@ -65,7 +65,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Controller_YandexMarket extends Core_Controller
 {
@@ -1119,14 +1119,19 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 		/* dimensions */
 		if (!isset($this->_forbiddenTags['dimensions'])
-			&& $oShop_Item->length != 0
-			&& $oShop_Item->width != 0
-			&& $oShop_Item->height != 0
+			&& ($oShop_Item->package_length > 0 && $oShop_Item->package_width > 0 && $oShop_Item->package_height > 0
+				||
+				$oShop_Item->length > 0 && $oShop_Item->width > 0 && $oShop_Item->height > 0)
 		)
 		{
-			$sDimensions = Shop_Controller::convertSizeMeasure($oShop_Item->length, $oShop->size_measure, 1)
-				. '/' . Shop_Controller::convertSizeMeasure($oShop_Item->width, $oShop->size_measure, 1)
-				. '/' . Shop_Controller::convertSizeMeasure($oShop_Item->height, $oShop->size_measure, 1);
+			$sDimensions = $oShop_Item->package_length > 0 && $oShop_Item->package_width > 0 && $oShop_Item->package_height > 0
+				? Shop_Controller::convertSizeMeasure($oShop_Item->package_length, $oShop->size_measure, 1)
+					. '/' . Shop_Controller::convertSizeMeasure($oShop_Item->package_width, $oShop->size_measure, 1)
+					. '/' . Shop_Controller::convertSizeMeasure($oShop_Item->package_height, $oShop->size_measure, 1)
+				: Shop_Controller::convertSizeMeasure($oShop_Item->length, $oShop->size_measure, 1)
+					. '/' . Shop_Controller::convertSizeMeasure($oShop_Item->width, $oShop->size_measure, 1)
+					. '/' . Shop_Controller::convertSizeMeasure($oShop_Item->height, $oShop->size_measure, 1);
+
 			$this->write('<dimensions>' . $sDimensions . '</dimensions>'. "\n");
 		}
 
@@ -1142,9 +1147,14 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			&& $this->write('<cpa>' . $cpa . '</cpa>' . "\n");
 
 		/* weight */
-		if (!isset($this->_forbiddenTags['weight']) && $oShop_Item->weight > 0)
+		if (!isset($this->_forbiddenTags['weight'])
+			&& ($oShop_Item->package_weight > 0 || $oShop_Item->weight > 0)
+		)
 		{
-			$this->write('<weight>' . Core_Str::convertWeight(rtrim($oShop->Shop_Measure->name, '. '), 'kg', $oShop_Item->weight) . '</weight>' . "\n");
+			$this->write('<weight>' . Core_Str::convertWeight(rtrim((string) $oShop->Shop_Measure->name, '. '), 'kg', $oShop_Item->package_weight > 0
+				? $oShop_Item->package_weight
+				: $oShop_Item->weight
+			) . '</weight>' . "\n");
 		}
 
 		/* rec */
@@ -1501,6 +1511,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		{
 			case 0: // Int
 			case 1: // String
+			case 11: // Float
 			case 4: // Textarea
 			case 6: // Wysiwyg
 				$value = $oProperty_Value->value;
@@ -1891,9 +1902,13 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 									$totalWeight += $oShop_Item->weight * $aItem['count'];
 
-									$totalVolume += Shop_Controller::convertSizeMeasure($oShop_Item->length, $oShop->size_measure, 0)
-										* Shop_Controller::convertSizeMeasure($oShop_Item->width, $oShop->size_measure, 0)
-										* Shop_Controller::convertSizeMeasure($oShop_Item->height, $oShop->size_measure, 0);
+									$totalVolume += $oShop_Item->package_length > 0 && $oShop_Item->package_width > 0 && $oShop_Item->package_height > 0
+										? Shop_Controller::convertSizeMeasure($oShop_Item->package_length, $oShop->size_measure, 0)
+											* Shop_Controller::convertSizeMeasure($oShop_Item->package_width, $oShop->size_measure, 0)
+											* Shop_Controller::convertSizeMeasure($oShop_Item->package_height, $oShop->size_measure, 0)
+										: Shop_Controller::convertSizeMeasure($oShop_Item->length, $oShop->size_measure, 0)
+											* Shop_Controller::convertSizeMeasure($oShop_Item->width, $oShop->size_measure, 0)
+											* Shop_Controller::convertSizeMeasure($oShop_Item->height, $oShop->size_measure, 0);
 								}
 							}
 						}
@@ -2307,7 +2322,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			{
 				$oShop_Item = Core_Entity::factory('Shop_Item')->find($orderItem['offerId']);
 
-				if (!is_null($oShop_Item))
+				if (!is_null($oShop_Item->id))
 				{
 					$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
 					$oShop_Order_Item
@@ -2630,7 +2645,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 				: $oSite->name
 		);
 
-		$this->write("<name>" . Core_Str::xml(mb_substr($shop_name, 0, 20)) . "</name>\n");
+		$this->write("<name>" . Core_Str::xml($shop_name) . "</name>\n");
 
 		// Название компании.
 		$this->write("<company>" . Core_Str::xml($oShop->Shop_Company->name) . "</company>\n");
@@ -2705,7 +2720,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 		return $this;
 	}
-	
+
 	/**
 	 * Set mode
 	 * @param string $mode

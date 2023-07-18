@@ -21,7 +21,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Entity extends Core_ORM
 {
@@ -53,17 +53,17 @@ class Core_Entity extends Core_ORM
 	}
 
 	/**
+	 * List of Shortcodes tags
+	 * @var array
+	 */
+	protected $_shortcodeTags = array();
+
+	/**
 	 * Allowed tags. If list of tags is empty, all tags will show.
 	 *
 	 * @var array
 	 */
 	protected $_allowedTags = array();
-
-	/**
-	 * List of Shortcodes tags
-	 * @var array
-	 */
-	protected $_shortcodeTags = array();
 
 	/**
 	 * Add tag to allowed tags list
@@ -74,6 +74,41 @@ class Core_Entity extends Core_ORM
 	{
 		$this->_allowedTags[$tag] = $tag;
 		return $this;
+	}
+
+	/**
+	 * Add tags to allowed tags list
+	 * @param array $aTags array of tags
+	 * @return self
+	 */
+	public function addAllowedTags(array $aTags)
+	{
+		$this->_allowedTags = array_merge($this->_allowedTags, array_combine($aTags, $aTags));
+		return $this;
+	}
+
+	/**
+	 * Remove tag from allowed tags list
+	 * @param string $tag tag
+	 * @return self
+	 */
+	public function removeAllowedTag($tag)
+	{
+		if (isset($this->_allowedTags[$tag]))
+		{
+			unset($this->_allowedTags[$tag]);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Get allowed tags list
+	 * @return array
+	 */
+	public function getAllowedTags()
+	{
+		return $this->_allowedTags;
 	}
 
 	/**
@@ -102,6 +137,17 @@ class Core_Entity extends Core_ORM
 	}
 
 	/**
+	 * Add tags to forbidden tags list
+	 * @param array $aTags array of tags
+	 * @return self
+	 */
+	public function addForbiddenTags(array $aTags)
+	{
+		$this->_forbiddenTags = array_merge($this->_forbiddenTags, array_combine($aTags, $aTags));
+		return $this;
+	}
+
+	/**
 	 * Remove tag from forbidden tags list
 	 * @param string $tag tag
 	 * @return self
@@ -112,22 +158,6 @@ class Core_Entity extends Core_ORM
 		{
 			unset($this->_forbiddenTags[$tag]);
 		}
-
-		return $this;
-	}
-
-	/**
-	 * Add tags to forbidden tags list
-	 * @param array $aTags array of tags
-	 * @return self
-	 */
-	public function addForbiddenTags(array $aTags)
-	{
-		/*foreach ($aTags as $tag)
-		{
-			$this->_forbiddenTags[$tag] = $tag;
-		}*/
-		$this->_forbiddenTags = array_merge($this->_forbiddenTags, array_combine($aTags, $aTags));
 
 		return $this;
 	}
@@ -315,7 +345,7 @@ class Core_Entity extends Core_ORM
 
 		/*$primaryKey = $this->getPrimaryKey();
 		// Заменяет уже существующий объект при mysql_fetch_object()
-		if ($primaryKey)
+		if ($primaryKey && is_scalar($primaryKey))
 		{
 			Core_ObjectWatcher::instance()->add($this);
 		}
@@ -331,7 +361,7 @@ class Core_Entity extends Core_ORM
 	static public function factory($modelName, $primaryKey = NULL)
 	{
 		// May be NULL or 0
-		if ($primaryKey)
+		if ($primaryKey && is_scalar($primaryKey))
 		{
 			$Core_ObjectWatcher = Core_ObjectWatcher::instance();
 			$realModelName = ucfirst($modelName) . '_Model';
@@ -346,7 +376,8 @@ class Core_Entity extends Core_ORM
 		$object = parent::factory($modelName, $primaryKey);
 
 		// Add into ObjectWatcher
-		$primaryKey && $Core_ObjectWatcher->add($object);
+		$primaryKey && is_scalar($primaryKey)
+			&& $Core_ObjectWatcher->add($object);
 
 		return $object;
 	}
@@ -502,7 +533,7 @@ class Core_Entity extends Core_ORM
 					$oField_Value->delete();
 				}
 
-				if (is_dir($fieldDir))
+				if (Core_File::isDir($fieldDir))
 				{
 					try {
 						Core_File::deleteDir($fieldDir);
@@ -544,7 +575,7 @@ class Core_Entity extends Core_ORM
 	public function find($primaryKey = NULL, $bCache = TRUE)
 	{
 		// May be NULL or 0
-		if ($bCache && $primaryKey)
+		if ($bCache && $primaryKey && is_scalar($primaryKey))
 		{
 			$Core_ObjectWatcher = Core_ObjectWatcher::instance();
 			$object = $Core_ObjectWatcher->exists(get_class($this), $primaryKey);
@@ -573,7 +604,8 @@ class Core_Entity extends Core_ORM
 		$object = parent::find(NULL, $bCache);
 
 		// Add into ObjectWatcher
-		$bCache && $primaryKey && $Core_ObjectWatcher->add($object);
+		$bCache && $primaryKey && is_scalar($primaryKey)
+			&& $Core_ObjectWatcher->add($object);
 
 		return $object;
 	}
@@ -812,6 +844,17 @@ class Core_Entity extends Core_ORM
 		Core_Event::notify($this->_modelName . '.onAfterGetXml', $this);
 
 		return $xml;
+	}
+
+	/**
+	 * Is $tagName Available
+	 * @param $tagName Tag Name
+	 * @return bool
+	 */
+	protected function _isTagAvailable($tagName)
+	{
+		return (count($this->_allowedTags) == 0 || isset($this->_allowedTags[$tagName]))
+			&& !isset($this->_forbiddenTags[$tagName]);
 	}
 
 	/**

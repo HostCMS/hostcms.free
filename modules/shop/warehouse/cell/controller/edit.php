@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Cell_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -138,11 +138,10 @@ class Shop_Warehouse_Cell_Controller_Edit extends Admin_Form_Action_Controller_T
 				->add($oCore_Html_Entity_Script);
 		}
 
-		$title = $this->_object->id
-			? Core::_('Shop_Warehouse_Cell.form_edit', $this->_object->name)
-			: Core::_('Shop_Warehouse_Cell.form_add');
-
-		$this->title($title);
+		$this->title($this->_object->id
+			? Core::_('Shop_Warehouse_Cell.form_edit', $this->_object->name, FALSE)
+			: Core::_('Shop_Warehouse_Cell.form_add')
+		);
 
 		return $this;
 	}

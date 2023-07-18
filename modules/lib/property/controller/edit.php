@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Lib
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Lib_Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -39,8 +39,9 @@ class Lib_Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 		parent::_prepareForm();
 
 		$this->title($this->_object->id
-			? Core::_('Lib_Property.lib_property_form_title_edit', $this->_object->name)
-			: Core::_('Lib_Property.lib_property_form_title_add'));
+			? Core::_('Lib_Property.lib_property_form_title_edit', $this->_object->name, FALSE)
+			: Core::_('Lib_Property.lib_property_form_title_add')
+		);
 
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 

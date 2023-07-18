@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core
 {
@@ -202,9 +202,11 @@ class Core
 			'compressionJsDirectory' => 'hostcmsfiles/js/',
 			'compressionCssDirectory' => 'hostcmsfiles/css/',
 			'sitemapDirectory' => 'hostcmsfiles/sitemap/',
+			'banAfterFailedAccessAttempts' => 5,
 			'session' => array(
 				'driver' => 'database',
 				'class' => 'Core_Session_Database',
+				'subdomain' => TRUE,
 			),
 			'headers' => array(
 				'X-Content-Type-Options' => 'nosniff',
@@ -300,21 +302,21 @@ class Core
 	/**
 	 * Callback function
 	 *
-	 * @param int $code код ошибки - E_ERROR и т.д.
+	 * @param int $errno код ошибки - E_ERROR и т.д.
 	 * @param string $msg сообщение об ошбике
 	 * @param string $file имя файла, в котором произошла ошибка
 	 * @param int $line строка, в котором произошла ошибка
 	 */
-	static public function _error($code, $msg, $file, $line)
+	static public function _error($errno, $msg, $file, $line)
 	{
 		// Не выводим ошибки, если режим сообщения об ошибках отключен
 		// или код ошибки меньше кода вывода ошибок
 		$error_reporting = error_reporting();
 
-		$bShowError = $error_reporting && $error_reporting >= $code;
-		//$bShowError = error_reporting() & $err_no;
-
-		// Уровень критичности ошибки
+		// The @ operator will no longer silence fatal errors (E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR, E_PARSE). Error handlers that expect error_reporting to be 0 when @ is used, should be adjusted to use a mask check
+		$bShowError = PHP_VERSION_ID >= 80000
+			? (error_reporting() & $errno) && $error_reporting >= $errno
+			: $error_reporting && $error_reporting >= $errno;
 
 		// The following error types cannot be handled with a user defined function: E_ERROR, E_PARSE, E_CORE_ERROR, E_CORE_WARNING, E_COMPILE_ERROR, E_COMPILE_WARNING independent of where they were raised, and most of E_STRICT raised in the file where set_error_handler() is called.
 		$error_level = array(
@@ -350,13 +352,13 @@ class Core
 			8192 => Core::_('Core.E_DEPRECATED'), // since PHP 7.4 E_DEPRECATED detected during parsing, not at runtime
 		);
 
-		$current_error_level = isset($error_level[$code])
-			? $error_level[$code]
+		$current_error_level = isset($error_level[$errno])
+			? $error_level[$errno]
 			: 0;
 
 		// Определяем название ошибки (Error/Warning/etc)
-		$current_error_name = isset($error_name[$code])
-			? $error_name[$code]
+		$current_error_name = isset($error_name[$errno])
+			? $error_name[$errno]
 			: 'Undefined error';
 
 		$aStack = array();
@@ -370,7 +372,7 @@ class Core
 		$sStack = implode(",\n", $aStack);
 
 		// Если ошибка уровня E_USER_ERROR
-		$message = $code == E_USER_ERROR
+		$message = $errno == E_USER_ERROR
 			? Core::_('Core.error_log_add_message')
 			: Core::_('Core.error_log_message_short', $current_error_name, $msg, $file, $line);
 
@@ -391,7 +393,7 @@ class Core
 		//}
 
 		// Если ошибка уровня E_ERROR или E_USER_ERROR - завершаем выполнение скрипта
-		if ($code == E_ERROR || $code == E_USER_ERROR)
+		if ($errno == E_ERROR || $errno == E_USER_ERROR)
 		{
 			exit();
 		}
@@ -721,7 +723,8 @@ class Core
 			|| strtolower(Core_Array::get($_SERVER, 'HTTPS', '')) == 'on' || Core_Array::get($_SERVER, 'HTTPS') == '1'
 			|| strtolower(Core_Array::get($_SERVER, 'HTTP_X_FORWARDED_PROTO', '')) == 'https'
 			|| strtolower(Core_Array::get($_SERVER, 'HTTP_X_SCHEME', '')) == 'https'
-			|| strtolower(Core_Array::get($_SERVER, 'HTTP_X_HTTPS', '')) == 'on' || Core_Array::get($_SERVER, 'HTTP_X_HTTPS') == '1';
+			|| strtolower(Core_Array::get($_SERVER, 'HTTP_X_HTTPS', '')) == 'on' || Core_Array::get($_SERVER, 'HTTP_X_HTTPS') == '1'
+			|| strtolower(Core_Array::get($_SERVER, 'HTTP_CF_VISITOR', '')) == '{"scheme":"https"}';
 	}
 
 	/**
@@ -790,9 +793,14 @@ class Core
 			11111111111111111111111111111111 00000000000000000000000000000000 */
 		//var_dump($int); die();
 
-		if ($int > 2147483647 || $int < -2147483648)
+		if (PHP_INT_SIZE > 4)
 		{
-			$int = $int ^ -4294967296;
+			($int > 2147483647 || $int < -2147483648)
+				&& $int = $int ^ -4294967296;
+		}
+		elseif (!is_int($int))
+		{
+			$int = intval($int);
 		}
 
 		return $int;
@@ -987,6 +995,10 @@ class Core
 		{
 			return $_SERVER['HTTP_DDG_CONNECTING_IP'];
 		}
+		elseif (isset($_SERVER['HTTP_X_QRATOR_IP_SOURCE']))
+		{
+			return $_SERVER['HTTP_X_QRATOR_IP_SOURCE'];
+		}
 
 		return Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1');
 	}
@@ -995,7 +1007,7 @@ class Core
 	* Проверка user-agent на принадлежность к ботам
 	*
 	* @param string $agent user-agent
-	* @return bool true, если это бот, false в противном случае
+	* @return bool
 	*
 	* <code>
 	* <?php
@@ -1010,6 +1022,8 @@ class Core
 	*/
 	static public function checkBot($agent)
 	{
-		return preg_match('/http|bot|spide|craw|finder|curl|mail|yandex|rambler|seach|seek|site|sogou|yahoo|msnbot|snoopy|google|bing/iu', $agent);
+		return is_string($agent)
+			? (bool) preg_match('/http|bot|spide|craw|finder|curl|mail|yandex|rambler|seach|seek|site|sogou|yahoo|msnbot|snoopy|google|bing/iu', $agent)
+			: FALSE;
 	}
 }

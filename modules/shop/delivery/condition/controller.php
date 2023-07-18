@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Delivery_Condition_Controller extends Core_Servant_Properties
 {
@@ -22,6 +22,8 @@ class Shop_Delivery_Condition_Controller extends Core_Servant_Properties
 		'shop_country_location_id',
 		'shop_country_location_city_id',
 		'shop_country_location_city_area_id',
+		'timeFrom',
+		'timeTo',
 		'totalWeight',
 		'totalAmount',
 	);
@@ -37,7 +39,7 @@ class Shop_Delivery_Condition_Controller extends Core_Servant_Properties
 		$shop_country_location_id = $this->shop_country_location_id;
 		$shop_country_location_city_id = $this->shop_country_location_city_id;
 		$shop_country_location_city_area_id = $this->shop_country_location_city_area_id;
-		
+
 		// Выбираем все способы доставки для данного типа с заданными условиями
 		$i = 0;
 		while ($i <= 4)
@@ -45,50 +47,73 @@ class Shop_Delivery_Condition_Controller extends Core_Servant_Properties
 			$oShop_Delivery_Conditions = $oShop_Delivery->Shop_Delivery_Conditions;
 			$oShop_Delivery_Conditions->queryBuilder()
 				->select('shop_delivery_conditions.*')
+				->where('active', '=', 1)
 				// Поле orderfield внесено для того, чтобы поля со всеми заполенынми условиями были выше
 				//->select(array(Core_QueryBuilder::expression('IF ( `min_weight` > 0 AND `max_weight` > 0 AND `min_price` > 0 AND `max_price` > 0, 1, 0)'), 'orderfield'))
 				// Отрезаем по Стране, Области, Городу и Району
 				->open()
-				->where('shop_country_id_inverted', '=', '0')
-				->where('shop_country_id', '=', $shop_country_id)
-				->setOr()
-				->where('shop_country_id_inverted', '=', '1')
-				->where('shop_country_id', '!=', $this->shop_country_id) // здесь всегда исходное значение переменной!
+					->where('shop_country_id_inverted', '=', '0')
+					->where('shop_country_id', '=', $shop_country_id)
+					->setOr()
+					->where('shop_country_id_inverted', '=', '1')
+					->where('shop_country_id', '!=', $this->shop_country_id) // здесь всегда исходное значение переменной!
 				->close()
 				->open()
-				->where('shop_country_location_id_inverted', '=', '0')
-				->where('shop_country_location_id', '=', $shop_country_location_id)
-				->setOr()
-				->where('shop_country_location_id_inverted', '=', '1')
-				->where('shop_country_location_id', '!=', $this->shop_country_location_id) // здесь всегда исходное значение переменной!
+					->where('shop_country_location_id_inverted', '=', '0')
+					->where('shop_country_location_id', '=', $shop_country_location_id)
+					->setOr()
+					->where('shop_country_location_id_inverted', '=', '1')
+					->where('shop_country_location_id', '!=', $this->shop_country_location_id) // здесь всегда исходное значение переменной!
 				->close()
 				->open()
-				->where('shop_country_location_city_id_inverted', '=', '0')
-				->where('shop_country_location_city_id', '=', $shop_country_location_city_id)
-				->setOr()
-				->where('shop_country_location_city_id_inverted', '=', '1')
-				->where('shop_country_location_city_id', '!=', $this->shop_country_location_city_id) // здесь всегда исходное значение переменной!
+					->where('shop_country_location_city_id_inverted', '=', '0')
+					->where('shop_country_location_city_id', '=', $shop_country_location_city_id)
+					->setOr()
+					->where('shop_country_location_city_id_inverted', '=', '1')
+					->where('shop_country_location_city_id', '!=', $this->shop_country_location_city_id) // здесь всегда исходное значение переменной!
 				->close()
 				->open()
-				->where('shop_country_location_city_area_id_inverted', '=', '0')
-				->where('shop_country_location_city_area_id', '=', $shop_country_location_city_area_id)
-				->setOr()
-				->where('shop_country_location_city_area_id_inverted', '=', '1')
-				->where('shop_country_location_city_area_id', '!=', $this->shop_country_location_city_area_id) // здесь всегда исходное значение переменной!
+					->where('shop_country_location_city_area_id_inverted', '=', '0')
+					->where('shop_country_location_city_area_id', '=', $shop_country_location_city_area_id)
+					->setOr()
+					->where('shop_country_location_city_area_id_inverted', '=', '1')
+					->where('shop_country_location_city_area_id', '!=', $this->shop_country_location_city_area_id) // здесь всегда исходное значение переменной!
 				->close()
-				->where('active', '=', 1)
 				// Основная обрезка по характеристикам заказа
 				->where('min_weight', '<=', $this->totalWeight)
 				->open()
-				->where('max_weight', '>=', $this->totalWeight)
-				->setOr()
-				->where('max_weight', '=', 0)
+					->where('max_weight', '>=', $this->totalWeight)
+					->setOr()
+					->where('max_weight', '=', 0)
 				->close()
+				// Price
 				->where('min_price', '<=', $this->totalAmount)
 				->open()
-				->where('max_price', '>=', $this->totalAmount)
-				->setOr()
-				->where('max_price', '=', 0)
+					->where('max_price', '>=', $this->totalAmount)
+					->setOr()
+					->where('max_price', '=', 0)
+				->close()
+				// Time
+				->open()
+					->open()
+						// Заданное время начала больше времени начала и меньше времени окончания
+						->where('time_from', '<=', $this->timeFrom)
+						->open()
+							->where('time_to', '>=', $this->timeFrom)
+							->setOr()
+							->where('time_to', '=', '00:00:00')
+						->close()
+					->close()
+					->setOr()
+					->open()
+						// Заданное время окончания больше времени начали и меньше времени окончания
+						->where('time_from', '<=', $this->timeTo)
+						->open()
+							->where('time_to', '>=', $this->timeTo)
+							->setOr()
+							->where('time_to', '=', '00:00:00')
+						->close()
+					->close()
 				->close()
 				// Сортируем вывод
 				->orderBy(Core_QueryBuilder::expression('IF ( `min_weight` > 0 AND `max_weight` > 0 AND `min_price` > 0 AND `max_price` > 0, 1, 0)'), 'DESC')
@@ -100,7 +125,7 @@ class Shop_Delivery_Condition_Controller extends Core_Servant_Properties
 				->limit(1);
 
 			$aShop_Delivery_Conditions = $oShop_Delivery_Conditions->findAll();
-			
+
 			// Проверяем выбрали ли хотя бы одну запись
 			if (count($aShop_Delivery_Conditions) > 0)
 			{

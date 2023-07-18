@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Filter_Controller
 {
@@ -34,6 +34,24 @@ class Shop_Filter_Controller
 		$this->_oShop = $oShop;
 
 		$this->_oShop_Item_Controller = new Shop_Item_Controller();
+	}
+
+	/**
+	 * Get Filter Table Name
+	 * @return string
+	 */
+	public function getTableName()
+	{
+		return 'shop_filter' . $this->_oShop->id;
+	}
+
+	/**
+	 * Get Prices Table Name
+	 * @return string
+	 */
+	public function getPriceTableName()
+	{
+		return 'shop_filter_price' . $this->_oShop->id;
 	}
 
 	/**
@@ -84,33 +102,52 @@ class Shop_Filter_Controller
 	}
 
 	/**
+	 * Get price sql string
+	 * @param Property_Model $oProperty
+	 * @return array array('column' => ..., 'index' => ...)
+	 */
+	protected function _getPriceSql(Shop_Price_Model $oShop_Price)
+	{
+		return array(
+			'column' => "`price{$oShop_Price->id}` DECIMAL(12,2) NOT NULL DEFAULT '0.00'",
+			'index' => "`price{$oShop_Price->id}` (`price{$oShop_Price->id}`)"
+		);
+	}
+
+	/**
 	 * Create shop filter table
 	 * @return self
 	 */
 	public function createTable()
 	{
-		// ALTER TABLE `shop_filter1` ADD `primary` TINYINT(1) NOT NULL AFTER `shop_item_id`;
+		$oCore_DataBase = Core_DataBase::instance();
+		$aConfig = $oCore_DataBase->getConfig();
+
+		$sEngine = isset($aConfig['storageEngine'])
+			? $aConfig['storageEngine']
+			: 'MyISAM';
+
+		// Filter
 		$aColumns = array(
 			"`id` INT(11) NOT NULL AUTO_INCREMENT",
-			"`shop_item_id` INT(11) NOT NULL DEFAULT '0'", // идентификатор товара
+			"`shop_item_id` INT(11) NOT NULL DEFAULT '0'",
 			"`primary` TINYINT(1) NOT NULL DEFAULT '0'",
 			"`modification_id` INT(11) NOT NULL DEFAULT '0'", // идентификатор родительского товара, которому принадлежит модификация
 			"`shop_group_id` INT(11) NOT NULL DEFAULT '0'",
 			"`shop_producer_id` INT(11) NOT NULL DEFAULT '0'",
-			"`shop_currency_id` INT(11) NOT NULL DEFAULT '0'",
-			"`price` DECIMAL(12,2) NOT NULL DEFAULT '0.00'",
+			//"`shop_currency_id` INT(11) NOT NULL DEFAULT '0'",
+			//"`price` DECIMAL(12,2) NOT NULL DEFAULT '0.00'",
 			"`price_absolute` DECIMAL(12,2) NOT NULL DEFAULT '0.00'",
 			"`available` TINYINT(1) NOT NULL DEFAULT '0'"
 		);
 
 		// Indexes
-		// 'KEY `shop_group_id` (`shop_group_id`,`modification_id`,`price_absolute`)',
 		$aIndexes = array(
 			'PRIMARY KEY (`id`)',
 			'KEY `shop_item_id` (`shop_item_id`)',
 			'KEY `modification_id` (`modification_id`)',
 			'KEY `shop_group_id` (`shop_group_id`,`primary`,`modification_id`)',
-			'KEY `shop_currency_id` (`shop_currency_id`)',
+			//'KEY `shop_currency_id` (`shop_currency_id`)',
 			'KEY `price` (`price_absolute`,`primary`,`shop_group_id`)',
 			'KEY `producer` (`shop_producer_id`)'
 		);
@@ -137,17 +174,43 @@ class Shop_Filter_Controller
 
 		$sColumns = implode(', ', $aColumns);
 
-		// A table can contain a maximum of 64 secondary indexes, 6 of them already added
-		$sIndexes = implode(', ', array_slice($aIndexes, 0, 58));
-
-		$oCore_DataBase = Core_DataBase::instance();
-		$aConfig = $oCore_DataBase->getConfig();
-
-		$sEngine = isset($aConfig['storageEngine'])
-			? $aConfig['storageEngine']
-			: 'MyISAM';
+		// A table can contain a maximum of 64 secondary indexes, 5 of them already added
+		$sIndexes = implode(', ', array_slice($aIndexes, 0, 59));
 
 		$query = "CREATE TABLE IF NOT EXISTS `" . $this->getTableName() . "` (" .
+			"\n{$sColumns}," .
+			"\n{$sIndexes}" .
+			"\n) ENGINE={$sEngine} DEFAULT CHARSET=utf8 AUTO_INCREMENT=0";
+
+		$oCore_DataBase->query($query);
+
+		// Prices
+		$aColumns = array(
+			"`id` INT(11) NOT NULL AUTO_INCREMENT",
+			"`shop_item_id` INT(11) NOT NULL DEFAULT '0'"
+		);
+
+		// Indexes
+		$aIndexes = array(
+			'PRIMARY KEY (`id`)',
+			'KEY `shop_item_id` (`shop_item_id`)'
+		);
+
+		$aShop_Prices = $this->_oShop->Shop_Prices->findAll(FALSE);
+		foreach ($aShop_Prices as $oShop_Price)
+		{
+			$aPriceSql = $this->_getPriceSql($oShop_Price);
+
+			$aColumns[] = $aPriceSql['column'];
+			$aIndexes[] = 'KEY ' . $aPriceSql['index'];
+		}
+
+		$sColumns = implode(', ', $aColumns);
+
+		// A table can contain a maximum of 64 secondary indexes, 1 of them already added
+		$sIndexes = implode(', ', array_slice($aIndexes, 0, 63));
+
+		$query = "CREATE TABLE IF NOT EXISTS `" . $this->getPriceTableName() . "` (" .
 			"\n{$sColumns}," .
 			"\n{$sIndexes}" .
 			"\n) ENGINE={$sEngine} DEFAULT CHARSET=utf8 AUTO_INCREMENT=0";
@@ -157,11 +220,6 @@ class Shop_Filter_Controller
 		return $this;
 	}
 
-	public function getTableName()
-	{
-		return 'shop_filter' . $this->_oShop->id;
-	}
-
 	/**
 	 * Remove shop filter table
 	 * @return self
@@ -169,6 +227,7 @@ class Shop_Filter_Controller
 	public function dropTable()
 	{
 		Core_DataBase::instance()->query("DROP TABLE IF EXISTS `" . $this->getTableName() . "`");
+		Core_DataBase::instance()->query("DROP TABLE IF EXISTS `" . $this->getPriceTableName() . "`");
 
 		return $this;
 	}
@@ -201,6 +260,31 @@ class Shop_Filter_Controller
 	}
 
 	/**
+	 * Add price column and index into table
+	 * @param Shop_Price_Model $oShop_Price
+	 * @return self
+	 */
+	public function addPrice(Shop_Price_Model $oShop_Price)
+	{
+		$sPriceTableName = $this->getPriceTableName();
+
+		$aPriceSql = $this->_getPriceSql($oShop_Price);
+
+		Core_DataBase::instance()->setQueryType(5)->query("ALTER TABLE `{$sPriceTableName}` ADD {$aPriceSql['column']}");
+
+		// Check exists indexes
+		$aIndexes = Core_DataBase::instance()->getIndexes($sPriceTableName);
+
+		// A table can contain a maximum of 64 secondary indexes.
+		if (count($aIndexes) < 64)
+		{
+			Core_DataBase::instance()->setQueryType(5)->query("ALTER TABLE `{$sPriceTableName}` ADD INDEX {$aPriceSql['index']}");
+		}
+
+		return $this;
+	}
+
+	/**
 	 * Remove property column and index from table
 	 * @param Property_Model $oProperty
 	 * @return self
@@ -226,30 +310,39 @@ class Shop_Filter_Controller
 		return $this;
 	}
 
-	protected $_cacheTableColumns = NULL;
+	/**
+	 * Cache for _getFilterTableColumns()
+	 * @var array
+	 */
+	protected $_cacheFilterTableColumns = NULL;
 
-	protected function _getTableColumns()
+	/**
+	 * Get a list of filter table fields
+	 * @return array
+	 */
+	protected function _getFilterTableColumns()
 	{
-		if (is_null($this->_cacheTableColumns))
+		if (is_null($this->_cacheFilterTableColumns))
 		{
 			$oCore_DataBase = Core_DataBase::instance();
 
-			$this->_cacheTableColumns = array();
+			$this->_cacheFilterTableColumns = array();
 
-			$sTableName = $this->getTableName();
-
-			$aTableColumns = $oCore_DataBase->getColumns($sTableName);
-
+			$aTableColumns = $oCore_DataBase->getColumns($this->getTableName());
 			foreach ($aTableColumns as $key => $aTableColumn)
 			{
 				$key != 'id'
-					&& $this->_cacheTableColumns[$key] = $oCore_DataBase->quoteColumnName($key);
+					&& $this->_cacheFilterTableColumns[$key] = $oCore_DataBase->quoteColumnName($key);
 			}
 		}
 
-		return $this->_cacheTableColumns;
+		return $this->_cacheFilterTableColumns;
 	}
 
+	/**
+	 * Cache for _getPropertyIDs()
+	 * @var array
+	 */
 	protected $_cachePropertyIDs = NULL;
 
 	protected function _getPropertyIDs()
@@ -258,7 +351,7 @@ class Shop_Filter_Controller
 		{
 			$this->_cachePropertyIDs = array();
 
-			$aTableColumns = $this->_getTableColumns();
+			$aTableColumns = $this->_getFilterTableColumns();
 
 			foreach ($aTableColumns as $key => $aTableColumn)
 			{
@@ -274,16 +367,75 @@ class Shop_Filter_Controller
 	}
 
 	/**
+	 * Cache for _getPriceTableColumns()
+	 * @var array
+	 */
+	protected $_cachePriceTableColumns = NULL;
+
+	/**
+	 * Get a list of price table fields
+	 * @return array
+	 */
+	protected function _getPriceTableColumns()
+	{
+		if (is_null($this->_cachePriceTableColumns))
+		{
+			$oCore_DataBase = Core_DataBase::instance();
+
+			$this->_cachePriceTableColumns = array();
+
+			$aTableColumns = $oCore_DataBase->getColumns($this->getPriceTableName());
+			foreach ($aTableColumns as $key => $aTableColumn)
+			{
+				$key != 'id'
+					&& $this->_cachePriceTableColumns[$key] = $oCore_DataBase->quoteColumnName($key);
+			}
+		}
+
+		return $this->_cachePriceTableColumns;
+	}
+
+	/**
+	 * Cache for _getPriceIDs()
+	 * @var array
+	 */
+	protected $_cachePriceIDs = NULL;
+
+	protected function _getPriceIDs()
+	{
+		if (is_null($this->_cachePriceIDs))
+		{
+			$this->_cachePriceIDs = array();
+
+			$aTableColumns = $this->_getPriceTableColumns();
+
+			foreach ($aTableColumns as $key => $aTableColumn)
+			{
+				if (strpos($key, 'price') === 0)
+				{
+					$price_id = substr($key, 5);
+					$this->_cachePriceIDs[$price_id] = $price_id;
+				}
+			}
+		}
+
+		return $this->_cachePriceIDs;
+	}
+
+	/**
 	 * Remove table rows
 	 * @param Shop_Item_Model $oShop_Item
 	 * @return self
 	 */
 	public function remove(Shop_Item_Model $oShop_Item)
 	{
-		$tableName = $this->getTableName();
+		// Remove All Filter Rows For Item
+		Core_QueryBuilder::delete($this->getTableName())
+			->where('shop_item_id', '=', $oShop_Item->id)
+			->execute();
 
-		// Remove All Rows For Item
-		Core_QueryBuilder::delete($tableName)
+		// Remove All Price Rows For Item
+		Core_QueryBuilder::delete($this->getPriceTableName())
 			->where('shop_item_id', '=', $oShop_Item->id)
 			->execute();
 
@@ -297,7 +449,7 @@ class Shop_Filter_Controller
 	 */
 	public function fill(Shop_Item_Model $oShop_Item)
 	{
-		$tableName = $this->getTableName();
+		$filterTableName = $this->getTableName();
 
 		// Remove All Rows For Item
 		$this->remove($oShop_Item);
@@ -310,24 +462,27 @@ class Shop_Filter_Controller
 				->status(Core_Log::$MESSAGE)
 				->write('Filter Fill ' . $oShop_Item->id);*/
 
-			$oDefaultCurrency = Core_Entity::factory('Shop_Currency')->getDefault();
+			/*$oDefaultCurrency = Core_Entity::factory('Shop_Currency')->getDefault();
 
 			$fCurrencyCoefficient = $oShop_Item->Shop_Currency->id > 0 && $oDefaultCurrency->id > 0
 				? Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
 					$oShop_Item->Shop_Currency, $oDefaultCurrency
 				)
-				: 0;
+				: 0;*/
 
 			// warehouse rest
 			$available = $oShop_Item->getRest() > 0 ? 1 : 0;
 
-			// prices
-			// $aPrices = $oShop_Item->getPrices();
-			$aPrices = $this->_oShop_Item_Controller->calculatePriceInItemCurrency($oShop_Item->price, $oShop_Item);
-
 			$shop_group_id = $oShop_Item->modification_id
 				? $oShop_Item->Modification->shop_group_id
 				: $oShop_Item->shop_group_id;
+
+			// prices
+			//$aPrices = $this->_oShop_Item_Controller->calculatePriceInItemCurrency($oShop_Item->price, $oShop_Item);
+			$aPrices = $this->_oShop_Item_Controller->calculatePrice($oShop_Item->price, $oShop_Item);
+
+			// Используется также ниже в блоке цен для групп клиентов
+			$price_absolute = $aPrices['price_discount'] /* * $fCurrencyCoefficient*/;
 
 			$aBaseInserts = array(
 				$oShop_Item->id,
@@ -335,9 +490,9 @@ class Shop_Filter_Controller
 				$oShop_Item->modification_id,
 				$shop_group_id,
 				$oShop_Item->shop_producer_id,
-				$oShop_Item->shop_currency_id,
-				$aPrices['price_discount'],
-				$aPrices['price_discount'] * $fCurrencyCoefficient, // price_absolute
+				//$oShop_Item->shop_currency_id,
+				//$aPrices['price_discount'], // price
+				$price_absolute, // price_absolute
 				$available
 			);
 
@@ -395,7 +550,7 @@ class Shop_Filter_Controller
 
 			$oCore_DataBase = Core_DataBase::instance();
 
-			$sTableColumnNames = implode(',', $this->_getTableColumns());
+			$sFilterTableColumnNames = implode(',', $this->_getFilterTableColumns());
 
 			$aInserts = array();
 
@@ -410,7 +565,7 @@ class Shop_Filter_Controller
 
 					if (count($aInserts) > 50)
 					{
-						$this->_insert($tableName, $sTableColumnNames, $aInserts);
+						$this->_insert($filterTableName, $sFilterTableColumnNames, $aInserts);
 
 						$aInserts = array();
 					}
@@ -427,7 +582,40 @@ class Shop_Filter_Controller
 			}
 
 			count($aInserts)
-				&& $this->_insert($tableName, $sTableColumnNames, $aInserts);
+				&& $this->_insert($filterTableName, $sFilterTableColumnNames, $aInserts);
+
+			// Prices
+			$aPriceIds = $this->_getPriceIDs();
+
+			if (count($aPriceIds))
+			{
+				$aValues = array(
+					$oShop_Item->id
+				);
+
+				$aPriceValues = array();
+
+				$aShop_Item_Prices = $oShop_Item->Shop_Item_Prices->findAll(FALSE);
+				foreach ($aShop_Item_Prices as $oShop_Item_Price)
+				{
+					//$aPrices = $this->_oShop_Item_Controller->calculatePriceInItemCurrency($oShop_Item_Price->value, $oShop_Item);
+					$aPrices = $this->_oShop_Item_Controller->calculatePrice($oShop_Item_Price->value, $oShop_Item);
+
+					$aPriceValues[$oShop_Item_Price->shop_price_id] = $aPrices['price_discount'] /* * $fCurrencyCoefficient*/;
+				}
+
+				foreach ($aPriceIds as $shop_price_id)
+				{
+					$fTmp = isset($aPriceValues[$shop_price_id])
+						? $aPriceValues[$shop_price_id]
+						: $price_absolute;
+
+					$aValues[] = $fTmp < $price_absolute ? $fTmp : $price_absolute;
+				}
+
+				$sPriceTableColumnNames = implode(',', $this->_getPriceTableColumns());
+				$this->_insert($this->getPriceTableName(), $sPriceTableColumnNames, array('(' . implode(', ', $aValues) . ')'));
+			}
 		}
 	}
 
@@ -462,10 +650,10 @@ class Shop_Filter_Controller
 		return $result;
 	}
 
-	protected function _insert($tableName, $sTableColumnNames, array $aValues)
+	protected function _insert($tableName, $sFilterTableColumnNames, array $aValues)
 	{
 		Core_DataBase::instance()->query(
-			"INSERT INTO `{$tableName}` ({$sTableColumnNames}) VALUES " . implode(",\n", $aValues)
+			"INSERT INTO `{$tableName}` ({$sFilterTableColumnNames}) VALUES " . implode(",\n", $aValues)
 		);
 
 		return $this;
@@ -511,7 +699,7 @@ class Shop_Filter_Controller
 	 */
 	public function checkPropertyExist($property_id)
 	{
-		$aTableColumns = $this->_getTableColumns();
+		$aTableColumns = $this->_getFilterTableColumns();
 
 		return isset($aTableColumns['property' . strval($property_id)]);
 	}

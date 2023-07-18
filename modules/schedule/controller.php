@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Schedule
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Schedule_Controller
 {
@@ -35,9 +35,14 @@ class Schedule_Controller
 			{
 				$aScheduleActions = $oCore_Module->getScheduleActions();
 
-				$sAction = isset($aScheduleActions[$oSchedule->action])
+				$mAction = isset($aScheduleActions[$oSchedule->action])
 					? $aScheduleActions[$oSchedule->action]
 					: 'code: ' . $oSchedule->action;
+
+				// Может быть стоковое имя или массив 0 => array('name' => 'foo', 'entityCaption' => 'bar')
+				$sAction = is_array($mAction)
+					? $mAction['name']
+					: $mAction;
 
 				// Log Begin
 				Core_Log::instance()
@@ -102,12 +107,26 @@ class Schedule_Controller
 				{
 					$aReturn = array();
 					$aScheduleActions = $oCore_Module->getScheduleActions();
-					if (count($aScheduleActions))
+
+					foreach ($aScheduleActions as $key => $mValue)
 					{
-						foreach ($aScheduleActions as $key => $value)
+						$entityCaption = Core::_('Schedule.entity_id');
+
+						if (is_array($mValue))
 						{
-							$aReturn[$key] = Core::_($oModule->path . '.' . 'schedule-' . $value);
+							$actionName = $mValue['name'];
+
+							isset($mValue['entityCaption'])
+								&& $entityCaption = $mValue['entityCaption'];
 						}
+						else
+						{
+							$actionName = $mValue;
+						}
+
+						$aAttr = array('data-entityCaption' => $entityCaption);
+
+						$aReturn[$key] = array('value' => Core::_($oModule->path . '.' . 'schedule-' . $actionName), 'attr' => $aAttr);
 					}
 
 					return self::$_getModuleActions[$moduleId] = $aReturn;

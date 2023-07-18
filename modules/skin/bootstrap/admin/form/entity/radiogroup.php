@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Radiogroup extends Skin_Default_Admin_Form_Entity_Radiogroup
 {
@@ -40,7 +40,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Radiogroup extends Skin_Default_Admin_For
 		{
 			foreach ($this->divAttr as $attrName => $attrValue)
 			{
-				$aDivAttr[] = "{$attrName}=\"" . htmlspecialchars($attrValue) . "\"";
+				$aDivAttr[] = "{$attrName}=\"" . htmlspecialchars((string) $attrValue) . "\"";
 			}
 		}
 
@@ -49,7 +49,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Radiogroup extends Skin_Default_Admin_For
 		{
 			foreach ($this->labelAttr as $attrName => $attrValue)
 			{
-				$aLabelAttr[] = "{$attrName}=\"" . htmlspecialchars($attrValue) . "\"";
+				$aLabelAttr[] = "{$attrName}=\"" . htmlspecialchars((string) $attrValue) . "\"";
 			}
 		}
 
@@ -79,7 +79,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Radiogroup extends Skin_Default_Admin_For
 			// ico к пункту
 			if (isset($this->ico[$key]))
 			{
-				?><i class="btn-label fa <?php echo htmlspecialchars($this->ico[$key])?>"></i><?php
+				?><i class="btn-label fa <?php echo htmlspecialchars((string) $this->ico[$key])?>"></i><?php
 			}
 			echo $value;
 			?></span>

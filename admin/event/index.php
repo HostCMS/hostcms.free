@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -165,7 +165,8 @@ $oAdmin_Form_Entity_Menus->add(
 		)
 		->onclick(
 			$bShow_subs || $siteuser_id
-				? $oAdmin_Form_Controller->getAdminActionModalLoad($oAdmin_Form_Controller->getPath(), 'edit', 'modal', 0, 0, $additionalParams)
+				// ? $oAdmin_Form_Controller->getAdminActionModalLoad($oAdmin_Form_Controller->getPath(), 'edit', 'modal', 0, 0, $additionalParams)
+				? $oAdmin_Form_Controller->getAdminActionModalLoad(array('path' => $oAdmin_Form_Controller->getPath(), 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => 0, 'additionalParams' => $additionalParams, 'width' => '90%'))
 				: $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
 );
@@ -499,8 +500,8 @@ if ($siteuser_id)
 }
 
 // Список значений для фильтра и поля
+$aList = array(0 => '—');
 $aEvent_Groups = Core_Entity::factory('Event_Group')->findAll();
-$aList[0] = "—";
 foreach ($aEvent_Groups as $oEvent_Group)
 {
 	$aList[$oEvent_Group->id] = $oEvent_Group->name;

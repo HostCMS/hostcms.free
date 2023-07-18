@@ -26,7 +26,6 @@
 </xsl:if>
 ---
 &labelHostcms;
-http://www.hostcms.ru
 </xsl:template>
 
 <xsl:template match="form_field_dir">

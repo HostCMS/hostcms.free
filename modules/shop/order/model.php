@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Model extends Core_Entity
 {
@@ -68,6 +68,7 @@ class Shop_Order_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_belongsTo = array(
+		'company_account' => array(),
 		'shop' => array(),
 		'shop_company' => array('model' => 'Company', 'foreign_key' => 'company_id'),
 		'shop_country_location' => array(),
@@ -104,7 +105,20 @@ class Shop_Order_Model extends Core_Entity
 		'status_datetime',
 	);
 
+	/**
+	 * TYPE
+	 * @var int
+	 */
 	const TYPE = 5;
+
+	/**
+	 * Get Entity Type
+	 * @return int
+	 */
+	public function getEntityType()
+	{
+		return self::TYPE;
+	}
 
 	/**
 	 * Mark entity as deleted
@@ -217,7 +231,7 @@ class Shop_Order_Model extends Core_Entity
 
 		$this->source_id && $this->Source->delete();
 
-		$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, self::TYPE);
+		$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, $this->getEntityType());
 		foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
 		{
 			$oShop_Warehouse_Entry->delete();
@@ -231,7 +245,7 @@ class Shop_Order_Model extends Core_Entity
 				->execute();
 		}
 
-		if (is_dir($sDir))
+		if (Core_File::isDir($sDir))
 		{
 			Core_File::deleteDir($sDir);
 		}
@@ -905,7 +919,7 @@ class Shop_Order_Model extends Core_Entity
 				? $this->datetime
 				: Core_Date::strftime($this->Shop->format_datetime, Core_Date::sql2timestamp($this->datetime)));
 
-		!isset($this->_forbiddenTags['dir'])
+		$this->_isTagAvailable('dir')
 			&& $this->addXmlTag('dir', Core_Page::instance()->shopCDN . $this->getOrderHref());
 
 		$this->source_id && $this->addEntity(
@@ -1715,7 +1729,7 @@ class Shop_Order_Model extends Core_Entity
 				$aWriteoff = $aTmp = $aRecount = array();
 
 				// Exists Shop_Warehouse_Entry
-				$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, self::TYPE);
+				$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, $this->getEntityType());
 
 				foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
 				{
@@ -1784,7 +1798,7 @@ class Shop_Order_Model extends Core_Entity
 						else
 						{
 							$oShop_Warehouse_Entry = Core_Entity::factory('Shop_Warehouse_Entry');
-							$oShop_Warehouse_Entry->setDocument($this->id, self::TYPE);
+							$oShop_Warehouse_Entry->setDocument($this->id, $this->getEntityType());
 							$oShop_Warehouse_Entry->shop_item_id = $shop_item_id;
 						}
 
@@ -1855,7 +1869,7 @@ class Shop_Order_Model extends Core_Entity
 	{
 		if ($this->posted)
 		{
-			$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, self::TYPE);
+			$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, $this->getEntityType());
 			foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
 			{
 				$shop_item_id = $oShop_Warehouse_Entry->shop_item_id;
@@ -1911,7 +1925,7 @@ class Shop_Order_Model extends Core_Entity
 	{
 		clearstatcache();
 
-		if (!is_dir($this->getOrderPath()))
+		if (!Core_File::isDir($this->getOrderPath()))
 		{
 			try
 			{
@@ -2061,7 +2075,7 @@ class Shop_Order_Model extends Core_Entity
 
 		$sUserFullName = Core_Event::getLastReturn();
 
-		if (!strlen($sUserFullName))
+		if (!strlen((string) $sUserFullName))
 		{
 			$aTmpArray = array();
 			$this->surname != '' && $aTmpArray[] = $this->surname;
@@ -2806,7 +2820,7 @@ class Shop_Order_Model extends Core_Entity
 
 				// Получаем данные о купоне
 				$shop_purchase_discount_coupon_id = $shop_purchase_discount_id = 0;
-				if (strlen($oShop_Purchase_Discount_Controller->couponText))
+				if (strlen((string) $oShop_Purchase_Discount_Controller->couponText))
 				{
 					$oShop_Purchase_Discounts_For_Coupon = $oShop->Shop_Purchase_Discounts->getByCouponText(
 						$oShop_Purchase_Discount_Controller->couponText
@@ -2985,7 +2999,7 @@ class Shop_Order_Model extends Core_Entity
 			->add(
 				$oCore_Html_Entity_Dropdownlist
 					->value($this->shop_order_status_id)
-					->options(Shop_Order_Status_Controller_Edit::getDropdownlistOptions())
+					->options(Shop_Order_Status_Controller_Edit::getDropdownlistOptions($this->shop_id))
 					->onchange("$.adminLoad({path: '{$path}', additionalParams: '{$additionalParams}', action: 'apply', post: { 'hostcms[checked][0][{$this->id}]': 0, apply_check_0_{$this->id}_fv_{$oAdmin_Form_Field->id}: $(this).find('li[selected]').prop('id') }, windowId: '{$oAdmin_Form_Controller->getWindowId()}'});")
 					->data('change-context', 'true')
 				)
@@ -3021,7 +3035,7 @@ class Shop_Order_Model extends Core_Entity
 			// Core_Meta
 			'this' => $this,
 			'shop_order' => $this,
-			'company' => $oCompany,
+			'company' => !is_null($oCompany) ? $oCompany : new Core_Meta_Empty(),
 			'shop' => $this->Shop,
 			'total_count' => 0,
 		);
@@ -3044,6 +3058,7 @@ class Shop_Order_Model extends Core_Entity
 			$node->okei = htmlspecialchars((string) $oShop_Item->Shop_Measure->okei);
 			$node->price = $oShop_Order_Item->price;
 			$node->quantity = $oShop_Order_Item->quantity;
+			$node->marking = htmlspecialchars((string) $oShop_Order_Item->marking);
 			$node->rate = $oShop_Order_Item->rate;
 			$node->rate_percent = $oShop_Order_Item->rate ? $oShop_Order_Item->rate . '%' : '';
 			$node->amount = Shop_Controller::instance()->round($oShop_Order_Item->quantity * $oShop_Order_Item->price);

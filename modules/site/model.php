@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Site
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Site_Model extends Core_Entity
 {
@@ -83,6 +83,7 @@ class Site_Model extends Core_Entity
 		'counter_useragent' => array(),
 		'counter_visit' => array(),
 		'cdn_site' => array(),
+		'chartaccount_cashflow' => array(),
 		'deal' => array(),
 		'deal_template' => array(),
 		'document' => array(),
@@ -125,7 +126,6 @@ class Site_Model extends Core_Entity
 		'seo_site' => array(),
 		'shop' => array(),
 		'shop_dir' => array(),
-		'shop_cashflow' => array(),
 		'shortlink' => array(),
 		'shortlink_dir' => array(),
 		'siteuser' => array(),
@@ -335,7 +335,6 @@ class Site_Model extends Core_Entity
 		{
 			$this->Shops->deleteAll(FALSE);
 			$this->Shop_Dirs->deleteAll(FALSE);
-			$this->Shop_Cashflows->deleteAll(FALSE);
 		}
 
 		if (Core::moduleIsActive('siteuser'))
@@ -411,6 +410,12 @@ class Site_Model extends Core_Entity
 			$this->Dms_Document_Checkpoints->deleteAll(FALSE);
 			$this->Dms_Case_Archives->deleteAll(FALSE);
 			$this->Dms_Case_Destructions->deleteAll(FALSE);
+		}
+
+
+		if (Core::moduleIsActive('chartaccount'))
+		{
+			$this->Chartaccount_Cashflows->deleteAll(FALSE);
 		}
 
 		$this->Site_Aliases->deleteAll(FALSE);
@@ -557,7 +562,7 @@ class Site_Model extends Core_Entity
 
 		$faviconPath = $this->_getFaviconPath();
 
-		if (!is_dir($faviconPath))
+		if (!Core_File::isDir($faviconPath))
 		{
 			try
 			{
@@ -589,7 +594,7 @@ class Site_Model extends Core_Entity
 		{
 			$uploaddir_path = CMS_FOLDER . $this->uploaddir;
 
-			if (!is_dir($uploaddir_path))
+			if (!Core_File::isDir($uploaddir_path))
 			{
 				try
 				{
@@ -621,15 +626,10 @@ class Site_Model extends Core_Entity
 		if (Core::moduleIsActive('advertisement'))
 		{
 			// Список баннеров сайта
-			$aAdvertisements = $this->Advertisements->findAll(FALSE);
-
-			// Массив, сожержащий копии баннеров
 			$aMatchAdvertisements = array();
-
-			// Цикл по баннерам
+			$aAdvertisements = $this->Advertisements->findAll(FALSE);
 			foreach ($aAdvertisements as $oAdvertisement)
 			{
-				// Копируем баннер
 				$oNewAdvertisement = $oAdvertisement->copy();
 				$newObject->add($oNewAdvertisement);
 
@@ -638,11 +638,8 @@ class Site_Model extends Core_Entity
 
 			// Список групп баннеров сайта
 			$aAdvertisement_Groups = $this->Advertisement_Groups->findAll(FALSE);
-
-			// Цикл по группам баннеров
 			foreach ($aAdvertisement_Groups as $oAdvertisement_Group)
 			{
-				// Копируем группу баннеров
 				$oNewAdvertisement_Group = $oAdvertisement_Group->copy();
 
 				// Связываем скопированную группу с сайтом
@@ -669,12 +666,8 @@ class Site_Model extends Core_Entity
 
 		// Documents
 		// Список статусов документов
-		$aDocument_Statuses = $this->Document_Statuses->findAll(FALSE);
-
-		// Массив для хранения копий статусов документов
 		$aMatchDocument_Statuses = array();
-
-		// Цикл по статусам документов
+		$aDocument_Statuses = $this->Document_Statuses->findAll(FALSE);
 		foreach ($aDocument_Statuses as $oDocument_Status)
 		{
 			// Копируем статус документа
@@ -685,11 +678,8 @@ class Site_Model extends Core_Entity
 		}
 
 		// Список разделов документов
-		$aDocument_Dirs = $this->Document_Dirs->findAll(FALSE);
-
 		$aMatchDocument_Dirs = array();
-
-		// Цикл по разделам документов
+		$aDocument_Dirs = $this->Document_Dirs->findAll(FALSE);
 		foreach ($aDocument_Dirs as $oDocument_Dir)
 		{
 			// Копируем разделы документов
@@ -699,10 +689,8 @@ class Site_Model extends Core_Entity
 			$aMatchDocument_Dirs[$oDocument_Dir->id] = $oNewDocument_Dir;
 		}
 
-		// Получаем скопированные разделы документов
-		$aNewDocument_Dirs = $newObject->Document_Dirs->findAll(FALSE);
-
 		// В цикле заменяем идентификаторы родительских разделов
+		$aNewDocument_Dirs = $newObject->Document_Dirs->findAll(FALSE);
 		foreach ($aNewDocument_Dirs as $oNewDocument_Dir)
 		{
 			if (isset($aMatchDocument_Dirs[$oNewDocument_Dir->parent_id]))
@@ -713,11 +701,9 @@ class Site_Model extends Core_Entity
 			}
 		}
 
-		// Получаем документы, принадлежащие сайту
-		$aDocuments = $this->Documents->findAll(FALSE);
-
+		// Документы
 		$aMatch_Documents = array();
-
+		$aDocuments = $this->Documents->findAll(FALSE);
 		foreach ($aDocuments as $oDocument)
 		{
 			//$oNewDocument = clone $oDocument;
@@ -748,7 +734,6 @@ class Site_Model extends Core_Entity
 
 		// Menu
 		$aMatchStructure_Menus = array();
-
 		$aStructure_Menus = $this->Structure_Menus->findAll(FALSE);
 		foreach ($aStructure_Menus as $oStructure_Menu)
 		{
@@ -758,13 +743,13 @@ class Site_Model extends Core_Entity
 			$aMatchStructure_Menus[$oStructure_Menu->id] = $oNewStructure_Menu;
 
 			$aReplace["->menu({$oStructure_Menu->id})"] = "->menu({$oNewStructure_Menu->id})";
+			$aReplace["->parentId({$oStructure_Menu->id})"] = "->parentId({$oNewStructure_Menu->id})";
 		}
 
 		// Structures
-		// Получаем доп. свойства узлов структуры
-		$aStructure_Properties = $this->Structure_Properties->findAll(FALSE);
-
+		// Доп. свойства узлов структуры
 		$aMatchStructure_Properties = array();
+		$aStructure_Properties = $this->Structure_Properties->findAll(FALSE);
 		foreach ($aStructure_Properties as $oStructure_Property)
 		{
 			$oProperty = $oStructure_Property->Property;
@@ -781,9 +766,8 @@ class Site_Model extends Core_Entity
 		}
 
 		// Получаем разделы доп. свойств узлов структуры
-		$aStructure_Property_Dirs = $this->Structure_Property_Dirs->findAll(FALSE);
-
 		$aMatchPropertyDirs = array();
+		$aStructure_Property_Dirs = $this->Structure_Property_Dirs->findAll(FALSE);
 		foreach ($aStructure_Property_Dirs as $oStructure_Property_Dir)
 		{
 			$oNewStructure_Property_Dir = clone $oStructure_Property_Dir;
@@ -802,7 +786,6 @@ class Site_Model extends Core_Entity
 
 		// Обновление parent_id для иерархии директорий
 		$aNewStructure_Property_Dirs = $newObject->Structure_Property_Dirs->findAll(FALSE);
-
 		foreach ($aNewStructure_Property_Dirs as $oNewStructure_Property_Dir)
 		{
 			$oNewProperty_Dir = $oNewStructure_Property_Dir->Property_Dir;
@@ -830,8 +813,9 @@ class Site_Model extends Core_Entity
 			}
 		}
 
-		$aStructures = $this->Structures->findAll(FALSE);
+		// Узлы структуры
 		$aMatchStructures = array();
+		$aStructures = $this->Structures->findAll(FALSE);
 		foreach ($aStructures as $oStructure)
 		{
 			$oNewStructure = $oStructure->copy();
@@ -845,6 +829,8 @@ class Site_Model extends Core_Entity
 			//$newObject->add($oNewStructure);
 			$aMatchStructures[$oStructure->id] = $oNewStructure;
 
+			$aReplace["'Structure', {$oStructure->id})"] = "'Structure', " . $oNewStructure->id . ")";
+
 			// Замена значений свойств
 			$aProperty_Values = $oNewStructure->getPropertyValues(FALSE);
 
@@ -855,11 +841,11 @@ class Site_Model extends Core_Entity
 			// Change dir
 			$newDir = $oNewStructure->getDirPath();
 
-			if (is_dir($oldDir))
+			if (Core_File::isDir($oldDir))
 			{
 				try
 				{
-					if (!is_dir($newDir))
+					if (!Core_File::isDir($newDir))
 					{
 						// Create all parent dirs
 						Core_File::mkdir($newDir, CHMOD, TRUE);
@@ -889,10 +875,9 @@ class Site_Model extends Core_Entity
 		// Lists
 		if (Core::moduleIsActive('list'))
 		{
-			// Получаем список разделов списков
-			$aList_Dirs = $this->List_Dirs->findAll(FALSE);
-
+			// Разделы списков
 			$aMatchList_Dirs = array();
+			$aList_Dirs = $this->List_Dirs->findAll(FALSE);
 			foreach ($aList_Dirs as $oList_Dir)
 			{
 				$oNewList_Dir = clone $oList_Dir;
@@ -911,9 +896,9 @@ class Site_Model extends Core_Entity
 				}
 			}
 
-			$aLists = $this->Lists->findAll(FALSE);
-
+			// Списки
 			$aMatchLists = array();
+			$aLists = $this->Lists->findAll(FALSE);
 			foreach ($aLists as $oList)
 			{
 				$oNewList = $oList->copy();
@@ -928,19 +913,13 @@ class Site_Model extends Core_Entity
 			}
 
 			unset($aMatchList_Dirs);
-
-			//$this->Lists->deleteAll(FALSE);
-			//$this->List_Dirs->deleteAll(FALSE);
 		}
 
 		// Polls
 		if (Core::moduleIsActive('poll'))
 		{
-			//$this->Poll_Groups->deleteAll(FALSE);
-
-			// Получаем список групп опросов
+			// Список групп опросов
 			$aPoll_Groups = $this->Poll_Groups->findAll(FALSE);
-
 			foreach ($aPoll_Groups as $oPoll_Group)
 			{
 				$oNewPoll_Group = $oPoll_Group->copy();
@@ -954,9 +933,8 @@ class Site_Model extends Core_Entity
 
 		if (Core::moduleIsActive('siteuser'))
 		{
-			// Получаем список групп пользователей
+			// Список групп пользователей
 			$aSiteuser_Groups = $this->Siteuser_Groups->findAll(FALSE);
-
 			foreach ($aSiteuser_Groups as $oSiteuser_Group)
 			{
 				$oNewSiteuser_Group = $oSiteuser_Group->copy();
@@ -965,10 +943,9 @@ class Site_Model extends Core_Entity
 				$aMatchSiteuser_Groups[$oSiteuser_Group->id] = $oNewSiteuser_Group;
 			}
 
-			// Получаем доп. свойства пользователей сайта
-			$aSiteuser_Properties = $this->Siteuser_Properties->findAll(FALSE);
-
+			// Доп. свойства пользователей сайта
 			$aMatchProperties = array();
+			$aSiteuser_Properties = $this->Siteuser_Properties->findAll(FALSE);
 			foreach ($aSiteuser_Properties as $oSiteuser_Property)
 			{
 				$oProperty = $oSiteuser_Property->Property;
@@ -985,9 +962,8 @@ class Site_Model extends Core_Entity
 			}
 
 			// Получаем разделы доп. свойств пользователей сайта
-			$aSiteuser_Property_Dirs = $this->Siteuser_Property_Dirs->findAll(FALSE);
-
 			$aMatchPropertyDirs = array();
+			$aSiteuser_Property_Dirs = $this->Siteuser_Property_Dirs->findAll(FALSE);
 			foreach ($aSiteuser_Property_Dirs as $oSiteuser_Property_Dir)
 			{
 				$oNewSiteuser_Property_Dir = clone $oSiteuser_Property_Dir;
@@ -1007,7 +983,6 @@ class Site_Model extends Core_Entity
 
 			// Обновление parent_id для иерархии директорий
 			$aNewSiteuser_Property_Dirs = $newObject->Siteuser_Property_Dirs->findAll(FALSE);
-
 			foreach ($aNewSiteuser_Property_Dirs as $oNewSiteuser_Property_Dir)
 			{
 				$oNewProperty_Dir = $oNewSiteuser_Property_Dir->Property_Dir;
@@ -1045,9 +1020,8 @@ class Site_Model extends Core_Entity
 				$newObject->add($oNewProvider);
 			}
 
+			// Клиенты
 			$aMatchSiteusers = array();
-
-			// Получаем список пользователей сайта
 			$aSiteusers = $this->Siteusers->findAll(FALSE);
 			foreach ($aSiteusers as $oSiteuser)
 			{
@@ -1085,7 +1059,7 @@ class Site_Model extends Core_Entity
 				}
 			}
 
-			// Цикл по пользователям сайта
+			// Цикл по клиентам
 			foreach ($aSiteusers as $oSiteuser)
 			{
 				$aSiteuser_Group_Lists = $oSiteuser->Siteuser_Group_Lists->findAll(FALSE);
@@ -1108,7 +1082,7 @@ class Site_Model extends Core_Entity
 				}
 			}
 
-			// В цикле по пользователям сайта, в котором копируем афиллиатов пользователей
+			// В цикле по клиентам, в котором копируем афиллиатов пользователей
 			/*
 			foreach ($aSiteusers as $oSiteuser)
 			{
@@ -1134,13 +1108,12 @@ class Site_Model extends Core_Entity
 			*/
 		}
 
+		// Informationsystems
 		$aMatchInformationsystems = array();
 		if (Core::moduleIsActive('informationsystem'))
 		{
-			// Informationsystems
-			$aInformationsystem_Dirs = $this->Informationsystem_Dirs->findAll(FALSE);
 			$aMatchInformationsystem_Dirs = array();
-
+			$aInformationsystem_Dirs = $this->Informationsystem_Dirs->findAll(FALSE);
 			foreach ($aInformationsystem_Dirs as $oInformationsystem_Dir)
 			{
 				$oNewInformationsystem_Dir = clone $oInformationsystem_Dir;
@@ -1163,8 +1136,6 @@ class Site_Model extends Core_Entity
 
 			//Получаем список информационных систем, принадлежащих сайту
 			$aInformationsystems = $this->Informationsystems->findAll(FALSE);
-
-			// Цикл по информационным системам, находящимся в корне разделов информационных систем
 			foreach ($aInformationsystems as $oInformationsystem)
 			{
 				$oNewInformationsystem = $oInformationsystem->copy();
@@ -1193,12 +1164,12 @@ class Site_Model extends Core_Entity
 			unset($aMatchInformationsystem_Dirs);
 		}
 
+		// Shop
 		$aMatchShops = array();
 		if (Core::moduleIsActive('shop'))
 		{
-			$aShop_Dirs = $this->Shop_Dirs->findAll(FALSE);
-
 			$aMatchShop_Dirs = array();
+			$aShop_Dirs = $this->Shop_Dirs->findAll(FALSE);
 			foreach ($aShop_Dirs as $oShop_Dir)
 			{
 				//$oNewShop_Dir = $oShop_Dir->copy();
@@ -1209,11 +1180,7 @@ class Site_Model extends Core_Entity
 			}
 
 			//Получаем список магазинов принадлежащих сайту
-			$oShops = $this->Shops;
-			//$oShops->queryBuilder()->where('shop_dir_id', '=', 0);
-			$aShops = $oShops->findAll(FALSE);
-
-			// Цикл по магазинам, находящимся в корне разделов магазинов
+			$aShops = $this->Shops->findAll(FALSE);
 			foreach ($aShops as $oShop)
 			{
 				$oNewShop = $oShop->copy();
@@ -1243,10 +1210,11 @@ class Site_Model extends Core_Entity
 			unset($aMatchShop_Dirs);
 		}
 
+		// Forum
 		if (Core::moduleIsActive('forum'))
 		{
-			$aForums = $this->Forums->findAll(FALSE);
 			$aMatchForums = array();
+			$aForums = $this->Forums->findAll(FALSE);
 			foreach ($aForums as $oForum)
 			{
 				$oNewForum = clone $oForum;
@@ -1285,20 +1253,10 @@ class Site_Model extends Core_Entity
 			}
 		}
 
-		/*if (Core::moduleIsActive('seo'))
-		{
-			$aSeo_Sites = $this->Seo_Sites->findAll(FALSE);
-			foreach ($aSeo_Sites as $oSeo_Site)
-			{
-				$newObject->add($oSeo_Site->copy());
-			}
-		}*/
-
 		if (Core::moduleIsActive('maillist'))
 		{
 			// Получаем список рассылок
 			$aMaillists = $this->Maillists->findAll(FALSE);
-
 			foreach ($aMaillists as $oMaillist)
 			{
 				// Копируем рассылку
@@ -1322,6 +1280,7 @@ class Site_Model extends Core_Entity
 			}
 		}
 
+		// Webhook
 		if (Core::moduleIsActive('webhook'))
 		{
 			$aWebhooks = $this->Webhooks->findAll(FALSE);
@@ -1333,22 +1292,48 @@ class Site_Model extends Core_Entity
 			}
 		}
 
+		// Формы
+		if (Core::moduleIsActive('form'))
+		{
+			$aMatchForms = array();
+			$aForms = $this->Forms->findAll(FALSE);
+			foreach ($aForms as $oForm)
+			{
+				$oNewForm =	$oForm->copy();
+				$newObject->add($oNewForm);
+
+				// Получаем поля типа "Список" скопированной формы
+				$oForm_Fields = $oNewForm->Form_Fields;
+				$oForm_Fields->queryBuilder()->where('type', '=', 6);
+
+				$aForm_Fields = $oForm_Fields->findAll(FALSE);
+				foreach ($aForm_Fields as $oForm_Field)
+				{
+					if (isset($aMatchLists[$oForm_Field->list_id]))
+					{
+						$oForm_Field->list_id = $aMatchLists[$oForm_Field->list_id]->id;
+						$oForm_Field->save();
+					}
+				}
+
+				$aMatchForms[$oForm->id] = $oNewForm;
+
+				$aReplace["'Form', {$oForm->id})"] = "'Form', " . $oNewForm->id . ")";
+			}
+		}
+
+		// Helpdesk
 		if (Core::moduleIsActive('helpdesk'))
 		{
-			$aHelpdesks = $this->Helpdesks->findAll(FALSE);
-
 			$aMatchHelpdesks = array();
-
+			$aHelpdesks = $this->Helpdesks->findAll(FALSE);
 			foreach ($aHelpdesks as $oHelpdesk)
 			{
 				//$oNewHelpdesk = $oHelpdesk->copy();
-
 				$oNewHelpdesk = clone $oHelpdesk;
 
-				$aHelpdesk_Categories = $oHelpdesk->Helpdesk_Categories->findAll(FALSE);
-
 				$aMatchHelpdesk_Categories = array();
-
+				$aHelpdesk_Categories = $oHelpdesk->Helpdesk_Categories->findAll(FALSE);
 				foreach ($aHelpdesk_Categories as $oHelpdesk_Category)
 				{
 					$oNewHelpdesk_Category = clone $oHelpdesk_Category;
@@ -1358,7 +1343,6 @@ class Site_Model extends Core_Entity
 				}
 
 				$aNewHelpdesk_Categories = $oNewHelpdesk->Helpdesk_Categories->findAll(FALSE);
-
 				foreach ($aNewHelpdesk_Categories as $oNewHelpdesk_Category)
 				{
 					if (isset($aMatchHelpdesk_Categories[$oNewHelpdesk_Category->parent_id]))
@@ -1370,7 +1354,6 @@ class Site_Model extends Core_Entity
 
 				// Получаем список статусов
 				$aMatchHelpdesk_Statuses = array();
-
 				$aHelpdesk_Statuses = $oHelpdesk->Helpdesk_Statuses->findAll(FALSE);
 				foreach ($aHelpdesk_Statuses as $oHelpdesk_Status)
 				{
@@ -1425,6 +1408,8 @@ class Site_Model extends Core_Entity
 				$newObject->add($oNewHelpdesk);
 
 				$aMatchHelpdesks[$oHelpdesk->id] = $oNewHelpdesk;
+
+				$aReplace["'Helpdesk', {$oHelpdesk->id})"] = "'Helpdesk', " . $oNewHelpdesk->id . ")";
 			}
 		}
 
@@ -1435,12 +1420,8 @@ class Site_Model extends Core_Entity
 		}
 
 		// Templates
-		// Получаем список разделов макетов сайта
-		$aTemplate_Dirs = $this->Template_Dirs->findAll(FALSE);
-
 		$aMatchTemplate_Dirs = array();
-
-		// В цикле копируем разделы макетов сайта
+		$aTemplate_Dirs = $this->Template_Dirs->findAll(FALSE);
 		foreach ($aTemplate_Dirs as $oTemplate_Dir)
 		{
 			$oNewTemplate_Dir = clone $oTemplate_Dir;
@@ -1449,9 +1430,8 @@ class Site_Model extends Core_Entity
 			$aMatchTemplate_Dirs[$oTemplate_Dir->id] = $oNewTemplate_Dir;
 		}
 
-		$aNewTemplate_Dirs = $newObject->Template_Dirs->findAll(FALSE);
-
 		// В цикле меняем идентификаторы родительских разделов на идентификаторы копий
+		$aNewTemplate_Dirs = $newObject->Template_Dirs->findAll(FALSE);
 		foreach ($aNewTemplate_Dirs as $oNewTemplate_Dir)
 		{
 			if (isset($aMatchTemplate_Dirs[$oNewTemplate_Dir->parent_id]))
@@ -1460,15 +1440,18 @@ class Site_Model extends Core_Entity
 			}
 		}
 
-		$aTemplates = $this->Templates->findAll(FALSE);
-
 		$aMatchTemplates = array();
+		$aTemplates = $this->Templates->findAll(FALSE);
 		foreach ($aTemplates as $oTemplate)
 		{
 			$oNewTemplate = clone $oTemplate;
 
 			$oNewTemplate->saveTemplateCssFile($oTemplate->loadTemplateCssFile());
-			$oNewTemplate->saveTemplateFile(str_replace(array_keys($aReplace), array_values($aReplace), $oTemplate->loadTemplateFile()));
+			$oNewTemplate->saveTemplateLessFile($oTemplate->loadTemplateLessFile());
+			$oNewTemplate->saveTemplateJsFile($oTemplate->loadTemplateJsFile());
+			$oNewTemplate->saveManifestFile($oTemplate->loadManifestFile());
+			$oNewTemplate->saveLngFile($this->lng, $oTemplate->loadLngFile($this->lng));
+			$oNewTemplate->saveTemplateFile(str_replace(array_keys($aReplace), array_values($aReplace), (string) $oTemplate->loadTemplateFile()));
 
 			if (isset($aMatchTemplate_Dirs[$oNewTemplate->template_dir_id]))
 			{
@@ -1515,35 +1498,6 @@ class Site_Model extends Core_Entity
 			{
 				$oDocument->template_id = $aMatchTemplates[$oDocument->template_id]->id;
 				$oDocument->save();
-			}
-		}
-
-		// Формы
-		if (Core::moduleIsActive('form'))
-		{
-			$aForms = $this->Forms->findAll(FALSE);
-
-			$aMatchForms = array();
-			foreach ($aForms as $oForm)
-			{
-				$oNewForm =	$oForm->copy();
-				$newObject->add($oNewForm);
-
-				// Получаем поля типа "Список" скопированной формы
-				$oForm_Fields = $oNewForm->Form_Fields;
-				$oForm_Fields->queryBuilder()->where('type', '=', 6);
-
-				$aForm_Fields = $oForm_Fields->findAll(FALSE);
-				foreach ($aForm_Fields as $oForm_Field)
-				{
-					if (isset($aMatchLists[$oForm_Field->list_id]))
-					{
-						$oForm_Field->list_id = $aMatchLists[$oForm_Field->list_id]->id;
-						$oForm_Field->save();
-					}
-				}
-
-				$aMatchForms[$oForm->id] = $oNewForm;
 			}
 		}
 

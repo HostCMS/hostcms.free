@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Wysiwyg
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Wysiwyg_Filemanager_Controller_Create_Directory extends Admin_Form_Action_Controller
 {
@@ -51,7 +51,7 @@ class Wysiwyg_Filemanager_Controller_Create_Directory extends Admin_Form_Action_
 		$dirName = Core_File::pathCorrection(/*Core_File::convertfileNameToLocalEncoding(*/$this->name/*)*/);
 		$newDir = CMS_FOLDER . $this->cdir . $dirName;
 
-		if (!file_exists($newDir) && !is_dir($newDir))
+		if (!file_exists($newDir) && !Core_File::isDir($newDir))
 		{
 			try
 			{

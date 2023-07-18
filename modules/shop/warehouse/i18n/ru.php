@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Склады',
@@ -48,6 +48,12 @@ return array(
 	'regrade' => 'Пересортица',
 	'movement' => 'Перемещение',
 	'types' => 'Типы',
+	'purchaseorders' => 'Заказы',
+	'invoices' => 'Счета',
+	'supplies' => 'Приемки',
+	'purchasereturns' => 'Возвраты',
+	'purchases' => 'Закупки',
+	'operations' => 'Операции',
 	'shop_warehouse_type' => 'Тип склада',
 	'separator' => 'Разделитель ячейки',
 	'space_separator' => 'Пробел',

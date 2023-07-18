@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properties
 {
@@ -122,51 +122,53 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 		// 0-вая строка - заголовок CSV-файла
 		$this->_aCurrentData[$this->_iCurrentDataPosition] = array(
 			// 11 cells
-			'"' . Core::_('Informationsystem_Item_Export.category_name') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.category_guid_id') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.category_parent_guid_id') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.category_meta_title') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.category_meta_description') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.category_meta_keywords') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.category_description') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.category_path') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.category_large_image') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.category_small_image') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.category_sorting') . '"',
+			Core::_('Informationsystem_Exchange.group_name'),
+			Core::_('Informationsystem_Exchange.group_guid'),
+			Core::_('Informationsystem_Exchange.group_parent_guid'),
+			Core::_('Informationsystem_Exchange.group_seo_title'),
+			Core::_('Informationsystem_Exchange.group_seo_description'),
+			Core::_('Informationsystem_Exchange.group_seo_keywords'),
+			Core::_('Informationsystem_Exchange.group_description'),
+			Core::_('Informationsystem_Exchange.group_path'),
+			Core::_('Informationsystem_Exchange.group_image_large'),
+			Core::_('Informationsystem_Exchange.group_image_small'),
+			Core::_('Informationsystem_Exchange.group_sorting'),
 			// 19
-			'"' . Core::_('Informationsystem_Item_Export.item_guid_id') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.item_path') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.item_name') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.item_description') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.item_text') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.item_tags') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.item_activity') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.item_sorting') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.item_meta_title') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.item_meta_description') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.item_meta_keywords') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.item_indexing') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.item_date') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.item_start_date') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.item_end_date') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.item_large_image') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.item_small_image') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.item_shortcuts') . '"',
-			'"' . Core::_('Informationsystem_Item_Export.item_siteuser_id') . '"',
+			Core::_('Informationsystem_Exchange.item_guid'),
+			Core::_('Informationsystem_Exchange.item_path'),
+			Core::_('Informationsystem_Exchange.item_name'),
+			Core::_('Informationsystem_Exchange.item_description'),
+			Core::_('Informationsystem_Exchange.item_text'),
+			Core::_('Informationsystem_Exchange.item_tags'),
+			Core::_('Informationsystem_Exchange.item_active'),
+			Core::_('Informationsystem_Exchange.item_sorting'),
+			Core::_('Informationsystem_Exchange.item_seo_title'),
+			Core::_('Informationsystem_Exchange.item_seo_description'),
+			Core::_('Informationsystem_Exchange.item_seo_keywords'),
+			Core::_('Informationsystem_Exchange.item_indexing'),
+			Core::_('Informationsystem_Exchange.item_datetime'),
+			Core::_('Informationsystem_Exchange.item_start_datetime'),
+			Core::_('Informationsystem_Exchange.item_end_datetime'),
+			Core::_('Informationsystem_Exchange.item_image_large'),
+			Core::_('Informationsystem_Exchange.item_image_small'),
+			Core::_('Informationsystem_Exchange.item_additional_group'),
+			Core::_('Informationsystem_Exchange.item_siteuser_id'),
 		);
+
+		$this->_aCurrentData[$this->_iCurrentDataPosition] = array_map(array($this, 'prepareCell'), $this->_aCurrentData[$this->_iCurrentDataPosition]);
 
 		// Добавляем в заголовок информацию о свойствах элементов
 		foreach ($this->_aItem_Properties as $oItem_Property)
 		{
-			$this->_aCurrentData[$this->_iCurrentDataPosition][] = sprintf('"%s"', $this->prepareString($oItem_Property->name));
+			$this->_aCurrentData[$this->_iCurrentDataPosition][] = $this->prepareCell($oItem_Property->name);
 			$this->_iItem_Properties_Count++;
 
 			if ($oItem_Property->type == 2)
 			{
-				$this->_aCurrentData[$this->_iCurrentDataPosition][] = sprintf('"%s"', $this->prepareString(Core::_('Informationsystem_Item.import_file_description', $oItem_Property->name)));
+				$this->_aCurrentData[$this->_iCurrentDataPosition][] = $this->prepareCell(Core::_('Informationsystem_Item.import_file_description', $oItem_Property->name));
 				$this->_iItem_Properties_Count++;
 
-				$this->_aCurrentData[$this->_iCurrentDataPosition][] = sprintf('"%s"', $this->prepareString(Core::_('Informationsystem_Item.import_small_images', $oItem_Property->name)));
+				$this->_aCurrentData[$this->_iCurrentDataPosition][] = $this->prepareCell(Core::_('Informationsystem_Item.import_small_images', $oItem_Property->name));
 				$this->_iItem_Properties_Count++;
 			}
 		}
@@ -174,15 +176,15 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 		// Добавляем в заголовок информацию о свойствах группы элементов
 		foreach ($this->_aGroup_Properties as $oGroup_Property)
 		{
-			$this->_aCurrentData[$this->_iCurrentDataPosition][] = sprintf('"%s"', $this->prepareString($oGroup_Property->name));
+			$this->_aCurrentData[$this->_iCurrentDataPosition][] = $this->prepareCell($oGroup_Property->name);
 			$this->_iGroup_Properties_Count++;
 
 			if ($oGroup_Property->type == 2)
 			{
-				$this->_aCurrentData[$this->_iCurrentDataPosition][] = sprintf('"%s"', $this->prepareString(Core::_('Informationsystem_Item.import_file_description', $oGroup_Property->name)));
+				$this->_aCurrentData[$this->_iCurrentDataPosition][] = $this->prepareCell(Core::_('Informationsystem_Item.import_file_description', $oGroup_Property->name));
 				$this->_iGroup_Properties_Count++;
 
-				$this->_aCurrentData[$this->_iCurrentDataPosition][] = sprintf('"%s"', $this->prepareString(Core::_('Informationsystem_Item.import_small_images', $oGroup_Property->name)));
+				$this->_aCurrentData[$this->_iCurrentDataPosition][] = $this->prepareCell(Core::_('Informationsystem_Item.import_small_images', $oGroup_Property->name));
 				$this->_iGroup_Properties_Count++;
 			}
 		}
@@ -202,20 +204,20 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 			$aProperty_Values = $oProperty->getValues($oInformationsystem_Item->id, FALSE);
 			$iProperty_Values_Count = count($aProperty_Values);
 
-			$aItemProperties[] = sprintf('"%s"', $this->prepareString(
+			$aItemProperties[] = $this->prepareCell(
 				$iProperty_Values_Count > 0
 					? $this->_getPropertyValue($oProperty, $aProperty_Values[0], $oInformationsystem_Item)
 					: ''
-			));
+			);
 
 			if ($oProperty->type == 2)
 			{
 				$aItemProperties[] = $iProperty_Values_Count
-					? sprintf('"%s"', $aProperty_Values[0]->file_description)
+					? $this->prepareCell($aProperty_Values[0]->file_description)
 					: '';
 
 				$aItemProperties[] = $iProperty_Values_Count
-					? ($aProperty_Values[0]->file_small == '' ? '' : sprintf('"%s"', $aProperty_Values[0]->getSmallFileHref()))
+					? ($aProperty_Values[0]->file_small == '' ? '' : $this->prepareCell($aProperty_Values[0]->getSmallFileHref()))
 					: '';
 			}
 		}
@@ -234,9 +236,9 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 		// У ИЭ нет необходимости дублировать данные о группе
 		/*if ($oInformationsystem_Item->Informationsystem_Group->id)
 		{
-			$aTmpArray[3] = sprintf('"%s"', $this->prepareString($oInformationsystem_Item->Informationsystem_Group->seo_title));
-			$aTmpArray[4] = sprintf('"%s"', $this->prepareString($oInformationsystem_Item->Informationsystem_Group->seo_description));
-			$aTmpArray[5] = sprintf('"%s"', $this->prepareString($oInformationsystem_Item->Informationsystem_Group->seo_keywords));
+			$aTmpArray[3] = $this->prepareCell($oInformationsystem_Item->Informationsystem_Group->seo_title);
+			$aTmpArray[4] = $this->prepareCell($oInformationsystem_Item->Informationsystem_Group->seo_description);
+			$aTmpArray[5] = $this->prepareCell($oInformationsystem_Item->Informationsystem_Group->seo_keywords);
 		}*/
 
 		// Ярлыки
@@ -250,34 +252,31 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 
 		return array_merge($aTmpArray,
 			array(
-				sprintf('"%s"', $this->prepareString($oInformationsystem_Item->guid)),
-				sprintf('"%s"', $this->prepareString($oInformationsystem_Item->path)),
-				sprintf('"%s"', $this->prepareString($oInformationsystem_Item->name)),
-				sprintf('"%s"', $this->prepareString($oInformationsystem_Item->description)),
-				sprintf('"%s"', $this->prepareString($oInformationsystem_Item->text)),
-				sprintf('"%s"', (Core::moduleIsActive('tag') ? $this->prepareString(implode(",", $oInformationsystem_Item->Tags->findAll(FALSE))) : "")),
-				sprintf('"%s"', $oInformationsystem_Item->active),
-				sprintf('"%s"', $oInformationsystem_Item->sorting),
-				sprintf('"%s"', $this->prepareString($oInformationsystem_Item->seo_title)),
-				sprintf('"%s"', $this->prepareString($oInformationsystem_Item->seo_description)),
-				sprintf('"%s"', $this->prepareString($oInformationsystem_Item->seo_keywords)),
-				sprintf('"%s"', $this->prepareString($oInformationsystem_Item->indexing)),
-				sprintf('"%s"', $oInformationsystem_Item->datetime == '0000-00-00 00:00:00'
+				$this->prepareCell($oInformationsystem_Item->guid),
+				$this->prepareCell($oInformationsystem_Item->path),
+				$this->prepareCell($oInformationsystem_Item->name),
+				$this->prepareCell($oInformationsystem_Item->description),
+				$this->prepareCell($oInformationsystem_Item->text),
+				$this->prepareCell(Core::moduleIsActive('tag') ? implode(',', $oInformationsystem_Item->Tags->findAll(FALSE)) : ''),
+				$oInformationsystem_Item->active,
+				$oInformationsystem_Item->sorting,
+				$this->prepareCell($oInformationsystem_Item->seo_title),
+				$this->prepareCell($oInformationsystem_Item->seo_description),
+				$this->prepareCell($oInformationsystem_Item->seo_keywords),
+				$this->prepareCell($oInformationsystem_Item->indexing),
+				$oInformationsystem_Item->datetime == '0000-00-00 00:00:00'
 					? '0000-00-00 00:00:00'
-					: Core_Date::sql2datetime($oInformationsystem_Item->datetime)
-				),
-				sprintf('"%s"', $oInformationsystem_Item->start_datetime == '0000-00-00 00:00:00'
+					: Core_Date::sql2datetime($oInformationsystem_Item->datetime),
+				$oInformationsystem_Item->start_datetime == '0000-00-00 00:00:00'
 					? '0000-00-00 00:00:00'
-					: Core_Date::sql2datetime($oInformationsystem_Item->start_datetime)
-				),
-				sprintf('"%s"', $oInformationsystem_Item->end_datetime == '0000-00-00 00:00:00'
+					: Core_Date::sql2datetime($oInformationsystem_Item->start_datetime),
+				$oInformationsystem_Item->end_datetime == '0000-00-00 00:00:00'
 					? '0000-00-00 00:00:00'
-					: Core_Date::sql2datetime($oInformationsystem_Item->end_datetime)
-				),
-				sprintf('"%s"', ($oInformationsystem_Item->image_large == '') ? '' : $oInformationsystem_Item->getLargeFileHref()),
-				sprintf('"%s"', ($oInformationsystem_Item->image_small == '') ? '' : $oInformationsystem_Item->getSmallFileHref()),
-				sprintf('"%s"', implode(',', $aTmpShortcuts)),
-				sprintf('"%s"', $oInformationsystem_Item->siteuser_id)
+					: Core_Date::sql2datetime($oInformationsystem_Item->end_datetime),
+				$this->prepareCell($oInformationsystem_Item->image_large == '' ? '' : $oInformationsystem_Item->getLargeFileHref()),
+				$this->prepareCell($oInformationsystem_Item->image_small == '' ? '' : $oInformationsystem_Item->getSmallFileHref()),
+				$this->prepareCell(implode(',', $aTmpShortcuts)),
+				$oInformationsystem_Item->siteuser_id
 			),
 			$aItemProperties,
 			$aGroupProperties
@@ -441,17 +440,17 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 			if ($iInformationsystemGroupId != 0)
 			{
 				$aTmpArray = array(
-					sprintf('"%s"', $this->prepareString($oInformationsystem_Group->name)),
-					sprintf('"%s"', $this->prepareString($oInformationsystem_Group->guid)),
-					sprintf('"%s"', $this->prepareString(is_null($oInformationsystem_Group->Informationsystem_Group->id) ? 'ID00000000' : $oInformationsystem_Group->Informationsystem_Group->guid)),
-					sprintf('"%s"', $this->prepareString($oInformationsystem_Group->seo_title)),
-					sprintf('"%s"', $this->prepareString($oInformationsystem_Group->seo_description)),
-					sprintf('"%s"', $this->prepareString($oInformationsystem_Group->seo_keywords)),
-					sprintf('"%s"', $this->prepareString($oInformationsystem_Group->description)),
-					sprintf('"%s"', $this->prepareString($oInformationsystem_Group->path)),
-					sprintf('"%s"', ($oInformationsystem_Group->image_large == '') ? '' : $oInformationsystem_Group->getLargeFileHref()),
-					sprintf('"%s"', ($oInformationsystem_Group->image_small == '') ? '' : $oInformationsystem_Group->getSmallFileHref()),
-					sprintf('"%s"', $this->prepareString($oInformationsystem_Group->sorting))
+					$this->prepareCell($oInformationsystem_Group->name),
+					$this->prepareCell($oInformationsystem_Group->guid),
+					$this->prepareCell(is_null($oInformationsystem_Group->Informationsystem_Group->id) ? 'ID00000000' : $oInformationsystem_Group->Informationsystem_Group->guid),
+					$this->prepareCell($oInformationsystem_Group->seo_title),
+					$this->prepareCell($oInformationsystem_Group->seo_description),
+					$this->prepareCell($oInformationsystem_Group->seo_keywords),
+					$this->prepareCell($oInformationsystem_Group->description),
+					$this->prepareCell($oInformationsystem_Group->path),
+					$this->prepareCell($oInformationsystem_Group->image_large == '' ? '' : $oInformationsystem_Group->getLargeFileHref()),
+					$this->prepareCell($oInformationsystem_Group->image_small == '' ? '' : $oInformationsystem_Group->getSmallFileHref()),
+					$this->prepareCell($oInformationsystem_Group->sorting)
 				);
 
 				// Пропускаем поля элемента
@@ -472,29 +471,36 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 					$aProperty_Values = $oGroup_Property->getValues($oInformationsystem_Group->id, FALSE);
 					$iProperty_Values_Count = count($aProperty_Values);
 
-					$aTmpArray[] = sprintf('"%s"', $this->prepareString($iProperty_Values_Count > 0 ? ($oGroup_Property->type != 2
-						? ($oGroup_Property->type == 3 && $aProperty_Values[0]->value != 0 && Core::moduleIsActive('list')
-							? $aProperty_Values[0]->List_Item->value
-							: ($oGroup_Property->type == 8
-								? Core_Date::sql2date($aProperty_Values[0]->value)
-								: ($oGroup_Property->type == 9
-									? Core_Date::sql2datetime($aProperty_Values[0]->value)
-									: $aProperty_Values[0]->value)))
-									: ($aProperty_Values[0]->file == ''
-										? ''
-										: $aProperty_Values[0]->setHref($oInformationsystem_Group->getGroupHref())->getLargeFileHref()))
-											: ''));
+					$aTmpArray[] = $this->prepareCell($iProperty_Values_Count > 0
+						? ($oGroup_Property->type != 2
+							? ($oGroup_Property->type == 3 && $aProperty_Values[0]->value != 0 && Core::moduleIsActive('list')
+								? $aProperty_Values[0]->List_Item->value
+								: ($oGroup_Property->type == 8
+									? Core_Date::sql2date($aProperty_Values[0]->value)
+									: ($oGroup_Property->type == 9
+										? Core_Date::sql2datetime($aProperty_Values[0]->value)
+										: $aProperty_Values[0]->value
+									)
+								)
+							)
+							: ($aProperty_Values[0]->file == ''
+								? ''
+								: $aProperty_Values[0]->setHref($oInformationsystem_Group->getGroupHref())->getLargeFileHref()
+							)
+						)
+						: ''
+					);
 
 					if ($oGroup_Property->type == 2)
 					{
 						$aTmpArray[] = $iProperty_Values_Count
-							? sprintf('"%s"', $aProperty_Values[0]->file_description)
+							? $this->prepareCell($aProperty_Values[0]->file_description)
 							: '';
 
 						$aTmpArray[] = $iProperty_Values_Count
 							? ($aProperty_Values[0]->file_small == ''
 								? ''
-								: $aProperty_Values[0]->setHref($oInformationsystem_Group->getGroupHref())->getSmallFileHref()
+								: $this->prepareCell($aProperty_Values[0]->setHref($oInformationsystem_Group->getGroupHref())->getSmallFileHref())
 							)
 							: '';
 					}
@@ -545,16 +551,15 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 						{
 							foreach ($aProperty_Values as $oProperty_Value)
 							{
-								$aCurrentPropertyLine[$iPropertyFieldOffset] = sprintf('"%s"', $this->prepareString(
-										$this->_getPropertyValue($oItem_Property, $oProperty_Value, $oInformationsystem_Item)
-									)
+								$aCurrentPropertyLine[$iPropertyFieldOffset] = $this->prepareCell(
+									$this->_getPropertyValue($oItem_Property, $oProperty_Value, $oInformationsystem_Item)
 								);
 
 								if ($oItem_Property->type == 2)
 								{
-									$aCurrentPropertyLine[$iPropertyFieldOffset + 1] = sprintf('"%s"', $this->prepareString($oProperty_Value->file_description));
+									$aCurrentPropertyLine[$iPropertyFieldOffset + 1] = $this->prepareCell($oProperty_Value->file_description);
 
-									$aCurrentPropertyLine[$iPropertyFieldOffset + 2] = sprintf('"%s"', $this->prepareString($oProperty_Value->setHref($oInformationsystem_Item->getItemHref())->getSmallFileHref()));
+									$aCurrentPropertyLine[$iPropertyFieldOffset + 2] = $this->prepareCell($oProperty_Value->setHref($oInformationsystem_Item->getItemHref())->getSmallFileHref());
 								}
 
 								$this->_printRow($aCurrentPropertyLine);
@@ -601,7 +606,17 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 	 */
 	public function prepareString($string)
 	{
-		return str_replace('"', '""', trim($string));
+		return str_replace('"', '""', trim((string) $string));
+	}
+
+	/**
+	 * Prepare cell
+	 * @param string $string
+	 * @return string
+	 */
+	public function prepareCell($string)
+	{
+		return sprintf('"%s"', $this->prepareString($string));
 	}
 
 	/**

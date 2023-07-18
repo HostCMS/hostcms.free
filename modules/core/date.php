@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Date
 {
@@ -382,17 +382,22 @@ class Core_Date
 	 * Strftime
 	 * @param string $format
 	 * @param int|NULL $timestamp
-	 * @return string
+	 * @return string|FALSE
 	 */
 	static function strftime($format, $timestamp = NULL)
 	{
+		if (is_null($format))
+		{
+			return FALSE;
+		}
+
 		if (PHP_VERSION_ID < 80100)
 		{
 			return strftime($format, $timestamp);
 		}
 		else
 		{
-			if (NULL === $timestamp) {
+			if (is_null($timestamp)) {
 				$timestamp = time();
 			}
 			elseif (is_numeric($timestamp)) {

@@ -27,7 +27,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Mail
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Mail
 {
@@ -188,6 +188,15 @@ abstract class Core_Mail
 	}
 
 	/**
+	 * Get separator
+	 * @return string
+	 */
+	public function getSeparator()
+	{
+		return $this->_separator;
+	}
+
+	/**
 	 * The chunk length.
 	 * @var string
 	 */
@@ -222,6 +231,15 @@ abstract class Core_Mail
 	}
 
 	/**
+	 * Get recipient address
+	 * @return string
+	 */
+	public function getTo()
+	{
+		return $this->_to;
+	}
+
+	/**
 	 * Mail FROM field
 	 * @var string
 	 */
@@ -236,6 +254,15 @@ abstract class Core_Mail
 	{
 		$this->_from = $from;
 		return $this;
+	}
+
+	/**
+	 * Get sender address
+	 * @return string
+	 */
+	public function getFrom()
+	{
+		return $this->_from;
 	}
 
 	/**
@@ -382,7 +409,7 @@ abstract class Core_Mail
 	 */
 	static public function sanitizeHeader($value)
 	{
-		return str_replace(array("\r", "\n", "\0"), '', $value);
+		return str_replace(array("\r", "\n", "\0"), '', (string) $value);
 	}
 
 	/**
@@ -399,7 +426,10 @@ abstract class Core_Mail
 	 */
 	public function header($name, $value)
 	{
-		$this->_headers[$name] = self::sanitizeHeader($value);
+		$this->_headers[$name] = !is_null($value)
+			? self::sanitizeHeader($value)
+			: '';
+
 		return $this;
 	}
 
@@ -432,7 +462,9 @@ abstract class Core_Mail
 
 	protected function _getChunkedMessage()
 	{
-		return chunk_split(base64_encode($this->_message), $this->_chunklen, $this->_separator);
+		return !is_null($this->_message)
+			? chunk_split(base64_encode($this->_message), $this->_chunklen, $this->_separator)
+			: '';
 	}
 
 	/**
@@ -446,6 +478,13 @@ abstract class Core_Mail
 	{
 		Core_Event::notify('Core_Mail.onBeforeSend', $this);
 
+		$eventResult = Core_Event::getLastReturn();
+
+		if (!is_null($eventResult))
+		{
+			return $eventResult;
+		}
+
 		$sFrom = !is_null($this->_senderName)
 			// NO SPACES BETWEEN name and <email> // rolled back
 			? '=?UTF-8?B?' . base64_encode($this->_senderName) . "?= <{$this->_from}>"
@@ -458,7 +497,7 @@ abstract class Core_Mail
 		$sTo = !is_null($this->_recipientName)
 			// NO SPACES BETWEEN name and <email> // rolled back
 			? '=?UTF-8?B?' . base64_encode($this->_recipientName) . "?= <{$this->_to}>"
-			: (strlen($this->_to)
+			: (!is_null($this->_to) && strlen($this->_to)
 				? "<{$this->_to}>"
 				: ''
 			);
@@ -530,7 +569,7 @@ abstract class Core_Mail
 
 			foreach ($this->_files as $value)
 			{
-				if (isset($value['filepath']) && isset($value['filename']) && is_file($value['filepath']))
+				if (isset($value['filepath']) && isset($value['filename']) && Core_File::isFile($value['filepath']))
 				{
 					try
 					{

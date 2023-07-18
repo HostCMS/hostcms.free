@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Module
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Module_Model extends Core_Entity
 {
@@ -193,7 +193,7 @@ class Module_Model extends Core_Entity
 		if (strlen($content))
 		{
 			$dir = dirname($configFilePath);
-			if (!is_dir($dir))
+			if (!Core_File::isDir($dir))
 			{
 				Core_File::mkdir($dir, CHMOD, $recursive = TRUE);
 			}
@@ -201,7 +201,7 @@ class Module_Model extends Core_Entity
 
 			Core_File::write($configFilePath, $content);
 		}
-		elseif (is_file($configFilePath))
+		elseif (Core_File::isFile($configFilePath))
 		{
 			Core_File::delete($configFilePath);
 		}
@@ -215,7 +215,7 @@ class Module_Model extends Core_Entity
 	{
 		$path = $this->getConfigFilePath();
 
-		return is_file($path)
+		return Core_File::isFile($path)
 			? Core_File::read($path)
 			: NULL;
 	}

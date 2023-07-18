@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -120,7 +120,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			case 'shop_item':
 				$title = $this->_object->id
-					? Core::_('Shop_Item.items_catalog_edit_form_title', $this->_object->name)
+					? Core::_('Shop_Item.items_catalog_edit_form_title', $this->_object->name, FALSE)
 					: Core::_('Shop_Item.items_catalog_add_form_title');
 
 				$this->getField('image_small_height')
@@ -723,11 +723,11 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oImageField = Admin_Form_Entity::factory('File')
 					->divAttr(array('class' => ''));
 
-				$oLargeFilePath = $this->_object->image_large != '' && is_file($this->_object->getLargeFilePath())
+				$oLargeFilePath = $this->_object->image_large != '' && Core_File::isFile($this->_object->getLargeFilePath())
 					? $this->_object->getLargeFileHref()
 					: '';
 
-				$oSmallFilePath = $this->_object->image_small != '' && is_file($this->_object->getSmallFilePath())
+				$oSmallFilePath = $this->_object->image_small != '' && Core_File::isFile($this->_object->getSmallFilePath())
 					? $this->_object->getSmallFileHref()
 					: '';
 
@@ -766,39 +766,13 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainTab
 					->move($this->getField('marking')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow7);
 
-				$this->getField('weight')
-					->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'))
-					->add(
-						Core_Html_Entity::factory('Span')
-							->class('input-group-addon dimension_patch')
-							->value(htmlspecialchars((string) $oShop->Shop_Measure->name))
-					);
-
-				$oMainTab->move($this->getField('weight'), $oMainRow7);
-
-				// Удаляем единицы измерения
-				$oAdditionalTab->delete($this->getField('shop_measure_id'));
-
-				// Единицы измерения
-				$oMainRow7->add(
-					Admin_Form_Entity::factory('Select')
-						->caption(Core::_('Shop_Item.shop_measure_id'))
-						->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'))
-						->options(
-							Shop_Controller::fillMeasures()
-						)
-						->name('shop_measure_id')
-						->value($this->_object->id
-							? $this->_object->shop_measure_id
-							: ($this->_object->Shop->default_shop_measure_id ? $this->_object->Shop->default_shop_measure_id : 0)
-						)
-				);
-
 				$oMainTab
 					->add($oMainRow8 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow9 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow10 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow11 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oMainRow12 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oDimensionBlock = Admin_Form_Entity::factory('Div')->id('dimensions')->class('well with-header'))
 					->add($oTabBlock = Admin_Form_Entity::factory('Div')->id('shop_tabs')->class('well with-header'))
 					->add($oPriceBlock = Admin_Form_Entity::factory('Div')->id('prices')->class('well with-header'))
 					->add($oSpecialPriceBlock = Admin_Form_Entity::factory('Div')->id('special_prices')->class('well with-header'))
@@ -894,6 +868,98 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				// Добавляем продавцов
 				$oMainRow10->add($oShop_SellerSelect);
+
+				$oDimensionBlock
+					->add(Admin_Form_Entity::factory('Div')
+							->class('header bordered-danger')
+							->value(Core::_('Shop_Item.dimension_header'))
+						)
+					->add($oDimensionRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oDimensionRow2 = Admin_Form_Entity::factory('Div')->class('row'));
+
+				$this->getField('length')
+					->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4 no-padding-right'))
+					->add(
+						Core_Html_Entity::factory('Span')
+							->class('input-group-addon dimension_patch')
+							->value('×')
+					)
+					->caption(Core::_('Shop_Item.item_length'));
+
+				$oMainTab->move($this->getField('length'), $oDimensionRow1);
+
+				$this->getField('width')
+					->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4 no-padding'))
+					->caption(Core::_('Shop_Item.item_width'))
+					->add(
+						Core_Html_Entity::factory('Span')
+							->class('input-group-addon dimension_patch')
+							->value('×')
+					);
+
+				$oMainTab->move($this->getField('width'), $oDimensionRow1);
+
+				$this->getField('height')
+					->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4 no-padding'))
+					->caption(Core::_('Shop_Item.item_height'))
+					->add(
+						Core_Html_Entity::factory('Span')
+							->class('input-group-addon dimension_patch')
+							->value(Core::_('Shop.size_measure_' . $oShop->size_measure))
+					);
+				$oMainTab->move($this->getField('height'), $oDimensionRow1);
+
+				$this->getField('package_length')
+					->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4 no-padding-right'))
+					->add(
+						Core_Html_Entity::factory('Span')
+							->class('input-group-addon dimension_patch')
+							->value('×')
+					)
+					->caption(Core::_('Shop_Item.package_length'));
+
+				$this->getField('weight')
+					->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'))
+					->add(
+						Core_Html_Entity::factory('Span')
+							->class('input-group-addon dimension_patch')
+							->value(htmlspecialchars((string) $oShop->Shop_Measure->name))
+					);
+
+				$oMainTab->move($this->getField('weight'), $oDimensionRow1);
+
+				$oMainTab->move($this->getField('package_length'), $oDimensionRow2);
+
+				$this->getField('package_width')
+					->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4 no-padding'))
+					->caption(Core::_('Shop_Item.package_width'))
+					->add(
+						Core_Html_Entity::factory('Span')
+							->class('input-group-addon dimension_patch')
+							->value('×')
+					);
+
+				$oMainTab->move($this->getField('package_width'), $oDimensionRow2);
+
+				$this->getField('package_height')
+					->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4 no-padding'))
+					->caption(Core::_('Shop_Item.package_height'))
+					->add(
+						Core_Html_Entity::factory('Span')
+							->class('input-group-addon dimension_patch')
+							->value(Core::_('Shop.size_measure_' . $oShop->size_measure))
+					);
+				$oMainTab->move($this->getField('package_height'), $oDimensionRow2);
+
+				$this->getField('package_weight')
+					->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'))
+					->add(
+						Core_Html_Entity::factory('Span')
+							->class('input-group-addon dimension_patch')
+							->value(htmlspecialchars((string) $oShop->Shop_Measure->name))
+					);
+
+				$oMainTab->move($this->getField('package_weight'), $oDimensionRow2);
 
 				$oTabBlock
 					->add(Admin_Form_Entity::factory('Div')
@@ -1286,10 +1352,31 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oMainTab
 					->move($this->getField('path'), $oMainRow8)
-					->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow7)
-					->move($this->getField('indexing')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow10)
-					->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow10)
-					->move($this->getField('apply_purchase_discount')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow10);
+					->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow7);
+
+				$oAdditionalTab->delete($this->getField('shop_item_type_id'));
+
+				$aShopItemTypeOptions = array();
+
+				$aShop_Item_Types = Core_Entity::factory('Shop_Item_Type')->findAll(FALSE);
+				foreach ($aShop_Item_Types as $oShop_Item_Type)
+				{
+					$aShopItemTypeOptions[$oShop_Item_Type->id] = $oShop_Item_Type->name;
+				}
+
+				$oShopItemTypeSelect = Admin_Form_Entity::factory('Select')
+					->caption(Core::_('Shop_Item.shop_item_type_id'))
+					->options($aShopItemTypeOptions)
+					->name('shop_item_type_id')
+					->value($this->_object->shop_item_type_id)
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'));
+
+				$oMainRow7->add($oShopItemTypeSelect);
+
+				$oMainTab
+					->move($this->getField('indexing')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow11)
+					->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow11)
+					->move($this->getField('apply_purchase_discount')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow11);
 
 				// Tags
 				if (Core::moduleIsActive('tag'))
@@ -1479,43 +1566,29 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oShopItemTabAssociated->add($oCore_Html_Entity_Script);
 
-				$this->getField('length')
-					->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4 no-padding-right'))
-					->add(
-						Core_Html_Entity::factory('Span')
-							->class('input-group-addon dimension_patch')
-							->value('×')
-					)
-					->caption(Core::_('Shop_Item.item_length'));
-
-				$oMainTab->move($this->getField('length'), $oMainRow11);
-
-				$this->getField('width')
-					->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4 no-padding'))
-					->caption(Core::_('Shop_Item.item_width'))
-					->add(
-						Core_Html_Entity::factory('Span')
-							->class('input-group-addon dimension_patch')
-							->value('×')
-					);
-
-				$oMainTab->move($this->getField('width'), $oMainRow11);
-
-				$this->getField('height')
-					->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4 no-padding'))
-					->caption(Core::_('Shop_Item.item_height'))
-					->add(
-						Core_Html_Entity::factory('Span')
-							->class('input-group-addon dimension_patch')
-							->value(Core::_('Shop.size_measure_' . $oShop->size_measure))
-					);
-				$oMainTab->move($this->getField('height'), $oMainRow11);
-
 				$oMainTab
-					->move($this->getField('min_quantity')->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4')), $oMainRow11)
-					->move($this->getField('max_quantity')->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4')), $oMainRow11)
-					->move($this->getField('quantity_step')->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4')), $oMainRow11)
+					->move($this->getField('min_quantity')->divAttr(array('class' => 'form-group col-xs-4 col-sm-2')), $oMainRow12)
+					->move($this->getField('max_quantity')->divAttr(array('class' => 'form-group col-xs-4 col-sm-2')), $oMainRow12)
+					->move($this->getField('quantity_step')->divAttr(array('class' => 'form-group col-xs-4 col-sm-2')), $oMainRow12)
 					;
+
+				// Удаляем единицы измерения
+				$oAdditionalTab->delete($this->getField('shop_measure_id'));
+
+				// Единицы измерения
+				$oMainRow12->add(
+					Admin_Form_Entity::factory('Select')
+						->caption(Core::_('Shop_Item.shop_measure_id'))
+						->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
+						->options(
+							Shop_Controller::fillMeasures()
+						)
+						->name('shop_measure_id')
+						->value($this->_object->id
+							? $this->_object->shop_measure_id
+							: ($this->_object->Shop->default_shop_measure_id ? $this->_object->Shop->default_shop_measure_id : 0)
+						)
+				);
 
 				$oMainTab->add(
 					Admin_Form_Entity::factory('Code')
@@ -1526,7 +1599,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			case 'shop_group':
 				// Выводим заголовок формы
 				$title = $this->_object->id
-					? Core::_('Shop_Group.groups_edit_form_title', $this->_object->name)
+					? Core::_('Shop_Group.groups_edit_form_title', $this->_object->name, FALSE)
 					: Core::_('Shop_Group.groups_add_form_title');
 
 				$this->addTabAfter($oShopGroupDescriptionTab = Admin_Form_Entity::factory('Tab')
@@ -1698,11 +1771,11 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oImageField = Admin_Form_Entity::factory('File')
 					->divAttr(array('class' => ''));
 
-				$oLargeFilePath = $this->_object->image_large != '' && is_file($this->_object->getLargeFilePath())
+				$oLargeFilePath = $this->_object->image_large != '' && Core_File::isFile($this->_object->getLargeFilePath())
 					? $this->_object->getLargeFileHref()
 					: '';
 
-				$oSmallFilePath = $this->_object->image_small != '' && is_file($this->_object->getSmallFilePath())
+				$oSmallFilePath = $this->_object->image_small != '' && Core_File::isFile($this->_object->getSmallFilePath())
 					? $this->_object->getSmallFileHref()
 					: '';
 
@@ -1896,7 +1969,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oShopGroupSeoTab->move($oSeoTitleField, $oShopGroupSeoTabRow1);
 				$oShopGroupSeoTab->move($oSeoDescriptionField, $oShopGroupSeoTabRow2);
 				$oShopGroupSeoTab->move($oSeoKeywordsField, $oShopGroupSeoTabRow3);
-
 
 				$oShopGroupImportExportTab->move($oGuidField, $oShopGroupImportExportTabRow1);
 
@@ -2285,9 +2357,25 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							->price(Shop_Controller::instance()->convertPrice(Core_Array::getPost("specPrice_{$oShop_Specialprice->id}", 0)))
 							->percent(Shop_Controller::instance()->convertPrice(Core_Array::getPost("specPercent_{$oShop_Specialprice->id}", 0)));
 
-						$oShop_Specialprice->price || $oShop_Specialprice->percent
-							? $oShop_Specialprice->save()
-							: $oShop_Specialprice->delete();
+						if ($oShop_Specialprice->price || $oShop_Specialprice->percent)
+						{
+							$oShop_Specialprice->save();
+						}
+						else
+						{
+							ob_start();
+							Core_Html_Entity::factory('Script')
+								->value("$(\"#{$windowId} input[name='specMinQuantity_{$oShop_Specialprice->id}']\").eq(0).prop('name', 'specMinQuantity_\\[\\]');
+								$(\"#{$windowId} input[name='specMaxQuantity_{$oShop_Specialprice->id}']\").eq(0).prop('name', 'specMaxQuantity_\\[\\]');
+								$(\"#{$windowId} input[name='specPrice_{$oShop_Specialprice->id}']\").eq(0).prop('name', 'specPrice_\\[\\]');
+								$(\"#{$windowId} input[name='specPercent_{$oShop_Specialprice->id}']\").eq(0).prop('name', 'specPercent_\\[\\]');
+								")
+								->execute();
+
+							$this->_Admin_Form_Controller->addMessage(ob_get_clean());
+
+							$oShop_Specialprice->delete();
+						}
 					}
 					else
 					{

@@ -5,17 +5,67 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
-
-Core_Auth::authorization($sModule = 'company');
 
 // Код формы
 $iAdmin_Form_Id = 64;
 $sAdminFormAction = '/admin/company/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
+
+if (Core_Auth::logged())
+{
+	Core_Auth::checkBackendBlockedIp();
+
+	// Контроллер формы
+	$oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
+
+	if (!is_null(Core_Array::getGet('loadCompanyAvatar')))
+	{
+		Core_Session::close();
+
+		$id = Core_Array::getGet('loadCompanyAvatar', 0, 'int');
+		$oCompany = Core_Entity::factory('Company')->getById($id);
+
+		$name = $oCompany ? strval($oCompany->name) : NULL;
+
+		if (!is_null($name))
+		{
+			// Get initials
+			$initials = Core_Str::getInitials($name);
+
+			$bgColor = Core_Str::createColor($id);
+
+			Core_Image::avatar($initials, $bgColor, $width = 130, $height = 130);
+		}
+
+		die();
+	}
+
+	if (!is_null(Core_Array::getPost('showPopover')))
+	{
+		$aJSON = array(
+			'html' => ''
+		);
+
+		$oCurrentUser = Core_Auth::getCurrentUser();
+
+		$company_id = Core_Array::getPost('company_id', 0, 'int');
+
+		$oCompany = Core_Entity::factory('Company')->getById($company_id);
+
+		if (!is_null($oCompany) && $oCurrentUser->checkObjectAccess($oCompany))
+		{
+			$aJSON['html'] = $oCompany->getProfilePopupBlock();
+		}
+
+		Core::showJson($aJSON);
+	}
+}
+
+Core_Auth::authorization($sModule = 'company');
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);

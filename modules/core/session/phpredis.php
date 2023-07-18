@@ -10,7 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Session_Phpredis extends Core_Session
 {
@@ -249,9 +249,6 @@ class Core_Session_Phpredis extends Core_Session
 
 			self::$_redis->expire($key, $this->_ttl);
 		}
-
-		// Set cookie with expiration date
-		//self::_setCookie();
 
 		return TRUE;
 	}

@@ -42,6 +42,7 @@ $Shop_Controller_Show
 	//->itemsPropertiesListJustAvailable(TRUE)
 	// ->barcodes(TRUE)
 	// ->warehouseMode('in-stock')
+	// ->warehouseMode('in-stock-modification')
 	// Выводить товары из подгрупп
 	->subgroups(TRUE)
 	->limit($limit)

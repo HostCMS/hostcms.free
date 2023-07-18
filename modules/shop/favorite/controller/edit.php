@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Favorite_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -39,7 +39,7 @@ class Shop_Favorite_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 					: '';
 
 				$title = $this->_object->id
-					? Core::_('Shop_Favorite.edit_form_title', $name)
+					? Core::_('Shop_Favorite.edit_form_title', $name, FALSE)
 					: Core::_('Shop_Favorite.add_form_title');
 
 				$oMainTab = $this->getTab('main');
@@ -139,7 +139,7 @@ class Shop_Favorite_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 				parent::setObject($object);
 
 				$title = $this->_object->id
-					? Core::_("Shop_Favorite_List.edit_form_title", $this->_object->name)
+					? Core::_("Shop_Favorite_List.edit_form_title", $this->_object->name, FALSE)
 					: Core::_("Shop_Favorite_List.add_form_title");
 
 				// Получаем стандартные вкладки

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Zip
 {
@@ -79,7 +79,7 @@ class Core_Zip
 				// Remove prefix from file path before add to zip.
 				$localPath = substr($filePath, $exclusiveLength);
 
-				if (is_file($filePath))
+				if (Core_File::isFile($filePath))
 				{
 					if (is_readable($filePath))
 					{
@@ -119,7 +119,7 @@ class Core_Zip
 						throw new Core_Exception('ZipArchive error read file %file', array('%file' => $filePath));
 					}
 				}
-				elseif (is_dir($filePath))
+				elseif (Core_File::isDir($filePath))
 				{
 					$use = TRUE;
 

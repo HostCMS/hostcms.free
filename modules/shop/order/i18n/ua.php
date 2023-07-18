@@ -162,4 +162,5 @@ return array(
 	'change_user' => 'Зміна відповідального: "%s"',
 	'merge_success' => 'Одиниці вимірювання об\'єднані!',
 	'shop_order_status_deadline' => 'Час життя статусу',
+	'company_account_id' => 'Розрахунковий рахунок',
 );

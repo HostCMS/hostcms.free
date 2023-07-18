@@ -31,4 +31,5 @@ return array(
 	'allowAllAccess_success' => 'Доступ успішно змінено!',
 	'denyAllBackendAccess_success' => 'Доступ успішно змінено!',
 	'allowAllBackendAccess_success' => 'Доступ успішно змінено!',
+	'useragent_menu' => 'Useragent',
 );

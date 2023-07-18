@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properties
 {
@@ -1618,7 +1618,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 							$sTargetFileName = "small_informationsystem_items_catalog_image{$this->_oCurrentItem->id}{$sTargetFileExtension}";
 						}
 
-						if (is_file($sSourceFile) && filesize($sSourceFile))
+						if (Core_File::isFile($sSourceFile) && filesize($sSourceFile))
 						{
 							// Удаляем старое малое изображение
 							if ($this->_oCurrentItem->image_small != '')
@@ -1865,7 +1865,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 								clearstatcache();
 
 								if (strpos(basename($sSourceFile), "CMS") === 0
-									&& is_file($sSourceFile)
+									&& Core_File::isFile($sSourceFile)
 								)
 								{
 									// Файл временный, подлежит удалению

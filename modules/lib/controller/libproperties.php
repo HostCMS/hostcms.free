@@ -10,7 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Lib
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 {
@@ -39,7 +39,10 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 	static public function getJson(Core_Entity $oObject)
 	{
 		$LA = array();
-		$aOptions = json_decode($oObject->options, TRUE);
+
+		$aOptions = !is_null($oObject->options)
+			? json_decode($oObject->options, TRUE)
+			: array();
 
 		$oLib = $oObject->Lib;
 

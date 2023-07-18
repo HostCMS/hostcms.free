@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Movement_Model extends Core_Entity
 {
@@ -43,7 +43,20 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 	 */
 	public $rollback = 0;
 
+	/**
+	 * TYPE
+	 * @var int
+	 */
 	const TYPE = 4;
+
+	/**
+	 * Get Entity Type
+	 * @return int
+	 */
+	public function getEntityType()
+	{
+		return self::TYPE;
+	}
 
 	/**
 	 * Constructor.
@@ -58,7 +71,7 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 			$oUser = Core_Auth::getCurrentUser();
 			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 			$this->_preloadValues['datetime'] = Core_Date::timestamp2sql(time());
-			$this->_preloadValues['posted'] = 0;
+			// $this->_preloadValues['posted'] = 0;
 		}
 	}
 
@@ -122,7 +135,7 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 
 		$this->Shop_Warehouse_Movement_Items->deleteAll(FALSE);
 
-		Core_Entity::factory('Shop_Warehouse_Entry')->deleteByDocument($this->id, self::TYPE);
+		Core_Entity::factory('Shop_Warehouse_Entry')->deleteByDocument($this->id, $this->getEntityType());
 
 		if (Core::moduleIsActive('revision'))
 		{
@@ -143,7 +156,7 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 			$oSource_Shop_Warehouse = $this->Source_Shop_Warehouse;
 			$oDestination_Shop_Warehouse = $this->Destination_Shop_Warehouse;
 
-			$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, self::TYPE);
+			$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, $this->getEntityType());
 
 			$aTmp = array();
 
@@ -179,7 +192,7 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 					else
 					{
 						$oShop_Warehouse_Entry_Source = Core_Entity::factory('Shop_Warehouse_Entry');
-						$oShop_Warehouse_Entry_Source->setDocument($this->id, self::TYPE);
+						$oShop_Warehouse_Entry_Source->setDocument($this->id, $this->getEntityType());
 						$oShop_Warehouse_Entry_Source->shop_item_id = $oShop_Warehouse_Movement_Item->shop_item_id;
 					}
 
@@ -195,7 +208,7 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 					else
 					{
 						$oShop_Warehouse_Entry_Destination = Core_Entity::factory('Shop_Warehouse_Entry');
-						$oShop_Warehouse_Entry_Destination->setDocument($this->id, self::TYPE);
+						$oShop_Warehouse_Entry_Destination->setDocument($this->id, $this->getEntityType());
 						$oShop_Warehouse_Entry_Destination->shop_item_id = $oShop_Warehouse_Movement_Item->shop_item_id;
 					}
 
@@ -240,7 +253,7 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 	{
 		if ($this->posted)
 		{
-			$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, self::TYPE);
+			$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, $this->getEntityType());
 
 			foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
 			{

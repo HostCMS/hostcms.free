@@ -5,19 +5,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 /**
  * Shop_Warehouse_Entry_Model
  *
- * Типы документов:
- * - 0 - Инвентаризация
- * - 1 - Приход
- * - 2 - Списание
- * - 3 - Пересортица
- * - 4 - Перемещение
- * - 5 - Заказ
- *
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Entry_Model extends Core_Entity
 {
@@ -56,7 +48,7 @@ class Shop_Warehouse_Entry_Model extends Core_Entity
 		}
 	}
 
-	/*
+	/**
 	 * Get uniq document ID
 	 * @param int $document_id document ID
 	 * @param int $type document type
@@ -64,7 +56,7 @@ class Shop_Warehouse_Entry_Model extends Core_Entity
 	 */
 	protected function _getDocumentId($document_id, $type)
 	{
-		return ($document_id << 8) | $type;
+		return Shop_Controller::getDocumentId($document_id, $type);
 	}
 
 	/*
@@ -80,7 +72,7 @@ class Shop_Warehouse_Entry_Model extends Core_Entity
 		return $this;
 	}
 
-	/*
+	/**
 	 * Get entries by document_id
 	 * @param int $document_id document ID
 	 * @param int $type document type
@@ -92,7 +84,7 @@ class Shop_Warehouse_Entry_Model extends Core_Entity
 		return $this->getAllBydocument_id($this->_getDocumentId($document_id, $type), $bCache);
 	}
 
-	/*
+	/**
 	 * Delete entries by document id
 	 * @param $document_id document ID
 	 * @param $type document type
@@ -107,7 +99,7 @@ class Shop_Warehouse_Entry_Model extends Core_Entity
 		return $this;
 	}
 
-	/*
+	/**
 	 * Get entries by document_id and shop_item_id
 	 * @param int $document_id document ID
 	 * @param int $type document type
@@ -126,15 +118,13 @@ class Shop_Warehouse_Entry_Model extends Core_Entity
 		return $this->findAll($bCache);
 	}
 
-	/*
+	/**
 	 * Get document type
 	 * @return int|NULL
 	 */
 	public function getDocumentType()
 	{
-		return $this->document_id
-			? Core_Bit::extractBits($this->document_id, 8, 1)
-			: NULL;
+		return Shop_Controller::getDocumentType($this->document_id);
 	}
 
 	/**

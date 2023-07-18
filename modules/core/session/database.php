@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Session_Database extends Core_Session
 {
@@ -112,19 +112,23 @@ class Core_Session_Database extends Core_Session
 				if ($row['time'] + $row['maxlifetime'] > time())
 				{
 					// Update last change time
-					Core_QueryBuilder::update('sessions')
+					$oDataBase = Core_QueryBuilder::update('sessions')
 						//->columns(array('time' => 'UNIX_TIMESTAMP(NOW())'))
 						->columns(array('time' => time()))
 						->where('id', '=', $id)
 						->execute();
 
+					$oDataBase->free();
+
 					return base64_decode($row['value']);
 				}
 				else
 				{
-					Core_QueryBuilder::delete('sessions')
+					$oDataBase = Core_QueryBuilder::delete('sessions')
 						->where('id', '=', $id)
 						->execute();
+
+					$oDataBase->free();
 				}
 			}
 		}
@@ -157,12 +161,16 @@ class Core_Session_Database extends Core_Session
 			{
 				$maxlifetime = self::getMaxLifeTime();
 
-				Core_QueryBuilder::insert('sessions')
+				$oDataBase->free();
+
+				$oDataBase = Core_QueryBuilder::insert('sessions')
 					->ignore()
 					->columns('id', 'value', 'time', 'maxlifetime')
 					->values($id, $value, time(), $maxlifetime)
 					->execute();
 			}
+
+			$oDataBase->free();
 
 			$this->_unlock($id);
 
@@ -181,12 +189,15 @@ class Core_Session_Database extends Core_Session
 	{
 		if ($this->_lock($id))
 		{
-			Core_QueryBuilder::delete('sessions')
+			$oDataBase = Core_QueryBuilder::delete('sessions')
 				->where('id', '=', $id)
 				->execute();
 
+			$oDataBase->free();
+
 			// для предотвращения автоматической повторной регистрации сеанса
-			$_SESSION = array();
+			// при регенерации идентификаора очищать не следует
+			//$_SESSION = array();
 
 			return TRUE;
 		}
@@ -209,7 +220,9 @@ class Core_Session_Database extends Core_Session
 		!$overwrite
 			&& $oCore_QueryBuilder->where('maxlifetime', '<', $maxlifetime);
 
-		$oCore_QueryBuilder->execute();
+		$oDataBase = $oCore_QueryBuilder->execute();
+
+		$oDataBase->free();
 
 		// Set cookie with expiration date
 		//self::_setCookie();
@@ -224,9 +237,11 @@ class Core_Session_Database extends Core_Session
 	 */
 	public function sessionGc($maxlifetime)
 	{
-		Core_QueryBuilder::delete('sessions')
+		$oDataBase = Core_QueryBuilder::delete('sessions')
 			->where('time + maxlifetime', '<', time())
 			->execute();
+
+		$oDataBase->free();
 
 		return TRUE;
 	}
@@ -311,6 +326,7 @@ class Core_Session_Database extends Core_Session
 	 */
 	static public function flushAll()
 	{
-		Core_QueryBuilder::truncate('sessions')->execute();
+		$oDataBase = Core_QueryBuilder::truncate('sessions')->execute();
+		$oDataBase->free();
 	}
 }

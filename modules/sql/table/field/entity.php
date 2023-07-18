@@ -9,11 +9,13 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Sql
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Sql_Table_Field_Entity
 {
 	//public $view = NULL;
+
+	protected $_values = array();
 
 	/**
 	 * Fields
@@ -192,7 +194,7 @@ class Sql_Table_Field_Entity
 	 */
 	public function __isset($property)
 	{
-		if (isset($this->_fields[$property]))
+		if (isset($this->_values[$property]))
 		{
 			return TRUE;
 		}
@@ -207,9 +209,36 @@ class Sql_Table_Field_Entity
 	 */
 	public function __get($property)
 	{
-		if (isset($this->_fields[$property]))
+		if (isset($this->_values[$property]))
 		{
-			return '';
+			return $this->_values[$property];
+		}
+	}
+
+	/**
+	 * Run when writing data to inaccessible properties
+	 * @param string $property property name
+	 * @param string $value property value
+	 * @return self
+	 * @ignore
+	 */
+	public function __set($property, $value)
+	{
+		$this->_values[$property] = $value;
+	}
+
+	/**
+	 * Triggered when invoking inaccessible methods in an object context
+	 * @param string $name method name
+	 * @param array $arguments arguments
+	 * @return mixed
+	 * @hostcms-event modelname.onCall
+	 */
+	public function __call($methodName, $arguments)
+	{
+		if (isset($this->_values[$methodName]) && count($arguments) == 0)
+		{
+			return $this->_values[$methodName];
 		}
 	}
 

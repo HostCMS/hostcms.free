@@ -16,12 +16,18 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Xsl
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Xsl_Stream_Lang
 {
+	/**
+	 * The current context, or null if no context was passed to the caller function.
+	 * @var resource|NULL
+	 */
+	public $context;
+
 	/**
 	 * Current position of a stream
 	 * @var int
@@ -78,13 +84,13 @@ class Xsl_Stream_Lang
 		}
 
 		$lng = Core::getLng();
-		
+
 		if (!isset(self::$_aDTD[$this->_xslName][$lng]))
 		{
 			$filePath = $this->_oXsl->getLngDtdPath($lng);
 
 			self::$_aDTD[$this->_xslName][$lng] = '<?xml version="1.0" encoding="UTF-8"?>'
-				. (is_file($filePath)
+				. (Core_File::isFile($filePath)
 					 ? Core_File::read($filePath)
 					 : '');
 		}
@@ -100,7 +106,7 @@ class Xsl_Stream_Lang
 	public function stream_read($count)
 	{
 		$lng = Core::getLng();
-		
+
 		$ret = substr(self::$_aDTD[$this->_xslName][$lng], $this->_position, $count);
 		$this->_position += strlen($ret);
 
@@ -145,18 +151,15 @@ class Xsl_Stream_Lang
 	public function stream_seek($offset, $whence)
 	{
 		$lng = Core::getLng();
-		
+
 		switch ($whence) {
 			case SEEK_SET:
-			if ($offset < strlen(self::$_aDTD[$this->_xslName][$lng]) && $offset >= 0)
-			{
-				 $this->position = $offset;
-				 return TRUE;
-			}
-			else
-			{
-				 return FALSE;
-			}
+				if ($offset < strlen(self::$_aDTD[$this->_xslName][$lng]) && $offset >= 0)
+				{
+					$this->position = $offset;
+					return TRUE;
+				}
+				return FALSE;
 			break;
 			case SEEK_CUR:
 				if ($offset >= 0)
@@ -164,21 +167,16 @@ class Xsl_Stream_Lang
 					$this->position += $offset;
 					return TRUE;
 				}
-				else
-				{
-					return FALSE;
-				}
+				return FALSE;
 			break;
 
 			case SEEK_END:
-			if (strlen(self::$_aDTD[$this->_xslName][$lng]) + $offset >= 0) {
-				 $this->position = strlen(self::$_aDTD[$this->_xslName][$lng]) + $offset;
-				 return TRUE;
-			}
-			else
-			{
+				if (strlen(self::$_aDTD[$this->_xslName][$lng]) + $offset >= 0)
+				{
+					$this->position = strlen(self::$_aDTD[$this->_xslName][$lng]) + $offset;
+					return TRUE;
+				}
 				return FALSE;
-			}
 			break;
 			default:
 				return FALSE;

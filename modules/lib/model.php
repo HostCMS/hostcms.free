@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Lib
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Lib_Model extends Core_Entity
 {
@@ -160,6 +160,7 @@ class Lib_Model extends Core_Entity
 	{
 		$path = $this->getLibDatFilePath($structure_id);
 
+		//return Core_File::isFile($path) // return 7.0.6
 		return is_file($path)
 			? Core_File::read($path)
 			: NULL;
@@ -244,14 +245,10 @@ class Lib_Model extends Core_Entity
 	{
 		$path = $this->getLibFilePath();
 
-		if (is_file($path))
-		{
-			return Core_File::read($path);
-		}
-		else
-		{
-			return NULL;
-		}
+		//return Core_File::isFile($path) // return 7.0.6
+		return is_file($path)
+			? Core_File::read($path)
+			: NULL;
 	}
 
 	/**
@@ -262,14 +259,10 @@ class Lib_Model extends Core_Entity
 	{
 		$path = $this->getLibConfigFilePath();
 
-		if (is_file($path))
-		{
-			return Core_File::read($path);
-		}
-		else
-		{
-			return NULL;
-		}
+		//return Core_File::isFile($path) // return 7.0.6
+		return is_file($path)
+			? Core_File::read($path)
+			: NULL;
 	}
 
 	/**
@@ -279,11 +272,18 @@ class Lib_Model extends Core_Entity
 	 */
 	public function execute()
 	{
+		$bLogged = Core_Auth::logged();
+		$bLogged && $fBeginTimeConfig = Core::getmicrotime();
+
 		Core_Event::notify($this->_modelName . '.onBeforeExecute', $this);
 
 		include $this->getLibFilePath();
 
 		Core_Event::notify($this->_modelName . '.onAfterExecute', $this);
+
+		$bLogged && Core_Page::instance()->addFrontendExecutionTimes(
+			Core::_('Core.time_page', Core::getmicrotime() - $fBeginTimeConfig)
+		);
 
 		return $this;
 	}

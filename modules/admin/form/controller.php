@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Admin_Form_Controller extends Core_Servant_Properties
 {
@@ -409,8 +409,9 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	{
 		if (!is_null($this->_Admin_Form) && is_null($this->_Admin_Form_Fields))
 		{
-			$aAdmin_Form_Fields = $this->_Admin_Form->Admin_Form_Fields->findAll(FALSE);
+			$this->_Admin_Form_Fields = array();
 
+			$aAdmin_Form_Fields = $this->_Admin_Form->Admin_Form_Fields->findAll(FALSE);
 			foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 			{
 				$this->_Admin_Form_Fields[$oAdmin_Form_Field->id] = $oAdmin_Form_Field;
@@ -486,6 +487,112 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		if (isset($this->_Admin_Form_Fields[$id]))
 		{
 			unset($this->_Admin_Form_Fields[$id]);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Admin_Form_Actions of Admin_Form
+	 * @var array|NULL
+	 */
+	protected $_Admin_Form_Actions = NULL;
+
+	/**
+	 * Load Admin_Form_Actions
+	 * @return self
+	 */
+	public function loadAdminFormActions()
+	{
+		if (!is_null($this->_Admin_Form) && is_null($this->_Admin_Form_Actions))
+		{
+			// Текущий пользователь
+			$oUser = Core_Auth::getCurrentUser();
+
+			if (is_null($oUser))
+			{
+				return FALSE;
+			}
+
+			$this->_Admin_Form_Actions = array();
+
+			// Доступные действия для пользователя
+			$aAdmin_Form_Actions = $this->_Admin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser);
+			foreach ($aAdmin_Form_Actions as $oAdmin_Form_Action)
+			{
+				$this->_Admin_Form_Actions[$oAdmin_Form_Action->id] = $oAdmin_Form_Action;
+			}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Set Admin_Form_Actions
+	 * @param array $aAdmin_Form_Actions
+	 * @return self
+	 */
+	public function setAdminFormActions(array $aAdmin_Form_Actions)
+	{
+		$this->_Admin_Form_Actions = $aAdmin_Form_Actions;
+
+		return $this;
+	}
+
+	/**
+	 * Get Admin_Form_Actions
+	 * @return array
+	 */
+	public function getAdminFormActions()
+	{
+		$this->loadAdminFormActions();
+
+		return $this->_Admin_Form_Actions;
+	}
+
+	/**
+	 * Get Admin_Form_Action by ID
+	 * @return object|NULL
+	 */
+	public function getAdminFormActionById($id)
+	{
+		$this->loadAdminFormActions();
+
+		return isset($this->_Admin_Form_Actions[$id])
+			? $this->_Admin_Form_Actions[$id]
+			: NULL;
+	}
+
+	/**
+	 * Get Admin_Form_Action by Name
+	 * @return object|NULL
+	 */
+	public function getAdminFormActionByName($name)
+	{
+		$this->loadAdminFormActions();
+
+		foreach ($this->_Admin_Form_Actions as $id => $oAdmin_Form_Action)
+		{
+			if ($oAdmin_Form_Action->name == $name)
+			{
+				return $oAdmin_Form_Action;
+			}
+		}
+
+		return NULL;
+	}
+
+	/**
+	 * Delete Admin_Form_Action by ID
+	 * @return self
+	 */
+	public function deleteAdminFormActionById($id)
+	{
+		$this->loadAdminFormActions();
+
+		if (isset($this->_Admin_Form_Actions[$id]))
+		{
+			unset($this->_Admin_Form_Actions[$id]);
 		}
 
 		return $this;
@@ -1044,10 +1151,14 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	protected $_content = NULL;
 
 	/**
-	 * Message text
-	 * @var string
+	 * Clear content for Back-end form
+	 * @return self
 	 */
-	protected $_message = NULL;
+	public function clearContent()
+	{
+		$this->_content = NULL;
+		return $this;
+	}
 
 	/**
 	 * Get content message
@@ -1068,6 +1179,12 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		$this->_content .= $content;
 		return $this;
 	}
+
+	/**
+	 * Message text
+	 * @var string
+	 */
+	protected $_message = NULL;
 
 	/**
 	 * Get form message
@@ -1199,7 +1316,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 				if (count($this->checked))
 				{
 					// Доступные действия для пользователя
-					$aAdmin_Form_Actions = $this->_Admin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser);
+					$aAdmin_Form_Actions = $this->getAdminFormActions();
 
 					$bActionAllowed = FALSE;
 
@@ -1562,7 +1679,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		}
 
 		// Доступные действия для пользователя
-		$aAllowed_Admin_Form_Actions = $this->_Admin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser);
+		$aAllowed_Admin_Form_Actions = $this->getAdminFormActions();
 
 		// Editable
 		$bEditable = FALSE;
@@ -1579,7 +1696,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		{
 			Core_Html_Entity::factory('Script')
 				->value("(function($){
-					$('#{$windowId} .editable').editable({windowId: '{$windowId}', path: '{$path}'});
+					$('#{$windowId} .editable').hostcmsEditable({windowId: '{$windowId}', path: '{$path}'});
 				})(jQuery);")
 				->execute();
 		}
@@ -1611,13 +1728,16 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		$aColumns = $oEntity->getTableColumns();
 		foreach ($aColumns as $columnName => $columnArray)
 		{
-			$subject = str_replace(
-				'{' . $columnName . '}',
-				$mode == 'link'
-					? htmlspecialchars((string) $oEntity->$columnName)
-					: Core_Str::escapeJavascriptVariable($this->jQueryEscape($oEntity->$columnName)),
-				$subject
-			);
+			if (isset($oEntity->$columnName))
+			{
+				$subject = str_replace(
+					'{' . $columnName . '}',
+					$mode == 'link'
+						? htmlspecialchars((string) $oEntity->$columnName)
+						: Core_Str::escapeJavascriptVariable($this->jQueryEscape($oEntity->$columnName)),
+					$subject
+				);
+			}
 		}
 
 		return $subject;
@@ -2301,7 +2421,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		$oSelect = Admin_Form_Entity::factory('Select')
 			->name($filterPrefix . $oAdmin_Form_Field->id)
 			->id($tabName . $filterPrefix . $oAdmin_Form_Field->id)
-			->class('no-padding-left no-padding-right')
+			// ->class('no-padding-left no-padding-right')
 			->style('width: 100%')
 			->divAttr(array())
 			->value($value);
@@ -2430,6 +2550,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 	protected function _filterCallbackCounterparty($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
 	{
 		$value = strval($value);
+
 		if (Core::moduleIsActive('siteuser'))
 		{
 			$placeholder = Core::_('Siteuser.select_siteuser');
@@ -2455,7 +2576,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 					{
 						$sOptionValue = 'company_' . $oSiteuserCompany->id;
 
-						$sOptions .= '<option value="' . $sOptionValue . '" class="siteuser-company" ' . ($value == $sOptionValue ? 'selected="selected"' : '') . '>' . htmlspecialchars($oSiteuserCompany->name) . '[' . htmlspecialchars($oSelectedSiteuser->login) . ']' . '%%%' . htmlspecialchars($oSiteuserCompany->getAvatar()) . '</option>';
+						$sOptions .= '<option value="' . $sOptionValue . '" class="siteuser-company" ' . ($value == $sOptionValue ? 'selected="selected"' : '') . '>' . htmlspecialchars($oSiteuserCompany->name) . ' [' . htmlspecialchars($oSelectedSiteuser->login) . ']' . '%%%' . htmlspecialchars($oSiteuserCompany->getAvatar()) . '</option>';
 					}
 
 					$aSiteuserPersons = $oSelectedSiteuser->Siteuser_People->findAll();
@@ -2463,7 +2584,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 					{
 						$sOptionValue = 'person_' . $oSiteuserPerson->id;
 
-						$sOptions .= '<option value="' . $sOptionValue . '" class="siteuser-person"' . ($value == $sOptionValue ? 'selected="selected"' : '') . '>' . htmlspecialchars($oSiteuserPerson->getFullName()) . '[' . htmlspecialchars($oSelectedSiteuser->login) . ']' . '%%%' . htmlspecialchars($oSiteuserPerson->getAvatar()) . '</option>';
+						$sOptions .= '<option value="' . $sOptionValue . '" class="siteuser-person"' . ($value == $sOptionValue ? 'selected="selected"' : '') . '>' . htmlspecialchars($oSiteuserPerson->getFullName()) . ' [' . htmlspecialchars($oSelectedSiteuser->login) . ']' . '%%%' . htmlspecialchars($oSiteuserPerson->getAvatar()) . '</option>';
 					}
 
 					$sOptions = '<optgroup label="' . htmlspecialchars($oSelectedSiteuser->login) . '" class="siteuser">' . $sOptions . '</optgroup>';
@@ -2486,6 +2607,70 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			<script>
 				$('#<?php echo $windowId?> #<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectPersonCompany({
 					url: '/admin/siteuser/index.php?loadSiteusers&types[]=person&types[]=company',
+					language: '<?php echo $language?>',
+					placeholder: '<?php echo $placeholder?>',
+					dropdownParent: $('#<?php echo $windowId?>')
+				});
+			</script>
+			<?php
+		}
+		else
+		{
+			?>—<?php
+		}
+	}
+
+	/**
+	 * Filter counterparty callback
+	 * @param string $value
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
+	 * @param string $filterPrefix
+	 * @param string $tabName
+	 */
+	protected function _filterCallbackSiteuserCompany($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
+	{
+		$value = strval($value);
+
+		if (Core::moduleIsActive('siteuser'))
+		{
+			$placeholder = Core::_('Siteuser.select_siteuser');
+			$language = Core_I18n::instance()->getLng();
+
+			$aTmpValue = explode('_', $value);
+
+			$sOptions = '';
+
+			if (count($aTmpValue) == 2 && $aTmpValue[0] == 'company')
+			{
+				$iCounterpartyId = intval($aTmpValue[1]);
+
+				$oSelectedSiteuser = $aTmpValue[0] == 'company'
+					? Core_Entity::factory('Siteuser_Company', $iCounterpartyId)->Siteuser
+					: NULL;
+
+				if (!is_null($oSelectedSiteuser->id))
+				{
+					$aSiteuserCompanies = $oSelectedSiteuser->Siteuser_Companies->findAll();
+
+					foreach ($aSiteuserCompanies as $oSiteuserCompany)
+					{
+						$sOptionValue = 'company_' . $oSiteuserCompany->id;
+
+						$sOptions .= '<option value="' . $sOptionValue . '" class="siteuser-company" ' . ($value == $sOptionValue ? 'selected="selected"' : '') . '>' . htmlspecialchars($oSiteuserCompany->name) . ' [' . htmlspecialchars($oSelectedSiteuser->login) . ']' . '%%%' . htmlspecialchars($oSiteuserCompany->getAvatar()) . '</option>';
+					}
+
+					$sOptions = '<optgroup label="' . htmlspecialchars($oSelectedSiteuser->login) . '" class="siteuser">' . $sOptions . '</optgroup>';
+				}
+			}
+
+			$windowId = $this->getWindowId();
+			?>
+			<select id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>">
+				<?php echo $sOptions?>
+			</select>
+			<script>
+				$('#<?php echo $windowId?> #<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectPersonCompany({
+					url: '/admin/siteuser/index.php?loadSiteusers&types[]=company',
 					language: '<?php echo $language?>',
 					placeholder: '<?php echo $placeholder?>',
 					dropdownParent: $('#<?php echo $windowId?>')
@@ -2633,6 +2818,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 				{
 					// Check field exists in the model
 					$fieldName = $this->getFieldName($oAdmin_Form_Field_Sorting->name);
+
 					if (isset($oEntity->$fieldName) || method_exists($oEntity, $fieldName)
 						// Для сортировки должно существовать св-во модели
 						// || property_exists($oEntity, $fieldName)

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Currency_Model extends Core_Entity
 {
@@ -20,6 +20,7 @@ class Shop_Currency_Model extends Core_Entity
 	protected $_hasMany = array(
 		'shop' => array(),
 		'shop_item' => array(),
+		'siteuser_representative_contract' => array(),
 	);
 
 	/**
@@ -145,7 +146,7 @@ class Shop_Currency_Model extends Core_Entity
 	{
 		return '<span class="darkgray">' . htmlspecialchars($this->formatWithCurrency(345)) . '</span>';
 	}
-	
+
 	/**
 	 * Backend callback method
 	 * @return string

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 {
@@ -228,7 +228,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 		}
 
 		// Доступные действия для пользователя
-		$aAllowed_Admin_Form_Actions = $this->_Admin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser);
+		$aAllowed_Admin_Form_Actions = $this->getAdminFormActions();
 
 		if ($this->_Admin_Form->show_operations && $this->showOperations
 			|| $allow_filter && $this->_showFilter)
@@ -741,7 +741,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 			}
 
 			// Доступные действия для пользователя
-			$aAllowed_Admin_Form_Actions = $this->_Admin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser);
+			$aAllowed_Admin_Form_Actions = $this->getAdminFormActions();
 		?>
 		<table cellpadding="5" cellspacing="0" border="1" width="100%" style="margin-top: 8px;" class="light_table">
 		<tr>

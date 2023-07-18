@@ -7,7 +7,6 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * Доступные методы:
  *
- * - commentsForbiddenTags(array('email')) массив тегов комментария, запрещенных к передаче в генерируемый XML
  * - commentsActivity('active'|'inactive'|'all') отображать комментарии: active - только активные, inactive - только неактивные, all - все, по умолчанию - active
  * - offset($offset) смещение, с которого выводить комментарии. По умолчанию 0
  * - limit($limit) количество выводимых комментариев
@@ -15,11 +14,23 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - pattern($pattern) шаблон разбора данных в URI, см. __construct()
  * - cache(TRUE|FALSE) использовать кэширование, по умолчанию TRUE
  * - calculateTotal(TRUE|FALSE) вычислять общее количество найденных, по умолчанию TRUE
+ * - addAllowedTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, разрешенных к передаче в генерируемый XML
+ * - addForbiddenTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, запрещенных к передаче в генерируемый XML
  *
  * Доступные свойства:
  *
  * - total общее количество доступных для отображения записей
  * - patternParams массив данных, извелеченных из URI при применении pattern
+ *
+ * Устаревшие методы:
+ *
+ * - commentsForbiddenTags(array('email')) массив тегов комментария, запрещенных к передаче в генерируемый XML
+ *
+ * Доступные пути для методов addAllowedTags/addForbiddenTags:
+ *
+ * - '/' или '/informationsystem' Информационная система
+ * - '/informationsystem/comment' Комментарии
+ * - '/informationsystem/informationsystem_item' Информационный элемент
  *
  * <code>
  * $Informationsystem_Comment_Controller_Show = new Informationsystem_Comment_Controller_Show(
@@ -38,7 +49,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Comment_Controller_Show extends Core_Controller
 {
@@ -190,6 +201,10 @@ class Informationsystem_Comment_Controller_Show extends Core_Controller
 			}
 		}
 
+		// Backward compatible
+		is_array($this->commentsForbiddenTags) && count($this->commentsForbiddenTags)
+			&& $this->addForbiddenTags('/informationsystem/comment', $this->commentsForbiddenTags);
+
 		$this->_setComments();
 
 		$oInformationsystem = $this->getEntity();
@@ -234,18 +249,16 @@ class Informationsystem_Comment_Controller_Show extends Core_Controller
 					->dateFormat($oInformationsystem->format_date)
 					->dateTimeFormat($oInformationsystem->format_datetime);
 
-				$oInformationsystem_Item = $oComment->Informationsystem_Item;
+				$oInformationsystem_Item = $oComment->Informationsystem_Item->clearEntities();
+				$this->applyForbiddenAllowedTags('/informationsystem/informationsystem_item', $oInformationsystem_Item);
 
 				// Tagged cache
 				$bCache && $this->_cacheTags[] = 'informationsystem_item_' . $oInformationsystem_Item->id;
 
 				$oComment->clearEntities();
-
 				$this->applyforbiddenTags($oComment);
 
-				$oComment->addEntity(
-					$oInformationsystem_Item->clearEntities()
-				);
+				$oComment->addEntity($oInformationsystem_Item);
 
 				$this->addEntity($oComment);
 
@@ -308,14 +321,7 @@ class Informationsystem_Comment_Controller_Show extends Core_Controller
 	 */
 	public function applyforbiddenTags($oComment)
 	{
-		if (!is_null($this->commentsForbiddenTags))
-		{
-			foreach ($this->commentsForbiddenTags as $forbiddenTag)
-			{
-				$oComment->addForbiddenTag($forbiddenTag);
-			}
-		}
-
+		$this->applyForbiddenAllowedTags('/informationsystem/comment', $oComment);
 		return $this;
 	}
 

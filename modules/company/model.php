@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Company
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Company_Model extends Core_Entity
 {
@@ -32,15 +32,38 @@ class Company_Model extends Core_Entity
 	public $location = 1;
 
 	/**
+	 * Callback cashboxes
+	 * @var int
+	 */
+	public $cashboxes = 1;
+
+	/**
+	 * Callback cashboxes
+	 * @var int
+	 */
+	public $accounts = 1;
+
+	/**
 	 * One-to-many or many-to-many relations
 	 * @var array
 	 */
 	protected $_hasMany = array(
 		'company_department' => array(),
 		'company_site' => array(),
+		'company_cashbox' => array(),
+		'company_account' => array(),
+		'chartaccount_operation' => array(),
+		'chartaccount_closure_period' => array(),
+		'chartaccount_entry' => array(),
 		'shop' => array(),
 		'shop_warehouse' => array(),
+		'shop_warrant' => array(),
+		'shop_warehouse_purchaseorder' => array(),
+		'shop_warehouse_invoice' => array(),
+		'shop_warehouse_supply' => array(),
+		'shop_warehouse_purchasereturn' => array(),
 		'site' => array('through' => 'company_site'),
+		'siteuser_company_contract' => array(),
 		'company_directory_email' => array(),
 		'directory_email' => array('through' => 'company_directory_email', 'foreign_key' => 'company_id'),
 		'company_directory_phone' => array(),
@@ -61,7 +84,7 @@ class Company_Model extends Core_Entity
 		'dms_case_destruction' => array(),
 		'dms_document' => array(),
 		'dms_nomenclature' => array(),
-		'dms_nomenclature_dir' => array(),
+		'dms_nomenclature_dir' => array()
 	);
 
 	/**
@@ -84,6 +107,23 @@ class Company_Model extends Core_Entity
 		'~fax',
 		'~site',
 		'~email'*/
+	);
+
+	/**
+	 * List of skipped columns from table
+	 * @var array
+	 */
+	protected $_skipColumns = array(
+		'~bic',
+		'~current_account',
+		'~correspondent_account',
+		'~bank_name',
+		'~bank_address',
+		'bic',
+		'current_account',
+		'correspondent_account',
+		'bank_name',
+		'bank_address',
 	);
 
 	/**
@@ -545,11 +585,52 @@ class Company_Model extends Core_Entity
 			->execute();
 	}
 
+	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function cashboxesBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$count = $this->Company_Cashboxes->getCount();
+		$count && Core_Html_Entity::factory('Span')
+			->class('badge badge-ico badge-palegreen white')
+			->value($count < 100 ? $count : '∞')
+			->title($count)
+			->execute();
+	}
+
+	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function accountsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$count = $this->Company_Accounts->getCount();
+		$count && Core_Html_Entity::factory('Span')
+			->class('badge badge-ico badge-pink white')
+			->value($count < 100 ? $count : '∞')
+			->title($count)
+			->execute();
+	}
+
+	/**
+	 * Get company avatar
+	 * @return string
+	 */
+	public function getAvatar()
+	{
+		return strlen((string) $this->image)
+			? $this->getImageHref()
+			: "/admin/company/index.php?loadCompanyAvatar={$this->id}";
+	}
+
 	public function imgBackend()
 	{
-		return $this->image != ''
-			? '<img width="25" class="company-image" src="' . $this->getImageHref() . '"/>'
-			: '';
+		return '<img width="25" class="company-image" src="' . $this->getAvatar() . '"/>';
 	}
 
 	/**
@@ -613,7 +694,7 @@ class Company_Model extends Core_Entity
 	{
 		clearstatcache();
 
-		if (!is_dir($this->getPath()))
+		if (!Core_File::isDir($this->getPath()))
 		{
 			try
 			{
@@ -632,7 +713,7 @@ class Company_Model extends Core_Entity
 	{
 		try
 		{
-			is_file($this->getImageFilePath()) && Core_File::delete($this->getImageFilePath());
+			Core_File::isFile($this->getImageFilePath()) && Core_File::delete($this->getImageFilePath());
 		} catch (Exception $e) {}
 
 		$this->image = '';
@@ -649,7 +730,7 @@ class Company_Model extends Core_Entity
 	{
 		$this->deleteImageFile();
 
-		if (is_dir($this->getPath()))
+		if (Core_File::isDir($this->getPath()))
 		{
 			try
 			{
@@ -682,6 +763,8 @@ class Company_Model extends Core_Entity
 		$this->Company_Sites->deleteAll(FALSE);
 		$this->Company_Activities->deleteAll(FALSE);
 		$this->Company_Locations->deleteAll(FALSE);
+		$this->Company_Cashboxes->deleteAll(FALSE);
+		$this->Company_Accounts->deleteAll(FALSE);
 
 		$this->Directory_Addresses->deleteAll(FALSE);
 		$this->Directory_Emails->deleteAll(FALSE);
@@ -697,6 +780,27 @@ class Company_Model extends Core_Entity
 			$this->Dms_Documents->deleteAll(FALSE);
 			$this->Dms_Nomenclatures->deleteAll(FALSE);
 			$this->Dms_Nomenclature_Dirs->deleteAll(FALSE);
+		}
+
+		if (Core::moduleIsActive('chartaccount'))
+		{
+			$this->Chartaccount_Operations->deleteAll(FALSE);
+			$this->Chartaccount_Closure_Periods->deleteAll(FALSE);
+			$this->Chartaccount_Entries->deleteAll(FALSE);
+		}
+
+		if (Core::moduleIsActive('shop'))
+		{
+			$this->Shop_Warrants->deleteAll(FALSE);
+			$this->Shop_Warehouse_Purchaseorders->deleteAll(FALSE);
+			$this->Shop_Warehouse_Invoices->deleteAll(FALSE);
+			$this->Shop_Warehouse_Supplies->deleteAll(FALSE);
+			$this->Shop_Warehouse_Purchasereturns->deleteAll(FALSE);
+		}
+
+		if (Core::moduleIsActive('siteuser'))
+		{
+			$this->Siteuser_Company_Contracts->deleteAll(FALSE);
 		}
 
 		// Удаляем директорию
@@ -739,12 +843,24 @@ class Company_Model extends Core_Entity
 	 */
 	protected function _prepareData()
 	{
-		$aDirectory_Addresses = $this->Directory_Addresses->findAll(FALSE);
-		$aDirectory_Phones = $this->Directory_Phones->findAll(FALSE);
-		$aDirectory_Websites = $this->Directory_Websites->findAll(FALSE);
-		$aDirectory_Emails = $this->Directory_Emails->findAll(FALSE);
-		$aDirectory_Socials = $this->Directory_Socials->findAll(FALSE);
-		$aDirectory_Messengers = $this->Directory_Messengers->findAll(FALSE);
+		$oCompany_Account = $this->Company_Accounts->getDefault();
+
+		if (!is_null($oCompany_Account))
+		{
+			$this
+				->addXmlTag('bic', $oCompany_Account->bic)
+				->addXmlTag('current_account', $oCompany_Account->current_account)
+				->addXmlTag('correspondent_account', $oCompany_Account->correspondent_account)
+				->addXmlTag('bank_name', $oCompany_Account->bank_name)
+				->addXmlTag('bank_address', $oCompany_Account->bank_address);
+		}
+
+		$aDirectory_Addresses = $this->Directory_Addresses->findAll();
+		$aDirectory_Phones = $this->Directory_Phones->findAll();
+		$aDirectory_Websites = $this->Directory_Websites->findAll();
+		$aDirectory_Emails = $this->Directory_Emails->findAll();
+		$aDirectory_Socials = $this->Directory_Socials->findAll();
+		$aDirectory_Messengers = $this->Directory_Messengers->findAll();
 
 		$this
 			->addEntities($aDirectory_Addresses)
@@ -753,6 +869,9 @@ class Company_Model extends Core_Entity
 			->addEntities($aDirectory_Websites)
 			->addEntities($aDirectory_Socials)
 			->addEntities($aDirectory_Messengers);
+
+		$aCompany_Accounts = $this->Company_Accounts->findAll();
+		$this->addEntities($aCompany_Accounts);
 
 		return $this;
 	}
@@ -797,6 +916,117 @@ class Company_Model extends Core_Entity
 		}
 
 		return $sCompanyPhone;
+	}
+
+	/**
+	 * Return html profile block
+	 * @param string $class class for block
+	 * @return string
+	 */
+	public function getProfileBlock($class = '')
+	{
+		/*$oUser = Core_Auth::getCurrentUser();
+		$sFullName = $this->name;
+
+		$oAdmin_Form = Core_Entity::factory('Admin_Form', 64);
+
+		$nameLink = $oAdmin_Form->Admin_Form_Actions->checkAllowedActionForUser($oUser, 'view')
+			? '<a href="/admin/siteuser/representative/index.php?hostcms[action]=view&hostcms[checked][0][' . $this->id . ']=1&siteuser_id=' . $this->siteuser_id . '" onclick="$.modalLoad({path: \'/admin/siteuser/representative/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $this->id . ']=1&siteuser_id=' . $this->siteuser_id . '\', windowId: \'id_content\', width: \'70%\'}); return false">' . htmlspecialchars($sFullName) . '</a>'
+			: htmlspecialchars($this->name);*/
+
+		/*$imgLink = $oAdmin_Form->Admin_Form_Actions->checkAllowedActionForUser($oUser, 'edit')
+			? '<a href="/admin/siteuser/representative/index.php?hostcms[action]=edit&hostcms[checked][0][' . $this->id . ']=1&siteuser_id=' . $this->siteuser_id . '" onclick="$.modalLoad({path: \'/admin/siteuser/representative/index.php\', action: \'edit\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $this->id . ']=1&siteuser_id=' . $this->siteuser_id . '&parentWindowId=id_content\', view: \'list\', windowId: \'id_content\', width: \'70%\'}); return false">
+				<i class="fa fa-building"></i>
+				<i class="fa fa-pencil"></i>
+			</a>'
+			: '<i class="fa fa-building"></i>';*/
+
+		$tin = !empty($this->tin) ? '<div class="tin">' . Core::_('Company.tin_list', $this->tin) . '</div>' : '';
+
+		return '<li class="ticket-item ' . $class . '" data-popover="hover" data-company-id="' . $this->id . '">
+			<div class="row">
+				<div class="ticket-user ticket-siteuser col-xs-12"><img class="siteuser-avatar lazy" data-src="' . $this->getAvatar() .'" />
+					<div class="user-name"><div>' . htmlspecialchars($this->name) . '</div>' . $tin . '</div>
+				</div>
+			</div>
+		</li>';
+	}
+
+	/**
+	 * Return html profile block for popup
+	 */
+	public function getProfilePopupBlock()
+	{
+		ob_start();
+		?>
+		<div class="siteuser-popup-wrapper">
+			<img class="avatar" src="<?php echo $this->getAvatar()?>"/>
+			<div class="semi-bold"><?php echo htmlspecialchars($this->name)?></div>
+		</div>
+		<?php
+
+		$aDirectory_Addresses = $this->Directory_Addresses->findAll(FALSE);
+
+		if (count($aDirectory_Addresses))
+		{
+			?><div class="margin-top-5"><?php
+			foreach ($aDirectory_Addresses as $oDirectory_Address)
+			{
+				if (strlen(trim($oDirectory_Address->value)))
+				{
+					$oDirectory_Address_Type = Core_Entity::factory('Directory_Address_Type')->find($oDirectory_Address->directory_address_type_id);
+
+					$sAddressType = !is_null($oDirectory_Address_Type->id)
+						? htmlspecialchars($oDirectory_Address_Type->name) . ": "
+						: '';
+
+					?><div><span class="popup-type"><i class="fa fa-map-marker fa-fw darkorange"></i> <?php echo $sAddressType?></span><span><?php echo htmlspecialchars($oDirectory_Address->getFullAddress())?></span></div><?php
+				}
+			}
+		}
+
+		$aDirectory_Phones = $this->Directory_Phones->findAll(FALSE);
+
+		if (count($aDirectory_Phones))
+		{
+			?><div class="margin-top-5"><?php
+			foreach ($aDirectory_Phones as $oDirectory_Phone)
+			{
+				if (strlen(Core_Str::sanitizePhoneNumber(trim($oDirectory_Phone->value))))
+				{
+					$oDirectory_Phone_Type = Core_Entity::factory('Directory_Phone_Type')->find($oDirectory_Phone->directory_phone_type_id);
+
+					$sPhoneType = !is_null($oDirectory_Phone_Type->id)
+						? htmlspecialchars($oDirectory_Phone_Type->name) . ": "
+						: '';
+
+					?><div><span class="popup-type"><i class="fa fa-phone fa-fw palegreen"></i> <?php echo $sPhoneType?></span><span><?php echo htmlspecialchars($oDirectory_Phone->value)?></span></div><?php
+				}
+			}
+			?></div><?php
+		}
+
+		$aDirectory_Emails = $this->Directory_Emails->findAll(FALSE);
+
+		if (count($aDirectory_Emails))
+		{
+			?><div class="margin-top-5"><?php
+			foreach ($aDirectory_Emails as $oDirectory_Email)
+			{
+				if (strlen(trim($oDirectory_Email->value)))
+				{
+					$oDirectory_Email_Type = Core_Entity::factory('Directory_Email_Type')->find($oDirectory_Email->directory_email_type_id);
+
+					$sEmailType = !is_null($oDirectory_Email_Type->id)
+						? htmlspecialchars($oDirectory_Email_Type->name) . ": "
+						: '';
+
+						?><div><span class="popup-type"><i class="fa fa-envelope-o fa-fw warning"></i> <?php echo $sEmailType?></span><span><a href="mailto:<?php echo htmlspecialchars($oDirectory_Email->value)?>"><?php echo htmlspecialchars($oDirectory_Email->value)?></a></span></div><?php
+				}
+			}
+		}
+
+		return ob_get_clean();
 	}
 
 	/**
@@ -885,5 +1115,81 @@ class Company_Model extends Core_Entity
 		}
 
 		return FALSE;
+	}
+
+	static protected $_oldCompanyFields = array('bic', 'current_account', 'correspondent_account', 'bank_name', 'bank_address');
+
+	public function __get($property)
+	{
+		if (in_array($property, self::$_oldCompanyFields))
+		{
+			switch ($property)
+			{
+				case 'bic':
+					$oCompany_Account = $this->_getCompanyDefaultAccount();
+					$return = !is_null($oCompany_Account)
+						? $oCompany_Account->bic
+						: '';
+				break;
+				case 'current_account':
+					$oCompany_Account = $this->_getCompanyDefaultAccount();
+					$return = !is_null($oCompany_Account)
+						? $oCompany_Account->current_account
+						: '';
+				break;
+				case 'correspondent_account':
+					$oCompany_Account = $this->_getCompanyDefaultAccount();
+					$return = !is_null($oCompany_Account)
+						? $oCompany_Account->correspondent_account
+						: '';
+				break;
+				case 'bank_name':
+					$oCompany_Account = $this->_getCompanyDefaultAccount();
+					$return = !is_null($oCompany_Account)
+						? $oCompany_Account->bank_name
+						: '';
+				break;
+				case 'bank_address':
+					$oCompany_Account = $this->_getCompanyDefaultAccount();
+					$return = !is_null($oCompany_Account)
+						? $oCompany_Account->bank_address
+						: '';
+				break;
+				default:
+					$return = NULL;
+			}
+
+			return $return;
+		}
+
+		return parent::__get($property);
+	}
+
+	protected function _getCompanyDefaultAccount()
+	{
+		return Core_Entity::factory('Company', $this->id)->Company_Accounts->getDefault();
+	}
+
+	public function __call($name, $arguments)
+	{
+		if (in_array($name, self::$_oldCompanyFields))
+		{
+			//$this->$name = $arguments[0];
+			return !count($arguments)
+				? $this->$name
+				: $this;
+		}
+
+		return parent::__call($name, $arguments);
+	}
+
+	public function __isset($property)
+	{
+		if (in_array($property, self::$_oldCompanyFields))
+		{
+			return TRUE;
+		}
+
+		return parent::__isset($property);
 	}
 }

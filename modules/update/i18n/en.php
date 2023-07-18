@@ -13,7 +13,10 @@ return array(
 	'server_error_respond_1' => 'Server configuration has been changed; unable to update. Please contact the support. Up to %s',
 	'server_error_respond_2' => 'User not found. Please ensure that you specified a correct login in your registration data in section Websites. Up to %s',
 	'server_error_respond_3' => 'Order not found. This order may belong to another user. Please ensure that you specified a correct login in your registration data in section Websites. Up to %s',
-	'server_error_respond_4' => 'HostCMS system not found. Please try to request update once more. Please pay attention &mdash; that the management system should be available on the main domain of the current website. Specify a main domain in the domains list. Up to %s',
+	'server_error_respond_4' => 'HostCMS system not found. Please try to request update once more.
+	<br />Please pay attention &mdash; that the management system should be available on the main domain of the current website, specify a main domain in the domains list.
+	<br /><b>If your site is running over HTTPS, then the site must have the HTTPS option set</b>.
+	<br />Up to %s',
 	'server_error_respond_5' => 'Period of technical support has expired! You can extend your technical support in private office.',
 	'server_error_respond_6' => 'You can only update from a younger to a major version.',
 	'server_error_respond_7' => 'Update unavailable.',

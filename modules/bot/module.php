@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Bot
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Bot_Module extends Core_Module
 {
@@ -23,7 +23,7 @@ class Bot_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2022-11-01';
+	public $date = '2023-03-01';
 
 	/**
 	 * Module name
@@ -32,12 +32,18 @@ class Bot_Module extends Core_Module
 	protected $_moduleName = 'bot';
 
 	/**
-	 * List of Schedule Actions
-	 * @var array
+	 * Get List of Schedule Actions
+	 * @return array
 	 */
-	protected $_scheduleActions = array(
-		0 => 'executeBotEntities'
-	);
+	public function getScheduleActions()
+	{
+		return array(
+			0 => array(
+				'name' => 'executeBotEntities',
+				'entityCaption' => ''
+			)
+		);
+	}
 
 	/**
 	 * Get Module's Menu

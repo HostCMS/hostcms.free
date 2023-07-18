@@ -14,12 +14,22 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - limit($limit) количество выводимых заказов
  * - page(2) текущая страница, по умолчанию 0, счет ведется с 0
  * - pattern($pattern) шаблон разбора данных в URI, см. __construct()
+ * - addAllowedTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, разрешенных к передаче в генерируемый XML
+ * - addForbiddenTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, запрещенных к передаче в генерируемый XML
+ *
+ * Доступные пути для методов addAllowedTags/addForbiddenTags:
+ *
+ * - '/' или '/shop' Магазин
+ * - '/shop/shop_order_properties/property' Свойство в списке свойств заказов
+ * - '/shop/shop_order_properties/property_dir' Раздел свойств в списке свойств заказов
+ * - '/shop/shop_payment_system' Платежная система
+ * - '/shop/shop_order' Заказ
  *
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Controller_Show extends Core_Controller
 {
@@ -206,14 +216,17 @@ class Shop_Order_Controller_Show extends Core_Controller
 
 			foreach ($aProperties as $oProperty)
 			{
-				$this->_aOrder_Properties[$oProperty->property_dir_id][] = $oProperty->clearEntities();
+				$oProperty->clearEntities();
+				$this->applyForbiddenAllowedTags('/shop/shop_order_properties/property', $oProperty);
+				$this->_aOrder_Properties[$oProperty->property_dir_id][] = $oProperty;
 			}
 
 			$aProperty_Dirs = $oShop_Order_Property_List->Property_Dirs->findAll();
 			foreach ($aProperty_Dirs as $oProperty_Dir)
 			{
 				$oProperty_Dir->clearEntities();
-				$this->_aOrder_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir->clearEntities();
+				$this->applyForbiddenAllowedTags('/shop/shop_order_properties/property_dir', $oProperty_Dir);
+				$this->_aOrder_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
 			}
 
 			$Shop_Order_Properties = Core::factory('Core_Xml_Entity')
@@ -237,9 +250,9 @@ class Shop_Order_Controller_Show extends Core_Controller
 		$aShop_Payment_Systems = $oShop->Shop_Payment_Systems->getAllByActive(1);
 		foreach ($aShop_Payment_Systems as $oShop_Payment_System)
 		{
-			$oShopPaymentSystemsEntity->addEntity(
-				$oShop_Payment_System->clearEntities()
-			);
+			$oShop_Payment_System->clearEntities();
+			$this->applyForbiddenAllowedTags('/shop/shop_payment_system', $oShop_Payment_System);
+			$oShopPaymentSystemsEntity->addEntity($oShop_Payment_System);
 		}
 
 		foreach ($aShop_Orders as $oShop_Order)
@@ -255,6 +268,8 @@ class Shop_Order_Controller_Show extends Core_Controller
 
 			$this->itemsProperties
 				&& $oShop_Order->showXmlProperties($this->itemsProperties, $this->sortPropertiesValues);
+
+			$this->applyForbiddenAllowedTags('/shop/shop_order', $oShop_Order);
 
 			$this->addEntity($oShop_Order);
 		}

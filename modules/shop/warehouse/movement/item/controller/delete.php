@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Movement_Item_Controller_Delete extends Admin_Form_Action_Controller
 {
@@ -36,13 +36,13 @@ class Shop_Warehouse_Movement_Item_Controller_Delete extends Admin_Form_Action_C
 				$oShop_Warehouse_Movement_Item->delete();
 
 				// Удаляем проводки в документе
-				$aShop_Warehouse_Entries = $oSource_Shop_Warehouse->Shop_Warehouse_Entries->getByDocumentAndShopItem($oShop_Warehouse_Movement->id, $oShop_Warehouse_Movement::TYPE, $shop_item_id);
+				$aShop_Warehouse_Entries = $oSource_Shop_Warehouse->Shop_Warehouse_Entries->getByDocumentAndShopItem($oShop_Warehouse_Movement->id, $oShop_Warehouse_Movement->getEntityType(), $shop_item_id);
 				foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
 				{
 					$oShop_Warehouse_Entry->delete();
 				}
 
-				$aShop_Warehouse_Entries = $oDestination_Shop_Warehouse->Shop_Warehouse_Entries->getByDocumentAndShopItem($oShop_Warehouse_Movement->id, $oShop_Warehouse_Movement::TYPE, $shop_item_id);
+				$aShop_Warehouse_Entries = $oDestination_Shop_Warehouse->Shop_Warehouse_Entries->getByDocumentAndShopItem($oShop_Warehouse_Movement->id, $oShop_Warehouse_Movement->getEntityType(), $shop_item_id);
 				foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
 				{
 					$oShop_Warehouse_Entry->delete();

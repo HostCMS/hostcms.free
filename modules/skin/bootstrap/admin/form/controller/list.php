@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_View
 {
@@ -535,7 +535,9 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 					}
 
 					// Доступные действия для пользователя
-					$aAllowed_Admin_Form_Actions = $oAdmin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser);
+					$aAllowed_Admin_Form_Actions = method_exists($oAdmin_Form_Controller, 'getAdminFormActions')
+						? $oAdmin_Form_Controller->getAdminFormActions()
+						: $oAdmin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser); // delete after 7.0.5
 
 					if ($oAdmin_Form->show_operations && $oAdmin_Form_Controller->showOperations
 						|| $allow_filter && $this->showFilter)
@@ -605,8 +607,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 				$onclick = $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath());
 
 				?><td class="apply-button sticky-column"><?php
-					?>
-					<div class="btn-group">
+					?><div class="btn-group">
 						<a class="btn btn-xs btn-palegreen" id="admin_forms_apply_button" title="<?php echo Core::_('Admin_Form.button_to_filter')?>" onclick="mainFormLocker.unlock(); <?php echo $onclick?>"><i class="fa-solid fa-magnifying-glass"></i></a>
 						<a title="<?php echo Core::_('Admin_Form.clear')?>" class="btn btn-xs btn-magenta" onclick="$.clearFilter('<?php echo $windowId?>')"><i class="fa fa-times-circle"></i></a>
 					</div><?php
@@ -1180,23 +1181,16 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 							if ($iActionsCount)
 							{
-								?><div class="btn-group <?php echo $iActionsCount > 1 ? 'visible-md visible-lg' : ''?>">
-									<?php echo $sActionsFullView?>
-								</div><?php
+								?><div class="btn-group <?php echo $iActionsCount > 1 ? 'visible-md visible-lg' : ''?>"><?php echo $sActionsFullView?></div><?php
 
 								if ($iActionsCount > 1)
 								{
-								?>
-								<div class="visible-xs visible-sm">
-									<div class="btn-group">
-											<button class="btn btn-palegreen btn-xs dropdown-toggle" data-toggle="dropdown" >
-											<i class="fa fa-bars"></i>
-										</button>
-										<ul class="dropdown-menu actions-dropdown-menu dropdown-menu-right" role="menu">
-										<?php echo $sActionsShortView?>
-										</ul>
-									</div>
-								</div><?php
+								?><div class="visible-xs visible-sm"><div class="btn-group">
+									<button class="btn btn-palegreen btn-xs dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bars"></i></button>
+									<ul class="dropdown-menu actions-dropdown-menu dropdown-menu-right" role="menu"><?php
+									echo $sActionsShortView;
+									?></ul>
+								</div></div><?php
 								}
 							}
 							?></td><?php
@@ -1245,7 +1239,9 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 			}
 
 			// Доступные действия для пользователя
-			$aAllowed_Admin_Form_Actions = $oAdmin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser);
+			$aAllowed_Admin_Form_Actions = method_exists($oAdmin_Form_Controller, 'getAdminFormActions')
+				? $oAdmin_Form_Controller->getAdminFormActions()
+				: $oAdmin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser); // delete after 7.0.5
 
 			// Групповые операции
 			if ($oAdmin_Form->show_group_operations && !empty($aAllowed_Admin_Form_Actions))
@@ -1284,7 +1280,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 						$sActionsFullView .= '<li><a title="' . htmlspecialchars($text) . '" href="' . $href . '" onclick="mainFormLocker.unlock(); ' . $onclick .'"><i class="' . htmlspecialchars($oAdmin_Form_Action->icon) . ' fa-fw btn-sm btn-' . htmlspecialchars($oAdmin_Form_Action->color) . '"></i>' . htmlspecialchars($text) . '</a></li>';
 
-						$sActionsShortView .= '<a href="' . htmlspecialchars($href) . '" onclick="mainFormLocker.unlock(); ' . $onclick . '" class="btn-labeled btn btn-'. htmlspecialchars($oAdmin_Form_Action->color) . '" ><i class="btn-label ' . htmlspecialchars($oAdmin_Form_Action->icon) . '"></i>' . htmlspecialchars($text) . '</a>';
+						$sActionsShortView .= '<a href="' . htmlspecialchars($href) . '" onclick="mainFormLocker.unlock(); ' . $onclick . '" class="btn-labeled btn btn-'. htmlspecialchars($oAdmin_Form_Action->color) . '"><i class="btn-label ' . htmlspecialchars($oAdmin_Form_Action->icon) . '"></i>' . htmlspecialchars($text) . '</a>';
 					}
 				}
 

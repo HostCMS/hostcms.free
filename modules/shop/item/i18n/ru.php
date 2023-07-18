@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Товары магазина',
@@ -105,7 +105,7 @@ return array(
 	'tab_properties' => "Дополнительные свойства",
 	'items_catalog_add_form_comment_link' => 'Отзывы',
 	'properties_item_for_groups_link' => 'Свойства товаров для группы',
-	'properties_item_for_groups_root_title' => 'Свойства товара, доступные для текущей группы товаров',
+	'properties_item_for_groups_root_title' => 'Свойства товара, доступные для группы "%s"',
 	'change_prices_for_shop_group' => 'Изменение цен',
 	'import_price_list_link' => "Импорт товаров",
 	'export_shop' => "Экспорт товаров",
@@ -259,6 +259,8 @@ return array(
 	'create_modification_copy_tying_products' => "Копировать сопутствующие товары",
 	'create_modification_copy_external_property' => "Копировать дополнительные свойства товара",
 	'create_modification_copy_tags' => "Копировать метки (теги) товара",
+	'create_modification_copy_main_images' => "Копировать основные изображения товара",
+	'create_modification_copy_external_property_files' => "Копировать дополнительные свойства типа \"Файл\" товара",
 	'generateModifications_success' => 'Модификации созданы успешно',
 	'file_does_not_specified' => 'Файл не указан',
 	'prices_add_form_recalculate' => "<acronym title=\"При выборе этого параметра будет произведен пересчет цены для всех товаров магазина, для которых она установлена\">Пересчитать установленные цены</acronym>",
@@ -365,5 +367,15 @@ return array(
 	'attribute_item_price_tab' => 'Цены',
 	'attribute_item_warehouse_tab' => 'Склады',
 	'shop_discount_siteuser_title' => 'Персональные скидки',
-	'main_menu_warrants' => 'Касса',
+	'main_menu_warrants' => 'Платежи',
+
+	'dimension_header' => 'Размеры',
+	'package_length' => 'Длина упаковки',
+	'package_width' => 'Ширина упаковки',
+	'package_height' => 'Высота упаковки',
+	'package_weight' => 'Вес с упаковкой',
+	'shop_item_type_id' => 'Вид номенклатуры',
+	'recount_sets_success' => 'Пересчет комплектов завершен!',
+
+	'modifications_menu' => 'Модификации'
 );

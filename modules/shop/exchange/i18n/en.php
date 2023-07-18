@@ -6,6 +6,15 @@ return array(
 	'group_name' => 'Section name',
 	'group_path' => 'Section path',
 	'group_sorting' => "Group sorting order",
+
+	'group_seo_group_title_template' => 'Group title template',
+	'group_seo_group_description_template' => 'Group description template',
+	'group_seo_group_keywords_template' => 'Group keywords template',
+
+	'group_seo_item_title_template' => 'Product title template',
+	'group_seo_item_description_template' => 'Product description template',
+	'group_seo_item_keywords_template' => 'Product keywords template',
+
 	'group_description' => 'Section description',
 	'group_seo_title' => "Group title",
 	'group_seo_description' => "Group description",

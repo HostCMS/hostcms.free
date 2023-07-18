@@ -5,11 +5,22 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 /**
  * Выбор способа доставки.
  *
+ * Доступные методы:
+ *
+ * - addAllowedTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, разрешенных к передаче в генерируемый XML
+ * - addForbiddenTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, запрещенных к передаче в генерируемый XML
+ *
+ * Доступные пути для методов addAllowedTags/addForbiddenTags:
+ *
+ * - '/' или '/shop' Магазин
+ * - '/shop/shop_delivery' Доставка
+ * - '/shop/shop_delivery_condition' Условие доставки
+ *
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Delivery_Controller_Show extends Core_Controller
 {
@@ -26,6 +37,8 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 		'totalAmount',
 		'couponText',
 		'postcode',
+		'timeFrom',
+		'timeTo',
 		'volume',
 		'paymentSystems',
 		'applyDiscounts',
@@ -181,14 +194,18 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 					{
 						$oShop_Delivery_Clone = clone $oShop_Delivery;
 
-						$this->paymentSystems && $oShop_Delivery_Clone->showXmlShopPaymentSystems($this->paymentSystems);
+						$this->paymentSystems
+							&& $oShop_Delivery_Clone->showXmlShopPaymentSystems($this->paymentSystems);
 
-						$this->addEntity(
-							$oShop_Delivery_Clone
-								->id($oShop_Delivery->id)
-								->clearEntities()
-								->addEntity($oShop_Delivery_Condition)
-						);
+						$oShop_Delivery_Clone
+							->id($oShop_Delivery->id)
+							->clearEntities()
+							->addEntity($oShop_Delivery_Condition);
+
+						$this->applyForbiddenAllowedTags('/shop/shop_delivery', $oShop_Delivery_Clone);
+						$this->applyForbiddenAllowedTags('/shop/shop_delivery_condition', $oShop_Delivery_Condition);
+
+						$this->addEntity($oShop_Delivery_Clone);
 
 						Core_Event::notify(get_class($this) . '.onAfterAddShopDeliveryCondition', $this, array($oShop_Delivery_Condition));
 					}
@@ -213,6 +230,8 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 				->shop_country_location_id($this->shop_country_location_id)
 				->shop_country_location_city_id($this->shop_country_location_city_id)
 				->shop_country_location_city_area_id($this->shop_country_location_city_area_id)
+				->timeFrom($this->timeFrom)
+				->timeTo($this->timeTo)
 				->totalWeight($this->totalWeight)
 				->totalAmount($this->totalAmount);
 
@@ -234,6 +253,8 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 					->amount($this->totalAmount)
 					->postcode($this->postcode)
 					->volume($this->volume)
+					->timeFrom($this->timeFrom)
+					->timeTo($this->timeTo)
 					->execute();
 
 				if (!is_null($aPrice))
@@ -411,5 +432,4 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 
 		return $this;
 	}
-
 }

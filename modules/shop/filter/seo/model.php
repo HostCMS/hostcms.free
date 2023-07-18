@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Filter_Seo_Model extends Core_Entity
 {
@@ -422,10 +422,10 @@ class Shop_Filter_Seo_Model extends Core_Entity
 	{
 		$this->clearXmlTags();
 
-		!isset($this->_forbiddenTags['url'])
+		$this->_isTagAvailable('url')
 			&& $this->addXmlTag('url', $this->Shop->Structure->getPath() . $this->getUrl());
 
-		if (!isset($this->_forbiddenTags['shop_filter_seo_property']))
+		if ($this->_isTagAvailable('shop_filter_seo_property'))
 		{
 			$aShop_Filter_Seo_Properties = $this->Shop_Filter_Seo_Properties->findAll();
 			foreach ($aShop_Filter_Seo_Properties as $oShop_Filter_Seo_Property)

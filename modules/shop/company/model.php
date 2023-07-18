@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Company_Model extends Company_Model
 {
@@ -172,7 +172,9 @@ class Shop_Company_Model extends Company_Model
 		if (in_array($name, self::$_oldFields))
 		{
 			//$this->$name = $arguments[0];
-			return $this;
+			return !count($arguments)
+				? $this->$name
+				: $this;
 		}
 
 		return parent::__call($name, $arguments);

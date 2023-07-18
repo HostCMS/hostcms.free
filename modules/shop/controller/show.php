@@ -16,7 +16,6 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	none — не показывать группы,
 	tree — показывать дерево групп и все группы на текущем уровне (по умолчанию),
 	all — показывать все группы.
- * - groupsForbiddenTags(array('description')) массив тегов групп, запрещенных к передаче в генерируемый XML
  * - item(123) идентификатор показываемого товара
  * - itemsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств товаров, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
  * - itemsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств товаров, по умолчанию TRUE. Ограничения на список свойств в виде массива влияет и на выборку значений свойств товара.
@@ -24,7 +23,6 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - commentsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств комментариев, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
  * - commentsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств комментариев, по умолчанию TRUE. Ограничения на список свойств в виде массива влияет и на выборку значений свойств товара.
  * - itemsPropertiesListJustAvailable(TRUE|FALSE) выводить только доступные значения у свойства. При использовании быстрого фильтра и включенном filterCounts(TRUE) будут выводиться доступные значения с учетом заданных фильтру ограничений, в противном случае будут выбираться значения, доступные товарам группы без учета заданных фильтру ограничений, по умолчанию FALSE
- * - itemsForbiddenTags(array('description')) массив тегов товаров, запрещенных к передаче в генерируемый XML
  * - warehouseMode('all'|'in-stock'|'in-stock-modification') режим вывода товаров:
 	'all' — все (по умолчанию),
 	'in-stock' — на складе,
@@ -75,6 +73,13 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - commentsActivity('active'|'inactive'|'all') отображать комментарии: active — только активные, inactive — только неактивные, all — все, по умолчанию - active
  * - calculateTotal(TRUE|FALSE) вычислять общее количество найденных, по умолчанию TRUE
  * - showPanel(TRUE|FALSE) показывать панель быстрого редактирования, по умолчанию TRUE
+ * - addAllowedTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, разрешенных к передаче в генерируемый XML
+ * - addForbiddenTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, запрещенных к передаче в генерируемый XML
+ *
+ * Устаревшие методы:
+ *
+ * - groupsForbiddenTags(array('description')) массив тегов групп, запрещенных к передаче в генерируемый XML
+ * - itemsForbiddenTags(array('description')) массив тегов товаров, запрещенных к передаче в генерируемый XML
  *
  * Доступные свойства:
  *
@@ -82,6 +87,25 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - patternParams массив данных, извелеченных из URI при применении pattern
  * - filterSeo примененный Shop_Filter_Seo
  * - getShownIDs() получить идентификаторы показанных товаров
+ *
+ * Доступные пути для методов addAllowedTags/addForbiddenTags:
+ *
+ * - '/' или '/shop' Магазин
+ * - '/shop/shop_group' Группы магазина
+ * - '/shop/shop_item' Товары магазина
+ * - '/shop/comparing/shop_item' Сравниваемые товары, если не указаны, используются правила для '/shop/shop_item'
+ * - '/shop/favorite/shop_item' Избранные товары, если не указаны, используются правила для '/shop/shop_item'
+ * - '/shop/viewed/shop_item' Просмотренные товары, если не указаны, используются правила для '/shop/shop_item'
+ * - '/shop/items_in_cart/shop_item' Товары в корзине, если не указаны, используются правила для '/shop/shop_item'
+ * - '/shop/shop_item/shop_item' Родительский товар модификации, если не указаны, используются правила для '/shop/shop_item'
+ * - '/shop/shop_filter_seos/shop_filter_seo' Доступные SEO-фильтры
+ * - '/shop/tag' Примененный Tag для фильтрации
+ * - '/shop/shop_producer' Примененный производитель для фильтрации
+ * - '/shop/shop_filter_seo' Примененный SEO-фильтр
+ * - '/shop/shop_group_properties/property' Свойство в списке свойств группы
+ * - '/shop/shop_group_properties/property_dir' Раздел свойств в списке свойств группы
+ * - '/shop/shop_item_properties/property' Свойство в списке свойств товара
+ * - '/shop/shop_item_properties/property_dir' Раздел свойств в списке свойств товара
  *
  * <code>
  * $Shop_Controller_Show = new Shop_Controller_Show(
@@ -100,7 +124,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Controller_Show extends Core_Controller
 {
@@ -471,8 +495,12 @@ class Shop_Controller_Show extends Core_Controller
 	 */
 	protected function _applyWarehouseConditions(Shop_Item_Model $oShop_Items)
 	{
+		$fieldName = $this->isShopFilterJoined($oShop_Items->queryBuilder())
+			? $this->getFilterTableName() . '.shop_item_id'
+			: 'shop_items.id';
+
 		return $this->_applyWarehouseConditionsQueryBuilder(
-			$oShop_Items->queryBuilder()
+			$oShop_Items->queryBuilder(), $fieldName, !$this->modificationsGroup
 		);
 	}
 
@@ -483,39 +511,55 @@ class Shop_Controller_Show extends Core_Controller
 	 * @param string $fieldName, default 'shop_items.id'
 	 * @return self
 	 */
-	protected function _applyWarehouseConditionsQueryBuilder(Core_QueryBuilder_Select $oCore_QueryBuilder_Select, $fieldName = 'shop_items.id')
+	protected function _applyWarehouseConditionsQueryBuilder(Core_QueryBuilder_Select $oCore_QueryBuilder_Select, $fieldName = 'shop_items.id', $groupBy = TRUE)
 	{
 		switch ($this->warehouseMode)
 		{
 			case 'in-stock':
-				$oCore_QueryBuilder_Select
-					->join('shop_warehouse_items', 'shop_warehouse_items.shop_item_id', '=', $fieldName)
-					->join('shop_warehouses', 'shop_warehouses.id', '=', 'shop_warehouse_items.shop_warehouse_id')
-					->where('shop_warehouses.active', '=', 1)
-					->where('shop_warehouses.deleted', '=', 0)
-					->having('SUM(shop_warehouse_items.count)', '>', 0);
+				if ($this->isShopFilterJoined($oCore_QueryBuilder_Select))
+				{
+					$oCore_QueryBuilder_Select->where('available', '>', 0);
+				}
+				else
+				{
+					$oCore_QueryBuilder_Select
+						->join('shop_warehouse_items', 'shop_warehouse_items.shop_item_id', '=', $fieldName)
+						->join('shop_warehouses', 'shop_warehouses.id', '=', 'shop_warehouse_items.shop_warehouse_id')
+						->where('shop_warehouses.active', '=', 1)
+						->where('shop_warehouses.deleted', '=', 0)
+						->having('SUM(shop_warehouse_items.count)', '>', 0);
 
-				!$this->modificationsGroup
-					&& $oCore_QueryBuilder_Select->groupBy($fieldName);
+					//!$this->modificationsGroup
+					$groupBy
+						&& $oCore_QueryBuilder_Select->groupBy($fieldName);
+				}
 			break;
 			case 'in-stock-modification':
-				$oCore_QueryBuilder_Select
-					// Модификации и остатки на складах модификаций
-					->leftJoin(array('shop_items', 'modifications'), 'modifications.modification_id', '=', $fieldName)
-					->leftJoin(array('shop_warehouse_items', 'modifications_shop_warehouse_items'), 'modifications_shop_warehouse_items.shop_item_id', '=', 'modifications.id')
-					// Остатки на складах основного товара
-					->leftJoin('shop_warehouse_items', 'shop_warehouse_items.shop_item_id', '=', $fieldName)
-					// Есть остатки на основном складе
-					->havingOpen()
-						->having('SUM(shop_warehouse_items.count)', '>', 0)
-						// Или
-						->setOr()
-						// Есть остатки на складах у модификаций
-						->having('SUM(modifications_shop_warehouse_items.count)', '>', 0)
-					->havingClose();
+				if ($this->isShopFilterJoined($oCore_QueryBuilder_Select))
+				{
+					$oCore_QueryBuilder_Select->where('available', '>', 0);
+				}
+				else
+				{
+					$oCore_QueryBuilder_Select
+						// Модификации и остатки на складах модификаций
+						->leftJoin(array('shop_items', 'modifications'), 'modifications.modification_id', '=', $fieldName)
+						->leftJoin(array('shop_warehouse_items', 'modifications_shop_warehouse_items'), 'modifications_shop_warehouse_items.shop_item_id', '=', 'modifications.id')
+						// Остатки на складах основного товара
+						->leftJoin('shop_warehouse_items', 'shop_warehouse_items.shop_item_id', '=', $fieldName)
+						// Есть остатки на основном складе
+						->havingOpen()
+							->having('SUM(shop_warehouse_items.count)', '>', 0)
+							// Или
+							->setOr()
+							// Есть остатки на складах у модификаций
+							->having('SUM(modifications_shop_warehouse_items.count)', '>', 0)
+						->havingClose();
 
-				!$this->modificationsGroup
-					&& $oCore_QueryBuilder_Select->groupBy($fieldName);
+					//!$this->modificationsGroup
+					$groupBy
+						&& $oCore_QueryBuilder_Select->groupBy($fieldName);
+				}
 			break;
 		}
 
@@ -653,44 +697,52 @@ class Shop_Controller_Show extends Core_Controller
 	{
 		$oShop = $this->getEntity();
 
-		$hostcmsCompare = array();
+		$aComparing = array();
 
 		$aShop_Compares = Shop_Compare_Controller::instance()->getAll($oShop);
 		foreach ($aShop_Compares as $oShop_Compare)
 		{
-			$hostcmsCompare[] = $oShop_Compare->shop_item_id;
+			$aComparing[] = $oShop_Compare->shop_item_id;
 		}
 
-		if (count($hostcmsCompare))
+		if (count($aComparing))
 		{
-			$this->addEntity(
-				$oCompareEntity = Core::factory('Core_Xml_Entity')
-					->name('comparing')
-			);
-
 			// Extract a slice of the array
-			$hostcmsCompare = array_slice($hostcmsCompare, 0, $this->comparingLimit, TRUE);
+			$aComparing = array_slice($aComparing, 0, $this->comparingLimit, TRUE);
 
-			foreach ($hostcmsCompare as $shop_item_id)
+			if ($this->_mode != 'tpl')
 			{
-				$oShop_Item = Core_Entity::factory('Shop_Item')->find($shop_item_id);
-				if (!is_null($oShop_Item->id))
+				$this->addEntity(
+					$oCompareEntity = Core::factory('Core_Xml_Entity')
+						->name('comparing')
+				);
+
+				foreach ($aComparing as $shop_item_id)
 				{
-					$oCompare_Shop_Item = clone $oShop_Item;
-					$oCompare_Shop_Item
-						->id($oShop_Item->id)
-						->showXmlProperties($this->itemsProperties, $this->sortPropertiesValues)
-						->showXmlBonuses($this->bonuses)
-						->showXmlSpecialprices($this->specialprices);
+					$oShop_Item = Core_Entity::factory('Shop_Item')->find($shop_item_id);
+					if (!is_null($oShop_Item->id))
+					{
+						$oCompare_Shop_Item = clone $oShop_Item;
+						$oCompare_Shop_Item
+							->id($oShop_Item->id)
+							->showXmlProperties($this->itemsProperties, $this->sortPropertiesValues)
+							->showXmlBonuses($this->bonuses)
+							->showXmlSpecialprices($this->specialprices);
 
-					!$this->sets && $oShop_Item->showXmlSets($this->sets);
+						!$this->sets && $oShop_Item->showXmlSets($this->sets);
 
-					$this->applyItemsForbiddenTags($oCompare_Shop_Item);
+						//$this->applyItemsForbiddenTags($oCompare_Shop_Item);
+						$this->applyForbiddenAllowedTags('/shop/comparing/shop_item|/shop/shop_item', $oCompare_Shop_Item);
 
-					Core_Event::notify(get_class($this) . '.onBeforeAddCompareEntity', $this, array($oCompare_Shop_Item));
+						Core_Event::notify(get_class($this) . '.onBeforeAddCompareEntity', $this, array($oCompare_Shop_Item));
 
-					$oCompareEntity->addEntity($oCompare_Shop_Item);
+						$oCompareEntity->addEntity($oCompare_Shop_Item);
+					}
 				}
+			}
+			else
+			{
+				$this->append('aComparing', $aComparing);
 			}
 		}
 
@@ -706,31 +758,26 @@ class Shop_Controller_Show extends Core_Controller
 	{
 		$oShop = $this->getEntity();
 
-		$hostcmsFavorite = array();
+		$aFavorite = array();
 
 		$aShop_Favorites = Shop_Favorite_Controller::instance()->getAll($oShop);
 		foreach ($aShop_Favorites as $oShop_Favorite)
 		{
-			$hostcmsFavorite[] = $oShop_Favorite->shop_item_id;
+			$aFavorite[] = $oShop_Favorite->shop_item_id;
 		}
 
-		if (count($hostcmsFavorite))
+		if (count($aFavorite))
 		{
-			$this->addEntity(
-				$oFavouriteEntity = Core::factory('Core_Xml_Entity')
-					->name('favorite')
-			);
-
 			switch ($this->favoriteOrder)
 			{
 				case 'RAND':
-					shuffle($hostcmsFavorite);
+					shuffle($aFavorite);
 				break;
 				case 'ASC':
-					asort($hostcmsFavorite);
+					asort($aFavorite);
 				break;
 				case 'DESC':
-					arsort($hostcmsFavorite);
+					arsort($aFavorite);
 				break;
 				default:
 					throw new Core_Exception("The favoriteOrder direction '%direction' doesn't allow",
@@ -739,28 +786,41 @@ class Shop_Controller_Show extends Core_Controller
 			}
 
 			// Extract a slice of the array
-			$hostcmsFavorite = array_slice($hostcmsFavorite, 0, $this->favoriteLimit);
+			$aFavorite = array_slice($aFavorite, 0, $this->favoriteLimit);
 
-			foreach ($hostcmsFavorite as $shop_item_id)
+			if ($this->_mode != 'tpl')
 			{
-				$oShop_Item = Core_Entity::factory('Shop_Item')->find($shop_item_id, FALSE);
-				if (!is_null($oShop_Item->id))
+				$this->addEntity(
+					$oFavouriteEntity = Core::factory('Core_Xml_Entity')
+						->name('favorite')
+				);
+
+				foreach ($aFavorite as $shop_item_id)
 				{
-					$oFavorite_Shop_Item = clone $oShop_Item;
-					$oFavorite_Shop_Item
-						->id($oShop_Item->id)
-						->showXmlProperties($this->itemsProperties, $this->sortPropertiesValues)
-						->showXmlBonuses($this->bonuses)
-						->showXmlSpecialprices($this->specialprices);
+					$oShop_Item = Core_Entity::factory('Shop_Item')->find($shop_item_id, FALSE);
+					if (!is_null($oShop_Item->id))
+					{
+						$oFavorite_Shop_Item = clone $oShop_Item;
+						$oFavorite_Shop_Item
+							->id($oShop_Item->id)
+							->showXmlProperties($this->itemsProperties, $this->sortPropertiesValues)
+							->showXmlBonuses($this->bonuses)
+							->showXmlSpecialprices($this->specialprices);
 
-					!$this->sets && $oFavorite_Shop_Item->showXmlSets($this->sets);
+						!$this->sets && $oFavorite_Shop_Item->showXmlSets($this->sets);
 
-					$this->applyItemsForbiddenTags($oFavorite_Shop_Item);
+						//$this->applyItemsForbiddenTags($oFavorite_Shop_Item);
+						$this->applyForbiddenAllowedTags('/shop/favorite/shop_item|/shop/shop_item', $oFavorite_Shop_Item);
 
-					Core_Event::notify(get_class($this) . '.onBeforeAddFavoriteEntity', $this, array($oFavorite_Shop_Item));
+						Core_Event::notify(get_class($this) . '.onBeforeAddFavoriteEntity', $this, array($oFavorite_Shop_Item));
 
-					$oFavouriteEntity->addEntity($oFavorite_Shop_Item);
+						$oFavouriteEntity->addEntity($oFavorite_Shop_Item);
+					}
 				}
+			}
+			else
+			{
+				$this->append('aFavorite', $aFavorite);
 			}
 		}
 
@@ -776,25 +836,20 @@ class Shop_Controller_Show extends Core_Controller
 	{
 		$oShop = $this->getEntity();
 
-		$hostcmsViewed = Core_Array::get(Core_Array::getSession('hostcmsViewed', array()), $oShop->id, array());
+		$aViewed = Core_Array::get(Core_Array::getSession('hostcmsViewed', array()), $oShop->id, array());
 
-		if (count($hostcmsViewed))
+		if (count($aViewed))
 		{
-			$this->addEntity(
-				$oViewedEntity = Core::factory('Core_Xml_Entity')
-					->name('viewed')
-			);
-
 			switch ($this->viewedOrder)
 			{
 				case 'RAND':
-					shuffle($hostcmsViewed);
+					shuffle($aViewed);
 				break;
 				case 'ASC':
-					ksort($hostcmsViewed);
+					ksort($aViewed);
 				break;
 				case 'DESC':
-					krsort($hostcmsViewed);
+					krsort($aViewed);
 				break;
 				default:
 					throw new Core_Exception("The viewedOrder direction '%direction' doesn't allow",
@@ -803,38 +858,51 @@ class Shop_Controller_Show extends Core_Controller
 			}
 
 			// Delete current item
-			if (($currentKey = array_search($this->item, $hostcmsViewed)) !== FALSE)
+			if (($currentKey = array_search($this->item, $aViewed)) !== FALSE)
 			{
-				unset($hostcmsViewed[$currentKey]);
+				unset($aViewed[$currentKey]);
 			}
 
 			// Extract a slice of the array
-			$hostcmsViewed = array_slice($hostcmsViewed, 0, $this->viewedLimit);
+			$aViewed = array_slice($aViewed, 0, $this->viewedLimit);
 
-			foreach ($hostcmsViewed as $view_item_id)
+			if ($this->_mode != 'tpl')
 			{
-				$oShop_Item = Core_Entity::factory('Shop_Item')->find($view_item_id, FALSE);
+				$this->addEntity(
+					$oViewedEntity = Core::factory('Core_Xml_Entity')
+						->name('viewed')
+				);
 
-				if (!is_null($oShop_Item->id) /*&& $oShop_Item->id != $this->item*/ && $oShop_Item->active)
+				foreach ($aViewed as $view_item_id)
 				{
-					$oViewed_Shop_Item = clone $oShop_Item;
-					$oViewed_Shop_Item
-						->id($oShop_Item->id)
-						->showXmlProperties($this->itemsProperties, $this->sortPropertiesValues)
-						->showXmlComments($this->comments)
-						->showXmlCommentsRating($this->commentsRating)
-						->showXmlModifications($this->modifications)
-						->showXmlBonuses($this->bonuses)
-						->showXmlSpecialprices($this->specialprices);
+					$oShop_Item = Core_Entity::factory('Shop_Item')->find($view_item_id, FALSE);
 
-					$this->applyItemsForbiddenTags($oViewed_Shop_Item);
+					if (!is_null($oShop_Item->id) /*&& $oShop_Item->id != $this->item*/ && $oShop_Item->active)
+					{
+						$oViewed_Shop_Item = clone $oShop_Item;
+						$oViewed_Shop_Item
+							->id($oShop_Item->id)
+							->showXmlProperties($this->itemsProperties, $this->sortPropertiesValues)
+							->showXmlComments($this->comments)
+							->showXmlCommentsRating($this->commentsRating)
+							->showXmlModifications($this->modifications)
+							->showXmlBonuses($this->bonuses)
+							->showXmlSpecialprices($this->specialprices);
 
-					!$this->sets && $oViewed_Shop_Item->showXmlSets($this->sets);
+						//$this->applyItemsForbiddenTags($oViewed_Shop_Item);
+						$this->applyForbiddenAllowedTags('/shop/viewed/shop_item|/shop/shop_item', $oViewed_Shop_Item);
 
-					Core_Event::notify(get_class($this) . '.onBeforeAddViewedEntity', $this, array($oViewed_Shop_Item));
+						!$this->sets && $oViewed_Shop_Item->showXmlSets($this->sets);
 
-					$oViewedEntity->addEntity($oViewed_Shop_Item);
+						Core_Event::notify(get_class($this) . '.onBeforeAddViewedEntity', $this, array($oViewed_Shop_Item));
+
+						$oViewedEntity->addEntity($oViewed_Shop_Item);
+					}
 				}
+			}
+			else
+			{
+				$this->append('aViewed', $aViewed);
 			}
 		}
 
@@ -931,7 +999,21 @@ class Shop_Controller_Show extends Core_Controller
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeRedeclaredShow', $this);
 
+		// Backward compatible
+		is_array($this->groupsForbiddenTags) && count($this->groupsForbiddenTags)
+			&& $this->addForbiddenTags('/shop/shop_group', $this->groupsForbiddenTags);
+
+		is_array($this->itemsForbiddenTags) && count($this->itemsForbiddenTags)
+			&& $this->addForbiddenTags('/shop/shop_item', $this->itemsForbiddenTags);
+
 		$oShop = $this->getEntity();
+
+		// Move rules from '/shop' to the root
+		$aAllowedTags = $this->getAllowedTags();
+		isset($aAllowedTags['/shop']) && $this->addAllowedTags('/', $aAllowedTags['/shop']);
+
+		$aForbiddenTags = $this->getForbiddenTags();
+		isset($aForbiddenTags['/shop']) && $this->addForbiddenTags('/', $aForbiddenTags['/shop']);
 
 		// Load user BEFORE FOUND_ROWS()
 		$oUser = Core_Auth::getCurrentUser();
@@ -1093,7 +1175,8 @@ class Shop_Controller_Show extends Core_Controller
 
 							Core_Event::notify(get_class($this).'.onBeforeAddCartItem', $this, array($oShop_Item_Into_Cart));
 
-							$this->applyItemsForbiddenTags($oShop_Item_Into_Cart->clearEntities());
+							//$this->applyItemsForbiddenTags($oShop_Item_Into_Cart->clearEntities());
+							$this->applyForbiddenAllowedTags('/shop/items_in_cart/shop_item|/shop/shop_item', $oShop_Item_Into_Cart);
 
 							$this->itemsProperties && $oShop_Item_Into_Cart->showXmlProperties($this->itemsProperties, $this->sortPropertiesValues);
 							!$this->sets && $oShop_Item_Into_Cart->showXmlSets($this->sets);
@@ -1126,8 +1209,11 @@ class Shop_Controller_Show extends Core_Controller
 			// Заново получаем $this->_oTag, т.к. он может быть изменен между parseUrl() и show()
 			$this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
 
-			$this->_oTag
-				&& $this->addEntity($this->_oTag);
+			if ($this->_oTag)
+			{
+				$this->applyForbiddenAllowedTags('/shop/tag', $this->_oTag);
+				$this->addEntity($this->_oTag);
+			}
 		}
 
 		// Независимо от limit, т.к. может использоваться отдельно для фильтра
@@ -1227,13 +1313,17 @@ class Shop_Controller_Show extends Core_Controller
 
 			foreach ($aProperties as $oProperty)
 			{
+				$oProperty->clearEntities();
+				$this->applyForbiddenAllowedTags('/shop/shop_group_properties/property', $oProperty);
 				$this->_aGroup_Properties[$oProperty->property_dir_id][] = $oProperty;
 			}
 
 			$aProperty_Dirs = $oShop_Group_Property_List->Property_Dirs->findAll();
 			foreach ($aProperty_Dirs as $oProperty_Dir)
 			{
-				$this->_aGroup_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir->clearEntities();
+				$oProperty_Dir->clearEntities();
+				$this->applyForbiddenAllowedTags('/shop/shop_group_properties/property_dir', $oProperty_Dir);
+				$this->_aGroup_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
 			}
 
 			if (!$bTpl)
@@ -1297,11 +1387,16 @@ class Shop_Controller_Show extends Core_Controller
 
 			$aShop_Filter_Seos = $oShop_Filter_Seos->findAll(FALSE);
 
-			count($aShop_Filter_Seos) && $this->addEntity(
-				Core::factory('Core_Xml_Entity')
-					->name('shop_filter_seos')
-					->addEntities($aShop_Filter_Seos)
-			);
+			if (count($aShop_Filter_Seos))
+			{
+				$this->applyForbiddenAllowedTags('/shop/shop_filter_seos/shop_filter_seo', $aShop_Filter_Seos);
+
+				$this->addEntity(
+					Core::factory('Core_Xml_Entity')
+						->name('shop_filter_seos')
+						->addEntities($aShop_Filter_Seos)
+				);
+			}
 		}
 
 		if ($this->limit > 0)
@@ -1342,6 +1437,7 @@ class Shop_Controller_Show extends Core_Controller
 
 			Core_Event::notify(get_class($this) . '.onBeforeAddShopItems', $this, array($aShop_Items));
 
+			$aClone_Shop_Items = array();
 			foreach ($aShop_Items as $oOriginal_Shop_Item)
 			{
 				$this->_shownIDs[] = $oOriginal_Shop_Item->id;
@@ -1443,8 +1539,9 @@ class Shop_Controller_Show extends Core_Controller
 						$this->addEntity($oShop_Item);
 
 						// Parent item for modification
-						$this->parentItem && $oShop_Item->addEntity(
-							Core_Entity::factory('Shop_Item', $this->parentItem)
+						if ($this->parentItem)
+						{
+							$oParentItem = Core_Entity::factory('Shop_Item', $this->parentItem)
 								->showXmlProperties($mShowPropertyIDs, $this->sortPropertiesValues)
 								->showXmlCommentProperties($mShowCommentPropertyIDs)
 								->showXmlTags($this->tags)
@@ -1453,17 +1550,27 @@ class Shop_Controller_Show extends Core_Controller
 								->showXmlModifications($this->modifications)
 								->showXmlSpecialprices($this->specialprices)
 								->showXmlVotes($this->votes)
-								->showXmlSets($this->sets)
-						);
+								->showXmlSets($this->sets);
+
+							$this->applyForbiddenAllowedTags('/shop/shop_item/shop_item|/shop/shop_item', $oParentItem);
+
+							$oShop_Item->addEntity($oParentItem);
+						}
 					}
 				}
 				else
 				{
 					$this->append('aShop_Items', $oShop_Item);
 				}
+
+				$aClone_Shop_Items[] = $oShop_Item;
 			}
 
-			Core_Event::notify(get_class($this) . '.onAfterAddShopItems', $this, array($aShop_Items));
+			unset($aShop_Items);
+
+			Core_Event::notify(get_class($this) . '.onAfterAddShopItems', $this, array($aClone_Shop_Items));
+
+			unset($aClone_Shop_Items);
 		}
 
 		echo $content = $this->get();
@@ -1490,6 +1597,19 @@ class Shop_Controller_Show extends Core_Controller
 	 */
 	public function applyFilterGroupCondition($oQueryBuilder, $fieldName)
 	{
+		if (!$this->item && !is_null($this->tag) && Core::moduleIsActive('tag'))
+		{
+			// тег получен в parseUrl()
+			is_null($this->_oTag)
+				&& $this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
+
+			if ($this->_oTag)
+			{
+				// В корне при фильтрации по меткам вывод идет из всех групп
+				$this->group == 0 && $this->group = FALSE;
+			}
+		}
+
 		if ($this->group !== FALSE)
 		{
 			if ($this->subgroups)
@@ -1565,6 +1685,9 @@ class Shop_Controller_Show extends Core_Controller
 
 		foreach ($aProperties as $oProperty)
 		{
+			$oProperty->clearEntities();
+			$this->applyForbiddenAllowedTags('/shop/shop_item_properties/property', $oProperty);
+
 			$oShop_Item_Property = $oProperty->Shop_Item_Property;
 
 			if ($oShop_Item_Property->show_in_item && $this->item
@@ -1574,7 +1697,7 @@ class Shop_Controller_Show extends Core_Controller
 				$aShowPropertyIDs[] = $oProperty->id;
 			}
 
-			$this->_aItem_Properties[$oProperty->property_dir_id][] = $oProperty->clearEntities();
+			$this->_aItem_Properties[$oProperty->property_dir_id][] = $oProperty;
 
 			if (!$bTpl)
 			{
@@ -1616,15 +1739,16 @@ class Shop_Controller_Show extends Core_Controller
 							$this->_itemsPropertiesListJustAvailable[$oProperty->id] = array();
 						}
 
-						// до clearGroupBy() !
-						if ($this->itemsPropertiesListJustAvailable)
+						// до clearGroupBy() ! // Перенесено в prepareFastfilterQbForProperty
+						/*if ($this->itemsPropertiesListJustAvailable)
 						{
-							$this->_applyWarehouseConditionsQueryBuilder($oQueryBuilder, "{$tableName}.shop_item_id");
-						}
+							$this->_applyWarehouseConditionsQueryBuilder($oQueryBuilder, "{$tableName}.shop_item_id", !$this->modificationsGroup);
+						}*/
 
 						if (!is_null($this->tag) && Core::moduleIsActive('tag'))
 						{
-							//$this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
+							is_null($this->_oTag)
+								&& $this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
 
 							if ($this->_oTag)
 							{
@@ -1733,6 +1857,7 @@ class Shop_Controller_Show extends Core_Controller
 			foreach ($aProperty_Dirs as $oProperty_Dir)
 			{
 				$oProperty_Dir->clearEntities();
+				$this->applyForbiddenAllowedTags('/shop/shop_item_properties/property_dir', $oProperty_Dir);
 				$this->_aItem_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
 			}
 
@@ -1786,34 +1911,28 @@ class Shop_Controller_Show extends Core_Controller
 		// Filter by prices
 		$this->applyFastFilterPrices($oQueryBuilder);
 
+		if ($this->itemsPropertiesListJustAvailable)
+		{
+			$this->_applyWarehouseConditionsQueryBuilder($oQueryBuilder, "{$tableName}.shop_item_id", TRUE);
+		}
+
 		if (!$this->filterShortcuts)
 		{
 			$this->applyFilterGroupCondition($oQueryBuilder, $tableName . '.shop_group_id');
 		}
 		else
 		{
+			// При фильтраци по всей таблице дополнительное объединение по модификациям и ярлыкам не требуется
 			if ($this->group !== FALSE)
 			{
 				$this->applyFilterGroupCondition($oQueryBuilder, $tableName . '.shop_group_id');
-			}
 
-			// Если не было дополнительных ограничений выше (1 - это whereRaw), то и не имеет смысла использовать OR subquery, работа ведется и так по всей таблице
-			// $this->filterCounts при получении количества для списков, ограничения на свойства заданы не будут и условие count($oQueryBuilder->getWhere()) > 1 не выполнится
-			if (count($oQueryBuilder->getWhere()) > 1 || $this->filterCounts)
-			{
-				$oCore_QueryBuilder_Select_Shortcuts = $this->_subquerySelectShortcuts('shop_item_id', $args);
-
-				// Filter by properties
-				$this->applyFastFilterProperties($oCore_QueryBuilder_Select_Shortcuts, array($oProperty->id));
-
-				// Filter by prices
-				$this->applyFastFilterPrices($oCore_QueryBuilder_Select_Shortcuts);
-
-				$oQueryBuilder->unionAll($oCore_QueryBuilder_Select_Shortcuts);
-
-				if ($this->modificationsList)
+				// Если не было дополнительных ограничений выше (1 - это whereRaw), то и не имеет смысла использовать OR subquery, работа ведется и так по всей таблице
+				// $this->filterCounts при получении количества для списков, ограничения на свойства заданы не будут и условие count($oQueryBuilder->getWhere()) > 1 не выполнится
+				// (в корне из всех подгрупп используется обычная выборка по всей таблице фильтров)
+				if (count($oQueryBuilder->getWhere()) > 1 || $this->filterCounts)
 				{
-					$oCore_QueryBuilder_Select_Shortcuts = $this->_subquerySelectShortcuts('modification_id', $args);
+					$oCore_QueryBuilder_Select_Shortcuts = $this->_subquerySelectShortcuts('shop_item_id', $args);
 
 					// Filter by properties
 					$this->applyFastFilterProperties($oCore_QueryBuilder_Select_Shortcuts, array($oProperty->id));
@@ -1821,7 +1940,30 @@ class Shop_Controller_Show extends Core_Controller
 					// Filter by prices
 					$this->applyFastFilterPrices($oCore_QueryBuilder_Select_Shortcuts);
 
+					if ($this->itemsPropertiesListJustAvailable)
+					{
+						$this->_applyWarehouseConditionsQueryBuilder($oCore_QueryBuilder_Select_Shortcuts, "{$tableName}.shop_item_id", TRUE);
+					}
+
 					$oQueryBuilder->unionAll($oCore_QueryBuilder_Select_Shortcuts);
+
+					if ($this->modificationsList)
+					{
+						$oCore_QueryBuilder_Select_Shortcuts = $this->_subquerySelectShortcuts('modification_id', $args);
+
+						// Filter by properties
+						$this->applyFastFilterProperties($oCore_QueryBuilder_Select_Shortcuts, array($oProperty->id));
+
+						// Filter by prices
+						$this->applyFastFilterPrices($oCore_QueryBuilder_Select_Shortcuts);
+
+						if ($this->itemsPropertiesListJustAvailable)
+						{
+							$this->_applyWarehouseConditionsQueryBuilder($oCore_QueryBuilder_Select_Shortcuts, "{$tableName}.shop_item_id", TRUE);
+						}
+
+						$oQueryBuilder->unionAll($oCore_QueryBuilder_Select_Shortcuts);
+					}
 				}
 			}
 		}
@@ -1839,6 +1981,9 @@ class Shop_Controller_Show extends Core_Controller
 			->join('shop_items', $tableName . '.' . $fieldName, '=', 'shop_items.shortcut_id') // $fieldName is `shop_item_id` OR `modification_id`
 			->where('shop_items.deleted', '=', 0)
 			->where('shop_items.shortcut_id', '>', 0);
+
+		in_array($fieldName, array('shop_item_id', 'modification_id'))
+			&& $oCore_QueryBuilder_Select_Shortcuts->indexHint($tableName, array('FORCE INDEX', $fieldName));
 
 		call_user_func_array(array($oCore_QueryBuilder_Select_Shortcuts, 'columns'), $columns);
 
@@ -1877,8 +2022,9 @@ class Shop_Controller_Show extends Core_Controller
 
 		foreach ($aProperties as $oProperty)
 		{
+			$oProperty->clearEntities();
 			$aShowPropertyIDs[] = $oProperty->id;
-			$this->_aComment_Properties[$oProperty->property_dir_id][] = $oProperty->clearEntities();
+			$this->_aComment_Properties[$oProperty->property_dir_id][] = $oProperty;
 		}
 
 		// Список свойств комментариев
@@ -1907,11 +2053,28 @@ class Shop_Controller_Show extends Core_Controller
 		return $aShowPropertyIDs;
 	}
 
+	/**
+	 * Get Filter Table Name
+	 * @return string
+	 */
 	public function getFilterTableName()
 	{
 		return 'shop_filter' . $this->getEntity()->id;
 	}
 
+	/**
+	 * Get Filter Price Table Name
+	 * @return string
+	 */
+	public function getFilterPriceTableName()
+	{
+		return 'shop_filter_price' . $this->getEntity()->id;
+	}
+
+	/**
+	 * Get Filter Group Table Name
+	 * @return string
+	 */
 	public function getFilterGroupTableName()
 	{
 		return 'shop_filter_group' . $this->getEntity()->id;
@@ -1997,10 +2160,13 @@ class Shop_Controller_Show extends Core_Controller
 
 			$this->group !== FALSE && $this->applyGroupCondition();
 
+			// Apply $this->warehouseMode
+			$this->_applyWarehouseConditions($this->_Shop_Items);
+
 			$this
-				->shopItems()
+				->_Shop_Items
 				->queryBuilder()
-				->where('shortcut_id', '=', 0)
+				->where('shop_items.shortcut_id', '=', 0)
 				->clearGroupBy()
 				->clearOrderBy();
 
@@ -2051,7 +2217,8 @@ class Shop_Controller_Show extends Core_Controller
 			if (Core::moduleIsActive('tag'))
 			{
 				// тег получен в parseUrl()
-				//$this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
+				is_null($this->_oTag)
+					&& $this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
 
 				if ($this->_oTag)
 				{
@@ -2077,7 +2244,7 @@ class Shop_Controller_Show extends Core_Controller
 			foreach ($aProducers as $producer_id)
 			{
 				$oShop_Producer = Core_Entity::factory('Shop_Producer', $producer_id);
-
+				$this->applyForbiddenAllowedTags('/shop/shop_producer', $oShop_Producer);
 				$this->addEntity($oShop_Producer);
 			}
 
@@ -2220,6 +2387,9 @@ class Shop_Controller_Show extends Core_Controller
 					// Ограничения на активность товаров
 					$this->_setItemsActivity($oCore_QueryBuilder_Select_Modifications);
 
+					// Ограничения по остаткам на складах
+					$this->_applyWarehouseConditionsQueryBuilder($oCore_QueryBuilder_Select_Modifications);
+
 					Core_Event::notify(get_class($this) . '.onBeforeSelectModifications', $this, array($oCore_QueryBuilder_Select_Modifications));
 
 					$this->_Shop_Items
@@ -2268,6 +2438,9 @@ class Shop_Controller_Show extends Core_Controller
 
 					// Ограничения на активность товаров
 					$this->_setItemsActivity($oCore_QueryBuilder_Select_Shortcuts);
+
+					// Ограничения по остаткам на складах
+					$this->_applyWarehouseConditionsQueryBuilder($oCore_QueryBuilder_Select_Shortcuts);
 
 					$this->_Shop_Items
 						->queryBuilder()
@@ -2999,6 +3172,8 @@ class Shop_Controller_Show extends Core_Controller
 			{
 				$this->filterSeo = $oShop_Filter_Seo;
 
+				$this->applyForbiddenAllowedTags('/shop/shop_filter_seo', $oShop_Filter_Seo);
+
 				$this->addEntity($oShop_Filter_Seo);
 
 				$seo_title = $oShop_Filter_Seo->seo_title != ''
@@ -3099,7 +3274,7 @@ class Shop_Controller_Show extends Core_Controller
 				{
 					$seo_title = $this->_oTag->seo_title != ''
 						? $this->_oTag->seo_title
-						: Core::_('Shop.tag', $this->_oTag->name);
+						: Core::_('Shop.tag', $this->_oTag->name, FALSE);
 
 					$seo_description = $this->_oTag->seo_description != ''
 						? $this->_oTag->seo_description
@@ -3280,13 +3455,10 @@ class Shop_Controller_Show extends Core_Controller
 	 */
 	public function applyGroupsForbiddenTags($oShop_Group)
 	{
-		if (!is_null($this->groupsForbiddenTags))
-		{
-			foreach ($this->groupsForbiddenTags as $forbiddenTag)
-			{
-				$oShop_Group->addForbiddenTag($forbiddenTag);
-			}
-		}
+		/*!is_null($this->groupsForbiddenTags)
+			&& $oShop_Group->addForbiddenTags($this->groupsForbiddenTags);*/
+
+		$this->applyForbiddenAllowedTags('/shop/shop_group', $oShop_Group);
 
 		return $this;
 	}
@@ -3298,13 +3470,10 @@ class Shop_Controller_Show extends Core_Controller
 	 */
 	public function applyItemsForbiddenTags($oShop_Item)
 	{
-		if (!is_null($this->itemsForbiddenTags))
-		{
-			foreach ($this->itemsForbiddenTags as $forbiddenTag)
-			{
-				$oShop_Item->addForbiddenTag($forbiddenTag);
-			}
-		}
+		/*!is_null($this->itemsForbiddenTags)
+			&& $oShop_Item->addForbiddenTags($this->itemsForbiddenTags);*/
+
+		$this->applyForbiddenAllowedTags('/shop/shop_item', $oShop_Item);
 
 		return $this;
 	}
@@ -3571,9 +3740,13 @@ class Shop_Controller_Show extends Core_Controller
 							// Ограничения на активность товаров
 							$this->_setItemsActivity($oCore_QueryBuilder_Select);
 
+							// Ограничения по остаткам на складах
+							$this->_applyWarehouseConditionsQueryBuilder($oCore_QueryBuilder_Select);
+
 							if (!is_null($this->tag) && Core::moduleIsActive('tag'))
 							{
-								//$this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
+								is_null($this->_oTag)
+									&& $this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
 
 								if ($this->_oTag)
 								{
@@ -3612,9 +3785,13 @@ class Shop_Controller_Show extends Core_Controller
 									// Ограничения на активность товаров
 									$this->_setItemsActivity($oCore_QueryBuilder_Select_Modifications);
 
+									// Ограничения по остаткам на складах
+									$this->_applyWarehouseConditionsQueryBuilder($oCore_QueryBuilder_Select_Modifications);
+
 									if (!is_null($this->tag) && Core::moduleIsActive('tag'))
 									{
-										//$this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
+										is_null($this->_oTag)
+											&& $this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
 
 										if ($this->_oTag)
 										{
@@ -3673,9 +3850,13 @@ class Shop_Controller_Show extends Core_Controller
 									// Ограничения на активность товаров
 									$this->_setItemsActivity($oCore_QueryBuilder_Select_Shortcuts);
 
+									// Ограничения по остаткам на складах
+									$this->_applyWarehouseConditionsQueryBuilder($oCore_QueryBuilder_Select_Shortcuts);
+
 									if (!is_null($this->tag) && Core::moduleIsActive('tag'))
 									{
-										//$this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
+										is_null($this->_oTag)
+											&& $this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
 
 										if ($this->_oTag)
 										{
@@ -3818,7 +3999,7 @@ class Shop_Controller_Show extends Core_Controller
 				// Edit
 				$sPath = '/admin/shop/item/index.php';
 				$sAdditional = "hostcms[action]=edit&shop_id={$oShop->id}&shop_group_id={$oShop_Group->parent_id}&hostcms[checked][0][{$this->group}]=1";
-				$sTitle = Core::_('Shop_Group.groups_edit_form_title', $oShop_Group->name);
+				$sTitle = Core::_('Shop_Group.groups_edit_form_title', $oShop_Group->name, FALSE);
 
 				$oXslSubPanel->add(
 					Core_Html_Entity::factory('A')
@@ -3874,7 +4055,7 @@ class Shop_Controller_Show extends Core_Controller
 			// Edit
 			$sPath = '/admin/shop/item/index.php';
 			$sAdditional = "hostcms[action]=edit&shop_id={$oShop->id}&shop_group_id={$oShop_Item->shop_group_id}&hostcms[checked][1][{$this->item}]=1";
-			$sTitle = Core::_('Shop_Item.items_catalog_edit_form_title', $oShop_Item->name);
+			$sTitle = Core::_('Shop_Item.items_catalog_edit_form_title', $oShop_Item->name, FALSE);
 
 			$oXslSubPanel->add(
 				Core_Html_Entity::factory('A')
@@ -3995,6 +4176,73 @@ class Shop_Controller_Show extends Core_Controller
 		return $this;
 	}
 
+	public function getFilterPriceAvailableFields()
+	{
+		$aFields = array();
+
+		if (Core::moduleIsActive('siteuser'))
+		{
+			$oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
+			if ($oSiteuser)
+			{
+				$oShop = $this->getEntity();
+
+				$aSiteuser_Groups = $oSiteuser->Siteuser_Groups->findAll();
+				foreach ($aSiteuser_Groups as $oSiteuser_Group)
+				{
+					// Может быть создано несколько цен для одной группы клиентов
+					$aShop_Prices = Core_Entity::factory('Shop_Price')->getAllBySiteuserGroupAndShop(
+						$oSiteuser_Group->id, $oShop->id
+					);
+
+					foreach ($aShop_Prices as $oShop_Price)
+					{
+						$aFields[] = 'price' . $oShop_Price->id;
+					}
+				}
+			}
+		}
+
+		// При наличии цен для групп клиентов $aFields, отдельно работать по price_absolute не имеет смысла,
+		// так как цена в спец.полях будет не выше, чем price_absolute
+		!count($aFields)
+			&& $aFields[] = 'price_absolute';
+
+		return $aFields;
+	}
+
+	protected function _getSubMinMaxQueryBuilder()
+	{
+		$oSubMinMaxQueryBuilder = Core_QueryBuilder::select()
+			->from('shop_items')
+			->join(array('shop_items', 's'), 'shop_items.id', '=', 's.shortcut_id')
+			->where('s.deleted', '=', 0)
+			->where('s.shortcut_id', '>', 0);
+
+		$this->applyFilterGroupCondition($oSubMinMaxQueryBuilder, 's.shop_group_id');
+
+		// Стандартные ограничения для товаров
+		$this->_applyItemConditionsQueryBuilder($oSubMinMaxQueryBuilder, 's');
+
+		// Ограничения на активность товаров
+		$this->_setItemsActivity($oSubMinMaxQueryBuilder, 's');
+
+		if (!is_null($this->tag) && Core::moduleIsActive('tag'))
+		{
+			is_null($this->_oTag)
+				&& $this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
+
+			if ($this->_oTag)
+			{
+				$oSubMinMaxQueryBuilder
+					->join('tag_shop_items', 's.id', '=', 'tag_shop_items.shop_item_id')
+					->where('tag_shop_items.tag_id', '=', $this->_oTag->id);
+			}
+		}
+
+		return $oSubMinMaxQueryBuilder;
+	}
+
 	/**
 	 * Add minimum and maximum price
 	 * @return self
@@ -4006,36 +4254,60 @@ class Shop_Controller_Show extends Core_Controller
 		// В быстром фильтре min/max для товаров и modificationsList считаем одним запросом
 		if ($oShop->filter)
 		{
+			//$min = $max = 0;
+
 			$tableName = $this->getFilterTableName();
+			$priceTableName = $this->getFilterPriceTableName();
 
-			$oSubMinMaxQueryBuilder = Core_QueryBuilder::select()
-				->clearSelect()
-				->select(array('MIN(price_absolute)', 'min'), array('MAX(price_absolute)', 'max'))
-				->from($tableName)
-				->where($tableName . '.primary', '=', 1);
+			$aMin = $aMax = array();
 
-			$this->applyFilterGroupCondition($oSubMinMaxQueryBuilder, $tableName . '.shop_group_id');
-
-			!$this->modificationsList
-				&& $oSubMinMaxQueryBuilder->where($tableName . '.modification_id', '=', 0);
-
-			if (!is_null($this->tag) && Core::moduleIsActive('tag'))
+			// Доступные поля для фильтрации по ценам
+			$aPriceFields = $this->getFilterPriceAvailableFields();
+			foreach ($aPriceFields as $sPriceField)
 			{
-				//$this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
+				$oSubMinMaxQueryBuilder = Core_QueryBuilder::select()
+					->clearSelect()
+					->select(array("MIN({$sPriceField})", 'min'), array("MAX({$sPriceField})", 'max'))
+					->from($tableName)
+					->where($tableName . '.primary', '=', 1);
 
-				if ($this->_oTag)
+				$sPriceField != 'price_absolute'
+					&& $oSubMinMaxQueryBuilder->join($priceTableName, $tableName . '.shop_item_id', '=', $priceTableName . '.shop_item_id');
+
+				$this->applyFilterGroupCondition($oSubMinMaxQueryBuilder, $tableName . '.shop_group_id');
+
+				!$this->modificationsList
+					&& $oSubMinMaxQueryBuilder->where($tableName . '.modification_id', '=', 0);
+
+				if (!is_null($this->tag) && Core::moduleIsActive('tag'))
 				{
-					$oSubMinMaxQueryBuilder
-						->join('tag_shop_items', $tableName . '.shop_item_id', '=', 'tag_shop_items.shop_item_id')
-						->where('tag_shop_items.tag_id', '=', $this->_oTag->id);
+					is_null($this->_oTag)
+						&& $this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
+
+					if ($this->_oTag)
+					{
+						$oSubMinMaxQueryBuilder
+							->join('tag_shop_items', $tableName . '.shop_item_id', '=', 'tag_shop_items.shop_item_id')
+							->where('tag_shop_items.tag_id', '=', $this->_oTag->id);
+					}
 				}
+
+				// Ограничение по складу через быстрый фильтр
+				if (in_array($this->warehouseMode, array('in-stock', 'in-stock-modification')))
+				{
+					$oSubMinMaxQueryBuilder->where($tableName . '.available', '>', 0);
+				}
+
+				$rows = $oSubMinMaxQueryBuilder->asAssoc()->execute()->current();
+
+				!is_null($rows['min']) && $aMin[] = $rows['min'];
+				$aMax[] = $rows['max'];
 			}
 
-			$rows = $oSubMinMaxQueryBuilder->asAssoc()->execute()->current();
-
-			$min = $rows['min'];
-			$max = $rows['max'];
+			$min = count($aMin) ? min($aMin) : 0;
+			$max = count($aMax) ? max($aMax) : 0;
 		}
+		// Basic Filter
 		else
 		{
 			$oSubMinMaxQueryBuilder = Core_QueryBuilder::select()
@@ -4056,7 +4328,8 @@ class Shop_Controller_Show extends Core_Controller
 
 			if (!is_null($this->tag) && Core::moduleIsActive('tag'))
 			{
-				//$this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
+				is_null($this->_oTag)
+					&& $this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
 
 				if ($this->_oTag)
 				{
@@ -4100,7 +4373,8 @@ class Shop_Controller_Show extends Core_Controller
 
 				if (!is_null($this->tag) && Core::moduleIsActive('tag'))
 				{
-					//$this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
+					is_null($this->_oTag)
+						&& $this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
 
 					if ($this->_oTag)
 					{
@@ -4125,45 +4399,34 @@ class Shop_Controller_Show extends Core_Controller
 
 		if ($this->filterShortcuts)
 		{
-			$oSubMinMaxQueryBuilder = Core_QueryBuilder::select()
-				->from('shop_items')
-				->join(array('shop_items', 's'), 'shop_items.id', '=', 's.shortcut_id')
-				->where('s.deleted', '=', 0)
-				->where('s.shortcut_id', '>', 0);
-
-			$this->applyFilterGroupCondition($oSubMinMaxQueryBuilder, 's.shop_group_id');
-
-			// Стандартные ограничения для товаров
-			$this->_applyItemConditionsQueryBuilder($oSubMinMaxQueryBuilder, 's');
-
-			// Ограничения на активность товаров
-			$this->_setItemsActivity($oSubMinMaxQueryBuilder, 's');
-
-			if (!is_null($this->tag) && Core::moduleIsActive('tag'))
-			{
-				//$this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
-
-				if ($this->_oTag)
-				{
-					$oSubMinMaxQueryBuilder
-						->join('tag_shop_items', 's.id', '=', 'tag_shop_items.shop_item_id')
-						->where('tag_shop_items.tag_id', '=', $this->_oTag->id);
-				}
-			}
-
 			if ($oShop->filter)
 			{
-				$tableName = $this->getFilterTableName();
+				// Цикл по всем доступным для клиента ценам
+				foreach ($aPriceFields as $sPriceField)
+				{
+					$tableName = $this->getFilterTableName();
 
-				$oSubMinMaxQueryBuilder
-					->clearSelect()
-					->select(array('MIN(price_absolute)', 'min'), array('MAX(price_absolute)', 'max'))
-					->join($tableName, 'shop_items.id', '=', $tableName . '.shop_item_id');
+					$oSubMinMaxQueryBuilder = $this->_getSubMinMaxQueryBuilder();
 
-				$rows = $oSubMinMaxQueryBuilder->asAssoc()->execute()->current();
+					$oSubMinMaxQueryBuilder
+						->clearSelect()
+						->select(array("MIN({$sPriceField})", 'min'), array("MAX({$sPriceField})", 'max'))
+						->join($tableName, 'shop_items.id', '=', $tableName . '.shop_item_id');
+
+					$sPriceField != 'price_absolute'
+						&& $oSubMinMaxQueryBuilder->join($priceTableName, $tableName . '.shop_item_id', '=', $priceTableName . '.shop_item_id');
+
+					$rows = $oSubMinMaxQueryBuilder->asAssoc()->execute()->current();
+
+					!is_null($rows['min']) && $rows['min'] < $min && $min = $rows['min'];
+					$rows['max'] > $max && $max = $rows['max'];
+				}
 			}
+			// Basic Filter
 			else
 			{
+				$oSubMinMaxQueryBuilder = $this->_getSubMinMaxQueryBuilder();
+
 				$this->applyAbsolutePrice($oSubMinMaxQueryBuilder, 's');
 
 				$oMinMaxQueryBuilder = Core_QueryBuilder::select(
@@ -4173,10 +4436,10 @@ class Shop_Controller_Show extends Core_Controller
 					->from(array($oSubMinMaxQueryBuilder, 't'));
 
 				$rows = $oMinMaxQueryBuilder->asAssoc()->execute()->current();
-			}
 
-			!is_null($rows['min']) && $rows['min'] < $min && $min = $rows['min'];
-			$rows['max'] > $max && $max = $rows['max'];
+				!is_null($rows['min']) && $rows['min'] < $min && $min = $rows['min'];
+				$rows['max'] > $max && $max = $rows['max'];
+			}
 		}
 
 		$this->addEntity(
@@ -4247,7 +4510,7 @@ class Shop_Controller_Show extends Core_Controller
 
 			$rows = $oMinMaxQueryBuilder->asAssoc()->execute()->current();
 
-			$rows['min'] < $min && $min = $rows['min'];
+			!is_null($rows['min']) && $rows['min'] < $min && $min = $rows['min'];
 			$rows['max'] > $max && $max = $rows['max'];
 		}
 
@@ -4347,7 +4610,7 @@ class Shop_Controller_Show extends Core_Controller
 
 			$rows = $oMinMaxQueryBuilder->asAssoc()->execute()->current();
 
-			$rows['min'] < $min && $min = $rows['min'];
+			!is_null($rows['min']) && $rows['min'] < $min && $min = $rows['min'];
 			$rows['max'] > $max && $max = $rows['max'];
 		}
 
@@ -4447,7 +4710,7 @@ class Shop_Controller_Show extends Core_Controller
 
 			$rows = $oMinMaxQueryBuilder->asAssoc()->execute()->current();
 
-			$rows['min'] < $min && $min = $rows['min'];
+			!is_null($rows['min']) && $rows['min'] < $min && $min = $rows['min'];
 			$rows['max'] > $max && $max = $rows['max'];
 		}
 
@@ -4547,7 +4810,7 @@ class Shop_Controller_Show extends Core_Controller
 
 			$rows = $oMinMaxQueryBuilder->asAssoc()->execute()->current();
 
-			$rows['min'] < $min && $min = $rows['min'];
+			!is_null($rows['min']) && $rows['min'] < $min && $min = $rows['min'];
 			$rows['max'] > $max && $max = $rows['max'];
 		}
 
@@ -4665,8 +4928,9 @@ class Shop_Controller_Show extends Core_Controller
 
 	/**
 	 * Add filter condition
-	 * ->addFilter('property', 17, '=', 33)
-	 * ->addFilter('price', '>', 100)
+	 * ->addFilter('property', 17, '=', 33) // Property 17
+	 * ->addFilter('price', '>', 100) // Item Price
+	 * ->addFilter('weight', '>', 5) // Main Property
 	 */
 	public function addFilter()
 	{
@@ -4955,20 +5219,34 @@ class Shop_Controller_Show extends Core_Controller
 	 */
 	public function applyFastFilterPrices($QB)
 	{
-		$oShop = $this->getEntity();
-
-		$tableName = $this->getFilterTableName();
-
 		if (count($this->_aFilterPrices))
 		{
-			$this->addAbsolutePrice();
+			//$this->addAbsolutePrice();
+			$tableName = $this->getFilterTableName();
+			$priceTableName = $this->getFilterPriceTableName();
 
-			foreach ($this->_aFilterPrices as $aTmpPrice)
+			// Доступные поля для фильтрации по ценам
+			$aPriceFields = $this->getFilterPriceAvailableFields();
+
+			// Клиенту доступно более одной цены или одна цена, но не равная price_absolute
+			(count($aPriceFields) > 1 || $aPriceFields[0] != 'price_absolute')
+				&& $QB->join($priceTableName, $tableName . '.shop_item_id', '=', $priceTableName . '.shop_item_id');
+
+			count($aPriceFields) > 1 && $QB->open();
+
+			foreach ($aPriceFields as $sPriceField)
 			{
-				list($condition, $value) = $aTmpPrice;
+				foreach ($this->_aFilterPrices as $aTmpPrice)
+				{
+					list($condition, $value) = $aTmpPrice;
 
-				$QB->where($tableName . '.price_absolute', $condition, $value);
+					$QB->where(($sPriceField != 'price_absolute' ? $priceTableName : $tableName) . '.' . $sPriceField, $condition, $value);
+				}
+
+				count($aPriceFields) > 1 && $QB->setOr();
 			}
+
+			count($aPriceFields) > 1 && $QB->close();
 		}
 
 		return $this;
@@ -5007,6 +5285,7 @@ class Shop_Controller_Show extends Core_Controller
 		$aTableNames = array();
 
 		$this->shopItems()->queryBuilder()
+			->straightJoin(FALSE) // Так как есть дополнительные опции по basicFilter, то оптимизатор работает лучше, чем быстрый фильтр с straightJoin и затем базовым фильтром
 			->leftJoin('shop_item_properties', 'shop_items.shop_id', '=', 'shop_item_properties.shop_id')
 			->setAnd()
 			->open();
@@ -5582,7 +5861,8 @@ class Shop_Controller_Show extends Core_Controller
 
 			if (!is_null($this->tag) && Core::moduleIsActive('tag'))
 			{
-				//$this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
+				is_null($this->_oTag)
+					&& $this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
 
 				if ($this->_oTag)
 				{
@@ -5591,6 +5871,12 @@ class Shop_Controller_Show extends Core_Controller
 						->join('tag_shop_items', 'shop_items.id', '=', 'tag_shop_items.shop_item_id')
 						->where('tag_shop_items.tag_id', '=', $this->_oTag->id);
 				}
+			}
+
+			// Ограничение по складу через быстрый фильтр
+			if (in_array($this->warehouseMode, array('in-stock', 'in-stock-modification')))
+			{
+				$oQB->where($tableName . '.available', '>', 0);
 			}
 
 			if ($this->filterShortcuts)
@@ -5609,9 +5895,13 @@ class Shop_Controller_Show extends Core_Controller
 				// Ограничения на активность товаров
 				$this->_setItemsActivity($oCore_QueryBuilder_Select_Shortcuts);
 
+				// Ограничения по остаткам на складах
+				$this->_applyWarehouseConditionsQueryBuilder($oCore_QueryBuilder_Select_Shortcuts);
+
 				if (!is_null($this->tag) && Core::moduleIsActive('tag'))
 				{
-					//$this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
+					is_null($this->_oTag)
+						&& $this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
 
 					if ($this->_oTag)
 					{
@@ -5652,12 +5942,16 @@ class Shop_Controller_Show extends Core_Controller
 			// Ограничения на активность товаров
 			$this->_setItemsActivity($oShop_Producers->queryBuilder());
 
+			// Ограничения по остаткам на складах
+			$this->_applyWarehouseConditionsQueryBuilder($oShop_Producers->queryBuilder());
+
 			!$this->modificationsList
 				&& $oShop_Producers->queryBuilder()->where('shop_items.modification_id', '=', 0);
 
 			if (!is_null($this->tag) && Core::moduleIsActive('tag'))
 			{
-				//$this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
+				is_null($this->_oTag)
+					&& $this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
 
 				if ($this->_oTag)
 				{
@@ -5684,13 +5978,17 @@ class Shop_Controller_Show extends Core_Controller
 				// Ограничения на активность товаров
 				$this->_setItemsActivity($oCore_QueryBuilder_Select_Shortcuts);
 
+				// Ограничения по остаткам на складах
+				$this->_applyWarehouseConditionsQueryBuilder($oCore_QueryBuilder_Select_Shortcuts);
+
 				$oQB
 					->setOr()
 					->where(/*$oShop->filter ? $tableName . '.shop_item_id' : */'shop_items.id', 'IN', $oCore_QueryBuilder_Select_Shortcuts);
 
 				if (!is_null($this->tag) && Core::moduleIsActive('tag'))
 				{
-					//$this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
+					is_null($this->_oTag)
+						&& $this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
 
 					if ($this->_oTag)
 					{

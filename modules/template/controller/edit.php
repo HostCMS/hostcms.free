@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Template
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -106,7 +106,7 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			case 'template':
 				$title = $this->_object->id
-					? Core::_('Template.title_edit', $this->_object->name)
+					? Core::_('Template.title_edit', $this->_object->name, FALSE)
 					: Core::_('Template.title_add');
 
 				$oTemplateTab = Admin_Form_Entity::factory('Tab')
@@ -208,7 +208,7 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				{
 					// LESS
 					case 1:
-						$styleValue = is_file($this->_object->getTemplateLessFilePath())
+						$styleValue = Core_File::isFile($this->_object->getTemplateLessFilePath())
 							? $this->_object->loadTemplateLessFile()
 							: $this->_object->loadTemplateCssFile();
 
@@ -216,7 +216,7 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					break;
 					// SCSS
 					case 2:
-						$styleValue = version_compare(PHP_VERSION, '5.6') >= 0 && is_file($this->_object->getTemplateScssFilePath())
+						$styleValue = version_compare(PHP_VERSION, '5.6') >= 0 && Core_File::isFile($this->_object->getTemplateScssFilePath())
 							? $this->_object->loadTemplateScssFile()
 							: $this->_object->loadTemplateCssFile();
 
@@ -299,7 +299,7 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$manifest = $this->_object->loadManifestFile();
 
-					!strlen($manifest)
+					$manifest == ''
 						&& $manifest = '<?xml version="1.0" encoding="UTF-8"?>' . "\n<manifest>\n</manifest>";
 
 					$oTextarea_Manifest
@@ -352,7 +352,7 @@ EOD;
 			case 'template_dir':
 			default:
 				$title = $this->_object->id
-					? Core::_('Template_Dir.title_edit', $this->_object->name)
+					? Core::_('Template_Dir.title_edit', $this->_object->name, FALSE)
 					: Core::_('Template_Dir.title_add');
 
 				$oMainTab
@@ -381,9 +381,7 @@ EOD;
 			break;
 		}
 
-		$this->title(
-			html_entity_decode($title)
-		);
+		$this->title($title);
 
 		return $this;
 	}

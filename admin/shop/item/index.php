@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -708,7 +708,7 @@ $oMenu->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Item.main_menu_warrants'))
-		->icon('fa-solid fa-cash-register')
+		->icon('fa-solid fa-coins')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warrant/index.php', NULL, NULL, $additionalParams)
 		)
@@ -719,6 +719,28 @@ $oMenu->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Item.show_sds_link'))
 		->icon('fa fa-book')
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Order_Status.model_name'))
+				->icon('fa fa-circle')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref($sOrderStatusFormPath = '/admin/shop/order/status/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax($sOrderStatusFormPath, NULL, NULL, $additionalParams)
+				)
+		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Order_Item_Status.model_name'))
+				->icon('fa fa-circle-o')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref($sOrderItemStatusFormPath = '/admin/shop/order/item/status/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax($sOrderItemStatusFormPath, NULL, NULL, $additionalParams)
+				)
+		)
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.seo_filter'))
@@ -822,7 +844,19 @@ $oMenu->add(
 					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/report/producer/index.php', NULL, NULL, $additionalParams)
 				)
 		)
-)*/;
+)*/
+->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Shop_Item.modifications_menu'))
+		->icon('fa-solid fa-code-fork')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/modification/index.php', NULL, NULL, $additionalParams)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/modification/index.php', NULL, NULL, $additionalParams)
+		)
+)
+;
 
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oMenu);
@@ -891,7 +925,7 @@ $oAdmin_Form_Controller->addEntity(
 		')
 );
 
-$sGlobalSearch = Core_DataBase::instance()->escapeLike($sGlobalSearch);
+$sGlobalSearch = str_replace(' ', '%', Core_DataBase::instance()->escapeLike($sGlobalSearch));
 
 // Хлебные крошки
 $oBreadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
@@ -1186,6 +1220,25 @@ if ($oAdminFormActionChangeAttribute && $oAdmin_Form_Controller->getAction() == 
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($oShop_Item_Controller_Change_Attribute);
+}
+
+// Действие "Пересчитать комплекты"
+$oAdminFormActionRecountSets = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('recount_sets');
+
+if ($oAdminFormActionRecountSets && $oAdmin_Form_Controller->getAction() == 'recount_sets')
+{
+	$oShop_Item_Controller_Recount_Set = Admin_Form_Action_Controller::factory(
+		'Shop_Item_Controller_Recount_Set', $oAdminFormActionRecountSets
+	);
+
+	$oShop_Item_Controller_Recount_Set
+		->title(Core::_('Shop_Item.recount_sets_items_title'))
+		->Shop($oShop);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oShop_Item_Controller_Recount_Set);
 }
 
 // Действие "Удаление значения свойства"

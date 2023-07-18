@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Bonus_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -160,7 +160,7 @@ class Shop_Bonus_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 
 				$title = $this->_object->id
-					? Core::_('Shop_Bonus.edit_title', $this->_object->name)
+					? Core::_('Shop_Bonus.edit_title', $this->_object->name, FALSE)
 					: Core::_('Shop_Bonus.add_title');
 
 				$oMainTab->add(
@@ -194,7 +194,7 @@ class Shop_Bonus_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainTab->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow3);
 
 				$title = $this->_object->id
-					? Core::_('Shop_Bonus_Dir.edit_title', $this->_object->name)
+					? Core::_('Shop_Bonus_Dir.edit_title', $this->_object->name, FALSE)
 					: Core::_('Shop_Bonus_Dir.add_title');
 			break;
 		}

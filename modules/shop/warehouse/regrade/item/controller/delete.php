@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Regrade_Item_Controller_Delete extends Admin_Form_Action_Controller
 {
@@ -36,7 +36,7 @@ class Shop_Warehouse_Regrade_Item_Controller_Delete extends Admin_Form_Action_Co
 				$oShop_Warehouse_Regrade_Item->delete();
 
 				// Удаляем проводки в документе
-				$aShop_Warehouse_Entries = $oShop_Warehouse->Shop_Warehouse_Entries->getByDocumentAndShopItem($oShop_Warehouse_Regrade->id, $oShop_Warehouse_Regrade::TYPE, array($writeoff_shop_item_id, $incoming_shop_item_id));
+				$aShop_Warehouse_Entries = $oShop_Warehouse->Shop_Warehouse_Entries->getByDocumentAndShopItem($oShop_Warehouse_Regrade->id, $oShop_Warehouse_Regrade->getEntityType(), array($writeoff_shop_item_id, $incoming_shop_item_id));
 				foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
 				{
 					$oShop_Warehouse_Entry->delete();

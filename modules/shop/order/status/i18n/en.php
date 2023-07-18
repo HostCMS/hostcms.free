@@ -21,7 +21,8 @@ return array(
 	'on_duty' => 'On duty',
 	'working_hours' => 'Working hours only',
 	'shop_order_item_status_id' => 'Item status set when creating an order',
-	'deadline_shop_order_status_id' => 'Deadline status of items set for non-delivery',
+	'deadline_shop_order_status_id' => 'Deadline status of orders set for non-delivery',
 	'lifetime' => 'Lifetime, in minutes',
 	'deadline' => 'Deadline until %s',
+	'shop_id' => 'Shop ID',
 );

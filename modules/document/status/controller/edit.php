@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Document
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Document_Status_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -22,11 +22,10 @@ class Document_Status_Controller_Edit extends Admin_Form_Action_Controller_Type_
 	{
 		parent::_prepareForm();
 
-		$title = $this->_object->id
-			? Core::_('Document_Status.edit_title', $this->_object->name)
-			: Core::_('Document_Status.add_title');
-
-		$this->title($title);
+		$this->title($this->_object->id
+			? Core::_('Document_Status.edit_title', $this->_object->name, FALSE)
+			: Core::_('Document_Status.add_title')
+		);
 	}
 
 	/**

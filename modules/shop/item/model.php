@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Model extends Core_Entity
 {
@@ -127,6 +127,9 @@ class Shop_Item_Model extends Core_Entity
 		'shop_item_certificate' => array(),
 		'lead_shop_item' => array(),
 		'deal_shop_item' => array(),
+		'shop_warehouse_purchaseorder_item' => array(),
+		'shop_warehouse_invoice_item' => array(),
+		'shop_warehouse_supply_item' => array(),
 	);
 
 	/**
@@ -171,6 +174,7 @@ class Shop_Item_Model extends Core_Entity
 		'shop' => array(),
 		'shop_producer' => array(),
 		'siteuser' => array(),
+		'shop_item_type' => array(),
 		'shop_item' => array('foreign_key' => 'shortcut_id'),
 		'modification' => array('model' => 'Shop_Item', 'foreign_key' => 'modification_id'),
 		'user' => array()
@@ -751,7 +755,7 @@ class Shop_Item_Model extends Core_Entity
 	{
 		$path = $this->getLargeFilePath();
 
-		if (is_file($path))
+		if (Core_File::isFile($path))
 		{
 			$aSizes = Core_Image::instance()->getImageSize($path);
 			if ($aSizes)
@@ -790,7 +794,7 @@ class Shop_Item_Model extends Core_Entity
 	{
 		$path = $this->getSmallFilePath();
 
-		if (is_file($path))
+		if (Core_File::isFile($path))
 		{
 			$aSizes = Core_Image::instance()->getImageSize($path);
 			if ($aSizes)
@@ -882,7 +886,7 @@ class Shop_Item_Model extends Core_Entity
 			try {
 				Core::$mainConfig['translate'] && $sTranslated = Core_Str::translate($this->name);
 
-				$this->path = Core::$mainConfig['translate'] && strlen($sTranslated)
+				$this->path = Core::$mainConfig['translate'] && strlen((string) $sTranslated)
 					? $sTranslated
 					: $this->name;
 
@@ -941,7 +945,7 @@ class Shop_Item_Model extends Core_Entity
 	{
 		clearstatcache();
 
-		if (!is_dir($this->getItemPath()))
+		if (!Core_File::isDir($this->getItemPath()))
 		{
 			try
 			{
@@ -965,7 +969,7 @@ class Shop_Item_Model extends Core_Entity
 		$newObject->guid = Core_Guid::get();
 		$newObject->save();
 
-		if (is_file($this->getLargeFilePath()))
+		if (Core_File::isFile($this->getLargeFilePath()))
 		{
 			try
 			{
@@ -975,7 +979,7 @@ class Shop_Item_Model extends Core_Entity
 			catch (Exception $e) {}
 		}
 
-		if (is_file($this->getSmallFilePath()))
+		if (Core_File::isFile($this->getSmallFilePath()))
 		{
 			try
 			{
@@ -1014,7 +1018,7 @@ class Shop_Item_Model extends Core_Entity
 				$oPropertyValue->setDir($this->getItemPath());
 				$oNewPropertyValue->setDir($newObject->getItemPath());
 
-				if (is_file($oPropertyValue->getLargeFilePath()))
+				if (Core_File::isFile($oPropertyValue->getLargeFilePath()))
 				{
 					try
 					{
@@ -1022,7 +1026,7 @@ class Shop_Item_Model extends Core_Entity
 					} catch (Exception $e) {}
 				}
 
-				if (is_file($oPropertyValue->getSmallFilePath()))
+				if (Core_File::isFile($oPropertyValue->getSmallFilePath()))
 				{
 					try
 					{
@@ -1276,7 +1280,7 @@ class Shop_Item_Model extends Core_Entity
 	public function deleteLargeImage()
 	{
 		$fileName = $this->getLargeFilePath();
-		if ($this->image_large != '' && is_file($fileName))
+		if ($this->image_large != '' && Core_File::isFile($fileName))
 		{
 			try
 			{
@@ -1296,7 +1300,7 @@ class Shop_Item_Model extends Core_Entity
 	public function deleteSmallImage()
 	{
 		$fileName = $this->getSmallFilePath();
-		if ($this->image_small != '' && is_file($fileName))
+		if ($this->image_small != '' && Core_File::isFile($fileName))
 		{
 			try
 			{
@@ -1643,7 +1647,7 @@ class Shop_Item_Model extends Core_Entity
 		// Удаляем файл малого изображения элемента
 		$this->deleteSmallImage();
 
-		if (is_dir($this->getItemPath()))
+		if (Core_File::isDir($this->getItemPath()))
 		{
 			try
 			{
@@ -1851,7 +1855,7 @@ class Shop_Item_Model extends Core_Entity
 		}
 
 		$oCore_Html_Entity_Div->value(
-			htmlspecialchars($object->name)
+			htmlspecialchars((string) $object->name)
 		);
 
 		if ($object->modification_id)
@@ -2306,26 +2310,26 @@ class Shop_Item_Model extends Core_Entity
 
 		$this->clearXmlTags();
 
-		!isset($this->_forbiddenTags['url'])
+		$this->_isTagAvailable('url')
 			&& $this->addXmlTag('url', $this->Shop->Structure->getPath() . $this->getPath());
 
-		!isset($this->_forbiddenTags['date'])
+		$this->_isTagAvailable('date')
 			&& $this->addXmlTag('date', Core_Date::strftime($oShop->format_date, Core_Date::sql2timestamp($this->datetime)));
 
-		/*!isset($this->_forbiddenTags['datetime'])
+		/*$this->_isTagAvailable('datetime')
 			&& */$this->addXmlTag('datetime', Core_Date::strftime($oShop->format_datetime, Core_Date::sql2timestamp($this->datetime)));
 
-		/*!isset($this->_forbiddenTags['start_datetime'])
+		/*$this->_isTagAvailable('start_datetime')
 			&& */$this->addXmlTag('start_datetime', $this->start_datetime == '0000-00-00 00:00:00'
 				? $this->start_datetime
 				: Core_Date::strftime($oShop->format_datetime, Core_Date::sql2timestamp($this->start_datetime)));
 
-		/*!isset($this->_forbiddenTags['end_datetime'])
+		/*$this->_isTagAvailable('end_datetime')
 			&& */$this->addXmlTag('end_datetime', $this->end_datetime == '0000-00-00 00:00:00'
 				? $this->end_datetime
 				: Core_Date::strftime($oShop->format_datetime, Core_Date::sql2timestamp($this->end_datetime)));
 
-		!isset($this->_forbiddenTags['dir'])
+		$this->_isTagAvailable('dir')
 			&& $this->addXmlTag('dir', Core_Page::instance()->shopCDN . $this->getItemHref());
 
 		if ($this->_showXmlVotes && Core::moduleIsActive('siteuser'))
@@ -2441,14 +2445,14 @@ class Shop_Item_Model extends Core_Entity
 		}
 
 		// Warehouses rest
-		!isset($this->_forbiddenTags['rest']) && $this->addXmlTag('rest', $this->getRest());
+		$this->_isTagAvailable('rest') && $this->addXmlTag('rest', $this->getRest());
 
 		// Reserved
-		!isset($this->_forbiddenTags['reserved']) && $this->addXmlTag('reserved', $oShop->reserve
+		$this->_isTagAvailable('reserved') && $this->addXmlTag('reserved', $oShop->reserve
 			? $this->getReserved()
 			: 0);
 
-		if (!isset($this->_forbiddenTags['getPrices']))
+		if ($this->_isTagAvailable('getPrices'))
 		{
 			// Prices
 			$aPrices = $this->getPrices();
@@ -2462,15 +2466,15 @@ class Shop_Item_Model extends Core_Entity
 					'formatted' => $oShopCurrency->format($aPrices['price_discount']),
 					'formattedWithCurrency' => $oShopCurrency->formatWithCurrency($aPrices['price_discount']))
 				);
-				!isset($this->_forbiddenTags['discount']) && $this->addXmlTag('discount', $aPrices['discount'], array(
+				$this->_isTagAvailable('discount') && $this->addXmlTag('discount', $aPrices['discount'], array(
 					'formatted' => $oShopCurrency->format($aPrices['discount']),
 					'formattedWithCurrency' => $oShopCurrency->formatWithCurrency($aPrices['discount']))
 				);
-				!isset($this->_forbiddenTags['tax']) && $this->addXmlTag('tax', $aPrices['tax'], array(
+				$this->_isTagAvailable('tax') && $this->addXmlTag('tax', $aPrices['tax'], array(
 					'formatted' => $oShopCurrency->format($aPrices['tax']),
 					'formattedWithCurrency' => $oShopCurrency->formatWithCurrency($aPrices['tax']))
 				);
-				!isset($this->_forbiddenTags['price_tax']) && $this->addXmlTag('price_tax', $aPrices['price_tax'], array(
+				$this->_isTagAvailable('price_tax') && $this->addXmlTag('price_tax', $aPrices['price_tax'], array(
 					'formatted' => $oShopCurrency->format($aPrices['price_tax']),
 					'formattedWithCurrency' => $oShopCurrency->formatWithCurrency($aPrices['price_tax']))
 				);
@@ -2503,15 +2507,15 @@ class Shop_Item_Model extends Core_Entity
 			}
 		}
 
-		$this->shop_seller_id && !isset($this->_forbiddenTags['shop_seller']) && $this->addEntity($this->Shop_Seller->clearEntities());
-		$this->shop_producer_id && !isset($this->_forbiddenTags['shop_producer']) && $this->addEntity($this->Shop_Producer->clearEntities());
-		$this->shop_measure_id && !isset($this->_forbiddenTags['shop_measure']) && $this->addEntity($this->Shop_Measure->clearEntities());
+		$this->shop_seller_id && $this->_isTagAvailable('shop_seller') && $this->addEntity($this->Shop_Seller->clearEntities());
+		$this->shop_producer_id && $this->_isTagAvailable('shop_producer') && $this->addEntity($this->Shop_Producer->clearEntities());
+		$this->shop_measure_id && $this->_isTagAvailable('shop_measure') && $this->addEntity($this->Shop_Measure->clearEntities());
 
 		// Barcodes
 		$this->_showXmlBarcodes && $this->addEntities($this->Shop_Item_Barcodes->findAll());
 
 		// Modifications
-		if ($this->_showXmlModifications && !isset($this->_forbiddenTags['modifications']))
+		if ($this->_showXmlModifications && $this->_isTagAvailable('modifications'))
 		{
 			$oShop_Items_Modifications = $this->Modifications;
 
@@ -2730,25 +2734,25 @@ class Shop_Item_Model extends Core_Entity
 				$avgGrade += 1;
 			}
 
-			!isset($this->_forbiddenTags['comments_count']) && $this->addEntity(
+			$this->_isTagAvailable('comments_count') && $this->addEntity(
 				Core::factory('Core_Xml_Entity')
 					->name('comments_count')
 					->value(count($aComments))
 			);
 
-			!isset($this->_forbiddenTags['comments_grade_sum']) && $this->addEntity(
+			$this->_isTagAvailable('comments_grade_sum') && $this->addEntity(
 				Core::factory('Core_Xml_Entity')
 					->name('comments_grade_sum')
 					->value($gradeSum)
 			);
 
-			!isset($this->_forbiddenTags['comments_grade_count']) && $this->addEntity(
+			$this->_isTagAvailable('comments_grade_count') && $this->addEntity(
 				Core::factory('Core_Xml_Entity')
 					->name('comments_grade_count')
 					->value($gradeCount)
 			);
 
-			!isset($this->_forbiddenTags['comments_average_grade']) && $this->addEntity(
+			$this->_isTagAvailable('comments_average_grade') && $this->addEntity(
 				Core::factory('Core_Xml_Entity')
 					->name('comments_average_grade')
 					->value($avgGrade)

@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Structure
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Structure',
@@ -90,4 +90,7 @@ return array(
 	'save_lib_file_error' => 'Unable to save lib file, check access rights.',
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
+	'add_shortcut_title' => 'Create Shortcut',
+	'add_item_shortcut_structure_id' => 'Parent node',
+	'shortcut_success' => "Shortcut added successfully",
 );

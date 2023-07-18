@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Model extends Core_Entity
 {
@@ -86,6 +86,8 @@ class Shop_Model extends Core_Entity
 		'shop_tab' => array(),
 		'shop_comment_property' => array(),
 		'shop_comment_property_dir' => array(),
+		'shop_order_status' => array(),
+		'shop_order_item_status' => array(),
 	);
 
 	/**
@@ -338,6 +340,9 @@ class Shop_Model extends Core_Entity
 		$this->Shop_Comment_Property_Dirs->deleteAll(FALSE);
 		$this->Shop_Comment_Properties->deleteAll(FALSE);
 
+		$this->Shop_Order_Statuses->deleteAll(FALSE);
+		$this->Shop_Order_Item_Statuses->deleteAll(FALSE);
+
 		$this->Shop_Affiliate_Plans->deleteAll(FALSE);
 		$this->Shop_Carts->deleteAll(FALSE);
 		$this->Shop_Favorites->deleteAll(FALSE);
@@ -437,7 +442,7 @@ class Shop_Model extends Core_Entity
 		// Создание директории для Watermark
 		$sWatermarkDirPath = $this->getPath() . '/watermarks';
 
-		if (!is_dir($sWatermarkDirPath))
+		if (!Core_File::isDir($sWatermarkDirPath))
 		{
 			try
 			{
@@ -476,7 +481,7 @@ class Shop_Model extends Core_Entity
 		try
 		{
 			$this->watermark_file != ''
-				&& is_file($this->getWatermarkFilePath())
+				&& Core_File::isFile($this->getWatermarkFilePath())
 				&& Core_File::copy($this->getWatermarkFilePath(), $newObject->getWatermarkFilePath());
 		} catch (Exception $e) {}
 
@@ -710,14 +715,39 @@ class Shop_Model extends Core_Entity
 		$aShop_Producers = $this->Shop_Producers->findAll();
 		foreach ($aShop_Producers as $oShop_Producer)
 		{
-			$newObject->add($oShop_Producer->copy());
+			$oNewShop_Producer = $oShop_Producer->copy();
+			$newObject->add($oNewShop_Producer);
+
+			// Новые пути известны после присвоения shop_id копируемому элементу
+			try
+			{
+				Core_File::copy($oShop_Producer->getLargeFilePath(), $oNewShop_Producer->getLargeFilePath());
+			} catch (Exception $e) {}
+
+			try
+			{
+				Core_File::copy($oShop_Producer->getSmallFilePath(), $oNewShop_Producer->getSmallFilePath());
+			} catch (Exception $e) {}
 		}
 
 		// Копирование продавцов
 		$aShop_Sellers = $this->Shop_Sellers->findAll();
 		foreach ($aShop_Sellers as $oShop_Seller)
 		{
-			$newObject->add($oShop_Seller->copy());
+			$oNewShop_Seller = $oShop_Seller->copy();
+			$newObject->add($oNewShop_Seller);
+
+			try
+			{
+				Core_File::copy($oShop_Seller->getLargeFilePath(), $oNewShop_Seller->getLargeFilePath());
+			}
+			catch (Exception $e) {}
+
+			try
+			{
+				Core_File::copy($oShop_Seller->getSmallFilePath(), $oNewShop_Seller->getSmallFilePath());
+			}
+			catch (Exception $e) {}
 		}
 
 		// Копирование складов
@@ -725,6 +755,69 @@ class Shop_Model extends Core_Entity
 		foreach ($aShop_Warehouses as $oShop_Warehouse)
 		{
 			$newObject->add($oShop_Warehouse->copy());
+		}
+
+		$aOrderReplace = array();
+
+		$oShop_Order_Statuses = $this->Shop_Order_Statuses;
+		$oShop_Order_Statuses->queryBuilder()
+			->clearOrderBy()
+			->orderBy('shop_order_statuses.id');
+
+		$aShop_Order_Statuses = $oShop_Order_Statuses->findAll();
+		foreach ($aShop_Order_Statuses as $oShop_Order_Status)
+		{
+			$oNew_Shop_Order_Status = clone $oShop_Order_Status;
+			$newObject->add($oNew_Shop_Order_Status);
+
+			$aOrderReplace[$oShop_Order_Status->id] = $oNew_Shop_Order_Status;
+		}
+
+		foreach ($aOrderReplace as $old_shop_order_status_id => $oShop_Order_Status_New)
+		{
+			$oShop_Order_Status_New->parent_id
+			&& $oShop_Order_Status_New->parent_id = isset($aOrderReplace[$oShop_Order_Status_New->parent_id])
+				? intval($aOrderReplace[$oShop_Order_Status_New->parent_id]->id)
+				: 0;
+
+			$oShop_Order_Status_New->deadline_shop_order_status_id
+				&& $oShop_Order_Status_New->deadline_shop_order_status_id = isset($aOrderReplace[$oShop_Order_Status_New->deadline_shop_order_status_id])
+					? intval($aOrderReplace[$oShop_Order_Status_New->deadline_shop_order_status_id]->id)
+					: 0;
+
+			$oShop_Order_Status_New->save();
+		}
+
+		$aItemReplaces = array();
+
+		// Статусы товаров заказа
+		$oShop_Order_Item_Statuses = $this->Shop_Order_Item_Statuses;
+		$oShop_Order_Item_Statuses->queryBuilder()
+			->clearOrderBy()
+			->orderBy('shop_order_item_statuses.id');
+
+		$aShop_Order_Item_Statuses = $oShop_Order_Item_Statuses->findAll(FALSE);
+		foreach ($aShop_Order_Item_Statuses as $oShop_Order_Item_Status)
+		{
+			$oNew_Shop_Order_Item_Status = clone $oShop_Order_Item_Status;
+			$newObject->add($oNew_Shop_Order_Item_Status);
+
+			$aItemReplaces[$oShop_Order_Item_Status->id] = $oNew_Shop_Order_Item_Status;
+		}
+
+		foreach ($aItemReplaces as $old_shop_order_item_status_id => $oShop_Order_Item_Status_New)
+		{
+			$oShop_Order_Item_Status_New->parent_id
+			&& $oShop_Order_Item_Status_New->parent_id = isset($aItemReplace[$oShop_Order_Item_Status_New->parent_id])
+				? intval($aItemReplace[$oShop_Order_Item_Status_New->parent_id]->id)
+				: 0;
+
+			$oShop_Order_Item_Status_New->shop_order_status_id
+				&& $oShop_Order_Item_Status_New->shop_order_status_id = isset($aOrderReplace[$oShop_Order_Item_Status_New->shop_order_status_id])
+					? intval($aOrderReplace[$oShop_Order_Item_Status_New->shop_order_status_id]->id)
+					: 0;
+
+			$oShop_Order_Item_Status_New->save();
 		}
 
 		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
@@ -875,6 +968,36 @@ class Shop_Model extends Core_Entity
 	}
 
 	/**
+	 * Shop_Price_Setting object.
+	 * @var object
+	 */
+	protected $_oShop_Price_Setting = NULL;
+
+	/**
+	 * Get $oShop_Price_Setting object
+	 * @return object|NULL
+	 */
+	protected function _getShopPriceSetting()
+	{
+		if (is_null($this->_oShop_Price_Setting))
+		{
+			$oShop_Price_Setting = Core_Entity::factory('Shop_Price_Setting');
+			$oShop_Price_Setting->shop_id = $this->id;
+			$oShop_Price_Setting->number = '';
+			$oShop_Price_Setting->posted = 0;
+			$oShop_Price_Setting->description = Core::_('Shop.set_price_recount_sets');
+			$oShop_Price_Setting->save();
+
+			$oShop_Price_Setting->number = $oShop_Price_Setting->id;
+			$oShop_Price_Setting->save();
+
+			$this->_oShop_Price_Setting = $oShop_Price_Setting;
+		}
+
+		return $this->_oShop_Price_Setting;
+	}
+
+	/**
 	 * Recount sets
 	 * @return self
 	 * @hostcms-event shop.onBeforeRecountSets
@@ -883,16 +1006,6 @@ class Shop_Model extends Core_Entity
 	public function recountSets()
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRecountSets', $this);
-
-		$oShop_Price_Setting = Core_Entity::factory('Shop_Price_Setting');
-		$oShop_Price_Setting->shop_id = $this->id;
-		$oShop_Price_Setting->number = '';
-		$oShop_Price_Setting->posted = 0;
-		$oShop_Price_Setting->description = Core::_('Shop.set_price_recount_sets');
-		$oShop_Price_Setting->save();
-
-		$oShop_Price_Setting->number = $oShop_Price_Setting->id;
-		$oShop_Price_Setting->save();
 
 		$limit = 100;
 		$offset = 0;
@@ -909,13 +1022,18 @@ class Shop_Model extends Core_Entity
 
 			foreach ($aShop_Items as $oShop_Item)
 			{
-				$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
-				$oShop_Price_Setting_Item->shop_price_setting_id = $oShop_Price_Setting->id;
-				$oShop_Price_Setting_Item->shop_price_id = 0;
-				$oShop_Price_Setting_Item->shop_item_id = $oShop_Item->id;
-				$oShop_Price_Setting_Item->old_price = $oShop_Item->price;
-				$oShop_Price_Setting_Item->new_price = $oShop_Item->getSetPrice();
-				$oShop_Price_Setting_Item->save();
+				if ($oShop_Item->price != $oShop_Item->getSetPrice())
+				{
+					$oShop_Price_Setting = $this->_getShopPriceSetting();
+
+					$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
+					$oShop_Price_Setting_Item->shop_price_setting_id = $oShop_Price_Setting->id;
+					$oShop_Price_Setting_Item->shop_price_id = 0;
+					$oShop_Price_Setting_Item->shop_item_id = $oShop_Item->id;
+					$oShop_Price_Setting_Item->old_price = $oShop_Item->price;
+					$oShop_Price_Setting_Item->new_price = $oShop_Item->getSetPrice();
+					$oShop_Price_Setting_Item->save();
+				}
 			}
 
 			$offset += $limit;
@@ -923,7 +1041,7 @@ class Shop_Model extends Core_Entity
 		while (count($aShop_Items));
 
 		// Проводим
-		$oShop_Price_Setting->post();
+		!is_null($this->_oShop_Price_Setting) && $this->_oShop_Price_Setting->post();
 
 		Core_Event::notify($this->_modelName . '.onAfterRecountSets', $this);
 
@@ -1180,7 +1298,7 @@ class Shop_Model extends Core_Entity
 	public function shop_currency_idBackend()
 	{
 		return $this->shop_currency_id
-			? htmlspecialchars($this->Shop_Currency->sign)
+			? htmlspecialchars($this->Shop_Currency->sign != '' ? $this->Shop_Currency->sign : $this->Shop_Currency->name)
 			: '';
 	}
 

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Company
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Company_Location_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -39,8 +39,9 @@ class Company_Location_Controller_Edit extends Admin_Form_Action_Controller_Type
 		parent::_prepareForm();
 
 		$this->title($this->_object->id
-			? Core::_('Company_Location.edit_title', $this->_object->name)
-			: Core::_('Company_Location.add_title'));
+			? Core::_('Company_Location.edit_title', $this->_object->name, FALSE)
+			: Core::_('Company_Location.add_title')
+		);
 
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');

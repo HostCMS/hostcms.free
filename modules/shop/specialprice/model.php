@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Specialprice_Model extends Core_Entity
 {
@@ -101,9 +101,9 @@ class Shop_Specialprice_Model extends Core_Entity
 		$this->clearXmlTags()
 			->addXmlTag('price', $aPrices['price_discount']);
 
-		!isset($this->_forbiddenTags['discount']) && $this->addXmlTag('discount', $aPrices['discount']);
-		!isset($this->_forbiddenTags['tax']) && $this->addXmlTag('tax', $aPrices['tax']);
-		!isset($this->_forbiddenTags['price_tax']) && $this->addXmlTag('price_tax', $aPrices['price_tax']);
+		$this->_isTagAvailable('discount') && $this->addXmlTag('discount', $aPrices['discount']);
+		$this->_isTagAvailable('tax') && $this->addXmlTag('tax', $aPrices['tax']);
+		$this->_isTagAvailable('price_tax') && $this->addXmlTag('price_tax', $aPrices['price_tax']);
 
 		return $this;
 	}

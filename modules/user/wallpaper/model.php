@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage User
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Wallpaper_Model extends Core_Entity
 {
@@ -128,12 +128,12 @@ class User_Wallpaper_Model extends Core_Entity
 	{
 		try
 		{
-			is_file($this->getLargeImageFilePath()) && Core_File::delete($this->getLargeImageFilePath());
+			Core_File::isFile($this->getLargeImageFilePath()) && Core_File::delete($this->getLargeImageFilePath());
 		} catch (Exception $e) {}
 
 		try
 		{
-			is_file($this->getSmallImageFilePath()) && Core_File::delete($this->getSmallImageFilePath());
+			Core_File::isFile($this->getSmallImageFilePath()) && Core_File::delete($this->getSmallImageFilePath());
 		} catch (Exception $e) {}
 
 		$this->image_large = '';
@@ -153,7 +153,7 @@ class User_Wallpaper_Model extends Core_Entity
 		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')
 			->class('fm_preview');
 
-		if (strlen($this->image_small))
+		if ($this->image_small != '')
 		{
 			$oCore_Html_Entity_Div
 				->add(

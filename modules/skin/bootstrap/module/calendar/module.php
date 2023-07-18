@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 {
@@ -47,7 +47,7 @@ class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 	{
 		$type = intval($type);
 		$oModule = Core_Entity::factory('Module')->getByPath($this->_moduleName);
-		$this->_path = "/admin/index.php?ajaxWidgetLoad&moduleId={$oModule->id}&type={$type}";
+		$path = "/admin/index.php?ajaxWidgetLoad&moduleId={$oModule->id}&type={$type}";
 
 		switch ($type)
 		{
@@ -164,9 +164,9 @@ class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 				}
 				else
 				{
-				?><div class="col-xs-12 col-sm-6" id="calendarAdminPage" data-hostcmsurl="<?php echo htmlspecialchars($this->_path)?>">
+				?><div class="col-xs-12 col-sm-6" id="calendarAdminPage" data-hostcmsurl="<?php echo htmlspecialchars($path)?>">
 					<script>
-					$.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#calendarAdminPage') });
+					$.widgetLoad({ path: '<?php echo $path?>', context: $('#calendarAdminPage') });
 					</script>
 				</div>
 				<?php

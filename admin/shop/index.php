@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -73,6 +73,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 			$oShop_Items->queryBuilder()
 				->select('shop_items.*', array(Core_QueryBuilder::expression("IF(shop_items.modification_id, CONCAT((SELECT m.name FROM shop_items AS m WHERE m.id = shop_items.modification_id AND m.deleted = 0), ', ', shop_items.name), shop_items.name)"), 'dataName'))
 				->where('shop_items.shortcut_id', '=', 0)
+				->where('shop_items.deleted', '=', 0)
 				->havingOpen()
 					->having('dataName', 'LIKE', $sQueryLike)
 					->setOr()
@@ -154,10 +155,21 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 					? $oShop_Currency
 					: $oShop_Item->Shop_Currency;
 
+				$name = strval((string) $oShop_Item->name);
+
+				if ($oShop_Item->modification_id)
+				{
+					$name .= ' → ' . htmlspecialchars($oShop_Item->Modification->name) . '';
+				}
+				elseif ($oShop_Item->shortcut_id)
+				{
+					$name .= ' → ' . htmlspecialchars($oShop_Item->Shop_Item->name) . '';
+				}
+
 				$aJSON[] = array(
 					'type' => 'item',
 					'id' => $oShop_Item->id,
-					'label' => $oShop_Item->name,
+					'label' => $name,
 					'price' => $aPrice['price_tax'] - $aPrice['tax'],
 					'price_formatWithCurrency' => $oTmpCurrency->formatWithCurrency($aPrice['price_tax'] - $aPrice['tax']),
 					'price_with_tax' => $aPrice['price_tax'],
@@ -193,7 +205,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 				$aJSON[] = array(
 					'type' => 'delivery',
 					'id' => $oShop_Delivery->id,
-					'label' => $oShop_Delivery->name,
+					'label' => strval((string) $oShop_Delivery->name),
 					'price' => '',
 					'price_with_tax' => '',
 					'rate' => 0,
@@ -224,7 +236,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 				$aJSON[] = array(
 					'type' => 'discount',
 					'id' => $oShop_Purchase_Discount->id,
-					'label' => $oShop_Purchase_Discount->name,
+					'label' => strval((string) $oShop_Purchase_Discount->name),
 					'price' => '',
 					'price_with_tax' => '',
 					'rate' => 0,
@@ -271,28 +283,6 @@ $oAdmin_Form_Entity_Menus->add(
 		->icon('fa fa-book')
 		->add(
 			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Order_Status.model_name'))
-				->icon('fa fa-circle')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref($sOrderStatusFormPath = '/admin/shop/order/status/index.php', NULL, NULL, $sAdditionalParam = "&shop_dir_id=" . intval(Core_Array::getGet('shop_dir_id', 0)))
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax($sOrderStatusFormPath, NULL, NULL, $sAdditionalParam)
-				)
-		)
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Order_Item_Status.model_name'))
-				->icon('fa fa-circle-o')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref($sOrderItemStatusFormPath = '/admin/shop/order/item/status/index.php', NULL, NULL, $sAdditionalParam = "&shop_dir_id=" . intval(Core_Array::getGet('shop_dir_id', 0)))
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax($sOrderItemStatusFormPath, NULL, NULL, $sAdditionalParam)
-				)
-		)
-		->add(
-			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Measure.mesures'))
 				->icon('fa fa-tachometer')
 				->href(
@@ -324,6 +314,17 @@ $oAdmin_Form_Entity_Menus->add(
 					$oAdmin_Form_Controller->getAdminLoadAjax($sCodesFormPath, NULL, NULL, $sAdditionalParam)
 				)
 		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item_Type.title'))
+				->icon('fa-solid fa-list-ol')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref($sTypesFormPath = '/admin/shop/item/type/index.php', NULL, NULL, $sAdditionalParam = "shop_dir_id=" . intval(Core_Array::getGet('shop_dir_id', 0)))
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax($sTypesFormPath, NULL, NULL, $sAdditionalParam)
+				)
+		)
 	)->add(
 	Admin_Form_Entity::factory('Menu')
 	->name(Core::_('Shop.show_finance'))
@@ -347,17 +348,6 @@ $oAdmin_Form_Entity_Menus->add(
 		)
 		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($sCurrenciesFormPath, NULL, NULL, '')
-		)
-	)
-	->add(
-	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Shop_Cashflow.title'))
-		->icon('fa-solid fa-arrow-right-arrow-left')
-		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref($sCashflowsFormPath = '/admin/shop/cashflow/index.php', NULL, NULL, '')
-		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax($sCashflowsFormPath, NULL, NULL, '')
 		)
 	)
 );

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Querybuilder
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_QueryBuilder_Statement
 {
@@ -123,7 +123,10 @@ abstract class Core_QueryBuilder_Statement
 			}
 		}
 
-		return array_unique($array);
+		// prohibited, since the required order of the columns sometimes can be violated
+		//$array = array_unique($array);
+		
+		return $array;
 	}
 
 	/**

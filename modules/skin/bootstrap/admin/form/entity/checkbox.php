@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Checkbox extends Skin_Default_Admin_Form_Entity_Checkbox {
 
@@ -41,7 +41,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Checkbox extends Skin_Default_Admin_Form_
 		{
 			foreach ($this->divAttr as $attrName => $attrValue)
 			{
-				$aDivAttr[] = "{$attrName}=\"" . htmlspecialchars($attrValue) . "\"";
+				$aDivAttr[] = "{$attrName}=\"" . htmlspecialchars((string) $attrValue) . "\"";
 			}
 		}
 
@@ -49,7 +49,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Checkbox extends Skin_Default_Admin_Form_
 
 		if ($this->postingUnchecked)
 		{
-			?><input type="hidden" name="<?php echo htmlspecialchars($this->name)?>" value="0" /><?php
+			?><input type="hidden" name="<?php echo htmlspecialchars((string) $this->name)?>" value="0" /><?php
 		}
 
 		if (count($this->_children))

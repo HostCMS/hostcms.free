@@ -28,6 +28,7 @@ Thumbs.db
 !admin/bot/**
 !admin/calendar/**
 !admin/company/**
+!admin/chartaccount/**
 !admin/constant/**
 !admin/crm/**
 !admin/directory/**
@@ -84,7 +85,7 @@ Thumbs.db
 !hostcmsfiles/style.css
 !images/**
 !install/images/**
-!install/dump_41.sql
+!install/dump_free.sql
 !install/index.php
 !install/licence.txt
 
@@ -94,6 +95,7 @@ Thumbs.db
 !modules/benchmark/**
 !modules/bot/**
 !modules/calendar/**
+!modules/chartaccount/**
 !modules/comment/**
 !modules/company/**
 !modules/constant/**

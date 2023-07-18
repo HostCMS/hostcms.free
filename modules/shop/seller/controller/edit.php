@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Seller_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -106,11 +106,11 @@ class Shop_Seller_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		// Добавляем новое поле типа файл
 		$oImageField = Admin_Form_Entity::factory('File');
 
-		$oLargeFilePath = $this->_object->image_large != '' && is_file($this->_object->getLargeFilePath())
+		$oLargeFilePath = $this->_object->image_large != '' && Core_File::isFile($this->_object->getLargeFilePath())
 			? $this->_object->getLargeFileHref()
 			: '';
 
-		$oSmallFilePath = $this->_object->image_small != '' && is_file($this->_object->getSmallFilePath())
+		$oSmallFilePath = $this->_object->image_small != '' && Core_File::isFile($this->_object->getSmallFilePath())
 			? $this->_object->getSmallFileHref()
 			: '';
 
@@ -151,11 +151,10 @@ class Shop_Seller_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oMainTab->addAfter($oImageField, $oDescriptionField);
 
-		$title = $this->_object->id
-			? Core::_('Shop_Seller.form_sellers_edit_title', $this->_object->name)
-			: Core::_('Shop_Seller.form_sellers_add_title');
-
-		$this->title($title);
+		$this->title($this->_object->id
+			? Core::_('Shop_Seller.form_sellers_edit_title', $this->_object->name, FALSE)
+			: Core::_('Shop_Seller.form_sellers_add_title')
+		);
 
 		return $this;
 	}

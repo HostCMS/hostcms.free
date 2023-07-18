@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_DateTime extends Skin_Default_Admin_Form_Entity_DateTime {
 
@@ -50,7 +50,7 @@ class Skin_Bootstrap_Admin_Form_Entity_DateTime extends Skin_Default_Admin_Form_
 		{
 			foreach ($this->divAttr as $attrName => $attrValue)
 			{
-				$aDivAttr[] = "{$attrName}=\"" . htmlspecialchars($attrValue) . "\"";
+				$aDivAttr[] = "{$attrName}=\"" . htmlspecialchars((string) $attrValue) . "\"";
 			}
 		}
 
@@ -60,7 +60,7 @@ class Skin_Bootstrap_Admin_Form_Entity_DateTime extends Skin_Default_Admin_Form_
 			?><span class="caption"><?php echo $this->caption?></span><?php
 		}
 
-		?><div id="div_<?php echo htmlspecialchars($this->id)?>" class="input-group">
+		?><div id="div_<?php echo htmlspecialchars((string) $this->id)?>" class="input-group">
 			<input <?php echo implode(' ', $aAttr) ?>/>
 			<span class="input-group-addon<?php echo $this->disabled == 'disabled' ? ' disabled'  : ''; ?>">
 				<span class="fa fa-calendar"></span>

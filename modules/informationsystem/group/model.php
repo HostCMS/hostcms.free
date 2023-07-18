@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Group_Model extends Core_Entity
 {
@@ -222,7 +222,7 @@ class Informationsystem_Group_Model extends Core_Entity
 			try {
 				Core::$mainConfig['translate'] && $sTranslated = Core_Str::translate($this->name);
 
-				$this->path = Core::$mainConfig['translate'] && strlen($sTranslated)
+				$this->path = Core::$mainConfig['translate'] && strlen((string) $sTranslated)
 					? $sTranslated
 					: $this->name;
 
@@ -370,13 +370,13 @@ class Informationsystem_Group_Model extends Core_Entity
 		$newObject->save();
 
 		// Существует файл большого изображения для оригинального элемента
-		if (is_file($this->getLargeFilePath()))
+		if (Core_File::isFile($this->getLargeFilePath()))
 		{
 			$newObject->saveLargeImageFile($this->getLargeFilePath(), $this->image_large);
 		}
 
 		// Существует файл малого изображения для оригинального элемента
-		if (is_file($this->getSmallFilePath()))
+		if (Core_File::isFile($this->getSmallFilePath()))
 		{
 			$newObject->saveSmallImageFile($this->getSmallFilePath(), $this->image_small);
 		}
@@ -410,7 +410,7 @@ class Informationsystem_Group_Model extends Core_Entity
 				$oPropertyValue->setDir($this->getGroupPath());
 				$oNewPropertyValue->setDir($newObject->getGroupPath());
 
-				if (is_file($oPropertyValue->getLargeFilePath()))
+				if (Core_File::isFile($oPropertyValue->getLargeFilePath()))
 				{
 					try
 					{
@@ -418,7 +418,7 @@ class Informationsystem_Group_Model extends Core_Entity
 					} catch (Exception $e) {}
 				}
 
-				if (is_file($oPropertyValue->getSmallFilePath()))
+				if (Core_File::isFile($oPropertyValue->getSmallFilePath()))
 				{
 					try
 					{
@@ -595,7 +595,7 @@ class Informationsystem_Group_Model extends Core_Entity
 	 */
 	public function createDir()
 	{
-		if (!is_dir($this->getGroupPath()))
+		if (!Core_File::isDir($this->getGroupPath()))
 		{
 			try
 			{
@@ -617,7 +617,7 @@ class Informationsystem_Group_Model extends Core_Entity
 		// Удаляем файл малого изображения группы
 		$this->deleteSmallImage();
 
-		if (is_dir($this->getGroupPath()))
+		if (Core_File::isDir($this->getGroupPath()))
 		{
 			try
 			{
@@ -634,7 +634,7 @@ class Informationsystem_Group_Model extends Core_Entity
 	public function deleteLargeImage()
 	{
 		$fileName = $this->getLargeFilePath();
-		if ($this->image_large != '' && is_file($fileName))
+		if ($this->image_large != '' && Core_File::isFile($fileName))
 		{
 			try
 			{
@@ -654,7 +654,7 @@ class Informationsystem_Group_Model extends Core_Entity
 	public function deleteSmallImage()
 	{
 		$fileName = $this->getSmallFilePath();
-		if ($this->image_small != '' && is_file($fileName))
+		if ($this->image_small != '' && Core_File::isFile($fileName))
 		{
 			try
 			{
@@ -1151,10 +1151,10 @@ class Informationsystem_Group_Model extends Core_Entity
 	{
 		$this->clearXmlTags();
 
-		!isset($this->_forbiddenTags['url'])
+		$this->_isTagAvailable('url')
 			&& $this->addXmlTag('url', $this->Informationsystem->Structure->getPath() . $this->getPath());
 
-		!isset($this->_forbiddenTags['dir'])
+		$this->_isTagAvailable('dir')
 			&& $this->addXmlTag('dir', Core_Page::instance()->informationsystemCDN . $this->getGroupHref());
 
 		if ($this->_showXmlProperties)

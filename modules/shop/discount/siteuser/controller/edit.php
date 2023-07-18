@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Discount_Siteuser_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -120,11 +120,10 @@ class Shop_Discount_Siteuser_Controller_Edit extends Admin_Form_Action_Controlle
 
 		$oMainRow2->add(Admin_Form_Entity::factory('Code')->html($html));
 
-		$title = $this->_object->id
+		$this->title($this->_object->id
 			? Core::_('Shop_Discount_Siteuser.edit_title')
-			: Core::_('Shop_Discount_Siteuser.add_title');
-
-		$this->title($title);
+			: Core::_('Shop_Discount_Siteuser.add_title')
+		);
 
 		return $this;
 	}

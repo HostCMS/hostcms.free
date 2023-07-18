@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Report_Controller
 {
@@ -701,7 +701,8 @@ class Shop_Report_Controller
 			$oShop_Warrants = Core_Entity::factory('Shop_Warrant');
 			$oShop_Warrants->queryBuilder()
 				->where('shop_warrants.shop_id', '=', self::$_shop_id)
-				->where('shop_warrants.active', '=', 1);
+				->where('shop_warrants.type', 'IN', array(0, 3)) // Расходный кассовый ордер и исходящий платеж
+				->where('shop_warrants.posted', '=', 1);
 
 			$aShop_Warrants = $oShop_Warrants->findAll(FALSE);
 			foreach ($aShop_Warrants as $oShop_Warrant)

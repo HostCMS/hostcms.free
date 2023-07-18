@@ -114,9 +114,10 @@ if (!is_null(Core_Array::getPost('anonymousmaillist')))
 			if (Core_Array::getPost("maillist_{$oMaillists->id}"))
 			{
 				// Пользователь не был подписан
-				is_null($oMaillist_Siteuser) && $oMaillist_Siteuser = Core_Entity::factory('Maillist_Siteuser')->siteuser_id($oSiteuser->id)->maillist_id($oMaillists->id);
+				is_null($oMaillist_Siteuser)
+					&& $oMaillist_Siteuser = Core_Entity::factory('Maillist_Siteuser')->siteuser_id($oSiteuser->id)->maillist_id($oMaillists->id);
 
-				$oMaillist_Siteuser->type = Core_Array::getPost("type_{$oMaillists->id}") == 0 ? 0 : 1;
+				$oMaillist_Siteuser->type = Core_Array::getPost("type_{$oMaillists->id}", 0, 'int') == 0 ? 0 : 1;
 				$oMaillist_Siteuser->save();
 
 			}

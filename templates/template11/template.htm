@@ -87,15 +87,15 @@
 			}
 
 			$Shop_Controller_Show
-				//Фильтровать по ярлыкам
+				//->warehouseMode('in-stock-modification')
 				->subgroups(FALSE)
+				//Фильтровать по ярлыкам
 				->filterShortcuts(TRUE)
 				->addProducers()
 				->filterCounts(TRUE)
 				->modificationsList(TRUE)
 				->modificationsGroup(TRUE)
 				->addMinMaxPrice()
-				
 				->itemsPropertiesListJustAvailable(TRUE)
 				//->applyFilter()
 				->show();

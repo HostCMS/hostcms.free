@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Document
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Document_Model extends Core_Entity
 {
@@ -82,7 +82,7 @@ class Document_Model extends Core_Entity
 	 */
 	public function adminTemplateBackend()
 	{
-		return htmlspecialchars($this->Template->name);
+		return htmlspecialchars((string) $this->Template->name);
 	}
 
 	/**
@@ -152,7 +152,7 @@ class Document_Model extends Core_Entity
 			return $eventResult;
 		}
 
-		$oSearch_Page->text = htmlspecialchars($this->name) . ' ' . $this->text;
+		$oSearch_Page->text = htmlspecialchars((string) $this->name) . ' ' . $this->text;
 
 		$oSearch_Page->title = $this->name;
 
@@ -167,7 +167,7 @@ class Document_Model extends Core_Entity
 					if ($oField_Value->value != 0)
 					{
 						$oList_Item = $oField_Value->List_Item;
-						$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ' . htmlspecialchars($oList_Item->description) . ' ';
+						$oList_Item->id && $oSearch_Page->text .= htmlspecialchars((string) $oList_Item->value) . ' ' . htmlspecialchars((string) $oList_Item->description) . ' ';
 					}
 				}
 				// Informationsystem
@@ -314,8 +314,9 @@ class Document_Model extends Core_Entity
 		$checkPanel = Core::checkPanel() && ($oUser = Core_Auth::getCurrentUser())
 			&& ($oSite = Core_Entity::factory('Site', CURRENT_SITE))
 			&& $oUser->checkModuleAccess(array('document'), $oSite)
-			&& $oUser->checkObjectAccess($this);
-		
+			&& $oUser->checkObjectAccess($this)
+			&& (!defined('FRONTEND_WYSIWYG') || FRONTEND_WYSIWYG);
+
 		if ($checkPanel)
 		{
 			?><div hostcms:id="<?php echo intval($this->id)?>" hostcms:field="editInPlace" hostcms:entity="document" hostcms:type="wysiwyg"><?php

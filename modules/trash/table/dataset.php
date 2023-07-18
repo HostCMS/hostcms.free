@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Trash
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Trash_Table_Dataset extends Admin_Form_Dataset
 {
@@ -63,6 +63,8 @@ class Trash_Table_Dataset extends Admin_Form_Dataset
 				->offset(0)
 				->asAssoc();
 
+			$this->_applyConditions($objects->queryBuilder());
+
 			$Core_DataBase = $objects->queryBuilder()->execute();
 
 			$row = $Core_DataBase->current();
@@ -96,6 +98,25 @@ class Trash_Table_Dataset extends Admin_Form_Dataset
 	}
 
 	/**
+	 * Apply Conditions
+	 * @param object $oQB
+	 * @return self
+	 */
+	protected function _applyConditions($oQB)
+	{
+		// Conditions
+		foreach ($this->_conditions as $condition)
+		{
+			foreach ($condition as $operator => $args)
+			{
+				call_user_func_array(array($oQB, $operator), $args);
+			}
+		}
+		
+		return $this;
+	}
+
+	/**
 	 * Load data
 	 * @param int $id items ID filter
 	 * @return self
@@ -113,6 +134,8 @@ class Trash_Table_Dataset extends Admin_Form_Dataset
 				->clear()
 				->where('deleted', '=', 1)
 				->clearOrderBy();
+
+			$this->_applyConditions($objects->queryBuilder());
 
 			if ($this->_limit)
 			{

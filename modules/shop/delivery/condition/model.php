@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Delivery_Condition_Model extends Core_Entity
 {
@@ -232,6 +232,28 @@ class Shop_Delivery_Condition_Model extends Core_Entity
 	{
 		$this->active = 1 - $this->active;
 		return $this->save();
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function time_fromBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return date("H:i", strtotime($this->time_from));
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function time_toBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return date("H:i", strtotime($this->time_to));
 	}
 
 	/**

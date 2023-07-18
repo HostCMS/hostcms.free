@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -53,7 +53,7 @@ $oAdmin_Form_Controller->addEntity(
 // Глобальный поиск
 $additionalParams = 'shop_id=' . $shop_id . '&shop_group_id=' . $shop_group_id;
 
-$sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
+$sGlobalSearch = Core_Array::getGet('globalSearch', '', 'trim');
 
 $oAdmin_Form_Controller->addEntity(
 	Admin_Form_Entity::factory('Code')
@@ -70,7 +70,7 @@ $oAdmin_Form_Controller->addEntity(
 		')
 );
 
-$sGlobalSearch = Core_DataBase::instance()->escapeLike($sGlobalSearch);
+$sGlobalSearch = str_replace(' ', '%', Core_DataBase::instance()->escapeLike($sGlobalSearch));
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
@@ -321,6 +321,10 @@ if (strlen($sGlobalSearch))
 			->addCondition(array('where' => array('properties.id', '=', $sGlobalSearch)))
 			->addCondition(array('setOr' => array()))
 			->addCondition(array('where' => array('properties.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('properties.guid', '=', $sGlobalSearch)))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('properties.tag_name', '=', $sGlobalSearch)))
 		->addCondition(array('close' => array()));
 }
 else

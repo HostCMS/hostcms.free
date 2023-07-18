@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Str
 {
@@ -455,12 +455,32 @@ class Core_Str
 		// Разделять числа и символы
 		if ($aConfig['splitNumberAndAlpha'])
 		{
-			$replace = array(
+			/*$replace = array(
 				"/([a-zA-Zа-яА-ЯёЁ])([0-9])/iu" => '\\1 \\2',
 				"/([0-9])([a-zA-Zа-яА-ЯёЁ])/iu" => '\\1 \\2'
 			);
 
-			$text = preg_replace(array_keys($replace), array_values($replace), $text);
+			$text = preg_replace(array_keys($replace), array_values($replace), $text);*/
+
+			$replace = array(
+				"/([a-zA-Zа-яА-ЯёЁ]+)([0-9]+)/iu",
+				"/([0-9]+)([a-zA-Zа-яА-ЯёЁ]+)/iu"
+			);
+
+			// ABC123 => ABC AB A 123 12 1
+			$text = preg_replace_callback($replace, function($matches) {
+				$return = '';
+
+				for ($m = 1; $m < 3; $m++)
+				{
+					$return .= ' ' . $matches[$m];
+					for ($len = mb_strlen($matches[$m]) - 1; $len > 0; $len--)
+					{
+						$return .= ' '. mb_substr($matches[$m], 0, $len);
+					}
+				}
+				return trim($return);
+			}, $text);
 		}
 
 		$text = str_replace(array("\n", "\r"), array(' ', ''), $text);
@@ -788,15 +808,22 @@ class Core_Str
 	/**
 	 * Get Color By Entity ID
 	 * @param int $id Entity ID
-	 * @param int $maxColor Max color, 0-255, default 210
+	 * @param int $maxColor Max color, 0-255, default 250
 	 * @return string HEX color, e.g. #B781AF
 	 */
-	static public function createColor($id, $maxColor = 210)
+	static public function createColor($id, $maxColor = 250)
 	{
+		$maxColorItem = $maxColor / 3;
 		$crc32 = abs(Core::crc32($id));
+		$iLast = 90;
+		$mod = $crc32 % $iLast;
 
 		return self::rgb2hex(
-			Core_Array::randomShuffle(array($crc32 % intval($maxColor / 4), $maxColor, $crc32 % $maxColor), $id % 6)
+			Core_Array::randomShuffle(array(
+									$maxColorItem / $iLast * $mod,
+				$maxColorItem + 	$maxColorItem / $iLast * $mod,
+				$maxColorItem * 2 + $maxColorItem / $iLast * $mod
+			), $id)
 		);
 	}
 
@@ -1620,5 +1647,97 @@ class Core_Str
 	public static function hideZeros($str)
 	{
 		return str_replace(array(self::getDecimalSeparator() . '00', self::getDecimalSeparator() . '000'), '', strval($str));
+	}
+
+	/**
+	 * Convert html to text
+	 * @param string $text
+	 * @return string
+	 */
+	public static function convertHtmlToText($text)
+	{
+		// Преобразуем пробелы и переводы строк после тегов
+		$text = str_replace(
+			array(">\r", ">\n", "\r", "\n", "&nbsp;", "&#xA0;"),
+			array('>', '>', ' ', ' ', ' ', ' '),
+			$text
+		);
+
+		// Убираем теги вместе с содержимым
+		$aSearchReplace = array(
+			"'<script[^>]*?>.*?</script>'siu" => '',
+			"'<style[^>]*?>.*?</style>'siu" => '',
+			"'<select[^>]*?>.*?</select>'siu" => '',
+			"'<head[^>]*?>.*?</head>'siu" => '',
+			"'[\n\t]+'" => ' ',
+			"'<br[^>]*>'siu" => "\n",
+			"'<div[^>]*>'siu" => "\n\n",
+			"'<p[^>]*>'siu" => "\n\n",
+			"'(<ul[^>]*>|</ul>)'siu" => "\n\n",
+			"'(<ol[^>]*>|</ol>)'siu" => "\n\n",
+			"'(<dl[^>]*>|</dl>)'siu" => "\n\n",
+			"'<li[^>]*>(.*?)</li>'siu" => "\t* \\1\n",
+			"'<li[^>]*>'siu" => "\n\t* ",
+			"'<dd[^>]*>(.*?)</dd>'siu" => " \\1\n",
+			"'<dt[^>]*>(.*?)</dt>'siu" => "\t* \\1",
+			"'<hr[^>]*>'siu" => "\n-------------------------------\n",
+			"'(<table[^>]*>|</table>)'siu" => "\n\n",
+			"'(<tr[^>]*>|</tr>)'siu" => "\n",
+			"'<td[^>]*>(.*?)</td>'siu" => "\t\t\\1\n",
+		);
+
+		$text = preg_replace(array_keys($aSearchReplace), array_values($aSearchReplace), $text);
+
+		// Обрезаем теги
+		$text = strip_tags($text);
+
+		// Преобразуем html-сущности
+		$text = html_entity_decode($text, ENT_COMPAT, 'UTF-8');
+
+		/*
+		U+2002	 	e2 80 82	EN SPACE
+		U+2003	 	e2 80 83	EM SPACE
+		U+2004	 	e2 80 84	THREE-PER-EM SPACE
+		U+2005	 	e2 80 85	FOUR-PER-EM SPACE
+		U+2006	 	e2 80 86	SIX-PER-EM SPACE
+		U+2007	 	e2 80 87	FIGURE SPACE
+		U+2008	 	e2 80 88	PUNCTUATION SPACE
+		U+2009	 	e2 80 89	THIN SPACE
+		U+200A	 	e2 80 8a	HAIR SPACE
+		U+200B	​	e2 80 8b	ZERO WIDTH SPACE
+		U+200C	‌	e2 80 8c	ZERO WIDTH NON-JOINER
+		U+200D	‍	e2 80 8d	ZERO WIDTH JOINER
+		*/
+		$text = str_replace(array("\xE2\x80\x82", "\xE2\x80\x83", "\xE2\x80\x84", "\xE2\x80\x85", "\xE2\x80\x86", "\xE2\x80\x87", "\xE2\x80\x88", "\xE2\x80\x89", "\xE2\x80\x8A", "\xE2\x80\x8B", "\xE2\x80\x8C", "\xE2\x80\x8D"), ' ', $text);
+
+		while (strpos($text, '  ') !== FALSE)
+		{
+			$text = str_replace('  ', ' ', $text);
+		}
+
+		$text = implode("\n", array_map('rtrim', explode("\n", $text)));
+
+		$text = preg_replace("'\n\s+\n'", "\n\n", $text);
+		$text = preg_replace("'[\n]{3,}'", "\n\n", $text);
+
+		return trim($text);
+	}
+
+	/**
+	 * Convert text to html
+	 * @param string $text
+	 * @return string
+	 */
+	public static function convertTextToHtml($text)
+	{
+		// Преобразуем html-сущности
+		$text = htmlspecialchars($text);
+
+		// Заменяем переводы строк
+		$text = nl2br($text);
+		$text = str_replace("\r", "", $text);
+		$text = str_replace("\n", "", $text);
+
+		return trim($text);
 	}
 }

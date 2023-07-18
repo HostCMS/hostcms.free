@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -16,6 +16,8 @@ $iAdmin_Form_Id = 173;
 $sAdminFormAction = '/admin/tag/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
+
+$tag_dir_id = intval(Core_Array::getGet('tag_dir_id', 0));
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
@@ -56,11 +58,29 @@ $oAdmin_Form_Entity_Menus->add(
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 
+
+// Глобальный поиск
+$additionalParams = 'tag_dir_id=' . $tag_dir_id;
+
+$sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
+
+$oAdmin_Form_Controller->addEntity(
+	Admin_Form_Entity::factory('Code')
+		->html('
+			<div class="row search-field margin-bottom-20">
+				<div class="col-xs-12">
+					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
+						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
+						<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
+						<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '"><i class="fa-solid fa-magnifying-glass fa-fw"></i></button>
+					</form>
+				</div>
+			</div>
+		')
+);
+
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
-
-// Строка навигации
-$tag_dir_id = intval(Core_Array::getGet('tag_dir_id', 0));
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs->add(
@@ -238,12 +258,20 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Tag_Dir')
 );
 
-// Ограничение источника 0 по родительской группе
-$oAdmin_Form_Dataset->addCondition(
-	array('where' =>
-		array('parent_id', '=', $tag_dir_id)
-	)
-);
+if (strlen($sGlobalSearch))
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('open' => array()))
+		->addCondition(array('where' => array('tag_dirs.id', '=', $sGlobalSearch)))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('tag_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
+}
+else
+{
+	// Ограничение источника 0 по родительской группе
+	$oAdmin_Form_Dataset->addCondition(array('where' => array('tag_dirs.parent_id', '=', $tag_dir_id)));
+}
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(
@@ -255,17 +283,29 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Tag')
 );
 
+if (strlen($sGlobalSearch))
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('open' => array()))
+		->addCondition(array('where' => array('tags.id', '=', $sGlobalSearch)))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('tags.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('tags.path', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
+}
+else
+{
+	// Ограничение источника 1 по родительской группе
+	$oAdmin_Form_Dataset->addCondition(array('where' => array('tags.tag_dir_id', '=', $tag_dir_id)));
+}
+
+$oAdmin_Form_Dataset->changeField('name', 'type', 1);
+
 // Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
 !$oUser->superuser && $oUser->only_access_my_own
 	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
-
-// Ограничение источника 1 по родительской группе
-$oAdmin_Form_Dataset->addCondition(
-	array('where' =>
-		array('tag_dir_id', '=', $tag_dir_id)
-	)
-)->changeField('name', 'type', 1);
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(
