@@ -11,7 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controller
 {
@@ -196,6 +196,51 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 
 		return $this;
 	}
+	
+	/**
+	 * Get all tabs
+	 * @return array
+	 */
+	public function getTabs()
+	{
+		return $this->_tabs;
+	}
+
+	/**
+	 * Get tab
+	 * @param string $tabName
+	 * @return Admin_Form_Entity_Tab
+	 */
+	public function getTab($tabName)
+	{
+		foreach ($this->_tabs as $oTab)
+		{
+			if ($oTab->name == $tabName)
+			{
+				return $oTab;
+			}
+		}
+
+		throw new Core_Exception("Tab %tab does not exist.", array('%tab' => $tabName));
+	}
+	
+	/**
+	 * Check is tab isset
+	 * @param string $tabName tab name
+	 * @return boolean
+	 */
+	public function issetTab($tabName)
+	{
+		foreach ($this->_tabs as $oTab)
+		{
+			if ($oTab->name == $tabName)
+			{
+				return TRUE;
+			}
+		}
+
+		return FALSE;
+	}
 
 	/**
 	 * Move tab before some another tab
@@ -240,7 +285,13 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 			// Порядковый номер для найденного символьного ключа
 			$key = array_search($key, $aArrayKeys, TRUE);
 
-			array_splice($this->_tabs, $key, 0, array($oAdmin_Form_Entity_Tab->name => $oAdmin_Form_Entity_Tab));
+			array_splice($this->_tabs, $key, 0, array(/*$oAdmin_Form_Entity_Tab->name =>*/ $oAdmin_Form_Entity_Tab));
+
+			// Keys in the replacement array of the array_splice are not preserved, change key manually
+			$aArrayKeys = array_keys($this->_tabs);
+			$aArrayKeys[$key] = $oAdmin_Form_Entity_Tab->name;
+			$this->_tabs = array_combine($aArrayKeys, $this->_tabs);
+
 			return $this;
 		}
 
@@ -264,7 +315,13 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 			// Порядковый номер для найденного символьного ключа
 			$key = array_search($key, $aArrayKeys, TRUE);
 
-			array_splice($this->_tabs, $key + 1, 0, array($oAdmin_Form_Entity_Tab->name => $oAdmin_Form_Entity_Tab));
+			array_splice($this->_tabs, $key + 1, 0, array(/*$oAdmin_Form_Entity_Tab->name =>*/ $oAdmin_Form_Entity_Tab));
+
+			// Keys in the replacement array of the array_splice are not preserved, change key manually
+			$aArrayKeys = array_keys($this->_tabs);
+			$aArrayKeys[$key + 1] = $oAdmin_Form_Entity_Tab->name;
+			$this->_tabs = array_combine($aArrayKeys, $this->_tabs);
+
 			return $this;
 		}
 
@@ -278,51 +335,6 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 	public function getFields()
 	{
 		return $this->_fields;
-	}
-
-	/**
-	 * Get all tabs
-	 * @return array
-	 */
-	public function getTabs()
-	{
-		return $this->_tabs;
-	}
-
-	/**
-	 * Check is tab isset
-	 * @param string $tabName tab name
-	 * @return boolean
-	 */
-	public function issetTab($tabName)
-	{
-		foreach ($this->_tabs as $oTab)
-		{
-			if ($oTab->name == $tabName)
-			{
-				return TRUE;
-			}
-		}
-
-		return FALSE;
-	}
-
-	/**
-	 * Get tab
-	 * @param string $tabName
-	 * @return Admin_Form_Entity_Tab
-	 */
-	public function getTab($tabName)
-	{
-		foreach ($this->_tabs as $oTab)
-		{
-			if ($oTab->name == $tabName)
-			{
-				return $oTab;
-			}
-		}
-
-		throw new Core_Exception("Tab %tab does not exist.", array('%tab' => $tabName));
 	}
 
 	/**
@@ -920,23 +932,30 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 						: intval($value);
 			break;
 			case 'decimal':
-				$value = str_replace(',', '.', $value);
-
-				// Remove everything except numbers and dot
-				$value = preg_replace('/[^0-9\.\-]/', '', $value);
-
-				$value == '' && $value = 0;
-
-				if ($value != 0 && isset($columnArray['max_length']))
+				if (!is_null($value))
 				{
-					$aMaxLength = explode(',', $columnArray['max_length']);
-					if (count($aMaxLength) == 2)
-					{
-						$maxValue = str_repeat(9, $aMaxLength[0] - $aMaxLength[1]) . '.' . str_repeat(9, $aMaxLength[1]);
+					$value = str_replace(',', '.', $value);
 
-						$value > $maxValue && $value = $maxValue;
-						$value < -$maxValue && $value = -$maxValue;
+					// Remove everything except numbers and dot
+					$value = preg_replace('/[^0-9\.\-]/', '', $value);
+
+					$value == '' && $value = 0;
+
+					if ($value != 0 && isset($columnArray['max_length']))
+					{
+						$aMaxLength = explode(',', $columnArray['max_length']);
+						if (count($aMaxLength) == 2)
+						{
+							$maxValue = str_repeat(9, $aMaxLength[0] - $aMaxLength[1]) . '.' . str_repeat(9, $aMaxLength[1]);
+
+							$value > $maxValue && $value = $maxValue;
+							$value < -$maxValue && $value = -$maxValue;
+						}
 					}
+				}
+				else
+				{
+					$value = 0;
 				}
 			break;
 			default:
@@ -1043,9 +1062,12 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 	/**
 	 * Get Admin_Form_Entity_Tabs
 	 * @return Admin_Form_Entity_Tabs|NULL
+	 * @hostcms-event Admin_Form_Action_Controller_Type_Edit.getAdmin_Form_Entity_Tabs
 	 */
 	protected function _getAdmin_Form_Entity_Tabs()
 	{
+		Core_Event::notify('Admin_Form_Action_Controller_Type_Edit.getAdmin_Form_Entity_Tabs', $this, array($this->_Admin_Form_Controller));
+
 		// Закладки
 		if (count($this->_tabs))
 		{

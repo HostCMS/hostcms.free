@@ -53,5 +53,7 @@ return array(
 	'markDeleted' => 'Видалити групу',
 	'shortcut_success' => "Ярлик групи успішно доданий",
 	'change_attributes_success' => 'Атрибути змінені успішно!',
-	'items_total_count' => 'Кількість активних товарів'
+	'items_total_count' => 'Кількість активних товарів',
+	'seo_group_h1_template' => 'Шаблон H1',
+	'seo_item_h1_template' => 'Шаблон H1',
 );

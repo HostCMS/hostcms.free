@@ -493,6 +493,11 @@ div.form-group .caption {
 	user-select: none;
 }
 div.form-group acronym { text-decoration: none; /*border-bottom: 1px dashed #D0D0D0;*/ cursor: help }
+/* div.form-group .tooltip {
+	width: 100%;
+} */
+
+div.form-group .tooltip-inner { max-width: 700px;}
 
 .radio-inline, .checkbox-inline {padding-left: 2px}
 
@@ -5999,7 +6004,7 @@ li.autocomplete-suggestion .name { font-weight: 600 }
 li.autocomplete-suggestion .name a { color: #333; }
 /* li.autocomplete-suggestion .price { width: 25% } */
 li.autocomplete-suggestion:nth-child(2n) { background-color: #f5f5f5 }
-li.autocomplete-suggestion:hover { background-color: #f7feff }
+li.autocomplete-suggestion:hover, li.autocomplete-suggestion:active, li.autocomplete-suggestion:focus, .ui-state-active { background-color: #f7feff }
 
 
 .tickets-container .tickets-list .ticket-item .ticket-time {
@@ -6784,7 +6789,7 @@ a#register-button, a.more-info-link, a#recount-button /* , .more-info-link:hover
 	margin-left: 5px;
 }
 .ui-sortable .placeholder { background-color: #f2f2f2; border: 1px dashed #ccc; height: 50px; margin-bottom: 5px; border-radius: 10px; }
-.ui-sortable .row:hover { cursor: move }
+.ui-sortable .row:hover, .ui-sortable .media-item { cursor: move }
 
 #start-workflow-button {
 	color: #8ecc4c;
@@ -7482,7 +7487,7 @@ ul.sql-user-tabs .fa-xmark {
 ul.sql-user-tabs .fa-xmark:hover {
 	cursor: pointer;
 }
-.shop-document-related-select:hover {
+.shop-document-related-select:hover, .production-stage-select:hover {
 	cursor: pointer;
 }
 
@@ -7552,6 +7557,206 @@ ul.sql-user-tabs .fa-xmark:hover {
 }
 .editable-unsaved {
 	font-weight: initial !important;
+}
+
+i.property-info {
+	color: #ccc;
+	margin-left: 5px;
+}
+
+.badge.badge-media-type {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.badge.badge-media-type0 {
+	border: 1px solid #babec4;
+	color: #95989d;
+	background-color: #f6f7f7;
+}
+.badge.badge-media-type1 {
+	border: 1px solid #90d46c;
+	color: #74aa57;
+	background-color: #f1f9ed;
+}
+.badge.badge-media-type2 {
+	border: 1px solid #49c8fa;
+	color: #3ba0c8;
+	background-color: #e9f8fe;
+}
+.badge.badge-media-type3 {
+	border: 1px solid #fb6e52;
+	color: #c95842;
+	background-color: #feedea;
+}
+.badge.badge-media-type4 {
+	border: 1px solid #ccc539;
+	color: #a49e2e;
+	background-color: #f8f8e7;
+}
+
+.media-wrapper {
+	display: flex;
+	/* align-items: center; */
+	align-items: stretch;
+	flex-wrap: wrap;
+	margin-top: 20px;
+	gap: 20px;
+}
+.media-wrapper .media-item {
+	box-shadow: 1px 0 3px 1px rgba(0,0,0,.1);
+}
+.media-item .media-item-file {
+	background-color: #fff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+}
+.media-wrapper .media-item .media-item-file.media-item-file-type1 {
+	background-image: url('/admin/images/tgrid.png');
+	background-repeat: no-repeat;
+}
+.media-wrapper .media-item .media-item-file i {
+	font-size: 150px;
+}
+.media-wrapper .media-item .media-item-file .select-file {
+	left: 10px;
+	top: 10px;
+	z-index: 1;
+	opacity: 1;
+	margin: 0;
+}
+.media-wrapper .media-item-info {
+	padding: 5px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+.media-wrapper .media-item-info .media-attributes-name {
+	font-weight: 600;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	max-width: 110px;
+}
+.media-wrapper .media-item-info .media-attributes-size {
+	color: #999;
+	font-size: 85%;
+	margin-top: 5px;
+}
+.media-wrapper .media-item-info .media-attributes-type {
+	margin-left: 20px;
+}
+.media-wrapper .media-item-file-actions {
+	/* font-size: 14px !important; */
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	/* opacity: .5; */
+	display: flex;
+	align-items: center;
+}
+.media-wrapper .media-item-file-actions .media-item-file-action {
+	font-size: 14px !important;
+	/* background-color: #fff; */
+	border-radius: 2px;
+}
+.media-wrapper .media-item-file-actions .media-item-file-action-wrapper {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 5px;
+	border-radius: 50%;
+	background-color: #f7f7f7dd;
+	width: 24px;
+}
+.media-wrapper .media-item-file-actions .media-item-file-action-wrapper.delete {
+	color: #ed4e2a;
+}
+.media-wrapper .media-item-file-actions .media-item-file-action-wrapper.edit {
+	color: #53a93f;
+	margin-right: 5px;
+}
+.media-wrapper .media-item-file-delete:hover, .media-wrapper .media-item-file-edit:hover {
+	cursor: pointer;
+	opacity: 1;
+}
+.select-file-wrapper {
+	position: absolute;
+	background-color: #fff;
+	border-radius: 50%;
+	width: 100px;
+	height: 100px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	opacity: 0;
+	transition: all 0.2s ease 0s;
+	cursor: pointer;
+}
+.select-file-wrapper i {
+	font-size: 80px !important;
+	color: #53a93f;
+}
+.media-item-file:hover .select-file-wrapper {
+	opacity: .8;
+}
+
+.media-groups-wrapper {
+	display: grid;
+	grid-template-columns: repeat(4, calc(25% - 15px));
+	gap: 20px;
+}
+.media-groups-wrapper .media-groups-item {
+	display: flex;
+	align-items: center;
+	background-color: #fff;
+	padding: 10px;
+	border: 1px solid #f1f1f1;
+	border-radius: 5px;
+	position: relative;
+}
+.media-groups-wrapper .media-groups-item-image i {
+	font-size: 25px;
+	margin-right: 10px;
+	color: #57b5e3;
+}
+.media-groups-wrapper .media-groups-name a {
+	color: #333;
+}
+.media-groups-wrapper .media-groups-name a:hover {
+	cursor: pointer;
+}
+.media-groups-wrapper .media-groups-item .media-groups-item-actions {
+	position: absolute;
+	right: 10px;
+	top: 5px;
+	color: #ccc;
+	font-size: 11px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.media-groups-wrapper .media-groups-item .media-groups-item-actions i:first-child {
+	margin-right: 5px;
+}
+.media-groups-wrapper .media-groups-item .media-groups-item-actions i:hover {
+	cursor: pointer;
+}
+.media-groups-wrapper .media-groups-item .media-groups-item-actions i.fa-pen:hover {
+	color: #53a93f;
+}
+.media-groups-wrapper .media-groups-item .media-groups-item-actions i.fa-trash:hover {
+	color: #ed4e2a;
+}
+
+.checkbox-inline, .checkbox-inline input[type="checkbox"] ~ .text {
+	position: initial !important;
+}
+
+.fa.fa-small {
+	font-size: 75% !important;
 }
 
 @media (max-width: 767px) {

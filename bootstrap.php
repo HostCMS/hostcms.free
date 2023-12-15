@@ -51,6 +51,7 @@ if (Core_Auth::logged())
 // Core_Event::attach('Shop_Payment_System_Handler.onAfterProcessOrder', array('Shop_Observer_Robokassa', 'onAfterProcessOrder'));
 
 // Core_Database::instance()->query("SET SESSION sql_mode = ''");
+// Core_Database::instance()->query('SET SESSION wait_timeout = 120');
 
 // Windows locale
 //setlocale(LC_ALL, array ('ru_RU.utf-8', 'rus_RUS.utf8'));

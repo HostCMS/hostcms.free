@@ -274,10 +274,17 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	 * @param string $tag tag
 	 * @return self
 	 */
-	public function addForbiddenTag($tag)
+	public function addForbiddenTag($path, $tag = NULL)
 	{
-		$this->_forbiddenTags[$tag] = $tag;
-		return $this;
+		// Backward compatibility
+		if (is_null($tag))
+		{
+			$tag = $path;
+			$path = '/shop/offers/offer';
+		}
+		/*$this->_forbiddenTags[$tag] = $tag;
+		return $this;*/
+		return parent::addForbiddenTag($path, $tag);
 	}
 
 	/**
@@ -285,14 +292,21 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	 * @param string $tag tag
 	 * @return self
 	 */
-	public function removeForbiddenTag($tag)
+	public function removeForbiddenTag($path, $tag = NULL)
 	{
-		if (isset($this->_forbiddenTags[$tag]))
+		// Backward compatibility
+		if (is_null($tag))
+		{
+			$tag = $path;
+			$path = '/shop/offers/offer';
+		}
+
+		/*if (isset($this->_forbiddenTags[$tag]))
 		{
 			unset($this->_forbiddenTags[$tag]);
 		}
-
-		return $this;
+		return $this;*/
+		return parent::removeForbiddenTag($path, $tag);
 	}
 
 	/**
@@ -300,11 +314,19 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	 * @param array $aTags array of tags
 	 * @return self
 	 */
-	public function addForbiddenTags(array $aTags)
+	//public function addForbiddenTags(array $aTags)
+	public function addForbiddenTags($path, array $aTags = array())
 	{
-		$this->_forbiddenTags = array_merge($this->_forbiddenTags, array_combine($aTags, $aTags));
+		// Backward compatibility
+		if (is_array($path))
+		{
+			$aTags = $path;
+			$path = '/shop/offers/offer';
+		}
 
-		return $this;
+		//$this->_forbiddenTags = array_merge($this->_forbiddenTags, array_combine($aTags, $aTags));
+		//return $this;
+		return parent::addForbiddenTags($path, $aTags);
 	}
 
 	/**
@@ -925,7 +947,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		/* Цена */
 		$this->write('<price>' . ($aPrices['price_discount']) . '</price>'. "\n");
 
-		if ($aPrices['discount'] > 0 && !isset($this->_forbiddenTags['discount']))
+		if ($aPrices['discount'] > 0 && !$this->isForbiddenTag('/shop/offers/offer', 'discount'))
 		{
 			/* Старая цена */
 			$this->write('<oldprice>' . ($aPrices['price'] + $aPrices['tax']) . '</oldprice>'. "\n");
@@ -1023,13 +1045,13 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		/* Delivery options */
 		if ($this->deliveryOptions)
 		{
-			!isset($this->_forbiddenTags['delivery'])
+			!$this->isForbiddenTag('/shop/offers/offer', 'delivery')
 				&& $this->write('<delivery>' . ($oShop_Item->delivery == 1 ? 'true' : 'false') . '</delivery>'. "\n");
 
-			!isset($this->_forbiddenTags['pickup'])
+			!$this->isForbiddenTag('/shop/offers/offer', 'pickup')
 				&& $this->write('<pickup>' . ($oShop_Item->pickup == 1 ? 'true' : 'false') . '</pickup>'. "\n");
 
-			!isset($this->_forbiddenTags['store'])
+			!$this->isForbiddenTag('/shop/offers/offer', 'store')
 				&& $this->write('<store>' . ($oShop_Item->store == 1 ? 'true' : 'false') . '</store>'. "\n");
 
 			$this->_deliveryOptions($oShop, $oShop_Item);
@@ -1047,25 +1069,25 @@ class Shop_Controller_YandexMarket extends Core_Controller
 				$this->write('<name>' . Core_Str::xml($oEntity->name) . '</name>'. "\n");
 			}
 
-			if (!isset($this->_forbiddenTags['vendor']) && $oShop_Item->shop_producer_id)
+			if (!$this->isForbiddenTag('/shop/offers/offer', 'vendor') && $oShop_Item->shop_producer_id)
 			{
 				$this->write('<vendor>' . Core_Str::xml($oShop_Item->Shop_Producer->name) . '</vendor>'. "\n");
 			}
 
-			if (!isset($this->_forbiddenTags['vendorCode']) && $oShop_Item->vendorcode != '')
+			if (!$this->isForbiddenTag('/shop/offers/offer', 'vendorCode') && $oShop_Item->vendorcode != '')
 			{
 				$this->write('<vendorCode>' . Core_Str::xml($oShop_Item->vendorcode) . '</vendorCode>'. "\n");
 			}
 		}
 
 		/* DESCRIPTION */
-		if (!isset($this->_forbiddenTags['description']))
+		if (!$this->isForbiddenTag('/shop/offers/offer', 'description'))
 		{
 			$description = !empty($oEntity->description)
 				? $oEntity->description
 				: $oEntity->text;
 
-			$iDescriptionLen = mb_strlen($description);
+			$iDescriptionLen = mb_strlen((string) $description);
 			if ($iDescriptionLen)
 			{
 				if (!is_array($this->cdata) || !in_array('description', $this->cdata) || $iDescriptionLen > 3000)
@@ -1085,7 +1107,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 		/* sales_notes */
 		// При размещении по модели DBS (продажи с доставкой магазина) элемент не поддерживается.
-		if (!isset($this->_forbiddenTags['sales_notes']) && $this->model != 'DBS')
+		if (!$this->isForbiddenTag('/shop/offers/offer', 'sales_notes') && $this->model != 'DBS')
 		{
 			$sales_notes = $oShop_Item->yandex_market_sales_notes != ''
 				? trim($oShop_Item->yandex_market_sales_notes)
@@ -1095,30 +1117,30 @@ class Shop_Controller_YandexMarket extends Core_Controller
 				&& $this->write('<sales_notes>' . Core_Str::xml(html_entity_decode(strip_tags($sales_notes), ENT_COMPAT, 'UTF-8')) . '</sales_notes>'. "\n");
 		}
 
-		if (!isset($this->_forbiddenTags['manufacturer_warranty']) && $oShop_Item->manufacturer_warranty)
+		if (!$this->isForbiddenTag('/shop/offers/offer', 'manufacturer_warranty') && $oShop_Item->manufacturer_warranty)
 		{
 			$this->write('<manufacturer_warranty>true</manufacturer_warranty>' . "\n");
 		}
 
-		if (!isset($this->_forbiddenTags['country_of_origin']) && trim($oShop_Item->country_of_origin) != '')
+		if (!$this->isForbiddenTag('/shop/offers/offer', 'country_of_origin') && trim($oShop_Item->country_of_origin) != '')
 		{
 			$this->write('<country_of_origin>' . Core_Str::xml(html_entity_decode(strip_tags($oShop_Item->country_of_origin), ENT_COMPAT, 'UTF-8')) . '</country_of_origin>'. "\n");
 		}
 
 		// Элемент предназначен для обозначения товара, который можно скачать. Если указано значение параметра true, товарное предложение показывается во всех регионах независимо от регионов доставки, указанных магазином на странице Параметры размещения.
-		if (!isset($this->_forbiddenTags['downloadable']) && $oShop_Item->type == 1)
+		if (!$this->isForbiddenTag('/shop/offers/offer', 'downloadable') && $oShop_Item->type == 1)
 		{
 			$this->write('<downloadable>true</downloadable>'. "\n");
 		}
 
 		/* adult */
-		if (!isset($this->_forbiddenTags['adult']) && $oShop_Item->adult)
+		if (!$this->isForbiddenTag('/shop/offers/offer', 'adult') && $oShop_Item->adult)
 		{
 			$this->write('<adult>true</adult>' . "\n");
 		}
 
 		/* dimensions */
-		if (!isset($this->_forbiddenTags['dimensions'])
+		if (!$this->isForbiddenTag('/shop/offers/offer', 'dimensions')
 			&& ($oShop_Item->package_length > 0 && $oShop_Item->package_width > 0 && $oShop_Item->package_height > 0
 				||
 				$oShop_Item->length > 0 && $oShop_Item->width > 0 && $oShop_Item->height > 0)
@@ -1143,11 +1165,11 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		/* cpa */
 		// https://yandex.ru/support/partnermarket-dsbs/offers.html#offers__cpa
 		/* Алкоголь, лекарственные средства и товары, подлежащие маркировке, с кодами идентификации из системы «Честный ЗНАК» не удастся разместить по модели DBS (продажи с доставкой магазина). Поэтому для них элемент всегда принимает значение 0. */
-		!isset($this->_forbiddenTags['cpa'])
+		!$this->isForbiddenTag('/shop/offers/offer', 'cpa')
 			&& $this->write('<cpa>' . $cpa . '</cpa>' . "\n");
 
 		/* weight */
-		if (!isset($this->_forbiddenTags['weight'])
+		if (!$this->isForbiddenTag('/shop/offers/offer', 'weight')
 			&& ($oShop_Item->package_weight > 0 || $oShop_Item->weight > 0)
 		)
 		{
@@ -1158,7 +1180,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		}
 
 		/* rec */
-		if (!isset($this->_forbiddenTags['rec']) && $this->recommended)
+		if (!$this->isForbiddenTag('/shop/offers/offer', 'rec') && $this->recommended)
 		{
 			$aTmp = array();
 
@@ -1200,7 +1222,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		Если товара нет в наличии, в элементе count укажите 0. Не оставляйте элемент пустым — в этом случае товар продолжит размещаться на Маркете.
 		Внимание. При размещении по модели ADV (реклама) элемент не поддерживается.
 		*/
-		if (!isset($this->_forbiddenTags['count']) && $this->model != 'ADV')
+		if (!$this->isForbiddenTag('/shop/offers/offer', 'count') && $this->model != 'ADV')
 		{
 			// 10.00 => 10
 			$this->write('<count>' . floatval($oShop_Item->getRest(FALSE)) . '</count>'. "\n");
@@ -1511,9 +1533,9 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		{
 			case 0: // Int
 			case 1: // String
-			case 11: // Float
 			case 4: // Textarea
 			case 6: // Wysiwyg
+			case 11: // Float
 				$value = $oProperty_Value->value;
 			break;
 
@@ -2677,7 +2699,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		// Core_File::flush();
 
 		/* adult */
-		if (!isset($this->_forbiddenTags['adult']) && $oShop->adult)
+		if (!$this->isForbiddenTag('/shop', 'adult') && $oShop->adult)
 		{
 			$this->write('<adult>true</adult>' . "\n");
 		}
@@ -2688,7 +2710,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			: 0;
 
 		/* cpa */
-		!isset($this->_forbiddenTags['cpa'])
+		!$this->isForbiddenTag('/shop', 'cpa')
 			&& $this->write('<cpa>' . $cpa . '</cpa>' . "\n");
 
 		Core_Event::notify(get_class($this) . '.onBeforeOffers', $this, array($oShop));

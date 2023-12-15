@@ -119,11 +119,11 @@ class Company_Model extends Core_Entity
 		'~correspondent_account',
 		'~bank_name',
 		'~bank_address',
-		'bic',
+		/*'bic',
 		'current_account',
 		'correspondent_account',
 		'bank_name',
-		'bank_address',
+		'bank_address',*/
 	);
 
 	/**
@@ -1121,6 +1121,12 @@ class Company_Model extends Core_Entity
 
 	public function __get($property)
 	{
+		// Before table changed
+		if (isset($this->$property))
+		{
+			return parent::__get($property);
+		}
+
 		if (in_array($property, self::$_oldCompanyFields))
 		{
 			switch ($property)

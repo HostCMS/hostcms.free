@@ -1,13 +1,5 @@
 <?php
-/**
- * Affiliates.
- *
- * @package HostCMS
- * @subpackage Affiliate
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
 	'affiliate_title' => 'Affiliate program',
 	'model_name' => 'Affiliate program',
@@ -19,7 +11,7 @@ return array(
 	'description' => 'Description',
 	'site_id' => '<acronym title="Website on which affiliate program is accessible">Website</acronym>',
 	'active' => 'Active',
-	'siteuser_group_id' => '<acronym title="Website user group that has access rights to affiliate program">Website user group</acronym>',
+	'siteuser_group_id' => '<acronym title="Website user group that has access rights to affiliate program">Customer Group</acronym>',
 	'datetime' => '<acronym title="Last modified date of affiliate program">Last modified date</acronym>',
 	'min_count_of_items' => '<acronym title="Minimum products amount that user should buy at a time to receive affiliate program charge">Minimum products amount</acronym>',
 	'min_amount_of_items' => '<acronym title="Minimum amount in currency of online store that user should buy at a time to receive affiliate program charge">Minimum amount in currency of online store</acronym>',

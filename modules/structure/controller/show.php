@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * - menu($menuId) вывод узлов структуры меню $menu, по умолчанию NULL (вывод из всех меню)
  * - parentId($parentId) идентификатор родительского узла, по умолчанию 0
- * - level($level) выводить узлы структуры только до уровня вложенности $level
+ * - level($level) выводить узлы структуры только до уровня вложенности $level, по умолчанию NULL - не ограничено
  * - showProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств узлов структуры, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
  * - structurePropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств узлов структуры, по умолчанию FALSE.
  * - sortPropertiesValues(TRUE|FALSE) сортировать значения дополнительных свойств, по умолчанию TRUE.
@@ -459,8 +459,15 @@ class Structure_Controller_Show extends Core_Controller
 
 					$oStructure
 						->id($oOriginal_Structure->id)
-						->parent_id($oShortcut_Structure->parent_id)
-						->shortcut_id($oShortcut_Structure->id);
+						->shortcut_id($oShortcut_Structure->id)
+						// влияет на формирование пути, нельзя явно указывать
+						//->parent_id($oShortcut_Structure->parent_id)
+						->addForbiddenTag('parent_id')
+						->addEntity(
+							Core::factory('Core_Xml_Entity')
+								->name('parent_id')
+								->value($oShortcut_Structure->id)
+						);
 				}
 				else
 				{
@@ -476,7 +483,9 @@ class Structure_Controller_Show extends Core_Controller
 				// Properties for structure entity
 				$oStructure->showXmlProperties($this->showProperties, $this->sortPropertiesValues);
 
-				if (is_null($this->level) || $level < $this->level)
+				// For Shortcuts children are not selected to avoid looping!
+				if ($oOriginal_Structure === $oStructure
+					&& (is_null($this->level) || $level < $this->level))
 				{
 					$this->_addStructuresByParentId($oStructure->id, $oStructure, $level + 1);
 				}

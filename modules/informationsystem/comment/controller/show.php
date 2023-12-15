@@ -91,6 +91,7 @@ class Informationsystem_Comment_Controller_Show extends Core_Controller
 	{
 		parent::__construct($oInformationsystem->clearEntities());
 
+		// Named subpatterns {name} can consist of up to 32 alphanumeric characters and underscores, but must start with a non-digit.
 		$this->pattern = rawurldecode(Core_Str::rtrimUri($this->getEntity()->Structure->getPath())) . '/comments({path}/)(page-{page}/)';
 
 		$this->patternExpressions = array(
@@ -99,6 +100,8 @@ class Informationsystem_Comment_Controller_Show extends Core_Controller
 
 		$this->limit = 5;
 		$this->calculateTotal = TRUE;
+
+		$this->commentsActivity = 'active';
 	}
 
 	/**
@@ -119,7 +122,7 @@ class Informationsystem_Comment_Controller_Show extends Core_Controller
 			->clearOrderBy()
 			->orderBy('comments.datetime', 'DESC');
 
-		$this->commentsActivity = strtolower($this->commentsActivity);
+		$this->commentsActivity = strtolower((string) $this->commentsActivity);
 		if ($this->commentsActivity != 'all')
 		{
 			$this->_Comments

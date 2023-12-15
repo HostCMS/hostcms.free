@@ -122,11 +122,11 @@ else
 				{
 					$Antispam_Controller = new Antispam_Controller();
 					$bAntispamAnswer = $Antispam_Controller
-						->addText($oComment->author)
-						->addText($oComment->email)
-						->addText($oComment->phone)
-						->addText($oComment->subject)
-						->addText($oComment->text)
+						->addText($oComment->author, 'author')
+						->addText($oComment->email, 'email')
+						->addText($oComment->phone, 'phone')
+						->addText($oComment->subject, 'subject')
+						->addText($oComment->text, 'text')
 						->execute();
 
 					// Check e-mail
@@ -314,8 +314,7 @@ $Shop_Controller_Show
 	)
 	->addMinMaxWidth()
 	->addMinMaxLength()
-	//->groupsForbiddenTags(array('name'))
-	/*->addAllowedTags('/shop/shop_group', array('name'))
-	->addAllowedTags('/shop', array('name'))
-	->addAllowedTags('/shop/shop_item', array('name'))*/
+	//->addAllowedTags('/shop', array('name'))
+	//->addAllowedTags('/shop/shop_item', array('name'))
+	//->addAllowedTags('/shop/shop_group', array('name'))
 	->show();

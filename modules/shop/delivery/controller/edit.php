@@ -272,7 +272,14 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 
 		if (Core_Array::getRequest('type') == 1)
 		{
-			$this->_object->saveHandlerFile(Core_Array::getRequest('code'));
+			$fileContent = Core_Array::getRequest('code', '');
+
+			if (strpos($fileContent, 'Shop_Delivery_Handler' . $this->_object->id) === FALSE)
+			{
+				$fileContent = preg_replace('/(class Shop_Delivery_Handler)\d* /i', '${1}' . $this->_object->id . ' ', $fileContent);
+			}
+
+			$this->_object->saveHandlerFile($fileContent);
 		}
 
 		// Обработка картинок

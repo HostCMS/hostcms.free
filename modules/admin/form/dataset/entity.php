@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 {
@@ -33,13 +33,6 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 	public function __construct(Core_Entity $oCore_Entity)
 	{
 		$this->_entity = $oCore_Entity;
-
-		/*$oUser = Core_Auth::getCurrentUser();
-
-		if (!is_null($oUser) && !$oUser->superuser && $oUser->only_access_my_own)
-		{
-			$this->_restrictAccess = $oUser->id;
-		}*/
 
 		Core_Event::notify(get_class($this) . '.onAfterConstruct', $this);
 	}
@@ -201,33 +194,41 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 			$bDebug
 				&& $fBeginTime = Core::getmicrotime();
 
-			// Применение внесенных условий отбора
-			$this->_setConditions();
-
-			$queryBuilder = $this->_entity->queryBuilder();
-
-			!is_null($this->_limit) && $queryBuilder
-				->limit($this->_limit)
-				->offset($this->_offset);
-
-			if (is_null($this->_count))
+			if (!is_null($this->_limit) && $this->_limit == 0 && $this->_offset == 0)
 			{
-				$issetHaving = $this->_issetHavingOrGroupBy();
-
-				if ($issetHaving)
-				{
-					$queryBuilder->sqlCalcFoundRows();
-				}
+				$this->_objects = array();
+				$this->_count = 0;
 			}
-
-			// Load columns
-			$this->_entity->getTableColumns();
-
-			$this->_objects = $this->_entity->findAll(FALSE);
-
-			if ($bDebug)
+			else
 			{
-				echo '<p><b>Select Query</b> (' . sprintf('%.3f', Core::getmicrotime() - $fBeginTime) . ' s.): <pre>', Core_DataBase::instance()->getLastQuery(), '</pre></p>';
+				// Применение внесенных условий отбора
+				$this->_setConditions();
+
+				$queryBuilder = $this->_entity->queryBuilder();
+
+				!is_null($this->_limit) && $queryBuilder
+					->limit($this->_limit)
+					->offset($this->_offset);
+
+				if (is_null($this->_count))
+				{
+					$issetHaving = $this->_issetHavingOrGroupBy();
+
+					if ($issetHaving)
+					{
+						$queryBuilder->sqlCalcFoundRows();
+					}
+				}
+
+				// Load columns
+				$this->_entity->getTableColumns();
+
+				$this->_objects = $this->_entity->findAll(FALSE);
+
+				if ($bDebug)
+				{
+					echo '<p><b>Select Query</b> (' . sprintf('%.3f', Core::getmicrotime() - $fBeginTime) . ' s.): <pre>', Core_DataBase::instance()->getLastQuery(), '</pre></p>';
+				}
 			}
 
 			$this->_loaded = TRUE;

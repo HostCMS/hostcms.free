@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Event
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Event_Timeline_Dataset extends Admin_Form_Dataset
 {
@@ -148,7 +148,8 @@ class Event_Timeline_Dataset extends Admin_Form_Dataset
 				->unionLimit($this->_limit)
 				->unionOffset($this->_offset);
 
-			Core::moduleIsActive('dms') && $oQB->union($this->_getQb3());
+			Core::moduleIsActive('dms')
+				&& $oQB->union($this->_getQb3());
 
 			$oCore_DataBase = $oQB->execute();
 

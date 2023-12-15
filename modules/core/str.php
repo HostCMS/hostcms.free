@@ -784,10 +784,9 @@ class Core_Str
 	 */
 	static public function ucfirst($str)
 	{
-		if (mb_strlen($str))
-		{
-			$str = mb_strtoupper(mb_substr($str, 0, 1)) . mb_substr($str, 1);
-		}
+		mb_strlen($str)
+			&& $str = mb_strtoupper(mb_substr($str, 0, 1)) . mb_substr($str, 1);
+
 		return $str;
 	}
 
@@ -1694,6 +1693,29 @@ class Core_Str
 		// Преобразуем html-сущности
 		$text = html_entity_decode($text, ENT_COMPAT, 'UTF-8');
 
+		// Различные виды пробелов
+		$text = self::convertSpaces($text);
+
+		while (strpos($text, '  ') !== FALSE)
+		{
+			$text = str_replace('  ', ' ', $text);
+		}
+
+		$text = implode("\n", array_map('rtrim', explode("\n", $text)));
+
+		$text = preg_replace("'\n\s+\n'", "\n\n", $text);
+		$text = preg_replace("'[\n]{3,}'", "\n\n", $text);
+
+		return trim($text);
+	}
+
+	/**
+	 * Converts different kinds of spaces (U+2002 - U+200D) to regular space
+	 * @param string $str
+	 * @return string
+	 */
+	static public function convertSpaces($str)
+	{
 		/*
 		U+2002	 	e2 80 82	EN SPACE
 		U+2003	 	e2 80 83	EM SPACE
@@ -1708,19 +1730,7 @@ class Core_Str
 		U+200C	‌	e2 80 8c	ZERO WIDTH NON-JOINER
 		U+200D	‍	e2 80 8d	ZERO WIDTH JOINER
 		*/
-		$text = str_replace(array("\xE2\x80\x82", "\xE2\x80\x83", "\xE2\x80\x84", "\xE2\x80\x85", "\xE2\x80\x86", "\xE2\x80\x87", "\xE2\x80\x88", "\xE2\x80\x89", "\xE2\x80\x8A", "\xE2\x80\x8B", "\xE2\x80\x8C", "\xE2\x80\x8D"), ' ', $text);
-
-		while (strpos($text, '  ') !== FALSE)
-		{
-			$text = str_replace('  ', ' ', $text);
-		}
-
-		$text = implode("\n", array_map('rtrim', explode("\n", $text)));
-
-		$text = preg_replace("'\n\s+\n'", "\n\n", $text);
-		$text = preg_replace("'[\n]{3,}'", "\n\n", $text);
-
-		return trim($text);
+		return str_replace(array("\xE2\x80\x82", "\xE2\x80\x83", "\xE2\x80\x84", "\xE2\x80\x85", "\xE2\x80\x86", "\xE2\x80\x87", "\xE2\x80\x88", "\xE2\x80\x89", "\xE2\x80\x8A", "\xE2\x80\x8B", "\xE2\x80\x8C", "\xE2\x80\x8D"), ' ', $str);
 	}
 
 	/**

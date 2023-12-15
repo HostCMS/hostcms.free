@@ -23,7 +23,7 @@ return array(
 	'email' => 'E-Mail',
 	'tabManagers' => 'Керівництво',
 	'tabContacts' => 'Контактні дані',
-	'tabBankingDetails' => 'Банківські реквізити',
+	'tabBankingDetails' => 'Реквізити',
 	'guid' => 'GUID',
 	'edit_success' =>	'Дані про компанію успішно оновлені.',
 	'edit_error' => 'Помилка додавання даних про компанію!',

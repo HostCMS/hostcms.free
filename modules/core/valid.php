@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Valid
 {
@@ -20,7 +20,9 @@ class Core_Valid
 	 */
 	static public function email($email)
 	{
-		return preg_match("/^[a-zA-Z0-9_\.\-]+@[a-zA-Z0-9\-]+\.[a-zA-Z0-9\-\.]+$/Du", $email) > 0;
+		return is_string($email)
+			? preg_match("/^[a-zA-Z0-9_\.\-]+@[a-zA-Z0-9\-]+\.[a-zA-Z0-9\-\.]+$/Du", $email) > 0
+			: FALSE;
 	}
 
 	/**
@@ -30,7 +32,9 @@ class Core_Valid
 	 */
 	static public function ip($ip)
 	{
-		return filter_var($ip, FILTER_VALIDATE_IP) !== FALSE;
+		return is_string($ip)
+			? filter_var($ip, FILTER_VALIDATE_IP) !== FALSE
+			: FALSE;
 	}
 
 	/**
@@ -40,7 +44,9 @@ class Core_Valid
 	 */
 	static public function url($url)
 	{
-		return preg_match("/^(?:https?|ftp):\/\/[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]$/i", $url) > 0;
+		return is_string($url)
+			? preg_match("/^(?:https?|ftp):\/\/[-a-z0-9+&@#\/%?=~_|!:,.;]*[-a-z0-9+&@#\/%=~_|]$/i", $url) > 0
+			: FALSE;
 	}
 
 	/**
@@ -50,6 +56,8 @@ class Core_Valid
 	 */
 	static public function host($host)
 	{
-		return preg_match("/^[-a-z0-9.]*(:[0-9]{1,5})?$/i", $host) > 0;
+		return is_string($host)
+			? preg_match("/^[-a-z0-9.]*(:[0-9]{1,5})?$/i", $host) > 0
+			: FALSE;
 	}
 }

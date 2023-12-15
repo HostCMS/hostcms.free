@@ -244,6 +244,7 @@ class Shop_Payment_System_Handler56 extends Shop_Payment_System_Handler
 			// 	QW - Qiwi Wallet
 			// 	WM - Webmoney
 			// 	GP - платежный терминал
+			// 	ACEURNMBX - Оплата в EUR картой всех стран мира, кроме РФ
 			'payment_method' => 'AC',
 
 			// тип плательщика, с возможными значениями:

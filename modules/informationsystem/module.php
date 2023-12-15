@@ -23,7 +23,7 @@ class Informationsystem_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2023-03-01';
+	public $date = '2023-07-17';
 
 	/**
 	 * Module name
@@ -288,7 +288,16 @@ class Informationsystem_Module extends Core_Module
 
 					Core_Event::notify(get_class($this) . '.searchCallback', $this, array($oSearch_Page, $oInformationsystem_Group));
 
-					!is_null($oInformationsystem_Group->id) && $oSearch_Page->addEntity($oInformationsystem_Group);
+					if (!is_null($oInformationsystem_Group->id))
+					{
+						$oSearch_Page->addEntity($oInformationsystem_Group);
+						
+						// Structure node
+						if ($oInformationsystem_Group->Informationsystem->structure_id)
+						{
+							$oSearch_Page->addEntity($oInformationsystem_Group->Informationsystem->Structure);
+						}
+					}
 				break;
 				case 2: // Информационые элементы
 					$oInformationsystem_Item = Core_Entity::factory('Informationsystem_Item')->find($oSearch_Page->module_value_id);
@@ -305,6 +314,12 @@ class Informationsystem_Module extends Core_Module
 						Core_Event::notify(get_class($this) . '.searchCallback', $this, array($oSearch_Page, $oInformationsystem_Item));
 
 						$oSearch_Page->addEntity($oInformationsystem_Item);
+						
+						// Structure node
+						if ($oInformationsystem_Item->Informationsystem->structure_id)
+						{
+							$oSearch_Page->addEntity($oInformationsystem_Item->Informationsystem->Structure);
+						}
 					}
 				break;
 			}

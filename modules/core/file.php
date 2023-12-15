@@ -56,7 +56,7 @@ class Core_File
 		return (!defined('PHP_MAXPATHLEN') || strlen($filename) < PHP_MAXPATHLEN)
 			&& is_dir($filename);
 	}
-	
+
 	/**
 	 * Tells whether the filename is a symbolic link
 	 * @param string $filename Path to the file.
@@ -830,6 +830,8 @@ class Core_File
 	 * - $param['small_image_name'] оригинальное имя файла малого изображения
 	 * - $param['large_image_target'] путь к создаваемому файлу большого изображения
 	 * - $param['small_image_target'] путь к создаваемому файлу малого изображения
+	 * - $param['large_image_output_format'] формат создаваемого большого изображения
+	 * - $param['small_image_output_format'] формат создаваемого малого изображения
 	 * - $param['create_small_image_from_large'] использовать большое изображение для создания малого (TRUE - использовать (по умолчанию), FALSE - не использовать)
 	 * - $param['large_image_max_width'] значение максимальной ширины большого изображения
 	 * - $param['large_image_max_height'] значение максимальной высоты большого изображения
@@ -999,6 +1001,14 @@ class Core_File
 			? $param['small_image_preserve_aspect_ratio']
 			: TRUE;
 
+		$large_image_output_format = isset($param['large_image_output_format'])
+			? $param['large_image_output_format']
+			: NULL;
+
+		$small_image_output_format = isset($param['small_image_output_format'])
+			? $param['small_image_output_format']
+			: NULL;
+
 		$aCore_Config = Core::$mainConfig;
 
 		// Задан файл-источник большого изображения
@@ -1012,7 +1022,7 @@ class Core_File
 
 				// Уменьшаем большую картинку до максимального размера.
 				if (self::isValidExtension($large_image_target, self::getResizeExtensions())
-					&& !Core_Image::instance()->resizeImage($large_image_target, $large_image_max_width, $large_image_max_height, $large_image_target, NULL, $large_image_preserve_aspect_ratio))
+					&& !Core_Image::instance()->resizeImage($large_image_target, $large_image_max_width, $large_image_max_height, $large_image_target, NULL, $large_image_preserve_aspect_ratio, $large_image_output_format))
 				{
 					throw new Core_Exception(Core::_('Core.error_resize'));
 				}
@@ -1042,7 +1052,7 @@ class Core_File
 						if (self::isValidExtension($small_image_target, self::getResizeExtensions()))
 						{
 							// Делаем уменьшенный файл.
-							if (!Core_Image::instance()->resizeImage($source_file_path, $small_image_max_width, $small_image_max_height, $small_image_target, NULL, $small_image_preserve_aspect_ratio))
+							if (!Core_Image::instance()->resizeImage($source_file_path, $small_image_max_width, $small_image_max_height, $small_image_target, NULL, $small_image_preserve_aspect_ratio, $small_image_output_format))
 							{
 								throw new Core_Exception(Core::_('Core.error_resize'));
 							}
@@ -1062,13 +1072,13 @@ class Core_File
 				elseif ($create_small_image_from_large && !empty($small_image_target) && !$large_image_watermark)
 				{
 					// Создаем малое изображение из большого
-					$create_small_from_small = Core_Image::instance()->resizeImage($large_image_target, $large_image_max_width, $large_image_max_height, $small_image_target, NULL, $small_image_preserve_aspect_ratio);
+					$create_small_from_small = Core_Image::instance()->resizeImage($large_image_target, $large_image_max_width, $large_image_max_height, $small_image_target, NULL, $small_image_preserve_aspect_ratio, $small_image_output_format);
 				}
 
 				// Накладываем Watermark на большое изображение и указан ватермарк
 				if ($large_image_watermark && $watermark_file_path != '')
 				{
-					Core_Image::instance()->addWatermark($large_image_target, $large_image_target, $watermark_file_path, $watermark_position_x, $watermark_position_y);
+					Core_Image::instance()->addWatermark($large_image_target, $large_image_target, $watermark_file_path, $watermark_position_x, $watermark_position_y, $large_image_output_format);
 				}
 
 				// Если передан флаг ватермарка для маленькой картинки - то копируем ее после наложения ватермарка на большую
@@ -1082,14 +1092,14 @@ class Core_File
 
 						if (isset($create_small_from_small) && $create_small_from_small)
 						{
-							Core_Image::instance()->addWatermark($small_image_target, $small_image_target, $watermark_file_path, $watermark_position_x, $watermark_position_y);
+							Core_Image::instance()->addWatermark($small_image_target, $small_image_target, $watermark_file_path, $watermark_position_x, $watermark_position_y, $small_image_output_format);
 
-							$bSuccess = Core_Image::instance()->resizeImage($small_image_target, $small_image_max_width, $small_image_max_height, $small_image_target, NULL, $small_image_preserve_aspect_ratio);
+							$bSuccess = Core_Image::instance()->resizeImage($small_image_target, $small_image_max_width, $small_image_max_height, $small_image_target, NULL, $small_image_preserve_aspect_ratio, $small_image_output_format);
 						}
 						else
 						{
 							// Создать малое изображение из большого
-							$bSuccess = Core_Image::instance()->resizeImage($large_image_target, $small_image_max_width, $small_image_max_height, $small_image_target, NULL, $small_image_preserve_aspect_ratio);
+							$bSuccess = Core_Image::instance()->resizeImage($large_image_target, $small_image_max_width, $small_image_max_height, $small_image_target, NULL, $small_image_preserve_aspect_ratio, $small_image_output_format);
 						}
 
 						if (!$bSuccess)
@@ -1134,7 +1144,7 @@ class Core_File
 				{
 					if (self::isValidExtension($small_image_target, self::getResizeExtensions()))
 					{
-						if (!Core_Image::instance()->resizeImage($small_image_target, $small_image_max_width, $small_image_max_height, $small_image_target, NULL, $small_image_preserve_aspect_ratio))
+						if (!Core_Image::instance()->resizeImage($small_image_target, $small_image_max_width, $small_image_max_height, $small_image_target, NULL, $small_image_preserve_aspect_ratio, $small_image_output_format))
 						{
 							throw new Core_Exception(Core::_('Core.error_resize'));
 						}
@@ -1146,11 +1156,11 @@ class Core_File
 				// Применить ватермарк к малой картинке
 				else
 				{
-					$bSuccess = Core_Image::instance()->addWatermark($small_image_target, $small_image_target, $watermark_file_path, $watermark_position_x, $watermark_position_y);
+					$bSuccess = Core_Image::instance()->addWatermark($small_image_target, $small_image_target, $watermark_file_path, $watermark_position_x, $watermark_position_y, $small_image_output_format);
 
 					if ($bSuccess)
 					{
-						$bSuccess = Core_Image::instance()->resizeImage($small_image_target, $small_image_max_width, $small_image_max_height, $small_image_target, NULL, $small_image_preserve_aspect_ratio);
+						$bSuccess = Core_Image::instance()->resizeImage($small_image_target, $small_image_max_width, $small_image_max_height, $small_image_target, NULL, $small_image_preserve_aspect_ratio, $small_image_output_format);
 
 						$bSuccess
 							? @chmod($small_image_target, CHMOD_FILE)

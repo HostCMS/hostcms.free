@@ -152,7 +152,7 @@ if (!is_null(Core_Array::getRequest('oneStepCheckout')))
 if (Core_Array::getGet('action', '', 'str') === 'repeat')
 {
 	$guid = Core_Array::getGet('guid', '', 'str');
-	if (strlen($guid))
+	if ($guid != '')
 	{
 		$oShop_Order = $oShop->Shop_Orders->getByGuid($guid);
 

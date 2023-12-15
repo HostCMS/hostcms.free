@@ -122,11 +122,11 @@ if (Core_Array::getPost('step') == 2)
 	{
 		$Antispam_Controller = new Antispam_Controller();
 
-		foreach ($_POST as $tmpValue)
+		foreach ($_POST as $tmpKey => $tmpValue)
 		{
 			if (is_string($tmpValue))
 			{
-				$Antispam_Controller->addText($tmpValue);
+				$Antispam_Controller->addText($tmpValue, $tmpKey);
 			}
 		}
 

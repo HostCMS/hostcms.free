@@ -456,7 +456,7 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 
 				return substr($this->name, -7) === '.tar.gz' && extension_loaded('zlib')
 					|| $ext == 'tar'
-					|| $ext = 'bz2' && extension_loaded('bz2');
+					|| $ext == 'bz2' && extension_loaded('bz2');
 			break;
 			case 'edit':
 				$ext = Core_File::getExtension($this->name);

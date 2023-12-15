@@ -160,8 +160,7 @@ class Lib_Model extends Core_Entity
 	{
 		$path = $this->getLibDatFilePath($structure_id);
 
-		//return Core_File::isFile($path) // return 7.0.6
-		return is_file($path)
+		return Core_File::isFile($path)
 			? Core_File::read($path)
 			: NULL;
 	}
@@ -245,8 +244,7 @@ class Lib_Model extends Core_Entity
 	{
 		$path = $this->getLibFilePath();
 
-		//return Core_File::isFile($path) // return 7.0.6
-		return is_file($path)
+		return Core_File::isFile($path)
 			? Core_File::read($path)
 			: NULL;
 	}
@@ -259,8 +257,7 @@ class Lib_Model extends Core_Entity
 	{
 		$path = $this->getLibConfigFilePath();
 
-		//return Core_File::isFile($path) // return 7.0.6
-		return is_file($path)
+		return Core_File::isFile($path)
 			? Core_File::read($path)
 			: NULL;
 	}
@@ -272,8 +269,8 @@ class Lib_Model extends Core_Entity
 	 */
 	public function execute()
 	{
-		$bLogged = Core_Auth::logged();
-		$bLogged && $fBeginTimeConfig = Core::getmicrotime();
+		//$bLogged = Core_Auth::logged();
+		//$bLogged && $fBeginTimeConfig = Core::getmicrotime();
 
 		Core_Event::notify($this->_modelName . '.onBeforeExecute', $this);
 
@@ -281,9 +278,9 @@ class Lib_Model extends Core_Entity
 
 		Core_Event::notify($this->_modelName . '.onAfterExecute', $this);
 
-		$bLogged && Core_Page::instance()->addFrontendExecutionTimes(
+		/*$bLogged && Core_Page::instance()->addFrontendExecutionTimes(
 			Core::_('Core.time_page', Core::getmicrotime() - $fBeginTimeConfig)
-		);
+		);*/
 
 		return $this;
 	}

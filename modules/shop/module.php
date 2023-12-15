@@ -16,6 +16,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * 7 - Shop_Warehouse_Invoice_Model
  * 8 - Shop_Warehouse_Supply
  * 9 - Shop_Warehouse_Purchasereturn
+ * 10 - Shop_Price_Setting_Model
  * 30 - Shop_Warrant_Model
  *
  * @package HostCMS
@@ -36,7 +37,7 @@ class Shop_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2023-03-01';
+	public $date = '2023-07-17';
 
 	/**
 	 * Module name
@@ -536,7 +537,16 @@ class Shop_Module extends Core_Module
 
 					Core_Event::notify(get_class($this) . '.searchCallback', $this, array($oSearch_Page, $oShop_Group));
 
-					!is_null($oShop_Group->id) && $oSearch_Page->addEntity($oShop_Group);
+					if (!is_null($oShop_Group->id))
+					{
+						$oSearch_Page->addEntity($oShop_Group);
+
+						// Structure node
+						if ($oShop_Group->Shop->structure_id)
+						{
+							$oSearch_Page->addEntity($oShop_Group->Shop->Structure);
+						}
+					}
 				break;
 				case 2: // Товары
 					$oShop_Item = Core_Entity::factory('Shop_Item')->find($oSearch_Page->module_value_id);
@@ -582,6 +592,12 @@ class Shop_Module extends Core_Module
 						Core_Event::notify(get_class($this) . '.searchCallback', $this, array($oSearch_Page, $oShop_Item));
 
 						$oSearch_Page->addEntity($oShop_Item);
+
+						// Structure node
+						if ($oShop_Item->Shop->structure_id)
+						{
+							$oSearch_Page->addEntity($oShop_Item->Shop->Structure);
+						}
 					}
 				break;
 				case 3: // Продавцы
@@ -883,17 +899,17 @@ class Shop_Module extends Core_Module
 			array(
 				'dir' => Core::_('Shop_Order.orders'),
 				'items' => array(
-					0 => array('name' => Core::_('Shop_Order.shops_link_order'))
+					5 => array('name' => Core::_('Shop_Order.shops_link_order'))
 				)
 			),
 			array(
 				'dir' => Core::_('Shop_Warehouse.warehouse'),
 				'items' => array(
+					0 => array('name' => Core::_('Shop_Warehouse_Inventory.title')),
 					1 => array('name' => Core::_('Shop_Warehouse_Incoming.title')),
 					2 => array('name' => Core::_('Shop_Warehouse_Writeoff.title')),
-					3 => array('name' => Core::_('Shop_Warehouse_Inventory.title')),
-					4 => array('name' => Core::_('Shop_Warehouse_Regrade.title')),
-					5 => array('name' => Core::_('Shop_Warehouse_Movement.title')),
+					3 => array('name' => Core::_('Shop_Warehouse_Regrade.title')),
+					4 => array('name' => Core::_('Shop_Warehouse_Movement.title')),
 					6 => array('name' => Core::_('Shop_Warehouse_Purchaseorder.title')),
 					7 => array('name' => Core::_('Shop_Warehouse_Invoice.title')),
 					8 => array('name' => Core::_('Shop_Warehouse_Supply.title')),
@@ -912,7 +928,7 @@ class Shop_Module extends Core_Module
 			array(
 				'dir' => Core::_('Shop_Price.show_prices_title'),
 				'items' => array(
-					50 => array('name' => Core::_('Shop_Price_Setting.title')),
+					10 => array('name' => Core::_('Shop_Price_Setting.title')),
 				)
 			),
 			array(

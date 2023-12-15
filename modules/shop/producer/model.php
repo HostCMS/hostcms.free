@@ -20,6 +20,12 @@ class Shop_Producer_Model extends Core_Entity
 	public $img = 1;
 
 	/**
+	 * Callback property_id
+	 * @var int
+	 */
+	public $discounts = 1;
+
+	/**
 	 * One-to-many or many-to-many relations
 	 * @var array
 	 */
@@ -28,6 +34,10 @@ class Shop_Producer_Model extends Core_Entity
 		'shop_filter_seo' => array(),
 		'shop_tab' => array('through' => 'shop_tab_producer'),
 		'shop_tab_producer' => array(),
+		'shop_bonus' => array('through' => 'shop_producer_bonus'),
+		'shop_discount' => array('through' => 'shop_producer_discount'),
+		'shop_producer_discount' => array(),
+		'shop_producer_bonus' => array()
 	);
 
 	/**
@@ -596,7 +606,30 @@ class Shop_Producer_Model extends Core_Entity
 
 		$this->Shop_Tab_Producers->deleteAll(FALSE);
 
+		$this->Shop_Producer_Discounts->deleteAll(FALSE);
+		$this->Shop_Producer_Bonuses->deleteAll(FALSE);
+
 		return parent::delete($primaryKey);
+	}
+
+	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function discountsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$countDiscount = $this->Shop_Producer_Discounts->getCountBySiteuser_id(0);
+		$countBonuses = $this->Shop_Producer_Bonuses->getCount();
+
+		$count = $countDiscount + $countBonuses;
+
+		$count && Core_Html_Entity::factory('Span')
+			->class('badge badge-ico badge-palegreen white')
+			->value($count < 100 ? $count : '∞')
+			->title($count)
+			->execute();
 	}
 
 	/**

@@ -443,7 +443,9 @@ abstract class Core_Html_Entity extends Core_Servant_Properties
 	 */
 	public function addClass($className)
 	{
-		$aClass = explode(' ', $this->class);
+		$aClass = !is_null($this->class)
+			? explode(' ', $this->class)
+			: array();
 
 		if (!in_array($className, $aClass))
 		{
@@ -462,7 +464,9 @@ abstract class Core_Html_Entity extends Core_Servant_Properties
 	 */
 	public function removeClass($className)
 	{
-		$aClass = explode(' ', $this->class);
+		$aClass = !is_null($this->class)
+			? explode(' ', $this->class)
+			: array();
 
 		$key = array_search($className, $aClass);
 

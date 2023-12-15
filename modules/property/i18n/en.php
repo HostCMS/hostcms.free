@@ -6,7 +6,7 @@
  * @subpackage Property
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Properties',
@@ -100,4 +100,8 @@ return array(
 	'changeIndexing_error' => 'An error occurred while changing the indexing status of a property.',
 	'use_trailing_punctuation' => '<acronym title="Optical text alignment function moves punctuation characters beyond the typing borders">Optical alignment</acronym>',
 	'use_typograph' => 'Prepress',
+
+	'move_to_list' => 'Move to list',
+	'add_to_list' => 'Add item to list',
+	'insert_value' => 'Insert value',
 );

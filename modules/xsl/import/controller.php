@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Xsl
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Xsl_Import_Controller extends Admin_Form_Action_Controller
 {
@@ -30,7 +30,7 @@ class Xsl_Import_Controller extends Admin_Form_Action_Controller
 	public function execute($operation = NULL)
 	{
 		$oUser = Core_Auth::getCurrentUser();
-		if ($oUser->only_access_my_own)
+		if (!$oUser->superuser && $oUser->only_access_my_own)
 		{
 			return FALSE;
 		}

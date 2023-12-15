@@ -133,6 +133,7 @@ return array(
 	'autocomplete_mode3' => 'Точний збіг',
 
 	'tabProperties' => 'Додаткові властивості',
+	'tabMedia' => 'Бібліотека',
 	'non_subject' => '<Без теми>',
 
 	'male' => 'Чоловік',

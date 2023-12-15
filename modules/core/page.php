@@ -165,7 +165,25 @@ class Core_Page extends Core_Servant_Properties
 		if (count($this->_children))
 		{
 			$this->_currentObject = array_shift($this->_children);
-			return $this->_currentObject->execute();
+
+			$bLib = get_class($this->_currentObject) == 'Lib_Model';
+
+			if ($bLib)
+			{
+				$bLogged = Core_Auth::logged();
+				$bLogged && $fBeginTimeConfig = Core::getmicrotime();
+			}
+
+			$return = $this->_currentObject->execute();
+
+			if ($bLib)
+			{
+				$bLogged && Core_Page::instance()->addFrontendExecutionTimes(
+					Core::_('Core.time_page', Core::getmicrotime() - $fBeginTimeConfig)
+				);
+			}
+
+			return $return;
 		}
 
 		return $this;

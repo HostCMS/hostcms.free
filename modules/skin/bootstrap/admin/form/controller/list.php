@@ -486,7 +486,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 							$fieldName = $oAdmin_Form_Field->getCaption($oAdmin_Language->id);
 
-							$fieldName = $fieldName !== ''
+							$fieldName = !is_null($fieldName) && $fieldName !== ''
 								? htmlspecialchars($fieldName)
 								: '—';
 
@@ -535,9 +535,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 					}
 
 					// Доступные действия для пользователя
-					$aAllowed_Admin_Form_Actions = method_exists($oAdmin_Form_Controller, 'getAdminFormActions')
-						? $oAdmin_Form_Controller->getAdminFormActions()
-						: $oAdmin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser); // delete after 7.0.5
+					$aAllowed_Admin_Form_Actions = $oAdmin_Form_Controller->getAdminFormActions();
 
 					if ($oAdmin_Form->show_operations && $oAdmin_Form_Controller->showOperations
 						|| $allow_filter && $this->showFilter)
@@ -1239,9 +1237,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 			}
 
 			// Доступные действия для пользователя
-			$aAllowed_Admin_Form_Actions = method_exists($oAdmin_Form_Controller, 'getAdminFormActions')
-				? $oAdmin_Form_Controller->getAdminFormActions()
-				: $oAdmin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser); // delete after 7.0.5
+			$aAllowed_Admin_Form_Actions = $oAdmin_Form_Controller->getAdminFormActions();
 
 			// Групповые операции
 			if ($oAdmin_Form->show_group_operations && !empty($aAllowed_Admin_Form_Actions))
@@ -1251,36 +1247,96 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 				$iGroupCount = 0;
 
+				$aAdminFormActionsByDir = array();
+
 				foreach ($aAllowed_Admin_Form_Actions as $oAdmin_Form_Action)
 				{
 					if ($oAdmin_Form_Action->group)
 					{
 						$iGroupCount++;
 
-						$text = htmlspecialchars($oAdmin_Form_Action->getCaption($oAdmin_Language->id));
-
-						$href = $oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), $oAdmin_Form_Action->name);
-						$onclick = $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), $oAdmin_Form_Action->name);
-
-						// Нужно подтверждение для действия
-						if ($oAdmin_Form_Action->confirm)
+						if (!$oAdmin_Form_Action->admin_form_action_dir_id)
 						{
-							$onclick = "res = confirm('" . Core::_('Admin_Form.confirm_dialog', htmlspecialchars($text)) . "'); if (res) { {$onclick} } else {return false}";
+							$text = htmlspecialchars($oAdmin_Form_Action->getCaption($oAdmin_Language->id));
 
-							$link_class = 'admin_form_action_alert_link';
+							$href = $oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), $oAdmin_Form_Action->name);
+							$onclick = $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), $oAdmin_Form_Action->name);
+
+							// Нужно подтверждение для действия
+							if ($oAdmin_Form_Action->confirm)
+							{
+								$onclick = "res = confirm('" . Core::_('Admin_Form.confirm_dialog', htmlspecialchars($text)) . "'); if (res) { {$onclick} } else {return false}";
+
+								// $link_class = 'admin_form_action_alert_link';
+							}
+							// else
+							// {
+							// 	$link_class = 'admin_form_action_link';
+							// }
+
+							// ниже по тексту alt-ы и title-ы не выводятся, т.к. они дублируются текстовыми
+							// надписями и при отключении картинок текст дублируется
+							/* alt="<?php echo htmlspecialchars($text)?>"*/
+
+							$sActionsFullView .= '<li><a title="' . htmlspecialchars($text) . '" href="' . $href . '" onclick="mainFormLocker.unlock(); ' . $onclick .'"><i class="' . htmlspecialchars($oAdmin_Form_Action->icon) . ' fa-fw btn-sm btn-' . htmlspecialchars($oAdmin_Form_Action->color) . '"></i>' . htmlspecialchars($text) . '</a></li>';
+
+							$sActionsShortView .= '<a href="' . htmlspecialchars($href) . '" onclick="mainFormLocker.unlock(); ' . $onclick . '" class="btn-labeled btn btn-'. htmlspecialchars($oAdmin_Form_Action->color) . '"><i class="btn-label ' . htmlspecialchars($oAdmin_Form_Action->icon) . '"></i>' . htmlspecialchars($text) . '</a>';
 						}
 						else
 						{
-							$link_class = 'admin_form_action_link';
+							$aAdminFormActionsByDir[$oAdmin_Form_Action->admin_form_action_dir_id][] = $oAdmin_Form_Action;
 						}
+					}
+				}
 
-						// ниже по тексту alt-ы и title-ы не выводятся, т.к. они дублируются текстовыми
-						// надписями и при отключении картинок текст дублируется
-						/* alt="<?php echo htmlspecialchars($text)?>"*/
+				// Сгруппированные действия
+				if (defined('HOSTCMS_UPDATE_NUMBER') && HOSTCMS_UPDATE_NUMBER > 195) // Проверку удалить в 7.0.7
+				{
+					$aAdmin_Form_Action_Dirs = $oAdmin_Form->Admin_Form_Action_Dirs->findAll();
+					foreach ($aAdmin_Form_Action_Dirs as $oAdmin_Form_Action_Dir)
+					{
+						if (isset($aAdminFormActionsByDir[$oAdmin_Form_Action_Dir->id]))
+						{
+							$icon = $oAdmin_Form_Action_Dir->icon != ''
+								? htmlspecialchars($oAdmin_Form_Action_Dir->icon)
+								: 'fa fa-bars';
 
-						$sActionsFullView .= '<li><a title="' . htmlspecialchars($text) . '" href="' . $href . '" onclick="mainFormLocker.unlock(); ' . $onclick .'"><i class="' . htmlspecialchars($oAdmin_Form_Action->icon) . ' fa-fw btn-sm btn-' . htmlspecialchars($oAdmin_Form_Action->color) . '"></i>' . htmlspecialchars($text) . '</a></li>';
+							$additionalClass = $oAdmin_Form_Action_Dir->getWordName() == ''
+								? ' no-margin-right no-padding-right'
+								: '';
 
-						$sActionsShortView .= '<a href="' . htmlspecialchars($href) . '" onclick="mainFormLocker.unlock(); ' . $onclick . '" class="btn-labeled btn btn-'. htmlspecialchars($oAdmin_Form_Action->color) . '"><i class="btn-label ' . htmlspecialchars($oAdmin_Form_Action->icon) . '"></i>' . htmlspecialchars($text) . '</a>';
+							$sActionsShortView .= '<div class="btn-group dropup">
+								<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown">
+									<i class="' . $icon . ' icon-separator ' . $additionalClass . '"></i>' .
+									htmlspecialchars($oAdmin_Form_Action_Dir->getWordName()) .
+								'</a>
+								<ul class="dropdown-menu">';
+
+							foreach ($aAdminFormActionsByDir[$oAdmin_Form_Action_Dir->id] as $key => $oAdmin_Form_Action)
+							{
+								$text = htmlspecialchars($oAdmin_Form_Action->getCaption($oAdmin_Language->id));
+
+								$href = $oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), $oAdmin_Form_Action->name);
+								$onclick = $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), $oAdmin_Form_Action->name);
+
+								// Нужно подтверждение для действия
+								if ($oAdmin_Form_Action->confirm)
+								{
+									$onclick = "res = confirm('" . Core::_('Admin_Form.confirm_dialog', htmlspecialchars($text)) . "'); if (res) { {$onclick} } else {return false}";
+								}
+
+								$divider = $key == 0
+									? '<li class="divider"></li>'
+									: '';
+
+								$sActionsFullView .= $divider . '<li><a title="' . htmlspecialchars($text) . '" href="' . $href . '" onclick="mainFormLocker.unlock(); ' . $onclick .'"><i class="' . htmlspecialchars($oAdmin_Form_Action->icon) . ' fa-fw btn-sm btn-' . htmlspecialchars($oAdmin_Form_Action->color) . '"></i>' . htmlspecialchars($text) . '</a></li>';
+
+								$sActionsShortView .= '<li><a title="' . htmlspecialchars($text) . '" href="' . $href . '" onclick="mainFormLocker.unlock(); ' . $onclick .'"><i class="' . htmlspecialchars($oAdmin_Form_Action->icon) . ' fa-fw btn-sm btn-' . htmlspecialchars($oAdmin_Form_Action->color) . '"></i>' . htmlspecialchars($text) . '</a></li>';
+							}
+
+							$sActionsShortView .= '</ul>
+							</div>';
+						}
 					}
 				}
 
@@ -1293,11 +1349,12 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 								<?php echo Core::_('Admin_Form.actions')?>
 							</a>
 							<ul class="dropdown-menu">
-							<?php echo $sActionsFullView?>
+								<?php echo $sActionsFullView?>
 							</ul>
 						</div>
 					</div><?php
 				}
+
 				?><div <?php echo $iGroupCount > 1 ? 'class="hidden-sm hidden-xs"' : ''?>>
 					<?php echo $sActionsShortView?>
 				</div>

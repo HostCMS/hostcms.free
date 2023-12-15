@@ -767,9 +767,9 @@ class Shop_Report_Controller
 				$aPopularItems[$iId] = array(
 					'name' => $oShop_Order_Item->name,
 					'marking' => $oShop_Order_Item->marking,
-					'avgPrice' => number_format((float) $oShop_Order_Item->dataAvgPrice, 2, '.', ' '),
+					'avgPrice' => /*number_format((float)*/ $oShop_Order_Item->dataAvgPrice/*, 2, '.', ' ')*/,
 					'quantityAmount' => $oShop_Order_Item->dataQuantityAmount,
-					'totalAmount' => number_format((float) $oShop_Order_Item->dataTotalAmount, 2, '.', ' ')
+					'totalAmount' => /*number_format((float) */$oShop_Order_Item->dataTotalAmount/*, 2, '.', ' ')*/
 				);
 
 				$oShop_Item = $oShop_Order_Item->Shop_Item->modification_id

@@ -44,7 +44,7 @@ return array(
 	'dynamic_page' => 'Динамічна сторінка',
 	'link' => 'Посилання',
 	'document_text' => 'Вміст сторінки',
-	'siteuser_group_id' => 'Група доступу',
+	'siteuser_group_id' => 'Група клієнтів',
 	'https' => 'Доступ через HTTPS',
 	'structure_source' => 'Динамічна сторінка',
 	'structure_config_source' => '<acronym title="Дозволяють перевизначати значення параметрів сторінки. Наприклад значення параметра «title»">Налаштування динамічної сторінки</acronym>',

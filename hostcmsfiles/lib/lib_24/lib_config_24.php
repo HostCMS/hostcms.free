@@ -22,7 +22,7 @@ if (!is_null(Core_Array::getPost('stealthSubscribe')))
 				{
 					$Antispam_Controller = new Antispam_Controller();
 					$bAntispamAnswer = $Antispam_Controller
-						->addText($email)
+						->addText($email, 'email')
 						->execute();
 
 					// Check e-mail

@@ -204,9 +204,15 @@ class Shop_Model extends Core_Entity
 		'seo_group_title_template',
 		'seo_group_keywords_template',
 		'seo_group_description_template',
+		'seo_group_h1_template',
 		'seo_item_title_template',
 		'seo_item_keywords_template',
 		'seo_item_description_template',
+		'seo_item_h1_template',
+		'seo_root_title_template',
+		'seo_root_description_template',
+		'seo_root_keywords_template',
+		'seo_root_h1_template',
 		'order_admin_subject',
 		'order_user_subject',
 		'confirm_admin_subject',
@@ -886,13 +892,14 @@ class Shop_Model extends Core_Entity
 			->from('shop_items')
 			->where('shop_items.shop_id', '=', $shop_id)
 			->where('shop_items.active', '=', 1)
+			->where('shop_items.modification_id', '=', 0)
+			->where('shop_items.deleted', '=', 0)
 			->where('shop_items.start_datetime', '<=', $current_date)
 			->open()
 				->where('shop_items.end_datetime', '>=', $current_date)
 				->setOr()
 				->where('shop_items.end_datetime', '=', '0000-00-00 00:00:00')
 			->close()
-			->where('shop_items.deleted', '=', 0)
 			->groupBy('shop_group_id');
 
 		Core_Event::notify($this->_modelName . '.onBeforeSelectCountItemsInRecount', $this, array($queryBuilder));

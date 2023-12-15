@@ -301,6 +301,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 		$this->itemsActivity = $this->groupsActivity = $this->commentsActivity = 'active'; // inactive, all
 
+		// Named subpatterns {name} can consist of up to 32 alphanumeric characters and underscores, but must start with a non-digit.
 		$this->pattern = rawurldecode(Core_Str::rtrimUri($this->getEntity()->Structure->getPath())) . '({path}/)(part-{part}/)(page-{page}/)(tag/{tag}/)';
 
 		$this->patternExpressions = array(
@@ -365,13 +366,14 @@ class Informationsystem_Controller_Show extends Core_Controller
 			case 1:
 				$this->_Informationsystem_Items
 					->queryBuilder()
-					->orderBy('informationsystem_items.name', $items_sorting_direction);
+					->orderBy('informationsystem_items.name', $items_sorting_direction)
+					->orderBy('informationsystem_items.id', 'DESC');
 				break;
 			case 2:
 				$this->_Informationsystem_Items
 					->queryBuilder()
 					->orderBy('informationsystem_items.sorting', $items_sorting_direction)
-					->orderBy('informationsystem_items.name', $items_sorting_direction);
+					->orderBy('informationsystem_items.name', 'ASC');
 				break;
 			case 0:
 			default:
@@ -553,10 +555,10 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 		// Backward compatible
 		is_array($this->groupsForbiddenTags) && count($this->groupsForbiddenTags)
-			&& $this->addForbiddenTags('/shop/shop_group', $this->groupsForbiddenTags);
+			&& $this->addForbiddenTags('/informationsystem/informationsystem_group', $this->groupsForbiddenTags);
 
 		is_array($this->itemsForbiddenTags) && count($this->itemsForbiddenTags)
-			&& $this->addForbiddenTags('/shop/shop_item', $this->itemsForbiddenTags);
+			&& $this->addForbiddenTags('/informationsystem/informationsystem_item', $this->itemsForbiddenTags);
 
 		$oInformationsystem = $this->getEntity();
 
@@ -626,6 +628,46 @@ class Informationsystem_Controller_Show extends Core_Controller
 				->value(intval($this->limit))
 		);
 
+		if ($this->item)
+		{
+			if ($this->_seoItemH1 != '')
+			{
+				$oInformationsystem_Item = Core_Entity::factory('Informationsystem_Item', $this->item);
+
+				$oCore_Meta = new Core_Meta();
+				$oCore_Meta
+					->addObject('informationsystem', $oInformationsystem)
+					->addObject('group', $oInformationsystem_Item->Informationsystem_Group)
+					->addObject('item', $oInformationsystem_Item)
+					->addObject('this', $this);
+
+				$this->addEntity(
+					Core::factory('Core_Xml_Entity')
+						->name('seo_item_h1')
+						->value($oCore_Meta->apply($this->_seoItemH1))
+				);
+			}
+		}
+		elseif ($this->_seoGroupH1 != '')
+		{
+			$oCore_Meta = new Core_Meta();
+			$oCore_Meta
+				->addObject('informationsystem', $oInformationsystem)
+				->addObject('this', $this);
+
+			if ($this->group)
+			{
+				$oInformationsystem_Group = Core_Entity::factory('Informationsystem_Group', $this->group);
+				$oCore_Meta->addObject('group', $oInformationsystem_Group);
+			}
+
+			$this->addEntity(
+				Core::factory('Core_Xml_Entity')
+					->name('seo_group_h1')
+					->value($oCore_Meta->apply($this->_seoGroupH1))
+			);
+		}
+
 		// Независимо от limit, т.к. может использоваться отдельно для фильтра
 		if (!$this->item)
 		{
@@ -639,8 +681,16 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 			if (!$this->item)
 			{
-				// Group's conditions for information system item
-				$this->group !== FALSE && $this->applyGroupCondition();
+				// Group condition for informationsystem item
+				if ($this->group !== FALSE)
+				{
+					$this->applyGroupCondition();
+				}
+				else
+				{
+					// при выборе из всей ИС ярлыки не требуются, так как будут присутствовать оригинальные инфоэлементы
+					$this->forbidSelectShortcuts();
+				}
 
 				$this->_setLimits();
 
@@ -1030,6 +1080,20 @@ class Informationsystem_Controller_Show extends Core_Controller
 	}
 
 	/**
+	 * Disable shortcuts
+	 * @return self
+	 */
+	protected function forbidSelectShortcuts()
+	{
+		// Отключаем выбор ярлыков
+		$this->_Informationsystem_Items
+			->queryBuilder()
+			->where('informationsystem_items.shortcut_id', '=', 0);
+
+		return $this;
+	}
+
+	/**
 	 * Apply item's condition by informationsystem_group_id
 	 * @return self
 	 */
@@ -1052,10 +1116,12 @@ class Informationsystem_Controller_Show extends Core_Controller
 	protected $_seoGroupTitle = NULL;
 	protected $_seoGroupDescription = NULL;
 	protected $_seoGroupKeywords = NULL;
+	protected $_seoGroupH1 = NULL;
 
 	protected $_seoItemTitle = NULL;
 	protected $_seoItemDescription = NULL;
 	protected $_seoItemKeywords = NULL;
+	protected $_seoItemH1 = NULL;
 
 	/**
 	 * Parse URL and set controller properties
@@ -1076,6 +1142,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 			&& $this->_seoGroupDescription = $oInformationsystem->seo_group_description_template;
 		$oInformationsystem->seo_group_keywords_template != ''
 			&& $this->_seoGroupKeywords = $oInformationsystem->seo_group_keywords_template;
+		$oInformationsystem->seo_group_h1_template != ''
+			&& $this->_seoGroupH1 = $oInformationsystem->seo_group_h1_template;
 
 		// Item: set informationsystem's SEO templates
 		$oInformationsystem->seo_item_title_template != ''
@@ -1084,6 +1152,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 			&& $this->_seoItemDescription = $oInformationsystem->seo_item_description_template;
 		$oInformationsystem->seo_item_keywords_template != ''
 			&& $this->_seoItemKeywords = $oInformationsystem->seo_item_keywords_template;
+		$oInformationsystem->seo_item_h1_template != ''
+			&& $this->_seoItemH1 = $oInformationsystem->seo_item_h1_template;
 
 		$Core_Router_Route = new Core_Router_Route($this->pattern, $this->patternExpressions);
 		$this->patternParams = $matches = $Core_Router_Route->applyPattern(Core::$url['path']);
@@ -1154,6 +1224,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 							&& $this->_seoGroupDescription = $oInformationsystem_Group->seo_group_description_template;
 						$oInformationsystem_Group->seo_group_keywords_template != ''
 							&& $this->_seoGroupKeywords = $oInformationsystem_Group->seo_group_keywords_template;
+						$oInformationsystem_Group->seo_group_h1_template != ''
+							&& $this->_seoGroupH1 = $oInformationsystem_Group->seo_group_h1_template;
 
 						// Item: set informationsystem's SEO templates
 						$oInformationsystem_Group->seo_item_title_template != ''
@@ -1162,6 +1234,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 							&& $this->_seoItemDescription = $oInformationsystem_Group->seo_item_description_template;
 						$oInformationsystem_Group->seo_item_keywords_template != ''
 							&& $this->_seoItemKeywords = $oInformationsystem_Group->seo_item_keywords_template;
+						$oInformationsystem_Group->seo_item_h1_template != ''
+							&& $this->_seoItemH1 = $oInformationsystem_Group->seo_item_h1_template;
 					}
 					else
 					{
@@ -1331,22 +1405,21 @@ class Informationsystem_Controller_Show extends Core_Controller
 						->addObject('informationsystem', $oInformationsystem)
 						->addObject('this', $this);
 
-					if ($oInformationsystem->seo_root_title_template != '')
-					{
-						$seo_title = $oCore_Meta->apply($oInformationsystem->seo_root_title_template);
-					}
+					// Title
+					$oInformationsystem->seo_root_title_template != ''
+						&& $seo_title = $oCore_Meta->apply($oInformationsystem->seo_root_title_template);
 
 					// Description
-					if ($oInformationsystem->seo_root_keywords_template != '')
-					{
-						$seo_description = $oCore_Meta->apply($oInformationsystem->seo_root_keywords_template );
-					}
+					$oInformationsystem->seo_root_description_template != ''
+						&& $seo_description = $oCore_Meta->apply($oInformationsystem->seo_root_description_template);
 
 					// Keywords
-					if ($oInformationsystem->seo_root_description_template != '')
-					{
-						$seo_keywords = $oCore_Meta->apply($oInformationsystem->seo_root_description_template );
-					}
+					$oInformationsystem->seo_root_keywords_template != ''
+						&& $seo_keywords = $oCore_Meta->apply($oInformationsystem->seo_root_keywords_template);
+
+					// H1
+					$oInformationsystem->seo_root_h1_template != ''
+						&& $this->_seoGroupH1 = $oInformationsystem->seo_root_h1_template;
 				}
 			}
 			elseif (!is_null($this->tag) && Core::moduleIsActive('tag'))
@@ -1603,6 +1676,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 	 * @param int $parent_id parent group ID
 	 * @param object $parentObject object
 	 * @return self
+	 * @hostcms-event Informationsystem_Controller_Show.onAfterAddInformationsystemGroups
 	 */
 	protected function _addGroupsByParentId($parent_id, $parentObject)
 	{
@@ -1655,6 +1729,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 				$this->_addGroupsByParentId($oInformationsystem_Group->id, $oInformationsystem_Group);
 			}
+
+			Core_Event::notify(get_class($this) . '.onAfterAddInformationsystemGroups', $this, array($this->_aInformationsystem_Groups[$parent_id]));
 		}
 
 		return $this;

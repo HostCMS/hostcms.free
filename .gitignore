@@ -39,6 +39,7 @@ Thumbs.db
 !admin/ipaddress/**
 !admin/field/**
 !admin/lib/**
+!admin/mail/**
 !admin/market/**
 !admin/module/**
 !admin/notification/**
@@ -111,6 +112,7 @@ modules/core/config/*
 !modules/ipaddress/**
 !modules/field/**
 !modules/lib/**
+!modules/mail/**
 !modules/market/**
 !modules/module/**
 !modules/notification/**

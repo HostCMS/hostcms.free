@@ -37,7 +37,7 @@ return array(
 	'maillist' => '<acronym title="Information system item can be added as a subscribe issue">Place in subscription</acronym>',
 	'maillist_default_value' => '-- Not send --',
 
-	'siteuser_group_id' => 'Access group',
+	'siteuser_group_id' => 'Customer Group',
 
 	'indexing' => 'Index',
 	'text' => 'Text',

@@ -106,6 +106,7 @@ class Shop_Producer_Controller_Show extends Core_Controller
 
 		$this->_aSiteuserGroups = $this->_getSiteuserGroups();
 
+		// Named subpatterns {name} can consist of up to 32 alphanumeric characters and underscores, but must start with a non-digit.
 		$this->pattern = rawurldecode($this->getEntity()->Structure->getPath()) . 'producers/({path})(page-{page}/)';
 
 		$this->patternExpressions = array(
@@ -326,38 +327,27 @@ class Shop_Producer_Controller_Show extends Core_Controller
 				}
 				else
 				{
-					$oCore_Response = Core_Page::instance()->deleteChild()->response->status(404);
-
-					// Если определена константа с ID страницы для 404 ошибки и она не равна нулю
-					$oSite = Core_Entity::factory('Site', CURRENT_SITE);
-					if ($oSite->error404)
-					{
-						$oStructure = Core_Entity::factory('Structure')->find($oSite->error404);
-
-						// страница с 404 ошибкой не найдена
-						if (is_null($oStructure->id))
-						{
-							throw new Core_Exception('Group not found');
-						}
-
-						$oCore_Page = Core_Page::instance();
-						$oCore_Page->addChild($oStructure->getRelatedObjectByType());
-						$oStructure->setCorePageSeo($oCore_Page);
-					}
-					else
-					{
-						if (Core::$url['path'] != '/')
-						{
-							// Редирект на главную страницу
-							$oCore_Response->header('Location', '/');
-						}
-					}
-					return $this;
+					return $this->error404();
 				}
 			}
 		}
+		elseif (is_null($path))
+		{
+			return $this->error404();
+		}
 
 		Core_Event::notify(get_class($this) . '.onAfterParseUrl', $this);
+
+		return $this;
+	}
+
+	/**
+	 * Define handler for 404 error
+	 * @return self
+	 */
+	public function error404()
+	{
+		Core_Page::instance()->error404();
 
 		return $this;
 	}

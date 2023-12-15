@@ -24,6 +24,7 @@ class Core_Image_Imagick extends Core_Image
 	 * @param string $targetFile путь к результирующему файлу
 	 * @param int $quality качество JPEG/PNG файла, если не передано, то берется из констант
 	 * @param int $preserveAspectRatio сохранять пропорции изображения
+	 * @param string|NULL $outputFormat формат, в котором сохранять изображение, по умолчанию NULL равен формату исходного
 	 * <code>
 	 * <?php
 	 * $sourceFile = CMS_FOLDER . 'file1.jpg';
@@ -34,10 +35,9 @@ class Core_Image_Imagick extends Core_Image
 	 * </code>
 	 * @return bool
 	 */
-	static public function resizeImage($sourceFile, $maxWidth, $maxHeight, $targetFile, $quality = NULL, $preserveAspectRatio = TRUE)
+	static public function resizeImage($sourceFile, $maxWidth, $maxHeight, $targetFile, $quality = NULL, $preserveAspectRatio = TRUE, $outputFormat = NULL)
 	{
 		$maxWidth = intval($maxWidth);
-
 		$maxHeight = intval($maxHeight);
 
 		$picsize = self::getImageSize($sourceFile);
@@ -52,6 +52,8 @@ class Core_Image_Imagick extends Core_Image
 
 		if ($sourceX > $maxWidth || $sourceY > $maxHeight)
 		{
+			$iImagetype = $iSourceImageType = self::exifImagetype($sourceFile);
+
 			if ($preserveAspectRatio)
 			{
 				$destX = $sourceX;
@@ -102,6 +104,9 @@ class Core_Image_Imagick extends Core_Image
 				}
 			}
 
+			$destX = intval($destX);
+			$destY = intval($destY);
+
 			// в $destX и $destY теперь хранятся размеры оригинального изображения после уменьшения
 			// от них рассчитываем размеры для обрезания на втором шаге
 			$destX_step2 = $maxWidth;
@@ -131,24 +136,39 @@ class Core_Image_Imagick extends Core_Image
 				$src_y = 0;
 			}
 
-			$ext = Core_File::getExtension($targetFile);
 			$oImagick = new Imagick($sourceFile);
-			if ($ext == 'jpg' || $ext == 'jpeg')
+
+			// Change output format
+			if (!is_null($outputFormat))
 			{
+				$iImagetype = self::getImagetypeByFormat($outputFormat);
+			}
+
+			// PNG => another types
+			$iSourceImageType == IMAGETYPE_PNG && $iSourceImageType != $iImagetype
+				&& $oImagick->setBackgroundColor(new ImagickPixel('#FFFFFF'));
+
+			if ($iImagetype == IMAGETYPE_JPEG)
+			{
+				$oImagick->setImageFormat('jpg');
 				$oImagick->setImageCompression(Imagick::COMPRESSION_JPEG);
 				$oImagick->setImageCompressionQuality(is_null($quality) ? (defined('JPG_QUALITY') ? JPG_QUALITY : 60) : intval($quality));
 			}
-			elseif ($ext == 'png')
+			elseif ($iImagetype == IMAGETYPE_PNG)
 			{
+				$oImagick->setImageFormat('png');
 				$oImagick->setImageCompression(Imagick::COMPRESSION_ZIP);
 				$oImagick->setImageCompressionQuality(is_null($quality) ? (defined('PNG_QUALITY') ? PNG_QUALITY : 6) : intval($quality));
 			}
-			elseif ($ext == 'webp')
+			elseif (defined('IMAGETYPE_WEBP') && $iImagetype == IMAGETYPE_WEBP)
 			{
 				$oImagick->setImageFormat('webp');
 				$oImagick->setImageCompressionQuality(is_null($quality) ? (defined('WEBP_QUALITY') ? WEBP_QUALITY : 80) : intval($quality));
 			}
-			elseif ($ext == 'gif'){}
+			elseif ($iImagetype == IMAGETYPE_GIF)
+			{
+				$oImagick->setImageFormat('gif');
+			}
 			else
 			{
 				$oImagick->clear();
@@ -174,13 +194,7 @@ class Core_Image_Imagick extends Core_Image
 			// Удаляем метаданные
 			$oImagick->stripImage();
 
-			if ($preserveAspectRatio)
-			{
-				$oImagick->writeImage($targetFile);
-				$oImagick->clear();
-				$oImagick->destroy();
-			}
-			else
+			if (!$preserveAspectRatio)
 			{
 				if ($destX_step2 == 0 || $destY_step2 == 0)
 				{
@@ -190,10 +204,11 @@ class Core_Image_Imagick extends Core_Image
 				$oImagick->cropImage($destX_step2, $destY_step2, $src_x, $src_y);
 				// Удаляем канвас
 				$oImagick->setImagePage(0, 0, 0, 0);
-				$oImagick->writeImage($targetFile);
-				$oImagick->clear();
-				$oImagick->destroy();
 			}
+
+			$oImagick->writeImage($targetFile);
+			$oImagick->clear();
+			$oImagick->destroy();
 
 			@chmod($targetFile, CHMOD_FILE);
 		}
@@ -213,6 +228,7 @@ class Core_Image_Imagick extends Core_Image
 	 * @param string $watermark путь к файлу watermark в формате PNG
 	 * @param string $watermarkX позиция по оси X (в пикселях или процентах)
 	 * @param string $watermarkY позиция по оси Y (в пикселях или процентах)
+	 * @param string|NULL $outputFormat формат, в котором сохранять изображение, по умолчанию NULL равен формату исходного
 	 * <code>
 	 * <?php
 	 * $source = CMS_FOLDER . 'file1.jpg';
@@ -224,41 +240,17 @@ class Core_Image_Imagick extends Core_Image
 	 * </code>
 	 * @return bool
 	 */
-	static public function addWatermark($source, $target, $watermark, $watermarkX = NULL, $watermarkY = NULL)
+	static public function addWatermark($source, $target, $watermark, $watermarkX = NULL, $watermarkY = NULL, $outputFormat = NULL)
 	{
 		$return = FALSE;
 
 		if (Core_File::isFile($watermark))
 		{
-			$sourceImage = new Imagick($source);
+			$oImagick = new Imagick($source);
 			$watermarkImage = new Imagick($watermark);
 
-			$ext = Core_File::getExtension($target);
-			if ($ext == 'jpg' || $ext == 'jpeg')
-			{
-				$sourceImage->setImageCompression(Imagick::COMPRESSION_JPEG);
-				$sourceImage->setImageCompressionQuality(JPG_QUALITY);
-			}
-			elseif ($ext == 'webp')
-			{
-				$sourceImage->setImageFormat('webp');
-				$sourceImage->setImageCompressionQuality(defined('WEBP_QUALITY') ? WEBP_QUALITY : 80);
-			}
-			elseif ($ext == 'png')
-			{
-				$sourceImage->setImageCompression(Imagick::COMPRESSION_ZIP);
-				$sourceImage->setImageCompressionQuality(PNG_QUALITY);
-			}
-			elseif ($ext == 'gif') {}
-			else
-			{
-				$sourceImage->clear();
-				$sourceImage->destroy();
-				$sourceImage->clear();
-				$sourceImage->destroy();
-				return FALSE;
-			}
-
+			$iImagetype = $iSourceImageType = self::exifImagetype($source);
+			
 			if (!is_null($watermarkX))
 			{
 				// Если передан атрибут в %-ах
@@ -266,7 +258,7 @@ class Core_Image_Imagick extends Core_Image
 				{
 					// Вычисляем позицию в %-х
 					$watermarkX = $regs[1] > 0
-						? ($sourceImage->getImageWidth() - $watermarkImage->getImageWidth()) * ($regs[1] / 100)
+						? ($oImagick->getImageWidth() - $watermarkImage->getImageWidth()) * ($regs[1] / 100)
 						: 0;
 				}
 			}
@@ -278,22 +270,68 @@ class Core_Image_Imagick extends Core_Image
 				{
 					// Вычисляем позицию в %-х
 					$watermarkY = $regs[1] > 0
-						? ($sourceImage->getImageHeight() - $watermarkImage->getImageHeight()) * ($regs[1] / 100)
+						? ($oImagick->getImageHeight() - $watermarkImage->getImageHeight()) * ($regs[1] / 100)
 						: 0;
 				}
 			}
 
+			$watermarkX = intval($watermarkX);
+			$watermarkY = intval($watermarkY);
+
 			$watermarkX < 0 && $watermarkX = 0;
 			$watermarkY < 0 && $watermarkY = 0;
 
-			$sourceImage->compositeImage($watermarkImage, imagick::COMPOSITE_OVER, $watermarkX, $watermarkY);
-			// Удаляем метаданные
-			$sourceImage->stripImage();
-			$sourceImage->writeImage($target);
-			$sourceImage->clear();
-			$sourceImage->destroy();
+			$oImagick->compositeImage($watermarkImage, imagick::COMPOSITE_OVER, $watermarkX, $watermarkY);
+			
 			$watermarkImage->clear();
 			$watermarkImage->destroy();
+
+			// Change output format
+			if (!is_null($outputFormat))
+			{
+				$iImagetype = self::getImagetypeByFormat($outputFormat);
+			}
+
+			// PNG => another types
+			$iSourceImageType == IMAGETYPE_PNG && $iSourceImageType != $iImagetype
+				&& $oImagick->setBackgroundColor(new ImagickPixel('#FFFFFF'));
+
+			if ($iImagetype == IMAGETYPE_JPEG)
+			{
+				$oImagick->setImageFormat('jpg');
+				$oImagick->setImageCompression(Imagick::COMPRESSION_JPEG);
+				$oImagick->setImageCompressionQuality(defined('JPG_QUALITY') ? JPG_QUALITY : 60);
+			}
+			elseif ($iImagetype == IMAGETYPE_PNG)
+			{
+				$oImagick->setImageFormat('png');
+				$oImagick->setImageCompression(Imagick::COMPRESSION_ZIP);
+				$oImagick->setImageCompressionQuality(defined('PNG_QUALITY') ? PNG_QUALITY : 6);
+			}
+			elseif (defined('IMAGETYPE_WEBP') && $iImagetype == IMAGETYPE_WEBP)
+			{
+				$oImagick->setImageFormat('webp');
+				$oImagick->setImageCompressionQuality(defined('WEBP_QUALITY') ? WEBP_QUALITY : 80);
+			}
+			elseif ($iImagetype == IMAGETYPE_GIF)
+			{
+				$oImagick->setImageFormat('gif');
+			}
+			else
+			{
+				$oImagick->clear();
+				$oImagick->destroy();
+				return FALSE;
+			}
+
+			// Удаляем метаданные
+			$oImagick->stripImage();
+
+			$oImagick->writeImage($target);
+			
+			$oImagick->clear();
+			$oImagick->destroy();
+
 			@chmod($target, CHMOD_FILE);
 			$return = TRUE;
 		}

@@ -55,7 +55,7 @@ return array(
 	'typograph_default_items' => 'Типографувати елементи',
 	'typograph_default_groups' => 'Типографувати групи',
 
-	'siteuser_group_id' => 'Група доступу',
+	'siteuser_group_id' => 'Група клієнтів',
 	'information_all' => 'Всі',
 
 	'structure_name' => 'Вузол структури',
@@ -150,4 +150,13 @@ return array(
 	'option_itemSmallImage' => 'Шаблон іменування малого зображення елементу',
 	'option_groupLargeImage' => 'Шаблон іменування великого зображення групи',
 	'option_groupSmallImage' => 'Шаблон іменування малого зображення групи',
+
+	'seo_group_h1_template' => 'Шаблон H1',
+	'seo_item_h1_template' => 'Шаблон H1',
+	'seo_root_h1_template' => 'Шаблон H1',
+
+	'searchIndexItem' => 'Ідентифікатор елемента',
+	'searchIndexGroup' => 'Ідентифікатор групи',
+	'searchUnindexItem' => 'Ідентифікатор елемента',
+	'recountInformationsystem' => 'Ідентифікатор інформаційної системи',
 );

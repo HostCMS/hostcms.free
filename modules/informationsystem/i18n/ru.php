@@ -66,7 +66,7 @@ return array(
 	'typograph_default_groups' => 'Типографировать группы',
 
 
-	'siteuser_group_id' => 'Группа доступа',
+	'siteuser_group_id' => 'Группа клиентов',
 	'information_all' => 'Все',
 
 	'structure_name' => 'Узел структуры',
@@ -130,12 +130,15 @@ return array(
 	'seo_group_title_template' => 'Шаблон title',
 	'seo_group_description_template' => 'Шаблон description',
 	'seo_group_keywords_template' => 'Шаблон keywords',
+	'seo_group_h1_template' => 'Шаблон H1',
 	'seo_item_title_template' => 'Шаблон title',
 	'seo_item_description_template' => 'Шаблон description',
 	'seo_item_keywords_template' => 'Шаблон keywords',
+	'seo_item_h1_template' => 'Шаблон H1',
 	'seo_root_title_template' => 'Шаблон title',
 	'seo_root_description_template' => 'Шаблон description',
 	'seo_root_keywords_template' => 'Шаблон keywords',
+	'seo_root_h1_template' => 'Шаблон H1',
 
 	'seo_template_informationsystem' => 'Информационная система',
 	'seo_template_informationsystem_name' => 'Название системы',

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Browser
 {
@@ -179,10 +179,20 @@ class Core_Browser
 		{
 			$browser = 'MS IE '. $log_version[1];
 		}
-		// Mozilla/5.0 (Windows; U; Windows NT 5.1; ru-RU) AppleWebKit/533.16 (KHTML, like Gecko) Version/5.0 Safari/533.16
+		// Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1
 		elseif (preg_match('#Version\/([0-9\.]*).*Safari/[0-9\.]#', $userAgent, $log_version))
 		{
 			$browser = 'Safari '. $log_version[1];
+		}
+		// Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/114.0.5735.124 Mobile/15E148 Safari/604.1
+		elseif (preg_match('#CriOS\/([0-9\.]*).*Safari/[0-9\.]#', $userAgent, $log_version))
+		{
+			$browser = 'Chrome ' . $log_version[1] . ' on iOS';
+		}
+		// Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/114.0 Mobile/15E148 Safari/605.1.15
+		elseif (preg_match('#FxiOS\/([0-9\.]*).*Safari/[0-9\.]#', $userAgent, $log_version))
+		{
+			$browser = 'Firefox ' . $log_version[1] . ' on iOS';
 		}
 		elseif (preg_match('#Netscape/([0-9].[0-9]{1,2})#', $userAgent, $log_version))
 		{

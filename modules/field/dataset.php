@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Field
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Field_Dataset extends Admin_Form_Dataset
 {
@@ -116,7 +116,7 @@ class Field_Dataset extends Admin_Form_Dataset
 
 		foreach ($aTables as $key => $aTableRow)
 		{
-			$sEngine = strtoupper(Core_Array::get($aTableRow, 'Engine'));
+			$sEngine = strtoupper(Core_Array::get($aTableRow, 'Engine', '', 'str'));
 			$sComment = Core_Array::get($aTableRow, 'Comment');
 
 			if ($sEngine != '' && $sComment != 'VIEW')

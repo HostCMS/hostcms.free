@@ -10,7 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Type_Shortcut extends Admin_Form_Action_Controller
 {
@@ -127,6 +127,11 @@ class Admin_Form_Action_Controller_Type_Shortcut extends Admin_Form_Action_Contr
 					$oInformationsystem = Core_Entity::factory('Informationsystem', Core_Array::getGet('informationsystem_id', 0));
 					$entity_id = $oInformationsystem->id;
 					$path = '/admin/informationsystem/item/index.php?autocomplete=1&show_shortcut_groups=1';
+				}
+				else
+				{
+					$entity_id = CURRENT_SITE;
+					$path = '/admin/structure/index.php?autocomplete=1&show_shortcuts=1';
 				}
 
 				if ($entity_id)

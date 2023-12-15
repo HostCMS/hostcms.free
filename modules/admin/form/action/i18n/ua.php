@@ -4,9 +4,9 @@ return array(
 	'model_name' => 'Дії форми центру адміністрування',
 	'action_lng_name' => 'Назва дії',
 	'action_lng_description' => 'Опис дії',
-	
+
 	'show_form_action_title' => 'Дії форми центру адміністрування "%s"',
-	
+
 	'apply_success' => 'Дані для дії успішно оновлені.',
 	'apply_error' => 'Помилка! Дані для дії не змінені.',
 
@@ -15,9 +15,9 @@ return array(
 
 	'copy_success' => 'Дію успішно скопійовано!',
 	'copy_error' => 'Помилка! Дію форми не скопійовано!',
-	
+
 	'show_form_action_menu_add_new_top' => 'Дія',
-	
+
 	'form_add_forms_event_title' => 'Додавання дії форми центру адміністрування',
 	'form_edit_forms_event_title' => 'Редагування дії форми центру адміністрування "%s"',
 
@@ -36,11 +36,12 @@ return array(
 
 	'admin_form_id' => 'Ідентифікатор форми центру адміністрування',
 	'id' => 'Ідентифікатор поля форми',
-	
+
 	'edit_success' => 'Дію форми додано!',
 	'edit_error' => 'Помилка! Дію форми не додано!',
-	
+
 	'form_event_menu_admin_form_action' => 'Список дій форми "%s"',
 	'delete_success' => 'Елемент видалений!',
 	'undelete_success' => 'Елемент відновлено!',
+	'admin_form_action_dir_id' => 'Батьківський розділ'
 );

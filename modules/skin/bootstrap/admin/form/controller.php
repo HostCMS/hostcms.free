@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 {
@@ -268,6 +268,24 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 		foreach ($this->_children as $oAdmin_Form_Entity)
 		{
 			if ($oAdmin_Form_Entity instanceof Skin_Bootstrap_Admin_Form_Entity_Menus)
+			{
+				$oAdmin_Form_Entity->execute();
+			}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Show children elements
+	 * @return self
+	 */
+	public function showFormBreadcrumbs()
+	{
+		// Связанные с формой элементы (меню, строка навигации и т.д.)
+		foreach ($this->_children as $oAdmin_Form_Entity)
+		{
+			if ($oAdmin_Form_Entity instanceof Skin_Bootstrap_Admin_Form_Entity_Breadcrumbs)
 			{
 				$oAdmin_Form_Entity->execute();
 			}

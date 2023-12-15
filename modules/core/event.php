@@ -131,6 +131,12 @@ class Core_Event
 		{
 			foreach (self::$_attached[$eventName] as $aValue)
 			{
+				// Show Debug Message
+				if (self::_isDebug() && !defined('IS_ADMIN_PART') && defined('OB_START'))
+				{
+					printf("\n<div>Event <b>%s</b>, calls <b>%s</b></div>", $eventName, Core::getCallableName($aValue[0]));
+				}
+
 				self::$_lastReturn = call_user_func($aValue[0], $object, $args, $aValue[1]);
 				if (self::$_lastReturn === FALSE)
 				{
@@ -157,5 +163,25 @@ class Core_Event
 		return isset(self::$_attached[$eventName])
 			? count(self::$_attached[$eventName])
 			: 0;
+	}
+
+	/**
+	 * Cache for _isDebug()
+	 * @var NULL|boolean
+	 */
+	static protected $_debug = NULL;
+
+	/**
+	 * Check is debug mode
+	 * @return NULL|boolean
+	 */
+	static protected function _isDebug()
+	{
+		if (is_null(self::$_debug) && Core::isInit())
+		{
+			self::$_debug = defined('EVENTS_DEBUG') && EVENTS_DEBUG;
+		}
+
+		return self::$_debug;
 	}
 }

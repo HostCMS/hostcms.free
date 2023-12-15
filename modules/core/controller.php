@@ -77,12 +77,17 @@ class Core_Controller extends Core_Servant_Properties
 	/**
 	 * Constructor.
 	 * @param Core_Entity $oEntity entity
+	 * @hostcms-event Core_Controller.onAfterConstruct
 	 */
 	public function __construct(Core_Entity $oEntity)
 	{
 		$this->setEntity($oEntity);
+
 		parent::__construct();
+
 		$this->addCacheSignature('entityId=' . $oEntity->getPrimaryKey());
+
+		Core_Event::notify(get_class($this) . '.onAfterConstruct', $this);
 	}
 
 	/**
@@ -493,7 +498,7 @@ class Core_Controller extends Core_Servant_Properties
 	 * @param array $aTags array of tags
 	 * @return self
 	 */
-	public function addAllowedTags($path, array $aTags)
+	public function addAllowedTags($path, array $aTags = array())
 	{
 		$this->_allowedTags[$path] = isset($this->_allowedTags[$path])
 			? array_merge($this->_allowedTags[$path], array_combine($aTags, $aTags))
@@ -551,7 +556,7 @@ class Core_Controller extends Core_Servant_Properties
 	 * @param array $aTags array of tags
 	 * @return self
 	 */
-	public function addForbiddenTags($path, array $aTags)
+	public function addForbiddenTags($path, array $aTags = array())
 	{
 		$this->_forbiddenTags[$path] = isset($this->_forbiddenTags[$path])
 			? array_merge($this->_forbiddenTags[$path], array_combine($aTags, $aTags))
@@ -650,6 +655,28 @@ class Core_Controller extends Core_Servant_Properties
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Check if a tag is forbidden
+	 * @param string $path Path to item, e.g. /shop/shop_item
+	 * @param string $tag tag
+	 * @return bool
+	 */
+	public function isForbiddenTag($path, $tag)
+	{
+		return isset($this->_forbiddenTags[$path][$tag]);
+	}
+
+	/**
+	 * Check if a tag is allowed
+	 * @param string $path Path to item, e.g. /shop/shop_item
+	 * @param string $tag tag
+	 * @return bool
+	 */
+	public function isAllowedTag($path, $tag)
+	{
+		return isset($this->_allowedTags[$path][$tag]);
 	}
 
 	/**

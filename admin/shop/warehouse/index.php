@@ -94,7 +94,7 @@ $oAdmin_Form_Entity_Menus->add(
 					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/purchaseorder/index.php', NULL, NULL /* , $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}" */)
 				)
 				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/purchaseorder/index.php', NULL, NULL, /* $additionalParams */)
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/purchaseorder/index.php', NULL, NULL /*, $additionalParams */)
 				)
 		)
 		->add(
@@ -105,7 +105,7 @@ $oAdmin_Form_Entity_Menus->add(
 					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/invoice/index.php', NULL, NULL /* , $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}" */)
 				)
 				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/invoice/index.php', NULL, NULL, /* $additionalParams */)
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/invoice/index.php', NULL, NULL /*, $additionalParams */)
 				)
 		)
 		->add(

@@ -557,7 +557,6 @@
 				<xsl:template name="AddCommentForm">
 					<xsl:param name="id" select="0"/>
 
-
 					<xsl:variable name="subject">
 						<xsl:if test="/shop/comment/parent_id/node() and /shop/comment/parent_id/node() and /shop/comment/parent_id= $id">
 							<xsl:value-of select="/shop/comment/subject"/>
@@ -586,7 +585,7 @@
 
 					<div class="comment">
 
-						<form action="{/shop/shop_item/url}" name="comment_form_0{$id}" method="post">
+						<form action="{/shop/shop_item/url}" name="comment_form_0{$id}" method="post" enctype="multipart/form-data">
 							<!-- Only for unauthorized users -->
 							<xsl:if test="/shop/siteuser_id = 0">
 

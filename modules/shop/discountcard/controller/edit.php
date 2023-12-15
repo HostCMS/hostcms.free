@@ -105,6 +105,7 @@ class Shop_Discountcard_Controller_Edit extends Admin_Form_Action_Controller_Typ
 				->options($this->fillLevels($this->_object->Shop))
 				->name('shop_discountcard_level_id')
 				->value($this->_object->shop_discountcard_level_id)
+				->disabled('disabled')
 		);
 
 		$oMainTab->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow3);

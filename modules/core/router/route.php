@@ -16,9 +16,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Router
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Router_Route
 {
@@ -70,7 +70,7 @@ class Core_Router_Route
 
 	/**
 	 * Constructor.
-	 * @param string $uriPattern URI pattern
+	 * @param string $uriPattern URI pattern. Named subpatterns {name} can consist of up to 32 alphanumeric characters and underscores, but must start with a non-digit.
 	 * @param array $expressions list of expressions
 	 */
 	public function __construct($uriPattern = NULL, array $expressions = array())

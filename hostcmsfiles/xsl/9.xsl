@@ -81,7 +81,7 @@
 
 		<div id="AddRecord" style="display: none">
 			<div class="comment">
-				<form action="./" method="post">
+				<form action="./" method="post" enctype="multipart/form-data">
 					<xsl:if test="/informationsystem/siteuser_id = 0">
 						<div class="row">
 							<div class="caption">&labelCommentName;</div>

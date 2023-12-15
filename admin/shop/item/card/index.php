@@ -20,6 +20,12 @@ $oAdmin_Form_Controller
 	->setUp()
 	->path('/admin/shop/item/card/index.php');
 
+// ZipArchive
+if (!class_exists('ZipArchive'))
+{
+	class ZipArchive extends Core_Zip_Pclzip { };
+}
+
 // Получаем параметры
 $oShop = Core_Entity::factory('Shop', Core_Array::getRequest('shop_id', 0));
 $oShopDir = $oShop->Shop_Dir;

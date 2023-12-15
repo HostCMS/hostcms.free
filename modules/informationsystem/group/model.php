@@ -56,7 +56,8 @@ class Informationsystem_Group_Model extends Core_Entity
 	protected $_hasMany = array(
 		'informationsystem_item' => array(),
 		'informationsystem_group' => array('foreign_key' => 'parent_id'),
-		'shortcut' => array('model' => 'Informationsystem_Group', 'foreign_key' => 'shortcut_id')
+		'shortcut' => array('model' => 'Informationsystem_Group', 'foreign_key' => 'shortcut_id'),
+		'media_informationsystem_group' => array()
 	);
 
 	/**
@@ -83,9 +84,11 @@ class Informationsystem_Group_Model extends Core_Entity
 		'seo_group_title_template',
 		'seo_group_keywords_template',
 		'seo_group_description_template',
+		'seo_group_h1_template',
 		'seo_item_title_template',
 		'seo_item_keywords_template',
-		'seo_item_description_template'
+		'seo_item_description_template',
+		'seo_item_h1_template'
 	);
 
 	/**
@@ -184,6 +187,7 @@ class Informationsystem_Group_Model extends Core_Entity
 	/**
 	 * Check and correct duplicate path
 	 * @return self
+	 * @hostcms-event informationsystem_group.onAfterCheckDuplicatePath
 	 */
 	public function checkDuplicatePath()
 	{
@@ -208,6 +212,8 @@ class Informationsystem_Group_Model extends Core_Entity
 		{
 			$this->path = Core_Guid::get();
 		}
+
+		Core_Event::notify($this->_modelName . '.onAfterCheckDuplicatePath', $this);
 
 		return $this;
 	}
@@ -347,6 +353,11 @@ class Informationsystem_Group_Model extends Core_Entity
 		$this->Informationsystem_Groups->deleteAll(FALSE);
 
 		$this->Shortcuts->deleteAll(FALSE);
+
+		if (Core::moduleIsActive('media'))
+		{
+			$this->Media_Informationsystem_Groups->deleteAll(FALSE);
+		}
 
 		// Удаляем директорию информационной группы
 		$this->deleteDir();

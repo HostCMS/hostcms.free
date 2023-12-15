@@ -37,7 +37,7 @@ return array(
 	'maillist' => '<acronym title="Элемент информационной системы можно добавить как выпуск в рассылку">Разместить в рассылке</acronym>',
 	'maillist_default_value' => '-- Не рассылать --',
 
-	'siteuser_group_id' => 'Группа доступа',
+	'siteuser_group_id' => 'Группа клиентов',
 
 	'indexing' => 'Индексировать',
 	'text' => 'Текст',

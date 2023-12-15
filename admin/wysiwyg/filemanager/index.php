@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -34,7 +34,7 @@ $cdir = Core_Array::getRequest('cdir', '', 'str');
 
 Core_Session::start();
 
-if ($cdir == '')
+if ($cdir === '')
 {
 	$cdir = isset($_SESSION['filemanager_cdir'])
 		? $_SESSION['filemanager_cdir']
@@ -44,7 +44,7 @@ if ($cdir == '')
 $cdir = Core_File::pathCorrection($cdir);
 $cdir = substr($cdir, 0, strrpos($cdir, DIRECTORY_SEPARATOR)) . DIRECTORY_SEPARATOR;
 
-if (strlen(Core_Array::getRequest('dir', '', 'str')))
+if (Core_Array::getRequest('dir', '', 'str') !== '')
 {
 	$cdir = Core_File::pathCorrection($cdir)
 		. trim(Core_File::pathCorrection(Core_Array::getRequest('dir', '', 'str')), DIRECTORY_SEPARATOR)

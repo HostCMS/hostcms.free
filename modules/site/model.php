@@ -94,7 +94,7 @@ class Site_Model extends Core_Entity
 		'dms_case_archive' => array(),
 		'dms_case_destruction' => array(),
 		'dms_communication' => array(),
-		'dms_field' => array(),
+		//'dms_field' => array(),
 		'dms_field_dir' => array(),
 		'dms_state' => array(),
 		'dms_template_instruction_dir' => array(),
@@ -119,6 +119,9 @@ class Site_Model extends Core_Entity
 		'list' => array(),
 		'list_dir' => array(),
 		'maillist' => array(),
+		'media_format' => array(),
+		'media_group' => array(),
+		'media_item' => array(),
 		'poll_group' => array(),
 		'search_log' => array(),
 		'search_page' => array(),
@@ -397,7 +400,7 @@ class Site_Model extends Core_Entity
 			$this->Dms_Documents->deleteAll(FALSE);
 			$this->Dms_Classes->deleteAll(FALSE);
 			$this->Dms_Communications->deleteAll(FALSE);
-			$this->Dms_Fields->deleteAll(FALSE);
+			//$this->Dms_Fields->deleteAll(FALSE);
 			$this->Dms_Field_Dirs->deleteAll(FALSE);
 			$this->Dms_States->deleteAll(FALSE);
 			$this->Dms_Participants->deleteAll(FALSE);
@@ -416,6 +419,13 @@ class Site_Model extends Core_Entity
 		if (Core::moduleIsActive('chartaccount'))
 		{
 			$this->Chartaccount_Cashflows->deleteAll(FALSE);
+		}
+
+		if (Core::moduleIsActive('media'))
+		{
+			$this->Media_Formats->deleteAll(FALSE);
+			$this->Media_Groups->deleteAll(FALSE);
+			$this->Media_Items->deleteAll(FALSE);
 		}
 
 		$this->Site_Aliases->deleteAll(FALSE);
@@ -1621,8 +1631,7 @@ class Site_Model extends Core_Entity
 	 */
 	public function getKeys()
 	{
-		$sKeys = trim(str_replace(array("\n", "\r", "\0", "\t", ), '', (string) $this->key));
-		return str_split($sKeys, 29);
+		return array_map('trim', explode("\n", (string) $this->key));
 	}
 
 	/**

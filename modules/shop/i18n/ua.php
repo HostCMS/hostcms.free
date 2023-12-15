@@ -17,7 +17,7 @@ return array(
 	'shop_dir_id' => "Розділ",
 	'description' => "Опис інтернет-магазину",
 	'structure_id' => "Вузол структури",
-	'siteuser_group_id' => 'Група доступу',
+	'siteuser_group_id' => 'Група клієнтів',
 	'shop_company_id' => 'Компанія',
 	'shop_currency_id' => "Валюта за замовчуванням",
 	'email' => "<acronym title=\"E-mail (група e-mail, через кому), на який(і) відправлятиметься інформація про замовлення\">E-mail куратора магазину</acronym>",
@@ -209,4 +209,15 @@ return array(
 	'option_groupSmallImage' => 'Шаблон іменування малого зображення групи',
 	'option_shop_item_card_xsl' => 'XSL-шаблон цінників',
 	'schedule-checkShopOrderStatusDeadline' => 'Перевірка статусів замовлень',
+
+	'seo_group_h1_template' => 'Шаблон H1',
+	'seo_item_h1_template' => 'Шаблон H1',
+	'seo_root_h1_template' => 'Шаблон H1',
+
+	'searchIndexItem' => 'Ідентифікатор елемента',
+	'searchIndexGroup' => 'Ідентифікатор групи',
+	'searchUnindexItem' => 'Ідентифікатор елемента',
+
+	'shop_id' => 'Ідентифікатор магазину',
+	'updateCurrency' => 'Назва драйвера',
 );

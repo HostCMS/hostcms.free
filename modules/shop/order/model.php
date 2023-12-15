@@ -625,20 +625,20 @@ class Shop_Order_Model extends Core_Entity
 				if ($iRowCount > 1)
 				{
 					Core::$log
-					->clear()
-					->status(1)
-					->notify(TRUE)
-					->write(Core::_('Shop_Order.cond_of_delivery_duplicate', $oShopDelivery->name, $aRows[0]->id));
+						->clear()
+						->status(1)
+						->notify(TRUE)
+						->write(Core::_('Shop_Order.cond_of_delivery_duplicate', $oShopDelivery->name, $aRows[0]->id));
 				}
 
 				$oShop_Delivery_Condition = $aRows[0];
 
-				if ($this->shop_delivery_condition_id == $oShop_Delivery_Condition->id)
+				/*if ($this->shop_delivery_condition_id == $oShop_Delivery_Condition->id)
 				{
 					// Нашли то же условие доставки
 				}
 				else
-				{
+				{*/
 					// Нашли новое условие доставки
 					$this->shop_delivery_condition_id = $oShop_Delivery_Condition->id;
 					$this->save();
@@ -661,7 +661,7 @@ class Shop_Order_Model extends Core_Entity
 						: '';
 					$oShop_Order_Item_Delivery->name = Core::_('Shop_Delivery.delivery', $oShop_Delivery_Condition->Shop_Delivery->name);
 					$oShop_Order_Item_Delivery->save();
-				}
+				//}
 
 				return TRUE;
 			}
@@ -1064,6 +1064,7 @@ class Shop_Order_Model extends Core_Entity
 		{
 			$this->paid = 1;
 			$this->payment_datetime = Core_Date::timestamp2sql(time());
+			$this->save();
 
 			// Получаем/выпускаем карту до начисления бонусов в _paidTransaction()
 			if ($this->siteuser_id && Core::moduleIsActive('siteuser'))
@@ -2332,6 +2333,7 @@ class Shop_Order_Model extends Core_Entity
 								case 1: // String
 								case 4: // Textarea
 								case 6: // Wysiwyg
+								case 11: // Float
 									$value = $oProperty_Value->value;
 								break;
 
@@ -2501,7 +2503,7 @@ class Shop_Order_Model extends Core_Entity
 				<b><?php echo Core::_('Shop_Order.order_card_order_status')?>:</b> <?php echo htmlspecialchars($this->Shop_Order_Status->name)?>
 			</div><?php
 		}
-		if (strlen($this->description))
+		if (!is_null($this->description) && $this->description !== '')
 		{
 			?><div>
 				<b><?php echo Core::_('Shop_Order.order_card_description')?>:</b> <?php echo htmlspecialchars($this->description)?>
@@ -2513,6 +2515,11 @@ class Shop_Order_Model extends Core_Entity
 				<b><?php echo Core::_('Shop_Order.order_card_status_of_pay')?>:</b> <?php echo Core_Date::sql2datetime($this->payment_datetime)?>
 			</div><?php
 		}
+		
+		$sig = $this->shop_currency_id
+			? htmlspecialchars((string) $this->Shop_Currency->sign)
+			: '';
+			
 		?>
 		<div class="row">
 			<div class="col-xs-12 table-responsive">
@@ -2530,7 +2537,7 @@ class Shop_Order_Model extends Core_Entity
 								<?php echo Core::_("Shop_Order.table_mark")?>
 							</th>
 							<th>
-								<?php echo Core::_("Shop_Order.table_price") . ", " . htmlspecialchars($this->Shop_Currency->sign)?>
+								<?php echo Core::_("Shop_Order.table_price") . ", " . $sig?>
 							</th>
 							<th width="10%">
 								<?php echo Core::_("Shop_Order.table_amount")?>
@@ -2539,10 +2546,10 @@ class Shop_Order_Model extends Core_Entity
 								<?php echo Core::_("Shop_Order.table_nds_tax")?>
 							</th>
 							<th width="10%">
-								<?php echo Core::_("Shop_Order.table_nds_value") . ", " . htmlspecialchars($this->Shop_Currency->sign)?>
+								<?php echo Core::_("Shop_Order.table_nds_value")?>
 							</th>
 							<th width="10%">
-								<?php echo Core::_("Shop_Order.table_amount_value") . ", " . htmlspecialchars($this->Shop_Currency->sign)?>
+								<?php echo Core::_("Shop_Order.table_amount_value") . ", " . $sig?>
 							</th>
 						</tr>
 					</thead>
@@ -2799,6 +2806,9 @@ class Shop_Order_Model extends Core_Entity
 
 					// Сумма скидки по дисконтной карте
 					$fDiscountcard = $amount * ($oShop_Discountcard_Level->discount / 100);
+					
+					$oShop_Discountcard_Level->round
+						&& $fDiscountcard = round($fDiscountcard);
 				}
 			}
 
@@ -3633,18 +3643,18 @@ class Shop_Order_Model extends Core_Entity
 
 		$person = trim($this->surname . ' ' . $this->name . ' ' . $this->patronymic);
 
-		if (strlen($person))
+		if ($person !== '')
 		{
 			$aReturn[] = Core::_('Shop_Order.order_card_contact_person') . ': ' . htmlspecialchars($person);
 		}
 
 		$aReturn[] = Core::_('Shop_Order.order_card_address') . ': ' . htmlspecialchars($this->getFullAddress());
 
-		if (strlen($this->phone))
+		if ($this->phone !== '')
 		{
 			$aReturn[] = Core::_('Shop_Order.order_card_phone') . ': ' . htmlspecialchars($this->phone);
 		}
-		if (strlen($this->email))
+		if ($this->email !== '')
 		{
 			$aReturn[] = Core::_('Shop_Order.order_card_email') . ': ' . htmlspecialchars($this->email);
 		}
@@ -3656,7 +3666,7 @@ class Shop_Order_Model extends Core_Entity
 		{
 			$aReturn[] = Core::_('Shop_Order.order_card_order_status') . ': ' . htmlspecialchars($this->Shop_Order_Status->name);
 		}
-		if (strlen($this->description))
+		if (!is_null($this->description) && $this->description !== '')
 		{
 			$aReturn[] = Core::_('Shop_Order.order_card_description') . ': ' . htmlspecialchars($this->description);
 		}

@@ -3487,6 +3487,11 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 										$oList_Item = Core_Entity::factory('List_Item');
 										$oList_Item->list_id = $oProperty->list_id;
 										$oList_Item->value = $tmpValue;
+										
+										// Apache %2F (/) is forbidden
+										strpos($tmpValue, '/') !== FALSE
+											&& $oList_Item->path = trim(str_replace('/', ' ', $tmpValue));
+										
 										$oList_Item->save();
 									}
 
@@ -3809,12 +3814,10 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			case 0: // Int
 				$changedValue = Shop_Controller::convertDecimal($sPropertyValue);
 			break;
-			// Файл
-			case 2:
+			case 2: // Файл
 				$changedValue = $sPropertyValue;
 			break;
-			// Список
-			case 3:
+			case 3: // Список
 				if (Core::moduleIsActive('list'))
 				{
 					$oList_Item = $oProperty->List->List_Items->getByValue($sPropertyValue, FALSE);
@@ -3825,10 +3828,15 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 					}
 					else
 					{
-						$changedValue = Core_Entity::factory('List_Item')
+						$oList_Item = Core_Entity::factory('List_Item')
 							->list_id($oProperty->list_id)
-							->value($sPropertyValue)
-							->save()
+							->value($sPropertyValue);
+						
+						// Apache %2F (/) is forbidden
+						strpos($sPropertyValue, '/') !== FALSE
+							&& $oList_Item->path = trim(str_replace('/', ' ', $sPropertyValue));
+											
+						$changedValue = $oList_Item->save()
 							->id;
 					}
 				}
@@ -3875,22 +3883,33 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				$changedValue = Shop_Controller::convertDecimal($sPropertyValue);
 			break;
 			case 12: // Shop
+				// by Name
 				$oShop_Item = $oProperty->Shop->Shop_Items->getByName($sPropertyValue);
 				if ($oShop_Item)
 				{
 					$changedValue = $oShop_Item->id;
 				}
-				elseif (is_numeric($sPropertyValue))
-				{
-					$oShop_Item = $oProperty->Shop->Shop_Items->getById($sPropertyValue);
-
-					$changedValue = $oShop_Item
-						? $oShop_Item->id
-						: NULL;
-				}
 				else
 				{
-					$changedValue = NULL;
+					// by Marking
+					$oShop_Item = $oProperty->Shop->Shop_Items->getByMarking($sPropertyValue);
+					if ($oShop_Item)
+					{
+						$changedValue = $oShop_Item->id;
+					}
+					// by ID
+					elseif (is_numeric($sPropertyValue))
+					{
+						$oShop_Item = $oProperty->Shop->Shop_Items->getById($sPropertyValue);
+
+						$changedValue = $oShop_Item
+							? $oShop_Item->id
+							: NULL;
+					}
+					else
+					{
+						$changedValue = NULL;
+					}
 				}
 			break;
 			default:
@@ -4470,10 +4489,15 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						}
 						else
 						{
-							$changedValue = Core_Entity::factory('List_Item')
+							$oList_Item = Core_Entity::factory('List_Item')
 								->list_id($oProperty->list_id)
-								->value($sPropertyValue)
-								->save()
+								->value($sPropertyValue);
+
+							// Apache %2F (/) is forbidden
+							strpos($sPropertyValue, '/') !== FALSE
+								&& $oList_Item->path = trim(str_replace('/', ' ', $sPropertyValue));
+
+							$changedValue = $oList_Item->save()
 								->id;
 						}
 					}

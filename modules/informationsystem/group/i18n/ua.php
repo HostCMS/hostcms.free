@@ -26,7 +26,7 @@ return array(
 	'active' => 'Активна',
 	'siteuser_id' => 'Клієнт',
 
-	'siteuser_group_id' => 'Група доступу',
+	'siteuser_group_id' => 'Група клієнтів',
 	'information_parent' => 'Як у батька',
 
 	'image_large' => 'Зображення',
@@ -65,4 +65,6 @@ return array(
 	'seo_item_keywords_template' => 'Шаблон keywords',
 	'markDeleted' => 'Видалити групу',
 	'shortcut_success' => 'Ярлик успішно створений.',
+	'seo_group_h1_template' => 'Шаблон H1',
+	'seo_item_h1_template' => 'Шаблон H1',
 );

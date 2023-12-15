@@ -116,11 +116,13 @@ if (!is_null(Core_Array::getGet('shortcuts')) && !is_null(Core_Array::getGet('te
 	Core::showJson($aJSON);
 }
 
-if (!is_null(Core_Array::getGet('items')) && !is_null(Core_Array::getGet('term')))
+if (!is_null(Core_Array::getGet('items')) && (!is_null(Core_Array::getGet('term')) || !is_null(Core_Array::getGet('queryString'))))
 {
 	$aJSON = array();
 
-	$sQuery = trim(Core_DataBase::instance()->escapeLike(Core_Str::stripTags(strval(Core_Array::getGet('term')))));
+	$sQuery = !is_null(Core_Array::getGet('term'))
+		? trim(Core_DataBase::instance()->escapeLike(Core_Str::stripTags(strval(Core_Array::getGet('term')))))
+		: trim(Core_DataBase::instance()->escapeLike(Core_Str::stripTags(strval(Core_Array::getGet('queryString')))));
 
 	$sQueryLike = '%' . str_replace(' ', '%', $sQuery) . '%';
 
@@ -140,9 +142,13 @@ if (!is_null(Core_Array::getGet('items')) && !is_null(Core_Array::getGet('term')
 
 		foreach ($aShop_Items as $oShop_Item)
 		{
+			$key = !is_null(Core_Array::getGet('term'))
+				? 'text'
+				: 'label';
+
 			$aJSON[] = array(
 				'id' => $oShop_Item->id,
-				'text' => $oShop_Item->name . ' [' . $oShop_Item->id . ']',
+				$key => $oShop_Item->name . ' [' . $oShop_Item->id . ']',
 			);
 		}
 	}
@@ -594,6 +600,17 @@ $oMenu->add(
 		)
 		->add(
 			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item.modifications_menu'))
+				->icon('fa-solid fa-code-fork')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/modification/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/modification/index.php', NULL, NULL, $additionalParams)
+				)
+		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.change_prices_for_shop_group'))
 				->icon('fa fa-usd')
 				->href(
@@ -845,17 +862,7 @@ $oMenu->add(
 				)
 		)
 )*/
-->add(
-	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Shop_Item.modifications_menu'))
-		->icon('fa-solid fa-code-fork')
-		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/modification/index.php', NULL, NULL, $additionalParams)
-		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/modification/index.php', NULL, NULL, $additionalParams)
-		)
-)
+
 ;
 
 // Добавляем все меню контроллеру
@@ -1241,6 +1248,25 @@ if ($oAdminFormActionRecountSets && $oAdmin_Form_Controller->getAction() == 'rec
 	$oAdmin_Form_Controller->addAction($oShop_Item_Controller_Recount_Set);
 }
 
+// Действие "Назначить модификацией"
+$oAdminFormActionSetModification = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('set_modification');
+
+if ($oAdminFormActionSetModification && $oAdmin_Form_Controller->getAction() == 'set_modification')
+{
+	$oShop_Item_Controller_Set_Modification = Admin_Form_Action_Controller::factory(
+		'Shop_Item_Controller_Set_Modification', $oAdminFormActionSetModification
+	);
+
+	$oShop_Item_Controller_Set_Modification
+		->title(Core::_('Shop_Item.set_modification_items_title'))
+		->Shop($oShop);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oShop_Item_Controller_Set_Modification);
+}
+
 // Действие "Удаление значения свойства"
 $oAction = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 	->Admin_Form_Actions
@@ -1351,7 +1377,7 @@ $oAdmin_Form_Dataset
 	->addCondition(array('where' => array('shop_id', '=', $oShop->id)))
 	->changeField('related', 'type', 1)
 	->changeField('modifications', 'type', 1)
-	->changeField('discounts', 'type', 1)
+	// ->changeField('discounts', 'type', 1)
 	->changeField('type', 'type', 1)
 	->changeField('reviews', 'type', 1)
 	->changeField('adminPrice', 'type', 1);
@@ -1428,6 +1454,8 @@ if (strlen($sGlobalSearch))
 			->addCondition(array('setOr' => array()))
 			->addCondition(array('where' => array('shop_items.marking', 'LIKE', '%' . $sGlobalSearch . '%')))
 			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('shop_items.vendorcode', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
 			->addCondition(array('where' => array('shop_items.seo_title', 'LIKE', '%' . $sGlobalSearch . '%')))
 			->addCondition(array('setOr' => array()))
 			->addCondition(array('where' => array('shop_items.seo_description', 'LIKE', '%' . $sGlobalSearch . '%')))
@@ -1480,6 +1508,7 @@ $oShop_Producers->queryBuilder()
 	->where('shop_items.shop_group_id', '=', $oShopGroup->id)
 	->where('shop_items.modification_id', '=', 0)
 	->where('shop_items.shortcut_id', '=', 0)
+	->where('shop_items.deleted', '=', 0)
 	//->groupBy('shop_producers.id')
 	->clearOrderBy()
 	->orderBy('shop_producers.sorting', 'ASC')
@@ -1507,6 +1536,7 @@ $oShop_Sellers->queryBuilder()
 	->where('shop_items.shop_group_id', '=', $oShopGroup->id)
 	->where('shop_items.modification_id', '=', 0)
 	->where('shop_items.shortcut_id', '=', 0)
+	->where('shop_items.deleted', '=', 0)
 	//->groupBy('shop_sellers.id')
 	->clearOrderBy()
 	->orderBy('shop_sellers.sorting', 'ASC')
@@ -1534,6 +1564,7 @@ $oShop_Measures->queryBuilder()
 	->where('shop_items.shop_group_id', '=', $oShopGroup->id)
 	->where('shop_items.modification_id', '=', 0)
 	->where('shop_items.shortcut_id', '=', 0)
+	->where('shop_items.deleted', '=', 0)
 	->clearOrderBy()
 	->orderBy('shop_measures.name', 'ASC');
 

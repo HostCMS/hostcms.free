@@ -40,7 +40,8 @@ class Informationsystem_Item_Model extends Core_Entity
 		'tag' => array('through' => 'tag_informationsystem_item'),
 		'tag_informationsystem_item' => array(),
 		'comment' => array('through' => 'comment_informationsystem_item'),
-		'vote' => array('through' => 'vote_informationsystem_item')
+		'vote' => array('through' => 'vote_informationsystem_item'),
+		'media_informationsystem_item' => array()
 	);
 
 	/**
@@ -304,6 +305,11 @@ class Informationsystem_Item_Model extends Core_Entity
 			$this->Tag_Informationsystem_Items->deleteAll(FALSE);
 		}
 
+		if (Core::moduleIsActive('media'))
+		{
+			$this->Media_Informationsystem_Items->deleteAll(FALSE);
+		}
+
 		// Удаляем директорию информационного элемента
 		$this->deleteDir();
 
@@ -350,7 +356,7 @@ class Informationsystem_Item_Model extends Core_Entity
 			->clearOrderBy()
 			->limit(1);
 
-		$aInformationsystem_Items = $this->findAll();
+		$aInformationsystem_Items = $this->findAll(FALSE);
 
 		return isset($aInformationsystem_Items[0])
 			? $aInformationsystem_Items[0]
@@ -596,6 +602,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	/**
 	 * Check and correct duplicate path
 	 * @return self
+	 * @hostcms-event informationsystem_item.onAfterCheckDuplicatePath
 	 */
 	public function checkDuplicatePath()
 	{
@@ -620,6 +627,8 @@ class Informationsystem_Item_Model extends Core_Entity
 		{
 			$this->path = Core_Guid::get();
 		}
+
+		Core_Event::notify($this->_modelName . '.onAfterCheckDuplicatePath', $this);
 
 		return $this;
 	}
@@ -1409,6 +1418,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	/**
 	 * Prepare entity and children entities
 	 * @return self
+	 * @hostcms-event informationsystem_item.onBeforeSelectComments
 	 */
 	protected function _prepareData()
 	{
@@ -1514,6 +1524,8 @@ class Informationsystem_Item_Model extends Core_Entity
 				$oComments->queryBuilder()
 					->where('active', '=', $this->_commentsActivity == 'inactive' ? 0 : 1);
 			}
+
+			Core_Event::notify($this->_modelName . '.onBeforeSelectComments', $this, array($oComments));
 
 			$aComments = $oComments->findAll();
 			foreach ($aComments as $oComment)

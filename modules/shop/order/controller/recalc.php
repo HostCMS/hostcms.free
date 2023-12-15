@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Controller_Recalc extends Admin_Form_Action_Controller
 {
@@ -21,11 +21,11 @@ class Shop_Order_Controller_Recalc extends Admin_Form_Action_Controller
 	public function execute($operation = NULL)
 	{
 		// Replace shop_delivery_id
-		$this->_object->shop_delivery_id = Core_Array::getPost('shop_delivery_id');
-		$this->_object->shop_country_id = Core_Array::getPost('shop_country_id');
-		$this->_object->shop_country_location_id = Core_Array::getPost('shop_country_location_id');
-		$this->_object->shop_country_location_city_id = Core_Array::getPost('shop_country_location_city_id');
-		$this->_object->shop_country_location_city_area_id = Core_Array::getPost('shop_country_location_city_area_id');
+		$this->_object->shop_delivery_id = Core_Array::getPost('shop_delivery_id', 0, 'int');
+		$this->_object->shop_country_id = Core_Array::getPost('shop_country_id', 0, 'int');
+		$this->_object->shop_country_location_id = Core_Array::getPost('shop_country_location_id', 0, 'int');
+		$this->_object->shop_country_location_city_id = Core_Array::getPost('shop_country_location_city_id', 0, 'int');
+		$this->_object->shop_country_location_city_area_id = Core_Array::getPost('shop_country_location_city_area_id', 0, 'int');
 		$this->_object->save();
 
 		$oShop_Delivery = Core_Entity::factory('Shop_Delivery')->getById($this->_object->shop_delivery_id);
@@ -49,7 +49,30 @@ class Shop_Order_Controller_Recalc extends Admin_Form_Action_Controller
 						')
 						->execute();
 
-					Core_Message::show(Core::_('Shop_Order.recalc_delivery_success'));
+					// Выбираем все товары заказа
+					$oShop_Order_Item_Delivery = $this->_object->Shop_Order_Items->getByType(1);
+
+					if ($oShop_Order_Item_Delivery)
+					{
+						Core::factory('Admin_Form_Entity_Code')
+							->html('
+								<script>
+									var $deliveryTr = $("#' . $windowId . ' .shop-item-table.shop-order-items tr#' . $oShop_Order_Item_Delivery->id . '");
+
+									$deliveryTr.find("input[name=shop_order_item_name_' . $oShop_Order_Item_Delivery->id . ']").val(\'' . Core_Str::escapeJavascriptVariable($oShop_Order_Item_Delivery->name) . '\');
+									$deliveryTr.find("input[name=shop_order_item_quantity_' . $oShop_Order_Item_Delivery->id . ']").val("1.00");
+									$deliveryTr.find("input[name=shop_order_item_price_' . $oShop_Order_Item_Delivery->id . ']").val(\'' . Core_Str::escapeJavascriptVariable($oShop_Order_Item_Delivery->price) . '\');
+
+									$.recountTotal();
+								</script>
+							')
+							->execute();
+					}
+
+					// Условие доставки задано
+					$this->_object->shop_delivery_condition_id
+						? Core_Message::show(Core::_('Shop_Order.recalc_delivery_success'))
+						: Core_Message::show(Core::_('Shop_Order.recalc_delivery_error'), 'error');
 				break;
 				case 1:
 					?>

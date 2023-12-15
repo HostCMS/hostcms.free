@@ -376,7 +376,7 @@ abstract class Core_Http
 		$this->_data[$key] = $value;
 		return $this;
 	}
-	
+
 	/**
 	 * Get POST-data
 	 * @return array
@@ -546,41 +546,46 @@ abstract class Core_Http
 	protected function _parseHeaders($header)
 	{
 		$aReturn = array();
-		$fields = explode("\r\n", preg_replace('/\x0D\x0A[\x09\x20]+/', ' ', $header));
 
-		foreach ($fields as $field)
+		if (!is_null($header))
 		{
-			if (preg_match('/([^:]+): (.*)/m', $field, $match))
-			{
-				$match[1] = preg_replace_callback(
-					'/(?<=^|[\x09\x20\x2D])./',
-					array($this, '_parseHeadersCallback'),
-					strtolower(trim($match[1]))
-				);
+			$fields = explode("\r\n", preg_replace('/\x0D\x0A[\x09\x20]+/', ' ', $header));
 
-				if ( isset($aReturn[$match[1]]))
+			foreach ($fields as $field)
+			{
+				if (preg_match('/([^:]+): (.*)/m', $field, $match))
 				{
-					if (is_array($aReturn[$match[1]]))
+					$match[1] = preg_replace_callback(
+						'/(?<=^|[\x09\x20\x2D])./',
+						array($this, '_parseHeadersCallback'),
+						strtolower(trim($match[1]))
+					);
+
+					if ( isset($aReturn[$match[1]]))
 					{
-						$aReturn[$match[1]][] = trim($match[2]);
+						if (is_array($aReturn[$match[1]]))
+						{
+							$aReturn[$match[1]][] = trim($match[2]);
+						}
+						else
+						{
+							$aReturn[$match[1]] = array($aReturn[$match[1]], $match[2]);
+						}
 					}
 					else
 					{
-						$aReturn[$match[1]] = array($aReturn[$match[1]], $match[2]);
+						$aReturn[$match[1]] = trim($match[2]);
 					}
 				}
-				else
+				// get last status
+				//elseif (!isset($aReturn['status']))
+				elseif (strpos($field, 'HTTP') === 0)
 				{
-					$aReturn[$match[1]] = trim($match[2]);
+					$aReturn['statuses'][] = $aReturn['status'] = trim($field);
 				}
 			}
-			// get last status
-			//elseif (!isset($aReturn['status']))
-			elseif (strpos($field, 'HTTP') === 0)
-			{
-				$aReturn['statuses'][] = $aReturn['status'] = trim($field);
-			}
 		}
+
 		return $aReturn;
 	}
 

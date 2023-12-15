@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Группы товаров',
@@ -55,9 +55,11 @@ return array(
 	'seo_group_title_template' => 'Шаблон title',
 	'seo_group_description_template' => 'Шаблон description',
 	'seo_group_keywords_template' => 'Шаблон keywords',
+	'seo_group_h1_template' => 'Шаблон H1',
 	'seo_item_title_template' => 'Шаблон title',
 	'seo_item_description_template' => 'Шаблон description',
 	'seo_item_keywords_template' => 'Шаблон keywords',
+	'seo_item_h1_template' => 'Шаблон H1',
 	'markDeleted' => 'Удалить группу',
 	'shortcut_success' => "Ярлык группы успешно добавлен",
 	'change_attributes_success' => 'Атрибуты изменены успешно!',

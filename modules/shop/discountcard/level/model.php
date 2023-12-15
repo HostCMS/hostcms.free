@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
  class Shop_Discountcard_Level_Model extends Core_Entity
 {
@@ -72,6 +72,17 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	public function amountBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		return $this->Shop->Shop_Currency->formatWithCurrency($this->amount);
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function roundBackend()
+	{
+		return $this->round
+			? '<i class="fa fa-check-circle-o green">'
+			: '<i class="fa fa-times-circle-o red">';
 	}
 
 	/**

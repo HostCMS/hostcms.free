@@ -58,7 +58,6 @@ class Shop_Seller_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		;
 
 		$oDescriptionField = $this->getField('description');
-
 		$oDescriptionField->wysiwyg = TRUE;
 
 		$oMainTab->move($this->getField('path')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow1);

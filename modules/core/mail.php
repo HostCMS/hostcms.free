@@ -100,17 +100,32 @@ abstract class Core_Mail
 
 		$aConfigDriver = Core_Array::get($aConfig, $aConfig[$name]['driver'], array());
 
+		$aConfig = $aPersonalConfig + (
+			defined('CURRENT_SITE') && isset($aConfigDriver[CURRENT_SITE])
+				? $aConfigDriver[CURRENT_SITE]
+				: $aConfigDriver
+		) + array(
+			'host' => NULL,
+			'port' => 25,
+			'log' => FALSE,
+			'timeout' => 5,
+			'dkim' => FALSE
+		);
+
+		if (isset($aConfig['dkim']) && is_array($aConfig['dkim']))
+		{
+			$aConfig['dkim'] += array(
+				'hash' => 'sha256', // sha256|sha1
+				'passphrase' => '',
+				'selector' => 'mail',
+				'domain' => NULL,
+				'identity' => NULL,
+				'body_canonicalization' => 'relaxed',
+			);
+		}
+
 		return $oDriver->config(
-			$aPersonalConfig + (
-				defined('CURRENT_SITE') && isset($aConfigDriver[CURRENT_SITE])
-					? $aConfigDriver[CURRENT_SITE]
-					: $aConfigDriver
-			) + array(
-				'host' => NULL,
-				'port' => 25,
-				'log' => FALSE,
-				'timeout' => 5
-			)
+			$aConfig
 		);
 	}
 
@@ -639,11 +654,9 @@ abstract class Core_Mail
 	}
 
 	/**
-	 * Generate Message-ID
-	 * @param $uniqueid
-	 * @return self
+	 * Get domain from $this->_from address, e.g. 'google.com' for 'my@google.com'
 	 */
-	public function messageId($uniqueid = NULL)
+	protected function _getDomain()
 	{
 		if (strpos($this->_from, '@') !== FALSE)
 		{
@@ -654,6 +667,18 @@ abstract class Core_Mail
 		{
 			$domain = $this->getServerHostname();
 		}
+
+		return $domain;
+	}
+
+	/**
+	 * Generate Message-ID
+	 * @param $uniqueid
+	 * @return self
+	 */
+	public function messageId($uniqueid = NULL)
+	{
+		$domain = $this->_getDomain();
 
 		$this->header('Message-ID', '<' . (is_null($uniqueid) ? Core::generateUniqueId() : sha1($uniqueid)) . '.' . date('YmdHis') . '@' . $domain . '>');
 
@@ -673,5 +698,226 @@ abstract class Core_Mail
 		}
 
 		return implode($this->_separator, $aHeaders);
+	}
+
+	/**
+	 * Get the array of the "relaxed" header canonicalization
+	 * @param $sHeaders Headers
+	 * @return array
+	 */
+	protected function _dkimRelaxedCanonicalizeHeader($sHeaders)
+	{
+		/* The "relaxed" header canonicalization algorithm MUST apply the following steps in order:
+			o Convert all header field names (not the header field values) to lowercase. For example, convert "SUBJect: AbC" to "subject: AbC".
+
+			o Unfold all header field continuation lines as described in [RFC5322]; in particular, lines with terminators embedded in continued header field values (that is, CRLF sequences followed by WSP) MUST be interpreted without the CRLF. Implementations MUST NOT remove the CRLF at the end of the header field value.
+
+			o Convert all sequences of one or more WSP characters to a single SP character. WSP characters here include those before and after a line folding boundary.
+
+			o Delete all WSP characters at the end of each unfolded header field value.
+
+			o Delete any WSP characters remaining before and after the colon separating the header field name from the header field value. The colon separator MUST be retained.
+		*/
+		$aHeaders = array();
+
+		$aSignedHeaders = array(
+			'from',
+			'mime-version',
+			'reply-to',
+			'subject',
+			'to'
+		);
+
+		$sHeaders = preg_replace("/\n\s+/", ' ', $sHeaders);
+
+		$aLines = explode("\r\n", $sHeaders);
+		foreach ($aLines as $line)
+		{
+			$line = preg_replace("/\s+/", ' ', $line);
+
+			if (!empty($line))
+			{
+				$line = explode(':', $line, 2);
+
+				// Convert all header field names (not the header field values) to lowercase.
+				$headerName = trim(strtolower($line[0]));
+				$headerValue = trim($line[1]);
+
+				if (in_array($headerName, $aSignedHeaders) || $headerName == 'dkim-signature')
+				{
+					$aHeaders[$headerName] = $headerName . ':' . $headerValue;
+				}
+			}
+		}
+
+		return $aHeaders;
+	}
+
+	/**
+	 * The "relaxed" Body Canonicalization Algorithm
+	 * @param string $body
+	 * @return string
+	 */
+	protected function _dkimRelaxedCanonicalizeBody($body)
+	{
+		/* The "relaxed" Body Canonicalization Algorithm
+
+		  The "relaxed" body canonicalization algorithm MUST apply the following steps (a) and (b) in order:
+
+		  a. Reduce whitespace:
+			  * Ignore all whitespace at the end of lines. Implementations MUST NOT remove the CRLF at the end of the line.
+			  * Reduce all sequences of WSP within a line to a single SP character.
+
+		  b. Ignore all empty lines at the end of the message body. "Empty line" is defined in Section 3.4.3.
+		  If the body is non-empty but does not end with a CRLF, a CRLF is added. (For email, this is only possible when using extensions to SMTP or non-SMTP transport mechanisms.)
+
+		  The SHA-1 value (in base64) for an empty body (canonicalized to a null input) is:
+		  2jmj7l5rSw0yVb/vlWAYkK/YBwk=
+
+		  The SHA-256 value is:
+		  47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=
+		*/
+
+		// Return CRLF for empty body
+		if ($body === '')
+		{
+			return "\r\n";
+		}
+
+		$aLines = explode("\r\n", $body);
+		foreach ($aLines as $key => $value)
+		{
+			// Ignore all whitespace at the end of lines
+			$value = rtrim($value);
+
+			// Reduce all sequences of WSP within a line to a single SP character.
+			$aLines[$key] = preg_replace('/\s+/', ' ', $value);
+		}
+
+		$body = implode("\r\n", $aLines);
+
+		return $this->_dkimSimpleCanonicalizeBody($body);
+	}
+
+	/**
+	 * The "simple" Body Canonicalization Algorithm
+	 * @param string $body
+	 * @return string
+	 */
+	protected function _dkimSimpleCanonicalizeBody($body)
+	{
+		/* The "simple" body canonicalization algorithm ignores all empty lines at the end of the message body.
+		  An empty line is a line of zero length after removal of the line terminator. If there is no body or
+		  no trailing CRLF on the message body, a CRLF is added. It makes no other changes to the message body.
+		  In more formal terms, the "simple" body canonicalization algorithm converts "*CRLF" at the end of the body to a single "CRLF".
+
+		  Note that a completely empty or missing body is canonicalized as a single "CRLF"; that is, the canonicalized length will be 2 octets.
+		*/
+
+		// Return CRLF for empty body
+		if ($body === '')
+		{
+			return "\r\n";
+		}
+
+		// Convert "*CRLF" at the end of the body to a single "CRLF"
+		while (mb_substr($body, -4) == "\r\n\r\n")
+		{
+			// Remove "\r\n"
+			$body = mb_substr($body, 0, -2);
+		}
+
+		if (mb_substr($body, -2) != "\r\n")
+		{
+			$body .= "\r\n";
+		}
+
+		return $body;
+	}
+
+	/**
+	 * Get DKIM-Signature header or empty string
+	 * @param string $dkimRelaxedCanonicalizeHeader
+	 * @param string dkimRelaxedCanonicalizeHeader
+	 * @return string
+	 */
+	protected function _getDkimSignature($dkimRelaxedCanonicalizeHeader, $body)
+	{
+		if (!Core_File::isFile($this->_config['dkim']['private_key']))
+		{
+			Core_Log::instance()->clear()
+				->status(Core_Log::$ERROR)
+				->write('Core_Mail::_getDkimSignature. The private_key ' . $this->_config['dkim']['private_key'] . ' does not exist');
+
+			return '';
+		}
+
+		$body = $this->_config['dkim']['body_canonicalization'] == 'relaxed'
+			? $this->_dkimRelaxedCanonicalizeBody($body)
+			: $this->_dkimSimpleCanonicalizeBody($body);
+
+		$FWS = "\r\n\t";
+
+		// The hash of the canonicalized body part of the message
+		$bh = rtrim(
+			chunk_split(base64_encode(
+				pack("H*", hash($this->_config['dkim']['hash'], $body))
+			), 64,
+			$FWS)
+		);
+
+		$domain = !is_null($this->_config['dkim']['domain'])
+			? $this->_config['dkim']['domain']
+			: $this->_getDomain();
+
+		$DkimSignature = "DKIM-Signature: v=1;{$FWS}" .
+			"a=rsa-{$this->_config['dkim']['hash']};{$FWS}" .
+			"q=dns/txt;{$FWS}" .
+			"s={$this->_config['dkim']['selector']};{$FWS}" .
+			"t=" . time() . ";{$FWS}" .
+			"c=relaxed/{$this->_config['dkim']['body_canonicalization']};{$FWS}" .
+			"h=" . implode(':', array_keys($dkimRelaxedCanonicalizeHeader)) . ";{$FWS}" .
+			"d={$domain};{$FWS}" .
+			(is_null($this->_config['dkim']['identity'])
+				? ''
+				: "i={$this->_config['dkim']['identity']};{$FWS}"
+			) .
+			"bh={$bh};{$FWS}" .
+			'b=';
+
+		// Get the canonicalized version of the $DkimSignature
+		$DkimSignatureCanonicalized = $this->_dkimRelaxedCanonicalizeHeader($DkimSignature);
+
+		switch ($this->_config['dkim']['hash'])
+		{
+			case 'sha256':
+				$algorithm = OPENSSL_ALGO_SHA256;
+			break;
+			case 'sha1':
+				$algorithm = OPENSSL_ALGO_SHA1;
+			break;
+			default:
+				throw new Core_Exception('Wrong dkim hash algorithm (supports "sha256" or "sha1"): ' . htmlspecialchars($this->_config['dkim']['hash']));
+		}
+
+		$private_key = openssl_pkey_get_private(Core_File::read($this->_config['dkim']['private_key']), $this->_config['dkim']['passphrase']);
+
+		$sData = implode("\r\n", $dkimRelaxedCanonicalizeHeader) . "\r\n" . $DkimSignatureCanonicalized['dkim-signature'];
+		if (openssl_sign($sData, $signature, $private_key, $algorithm))
+		{
+			$DkimSignature .= rtrim(
+				chunk_split(base64_encode($signature), 64, $FWS)
+			) . "\r\n";
+		}
+		else
+		{
+			Core_Log::instance()->clear()
+				->status(Core_Log::$ERROR)
+				->write('Core_Mail::_getDkimSignature. openssl_sign error!');
+
+			$DkimSignature = '';
+		}
+
+		return $DkimSignature;
 	}
 }

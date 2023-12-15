@@ -31,7 +31,7 @@ return array(
 	'email' => 'E-Mail',
 	'tabManagers' => 'Guidelines',
 	'tabContacts' => 'Contact details',
-	'tabBankingDetails' => 'Account details',
+	'tabBankingDetails' => 'Details',
 	'guid' => 'GUID',
 	'edit_success' => 'Company information updated successfully.',
 	'edit_error' => 'Error while adding company information!',

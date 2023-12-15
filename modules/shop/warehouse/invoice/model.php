@@ -483,10 +483,13 @@ class Shop_Warehouse_Invoice_Model extends Core_Entity
 			'Items' => array(),
 		);
 
-		$oSiteuser_Company = $this->Siteuser_Company;
-		$aReplace['siteuser_company'] = Core::moduleIsActive('siteuser') && !is_null($oSiteuser_Company)
-			? $oSiteuser_Company
-			: new Core_Meta_Empty();
+		if (Core::moduleIsActive('siteuser'))
+		{
+			$oSiteuser_Company = $this->Siteuser_Company;
+			$aReplace['siteuser_company'] = !is_null($oSiteuser_Company)
+				? $oSiteuser_Company
+				: new Core_Meta_Empty();
+		}
 
 		$position = 1;
 

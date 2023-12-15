@@ -135,6 +135,19 @@ a.m0 { margin-right: 0 !important; }
 	box-shadow: none !important;
 	/* margin-left: 10px;	 */
 }
+.hostcmsSubPanel div.hostcmsButtonImported > a {
+	background: #cfecf7;
+	color: #777;
+	padding: 3px 4px;
+	font-size: 8pt;
+	font-weight: bold;
+	border-radius: 3px;
+	margin-right: 0;
+}
+.hostcmsSubPanel div.hostcmsButtonImported > a:hover {
+	background: #f3f3f3;
+	color: #777;
+}
 .hostcmsPanel i {
   width: auto !important;
   height: auto !important;

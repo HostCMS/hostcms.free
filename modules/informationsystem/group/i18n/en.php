@@ -23,7 +23,7 @@ return array(
 	'indexing' => 'Index',
 	'active' => 'Active',
 	'siteuser_id' => 'Client',
-	'siteuser_group_id' => 'Access siteuser group',
+	'siteuser_group_id' => 'Customer Group',
 	'information_parent' => 'Like parent',
 
 	'image_large' => 'Picture',
@@ -62,4 +62,6 @@ return array(
 	'seo_item_keywords_template' => 'KEYWORDS template',
 	'markDeleted' => 'Delete group',
 	'shortcut_success' => "Group shortcut added successfully",
+	'seo_group_h1_template' => 'H1 Template',
+	'seo_item_h1_template' => 'H1 Template',
 );

@@ -15,9 +15,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Controller_YandexRealty extends Core_Controller
 {
@@ -269,9 +269,20 @@ class Shop_Controller_YandexRealty extends Core_Controller
 			case 1: // String
 			case 4: // Textarea
 			case 6: // Wysiwyg
-			case 8: // Date
-			case 9: // Datetime
+			case 11: // Float
 				$value = $oProperty_Value->value;
+			break;
+
+			case 8: // Date
+				$value = $oProperty_Value->value != '0000-00-00 00:00:00'
+					? Core_Date::sql2date($oProperty_Value->value)
+					: NULL;
+			break;
+
+			case 9: // Datetime
+				$value = $oProperty_Value->value != '0000-00-00 00:00:00'
+					? Core_Date::sql2datetime($oProperty_Value->value)
+					: NULL;
 			break;
 
 			case 3: // List

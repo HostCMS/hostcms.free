@@ -316,7 +316,7 @@
 
 		<div class="comment">
 			
-			<form action="{/informationsystem/informationsystem_item/url}" name="comment_form_0{$id}" method="post">
+			<form action="{/informationsystem/informationsystem_item/url}" name="comment_form_0{$id}" method="post" enctype="multipart/form-data">
 				<!-- Only for unauthorized users -->
 				<xsl:if test="/informationsystem/siteuser_id = 0">
 

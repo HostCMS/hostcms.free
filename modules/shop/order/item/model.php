@@ -500,10 +500,15 @@ class Shop_Order_Item_Model extends Core_Entity
 
 		$price = $this->getPrice();
 		$tax = $this->getTax();
+		$amount = $price * $this->quantity;
 
 		$oShop_Currency = $this->Shop_Order->Shop_Currency;
 
 		$this->clearXmlTags()
+			->addForbiddenTag('quantity')
+			->addXmlTag('quantity', $this->quantity, array(
+				'formatted' => $oShop_Currency->format($this->quantity))
+			)
 			->addXmlTag('price', $price, array(
 				'formatted' => $oShop_Currency->format($price),
 				'formattedWithCurrency' => $oShop_Currency->formatWithCurrency($price))
@@ -511,6 +516,10 @@ class Shop_Order_Item_Model extends Core_Entity
 			->addXmlTag('tax', $tax, array(
 				'formatted' => $oShop_Currency->format($tax),
 				'formattedWithCurrency' => $oShop_Currency->formatWithCurrency($tax))
+			)
+			->addXmlTag('amount', $amount, array(
+				'formatted' => $oShop_Currency->format($amount),
+				'formattedWithCurrency' => $oShop_Currency->formatWithCurrency($amount))
 			);
 
 		// Заказ оплачен и товар электронный
@@ -570,6 +579,7 @@ class Shop_Order_Item_Model extends Core_Entity
 							$countGoodsNeed--;
 						}
 
+						// Оплаченный заказ будет значение 1.
 						$mode = $this->Shop_Order->paid == 0 ? -1 : 1;
 
 						// Списываем электронный товар, если он ограничен

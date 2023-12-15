@@ -24,7 +24,7 @@ return array(
 	'price_header' => "Цены",
 	'price' => "Основная цена",
 	'active' => "Товар активен",
-	'siteuser_group_id' => 'Группа доступа',
+	'siteuser_group_id' => 'Группа клиентов',
 	'sorting' => "Порядок сортировки",
 	'path' => "<acronym title=\"Путь, например item_30312\">Путь</acronym>",
 	'seo_title' => "Заголовок (title)",
@@ -377,5 +377,8 @@ return array(
 	'shop_item_type_id' => 'Вид номенклатуры',
 	'recount_sets_success' => 'Пересчет комплектов завершен!',
 
-	'modifications_menu' => 'Модификации'
+	'modifications_menu' => 'Модификации',
+
+	'set_modification_items_title' => 'Назначить модификацией',
+	'set_modification_success' => 'Модификации назначены успешно!',
 );

@@ -3,6 +3,8 @@
 return array(
 	'model_name' => 'Знижки',
 	'show_item_discount_title' => "Знижки на товар \"%s\"",
+	'show_group_discount_title' => "Знижки на групу товарів \"%s\"",
+	'show_producer_discount_title' => "Знижки на товари виробника \"%s\"",
 	'discount_add_form_link' => 'Довідник "Знижки"',
 	'show_groups_discount' => "Знижка",
 	'show_groups_discount_add' => "Додати",

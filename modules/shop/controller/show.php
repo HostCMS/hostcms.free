@@ -395,6 +395,7 @@ class Shop_Controller_Show extends Core_Controller
 
 		$this->itemsActivity = $this->groupsActivity = $this->commentsActivity = 'active'; // inactive, all
 
+		// Named subpatterns {name} can consist of up to 32 alphanumeric characters and underscores, but must start with a non-digit.
 		$this->pattern = rawurldecode(Core_Str::rtrimUri($this->getEntity()->Structure->getPath())) . '({path}/)(user-{user}/)(page-{page}/)(tag/{tag}/)(producer-{producer}/)';
 
 		$this->patternExpressions = array(
@@ -459,13 +460,14 @@ class Shop_Controller_Show extends Core_Controller
 			case 1:
 				$this->_Shop_Items
 					->queryBuilder()
-					->orderBy('shop_items.name', $items_sorting_direction);
+					->orderBy('shop_items.name', $items_sorting_direction)
+					->orderBy('shop_items.id', 'DESC');
 				break;
 			case 2:
 				$this->_Shop_Items
 					->queryBuilder()
 					->orderBy('shop_items.sorting', $items_sorting_direction)
-					->orderBy('shop_items.name', $items_sorting_direction);
+					->orderBy('shop_items.name', 'ASC');
 				break;
 			case 0:
 			default:
@@ -1137,6 +1139,45 @@ class Shop_Controller_Show extends Core_Controller
 						->value(intval($producer_id))
 				);
 			}
+		}
+
+		if ($this->item)
+		{
+			if ($this->_seoItemH1 != '')
+			{
+				$oShop_Item = Core_Entity::factory('Shop_Item', $this->item);
+				$oCore_Meta = new Core_Meta();
+				$oCore_Meta
+					->addObject('shop', $oShop)
+					->addObject('group', $oShop_Item->Shop_Group)
+					->addObject('item', $oShop_Item)
+					->addObject('this', $this);
+
+				$this->addEntity(
+					Core::factory('Core_Xml_Entity')
+						->name('seo_item_h1')
+						->value($oCore_Meta->apply($this->_seoItemH1))
+				);
+			}
+		}
+		elseif ($this->_seoGroupH1 != '')
+		{
+			$oCore_Meta = new Core_Meta();
+			$oCore_Meta
+				->addObject('shop', $oShop)
+				->addObject('this', $this);
+
+			if ($this->group)
+			{
+				$oShop_Group = Core_Entity::factory('Shop_Group', $this->group);
+				$oCore_Meta->addObject('group', $oShop_Group);
+			}
+
+			$this->addEntity(
+				Core::factory('Core_Xml_Entity')
+					->name('seo_group_h1')
+					->value($oCore_Meta->apply($this->_seoGroupH1))
+			);
 		}
 
 		// Comparing, favorite and viewed goods
@@ -2153,10 +2194,11 @@ class Shop_Controller_Show extends Core_Controller
 				$this->producer($iProducerId);
 			}
 
-			$this->applyItemCondition();
-
 			// до applyGroupCondition
 			$this->applyFilter();
+
+			// после applyFilter()
+			$this->applyItemCondition();
 
 			$this->group !== FALSE && $this->applyGroupCondition();
 
@@ -2225,9 +2267,13 @@ class Shop_Controller_Show extends Core_Controller
 					// moved to the show()
 					//$this->addEntity($this->_oTag);
 
+					$fieldName = $this->isShopFilterJoined($this->_Shop_Items->queryBuilder())
+						? $this->getFilterTableName() . '.shop_item_id'
+						: 'shop_items.id';
+
 					$this->_Shop_Items
 						->queryBuilder()
-						->join('tag_shop_items', 'shop_items.id', '=', 'tag_shop_items.shop_item_id')
+						->join('tag_shop_items', $fieldName, '=', 'tag_shop_items.shop_item_id')
 						->where('tag_shop_items.tag_id', '=', $this->_oTag->id);
 
 					// В корне при фильтрации по меткам вывод идет из всех групп
@@ -2267,7 +2313,7 @@ class Shop_Controller_Show extends Core_Controller
 	 */
 	protected function forbidSelectShortcuts()
 	{
-		// Отключаем выбор ярлыков из текущей группы
+		// Отключаем выбор ярлыков
 		$this->_Shop_Items
 			->queryBuilder()
 			->where('shop_items.shortcut_id', '=', 0);
@@ -2463,10 +2509,12 @@ class Shop_Controller_Show extends Core_Controller
 	protected $_seoGroupTitle = NULL;
 	protected $_seoGroupDescription = NULL;
 	protected $_seoGroupKeywords = NULL;
+	protected $_seoGroupH1 = NULL;
 
 	protected $_seoItemTitle = NULL;
 	protected $_seoItemDescription = NULL;
 	protected $_seoItemKeywords = NULL;
+	protected $_seoItemH1 = NULL;
 
 	protected $_filterPath = NULL;
 
@@ -2511,6 +2559,8 @@ class Shop_Controller_Show extends Core_Controller
 			&& $this->_seoGroupDescription = $oShop->seo_group_description_template;
 		$oShop->seo_group_keywords_template != ''
 			&& $this->_seoGroupKeywords = $oShop->seo_group_keywords_template;
+		$oShop->seo_group_h1_template != ''
+			&& $this->_seoGroupH1 = $oShop->seo_group_h1_template;
 
 		// Item: set shop's SEO templates
 		$oShop->seo_item_title_template != ''
@@ -2519,6 +2569,8 @@ class Shop_Controller_Show extends Core_Controller
 			&& $this->_seoItemDescription = $oShop->seo_item_description_template;
 		$oShop->seo_item_keywords_template != ''
 			&& $this->_seoItemKeywords = $oShop->seo_item_keywords_template;
+		$oShop->seo_item_h1_template != ''
+			&& $this->_seoItemH1 = $oShop->seo_item_h1_template;
 
 		$Core_Router_Route = new Core_Router_Route($this->pattern, $this->patternExpressions);
 		$this->patternParams = $matches = $Core_Router_Route->applyPattern(Core::$url['path']);
@@ -2618,6 +2670,8 @@ class Shop_Controller_Show extends Core_Controller
 									&& $this->_seoGroupDescription = $oShop_Group->seo_group_description_template;
 								$oShop_Group->seo_group_keywords_template != ''
 									&& $this->_seoGroupKeywords = $oShop_Group->seo_group_keywords_template;
+								$oShop_Group->seo_group_h1_template != ''
+									&& $this->_seoGroupH1 = $oShop_Group->seo_group_h1_template;
 
 								// Item: set shop's SEO templates
 								$oShop_Group->seo_item_title_template != ''
@@ -2626,6 +2680,8 @@ class Shop_Controller_Show extends Core_Controller
 									&& $this->_seoItemDescription = $oShop_Group->seo_item_description_template;
 								$oShop_Group->seo_item_keywords_template != ''
 									&& $this->_seoItemKeywords = $oShop_Group->seo_item_keywords_template;
+								$oShop_Group->seo_item_h1_template != ''
+									&& $this->_seoItemH1 = $oShop_Group->seo_item_h1_template;
 							}
 							else
 							{
@@ -3252,22 +3308,21 @@ class Shop_Controller_Show extends Core_Controller
 							->addObject('shop', $oShop)
 							->addObject('this', $this);
 
-						if ($oShop->seo_root_title_template != '')
-						{
-							$seo_title = $oCore_Meta->apply($oShop->seo_root_title_template);
-						}
+						// Title
+						$oShop->seo_root_title_template != ''
+							&& $seo_title = $oCore_Meta->apply($oShop->seo_root_title_template);
 
 						// Description
-						if ($oShop->seo_root_keywords_template != '')
-						{
-							$seo_description = $oCore_Meta->apply($oShop->seo_root_keywords_template );
-						}
+						$oShop->seo_root_description_template != ''
+							&& $seo_description = $oCore_Meta->apply($oShop->seo_root_description_template);
 
 						// Keywords
-						if ($oShop->seo_root_description_template != '')
-						{
-							$seo_keywords = $oCore_Meta->apply($oShop->seo_root_description_template );
-						}
+						$oShop->seo_root_keywords_template != ''
+							&& $seo_keywords = $oCore_Meta->apply($oShop->seo_root_keywords_template);
+
+						// H1
+						$oShop->seo_root_h1_template != ''
+							&& $this->_seoGroupH1 = $oShop->seo_root_h1_template;
 					}
 				}
 				elseif (!is_null($this->tag) && Core::moduleIsActive('tag'))
@@ -3595,6 +3650,7 @@ class Shop_Controller_Show extends Core_Controller
 	 * @param int $parent_id
 	 * @param object $parentObject
 	 * @return self
+	 * @hostcms-event Shop_Controller_Show.onAfterAddShopGroups
 	 */
 	protected function _addGroupsByParentId($parent_id, $parentObject)
 	{
@@ -3638,7 +3694,10 @@ class Shop_Controller_Show extends Core_Controller
 
 				$this->_addGroupsByParentId($oShop_Group->id, $oShop_Group);
 			}
+
+			Core_Event::notify(get_class($this) . '.onAfterAddShopGroups', $this, array($this->_aShop_Groups[$parent_id]));
 		}
+
 		return $this;
 	}
 
@@ -4347,8 +4406,8 @@ class Shop_Controller_Show extends Core_Controller
 
 			$rows = $oMinMaxQueryBuilder->asAssoc()->execute()->current();
 
-			$min = $rows['min'];
-			$max = $rows['max'];
+			$min = floatval($rows['min']);
+			$max = floatval($rows['max']);
 
 			if ($this->modificationsList)
 			{
@@ -4480,8 +4539,8 @@ class Shop_Controller_Show extends Core_Controller
 
 		$rows = $oMinMaxQueryBuilder->asAssoc()->execute()->current();
 
-		$min = $rows['min'];
-		$max = $rows['max'];
+		$min = floatval($rows['min']);
+		$max = floatval($rows['max']);
 
 		if ($this->modificationsList)
 		{
@@ -4580,8 +4639,8 @@ class Shop_Controller_Show extends Core_Controller
 
 		$rows = $oMinMaxQueryBuilder->asAssoc()->execute()->current();
 
-		$min = $rows['min'];
-		$max = $rows['max'];
+		$min = floatval($rows['min']);
+		$max = floatval($rows['max']);
 
 		if ($this->modificationsList)
 		{
@@ -4680,8 +4739,8 @@ class Shop_Controller_Show extends Core_Controller
 
 		$rows = $oMinMaxQueryBuilder->asAssoc()->execute()->current();
 
-		$min = $rows['min'];
-		$max = $rows['max'];
+		$min = floatval($rows['min']);
+		$max = floatval($rows['max']);
 
 		if ($this->modificationsList)
 		{
@@ -4780,8 +4839,8 @@ class Shop_Controller_Show extends Core_Controller
 
 		$rows = $oMinMaxQueryBuilder->asAssoc()->execute()->current();
 
-		$min = $rows['min'];
-		$max = $rows['max'];
+		$min = floatval($rows['min']);
+		$max = floatval($rows['max']);
 
 		if ($this->modificationsList)
 		{

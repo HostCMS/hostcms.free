@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Товары заказа',
@@ -34,6 +34,7 @@ return array(
 	'order_item_type_caption4' => 'Скидка по дисконтной карте',
 	'order_item_type_caption5' => 'Списание бонусов',
 	'order_item_type_caption6' => 'Частичная оплата с лицевого счета',
+	'order_item_type_caption7' => 'Услуга',
 	'edit_success' => "Информация о товаре в заказе успешно добавлена",
 	'markDeleted_success' => "Информация о товаре в заказе успешно удалена!",
 	'replenishment_account' => 'Пополнение лицевого счета пользователя "%s" в магазине "%s"',

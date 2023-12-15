@@ -196,7 +196,8 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					)
 					->add($oShopGroupBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oShopGroupBlockRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopGroupBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+					->add($oShopGroupBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopGroupBlockRow4 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$oShopGroupHeaderDiv
 					->add(Admin_Form_Entity::factory('Code')->html(
@@ -210,7 +211,8 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					)
 					->add($oShopItemBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oShopItemBlockRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopItemBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+					->add($oShopItemBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopItemBlockRow4 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$oShopItemHeaderDiv
 					->add(Admin_Form_Entity::factory('Code')->html(
@@ -224,7 +226,8 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					)
 					->add($oShopRootBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oShopRootBlockRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopRootBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+					->add($oShopRootBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopRootBlockRow4 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$oShopRootHeaderDiv
 					->add(Admin_Form_Entity::factory('Code')->html(
@@ -290,12 +293,15 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->move($this->getField('seo_group_title_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oShopGroupBlockRow1)
 					->move($this->getField('seo_group_description_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oShopGroupBlockRow2)
 					->move($this->getField('seo_group_keywords_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oShopGroupBlockRow3)
+					->move($this->getField('seo_group_h1_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oShopGroupBlockRow4)
 					->move($this->getField('seo_item_title_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oShopItemBlockRow1)
 					->move($this->getField('seo_item_description_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oShopItemBlockRow2)
 					->move($this->getField('seo_item_keywords_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oShopItemBlockRow3)
+					->move($this->getField('seo_item_h1_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oShopItemBlockRow4)
 					->move($this->getField('seo_root_title_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oShopRootBlockRow1)
 					->move($this->getField('seo_root_description_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oShopRootBlockRow2)
 					->move($this->getField('seo_root_keywords_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oShopRootBlockRow3)
+					->move($this->getField('seo_root_h1_template')->divAttr(array('class' => 'form-group col-xs-12'))->rows(1), $oShopRootBlockRow4)
 					;
 
 				// Переопределяем стандартные поля на нужный нам вид

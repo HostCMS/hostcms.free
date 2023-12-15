@@ -595,18 +595,23 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			case 3:
 				if (Core::moduleIsActive('list') && $oProperty->list_id)
 				{
-					$oListItem = Core_Entity::factory('List', $oProperty->list_id)
+					$oList_Item = Core_Entity::factory('List', $oProperty->list_id)
 						->List_Items
 						->getByValue($value, FALSE);
 
-					if (is_null($oListItem))
+					if (is_null($oList_Item))
 					{
-						$oListItem = Core_Entity::factory('List_Item')
+						$oList_Item = Core_Entity::factory('List_Item')
 							->list_id($oProperty->list_id)
-							->value($value)
-							->save();
+							->value($value);
+
+						// Apache %2F (/) is forbidden
+						strpos($value, '/') !== FALSE
+							&& $oList_Item->path = trim(str_replace('/', ' ', $value));
+
+						$oList_Item->save();
 					}
-					$changedValue = $oListItem->id;
+					$changedValue = $oList_Item->id;
 				}
 				else
 				{
@@ -1290,6 +1295,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 			$this->_aPropertyValues = Core_Array::get($aJSON, '_aPropertyValues', array());
 			$this->_aBaseProperties = Core_Array::get($aJSON, '_aBaseProperties', array());
+			$this->sShopDefaultPriceGUID = Core_Array::get($aJSON, 'sShopDefaultPriceGUID', '');
 		}
 
 		return $this;
@@ -1424,7 +1430,8 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					Core_File::write($sJsonFilePath, json_encode(
 						array(
 							'_aPropertyValues' => $this->_aPropertyValues,
-							'_aBaseProperties' => $this->_aBaseProperties
+							'_aBaseProperties' => $this->_aBaseProperties,
+							'sShopDefaultPriceGUID' => $this->sShopDefaultPriceGUID
 						)
 					));
 				}
@@ -2871,8 +2878,13 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 						if (is_null($oList_Item))
 						{
 							$oList_Item = Core_Entity::factory('List_Item');
-							$oList_Item->value = $listValue;
 							$oList_Item->list_id = $oProperty->list_id;
+							$oList_Item->value = $listValue;
+
+							// Apache %2F (/) is forbidden
+							strpos($listValue, '/') !== FALSE
+								&& $oList_Item->path = trim(str_replace('/', ' ', $listValue));
+
 							$oList_Item->save();
 						}
 					}

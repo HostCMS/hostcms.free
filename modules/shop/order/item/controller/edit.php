@@ -178,13 +178,14 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 				->caption(Core::_('Shop_Order_Item.type'))
 				->options(
 					array(
-						Core::_('Shop_Order_Item.order_item_type_caption0'),
-						Core::_('Shop_Order_Item.order_item_type_caption1'),
-						Core::_('Shop_Order_Item.order_item_type_caption2'),
-						Core::_('Shop_Order_Item.order_item_type_caption3'),
-						Core::_('Shop_Order_Item.order_item_type_caption4'),
-						Core::_('Shop_Order_Item.order_item_type_caption5'),
-						Core::_('Shop_Order_Item.order_item_type_caption6')
+						0 => Core::_('Shop_Order_Item.order_item_type_caption0'),
+						7 => Core::_('Shop_Order_Item.order_item_type_caption7'),
+						1 => Core::_('Shop_Order_Item.order_item_type_caption1'),
+						2 => Core::_('Shop_Order_Item.order_item_type_caption2'),
+						3 => Core::_('Shop_Order_Item.order_item_type_caption3'),
+						4 => Core::_('Shop_Order_Item.order_item_type_caption4'),
+						5 => Core::_('Shop_Order_Item.order_item_type_caption5'),
+						6 => Core::_('Shop_Order_Item.order_item_type_caption6')
 					)
 				)
 				->name('type')

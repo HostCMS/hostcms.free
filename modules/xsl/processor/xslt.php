@@ -27,6 +27,9 @@ class Xsl_Processor_Xslt extends Xsl_Processor
 
 		$return = NULL;
 
+		// List of used import://, see Xsl_Processor_Observer::onAfterProcess
+		Xsl_Stream_Import::clearImported();
+
 		// Load the xml file and stylesheet as domdocuments
 		$xsl = new DomDocument();
 		$xsl->substituteEntities = TRUE;

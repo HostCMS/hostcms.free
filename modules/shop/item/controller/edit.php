@@ -213,6 +213,21 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->template_id($template_id)
 					->fillTab();
 
+				if (Core::moduleIsActive('media'))
+				{
+					$oMediaTab = Admin_Form_Entity::factory('Tab')
+						->caption(Core::_("Admin_Form.tabMedia"))
+						->name('Media');
+
+					$this->addTabAfter($oMediaTab, $oPropertyTab);
+
+					Media_Controller_Tab::factory($this->_Admin_Form_Controller)
+						->setObject($this->_object)
+						->setDatasetId($this->getDatasetId())
+						->setTab($oMediaTab)
+						->fillTab();
+				}
+
 				// Переносим поля на вкладки
 				$oMainTab
 					->move($oDescriptionField = $this->getField('description'), $oShopItemTabDescription)
@@ -449,7 +464,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->where('shop_id', '=', $this->_object->shop_id)
 					->where('shop_group_id', '=', $iShopGroupId);
 
-				$iCountModifications = $oShop_Items->getCount();
+				/*$iCountModifications = $oShop_Items->getCount();
 
 				if ($iCountModifications < Core::$mainConfig['switchSelectToAutocomplete'])
 				{
@@ -463,7 +478,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$oMainRow3->add($oModificationSelect);
 				}
 				else
-				{
+				{*/
 					$oModificationInput = Admin_Form_Entity::factory('Input')
 						->caption(Core::_('Shop_Item.shop_item_catalog_modification_flag'))
 						->divAttr(array('class' => 'form-group col-xs-12 col-lg-3'))
@@ -499,9 +514,9 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							minLength: 1,
 							create: function() {
 								$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
-									return $('<li></li>')
+									return $('<li class=\"autocomplete-suggestion\"></li>')
 										.data('item.autocomplete', item)
-										.append($('<a>').text(item.label))
+										.append($('<div class=\"name\">').text(item.label))
 										.appendTo(ul);
 								}
 
@@ -529,7 +544,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->add($oModificationInput)
 						->add($oModificationInputHidden)
 						->add($oCore_Html_Entity_Script_Modification);
-				}
+				/*}*/
 
 				if (!$object->modification_id)
 				{
@@ -1090,7 +1105,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						$oItemPriceCheckBox = Admin_Form_Entity::factory('Checkbox')
 							->caption(htmlspecialchars($oShopPrice->name))
 							->id("item_price_id_{$oShopPrice->id}")
-							->value($value)
+							->value(1)
+							->checked(!is_null($oShop_Item_Price))
 							->name("item_price_id_{$oShopPrice->id}")
 							->divAttr(array('class' => 'form-group margin-top-10 col-xs-8 col-md-4'))
 							->onclick("document.getElementById('item_price_value_{$oShopPrice->id}').disabled
@@ -1625,7 +1641,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					)
 					->add($oShopGroupBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oShopGroupBlockRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopGroupBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+					->add($oShopGroupBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopGroupBlockRow4 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$oShopGroupHeaderDiv
 					->add(Admin_Form_Entity::factory('Code')->html(
@@ -1639,7 +1656,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					)
 					->add($oShopItemBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oShopItemBlockRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopItemBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+					->add($oShopItemBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopItemBlockRow4 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$oShopItemHeaderDiv
 					->add(Admin_Form_Entity::factory('Code')->html(
@@ -1651,9 +1669,11 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->move($this->getField('seo_group_title_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopGroupBlockRow1)
 					->move($this->getField('seo_group_description_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopGroupBlockRow2)
 					->move($this->getField('seo_group_keywords_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopGroupBlockRow3)
+					->move($this->getField('seo_group_h1_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopGroupBlockRow4)
 					->move($this->getField('seo_item_title_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopItemBlockRow1)
 					->move($this->getField('seo_item_description_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopItemBlockRow2)
-					->move($this->getField('seo_item_keywords_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopItemBlockRow3);
+					->move($this->getField('seo_item_keywords_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopItemBlockRow3)
+					->move($this->getField('seo_item_h1_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopItemBlockRow4);
 
 				$this->addTabAfter($oShopGroupImportExportTab =
 					Admin_Form_Entity::factory('Tab')
@@ -1674,6 +1694,21 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->setTab($oPropertyTab)
 					->template_id($template_id)
 					->fillTab();
+
+				if (Core::moduleIsActive('media'))
+				{
+					$oMediaTab = Admin_Form_Entity::factory('Tab')
+						->caption(Core::_("Admin_Form.tabMedia"))
+						->name('Media');
+
+					$this->addTabAfter($oMediaTab, $oPropertyTab);
+
+					Media_Controller_Tab::factory($this->_Admin_Form_Controller)
+						->setObject($this->_object)
+						->setDatasetId($this->getDatasetId())
+						->setTab($oMediaTab)
+						->fillTab();
+				}
 
 				$oMainTab
 					->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -2794,6 +2829,13 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			break;
 		}
 
+		if (Core::moduleIsActive('media'))
+		{
+			Media_Controller_Tab::factory($this->_Admin_Form_Controller)
+				->setObject($this->_object)
+				->applyObjectProperty();
+		}
+
 		// Clear tagged cache
 		$this->_object->clearCache();
 
@@ -3078,9 +3120,34 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			);
 		}
 
+		if ($bNewObject)
+		{
+			ob_start();
+			$this->_fillMedia()->execute();
+			$this->_Admin_Form_Controller->addMessage(ob_get_clean());
+		}
+
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 
 		return $this;
+	}
+
+	/*
+	 * Add shop documents
+	 * @return Admin_Form_Entity
+	 */
+	protected function _fillMedia()
+	{
+		$modalWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('modalWindowId', '', 'str'));
+		$windowId = $modalWindowId ? $modalWindowId : $this->_Admin_Form_Controller->getWindowId();
+
+		$modelName = $this->_object->getModelName();
+
+		return Admin_Form_Entity::factory('Script')
+			->value("$(function (){
+				mainFormLocker.unlock();
+				$.adminLoad({ path: '/admin/media/index.php', additionalParams: 'entity_id=" . $this->_object->id . "&type=" . $modelName . "&dataset_id=" . $this->getDatasetId() . "&parentWindowId=" . $windowId . "&_module=0', windowId: '{$windowId}-media-items', loadingScreen: false });
+			});");
 	}
 
 	/**
@@ -3270,9 +3337,9 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					minLength: 1,
 					create: function() {
 						$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
-							return $('<li></li>')
+							return $('<li class=\"autocomplete-suggestion\"></li>')
 								.data('item.autocomplete', item)
-								.append($('<a>').text(item.label))
+								.append($('<div class=\"name\">').text(item.label))
 								.appendTo(ul);
 						}
 						$(this).prev('.ui-helper-hidden-accessible').remove();
@@ -3537,7 +3604,13 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->orderBy('name');
 
 		$like != ''
-			? $oQB->where('shop_items.name', 'LIKE', '%' . $like . '%')->limit(10)
+			? $oQB
+				->open()
+					->where('shop_items.name', 'LIKE', '%' . $like . '%')
+					->setOr()
+					->where('shop_items.id', '=', $like)
+				->close()
+				->limit(Core::$mainConfig['autocompleteItems'])
 			: $oQB->where('shop_group_id', '=', $iShopGroupId);
 
 		$aTmp = $oQB->execute()->asAssoc()->result();
