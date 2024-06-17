@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 abstract class Core_Skin
 {
@@ -111,11 +110,12 @@ abstract class Core_Skin
 	/**
 	 * Add JS file path
 	 * @param string $path file path
+	 * @param string $type type, default NULL
 	 * @return self
 	 */
-	public function addJs($path)
+	public function addJs($path, $type = NULL)
 	{
-		$this->_js[] = $path;
+		$this->_js[] = array('src' => $path, 'type' => $type);
 		return $this;
 	}
 

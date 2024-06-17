@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 {
@@ -66,8 +65,8 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 		$oCore_Registry->set('Admin_Form_Count', $iAdmin_Form_Count + 1);
 
 		$aConfig = Core_Config::instance()->get('core_syntaxhighlighter', array()) + array(
-			'mode' => 'ace/mode/php',
-			'theme' => 'ace/theme/chrome',
+			'mode' => '"ace/mode/php"',
+			'theme' => '"ace/theme/chrome"',
 			'showPrintMargin' => false,
 			'autoScrollEditorIntoView' => true,
 			'wrap' => true
@@ -76,16 +75,7 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 		$this->id = $this->name = 'field_id_' . $iAdmin_Form_Count;
 		$this->style('width: 100%')
 			->rows(3)
-			->syntaxHighlighterOptions(
-				$aConfig
-				/*array(
-					'mode' => 'ace/mode/php',
-					'theme' => 'ace/theme/github',
-					'showPrintMargin' => false,
-					'autoScrollEditorIntoView' => true,
-					'wrap' => true
-				)*/
-			);
+			->syntaxHighlighterOptions($aConfig);
 
 		$this->class .= ' form-control';
 		$this->divAttr = array('class' => 'form-group col-xs-12');
@@ -93,9 +83,13 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 
 	/**
 	 * Executes the business logic.
+	 * @hostcms-event Skin_Default_Admin_Form_Entity_Textarea.onBeforeExecute
+	 * @hostcms-event Skin_Default_Admin_Form_Entity_Textarea.onAfterExecute
 	 */
 	public function execute()
 	{
+		Core_Event::notify(get_class($this) . '.onBeforeExecute', $this);
+
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		($this->wysiwyg || $this->syntaxHighlighter)
@@ -148,6 +142,8 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 		}
 
 		?></div><?php
+
+		Core_Event::notify(get_class($this) . '.onAfterExecute', $this);
 	}
 
 	protected function _format()
@@ -250,10 +246,8 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 					? array_merge(explode(',', $userCss), $aCSS)
 					: $aCSS;
 
-				if (count($aUserCsses))
-				{
-					$this->_init['content_css'] = "['" . implode("','", $aUserCsses) . "']";
-				}
+				count($aUserCsses)
+					&& $this->_init['content_css'] = "['" . implode("','", $aUserCsses) . "']";
 
 				// Array of structures
 				$aStructures = $this->_fillStructureList(CURRENT_SITE);
@@ -285,6 +279,7 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 					$aInit = array();
 					foreach ($this->_init as $init_name => $init_value)
 					{
+						is_bool($init_value) && $init_value = $init_value ? 'true' : 'false';
 						$aInit[] = "{$init_name}: {$init_value}";
 					}
 					$sInit = implode(", \n", $aInit);
@@ -305,7 +300,14 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 			$aTmp = array();
 			foreach ($this->syntaxHighlighterOptions as $key => $value)
 			{
-				$aTmp[] = "'" . Core_Str::escapeJavascriptVariable($key) . "': '" . Core_Str::escapeJavascriptVariable($value) . "'";
+				is_string($value) && !is_numeric($value) && $value[0] != '"' && $value = '"' . $value . '"';
+				is_bool($value) && $value = $value ? 'true' : 'false';
+
+				$aTmp[] = Core_Str::escapeJavascriptVariable($key) . ": " . (
+					is_array($value)
+						? json_encode($value)
+						: $value
+					);
 			}
 
 			// $sHeight = ($this->rows * 15) . 'px';
@@ -325,13 +327,17 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 
 						$(div).insertAfter(jTextarea.hide()).text(jTextarea.val());
 
+						// var beautify = ace.require('ace/ext/beautify');
+
 						var editor = ace.edit(div, {
-							" . implode(",\n", $aTmp) . "
+							" . implode(",\n							", $aTmp) . "
 						});
 
+						// beautify.beautify(editor.session);
+
 						editor.setOptions({
-							maxLines: '" . $this->rows . "',
-							minLines: '" . $this->rows . "'
+							maxLines: '{$this->rows}',
+							minLines: '{$this->rows}'
 						});
 					});
 				")

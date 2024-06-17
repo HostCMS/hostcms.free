@@ -10,6 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - tag_dirs(TRUE|FALSE) отображать разделы тегов, по умолчанию FALSE
  * - tag_dir($tag_dir_id) идентификатор раздела меток, из которого выводить метки
  * - group($id) идентификатор группы магазина или массив идентификаторов
+ * - subgroups(TRUE|FALSE) отображать товары из подгрупп, доступно при указании в group() одного идентификатора родительской группы (не массива), по умолчанию FALSE
  * - offset($offset) смещение, с которого выводить метки. По умолчанию 0
  * - limit($limit) количество выводимых меток
  * - addAllowedTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, разрешенных к передаче в генерируемый XML
@@ -37,8 +38,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Controller_Tag_Show extends Core_Controller
 {
@@ -49,6 +49,7 @@ class Shop_Controller_Tag_Show extends Core_Controller
 	protected $_allowedProperties = array(
 		'tag_dirs',
 		'group',
+		'subgroups',
 		'tag_dir',
 		'offset',
 		'limit',
@@ -75,6 +76,32 @@ class Shop_Controller_Tag_Show extends Core_Controller
 	public function __construct(Shop_Model $oShop)
 	{
 		parent::__construct($oShop->clearEntities());
+
+		$this->_setTags();
+
+		$this->group = FALSE;
+		$this->tag_dirs = $this->tag_dir = FALSE;
+		$this->offset = 0;
+		$this->cache = TRUE;
+	}
+
+	/**
+	 * Clone controller
+	 * @return void
+	 * @ignore
+	 */
+	public function __clone()
+	{
+		$this->_setTags();
+	}
+
+	/**
+	 * Prepare items for showing
+	 * @return self
+	 */
+	protected function _setTags()
+	{
+		$oShop = $this->getEntity();
 
 		$siteuser_id = 0;
 		$aSiteuserGroups = array(0, -1);
@@ -122,10 +149,7 @@ class Shop_Controller_Tag_Show extends Core_Controller
 			->having('count', '>', 0)
 			->orderBy('tags.name', 'ASC');
 
-		$this->group = NULL;
-		$this->tag_dirs = $this->tag_dir = FALSE;
-		$this->offset = 0;
-		$this->cache = TRUE;
+		return $this;
 	}
 
 	/**
@@ -146,6 +170,9 @@ class Shop_Controller_Tag_Show extends Core_Controller
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeRedeclaredShow', $this);
 
+		$this->group === 0 && $this->subgroups
+			&& $this->group = FALSE;
+
 		if ($this->cache && Core::moduleIsActive('cache'))
 		{
 			$oCore_Cache = Core_Cache::instance(Core::$mainConfig['defaultCache']);
@@ -157,8 +184,6 @@ class Shop_Controller_Tag_Show extends Core_Controller
 				return $this;
 			}
 		}
-
-		$oShop = $this->getEntity();
 
 		if ($this->tag_dirs)
 		{
@@ -172,34 +197,69 @@ class Shop_Controller_Tag_Show extends Core_Controller
 			$this->_addDirsByParentId(0, $this);
 		}
 
+		$oCore_Xml_Entity_Group = Core::factory('Core_Xml_Entity')
+			->name('group')
+			->value(is_array($this->group) ? Core_Array::first($this->group) : intval($this->group)); // FALSE => 0
+
+		if (is_array($this->group))
+		{
+			$oCore_Xml_Entity_Group->addAttribute('all', implode(',', $this->group));
+		}
+
 		$this->addEntity(
-			Core::factory('Core_Xml_Entity')
-				->name('group')
-				->value(intval($this->group)) // FALSE => 0
+			$oCore_Xml_Entity_Group
 		)
 		->addEntity(
 			Core::factory('Core_Xml_Entity')
 				->name('limit')
 				->value(intval($this->limit))
 		);
+		
+		$oQueryBuilder = $this->_tags->queryBuilder();
 
-		if (!is_null($this->group))
+		if ($this->group !== FALSE)
 		{
-			$this->_tags
-				->queryBuilder()
-				->where('shop_items.shop_group_id', is_array($this->group) ? 'IN' : '=', $this->group);
-		}
+			if ($this->subgroups)
+			{
+				// Fast filter + scalar group
+				if ($this->getEntity()->filter && !is_array($this->group))
+				{
+					/*$method = $oQueryBuilder->isStraightJoin()
+						? 'firstJoin'
+						: 'join';*/
 
+					$tableName = $this->getFilterGroupTableName();
+					$oQueryBuilder->join($tableName, 'shop_items.shop_group_id', '=', $tableName . '.child_id',
+						array(
+							array('AND' => array($tableName . '.shop_group_id', '=', $this->group))
+						)
+					);
+				}
+				else
+				{
+					$oQueryBuilder->where('shop_items.shop_group_id', 'IN',
+						!is_array($this->group)
+							? $this->getSubgroups($this->group)
+							: $this->group
+					);
+				}
+			}
+			else
+			{
+				$oQueryBuilder
+					->where('shop_items.shop_group_id', is_array($this->group) ? 'IN' : '=', $this->group);
+			}
+		}
+		
 		if ($this->tag_dir !== FALSE)
 		{
-			$this->_tags
-				->queryBuilder()
+			$oQueryBuilder
 				->where('tag_dir_id', is_array($this->tag_dir) ? 'IN' : '=', $this->tag_dir);
 		}
 
 		if ($this->limit > 0)
 		{
-			$this->_tags->queryBuilder()
+			$oQueryBuilder
 				->limit($this->offset, $this->limit);
 		}
 
@@ -238,5 +298,85 @@ class Shop_Controller_Tag_Show extends Core_Controller
 			}
 		}
 		return $this;
+	}
+	
+	/**
+	 * Get Filter Group Table Name
+	 * @return string
+	 */
+	public function getFilterGroupTableName()
+	{
+		return 'shop_filter_group' . $this->getEntity()->id;
+	}
+	
+	/**
+	 * Groups Tree For fillShopGroups()
+	 * @var NULL|array
+	 */
+	protected $_aGroupTree = NULL;
+
+	/** 
+	 * Fill $this->_aGroupTree array
+	 * @param int $parent_id 
+	 * @return array
+	 */
+	public function fillShopGroups($parent_id = 0)
+	{
+		$parent_id = intval($parent_id);
+
+		if (is_null($this->_aGroupTree))
+		{
+			$this->_aGroupTree = array();
+
+			$oShop = $this->getEntity();
+
+			$aTmp = Core_QueryBuilder::select('id', 'parent_id')
+				->from('shop_groups')
+				->where('shop_id', '=', $oShop->id)
+				->where('shortcut_id', '=', 0)
+				->where('deleted', '=', 0)
+				->execute()->asAssoc()->result();
+
+			foreach ($aTmp as $aGroup)
+			{
+				$this->_aGroupTree[$aGroup['parent_id']][] = $aGroup;
+			}
+		}
+
+		$aReturn = array();
+
+		if (isset($this->_aGroupTree[$parent_id]))
+		{
+			foreach ($this->_aGroupTree[$parent_id] as $childrenGroup)
+			{
+				$aReturn[] = $childrenGroup['id'];
+				$aReturn = array_merge($aReturn, $this->fillShopGroups($childrenGroup['id']));
+			}
+		}
+
+		return $aReturn;
+	}
+
+	/**
+	 * Array of subgroups
+	 * @var array
+	 */
+	protected $_subgroups = array();
+
+	/**
+	 * Get array of subgroups ID, inc. $group_id
+	 * @param int $group_id
+	 * @return array
+	 */
+	public function getSubgroups($group_id)
+	{
+		if (!isset($this->_subgroups[$group_id]))
+		{
+			$this->_subgroups[$group_id] = $this->fillShopGroups($group_id);
+			// Set first ID as current group
+			array_unshift($this->_subgroups[$group_id], $group_id);
+		}
+
+		return $this->_subgroups[$group_id];
 	}
 }

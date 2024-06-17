@@ -7,7 +7,7 @@ return array(
 	'authorization_form_ip' => 'Прив\'язати сесію до IP-адреси',
 	'authorization_form_button' => 'Ввійти',
 	'themes' => 'Теми',
-	'authorization_error_valid_user' => 'Помилка! Невірні данні!<br />Ваша IP-адреса <b>%s</b>, адміністратор повідомлений про подію.',
+	'authorization_error_valid_user' => "Помилка! Невірні данні, логін <b>%s</b>!<br />Ваша IP-адреса <b>%s</b>, адміністратору повідомлено про подію.",
 	'authorization_error_access_temporarily_unavailable' => 'Доступ тимчасово заборонений. Ви можете спробувати ввести пароль через %s сек.',
 	'authorization_title' => 'Вхід в центр адміністрування HostCMS',
 	'authorization_notice' => '* Для входу в центр адміністрування в браузері має бути дозволено використання Cookies.',
@@ -107,4 +107,11 @@ return array(
 	'no_title' => '<Без назви>',
 
 	'root' => 'Корінь',
+	'autocomplete_placeholder' => "Почніть вводити…",
+
+	'time' => 'раз',
+	'day' => 'день',
+	'days' => '%d днів',
+	'hour' => 'година',
+	'hours' => '%d годин',
 );

@@ -37,4 +37,5 @@ return array(
 	'modules_active_unset' => 'Активність модуля "%s" знята',
 	'delete_success' => 'Елемент видалений!',
 	'undelete_success' => 'Елемент відновлено!',
+	'add_error' => 'Модуль вже існує!',
 );

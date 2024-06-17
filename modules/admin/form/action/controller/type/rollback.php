@@ -9,8 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Type_Rollback extends Admin_Form_Action_Controller
 {
@@ -95,12 +94,9 @@ class Admin_Form_Action_Controller_Type_Rollback extends Admin_Form_Action_Contr
 			{
 				ob_start();
 
-				$aRevisions = Revision_Controller::getRevisions($this->_object);
-
+				$aRevisions = Revision_Controller::getRevisions($this->_object, 12, array('id', 'model', 'entity_id', 'datetime', 'user_id', 'deleted'));
 				if (count($aRevisions))
 				{
-					$aRevisions = array_slice($aRevisions, 0, 12);
-
 					?>
 					<table class="table table-hover">
 						<thead>
@@ -125,8 +121,8 @@ class Admin_Form_Action_Controller_Type_Rollback extends Admin_Form_Action_Contr
 								<tr>
 									<td width="30px"><label><input name="revision_version_id" type="radio" value="<?php echo $oRevision->id?>" class="colored-blue" <?php echo $checked?>/><span class="text"></span></label></td>
 									<td><?php echo $oRevision->id?></td>
-									<td width="120px"><?php echo Core_Date::timestamp2string($iDatetime)?></td>
-									<td style="text-align:center"><a id="revision<?php echo $oRevision->id?>" href="javascript:void(0);"><i class="fa-solid fa-eye gray"></i></a></td>
+									<td width="140px"><?php echo Core_Date::timestamp2string($iDatetime)?></td>
+									<td width="30px" style="text-align:center"><a id="revision<?php echo $oRevision->id?>" href="javascript:void(0);"><i class="fa-solid fa-eye gray"></i></a></td>
 									<td style="text-align:left"><?php echo $oRevision->User->getAvatarWithName()?></td>
 								</tr>
 								<?php

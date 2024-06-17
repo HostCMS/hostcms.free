@@ -80,8 +80,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Page extends Core_Servant_Properties
 {
@@ -659,7 +658,31 @@ class Core_Page extends Core_Servant_Properties
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeError404', $this);
 
-		$oCore_Response = $this->deleteChild()->response->status(404);
+		return $this->_errorNotFound(404);
+	}
+	
+	/**
+	 * Show 410 error
+	 * @return self
+	 * @hostcms-event Core_Page.onBeforeError410
+	 */
+	public function error410()
+	{
+		Core_Event::notify(get_class($this) . '.onBeforeError410', $this);
+
+		return $this->_errorNotFound(410);
+	}
+
+	/**
+	 * Show 404 error
+	 * @return self
+	 * @hostcms-event Core_Page.onBeforeError404
+	 */
+	protected function _errorNotFound($code)
+	{
+		$code = intval($code);
+
+		$oCore_Response = $this->deleteChild()->response->status($code);
 
 		$oSite = Core_Entity::factory('Site', CURRENT_SITE);
 
@@ -670,7 +693,7 @@ class Core_Page extends Core_Servant_Properties
 			// страница с 404 ошибкой не найдена
 			if (is_null($oStructure->id))
 			{
-				throw new Core_Exception('Structure 404 not found');
+				throw new Core_Exception("Structure {$code} Not Found");
 			}
 
 			$this->prepareByStructure($oStructure);
@@ -688,7 +711,7 @@ class Core_Page extends Core_Servant_Properties
 					. '<html>'
 					. '<head>'
 					. '<meta charset="utf-8">'
-					. '<title>404</title>'
+					. '<title>' . $code . '</title>'
 					. '<meta http-equiv="refresh" content="0; url=/">'
 					. '</head>'
 					. '</html>'

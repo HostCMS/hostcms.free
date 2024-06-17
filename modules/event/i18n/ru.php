@@ -5,8 +5,7 @@
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Дела',
@@ -115,6 +114,7 @@ return array(
 	'notificationDescriptionType7' => 'Группа дела изменена с "%s" на "%s"',
 	'notificationDescriptionType8' => 'Дело провалено',
 	'copy_success' => "Дело успешно скопировано!",
+	'delete_success' => 'Элемент удален!',
 	'undelete_success' => "Элемент восстановлен!",
 	'apply_success' => "Дело успешно изменено!",
 	'related_elements' => "Связанные элементы",
@@ -163,4 +163,17 @@ return array(
 	'event_files' => 'Файлы',
 	'guid' => 'GUID',
 	'last_modified' => 'Последнее изменение',
+
+	'event_calendar_caldav_id' => 'Календари',
+	'select_calendar' => 'Выберите каледарь',
+
+	'tags' => 'Метки (теги)',
+	'type_tag' => 'Введите тэг ...',
+
+	'without_deadline' => 'Без срока',
+	'add_checklist' => 'добавить чек-лист',
+	'remove_checklist' => 'удалить чек-лист',
+	'checklist_name' => 'Название чек-листа',
+	'checklist_item_name' => 'Название пункта',
+	'add_checklist_item' => 'Добавить пункт',
 );

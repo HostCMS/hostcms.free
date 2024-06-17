@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -28,7 +27,7 @@ $oShopDir = $oShop->Shop_Dir;
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create();
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title(Core::_('Shop_Warehouse_Convolution.title'));
@@ -39,7 +38,7 @@ ob_start();
 
 $oAdmin_View = Admin_View::create();
 $oAdmin_View
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->pageTitle(Core::_('Shop_Warehouse_Convolution.title'));
 
 $bStart = Core_Array::getRequest('_', FALSE) && $oAdmin_Form_Controller->getAction() == 'start';

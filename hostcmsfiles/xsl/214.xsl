@@ -14,7 +14,7 @@
 
 	<xsl:template match="shop">
 		<h1>&labelProducers;</h1>
-		
+
 		<xsl:if test="count(shop_producer) = 0">
 			<div id="error">&labelNone;</div>
 		</xsl:if>
@@ -26,7 +26,7 @@
 		</table>
 
 		<!-- Current page link -->
-		<xsl:variable name="link"><xsl:value-of select="/shop/url"/>producers/</xsl:variable>
+		<xsl:variable name="link"><xsl:value-of select="/shop/producer_url"/></xsl:variable>
 
 		<xsl:call-template name="for">
 			<xsl:with-param name="link" select="$link"/>
@@ -41,9 +41,9 @@
 	<xsl:template match="shop_producer">
 		<td width="33%" align="center" valign="top">
 			<xsl:if test="image_small != ''">
-				<p><a href="{/shop/url}producers/{path}/"><img src="{dir}{image_small}" class="image" /></a></p>
+				<p><a href="{url}"><img src="{dir}{image_small}" class="image" /></a></p>
 			</xsl:if>
-			<p><a href="{/shop/url}producers/{path}/"><xsl:value-of disable-output-escaping="no" select="name"/></a></p>
+			<p><a href="{url}"><xsl:value-of select="name"/></a></p>
 		</td>
 		<xsl:if test="position() mod 3 = 0 and position() != last()">
 			<xsl:text disable-output-escaping="yes">
@@ -110,10 +110,10 @@
 			<!-- Set $link variable -->
 			<xsl:variable name="number_link">
 				<xsl:choose>
-					
+
 					<xsl:when test="$i != 0">
-						<xsl:value-of select="$prefix"/>-<xsl:value-of select="$i + 1"/>/</xsl:when>
-					
+					<xsl:value-of select="$prefix"/>-<xsl:value-of select="$i + 1"/>/</xsl:when>
+
 					<xsl:otherwise></xsl:otherwise>
 				</xsl:choose>
 			</xsl:variable>
@@ -153,9 +153,9 @@
 			<xsl:if test="$page != 0 and $i = $page">
 				<xsl:variable name="prev_number_link">
 					<xsl:choose>
-						
+
 						<xsl:when test="$page &gt; 1">page-<xsl:value-of select="$i"/>/</xsl:when>
-						
+
 						<xsl:otherwise></xsl:otherwise>
 					</xsl:choose>
 				</xsl:variable>

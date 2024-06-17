@@ -126,23 +126,38 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 	 */
 	public function checkPaymentBeforeContent()
 	{
-		// для отличия от SuccessURL/FailURL
-		if (isset($_REQUEST['SignatureValue']) && !isset($_REQUEST['Culture']))
+		// Умедомления от Робокасса и возврат на сайт проверяем в checkPaymentBeforeContent() через POST, т.к. затем будет редирект уже с GET
+		if (isset($_POST['SignatureValue']))
 		{
-			// Получаем ID заказа
-			$order_id = intval(Core_Array::getRequest('InvId'));
-
-			$oShop_Order = Core_Entity::factory('Shop_Order')->find($order_id);
-
-			if (!is_null($oShop_Order->id))
+			// для отличия от SuccessURL/FailURL
+			if (!isset($_POST['Culture']))
 			{
-				// Вызов обработчика платежной системы
-				Shop_Payment_System_Handler::factory($oShop_Order->Shop_Payment_System)
-					->shopOrder($oShop_Order)
-					->paymentProcessing();
-			}
+				// Получаем ID заказа
+				$order_id = intval(Core_Array::getPost('InvId'));
 
-			exit();
+				$oShop_Order = Core_Entity::factory('Shop_Order')->find($order_id);
+
+				if (!is_null($oShop_Order->id))
+				{
+					// Вызов обработчика платежной системы
+					Shop_Payment_System_Handler::factory($oShop_Order->Shop_Payment_System)
+						->shopOrder($oShop_Order)
+						->paymentProcessing();
+				}
+
+				exit();
+			}
+			else
+			{
+				// PHPSESSID has Lax cookie, use a redirect that the browser passes PHPSESSID
+				$OutSum = Core_Array::getPost('OutSum', '', 'str');
+				$InvId = Core_Array::getPost('InvId', 0, 'int');
+				$SignatureValue = Core_Array::getPost('SignatureValue', '', 'str');
+				$Culture = Core_Array::getPost('Culture', '', 'str');
+
+				header('Location: ./?OutSum=' . htmlspecialchars($OutSum) . '&InvId=' . htmlspecialchars($InvId) . '&SignatureValue=' . htmlspecialchars($SignatureValue) . '&Culture=' . htmlspecialchars($Culture));
+				exit();
+			}
 		}
 	}
 
@@ -330,7 +345,7 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 		<h1>Оплата через систему ROBOKASSA</h1>
 
 		<div class="margin-bottom-10">
-			<a href="http://www.robokassa.ru/" target="_blank">
+			<a href="https://www.robokassa.ru/" target="_blank">
 				<svg version="1.1" id="Слой_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="-23 363.8 600 66" enable-background="new -23 363.8 600 66" xml:space="preserve" width="200">
 				<path fill="#0071CE" d="M29.6,386c0-13.1-6.6-21.9-19.8-21.9H-9.9c-13.1,0-13.1,7.5-13.1,13.1v52.5h13.1v-17.6H3.3l8.7,17.6h17.6
 					l-12.3-20.6C24.7,405.3,29.6,395.2,29.6,386z M-9.9,399.1v-21.9H9.8c1.8,0,6.6,2.6,6.6,8.7s-4.8,13.1-10.9,13.1H-9.9z"></path>

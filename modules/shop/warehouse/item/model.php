@@ -8,11 +8,16 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Warehouse_Item_Model extends Core_Entity
 {
+	/**
+	 * Callback property_id
+	 * @var int
+	 */
+	public $entries = 1;
+
 	/**
 	 * Disable markDeleted()
 	 * @var mixed
@@ -260,7 +265,9 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 			? Core_Entity::factory('Shop_Item', $this->Shop_Item->shortcut_id)
 			: $this->Shop_Item;
 
-		return htmlspecialchars($oShop_Item->Shop_Currency->sign);
+		return $oShop_Item->shop_currency_id
+			? htmlspecialchars((string) $oShop_Item->Shop_Currency->sign)
+			: '';
 	}
 
 	/**
@@ -285,7 +292,7 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 		$oShop_Item = $this->Shop_Item;
 
 		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')->value(
-			htmlspecialchars($oShop_Item->name)
+			htmlspecialchars((string) $oShop_Item->name)
 		);
 
 		$bRightTime = ($oShop_Item->start_datetime == '0000-00-00 00:00:00' || time() > Core_Date::sql2timestamp($oShop_Item->start_datetime))
@@ -391,13 +398,15 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	/*public function countBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function countBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		$this->count == '0.00' && Core_Html_Entity::factory('Span')
-			->class('badge badge-ico badge-darkorange white')
-			->value('<i class="fa fa-exclamation"></i>')
+		$reserved = $this->getReserved();
+		$reserved && Core_Html_Entity::factory('Span')
+			->class('badge badge-darkorange white')
+			->value('-' . $reserved)
+			->title(Core::_('Shop_Warehouse_Item.reserved'))
 			->execute();
-	}*/
+	}
 
 	/**
 	 * Backend callback method
@@ -406,14 +415,14 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 	public function countBackend()
 	{
 		$class = $this->count > 0
-			? 'green'
+			? 'success'
 			: 'darkorange';
 
 		$this->count == 0 && $class = '';
 
 		Core_Html_Entity::factory('Span')
 			->class($class)
-			->value($this->count)
+			->value(Core_Str::hideZeros($this->count))
 			->execute();
 	}
 

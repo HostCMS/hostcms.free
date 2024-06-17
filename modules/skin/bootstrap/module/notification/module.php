@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 {
@@ -121,7 +120,10 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 								'title' => strval($oNotification->title), // NULL => ''
 								'description' => strval($oNotification->description), // NULL => ''
 								'datetime' => Core_Date::sql2datetime($oNotification->datetime),
-								'read' => $oNotification->read
+								'read' => $oNotification->read,
+								'timeout' => '7000',
+								'ajaxUrl' => '',
+								'show' => 1,
 							);
 
 							$aNotificationDecorations = array();
@@ -131,7 +133,7 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 
 								if (!is_null($oCore_Module))
 								{
-									$aNotificationDecorations = $oCore_Module->getNotificationDesign($oNotification->type, $oNotification->entity_id);
+									$aNotificationDecorations = $oCore_Module->getNotificationDesignByNotification($oNotification);
 
 									$aNotification['href'] = Core_Array::get($aNotificationDecorations, 'href');
 									$aNotification['onclick'] = "$(this).parents('li.open').click(); " . Core_Array::get($aNotificationDecorations, 'onclick');
@@ -139,6 +141,9 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 									$aNotification['notification'] = Core_Array::get($aNotificationDecorations, 'notification');
 									$aNotification['extra'] = Core_Array::get($aNotificationDecorations, 'extra');
 									$aNotification['site'] = Core_Array::get($aNotificationDecorations, 'site');
+									$aNotification['timeout'] = Core_Array::get($aNotificationDecorations, 'timeout', $aNotification['timeout']);
+									$aNotification['ajaxUrl'] = Core_Array::get($aNotificationDecorations, 'ajaxUrl');
+									$aNotification['show'] = Core_Array::get($aNotificationDecorations, 'show', $aNotification['show']);
 								}
 							}
 

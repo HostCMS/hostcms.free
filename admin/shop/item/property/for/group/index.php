@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../../../../bootstrap.php');
 
@@ -28,7 +27,7 @@ $title = Core::_('Shop_Item.properties_item_for_groups_root_title', $shop_group_
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title($title)
@@ -243,7 +242,6 @@ $oAdmin_Form_Dataset->addCondition(
 			array('AND' => array('shop_item_property_for_groups.shop_id ', '=', $shop_id)),
 			array('AND' => array('shop_item_property_for_groups.shop_group_id', '=', $shop_group_id))
 		)
-
 	))
 )
 ->addCondition(

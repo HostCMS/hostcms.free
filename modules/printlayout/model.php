@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Printlayout
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Printlayout_Model extends Core_Entity
 {
@@ -277,13 +276,13 @@ class Printlayout_Model extends Core_Entity
 		switch ($ext)
 		{
 			case 'docx':
-				$img = '<i class="fa fa-file-word-o"></i>';
+				$img = '<i class="fa-regular fa-file-word"></i>';
 			break;
 			case 'xlsx':
-				$img = '<i class="fa fa-file-excel-o"></i>';
+				$img = '<i class="fa-regular fa-file-excel"></i>';
 			break;
 			default:
-				$img = '<i class="fa fa-file-o"></i>';
+				$img = '<i class="fa-regular fa-file"></i>';
 		}
 
 		return $img;

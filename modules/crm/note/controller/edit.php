@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Crm_Note_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -51,12 +50,12 @@ class Crm_Note_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class(''))
+			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row mr2'))
+			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 			;
 
 		$this->getField('text')
-			->rows(5)
+			->rows(10)
 			->wysiwyg(Core::moduleIsActive('wysiwyg'))
 			->wysiwygOptions(array(
 				'menubar' => 'false',
@@ -81,11 +80,11 @@ class Crm_Note_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$oFile = Admin_Form_Entity::factory('File')
 				->controller($this->_Admin_Form_Controller)
 				->type('file')
-				->caption(Core::_('Deal.attachment'))
+				->caption(Core::_('Crm_Note.file'))
 				->name("file_{$oCrm_Note_Attachment->id}")
 				->largeImage(
 					array(
-						'path' => '/admin/crm/note/index.php?preview&' . $relatedId . '=' . $this->_relatedObject->id . '&crm_note_attachment_id=' . $oCrm_Note_Attachment->id,
+						'path' => '/admin/crm/note/index.php?' . $relatedId . '=' . $this->_relatedObject->id . '&crm_note_attachment_id=' . $oCrm_Note_Attachment->id,
 						'show_params' => FALSE,
 						'originalName' => $oCrm_Note_Attachment->file_name,
 						'delete_onclick' => "$.adminLoad({path: '/admin/event/note/index.php', additionalParams: 'hostcms[checked][0][{$this->_object->id}]=1&{$relatedId}={$this->_relatedObject->id}', operation: '{$oCrm_Note_Attachment->id}', action: 'deleteFile', windowId: '{$windowId}'}); return false",
@@ -95,22 +94,16 @@ class Crm_Note_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->smallImage(
 					array('show' => FALSE)
 				)
-				->divAttr(array('id' => "file_{$oCrm_Note_Attachment->id}", 'class' => 'input-group col-xs-12'));
+				->divAttr(array('id' => "file_{$oCrm_Note_Attachment->id}", 'class' => 'col-xs-12'));
 
 			$oMainRow2->add($oFile);
 		}
 
-		$oAdmin_Form_Entity_Code = Admin_Form_Entity::factory('Code');
-		$oAdmin_Form_Entity_Code->html('<div class="input-group-addon no-padding add-remove-property"><div class="no-padding-left col-lg-12"><div class="btn btn-palegreen" onclick="$.cloneFile(\'' . $windowId .'\'); event.stopPropagation();"><i class="fa fa-plus-circle close"></i></div>
-			<div class="btn btn-darkorange" onclick="$(this).parents(\'#file\').remove(); event.stopPropagation();"><i class="fa fa-minus-circle close"></i></div>
-			</div>
-			</div>');
-
-		$oFileNew = Admin_Form_Entity::factory('File')
+		$oAdmin_Form_Entity = Admin_Form_Entity::factory('File')
 			->controller($this->_Admin_Form_Controller)
 			->type('file')
 			->name("file[]")
-			->caption(Core::_('Deal.attachment'))
+			->caption(Core::_('Crm_Note.file'))
 			->largeImage(
 				array(
 					'show_params' => FALSE,
@@ -120,10 +113,22 @@ class Crm_Note_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->smallImage(
 				array('show' => FALSE)
 			)
-			->divAttr(array('id' => 'file', 'class' => 'row col-xs-12 add-deal-attachment '))
-			->add($oAdmin_Form_Entity_Code);
+			->divAttr(array('class' => 'form-group col-xs-12'));
 
-		$oMainRow3->add($oFileNew);
+		$oMainRow3->add(
+			Admin_Form_Entity::factory('Div')
+				->class('input-group')
+				->id('file')
+				->add($oAdmin_Form_Entity)
+				->add(
+					Admin_Form_Entity::factory('Code')->html('<div class="input-group-addon add-remove-property">
+					<div class="no-padding-left col-lg-12">
+					<div class="btn btn-palegreen" onclick="$.cloneFile(\'' . $windowId .'\'); event.stopPropagation();"><i class="fa fa-plus-circle close"></i></div>
+					<div class="btn btn-darkorange" onclick="$(this).parents(\'#file\').remove(); event.stopPropagation();"><i class="fa fa-minus-circle close"></i></div>
+					</div>
+					</div>')
+				)
+		);
 
 		return $this;
 	}

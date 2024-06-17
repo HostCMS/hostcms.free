@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core
 {
@@ -188,7 +187,8 @@ class Core
 			'datePickerFormat' => 'DD.MM.YYYY',
 			'dateTimePickerFormat' => 'DD.MM.YYYY HH:mm:ss',
 			'timePickerFormat' => 'HH:mm:ss',
-			'availableExtension' => array ('JPG', 'JPEG', 'GIF', 'PNG', 'WEBP', 'PDF', 'ZIP', 'DOC', 'DOCX', 'XLS', 'XLSX'),
+			'availableExtension' => array('JPG', 'JPEG', 'JFIF', 'GIF', 'PNG', 'WEBP', 'AVIF', 'SVG', 'PDF', 'ZIP', 'GZ', 'DOC', 'DOCX', 'XLS', 'XLSX', 'TXT'),
+			'availableGetVariables' => array('_openstat', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid', 'yclid', 'ymclid', 'ysclid', 'yadclid', 'fbclid', 'yadordid', 'from', 'etext'),
 			'defaultCache' => 'file',
 			'timezone' => 'America/Los_Angeles',
 			'translate' => TRUE,
@@ -198,11 +198,14 @@ class Core
 			'cms_folders' => NULL,
 			'dirMode' => 0755,
 			'fileMode' => 0644,
+			'dropzoneMaxFilesize' => 25,
 			'errorDocument503' => 'hostcmsfiles/503.htm',
+			'httpCodeNotFound' => 404,
 			'compressionJsDirectory' => 'hostcmsfiles/js/',
 			'compressionCssDirectory' => 'hostcmsfiles/css/',
 			'sitemapDirectory' => 'hostcmsfiles/sitemap/',
 			'banAfterFailedAccessAttempts' => 5,
+			'csrf_lifetime' => 86400,
 			'session' => array(
 				'driver' => 'database',
 				'class' => 'Core_Session_Database',
@@ -210,11 +213,30 @@ class Core
 			),
 			'headers' => array(
 				'X-Content-Type-Options' => 'nosniff',
-				'X-XSS-Protection' => '1;mode=block',
+				'X-XSS-Protection' => '1;mode=block'
 			),
 			'backendSessionLifetime' => 14400,
 			'backendContentSecurityPolicy' => "default-src 'self' www.hostcms.ru www.youtube.com youtube.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: *.cloudflare.com *.kaspersky-labs.com; img-src 'self' chart.googleapis.com data: blob: www.hostcms.ru; font-src 'self'; connect-src 'self' blob:; style-src 'self' 'unsafe-inline'"
 		);
+	}
+	
+	static public function addContentSecurityPolicy($directive, $value)
+	{
+		$aDirectives = array();
+		$aTmp = explode(';', self::$mainConfig['backendContentSecurityPolicy']);
+		$aTmp = array_map('trim', $aTmp);
+		foreach ($aTmp as $sTmp)
+		{
+			//$aExp = explode(' ', $sTmp, 2);
+			
+			if (strpos($sTmp, $directive) === 0)
+			{
+				$sTmp .= ' ' . $value;
+			}
+			$aDirectives[] = $sTmp;
+		}
+		
+		self::$mainConfig['backendContentSecurityPolicy'] = implode('; ', $aDirectives);
 	}
 
 	/**
@@ -853,7 +875,8 @@ class Core
 			// Decode parts of URL
 			foreach (self::$url as $key => $value)
 			{
-				$value = urldecode($value);
+				// mod_rewrite has to unescape URLs before mapping them, so backreferences will be unescaped at the time they are applied.
+				$value = rawurldecode($value);
 
 				// В перечень не включаем ASCII, т.к. тогда просто англ. текст будет определятся как ASCII
 				if (strtoupper(mb_detect_encoding($value, 'UTF-8', TRUE)) != 'UTF-8')
@@ -974,7 +997,7 @@ class Core
 
 		// bug in Chrome
 		//header("Content-Length: " . strlen($content));
-		echo json_encode($content);
+		echo json_encode($content, defined('JSON_UNESCAPED_UNICODE') ? JSON_UNESCAPED_UNICODE : 0);
 
 		exit();
 	}
@@ -1022,14 +1045,15 @@ class Core
 	*/
 	static public function checkBot($agent)
 	{
+		// gptbot|LetsearchBot|LightspeedSystemsCrawler|
 		return is_string($agent)
-			? (bool) preg_match('/http|bot|spide|craw|finder|curl|mail|yandex|rambler|seach|seek|site|sogou|yahoo|msnbot|snoopy|google|bing/iu', $agent)
+			? (bool) preg_match('/http|bot|spide|craw|finder|curl|mail|yandex|rambler|seach|seek|site|sogou|yahoo|msnbot|snoopy|google|bing|feedreader|links|megaindex|simplepie|siteimprove/iu', $agent)
 			: FALSE;
 	}
 
 	/**
 	 * Get callable name
-	 * @param callable $callable
+	 * @param callable|object $callable
 	 * @return string
 	 */
 	static public function getCallableName($callable)

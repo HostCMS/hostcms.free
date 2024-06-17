@@ -4,9 +4,8 @@
  *
  * @package HostCMS
  * @subpackage Module
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @version 7.x
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Modules',
@@ -45,4 +44,5 @@ return array(
 	'modules_active_unset' => 'Module "%s" deactivated',
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
+	'add_error' => 'A module with this path already exists!',
 );

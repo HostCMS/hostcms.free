@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -163,6 +162,7 @@ class Admin_Form_Action_Controller_Edit extends Admin_Form_Action_Controller_Typ
 				$oMainTab->move($this->getField('single'), $oMainRow3);
 				$oMainTab->move($this->getField('group'), $oMainRow4);
 				$oMainTab->move($this->getField('modal'), $oMainRow5);
+				$oMainTab->move($this->getField('new_window'), $oMainRow5);
 
 
 				$this->getField('sorting')
@@ -200,6 +200,23 @@ class Admin_Form_Action_Controller_Edit extends Admin_Form_Action_Controller_Typ
 				);
 			break;
 			case 'admin_form_action_dir':
+				$this->getField('icon')
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
+
+				$this->getField('color')
+					->class('form-control input-lg')
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
+
+				$oMainTab
+					->move($this->getField('icon'), $oMainRow1)
+					->move($this->getField('color'), $oMainRow1);
+
+				$this->getField('sorting')
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
+
+				$oMainTab
+					->move($this->getField('sorting'), $oMainRow2);
+
 				$this->title(is_null($this->_object->id)
 					? Core::_('Admin_Form_Action_Dir.form_add_forms_event_title')
 					: Core::_('Admin_Form_Action_Dir.form_edit_forms_event_title', $form_name, FALSE)

@@ -20,7 +20,6 @@ return array(
 	'smtp' => 'SMTP-сервер',
 	'pop3' => 'POP3-сервер',
 	'imap' => 'IMAP-сервер',
-	'ssl' => 'Використовувати захищений протокол SSL/TSL',
 	'delete_messages' => 'Видаляти листи з сервера',
 	'sorting' => 'Порядок сортування',
 	'active' => 'Активний',
@@ -33,4 +32,7 @@ return array(
 	'process_mails' => 'Обробити листи за',
 	'days' => 'днів',
 	'password' => 'Пароль',
+	'encryption' => 'Шифрування',
+	'cert_validation' => 'Валідація сертифіката',
+	'folders' => 'Папки',
 );

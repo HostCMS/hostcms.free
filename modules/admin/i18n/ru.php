@@ -7,8 +7,8 @@ return array(
 	'authorization_form_ip' => 'Привязать сессию к IP-адресу',
 	'authorization_form_button' => 'Войти',
 	'themes' => 'Темы',
-	'authorization_error_valid_user' => 'Ошибка! Неверные данные!<br />Ваш IP-адрес <b>%s</b>, администратор уведомлен о событии.',
-	'authorization_error_access_temporarily_unavailable' => 'Доступ временно запрещен. Вы можете попробовать ввести пароль через %s сек.',
+	'authorization_error_valid_user' => "Ошибка! Неверные данные, логин <b>%s</b>!<br />Ваш IP-адрес <b>%s</b>, администратор уведомлен о событии.",
+	'authorization_error_access_temporarily_unavailable' => 'Доступ временно запрещен, логин %s. Вы можете попробовать ввести пароль через %d сек.',
 	'authorization_title' => 'Вход в центр администрирования HostCMS',
 	'authorization_notice' => '* Для входа в центр администрирования в браузере должно быть разрешено использование Cookies.',
 	'authorization_notice2' => '** Привязка сессии к IP-адресу уменьшает риск несанкционированного доступа к центру администрирования.',
@@ -107,4 +107,11 @@ return array(
 	'no_title' => '<Без названия>',
 
 	'root' => "Корень",
+
+	'autocomplete_placeholder' => "Начните вводить…",
+	'time' => 'раз',
+	'day' => 'день',
+	'days' => '%d дней',
+	'hour' => 'час',
+	'hours' => '%d часов',
 );

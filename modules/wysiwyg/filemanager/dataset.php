@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Wysiwyg
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 {
@@ -152,6 +151,7 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 							$Wysiwyg_Filemanager_File->setSortField($sortField);
 							$Wysiwyg_Filemanager_File->path = $this->_path;
 							$Wysiwyg_Filemanager_File->name = @iconv(mb_detect_encoding($file, mb_detect_order(), TRUE), "UTF-8", $file);
+							$Wysiwyg_Filemanager_File->nameEncoded = rawurlencode($Wysiwyg_Filemanager_File->name);
 							$Wysiwyg_Filemanager_File->datetime = Core_Date::timestamp2sql($stat[9]);
 							$Wysiwyg_Filemanager_File->type = $filetype;
 							$Wysiwyg_Filemanager_File->size = $filetype == 'dir'

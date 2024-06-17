@@ -17,6 +17,14 @@ return array(
 	'group_sorting' => 'Порядок сортування розділу',
 	'group_active' => 'Активність групи',
 
+	'group_seo_group_title_template' => 'Шаблон title групи',
+	'group_seo_group_description_template' => 'Шаблон description групи',
+	'group_seo_group_keywords_template' => 'Шаблон keywords групи',
+
+	'group_seo_item_title_template' => 'Шаблон title елемента',
+	'group_seo_item_description_template' => 'Шаблон description елемента',
+	'group_seo_item_keywords_template' => 'Шаблон keywords елемента',
+
 	'item_id' => 'Ідентифікатор елемента',
 	'item_guid' => 'GUID ідентифікатор елемента',
 	'item_path' => 'Шлях до елементу',

@@ -63,7 +63,7 @@ return array(
 	'error_log_module_access_allowed' => "Access allowed to module \"%s\"",
 	'error_log_action_access_allowed' => "Action \"%s\" of form \"%s\"",
 	'error_log_logged' => "User was logged on",
-	'error_log_authorization_error' => 'Incorrect authentication data',
+	'error_log_authorization_error' => "Incorrect authentication data, login '%s'",
 	'error_log_exit' => 'Logout',
 	'session_destroy_error' => 'Error session closing',
 	'session_change_ip' => 'Trying to use session %s with IP %s',
@@ -103,7 +103,7 @@ return array(
 	'deleteNote' => 'Delete note',
 
 	'key_not_found' => 'License Key Not Found!',
-	'getting_key' => '<div style="margin-top: 20px; overflow: auto; z-index: 9999; background-color: rgba(255, 255, 255, .8); padding: 0 20px; text-shadow: 1px 1px 0 rgba(255, 255, 255, .4)">
+	'getting_key' => '<div style="width: 100%; margin-top: 20px; overflow: auto; z-index: 9999; background-color: rgba(255, 255, 255, .8); padding: 0 20px; text-shadow: 1px 1px 0 rgba(255, 255, 255, .4)">
 	<h2>Getting key</h2>
 
 	<p>After installing you should register new user on our site or use exist username and password to access your «<a href="https://www.hostcms.ru/users/" target="_blank">Personal account</a>»</p>
@@ -230,7 +230,7 @@ return array(
 	'missing_template_for_page' => 'Missing template for page!',
 	'change template instruction' => 'You need to change main page in <b>"Backend" → "Structure" → "Structure"</b>',
 	'hosting_mismatch_system_requirements' => 'Hosting mismatch with the system requirements!',
-	'requires_php5' => 'You need PHP 5 or PHP 7 with installed <a href="https://www.hostcms.ru/documentation/server/ibxslt/" target="_blank">Libxslt</a> for work.',
+	'requires_php5' => 'You need PHP 5 or PHP 7/8 with installed <a href="https://www.hostcms.ru/documentation/server/ibxslt/" target="_blank">Libxslt</a> for work.',
 	'list_tested_hosting' => 'Our website contains <a href="https://www.hostcms.ru/hosting/" target="_blank">list of tested hosting</a> suitable for HostCMS.',
 
 	'show_title' => 'Show',
@@ -243,4 +243,9 @@ return array(
 	'unpack_error_creating_dir' => 'Error creating directory for %s',
 	'unpack_error_opening_binary_mode' => 'Error opening file %s in binary mode',
 	'unpack_file_incorrect_size' => 'Extracted file %s has incorrect size %d, expected %d. The archive may be corrupted.',
+
+	'error_log_backend_blocked_ip' => "Access to the admin center is blocked, IP '%s'",
+	'error_log_backend_blocked_useragent' => "Access to the admin center is blocked, IP '%s', User Agent '%s'",
+	'csrf_wrong_token' => 'Invalid CSRF token, please update the form!',
+	'csrf_token_timeout' => 'CSRF token has expired, please refresh the form!',
 );

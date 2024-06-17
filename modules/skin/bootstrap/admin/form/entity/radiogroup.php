@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Radiogroup extends Skin_Default_Admin_Form_Entity_Radiogroup
 {
@@ -30,9 +29,13 @@ class Skin_Bootstrap_Admin_Form_Entity_Radiogroup extends Skin_Default_Admin_For
 
 	/**
 	 * Executes the business logic.
+	 * @hostcms-event Skin_Bootstrap_Admin_Form_Entity_Radiogroup.onBeforeExecute
+	 * @hostcms-event Skin_Bootstrap_Admin_Form_Entity_Radiogroup.onAfterExecute
 	 */
 	public function execute()
 	{
+		Core_Event::notify(get_class($this) . '.onBeforeExecute', $this);
+
 		$aAttr = $this->getAttrsString();
 
 		$aDivAttr = array();
@@ -79,7 +82,10 @@ class Skin_Bootstrap_Admin_Form_Entity_Radiogroup extends Skin_Default_Admin_For
 			// ico к пункту
 			if (isset($this->ico[$key]))
 			{
-				?><i class="btn-label fa <?php echo htmlspecialchars((string) $this->ico[$key])?>"></i><?php
+				$ico = strpos($this->ico[$key], ' ') === FALSE
+					? 'fa ' . $this->ico[$key]
+					: $this->ico[$key];
+				?><i class="btn-label <?php echo htmlspecialchars((string) $ico)?>"></i><?php
 			}
 			echo $value;
 			?></span>
@@ -87,6 +93,14 @@ class Skin_Bootstrap_Admin_Form_Entity_Radiogroup extends Skin_Default_Admin_For
 			<?php
 		}
 
+		if (count($this->_children))
+		{
+			// Могут быть дочерние элементы элементы
+			$this->executeChildren();
+		}
+
 		?></div></div><?php
+
+		Core_Event::notify(get_class($this) . '.onAfterExecute', $this);
 	}
 }

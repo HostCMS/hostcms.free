@@ -3,9 +3,8 @@
  * Administration center users.
  *
  * @package HostCMS
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @version 7.x
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../../../bootstrap.php');
 
@@ -44,7 +43,7 @@ $oAdmin_Word_Value = Core_Entity::factory('Admin_Form', $admin_form_id)
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title(Core::_('Company_Department_Action_Access.ua_show_user_form_events_access_title', $oAdmin_Word_Value->name, $oCompany_Department->name))

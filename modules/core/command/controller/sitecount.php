@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Command
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Command_Controller_Sitecount extends Core_Command_Controller
 {
@@ -44,11 +43,12 @@ class Core_Command_Controller_Sitecount extends Core_Command_Controller
 
 		Core_Html_Entity::factory('Div')
 			->class('indexMessage')
-			->add(Core_Html_Entity::factory('H1')->value($title))
-			->add(Core_Html_Entity::factory('P')->value(Core::_('Core.message_limit_available_sites_exceeded')
-			))
-			->add(Core_Html_Entity::factory('P')->value(Core::_('Core.message_remove_unnecessary_sites')
-			))
+			->add(
+				Core_Html_Entity::factory('Div')
+					->add(Core_Html_Entity::factory('H1')->value($title))
+					->add(Core_Html_Entity::factory('P')->value(Core::_('Core.message_limit_available_sites_exceeded')))
+					->add(Core_Html_Entity::factory('P')->value(Core::_('Core.message_remove_unnecessary_sites')))
+			)
 			->execute();
 
 		$oSkin->footer();

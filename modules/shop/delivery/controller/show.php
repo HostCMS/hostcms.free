@@ -19,8 +19,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Delivery_Controller_Show extends Core_Controller
 {
@@ -100,6 +99,7 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 
 		$this->_Shop_Deliveries
 			->queryBuilder()
+			->select('shop_deliveries.*')
 			->where('shop_deliveries.active', '=', 1);
 
 		return $this;
@@ -140,6 +140,26 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 
 		Core_Session::start();
 
+		$aSiteuser_Group_IDs = array(0);
+
+		if (Core::moduleIsActive('siteuser'))
+		{
+			$oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
+			if ($oSiteuser)
+			{
+				$aSiteuser_Groups = $oSiteuser->Siteuser_Groups->findAll();
+				foreach ($aSiteuser_Groups as $oSiteuser_Group)
+				{
+					$aSiteuser_Group_IDs[] = $oSiteuser_Group->id;
+				}
+			}
+		}
+
+		$this->_Shop_Deliveries
+			->queryBuilder()
+			->join('shop_delivery_siteuser_groups', 'shop_delivery_siteuser_groups.shop_delivery_id', '=', 'shop_deliveries.id')
+			->where('shop_delivery_siteuser_groups.siteuser_group_id', 'IN', $aSiteuser_Group_IDs);
+
 		// Выбираем все типы доставки для данного магазина
 		$aShop_Deliveries = $this->_Shop_Deliveries->findAll();
 
@@ -178,8 +198,6 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 								->name('description')
 								->value($object->description)
 						);
-
-
 
 					// Replace $oShop_Delivery_Condition
 					$aShop_Delivery_Conditions[$key] = $oShop_Delivery_Condition;

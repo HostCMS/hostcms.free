@@ -8,9 +8,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @version 7.x
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Controller_Load_Select_Options extends Admin_Form_Action_Controller_Type_Load_Select_Options
 {
@@ -50,6 +49,11 @@ class Shop_Controller_Load_Select_Options extends Admin_Form_Action_Controller_T
 			$oTmp->value = $Object->id;
 			$oTmp->name = self::getOptionName(!$Object->shortcut_id ? $Object : $Object->Shop_Item);
 
+			if (!$Object->active)
+			{
+				$oTmp->attr = array('class' => 'darkgray line-through');
+			}
+
 			$this->_values[] = $oTmp;
 
 			// Shop Item's modifications
@@ -61,7 +65,7 @@ class Shop_Controller_Load_Select_Options extends Admin_Form_Action_Controller_T
 					->queryBuilder()
 					->clearOrderBy()
 					->clearSelect()
-					->select('id', 'shortcut_id', 'modification_id', 'name', 'marking');
+					->select('id', 'shortcut_id', 'modification_id', 'name', 'marking', 'active');
 
 				$aModifications = $oModifications->findAll(FALSE);
 
@@ -70,6 +74,12 @@ class Shop_Controller_Load_Select_Options extends Admin_Form_Action_Controller_T
 					$oTmp = new stdClass();
 					$oTmp->value = $oModification->id;
 					$oTmp->name = self::getOptionName($oModification);
+
+					if (!$oModification->active)
+					{
+						$oTmp->attr = array('class' => 'darkgray line-through');
+					}
+
 					$this->_values[] = $oTmp;
 				}
 			}

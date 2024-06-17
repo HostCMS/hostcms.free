@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Database
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 abstract class Core_DataBase
 {
@@ -134,6 +133,15 @@ abstract class Core_DataBase
 	abstract protected function _fetch($result, $bCache = TRUE);
 
 	/**
+	 * Is database connected
+	 * @return boolean
+	 */
+	public function isConnected()
+	{
+		return !is_null($this->_connection);
+	}
+
+	/**
 	 * Get list of columns in the table
 	 *
 	 * @param string $tableName Table name
@@ -145,7 +153,7 @@ abstract class Core_DataBase
 	{
 		$this->connect();
 
-		$query = "SHOW COLUMNS FROM " . $this->quoteColumnName($tableName);
+		$query = "SHOW COLUMNS FROM " . $this->quoteTableName($tableName);
 
 		if (!is_null($selectionCondition))
 		{
@@ -188,7 +196,7 @@ abstract class Core_DataBase
 	{
 		$this->connect();
 
-		$query = "SHOW FULL COLUMNS FROM " . $this->quoteColumnName($tableName);
+		$query = "SHOW FULL COLUMNS FROM " . $this->quoteTableName($tableName);
 
 		if (!is_null($selectionCondition))
 		{
@@ -211,7 +219,7 @@ abstract class Core_DataBase
 	{
 		$this->connect();
 
-		$query = "SHOW INDEXES FROM " . $this->quoteColumnName($tableName);
+		$query = "SHOW INDEXES FROM " . $this->quoteTableName($tableName);
 
 		if (!is_null($selectionCondition))
 		{
@@ -224,6 +232,35 @@ abstract class Core_DataBase
 		foreach ($result as $row)
 		{
 			$return[$row['Key_name']][] = $row;
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Get variables
+	 *
+	 * @param mixed $selectionCondition Selection condition
+	 * @return array
+	 */
+	public function getVariables($selectionCondition = NULL)
+	{
+		$this->connect();
+
+		$query = "SHOW VARIABLES";
+
+		if (!is_null($selectionCondition))
+		{
+			$query .= ' LIKE ' . $this->quote($selectionCondition);
+		}
+
+		// free in the result
+		$result = $this->query($query)->asAssoc()->result();
+
+		$return = array();
+		foreach ($result as $row)
+		{
+			$return[] = array('name' => $row['Variable_name'], 'value' => $row['Value']);
 		}
 
 		return $return;
@@ -314,19 +351,19 @@ abstract class Core_DataBase
 
 	/**
 	 * Get the ID generated in the last query
-	 * @return integer|null
+	 * @return int|null
 	 */
 	abstract public function getInsertId();
 
 	/**
 	 * Get number of affected rows in previous MySQL operation
-	 * @return integer|null number of affected rows or NULL
+	 * @return int|null number of affected rows or NULL
 	 */
 	abstract public function getAffectedRows();
 
 	/**
 	 * Returns the number of columns in the result set
-	 * @return integer|null number of columns in the result set
+	 * @return int|null number of columns in the result set
 	 */
 	abstract public function getColumnCount();
 
@@ -413,7 +450,7 @@ abstract class Core_DataBase
 	/**
 	 * Get type of query
 	 *
-	 * @return integer
+	 * @return int
 	 */
 	public function getQueryType()
 	{
@@ -592,7 +629,37 @@ abstract class Core_DataBase
 	}
 
 	/**
-	 * Create table $tableName dump
+	 * Dump structure of table $tableName
+	 * @param string $tableName
+	 * @param Core_Out $stdOut
+	 * return Core_DataBase
+	 */
+	public function dumpStructure($tableName, Core_Out $stdOut)
+	{
+		$sQuoted = $this->quote($tableName);
+		$quotedTableName = $this->quoteTableName($tableName);
+
+		$stdOut->write(
+			"\r\n\r\n" .
+			"-- \r\n" .
+			"-- Structure for table " . $sQuoted . " \r\n" .
+			"-- \r\n\r\n" .
+			"DROP TABLE IF EXISTS " . $quotedTableName . ";\r\n"
+		);
+
+		$aCreate = $this->query("SHOW CREATE TABLE {$quotedTableName}")->asAssoc()->current();
+
+		$this->free();
+
+		$stdOut->write(
+			"{$aCreate['Create Table']};\r\n\r\n"
+		);
+
+		return $this;
+	}
+
+	/**
+	 * Dump table $tableName
 	 * @param string $tableName
 	 * @param Core_Out $stdOut
 	 * return Core_DataBase
@@ -600,22 +667,24 @@ abstract class Core_DataBase
 	public function dump($tableName, Core_Out $stdOut)
 	{
 		$sQuoted = $this->quote($tableName);
-		$sColumnName = $this->quoteColumnName($tableName);
+		$quotedTableName = $this->quoteTableName($tableName);
 
-		$stdOut->write(
+		$this->dumpStructure($tableName, $stdOut);
+
+		/*$stdOut->write(
 			"\r\n\r\n" .
 			"-- \r\n" .
 			"-- Structure for table " . $sQuoted . " \r\n" .
 			"-- \r\n\r\n" .
-			"DROP TABLE IF EXISTS " . $sColumnName . ";\r\n"
+			"DROP TABLE IF EXISTS " . $quotedTableName . ";\r\n"
 		);
 
-		$aCreate = $this->query("SHOW CREATE TABLE {$sColumnName}")->asAssoc()->current();
+		$aCreate = $this->query("SHOW CREATE TABLE {$quotedTableName}")->asAssoc()->current();
 
-		$this->free();
+		$this->free();*/
 
 		$stdOut->write(
-			"{$aCreate['Create Table']};\r\n\r\n" .
+			//"{$aCreate['Create Table']};\r\n\r\n" .
 			"-- \r\n" .
 			"-- Data for table {$sQuoted} \r\n" .
 			"-- \r\n\r\n"
@@ -627,7 +696,7 @@ abstract class Core_DataBase
 			->execute()
 			->asAssoc();
 
-		$sInsertInto = "INSERT INTO {$sColumnName} VALUES ";
+		$sInsertInto = "INSERT INTO {$quotedTableName} VALUES ";
 		$search = array("'", "\\", "\x00", "\x0a", "\x0d", "\x1a");
 		$replace = array("''", "\\\\", '\0', '\n', '\r', '\Z');
 
@@ -637,7 +706,7 @@ abstract class Core_DataBase
 		{
 			if ($i == 0)
 			{
-				$content .= "LOCK TABLES {$sColumnName} WRITE; \r\n" .
+				$content .= "LOCK TABLES {$quotedTableName} WRITE; \r\n" .
 					$sInsertInto;
 			}
 			else

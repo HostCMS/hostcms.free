@@ -5,8 +5,7 @@
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Склады',
@@ -41,7 +40,8 @@ return array(
 	'phone' => 'Телефон',
 	'website' => 'Сайт',
 	'working_time' => 'Часы работы',
-	'shop_items_count' => 'Общее количество товаров на складе (ед.)',
+	'shop_items_count' => 'Общее количество единиц на складе',
+	'shop_items_total_count' => 'Общее количество наименований на складе',
 	'inventory' => 'Инвентаризация',
 	'incoming' => 'Оприходование',
 	'writeoff' => 'Списание',
@@ -60,4 +60,5 @@ return array(
 	'convolution' => 'Свёртка базы',
 	'tags' => 'Метки',
 	'type_tag' => 'Укажите метки',
+	'entries' => 'Проводки',
 );

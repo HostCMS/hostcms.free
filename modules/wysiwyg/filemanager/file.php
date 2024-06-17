@@ -8,10 +8,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Wysiwyg
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
-class Wysiwyg_Filemanager_File extends Core_Entity
+class Wysiwyg_Filemanager_File extends Core_Empty_Entity
 {
 	/**
 	 * Model name
@@ -30,6 +29,12 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 	 * @var string
 	 */
 	public $name = NULL;
+
+	/**
+	 * Backend property
+	 * @var string
+	 */
+	public $nameEncoded = NULL;
 
 	/**
 	 * Backend property
@@ -78,15 +83,6 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 	 * @var int
 	 */
 	public $download = 0;
-
-	/**
-	 * Load columns list
-	 * @return self
-	 */
-	protected function _loadColumns()
-	{
-		return $this;
-	}
 
 	/**
 	 * Set preload values from _preloadValues
@@ -213,7 +209,7 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 	public function getTableColumns()
 	{
 		return array_flip(
-			array('hash', 'name', 'type', 'datetime', 'size', 'mode', 'owner', 'user_id')
+			array('hash', 'name', 'nameEncoded', 'type', 'datetime', 'size', 'mode', 'owner', 'user_id')
 		);
 	}
 
@@ -347,7 +343,7 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 							//$ext = Core_File::getExtension($this->name);
 							if ($iImagetype == IMAGETYPE_JPEG)
 							{
-								$sourceResource = imagecreatefromjpeg($filePath);
+								$sourceResource = @imagecreatefromjpeg($filePath);
 
 								if ($sourceResource)
 								{
@@ -363,7 +359,7 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 							}
 							elseif ($iImagetype == IMAGETYPE_PNG)
 							{
-								$sourceResource = imagecreatefrompng($filePath);
+								$sourceResource = @imagecreatefrompng($filePath);
 
 								if ($sourceResource)
 								{
@@ -381,11 +377,11 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 							}
 							elseif ($iImagetype == IMAGETYPE_GIF)
 							{
-								$sourceResource = imagecreatefromgif ($filePath);
+								$sourceResource = @imagecreatefromgif ($filePath);
 
 								if ($sourceResource)
 								{
-									Core_Image_Gd::setTransparency($targetResourceStep1, $sourceResource);
+									Core_Image::instance('gd')->setTransparency($targetResourceStep1, $sourceResource);
 
 									imagecopyresampled($targetResourceStep1, $sourceResource, 0, 0, 0, 0, $destX, $destY, $sourceX, $sourceY);
 

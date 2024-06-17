@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 {
@@ -172,12 +171,14 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 
 							foreach ($aComments as $oComment)
 							{
+								$csrf = Core_Security::getCsrfToken();
+
 								$sEditHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sInformationsystemCommentsHref, 'edit', NULL, 0, $oComment->id);
 								$sEditOnClick = $oComments_Admin_Form_Controller->getAdminActionLoadAjax($sInformationsystemCommentsHref, 'edit', NULL, 0, $oComment->id);
 
 								$sChangeActiveHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sInformationsystemCommentsHref, 'changeActive', NULL, 0, $oComment->id);
 
-								$sMarkDeletedHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sInformationsystemCommentsHref, 'markDeleted', NULL, 0, $oComment->id);
+								$sMarkDeletedHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sInformationsystemCommentsHref, 'markDeleted', NULL, 0, $oComment->id, "secret_csrf={$csrf}");
 								?>
 								<li class="task-item">
 									<div class="row">
@@ -324,12 +325,14 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 
 							foreach ($aComments as $oComment)
 							{
+								$csrf = Core_Security::getCsrfToken();
+
 								$sEditHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sShopCommentsHref, 'edit', NULL, 0, $oComment->id);
 								$sEditOnClick = $oComments_Admin_Form_Controller->getAdminActionLoadAjax($sShopCommentsHref, 'edit', NULL, 0, $oComment->id);
 
 								$sChangeActiveHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sShopCommentsHref, 'changeActive', NULL, 0, $oComment->id);
 
-								$sMarkDeletedHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sShopCommentsHref, 'markDeleted', NULL, 0, $oComment->id);
+								$sMarkDeletedHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sShopCommentsHref, 'markDeleted', NULL, 0, $oComment->id, "secret_csrf={$csrf}");
 								?>
 								<li class="task-item">
 									<div class="row">

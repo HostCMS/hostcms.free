@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Command
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Command_Controller_Default extends Core_Command_Controller
 {
@@ -134,7 +133,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 				if (preg_match("/[а-яА-ЯёЁa-zA-Z0-9_\.\-]+\.[a-zA-Z0-9\-\.]{2,}$/Du", end($aPath)))
 				{
 					$oCore_Response
-						->status(404)
+						->status(Core::$mainConfig['httpCodeNotFound'])
 						->body('HostCMS: File \'' . htmlspecialchars($this->_uri) . '\' not found.');
 
 					return $oCore_Response;
@@ -153,7 +152,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 			else
 			{
 				$oCore_Response
-					->status(404)
+					->status(Core::$mainConfig['httpCodeNotFound'])
 					->body('HostCMS: File not found.');
 			}
 
@@ -165,6 +164,16 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 		// Content-Security-Policy
 		$oSite->csp != ''
 			&& $oCore_Response->header('Content-Security-Policy', $oSite->csp);
+
+		// Clickjacking
+		if ($oSite->protect_frame)
+		{
+			// Not in exclusions
+			if (!$oSite->uriSatisfyRequirements($this->_uri, $oSite->protect_frame_exclusions) && (!defined('PROTECT_FRAME') || PROTECT_FRAME))
+			{
+				$oCore_Response->header('X-Frame-Options', 'SAMEORIGIN');
+			}
+		}
 
 		// XSS protect
 		if ($oSite->protect)
@@ -246,7 +255,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 		}
 		else
 		{
-			$oCore_Response->status(404);
+			$oCore_Response->status(Core::$mainConfig['httpCodeNotFound']);
 
 			// Если определена константа с ID страницы для 404 ошибки и она не равна нулю
 			if ($oSite->error404)
@@ -310,6 +319,14 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 				->service('google')
 				->apply();
 		}
+		elseif (!is_null(Core_Array::getGet('yclid')) || !is_null(Core_Array::getGet('ymclid')) || !is_null(Core_Array::getGet('ysclid')))
+		{
+			$oSource_Controller = new Source_Controller();
+			$oSource_Controller
+				->type(3)
+				->service('yandex')
+				->apply();
+		}
 
 		// Если доступ к узлу структуры только по HTTPS, а используется HTTP,
 		// то делаем 301 редирект
@@ -320,7 +337,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 
 			$oCore_Response
 				->status(301)
-				->header('Location', 'https://' . str_replace(array("\r", "\n", "\0"), '', $url));
+				->header('Location', 'https://' . Core_Http::sanitizeHeader($url));
 
 			return $oCore_Response;
 		}
@@ -473,18 +490,6 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 			}
 		}
 
-		// Counter is active and it's a bot
-		if (Core::moduleIsActive('counter') && Counter_Controller::checkBot(Core_Array::get($_SERVER, 'HTTP_USER_AGENT')))
-		{
-			Counter_Controller::instance()
-				->site($oSite)
-				->page((Core::httpsUses() ? 'https' : 'http') . '://' . strtolower(Core_Array::get($_SERVER, 'HTTP_HOST')) . Core_Array::get($_SERVER, 'REQUEST_URI'))
-				->ip(Core::getClientIp())
-				->userAgent(Core_Array::get($_SERVER, 'HTTP_USER_AGENT'))
-				->counterId(0)
-				->buildCounter();
-		}
-
 		$bLogged = Core_Auth::logged();
 
 		if ($bLogged)
@@ -513,11 +518,24 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 		// Проверка на передачу GET-параметров для статичного документа
 		if (defined('ERROR_404_GET_REQUESTS') && ERROR_404_GET_REQUESTS
 			&& $oStructure->type == 0 && count($_GET) && !($bLogged && isset($_GET['hostcmsAction']))
-			&& !isset($_GET['_openstat']) && !isset($_GET['utm_source'])
-			&& !isset($_GET['gclid']) && !isset($_GET['from'])
 		)
 		{
-			$oCore_Page->error404();
+			// Разрешенные GET-параметры
+			$bAvailableGetVariable = FALSE;
+			foreach (Core::$mainConfig['availableGetVariables'] as $availableGetVariable)
+			{
+				if (isset($_GET[$availableGetVariable]))
+				{
+					$bAvailableGetVariable = TRUE;
+					break;
+				}
+			}
+
+			!$bAvailableGetVariable
+				&& (Core::$mainConfig['httpCodeNotFound'] == 404
+					? $oCore_Page->error404()
+					: $oCore_Page->error410()
+				);
 		}
 
 		Core_Event::notify(get_class($this) . '.onBeforeContentCreation', $this, array($oCore_Page, $oCore_Response));
@@ -543,7 +561,6 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 					= $oStructure->Lib->getDat($oStructure->id);
 
 				$LibConfig = $oStructure->Lib->getLibConfigFilePath();
-
 				if (Core_File::isFile($LibConfig) && is_readable($LibConfig))
 				{
 					include $LibConfig;

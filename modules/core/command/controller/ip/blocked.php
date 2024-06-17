@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Command
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Command_Controller_Ip_Blocked extends Core_Command_Controller
 {
@@ -67,6 +66,28 @@ class Core_Command_Controller_Ip_Blocked extends Core_Command_Controller
 				}
 
 				ob_start();
+				
+				if ($oStructure->type == 1)
+				{
+					$StructureConfig = $oStructure->getStructureConfigFilePath();
+
+					if (Core_File::isFile($StructureConfig) && is_readable($StructureConfig))
+					{
+						include $StructureConfig;
+					}
+				}
+				elseif ($oStructure->type == 2)
+				{
+					$oCore_Page->libParams
+						= $oStructure->Lib->getDat($oStructure->id);
+
+					$LibConfig = $oStructure->Lib->getLibConfigFilePath();
+					if (Core_File::isFile($LibConfig) && is_readable($LibConfig))
+					{
+						include $LibConfig;
+					}
+				}
+
 				$oCore_Page
 					->addChild($oStructure->getRelatedObjectByType())
 					->template($oTemplate)
@@ -92,10 +113,11 @@ class Core_Command_Controller_Ip_Blocked extends Core_Command_Controller
 
 		Core_Html_Entity::factory('Div')
 			->class('indexMessage')
-			->add(Core_Html_Entity::factory('H1')->value($title))
-			->add(Core_Html_Entity::factory('P')->value(
-				$title = Core::_('Core.access_forbidden')
-			))
+			->add(
+				Core_Html_Entity::factory('Div')
+					->add(Core_Html_Entity::factory('H1')->value($title))
+					->add(Core_Html_Entity::factory('P')->value(Core::_('Core.access_forbidden')))
+			)
 			->execute();
 
 		$oSkin->footer();

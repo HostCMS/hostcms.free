@@ -2,6 +2,15 @@
 
 $oShop = Core_Entity::factory('Shop', Core_Array::get(Core_Page::instance()->libParams, 'shopId'));
 
+// ?catalog|?terms
+/*$fileMode = !is_null(Core_Array::getGet('catalog'))
+	? 'catalog'
+	: (
+		!is_null(Core_Array::getGet('terms'))
+			? 'terms'
+			: NULL
+	);*/
+
 //$oCore_Out_File = new Core_Out_File();
 //$oCore_Out_File->filePath(CMS_FOLDER . "yandexmarket.xml");
 
@@ -15,10 +24,11 @@ $Shop_Controller_YandexMarket
 	//->outlets(TRUE)
 	->parseUrl()
 	//->surcharge('20%')
-	//->additionalImages(array('images'))
+	// ->additionalImages(array('images'))
 	//->model('ADV')
 	->groupModifications(FALSE)
 	//->modifications(TRUE)
+	// ->media(TRUE)
 	//->deliveryOptions(TRUE)
 	//->itemsForbiddenProperties(array(7431, 7493))
 	//->additionalTagNames(array('expiry' => 8365))

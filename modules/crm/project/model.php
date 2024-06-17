@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Crm_Project_Model extends Core_Entity
 {
@@ -139,28 +138,39 @@ class Crm_Project_Model extends Core_Entity
 	 */
  	public function deadlineBackend()
 	{
+		$color = '';
+
 		if ($this->deadline != '0000-00-00 00:00:00')
 		{
 			if ($this->completed)
 			{
-				$class = 'darkgray';
+				// $class = 'darkgray';
+				$color = '#777';
 			}
 			elseif (Core_Date::sql2timestamp($this->deadline) < time())
 			{
-				$class = 'badge badge-orange';
+				// $class = 'badge badge-orange';
+				$color = '#fb6e52';
 			}
 			elseif (Core_Date::timestamp2sqldate(Core_Date::sql2timestamp($this->deadline)) == Core_Date::timestamp2sqldate(time()))
 			{
-				$class = 'badge badge-palegreen';
+				// $class = 'badge badge-palegreen';
+				$color = '#a0d468';
 			}
 			else
 			{
-				$class = 'badge badge-lightgray';
+				// $class = 'badge badge-lightgray';
+				$color = '#999';
 			}
 		}
 
-		return $this->deadline != '0000-00-00 00:00:00'
-			? '<span class="' . $class . ' small2">' . Core_Date::timestamp2string(Core_Date::sql2timestamp($this->deadline)) . '</span>'
+		$style = $color != ''
+			? "border-color: " . $color . "; color: " . Core_Str::hex2darker($color, 0.2) . "; background-color: " . Core_Str::hex2lighter($color, 0.88)
+			: '';
+
+		return $style != '' && $this->deadline != '0000-00-00 00:00:00'
+			// ? '<span class="' . $class . ' small2">' . Core_Date::timestamp2string(Core_Date::sql2timestamp($this->deadline)) . '</span>'
+			? '<span class="badge badge-round badge-max-width" style="' . $style . '">' . Core_Date::timestamp2string(Core_Date::sql2timestamp($this->deadline)) . '</span>'
 			: '';
 	}
 

@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Mail
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Mail_Smtp extends Core_Mail
 {
@@ -175,7 +174,7 @@ class Core_Mail_Smtp extends Core_Mail
 			}
 
 			// MAIL FROM and user name may be different
-			$smtpFrom = Core_Array::get($this->_config, 'from', $this->_config['username']);
+			$smtpFrom = Core_Array::get($this->_config, 'from', Core_Array::get($this->_config, 'username', 'undefined'));
 
 			$this->_serverFputs("MAIL FROM: <{$smtpFrom}>\r\n");
 			$server_response = $this->_serverFgets();

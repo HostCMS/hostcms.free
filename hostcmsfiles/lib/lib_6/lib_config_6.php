@@ -28,7 +28,7 @@ $Shop_Controller_Show
 	// Выводить специальные цены
 	->specialprices(TRUE)
 	// Выводить модификации на уровне с товаром
-	->modificationsList(TRUE)
+	//->modificationsList(TRUE)
 	//->modificationsGroup(TRUE)
 	// Режим вывода групп
 	//->groupsMode('none')

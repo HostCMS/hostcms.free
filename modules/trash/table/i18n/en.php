@@ -1,15 +1,8 @@
 <?php 
-/**
- * Trash.
- *
- * @package HostCMS
- * @subpackage Trash
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'Trash. Deleted items',
 	'menu' => 'Deleted items',
-	'title' => 'Deleted items "%s"'
+	'title' => 'Deleted items "%s"',
+	'model_unavailable' => "Model '%s' is not available, please check if the module is active!",
 );

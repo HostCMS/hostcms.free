@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Item_Modification_Create_Controller extends Admin_Form_Action_Controller
 {
@@ -151,6 +150,12 @@ class Shop_Item_Modification_Create_Controller extends Admin_Form_Action_Control
 					$oShopItem->width = $oShopItemParent->width;
 					$oShopItem->height = $oShopItemParent->height;
 					$oShopItem->weight = $oShopItemParent->weight;
+					
+					// Упаковка
+					$oShopItem->package_length = $oShopItemParent->package_length;
+					$oShopItem->package_width = $oShopItemParent->package_width;
+					$oShopItem->package_height = $oShopItemParent->package_height;
+					$oShopItem->package_weight = $oShopItemParent->package_weight;
 
 					// Ограничения на покупку
 					$oShopItem->min_quantity = $oShopItemParent->min_quantity;

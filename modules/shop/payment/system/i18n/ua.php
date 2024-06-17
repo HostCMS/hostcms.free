@@ -31,4 +31,6 @@ return array(
 	'type2' => 'Банк',
 	'type3' => 'Рахунок',
 	'shop_order_status_id' => 'Статус замовлення при оплаті',
+	'siteuser_groups' => "Група доступу",
+	'all' => 'Всі',
 );

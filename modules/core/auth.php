@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Auth
 {
@@ -42,23 +41,29 @@ class Core_Auth
 	 */
 	static public function checkBackendBlockedIp()
 	{
-		// Check IP addresses
-		$ip = Core::getClientIp();
-		$aIp = array($ip);
-		$HTTP_X_FORWARDED_FOR = Core_Array::get($_SERVER, 'HTTP_X_FORWARDED_FOR');
-		if (!is_null($HTTP_X_FORWARDED_FOR) && $ip != $HTTP_X_FORWARDED_FOR)
-		{
-			$aIp[] = $HTTP_X_FORWARDED_FOR;
-		}
-
 		if (Core::moduleIsActive('ipaddress'))
 		{
-			$oIpaddress_Controller = new Ipaddress_Controller();
-
-			$bBlocked = $oIpaddress_Controller->isBackendBlocked($aIp) || Ipaddress_Useragent_Controller::isBlocked();
-
-			if ($bBlocked)
+			// Check IP addresses
+			$ip = Core::getClientIp();
+			$aIp = array($ip);
+			$HTTP_X_FORWARDED_FOR = Core_Array::get($_SERVER, 'HTTP_X_FORWARDED_FOR');
+			if (!is_null($HTTP_X_FORWARDED_FOR) && $ip != $HTTP_X_FORWARDED_FOR)
 			{
+				$aIp[] = $HTTP_X_FORWARDED_FOR;
+			}
+
+			$bBlockedIp = Ipaddress_Controller::instance()->isBackendBlocked($aIp);
+			$bBlockedFilter = Ipaddress_Filter_Controller::instance()->isBlocked();
+
+			if ($bBlockedIp || $bBlockedFilter)
+			{
+				Core_Log::instance()->clear()
+					->status(Core_Log::$MESSAGE)
+					->write($bBlockedIp
+						? Core::_('Core.error_log_backend_blocked_ip', implode(',', $aIp))
+						: Core::_('Core.error_log_backend_blocked_useragent', implode(',', $aIp), Core_Array::get($_SERVER, 'HTTP_USER_AGENT', '', 'str'))
+					);
+
 				$oCore_Response = new Core_Response();
 
 				$oCore_Response
@@ -70,6 +75,7 @@ class Core_Auth
 					->body('HostCMS: Error 403. Access Forbidden!')
 					->sendHeaders()
 					->showBody();
+
 				exit();
 			}
 		}
@@ -90,7 +96,7 @@ class Core_Auth
 	 */
 	static public function authorization($aModuleNames)
 	{
-		self::checkBackendBlockedIp();
+		!self::logged() && self::checkBackendBlockedIp();
 
 		self::systemInit();
 
@@ -205,26 +211,25 @@ class Core_Auth
 			// Устанавливаем текущий сайт
 			self::setCurrentSite();
 
-			if (!isset($_SESSION['valid_user']))
-			{
-				throw new Core_Exception(
-					'User unknown.'
-				);
-			}
-
-			$oUser = Core_Entity::factory('User')->getByLogin(
-				$_SESSION['valid_user']
-			);
+			$oUser = Core_Entity::factory('User')->getCurrent();
 
 			if (is_null($oUser))
 			{
-				unset($_SESSION['valid_user']);
+				self::logout();
+
 				throw new Core_Exception(
 					'User not found, please relogin.'
 				);
 			}
 
 			$oSite = Core_Entity::factory('Site', $_SESSION['current_site_id']);
+
+			// Временная зона центра администрирования устанавливается отдельно
+			$timezone = trim($oSite->timezone);
+			if ($timezone != '')
+			{
+				date_default_timezone_set($timezone);
+			}
 
 			$bModuleAccess = $oUser->checkModuleAccess($aModuleNames, $oSite);
 
@@ -281,8 +286,9 @@ class Core_Auth
 		if (defined('USE_ONLY_HTTPS_AUTHORIZATION') && USE_ONLY_HTTPS_AUTHORIZATION && !Core::httpsUses())
 		{
 			//$url = strtolower(Core_Array::get($_SERVER, 'HTTP_HOST')) . $_SERVER['REQUEST_URI'];
-			$url = strtolower(Core_Array::get($_SERVER, 'SERVER_NAME')) . $_SERVER['REQUEST_URI'];
-			$url = str_replace(array("\r", "\n", "\0"), '', $url);
+			$url = Core_Http::sanitizeHeader(
+				strtolower(Core_Array::get($_SERVER, 'SERVER_NAME')) . $_SERVER['REQUEST_URI']
+			);
 
 			header("HTTP/1.1 302 Found");
 			header("Location: https://{$url}");
@@ -319,11 +325,14 @@ class Core_Auth
 		Core_Event::notify('Core_Auth.onAfterSystemInit');
 	}
 
+	/**
+	 * Define CURRENT_LNG constant
+	 * @param string $lng
+	 */
 	static public function setCurrentLng($lng)
 	{
 		if (!defined('CURRENT_LNG'))
 		{
-			// Выбираем
 			empty($lng) && $lng = strtolower(
 				substr(Core_Array::get($_SERVER, 'HTTP_ACCEPT_LANGUAGE', '', 'str'), 0, 2)
 			);
@@ -334,15 +343,13 @@ class Core_Auth
 
 			!$oAdmin_Language && $lng = NULL;
 
-			// Устанавливаем полученный язык
 			define('CURRENT_LNG', !is_null($lng) ? $lng : DEFAULT_LNG);
 			Core_I18n::instance()->setLng(CURRENT_LNG);
 
-			$oAdmin_Language = Core_Entity::factory('Admin_Language')->getByShortname(CURRENT_LNG);
-			define('CURRENT_LANGUAGE_ID', !is_null($oAdmin_Language) && $oAdmin_Language->active
-				? $oAdmin_Language->id
-				: 0
-			);
+			!$oAdmin_Language
+				&& $oAdmin_Language = Core_Entity::factory('Admin_Language')->getByShortname(CURRENT_LNG);
+
+			define('CURRENT_LANGUAGE_ID', !is_null($oAdmin_Language) ? $oAdmin_Language->id : 0);
 		}
 	}
 
@@ -393,17 +400,17 @@ class Core_Auth
 					{
 						// Пользователь существует
 						$oUser = Core_Entity::factory('User')->getCurrent();
-						if ($oUser && $oUser->active)
+						if ($oUser && $oUser->active && !$oUser->dismissed)
 						{
 							self::$_logged = TRUE;
 							self::$_currentUser = $oUser;
 
 							// Log to the `user_sessions` table
-							self::_logToUserSession();
+							User_Controller::logToUserSession();
 						}
 						else
 						{
-							Core_Auth::logout();
+							self::logout();
 						}
 					}
 					else
@@ -415,7 +422,7 @@ class Core_Auth
 							->notify(FALSE)
 							->write(Core::_('Core.session_change_ip', $sessionId, $ip));
 
-						Core_Auth::logout();
+						self::logout();
 					}
 				}
 
@@ -424,36 +431,6 @@ class Core_Auth
 		}
 
 		return self::$_logged;
-	}
-
-	/**
-	 * Log access to the `user_sessions` table
-	 */
-	static protected function _logToUserSession()
-	{
-		$ip = Core::getClientIp();
-		$sessionId = session_id();
-		$userAgent = Core_Array::get($_SERVER, 'HTTP_USER_AGENT', '', 'str');
-
-		$oDataBase = Core_QueryBuilder::update('user_sessions')
-			->set('user_id', self::$_currentUser->id)
-			->set('time', time())
-			->set('user_agent', $userAgent)
-			//->set('ip', $ip)
-			->where('id', '=', $sessionId)
-			->where('ip', '=', $ip)
-			->execute();
-
-		// Returns the number of rows affected by the last SQL statement
-		// If nothing's really was changed affected rowCount will return 0.
-		if ($oDataBase->getAffectedRows() == 0)
-		{
-			Core_QueryBuilder::insert('user_sessions')
-				->ignore()
-				->columns('id', 'user_id', 'time', 'user_agent', 'ip')
-				->values($sessionId, self::$_currentUser->id, time(), $userAgent, $ip)
-				->execute();
-		}
 	}
 
 	/**
@@ -474,8 +451,25 @@ class Core_Auth
 				$_SESSION['current_site_id'] = intval($iSelectedSite);
 			}
 
+			$site_id = NULL;
+
 			// Если нет выбранного сайта
-			if (!isset($_SESSION['current_site_id']))
+			if (isset($_SESSION['current_site_id']))
+			{
+				// Check site exists
+				$oSite = Core_Entity::factory('Site')->getById($_SESSION['current_site_id']);
+
+				if (is_null($oSite))
+				{
+					unset($_SESSION['current_site_id']);
+				}
+				else
+				{
+					$site_id = $oSite->id;
+				}
+			}
+
+			if (!$site_id)
 			{
 				if (is_null(self::$_currentUser))
 				{
@@ -520,18 +514,28 @@ class Core_Auth
 						else
 						{
 							self::logout();
-							exit();
+							exit('No site is available! Check company structure.');
 						}
 					}
 				}
 
-				if (!$site_id)
-				{
-					exit('Site does not exist! Check aliases and permissions for a users.');
-				}
-
 				// Заносим значение в сессию
 				$_SESSION['current_site_id'] = $site_id;
+			}
+
+			if (!$site_id)
+			{
+				Core_Log::instance()->clear()
+					->status(Core_Log::$ERROR)
+					->notify(FALSE)
+					->write('Site does not exist! Check aliases and permissions for a users.');
+
+				self::logout();
+
+				header("HTTP/1.1 302 Found");
+				header("Location: /admin/");
+
+				exit();
 			}
 
 			// Определяем константу
@@ -579,8 +583,8 @@ class Core_Auth
 				// Определяем период времени, в течении которого пользователю, имевшему неудачные
 				// попытки доступа в систему запрещен вход в систему
 				$delta_access_denied = $iCountAccessdenied > 2
-					? 5 * exp(2 * log($iCountAccessdenied - 1))
-					: 5;
+					? 5 * exp(2.2 * log($iCountAccessdenied - 1))
+					: 5 * $iCountAccessdenied;
 
 				// Если период запрета доступа в систему не истек
 				if ($delta_access_denied > $delta)
@@ -615,8 +619,8 @@ class Core_Auth
 					self::$_lastError = 'access temporarily unavailable';
 
 					throw new Core_Exception(
-						Core::_('Admin.authorization_error_access_temporarily_unavailable'),
-							array('%s' => round($delta_access_denied - $delta)), 0, $bShowDebugTrace = FALSE
+						Core::_('Admin.authorization_error_access_temporarily_unavailable', $login, round($delta_access_denied - $delta)),
+						array(), 0, $bShowDebugTrace = FALSE
 					);
 				}
 			}
@@ -628,6 +632,7 @@ class Core_Auth
 			return FALSE;
 		}
 
+		// С доп.проверкой на active и dismissed в методе getByLoginAndPassword()
 		$oUser = Core_Entity::factory('User')->getByLoginAndPassword($login, $password);
 
 		if ($oUser)
@@ -639,8 +644,6 @@ class Core_Auth
 				Core_Session::start();
 			}
 
-			self::$_regenerateId && Core_Session::regenerateId(TRUE);
-
 			// Записываем ID пользователя
 			$_SESSION['current_users_id'] = $oUser->id;
 			$_SESSION['valid_user'] = $oUser->login;
@@ -649,11 +652,17 @@ class Core_Auth
 
 			$assignSessionToIp && $_SESSION['current_user_ip'] = $ip;
 
+			// Создаем новый ID сессии без уничтожения предыдущей
+			self::$_regenerateId && Core_Session::regenerateId(FALSE);
+
 			self::$_logged = TRUE;
 			self::$_currentUser = $oUser;
 
+			// Destroy Old Sessions
+			User_Controller::destroyOldUserSessions();
+
 			// Log to the `user_sessions` table
-			self::_logToUserSession();
+			User_Controller::logToUserSession();
 
 			Core_Log::instance()->clear()
 				->status(Core_Log::$ERROR)

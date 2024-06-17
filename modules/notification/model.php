@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Notification
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Notification_Model extends Core_Entity
 {
@@ -64,18 +63,18 @@ class Notification_Model extends Core_Entity
 	{
 		if ($this->module_id && ($oCore_Module = $this->Module->loadModule()->Core_Module) && !is_null($oCore_Module))
 		{
-			$aNotificationDecorations = $oCore_Module->getNotificationDesign($this->type, $this->entity_id);
+			$aNotificationDecorations = $oCore_Module->getNotificationDesign($this->type, $this->entity_id, $this);
 
-			$aNotification['icon'] = Core_Array::get($aNotificationDecorations, 'icon');
-
-			$sReturn = "<i class=\"notification-ico {$aNotification['icon']['ico']} {$aNotification['icon']['background-color']} {$aNotification['icon']['color']} fa-fw\"></i>";
+			$aIcon = Core_Array::get($aNotificationDecorations, 'icon');
 		}
 		else
 		{
-			$sReturn = '<i class="fa fa-info bg-themeprimary white fa-fw"></i>';
+			$aIcon = array();
 		}
 
-		return $sReturn;
+		return !is_null($aIcon)
+			? "<i class=\"notification-ico {$aIcon['ico']} {$aIcon['background-color']} {$aIcon['color']} fa-fw\"></i>"
+			: '<i class="notification-ico fa fa-info bg-themeprimary white fa-fw"></i>';
 	}
 
 	/**
@@ -90,12 +89,12 @@ class Notification_Model extends Core_Entity
 
 		if ($this->module_id && ($oCore_Module = $this->Module->loadModule()->Core_Module) && !is_null($oCore_Module))
 		{
-			$aNotificationDecorations = $oCore_Module->getNotificationDesign($this->type, $this->entity_id);
+			$aNotificationDecorations = $oCore_Module->getNotificationDesign($this->type, $this->entity_id, $this);
 
 			$href = Core_Array::get($aNotificationDecorations, 'href');
 			$onclick = Core_Array::get($aNotificationDecorations, 'onclick');
 
-			if (strlen($href) || strlen($onclick))
+			if (strlen((string) $href) || strlen((string) $onclick))
 			{
 				ob_start();
 

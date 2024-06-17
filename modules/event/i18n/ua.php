@@ -102,6 +102,7 @@ return array(
 	'notificationDescriptionType6' => 'Статус справи змінений з "%s" на "%s"',
 	'notificationDescriptionType7' => 'Група справи змінена з "%s" на "%s"',
 	'copy_success' => "Справа успішно скопійована!",
+	'delete_success' => 'Елемент знищений!',
 	'undelete_success' => "Елемент відновлено!",
 	'apply_success' => "Справа успішно змінена!",
 	'in_process' => 'В процесі',
@@ -156,4 +157,11 @@ return array(
 	'tabDmsDocuments' => 'Документи',
 	'guid' => 'GUID',
 	'last_modified' => 'Востаннє змінено',
+
+	'event_calendar_caldav_id' => 'Календарі',
+	'select_calendar' => 'Виберіть каледар',
+
+	'tags' => "Мітки (теги)",
+	'type_tag' => 'Введіть тег ...',
+	'without_deadline' => 'Без терміну',
 );

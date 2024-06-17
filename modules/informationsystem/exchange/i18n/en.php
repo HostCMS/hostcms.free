@@ -17,8 +17,16 @@ return array(
 	'group_sorting' => 'Group Sorting',
 	'group_active' => 'Group activity',
 
-	'item_id' => 'Product ID',
-	'item_guid' => 'GUID ID',
+	'group_seo_group_title_template' => 'Group title template',
+	'group_seo_group_description_template' => 'Group description template',
+	'group_seo_group_keywords_template' => 'Group keywords template',
+
+	'group_seo_item_title_template' => 'Item title template',
+	'group_seo_item_description_template' => 'Item description template',
+	'group_seo_item_keywords_template' => 'Item keywords template',
+
+	'item_id' => 'Item ID',
+	'item_guid' => 'GUID',
 	'item_path' => 'Item Path',
 	'item_name' => 'Item Name',
 	'item_description' => 'Item Description',
@@ -33,8 +41,8 @@ return array(
 	'item_datetime' => 'Date',
 	'item_start_datetime' => 'Start Datetime',
 	'item_end_datetime' => 'End Datetime',
-	'item_image_large' => 'Product image file',
-	'item_image_small' => 'Small image file for product',
+	'item_image_large' => 'Item image file',
+	'item_image_small' => 'Item small image file',
 	'item_additional_group' => 'Shortcute\'s GUID',
 	'item_siteuser_id' => 'Client ID'
 );

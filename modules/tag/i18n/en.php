@@ -29,4 +29,5 @@ return array(
 	'seo_title' => '<acronym title="Meta element title">Title</acronym>',
 	'seo_description' => '<acronym title="Meta element description">Description</acronym>',
 	'seo_keywords' => '<acronym title="Meta element keywords">Keywords</acronym>',
+	'h1' => "Heading H1",
 );

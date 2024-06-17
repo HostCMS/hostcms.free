@@ -7,9 +7,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @version 7.x
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Group_Property_List_Model extends Shop_Model
 {
@@ -18,7 +17,7 @@ class Shop_Group_Property_List_Model extends Shop_Model
 	 * @var string
 	 */
 	protected $_tableName = 'shops';
-	
+
 	/**
 	 * Name of the model
 	 * @var string
@@ -30,7 +29,7 @@ class Shop_Group_Property_List_Model extends Shop_Model
 	 * @var int
 	 */
 	public $changeFilename = TRUE;
-	
+
 	/**
 	 * Backend property
 	 * @var int
@@ -142,7 +141,7 @@ class Shop_Group_Property_List_Model extends Shop_Model
 	 */
 	public function getLargeFileName(Core_Entity $object, $oFileValue, $originalFileName)
 	{
-		return 'shop_property_file_' . $object->id . '_' . $oFileValue->id . '.' . Core_File::getExtension($originalFileName);
+		return Property_Controller::getLargeFileName($object, $oFileValue, $originalFileName);
 	}
 
 	/**
@@ -154,7 +153,7 @@ class Shop_Group_Property_List_Model extends Shop_Model
 	 */
 	public function getSmallFileName(Core_Entity $object, $oFileValue, $originalFileName)
 	{
-		return 'small_shop_property_file_' . $object->id . '_' . $oFileValue->id . '.' . Core_File::getExtension($originalFileName);
+		return Property_Controller::getSmallFileName($object, $oFileValue, $originalFileName);
 	}
 
 	/**

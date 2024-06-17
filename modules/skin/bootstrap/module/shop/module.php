@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 {
@@ -550,9 +549,9 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 													{
 														?>
 														brandsDiagramData.push({
-																label:'<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars(Core_Str::cut($oShop_Order_Item->Shop_Item->Shop_Producer->name, $aConfig['cutNames'])))?>',
-																data:[<?php echo $oShop_Order_Item->sum?>],
-																color: '#<?php echo $iCountColors ? $aColors[$key % $iCountColors] : 'E75B8D'?>'
+															label:'<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars(Core_Str::cut($oShop_Order_Item->Shop_Item->Shop_Producer->name, $aConfig['cutNames'])))?>',
+															data:[<?php echo $oShop_Order_Item->sum?>],
+															color: '#<?php echo $iCountColors ? $aColors[$key % $iCountColors] : 'E75B8D'?>'
 														});
 														<?php
 														$i++;
@@ -627,11 +626,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 
 					<script>
 					$(function() {
-						var aScripts = [
-							'jquery.sparkline.js'
-						];
-
-						$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/sparkline/').done(function() {
+						$.getMultiContent(['jquery.sparkline.js'], '/modules/skin/bootstrap/js/charts/sparkline/').done(function() {
 							setTimeout(function() {
 								var sparklinelines = $('[data-sparkline=line]');
 								$.each(sparklinelines, function () {

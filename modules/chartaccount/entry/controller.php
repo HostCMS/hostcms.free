@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Chartaccount
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Chartaccount_Entry_Controller
 {
@@ -93,7 +92,9 @@ class Chartaccount_Entry_Controller
 				if ($fieldName == 'subcount' && is_array($fieldValue) && count($fieldValue))
 				{
 					!$bJoined
-						&& $oChartaccount_Entries->queryBuilder()->join('chartaccount_entry_subcounts', 'chartaccount_entries.id', '=', 'chartaccount_entry_subcounts.chartaccount_entry_id');
+						&& $oChartaccount_Entries->queryBuilder()
+							->join('chartaccount_entry_subcounts', 'chartaccount_entries.id', '=', 'chartaccount_entry_subcounts.chartaccount_entry_id')
+							->groupBy('chartaccount_entries.id');
 
 					count($fieldValue) > 1 && $oChartaccount_Entries->queryBuilder()->open();
 
@@ -244,7 +245,9 @@ class Chartaccount_Entry_Controller
 
 // echo htmlspecialchars(Core_DataBase::instance()->getLastQuery());
 
-				return $aReturn[0]->dataTotalAmount;
+				return isset($aReturn[0])
+					? $aReturn[0]->dataTotalAmount
+					: 0;
 			}
 			elseif (!is_null(self::$_lastError))
 			{
@@ -288,6 +291,8 @@ class Chartaccount_Entry_Controller
 		}
 	}
 
+	static protected $_alreadyAffectedEntries = array();
+
 	/**
 	 * Insert entry
 	 * @param int $document_id
@@ -308,17 +313,19 @@ class Chartaccount_Entry_Controller
 			)
 		);
 
-		if (isset($aChartaccount_Entries[0]))
-		{
-			$oChartaccount_Entry = array_shift($aChartaccount_Entries);
+		$oChartaccount_Entry = NULL;
 
-			// Удаляем оставшиеся проводки по переданным Д+К
-			foreach ($aChartaccount_Entries as $oTmp_Chartaccount_Entry)
+		// Find not affected
+		foreach ($aChartaccount_Entries as $oTmpChartaccount_Entry)
+		{
+			if (!in_array($oTmpChartaccount_Entry->id, self::$_alreadyAffectedEntries))
 			{
-				$oTmp_Chartaccount_Entry->delete();
+				$oChartaccount_Entry = $oTmpChartaccount_Entry;
+				self::$_alreadyAffectedEntries[] = $oTmpChartaccount_Entry->id;
 			}
 		}
-		else
+
+		if (is_null($oChartaccount_Entry))
 		{
 			$oChartaccount_Entry = Core_Entity::factory('Chartaccount_Entry');
 			$oChartaccount_Entry->document_id = $document_id;
@@ -329,6 +336,11 @@ class Chartaccount_Entry_Controller
 		if (isset($aEntry['amount']))
 		{
 			$oChartaccount_Entry->amount = $aEntry['amount'];
+		}
+
+		if (isset($aEntry['description']))
+		{
+			$oChartaccount_Entry->description = $aEntry['description'];
 		}
 
 		if (isset($aEntry['datetime']))

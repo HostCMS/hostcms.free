@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 {
@@ -123,6 +122,9 @@ class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 						$oShop_Price_Setting_Item->new_price = $value;
 						$oShop_Price_Setting_Item->save();
 
+						// Object consist old value before reload from database
+						$this->_object->price = $value;
+
 						$this->_object->clearCache();
 					}
 				}
@@ -150,7 +152,7 @@ class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 								$oShop_Warehouse_Inventory_Item->shop_item_id = $this->_object->id;
 								$oShop_Warehouse_Inventory_Item->count = $value;
 								$oShop_Warehouse_Inventory_Item->save();
-
+								
 								$this->_object->clearCache();
 							}
 						}

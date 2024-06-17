@@ -27,4 +27,6 @@ return array(
 	'minutes' => 'минут',
 	'hours' => 'часов',
 	'days' => 'дней',
+	'active' => 'Активность',
+	'changeActive_success' => 'Информация успешно изменена',
 );

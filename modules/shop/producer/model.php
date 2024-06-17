@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Producer_Model extends Core_Entity
 {
@@ -93,12 +92,12 @@ class Shop_Producer_Model extends Core_Entity
 
 
 	/**
-	 * Get path for files
+	 * Get path
 	 * @return string
 	 */
 	public function getPath()
 	{
-		return 'producers/' . rawurlencode($this->path) . '/';
+		return $this->Shop->Producer_Structure->getPath() . rawurlencode($this->path) . '/';
 	}
 
 	/**
@@ -180,7 +179,6 @@ class Shop_Producer_Model extends Core_Entity
 		{
 			$oSearch_Page->url = ($this->Shop->Structure->https ? 'https://' : 'http://')
 				. $oSiteAlias->name
-				. $this->Shop->Structure->getPath()
 				. $this->getPath();
 		}
 		else
@@ -205,7 +203,35 @@ class Shop_Producer_Model extends Core_Entity
 	}
 
 	/**
-	 * Get producer path
+	 * Add item into search index
+	 * @return self
+	 */
+	public function index()
+	{
+		if (Core::moduleIsActive('search') && $this->active)
+		{
+			Search_Controller::indexingSearchPages(array($this->indexing()));
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Remove item from search index
+	 * @return self
+	 */
+	public function unindex()
+	{
+		if (Core::moduleIsActive('search'))
+		{
+			Search_Controller::deleteSearchPage($this->Shop->site_id, 3, 4, $this->id);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Get producer file path
 	 * @return string
 	 */
 	public function getProducerPath()
@@ -230,6 +256,14 @@ class Shop_Producer_Model extends Core_Entity
 	{
 		$this->indexing = 1 - $this->indexing;
 		$this->save();
+		
+		if ($this->indexing && Core::moduleIsActive('search'))
+		{
+			Search_Controller::indexingSearchPages(array(
+				$this->indexing()
+			));
+		}
+		
 		return $this;
 	}
 
@@ -315,6 +349,8 @@ class Shop_Producer_Model extends Core_Entity
 			} catch (Exception $e) {
 				$this->path = Core_Str::transliteration($this->name);
 			}
+
+			$this->checkDuplicatePath();
 		}
 		elseif ($this->id)
 		{
@@ -358,7 +394,14 @@ class Shop_Producer_Model extends Core_Entity
 	 */
 	public function save()
 	{
-		is_null($this->path) && $this->makePath();
+		if (is_null($this->path) || $this->path === '')
+		{
+			$this->makePath();
+		}
+		elseif (in_array('path', $this->_changedColumns))
+		{
+			$this->checkDuplicatePath();
+		}
 
 		parent::save();
 
@@ -519,7 +562,7 @@ class Shop_Producer_Model extends Core_Entity
 	public function move($shop_producer_dir_id)
 	{
 		$this->shop_producer_dir_id = $shop_producer_dir_id;
-		$this->save();
+		$this->checkDuplicatePath()->save();
 		return $this;
 	}
 
@@ -541,6 +584,34 @@ class Shop_Producer_Model extends Core_Entity
 			->execute();
 
 		$oObject->markDeleted();
+
+		return $this;
+	}
+
+	/**
+	 * Check and correct duplicate path
+	 * @return self
+	 * @hostcms-event shop_producer.onAfterCheckDuplicatePath
+	 */
+	public function checkDuplicatePath()
+	{
+		if (strlen($this->path))
+		{
+			$oShop = $this->Shop;
+
+			// Search the same item or group
+			$oSameShopProducer = $oShop->Shop_Producers->getByPath($this->path);
+			if (!is_null($oSameShopProducer) && $oSameShopProducer->id != $this->id)
+			{
+				$this->path = Core_Guid::get();
+			}
+		}
+		else
+		{
+			$this->path = Core_Guid::get();
+		}
+
+		Core_Event::notify($this->_modelName . '.onAfterCheckDuplicatePath', $this);
 
 		return $this;
 	}
@@ -580,7 +651,8 @@ class Shop_Producer_Model extends Core_Entity
 	protected function _prepareData()
 	{
 		$this->clearXmlTags()
-			->addXmlTag('dir', Core_Page::instance()->shopCDN . $this->getProducerHref());
+			->addXmlTag('dir', Core_Page::instance()->shopCDN . $this->getProducerHref())
+			->addXmlTag('url', $this->getPath());
 
 		return $this;
 	}

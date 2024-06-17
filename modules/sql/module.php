@@ -8,10 +8,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Sql
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
-class Sql_Module extends Core_Module
+class Sql_Module extends Core_Module_Abstract
 {
 	/**
 	 * Module version
@@ -23,14 +22,14 @@ class Sql_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2023-07-17';
+	public $date = '2024-06-06';
 
 	/**
 	 * Module name
 	 * @var string
 	 */
 	protected $_moduleName = 'sql';
-	
+
 	/**
 	 * Get Module's Menu
 	 * @return array

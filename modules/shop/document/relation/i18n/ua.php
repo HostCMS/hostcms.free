@@ -1,6 +1,7 @@
 <?php
 
 return array(
+	'model_name' => 'Пов\'язані документи',
 	'documents' => 'Документ',
 	'add_purchaseorder' => 'Замовлення постачальника',
 	'add_shop_warehouse_invoice' => 'Рахунок постачальника',

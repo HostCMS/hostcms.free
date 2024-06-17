@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Comment
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Comment_Model extends Core_Entity
 {
@@ -46,9 +45,11 @@ class Comment_Model extends Core_Entity
 	 */
 	protected $_hasOne = array(
 		'comment_informationsystem_item' => array('foreign_key' => 'comment_id'),
-		'comment_shop_item' => array('foreign_key' => 'comment_id'),
 		'informationsystem_item' => array('through' => 'comment_informationsystem_item'),
-		'shop_item' => array('through' => 'comment_shop_item')
+		'comment_shop_item' => array('foreign_key' => 'comment_id'),
+		'shop_item' => array('through' => 'comment_shop_item'),
+		'comment_shop_order' => array('foreign_key' => 'comment_id'),
+		'shop_order' => array('through' => 'comment_shop_order')
 	);
 
 	/**
@@ -169,6 +170,7 @@ class Comment_Model extends Core_Entity
 
 		$this->Comment_Informationsystem_Item->delete();
 		$this->Comment_Shop_Item->delete();
+		$this->Comment_Shop_Order->delete();
 
 		$this->Comments->deleteAll(FALSE);
 
@@ -231,7 +233,7 @@ class Comment_Model extends Core_Entity
 		$onclick = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $oAdmin_Form_Field->onclick);
 
 		// Subject
-		trim($this->subject) != '' && Core_Html_Entity::factory('Strong')
+		$this->subject != '' && Core_Html_Entity::factory('Strong')
 			->value(htmlspecialchars($this->subject))
 			->execute();
 
@@ -245,7 +247,7 @@ class Comment_Model extends Core_Entity
 
 		$subCommentCount && Core_Html_Entity::factory('Span')
 			->class('count')
-			->value(htmlspecialchars($subCommentCount))
+			->value($subCommentCount)
 			->execute();
 
 		if (strlen($this->ip))
@@ -298,7 +300,7 @@ class Comment_Model extends Core_Entity
 			Core_Html_Entity::factory('A')
 				->href($oAdmin_Form_Controller->getAdminActionLoadHref('/admin/siteuser/index.php', 'edit', NULL, 0, intval($this->Siteuser->id)))
 				->onclick("$.openWindowAddTaskbar({path: '/admin/siteuser/index.php', additionalParams: '&hostcms[checked][0][{$this->Siteuser->id}]=1&hostcms[action]=edit', shortcutImg: '" . '/modules/skin/' . Core_Skin::instance()->getSkinName() . '/images/module/siteuser.png' . "', shortcutTitle: 'undefined', Minimize: true}); return false")
-				->value(htmlspecialchars($this->Siteuser->login))
+				->value(htmlspecialchars((string) $this->Siteuser->login))
 				->execute();
 
 			return ob_get_clean();
@@ -495,6 +497,11 @@ class Comment_Model extends Core_Entity
 				$entityModel = 'Shop_Comment_Property_List';
 				$entityId = $this->Comment_Shop_Item->Shop_Item->shop_id;
 			}
+			elseif ($this->Comment_Shop_Order->id)
+			{
+				$entityModel = 'Shop_Order_Comment_Property_List';
+				$entityId = $this->Comment_Shop_Order->Shop_Order->shop_id;
+			}
 
 			$aProperties = Core_Entity::factory($entityModel, $entityId)
 				->Properties
@@ -532,6 +539,10 @@ class Comment_Model extends Core_Entity
 		elseif ($this->Comment_Shop_Item->id)
 		{
 			$oEntity = $this->Shop_Item->Shop;
+		}
+		elseif ($this->Comment_Shop_Order->id)
+		{
+			$oEntity = $this->Shop_Order->Shop;
 		}
 		else
 		{

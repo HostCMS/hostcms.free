@@ -29,7 +29,7 @@ class Smarty_Internal_Method_CompileAllTemplates
      * @param int     $time_limit
      * @param int     $max_errors
      *
-     * @return integer number of template files recompiled
+     * @return int number of template files recompiled
      */
     public function compileAllTemplates(
         Smarty $smarty,

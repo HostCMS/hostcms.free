@@ -72,4 +72,8 @@ return array(
 	'filter_having' => 'HAVING',
 	'delete_success' => 'Елемент видалений!',
 	'undelete_success' => 'Елемент відновлено!',
+	'filter_condition' => 'Умова фільтрації',
+
+	'show_by_default' => 'Показувати за замовчуванням',
+	'not_show_by_default' => 'Не показувати за замовчуванням',
 );

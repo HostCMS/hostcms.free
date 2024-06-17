@@ -56,4 +56,5 @@ return array(
 	'items_total_count' => 'Кількість активних товарів',
 	'seo_group_h1_template' => 'Шаблон H1',
 	'seo_item_h1_template' => 'Шаблон H1',
+	'changeIndexation_success' => 'Індексація групи магазину змінена.',
 );

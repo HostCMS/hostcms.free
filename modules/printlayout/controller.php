@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Printlayout
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Printlayout_Controller extends Core_Controller
 {
@@ -493,7 +492,7 @@ class Printlayout_Controller extends Core_Controller
 				$onclick = $Admin_Form_Controller->getAdminLoadAjax($Admin_Form_Controller->getPath(), 'print', NULL, $additionalParam . '&type=' . $type . '&printlayout_id=' . $oPrintlayout->id);
 
 				$printlayoutsButton .= '<li>
-					<a onclick="' . $onclick . '">' . htmlspecialchars($oPrintlayout->name) . '</a>
+					<a onclick="mainFormLocker.unlock(); ' . $onclick . '">' . htmlspecialchars($oPrintlayout->name) . '</a>
 				</li>';
 			}
 		}

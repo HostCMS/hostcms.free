@@ -8,10 +8,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Lib
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
-class Lib_Module extends Core_Module
+class Lib_Module extends Core_Module_Abstract
 {
 	/**
 	 * Module version
@@ -23,14 +22,14 @@ class Lib_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2023-07-17';
+	public $date = '2024-06-06';
 
 	/**
 	 * Module name
 	 * @var string
 	 */
 	protected $_moduleName = 'lib';
-	
+
 	/**
 	 * Get Module's Menu
 	 * @return array
@@ -41,7 +40,7 @@ class Lib_Module extends Core_Module
 			array(
 				'sorting' => 90,
 				'block' => 0,
-				'ico' => 'fa fa-briefcase',
+				'ico' => 'fa-regular fa-rectangle-list',
 				'name' => Core::_('lib.menu'),
 				'href' => "/admin/lib/index.php",
 				'onclick' => "$.adminLoad({path: '/admin/lib/index.php'}); return false"
@@ -50,7 +49,7 @@ class Lib_Module extends Core_Module
 
 		return parent::getMenu();
 	}
-	
+
 	/**
 	 * Функция обратного вызова для поисковой индексации
 	 *
@@ -59,7 +58,7 @@ class Lib_Module extends Core_Module
 	 * @return array
 	 * @hostcms-event Lib_Module.indexing
 	 */
-	public function indexing($offset, $limit)
+	public function indexing($site_id, $offset, $limit)
 	{
 		$offset = intval($offset);
 		$limit = intval($limit);

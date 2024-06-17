@@ -163,7 +163,7 @@ class Smarty_Internal_CacheResource_File extends Smarty_CacheResource
      * @param Smarty  $smarty
      * @param integer $exp_time expiration time (number of seconds, not timestamp)
      *
-     * @return integer number of cache files deleted
+     * @return int number of cache files deleted
      */
     public function clearAll(Smarty $smarty, $exp_time = null)
     {
@@ -179,7 +179,7 @@ class Smarty_Internal_CacheResource_File extends Smarty_CacheResource
      * @param string  $compile_id    compile id
      * @param integer $exp_time      expiration time (number of seconds, not timestamp)
      *
-     * @return integer number of cache files deleted
+     * @return int number of cache files deleted
      */
     public function clear(Smarty $smarty, $resource_name, $cache_id, $compile_id, $exp_time)
     {

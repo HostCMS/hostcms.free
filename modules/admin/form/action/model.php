@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Admin_Form_Action_Model extends Core_Entity
 {
@@ -29,6 +28,12 @@ class Admin_Form_Action_Model extends Core_Entity
 	 * Word name in back-end form
 	 */
 	public $word_name = NULL;
+
+	/**
+	 * Additional attrs
+	 * @var array
+	 */
+	public $attrs = array();
 
 	/**
 	 * One-to-many or many-to-many relations

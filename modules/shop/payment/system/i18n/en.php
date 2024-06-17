@@ -5,8 +5,7 @@
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Payment systems',
@@ -39,4 +38,6 @@ return array(
 	'type2' => 'Bank',
 	'type3' => 'Account',
 	'shop_order_status_id' => 'Payment order status',
+	'siteuser_groups' => "Siteuser group",
+	'all' => 'All',
 );

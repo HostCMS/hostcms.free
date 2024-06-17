@@ -8,11 +8,16 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Sql
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
-class Sql_Table_Field_Entity
+class Sql_Table_Field_Entity extends Core_Empty_Entity
 {
+	/**
+	 * Name of the model
+	 * @var string
+	 */
+	protected $_modelName = 'sql_table_field';
+
 	//public $view = NULL;
 
 	protected $_values = array();
@@ -21,7 +26,7 @@ class Sql_Table_Field_Entity
 	 * Fields
 	 * @var array
 	 */
-	protected $_fields = array(
+	protected $_tableColums = array(
 		'Field' => array(
 			'datatype' => 'string',
 			'type' => 'string',
@@ -90,15 +95,6 @@ class Sql_Table_Field_Entity
 		));
 
 	/**
-	 * Get tableColumns
-	 * @return array
-	 */
-	public function getTableColumns()
-	{
-		return $this->_fields;
-	}
-
-	/**
 	 * Get primary key value
 	 * @return mixed
 	 */
@@ -114,15 +110,6 @@ class Sql_Table_Field_Entity
 	public function getPrimaryKeyName()
 	{
 		return 'Field';
-	}
-
-	/**
-	 * Get model name
-	 * @return void
-	 */
-	public function getModelName()
-	{
-		return 'sql_table_field';
 	}
 
 	/**
@@ -159,21 +146,15 @@ class Sql_Table_Field_Entity
 		}
 	}
 
-
 	/**
 	 * Backend callback method
 	 * @return string
 	 */
 	public function DefaultBackend()
 	{
-		if ($this->Null == 'YES' && is_null($this->Default))
-		{
-			return 'NULL';
-		}
-		else
-		{
-			return htmlspecialchars((string) $this->Default);
-		}
+		return $this->Null == 'YES' && is_null($this->Default)
+			? 'NULL'
+			: htmlspecialchars((string) $this->Default);
 	}
 
 	/**

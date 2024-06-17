@@ -62,8 +62,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_ORM
 {
@@ -356,6 +355,16 @@ class Core_ORM
 	}
 
 	/**
+	 * Set table name
+	 * @return selg
+	 */
+	public function setTableName($tableName)
+	{
+		$this->_tableName = $tableName;
+		return $this;
+	}
+
+	/**
 	 * Delete object from database
 	 *
 	 * <code>
@@ -414,15 +423,15 @@ class Core_ORM
 	 */
 	static public function factory($modelName, $primaryKey = NULL)
 	{
-		$modelName = self::getClassName($modelName);
+		$className = self::getClassName($modelName);
 
-		if (!class_exists($modelName))
+		if (!class_exists($className))
 		{
-			throw new Core_Exception("Model '%modelName' does not exist",
+			throw new Core_Exception("Model '%modelName' does not exist. Check module activity!",
 				array('%modelName' => $modelName));
 		}
 
-		return new $modelName($primaryKey);
+		return new $className($primaryKey);
 	}
 
 	/**
@@ -1909,6 +1918,7 @@ class Core_ORM
 					}
 				break;
 				case 'geometry':
+				case 'set':
 					// nothing to do
 				break;
 				default:
@@ -2216,6 +2226,7 @@ class Core_ORM
 	/**
 	 * Convert Object to Array
 	 * @return array
+	 * @hostcms-event modelname.onAfterToArray
 	 */
 	public function toArray()
 	{
@@ -2232,7 +2243,12 @@ class Core_ORM
 			$return[$key] = $value;
 		}
 
-		return $return;
+		Core_Event::notify($this->_modelName . '.onAfterToArray', $this, array($return));
+		$eventResult = Core_Event::getLastReturn();
+
+		return is_array($eventResult)
+			? $eventResult
+			: $return;
 	}
 
 	/**

@@ -5,8 +5,7 @@
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Заказы магазина',
@@ -171,4 +170,13 @@ return array(
 	'change_user' => 'Изменение ответственного: "%s"',
 	'shop_order_status_deadline' => 'Время жизни статуса',
 	'company_account_id' => 'Расчетный счет',
+
+	'show_orders_comment' => 'Комментарии',
+	'show_comments_title' => 'Комментарии к заказам магазина "%s"',
+	'show_list_of_item_comments_properties_title' => "Список свойств отзывов о заказах интернет-магазина \"%s\"",
+	'add_value' => 'Добавить отсутствующие значения свойства по умолчанию у заказов',
+	'show_item_comment_title' => 'Комментарии заказа %s',
+
+	'tags' => 'Метки (теги)',
+	'type_tag' => 'Введите тэг ...',
 );

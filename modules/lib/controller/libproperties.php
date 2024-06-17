@@ -9,8 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Lib
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 {
@@ -418,7 +417,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 													Core_Html_Entity::factory('A')
 														->href("/admin/xsl/index.php?xsl_dir_id={$xsl_dir_id}&hostcms[checked][1][{$xsl_id}]=1&hostcms[action]=edit")
 														->target('_blank')
-														->class('input-group-addon bg-blue bordered-blue')
+														->class('input-group-addon blue')
 														->value('<i class="fa fa-pencil"></i>')
 												)
 										)
@@ -622,7 +621,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 													Core_Html_Entity::factory('A')
 														->href("/admin/tpl/index.php?tpl_dir_id={$tpl_dir_id}&hostcms[checked][1][{$tpl_id}]=1&hostcms[action]=edit")
 														->target('_blank')
-														->class('input-group-addon bg-blue bordered-blue')
+														->class('input-group-addon blue')
 														->value('<i class="fa fa-pencil"></i>')
 												)
 										)
@@ -670,7 +669,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 									'path' => $valueItem,
 									'show_params' => FALSE,
 									'originalName' => basename($valueItem),
-									'delete_onclick' => "$.adminLoad({path: '{$path}', additionalParams: 'hostcms[checked][0][{$this->_object->id}]=1&varible_name=" . Core_Str::escapeJavascriptVariable($oLib_Property->varible_name) . "', operation: '{$key}', action: 'deleteLibFile', windowId: '{$windowId}'}); return false",
+									'delete_onclick' => "$.adminLoad({path: '{$path}', additionalParams: 'hostcms[checked][0][{$this->_object->id}]=1&varible_name=" . Core_Str::escapeJavascriptVariable($oLib_Property->varible_name) . "&secret_csrf=" . Core_Security::getCsrfToken() . "', operation: '{$key}', action: 'deleteLibFile', windowId: '{$windowId}'}); return false",
 									// 'delete_href' => '',
 								)
 							);

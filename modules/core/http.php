@@ -49,8 +49,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Http
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 abstract class Core_Http
 {
@@ -70,6 +69,12 @@ abstract class Core_Http
 	protected $_originalConfig = NULL;
 
 	/**
+	 * The singleton instance.
+	 * @var array
+	 */
+	static private $_instance = array();
+
+	/**
 	 * Register an existing instance as a singleton.
 	 * @param string $name
 	 * @return object
@@ -81,19 +86,27 @@ abstract class Core_Http
 			throw new Core_Exception('Wrong argument type (expected String)');
 		}
 
-		$aConfig = Core::$config->get('core_http', array());
-
-		if (!isset($aConfig[$name]) || !isset($aConfig[$name]['driver']))
+		if (!isset(self::$_instance[$name]))
 		{
-			throw new Core_Exception('Core_Http "%name" configuration doesn\'t defined', array('%name' => $name));
+			$aConfig = Core::$config->get('core_http', array());
+
+			if (!isset($aConfig[$name]) || !isset($aConfig[$name]['driver']))
+			{
+				throw new Core_Exception('Core_Http "%name" configuration doesn\'t defined', array('%name' => $name));
+			}
+
+			// Base config of the $name + driver's default config
+			$aConfigDriver = $aConfig[$name]
+				+ Core_Array::get($aConfig, $aConfig[$name]['driver'], array())
+				+ array('options' => array());
+
+			$driver = self::_getDriverName($aConfigDriver['driver']);
+
+			self::$_instance[$name] = new $driver($aConfigDriver);
+			self::$_instance[$name]->config($aConfigDriver);
 		}
 
-		$aConfig[$name] += array('options' => array());
-
-		$driver = self::_getDriverName($aConfig[$name]['driver']);
-		$oDriver = new $driver($aConfig[$name]);
-
-		return $oDriver->config($aConfig[$name]);
+		return self::$_instance[$name];
 	}
 
 	/**
@@ -206,9 +219,8 @@ abstract class Core_Http
 			->contentType('application/x-www-form-urlencoded');
 
 		$this
-			->additionalHeader('Accept-Charset', 'utf-8, *;q=0.9')
-			->additionalHeader('Accept-Language', 'ru-ru, ru;q=0.8, en-us;q=0.5, en;q=0.3')
-			//->additionalHeader('Keep-Alive', '300')
+			->additionalHeader('Accept-Charset', 'utf-8,*;q=0.9')
+			->additionalHeader('Accept-Language', 'ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3')
 			->additionalHeader('Accept', 'text/html,application/xml,application/xhtml+xml;q=0.9,text/plain;q=0.8,*/*;q=0.7');
 
 		return $this;
@@ -520,7 +532,7 @@ abstract class Core_Http
 	/**
 	 * Parse HTTP status code
 	 * @param string $status status code, e.g. 'HTTP/1.1 200 OK'
-	 * @return int
+	 * @return int e.g. '200'
 	 */
 	public function parseHttpStatusCode($status)
 	{
@@ -590,6 +602,16 @@ abstract class Core_Http
 	}
 
 	/**
+	 * Sanitize Header Value
+	 * @param string $value
+	 * @return string
+	 */
+	static public function sanitizeHeader($value)
+	{
+		return str_replace(array("\r", "\n", "\0"), '', (string) $value);
+	}
+
+	/**
 	 * Get random OS for $browser and $version
 	 * @param string $browser
 	 * @param string $version
@@ -598,9 +620,9 @@ abstract class Core_Http
 	static public function getOs($browser, $version = NULL)
 	{
 		is_null($version) && $browser == 'firefox'
-			&& $version = rand(40, 96) . '.' . rand(0, 9);
+			&& $version = rand(40, 108) . '.' . rand(0, 9);
 
-		switch (rand(0,2))
+		switch (rand(0, 2))
 		{
 			// Windows
 			case 0:
@@ -643,14 +665,14 @@ abstract class Core_Http
 
 		if ($browser == 'chrome')
 		{
-			$version = rand(60, 97) . '.0.' . rand(1000, 5000) . '.' . rand(10, 400);
+			$version = rand(60, 118) . '.0.' . rand(1000, 5000) . '.' . rand(10, 400);
 			$os = self::getOs($browser, $version);
 			$appleVersion = (rand(0, 1) ? rand(533, 537) : rand(600, 603)) . '.' . rand(30, 50);
 			$userAgent = "Mozilla/5.0 ({$os}) AppleWebKit/{$appleVersion} (KHTML, like Gecko) Chrome/{$version} Safari/{$appleVersion}";
 		}
 		elseif ($browser == 'firefox')
 		{
-			$version = rand(60, 96) . '.' . rand(0, 9);
+			$version = rand(60, 108) . '.' . rand(0, 9);
 			$os = self::getOs($browser, $version);
 			$userAgent = "Mozilla/5.0 ({$os}) Gecko/20100101 Firefox/{$version}";
 		}

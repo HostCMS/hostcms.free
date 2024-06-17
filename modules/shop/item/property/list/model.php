@@ -7,9 +7,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @version 7.x
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Item_Property_List_Model extends Shop_Model
 {
@@ -142,7 +141,7 @@ class Shop_Item_Property_List_Model extends Shop_Model
 	 */
 	public function getLargeFileName(Core_Entity $object, $oFileValue, $originalFileName)
 	{
-		return 'shop_property_file_' . $object->id . '_' . $oFileValue->id . '.' . Core_File::getExtension($originalFileName);
+		return Property_Controller::getLargeFileName($object, $oFileValue, $originalFileName);
 	}
 
 	/**
@@ -154,7 +153,7 @@ class Shop_Item_Property_List_Model extends Shop_Model
 	 */
 	public function getSmallFileName(Core_Entity $object, $oFileValue, $originalFileName)
 	{
-		return 'small_shop_property_file_' . $object->id . '_' . $oFileValue->id . '.' . Core_File::getExtension($originalFileName);
+		return Property_Controller::getSmallFileName($object, $oFileValue, $originalFileName);
 	}
 
 	/**
@@ -174,7 +173,7 @@ class Shop_Item_Property_List_Model extends Shop_Model
 				->join('shop_item_property_for_groups', 'shop_item_property_for_groups.shop_item_property_id', '=', 'shop_item_properties.id')
 				->where('shop_item_property_for_groups.shop_id', '=', $this->id)
 				->where('shop_item_property_for_groups.shop_group_id', is_array($shop_group_id) ? 'IN' : '=', $shop_group_id);
-				
+
 			is_array($shop_group_id)
 				&& $oProperties
 					->queryBuilder()

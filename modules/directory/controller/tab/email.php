@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Directory
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Directory_Controller_Tab_Email extends Directory_Controller_Tab
 {
@@ -69,6 +68,7 @@ class Directory_Controller_Tab_Email extends Directory_Controller_Tab
 					->value($oUser_Directory_Email ? $oUser_Directory_Email->Directory_Email->value : '')
 					->caption(Core::_('Directory_Email.email'))
 					->divAttr(array('class' => 'form-group no-padding-left ' . ($this->showPublicityControlElement ? 'col-lg-4 col-xs-6' : 'col-lg-5 col-sm-5 col-xs-5')))
+					->class('form-control bold')
 			);
 
 		if ($this->showPublicityControlElement)

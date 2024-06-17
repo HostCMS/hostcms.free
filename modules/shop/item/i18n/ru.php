@@ -5,8 +5,7 @@
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Товары магазина',
@@ -151,9 +150,9 @@ return array(
 	'import_price_list_separator3' => "Табуляция",
 	'import_price_list_separator4' => 'Другой',
 	'import_price_list_separator' => "Разделитель",
-	'import_price_list_stop' => "Ограничитель",
-	'import_price_list_stop1' => "Кавычки",
-	'import_price_list_stop2' => 'Другой',
+	'limiter' => "Ограничитель",
+	'limiter1' => "Кавычки",
+	'limiter2' => 'Другой',
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
 	'price_list_encoding' => "Кодировка",
@@ -381,4 +380,15 @@ return array(
 
 	'set_modification_items_title' => 'Назначить модификацией',
 	'set_modification_success' => 'Модификации назначены успешно!',
+
+	'item_barcodes' => 'Штрихкоды',
+	'barcode_type' => 'Тип штрихкода',
+	'barcode_prefix' => 'Префикс',
+	'barcode_generate' => 'Сгенерировать',
+	'shop_item_barcode_set' => 'Штрихкоды сгенерированы успешно!',
+
+	'export_in_stock_items' => 'Экспортировать товары в наличии',
+
+	'closed' => 'Закрыт',
+	'changeIndexation_success' => 'Индексация товара изменена.',
 );

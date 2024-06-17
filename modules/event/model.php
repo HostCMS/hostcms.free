@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Event_Model extends Core_Entity
 {
@@ -44,7 +43,11 @@ class Event_Model extends Core_Entity
 		'event_crm_note' => array(),
 		'crm_note' => array('through' => 'event_crm_note'),
 		'dms_document' => array('through' => 'event_dms_document'),
-		'event_dms_document' => array()
+		'event_dms_document' => array(),
+		'event_calendar_caldav' => array(),
+		'tag' => array('through' => 'tag_event'),
+		'tag_event' => array(),
+		'event_checklist' => array()
 	);
 
 	/**
@@ -78,6 +81,14 @@ class Event_Model extends Core_Entity
 		'datetime',
 		'start',
 		'deadline',
+	);
+
+	/**
+	 * Default sorting for models
+	 * @var array
+	 */
+	protected $_sorting = array(
+		'events.datetime' => 'DESC',
 	);
 
 	/**
@@ -152,40 +163,38 @@ class Event_Model extends Core_Entity
 			? '<i class="fa fa-clock-o event-title-deadline"></i>'
 			: '';*/
 
-		?><div class="d-flex align-items-center"><?php
+		$opacity = $this->completed != 0
+			? 'opacity'
+			: '';
+
+		?><div class="d-flex align-items-center <?php echo $opacity?>"><?php
 		if ($this->Event_Attachments->getCount(FALSE))
 		{
 			?><i class="fa fa-paperclip name-attachments"></i><?php
 		}
 
-		?><div class="semi-bold editable" style="display: inline-block;" id="apply_check_0_<?php echo $this->id?>_fv_1226"><?php echo htmlspecialchars((string) $this->name)?></div></div>
-		<?php
-		if ($this->parent_id)
-		{
-			$oEvent = $this->Event;
-			?>
-			<span class="small gray"> → <a class="gray" href="/admin/event/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $oEvent->id?>]=1" onclick="$.modalLoad({path: '/admin/event/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oEvent->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>', width: '90%'}); return false"><?php echo htmlspecialchars((string) $this->Event->name)?></a></span>
-			<?php
-		}
-		elseif(Core::moduleIsActive('lead') && $this->Lead_Event->id)
-		{
-			$oLead = $this->Lead_Event->Lead;
-			?>
-			<span class="small gray"> → <a class="gray" href="/admin/lead/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $oLead->id?>]=1" onclick="$.modalLoad({path: '/admin/lead/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oLead->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>', width: '90%'}); return false"><?php echo htmlspecialchars((string) $this->Lead_Event->Lead->getFullName())?></a></span>
-			<?php
-		}
-		elseif(Core::moduleIsActive('deal') && $this->Deal_Event->id)
-		{
-			$oDeal = $this->Deal_Event->Deal;
-			?>
-			<span class="small gray"> → <a class="gray" href="/admin/deal/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $oDeal->id?>]=1" onclick="$.modalLoad({path: '/admin/deal/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oDeal->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>', width: '90%'}); return false"><?php echo htmlspecialchars((string) $this->Deal_Event->Deal->name)?></a></span>
-			<?php
-		}
-
+		?><div class="semi-bold editable" style="display: inline-block;" id="apply_check_0_<?php echo $this->id?>_fv_1226"><?php echo htmlspecialchars((string) $this->name)?></div><?php
+		echo $this->_showChecklists();
+		?></div><?php
 		if ($this->description != '')
 		{
 			?><div class="event-description"><?php echo nl2br(htmlspecialchars((string) $this->description))?></div><?php
 		}
+
+		$this->relatedBackend($oAdmin_Form_Field, $oAdmin_Form_Controller);
+
+		if (Core::moduleIsActive('tag'))
+		{
+			$aTags = $this->Tags->findAll(FALSE);
+
+			foreach ($aTags as $oTag)
+			{
+				Core_Html_Entity::factory('Code')
+					->value('<span class="badge badge-square badge-tag badge-max-width badge-lightgray margin-right-5" title="' . htmlspecialchars($oTag->name) . '"><i class="fa fa-tag"></i> ' . htmlspecialchars($oTag->name) . '</span>')
+					->execute();
+			}
+		}
+
 		?><div class="event-creator-wrapper"><div class="small2"><?php
 
 		$oEventCreator = $this->getCreator();
@@ -198,10 +207,56 @@ class Event_Model extends Core_Entity
 			?><span style="color: <?php echo $currentColor?>"><?php $oEventCreator->showLink($oAdmin_Form_Controller->getWindowId())?></span><?php
 		}
 
+		// Ответственные сотрудники
+		$aEvent_Users = $this->Event_Users->findAll();
+
+		if (count($aEvent_Users))
+		{
+			foreach ($aEvent_Users as $oEvent_User)
+			{
+				$oResponsibleUser = $oEvent_User->User;
+
+				if (!is_null($oEventCreator) && !is_null($oResponsibleUser->id) && $oEventCreator->id != $oResponsibleUser->id)
+				{
+					$currentColor = Core_Str::createColor($oResponsibleUser->id);
+
+					?>
+					<div class="deal-responsible" style="color: <?php echo $currentColor?>"><?php $oResponsibleUser->showLink($oAdmin_Form_Controller->getWindowId())?></div><?php
+				}
+			}
+		}
+
 		?></div><span class="small darkgray text-align-right"><i class="fa fa-clock-o"></i><?php echo Core_Date::time2string(time() - Core_Date::sql2timestamp($this->datetime))?></span><?php
 		?></div><?php
 
 		return ob_get_clean();
+	}
+
+	/**
+	 * Show event checklists
+	 * @return string
+	 */
+	protected function _showChecklists()
+	{
+		$iTotalCount = $iCompletedCount = 0;
+
+		$aEvent_Checklists = $this->Event_Checklists->findAll(FALSE);
+		foreach ($aEvent_Checklists as $oEvent_Checklist)
+		{
+			$iCompletedCount += $oEvent_Checklist->Event_Checklist_Items->getCountByCompleted(1, FALSE);
+			$iTotalCount += $oEvent_Checklist->Event_Checklist_Items->getCount(FALSE);
+		}
+
+		// var_dump('completed', $iCompletedCount);
+		// var_dump('total', $iTotalCount);
+
+		if ($iTotalCount)
+		{
+			$color = '#777';
+			$style = "border-color: " . $color . "; color: " . Core_Str::hex2darker($color, 0.2) . "; background-color: " . Core_Str::hex2lighter($color, 0.88);
+
+			return '<span class="badge badge-round badge-max-width margin-left-5" style="' . $style . '"><i class="fa-regular fa-square-check margin-right-5"></i>' . $iCompletedCount . '/' . $iTotalCount . '</span>';
+		}
 	}
 
 	/**
@@ -276,36 +331,53 @@ class Event_Model extends Core_Entity
 	 */
 	public function deadlineBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
+		$color = '';
+
+		$bShowTime = $this->all_day ? FALSE : TRUE;
+
 		if ($this->deadline != '0000-00-00 00:00:00')
 		{
 			if ($this->completed)
 			{
-				$class = 'darkgray';
+				// $class = 'darkgray';
+				$color = '#777';
 			}
 			elseif (Core_Date::sql2timestamp($this->deadline) < time())
 			{
-				$class = 'badge badge-orange';
+				// $class = 'badge badge-orange';
+				$color = '#fb6e52';
 			}
 			elseif (Core_Date::timestamp2sqldate(Core_Date::sql2timestamp($this->deadline)) == Core_Date::timestamp2sqldate(time()))
 			{
-				$class = 'badge badge-palegreen';
+				// $class = 'badge badge-palegreen';
+				$color = '#a0d468';
 			}
 			else
 			{
-				$class = 'badge badge-lightgray';
+				// $class = 'badge badge-lightgray';
+				$color = '#999';
 			}
+
+			$text = Core_Date::timestamp2string(Core_Date::sql2timestamp($this->deadline), $bShowTime);
+		}
+		else
+		{
+			$color = '#888';
+
+			$text = Core::_('Event.without_deadline');
 		}
 
-		$bShowTime = $this->all_day ? FALSE : TRUE;
+		$style = $color != ''
+			? "border-color: " . $color . "; color: " . Core_Str::hex2darker($color, 0.2) . "; background-color: " . Core_Str::hex2lighter($color, 0.88)
+			: '';
 
-		return $this->deadline != '0000-00-00 00:00:00'
-			? '<span class="' . $class . ' small2">' . Core_Date::timestamp2string(Core_Date::sql2timestamp($this->deadline), $bShowTime) . '</span>'
+		return $this->completed != 1 && $style != ''
+			? '<span class="badge badge-round badge-max-width" style="' . $style . '">' . $text . '</span>'
 			: '';
 	}
 
 	/**
 	 * Backend callback method
-	 * @return string
 	 */
 	public function relatedBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
@@ -329,7 +401,6 @@ class Event_Model extends Core_Entity
 	/**
 	 * Show deal badge
 	 * @param Admin_Form_Controller_Model $oAdmin_Form_Controller
-	 * @return string
 	 */
 	public function showDeals($oAdmin_Form_Controller)
 	{
@@ -352,7 +423,6 @@ class Event_Model extends Core_Entity
 	/**
 	 * Show lead badge
 	 * @param Admin_Form_Controller_Model $oAdmin_Form_Controller
-	 * @return string
 	 */
 	public function showLeads($oAdmin_Form_Controller)
 	{
@@ -748,9 +818,11 @@ class Event_Model extends Core_Entity
 		{
 			$this->finish = Core_Date::timestamp2sql(time());
 		}
+		else
+		{
+			$this->finish = '0000-00-00 00:00:00';
+		}
 
-		// $this->completed = 1 - $this->completed;
-		// !$this->completed && $this->event_status_id = 0;
 		$this->save();
 
 		$this->changeCompletedSendNotification();
@@ -950,6 +1022,7 @@ class Event_Model extends Core_Entity
 		$this->Event_Histories->deleteAll(FALSE);
 		$this->Crm_Notes->deleteAll(FALSE);
 		$this->Event_Crm_Notes->deleteAll(FALSE);
+		$this->Event_Checklists->deleteAll(FALSE);
 
 		$this->Event_Dms_Documents->deleteAll(FALSE);
 
@@ -966,6 +1039,17 @@ class Event_Model extends Core_Entity
 		if (Core::moduleIsActive('lead'))
 		{
 			$this->Lead_Events->deleteAll(FALSE);
+		}
+
+		if (Core::moduleIsActive('calendar'))
+		{
+			$this->Event_Calendar_Caldavs->deleteAll(FALSE);
+		}
+
+		if (Core::moduleIsActive('tag'))
+		{
+			// Удаляем метки
+			$this->Tag_Events->deleteAll(FALSE);
 		}
 
 		/*if (Core::moduleIsActive('dms'))
@@ -1163,6 +1247,11 @@ class Event_Model extends Core_Entity
 		return $this->deadline;
 	}
 
+	/**
+	 * Show content
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
 	public function showContent($oAdmin_Form_Controller)
 	{
 		$oUser = Core_Auth::getCurrentUser();
@@ -1649,6 +1738,50 @@ class Event_Model extends Core_Entity
 
 		$this->event_type_id
 			&& $this->addEntity($this->Event_Type);
+
+		return $this;
+	}
+
+	/**
+	 * Apply tags for item
+	 * @param string $sTags string of tags, separated by comma
+	 * @return self
+	 */
+	public function applyTags($sTags)
+	{
+		$aTags = explode(',', $sTags);
+
+		return $this->applyTagsArray($aTags);
+	}
+
+	/**
+	 * Apply array tags for item
+	 * @param array $aTags array of tags
+	 * @return self
+	 */
+	public function applyTagsArray(array $aTags)
+	{
+		// Удаляем связь метками
+		$this->Tag_Events->deleteAll(FALSE);
+
+		foreach ($aTags as $tag_name)
+		{
+			$tag_name = trim($tag_name);
+
+			if ($tag_name != '')
+			{
+				$oTag = Core_Entity::factory('Tag')->getByName($tag_name, FALSE);
+
+				if (is_null($oTag))
+				{
+					$oTag = Core_Entity::factory('Tag');
+					$oTag->name = $oTag->path = $tag_name;
+					$oTag->save();
+				}
+
+				$this->add($oTag);
+			}
+		}
 
 		return $this;
 	}

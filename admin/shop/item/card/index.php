@@ -5,7 +5,7 @@
 * @package HostCMS
 * @version 7.x
 * @author Hostmake LLC
-* @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2024, https://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -16,7 +16,7 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
 // Контроллер формы
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path('/admin/shop/item/card/index.php');
 
@@ -172,7 +172,7 @@ else
 	);
 
 	$oAdmin_View = Admin_View::create()
-		->module(Core_Module::factory($sModule))
+		->module(Core_Module_Abstract::factory($sModule))
 		->pageTitle(Core::_('Shop_Item.item_cards_print'))
 		->addChild($oAdmin_Form_Entity_Breadcrumbs);
 

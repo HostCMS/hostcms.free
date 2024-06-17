@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Skin_Bootstrap extends Core_Skin
 {
@@ -55,6 +54,7 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/ace/ext-language_tools.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/ace/ext-searchbox-hostcms.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/ace/ext-prompt.js')
+			// ->addJs('/modules/skin/' . $this->_skinName . '/js/ace/ext-beautify.js')
 
 			->addJs('/modules/skin/' . $this->_skinName . '/js/star-rating.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/typeahead-bs2.min.js')
@@ -74,6 +74,10 @@ class Skin_Bootstrap extends Core_Skin
 
 			->addJs('/modules/skin/' . $this->_skinName . '/js/bootstrap-editable/js/bootstrap-editable.min.js')
 
+			->addJs('/modules/skin/' . $this->_skinName . '/js/sip/howler.min.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/sip/jssip.min.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/sip/softophone.js', 'module')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/sip/jquery.softophone.js', 'module')
 
 			//->addJs('/modules/skin/' . $this->_skinName . '/js/timeslider/timeslider.js')
 			//->addJs('/modules/skin/' . $this->_skinName . '/js/fuelux/wizard/wizard-custom.min.js')
@@ -124,10 +128,11 @@ class Skin_Bootstrap extends Core_Skin
 
 		<?php
 		$this->addJs('/modules/skin/' . $this->_skinName . "/js/lng/{$lng}/{$lng}.js");
-		foreach ($this->_js as $sPath)
+		foreach ($this->_js as $aJs)
 		{
 			Core_Html_Entity::factory('Script')
-				->src($sPath . '?' . $timestamp)
+				->src($aJs['src'] . '?' . $timestamp)
+				->type($aJs['type'])
 				->execute();
 		}
 		/*<!-- Fonts -->
@@ -147,7 +152,6 @@ class Skin_Bootstrap extends Core_Skin
 		}
 		?>
 		</script>
-
 		<script src="/admin/wysiwyg/jquery.tinymce.min.js?<?php echo $timestamp?>"></script>
 		<?php
 		if ($this->_mode != 'install')
@@ -241,119 +245,125 @@ class Skin_Bootstrap extends Core_Skin
 						?><div class="navbar-account">
 							<ul class="account-area">
 								<?php
-								/*
-								?>
-								<li id="phone">
-									<a href="#" title="<?php echo Core::_('Admin.phone')?>" data-toggle="dropdown" class="dropdown-toggle">
-										<i class="icon fa fa-phone"></i>
-										<!--<span class="badge hidden"></span>-->
-									</a>
-									<div id="phoneListBox" class="pull-left dropdown-menu dropdown-arrow dropdown-bookmark dropdown-notifications dropdown-phone">
-										<div>
-											<input class="form-control phone-number" type="text" placeholder="Введите номер телефона"/>
-											<span class="backspace-button hidden"><i class="fas fa-backspace"></i></span>
-										</div>
-										<div class="pad hidden">
-											<div class="dial-pad">
-												<div class="digits">
-													<div class="wrapper"><div class="dig number-dig" name="1">1</div></div>
-													<div class="wrapper"><div class="dig number-dig" name="2">2</div></div>
-													<div class="wrapper"><div class="dig number-dig" name="3">3</div></div>
-													<div class="wrapper"><div class="dig number-dig" name="4">4</div></div>
-													<div class="wrapper"><div class="dig number-dig" name="5">5</div></div>
-													<div class="wrapper"><div class="dig number-dig" name="6">6</div></div>
-													<div class="wrapper"><div class="dig number-dig" name="7">7</div></div>
-													<div class="wrapper"><div class="dig number-dig" name="8">8</div></div>
-													<div class="wrapper"><div class="dig number-dig" name="9">9</div></div>
-													<div class="wrapper"><div class="dig number-dig astrisk" name="*">*</div></div>
-													<div class="wrapper"><div class="dig number-dig" name="0">0</div></div>
-													<div class="wrapper"><div class="dig number-dig" name="#">#</div></div>
-													<div class="wrapper"><div class="dig number-dig" name="+">+</div></div>
-												</div>
-											</div>
-										</div>
-										<div class="phone-action-buttons">
-											<div class="call"><a href="#"><i class="fas fa-phone-alt palegreen"></i></a></div>
-											<div class="hangup hidden"><a href="#"><i class="fas fa-phone-slash darkorange"></i></a></div>
-											<div class="timer white hidden">00:53</div>
-											<div class="microphone"><a href="#"><i class="fas fa-microphone gray"></i></a></div>
-											<div class="keyboard"><a href="#"><i class="fas fa-keyboard"></i></a></div>
-										</div>
-									</div>
-									<script>
-									$(function (){
-										var jPhoneListBox = $('.navbar-account #phoneListBox');
+								if (Core::moduleIsActive('telephony'))
+								{
+									$aTelephonies = Core_Entity::factory('Telephony')->getTelephonies();
+									if (count($aTelephonies))
+									{
+										$aLines = array();
+										foreach ($aTelephonies as $oTelephony)
+										{
+											$oTelephony_Lines = $oTelephony->Telephony_Lines;
+											$oTelephony_Lines->queryBuilder()
+												->where('user_id', '=', $oUser->id)
+												->where('active', '=', 1);
 
-										jPhoneListBox.on({
-											'click': function (event){
-												event.stopPropagation();
-											},
-											'touchstart': function (event) {
-												$(this).data({'isTouchStart': true});
+											$aTelephony_Lines = $oTelephony_Lines->findAll(FALSE);
+
+											foreach ($aTelephony_Lines as $oTelephony_Line)
+											{
+												if ($oTelephony_Line->login != '' && $oTelephony_Line->password != '')
+												{
+													$aLines[] = $oTelephony_Line;
+												}
 											}
-										});
+										}
 
-										$(function(){
-											$.extend({
-												toggleBackspace: function()
-												{
-													var phone = $('.phone-number').val();
+										if (count($aLines))
+										{
+											?><li id="softophone">
+												<a href="#" title="<?php echo Core::_('Admin.phone')?>" data-toggle="dropdown" class="dropdown-toggle">
+													<i class="icon fa fa-phone"></i>
+													<!--<span class="badge hidden"></span>-->
+												</a>
+												<div id="phoneListBox" class="pull-left dropdown-menu dropdown-arrow dropdown-bookmark dropdown-notifications dropdown-phone">
+													<div class="phone-number-wrapper">
+														<input class="form-control phone-number" type="text" placeholder="Введите номер телефона"/>
+														<span class="backspace-button hidden"><i class="fas fa-backspace"></i></span>
+													</div>
+													<div class="telephony-name-wrapper">
+														<i class="fa-solid fa-circle fa-xs darkorange"></i>
+														<select class="telephony-name"><?php
+															foreach ($aLines as $oLine)
+															{
+																?><option data-line="<?php echo $oLine->id?>" value="<?php echo $oLine->id?>"><?php echo htmlspecialchars($oLine->name)?> [<?php echo htmlspecialchars($oLine->Telephony->name)?>]</option><?php
+															}
+														?></select>
+													</div>
+													<div class="caller-name hidden"><i class="fa-solid fa-user margin-right-5"></i><span></span></div>
+													<div class="pad hidden">
+														<div class="dial-pad">
+															<div class="digits">
+																<div class="wrapper"><div class="dig number-dig" name="1">1</div></div>
+																<div class="wrapper"><div class="dig number-dig" name="2">2</div></div>
+																<div class="wrapper"><div class="dig number-dig" name="3">3</div></div>
+																<div class="wrapper"><div class="dig number-dig" name="4">4</div></div>
+																<div class="wrapper"><div class="dig number-dig" name="5">5</div></div>
+																<div class="wrapper"><div class="dig number-dig" name="6">6</div></div>
+																<div class="wrapper"><div class="dig number-dig" name="7">7</div></div>
+																<div class="wrapper"><div class="dig number-dig" name="8">8</div></div>
+																<div class="wrapper"><div class="dig number-dig" name="9">9</div></div>
+																<div class="wrapper"><div class="dig number-dig astrisk" name="*">*</div></div>
+																<div class="wrapper"><div class="dig number-dig" name="0">0</div></div>
+																<div class="wrapper"><div class="dig number-dig" name="#">#</div></div>
+																<div class="wrapper"><div class="dig number-dig" name="+">+</div></div>
+															</div>
+														</div>
+													</div>
+													<div class="phone-action-buttons">
+														<div class="call"><a href="#"><i class="fa-solid fa-phone palegreen"></i></a></div>
+														<div class="hangup hidden"><a href="#"><i class="fa-solid fa-phone-slash darkorange"></i></a></div>
+														<div class="timer white hidden"><span id="minutes">00</span>:<span id="seconds">00</span></div>
+														<div class="microphone"><a href="#"><i class="fa-solid fa-microphone gray"></i></a></div>
+														<div class="keyboard"><a href="#"><i class="fa-solid fa-keyboard"></i></a></div>
+													</div>
+												</div>
+												<script type="module">
+													$(function () {
+														$.softophonePrepare();
 
-													if (phone.length)
-													{
-														$('.backspace-button').removeClass('hidden');
-													}
-													else
-													{
-														$('.backspace-button').addClass('hidden');
-													}
-												}
-											});
+														var aLines = [];
 
-											$('.phone-number').on('keyup', function(){
-												$.toggleBackspace();
-											});
+														<?php
+														foreach ($aLines as $oTelephony_Line)
+														{
+															$oTelephony = $oTelephony_Line->Telephony;
 
-											$('.backspace-button').on('click', function(){
-												// $('.phone-number').focus();
+															$aSettings = !is_null($oTelephony->settings)
+																? json_decode($oTelephony->settings, TRUE)
+																: array();
 
-												var phone = $('.phone-number').val();
-												$('.phone-number').val(phone.substring(0, phone.length - 1));
+															$register_server = isset($aSettings['register_server']) ? htmlspecialchars($aSettings['register_server']) : '';
 
-												if (phone.length == 1)
-												{
-													$('.backspace-button').addClass('hidden');
-												}
-											});
+															if ($register_server != '')
+															{
+																?>aLines[<?php echo Core_Str::escapeJavascriptVariable($oTelephony_Line->id)?>] = {
+																	server: '<?php echo Core_Str::escapeJavascriptVariable($oTelephony->server)?>',
+																	login: '<?php echo Core_Str::escapeJavascriptVariable($oTelephony_Line->login)?>',
+																	password: '<?php echo Core_Str::escapeJavascriptVariable($oTelephony_Line->password)?>',
+																	register_server: '<?php echo Core_Str::escapeJavascriptVariable($register_server)?>',
+																	display_name: '<?php echo Core_Str::escapeJavascriptVariable($oTelephony_Line->name)?>'
+																};<?php
+															}
+														}
+														?>
 
-											$('.microphone').on('click', function(){
-												$(this).find('i').toggleClass('fa-microphone gray fa-microphone-slash darkorange');
-											});
+														$('.telephony-name-wrapper .telephony-name').on('change', function(){
+															var line = $(this).val();
 
-											$('.keyboard').on('click', function(){
-												$('.pad').toggleClass('hidden');
-												$(this).find('i').toggleClass('azure');
-												$('.phone-action-buttons').toggleClass('padding-bottom-10');
-												$('.phone-number').focus();
-											});
+															if (typeof aLines[line] != "undefined")
+															{
+																$.initSoftophone(line, aLines[line]);
+															}
+														});
 
-											$('.dial-pad .number-dig').on('click', function(){
-												var phone = $('.phone-number').val();
-												$('.phone-number').val(phone + $(this).text());
-
-												$.toggleBackspace();
-												$('.phone-number').focus();
-											});
-
-											$('.navbar li#phone').on('shown.bs.dropdown', function (event){
-												$('.phone-number').focus();
-											});
-										});
-									});
-									</script>
-								</li>
-								<?php
-								*/
+														$('.telephony-name-wrapper .telephony-name').change();
+													});
+												</script>
+											</li><?php
+										}
+									}
+								}
 								?>
 								<li id="bookmarks">
 									<a href="#" title="<?php echo Core::_('Admin.bookmarks')?>" data-toggle="dropdown" class="dropdown-toggle">
@@ -403,7 +413,7 @@ class Skin_Bootstrap extends Core_Skin
 								</li>
 								<li>
 									<a id="sound-switch" title="<?php echo Core::_('Admin.sound')?>" href="#">
-										<i class="icon fa-solid fa-<?php echo $oUser->sound ? 'volume-high' : 'volume-off'?>"></i>
+										<i class="icon fa-solid fa-<?php echo $oUser->sound ? 'volume-high' : 'volume-xmark'?>"></i>
 									</a>
 
 									<?php
@@ -532,9 +542,9 @@ class Skin_Bootstrap extends Core_Skin
 											<span class="input-icon">
 												<input type="text" class="form-control input-xs" id="notification-search" />
 												<i class="glyphicon glyphicon-search"></i>
-												<i class="glyphicon glyphicon-remove palegreen" title="<?php echo Core::_('Notification.search_clear_button_tittle');?>" style="cursor:pointer; position: absolute; left: 93%;bottom: 0;line-height: 24px;font-size: 10px;width: 24px;padding-top: 0px;"></i>
+												<i class="glyphicon glyphicon-remove palegreen" title="<?php echo Core::_('Notification.search_clear_button_tittle')?>" style="cursor:pointer; position: absolute; left: 93%;bottom: 0;line-height: 24px;font-size: 10px;width: 24px;padding-top: 0px;"></i>
 											</span>
-											<span class="pull-right darkorange" style="display: block; margin-right: 5px; cursor:pointer;"><i class="fa fa-trash-o" title="<?php echo Core::_('Notification.notifications_trash_title'); ?>"></i></span>
+											<span class="notification-delete"><i class="fa fa-trash-o" title="<?php echo Core::_('Notification.notifications_trash_title')?>"></i></span>
 										</div>
 									</div>
 
@@ -824,6 +834,8 @@ class Skin_Bootstrap extends Core_Skin
 										$aWorkdayStatuses = array('ready', 'denied', 'working', 'break', 'completed', 'expired');
 
 										$statusClassName = Core_Array::get($aWorkdayStatuses, $workdayStatus, 0);
+
+										$csrf_token = Core_Security::getCsrfToken();
 										?>
 										<li class="workday">
 											<div id="workdayControl" class="<?php echo $statusClassName?> pull-left">
@@ -884,7 +896,7 @@ class Skin_Bootstrap extends Core_Skin
 											</ul>
 										</li>
 										<li class="dropdown-footer">
-											<a href="/admin/logout.php" onmousedown="$(window).off('beforeunload')"><?php echo Core::_('Admin.exit')?></a>
+											<a href="/admin/logout.php?secret_csrf=<?php echo $csrf_token?>" onmousedown="$(window).off('beforeunload')"><?php echo Core::_('Admin.exit')?></a>
 										</li>
 									</ul>
 
@@ -1007,6 +1019,7 @@ class Skin_Bootstrap extends Core_Skin
 										$('<a>')
 											.attr('href', item.href)
 											.attr('onclick', item.onclick)
+											.attr('title', item.label)
 											.text(item.label)
 									)
 									.appendTo(ul.addClass('searchhelper'));
@@ -1063,7 +1076,7 @@ class Skin_Bootstrap extends Core_Skin
 			// До onLoadSkinConfig, чтобы отработать навешенные в конструкторе Skin_Module_... хуки
 			$aCore_Module[$oModule->path] = $this->getSkinModule($oModule->path);
 			// Не для каждого модуля определен Skin_ класс
-			is_null($aCore_Module[$oModule->path]) && $aCore_Module[$oModule->path] = Core_Module::factory($oModule->path);
+			is_null($aCore_Module[$oModule->path]) && $aCore_Module[$oModule->path] = Core_Module_Abstract::factory($oModule->path);
 		}
 		unset($aModules);
 
@@ -1102,7 +1115,7 @@ class Skin_Bootstrap extends Core_Skin
 						<?php
 						foreach ($subItems as $oModule)
 						{
-							//$oCore_Module = Core_Module::factory($oModule->path);
+							//$oCore_Module = Core_Module_Abstract::factory($oModule->path);
 							$oCore_Module = Core_Array::get($aCore_Module, $oModule->path);
 
 							if ($oCore_Module)
@@ -1166,7 +1179,7 @@ class Skin_Bootstrap extends Core_Skin
 			// Невошедшие в другие группы
 			foreach ($aModuleList as $oModule)
 			{
-				//$oCore_Module = Core_Module::factory($oModule->path);
+				//$oCore_Module = Core_Module_Abstract::factory($oModule->path);
 				$oCore_Module = Core_Array::get($aCore_Module, $oModule->path);
 
 				if ($oCore_Module)
@@ -1234,13 +1247,11 @@ class Skin_Bootstrap extends Core_Skin
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta charset="utf-8" />
-<title><?php echo htmlspecialchars($this->_title)?></title>
+<title><?php echo htmlspecialchars((string) $this->_title)?></title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="referrer" content="no-referrer" />
-<link rel="apple-touch-icon" href="/modules/skin/bootstrap/ico/icon-iphone-retina.png" />
-<link rel="shortcut icon" type="image/x-icon" href="/modules/skin/bootstrap/ico/favicon.ico" />
-<link rel="icon" type="image/png" href="/modules/skin/bootstrap/ico/favicon.png" />
+<link rel="icon" type="image/svg+xml" href="/modules/skin/bootstrap/ico/favicon.svg" />
 <?php $this->showHead()?>
 </head>
 <body class="body-<?php echo htmlspecialchars((string) $this->_mode)?> hostcms-bootstrap1">
@@ -1249,7 +1260,7 @@ class Skin_Bootstrap extends Core_Skin
 		{
 			if (Core_Auth::logged())
 			{
-				$this->loadingContainer();
+				/*$this->_mode != 'blank' && */$this->loadingContainer();
 
 				if (!in_array($this->_mode, array('blank', 'authorization')))
 				{
@@ -1304,6 +1315,8 @@ class Skin_Bootstrap extends Core_Skin
 		}
 
 		$bDeviceTracking = !isset($_SERVER['HTTP_CF_IPCOUNTRY']) && Core_Array::getCookie('hostcms_device_tracking', 'on') == 'on';
+
+		$time = time();
 		?>
 
 		<div class="loginbox">
@@ -1328,6 +1341,7 @@ class Skin_Bootstrap extends Core_Skin
 				<div class="loginbox-submit">
 					<input type="submit" name="submit" class="btn btn-danger btn-block" value="<?php echo Core::_('Admin.authorization_form_button')?>">
 				</div>
+				<input type="hidden" name="secret_csrf" value="<?php echo Core_Security::getCsrfToken()?>">
 			</form>
 		</div>
 		</div>
@@ -1384,7 +1398,7 @@ class Skin_Bootstrap extends Core_Skin
 <div class="container">
 	<div class="row">
 		<div class="col-xs-12">
-			<p class="copy pull-left copyright">Copyright © 2005–2023 <?php echo Core::_('Admin.company')?></p>
+			<p class="copy pull-left copyright">Copyright © 2005–2024 <?php echo Core::_('Admin.company')?></p>
 			<p class="copy text-right contacts">
 				<?php echo Core::_('Admin.website')?> <a href="http://<?php echo Core::_('Admin.company-website')?>" target="_blank"><?php echo Core::_('Admin.company-website')?></a>
 				<br/>
@@ -1587,15 +1601,14 @@ class Skin_Bootstrap extends Core_Skin
 			<div class="row">
 				<?php
 				// Core
-				$Core_Module = $this->getSkinModule('core');
-
+				/*$Core_Module = $this->getSkinModule('core');
 				if (!is_null($Core_Module))
 				{
 					if (method_exists($Core_Module, 'widget'))
 					{
 						$Core_Module->widget();
 					}
-				}
+				}*/
 
 				// Other modules
 				$oSite = Core_Entity::factory('Site', CURRENT_SITE);
@@ -1853,6 +1866,8 @@ class Skin_Bootstrap extends Core_Skin
 		$oHostcmsSubPanel = Core_Html_Entity::factory('Div')
 			->class('hostcmsSubPanel');
 
+		$csrf_token = Core_Security::getCsrfToken();
+
 		$oHostcmsTopPanel
 			->add(
 				Core_Html_Entity::factory('Div')
@@ -1873,8 +1888,8 @@ class Skin_Bootstrap extends Core_Skin
 					)
 					->add(
 						Core_Html_Entity::factory('A')
-							->href('/admin/logout.php')
-							->onclick("hQuery.ajax({url: '/admin/logout.php', dataType: 'html', success: function() {location.reload()}}); return false;")
+							->href('/admin/logout.php?secret_csrf=' . $csrf_token)
+							->onclick("hQuery.ajax({url: '/admin/logout.php?secret_csrf={$csrf_token}', dataType: 'html', success: function() {location.reload()}}); return false;")
 							->add(
 								Core_Html_Entity::factory('I')
 									->id('hostcmsLogout')
@@ -2313,12 +2328,16 @@ class Skin_Bootstrap extends Core_Skin
 			'toolbar1',
 			'menubar',
 			'file_picker_callback',
+			'content_css',
 		);
 
 		foreach ($aCoreConfig as $key => $value)
 		{
-			!in_array($key, $aExcludeKeys)
-				&& $aConfig[] = $key . ": " . $value;
+			if (!in_array($key, $aExcludeKeys))
+			{
+				is_bool($value) && $value = $value ? 'true' : 'false';
+				$aConfig[] = "{$key}: {$value}";
+			}
 		}
 
 		$oHostcmsTopPanel

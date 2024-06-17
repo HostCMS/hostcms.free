@@ -7,14 +7,20 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @version 7.x
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
-class Skin_Default_Admin_Form_Entity_Stars extends Skin_Default_Admin_Form_Entity_Select {
-
+class Skin_Default_Admin_Form_Entity_Stars extends Skin_Default_Admin_Form_Entity_Select
+{
+	/**
+	 * Executes the business logic.
+	 * @hostcms-event Skin_Default_Admin_Form_Entity_A.onBeforeExecute
+	 * @hostcms-event Skin_Default_Admin_Form_Entity_A.onAfterExecute
+	 */
 	public function execute()
 	{
+		Core_Event::notify(get_class($this) . '.onBeforeExecute', $this);
+
 		$this
 			->options(
 				array(
@@ -25,6 +31,9 @@ class Skin_Default_Admin_Form_Entity_Stars extends Skin_Default_Admin_Form_Entit
 					5 => 'Excellent',
 				)
 			);
+
 		return parent::execute();
+
+		Core_Event::notify(get_class($this) . '.onAfterExecute', $this);
 	}
 }

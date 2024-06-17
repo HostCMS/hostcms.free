@@ -43,7 +43,7 @@
 			</xsl:if>
 
 			<p>&labelLine5;
-				<br />&labelRequired;</p>
+			<br />&labelRequired;</p>
 
 			<div class="comment">
 				<form action="/users/registration/" method="post" enctype="multipart/form-data">
@@ -66,7 +66,7 @@
 					<div class="row">
 						<div class="caption">&labelEmail;</div>
 						<div class="field">
-							<input name="email" type="text" value="{email}" size="35"/> *</div>
+						<input name="email" type="text" value="{email}" size="35"/> *</div>
 					</div>
 					<div class="row">
 						<div class="caption">&labelName;</div>
@@ -95,7 +95,7 @@
 
 						<div class="row">
 							<div class="caption">
-						&labelCaptchaId;<sup><font color="red">*</font></sup>
+								&labelCaptchaId;<sup><font color="red">*</font></sup>
 							</div>
 							<div class="field">
 								<input type="hidden" name="captcha_id" value="{/siteuser/captcha_id}"/>
@@ -121,6 +121,7 @@
 							<input name="apply" type="submit" value="{$buttonName}" class="button" />
 						</div>
 					</div>
+					<input type="hidden" name="csrf_token" value="{csrf_token}"/>
 				</form>
 			</div>
 		</div>

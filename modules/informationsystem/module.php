@@ -8,10 +8,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
-class Informationsystem_Module extends Core_Module
+class Informationsystem_Module extends Core_Module_Abstract
 {
 	/**
 	 * Module version
@@ -23,7 +22,7 @@ class Informationsystem_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2023-07-17';
+	public $date = '2024-06-06';
 
 	/**
 	 * Module name
@@ -103,11 +102,12 @@ class Informationsystem_Module extends Core_Module
 	/**
 	 * Функция обратного вызова для поисковой индексации
 	 *
-	 * @param $offset
-	 * @param $limit
+	 * @param int $site_id
+	 * @param int $offset
+	 * @param int $limit
 	 * @return array
 	 */
-	public function indexing($offset, $limit)
+	public function indexing($site_id, $offset, $limit)
 	{
 		if (!isset($_SESSION['search_block']))
 		{
@@ -128,7 +128,7 @@ class Informationsystem_Module extends Core_Module
 					->status(Core_Log::$MESSAGE)
 					->write("indexingInformationsystemGroups({$offset}, {$limit})");
 
-				$aPages = $this->indexingInformationsystemGroups($offset, $limit);
+				$aPages = $this->indexingInformationsystemGroups($site_id, $offset, $limit);
 
 				$currentStepCount = count($aPages);
 
@@ -150,7 +150,7 @@ class Informationsystem_Module extends Core_Module
 					->status(Core_Log::$MESSAGE)
 					->write("indexingInformationsystemItems({$offset}, {$limit})");
 
-				$aTmpResult = $this->indexingInformationsystemItems($offset, $limit);
+				$aTmpResult = $this->indexingInformationsystemItems($site_id, $offset, $limit);
 
 				$currentStepCount = count($aTmpResult);
 
@@ -163,13 +163,15 @@ class Informationsystem_Module extends Core_Module
 	/**
 	 * Индексация информационных групп
 	 *
+	 * @param int $site_id
 	 * @param int $offset
 	 * @param int $limit
 	 * @return array
 	 * @hostcms-event Informationsystem_Module.indexingInformationsystemGroups
 	 */
-	public function indexingInformationsystemGroups($offset, $limit)
+	public function indexingInformationsystemGroups($site_id, $offset, $limit)
 	{
+		$site_id = intval($site_id);
 		$offset = intval($offset);
 		$limit = intval($limit);
 
@@ -186,6 +188,7 @@ class Informationsystem_Module extends Core_Module
 			->where('informationsystem_groups.shortcut_id', '=', 0)
 			->where('informationsystem_groups.active', '=', 1)
 			->where('informationsystem_groups.deleted', '=', 0)
+			->where('informationsystems.site_id', '=', $site_id)
 			->where('informationsystems.deleted', '=', 0)
 			->where('structures.deleted', '=', 0)
 			->orderBy('informationsystem_groups.id', 'DESC')
@@ -207,13 +210,15 @@ class Informationsystem_Module extends Core_Module
 	/**
 	 * Индексация информационных элементов
 	 *
+	 * @param int $site_id
 	 * @param int $offset
 	 * @param int $limit
 	 * @return array
 	 * @hostcms-event Informationsystem_Module.indexingInformationsystemItems
 	 */
-	public function indexingInformationsystemItems($offset, $limit)
+	public function indexingInformationsystemItems($site_id, $offset, $limit)
 	{
+		$site_id = intval($site_id);
 		$offset = intval($offset);
 		$limit = intval($limit);
 
@@ -250,9 +255,11 @@ class Informationsystem_Module extends Core_Module
 			->open()
 				->where('informationsystem_groups.id', 'IS', NULL)
 				->setOr()
+				->where('informationsystem_groups.deleted', '=', 0)
 				->where('informationsystem_groups.active', '=', 1)
 				->where('informationsystem_groups.indexing', '=', 1)
 			->close()
+			->where('informationsystems.site_id', '=', $site_id)
 			->where('informationsystems.deleted', '=', 0)
 			->where('structures.deleted', '=', 0)
 			->orderBy('informationsystem_items.id', 'DESC')
@@ -291,7 +298,7 @@ class Informationsystem_Module extends Core_Module
 					if (!is_null($oInformationsystem_Group->id))
 					{
 						$oSearch_Page->addEntity($oInformationsystem_Group);
-						
+
 						// Structure node
 						if ($oInformationsystem_Group->Informationsystem->structure_id)
 						{
@@ -314,7 +321,7 @@ class Informationsystem_Module extends Core_Module
 						Core_Event::notify(get_class($this) . '.searchCallback', $this, array($oSearch_Page, $oInformationsystem_Item));
 
 						$oSearch_Page->addEntity($oInformationsystem_Item);
-						
+
 						// Structure node
 						if ($oInformationsystem_Item->Informationsystem->structure_id)
 						{

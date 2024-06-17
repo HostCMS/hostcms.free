@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Discount_Siteuser_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -125,7 +124,7 @@ class Shop_Discount_Siteuser_Item_Controller_Edit extends Admin_Form_Action_Cont
 		$siteuser_id = Core_Array::getGet('siteuser_id', 0, 'int');
 		$shop_discount_id = intval(Core_Array::get($this->_formValues, 'shop_discount_id'));
 
-		// parent::_applyObjectProperty();
+		//parent::_applyObjectProperty();
 
 		if ($siteuser_id)
 		{

@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Time extends Admin_Form_Entity_Input
 {
@@ -26,9 +25,13 @@ class Skin_Default_Admin_Form_Entity_Time extends Admin_Form_Entity_Input
 
 	/**
 	 * Executes the business logic.
+	 * @hostcms-event Skin_Default_Admin_Form_Entity_Time.onBeforeExecute
+	 * @hostcms-event Skin_Default_Admin_Form_Entity_Time.onAfterExecute
 	 */
 	public function execute()
 	{
+		Core_Event::notify(get_class($this) . '.onBeforeExecute', $this);
+
 		$this->value = $this->value == '00:00:00' || $this->value == ''
 			? ''
 			: $this->value;
@@ -70,5 +73,7 @@ class Skin_Default_Admin_Form_Entity_Time extends Admin_Form_Entity_Input
 		}
 
 		?></div><?php
+
+		Core_Event::notify(get_class($this) . '.onAfterExecute', $this);
 	}
 }

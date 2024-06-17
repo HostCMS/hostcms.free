@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Informationsystem_Model extends Core_Entity
 {
@@ -553,10 +552,22 @@ class Informationsystem_Model extends Core_Entity
 
 		$this->_cacheGroups = array();
 
-		$queryBuilder = Core_QueryBuilder::select('parent_id', array('COUNT(id)', 'count'))
+		$queryBuilder = Core_QueryBuilder::select('informationsystem_groups.parent_id', array('COUNT(informationsystem_groups.id)', 'count'))
 			->from('informationsystem_groups')
+			// Активность ярлыков
+			->leftJoin(array('informationsystem_groups', 'shortcuts'), 'shortcuts.id', '=', 'informationsystem_groups.shortcut_id',
+				array(
+					array('AND' => array('shortcuts.active', '=', 1))
+				)
+			)
 			->where('informationsystem_groups.informationsystem_id', '=', $information_system_id)
 			->where('informationsystem_groups.active', '=', 1)
+			// Активность ярлыков
+			->open()
+				->where('informationsystem_groups.shortcut_id', '=', 0)
+				->setOr()
+				->where('shortcuts.id', 'IS NOT', NULL)
+			->close()
 			->where('informationsystem_groups.deleted', '=', 0)
 			->groupBy('parent_id');
 
@@ -573,8 +584,14 @@ class Informationsystem_Model extends Core_Entity
 		$current_date = date('Y-m-d H:i:s');
 
 		$queryBuilder->clear()
-			->select('informationsystem_group_id', array('COUNT(id)', 'count'))
+			->select('informationsystem_items.informationsystem_group_id', array('COUNT(informationsystem_items.id)', 'count'))
 			->from('informationsystem_items')
+			// Активность ярлыков
+			->leftJoin(array('informationsystem_items', 'shortcuts'), 'shortcuts.id', '=', 'informationsystem_items.shortcut_id',
+				array(
+					array('AND' => array('shortcuts.active', '=', 1))
+				)
+			)
 			->where('informationsystem_items.informationsystem_id', '=', $information_system_id)
 			->where('informationsystem_items.active', '=', 1)
 			->where('informationsystem_items.start_datetime', '<=', $current_date)
@@ -584,12 +601,17 @@ class Informationsystem_Model extends Core_Entity
 				->where('informationsystem_items.end_datetime', '=', '0000-00-00 00:00:00')
 			->close()
 			->where('informationsystem_items.deleted', '=', 0)
+			// Активность ярлыков
+			->open()
+				->where('informationsystem_items.shortcut_id', '=', 0)
+				->setOr()
+				->where('shortcuts.id', 'IS NOT', NULL)
+			->close()
 			->groupBy('informationsystem_group_id');
 
 		Core_Event::notify($this->_modelName . '.onBeforeSelectCountItemsInRecount', $this, array($queryBuilder));
 
 		$aInformationsystem_Items = $queryBuilder->execute()->asAssoc()->result();
-
 		foreach ($aInformationsystem_Items as $Informationsystem_Item)
 		{
 			$this->_cacheItems[$Informationsystem_Item['informationsystem_group_id']] = $Informationsystem_Item['count'];
@@ -760,11 +782,29 @@ class Informationsystem_Model extends Core_Entity
 			->title(Core::_('Informationsystem.all_groups_count', $countInformationsystemGroups))
 			->execute();
 
-		$countInformationsystemItems = $this->Informationsystem_Items->getCount();
+
+		$oInformationsystemItems = $this->Informationsystem_Items;
+		$oInformationsystemItems->queryBuilder()
+			->where('informationsystem_items.shortcut_id', '=', 0);
+
+		$countInformationsystemItems = $oInformationsystemItems->getCount();
+
 		$countInformationsystemItems && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
-			->value('<i class="fa fa-file-o"></i> ' . $countInformationsystemItems)
+			->value('<i class="fa fa-list-alt"></i> ' . $countInformationsystemItems)
 			->title(Core::_('Informationsystem.all_items_count', $countInformationsystemItems))
+			->execute();
+
+		$oInformationsystemItems = $this->Informationsystem_Items;
+		$oInformationsystemItems->queryBuilder()
+			->where('informationsystem_items.shortcut_id', '!=', 0);
+
+		$countShortcuts = $oInformationsystemItems->getCount();
+
+		$countShortcuts && Core_Html_Entity::factory('Span')
+			->class('badge badge-hostcms badge-square')
+			->value('<i class="fa-solid fa-link"></i> ' . $countShortcuts)
+			->title(Core::_('Informationsystem.all_shortcuts_count', $countShortcuts))
 			->execute();
 	}
 
@@ -793,6 +833,148 @@ class Informationsystem_Model extends Core_Entity
 	public function getWatermarkDefaultPositionY()
 	{
 		return $this->watermark_default_position_y;
+	}
+
+	/**
+	 * Backup revision
+	 * @return self
+	 */
+	public function backupRevision()
+	{
+		if (Core::moduleIsActive('revision'))
+		{
+			$aBackup = array(
+				'informationsystem_dir_id' => $this->informationsystem_dir_id,
+				'structure_id' => $this->structure_id,
+				'site_id' => $this->site_id,
+				'name' => $this->name,
+				'description' => $this->description,
+				'items_sorting_direction' => $this->items_sorting_direction,
+				'items_sorting_field' => $this->items_sorting_field,
+				'groups_sorting_direction' => $this->groups_sorting_direction,
+				'groups_sorting_field' => $this->groups_sorting_field,
+				'image_large_max_width' => $this->image_large_max_width,
+				'image_large_max_height' => $this->image_large_max_height,
+				'image_small_max_width' => $this->image_small_max_width,
+				'image_small_max_height' => $this->image_small_max_height,
+				'siteuser_group_id' => $this->siteuser_group_id,
+				'use_captcha' => $this->use_captcha,
+				'watermark_file' => $this->watermark_file,
+				'watermark_default_use_large_image' => $this->watermark_default_use_large_image,
+				'watermark_default_use_small_image' => $this->watermark_default_use_small_image,
+				'watermark_default_position_x' => $this->watermark_default_position_x,
+				'watermark_default_position_y' => $this->watermark_default_position_y,
+				'create_small_image' => $this->create_small_image,
+				'user_id' => $this->user_id,
+				'items_on_page' => $this->items_on_page,
+				'format_date' => $this->format_date,
+				'format_datetime' => $this->format_datetime,
+				'url_type' => $this->url_type,
+				'typograph_default_items' => $this->typograph_default_items,
+				'typograph_default_groups' => $this->typograph_default_groups,
+				'apply_tags_automatically' => $this->apply_tags_automatically,
+				'change_filename' => $this->change_filename,
+				'apply_keywords_automatically' => $this->apply_keywords_automatically,
+				'group_image_large_max_width' => $this->group_image_large_max_width,
+				'group_image_large_max_height' => $this->group_image_large_max_height,
+				'group_image_small_max_width' => $this->group_image_small_max_width,
+				'group_image_small_max_height' => $this->group_image_small_max_height,
+				'preserve_aspect_ratio' => $this->preserve_aspect_ratio,
+				'preserve_aspect_ratio_small' => $this->preserve_aspect_ratio_small,
+				'preserve_aspect_ratio_group' => $this->preserve_aspect_ratio_group,
+				'preserve_aspect_ratio_group_small' => $this->preserve_aspect_ratio_group_small,
+				'seo_group_title_template' => $this->seo_group_title_template,
+				'seo_group_keywords_template' => $this->seo_group_keywords_template,
+				'seo_group_description_template' => $this->seo_group_description_template,
+				'seo_group_h1_template' => $this->seo_group_h1_template,
+				'seo_item_title_template' => $this->seo_item_title_template,
+				'seo_item_keywords_template' => $this->seo_item_keywords_template,
+				'seo_item_description_template' => $this->seo_item_description_template,
+				'seo_item_h1_template' => $this->seo_item_h1_template,
+				'seo_root_title_template' => $this->seo_root_title_template,
+				'seo_root_keywords_template' => $this->seo_root_keywords_template,
+				'seo_root_description_template' => $this->seo_root_description_template,
+				'seo_root_h1_template' => $this->seo_root_h1_template
+			);
+
+			Revision_Controller::backup($this, $aBackup);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Rollback Revision
+	 * @param int $revision_id Revision ID
+	 * @return self
+	 */
+	public function rollbackRevision($revision_id)
+	{
+		if (Core::moduleIsActive('revision'))
+		{
+			$oRevision = Core_Entity::factory('Revision', $revision_id);
+
+			$aBackup = json_decode($oRevision->value, TRUE);
+
+			if (is_array($aBackup))
+			{
+				$this->informationsystem_dir_id = Core_Array::get($aBackup, 'informationsystem_dir_id');
+				$this->structure_id = Core_Array::get($aBackup, 'structure_id');
+				$this->site_id = Core_Array::get($aBackup, 'site_id');
+				$this->name = Core_Array::get($aBackup, 'name');
+				$this->description = Core_Array::get($aBackup, 'description');
+				$this->items_sorting_direction = Core_Array::get($aBackup, 'items_sorting_direction');
+				$this->items_sorting_field = Core_Array::get($aBackup, 'items_sorting_field');
+				$this->groups_sorting_direction = Core_Array::get($aBackup, 'groups_sorting_direction');
+				$this->groups_sorting_field = Core_Array::get($aBackup, 'groups_sorting_field');
+				$this->image_large_max_width = Core_Array::get($aBackup, 'image_large_max_width');
+				$this->image_large_max_height = Core_Array::get($aBackup, 'image_large_max_height');
+				$this->image_small_max_width = Core_Array::get($aBackup, 'image_small_max_width');
+				$this->image_small_max_height = Core_Array::get($aBackup, 'image_small_max_height');
+				$this->siteuser_group_id = Core_Array::get($aBackup, 'siteuser_group_id');
+				$this->use_captcha = Core_Array::get($aBackup, 'use_captcha');
+				$this->watermark_file = Core_Array::get($aBackup, 'watermark_file');
+				$this->watermark_default_use_large_image = Core_Array::get($aBackup, 'watermark_default_use_large_image');
+				$this->watermark_default_use_small_image = Core_Array::get($aBackup, 'watermark_default_use_small_image');
+				$this->watermark_default_position_x = Core_Array::get($aBackup, 'watermark_default_position_x');
+				$this->watermark_default_position_y = Core_Array::get($aBackup, 'watermark_default_position_y');
+				$this->create_small_image = Core_Array::get($aBackup, 'create_small_image');
+				$this->user_id = Core_Array::get($aBackup, 'user_id');
+				$this->items_on_page = Core_Array::get($aBackup, 'items_on_page');
+				$this->format_date = Core_Array::get($aBackup, 'format_date');
+				$this->format_datetime = Core_Array::get($aBackup, 'format_datetime');
+				$this->url_type = Core_Array::get($aBackup, 'url_type');
+				$this->typograph_default_items = Core_Array::get($aBackup, 'typograph_default_items');
+				$this->typograph_default_groups = Core_Array::get($aBackup, 'typograph_default_groups');
+				$this->apply_tags_automatically = Core_Array::get($aBackup, 'apply_tags_automatically');
+				$this->change_filename = Core_Array::get($aBackup, 'change_filename');
+				$this->apply_keywords_automatically = Core_Array::get($aBackup, 'apply_keywords_automatically');
+				$this->group_image_large_max_width = Core_Array::get($aBackup, 'group_image_large_max_width');
+				$this->group_image_large_max_height = Core_Array::get($aBackup, 'group_image_large_max_height');
+				$this->group_image_small_max_width = Core_Array::get($aBackup, 'group_image_small_max_width');
+				$this->group_image_small_max_height = Core_Array::get($aBackup, 'group_image_small_max_height');
+				$this->preserve_aspect_ratio = Core_Array::get($aBackup, 'preserve_aspect_ratio');
+				$this->preserve_aspect_ratio_small = Core_Array::get($aBackup, 'preserve_aspect_ratio_small');
+				$this->preserve_aspect_ratio_group = Core_Array::get($aBackup, 'preserve_aspect_ratio_group');
+				$this->preserve_aspect_ratio_group_small = Core_Array::get($aBackup, 'preserve_aspect_ratio_group_small');
+				$this->seo_group_title_template = Core_Array::get($aBackup, 'seo_group_title_template');
+				$this->seo_group_keywords_template = Core_Array::get($aBackup, 'seo_group_keywords_template');
+				$this->seo_group_description_template = Core_Array::get($aBackup, 'seo_group_description_template');
+				$this->seo_group_h1_template = Core_Array::get($aBackup, 'seo_group_h1_template');
+				$this->seo_item_title_template = Core_Array::get($aBackup, 'seo_item_title_template');
+				$this->seo_item_keywords_template = Core_Array::get($aBackup, 'seo_item_keywords_template');
+				$this->seo_item_description_template = Core_Array::get($aBackup, 'seo_item_description_template');
+				$this->seo_item_h1_template = Core_Array::get($aBackup, 'seo_item_h1_template');
+				$this->seo_root_title_template = Core_Array::get($aBackup, 'seo_root_title_template');
+				$this->seo_root_keywords_template = Core_Array::get($aBackup, 'seo_root_keywords_template');
+				$this->seo_root_description_template = Core_Array::get($aBackup, 'seo_root_description_template');
+				$this->seo_root_h1_template = Core_Array::get($aBackup, 'seo_root_h1_template');
+
+				$this->save();
+			}
+		}
+
+		return $this;
 	}
 
 	/**

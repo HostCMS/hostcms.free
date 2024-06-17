@@ -14,6 +14,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - pattern($pattern) шаблон разбора данных в URI, см. __construct()
  * - cache(TRUE|FALSE) использовать кэширование, по умолчанию TRUE
  * - calculateTotal(TRUE|FALSE) вычислять общее количество найденных, по умолчанию TRUE
+ * - commentsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств комментариев, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
+ * - commentsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств комментариев, по умолчанию TRUE.
  * - addAllowedTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, разрешенных к передаче в генерируемый XML
  * - addForbiddenTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, запрещенных к передаче в генерируемый XML
  *
@@ -38,9 +40,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * );
  *
  * $Informationsystem_Comment_Controller_Show
- * 	->xsl(
- * 		Core_Entity::factory('Xsl')->getByName('СписокКомментариевНаГлавной')
- * 	)
+ * 	->xsl('СписокКомментариевНаГлавной')
+ * 	->commentsProperties(TRUE)
  * 	->limit(5)
  * 	->show();
  * </code>
@@ -48,8 +49,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Informationsystem_Comment_Controller_Show extends Core_Controller
 {
@@ -69,6 +69,9 @@ class Informationsystem_Comment_Controller_Show extends Core_Controller
 		'commentsForbiddenTags',
 		'commentsActivity',
 		'calculateTotal',
+		'commentsProperties',
+		'commentsPropertiesList',
+		'url'
 	);
 
 	/**
@@ -82,6 +85,36 @@ class Informationsystem_Comment_Controller_Show extends Core_Controller
 	 * @var string
 	 */
 	protected $_cacheName = 'informationsystem_comment_show';
+
+	/**
+	 * List of properties for item
+	 * @var array
+	 */
+	protected $_aComment_Properties = array();
+
+	/**
+	 * List of property directories for item
+	 * @var array
+	 */
+	protected $_aComment_Property_Dirs = array();
+
+	/**
+	 * Get _aComment_Properties set
+	 * @return array
+	 */
+	public function getCommentProperties()
+	{
+		return $this->_aComment_Properties;
+	}
+
+	/**
+	 * Get _aItem_Property_Dirs set
+	 * @return array
+	 */
+	public function getCommentPropertyDirs()
+	{
+		return $this->_aComment_Property_Dirs;
+	}
 
 	/**
 	 * Constructor.
@@ -99,9 +132,13 @@ class Informationsystem_Comment_Controller_Show extends Core_Controller
 		);
 
 		$this->limit = 5;
-		$this->calculateTotal = TRUE;
+		$this->commentsPropertiesList = $this->calculateTotal = TRUE;
 
 		$this->commentsActivity = 'active';
+
+		$this->commentsProperties = FALSE;
+		
+		$this->url = Core::$url['path'];
 	}
 
 	/**
@@ -204,6 +241,8 @@ class Informationsystem_Comment_Controller_Show extends Core_Controller
 			}
 		}
 
+		$bTpl = $this->_mode == 'tpl';
+
 		// Backward compatible
 		is_array($this->commentsForbiddenTags) && count($this->commentsForbiddenTags)
 			&& $this->addForbiddenTags('/informationsystem/comment', $this->commentsForbiddenTags);
@@ -211,6 +250,45 @@ class Informationsystem_Comment_Controller_Show extends Core_Controller
 		$this->_setComments();
 
 		$oInformationsystem = $this->getEntity();
+
+		// Показывать дополнительные свойства комментариев
+		if ($this->commentsProperties && $this->commentsPropertiesList)
+		{
+			$oInformationsystem_Comment_Property_List = Core_Entity::factory('Informationsystem_Comment_Property_List', $oInformationsystem->id);
+
+			$oProperties = $oInformationsystem_Comment_Property_List->Properties;
+			if (is_array($this->commentsPropertiesList) && count($this->commentsPropertiesList))
+			{
+				$oProperties->queryBuilder()
+					->where('properties.id', 'IN', $this->commentsPropertiesList);
+			}
+			$aProperties = $oProperties->findAll();
+
+			foreach ($aProperties as $oProperty)
+			{
+				$oProperty->clearEntities();
+				$this->_aComment_Properties[$oProperty->property_dir_id][] = $oProperty;
+			}
+
+			$aProperty_Dirs = $oInformationsystem_Comment_Property_List->Property_Dirs->findAll();
+			foreach ($aProperty_Dirs as $oProperty_Dir)
+			{
+				$oProperty_Dir->clearEntities();
+				$this->_aComment_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
+			}
+
+			if (!$bTpl)
+			{
+				$Comment_Properties = Core::factory('Core_Xml_Entity')
+					->name('comment_properties');
+
+				$this->addEntity($Comment_Properties);
+
+				Core_Event::notify(get_class($this) . '.onBeforeAddCommentsPropertiesList', $this, array($Comment_Properties));
+
+				$this->_addCommentsPropertiesList(0, $Comment_Properties);
+			}
+		}
 
 		$this->addEntity(
 			Core::factory('Core_Xml_Entity')
@@ -230,7 +308,7 @@ class Informationsystem_Comment_Controller_Show extends Core_Controller
 
 			if ($this->page && !count($aComments))
 			{
-				return $this->error404();
+				return $this->error410();
 			}
 
 			if ($this->calculateTotal)
@@ -260,6 +338,8 @@ class Informationsystem_Comment_Controller_Show extends Core_Controller
 
 				$oComment->clearEntities();
 				$this->applyforbiddenTags($oComment);
+
+				$oComment->showXmlProperties($this->commentsProperties);
 
 				$oComment->addEntity($oInformationsystem_Item);
 
@@ -297,7 +377,7 @@ class Informationsystem_Comment_Controller_Show extends Core_Controller
 		Core_Event::notify(get_class($this) . '.onBeforeParseUrl', $this);
 
 		$Core_Router_Route = new Core_Router_Route($this->pattern, $this->patternExpressions);
-		$this->patternParams = $matches = $Core_Router_Route->applyPattern(Core::$url['path']);
+		$this->patternParams = $matches = $Core_Router_Route->applyPattern($this->url);
 
 		if (isset($matches['page']) && is_numeric($matches['page']))
 		{
@@ -308,11 +388,36 @@ class Informationsystem_Comment_Controller_Show extends Core_Controller
 			}
 			else
 			{
-				return $this->error404();
+				return $this->error410();
 			}
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterParseUrl', $this);
+
+		return $this;
+	}
+
+	/**
+	 * Add items properties list to $parentObject
+	 * @param int $parent_id parent group ID
+	 * @param object $parentObject object
+	 * @return self
+	 */
+	protected function _addCommentsPropertiesList($parent_id, $parentObject)
+	{
+		if (isset($this->_aComment_Property_Dirs[$parent_id]))
+		{
+			foreach ($this->_aComment_Property_Dirs[$parent_id] as $oProperty_Dir)
+			{
+				$parentObject->addEntity($oProperty_Dir);
+				$this->_addCommentsPropertiesList($oProperty_Dir->id, $oProperty_Dir);
+			}
+		}
+
+		if (isset($this->_aComment_Properties[$parent_id]))
+		{
+			$parentObject->addEntities($this->_aComment_Properties[$parent_id]);
+		}
 
 		return $this;
 	}
@@ -325,6 +430,17 @@ class Informationsystem_Comment_Controller_Show extends Core_Controller
 	public function applyforbiddenTags($oComment)
 	{
 		$this->applyForbiddenAllowedTags('/informationsystem/comment', $oComment);
+		return $this;
+	}
+
+	/**
+	 * Define handler for 410 error
+	 * @return self
+	 */
+	public function error410()
+	{
+		Core_Page::instance()->error410();
+
 		return $this;
 	}
 

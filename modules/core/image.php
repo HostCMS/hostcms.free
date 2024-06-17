@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 abstract class Core_Image
 {
@@ -108,10 +107,10 @@ abstract class Core_Image
 	 * </code>
 	 * @return bool
 	 */
-	static public function resizeImage($sourceFile, $maxWidth, $maxHeight, $targetFile, $quality = NULL, $preserveAspectRatio = TRUE)
+	/*static public function resizeImage($sourceFile, $maxWidth, $maxHeight, $targetFile, $quality = NULL, $preserveAspectRatio = TRUE)
 	{
 		return Core_Image::instance()->resizeImage($sourceFile, $maxWidth, $maxHeight, $targetFile, $quality, $preserveAspectRatio);
-	}
+	}*/
 
 	/**
 	 * Create avatar
@@ -170,7 +169,7 @@ abstract class Core_Image
 
 		exit();
 	}
-	
+
 	/**
 	 * Get IMAGETYPE_xxx by $outputFormat
 	 * @param string $outputFormat Output Format, e.g. 'webp'
@@ -179,7 +178,7 @@ abstract class Core_Image
 	static public function getImagetypeByFormat($outputFormat)
 	{
 		$iImagetype = NULL;
-		
+
 		if (!is_null($outputFormat))
 		{
 			switch (strtolower($outputFormat))
@@ -191,15 +190,71 @@ abstract class Core_Image
 				case 'png':
 					$iImagetype = IMAGETYPE_GIF;
 				break;
+				// PHP 7.1.0+
 				case 'webp':
 					if (defined('IMAGETYPE_WEBP') && function_exists('imagecreatefromwebp'))
 					{
 						$iImagetype = IMAGETYPE_WEBP;
 					}
 				break;
+				// PHP 8.1.0+
+				case 'avif':
+					if (defined('IMAGETYPE_AVIF') && function_exists('imagecreatefromavif'))
+					{
+						$iImagetype = IMAGETYPE_AVIF;
+					}
+				break;
 			}
 		}
-		
+
 		return $iImagetype;
 	}
+
+	/**
+	 * Пропорциональное масштабирование изображения
+	 *
+	 * @param string $sourceFile путь к исходному файлу
+	 * @param int $maxWidth максимальная ширина картинки
+	 * @param int $maxHeight максимальная высота картинки
+	 * @param string $targetFile путь к результирующему файлу
+	 * @param int $quality качество JPEG/PNG файла, если не передано, то берется из констант
+	 * @param int $preserveAspectRatio сохранять пропорции изображения
+	 * @param string|NULL $outputFormat формат, в котором сохранять изображение, по умолчанию NULL равен формату исходного
+	 * @return bool
+	 */
+	abstract public function resizeImage($sourceFile, $maxWidth, $maxHeight, $targetFile, $quality = NULL, $preserveAspectRatio = TRUE, $outputFormat = NULL);
+
+	/**
+	 * Добавление watermark на изображение. Если файл watermark не существует, метод скопирует исходное изображение
+	 *
+	 * @param string $source путь к файлу источнику
+	 * @param string $target путь к файлу получателю
+	 * @param string $watermark путь к файлу watermark в формате PNG
+	 * @param string $watermarkX позиция по оси X (в пикселях или процентах)
+	 * @param string $watermarkY позиция по оси Y (в пикселях или процентах)
+	 * @param string|NULL $outputFormat формат, в котором сохранять изображение, по умолчанию NULL равен формату исходного
+	 * @return bool
+	 */
+	abstract public function addWatermark($source, $target, $watermark, $watermarkX = NULL, $watermarkY = NULL, $outputFormat = NULL);
+
+	/**
+	 * Get image size
+	 * @param string $path path
+	 * @return mixed
+	 */
+	abstract public function getImageSize($path);
+
+	/**
+	 * Get Image Type: 0 = UNKNOWN, 1 = GIF, 2 = JPG, 3 = PNG, 4 = SWF, 5 = PSD, 6 = BMP, 7 = TIFF (orden de bytes intel), 8 = TIFF (orden de bytes motorola),
+	 * 9 = JPC, 10 = JP2, 11 = JPX, 12 = JB2, 13 = SWC, 14 = IFF, 15 = WBMP, 16 = XBM, 17 = ICO, 18 = WEBP, 19 = AVIF, 20 = COUNT
+	 * @param string $path
+	 * @return mixed
+	 */
+	abstract public function getImageType($path);
+
+	/**
+	 * Check GD-Module Availability
+	 * @return bool
+	 */
+	abstract public function isAvailable();
 }

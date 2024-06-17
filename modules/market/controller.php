@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Market
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Market_Controller extends Core_Servant_Properties
 {
@@ -189,6 +188,12 @@ class Market_Controller extends Core_Servant_Properties
 	 */
 	public function getMarket()
 	{
+		// При установке беслпатной редакции данные будут пусты
+		/*if ($this->contract !== '' && !is_null($this->contract)
+			&& $this->pin !== '' && !is_null($this->pin)
+		)
+		{*/
+		
 		$md5_contract = md5($this->contract);
 		$md5_pin = md5($this->pin);
 
@@ -229,7 +234,7 @@ class Market_Controller extends Core_Servant_Properties
 		$Core_Http = Core_Http::instance()
 			->url($url)
 			->timeout($maxExecutionTime > 0 ? $maxExecutionTime - 3 : 20)
-			->referer(Core_Array::get($_SERVER, 'HTTP_HOST'))
+			->referer(Core_Array::get($_SERVER, 'REQUEST_SCHEME', 'http') . '://' . Core_Array::get($_SERVER, 'HTTP_HOST'))
 			->execute();
 
 		$data = $Core_Http->getDecompressedBody();
@@ -303,6 +308,7 @@ class Market_Controller extends Core_Servant_Properties
 		$this->error = isset($oXml->error)
 			? intval($oXml->error)
 			: 0;
+		//}
 
 		return $this;
 	}
@@ -357,7 +363,7 @@ class Market_Controller extends Core_Servant_Properties
 		$Core_Http = Core_Http::instance()
 			->url($url)
 			->timeout($maxExecutionTime > 0 ? $maxExecutionTime - 3 : 20)
-			->referer(Core_Array::get($_SERVER, 'HTTP_HOST'))
+			->referer(Core_Array::get($_SERVER, 'REQUEST_SCHEME', 'http') . '://' . Core_Array::get($_SERVER, 'HTTP_HOST'))
 			->execute();
 
 		$data = $Core_Http->getDecompressedBody();
@@ -418,10 +424,10 @@ class Market_Controller extends Core_Servant_Properties
 						// CMS_FOLDER . 'hostcmsfiles/tmp/install/{id}/'
 						$this->tmpDir = $this->getPath() . DIRECTORY_SEPARATOR . $this->_Module->shop_item_id;
 
-						// Удаляем директорию с данными предыдущей установки (3 mins)
+						// Удаляем директорию с данными предыдущей установки (5 mins)
 						$bExists = Core_File::isDir($this->tmpDir)
 							&& Core_File::isFile($this->tmpDir . DIRECTORY_SEPARATOR . 'module.xml')
-							&& filemtime($this->tmpDir) + 60 * 3 > time();
+							&& filemtime($this->tmpDir) + 60 * 5 > time();
 
 						if (!$bExists)
 						{
@@ -432,12 +438,18 @@ class Market_Controller extends Core_Servant_Properties
 								// Создаем директорию снова
 								Core_File::mkdir($this->tmpDir, CHMOD, TRUE);
 
-								$Core_Http = $this->getModuleFile($this->_Module->file);
-
-								// Сохраняем tar.gz
 								$source_file = $this->tmpDir . DIRECTORY_SEPARATOR . 'tmpfile.tar.gz';
 
-								Core_File::write($source_file, $Core_Http->getDecompressedBody());
+								$bTarGzExists = Core_File::isFile($source_file) && filemtime($source_file) + 60 * 5 > time();
+
+								// Файла нет или не прошло 5 минут с момента создания
+								if (!$bTarGzExists)
+								{
+									$Core_Http = $this->getModuleFile($this->_Module->file);
+
+									// Сохраняем tar.gz
+									Core_File::write($source_file, $Core_Http->getDecompressedBody());
+								}
 
 								if (Core_File::filesize($source_file))
 								{
@@ -990,7 +1002,7 @@ class Market_Controller extends Core_Servant_Properties
 		$Core_Http = Core_Http::instance()
 			->url($url)
 			->timeout($maxExecutionTime > 0 ? $maxExecutionTime - 3 : 20)
-			->referer(Core_Array::get($_SERVER, 'HTTP_HOST'))
+			->referer(Core_Array::get($_SERVER, 'REQUEST_SCHEME', 'http') . '://' . Core_Array::get($_SERVER, 'HTTP_HOST'))
 			->execute();
 
 		return $Core_Http;

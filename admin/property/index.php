@@ -3,9 +3,8 @@
  * Properties.
  *
  * @package HostCMS
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @version 7.x
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -19,19 +18,19 @@ if (Core_Auth::logged())
 	)
 	{
 		$sQuery = trim(Core_DataBase::instance()->escapeLike(Core_Str::stripTags(strval(Core_Array::getGet('queryString')))));
-		$modelName = strval(Core_Array::getGet('linkedObjectName'));
-		$id = intval(Core_Array::getGet('linkedObjectId'));
+		$modelName = Core_Array::getGet('linkedObjectName', '', 'trim');
+		$id = Core_Array::getGet('linkedObjectId', 0, 'int');
 		$linkedObject = Core_Entity::factory($modelName, $id);
 
 		$aJSON = array();
 
-		$aJSON = array(
+		$aJSON[] = array(
 			'id' => 0,
 			'label' => Core::_('Property_Dir.root'),
 		);
 
 		// Ends on _Property_List
-		if (preg_match('/_Property_List$/', $linkedObject))
+		if (preg_match('/_property_list$/', $modelName))
 		{
 			if (strlen($sQuery))
 			{
@@ -59,7 +58,7 @@ if (Core_Auth::logged())
 
 					$aJSON[] = array(
 						'id' => $oProperty_Dir->id,
-						'label' => $sParents . ' [' . $oProperty_Dir->id . ']',
+						'label' => $sParents
 					);
 				}
 			}

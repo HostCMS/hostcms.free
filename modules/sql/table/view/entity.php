@@ -3,20 +3,21 @@
 defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 /**
- * SQL.
+ * Sql_Table_View_Entity
  *
  * @package HostCMS
  * @subpackage Sql
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
-class Sql_Table_View_Entity
+class Sql_Table_View_Entity extends Core_Empty_Entity
 {
 	/**
-	 * Columns
-	 * @var mixed
+	 * Name of the model
+	 * @var string
 	 */
+	protected $_modelName = 'sql_table_view';
+
 	protected $_columns = NULL;
 
 	/**
@@ -25,10 +26,8 @@ class Sql_Table_View_Entity
 	 */
 	public function getTableColumns()
 	{
-		if (is_null($this->_columns) && !is_null($this->_tableName))
-		{
-			$this->_columns = Core_DataBase::instance()->getColumns($this->_tableName);
-		}
+		is_null($this->_columns) && !is_null($this->_tableName)
+			&& $this->_columns = Core_DataBase::instance()->getColumns($this->_tableName);
 
 		return $this->_columns;
 	}
@@ -66,7 +65,12 @@ class Sql_Table_View_Entity
 	{
 		if (isset($this->_fields[$property]))
 		{
-			return $this->_fields[$property];
+			return $this->_columns[$property]['binary']
+				? (strlen($this->_fields[$property]) < 128
+					? '0x' . bin2hex($this->_fields[$property])
+					: 'Binary'
+				)
+				: $this->_fields[$property];
 		}
 	}
 
@@ -191,19 +195,10 @@ class Sql_Table_View_Entity
 	}
 
 	/**
-	 * Get model name
-	 * @return string
-	 */
-	public function getModelName()
-	{
-		return 'sql_table_view';
-	}
-
-	/**
 	 * Delete
 	 * @return self
 	 */
-	public function delete()
+	public function delete($primaryKey = NULL)
 	{
 		$primaryKeyName = $this->getPrimaryKeyName();
 

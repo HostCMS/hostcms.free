@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Browser
 {
@@ -20,6 +19,11 @@ class Core_Browser
 	 */
 	static public function getDevice($userAgent)
 	{
+		if (is_null($userAgent) || $userAgent === '')
+		{
+			return 0;
+		}
+
 		// Tablet
 		if (preg_match('/iP(a|ro)d|FOLIO|playbook/i', $userAgent)
 			|| preg_match('/tablet/i', $userAgent) && !preg_match('/RX-34/i', $userAgent)
@@ -117,21 +121,38 @@ class Core_Browser
 	 */
 	static public function getBrowser($userAgent)
 	{
-		if (preg_match('#Firefox/([0-9]*)#', $userAgent, $log_version))
+		if (is_null($userAgent) || $userAgent === '')
 		{
-			$browser = 'Firefox '. $log_version[1];
+			return '-';
 		}
-		elseif (preg_match('#YaBrowser/([0-9]*)#', $userAgent, $log_version))
+
+		if (preg_match('#Firefox/([0-9]*)#', $userAgent, $matches))
 		{
-			$browser = 'Yandex Browser '. $log_version[1];
+			$browser = 'Firefox '. $matches[1];
 		}
-		elseif (preg_match('#Edge/([0-9]*)#', $userAgent, $log_version))
+		elseif (preg_match('#(?:YaBrowser|YaSearchBrowser)/([0-9]*)#', $userAgent, $matches))
 		{
-			$browser = 'Edge '. $log_version[1];
+			$browser = 'Yandex Browser '. $matches[1];
 		}
-		elseif (preg_match('#Trident/([0-9]*)#', $userAgent, $log_version))
+		elseif (preg_match('#SamsungBrowser/([0-9]*)#', $userAgent, $matches))
 		{
-			switch ($log_version[1])
+			$browser = 'Samsung Browser '. $matches[1];
+		}
+		elseif (preg_match('#HuaweiBrowser/([0-9]*)#', $userAgent, $matches))
+		{
+			$browser = 'Huawei Browser '. $matches[1];
+		}
+		elseif (preg_match('#MiuiBrowser/([0-9]*)#', $userAgent, $matches))
+		{
+			$browser = 'Miui Browser '. $matches[1];
+		}
+		elseif (preg_match('#(?:Edge|Edg)/([0-9]*)#', $userAgent, $matches))
+		{
+			$browser = 'Edge '. $matches[1];
+		}
+		elseif (preg_match('#Trident/([0-9]*)#', $userAgent, $matches))
+		{
+			switch ($matches[1])
 			{
 				case '4.0':
 					$browser = 'MS IE 8';
@@ -152,59 +173,68 @@ class Core_Browser
 					$browser = 'MS IE';
 			}
 		}
-		elseif (preg_match('#Opera Mini/([0-9]*)#', $userAgent, $log_version))
+		elseif (preg_match('#Opera Mini/([0-9]*)#', $userAgent, $matches))
 		{
-			$browser = 'Opera Mini '. $log_version[1];
+			$browser = 'Opera Mini '. $matches[1];
 		}
 		elseif (// (9.80) взято в скобки, чтобы индекс был [2], т.к. во втором выражении он [2]
-		preg_match('#Opera/(9.80).*Version\/([0-9\.]*)#', $userAgent, $log_version)
-		|| preg_match('#Opera[/\s]([0-9\.]*)#', $userAgent, $log_version))
+		preg_match('#Opera/(9.80).*Version\/([0-9]*)#', $userAgent, $matches)
+		|| preg_match('#Opera[/\s]([0-9]*)#', $userAgent, $matches))
 		{
-			$browser = 'Opera '. $log_version[1];
+			$browser = 'Opera '. $matches[1];
+		}
+		elseif (preg_match('#OPR/([0-9]*)#', $userAgent, $matches))
+		{
+			$browser = 'Opera '. $matches[1];
+		}
+		// Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) GSA/302.0.603406840 Mobile/15E148 Safari/604.1
+		elseif (preg_match('#GSA/([0-9]*)#', $userAgent, $matches))
+		{
+			$browser = 'Google Search App '. $matches[1];
 		}
 		// до Safari, т.к.: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.133 Safari/534.16
-		elseif (preg_match('#Chrome/([0-9]*)#', $userAgent, $log_version))
+		elseif (preg_match('#Chrome/([0-9]*)#', $userAgent, $matches))
 		{
-			$browser = 'Chrome '. $log_version[1];
+			$browser = 'Chrome '. $matches[1];
 		}
-		elseif (preg_match('#UCBrowser/([0-9]*)#', $userAgent, $log_version))
+		elseif (preg_match('#UCBrowser/([0-9]*)#', $userAgent, $matches))
 		{
-			$browser = 'UCBrowser '. $log_version[1];
+			$browser = 'UCBrowser '. $matches[1];
 		}
-		elseif (preg_match('#Vivaldi/([0-9]*)#', $userAgent, $log_version))
+		elseif (preg_match('#Vivaldi/([0-9]*)#', $userAgent, $matches))
 		{
-			$browser = 'Vivaldi '. $log_version[1];
+			$browser = 'Vivaldi '. $matches[1];
 		}
-		elseif (preg_match('#MSIE ([0-9]*)#', $userAgent, $log_version))
+		elseif (preg_match('#MSIE ([0-9]*)#', $userAgent, $matches))
 		{
-			$browser = 'MS IE '. $log_version[1];
+			$browser = 'MS IE '. $matches[1];
 		}
 		// Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1
-		elseif (preg_match('#Version\/([0-9\.]*).*Safari/[0-9\.]#', $userAgent, $log_version))
+		elseif (preg_match('#Version\/([0-9\.]*).*Safari/[0-9\.]#', $userAgent, $matches))
 		{
-			$browser = 'Safari '. $log_version[1];
+			$browser = 'Safari '. $matches[1];
 		}
 		// Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/114.0.5735.124 Mobile/15E148 Safari/604.1
-		elseif (preg_match('#CriOS\/([0-9\.]*).*Safari/[0-9\.]#', $userAgent, $log_version))
+		elseif (preg_match('#CriOS\/([0-9]*).*Safari/[0-9\.]#', $userAgent, $matches))
 		{
-			$browser = 'Chrome ' . $log_version[1] . ' on iOS';
+			$browser = 'Chrome ' . $matches[1] . ' for iOS';
 		}
 		// Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/114.0 Mobile/15E148 Safari/605.1.15
-		elseif (preg_match('#FxiOS\/([0-9\.]*).*Safari/[0-9\.]#', $userAgent, $log_version))
+		elseif (preg_match('#FxiOS\/([0-9\.]*).*Safari/[0-9\.]#', $userAgent, $matches))
 		{
-			$browser = 'Firefox ' . $log_version[1] . ' on iOS';
+			$browser = 'Firefox ' . $matches[1] . ' on iOS';
 		}
-		elseif (preg_match('#Netscape/([0-9].[0-9]{1,2})#', $userAgent, $log_version))
+		elseif (preg_match('#Netscape/([0-9].[0-9]{1,2})#', $userAgent, $matches))
 		{
-			$browser = 'Netscape '. $log_version[1];
+			$browser = 'Netscape '. $matches[1];
 		}
-		elseif (preg_match('#OmniWeb/([0-9].[0-9]{1,2})#', $userAgent, $log_version))
+		elseif (preg_match('#OmniWeb/([0-9].[0-9]{1,2})#', $userAgent, $matches))
 		{
-			$browser = 'Omniweb '. $log_version[1];
+			$browser = 'Omniweb '. $matches[1];
 		}
-		elseif (preg_match('#Konqueror/([0-9].[0-9]{1,2})#', $userAgent, $log_version))
+		elseif (preg_match('#Konqueror/([0-9].[0-9]{1,2})#', $userAgent, $matches))
 		{
-			$browser ='Konqueror '. $log_version[1];
+			$browser ='Konqueror '. $matches[1];
 		}
 		else
 		{
@@ -237,6 +267,22 @@ class Core_Browser
 		{
 			$return = 'fab fa-safari fa-fw blue';
 		}
+		elseif (strpos($browser, 'Opera') !== FALSE)
+		{
+			$return = 'fab fa-opera fa-fw red';
+		}
+		elseif (strpos($browser, 'Edge') !== FALSE)
+		{
+			$return = 'fab fa-edge fa-fw sky';
+		}
+		elseif (strpos($browser, 'MS IE') !== FALSE)
+		{
+			$return = 'fab fa-internet-explorer fa-fw blue';
+		}
+		elseif (strpos($browser, 'Google Search App') !== FALSE)
+		{
+			$return = 'fab fa-google fa-fw green';
+		}
 		else
 		{
 			$return = NULL;
@@ -252,8 +298,13 @@ class Core_Browser
 	 */
 	static public function getOs($userAgent)
 	{
-		// defore Mac
-		// Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1
+		if (is_null($userAgent) || $userAgent === '')
+		{
+			return '-';
+		}
+
+		// before Mac
+		// Mozilla/5.0 (iPhone; CPU iPhone OS 15_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Mobile/15E148 Safari/604.1
 		if (preg_match("/CPU (iPhone )?OS/i", $userAgent))
 		{
 			$os = "iOS";

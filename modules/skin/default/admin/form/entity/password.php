@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Password extends Admin_Form_Entity_Input
 {
@@ -36,9 +35,13 @@ class Skin_Default_Admin_Form_Entity_Password extends Admin_Form_Entity_Input
 
 	/**
 	 * Executes the business logic.
+	 * @hostcms-event Skin_Default_Admin_Form_Entity_Password.onBeforeExecute
+	 * @hostcms-event Skin_Default_Admin_Form_Entity_Password.onAfterExecute
 	 */
 	public function execute()
 	{
+		Core_Event::notify(get_class($this) . '.onBeforeExecute', $this);
+
 		is_null($this->size) && is_null($this->style) && $this->style('width: 100%');
 
 		$aAttr = $this->getAttrsString();
@@ -81,5 +84,7 @@ class Skin_Default_Admin_Form_Entity_Password extends Admin_Form_Entity_Input
 		}
 
 		?></div><?php
+
+		Core_Event::notify(get_class($this) . '.onAfterExecute', $this);
 	}
 }

@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_User_Module extends User_Module
 {
@@ -459,7 +458,7 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 
 						if($oModule)
 						{
-							$oCore_Module = Core_Module::factory($oModule->path);
+							$oCore_Module = Core_Module_Abstract::factory($oModule->path);
 
 							if ($oModule->active && $oCore_Module)
 							{

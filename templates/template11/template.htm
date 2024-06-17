@@ -9,6 +9,7 @@
 <div class="right_block">
 	<div class="content">
 		<?php
+
 		// Разделы магазина
 		if (Core::moduleIsActive('shop'))
 		{
@@ -41,7 +42,7 @@
 				->itemsProperties(TRUE);
 
 			if (is_object(Core_Page::instance()->object)
-				&& get_class(Core_Page::instance()->object) == 'Shop_Controller_Show')
+				&& Core_Page::instance()->object instanceof Shop_Controller_Show)
 			{
 				$Shop_Controller_Show->group(Core_Page::instance()->object->group);
 				$iCurrentShopGroup = Core_Page::instance()->object->group;
@@ -182,6 +183,8 @@
 				Core_Entity::factory('Shop', Core_Page::instance()->libParams['shopId'])
 			);
 			$Shop_Controller_Tag_Show
+				//->group(586)
+				//->subgroups(TRUE)
 				->xsl(
 					Core_Entity::factory('Xsl')->getByName('ОблакоТэговМагазин')
 				);

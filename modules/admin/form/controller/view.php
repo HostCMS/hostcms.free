@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Admin_Form_Controller_View extends Core_Servant_Properties
 {
@@ -39,6 +38,7 @@ class Admin_Form_Controller_View extends Core_Servant_Properties
 	 */
 	protected $_allowedProperties = array(
 		'showFilter',
+		'showTopFilterTags',
 		'showChangeViews',
 		'showPageSelector',
 		'showPageNavigation'

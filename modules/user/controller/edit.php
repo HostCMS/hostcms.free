@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage User
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -49,7 +48,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->add($oMainRow8 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow9 = Admin_Form_Entity::factory('Div')->class('row'));
 
-		$oMainTab->move($this->getField('login'), $oMainRow1);
+		$oMainTab->move($this->getField('login')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow1);
 
 		$oMainTab->delete($this->getField('password'));
 
@@ -62,7 +61,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->caption(Core::_('User.password'))
 			->id('password_first')
 			->name('password_first')
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-6 col-lg-6'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
 			->generatePassword(TRUE);
 
 		!$this->_object->id && $oPasswordFirst->format($aPasswordFormat);
@@ -70,7 +69,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oPasswordSecond = Admin_Form_Entity::factory('Password')
 			->caption(Core::_('User.password_second'))
 			->name('password_second')
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-6 col-lg-6'));
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 		$aPasswordFormatSecond = array(
 			'fieldEquality' => array(
@@ -94,7 +93,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->move($this->getField('superuser')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow3)
 			->move($this->getField('only_access_my_own')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow3)
 			->move($this->getField('freelance')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow4)
-			->move($this->getField('dismissed')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow4)
+			->move($this->getField('dismissed')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))->class('form-control colored-danger'), $oMainRow4)
 			->move($this->getField('read_only')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow4)
 			->move($this->getField('root_dir'), $oMainRow5);
 
@@ -170,7 +169,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->id('sex' . time())
 			->caption(Core::_('User.sex'))
 			->value($this->_object->sex)
-			->divAttr(array('class' => 'form-group col-lg-4 col-md-3 col-sm-6 col-xs-12'))
+			->divAttr(array('class' => 'form-group col-lg-4 col-md-3 col-sm-6 col-xs-12 rounded-radio-group'))
 			->radio(array(
 				0 => Core::_('User.male'),
 				1 => Core::_('User.female')
@@ -191,7 +190,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$sFormPath = $this->_Admin_Form_Controller->getPath();
 
-		$aConfig = Core_Config::instance()->get('user_config', array()) + array (
+		$aConfig = Core_Config::instance()->get('user_config', array()) + array(
 			'max_height' => 130,
 			'max_width' => 130
 		);
@@ -875,8 +874,8 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	{
 		if (!is_null($operation) && $operation != '')
 		{
-			$login = Core_Array::getRequest('login');
-			$id = Core_Array::getRequest('id');
+			$login = Core_Array::getRequest('login', '', 'str');
+			$id = Core_Array::getRequest('id', 0, 'int');
 			$oSameUser = Core_Entity::factory('User')->getByLogin($login);
 
 			if (!is_null($oSameUser) && $oSameUser->id != $id)

@@ -10,8 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Image_Imagick extends Core_Image
 {
@@ -35,7 +34,7 @@ class Core_Image_Imagick extends Core_Image
 	 * </code>
 	 * @return bool
 	 */
-	static public function resizeImage($sourceFile, $maxWidth, $maxHeight, $targetFile, $quality = NULL, $preserveAspectRatio = TRUE, $outputFormat = NULL)
+	public function resizeImage($sourceFile, $maxWidth, $maxHeight, $targetFile, $quality = NULL, $preserveAspectRatio = TRUE, $outputFormat = NULL)
 	{
 		$maxWidth = intval($maxWidth);
 		$maxHeight = intval($maxHeight);
@@ -240,7 +239,7 @@ class Core_Image_Imagick extends Core_Image
 	 * </code>
 	 * @return bool
 	 */
-	static public function addWatermark($source, $target, $watermark, $watermarkX = NULL, $watermarkY = NULL, $outputFormat = NULL)
+	public function addWatermark($source, $target, $watermark, $watermarkX = NULL, $watermarkY = NULL, $outputFormat = NULL)
 	{
 		$return = FALSE;
 
@@ -250,7 +249,7 @@ class Core_Image_Imagick extends Core_Image
 			$watermarkImage = new Imagick($watermark);
 
 			$iImagetype = $iSourceImageType = self::exifImagetype($source);
-			
+
 			if (!is_null($watermarkX))
 			{
 				// Если передан атрибут в %-ах
@@ -281,8 +280,8 @@ class Core_Image_Imagick extends Core_Image
 			$watermarkX < 0 && $watermarkX = 0;
 			$watermarkY < 0 && $watermarkY = 0;
 
-			$oImagick->compositeImage($watermarkImage, imagick::COMPOSITE_OVER, $watermarkX, $watermarkY);
-			
+			$oImagick->compositeImage($watermarkImage, Imagick::COMPOSITE_OVER, $watermarkX, $watermarkY);
+
 			$watermarkImage->clear();
 			$watermarkImage->destroy();
 
@@ -328,7 +327,7 @@ class Core_Image_Imagick extends Core_Image
 			$oImagick->stripImage();
 
 			$oImagick->writeImage($target);
-			
+
 			$oImagick->clear();
 			$oImagick->destroy();
 
@@ -352,7 +351,7 @@ class Core_Image_Imagick extends Core_Image
 	 * @param string $path path
 	 * @return mixed
 	 */
-	static public function getImageSize($path)
+	public function getImageSize($path)
 	{
 		if (Core_File::isFile($path) && is_readable($path) && filesize($path) > 12 && self::exifImagetype($path))
 		{
@@ -402,7 +401,7 @@ class Core_Image_Imagick extends Core_Image
 	 * @param string $path
 	 * @return mixed
 	 */
-	static public function getImageType($path)
+	public function getImageType($path)
 	{
 		$oImagick = new Imagick($path);
 		$format = $oImagick->getImageFormat();
@@ -416,9 +415,18 @@ class Core_Image_Imagick extends Core_Image
 	 * Get ImageMagick version
 	 * @return string
 	 */
-	static public function getIMVersion()
+	public function getIMVersion()
 	{
 		$im = new Imagick();
 		return Core_Array::get($im->getVersion(), 'versionString', '');
+	}
+	
+	/**
+	 * Check Imagick-Module Availability
+	 * @return bool
+	 */
+	public function isAvailable()
+	{
+		return class_exists('Imagick');
 	}
 }

@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Admin_Form_Model extends Core_Entity
 {
@@ -49,7 +48,8 @@ class Admin_Form_Model extends Core_Entity
 		'admin_form_field' => array(),
 		'admin_form_action' => array(),
 		'admin_form_action_dir' => array(),
-		'admin_form_autosave' => array()
+		'admin_form_autosave' => array(),
+		'admin_form_field_setting' => array()
 	);
 
 	/**
@@ -103,6 +103,7 @@ class Admin_Form_Model extends Core_Entity
 		$this->Admin_Form_Action_Dirs->deleteAll(FALSE);
 		$this->Admin_Form_Settings->deleteAll(FALSE);
 		$this->Admin_Form_Autosaves->deleteAll(FALSE);
+		$this->Admin_Form_Field_Settings->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);
 	}
@@ -142,5 +143,41 @@ class Admin_Form_Model extends Core_Entity
 
 			return $oAdmin_Form_Setting;
 		}
+	}
+
+	/**
+	 * Get available fields for user
+	 * @param int $user_id
+	 * @return array
+	 */
+	public function getAvailableFieldsForUser($user_id)
+	{
+		$aAvailableFields = array();
+
+		// Available Fields for User
+		$oAdmin_Form_Field_Settings = Core_Entity::factory('Admin_Form_Field_Setting');
+		$oAdmin_Form_Field_Settings->queryBuilder()
+			->where('admin_form_field_settings.admin_form_id', '=', $this->id)
+			->where('admin_form_field_settings.user_id', '=', $user_id);
+
+		$aAdmin_Form_Field_Settings = $oAdmin_Form_Field_Settings->findAll(FALSE);
+		/*if (count($aAdmin_Form_Field_Settings))
+		{*/
+			foreach ($aAdmin_Form_Field_Settings as $oAdmin_Form_Field_Setting)
+			{
+				$aAvailableFields[$oAdmin_Form_Field_Setting->admin_form_field_id] = $oAdmin_Form_Field_Setting->admin_form_field_id;
+			}
+		/*}
+		else
+		{
+			// Поля могут быть заданы самому контроллеру (например в SQL), получение перенесено в list
+			$aAdmin_Form_Fields = $this->Admin_Form_Fields->findAll(FALSE);
+			foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
+			{
+				$aAvailableFields[$oAdmin_Form_Field->id] = $oAdmin_Form_Field->id;
+			}
+		}*/
+
+		return $aAvailableFields;
 	}
 }

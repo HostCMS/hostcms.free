@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Company
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Company_Cashbox_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -50,7 +49,8 @@ class Company_Cashbox_Controller_Edit extends Admin_Form_Action_Controller_Type_
 
 		$oMainTab
 			->move($this->getField('name')->format(array('minlen' => array('value' => 1)))->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1)
-			->move($this->getField('default')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2)
+			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow2)
+			->move($this->getField('default')->divAttr(array('class' => 'form-group col-xs-12 col-sm-9 margin-top-21')), $oMainRow2)
 			;
 
 		return $this;

@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Интернет-магазины',
@@ -24,6 +23,7 @@ return array(
 	'shop_dir_id' => "Раздел",
 	'description' => "Описание интернет-магазина",
 	'structure_id' => "Узел структуры",
+	'producer_structure_id' => "Узел структуры производителей",
 	'siteuser_group_id' => 'Группа клиентов',
 	'shop_company_id' => 'Компания',
 	'shop_currency_id' => "Валюта по умолчанию",
@@ -183,7 +183,9 @@ return array(
 	'seo_template_filter_producer' => 'Производитель',
 
 	'all_groups_count' => 'Всего групп: %s',
-	'all_items_count' => 'Всего товаров, включая модификации и ярлыки: %s',
+	'all_items_count' => 'Всего товаров, исключая модификации и ярлыки: %s',
+	'all_modifications_count' => 'Всего модификаций: %s',
+	'all_shortcuts_count' => 'Всего ярлыков: %s',
 
 	'create_small_image' => 'Создавать малое изображение из большого',
 
@@ -219,4 +221,8 @@ return array(
 	'searchUnindexItem' => 'Идентификатор элемента',
 	'shop_id' => 'Идентификатор магазина',
 	'updateCurrency' => 'Название драйвера',
+
+	'seo_template_filter_prices' => 'Фильтр по цене',
+	'seo_template_filter_prices_from' => 'Цена от',
+	'seo_template_filter_prices_to' => 'до',
 );

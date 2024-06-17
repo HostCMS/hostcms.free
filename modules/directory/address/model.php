@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Directory
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Directory_Address_Model extends Core_Entity
 {
@@ -99,7 +98,9 @@ class Directory_Address_Model extends Core_Entity
 			$this->postcode,
 			$this->country,
 			$this->city,
-			$this->value
+			$this->value,
+			$this->house,
+			$this->flat
 		);
 
 		$aFullAddress = array_map('strval', $aFullAddress);

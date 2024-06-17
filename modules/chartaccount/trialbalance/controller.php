@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Chartaccount
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Chartaccount_Trialbalance_Controller
 {
@@ -133,6 +132,8 @@ class Chartaccount_Trialbalance_Controller
 
 		$aCompanies = $oSite->Companies->findAll();
 
+		$windowId = self::$_Admin_Form_Controller->getWindowId();
+
 		ob_start();
 		?>
 		<div class="col-xs-12 col-sm-6 col-lg-3 report-company">
@@ -235,7 +236,7 @@ class Chartaccount_Trialbalance_Controller
 			<div class="all-year">
 				<?php echo Core::_('Chartaccount_Trialbalance.all_year')?>
 				<label>
-					<input class="checkbox-slider toggle colored-success" name="all_year" onchange="$(this).val(+this.checked); $.sendRequest({context: $('.mainForm')});" value="<?php echo self::$bAllYear?>" <?php echo self::$bAllYear ? 'checked="checked"' : ''?> type="checkbox" />
+					<input class="checkbox-slider toggle colored-success" name="all_year" onchange="$(this).val(+this.checked); $.sendRequest({path: '<?php echo self::$_path?>', context: $('.mainForm')});" value="<?php echo self::$bAllYear?>" <?php echo self::$bAllYear ? 'checked="checked"' : ''?> type="checkbox" />
 					<span class="text"></span>
 				</label>
 			</div>
@@ -260,13 +261,15 @@ class Chartaccount_Trialbalance_Controller
 							quarter: $('select[name="quarter"]').val(),
 							year: $('select[name="year"]').val(),
 							all_year: $('input[name="all_year"]').val(),
+							subcounts: $.getChartaccountSubcouns('<?php echo $windowId?>'),
 							external_data: settings.data
 						};
 
 						$.loadingScreen('show');
 
 						$.ajax({
-							url: '<?php echo self::$_path?>',
+							// url: '<?php echo self::$_path?>',
+							url: settings.path,
 							data: dataRequest,
 							dataType: 'json',
 							context: settings.context,

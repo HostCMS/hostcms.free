@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -51,7 +50,8 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'));
+			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oSiteuserGroupBlock = Admin_Form_Entity::factory('Div')->class('well with-header well-sm'));
 
 		$oAdditionalTab->add($oAdditionalRow1 = Admin_Form_Entity::factory('Div')->class('row'));
 
@@ -73,7 +73,7 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		$oImageField
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 no-padding-left'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
 			->name("image")
 			->id("image")
 			->largeImage(array(
@@ -99,9 +99,47 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 			);
 
 		$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow3);
+
 		$oMainRow4->add($oImageField);
 		$oMainTab->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow4);
 		$oMainTab->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 margin-top-21')), $oMainRow4);
+
+		// Группа доступа
+		$aSiteuser_Groups = array(0 => Core::_('Shop_Discount.all'));
+
+		if (Core::moduleIsActive('siteuser'))
+		{
+			$oSiteuser_Controller_Edit = new Siteuser_Controller_Edit($this->_Admin_Form_Action);
+			$aSiteuser_Groups = $aSiteuser_Groups + $oSiteuser_Controller_Edit->fillSiteuserGroups($this->_object->Shop->site_id);
+		}
+
+		$oSiteuserGroupBlock
+			->add(Admin_Form_Entity::factory('Div')
+				->class('header bordered-azure')
+				->value(Core::_("Shop_Payment_System.siteuser_groups"))
+			)
+			->add($oSiteuserGroupBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'));
+
+		$aTmp = array();
+
+		$aShop_Delivery_Siteuser_Groups = $this->_object->Shop_Delivery_Siteuser_Groups->findAll(FALSE);
+		foreach ($aShop_Delivery_Siteuser_Groups as $oShop_Delivery_Siteuser_Group)
+		{
+			!in_array($oShop_Delivery_Siteuser_Group->siteuser_group_id, $aTmp)
+				&& $aTmp[] = $oShop_Delivery_Siteuser_Group->siteuser_group_id;
+		}
+
+		foreach ($aSiteuser_Groups as $siteuser_group_id => $name)
+		{
+			$oSiteuserGroupBlockRow1->add($oCheckbox = Admin_Form_Entity::factory('Checkbox')
+				->divAttr(array('class' => 'form-group col-xs-12 col-md-4'))
+				->name('siteuser_group_' . $siteuser_group_id)
+				->caption(htmlspecialchars($name))
+			);
+
+			(!$this->_object->id || in_array($siteuser_group_id, $aTmp))
+				&& $oCheckbox->checked('checked');
+		}
 
 		$this->title($this->_object->id
 			? Core::_('Shop_Delivery.type_of_delivery_edit_form_title', $this->_object->name, FALSE)
@@ -176,7 +214,7 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 					'fa-file-code-o'
 				)
 			)
-			->divAttr(array('class' => 'form-group col-xs-12 col-md-4 margin-top-21'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-md-4 margin-top-21 rounded-radio-group'))
 			->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [0,1]); window.dispatchEvent(new Event('resize'));")
 			->value($this->_object->type)
 			->name('type');
@@ -186,8 +224,7 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 		$oTextarea = Admin_Form_Entity::factory('Textarea');
 
 		$oTmpOptions = $oTextarea->syntaxHighlighterOptions;
-		// $oTmpOptions['mode'] = 'application/x-httpd-php';
-		$oTmpOptions['mode'] = 'ace/mode/php';
+		$oTmpOptions['mode'] = '"ace/mode/php"';
 
 		$oTextarea->caption(Core::_('Shop_Delivery.handler'))
 			->name('code')
@@ -451,6 +488,49 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 					// !is_null($oShop_Delivery_Payment_System) && $oShop_Delivery_Payment_System->delete();
 
 					$this->_object->remove($oShop_Payment_System);
+				}
+			}
+		}
+
+		// Группа доступа
+		$aSiteuser_Groups = array(0 => Core::_('Structure.all'));
+
+		if (Core::moduleIsActive('siteuser'))
+		{
+			$oSiteuser_Controller_Edit = new Siteuser_Controller_Edit($this->_Admin_Form_Action);
+			$aSiteuser_Groups = $aSiteuser_Groups + $oSiteuser_Controller_Edit->fillSiteuserGroups($this->_object->Shop->site_id);
+		}
+
+		$aTmp = array();
+
+		$aShop_Delivery_Siteuser_Groups = $this->_object->Shop_Delivery_Siteuser_Groups->findAll(FALSE);
+		foreach ($aShop_Delivery_Siteuser_Groups as $oShop_Delivery_Siteuser_Group)
+		{
+			!in_array($oShop_Delivery_Siteuser_Group->siteuser_group_id, $aTmp)
+				&& $aTmp[] = $oShop_Delivery_Siteuser_Group->siteuser_group_id;
+		}
+
+		foreach ($aSiteuser_Groups as $siteuser_group_id => $name)
+		{
+			$bSiteuserGroupChecked = Core_Array::getPost('siteuser_group_' . $siteuser_group_id);
+
+			if ($bSiteuserGroupChecked)
+			{
+				if (!in_array($siteuser_group_id, $aTmp))
+				{
+					$oShop_Delivery_Siteuser_Group = Core_Entity::factory('Shop_Delivery_Siteuser_Group');
+					$oShop_Delivery_Siteuser_Group->siteuser_group_id = $siteuser_group_id;
+					$this->_object->add($oShop_Delivery_Siteuser_Group);
+				}
+			}
+			else
+			{
+				if (in_array($siteuser_group_id, $aTmp))
+				{
+					$oShop_Delivery_Siteuser_Group = $this->_object->Shop_Delivery_Siteuser_Groups->getObject($this->_object, $siteuser_group_id);
+
+					!is_null($oShop_Delivery_Siteuser_Group)
+						&& $oShop_Delivery_Siteuser_Group->delete();
 				}
 			}
 		}

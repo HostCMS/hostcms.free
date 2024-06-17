@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Bonus_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -130,7 +129,7 @@ class Shop_Bonus_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->id('accrual' . time())
 					->caption(Core::_('Shop_Bonus.accrual'))
 					->value($accrualValue)
-					->divAttr(array('class' => 'pull-left'))
+					->divAttr(array('class' => 'pull-left rounded-radio-group'))
 					->radio(array(
 						0 => Core::_('Shop_Bonus.from'),
 						1 => Core::_('Shop_Bonus.through')

@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Delivery_Condition_Model extends Core_Entity
 {
@@ -18,12 +17,6 @@ class Shop_Delivery_Condition_Model extends Core_Entity
 	 * @var int
 	 */
 	public $img=1;
-
-	/**
-	 * Backend property
-	 * @var int
-	 */
-	public $currency_name = '';
 
 	/**
 	 * Backend property
@@ -254,6 +247,31 @@ class Shop_Delivery_Condition_Model extends Core_Entity
 	public function time_toBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		return date("H:i", strtotime($this->time_to));
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		if ($this->time_from != '00:00:00' || $this->time_to != '00:00:00')
+		{
+			?><span class="badge badge-square badge-pink inverted margin-left-5 small"><i class="fas fa-stopwatch"></i> <?php echo date("H:i", strtotime($this->time_from)), ' — ', date("H:i", strtotime($this->time_to))?></span><?php
+		}
+	}
+	
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function priceBackend()
+	{
+		return $this->shop_currency_id
+			? $this->Shop_Currency->formatWithCurrency($this->price)
+			: $this->price;
 	}
 
 	/**

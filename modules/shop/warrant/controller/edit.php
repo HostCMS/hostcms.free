@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Warrant_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -279,7 +278,7 @@ class Shop_Warrant_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 			->name('chartaccount_cashflow_id')
 			->value($this->_object->chartaccount_cashflow_id)
 			->caption(Core::_('Shop_Warrant.chartaccount_cashflow_id'))
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'));
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 		$oMainRow2->add($oSelectCashflows);
 
@@ -325,8 +324,8 @@ class Shop_Warrant_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 		$oMainTab
 			->move($this->getField('posted')->divAttr(array('class' => 'form-group col-xs-12 col-lg-3 margin-top-21')), $oMainRow2)
 			->move($this->getField('description')->caption($description)->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1)
-			->move($this->getField('reason')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow3)
-			->move($this->getField('amount')->divAttr(array('class' => 'form-group col-xs-11 col-sm-2')), $oMainRow3);
+			->move($this->getField('reason')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3')), $oMainRow3)
+			->move($this->getField('amount')->divAttr(array('class' => 'form-group col-xs-11 col-sm-4 col-md-2')), $oMainRow3);
 
 		$oMainRow3
 			->add(

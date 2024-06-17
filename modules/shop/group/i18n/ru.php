@@ -5,8 +5,7 @@
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Группы товаров',
@@ -63,5 +62,6 @@ return array(
 	'markDeleted' => 'Удалить группу',
 	'shortcut_success' => "Ярлык группы успешно добавлен",
 	'change_attributes_success' => 'Атрибуты изменены успешно!',
-	'items_total_count' => 'Количество активных товаров'
+	'items_total_count' => 'Количество активных товаров',
+	'changeIndexation_success' => 'Индексация группы магазина изменена.',
 );

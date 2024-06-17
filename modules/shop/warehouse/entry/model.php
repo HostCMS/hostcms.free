@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Warehouse_Entry_Model extends Core_Entity
 {
@@ -119,12 +118,149 @@ class Shop_Warehouse_Entry_Model extends Core_Entity
 	}
 
 	/**
+	 * Object
+	 * @var object|NULL
+	 */
+	protected $_object = NULL;
+
+	/**
+	 * Get object
+	 * @return object|NULL
+	 */
+	protected function _getObject()
+	{
+		if (is_null($this->_object))
+		{
+			$this->_object = Shop_Controller::getDocument($this->document_id);
+		}
+
+		return $this->_object;
+	}
+
+	/**
 	 * Get document type
 	 * @return int|NULL
 	 */
 	public function getDocumentType()
 	{
 		return Shop_Controller::getDocumentType($this->document_id);
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function valueBackend()
+	{
+		$class = $this->value > 0
+			? 'success'
+			: 'darkorange';
+
+		$this->value == 0 && $class = '';
+
+		Core_Html_Entity::factory('Span')
+			->class($class)
+			->value($this->value)
+			->execute();
+	}
+
+	/**
+	 * Get item's name
+	 * @return string
+	 */
+	public function dataNameBackend()
+	{
+		return $this->Shop_Item->nameBackend();
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function userBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$oObject = $this->_getObject();
+
+		return !is_null($oObject) && isset($oObject->user_id) && $oObject->user_id
+			? $oObject->User->showAvatarWithName()
+			: '';
+	}
+
+	/**
+	 * Get item's name
+	 * @return string
+	 */
+	public function shop_warehouse_idBackend()
+	{
+		return $this->Shop_Warehouse->id ? htmlspecialchars((string) $this->Shop_Warehouse->name) : '';
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function documentBackend()
+	{
+		$type = Shop_Controller::getDocumentType($this->document_id);
+
+		$color = Core_Str::createColor($type);
+
+		/* Типы документов:
+		* 0 - Shop_Warehouse_Inventory_Model
+		* 1 - Shop_Warehouse_Incoming_Model
+		* 2 - Shop_Warehouse_Writeoff_Model
+		* 3 - Shop_Warehouse_Regrade_Model
+		* 4 - Shop_Warehouse_Movement_Model
+		* 5 - Shop_Order_Model
+		* 6 - Shop_Warehouse_Purchaseorder_Model
+		* 7 - Shop_Warehouse_Invoice_Model
+		* 8 - Shop_Warehouse_Supply_Model
+		* 9 - Shop_Warehouse_Purchasereturn_Model
+		*/
+		switch ($type)
+		{
+			case 0:
+				$path = '/admin/shop/warehouse/inventory/index.php';
+			break;
+			case 1:
+				$path = '/admin/shop/warehouse/incoming/index.php';
+			break;
+			case 2:
+				$path = '/admin/shop/warehouse/writeoff/index.php';
+			break;
+			case 3:
+				$path = '/admin/shop/warehouse/regrade/index.php';
+			break;
+			case 4:
+				$path = '/admin/shop/warehouse/movement/index.php';
+			break;
+			case 5:
+				$path = '/admin/shop/order/index.php';
+			break;
+			case 6:
+				$path = '/admin/shop/warehouse/purchaseorder/index.php';
+			break;
+			case 7:
+				$path = '/admin/shop/warehouse/invoice/index.php';
+			break;
+			case 8:
+				$path = '/admin/shop/warehouse/supply/index.php';
+			break;
+			case 9:
+				$path = '/admin/shop/warehouse/purchasereturn/index.php';
+			break;
+			default:
+				$path = '';
+		}
+
+		$id = $this->document_id >> 8;
+
+		if ($path != '' && $id)
+		{
+			return '<span class="badge badge-round badge-max-width" style="border-color: ' . $color . '; color: ' . Core_Str::hex2darker($color, 0.2) . '; background-color: ' . Core_Str::hex2lighter($color, 0.88) . '"><a style="color: ' . $color . '" href="' . $path . '?hostcms[action]=edit&hostcms[checked][0][' . $id . ']=1" onclick="$.modalLoad({path: \'' . $path . '\', action: \'edit\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $id . ']=1\', windowId: \'modal' . $this->document_id . '\', width: \'90%\'}); return false">' . Core::_('Shop_Document_Relation.type' . $type) . ' ' . $id . '</a></span>';
+		}
 	}
 
 	/**

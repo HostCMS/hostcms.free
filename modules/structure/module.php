@@ -8,10 +8,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Structure
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
-class Structure_Module extends Core_Module
+class Structure_Module extends Core_Module_Abstract
 {
 	/**
 	 * Module version
@@ -23,7 +22,7 @@ class Structure_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2023-07-17';
+	public $date = '2024-06-06';
 
 	/**
 	 * Module name
@@ -54,13 +53,15 @@ class Structure_Module extends Core_Module
 	/**
 	 * Индексация структуры сайта
 	 *
-	 * @param $offset
-	 * @param $limit
+	 * @param int $site_id
+	 * @param int $offset
+	 * @param int $limit
 	 * @return array
 	 * @hostcms-event Structure_Module.indexing
 	 */
-	public function indexing($offset, $limit)
+	public function indexing($site_id, $offset, $limit)
 	{
+		$site_id = intval($site_id);
 		$offset = intval($offset);
 		$limit = intval($limit);
 
@@ -68,12 +69,13 @@ class Structure_Module extends Core_Module
 			->notify(FALSE)
 			->status(Core_Log::$MESSAGE)
 			->write("structure indexing({$offset}, {$limit})");
-		
+
 		$oStructure = Core_Entity::factory('Structure');
 
 		$oStructure
 			->queryBuilder()
 			->join('sites', 'structures.site_id', '=', 'sites.id')
+			->where('structures.site_id', '=', $site_id)
 			->where('structures.active', '=', 1)
 			->where('structures.shortcut_id', '=', 0)
 			->where('structures.indexing', '=', 1)

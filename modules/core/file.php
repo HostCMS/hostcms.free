@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_File
 {
@@ -17,7 +16,7 @@ class Core_File
 	 * File types with resize support
 	 * @var array
 	 */
-	static public $resizeExtensions = array('JPG', 'JPEG', 'GIF', 'PNG');
+	static public $resizeExtensions = array('JPG', 'JPEG', 'GIF', 'PNG', 'JFIF');
 
 	/**
 	 * Get resize extensions
@@ -31,6 +30,10 @@ class Core_File
 		{
 			$aReturn[] = 'WEBP';
 		}
+		if (PHP_VERSION_ID >= 80100)
+		{
+			$aReturn[] = 'AVIF';
+		}
 
 		return $aReturn;
 	}
@@ -42,7 +45,7 @@ class Core_File
 	 */
 	static public function isFile($filename)
 	{
-		return (!defined('PHP_MAXPATHLEN') || strlen($filename) < PHP_MAXPATHLEN)
+		return !is_null($filename) && (!defined('PHP_MAXPATHLEN') || strlen($filename) < PHP_MAXPATHLEN)
 			&& is_file($filename);
 	}
 
@@ -137,6 +140,14 @@ class Core_File
 	}
 
 	/**
+	 * Clears file status cache
+	 */
+	static public function clearCache()
+	{
+		clearstatcache();
+	}
+
+	/**
 	 * Copies directory
 	 * @param string $source The source directory.
 	 * @param string $target The destination directory.
@@ -157,7 +168,7 @@ class Core_File
 				{
 					if ($file != '.' && $file!='..')
 					{
-						clearstatcache();
+						self::clearCache();
 
 						self::isFile($source . DIRECTORY_SEPARATOR . $file)
 							? self::copy($source . DIRECTORY_SEPARATOR . $file, $target . DIRECTORY_SEPARATOR . $file)
@@ -219,23 +230,26 @@ class Core_File
 
 	/**
 	 * Deletes a file
-	 * @param string $fileName Path to the file.
+	 * @param string $filePath Path to the file.
 	 */
-	static public function delete($fileName)
+	static public function delete($filePath)
 	{
-		if (self::isFile($fileName) || self::isLink($fileName))
+		if (self::isLink($filePath) || self::isFile($filePath))
 		{
-			if (!@unlink($fileName))
+			if (!@unlink($filePath))
 			{
-				throw new Core_Exception("Delete file '%fileName' error.",
-					array('%fileName' => Core::cutRootPath($fileName)));
+				$aError = error_get_last();
+					
+				throw new Core_Exception("Delete file '%filePath' error. %reason",
+					array('%filePath' => Core::cutRootPath($filePath), '%reason' => isset($aError['message']) ? $aError['message'] : ''));
 			}
+			clearstatcache(FALSE, $filePath);
 		}
-		else
+		/*else
 		{
-			throw new Core_Exception("The file '%fileName' does not exist.",
-				array('%fileName' => Core::cutRootPath($fileName)));
-		}
+			throw new Core_Exception("The file '%filePath' does not exist.",
+				array('%filePath' => Core::cutRootPath($filePath)));
+		}*/
 	}
 
 	/**
@@ -284,7 +298,7 @@ class Core_File
 				{
 					if ($file != '.' && $file != '..')
 					{
-						clearstatcache();
+						self::clearCache();
 						$pathName = $dirname . DIRECTORY_SEPARATOR . $file;
 
 						if (self::isFile($pathName))
@@ -299,7 +313,7 @@ class Core_File
 				}
 
 				closedir($dh);
-				clearstatcache();
+				self::clearCache();
 
 				if (self::isDir($dirname) && !@rmdir($dirname))
 				{
@@ -344,7 +358,7 @@ class Core_File
 				{
 					if ($file != '.' && $file != '..')
 					{
-						clearstatcache();
+						self::clearCache();
 						$pathName = $dirname . DIRECTORY_SEPARATOR . $file;
 
 						if (self::isFile($pathName))
@@ -361,7 +375,7 @@ class Core_File
 				}
 
 				closedir($dh);
-				clearstatcache();
+				self::clearCache();
 
 				return $bReturn;
 			}
@@ -444,7 +458,7 @@ class Core_File
 	 */
 	static public function mkdir($pathname, $mode = CHMOD, $recursive = FALSE)
 	{
-		clearstatcache();
+		self::clearCache();
 
 		if (!self::isDir($pathname) && !self::isLink($pathname))
 		{
@@ -456,8 +470,9 @@ class Core_File
 			}
 			else
 			{
-				throw new Core_Exception("The directory '%pathname' directory has not been created.",
-					array('%pathname' => Core::cutRootPath($pathname)));
+				$aError = error_get_last();
+				throw new Core_Exception("The directory '%pathname' directory has not been created. %reason",
+					array('%pathname' => Core::cutRootPath($pathname), '%reason' => isset($aError['message']) ? $aError['message'] : ''));
 			}
 		}
 	}
@@ -598,7 +613,7 @@ class Core_File
 	 */
 	static public function convertfileNameToLocalEncoding($fileName)
 	{
-		return @iconv("UTF-8", "Windows-1251//IGNORE//TRANSLIT", $fileName);
+		return @iconv("UTF-8", "Windows-1251//IGNORE//TRANSLIT", (string) $fileName);
 	}
 
 	/**
@@ -608,7 +623,7 @@ class Core_File
 	 */
 	static public function convertfileNameFromLocalEncoding($fileName)
 	{
-		return @iconv("Windows-1251", "UTF-8//IGNORE//TRANSLIT", $fileName);
+		return @iconv("Windows-1251", "UTF-8//IGNORE//TRANSLIT", (string) $fileName);
 	}
 
 	/**
@@ -660,8 +675,6 @@ class Core_File
 				array('%file' => Core::cutRootPath($file)));
 		}
 
-		$fileName = str_replace(array("\r", "\n", "\0"), '', $fileName);
-
 		header('Pragma: public');
 		header('Content-Type: ' . Core_Mime::getFileMime($file));
 
@@ -669,7 +682,7 @@ class Core_File
 			? 'attachment'
 			: 'inline';
 
-		header("Content-Disposition: {$contentDisposition}; filename=\"" . rawurlencode($fileName) . "\";");
+		header("Content-Disposition: {$contentDisposition}; filename=\"" . rawurlencode(Core_Http::sanitizeHeader($fileName)) . "\";");
 		header('Content-Transfer-Encoding: binary');
 		header('Content-Length: ' . filesize($file));
 

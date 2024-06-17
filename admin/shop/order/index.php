@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -31,18 +30,26 @@ $oShopDir = Core_Entity::factory('Shop_Dir', $oShop->shop_dir_id);
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title($sFormTitle = Core::_('Shop_Order.show_order_title', $oShop->name))
 	->pageTitle($sFormTitle);
 
+$oAdmin_Form_Controller->showTopFilterTags = 'shop_order';
+
 $windowId = $oAdmin_Form_Controller->getWindowId();
 
 $siteuser_id = intval(Core_Array::getGet('siteuser_id'));
-$siteuser_id && $windowId != 'id_content' && $oAdmin_Form_Controller->Admin_View(
-	Admin_View::getClassName('Admin_Internal_View')
-);
+if ($siteuser_id && $windowId != 'id_content')
+{
+	$oAdmin_Form_Controller
+		->Admin_View(
+			Admin_View::getClassName('Admin_Internal_View')
+		)
+		->addView('order', 'Siteuser_Controller_Order')
+		->view('order');
+}
 
 // Shop Order Print Forms
 $shop_print_form_id = intval(Core_Array::getGet('shop_print_form_id'));
@@ -89,16 +96,16 @@ if (Core_Array::getPost('recalcFormula'))
 	);
 
 	$price = Core_Array::getPost('shop_delivery_condition_price');
-	
+
 	if (!is_null($price))
 	{
 		$shop_order_id = Core_Array::getPost('shop_order_id', 0, 'int');
 		$oShop_Order = Core_Entity::factory('Shop_Order')->getById($shop_order_id);
-		
+
 		if (!is_null($oShop_Order) && $oUser->checkObjectAccess($oShop_Order))
 		{
 			$shop_delivery_condition_name = Core_Array::getPost('shop_delivery_condition_name');
-			
+
 
 			$oShop_Order_Item_Delivery = $oShop_Order->Shop_Order_Items->getByType(1);
 			if (is_null($oShop_Order_Item_Delivery))
@@ -201,10 +208,15 @@ else
 	$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0);
 }
 
+$btn = $siteuser_id && $windowId != 'id_content'
+	? 'btn-gray'
+	: 'btn-palegreen';
+
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Order.shops_link_order_add'))
 		->icon('fa fa-plus')
+		->class('btn ' . $btn)
 		->href($href)
 		->onclick($onclick)
 );
@@ -212,6 +224,16 @@ $oAdmin_Form_Entity_Menus->add(
 if (!$siteuser_id)
 {
 	$oAdmin_Form_Entity_Menus->add(
+		Admin_Form_Entity::factory('Menu')
+			->name(Core::_('Shop_Item.items_catalog_add_form_comment_link'))
+			->icon('fa fa-comments')
+			->href(
+				$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/comment/index.php', NULL, NULL, "shop_id={$oShop->id}")
+			)
+			->onclick(
+				$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/comment/index.php', NULL, NULL, "shop_id={$oShop->id}")
+			)
+	)->add(
 		Admin_Form_Entity::factory('Menu')
 			->name(Core::_('Shop_Order.property_menu'))
 			->icon('fa fa-gears')
@@ -615,9 +637,13 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 
+$oAdmin_Form_Dataset->addCondition(
+	array('select' => array('shop_orders.*'))
+);
+
 // Доступ только к своим
 !$oUser->superuser && $oUser->only_access_my_own
-	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
+	&& $oAdmin_Form_Dataset->addUserConditions();
 
 if ($siteuser_id)
 {
@@ -643,8 +669,11 @@ else
 					)
 				)
 			)
+			->addCondition(
+				array('leftJoin' => array('shop_order_items', 'shop_order_items.shop_order_id', '=', 'shop_orders.id'))
+			)
 			->addCondition(array('open' => array()))
-				->addCondition(array('where' => array('shop_orders.id', '=', $sGlobalSearch)))
+				->addCondition(array('where' => array('shop_orders.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
 				->addCondition(array('setOr' => array()))
 				->addCondition(array('where' => array('shop_orders.invoice', 'LIKE', '%' . $sGlobalSearch . '%')))
 				->addCondition(array('setOr' => array()))
@@ -665,6 +694,10 @@ else
 				->addCondition(array('where' => array('shop_orders.phone', 'LIKE', '%' . $sGlobalSearch . '%')))
 				->addCondition(array('setOr' => array()))
 				->addCondition(array('where' => array('shop_orders.email', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_order_items.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_order_items.marking', 'LIKE', '%' . $sGlobalSearch . '%')))
 			->addCondition(array('close' => array()))
 			->addCondition(
 				array('groupBy' => array('shop_orders.id'))
@@ -672,12 +705,48 @@ else
 	}
 }
 
-// Список значений для фильтра и поля
-$aShop_Order_Statuses = Core_Entity::factory('Shop_Order_Status')->getAllByShop_id($shop_id);
-$aList = array('0' => '—');
-foreach ($aShop_Order_Statuses as $oShop_Order_Status)
+if (isset($oAdmin_Form_Controller->request['topFilter_filter_tags'])
+	&& is_array($oAdmin_Form_Controller->request['topFilter_filter_tags']))
 {
-	$aList[$oShop_Order_Status->id] = $oShop_Order_Status->name;
+	$aValues = $oAdmin_Form_Controller->request['topFilter_filter_tags'];
+	$aValues = array_filter($aValues, 'strlen');
+
+	if (count($aValues))
+	{
+		$oAdmin_Form_Dataset->addCondition(
+			array('join' => array('tag_shop_orders', 'shop_orders.id', '=', 'tag_shop_orders.shop_order_id'))
+		)->addCondition(
+			array('join' => array('tags', 'tags.id', '=', 'tag_shop_orders.tag_id'))
+		)->addCondition(
+			array('where' => array('tags.name', 'IN', $aValues))
+		);
+	}
+}
+
+// Список значений для фильтра и поля
+$aList = array('0' => '—');
+if ($shop_id)
+{
+	$aShop_Order_Statuses = Core_Entity::factory('Shop_Order_Status')->getAllByShop_id($shop_id);
+	foreach ($aShop_Order_Statuses as $oShop_Order_Status)
+	{
+		$aList[$oShop_Order_Status->id] = $oShop_Order_Status->name;
+	}
+}
+elseif (!$shop_id && $siteuser_id)
+{
+	// Список заказов клиента
+	$oSite = Core_Entity::factory('Site', CURRENT_SITE);
+
+	$aShops = $oSite->Shops->findAll(FALSE);
+	foreach ($aShops as $oShop)
+	{
+		$aShop_Order_Statuses = Core_Entity::factory('Shop_Order_Status')->getAllByShop_id($oShop->id);
+		foreach ($aShop_Order_Statuses as $oShop_Order_Status)
+		{
+			$aList[$oShop_Order_Status->id] = $oShop_Order_Status->name;
+		}
+	}
 }
 
 $oAdmin_Form_Dataset

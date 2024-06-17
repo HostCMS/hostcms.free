@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Wysiwyg
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Wysiwyg_Filemanager_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -32,6 +31,8 @@ class Wysiwyg_Filemanager_Controller_Edit extends Admin_Form_Action_Controller_T
 	protected function _prepareForm()
 	{
 		//parent::_prepareForm();
+
+		$this->_prepeared = TRUE;
 
 		$oMainTab = Admin_Form_Entity::factory('Tab')
 			->caption('main')
@@ -102,6 +103,8 @@ class Wysiwyg_Filemanager_Controller_Edit extends Admin_Form_Action_Controller_T
 
 		$oMainRow1->add($oFile_Content);
 
+		$this->_addCsrfToken();
+
 		$this->title(
 			Core::_('Wysiwyg_Filemanager.edit_file', $this->_object->name, FALSE)
 		);
@@ -115,6 +118,9 @@ class Wysiwyg_Filemanager_Controller_Edit extends Admin_Form_Action_Controller_T
 	 */
 	protected function _applyObjectProperty()
 	{
+		$secret_csrf = Core_Array::getPost('secret_csrf', '', 'trim');
+		$this->_checkCsrf($secret_csrf);
+
 		$filePath = $this->_getFilePath();
 
 		$content = Core_Array::getPost('text');

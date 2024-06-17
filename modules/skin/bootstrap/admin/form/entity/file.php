@@ -8,11 +8,16 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Entity_File
 {
+	/**
+	 * Preview Extensions
+	 * @var array
+	 */
+	static protected $_previewExtensions = array('jpg', 'jpeg', 'gif', 'png', 'webp', 'svg', 'avif');
+	
 	/**
 	 * Execute business logic
 	 * @hostcms-event Skin_Bootstrap_Admin_Form_Entity_File.onAfterShowLargeImage
@@ -38,6 +43,8 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 
 			// show_big_image_params - параметр, определяющий отображать ли настройки большого изображения
 			'show_params' => TRUE,
+
+			'show_actions' => TRUE,
 
 			// watermark_position_x - значение поля ввода с подписью "По оси X"
 			'watermark_position_x' => '50%',
@@ -104,6 +111,8 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 			// show_small_image_params - параметр, определяющий отображать ли настройки малого изображения
 			'show_params' => TRUE,
 
+			'show_actions' => TRUE,
+
 			// make_small_image_from_big_show - отображать ли checkbox с подписью "Создать малое изображение из большого" (1 - отображать (по умолчанию), 0 - не отображать);
 			'create_small_image_from_large' => TRUE,
 
@@ -160,10 +169,17 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 			}
 		}
 
-		$oMain_Div->class(
+		/*$oMain_Div->class(
 			(count($this->_children) ? 'input-group' : '')
 			. ($oMain_Div->class != '' ? ' ' . $oMain_Div->class : '')
-		);
+		);*/
+
+		count($this->_children) && $oMain_Div->class = trim($oMain_Div->class . ' input-group');
+
+		$oRow_Div = new Core_Html_Entity_Div();
+		$oRow_Div->class('row');
+
+		$oMain_Div->add($oRow_Div);
 
 		$sDivClass = $this->smallImage['show'] || $this->largeImage['show_description']
 			? 'col-xs-12 col-sm-6'
@@ -189,16 +205,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 					)
 			);
 
-		if ($this->crop)
-		{
-			$oLarge_Input_Group_Div->add(Core_Html_Entity::factory('Script')
-					->value('$(function(){
-						$("#' . $windowId . ' input#' . $this->largeImage['id'] . '").on("change", function(){
-							$.showCropButton($(this), "' . $this->largeImage['id'] . '", "' . $windowId . '");
-						});
-					})')
-				);
-		}
+		$oRow_Div->add($oLarge_Input_Div);
 
 		if ($this->largeImage['path'] != '')
 		{
@@ -210,25 +217,19 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 				? $this->largeImage['originalName']
 				: basename(rawurldecode($this->largeImage['path']));
 
+			$fileCaptionWrapperClass = !$this->largeImage['show_actions']
+				? 'w-100'
+				: '';
+
 			$oLarge_Input_Group_Div->add(
 				Admin_Form_Entity::factory('Code')
-					->html('<div class="file-caption-wrapper"><div id="file_preview_large_' . $this->largeImage['id'] . '" class="file-caption"><i class="' . Core_File::getIcon($originalName) . ' margin-right-5"></i><a target="_blank" href="' . htmlspecialchars($this->largeImage['path']) . $prefixRand . 'rnd=' . rand() .'">'
+					->html('<div class="file-caption-wrapper ' . $fileCaptionWrapperClass . '"><div id="file_preview_large_' . $this->largeImage['id'] . '" class="file-caption"><i class="' . Core_File::getIcon($originalName) . ' margin-right-5"></i><a target="_blank" href="' . htmlspecialchars($this->largeImage['path']) . $prefixRand . 'rnd=' . rand() .'">'
 						. htmlspecialchars($originalName)
 						. '</a></div></div>')
 			);
-		}
 
-		$oMain_Div->add($oLarge_Input_Div);
-
-		if ($this->largeImage['path'] != '' || $this->largeImage['show_params'])
-		{
-			// Картинка с контролем большого изображения
-			if ($this->largeImage['path'] != '')
+			if($this->largeImage['show_actions'])
 			{
-				$prefixRand = strpos($this->largeImage['path'], '?') === FALSE
-					? '?'
-					: '&';
-
 				$oLarge_Input_Group_Div->add(
 					Core_Html_Entity::factory('A')
 						->id('preview_large_' . $this->largeImage['id'])
@@ -250,6 +251,14 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 		{
 			$originalName = $this->largeImage['originalName'] != '' ? $this->largeImage['originalName'] : basename($this->largeImage['path']);
 			$oLarge_Input_Group_Div->add(
+				Core_Html_Entity::factory('Script')
+					->value('$(function(){
+						$("#' . $windowId . ' input#' . $this->largeImage['id'] . '").on("change", function(){
+							$.showCropButton($(this), "' . $this->largeImage['id'] . '", "' . $windowId . '");
+						});
+					})')
+				)
+			->add(
 				Core_Html_Entity::factory('A')
 					->id('crop_' . $this->largeImage['id'])
 					->class($this->largeImage['path'] == '' ? 'hidden' : 'input-group-addon control-item')
@@ -417,24 +426,18 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 							)
 					);
 			}
-			// -----------------
 
-			// Настройки большого изображения
-			if ($this->largeImage['show_params'])
-			{
-				$oLarge_Input_Group_Div
+			$oLarge_Input_Group_Div->add(
+				Core_Html_Entity::factory('Span')
+					->id('file_large_settings_' . $iAdmin_Form_Count)
+					->class('input-group-addon control-item')
+					->addAllowedProperty('data-title')
+					->set('data-title', '<b>' . htmlspecialchars($this->largeImage['windowTitle']) . '</b>')
 					->add(
-						Core_Html_Entity::factory('Span')
-							->id('file_large_settings_' . $iAdmin_Form_Count)
-							->class('input-group-addon control-item')
-							->addAllowedProperty('data-title')
-							->set('data-title', '<b>' . htmlspecialchars($this->largeImage['windowTitle']) . '</b>')
-							->add(
-								Admin_Form_Entity::factory('Code')->html('<i class="fa fa-cog"></i>')
-							)
+						Admin_Form_Entity::factory('Code')->html('<i class="fa fa-cog"></i>')
 					)
-					->add($oLargeWatermark_Div);
-			}
+			)
+			->add($oLargeWatermark_Div);
 		}
 
 		// Быстрый просмотр большого изображения
@@ -442,7 +445,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 		{
 			$pathForExt = $this->largeImage['originalName'] != '' ? $this->largeImage['originalName'] : $this->largeImage['path'];
 
-			if (Core_File::isValidExtension($pathForExt, array('jpg', 'jpeg', 'gif', 'png', 'webp', 'svg')))
+			if (Core_File::isValidExtension($pathForExt, self::$_previewExtensions))
 			{
 				$prefixRand = strpos($this->largeImage['path'], '?') === FALSE ? '?' : '&';
 
@@ -452,21 +455,35 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 
 				$oLarge_Input_Group_Div->add(Core_Html_Entity::factory('Script')
 					->value('$(function(){
-							$("#' . $windowId . ' #file_preview_large_' . $this->largeImage['id'] . '").popover({
-								content: \'<img src="' . htmlspecialchars($this->largeImage['path']) . $prefixRand . 'rnd=' . rand() .'" style="' . $style . '" />\',
-								html: true,
-								placement: \'top\',
-								container: "body",
-								trigger: "hover"
-							});
-						});'
-					));
+						$("#' . $windowId . ' #file_preview_large_' . $this->largeImage['id'] . '").popover({
+							content: \'<img src="' . htmlspecialchars($this->largeImage['path']) . $prefixRand . 'rnd=' . rand() .'" style="' . $style . '" />\',
+							//content: \'<div style="background-image: url(\\\'' . htmlspecialchars($this->largeImage['path']) . $prefixRand . 'rnd=' . rand() .'\\\')" style="' . $style . '" />\',
+							html: true,
+							placement: "top",
+							container: "body",
+							trigger: "hover",
+							/*content: function(){
+								var $img = $("<div>").append($("<img>")
+									.attr("src", "' . htmlspecialchars($this->largeImage['path']) . $prefixRand . 'rnd=' . rand() .'")
+									.attr("style", "' . $style . '"))
+									// .html()
+									;
+
+								console.log($img);
+								console.log($img.html());
+
+
+								return $img.html();
+							}*/
+						});
+					});'
+				));
 			}
 		}
 
 		if ($this->largeImage['show_description'])
 		{
-			$oMain_Div
+			$oRow_Div
 				->add(
 					Core_Html_Entity::factory('Div')
 						->class('form-group col-xs-12 col-sm-6')
@@ -512,16 +529,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 					)
 				);
 
-			if ($this->crop)
-			{
-				$oSmall_Input_Group_Div->add(Core_Html_Entity::factory('Script')
-					->value('$(function(){
-						$("#' . $windowId . ' input#' . $this->smallImage['id'] .'").on("change", function(){
-							$.showCropButton($(this), "' . $this->smallImage['id'] . '", "' . $windowId . '");
-						});
-					})')
-				);
-			}
+			$oRow_Div->add($oSmall_Input_Div);
 
 			if ($this->smallImage['path'] != '')
 			{
@@ -533,23 +541,19 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 					? $this->smallImage['originalName']
 					: basename(rawurldecode($this->smallImage['path']));
 
+				$fileCaptionWrapperClass = !$this->smallImage['show_actions']
+					? 'w-100'
+					: '';
+
 				$oSmall_Input_Group_Div->add(
 					Admin_Form_Entity::factory('Code')
-						->html('<div class="file-caption-wrapper"><div id="file_preview_' . $this->smallImage['id'] . '" class="file-caption"><i class="' . Core_File::getIcon($originalName) . ' margin-right-5"></i><a target="_blank" href="' . htmlspecialchars($this->smallImage['path']) . $prefixRand . 'rnd=' . rand() .'">'
+						->html('<div class="file-caption-wrapper ' . $fileCaptionWrapperClass . '"><div id="file_preview_' . $this->smallImage['id'] . '" class="file-caption"><i class="' . Core_File::getIcon($originalName) . ' margin-right-5"></i><a target="_blank" href="' . htmlspecialchars($this->smallImage['path']) . $prefixRand . 'rnd=' . rand() .'">'
 							. htmlspecialchars($originalName)
 							. '</a></div></div>')
 				);
-			}
 
-			$oMain_Div->add($oSmall_Input_Div);
-
-			if ($this->smallImage['path'] != '' || $this->smallImage['show_params'])
-			{
-				// Картинка с контролем малого изображения
-				if ($this->smallImage['path'] != '')
+				if($this->smallImage['show_actions'])
 				{
-					$prefixRand = strpos($this->smallImage['path'], '?') === FALSE ? '?' : '&';
-
 					$oSmall_Input_Group_Div->add(
 						Core_Html_Entity::factory('A')
 							->id('preview_' . $this->smallImage['id'])
@@ -565,216 +569,224 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 								->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-trash"></i>'))
 						);
 				}
+			}
 
-				if ($this->crop)
-				{
-					$originalName = $this->smallImage['originalName'] != '' ? $this->smallImage['originalName'] : basename($this->smallImage['path']);
-					$oSmall_Input_Group_Div->add(
-						Core_Html_Entity::factory('A')
-							->id('crop_' . $this->smallImage['id'])
-							->class($this->smallImage['path'] == '' ? 'hidden' : 'input-group-addon control-item')
-							->onclick("$.showCropModal('{$this->smallImage['id']}', '" . Core_Str::escapeJavascriptVariable($this->smallImage['path']) . "', '" . Core_Str::escapeJavascriptVariable($originalName) . "')")
-							->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-crop"></i>'))
-					);
-				}
+			if ($this->crop)
+			{
+				$originalName = $this->smallImage['originalName'] != '' ? $this->smallImage['originalName'] : basename($this->smallImage['path']);
+				$oSmall_Input_Group_Div->add(
+					Core_Html_Entity::factory('Script')
+						->value('$(function(){
+							$("#' . $windowId . ' input#' . $this->smallImage['id'] .'").on("change", function(){
+								$.showCropButton($(this), "' . $this->smallImage['id'] . '", "' . $windowId . '");
+							});
+						})')
+				)
+				->add(
+					Core_Html_Entity::factory('A')
+						->id('crop_' . $this->smallImage['id'])
+						->class($this->smallImage['path'] == '' ? 'hidden' : 'input-group-addon control-item')
+						->onclick("$.showCropModal('{$this->smallImage['id']}', '" . Core_Str::escapeJavascriptVariable($this->smallImage['path']) . "', '" . Core_Str::escapeJavascriptVariable($originalName) . "')")
+						->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-crop"></i>'))
+				);
+			}
 
-				// Настройки малого изображения
-				if ($this->smallImage['show_params'])
-				{
-					$oSmallWatermark_Div = Core_Html_Entity::factory('Div')
-						->id("{$windowId}_watermark_{$this->smallImage['name']}")
-						->style("display: none")
-						->class('form-horizontal')
-						->add(
-							Core_Html_Entity::factory('Div')
-								->class('form-group')
-								->add(
-									Core_Html_Entity::factory('Label')
-										->class('col-xs-12 col-lg-8 control-label')
-										->value(Core::_('Admin_Form.small_image_max_width'))
-								)
-								->add(
-									Core_Html_Entity::factory('Div')
-										->class('col-xs-12 col-lg-4')
-										->add(
-											Core_Html_Entity::factory('Input')
-												->type('text')
-												->class('form-control')
-												->name('small_max_width_' . $this->smallImage['name'])
-												->value($this->smallImage['max_width'])
-												->min(1)
-										)
-								)
-								->add(
-									Core_Html_Entity::factory('Div')
-										->class('clearfix')
-								)
-						)
-						->add(
-							Core_Html_Entity::factory('Div')
-								->class('form-group')
-								->add(
-									Core_Html_Entity::factory('Label')
-										->class('col-xs-12 col-lg-8 control-label')
-										->value(Core::_('Admin_Form.small_image_max_height'))
+			// Настройки малого изображения
+			if ($this->smallImage['show_params'])
+			{
+				$oSmallWatermark_Div = Core_Html_Entity::factory('Div')
+					->id("{$windowId}_watermark_{$this->smallImage['name']}")
+					->style("display: none")
+					->class('form-horizontal')
+					->add(
+						Core_Html_Entity::factory('Div')
+							->class('form-group')
+							->add(
+								Core_Html_Entity::factory('Label')
+									->class('col-xs-12 col-lg-8 control-label')
+									->value(Core::_('Admin_Form.small_image_max_width'))
+							)
+							->add(
+								Core_Html_Entity::factory('Div')
+									->class('col-xs-12 col-lg-4')
+									->add(
+										Core_Html_Entity::factory('Input')
+											->type('text')
+											->class('form-control')
+											->name('small_max_width_' . $this->smallImage['name'])
+											->value($this->smallImage['max_width'])
+											->min(1)
 									)
-								->add(
-									Core_Html_Entity::factory('Div')
-										->class('col-xs-12 col-lg-4')
-										->add(
-											Core_Html_Entity::factory('Input')
-												->type('text')
-												->class('form-control')
-												->name('small_max_height_' . $this->smallImage['name'])
-												->value($this->smallImage['max_height'])
-												->min(1)
-										)
-								)
-								->add(
-									Core_Html_Entity::factory('Div')
-										->class('clearfix')
-								)
-						);
-
-					// Создать малое изображение из большого
-					if ($this->smallImage['create_small_image_from_large'])
-					{
-						$Core_Html_Entity_Checkbox = Admin_Form_Entity::factory('Checkbox')
-							->divAttr(array('class' => 'form-group col-xs-12'))
-							->name("create_small_image_from_large_{$this->smallImage['name']}")
-							->id("create_small_image_from_large_{$this->smallImage['name']}")
-							->caption(Core::_('Admin_Form.create_thumbnail'))
-							->value(1)
-							->checked($this->smallImage['create_small_image_from_large_checked']);
-
-						$oSmallWatermark_Div
-							->add(
-								$Core_Html_Entity_Checkbox
 							)
 							->add(
 								Core_Html_Entity::factory('Div')
 									->class('clearfix')
-							);
-					}
-
-					// Отображать Сохранять пропорции изображения
-					if ($this->smallImage['preserve_aspect_ratio_checkbox'])
-					{
-						$Core_Html_Entity_Checkbox = Admin_Form_Entity::factory('Checkbox')
-							->divAttr(array('class' => 'form-group col-xs-12'))
-							->name("small_preserve_aspect_ratio_{$this->smallImage['name']}")
-							->id("small_preserve_aspect_ratio_{$this->smallImage['name']}")
-							->caption(Core::_('Admin_Form.image_preserve_aspect_ratio'))
-							->value(1)
-							->checked($this->smallImage['preserve_aspect_ratio_checkbox_checked']);
-
-						$oSmallWatermark_Div
-							->add($Core_Html_Entity_Checkbox)
+							)
+					)
+					->add(
+						Core_Html_Entity::factory('Div')
+							->class('form-group')
+							->add(
+								Core_Html_Entity::factory('Label')
+									->class('col-xs-12 col-lg-8 control-label')
+									->value(Core::_('Admin_Form.small_image_max_height'))
+								)
 							->add(
 								Core_Html_Entity::factory('Div')
-									->class('clearfix')
-							);
-					}
-					// Наложить водяной знак на изображение
-					if ($this->smallImage['place_watermark_checkbox'] == 1)
-					{
-						$Core_Html_Entity_Checkbox = Admin_Form_Entity::factory('Checkbox')
-							->divAttr(array('class' => 'form-group col-xs-12'))
-							->name("small_place_watermark_checkbox_{$this->smallImage['name']}")
-							->id("small_place_watermark_checkbox_{$this->smallImage['name']}")
-							->caption(Core::_('Admin_Form.place_watermark'))
-							->value(1)
-							->checked($this->smallImage['place_watermark_checkbox_checked']);
-
-						$oSmallWatermark_Div
-							->add(
-								Core_Html_Entity::factory('Div')
-								->class('form-group col-xs-12')
-								->add($Core_Html_Entity_Checkbox)
+									->class('col-xs-12 col-lg-4')
+									->add(
+										Core_Html_Entity::factory('Input')
+											->type('text')
+											->class('form-control')
+											->name('small_max_height_' . $this->smallImage['name'])
+											->value($this->smallImage['max_height'])
+											->min(1)
+									)
 							)
 							->add(
 								Core_Html_Entity::factory('Div')
 									->class('clearfix')
-							);
-					}
+							)
+					);
 
-					if ($this->smallImage['show_description'])
-					{
-						$oMain_Div
-							->add(
-								Core_Html_Entity::factory('Div')
-								->class('form-group col-xs-12 col-sm-6')
-								->add(
-									Core_Html_Entity::factory('Span')
-										->class('caption')
-										->value(Core::_('Admin_Form.file_description'))
-								)
-								->add(
-									Core_Html_Entity::factory('Input')
-										->type('text')
-										->name("description_{$this->smallImage['name']}")
-										->class('form-control description-small')
-										->value($this->smallImage['description'])
-								)
-							);
-					}
+				// Создать малое изображение из большого
+				if ($this->smallImage['create_small_image_from_large'])
+				{
+					$Core_Html_Entity_Checkbox = Admin_Form_Entity::factory('Checkbox')
+						->divAttr(array('class' => 'form-group col-xs-12'))
+						->name("create_small_image_from_large_{$this->smallImage['name']}")
+						->id("create_small_image_from_large_{$this->smallImage['name']}")
+						->caption(Core::_('Admin_Form.create_thumbnail'))
+						->value(1)
+						->checked($this->smallImage['create_small_image_from_large_checked']);
 
-					$oSmall_Input_Group_Div
+					$oSmallWatermark_Div
 						->add(
-							Core_Html_Entity::factory('Span')
-								->id('file_small_settings_' . $iAdmin_Form_Count)
-								->class('input-group-addon control-item')
-								->addAllowedProperty('data-title')
-								->set('data-title', '<b>' . htmlspecialchars($this->smallImage['windowTitle']) . '</b>')
-								->add(
-									Admin_Form_Entity::factory('Code')->html('<i class="fa fa-cog"></i>')
-								)
+							$Core_Html_Entity_Checkbox
 						)
-						->add($oSmallWatermark_Div);
+						->add(
+							Core_Html_Entity::factory('Div')
+								->class('clearfix')
+						);
 				}
 
-				// Быстрый просмотр малого изображения
-				if ($this->smallImage['path'] != '')
+				// Отображать Сохранять пропорции изображения
+				if ($this->smallImage['preserve_aspect_ratio_checkbox'])
 				{
-					$pathForExt = $this->smallImage['originalName'] != '' ? $this->smallImage['originalName'] : $this->smallImage['path'];
+					$Core_Html_Entity_Checkbox = Admin_Form_Entity::factory('Checkbox')
+						->divAttr(array('class' => 'form-group col-xs-12'))
+						->name("small_preserve_aspect_ratio_{$this->smallImage['name']}")
+						->id("small_preserve_aspect_ratio_{$this->smallImage['name']}")
+						->caption(Core::_('Admin_Form.image_preserve_aspect_ratio'))
+						->value(1)
+						->checked($this->smallImage['preserve_aspect_ratio_checkbox_checked']);
 
-					if (Core_File::isValidExtension($pathForExt, array('jpg', 'jpeg', 'gif', 'png', 'webp', 'svg')))
-					{
-						$prefixRand = strpos($this->smallImage['path'], '?') === FALSE ? '?' : '&';
+					$oSmallWatermark_Div
+						->add($Core_Html_Entity_Checkbox)
+						->add(
+							Core_Html_Entity::factory('Div')
+								->class('clearfix')
+						);
+				}
+				// Наложить водяной знак на изображение
+				if ($this->smallImage['place_watermark_checkbox'] == 1)
+				{
+					$Core_Html_Entity_Checkbox = Admin_Form_Entity::factory('Checkbox')
+						->divAttr(array('class' => 'form-group col-xs-12'))
+						->name("small_place_watermark_checkbox_{$this->smallImage['name']}")
+						->id("small_place_watermark_checkbox_{$this->smallImage['name']}")
+						->caption(Core::_('Admin_Form.place_watermark'))
+						->value(1)
+						->checked($this->smallImage['place_watermark_checkbox_checked']);
 
-						$style = Core_File::getExtension($pathForExt) === 'svg'
-							? 'height:100px'
-							: 'max-height:200px';
+					$oSmallWatermark_Div
+						->add(
+							Core_Html_Entity::factory('Div')
+							->class('form-group col-xs-12')
+							->add($Core_Html_Entity_Checkbox)
+						)
+						->add(
+							Core_Html_Entity::factory('Div')
+								->class('clearfix')
+						);
+				}
 
-						$oSmall_Input_Group_Div->add(Core_Html_Entity::factory('Script')
-							->value('$(function(){
-								$("#' . $windowId . ' #file_preview_' . $this->smallImage['id'] . '").popover({
-									content: \'<img src="' . $this->smallImage['path'] . $prefixRand . 'rnd=' . rand() . '" style="' . $style . '" />\',
-									html: true,
-									placement: \'top\',
-									container: "body",
-									trigger: "hover"
-								});
-							});'
-						));
-					}
+				if ($this->smallImage['show_description'])
+				{
+					$oRow_Div
+						->add(
+							Core_Html_Entity::factory('Div')
+							->class('form-group col-xs-12 col-sm-6')
+							->add(
+								Core_Html_Entity::factory('Span')
+									->class('caption')
+									->value(Core::_('Admin_Form.file_description'))
+							)
+							->add(
+								Core_Html_Entity::factory('Input')
+									->type('text')
+									->name("description_{$this->smallImage['name']}")
+									->class('form-control description-small')
+									->value($this->smallImage['description'])
+							)
+						);
+				}
+
+				$oSmall_Input_Group_Div
+					->add(
+						Core_Html_Entity::factory('Span')
+							->id('file_small_settings_' . $iAdmin_Form_Count)
+							->class('input-group-addon control-item')
+							->addAllowedProperty('data-title')
+							->set('data-title', '<b>' . htmlspecialchars($this->smallImage['windowTitle']) . '</b>')
+							->add(
+								Admin_Form_Entity::factory('Code')->html('<i class="fa fa-cog"></i>')
+							)
+					)
+					->add($oSmallWatermark_Div);
+			}
+
+			// Быстрый просмотр малого изображения
+			if ($this->smallImage['path'] != '')
+			{
+				$pathForExt = $this->smallImage['originalName'] != '' ? $this->smallImage['originalName'] : $this->smallImage['path'];
+
+				if (Core_File::isValidExtension($pathForExt, self::$_previewExtensions))
+				{
+					$prefixRand = strpos($this->smallImage['path'], '?') === FALSE ? '?' : '&';
+
+					$style = Core_File::getExtension($pathForExt) === 'svg'
+						? 'height:100px'
+						: 'max-height:200px';
+
+					$oSmall_Input_Group_Div->add(Core_Html_Entity::factory('Script')
+						->value('$(function(){
+							$("#' . $windowId . ' #file_preview_' . $this->smallImage['id'] . '").popover({
+								content: \'<img src="' . $this->smallImage['path'] . $prefixRand . 'rnd=' . rand() . '" style="' . $style . '" />\',
+								html: true,
+								placement: \'top\',
+								container: "body",
+								trigger: "hover"
+							});
+						});'
+					));
 				}
 			}
+
 
 			Core_Event::notify(get_class($this) . '.onAfterShowSmallImage', $this, array($oSmall_Input_Div));
 		}
 
 		foreach ($this->_children as $oCore_Html_Entity)
 		{
-			$oMain_Div->add($oCore_Html_Entity);
+			$oRow_Div->add($oCore_Html_Entity);
 		}
 
-		$oMain_Div
-			->add(Core_Html_Entity::factory('Div')
-					->style('clear: both')
-			);
+		$oRow_Div->add(
+			Core_Html_Entity::factory('Div')->style('clear: both')
+		);
 
-		Core_Event::notify(get_class($this) . '.onBeforeExecute', $this, array($oMain_Div));
+		Core_Event::notify(get_class($this) . '.onBeforeExecute', $this, array($oRow_Div, $oMain_Div));
 
 		$oMain_Div->execute();
 	}

@@ -1,13 +1,5 @@
 <?php
-/**
- * IP addresses.
- *
- * @package HostCMS
- * @subpackage Ipaddress
- * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'IP-адреса',
 	'menu' => 'IP-адреса',
@@ -23,10 +15,8 @@ return array(
 	'add_title' => 'Добавление информации об IP-адресе',
 	'edit_title' => 'Редактирование информации об IP-адресе "%s"',
 	'main_menu' => 'IP-адрес',
-	'ip' => '<acronym title="IP-адрес, например, 192.168.0.1 или маска, например, 192.168.0.0/24">IP-адрес или маска</acronym>',
+	'ip' => '<acronym title="IP-адрес, например, 192.168.0.1 или маска, например, 192.168.0.0/24">IP-адреса или CIDR, через запятую</acronym>',
 	'id' => 'Идентификатор',
-	'ip_apply' => 'Применить',
-	'ip_save' => 'Сохранить',
 	'show_ip_title' => 'Список IP-адресов',
 	'add' => 'Добавить',
 	'comment' => 'Комментарий',
@@ -39,5 +29,22 @@ return array(
 	'allowAllAccess_success' => 'Доступ успешно изменен!',
 	'denyAllBackendAccess_success' => 'Доступ успешно изменен!',
 	'allowAllBackendAccess_success' => 'Доступ успешно изменен!',
-	'useragent_menu' => 'Useragent',
+	'filter_menu' => 'Фильтр IP',
+	'confirm_ban' => 'Вы уверены что хотите забанить IP-адрес?',
+	'error_log_blocked_ip' => "Доступ к сайту заблокирован, IP '%s'",
+	'error_log_blocked_useragent' => "Доступ к сайту заблокирован фильтром, IP '%s', User Agent '%s'",
+	'datetime' => "Дата",
+	'visitor_menu' => "Посетители",
+	'add_dir' => "Группа",
+	'ipaddress_dir_id' => "Группа",
+	'move_items_groups_title' => "Перенос IP-адресов",
+	'move_items_groups_ipaddress_dir_id' => "Группа IP-адресов",
+	'move_success' => 'IP-адреса перенесены',
+	'merge_success' => 'IP-адреса объединены',
+
+	'bot_page_tab_title' => 'Всего лишь минутку…',
+	'bot_page_title' => 'Проверяем, что вы человек. Пожалуйста, нажмите кнопку "Я не робот":',
+	'bot_page_description' => '%s необходимо проверить безопасность вашего соединения, прежде чем продолжить.',
+	'bot_page_button' => 'Я не робот &#187;',
+	'bot_page_button_wait' => 'Подождите...',
 );

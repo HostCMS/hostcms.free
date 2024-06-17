@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Wysiwyg
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Wysiwyg_Filemanager_Controller_Upload_File extends Admin_Form_Action_Controller
 {
@@ -38,35 +37,46 @@ class Wysiwyg_Filemanager_Controller_Upload_File extends Admin_Form_Action_Contr
 	 */
 	public function execute($operation = NULL)
 	{
-		if (is_null($this->cdir))
-		{
-			throw new Core_Exception('cdir is NULL.');
-		}
+		try {
+			$secret_csrf = Core_Array::getGet('secret_csrf', '', 'trim');
+			$this->_checkCsrf($secret_csrf);
 
-		if (is_null($this->file))
-		{
-			throw new Core_Exception('file is NULL.');
-		}
-
-		if (isset($this->file['name']))
-		{
-			if (is_array($this->file['name']))
+			if (is_null($this->cdir))
 			{
-				foreach ($this->file['name'] as $key => $fileName)
+				throw new Core_Exception('cdir is NULL.');
+			}
+
+			if (is_null($this->file))
+			{
+				throw new Core_Exception('file is NULL.');
+			}
+
+			if (isset($this->file['name']))
+			{
+				if (is_array($this->file['name']))
 				{
-					$this->_uploadFile($this->file['tmp_name'][$key], $fileName);
+					foreach ($this->file['name'] as $key => $fileName)
+					{
+						$this->_uploadFile($this->file['tmp_name'][$key], $fileName);
+					}
+				}
+				else
+				{
+					$this->_uploadFile($this->file['tmp_name'], $this->file['name']);
+				}
+
+				if (function_exists('opcache_reset'))
+				{
+					opcache_reset();
 				}
 			}
-			else
-			{
-				$this->_uploadFile($this->file['tmp_name'], $this->file['name']);
-			}
-			
-			if (function_exists('opcache_reset'))
-			{
-				opcache_reset();
-			}
 		}
+		catch (Exception $e)
+		{
+			$this->addMessage(Core_Message::get($e->getMessage(), 'error'));
+			return TRUE;
+		}
+
 		return FALSE;
 	}
 

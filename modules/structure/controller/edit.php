@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Structure
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -22,7 +21,6 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	{
 		$this
 			->addSkipColumn('shortcut_id')
-			->addSkipColumn('data_template_id')
 			->addSkipColumn('options');
 
 		if ($object->shortcut_id != 0)
@@ -190,7 +188,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->id('structureType' . time())
 			->caption(Core::_('Structure.type'))
 			->value($this->_object->type)
-			->divAttr(array('id' => 'structure_types', 'class' => 'form-group col-xs-12'))
+			->divAttr(array('id' => 'structure_types', 'class' => 'form-group col-xs-12 rounded-radio-group'))
 			->radio(
 				array(
 					0 => Core::_('Structure.static_page'),
@@ -202,10 +200,10 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->buttonset(TRUE)
 			->ico(
 				array(
-					0 => 'fa-file-o',
-					2 => 'fa-list-alt',
-					1 => 'fa-file-code',
-					3 => 'fa-link'
+					0 => 'fa-regular fa-file-lines fa-fw',
+					2 => 'fa-regular fa-rectangle-list fa-fw',
+					1 => 'fa-solid fa-code fa-fw',
+					3 => 'fa-solid fa-link fa-fw'
 				)
 			)
 			->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [0,1,2,3]); window.dispatchEvent(new Event('resize'));");
@@ -214,7 +212,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oAdditionalTab->delete($this->getField('document_id'));
 
 		$this->getField('url')
-			->divAttr(array('class' => 'form-group col-lg-6 hidden-0 hidden-1 hidden-2'))
+			->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2'))
 			// clear standart url pattern
 			->format(array('lib' => array()));
 
@@ -223,8 +221,6 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
 		$this->getField('indexing')
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
-		// $this->getField('https')
-			// ->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
 
 		$oMainTab
 			->move($this->getField('active'), $oMainRow4)
@@ -298,7 +294,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							? $this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/document/index.php', 'edit', NULL, 1, intval($oDocument->id), 'document_dir_id=' . intval($oDocument->document_dir_id))
 							: ''
 					)
-					->class('document-edit input-group-addon bg-blue bordered-blue' . ($oDocument->id ? '' : ' hidden'))
+					->class('document-edit input-group-addon blue' . ($oDocument->id ? '' : ' hidden'))
 					->value('<i class="fa fa-pencil"></i>')
 			);
 
@@ -336,7 +332,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->add(
 				Admin_Form_Entity::factory('A')
 					->target('_blank')
-					->class('template-edit input-group-addon bg-blue bordered-blue')
+					->class('template-edit input-group-addon blue')
 					->value('<i class="fa fa-pencil"></i>')
 			);
 
@@ -356,7 +352,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$this->getField('path')->add(
 				$pathLink = Admin_Form_Entity::factory('A')
 					->id('pathLink')
-					->class('input-group-addon bg-blue bordered-blue')
+					->class('input-group-addon blue')
 					->value('<i class="fa fa-external-link"></i>')
 			);
 
@@ -418,7 +414,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							? $this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/lib/index.php', 'edit', NULL, 1, intval($oLib->id), 'lib_dir_id=' . intval($oLib->lib_dir_id))
 							: ''
 					)
-					->class('lib-edit input-group-addon bg-blue bordered-blue' . ($oLib->id ? '' : ' hidden'))
+					->class('lib-edit input-group-addon blue ' . ($oLib->id ? '' : ' hidden'))
 					->value('<i class="fa fa-pencil"></i>')
 			);
 
@@ -434,8 +430,10 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$Div_Lib_Properties
 			->html(ob_get_clean());
 
-		$oMainRow9->add($Select_LibDir);
-		$oMainRow10->add($Select_Lib);
+		$oMainRow9
+			->add($Select_LibDir)
+			->add($Select_Lib);
+
 		$oMainRow11->add($Div_Lib_Properties);
 
 		// Динамическая страница
@@ -443,7 +441,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oTmpOptions = $oTextarea_Structure_Source->syntaxHighlighterOptions;
 		// $oTmpOptions['mode'] = 'application/x-httpd-php';
-		$oTmpOptions['mode'] = 'ace/mode/php';
+		$oTmpOptions['mode'] = '"ace/mode/php"';
 
 		$oTextarea_Structure_Source
 			->name('structure_source')
@@ -458,7 +456,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oTmpOptions = $oTextarea_StructureConfig_Source->syntaxHighlighterOptions;
 		// $oTmpOptions['mode'] = 'application/x-httpd-php';
-		$oTmpOptions['mode'] = 'ace/mode/php';
+		$oTmpOptions['mode'] = '"ace/mode/php"';
 
 		$oTextarea_StructureConfig_Source
 			->name('structure_config_source')
@@ -577,6 +575,8 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	protected function _applyObjectProperty()
 	{
+		$bNewObject = is_null($this->_object->id) && is_null(Core_Array::getPost('id'));
+
 		// Backup structure revision
 		if (Core::moduleIsActive('revision') && $this->_object->id)
 		{
@@ -707,7 +707,32 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			);
 		}
 
+		if ($bNewObject && Core::moduleIsActive('media'))
+		{
+			ob_start();
+			$this->_fillMedia()->execute();
+			$this->_Admin_Form_Controller->addMessage(ob_get_clean());
+		}
+
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
+	}
+
+	/*
+	 * Add shop documents
+	 * @return Admin_Form_Entity
+	 */
+	protected function _fillMedia()
+	{
+		$modalWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('modalWindowId', '', 'str'));
+		$windowId = $modalWindowId ? $modalWindowId : $this->_Admin_Form_Controller->getWindowId();
+
+		$modelName = $this->_object->getModelName();
+
+		return Admin_Form_Entity::factory('Script')
+			->value("$(function (){
+				mainFormLocker.unlock();
+				$.adminLoad({ path: '/admin/media/index.php', additionalParams: 'entity_id=" . $this->_object->id . "&type=" . $modelName . "&dataset_id=" . $this->getDatasetId() . "&parentWindowId=" . $windowId . "&_module=0', windowId: '{$windowId}-media-items', loadingScreen: false });
+			});");
 	}
 
 	/**
@@ -729,24 +754,21 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$aReturn = array();
 
 		// Дочерние разделы
-
 		$oStructures = $oStructure->Structures;
 		$oStructures->queryBuilder()
 			->where('structures.site_id', '=', $iSiteId)
-			->where('structures.shortcut_id', '=', 0);
+			->where('structures.shortcut_id', '=', 0)
+			->clearOrderBy()
+			->orderBy('structures.sorting', 'ASC');
 
-		// $aChildren = $oStructure->Structures->getBySiteId($iSiteId);
 		$aChildren = $oStructures->findAll(FALSE);
 
-		if (count($aChildren))
+		foreach ($aChildren as $oStructure)
 		{
-			foreach ($aChildren as $oStructure)
+			if ($bExclude != $oStructure->id)
 			{
-				if ($bExclude != $oStructure->id)
-				{
-					$aReturn[$oStructure->id] = str_repeat('  ', $iLevel) . $oStructure->name . ' [' . $oStructure->path . ']';
-					$aReturn += $this->fillStructureList($iSiteId, $oStructure->id, $bExclude, $iLevel + 1);
-				}
+				$aReturn[$oStructure->id] = str_repeat('  ', $iLevel) . $oStructure->name . ' [' . $oStructure->path . ']';
+				$aReturn += $this->fillStructureList($iSiteId, $oStructure->id, $bExclude, $iLevel + 1);
 			}
 		}
 

@@ -8,10 +8,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Sql
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
-class Sql_Table_Index_Entity
+class Sql_Table_Index_Entity extends Core_Empty_Entity
 {
 	//public $view = NULL;
 
@@ -25,7 +24,7 @@ class Sql_Table_Index_Entity
 	 * Fields
 	 * @var array
 	 */
-	protected $_fields = array(
+	protected $_tableColums = array(
 		'name' => array(
 			'datatype' => 'string',
 			'type' => 'string',
@@ -34,15 +33,6 @@ class Sql_Table_Index_Entity
 			'null' => FALSE
 		)
 	);
-
-	/**
-	 * Get tableColumns
-	 * @return array
-	 */
-	public function getTableColumns()
-	{
-		return $this->_fields;
-	}
 
 	/**
 	 * Get primary key value
@@ -74,7 +64,7 @@ class Sql_Table_Index_Entity
 	 */
 	public function __isset($property)
 	{
-		if (isset($this->_fields[$property]))
+		if (isset($this->_tableColums[$property]))
 		{
 			return TRUE;
 		}
@@ -89,7 +79,7 @@ class Sql_Table_Index_Entity
 	 */
 	public function __get($property)
 	{
-		if (isset($this->_fields[$property]))
+		if (isset($this->_tableColums[$property]))
 		{
 			return '';
 		}

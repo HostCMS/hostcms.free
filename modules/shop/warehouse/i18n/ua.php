@@ -52,4 +52,6 @@ return array(
 	'convolution' => 'Згортка бази',
 	'tags' => 'Мітки',
 	'type_tag' => 'Вкажіть мітки',
+	'shop_items_total_count' => 'Загальна кількість найменувань на складі',
+	'entries' => 'Проведення',
 );

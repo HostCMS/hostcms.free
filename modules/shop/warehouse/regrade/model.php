@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Warehouse_Regrade_Model extends Core_Entity
 {
@@ -301,7 +300,7 @@ class Shop_Warehouse_Regrade_Model extends Core_Entity
 	 */
 	public function shop_warehouse_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		return htmlspecialchars($this->Shop_Warehouse->name);
+		return $this->Shop_Warehouse->id ? htmlspecialchars((string) $this->Shop_Warehouse->name) : '';
 	}
 
 	/**
@@ -433,7 +432,6 @@ class Shop_Warehouse_Regrade_Model extends Core_Entity
 		$position = 1;
 
 		$aShop_Warehouse_Regrade_Items = $this->Shop_Warehouse_Regrade_Items->findAll();
-
 		foreach ($aShop_Warehouse_Regrade_Items as $oShop_Warehouse_Regrade_Item)
 		{
 			$oShop_Item_Writeoff = Core_Entity::factory('Shop_Item')->getById($oShop_Warehouse_Regrade_Item->writeoff_shop_item_id);
@@ -470,14 +468,14 @@ class Shop_Warehouse_Regrade_Model extends Core_Entity
 				$node->position = $position++;
 				$node->writeoff_item = $oShop_Item_Writeoff;
 				$node->writeoff_name = htmlspecialchars($oShop_Item_Writeoff->name);
-				$node->writeoff_measure = htmlspecialchars((string) $oShop_Item_Writeoff->Shop_Measure->name);
-				$node->writeoff_currency = htmlspecialchars($oShop_Item_Writeoff->Shop_Currency->sign);
+				$node->writeoff_measure = $oShop_Item_Writeoff->shop_measure_id ? htmlspecialchars((string) $oShop_Item_Writeoff->Shop_Measure->name) : '';
+				$node->writeoff_currency = $oShop_Item_Writeoff->shop_currency_id ? htmlspecialchars((string) $oShop_Item_Writeoff->Shop_Currency->sign) : '';
 				$node->writeoff_price = $oShop_Warehouse_Regrade_Item->writeoff_price;
 				$node->writeoff_barcodes = implode(', ', $aWriteoffBarcodes);
 				$node->incoming_item = $oShop_Item_Incoming;
 				$node->incoming_name = htmlspecialchars($oShop_Item_Incoming->name);
-				$node->incoming_measure = htmlspecialchars((string) $oShop_Item_Incoming->Shop_Measure->name);
-				$node->incoming_currency = htmlspecialchars($oShop_Item_Incoming->Shop_Currency->sign);
+				$node->incoming_measure = $oShop_Item_Incoming->shop_measure_id ? htmlspecialchars((string) $oShop_Item_Incoming->Shop_Measure->name) : '';
+				$node->incoming_currency = $oShop_Item_Incoming->shop_currency_id ? htmlspecialchars($oShop_Item_Incoming->Shop_Currency->sign) : '';
 				$node->incoming_price = $oShop_Warehouse_Regrade_Item->incoming_price;
 				$node->incoming_barcodes = implode(', ', $aIncomingBarcodes);
 				$node->count = $oShop_Warehouse_Regrade_Item->count;
@@ -487,6 +485,10 @@ class Shop_Warehouse_Regrade_Model extends Core_Entity
 				$aReplace['total_count']++;
 			}
 		}
+
+		$aReplace['year'] = date('Y');
+		$aReplace['month'] = date('m');
+		$aReplace['day'] = date('d');
 
 		Core_Event::notify($this->_modelName . '.onAfterGetPrintlayoutReplaces', $this, array($aReplace));
 		$eventResult = Core_Event::getLastReturn();

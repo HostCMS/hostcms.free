@@ -106,4 +106,10 @@ return array(
 	'protect' => 'Захист від атак',
 	'sender_name' => 'Ім\'я відправника',
 	'filter_placeholder' => 'Фільтр за назвою',
+
+	'site_protect' => 'Захист',
+	'protect_header' => 'Фрейми',
+	'protect_frame' => 'Захист від кадрів',
+	'protect_frame_exclusions' => 'Не захищати сторінки',
+	'error_bot' => 'Сторінка для перевірки ботів',
 );

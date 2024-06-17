@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Site
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -38,6 +37,10 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	protected function _prepareForm()
 	{
 		parent::_prepareForm();
+
+		$oSiteTabProtects = Admin_Form_Entity::factory('Tab')
+			->caption(Core::_('Site.site_protect'))
+			->name('Protects');
 
 		$oSiteTabFormats = Admin_Form_Entity::factory('Tab')
 			->caption(Core::_('Site.site_dates'))
@@ -68,10 +71,11 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainTab->delete($this->getField('csp'));
 
 		$this
-			->addTabAfter($oSiteTabFormats, $oMainTab)
+			->addTabAfter($oSiteTabProtects, $oMainTab)
+			->addTabAfter($oSiteTabRobots, $oSiteTabProtects)
+			->addTabAfter($oSiteTabFormats, $oSiteTabRobots)
 			->addTabAfter($oSiteTabErrors, $oSiteTabFormats)
-			->addTabAfter($oSiteTabRobots, $oSiteTabErrors)
-			->addTabAfter($oSiteTabCsp, $oSiteTabRobots)
+			->addTabAfter($oSiteTabCsp, $oSiteTabErrors)
 			->addTabAfter($oSiteTabLicense, $oSiteTabCsp);
 
 		// Hide Cache tab
@@ -97,6 +101,24 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'));
 
+		$oSiteTabProtects
+			->add($oSiteTabProtectsRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oProtectBlock = Admin_Form_Entity::factory('Div')->class('well with-header'));
+
+		$oProtectBlock
+			->add(Admin_Form_Entity::factory('Div')
+				->class('header bordered-success')
+				->value(Core::_("Site.protect_header"))
+			)
+			->add($oProtectBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oProtectBlockRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+		;
+
+		$oMainTab
+			->move($this->getField('protect_frame')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4')), $oProtectBlockRow1)
+			->move($this->getField('protect_frame_exclusions')->divAttr(array('class' => 'form-group col-xs-12')), $oProtectBlockRow2)
+			;
+
 		$oSiteTabFormats
 			->add($oSiteTabFormatsRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oSiteTabFormatsRow2 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -104,7 +126,8 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oSiteTabErrors
 			->add($oSiteTabErrorsRow1 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oSiteTabErrorsRow2 = Admin_Form_Entity::factory('Div')->class('row'));
+			->add($oSiteTabErrorsRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oSiteTabErrorsRow3 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		$oSiteTabRobots
 			->add($oSiteTabRobotsRow1 = Admin_Form_Entity::factory('Div')->class('row'));
@@ -215,8 +238,8 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		/* $oMainRow4 */
 		$oMainTab->move($this->getField('send_attendance_report')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4')), $oMainRow4);
-		$oMainTab->move($this->getField('protect')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-lg-2')), $oMainRow4);
-		$oMainTab->move($this->getField('safe_email')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4')), $oMainRow4);
+		$oMainTab->move($this->getField('protect')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-lg-2')), $oSiteTabProtectsRow1);
+		$oMainTab->move($this->getField('safe_email')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4')), $oSiteTabProtectsRow1);
 
 		/* $oMainRow5 */
 		$this->getField('uploaddir')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4'));
@@ -231,7 +254,7 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oFavicon
 			->type('file')
 			->caption(Core::_('Site.favicon'))
-			->divAttr(array('class' => 'input-group col-xs-12 col-sm-6'))
+			// ->divAttr(array('class' => 'input-group col-xs-12 col-sm-6'))
 			->name("icofile")
 			->id("icofile")
 			->largeImage(
@@ -267,13 +290,11 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$this->getField('error')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 		$oMainTab->move($this->getField('error'), $oSiteTabErrorsRow1);
 
-		$oMainTab->delete(
-			 $this->getField('error404')
-		)->delete(
-			 $this->getField('error403')
-		)->delete(
-			 $this->getField('closed')
-		);
+		$oMainTab
+			->delete($this->getField('error404'))
+			->delete($this->getField('error403'))
+			->delete($this->getField('closed'))
+			->delete($this->getField('error_bot'));
 
 		$Structure_Controller_Edit = new Structure_Controller_Edit($this->_Admin_Form_Action);
 
@@ -306,6 +327,15 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->caption(Core::_('Site.closed'))
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 		$oSiteTabErrorsRow2->add($oSelect_503);
+
+		$oSelect_Bot = Admin_Form_Entity::factory('Select');
+		$oSelect_Bot
+			->options($aStructureData)
+			->name('error_bot')
+			->value($this->_object->error_bot)
+			->caption(Core::_('Site.error_bot'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
+		$oSiteTabErrorsRow3->add($oSelect_Bot);
 
 		/* $oSiteTabRobotsRow1 */
 		$this->getField('robots')->rows(15)->divAttr(array('class' => 'form-group col-xs-12'));

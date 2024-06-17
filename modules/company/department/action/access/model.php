@@ -7,9 +7,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Company
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @version 7.x
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Company_Department_Action_Access_Model extends Core_Entity
 {
@@ -49,9 +48,10 @@ class Company_Department_Action_Access_Model extends Core_Entity
 	 * Get element by site and action
 	 * @param int $site_id site ID
 	 * @param int $admin_form_action_id action ID
+	 * @param bool $bCache cache
 	 * @return mixed
 	 */
-	public function getBySiteAndAction($site_id, $admin_form_action_id)
+	public function getBySiteAndAction($site_id, $admin_form_action_id, $bCache = TRUE)
 	{
 		$this->queryBuilder()
 			// т.к. с учетом заданных в связи условий
@@ -60,7 +60,7 @@ class Company_Department_Action_Access_Model extends Core_Entity
 			->where('admin_form_action_id', '=', $admin_form_action_id)
 			->limit(1);
 
-		$aCompany_Department_Action_Access = $this->findAll();
+		$aCompany_Department_Action_Access = $this->findAll($bCache);
 
 		return isset($aCompany_Department_Action_Access[0]) ? $aCompany_Department_Action_Access[0] : NULL;
 	}

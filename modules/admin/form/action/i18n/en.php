@@ -45,4 +45,6 @@ return array(
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
 	'admin_form_action_dir_id' => 'Parent dir',
+
+	'new_window' => 'Open in a new window',
 );

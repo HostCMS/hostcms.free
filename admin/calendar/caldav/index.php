@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -20,11 +19,41 @@ $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title(Core::_('Calendar_Caldav.title'))
 	->pageTitle(Core::_('Calendar_Caldav.title'));
+
+if (!is_null(Core_Array::getGet('loadCalendars')) && !is_null(Core_Array::getGet('term')))
+{
+	$aJSON = array();
+
+	$sQuery = trim(Core_DataBase::instance()->escapeLike(Core_Str::stripTags(strval(Core_Array::getGet('term')))));
+
+	$sQueryLike = '%' . str_replace(' ', '%', $sQuery) . '%';
+
+	if (strlen($sQuery))
+	{
+		$oCalendar_Caldavs = Core_Entity::factory('Calendar_Caldav');
+		$oCalendar_Caldavs->queryBuilder()
+			->where('calendar_caldavs.active', '=', 1)
+			->where('calendar_caldavs.name', 'LIKE', $sQueryLike)
+			->limit(Core::$mainConfig['autocompleteItems']);
+
+		$aCalendar_Caldavs = $oCalendar_Caldavs->findAll(FALSE);
+
+		foreach ($aCalendar_Caldavs as $oCalendar_Caldav)
+		{
+			$aJSON[] = array(
+				'id' => $oCalendar_Caldav->id,
+				'text' => ($oCalendar_Caldav->icon != '' ? '<i class="' . $oCalendar_Caldav->icon . '"></i> ' : '') . $oCalendar_Caldav->name
+			);
+		}
+	}
+
+	Core::showJson($aJSON);
+}
 
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');

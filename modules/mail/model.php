@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Mail
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Mail_Model extends Core_Entity
 {
@@ -62,7 +61,7 @@ class Mail_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_preloadValues = array(
-		'ssl' => 0,
+		'encryption' => '',
 		'sorting' => 0,
 		'active' => 0,
 	);
@@ -133,11 +132,32 @@ class Mail_Model extends Core_Entity
 	 */
 	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		if ($this->ssl)
+		if ($this->encryption != '')
 		{
 			$sslColor = '#a0d468';
 
-			?><span class="badge badge-round badge-max-width margin-left-5" title="<?php echo Core::_('Mail.ssl')?>" style="border-color: <?php echo $sslColor?>; color: <?php echo Core_Str::hex2darker($sslColor, 0.2)?>; background-color:<?php echo Core_Str::hex2lighter($sslColor, 0.88)?>">SSL</span><?php
+			?><span class="badge badge-round badge-max-width margin-left-5" style="border-color: <?php echo $sslColor?>; color: <?php echo Core_Str::hex2darker($sslColor, 0.2)?>; background-color:<?php echo Core_Str::hex2lighter($sslColor, 0.88)?>"><?php echo htmlspecialchars(strtoupper($this->encryption))?></span><?php
+		}
+
+		if ($this->imap != '')
+		{
+			$imapColor = '#8e2844';
+
+			?><span class="badge badge-round badge-max-width margin-left-5" style="border-color: <?php echo $imapColor?>; color: <?php echo Core_Str::hex2darker($imapColor, 0.2)?>; background-color:<?php echo Core_Str::hex2lighter($imapColor, 0.88)?>">IMAP</span><?php
+		}
+
+		if ($this->pop3 != '')
+		{
+			$pop3Color = '#8c76f6';
+
+			?><span class="badge badge-round badge-max-width margin-left-5" style="border-color: <?php echo $pop3Color?>; color: <?php echo Core_Str::hex2darker($pop3Color, 0.2)?>; background-color:<?php echo Core_Str::hex2lighter($pop3Color, 0.88)?>">POP3</span><?php
+		}
+
+		if ($this->folders != '')
+		{
+			$foldersColor = '#f7b04b';
+
+			?><span class="badge badge-round badge-max-width margin-left-5" style="border-color: <?php echo $foldersColor?>; color: <?php echo Core_Str::hex2darker($foldersColor, 0.2)?>; background-color:<?php echo Core_Str::hex2lighter($foldersColor, 0.88)?>"><?php echo htmlspecialchars($this->folders)?></span><?php
 		}
 
 		if ($this->default)
@@ -167,21 +187,44 @@ class Mail_Model extends Core_Entity
 			->login($this->login)
 			->password($this->password)
 			->delete($this->_deleteMessages)
-			->ssl($this->ssl)
 			->type($this->imap != '' ? 'imap' : 'pop3')
-			->server($this->imap != '' ? $this->imap : $this->pop3);
+			->server($this->imap != '' ? $this->imap : $this->pop3)
+			->validateCert($this->cert_validation);
+
+		switch ($this->encryption)
+		{
+			case 'ssl':
+				$Core_Mail_Imap->ssl(TRUE);
+			break;
+			case 'tls':
+				$Core_Mail_Imap->tls(TRUE);
+			break;
+			case 'notls':
+				$Core_Mail_Imap->notls(TRUE);
+			break;
+		}
 
 		!is_null($this->_search)
 			&& $Core_Mail_Imap->search($this->_search);
 
-		$Core_Mail_Imap->execute();
+		$aMessages = array();
 
-		if (count($Core_Mail_Imap->getErrors()) && is_array($Core_Mail_Imap->getErrors()))
+		$aFolders = explode(',', $this->folders);
+		!count($aFolders) && $aFolders = array('INBOX');
+
+		foreach ($aFolders as $sFolder)
 		{
-			throw new Core_Exception(implode("\n", $Core_Mail_Imap->getErrors()));
-		}
+			$Core_Mail_Imap
+				->folder($sFolder)
+				->execute();
 
-		$aMessages = $Core_Mail_Imap->getMessages();
+			if (count($Core_Mail_Imap->getErrors()) && is_array($Core_Mail_Imap->getErrors()))
+			{
+				throw new Core_Exception(implode("\n", $Core_Mail_Imap->getErrors()));
+			}
+
+			$aMessages = array_merge($aMessages, $Core_Mail_Imap->getMessages());
+		}
 
 		// Создавать лид для входящих писем
 		if ($this->create_leads && Core::moduleIsActive('lead'))

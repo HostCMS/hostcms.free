@@ -22,7 +22,7 @@ return array(
 	'paid' => 'Paid',
 	'not_paid' => 'Not paid',
 	'canceled' => 'Cancelled',
-	'order_items_link' => "Pruducts",
+	'order_items_link' => "Products",
 	'payment_datetime' => "Payment date",
 	'system_of_pay' => "Payment system",
 	'print' => "Print",
@@ -168,4 +168,12 @@ return array(
 	'merge_success' => 'Measure merged successfully!',
 	'shop_order_status_deadline' => 'Status deadline',
 	'company_account_id' => 'Current account',
+
+	'show_orders_comment' => 'Comments',
+	'show_comments_title' => 'Comments on orders from store "%s"',
+	'show_list_of_item_comments_properties_title' => "List of properties of reviews about orders of the online store \"%s\"",
+	'add_value' => 'Add missing default property values for orders',
+	'show_item_comment_title' => 'Order %s comments',
+	'tags' => "Labels (tags)",
+	'type_tag' => 'Type tag ...',
 );

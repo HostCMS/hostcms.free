@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Directory
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 {
@@ -51,7 +50,7 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 	{
 		$sNameSuffix = $oUser_Directory_Address ? '#' . $oUser_Directory_Address->Directory_Address->id : '[]';
 
-		 $oRowElements = Admin_Form_Entity::factory('Div')
+		$oRowElements = Admin_Form_Entity::factory('Div')
 			->class('row')
 			->add(
 				Admin_Form_Entity::factory('Select')
@@ -75,7 +74,7 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 					->value($oUser_Directory_Address ? $oUser_Directory_Address->Directory_Address->postcode : '')
 					->caption(Core::_('Directory_Address.address_postcode'))
 					// ->divAttr(array('class' => 'form-group no-padding-left ' . ($this->showPublicityControlElement ? 'col-xs-3' : 'col-lg-5 col-sm-6 col-xs-5')))
-					->divAttr(array('class' => 'form-group col-xs-6 col-lg-2'))
+					->divAttr(array('class' => 'form-group no-padding-left-lg col-xs-6 col-lg-2'))
 			)
 			->add(
 				Admin_Form_Entity::factory('Input')
@@ -91,21 +90,36 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 					->value($oUser_Directory_Address ? $oUser_Directory_Address->Directory_Address->value : '')
 					->caption(Core::_('Directory_Address.address'))
 					// ->divAttr(array('class' => 'form-group ' . ($this->showPublicityControlElement ? 'col-sm-8 col-xs-3' : 'col-lg-5 col-sm-6 col-xs-5')))
-					->divAttr(array('class' => 'form-group col-xs-12 col-lg-5'))
-			)
+					->divAttr(array('class' => 'form-group col-xs-12 col-lg-6'))
+					->class('form-control bold')
+			)->add(
+				Admin_Form_Entity::factory('Input')
+					->name($this->prefix . 'address_house' . $sNameSuffix)
+					->value($oUser_Directory_Address ? $oUser_Directory_Address->Directory_Address->house : '')
+					->caption(Core::_('Directory_Address.house'))
+					->divAttr(array('class' => 'form-group no-padding-left-lg col-xs-6 col-lg-3'))
+			)->add(
+				Admin_Form_Entity::factory('Input')
+					->name($this->prefix . 'address_flat' . $sNameSuffix)
+					->value($oUser_Directory_Address ? $oUser_Directory_Address->Directory_Address->flat : '')
+					->caption(Core::_('Directory_Address.flat'))
+					->divAttr(array('class' => 'form-group col-xs-6 col-lg-3 no-padding-left-sm no-padding-left-xs'))
+			);
+
+		$oRowElements
 			->add(
 				Admin_Form_Entity::factory('Input')
 					->name($this->prefix . 'latitude' . $sNameSuffix)
 					->value($oUser_Directory_Address ? $oUser_Directory_Address->Directory_Address->latitude : '')
 					->caption(Core::_('Directory_Address.latitude'))
-					->divAttr(array('class' => 'form-group col-xs-5 col-lg-2'))
+					->divAttr(array('class' => 'form-group col-xs-6 col-lg-2'))
 			)
 			->add(
 				Admin_Form_Entity::factory('Input')
 					->name($this->prefix . 'longitude' . $sNameSuffix)
 					->value($oUser_Directory_Address ? $oUser_Directory_Address->Directory_Address->longitude : '')
 					->caption(Core::_('Directory_Address.longitude'))
-					->divAttr(array('class' => 'form-group col-xs-5 col-lg-2 no-padding-left-sm no-padding-left-xs'))
+					->divAttr(array('class' => 'form-group col-xs-6 col-lg-2 no-padding-left-sm no-padding-left-xs'))
 			);
 
 		if ($this->showPublicityControlElement)
@@ -125,7 +139,7 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 			// Для нового свойства добавляет скрытое поле, хранящее состояние чекбокса
 			/*if (!$oUser_Directory_Address)
 			{
-				$oRowElements->add(
+				$oRowElements2->add(
 					Core_Html_Entity::factory('Input')
 						->type('hidden')
 						->value(0)
@@ -144,7 +158,7 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 			: 'margin-top-23 no-padding-left';
 
 		return Admin_Form_Entity::factory('Div') // div с кноками + и -
-			->class('add-remove-property ' . $margin_top_23 . ' pull-left' . (count($this->_aDirectory_Relations) ? ' btn-group' : '') . ($className ? ' ' . $className : ''))
+			->class('add-remove-property ' . $margin_top_23 . ' pull-right' . (count($this->_aDirectory_Relations) ? ' btn-group' : '') . ($className ? ' ' . $className : ''))
 			->add(
 				Admin_Form_Entity::factory('Code')
 					->html('<div class="btn btn-palegreen inverted" onclick="$.cloneFormRow(this); event.stopPropagation();"><i class="fa fa-plus-circle close"></i></div><div class="btn btn-darkorange btn-delete inverted' . (count($this->_aDirectory_Relations) ? '' : ' hide') . '" onclick="$.deleteFormRow(this); event.stopPropagation();"><i class="fa fa-minus-circle close"></i></div>')
@@ -165,8 +179,10 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 			$sCountry = Core_Array::getPost("{$prefix}address_country#{$oDirectory_Address->id}", NULL, 'string');
 			$sPostcode = Core_Array::getPost("{$prefix}address_postcode#{$oDirectory_Address->id}", NULL, 'string');
 			$sCity = Core_Array::getPost("{$prefix}address_city#{$oDirectory_Address->id}", NULL, 'string');
+			$sHouse = Core_Array::getPost("{$prefix}address_house#{$oDirectory_Address->id}", NULL, 'string');
+			$sFlat = Core_Array::getPost("{$prefix}address_flat#{$oDirectory_Address->id}", NULL, 'string');
 
-			if (strlen($sAddress) || strlen($sCountry) || strlen($sPostcode) || strlen($sCity))
+			if (strlen($sAddress) || strlen($sCountry) || strlen($sPostcode) || strlen($sCity) || strlen($sHouse) || strlen($sFlat))
 			{
 				$oDirectory_Address
 					->directory_address_type_id(Core_Array::getPost("{$prefix}address_type#{$oDirectory_Address->id}", 0, 'int'))
@@ -175,6 +191,8 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 					->postcode($sPostcode)
 					->city($sCity)
 					->value($sAddress)
+					->house($sHouse)
+					->flat($sFlat)
 					->latitude(Core_Array::getPost("{$prefix}latitude#{$oDirectory_Address->id}", '', 'string'))
 					->longitude(Core_Array::getPost("{$prefix}longitude#{$oDirectory_Address->id}", '', 'string'))
 					->save();
@@ -198,6 +216,8 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 		$aAddress_Country = Core_Array::getPost($prefix . 'address_country', array());
 		$aAddress_Postcode = Core_Array::getPost($prefix . 'address_postcode', array());
 		$aAddress_City = Core_Array::getPost($prefix . 'address_city', array());
+		$aAddress_House = Core_Array::getPost($prefix . 'address_house', array());
+		$aAddress_Flat = Core_Array::getPost($prefix . 'address_flat', array());
 		$aLatitudes = Core_Array::getPost($prefix . 'latitude', array());
 		$aLongitudes = Core_Array::getPost($prefix . 'longitude', array());
 		$aAddress_Public = Core_Array::getPost($prefix . 'address_public', array());
@@ -211,8 +231,10 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 				$sCountry = Core_Array::get($aAddress_Country, $key, NULL, 'string');
 				$sPostcode = Core_Array::get($aAddress_Postcode, $key, NULL, 'string');
 				$sCity = Core_Array::get($aAddress_City, $key, NULL, 'string');
+				$sHouse = Core_Array::get($aAddress_House, $key, NULL, 'string');
+				$sFlat = Core_Array::get($aAddress_Flat, $key, NULL, 'string');
 
-				if (strlen($sAddress) || strlen($sCountry) || strlen($sPostcode) || strlen($sCity))
+				if (strlen($sAddress) || strlen($sCountry) || strlen($sPostcode) || strlen($sCity) || strlen($sHouse) || strlen($sFlat))
 				{
 					$oDirectory_Address = Core_Entity::factory('Directory_Address')
 						->directory_address_type_id(Core_Array::get($aAddress_Types, $key, 0, 'int'))
@@ -221,6 +243,8 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 						->postcode($sPostcode)
 						->city($sCity)
 						->value($sAddress)
+						->house($sHouse)
+						->flat($sFlat)
 						->latitude(Core_Array::get($aLatitudes, $key, NULL, 'string'))
 						->longitude(Core_Array::get($aLongitudes, $key, NULL, 'string'))
 						->save();
@@ -235,6 +259,8 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 						$(\"#{$windowId} input[name='{$prefix}address_country\\[\\]']\").eq({$i}).prop('name', '{$prefix}address_country#{$oDirectory_Address->id}');
 						$(\"#{$windowId} input[name='{$prefix}address_postcode\\[\\]']\").eq({$i}).prop('name', '{$prefix}address_postcode#{$oDirectory_Address->id}');
 						$(\"#{$windowId} input[name='{$prefix}address_city\\[\\]']\").eq({$i}).prop('name', '{$prefix}address_city#{$oDirectory_Address->id}');
+						$(\"#{$windowId} input[name='{$prefix}address_house\\[\\]']\").eq({$i}).prop('name', '{$prefix}address_house#{$oDirectory_Address->id}');
+						$(\"#{$windowId} input[name='{$prefix}address_flat\\[\\]']\").eq({$i}).prop('name', '{$prefix}address_flat#{$oDirectory_Address->id}');
 						$(\"#{$windowId} input[name='{$prefix}latitude\\[\\]']\").eq({$i}).prop('name', '{$prefix}latitude#{$oDirectory_Address->id}');
 						$(\"#{$windowId} input[name='{$prefix}longitude\\[\\]']\").eq({$i}).prop('name', '{$prefix}longitude#{$oDirectory_Address->id}');
 						$(\"#{$windowId} input[name='{$prefix}address_public\\[\\]']\").eq({$i}).prop('name', '{$prefix}address_public#{$oDirectory_Address->id}');

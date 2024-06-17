@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Admin_Form
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Admin_Form_Action_Dir_Model extends Core_Entity
 {
@@ -133,6 +132,17 @@ class Admin_Form_Action_Dir_Model extends Core_Entity
 	}
 
 	/**
+	 * Get name
+	 * @return string
+	 */
+	public function getName()
+	{
+		return $this->word_name != ''
+			? htmlspecialchars($this->word_name)
+			: Core::_('Admin.no_title');
+	}
+
+	/**
 	 * Backend callback method
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
@@ -148,9 +158,7 @@ class Admin_Form_Action_Dir_Model extends Core_Entity
 
 		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div');
 
-		$name = $this->word_name != ''
-			? htmlspecialchars($this->word_name)
-			: Core::_('Admin.no_title');
+		$name = $this->getName();
 
 		$oCore_Html_Entity_Div
 			->add(

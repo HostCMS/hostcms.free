@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 {
@@ -339,9 +338,20 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				->controller($window_Admin_Form_Controller);
 
 			$oAdmin_Form_Entity_Input_Weight = Admin_Form_Entity::factory('Input')
-				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
 				->name('weight')
 				->caption(Core::_('Shop_Item.weight'))
+				->controller($window_Admin_Form_Controller)
+				->add(
+					Core_Html_Entity::factory('Span')
+						->class('input-group-addon dimension_patch')
+						->value($oShop->shop_measure_id ? htmlspecialchars((string) $oShop->Shop_Measure->name) : '')
+				);
+
+			$oAdmin_Form_Entity_Input_Weight_Package = Admin_Form_Entity::factory('Input')
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
+				->name('package_weight')
+				->caption(Core::_('Shop_Item.package_weight'))
 				->controller($window_Admin_Form_Controller)
 				->add(
 					Core_Html_Entity::factory('Span')
@@ -387,7 +397,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				->controller($window_Admin_Form_Controller);
 
 			$oAdmin_Form_Entity_Input_Length = Admin_Form_Entity::factory('Input')
-				->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4 no-padding-right'))
+				->divAttr(array('class' => 'form-group col-lg-3 col-md-3 col-sm-3 col-xs-4 no-padding-right'))
 				->name('length')
 				->caption(Core::_('Shop_Item.item_length'))
 				->controller($window_Admin_Form_Controller)
@@ -398,7 +408,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				);
 
 			$oAdmin_Form_Entity_Input_Width = Admin_Form_Entity::factory('Input')
-				->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4 no-padding'))
+				->divAttr(array('class' => 'form-group col-lg-3 col-md-3 col-sm-3 col-xs-4 no-padding'))
 				->name('width')
 				->caption(Core::_('Shop_Item.item_width'))
 				->controller($window_Admin_Form_Controller)
@@ -409,24 +419,58 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				);
 
 			$oAdmin_Form_Entity_Input_Height = Admin_Form_Entity::factory('Input')
-				->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4 no-padding'))
+				->divAttr(array('class' => 'form-group col-lg-3 col-md-3 col-sm-3 col-xs-4 no-padding'))
 				->name('height')
 				->caption(Core::_('Shop_Item.item_height'))
-				->controller($window_Admin_Form_Controller)
-				->add(
+				->controller($window_Admin_Form_Controller);
+
+			if ($oShop->size_measure != '')
+			{
+				$oAdmin_Form_Entity_Input_Height->add(
 					Core_Html_Entity::factory('Span')
 						->class('input-group-addon dimension_patch')
 						->value(Core::_('Shop.size_measure_' . $oShop->size_measure))
 				);
+			}
+
+			$oAdmin_Form_Entity_Input_Length_Package = Admin_Form_Entity::factory('Input')
+				->divAttr(array('class' => 'form-group col-lg-3 col-md-3 col-sm-3 col-xs-4 no-padding-right'))
+				->name('package_length')
+				->caption(Core::_('Shop_Item.package_length'))
+				->controller($window_Admin_Form_Controller)
+				->add(
+					Core_Html_Entity::factory('Span')
+						->class('input-group-addon dimension_patch')
+						->value('×')
+				);
+
+			$oAdmin_Form_Entity_Input_Width_Package = Admin_Form_Entity::factory('Input')
+				->divAttr(array('class' => 'form-group col-lg-3 col-md-3 col-sm-3 col-xs-4 no-padding'))
+				->name('package_width')
+				->caption(Core::_('Shop_Item.package_width'))
+				->controller($window_Admin_Form_Controller)
+				->add(
+					Core_Html_Entity::factory('Span')
+						->class('input-group-addon dimension_patch')
+						->value('×')
+				);
+
+			$oAdmin_Form_Entity_Input_Height_Package = Admin_Form_Entity::factory('Input')
+				->divAttr(array('class' => 'form-group col-lg-3 col-md-3 col-sm-3 col-xs-4 no-padding'))
+				->name('package_height')
+				->caption(Core::_('Shop_Item.package_height'))
+				->controller($window_Admin_Form_Controller);
+
+			if ($oShop->size_measure != '')
+			{
+				$oAdmin_Form_Entity_Input_Height_Package->add(
+					Core_Html_Entity::factory('Span')
+						->class('input-group-addon dimension_patch')
+						->value(Core::_('Shop.size_measure_' . $oShop->size_measure))
+				);
+			}
 
 			$oItemMainTab
-				->add(
-					Admin_Form_Entity::factory('Div')
-						->class('row')
-						// ->add($oAdmin_Form_Entity_Select_Currencies)
-						->add($oAdmin_Form_Entity_Select_Measures)
-						// ->add($oAdmin_Form_Entity_Select_Tax)
-				)
 				->add(
 					Admin_Form_Entity::factory('Div')
 						->class('row')
@@ -444,7 +488,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				->add(
 					Admin_Form_Entity::factory('Div')
 						->class('row')
-						->add($oAdmin_Form_Entity_Input_Weight)
+						->add($oAdmin_Form_Entity_Select_Measures)
 						->add($oAdmin_Form_Entity_Select_Order_Discount)
 						->add($oAdmin_Form_Entity_Input_Datetime)
 				)
@@ -454,6 +498,14 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 						->add($oAdmin_Form_Entity_Input_Length)
 						->add($oAdmin_Form_Entity_Input_Width)
 						->add($oAdmin_Form_Entity_Input_Height)
+						->add($oAdmin_Form_Entity_Input_Weight)
+				)->add(
+					Admin_Form_Entity::factory('Div')
+						->class('row')
+						->add($oAdmin_Form_Entity_Input_Length_Package)
+						->add($oAdmin_Form_Entity_Input_Width_Package)
+						->add($oAdmin_Form_Entity_Input_Height_Package)
+						->add($oAdmin_Form_Entity_Input_Weight_Package)
 				);
 
 			if (Core::moduleIsActive('tag'))
@@ -825,28 +877,33 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeApplyItem', $this, array($oShop_Item));
 
-		Core_Array::getPost('shop_currency_id') && $oShop_Item->shop_currency_id = intval(Core_Array::getPost('shop_currency_id'));
-		Core_Array::getPost('shop_producer_id') && $oShop_Item->shop_producer_id = intval(Core_Array::getPost('shop_producer_id'));
-		Core_Array::getPost('shop_seller_id') && $oShop_Item->shop_seller_id = intval(Core_Array::getPost('shop_seller_id'));
-		Core_Array::getPost('shop_tax_id') && $oShop_Item->shop_tax_id = intval(Core_Array::getPost('shop_tax_id'));
-		Core_Array::getPost('shop_measure_id') && $oShop_Item->shop_measure_id = intval(Core_Array::getPost('shop_measure_id'));
-		Core_Array::getPost('siteuser_group_id') && $oShop_Item->siteuser_group_id = intval(Core_Array::getPost('siteuser_group_id'));
+		Core_Array::getPost('shop_currency_id') && $oShop_Item->shop_currency_id = Core_Array::getPost('shop_currency_id', 0, 'int');
+		Core_Array::getPost('shop_producer_id') && $oShop_Item->shop_producer_id = Core_Array::getPost('shop_producer_id', 0, 'int');
+		Core_Array::getPost('shop_seller_id') && $oShop_Item->shop_seller_id = Core_Array::getPost('shop_seller_id', 0, 'int');
+		Core_Array::getPost('shop_tax_id') && $oShop_Item->shop_tax_id = Core_Array::getPost('shop_tax_id', 0, 'int');
+		Core_Array::getPost('shop_measure_id') && $oShop_Item->shop_measure_id = Core_Array::getPost('shop_measure_id', 0, 'int');
+		Core_Array::getPost('siteuser_group_id') && $oShop_Item->siteuser_group_id = Core_Array::getPost('siteuser_group_id', 0, 'int');
 
-		Core_Array::getPost('active') !== '' && $oShop_Item->active = intval(Core_Array::getPost('active'));
-		Core_Array::getPost('indexing') !== '' && $oShop_Item->indexing = intval(Core_Array::getPost('indexing'));
-		Core_Array::getPost('yandex_market') !== '' && $oShop_Item->yandex_market = intval(Core_Array::getPost('yandex_market'));
+		Core_Array::getPost('active') !== '' && $oShop_Item->active = Core_Array::getPost('active', 0, 'int');
+		Core_Array::getPost('indexing') !== '' && $oShop_Item->indexing = Core_Array::getPost('indexing', 0, 'int');
+		Core_Array::getPost('yandex_market') !== '' && $oShop_Item->yandex_market = Core_Array::getPost('yandex_market', 0, 'int');
 
-		Core_Array::getPost('weight') !== '' && $oShop_Item->weight = floatval(Core_Array::getPost('weight'));
-		Core_Array::getPost('apply_purchase_discount') !== '' && $oShop_Item->apply_purchase_discount = intval(Core_Array::getPost('apply_purchase_discount'));
+		Core_Array::getPost('apply_purchase_discount') !== '' && $oShop_Item->apply_purchase_discount = Core_Array::getPost('apply_purchase_discount', 0, 'int');
 		Core_Array::getPost('datetime') !== '' && $oShop_Item->datetime = strval(Core_Date::datetime2sql(Core_Array::getPost('datetime')));
 
-		Core_Array::getPost('length') !== '' && $oShop_Item->length = floatval(Core_Array::getPost('length'));
-		Core_Array::getPost('width') !== '' && $oShop_Item->width = floatval(Core_Array::getPost('width'));
-		Core_Array::getPost('height') !== '' && $oShop_Item->height = floatval(Core_Array::getPost('height'));
+		Core_Array::getPost('length') !== '' && $oShop_Item->length = Core_Array::getPost('length', 0, 'float');
+		Core_Array::getPost('width') !== '' && $oShop_Item->width = Core_Array::getPost('width', 0, 'float');
+		Core_Array::getPost('height') !== '' && $oShop_Item->height = Core_Array::getPost('height', 0, 'float');
+		Core_Array::getPost('weight') !== '' && $oShop_Item->weight = Core_Array::getPost('weight', 0, 'float');
 
-		Core_Array::getPost('min_quantity') !== '' && $oShop_Item->min_quantity = floatval(Core_Array::getPost('min_quantity'));
-		Core_Array::getPost('max_quantity') !== '' && $oShop_Item->max_quantity = floatval(Core_Array::getPost('max_quantity'));
-		Core_Array::getPost('quantity_step') !== '' && $oShop_Item->quantity_step = floatval(Core_Array::getPost('quantity_step'));
+		Core_Array::getPost('package_length') !== '' && $oShop_Item->package_length = Core_Array::getPost('package_length', 0, 'float');
+		Core_Array::getPost('package_width') !== '' && $oShop_Item->package_width = Core_Array::getPost('package_width', 0, 'float');
+		Core_Array::getPost('package_height') !== '' && $oShop_Item->package_height = Core_Array::getPost('package_height', 0, 'float');
+		Core_Array::getPost('package_weight') !== '' && $oShop_Item->package_weight = Core_Array::getPost('package_weight', 0, 'float');
+
+		Core_Array::getPost('min_quantity') !== '' && $oShop_Item->min_quantity = Core_Array::getPost('min_quantity', 0, 'float');
+		Core_Array::getPost('max_quantity') !== '' && $oShop_Item->max_quantity = Core_Array::getPost('max_quantity', 0, 'float');
+		Core_Array::getPost('quantity_step') !== '' && $oShop_Item->quantity_step = Core_Array::getPost('quantity_step', 0, 'float');
 
 		$oShop_Item->save();
 

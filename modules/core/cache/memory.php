@@ -7,9 +7,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Cache
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @version 7.x
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Cache_Memory extends Core_Cache
 {
@@ -18,7 +17,7 @@ class Core_Cache_Memory extends Core_Cache
 	 * Максимальное количество объектов в каждом кэше
 	 * @var integer
 	 */
-	static protected $_maxObjects = 128;
+	static protected $_maxObjects = 512;
 
 	/**
 	 * Cache storage
@@ -84,7 +83,10 @@ class Core_Cache_Memory extends Core_Cache
 		// Delete old items
 		if (/*rand(0, self::$_maxObjects) == 0 && */isset($this->_data[$cacheName]) && count($this->_data[$cacheName]) > self::$_maxObjects)
 		{
-			$this->_data[$cacheName] = array_slice($this->_data[$cacheName], floor(self::$_maxObjects / 2));
+			$this->_data[$cacheName] = array_slice($this->_data[$cacheName], floor(self::$_maxObjects / 4));
+			
+			// Forces collection of any existing garbage cycles
+			function_exists('gc_collect_cycles') && gc_collect_cycles();
 		}
 
 		$this->_data[$cacheName][$key] = $value;
@@ -128,7 +130,7 @@ class Core_Cache_Memory extends Core_Cache
 	/**
 	 * Get a count of keys in cache $cacheName
 	 * @param string $cacheName cache name
-	 * @return integer
+	 * @return int
 	 */
 	public function getCount($cacheName = 'default')
 	{

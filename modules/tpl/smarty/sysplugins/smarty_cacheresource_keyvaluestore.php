@@ -177,7 +177,7 @@ abstract class Smarty_CacheResource_KeyValueStore extends Smarty_CacheResource
      * @param Smarty  $smarty   Smarty object
      * @param integer $exp_time expiration time [being ignored]
      *
-     * @return integer number of cache files deleted [always -1]
+     * @return int number of cache files deleted [always -1]
      * @uses   purge() to clear the whole store
      * @uses   invalidate() to mark everything outdated if purge() is inapplicable
      */

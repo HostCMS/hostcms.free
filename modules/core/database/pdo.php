@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Database
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_DataBase_Pdo extends Core_DataBase
 {
@@ -659,7 +658,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 		$this->connect();
 
 		Core_Event::notify('Core_DataBase.onBeforeQuery', $this, array($sql));
-//if (!is_null($this->_result)) { echo '+'; var_dump($this->_lastQuery);}
+		//if (!is_null($this->_result)) { echo '+'; var_dump($this->_lastQuery);}
 		$this->_lastQuery = $sql;
 
 		try
@@ -835,7 +834,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 
 	/**
 	 * Get number of rows in result
-	 * @return integer|null number of rows or NULL
+	 * @return int|null number of rows or NULL
 	 */
 	/*public function getNumRows()
 	{
@@ -844,7 +843,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 
 	/**
 	 * Get the ID generated in the last query
-	 * @return integer|null
+	 * @return int|null
 	 */
 	public function getInsertId()
 	{
@@ -858,7 +857,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 
 	/**
 	 * Get number of affected rows in previous operation
-	 * @return integer|null number of affected rows or NULL
+	 * @return int|null number of affected rows or NULL
 	 */
 	public function getAffectedRows()
 	{
@@ -873,7 +872,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 
 	/**
 	 * Returns the number of columns in the result set
-	 * @return integer|null number of columns in the result set
+	 * @return int|null number of columns in the result set
 	 */
 	public function getColumnCount()
 	{

@@ -5,8 +5,7 @@
  * @package HostCMS
  * @subpackage Site
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Sites',
@@ -114,4 +113,10 @@ return array(
 	'protect' => 'Protection against attacks',
 	'sender_name' => 'Sender name',
 	'filter_placeholder' => 'Filter by name',
+
+	'site_protect' => 'Protection',
+	'protect_header' => 'Frames',
+	'protect_frame' => 'Protection from frames',
+	'protect_frame_exclusions' => 'Do not protect pages',
+	'error_bot' => 'Page for checking bots',
 );

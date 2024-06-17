@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Admin_Form_Field_Model extends Core_Entity
 {
@@ -27,6 +26,14 @@ class Admin_Form_Field_Model extends Core_Entity
 		'admin_word' => array(),
 		'admin_form' => array(),
 		'user' => array()
+	);
+
+	/**
+	 * One-to-many or many-to-many relations
+	 * @var array
+	 */
+	protected $_hasMany = array(
+		'admin_form_field_setting' => array()
 	);
 
 	/**
@@ -81,6 +88,8 @@ class Admin_Form_Field_Model extends Core_Entity
 
 		$this->Admin_Word->delete();
 
+		$this->Admin_Form_Field_Settings->deleteAll(FALSE);
+
 		return parent::delete($primaryKey);
 	}
 
@@ -120,6 +129,22 @@ class Admin_Form_Field_Model extends Core_Entity
 	 */
 	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
+		if ($this->width != '')
+		{
+			Core_Html_Entity::factory('Span')
+				->class('badge badge-round badge-max-width badge-palegreen')
+				->value(htmlspecialchars($this->width))
+				->execute();
+		}
+
+		if ($this->class != '')
+		{
+			Core_Html_Entity::factory('Span')
+				->class('badge badge-round badge-max-width badge-sky')
+				->value(htmlspecialchars($this->class))
+				->execute();
+		}
+
 		switch ($this->view)
 		{
 			case 0:
@@ -139,5 +164,14 @@ class Admin_Form_Field_Model extends Core_Entity
 			->title(Core::_('Admin_Form_Field.field_view' . $this->view))
 			->value($badge)
 			->execute();
+
+		if (!$this->show_by_default)
+		{
+			Core_Html_Entity::factory('Span')
+				->class('badge badge-hostcms badge-square darkgray pull-right margin-right-5')
+				->title(Core::_('Admin_Form_Field.not_show_by_default'))
+				->value('<i class="fa-solid fa-eye-slash fa-fw"></i>')
+				->execute();
+		}
 	}
 }

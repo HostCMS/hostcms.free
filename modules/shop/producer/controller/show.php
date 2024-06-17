@@ -37,8 +37,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Producer_Controller_Show extends Core_Controller
 {
@@ -57,6 +56,7 @@ class Shop_Producer_Controller_Show extends Core_Controller
 		'patternExpressions',
 		'patternParams',
 		'dirsList',
+		'url'
 	);
 
 	/**
@@ -107,11 +107,13 @@ class Shop_Producer_Controller_Show extends Core_Controller
 		$this->_aSiteuserGroups = $this->_getSiteuserGroups();
 
 		// Named subpatterns {name} can consist of up to 32 alphanumeric characters and underscores, but must start with a non-digit.
-		$this->pattern = rawurldecode($this->getEntity()->Structure->getPath()) . 'producers/({path})(page-{page}/)';
+		$this->pattern = rawurldecode($this->getEntity()->Producer_Structure->getPath()) . '({path})(page-{page}/)';
 
 		$this->patternExpressions = array(
 			'page' => '\d+',
 		);
+
+		$this->url = Core::$url['path'];
 	}
 
 	/**
@@ -180,14 +182,13 @@ class Shop_Producer_Controller_Show extends Core_Controller
 	 * Show built data
 	 * @return self
 	 * @hostcms-event Shop_Producer_Controller_Show.onBeforeRedeclaredShow
+	 * @hostcms-event Shop_Controller_Show.onAfterAddShopProducers
 	 */
 	public function show()
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeRedeclaredShow', $this);
 
 		$bTpl = $this->_mode == 'tpl';
-
-		$oShop = $this->getEntity();
 
 		$this->addEntity(
 			Core::factory('Core_Xml_Entity')
@@ -282,6 +283,8 @@ class Shop_Producer_Controller_Show extends Core_Controller
 					$this->append('aShop_Producers', $oShop_Producer);
 				}
 			}
+
+			Core_Event::notify(get_class($this) . '.onAfterAddShopProducers', $this, array($aShop_Producers));
 		}
 
 		return parent::show();
@@ -300,7 +303,7 @@ class Shop_Producer_Controller_Show extends Core_Controller
 		$oShop = $this->getEntity();
 
 		$Core_Router_Route = new Core_Router_Route($this->pattern, $this->patternExpressions);
-		$this->patternParams = $matches = $Core_Router_Route->applyPattern(Core::$url['path']);
+		$this->patternParams = $matches = $Core_Router_Route->applyPattern($this->url);
 
 		if (isset($matches['page']) && $matches['page'] > 1)
 		{
@@ -327,7 +330,7 @@ class Shop_Producer_Controller_Show extends Core_Controller
 				}
 				else
 				{
-					return $this->error404();
+					return $this->error410();
 				}
 			}
 		}
@@ -337,6 +340,17 @@ class Shop_Producer_Controller_Show extends Core_Controller
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterParseUrl', $this);
+
+		return $this;
+	}
+
+	/**
+	 * Define handler for 410 error
+	 * @return self
+	 */
+	public function error410()
+	{
+		Core_Page::instance()->error410();
 
 		return $this;
 	}

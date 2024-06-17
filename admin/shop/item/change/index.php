@@ -5,7 +5,7 @@
 * @package HostCMS
 * @version 7.x
 * @author Hostmake LLC
-* @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2024, https://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -20,13 +20,13 @@ $oAdmin_Form_Controller = Admin_Form_Controller::create();
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
 // Контроллер формы
-$oAdmin_Form_Controller->module(Core_Module::factory($sModule))->setUp()->path('/admin/shop/item/change/index.php');
+$oAdmin_Form_Controller->module(Core_Module_Abstract::factory($sModule))->setUp()->path('/admin/shop/item/change/index.php');
 
 ob_start();
 
 $oAdmin_View = Admin_View::create();
 $oAdmin_View
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->pageTitle(Core::_('Shop_Item.change_prices_for_shop_group'));
 
 // Первая крошка на список магазинов
@@ -114,35 +114,42 @@ $oMainTab
 			->ico(array('fa-plus'))
 			->colors(array('btn-sky'))
 			->name('type_of_change')
-			->divAttr(array('class' => 'form-group col-xs-7 col-sm-4')))
-		->add(Admin_Form_Entity::factory('Input')
-			->name('increase_price_rate')
-			->caption('&nbsp;')
-			->value('0.00')
-			->divAttr(array('class' => 'form-group col-xs-3 col-sm-2')))
-		->add(Admin_Form_Entity::factory('Span')
-			->value($oShop->Shop_Currency->sign)
-			->divAttr(array('class' => 'form-group col-xs-2', 'style' => 'margin-top: 35px')))
+			->divAttr(array('class' => 'form-group col-xs-12 rounded-radio-group'))
+			->add(Admin_Form_Entity::factory('Input')
+				->name('increase_price_rate')
+				->caption('&nbsp;')
+				->value('0.00')
+				->divAttr(array('class' => 'form-group d-inline-block margin-left-10'))
+			)
+			->add(Admin_Form_Entity::factory('Span')
+				->value($oShop->Shop_Currency->sign)
+				->divAttr(array('class' => 'form-group d-inline-block'))
+			)
+		)
 	)
 	->add(Admin_Form_Entity::factory('Div')->class('row')
 		->add(Admin_Form_Entity::factory('Radiogroup')
 			->radio(array(1 => Core::_('Shop_Item.multiply_price_to_digit')))
 			->name('type_of_change')
 			->ico(array(1 => 'fa-asterisk'))
-			->divAttr(array('class' => 'form-group col-xs-7 col-sm-4')))
-		->add(Admin_Form_Entity::factory('Input')
-			->name("multiply_price_rate")
-			->divAttr(array('class' => 'form-group col-xs-3 col-sm-2'))
-			->value('1.00'))
+			->divAttr(array('class' => 'form-group col-xs-12 rounded-radio-group'))
+			->add(Admin_Form_Entity::factory('Input')
+				->name("multiply_price_rate")
+				->divAttr(array('class' => 'form-group d-inline-block margin-left-10'))
+				->value('1.00')
+			)
+		)
 	)
 	->add(Admin_Form_Entity::factory('Div')->class('row')
 		->add(Admin_Form_Entity::factory('Checkbox')
 			->name('flag_include_modifications')
-			->caption(Core::_('Shop_Item.flag_include_modifications')))
+			->caption(Core::_('Shop_Item.flag_include_modifications'))
+		)
 	)->add(Admin_Form_Entity::factory('Div')->class('row')
 		->add(Admin_Form_Entity::factory('Checkbox')
 			->name('flag_include_spec_prices')
-			->caption(Core::_('Shop_Item.flag_include_spec_prices')))
+			->caption(Core::_('Shop_Item.flag_include_spec_prices'))
+		)
 	);
 
 if (Core::moduleIsActive('siteuser'))
@@ -187,12 +194,15 @@ $oMainTab
 			->caption(Core::_('Shop_Item.select_discount_type'))
 			->name('shop_discount_id')
 			->divAttr(array('class' => 'form-group col-xs-12'))
-			->filter(TRUE))
+			->filter(TRUE)
+		)
 	)
 	->add(Admin_Form_Entity::factory('Div')->class('row')
 		->add(Admin_Form_Entity::factory('Checkbox')
 			->name('flag_delete_discount')
-			->caption(Core::_('Shop_Item.flag_delete_discount')))
+			->caption(Core::_('Shop_Item.flag_delete_discount'))
+			->class('form-control colored-danger times')
+		)
 	);
 
 // Получение бонусов
@@ -202,7 +212,7 @@ if (Core::moduleIsActive('siteuser'))
 	$aShop_Bonuses = $oShop->Shop_Bonuses->findAll();
 	foreach ($aShop_Bonuses as $oShop_Bonus)
 	{
-		$aBonuses[$oShop_Bonus->id] = $oShop_Bonus->name;
+		$aBonuses[$oShop_Bonus->id] = $oShop_Bonus->getOptions();
 	}
 
 	$oMainTab
@@ -217,7 +227,9 @@ if (Core::moduleIsActive('siteuser'))
 	->add(Admin_Form_Entity::factory('Div')->class('row')
 		->add(Admin_Form_Entity::factory('Checkbox')
 			->name('flag_delete_bonus')
-			->caption(Core::_('Shop_Item.flag_delete_bonus')))
+			->caption(Core::_('Shop_Item.flag_delete_bonus'))
+			->class('form-control colored-danger times')
+		)
 	);
 }
 

@@ -16,6 +16,14 @@ return array(
 	'group_image_small' => 'Файл малого изображения для группы элементов',
 	'group_sorting' => 'Порядок сортировки группы',
 	'group_active' => 'Активность группы',
+	
+	'group_seo_group_title_template' => 'Шаблон title группы',
+	'group_seo_group_description_template' => 'Шаблон description группы',
+	'group_seo_group_keywords_template' => 'Шаблон keywords группы',
+
+	'group_seo_item_title_template' => 'Шаблон title информационного элемента',
+	'group_seo_item_description_template' => 'Шаблон description информационного элемента',
+	'group_seo_item_keywords_template' => 'Шаблон keywords информационного элемента',
 
 	'item_id' => 'Идентификатор элемента',
 	'item_guid' => 'GUID идентификатор элемента',

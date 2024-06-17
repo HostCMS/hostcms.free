@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -20,7 +19,7 @@ $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title(Core::_('Shop.menu'))
@@ -105,7 +104,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 				$aPrice = $oShop_Item_Controller->calculatePriceInItemCurrency($price * $fCurrencyCoefficient, $oShop_Item);
 
 				$measureName = $oShop_Item->shop_measure_id
-					? htmlspecialchars($oShop_Item->Shop_Measure->name)
+					? htmlspecialchars((string) $oShop_Item->Shop_Measure->name)
 					: '';
 
 				$aPrices = array();
@@ -159,11 +158,11 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 				if ($oShop_Item->modification_id)
 				{
-					$name .= ' → ' . htmlspecialchars($oShop_Item->Modification->name) . '';
+					$name .= ' → ' . htmlspecialchars((string) $oShop_Item->Modification->name) . '';
 				}
 				elseif ($oShop_Item->shortcut_id)
 				{
-					$name .= ' → ' . htmlspecialchars($oShop_Item->Shop_Item->name) . '';
+					$name .= ' → ' . htmlspecialchars((string) $oShop_Item->Shop_Item->name) . '';
 				}
 
 				$aJSON[] = array(

@@ -9,8 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Structure
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Structure_Controller_Libproperties extends Lib_Controller_Libproperties
 {
@@ -32,7 +31,7 @@ class Structure_Controller_Libproperties extends Lib_Controller_Libproperties
 		if (is_null($oLib->id))
 		{
 			Core_Message::show(
-				Core::_('Structure.lib_contains_no_parameters')
+				Core::_('Structure.lib_contains_no_parameters'), 'info'
 			);
 		}
 		else

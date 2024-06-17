@@ -6,8 +6,7 @@
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Information systems',
@@ -166,4 +165,6 @@ return array(
 	'searchIndexGroup' => 'Group ID',
 	'searchUnindexItem' => 'Item ID',
 	'recountInformationsystem' => 'Informationsystem ID',
+
+	'all_shortcuts_count' => 'Total shortcuts: %s',
 );

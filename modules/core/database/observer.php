@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Database
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Database_Observer
 {
@@ -108,8 +107,9 @@ class Core_Database_Observer
 			if ($oUser && $oUser->superuser)
 			{
 				$queryLog = $oCore_Registry->get('Core_DataBase.queryLog', array());
+				$limit = defined('ALLOW_SHOW_SQL_LIMIT') ? ALLOW_SHOW_SQL_LIMIT : 2000;
 
-				if (count($queryLog) < 2000)
+				if (count($queryLog) < $limit)
 				{
 					$aLog = array(
 						'query' => $args[0],

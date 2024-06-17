@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Str
 {
@@ -129,14 +128,11 @@ class Core_Str
 		{
 			$aString = explode(' ', $string);
 
-			if (count($aString) > 0)
+			foreach ($aString as $key => $value)
 			{
-				foreach ($aString as $key => $value)
+				if (mb_strlen($value) > $maxLen)
 				{
-					if (mb_strlen($value) > $maxLen)
-					{
-						$aString[$key] = self::cut($value, $maxLen);
-					}
+					$aString[$key] = self::cut($value, $maxLen);
 				}
 			}
 
@@ -738,6 +734,44 @@ class Core_Str
 
 		return $size . ' ' . $textSize;
 	}
+	
+	/**
+	 * Convert count from int to K thousands, M million and B billion suffix, e.g. 102010 => 102K
+	 *
+	 * @param int $int e.g. 102010
+	 * @return string
+	 */
+	static public function getTextCount($count)
+	{
+		if ($count >= 99999)
+		{
+			$textSize = 'K';
+			$count = $count / 1000;
+			$round = 0;
+
+			if ($count >= 1000)
+			{
+				$textSize = 'M';
+				$count = $count / 1000;
+				$round = 1;
+
+				if ($count >= 1000)
+				{
+					$textSize = 'B';
+					$count = $count / 1000;
+					$round = 2;
+				}
+			}
+
+			$count = sprintf("%.{$round}f", $count);
+		}
+		else
+		{
+			$textSize = '';
+		}
+
+		return $count . $textSize;
+	}
 
 	/**
 	 * Cut first and last slash
@@ -807,10 +841,10 @@ class Core_Str
 	/**
 	 * Get Color By Entity ID
 	 * @param int $id Entity ID
-	 * @param int $maxColor Max color, 0-255, default 250
+	 * @param int $maxColor Max color, 0-255, default 210
 	 * @return string HEX color, e.g. #B781AF
 	 */
-	static public function createColor($id, $maxColor = 250)
+	static public function createColor($id, $maxColor = 210)
 	{
 		$maxColorItem = $maxColor / 3;
 		$crc32 = abs(Core::crc32($id));
@@ -1594,6 +1628,85 @@ class Core_Str
 	}
 
 	/**
+	 * Convert dimension
+	 *
+	 * @param string $from, $to, $value
+	 * @param string $to
+	 * @param mixed $value
+	 * @return float
+	 */
+	static public function convertDimension($from, $to, $value)
+	{
+		switch ($from)
+		{
+			case 'мм':
+			case 'mm':
+			default:
+				$coeff = 1;
+			break;
+			case 'см':
+			case 'sm':
+				$coeff = 10;
+			break;
+			case 'дц':
+			case 'dm':
+				$coeff = 100;
+			break;
+			case 'м':
+			case 'm':
+				$coeff = 1000;
+			break;
+			case 'фут':
+			case 'ft':
+				$coeff = 304.8;
+			break;
+			case 'дюйм':
+			case 'in':
+			case 'inch':
+				$coeff = 25.4;
+			break;
+		}
+
+		// Пересчет из $from в миллиметры
+		$value *= $coeff;
+
+		switch ($to)
+		{
+			case 'мм':
+			case 'mm':
+			default:
+				$coeff = 1;
+			break;
+			case 'см':
+			case 'sm':
+				$coeff = 0.1;
+			break;
+			case 'дц':
+			case 'dm':
+				$coeff = 0.01;
+			break;
+			case 'м':
+			case 'm':
+				$coeff = 0.001;
+			break;
+			case 'фут':
+			case 'ft':
+				$coeff = 0.0032808398950131;
+			break;
+			case 'дюйм':
+			case 'in':
+			case 'inch':
+				$coeff = 0.0393700787401575;
+			break;
+		}
+
+		// Пересчет из граммов в $to
+		$value *= $coeff;
+
+		return sprintf("%.3f", $value);
+	}
+
+	/**
 	 * Remove BOM
 	 *
 	 * @param string $str
@@ -1670,7 +1783,7 @@ class Core_Str
 			"'<head[^>]*?>.*?</head>'siu" => '',
 			"'[\n\t]+'" => ' ',
 			"'<br[^>]*>'siu" => "\n",
-			"'<div[^>]*>'siu" => "\n\n",
+			"'<div[^>]*>'siu" => "\n",
 			"'<p[^>]*>'siu" => "\n\n",
 			"'(<ul[^>]*>|</ul>)'siu" => "\n\n",
 			"'(<ol[^>]*>|</ol>)'siu" => "\n\n",
@@ -1681,8 +1794,8 @@ class Core_Str
 			"'<dt[^>]*>(.*?)</dt>'siu" => "\t* \\1",
 			"'<hr[^>]*>'siu" => "\n-------------------------------\n",
 			"'(<table[^>]*>|</table>)'siu" => "\n\n",
-			"'(<tr[^>]*>|</tr>)'siu" => "\n",
-			"'<td[^>]*>(.*?)</td>'siu" => "\t\t\\1\n",
+			"'(<tr[^>]*>)'siu" => "\n", // |</tr>
+			"'<td[^>]*>(.*?)</td>'siu" => "\t\t\\1",
 		);
 
 		$text = preg_replace(array_keys($aSearchReplace), array_values($aSearchReplace), $text);
@@ -1696,6 +1809,8 @@ class Core_Str
 		// Различные виды пробелов
 		$text = self::convertSpaces($text);
 
+		$text = preg_replace('/[ \t]{2,}/u', ' ', $text);
+
 		while (strpos($text, '  ') !== FALSE)
 		{
 			$text = str_replace('  ', ' ', $text);
@@ -1703,8 +1818,7 @@ class Core_Str
 
 		$text = implode("\n", array_map('rtrim', explode("\n", $text)));
 
-		$text = preg_replace("'\n\s+\n'", "\n\n", $text);
-		$text = preg_replace("'[\n]{3,}'", "\n\n", $text);
+		$text = preg_replace("'\n\s+\n|[\n]{3,}'", "\n\n", $text);
 
 		return trim($text);
 	}
@@ -1717,6 +1831,9 @@ class Core_Str
 	static public function convertSpaces($str)
 	{
 		/*
+		U+1680		e1 9A 80	Ogham Space Mark
+		U+2000	 	e2 80 80	En Quad
+		U+2001	 	e2 80 81	Em Quad
 		U+2002	 	e2 80 82	EN SPACE
 		U+2003	 	e2 80 83	EM SPACE
 		U+2004	 	e2 80 84	THREE-PER-EM SPACE
@@ -1726,11 +1843,12 @@ class Core_Str
 		U+2008	 	e2 80 88	PUNCTUATION SPACE
 		U+2009	 	e2 80 89	THIN SPACE
 		U+200A	 	e2 80 8a	HAIR SPACE
-		U+200B	​	e2 80 8b	ZERO WIDTH SPACE
-		U+200C	‌	e2 80 8c	ZERO WIDTH NON-JOINER
-		U+200D	‍	e2 80 8d	ZERO WIDTH JOINER
+		U+200B		e2 80 8b	ZERO WIDTH SPACE
+		U+200C		e2 80 8c	ZERO WIDTH NON-JOINER
+		U+200D		e2 80 8d	ZERO WIDTH JOINER
+		U+2800		e2 A0 80	Braille Pattern Blank
 		*/
-		return str_replace(array("\xE2\x80\x82", "\xE2\x80\x83", "\xE2\x80\x84", "\xE2\x80\x85", "\xE2\x80\x86", "\xE2\x80\x87", "\xE2\x80\x88", "\xE2\x80\x89", "\xE2\x80\x8A", "\xE2\x80\x8B", "\xE2\x80\x8C", "\xE2\x80\x8D"), ' ', $str);
+		return str_replace(array("\xE1\x9A\x80", "\xE2\x80\x80", "\xE2\x80\x81", "\xE2\x80\x82", "\xE2\x80\x83", "\xE2\x80\x84", "\xE2\x80\x85", "\xE2\x80\x86", "\xE2\x80\x87", "\xE2\x80\x88", "\xE2\x80\x89", "\xE2\x80\x8A", "\xE2\x80\x8B", "\xE2\x80\x8C", "\xE2\x80\x8D", "\xE2\xA0\x80"), ' ', $str);
 	}
 
 	/**
@@ -1749,5 +1867,33 @@ class Core_Str
 		$text = str_replace("\n", "", $text);
 
 		return trim($text);
+	}
+
+	/**
+	 * Mask parts of a string with the asterisk character
+	 * @param string $string
+	 * @param int|NULL $visibleCount
+	 * @return string
+	 */
+	public static function stringToSecret($string, $visibleCount = NULL)
+	{
+		if (!is_scalar($string))
+		{
+			return '';
+		}
+
+		$length = mb_strlen($string);
+
+		$visibleCount < 1
+			&& $visibleCount = intval(round($length / 4));
+
+		if ($visibleCount > 0 && $visibleCount < $length)
+		{
+			$hiddenCount = $length - $visibleCount;
+			$visibleCountFirst = floor($visibleCount / 2);
+			$string = substr($string, 0, $visibleCountFirst) . str_repeat('*', $hiddenCount) . substr($string, -1 * ($visibleCount - $visibleCountFirst));
+		}
+
+		return $string;
 	}
 }

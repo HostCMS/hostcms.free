@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Company
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Company_Department_Model extends Core_Entity
 {
@@ -222,16 +221,17 @@ class Company_Department_Model extends Core_Entity
 	 * Get acces to form's action
 	 * @param Admin_Form_Action_Model $oAdmin_Form_Action action
 	 * @param Site_Model $oSite site
+	 * @param bool $bCache cache
 	 * @return User_Group_Action_Access_Model
 	 */
-	public function getAdminFormActionAccess(Admin_Form_Action_Model $oAdmin_Form_Action, Site_Model $oSite)
+	public function getAdminFormActionAccess(Admin_Form_Action_Model $oAdmin_Form_Action, Site_Model $oSite, $bCache = TRUE)
 	{
 		if (is_null($oAdmin_Form_Action->name))
 		{
 			throw new Core_Exception('Action does not exist');
 		}
 
-		$oCompany_Department_Action_Access = $this->Company_Department_Action_Accesses->getBySiteAndAction(intval($oSite->id), intval($oAdmin_Form_Action->id));
+		$oCompany_Department_Action_Access = $this->Company_Department_Action_Accesses->getBySiteAndAction(intval($oSite->id), intval($oAdmin_Form_Action->id), $bCache);
 
 		return $oCompany_Department_Action_Access;
 	}

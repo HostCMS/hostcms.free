@@ -159,4 +159,5 @@ return array(
 	'searchIndexGroup' => 'Ідентифікатор групи',
 	'searchUnindexItem' => 'Ідентифікатор елемента',
 	'recountInformationsystem' => 'Ідентифікатор інформаційної системи',
+	'all_shortcuts_count' => 'Всього ярликів: %s',
 );

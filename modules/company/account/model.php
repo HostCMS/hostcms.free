@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Company
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Company_Account_Model extends Core_Entity
 {
@@ -20,6 +19,14 @@ class Company_Account_Model extends Core_Entity
 	protected $_belongsTo = array(
 		'company' => array(),
 		'user' => array(),
+	);
+
+	/**
+	 * Default sorting for models
+	 * @var array
+	 */
+	protected $_sorting = array(
+		'company_accounts.id' => 'ASC',
 	);
 
 	/**

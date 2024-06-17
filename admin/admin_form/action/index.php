@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -20,6 +19,8 @@ $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 $admin_form_id = Core_Array::getGet('admin_form_id', 0, 'int');
 $admin_form_action_dir_id = Core_Array::getGet('admin_form_action_dir_id', 0, 'int');
 
+$oAdmin_Form_Action_Dir = Core_Entity::factory('Admin_Form_Action_Dir', $admin_form_action_dir_id);
+
 $oAdmin_Form_Current = Core_Entity::factory('Admin_Form', $admin_form_id);
 $oAdmin_Word_Value = $oAdmin_Form_Current->Admin_Word->getWordByLanguage(CURRENT_LANGUAGE_ID);
 
@@ -30,7 +31,7 @@ $form_name = $oAdmin_Word_Value
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title(Core::_('Admin_Form_Action.show_form_action_title', $form_name))
@@ -96,6 +97,17 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 			$oAdmin_Form_Controller->getAdminLoadAjax(array('path' => $oAdmin_Form_Controller->getPath(), 'additionalParams' => "admin_form_id={$admin_form_id}"))
 	)
 );
+
+// Крошки по группам
+if ($oAdmin_Form_Action_Dir->id)
+{
+	$oBreadcrumb = Admin_Form_Entity::factory('Breadcrumb')
+		->name($oAdmin_Form_Action_Dir->getName())
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/admin_form/action/index.php', NULL, NULL, "admin_form_id={$admin_form_id}&admin_form_action_dir_id={$oAdmin_Form_Action_Dir->id}"))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/admin_form/action/index.php', NULL, NULL, "admin_form_id={$admin_form_id}&admin_form_action_dir_id={$oAdmin_Form_Action_Dir->id}"));
+
+	$oAdmin_Form_Entity_Breadcrumbs->add($oBreadcrumb);
+}
 
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
@@ -192,7 +204,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 // Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
 !$oUser->superuser && $oUser->only_access_my_own
-	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
+	&& $oAdmin_Form_Dataset->addUserConditions();
 
 $oAdmin_Form_Dataset->addCondition(
 	array('select' => array('admin_form_actions.*', array('admin_word_values.name', 'word_name')))

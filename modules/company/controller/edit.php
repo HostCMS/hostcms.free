@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Company
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Company_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -130,7 +129,7 @@ class Company_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					'show' => FALSE
 				)
 			)
-			->divAttr(array('class' => 'form-group col-xs-12 col-md-6 col-lg-3 no-padding-xs no-padding-sm'))
+			->divAttr(array('class' => 'col-xs-12 col-md-6 col-lg-3 no-padding-xs no-padding-sm'))
 			;
 
 		$oMainTabRow1->add($oImageField);

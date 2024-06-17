@@ -27,4 +27,6 @@ return array(
 	'minutes' => 'minutes',
 	'hours' => 'hours',
 	'days' => 'days',
+	'active' => 'Activity',
+	'changeActive_success' => 'Information changed successfully',
 );

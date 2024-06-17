@@ -39,7 +39,7 @@ abstract class Smarty_CacheResource_Custom extends Smarty_CacheResource
      * @param string $cache_id   cache id
      * @param string $compile_id compile id
      *
-     * @return integer|boolean timestamp (epoch) the template was modified, or false if not found
+     * @return int|boolean timestamp (epoch) the template was modified, or false if not found
      */
     protected function fetchTimestamp($id, $name, $cache_id, $compile_id)
     {
@@ -68,7 +68,7 @@ abstract class Smarty_CacheResource_Custom extends Smarty_CacheResource
      * @param string|null  $compile_id compile id
      * @param integer|null $exp_time   seconds till expiration time in seconds or null
      *
-     * @return integer      number of deleted caches
+     * @return int      number of deleted caches
      */
     abstract protected function delete($name, $cache_id, $compile_id, $exp_time);
 
@@ -212,7 +212,7 @@ abstract class Smarty_CacheResource_Custom extends Smarty_CacheResource
      * @param Smarty  $smarty   Smarty object
      * @param integer $exp_time expiration time (number of seconds, not timestamp)
      *
-     * @return integer number of cache files deleted
+     * @return int number of cache files deleted
      */
     public function clearAll(Smarty $smarty, $exp_time = null)
     {

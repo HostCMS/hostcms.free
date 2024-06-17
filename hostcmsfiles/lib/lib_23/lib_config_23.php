@@ -266,50 +266,94 @@ if (Core::moduleIsActive('siteuser'))
 	// Авторизация по логину и паролю
 	if (Core_Array::getPost('apply'))
 	{
-		$oSiteuser = $oSiteuser->Site->Siteusers->getByLoginAndPassword(
-			Core_Array::getPost('login', '', 'str'), Core_Array::getPost('password', '', 'str')
-		);
-
-		if (!is_null($oSiteuser))
+		// Проверка CSRF-токена
+		if ($Siteuser_Controller_Show->checkCsrf(Core_Array::getPost('csrf_token', '', 'str')))
 		{
-			if ($oSiteuser->active)
+			$login = Core_Array::getPost('login', '', 'str');
+			$password = Core_Array::getPost('password', '', 'str');
+			
+			// May be NULL if the siteuser is not found or FALSE if access is temporarily denied
+			$oSiteuser = $Siteuser_Controller_Show->getByLoginAndPassword($login, $password);
+
+			if (is_object($oSiteuser))
 			{
-				$expires = Core_Array::getPost('remember')
-					? 2678400 // 31 день
-					: 86400; // 1 день
+				if ($oSiteuser->active)
+				{
+					$expires = Core_Array::getPost('remember')
+						? 2678400 // 31 день
+						: 86400; // 1 день
 
-				$oSiteuser
-					// Привязывать ли сессию пользователя к IP
-					->attachSessionToIp($attachSessionToIp)
-					->setCurrent($expires);
+					$oSiteuser
+						// Привязывать ли сессию пользователя к IP
+						->attachSessionToIp($attachSessionToIp)
+						->setCurrent($expires);
 
-				// Change controller's siteuser
-				$Siteuser_Controller_Show->setEntity($oSiteuser);
+					// Change controller's siteuser
+					$Siteuser_Controller_Show->setEntity($oSiteuser);
 
-				// Location
-				!is_null(Core_Array::getPost('location')) && $Siteuser_Controller_Show->go(
-					Core_Array::getPost('location', '', 'str')
+					// Location
+					!is_null(Core_Array::getPost('location')) && $Siteuser_Controller_Show->go(
+						Core_Array::getPost('location', '', 'str')
+					);
+				}
+				else
+				{
+					// Пользователь не активирован!
+					$Siteuser_Controller_Show->addEntity(
+						Core::factory('Core_Xml_Entity')
+							->name('error_code')->value('siteuserInactive')
+						);
+					
+					// Log action
+					Core_Log::instance()->clear()
+						->status(Core_Log::$MESSAGE)
+						->write(Core::_('Siteuser.siteuserInactive', $login));
+				}
+			}
+			elseif ($oSiteuser === FALSE)
+			{
+				// Доступ временно запрещен
+				$Siteuser_Controller_Show->addEntity(
+					Core::factory('Core_Xml_Entity')
+						->name('error_code')->value('accessTemporarilyDenied')
 				);
+				
+				// Log action
+				Core_Log::instance()->clear()
+					->status(Core_Log::$MESSAGE)
+					->write(Core::_('Siteuser.accessTemporarilyDenied', $login));
 			}
 			else
 			{
+				// Введите корректный логин и пароль!
 				$Siteuser_Controller_Show->addEntity(
 					Core::factory('Core_Xml_Entity')
-						->name('error')->value('Пользователь не активирован!')
-					);
+						->name('error_code')->value('wrongLoginPassword')
+				);
+				
+				// Log action
+				Core_Log::instance()->clear()
+					->status(Core_Log::$MESSAGE)
+					->write(Core::_('Siteuser.wrongLoginPassword', $login));
 			}
 		}
 		else
 		{
+			// Форма устарела, обновите страницу и повторите вход!
 			$Siteuser_Controller_Show->addEntity(
 				Core::factory('Core_Xml_Entity')
-					->name('error')->value('Введите корректный логин и пароль!')
+					->name('error_code')->value('wrongCsrf')
 			);
+			
+			// Log action
+			Core_Log::instance()->clear()
+				->status(Core_Log::$MESSAGE)
+				->write(Core::_('Siteuser.wrongCsrf'));
 		}
 	}
 
 	// Авторизация по логину OpenID
-	if (Core_Array::getPost('applyOpenIDLogin'))
+	/*if (Core_Array::getPost('applyOpenIDLogin'))
 	{
 		$oSiteuser_OpenID_Controller = Siteuser_OpenID_Controller::instance();
 
@@ -485,7 +529,7 @@ if (Core::moduleIsActive('siteuser'))
 					->name('provider_error')->value('Ошибка проверки подписи! Повторите авторизацию.')
 			);
 		}
-	}
+	}*/
 
 	// Подтверждение регистрации пользователем
 	if (Core_Array::getGet('accept'))

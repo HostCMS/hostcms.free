@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -28,7 +27,7 @@ $sFormTitle = $oShopGroup->id
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sFormAction)
 	->title($sFormTitle)
@@ -135,8 +134,10 @@ if (!is_null(Core_Array::getGet('items')) && (!is_null(Core_Array::getGet('term'
 		$oShop_Items->queryBuilder()
 			->where('shop_items.name', 'LIKE', $sQueryLike)
 			->where('shop_items.shortcut_id', '=', 0)
-			->where('shop_items.modification_id', '=', 0)
 			->limit(Core::$mainConfig['autocompleteItems']);
+
+		is_null(Core_Array::getGet('add_modifications'))
+			&& $oShop_Items->queryBuilder()->where('shop_items.modification_id', '=', 0);
 
 		$aShop_Items = $oShop_Items->findAll(FALSE);
 
@@ -148,7 +149,43 @@ if (!is_null(Core_Array::getGet('items')) && (!is_null(Core_Array::getGet('term'
 
 			$aJSON[] = array(
 				'id' => $oShop_Item->id,
-				$key => $oShop_Item->name . ' [' . $oShop_Item->id . ']',
+				$key => $oShop_Item->name
+			);
+		}
+	}
+
+	Core::showJson($aJSON);
+}
+
+if (!is_null(Core_Array::getGet('groups')) && !is_null(Core_Array::getGet('term')))
+{
+	$aJSON = array();
+
+	$sQuery = trim(Core_DataBase::instance()->escapeLike(Core_Str::stripTags(strval(Core_Array::getGet('term')))));
+
+	$sQueryLike = '%' . str_replace(' ', '%', $sQuery) . '%';
+
+	$iShopId = intval(Core_Array::getGet('shop_id'));
+	$oShop = Core_Entity::factory('Shop', $iShopId);
+
+	if (strlen($sQuery))
+	{
+		$oShop_Groups = $oShop->Shop_Groups;
+		$oShop_Groups->queryBuilder()
+			->where('shop_groups.name', 'LIKE', $sQueryLike)
+			->where('shop_groups.active', '=', 1)
+			->where('shop_groups.shortcut_id', '=', 0)
+			->limit(Core::$mainConfig['autocompleteItems']);
+
+		$aShop_Groups = $oShop_Groups->findAll(FALSE);
+
+		foreach ($aShop_Groups as $oShop_Group)
+		{
+			$sParents = $oShop_Group->groupPathWithSeparator();
+
+			$aJSON[] = array(
+				'id' => $oShop_Group->id,
+				'text' => $sParents . ' [' . $oShop_Group->id . ']',
 			);
 		}
 	}
@@ -211,7 +248,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 	{
 		$aJSON[0] = array(
 			'id' => 0,
-			'label' => Core::_('Shop_Item.root') . ' [0]'
+			'label' => Core::_('Shop_Item.root')
 		);
 
 		$oShop_Groups = $oShop->Shop_Groups;
@@ -251,7 +288,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 			$aJSON[] = array(
 				'id' => $oShop_Group->id,
-				'label' => $sParents . ' [' . $oShop_Group->id . ']'
+				'label' => $sParents
 			);
 		}
 	}
@@ -277,7 +314,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 	{
 		$aJSON[0] = array(
 			'id' => 0,
-			'label' => Core::_('Shop_Item.root') . ' [0]'
+			'label' => Core::_('Shop_Item.root')
 		);
 
 		$oShop_Groups = $oShop->Shop_Groups;
@@ -314,7 +351,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 			$aJSON[] = array(
 				'id' => $oShop_Group->id,
-				'label' => $sParents . ' [' . $oShop_Group->id . ']'
+				'label' => $sParents
 			);
 		}
 	}
@@ -331,9 +368,11 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 	$iShopItemId = intval(Core_Array::getGet('shop_item_id'));
 	$oShop_Item = Core_Entity::factory('Shop_Item', $iShopItemId);
 
-	$aJSON = array(
+	$aJSON = array();
+
+	$aJSON[] = array(
 		'id' => 0,
-		'label' => Core::_('Shop_Item.modifications_root') . ' [0]'
+		'label' => Core::_('Shop_Item.modifications_root')
 	);
 
 	if (strlen($sQuery))
@@ -391,7 +430,8 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 			{
 				$aJSON[] = array(
 					'id' => $oShop_Item->id,
-					'label' => Shop_Controller_Load_Select_Options::getOptionName($oShop_Item)
+					'label' => Shop_Controller_Load_Select_Options::getOptionName($oShop_Item),
+					'active' => $oShop_Item->active
 				);
 
 				// Shop Item's modifications
@@ -403,7 +443,7 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 						->queryBuilder()
 						->clearOrderBy()
 						->clearSelect()
-						->select('id', 'shortcut_id', 'modification_id',  'name', 'marking');
+						->select('id', 'shortcut_id', 'modification_id',  'name', 'marking', 'active');
 
 					$aModifications = $oModifications->findAll(FALSE);
 
@@ -411,7 +451,8 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 					{
 						$aJSON[] = array(
 							'id' => $oModification->id,
-							'label' => Shop_Controller_Load_Select_Options::getOptionName($oModification)
+							'label' => Shop_Controller_Load_Select_Options::getOptionName($oModification),
+							'active' => $oModification->active
 						);
 					}
 				}
@@ -419,7 +460,7 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 		}
 		else
 		{
-			$aJSON = array(
+			$aJSON[] = array(
 				'id' => 0,
 				'label' => Core::_('Shop_Item.root'),
 			);
@@ -434,22 +475,11 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 
 			foreach ($aShop_Groups as $oShop_Group)
 			{
-				/*$aParentGroups = array();
-
-				$aTmpGroup = $oShop_Group;
-
-				// Добавляем все директории от текущей до родителя.
-				do {
-					$aParentGroups[] = $aTmpGroup->name;
-				} while ($aTmpGroup = $aTmpGroup->getParent());
-
-				$sParents = implode(' → ', array_reverse($aParentGroups));*/
-
 				$sParents = $oShop_Group->groupPathWithSeparator();
 
 				$aJSON[] = array(
 					'id' => $oShop_Group->id,
-					'label' => $sParents . ' [' . $oShop_Group->id . ']',
+					'label' => $sParents,
 				);
 			}
 		}
@@ -542,7 +572,7 @@ $oDiscountMenu->add(
 $oMenu->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Item.links_items'))
-		->icon('fa fa-file-text-o')
+		->icon('fa-solid fa-box')
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.links_items_add'))
@@ -568,7 +598,7 @@ $oMenu->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.properties_item_for_groups_link'))
-				->icon('fa fa-folder-open-o')
+				->icon('fa fa-folder-o')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/property/for/group/index.php', NULL, NULL, $additionalParams)
 				)
@@ -579,7 +609,7 @@ $oMenu->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.items_catalog_add_form_tab_link'))
-				->icon('fa fa-folder-o')
+				->icon('fa-solid fa-ellipsis')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/tab/index.php', NULL, NULL, $additionalParams)
 				)
@@ -644,6 +674,17 @@ $oMenu->add(
 		)
 		->add(
 			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item.item_barcodes'))
+				->icon('fa-solid fa-barcode')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/barcode/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/barcode/index.php', NULL, NULL, $additionalParams)
+				)
+		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.item_cards'))
 				->icon('fa fa-tag')
 				->href(
@@ -667,7 +708,7 @@ $oMenu->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Group.links_groups'))
-		->icon('fa fa-folder-o')
+		->icon('fa-regular fa-folder-open')
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Group.links_groups_add'))
@@ -715,7 +756,7 @@ $oMenu->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Item.main_menu_warehouses_list'))
-		->icon('fa fa-balance-scale')
+		->icon('fa-solid fa-warehouse')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/index.php', NULL, NULL, $additionalParams)
 		)
@@ -1388,7 +1429,7 @@ if (strlen($sGlobalSearch))
 	{
 		$oAdmin_Form_Dataset
 			->addCondition(array('open' => array()))
-				->addCondition(array('where' => array('shop_groups.id', '=', $sGlobalSearch)))
+				->addCondition(array('where' => array('shop_groups.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
 				->addCondition(array('setOr' => array()))
 				->addCondition(array('where' => array('shop_groups.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 				->addCondition(array('setOr' => array()))
@@ -1423,7 +1464,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(Core_Entity::factory('Shop_
 // Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
 !$oUser->superuser && $oUser->only_access_my_own
-	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
+	&& $oAdmin_Form_Dataset->addUserConditions();
 
 $oAdmin_Form_Dataset
 	->addCondition(
@@ -1444,7 +1485,7 @@ if (strlen($sGlobalSearch))
 				array('leftJoin' => array('shop_item_barcodes', 'shop_items.id', '=', 'shop_item_barcodes.shop_item_id'))
 			)*/
 			->addCondition(array('open' => array()))
-			->addCondition(array('where' => array('shop_items.id', '=', $sGlobalSearch)))
+			->addCondition(array('where' => array('shop_items.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
 			->addCondition(array('setOr' => array()))
 			->addCondition(array('where' => array('shop_items.guid', '=', $sGlobalSearch)))
 			->addCondition(array('setOr' => array()))

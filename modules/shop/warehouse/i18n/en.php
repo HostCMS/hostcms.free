@@ -5,8 +5,7 @@
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО 'Хостмэйк' (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024 ООО 'Хостмэйк' (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Warehouses',
@@ -60,4 +59,6 @@ return array(
 	'convolution' => 'Convolution',
 	'tags' => 'Tags',
 	'type_tag' => 'Specify tags',
+	'shop_items_total_count' => 'Total number of items in stock',
+	'entries' => 'Entries',
 );

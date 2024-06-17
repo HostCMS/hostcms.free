@@ -18,8 +18,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 abstract class Core_Session
 {
@@ -61,7 +60,7 @@ abstract class Core_Session
 	{
 		$aDebugTrace = Core::debugBacktrace();
 
-		$message = "Core_Session::{$actionName}()";
+		$message = "Core_Session::{$actionName}";
 
 		foreach ($aDebugTrace as $aTrace)
 		{
@@ -72,10 +71,10 @@ abstract class Core_Session
 	}
 
 	/**
-	 * Cookie Lifetime, default 31536000
+	 * Cookie Lifetime, default 31 day is 2678400
 	 * @var int
 	 */
-	static protected $_cookieLifetime = 31536000;
+	static protected $_cookieLifetime = 2678400;
 
 	/**
 	 * Set Cookie Lifetime
@@ -148,13 +147,14 @@ abstract class Core_Session
 
 	/**
 	 * Start session
+	 * @param string|NULL $id Session ID
 	 * @return boolean
 	 */
-	static public function start()
+	static public function start($id = NULL)
 	{
 		if (!self::isStarted())
 		{
-			self::$_debug && self::_log('start');
+			self::$_debug && self::_log('start()');
 
 			// Destroy existing session started by session.auto_start
 			if (is_null(self::$_handler) && session_id())
@@ -165,10 +165,14 @@ abstract class Core_Session
 
 			self::_setSessionHandler();
 
-			if (!defined('DENY_INI_SET') || !DENY_INI_SET)
+			$cookieLifetime = self::$_cookieLifetime > self::$_maxlifetime
+				? self::$_cookieLifetime
+				: self::$_maxlifetime;
+
+			if ((!defined('DENY_INI_SET') || !DENY_INI_SET) && !headers_sent())
 			{
-				ini_set('session.cookie_lifetime', self::$_cookieLifetime);
-				//ini_set('session.gc_maxlifetime', self::$_cookieLifetime);
+				ini_set('session.cookie_lifetime', $cookieLifetime);
+				//ini_set('session.gc_maxlifetime', $cookieLifetime);
 			}
 
 			$domain = self::getDomain();
@@ -179,6 +183,7 @@ abstract class Core_Session
 
 				$domain = self::correctDomain($domain);
 
+				// Do not set on subdomains, change $domain to NULL
 				if (!$aConfig['subdomain'])
 				{
 					// Delete old subdomain cookie
@@ -205,7 +210,7 @@ abstract class Core_Session
 					if (PHP_VERSION_ID >= 70300)
 					{
 						session_set_cookie_params(array(
-							'lifetime' => self::$_cookieLifetime,
+							'lifetime' => $cookieLifetime,
 							'path' => '/',
 							'domain' => $domain,
 							'secure' => $aConfig['secure'],
@@ -215,19 +220,33 @@ abstract class Core_Session
 					}
 					else
 					{
-						session_set_cookie_params(self::$_cookieLifetime, '/; SameSite=' . $aConfig['samesite'], $domain, $aConfig['secure'], $aConfig['httponly']);
+						session_set_cookie_params($cookieLifetime, '/; SameSite=' . $aConfig['samesite'], $domain, $aConfig['secure'], $aConfig['httponly']);
 					}
 				}
 				else
 				{
-					session_set_cookie_params(self::$_cookieLifetime, '/', $domain, $aConfig['secure'], $aConfig['httponly']);
+					session_set_cookie_params($cookieLifetime, '/', $domain, $aConfig['secure'], $aConfig['httponly']);
 				}
 			}
 
 			// При повторном запуске $_SESSION уже будет
 			//if (Core_Array::getRequest(self::getName())/* && !isset($_SESSION)*/)
 			//{
+
+			if (!is_null($id))
+			{
+				self::$_debug && self::_log('start(), set session id ' . $id);
+
+				session_id($id);
+				ini_set('session.use_strict_mode', 0);
+			}
+
 			@session_start();
+
+			if (!is_null($id))
+			{
+				//ini_restore('session.use_strict_mode');
+			}
 
 			if (!self::$_started)
 			{
@@ -245,6 +264,32 @@ abstract class Core_Session
 					throw new Core_Exception(self::$_error . 'Please wait! Refreshing page ... <script>setTimeout(function() {window.location.reload(true);}, 3000);</script>');
 				}
 			}
+
+			// Сессия помечена уничтожаемой
+			/*if (is_null($id) && isset($_SESSION['_destroyed']) && isset($_SESSION['_new_session_id']))
+			{
+				self::$_debug && self::_log('start(), old regenerated session, time ' . $_SESSION['_destroyed'] . ', new session id ' . $_SESSION['_new_session_id']);
+
+				// Прошло 30 сек.
+				if ($_SESSION['_destroyed'] < time() - 30)
+				{
+					self::$_debug && self::_log('start(), destroy old regenerated session');
+
+					self::destroy(session_id());
+					return FALSE;
+				}
+
+				if (isset($_SESSION['_new_session_id']))
+				{
+					self::$_debug && self::_log('start(), change old regenerated session id to ' . $_SESSION['_new_session_id']);
+
+					// Срок действия ещё не полностью истёк, заново пытаемся установить правильный cookie идентификатора сессиии.
+					self::close();
+
+					// Стартуем сессию с новым идентификатором.
+					return self::start($_SESSION['_new_session_id']);
+				}
+			}*/
 
 			//self::$_started = TRUE; // Moved to Read & Lock
 			self::$_hasSessionId = TRUE;
@@ -324,9 +369,36 @@ abstract class Core_Session
 	{
 		if (self::isActive())
 		{
-			!headers_sent()
-				? session_regenerate_id($delete_old_session)
-				: @session_regenerate_id($delete_old_session);
+			/*if ($delete_old_session)
+			{*/
+				!headers_sent()
+					? session_regenerate_id($delete_old_session)
+					: @session_regenerate_id($delete_old_session);
+			/*}
+			else
+			{
+				$new_session_id = session_create_id();
+
+				// backup session variables
+				$keepSession = $_SESSION ;
+
+				// Новый идентификатор сессии
+				$_SESSION['_new_session_id'] = $new_session_id;
+
+				// Устанавливаем временную метку удаления
+				$_SESSION['_destroyed'] = time();
+
+				self::close();
+
+				// Стартуем сессию с новым идентификатором.
+				self::start($new_session_id);
+
+				// Новой сессии не требуется временная метка удаления и новый ИД сессии
+				//unset($_SESSION['_new_session_id']);
+				//unset($_SESSION['_destroyed']);
+
+				$_SESSION = $keepSession;
+			}*/
 		}
 	}
 
@@ -341,30 +413,42 @@ abstract class Core_Session
 	 */
 	static protected function _setSessionHandler()
 	{
-		$aConfig = self::getConfig();
-
-		if (!isset($aConfig['driver']))
+		if (is_null(self::$_handler))
 		{
-			throw new Core_Exception('Wrong Session config, needs driver');
+			$aConfig = self::getConfig();
+
+			if (!isset($aConfig['driver']))
+			{
+				throw new Core_Exception('Wrong Session config, needs driver');
+			}
+
+			$sessionClass = isset($aConfig['class'])
+				? $aConfig['class']
+				: self::_getDriverName($aConfig['driver']);
+
+			$oCore_Session = self::$_handler = new $sessionClass();
+
+			// Callables $validate_sid and $update_timestamp are supported since PHP 7.0
+			PHP_VERSION_ID >= 70000
+				? session_set_save_handler(
+					array($oCore_Session, 'sessionOpen'),
+					array($oCore_Session, 'sessionClose'),
+					array($oCore_Session, 'sessionRead'),
+					array($oCore_Session, 'sessionWrite'),
+					array($oCore_Session, 'sessionDestroyer'),
+					array($oCore_Session, 'sessionGc'),
+					array($oCore_Session, 'sessionCreateSid'),
+					array($oCore_Session, 'sessionValidateSid')
+				)
+				: session_set_save_handler(
+					array($oCore_Session, 'sessionOpen'),
+					array($oCore_Session, 'sessionClose'),
+					array($oCore_Session, 'sessionRead'),
+					array($oCore_Session, 'sessionWrite'),
+					array($oCore_Session, 'sessionDestroyer'),
+					array($oCore_Session, 'sessionGc')
+				);
 		}
-
-		$sessionClass = isset($aConfig['class'])
-			? $aConfig['class']
-			: self::_getDriverName($aConfig['driver']);
-
-		//if (is_null(self::$_handler))
-		//{
-		$oCore_Session = self::$_handler = new $sessionClass();
-
-		session_set_save_handler(
-			array($oCore_Session, 'sessionOpen'),
-			array($oCore_Session, 'sessionClose'),
-			array($oCore_Session, 'sessionRead'),
-			array($oCore_Session, 'sessionWrite'),
-			array($oCore_Session, 'sessionDestroyer'),
-			array($oCore_Session, 'sessionGc')
-		);
-		//}
 	}
 
 	/**
@@ -385,7 +469,7 @@ abstract class Core_Session
 	{
 		if (self::$_started)
 		{
-			self::$_debug && self::_log('close');
+			self::$_debug && self::_log('close()');
 
 			if (self::isActive())
 			{
@@ -410,23 +494,27 @@ abstract class Core_Session
 	{
 		$aConfig = self::getConfig();
 
-		Core_Cookie::set(session_name(), '', array(
-			'expires' => 0,
-			'path' => '/',
-			'domain' => NULL,
-			'secure' => $aConfig['secure'],
-			'httponly' => $aConfig['httponly'])
-		);
+		// If destroy the current session
+		if (session_id() === $id)
+		{
+			Core_Cookie::set(session_name(), '', array(
+				'expires' => 0,
+				'path' => '/',
+				'domain' => NULL,
+				'secure' => $aConfig['secure'],
+				'httponly' => $aConfig['httponly'])
+			);
 
-		$domain = self::correctDomain(self::getDomain());
+			$domain = self::correctDomain(self::getDomain());
 
-		Core_Cookie::set(session_name(), '', array(
-			'expires' => 0,
-			'path' => '/',
-			'domain' => $domain,
-			'secure' => $aConfig['secure'],
-			'httponly' => $aConfig['httponly'])
-		);
+			Core_Cookie::set(session_name(), '', array(
+				'expires' => 0,
+				'path' => '/',
+				'domain' => $domain,
+				'secure' => $aConfig['secure'],
+				'httponly' => $aConfig['httponly'])
+			);
+		}
 
 		return self::$_handler->sessionDestroyer($id);
 	}

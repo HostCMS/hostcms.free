@@ -6,8 +6,7 @@
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 return array(
 	'save' => 'Save',
@@ -159,5 +158,11 @@ return array(
 	'successfully' => 'Successfully',
 	'failed' => 'Failed',
 
-	'timeline_empty' => 'Timeline is empty!'
+	'timeline_empty' => 'Timeline is empty!',
+	'viewForm_disallow' => 'Viewing the form is disabled!',
+
+	'admin_form_field_settings' => 'Form field settings',
+	'setting_modal_title' => 'Form field "%s" settings',
+	'select_all' => 'Select all',
+	'disable_all' => 'Disable all'
 );

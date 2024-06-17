@@ -8,12 +8,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
-class Event_Controller_Kanban extends Admin_Form_Controller_View
+class Event_Controller_Kanban extends Skin_Bootstrap_Admin_Form_Controller_List
 {
-
 	/**
 	 * Executes the business logic.
 	 * @return self
@@ -48,7 +46,7 @@ class Event_Controller_Kanban extends Admin_Form_Controller_View
 		<div class="table-toolbar">
 			<?php $this->_Admin_Form_Controller->showFormMenus()?>
 			<div class="table-toolbar-right pull-right">
-				<?php $this->_Admin_Form_Controller->pageSelector()?>
+				<?php $this->_pageSelector()?>
 				<?php $this->_Admin_Form_Controller->showChangeViews()?>
 			</div>
 			<div class="clear"></div>
@@ -85,6 +83,11 @@ class Event_Controller_Kanban extends Admin_Form_Controller_View
 		// $oAdmin_Language = $oAdmin_Form_Controller->getAdminLanguage();
 
 		$aAdmin_Form_Fields = $oAdmin_Form->Admin_Form_Fields->findAll();
+
+		if ($this->_filterAvailable())
+		{
+			$this->_showTopFilter();
+		}
 
 		// $oSortingField = $oAdmin_Form_Controller->getSortingField();
 
@@ -194,11 +197,19 @@ class Event_Controller_Kanban extends Admin_Form_Controller_View
 												$aEvent_Users = array_slice($aEvent_Users, 0, 4);
 												$count = count($aEvent_Users);
 
+												$aIds = array();
+
 												foreach ($aEvent_Users as $key => $oEvent_User)
 												{
-													$zIndex = $count - $key;
 													$oEventUser = $oEvent_User->User;
-													?><span data-popover="hover" data-user-id="<?php echo $oEventUser->id?>" style="z-index: <?php echo $zIndex?>"><img src="<?php echo $oEventUser->getAvatar()?>"/></span><?php
+
+													if (!in_array($oEventUser->id, $aIds))
+													{
+														$zIndex = $count - $key;
+														?><span data-popover="hover" data-user-id="<?php echo $oEventUser->id?>" style="z-index: <?php echo $zIndex?>"><img src="<?php echo $oEventUser->getAvatar()?>"/></span><?php
+
+														$aIds[] = $oEventUser->id;
+													}
 												}
 												?>
 												<!-- <span data-popover="hover" data-user-id="<?php echo $oUser->id?>"><img src="<?php echo $oUser->getAvatar()?>" title="<?php echo htmlspecialchars($oUser->getFullName())?>"/></span> -->
@@ -211,9 +222,24 @@ class Event_Controller_Kanban extends Admin_Form_Controller_View
 										if ($oEntity->description != '')
 										{
 											?><div class="crm-description">
-												<span><?php echo htmlspecialchars($oEntity->description)?></span>
+												<span><?php echo nl2br(htmlspecialchars($oEntity->description))?></span>
 											</div><?php
 										}
+
+										if (Core::moduleIsActive('tag'))
+										{
+											?><div class="row"><div class="col-xs-12"><?php
+											$aTags = $oEntity->Tags->findAll(FALSE);
+
+											foreach ($aTags as $oTag)
+											{
+												Core_Html_Entity::factory('Code')
+													->value('<span class="badge badge-square badge-tag badge-max-width badge-lightgray margin-right-5" title="' . htmlspecialchars($oTag->name) . '"><i class="fa fa-tag"></i> ' . htmlspecialchars($oTag->name) . '</span>')
+													->execute();
+											}
+											?></div></div><?php
+										}
+
 										?>
 
 										<div class="crm-description">
@@ -320,7 +346,10 @@ class Event_Controller_Kanban extends Admin_Form_Controller_View
 		});
 		</script>
 		<?php
-
+		if (Core_Array::get($oAdmin_Form_Controller->filterSettings, 'show'))
+		{
+			?><script>$.toggleFilter();</script><?php
+		}
 		return $this;
 	}
 }

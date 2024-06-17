@@ -219,6 +219,10 @@
 											<input name="password" type="password" size="12" value="" /><xsl:text> </xsl:text>
 											<input name="apply" class="button" type="submit" value="&labelEnter;" />
 											<br />
+
+											<!-- CSRF-токен -->
+											<input name="csrf_token" type="hidden" value="{csrf_token}" />
+
 											<input type="hidden" name="location" value="{url}{forum_category/@id}/{forum_topic/@id}/" />
 										</form>
 									</div>

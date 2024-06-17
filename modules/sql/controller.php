@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Sql
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Sql_Controller
 {
@@ -241,5 +240,22 @@ class Sql_Controller
 		}
 
 		return FALSE;
+	}
+	
+	/**
+	 * Sanitize MySQL Identifiers
+	 * @param string
+	 * @return string
+	 */
+	static public function sanitizeIdentifiers($str)
+	{
+		// https://dev.mysql.com/doc/refman/8.0/en/identifiers.html
+		/* Permitted characters in unquoted identifiers:
+			ASCII: [0-9,a-z,A-Z$_] (basic Latin letters, digits 0-9, dollar, underscore)
+			Extended: U+0080 .. U+FFFF 
+		Permitted characters in quoted identifiers include the full Unicode Basic Multilingual Plane (BMP), except U+0000:
+			ASCII: U+0001 .. U+007F
+			Extended: U+0080 .. U+FFFF */
+		return !is_null($str) ? preg_replace('/[^A-Za-z0-9$_\x{0001}-\x{007F}\x{0080}-\x{FFFF}]/u', '', $str) : '';
 	}
 }

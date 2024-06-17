@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Lib
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Lib_Export_Controller extends Core_Servant_Properties
 {
@@ -119,12 +118,11 @@ class Lib_Export_Controller extends Core_Servant_Properties
 			: 'libs';
 
 		$fileName = $prefix . '_' . date("Y_m_d_H_i_s") . '.json';
-		$fileName = str_replace(array("\r", "\n", "\0"), '', $fileName);
 
 		header("Pragma: public");
 		header("Content-Description: File Transfer");
 		header("Content-Type: " . Core_Mime::getFileMime($fileName));
-		header("Content-Disposition: attachment; filename = \"" . rawurlencode($fileName) . "\";");
+		header("Content-Disposition: attachment; filename = \"" . rawurlencode(Core_Http::sanitizeHeader($fileName)) . "\";");
 		header("Content-Transfer-Encoding: binary");
 
 		echo json_encode(

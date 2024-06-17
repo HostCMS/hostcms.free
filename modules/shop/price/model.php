@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Price_Model extends Core_Entity
 {
@@ -168,7 +167,7 @@ class Shop_Price_Model extends Core_Entity
 	{
 		if (Core::moduleIsActive('siteuser') && $this->siteuser_group_id)
 		{
-			return htmlspecialchars($this->Siteuser_Group->name);
+			return htmlspecialchars((string) $this->Siteuser_Group->name);
 		}
 	}
 }

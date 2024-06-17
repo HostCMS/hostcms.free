@@ -24,16 +24,21 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - totalTax налог неотложенного товара
  * - totalWeight суммарный вес неотложенного товара
  * - totalVolume суммарный объем неотложенного товара
+ * - totalPackageWeight суммарный вес c упаковкой неотложенного товара
+ * - totalPackageVolume суммарный объем с упаковкой неотложенного товара
  * - totalQuantityForPurchaseDiscount общее количество неотложенного товара для расчета скидки от суммы заказа
  * - totalAmountForPurchaseDiscount сумма неотложенного товара для расчета скидки от суммы заказа
  * - totalDiscountPrices цены товаров для расчета скидки на N-й товар
  *
+ * <code>
+ * $Shop_Cart_Controller = Shop_Cart_Controller::instance();
+ * $aShop_Cart = $Shop_Cart_Controller->getAll($oShop);
+ * </code>
  *
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 abstract class Shop_Cart_Controller extends Core_Servant_Properties
 {
@@ -55,6 +60,8 @@ abstract class Shop_Cart_Controller extends Core_Servant_Properties
 		'totalTax',
 		'totalWeight',
 		'totalVolume',
+		'totalPackageWeight',
+		'totalPackageVolume',
 		'totalQuantityForPurchaseDiscount',
 		'totalAmountForPurchaseDiscount',
 		'totalDiscountPrices',

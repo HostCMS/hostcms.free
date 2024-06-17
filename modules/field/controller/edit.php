@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Field
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -277,7 +276,8 @@ class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						$oListInput = Admin_Form_Entity::factory('Input')
 							->caption(Core::_('Field.list_id'))
 							->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'))
-							->name('list_name');
+							->name('list_name')
+							->placeholder(Core::_('Admin.autocomplete_placeholder'));
 
 						$this->_object->list_id
 							&& $oListInput->value($oList->name . ' [' . $oList->id . ']');
@@ -306,9 +306,10 @@ class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 									minLength: 1,
 									create: function() {
 										$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
-											return $('<li></li>')
+											return $('<li class=\"autocomplete-suggestion\"></li>')
 												.data('item.autocomplete', item)
-												.append($('<a>').text(item.label))
+												.append($('<div class=\"name\">').html($.escapeHtml(item.label)))
+												.append($('<div class=\"id\">').html('[' + $.escapeHtml(item.id) + ']'))
 												.appendTo(ul);
 										}
 

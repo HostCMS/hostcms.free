@@ -14,4 +14,5 @@ return array(
 	'markDeleted_success' => "The posting information has been successfully deleted!",
 	'delete_success' => "The posting information has been successfully deleted!",
 	'edit_success' => "Information successfully changed!",
+	'description' => 'Description',
 );

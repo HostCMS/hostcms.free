@@ -9,8 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Cart_Controller_Default extends Shop_Cart_Controller
 {
@@ -73,7 +72,7 @@ class Shop_Cart_Controller_Default extends Shop_Cart_Controller
 		// Есть скидки на N-й товар, доступные для текущей даты
 		$bPositionDiscount = $oShop->Shop_Purchase_Discounts->checkAvailableWithPosition();
 
-		$this->totalAmount = $this->totalQuantity = $this->totalTax = $this->totalWeight = $this->totalVolume
+		$this->totalAmount = $this->totalQuantity = $this->totalTax = $this->totalWeight = $this->totalVolume = $this->totalPackageWeight = $this->totalPackageVolume
 			= $this->totalQuantityForPurchaseDiscount = $this->totalAmountForPurchaseDiscount
 			= 0;
 
@@ -141,6 +140,12 @@ class Shop_Cart_Controller_Default extends Shop_Cart_Controller
 				$this->totalVolume += Shop_Controller::convertSizeMeasure($oShop_Item->length, $oShop->size_measure, 0)
 					* Shop_Controller::convertSizeMeasure($oShop_Item->width, $oShop->size_measure, 0)
 					* Shop_Controller::convertSizeMeasure($oShop_Item->height, $oShop->size_measure, 0);
+
+				$this->totalPackageWeight += $oShop_Item->package_weight * $oShop_Cart->quantity;
+
+				$this->totalPackageVolume += Shop_Controller::convertSizeMeasure($oShop_Item->package_length, $oShop->size_measure, 0)
+					* Shop_Controller::convertSizeMeasure($oShop_Item->package_width, $oShop->size_measure, 0)
+					* Shop_Controller::convertSizeMeasure($oShop_Item->package_height, $oShop->size_measure, 0);
 			}
 		}
 
@@ -416,7 +421,8 @@ class Shop_Cart_Controller_Default extends Shop_Cart_Controller
 
 					if (!is_int($iStep))
 					{
-						$this->quantity = ceil($iStep) * $oShop_Item->quantity_step;
+						// round() needs to fix 3.000000000001 to 3.0
+						$this->quantity = ceil(round($iStep, 1)) * $oShop_Item->quantity_step;
 					}
 				}
 

@@ -382,6 +382,12 @@ function Notify(message, description, position, timeout, theme, icon, closable, 
 	toastr.options.closeButton = closable;
 	toastr.options.iconClass = icon + ' toast-' + theme;
 	toastr.options.playSound = sound;
+
+	if (timeout == 0)
+	{
+		toastr.options.tapToDismiss = false;
+	}
+
 	toastr['custom'](description, message);
 }
 

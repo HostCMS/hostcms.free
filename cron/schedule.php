@@ -35,6 +35,7 @@ if (Core::moduleIsActive('schedule'))
 			$oSchedules = Core_Entity::factory('Schedule');
 			$oSchedules->queryBuilder()
 				->where('schedules.site_id', '=', $oSite->id)
+				->where('schedules.active', '=', 1)
 				->where('schedules.completed', '=', 0)
 				->where('schedules.start_datetime', '<', $dateTime)
 				->clearOrderBy()

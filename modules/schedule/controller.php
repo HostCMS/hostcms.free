@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Schedule
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Schedule_Controller
 {
@@ -102,7 +101,7 @@ class Schedule_Controller
 
 			if (!is_null($oModule->id))
 			{
-				$oCore_Module = Core_Module::factory($oModule->path);
+				$oCore_Module = Core_Module_Abstract::factory($oModule->path);
 				if ($oCore_Module)
 				{
 					$aReturn = array();

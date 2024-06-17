@@ -113,10 +113,10 @@
         toolHtml += '<span class="bbedit-' + tags[i] + '" title="' + $.bbedit.i18n[settings.lang][tags[i]] + '">&nbsp;</span> ';
       }
       toolHtml += '</div>';
-      
+
 	  //var smilies = settings.smilies.split(/,\s*/);
       var smilies = settings.smilies;
-	  
+
 	  var smileyHtml = '<div class="bbedit-smileybar">';
       for (var i in smilies) {
         if (smilies[i] != '|') {
@@ -217,12 +217,12 @@
 		  toolbar.find(".bbedit-sub").click(function() {
             insertTag(data, '[sub]', '[/sub]');
           });
-		  
+
 		  // Вставка ника
 		  $(".table_messages span.author_name").click(function() {
             insertTag(data, '[b]'+$(this).text(), '[/b],\r\n');
           });
-		  
+
         }
         if (settings.enableSmileybar) {
           var smileybar = $(smileyHtml);

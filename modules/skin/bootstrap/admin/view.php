@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_View extends Admin_View
 {
@@ -102,7 +101,7 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 			{
 				if (is_null($this->module))
 				{
-					throw new Core_Exception('You use OLD module. Update index.php to set ->module(Core_Module::factory($sModule))');
+					throw new Core_Exception('You use OLD module. Update index.php to set ->module(Core_Module_Abstract::factory($sModule))');
 				}
 
 				$moduleName = $this->module->getModuleName();

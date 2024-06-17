@@ -8,11 +8,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Directory
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Directory_Controller_Tab_Website extends Directory_Controller_Tab
 {
+	protected $_directoryTypeName = 'Directory_Website_Type';
 	protected $_titleHeaderColor = 'gray';
 	// protected $_titleHeaderColor = 'bordered-gray';
 	protected $_faTitleIcon = 'fa fa-globe';
@@ -56,6 +56,8 @@ class Directory_Controller_Tab_Website extends Directory_Controller_Tab
 					->value($oUser_Directory_Website ? $oUser_Directory_Website->Directory_Website->value : '')
 					->caption(Core::_('Directory_Website.site'))
 					->divAttr(array('class' => 'form-group ' . ($this->showPublicityControlElement ? 'col-xs-5 col-lg-4' : 'col-lg-4 col-xs-5')))
+					->placeholder('https://')
+					->class('form-control bold')
 			)
 			->add(
 				Admin_Form_Entity::factory('Input')

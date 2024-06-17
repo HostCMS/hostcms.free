@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -39,7 +38,7 @@ $oDelivery = Core_Entity::factory('Shop_Delivery', $shop_delivery_id);
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title($sFormTitle = Core::_("Shop_Delivery_Condition.show_cond_of_delivery_title", $oDelivery->name))
@@ -369,7 +368,7 @@ $oAdmin_Form_Dataset
 	->changeField('min_price', 'editable', 0)
 	->changeField('max_price', 'editable', 0)
 	->changeField('price', 'editable', 0)
-	->changeField('currency_name', 'editable', 0)
+	//->changeField('currency_name', 'editable', 0)
 ;
 
 // Источник данных 1
@@ -378,13 +377,13 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(Core_Entity::factory('Shop_
 // Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
 !$oUser->superuser && $oUser->only_access_my_own
-	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
+	&& $oAdmin_Form_Dataset->addUserConditions();
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 $oAdmin_Form_Dataset
-	->addCondition(array('select' => array('shop_delivery_conditions.*', array('shop_currencies.name', 'currency_name'))))
-	->addCondition(array('leftJoin' => array('shop_currencies', 'shop_currencies.id', '=', 'shop_delivery_conditions.shop_currency_id')))
+	//->addCondition(array('select' => array('shop_delivery_conditions.*', array('shop_currencies.name', 'currency_name'))))
+	//->addCondition(array('leftJoin' => array('shop_currencies', 'shop_currencies.id', '=', 'shop_delivery_conditions.shop_currency_id')))
 	->addCondition(array('where' => array('shop_delivery_id', '=', $shop_delivery_id)))
 	->addCondition(array('where' => array('shop_delivery_condition_dir_id', '=', $shop_delivery_condition_dir_id)))
 	->changeField('name', 'type', 1)

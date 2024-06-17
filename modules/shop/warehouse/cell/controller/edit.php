@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Warehouse_Cell_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -81,7 +80,8 @@ class Shop_Warehouse_Cell_Controller_Edit extends Admin_Form_Action_Controller_T
 			$oCellInput = Admin_Form_Entity::factory('Input')
 				->caption(Core::_('Shop_Warehouse_Cell.parent_id'))
 				->divAttr(array('class' => 'form-group col-xs-12 col-md-3'))
-				->name('parent_name');
+				->name('parent_name')
+				->placeholder(Core::_('Admin.autocomplete_placeholder'));
 
 			if ($this->_object->parent_id)
 			{
@@ -113,9 +113,10 @@ class Shop_Warehouse_Cell_Controller_Edit extends Admin_Form_Action_Controller_T
 					minLength: 1,
 					create: function() {
 						$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
-							return $('<li></li>')
+							return $('<li class=\"autocomplete-suggestion\"></li>')
 								.data('item.autocomplete', item)
-								.append($('<a>').text(item.label))
+								.append($('<div class=\"name\">').html($.escapeHtml(item.label)))
+								.append($('<div class=\"id\">').html('[' + $.escapeHtml(item.id) + ']'))
 								.appendTo(ul);
 						}
 						$(this).prev('.ui-helper-hidden-accessible').remove();

@@ -5,8 +5,7 @@
  * @package HostCMS
  * @subpackage Site
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Сайты',
@@ -41,6 +40,7 @@ return array(
 	'site_add_site_form_title' => 'Добавление информации о сайте',
 	'site_edit_site_form_title' => 'Редактирование информации о сайте "%s"',
 	'site_dates' => 'Форматы',
+	'site_protect' => 'Защита',
 	'site_errors' => 'Ошибки',
 	'site_robots_txt' => 'robots.txt',
 	'site_licence' => 'Ключи',
@@ -114,4 +114,10 @@ return array(
 	'protect' => 'Защита от атак',
 	'sender_name' => 'Имя отправителя',
 	'filter_placeholder' => 'Фильтр по названию',
+
+	'protect_header' => 'Фреймы',
+	'protect_frame' => 'Защита от фреймов',
+	'protect_frame_exclusions' => 'Не защищать страницы',
+
+	'error_bot' => 'Страница для проверки ботов',
 );

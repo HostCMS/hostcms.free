@@ -26,8 +26,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Mail
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 abstract class Core_Mail
 {
@@ -76,6 +75,15 @@ abstract class Core_Mail
 	}
 
 	/**
+	 * Get log
+	 * @return NULL|string
+	 */
+	public function getLog()
+	{
+		return $this->_log;
+	}
+
+	/**
 	 * Register an existing instance as a singleton.
 	 * @param string $name
 	 * @param array $aPersonalConfig
@@ -98,7 +106,8 @@ abstract class Core_Mail
 		$driver = self::_getDriverName($aConfig[$name]['driver']);
 		$oDriver = new $driver();
 
-		$aConfigDriver = Core_Array::get($aConfig, $aConfig[$name]['driver'], array());
+		// Base config of the $name + driver's default config
+		$aConfigDriver = $aConfig[$name] + Core_Array::get($aConfig, $aConfig[$name]['driver'], array());
 
 		$aConfig = $aPersonalConfig + (
 			defined('CURRENT_SITE') && isset($aConfigDriver[CURRENT_SITE])
@@ -124,9 +133,7 @@ abstract class Core_Mail
 			);
 		}
 
-		return $oDriver->config(
-			$aConfig
-		);
+		return $oDriver->config($aConfig);
 	}
 
 	/**
@@ -421,10 +428,11 @@ abstract class Core_Mail
 	 * Sanitize Header Value
 	 * @param string $value
 	 * @return string
+	 * @see Core_Http::sanitizeHeader()
 	 */
 	static public function sanitizeHeader($value)
 	{
-		return str_replace(array("\r", "\n", "\0"), '', (string) $value);
+		return Core_Http::sanitizeHeader($value);
 	}
 
 	/**
@@ -442,7 +450,7 @@ abstract class Core_Mail
 	public function header($name, $value)
 	{
 		$this->_headers[$name] = !is_null($value)
-			? self::sanitizeHeader($value)
+			? Core_Http::sanitizeHeader($value)
 			: '';
 
 		return $this;
@@ -658,7 +666,7 @@ abstract class Core_Mail
 	 */
 	protected function _getDomain()
 	{
-		if (strpos($this->_from, '@') !== FALSE)
+		if (!is_null($this->_from) && strpos($this->_from, '@') !== FALSE)
 		{
 			$aTmp = explode('@', $this->_from);
 			$domain = array_pop($aTmp);

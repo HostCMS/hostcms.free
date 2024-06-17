@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Warehouse_Model extends Core_Entity
 {
@@ -17,7 +16,7 @@ class Shop_Warehouse_Model extends Core_Entity
 	 * Callback property_id
 	 * @var int
 	 */
-	public $items = 1;
+	public $cells = 1;
 
 	/**
 	 * One-to-many or many-to-many relations
@@ -210,6 +209,13 @@ class Shop_Warehouse_Model extends Core_Entity
 	 */
 	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
+		$count = $this->Shop_Warehouse_Items->getCount();
+		$count && Core_Html_Entity::factory('Span')
+			->class('badge badge-hostcms badge-square')
+			->value('<i class="fa-solid fa-box"></i> ' . $count)
+			->title(Core::_('Shop_Warehouse.shop_items_total_count'))
+			->execute();
+
 		$queryBuilder = Core_QueryBuilder::select(array('SUM(count)', 'count'))
 			->from('shop_warehouse_items')
 			->where('shop_warehouse_items.shop_warehouse_id', '=', $this->id);
@@ -218,7 +224,7 @@ class Shop_Warehouse_Model extends Core_Entity
 
 		$aResult['count'] && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
-			->value($aResult['count'])
+			->value('<i class="fa-solid fa-boxes-stacked"></i> ' . Core_Str::hideZeros($aResult['count']))
 			->title(Core::_('Shop_Warehouse.shop_items_count'))
 			->execute();
 
@@ -233,7 +239,7 @@ class Shop_Warehouse_Model extends Core_Entity
 			foreach ($aTags as $oTag)
 			{
 				Core_Html_Entity::factory('Code')
-					->value('<span class="badge badge-square badge-max-width badge-lightgray margin-left-5" title="' . htmlspecialchars($oTag->name) . '"><i class="fa fa-tag"></i> ' . htmlspecialchars($oTag->name) . '</span>')
+					->value('<span class="badge badge-square badge-tag badge-max-width badge-lightgray margin-left-5" title="' . htmlspecialchars($oTag->name) . '"><i class="fa fa-tag"></i> ' . htmlspecialchars($oTag->name) . '</span>')
 					->execute();
 			}
 		}
@@ -245,7 +251,7 @@ class Shop_Warehouse_Model extends Core_Entity
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function itemsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	/*public function itemsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$count = $this->Shop_Warehouse_Items->getCount();
 		$count && Core_Html_Entity::factory('Span')
@@ -253,7 +259,7 @@ class Shop_Warehouse_Model extends Core_Entity
 			->value($count)
 			->title($count)
 			->execute();
-	}
+	}*/
 
 	/**
 	 * Get rest
@@ -388,8 +394,10 @@ class Shop_Warehouse_Model extends Core_Entity
 		ob_start();
 		Core_Html_Entity::factory('A')
 			->value(htmlspecialchars($this->name))
-			->href("/admin/shop/warehouse/cell/index.php?shop_warehouse_id={$this->id}&shop_id={$aExternalReplace['{shop_id}']}&shop_group_id={$aExternalReplace['{shop_group_id}']}")
-			->onclick("$.adminLoad({path: '/admin/shop/warehouse/cell/index.php',additionalParams: 'shop_warehouse_id=" . $this->id . "&shop_id=" . $aExternalReplace['{shop_id}'] . "&shop_group_id=" . $aExternalReplace['{shop_group_id}'] . "', windowId: '{$windowId}'}); return false;")
+			// ->href("/admin/shop/warehouse/cell/index.php?shop_warehouse_id={$this->id}&shop_id={$aExternalReplace['{shop_id}']}&shop_group_id={$aExternalReplace['{shop_group_id}']}")
+			// ->onclick("$.adminLoad({path: '/admin/shop/warehouse/cell/index.php',additionalParams: 'shop_warehouse_id=" . $this->id . "&shop_id=" . $aExternalReplace['{shop_id}'] . "&shop_group_id=" . $aExternalReplace['{shop_group_id}'] . "', windowId: '{$windowId}'}); return false;")
+			->href("/admin/shop/warehouse/item/index.php?shop_warehouse_id={$this->id}&shop_id={$aExternalReplace['{shop_id}']}&shop_group_id={$aExternalReplace['{shop_group_id}']}")
+			->onclick("$.adminLoad({path: '/admin/shop/warehouse/item/index.php',additionalParams: 'shop_warehouse_id=" . $this->id . "&shop_id=" . $aExternalReplace['{shop_id}'] . "&shop_group_id=" . $aExternalReplace['{shop_group_id}'] . "', windowId: '{$windowId}'}); return false;")
 			->execute();
 
 		return ob_get_clean();
@@ -472,6 +480,23 @@ class Shop_Warehouse_Model extends Core_Entity
 	}
 
 	/**
+	 * Show tags data in XML
+	 * @var boolean
+	 */
+	protected $_showXmlTags = FALSE;
+
+	/**
+	 * Add tags XML to the warehouse
+	 * @param boolean $showXmlTags mode
+	 * @return self
+	 */
+	public function showXmlTags($showXmlTags = TRUE)
+	{
+		$this->_showXmlTags = $showXmlTags;
+		return $this;
+	}
+
+	/**
 	 * Get stdObject for entity and children entities
 	 * @return stdObject
 	 * @hostcms-event shop_warehouse.onBeforeRedeclaredGetStdObject
@@ -493,10 +518,7 @@ class Shop_Warehouse_Model extends Core_Entity
 	{
 		$this->clearXmlTags();
 
-		if (Core::moduleIsActive('tag'))
-		{
-			$this->addEntities($this->Tags->findAll(FALSE));
-		}
+		$this->_showXmlTags && Core::moduleIsActive('tag') && $this->addEntities($this->Tags->findAll(FALSE));
 
 		return $this;
 	}

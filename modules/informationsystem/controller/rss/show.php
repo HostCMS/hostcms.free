@@ -12,7 +12,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - group($id) идентификатор информационной группы, если FALSE, то вывод инофрмационных элементов
  * осуществляется из всех групп
  * - yandex(TRUE|FALSE) экспорт в Яндекс.Новости, по умолчанию FALSE
- * - turbo(TRUE|FALSE) выгрузка для Яндекс.Турбо, по умолчанию FALSE
+ * - turbo(TRUE|FALSE|'disable') выгрузка для Яндекс.Турбо, по умолчанию FALSE, при 'disable' формируется список на удаление со ссылкой на страницу
  * - stripTags(TRUE|FALSE) удалять HTML-теги из экспортируемых данных, по умолчанию TRUE
  * - cache(TRUE|FALSE) использовать кэширование, по умолчанию TRUE
  * - tag($path) путь тега, с использованием которого ведется отбор информационных элементов
@@ -32,8 +32,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Informationsystem_Controller_Rss_Show extends Core_Controller
 {
@@ -83,6 +82,36 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 	public function __construct(Informationsystem_Model $oInformationsystem)
 	{
 		parent::__construct($oInformationsystem->clearEntities());
+
+		$this->_setInformationsystemItems();
+
+		$this->group = $this->yandex = $this->turbo = FALSE;
+
+		$this->stripTags = $this->cache = TRUE;
+		$this->offset = 0;
+
+		$this->channelEntities = $this->itemProperties = array();
+
+		$this->_Core_Rss = new Core_Rss();
+	}
+
+	/**
+	 * Clone controller
+	 * @return void
+	 * @ignore
+	 */
+	public function __clone()
+	{
+		$this->_setInformationsystemItems();
+	}
+
+	/**
+	 * Prepare items for showing
+	 * @return self
+	 */
+	protected function _setInformationsystemItems()
+	{
+		$oInformationsystem = $this->getEntity();
 
 		$this->_Informationsystem_Items = $oInformationsystem->Informationsystem_Items;
 
@@ -154,14 +183,7 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 			->close()
 			->where('informationsystem_items.siteuser_group_id', 'IN', $aSiteuserGroups);
 
-		$this->group = $this->yandex = $this->turbo = FALSE;
-
-		$this->stripTags = $this->cache = TRUE;
-		$this->offset = 0;
-
-		$this->channelEntities = $this->itemProperties = array();
-
-		$this->_Core_Rss = new Core_Rss();
+		return $this;
 	}
 
 	/**
@@ -212,6 +234,7 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 	 * Show RSS
 	 * @return self
 	 * @hostcms-event Informationsystem_Controller_Rss_Show.onBeforeRedeclaredShow
+	 * @hostcms-event Informationsystem_Controller_Rss_Show.onBeforeSelectInformationsystemItem
 	 * @hostcms-event Informationsystem_Controller_Rss_Show.onBeforeAddItem
 	 */
 	public function show()
@@ -272,7 +295,7 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 			&& $this->_Core_Rss->xmlns('yandex', 'http://news.yandex.ru')
 			&& $this->_Core_Rss->xmlns('media', 'http://search.yahoo.com/mrss/');
 
-		if ($this->turbo)
+		if ($this->turbo === TRUE)
 		{
 			$this->_Core_Rss->xmlns('turbo', 'http://turbo.yandex.ru');
 			$this->_Core_Rss->add('turbo:cms_plugin', 'E002780CE3D29DFF362D7A37943187B5');
@@ -315,6 +338,8 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 				->limit(intval($this->limit));
 		}
 
+		Core_Event::notify(get_class($this) . '.onBeforeSelectInformationsystemItem', $this, array($this->_Informationsystem_Items));
+
 		$aInformationsystem_Items = $this->_Informationsystem_Items->findAll();
 
 		$oSiteAlias = $oInformationsystem->Site->getCurrentAlias();
@@ -342,155 +367,164 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 		{
 			$oInformationsystem_Item->shortcut_id && $oInformationsystem_Item = $oInformationsystem_Item->Informationsystem_Item;
 
-			$attributes = array();
+			$attributes = $this->_currentItem = array();
 
-			$this->_currentItem = array();
-			$this->_currentItem['pubDate'] = date('r', Core_Date::sql2timestamp($oInformationsystem_Item->datetime));
-			$this->_currentItem['title'] = Core_Str::str2ncr(
-				Core_Str::xml($this->stripTags
-					? strip_tags($oInformationsystem_Item->name)
-					: $oInformationsystem_Item->name
-				)
-			);
-
-			$description = $oInformationsystem_Item->description;
-
-			$iCountShortcodes &&
-				$description = $oShortcode_Controller->applyShortcodes($description);
-
-			$this->_currentItem['description'] = Core_Str::str2ncr(
-				Core_Str::xml($this->stripTags
-					? strip_tags($description)
-					: $description)
-			);
-
-			$fullText = $oInformationsystem_Item->text;
-
-			$iCountShortcodes &&
-				$fullText = $oShortcode_Controller->applyShortcodes($fullText);
-
-			$this->stripTags
-				&& $fullText = strip_tags($fullText, $sAllowedTags);
-
-			if ($this->yandex)
+			if ($this->turbo !== 'disable')
 			{
-				$this->_currentItem['yandex:full-text'] = Core_Str::str2ncr(
-					Core_Str::xml($fullText)
+				$this->_currentItem['pubDate'] = date('r', Core_Date::sql2timestamp($oInformationsystem_Item->datetime));
+				$this->_currentItem['title'] = Core_Str::str2ncr(
+					Core_Str::xml($this->stripTags
+						? strip_tags($oInformationsystem_Item->name)
+						: $oInformationsystem_Item->name
+					)
 				);
 
-				if ($oInformationsystem_Item->Informationsystem_Group->id)
+				$description = $oInformationsystem_Item->description;
+
+				$iCountShortcodes &&
+					$description = $oShortcode_Controller->applyShortcodes($description);
+
+				$this->_currentItem['description'] = Core_Str::str2ncr(
+					Core_Str::xml($this->stripTags
+						? strip_tags($description)
+						: $description)
+				);
+
+				$fullText = $oInformationsystem_Item->text;
+
+				$iCountShortcodes &&
+					$fullText = $oShortcode_Controller->applyShortcodes($fullText);
+
+				$this->stripTags
+					&& $fullText = strip_tags($fullText, $sAllowedTags);
+
+				if ($this->yandex)
 				{
-					$this->_currentItem['category'] = Core_Str::str2ncr(
-						Core_Str::xml($oInformationsystem_Item->Informationsystem_Group->name)
+					$this->_currentItem['yandex:full-text'] = Core_Str::str2ncr(
+						Core_Str::xml($fullText)
 					);
+
+					if ($oInformationsystem_Item->Informationsystem_Group->id)
+					{
+						$this->_currentItem['category'] = Core_Str::str2ncr(
+							Core_Str::xml($oInformationsystem_Item->Informationsystem_Group->name)
+						);
+					}
 				}
 			}
 
 			$this->_currentItem['link'] = $this->_currentItem['guid'] = Core_Str::str2ncr(Core_Str::xml($this->_path . $oInformationsystem_Item->getPath()));
 
-			if ($oInformationsystem_Item->image_large)
+			if ($this->turbo !== 'disable')
 			{
-				$largeFilePath = $oInformationsystem_Item->getLargeFilePath();
-
-				$enclosure = array(
-					'name' => 'enclosure',
-					'value' => NULL,
-					'attributes' => array(
-						'url' => $sitePath . $oInformationsystem_Item->getLargeFileHref(),
-						'type' => Core_Mime::getFileMime($largeFilePath)
-					)
-				);
-
-				if (Core_File::isFile($largeFilePath))
+				if ($oInformationsystem_Item->image_large)
 				{
-					$enclosure['attributes']['length'] = filesize($largeFilePath);
+					$largeFilePath = $oInformationsystem_Item->getLargeFilePath();
+
+					$enclosure = array(
+						'name' => 'enclosure',
+						'value' => NULL,
+						'attributes' => array(
+							'url' => $sitePath . $oInformationsystem_Item->getLargeFileHref(),
+							'type' => Core_Mime::getFileMime($largeFilePath)
+						)
+					);
+
+					if (Core_File::isFile($largeFilePath))
+					{
+						$enclosure['attributes']['length'] = filesize($largeFilePath);
+					}
+
+					$this->_currentItem[] = $enclosure;
 				}
 
-				$this->_currentItem[] = $enclosure;
-			}
-
-			if (is_array($this->itemProperties))
-			{
-				foreach ($this->itemProperties as $propertyId => $tagName)
+				if (is_array($this->itemProperties))
 				{
-					if (is_numeric($propertyId))
+					foreach ($this->itemProperties as $propertyId => $tagName)
 					{
-						$oProperty = Core_Entity::factory('Property', $propertyId);
-						$aProerty_Values = $oProperty->getValues($oInformationsystem_Item->id, FALSE);
-
-						foreach ($aProerty_Values as $oProperty_Value)
+						if (is_numeric($propertyId))
 						{
-							$aTmp = NULL;
+							$oProperty = Core_Entity::factory('Property', $propertyId);
+							$aProerty_Values = $oProperty->getValues($oInformationsystem_Item->id, FALSE);
 
-							switch ($oProperty->type)
+							foreach ($aProerty_Values as $oProperty_Value)
 							{
-								case 2: // File
-									$oProperty_Value
-										->setHref('/' . $oInformationsystem_Item->getHref())
-										->setDir($oInformationsystem_Item->getPath());
+								$aTmp = NULL;
 
-									if ($oProperty_Value->file_name)
-									{
-										$largeFilePath = $oProperty_Value->getLargeFilePath();
+								switch ($oProperty->type)
+								{
+									case 2: // File
+										$oProperty_Value
+											->setHref('/' . $oInformationsystem_Item->getHref())
+											->setDir($oInformationsystem_Item->getPath());
 
-										$aTmp = array(
+										if ($oProperty_Value->file_name)
+										{
+											$largeFilePath = $oProperty_Value->getLargeFilePath();
+
+											$aTmp = array(
+												'name' => $tagName,
+												'value' => NULL,
+												'attributes' => array(
+													'url' => $sitePath . $oInformationsystem_Item->getLargeFileHref(),
+													'type' => Core_Mime::getFileMime($largeFilePath)
+												)
+											);
+										}
+									break;
+									case 3: // List
+										if (Core::moduleIsActive('list') && $oProperty_Value->value)
+										{
+											$aTmp = array(
+												'name' => $tagName,
+												'value' => Core_Entity::factory('List_Item', intval($oProperty_Value->value))->value
+											);
+										}
+									break;
+									default:
+										$oProperty_Value->value !== '' && $aTmp = array(
 											'name' => $tagName,
-											'value' => NULL,
-											'attributes' => array(
-												'url' => $sitePath . $oInformationsystem_Item->getLargeFileHref(),
-												'type' => Core_Mime::getFileMime($largeFilePath)
-											)
+											'value' => $oProperty_Value->value
 										);
-									}
-								break;
-								case 3: // List
-									if (Core::moduleIsActive('list') && $oProperty_Value->value)
-									{
-										$aTmp = array(
-											'name' => $tagName,
-											'value' => Core_Entity::factory('List_Item', intval($oProperty_Value->value))->value
-										);
-									}
-								break;
-								default:
-									$oProperty_Value->value !== '' && $aTmp = array(
-										'name' => $tagName,
-										'value' => $oProperty_Value->value
-									);
-								break;
+									break;
+								}
+
+								!is_null($aTmp)
+									&& $this->_currentItem[] = $aTmp;
 							}
-
-							!is_null($aTmp)
-								&& $this->_currentItem[] = $aTmp;
 						}
 					}
 				}
 			}
 
-			if ($this->turbo)
+			// TRUE or 'disable'
+			if ($this->turbo !== FALSE)
 			{
-				$attributes['turbo'] = 'true';
+				$attributes['turbo'] = $this->turbo === TRUE ? 'true' : 'false';
 
-				// https://yandex.ru/dev/turbo/doc/rss/elements/header.html
-				$turboContent = PHP_EOL . '<header>' . PHP_EOL;
-
-				if ($oInformationsystem_Item->image_large)
+				if ($this->turbo === TRUE)
 				{
-					$turboContent .= '<figure>' . PHP_EOL .
-						'<img src="' . htmlspecialchars($sitePath . $oInformationsystem_Item->getLargeFileHref()) . '" />' . PHP_EOL .
-					'</figure>' . PHP_EOL;
+					// https://yandex.ru/dev/turbo/doc/rss/elements/header.html
+					$turboContent = PHP_EOL . '<header>' . PHP_EOL;
+
+					if ($oInformationsystem_Item->image_large)
+					{
+						$turboContent .= '<figure>' . PHP_EOL .
+							'<img src="' . htmlspecialchars($sitePath . $oInformationsystem_Item->getLargeFileHref()) . '" />' . PHP_EOL .
+						'</figure>' . PHP_EOL;
+					}
+
+					$turboContent .= '<h1>' . $this->_currentItem['title'] . '</h1>' . PHP_EOL .
+						'</header>' . PHP_EOL .
+						//'<h2>' . $this->_currentItem['title'] . '</h2>' . PHP_EOL .
+						$fullText . PHP_EOL;
+
+					$this->_currentItem[] = array(
+						'name' => 'turbo:content',
+						'value' => $turboContent,
+						'CDATA' => TRUE
+					);
 				}
-
-				$turboContent .= '<h1>' . $this->_currentItem['title'] . '</h1>' . PHP_EOL .
-					'</header>' . PHP_EOL .
-					//'<h2>' . $this->_currentItem['title'] . '</h2>' . PHP_EOL .
-					$fullText . PHP_EOL;
-
-				$this->_currentItem[] = array(
-					'name' => 'turbo:content',
-					'value' => $turboContent,
-					'CDATA' => TRUE
-				);
 			}
 
 			Core_Event::notify(get_class($this) . '.onBeforeAddItem', $this, array($oInformationsystem_Item, $this->_currentItem));
@@ -501,6 +535,20 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 		$content = $this->_Core_Rss->get();
 		$this->_Core_Rss->showWithHeader($content);
 		$this->cache && Core::moduleIsActive('cache') && $oCore_Cache->set($cacheKey, $content, $cacheName);
+
+		return $this;
+	}
+
+	/**
+	 * Disable shortcuts
+	 * @return self
+	 */
+	public function forbidSelectShortcuts()
+	{
+		// Отключаем выбор ярлыков
+		$this->_Informationsystem_Items
+			->queryBuilder()
+			->where('informationsystem_items.shortcut_id', '=', 0);
 
 		return $this;
 	}

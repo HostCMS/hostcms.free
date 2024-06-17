@@ -20,8 +20,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Payment_System_Controller_Show extends Core_Controller
 {
@@ -71,6 +70,7 @@ class Shop_Payment_System_Controller_Show extends Core_Controller
 		$this->_Shop_Payment_Systems = $oShop->Shop_Payment_Systems;
 		$this->_Shop_Payment_Systems
 			->queryBuilder()
+			->select('shop_payment_systems.*')
 			->where('shop_payment_systems.active', '=', 1);
 
 		if (Core_Session::hasSessionId())
@@ -105,10 +105,29 @@ class Shop_Payment_System_Controller_Show extends Core_Controller
 		{
 			$this->_Shop_Payment_Systems
 				->queryBuilder()
-				->select('shop_payment_systems.*')
 				->join('shop_delivery_payment_systems', 'shop_delivery_payment_systems.shop_payment_system_id', '=', 'shop_payment_systems.id')
 				->where('shop_delivery_payment_systems.shop_delivery_id', '=', $this->shop_delivery_id);
 		}
+
+		$aSiteuser_Group_IDs = array(0);
+
+		if (Core::moduleIsActive('siteuser'))
+		{
+			$oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
+			if ($oSiteuser)
+			{
+				$aSiteuser_Groups = $oSiteuser->Siteuser_Groups->findAll();
+				foreach ($aSiteuser_Groups as $oSiteuser_Group)
+				{
+					$aSiteuser_Group_IDs[] = $oSiteuser_Group->id;
+				}
+			}
+		}
+
+		$this->_Shop_Payment_Systems
+			->queryBuilder()
+			->join('shop_payment_system_siteuser_groups', 'shop_payment_system_siteuser_groups.shop_payment_system_id', '=', 'shop_payment_systems.id')
+			->where('shop_payment_system_siteuser_groups.siteuser_group_id', 'IN', $aSiteuser_Group_IDs);
 
 		$aShop_Payment_Systems = $this->_Shop_Payment_Systems->findAll();
 		foreach ($aShop_Payment_Systems as $oShop_Payment_System)

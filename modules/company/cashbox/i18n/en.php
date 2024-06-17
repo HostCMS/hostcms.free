@@ -15,4 +15,5 @@ return array(
 	'undelete_success' => 'Item restored!',
 	'apply_success' => "Information changed successfully",
 	'changeDefaultStatus_success' => "Information changed successfully",
+	'sorting' => 'Sorting',
 );

@@ -9,8 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Session_Phpredis extends Core_Session
 {
@@ -66,6 +65,12 @@ class Core_Session_Phpredis extends Core_Session
 	 * @var string
 	 */
 	protected $_format = 'i*';
+
+	/**
+	 * TTL
+	 * @var int
+	 */
+	protected $_ttl = 0;
 
 	/**
 	 * Constructor.
@@ -224,7 +229,8 @@ class Core_Session_Phpredis extends Core_Session
 			$this->_unlock($id);
 
 			// для предотвращения автоматической повторной регистрации сеанса
-			$_SESSION = array();
+			// при регенерации идентификаора очищать не следует
+			//$_SESSION = array();
 
 			return TRUE;
 		}
@@ -262,6 +268,28 @@ class Core_Session_Phpredis extends Core_Session
 	{
 		// Nothing to do
 		return TRUE;
+	}
+
+	/**
+	 * This callback is executed when a new session ID is required.
+	 * @return string
+	 */
+	public function sessionCreateSid()
+	{
+		return session_create_id();
+	}
+
+	/**
+	 * This callback is executed when a session is to be started, a session ID is supplied and session.use_strict_mode is enabled
+	 * @param string $id Session ID
+	 * @return bool
+	 */
+	public function sessionValidateSid($id)
+	{
+		$key = $this->_getKey($id);
+		$value = self::$_redis->get($key);
+
+		return $value === FALSE;
 	}
 
 	/**

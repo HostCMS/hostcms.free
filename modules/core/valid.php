@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Valid
 {
@@ -34,6 +33,30 @@ class Core_Valid
 	{
 		return is_string($ip)
 			? filter_var($ip, FILTER_VALIDATE_IP) !== FALSE
+			: FALSE;
+	}
+
+	/**
+	 * Checks if $ip is valid IPv4
+	 * @param string $ip IP
+	 * @return boolean
+	 */
+	static public function ipv4($ip)
+	{
+		return is_string($ip)
+			? filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== FALSE
+			: FALSE;
+	}
+	
+	/**
+	 * Checks if $ip is valid IPv6
+	 * @param string $ip IP
+	 * @return boolean
+	 */
+	static public function ipv6($ip)
+	{
+		return is_string($ip)
+			? filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== FALSE
 			: FALSE;
 	}
 

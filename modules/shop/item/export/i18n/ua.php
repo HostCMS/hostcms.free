@@ -37,4 +37,11 @@ return array(
 	'order_item_price' => 'Ціна товару замовлення',
 	'order_item_tax' => 'Податок на товар замовлення',
 	'order_item_type' => 'Тип товару',
+	'begin_file_export_orders' => 'Вивантаження у файл %s',
+	'begin_file_export' => 'Вивантаження у файл %s, група "%s"',
+	'end_file_export' => 'Вивантаження файлу %s завершено',
+	'export_mode' => 'Вивантажити',
+	'export_mode1' => 'у файл',
+	'export_mode2' => 'на сервер',
+	'property_header' => 'Додаткові властивості товарів у замовленні',
 );

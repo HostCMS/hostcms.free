@@ -1,7 +1,7 @@
 <?php
 
 return array(
-	'model_name' => 'Антиспам',
+	'model_name' => 'Антиспам, запис журналу',
 	'menu' => 'Антиспам',
 	'title' => 'Антиспам',
 	'delete_success' => 'Елемент успішно видалений!',

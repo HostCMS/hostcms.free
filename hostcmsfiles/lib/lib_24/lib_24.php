@@ -296,520 +296,574 @@ if (!is_null(Core_Array::getPost('apply')))
 	// Проверка корректности email
 	if (Core_Valid::email($email))
 	{
-		// Check captcha
-		if ($oSiteuser->id > 0 || Core_Captcha::valid(Core_Array::getPost('captcha_id', '', 'str'), Core_Array::getPost('captcha', '', 'str')))
+		// Проверка CSRF-токена
+		if ($oSiteuser->id > 0 || $Siteuser_Controller_Show->checkCsrf(Core_Array::getPost('csrf_token', '', 'str')))
 		{
-			// Пароль необязателен при обновлении данных о пользователе
-			if (strlen($login) > 0 && ($oSiteuser->id > 0 || strlen($password) > 0) && strlen($email) > 0 && mb_strpos($login, 'http://') === FALSE)
+			// Check captcha
+			if ($oSiteuser->id > 0 || Core_Captcha::valid(Core_Array::getPost('captcha_id', '', 'str'), Core_Array::getPost('captcha', '', 'str')))
 			{
-				// Проверка совпадения логина
-				$oTmpSiteuser = $oSiteuser->Site->Siteusers->getByLogin($login);
-				if (is_null($oTmpSiteuser) || $oTmpSiteuser->id == $oSiteuser->id)
+				// Пароль необязателен при обновлении данных о пользователе
+				if (strlen($login) > 0 && ($oSiteuser->id > 0 || strlen($password) > 0) && strlen($email) > 0 && mb_strpos($login, 'http://') === FALSE)
 				{
-					// Проверка совпадения email
-					$oTmpSiteuser = $oSiteuser->Site->Siteusers->getByEmail($email);
+					// Проверка совпадения логина
+					$oTmpSiteuser = $oSiteuser->Site->Siteusers->getByLogin($login);
 					if (is_null($oTmpSiteuser) || $oTmpSiteuser->id == $oSiteuser->id)
 					{
-						// При быстрой регистрации password2 не передается
-						$bQuickRegistration = is_null(Core_Array::getPost('password2'));
-
-						if ($bQuickRegistration || $password === Core_Array::getPost('password2', '', 'str'))
+						// Проверка совпадения email
+						$oTmpSiteuser = $oSiteuser->Site->Siteusers->getByEmail($email);
+						if (is_null($oTmpSiteuser) || $oTmpSiteuser->id == $oSiteuser->id)
 						{
-							// Новому пользователю устанавливаем сразу активность при быстрой регистрации
-							$bNewUser && $oSiteuser->active = $bQuickRegistration ? 1 : 0;
+							// При быстрой регистрации password2 не передается
+							$bQuickRegistration = is_null(Core_Array::getPost('password2'));
 
-							// Antispam
-							if (Core::moduleIsActive('antispam'))
+							if ($bQuickRegistration || $password === Core_Array::getPost('password2', '', 'str'))
 							{
-								$Antispam_Controller = new Antispam_Controller();
-								$Antispam_Controller
-									->addText($oSiteuser->login, 'login')
-									->addText($oSiteuser->email, 'email');
+								// Новому пользователю устанавливаем сразу активность при быстрой регистрации
+								$bNewUser && $oSiteuser->active = $bQuickRegistration ? 1 : 0;
 
-								if (!is_null(Core_Array::getPost("company_name")))
+								// Antispam
+								if (Core::moduleIsActive('antispam'))
 								{
-									$aSiteuserCompanies = Core_Array::getPost("company_name");
-									$aSiteuserCompanyAddress = Core_Array::getPost("company_address");
-									$aSiteuserCompanyCountry = Core_Array::getPost("company_country");
-									$aSiteuserCompanyPostcode = Core_Array::getPost("company_postcode");
-									$aSiteuserCompanyCity = Core_Array::getPost("company_city");
+									$Antispam_Controller = new Antispam_Controller();
+									$Antispam_Controller
+										->addText($oSiteuser->login, 'login')
+										->addText($oSiteuser->email, 'email');
 
-									foreach ($aSiteuserCompanies as $key => $sSiteuserCompanyName)
+									if (!is_null(Core_Array::getPost("company_name")))
 									{
-										$Antispam_Controller
-											->addText($sSiteuserCompanyName)
-											->addText(Core_Array::get($aSiteuserCompanyAddress, $key, '', 'str'))
-											->addText(Core_Array::get($aSiteuserCompanyCountry, $key, '', 'str'))
-											->addText(Core_Array::get($aSiteuserCompanyPostcode, $key, '', 'str'))
-											->addText(Core_Array::get($aSiteuserCompanyCity, $key, '', 'str'));
-									}
-								}
+										$aSiteuserCompanies = Core_Array::getPost("company_name");
+										$aSiteuserCompanyAddress = Core_Array::getPost("company_address");
+										$aSiteuserCompanyCountry = Core_Array::getPost("company_country");
+										$aSiteuserCompanyPostcode = Core_Array::getPost("company_postcode");
+										$aSiteuserCompanyCity = Core_Array::getPost("company_city");
 
-								if (!is_null(Core_Array::getPost("person_name")))
-								{
-									$aSiteuserPeopleNames = Core_Array::getPost("person_name");
-									$aSiteuserPeopleSurnames = Core_Array::getPost("person_surname");
-									$aSiteuserPeoplePatronymics = Core_Array::getPost("person_patronymic");
-									$aSiteuserPeoplePostcodes = Core_Array::getPost("person_postcode");
-									$aSiteuserPeopleCountries = Core_Array::getPost("person_country");
-									$aSiteuserPeopleCities = Core_Array::getPost("person_city");
-									$aSiteuserPeopleAddresses = Core_Array::getPost("person_address");
-
-									foreach ($aSiteuserPeopleNames as $key => $sSiteuserPersonName)
-									{
-										$Antispam_Controller
-											->addText($sSiteuserPersonName)
-											->addText(Core_Array::get($aSiteuserPeopleSurnames, $key, '', 'str'))
-											->addText(Core_Array::get($aSiteuserPeoplePatronymics, $key, '', 'str'))
-											->addText(Core_Array::get($aSiteuserPeoplePostcodes, $key, '', 'str'))
-											->addText(Core_Array::get($aSiteuserPeopleCountries, $key, '', 'str'))
-											->addText(Core_Array::get($aSiteuserPeopleCities, $key, '', 'str'))
-											->addText(Core_Array::get($aSiteuserPeopleAddresses, $key, '', 'str'));
-									}
-								}
-
-								$bAntispamAnswer = $Antispam_Controller->execute();
-
-								// Check e-mail
-								if ($bAntispamAnswer)
-								{
-									$bAntispamAnswer = Antispam_Domain_Controller::checkEmail($oSiteuser->email);
-								}
-							}
-							else
-							{
-								$bAntispamAnswer = TRUE;
-							}
-
-							if ($bAntispamAnswer)
-							{
-								$oSiteuser->save();
-
-								if ($bNewUser)
-								{
-									// Внесение пользователя в группу по умолчанию
-									$oSiteuser_Group = $oSiteuser->Site->Siteuser_Groups->getDefault();
-
-									if (!is_null($oSiteuser_Group))
-									{
-										$oSiteuser_Group->add($oSiteuser);
-									}
-								}
-
-								// Почтовые рассылки
-								if (Core::moduleIsActive('maillist'))
-								{
-									$aMaillists = $oSiteuser->getAllowedMaillists();
-
-									foreach ($aMaillists as $oMaillists)
-									{
-										$oMaillist_Siteuser = $oSiteuser->Maillist_Siteusers->getByMaillist($oMaillists->id);
-
-										// Пользователь подписан
-										if (Core_Array::getPost("maillist_{$oMaillists->id}"))
+										foreach ($aSiteuserCompanies as $key => $sSiteuserCompanyName)
 										{
-											// Пользователь не был подписан
-											is_null($oMaillist_Siteuser)
-												&& $oMaillist_Siteuser = Core_Entity::factory('Maillist_Siteuser')->siteuser_id($oSiteuser->id)->maillist_id($oMaillists->id);
-
-											$oMaillist_Siteuser->type = Core_Array::getPost("type_{$oMaillists->id}") == 0 ? 0 : 1;
-											$oMaillist_Siteuser->save();
-
-										}
-										elseif (!is_null($oMaillist_Siteuser))
-										{
-											// Отписываем пользователя от рассылки
-											$oMaillist_Siteuser->delete();
+											$Antispam_Controller
+												->addText($sSiteuserCompanyName)
+												->addText(Core_Array::get($aSiteuserCompanyAddress, $key, '', 'str'))
+												->addText(Core_Array::get($aSiteuserCompanyCountry, $key, '', 'str'))
+												->addText(Core_Array::get($aSiteuserCompanyPostcode, $key, '', 'str'))
+												->addText(Core_Array::get($aSiteuserCompanyCity, $key, '', 'str'));
 										}
 									}
-								}
 
-								// Дополнительные свойства, существующие значения
-								$aProperty_Values = $oSiteuser->getPropertyValues();
-								foreach ($aProperty_Values as $oProperty_Value)
-								{
-									$oProperty = $oProperty_Value->Property;
-
-									if ($oProperty->type != 10)
+									if (!is_null(Core_Array::getPost("person_name")))
 									{
-										$sFieldName = "property_{$oProperty->id}_{$oProperty_Value->id}";
+										$aSiteuserPeopleNames = Core_Array::getPost("person_name");
+										$aSiteuserPeopleSurnames = Core_Array::getPost("person_surname");
+										$aSiteuserPeoplePatronymics = Core_Array::getPost("person_patronymic");
+										$aSiteuserPeoplePostcodes = Core_Array::getPost("person_postcode");
+										$aSiteuserPeopleCountries = Core_Array::getPost("person_country");
+										$aSiteuserPeopleCities = Core_Array::getPost("person_city");
+										$aSiteuserPeopleAddresses = Core_Array::getPost("person_address");
 
-										$value = $oProperty->type == 2
-											? Core_Array::getFiles($sFieldName)
-											: Core_Array::getPost($sFieldName);
-
-										addPropertyValue($oSiteuser, $oProperty, $oProperty_Value, $value);
-									}
-								}
-
-								// Дополнительные свойства, новые значения
-								$oSiteuser_Property_List = Core_Entity::factory('Siteuser_Property_List', $oSiteuser->site_id);
-
-								$aProperties = $oSiteuser_Property_List->Properties->findAll();
-								foreach ($aProperties as $oProperty)
-								{
-									// Поле не скрытое
-									if ($oProperty->type != 10)
-									{
-										$sFieldName = "property_{$oProperty->id}";
-
-										if ($oProperty->type == 2)
+										foreach ($aSiteuserPeopleNames as $key => $sSiteuserPersonName)
 										{
-											$aValues = Core_Array::getFiles($sFieldName);
-
-											$mTmpValue = array();
-
-											if (isset($aValues['name']))
-											{
-												foreach ($aValues['name'] as $key => $value)
-												{
-													$mTmpValue[$key] = array(
-														"name" => isset($aValues['name']) ? Core_Array::get($aValues['name'], $key) : NULL,
-														"type" => isset($aValues['type']) ? Core_Array::get($aValues['type'], $key) : NULL,
-														"tmp_name" => isset($aValues['tmp_name']) ? Core_Array::get($aValues['tmp_name'], $key) : NULL,
-														"error" => isset($aValues['error']) ? Core_Array::get($aValues['error'], $key) : NULL,
-														"size" => isset($aValues['size']) ? Core_Array::get($aValues['size'], $key) : NULL
-													);
-												}
-											}
-
-											$aValues = $mTmpValue;
-										}
-										else
-										{
-											$aValues = Core_Array::getPost($sFieldName);
-										}
-
-										if (is_array($aValues))
-										{
-											foreach ($aValues as $key => $value)
-											{
-												$oProperty_Value = $oProperty->createNewValue($oSiteuser->id);
-												addPropertyValue($oSiteuser, $oProperty, $oProperty_Value, $value);
-											}
+											$Antispam_Controller
+												->addText($sSiteuserPersonName)
+												->addText(Core_Array::get($aSiteuserPeopleSurnames, $key, '', 'str'))
+												->addText(Core_Array::get($aSiteuserPeoplePatronymics, $key, '', 'str'))
+												->addText(Core_Array::get($aSiteuserPeoplePostcodes, $key, '', 'str'))
+												->addText(Core_Array::get($aSiteuserPeopleCountries, $key, '', 'str'))
+												->addText(Core_Array::get($aSiteuserPeopleCities, $key, '', 'str'))
+												->addText(Core_Array::get($aSiteuserPeopleAddresses, $key, '', 'str'));
 										}
 									}
-								}
 
-								// Companies
-								$aSiteuser_Companies = $oSiteuser->Siteuser_Companies->findAll(FALSE);
-								foreach ($aSiteuser_Companies as $oSiteuser_Company)
-								{
-									if (!is_null(Core_Array::getPost("company_name{$oSiteuser_Company->id}")))
+									$bAntispamAnswer = $Antispam_Controller->execute();
+
+									// Check e-mail
+									if ($bAntispamAnswer)
 									{
-										$oSiteuser_Company->name = Core_Array::getPost("company_name{$oSiteuser_Company->id}", '', 'str');
-										$oSiteuser_Company->save();
-
-										$aFileData = Core_Array::getFiles("company_image{$oSiteuser_Company->id}", array());
-										uploadImage($oSiteuser_Company, $aFileData);
+										$bAntispamAnswer = Antispam_Domain_Controller::checkEmail($oSiteuser->email);
 									}
-
-									if (!is_null(Core_Array::getPost("company_address{$oSiteuser_Company->id}")))
-									{
-										$aDirectory_Addresses = $oSiteuser_Company->Directory_Addresses->findAll();
-										if (!isset($aDirectory_Addresses[0]))
-										{
-											$aDirectory_Addresses[0] = Core_Entity::factory('Directory_Address');
-											$aDirectory_Addresses[0]->value = '';
-											$oSiteuser_Company->add($aDirectory_Addresses[0]);
-										}
-
-										$aDirectory_Addresses[0]->postcode = Core_Array::getPost("company_postcode{$oSiteuser_Company->id}", '', 'str');
-										$aDirectory_Addresses[0]->country = Core_Array::getPost("company_country{$oSiteuser_Company->id}", '', 'str');
-										$aDirectory_Addresses[0]->city = Core_Array::getPost("company_city{$oSiteuser_Company->id}", '', 'str');
-										$aDirectory_Addresses[0]->value = Core_Array::getPost("company_address{$oSiteuser_Company->id}", '', 'str');
-										$aDirectory_Addresses[0]->save();
-									}
-
-									applyDirectoryValues($oSiteuser_Company->id, $oSiteuser_Company, 'Directory_Phone');
-									applyDirectoryValues($oSiteuser_Company->id, $oSiteuser_Company, 'Directory_Email');
-									applyDirectoryValues($oSiteuser_Company->id, $oSiteuser_Company, 'Directory_Social');
-									applyDirectoryValues($oSiteuser_Company->id, $oSiteuser_Company, 'Directory_Messenger');
-									applyDirectoryValues($oSiteuser_Company->id, $oSiteuser_Company, 'Directory_Website');
-								}
-
-								// People
-								$aSiteuser_People = $oSiteuser->Siteuser_People->findAll(FALSE);
-								foreach ($aSiteuser_People as $oSiteuser_Person)
-								{
-									if (!is_null(Core_Array::getPost("person_name{$oSiteuser_Person->id}")))
-									{
-										$oSiteuser_Person->name = Core_Array::getPost("person_name{$oSiteuser_Person->id}", '', 'str');
-										$oSiteuser_Person->surname = Core_Array::getPost("person_surname{$oSiteuser_Person->id}", '', 'str');
-										$oSiteuser_Person->patronymic = Core_Array::getPost("person_patronymic{$oSiteuser_Person->id}", '', 'str');
-
-										// $oSiteuser_Person->postcode = Core_Array::getPost("person_postcode{$oSiteuser_Person->id}", '', 'str');
-										// $oSiteuser_Person->country = Core_Array::getPost("person_country{$oSiteuser_Person->id}", '', 'str');
-										// $oSiteuser_Person->city = Core_Array::getPost("person_city{$oSiteuser_Person->id}", '', 'str');
-										// $oSiteuser_Person->address = Core_Array::getPost("person_address{$oSiteuser_Person->id}", '', 'str');
-
-										$oSiteuser_Person->save();
-
-										$aFileData = Core_Array::getFiles("person_image{$oSiteuser_Person->id}", array());
-										uploadImage($oSiteuser_Person, $aFileData);
-									}
-
-									if (!is_null(Core_Array::getPost("person_address{$oSiteuser_Person->id}")))
-									{
-										$aDirectory_Addresses = $oSiteuser_Person->Directory_Addresses->findAll();
-										if (!isset($aDirectory_Addresses[0]))
-										{
-											$aDirectory_Addresses[0] = Core_Entity::factory('Directory_Address');
-											$aDirectory_Addresses[0]->value = '';
-											$oSiteuser_Person->add($aDirectory_Addresses[0]);
-										}
-
-										$aDirectory_Addresses[0]->postcode = Core_Array::getPost("person_postcode{$oSiteuser_Person->id}", '', 'str');
-										$aDirectory_Addresses[0]->country = Core_Array::getPost("person_country{$oSiteuser_Person->id}", '', 'str');
-										$aDirectory_Addresses[0]->city = Core_Array::getPost("person_city{$oSiteuser_Person->id}", '', 'str');
-										$aDirectory_Addresses[0]->value = Core_Array::getPost("person_address{$oSiteuser_Person->id}", '', 'str');
-										$aDirectory_Addresses[0]->save();
-									}
-
-									applyDirectoryValues($oSiteuser_Person->id, $oSiteuser_Person, 'Directory_Phone');
-									applyDirectoryValues($oSiteuser_Person->id, $oSiteuser_Person, 'Directory_Email');
-									applyDirectoryValues($oSiteuser_Person->id, $oSiteuser_Person, 'Directory_Social');
-									applyDirectoryValues($oSiteuser_Person->id, $oSiteuser_Person, 'Directory_Messenger');
-									applyDirectoryValues($oSiteuser_Person->id, $oSiteuser_Person, 'Directory_Website');
-								}
-
-								// Новые блоки Компаний
-								if (!is_null(Core_Array::getPost("company_name")))
-								{
-									$aSiteuserCompanies = Core_Array::getPost("company_name");
-									$aSiteuserCompanyAddress = Core_Array::getPost("company_address");
-									$aSiteuserCompanyCountry = Core_Array::getPost("company_country");
-									$aSiteuserCompanyPostcode = Core_Array::getPost("company_postcode");
-									$aSiteuserCompanyCity = Core_Array::getPost("company_city");
-									//$aSiteuserCompanyPhone = Core_Array::getPost("company_0_phone");
-									//$aSiteuserCompanyEmail = Core_Array::getPost("company_0_email");
-									//$aSiteuserCompanySocial = Core_Array::getPost("company_0_social");
-									//$aSiteuserCompanyMessenger = Core_Array::getPost("company_0_messenger");
-									//$aSiteuserCompanyWebsite = Core_Array::getPost("company_0_website");
-
-									foreach ($aSiteuserCompanies as $key => $sSiteuserCompanyName)
-									{
-										// Проверка на количество компаний у клиента
-										if ($oSiteuser->Siteuser_Companies->getCount(FALSE) < $max_representatives)
-										{
-											if (strlen($sSiteuserCompanyName))
-											{
-												$oSiteuser_Company = Core_Entity::factory('Siteuser_Company');
-												$oSiteuser_Company->name = Core_Str::toStr($sSiteuserCompanyName);
-												$oSiteuser_Company->siteuser_id = $oSiteuser->id;
-												$oSiteuser_Company->save();
-
-												$aFileData = Core_Array::getFiles("company_image", array());
-
-												if (isset($aFileData['name'][$key]))
-												{
-													$aTmpFile = array(
-														"name" => isset($aFileData['name']) ? Core_Array::get($aFileData['name'], $key) : NULL,
-														"type" => isset($aFileData['type']) ? Core_Array::get($aFileData['type'], $key) : NULL,
-														"tmp_name" => isset($aFileData['tmp_name']) ? Core_Array::get($aFileData['tmp_name'], $key) : NULL,
-														"error" => isset($aFileData['error']) ? Core_Array::get($aFileData['error'], $key) : NULL,
-														"size" => isset($aFileData['size']) ? Core_Array::get($aFileData['size'], $key) : NULL
-													);
-
-													uploadImage($oSiteuser_Company, $aTmpFile);
-												}
-
-												$value = Core_Array::get($aSiteuserCompanyAddress, $key, '', 'str');
-												if ($value != '')
-												{
-													$oDirectory_Address = Core_Entity::factory('Directory_Address');
-													$oDirectory_Address->country = Core_Array::get($aSiteuserCompanyCountry, $key, '', 'str');
-													$oDirectory_Address->postcode = Core_Array::get($aSiteuserCompanyPostcode, $key, '', 'str');
-													$oDirectory_Address->city = Core_Array::get($aSiteuserCompanyCity, $key, '', 'str');
-													$oDirectory_Address->value = $value;
-													$oSiteuser_Company->add($oDirectory_Address);
-												}
-
-												applyDirectoryValues(0, $oSiteuser_Company, 'Directory_Phone');
-												applyDirectoryValues(0, $oSiteuser_Company, 'Directory_Email');
-												applyDirectoryValues(0, $oSiteuser_Company, 'Directory_Social');
-												applyDirectoryValues(0, $oSiteuser_Company, 'Directory_Messenger');
-												applyDirectoryValues(0, $oSiteuser_Company, 'Directory_Website');
-											}
-										}
-									}
-								}
-
-								// Новые блоки Персон
-								if (!is_null(Core_Array::getPost("person_name")))
-								{
-									$aSiteuserPeopleNames = Core_Array::getPost("person_name");
-									$aSiteuserPeopleSurnames = Core_Array::getPost("person_surname");
-									$aSiteuserPeoplePatronymics = Core_Array::getPost("person_patronymic");
-									$aSiteuserPeoplePostcodes = Core_Array::getPost("person_postcode");
-									$aSiteuserPeopleCountries = Core_Array::getPost("person_country");
-									$aSiteuserPeopleCities = Core_Array::getPost("person_city");
-									$aSiteuserPeopleAddresses = Core_Array::getPost("person_address");
-
-									//$aSiteuserPeoplePhone = Core_Array::getPost("person_0_phone");
-									//$aSiteuserPeopleEmail = Core_Array::getPost("person_0_email");
-									//$aSiteuserPeopleSocial = Core_Array::getPost("person_0_social");
-									//$aSiteuserPeopleMessenger = Core_Array::getPost("person_0_messenger");
-									//$aSiteuserPeopleWebsite = Core_Array::getPost("person_0_website");
-
-									foreach ($aSiteuserPeopleNames as $key => $sSiteuserPersonName)
-									{
-										// Проверка на количество представителей у клиента
-										if ($oSiteuser->Siteuser_People->getCount(FALSE) < $max_representatives)
-										{
-											if (strlen($sSiteuserPersonName))
-											{
-												$oSiteuser_Person = Core_Entity::factory('Siteuser_Person');
-												$oSiteuser_Person->name = Core_Str::toStr($sSiteuserPersonName);
-												$oSiteuser_Person->siteuser_id = $oSiteuser->id;
-
-												$oSiteuser_Person->surname = Core_Array::get($aSiteuserPeopleSurnames, $key, '', 'str');
-												$oSiteuser_Person->patronymic = Core_Array::get($aSiteuserPeoplePatronymics, $key, '', 'str');
-
-												// $oSiteuser_Person->postcode = Core_Array::get($aSiteuserPeoplePostcodes, $key, '', 'str');
-												// $oSiteuser_Person->country = Core_Array::get($aSiteuserPeopleCountries, $key, '', 'str');
-												// $oSiteuser_Person->city = Core_Array::get($aSiteuserPeopleCities, $key, '', 'str');
-												// $oSiteuser_Person->address = Core_Array::get($aSiteuserPeopleAddresses, $key, '', 'str');
-
-												$oSiteuser_Person->save();
-
-												$aFileData = Core_Array::getFiles("person_image", array());
-
-												if (isset($aFileData['name'][$key]))
-												{
-													$aTmpFile = array(
-														"name" => isset($aFileData['name']) ? Core_Array::get($aFileData['name'], $key) : NULL,
-														"type" => isset($aFileData['type']) ? Core_Array::get($aFileData['type'], $key) : NULL,
-														"tmp_name" => isset($aFileData['tmp_name']) ? Core_Array::get($aFileData['tmp_name'], $key) : NULL,
-														"error" => isset($aFileData['error']) ? Core_Array::get($aFileData['error'], $key) : NULL,
-														"size" => isset($aFileData['size']) ? Core_Array::get($aFileData['size'], $key) : NULL
-													);
-
-													uploadImage($oSiteuser_Person, $aTmpFile);
-												}
-
-												$value = Core_Array::get($aSiteuserPeopleAddresses, $key, '', 'str');
-												if ($value != '')
-												{
-													$oDirectory_Address = Core_Entity::factory('Directory_Address');
-													$oDirectory_Address->country = Core_Array::get($aSiteuserPeopleCountries, $key, '', 'str');
-													$oDirectory_Address->postcode = Core_Array::get($aSiteuserPeoplePostcodes, $key, '', 'str');
-													$oDirectory_Address->city = Core_Array::get($aSiteuserPeopleCities, $key, '', 'str');
-													$oDirectory_Address->value = $value;
-													$oSiteuser_Person->add($oDirectory_Address);
-												}
-
-												applyDirectoryValues(0, $oSiteuser_Person, 'Directory_Phone');
-												applyDirectoryValues(0, $oSiteuser_Person, 'Directory_Email');
-												applyDirectoryValues(0, $oSiteuser_Person, 'Directory_Social');
-												applyDirectoryValues(0, $oSiteuser_Person, 'Directory_Messenger');
-												applyDirectoryValues(0, $oSiteuser_Person, 'Directory_Website');
-											}
-										}
-									}
-								}
-
-								// Регистрация нового пользователя
-								if ($bNewUser)
-								{
-									if ($bQuickRegistration)
-									{
-										// Авторизуем зарегистрированного пользователя
-										$oSiteuser
-											// Не привязывать сессию пользователя к IP
-											->attachSessionToIp($attachSessionToIp)
-											->setCurrent();
-
-										// Перенаправляем на страницу, с которой он пришел
-										!is_null(Core_Array::getPost('location')) && $Siteuser_Controller_Show->go(
-											Core_Array::getPost('location', '', 'str')
-										);
-									}
-
-									// Отправка письма
-									$oSite_Alias = $oSiteuser->Site->getCurrentAlias();
-									$Siteuser_Controller_Show
-										->setEntity($oSiteuser)
-										->applyAffiliate(Core_Array::get($_COOKIE, 'affiliate_name'))
-										->subject(
-											Core::_('Siteuser.confirm_subject', !is_null($oSite_Alias) ? $oSite_Alias->alias_name_without_mask : '')
-										)
-										->sendConfirmationMail(Core_Entity::factory('Xsl')->getByName($xsl_letter));
-
-									?>
-									<h1>Спасибо за регистрацию</h1>
-									<p>Для продолжения работы необходимо подтвердить регистрацию Ваших данных.
-									В Ваш адрес отправлено письмо, содержащее ссылку для подтверждения регистрации.</p>
-									<p>Если Ваш браузер поддерживает автоматическое перенаправление через 3 секунды Вы перейдете на страницу <a href="../">авторизации пользователя</a>.</p>
-									<script type="text/javascript">setTimeout(function(){ location = '../' }, 3000);</script>
-									<?php
-
-									return;
 								}
 								else
 								{
-									?><h1>Ваши анкетные данные успешно изменены</h1>
-									<p>Если Ваш браузер поддерживает автоматическое перенаправление через 3 секунды Вы перейдете в <a href="../">кабинет пользователя</a>.</p>
-									<script type="text/javascript">setTimeout(function(){ location = '../' }, 3000);</script>
-									<?php
+									$bAntispamAnswer = TRUE;
+								}
 
-									return;
+								if ($bAntispamAnswer)
+								{
+									$oSiteuser->save();
+
+									if ($bNewUser)
+									{
+										// Внесение пользователя в группу по умолчанию
+										$oSiteuser_Group = $oSiteuser->Site->Siteuser_Groups->getDefault();
+
+										if (!is_null($oSiteuser_Group))
+										{
+											$oSiteuser_Group->add($oSiteuser);
+										}
+									}
+
+									// Почтовые рассылки
+									if (Core::moduleIsActive('maillist'))
+									{
+										$aMaillists = $oSiteuser->getAllowedMaillists();
+
+										foreach ($aMaillists as $oMaillists)
+										{
+											$oMaillist_Siteuser = $oSiteuser->Maillist_Siteusers->getByMaillist($oMaillists->id);
+
+											// Пользователь подписан
+											if (Core_Array::getPost("maillist_{$oMaillists->id}"))
+											{
+												// Пользователь не был подписан
+												is_null($oMaillist_Siteuser)
+													&& $oMaillist_Siteuser = Core_Entity::factory('Maillist_Siteuser')->siteuser_id($oSiteuser->id)->maillist_id($oMaillists->id);
+
+												$oMaillist_Siteuser->type = Core_Array::getPost("type_{$oMaillists->id}") == 0 ? 0 : 1;
+												$oMaillist_Siteuser->save();
+
+											}
+											elseif (!is_null($oMaillist_Siteuser))
+											{
+												// Отписываем пользователя от рассылки
+												$oMaillist_Siteuser->delete();
+											}
+										}
+									}
+
+									// Дополнительные свойства, существующие значения
+									$aProperty_Values = $oSiteuser->getPropertyValues();
+									foreach ($aProperty_Values as $oProperty_Value)
+									{
+										$oProperty = $oProperty_Value->Property;
+
+										if ($oProperty->type != 10)
+										{
+											$sFieldName = "property_{$oProperty->id}_{$oProperty_Value->id}";
+
+											$value = $oProperty->type == 2
+												? Core_Array::getFiles($sFieldName)
+												: Core_Array::getPost($sFieldName);
+
+											addPropertyValue($oSiteuser, $oProperty, $oProperty_Value, $value);
+										}
+									}
+
+									// Дополнительные свойства, новые значения
+									$oSiteuser_Property_List = Core_Entity::factory('Siteuser_Property_List', $oSiteuser->site_id);
+
+									$aProperties = $oSiteuser_Property_List->Properties->findAll();
+									foreach ($aProperties as $oProperty)
+									{
+										// Поле не скрытое
+										if ($oProperty->type != 10)
+										{
+											$sFieldName = "property_{$oProperty->id}";
+
+											if ($oProperty->type == 2)
+											{
+												$aValues = Core_Array::getFiles($sFieldName);
+
+												$mTmpValue = array();
+
+												if (isset($aValues['name']))
+												{
+													foreach ($aValues['name'] as $key => $value)
+													{
+														$mTmpValue[$key] = array(
+															"name" => isset($aValues['name']) ? Core_Array::get($aValues['name'], $key) : NULL,
+															"type" => isset($aValues['type']) ? Core_Array::get($aValues['type'], $key) : NULL,
+															"tmp_name" => isset($aValues['tmp_name']) ? Core_Array::get($aValues['tmp_name'], $key) : NULL,
+															"error" => isset($aValues['error']) ? Core_Array::get($aValues['error'], $key) : NULL,
+															"size" => isset($aValues['size']) ? Core_Array::get($aValues['size'], $key) : NULL
+														);
+													}
+												}
+
+												$aValues = $mTmpValue;
+											}
+											else
+											{
+												$aValues = Core_Array::getPost($sFieldName);
+											}
+
+											if (is_array($aValues))
+											{
+												foreach ($aValues as $key => $value)
+												{
+													$oProperty_Value = $oProperty->createNewValue($oSiteuser->id);
+													addPropertyValue($oSiteuser, $oProperty, $oProperty_Value, $value);
+												}
+											}
+										}
+									}
+
+									// Companies
+									$aSiteuser_Companies = $oSiteuser->Siteuser_Companies->findAll(FALSE);
+									foreach ($aSiteuser_Companies as $oSiteuser_Company)
+									{
+										if (!is_null(Core_Array::getPost("company_name{$oSiteuser_Company->id}")))
+										{
+											$oSiteuser_Company->name = Core_Array::getPost("company_name{$oSiteuser_Company->id}", '', 'str');
+											$oSiteuser_Company->save();
+
+											$aFileData = Core_Array::getFiles("company_image{$oSiteuser_Company->id}", array());
+											uploadImage($oSiteuser_Company, $aFileData);
+										}
+
+										if (!is_null(Core_Array::getPost("company_address{$oSiteuser_Company->id}")))
+										{
+											$aDirectory_Addresses = $oSiteuser_Company->Directory_Addresses->findAll();
+											if (!isset($aDirectory_Addresses[0]))
+											{
+												$aDirectory_Addresses[0] = Core_Entity::factory('Directory_Address');
+												$aDirectory_Addresses[0]->value = '';
+												$oSiteuser_Company->add($aDirectory_Addresses[0]);
+											}
+
+											$aDirectory_Addresses[0]->postcode = Core_Array::getPost("company_postcode{$oSiteuser_Company->id}", '', 'str');
+											$aDirectory_Addresses[0]->country = Core_Array::getPost("company_country{$oSiteuser_Company->id}", '', 'str');
+											$aDirectory_Addresses[0]->city = Core_Array::getPost("company_city{$oSiteuser_Company->id}", '', 'str');
+											$aDirectory_Addresses[0]->value = Core_Array::getPost("company_address{$oSiteuser_Company->id}", '', 'str');
+											$aDirectory_Addresses[0]->save();
+										}
+
+										applyDirectoryValues($oSiteuser_Company->id, $oSiteuser_Company, 'Directory_Phone');
+										applyDirectoryValues($oSiteuser_Company->id, $oSiteuser_Company, 'Directory_Email');
+										applyDirectoryValues($oSiteuser_Company->id, $oSiteuser_Company, 'Directory_Social');
+										applyDirectoryValues($oSiteuser_Company->id, $oSiteuser_Company, 'Directory_Messenger');
+										applyDirectoryValues($oSiteuser_Company->id, $oSiteuser_Company, 'Directory_Website');
+									}
+
+									// People
+									$aSiteuser_People = $oSiteuser->Siteuser_People->findAll(FALSE);
+									foreach ($aSiteuser_People as $oSiteuser_Person)
+									{
+										if (!is_null(Core_Array::getPost("person_name{$oSiteuser_Person->id}")))
+										{
+											$oSiteuser_Person->name = Core_Array::getPost("person_name{$oSiteuser_Person->id}", '', 'str');
+											$oSiteuser_Person->surname = Core_Array::getPost("person_surname{$oSiteuser_Person->id}", '', 'str');
+											$oSiteuser_Person->patronymic = Core_Array::getPost("person_patronymic{$oSiteuser_Person->id}", '', 'str');
+
+											// $oSiteuser_Person->postcode = Core_Array::getPost("person_postcode{$oSiteuser_Person->id}", '', 'str');
+											// $oSiteuser_Person->country = Core_Array::getPost("person_country{$oSiteuser_Person->id}", '', 'str');
+											// $oSiteuser_Person->city = Core_Array::getPost("person_city{$oSiteuser_Person->id}", '', 'str');
+											// $oSiteuser_Person->address = Core_Array::getPost("person_address{$oSiteuser_Person->id}", '', 'str');
+
+											$oSiteuser_Person->save();
+
+											$aFileData = Core_Array::getFiles("person_image{$oSiteuser_Person->id}", array());
+											uploadImage($oSiteuser_Person, $aFileData);
+										}
+
+										if (!is_null(Core_Array::getPost("person_address{$oSiteuser_Person->id}")))
+										{
+											$aDirectory_Addresses = $oSiteuser_Person->Directory_Addresses->findAll();
+											if (!isset($aDirectory_Addresses[0]))
+											{
+												$aDirectory_Addresses[0] = Core_Entity::factory('Directory_Address');
+												$aDirectory_Addresses[0]->value = '';
+												$oSiteuser_Person->add($aDirectory_Addresses[0]);
+											}
+
+											$aDirectory_Addresses[0]->postcode = Core_Array::getPost("person_postcode{$oSiteuser_Person->id}", '', 'str');
+											$aDirectory_Addresses[0]->country = Core_Array::getPost("person_country{$oSiteuser_Person->id}", '', 'str');
+											$aDirectory_Addresses[0]->city = Core_Array::getPost("person_city{$oSiteuser_Person->id}", '', 'str');
+											$aDirectory_Addresses[0]->value = Core_Array::getPost("person_address{$oSiteuser_Person->id}", '', 'str');
+											$aDirectory_Addresses[0]->save();
+										}
+
+										applyDirectoryValues($oSiteuser_Person->id, $oSiteuser_Person, 'Directory_Phone');
+										applyDirectoryValues($oSiteuser_Person->id, $oSiteuser_Person, 'Directory_Email');
+										applyDirectoryValues($oSiteuser_Person->id, $oSiteuser_Person, 'Directory_Social');
+										applyDirectoryValues($oSiteuser_Person->id, $oSiteuser_Person, 'Directory_Messenger');
+										applyDirectoryValues($oSiteuser_Person->id, $oSiteuser_Person, 'Directory_Website');
+									}
+
+									// Новые блоки Компаний
+									if (!is_null(Core_Array::getPost("company_name")))
+									{
+										$aSiteuserCompanies = Core_Array::getPost("company_name");
+										$aSiteuserCompanyAddress = Core_Array::getPost("company_address");
+										$aSiteuserCompanyCountry = Core_Array::getPost("company_country");
+										$aSiteuserCompanyPostcode = Core_Array::getPost("company_postcode");
+										$aSiteuserCompanyCity = Core_Array::getPost("company_city");
+										//$aSiteuserCompanyPhone = Core_Array::getPost("company_0_phone");
+										//$aSiteuserCompanyEmail = Core_Array::getPost("company_0_email");
+										//$aSiteuserCompanySocial = Core_Array::getPost("company_0_social");
+										//$aSiteuserCompanyMessenger = Core_Array::getPost("company_0_messenger");
+										//$aSiteuserCompanyWebsite = Core_Array::getPost("company_0_website");
+
+										foreach ($aSiteuserCompanies as $key => $sSiteuserCompanyName)
+										{
+											// Проверка на количество компаний у клиента
+											if ($oSiteuser->Siteuser_Companies->getCount(FALSE) < $max_representatives)
+											{
+												if (strlen($sSiteuserCompanyName))
+												{
+													$oSiteuser_Company = Core_Entity::factory('Siteuser_Company');
+													$oSiteuser_Company->name = Core_Str::toStr($sSiteuserCompanyName);
+													$oSiteuser_Company->siteuser_id = $oSiteuser->id;
+													$oSiteuser_Company->save();
+
+													$aFileData = Core_Array::getFiles("company_image", array());
+
+													if (isset($aFileData['name'][$key]))
+													{
+														$aTmpFile = array(
+															"name" => isset($aFileData['name']) ? Core_Array::get($aFileData['name'], $key) : NULL,
+															"type" => isset($aFileData['type']) ? Core_Array::get($aFileData['type'], $key) : NULL,
+															"tmp_name" => isset($aFileData['tmp_name']) ? Core_Array::get($aFileData['tmp_name'], $key) : NULL,
+															"error" => isset($aFileData['error']) ? Core_Array::get($aFileData['error'], $key) : NULL,
+															"size" => isset($aFileData['size']) ? Core_Array::get($aFileData['size'], $key) : NULL
+														);
+
+														uploadImage($oSiteuser_Company, $aTmpFile);
+													}
+
+													$value = Core_Array::get($aSiteuserCompanyAddress, $key, '', 'str');
+													if ($value != '')
+													{
+														$oDirectory_Address = Core_Entity::factory('Directory_Address');
+														$oDirectory_Address->country = Core_Array::get($aSiteuserCompanyCountry, $key, '', 'str');
+														$oDirectory_Address->postcode = Core_Array::get($aSiteuserCompanyPostcode, $key, '', 'str');
+														$oDirectory_Address->city = Core_Array::get($aSiteuserCompanyCity, $key, '', 'str');
+														$oDirectory_Address->value = $value;
+														$oSiteuser_Company->add($oDirectory_Address);
+													}
+
+													applyDirectoryValues(0, $oSiteuser_Company, 'Directory_Phone');
+													applyDirectoryValues(0, $oSiteuser_Company, 'Directory_Email');
+													applyDirectoryValues(0, $oSiteuser_Company, 'Directory_Social');
+													applyDirectoryValues(0, $oSiteuser_Company, 'Directory_Messenger');
+													applyDirectoryValues(0, $oSiteuser_Company, 'Directory_Website');
+												}
+											}
+										}
+									}
+
+									// Новые блоки Персон
+									if (!is_null(Core_Array::getPost("person_name")))
+									{
+										$aSiteuserPeopleNames = Core_Array::getPost("person_name");
+										$aSiteuserPeopleSurnames = Core_Array::getPost("person_surname");
+										$aSiteuserPeoplePatronymics = Core_Array::getPost("person_patronymic");
+										$aSiteuserPeoplePostcodes = Core_Array::getPost("person_postcode");
+										$aSiteuserPeopleCountries = Core_Array::getPost("person_country");
+										$aSiteuserPeopleCities = Core_Array::getPost("person_city");
+										$aSiteuserPeopleAddresses = Core_Array::getPost("person_address");
+
+										//$aSiteuserPeoplePhone = Core_Array::getPost("person_0_phone");
+										//$aSiteuserPeopleEmail = Core_Array::getPost("person_0_email");
+										//$aSiteuserPeopleSocial = Core_Array::getPost("person_0_social");
+										//$aSiteuserPeopleMessenger = Core_Array::getPost("person_0_messenger");
+										//$aSiteuserPeopleWebsite = Core_Array::getPost("person_0_website");
+
+										foreach ($aSiteuserPeopleNames as $key => $sSiteuserPersonName)
+										{
+											// Проверка на количество представителей у клиента
+											if ($oSiteuser->Siteuser_People->getCount(FALSE) < $max_representatives)
+											{
+												if (strlen($sSiteuserPersonName))
+												{
+													$oSiteuser_Person = Core_Entity::factory('Siteuser_Person');
+													$oSiteuser_Person->name = Core_Str::toStr($sSiteuserPersonName);
+													$oSiteuser_Person->siteuser_id = $oSiteuser->id;
+
+													$oSiteuser_Person->surname = Core_Array::get($aSiteuserPeopleSurnames, $key, '', 'str');
+													$oSiteuser_Person->patronymic = Core_Array::get($aSiteuserPeoplePatronymics, $key, '', 'str');
+
+													// $oSiteuser_Person->postcode = Core_Array::get($aSiteuserPeoplePostcodes, $key, '', 'str');
+													// $oSiteuser_Person->country = Core_Array::get($aSiteuserPeopleCountries, $key, '', 'str');
+													// $oSiteuser_Person->city = Core_Array::get($aSiteuserPeopleCities, $key, '', 'str');
+													// $oSiteuser_Person->address = Core_Array::get($aSiteuserPeopleAddresses, $key, '', 'str');
+
+													$oSiteuser_Person->save();
+
+													$aFileData = Core_Array::getFiles("person_image", array());
+
+													if (isset($aFileData['name'][$key]))
+													{
+														$aTmpFile = array(
+															"name" => isset($aFileData['name']) ? Core_Array::get($aFileData['name'], $key) : NULL,
+															"type" => isset($aFileData['type']) ? Core_Array::get($aFileData['type'], $key) : NULL,
+															"tmp_name" => isset($aFileData['tmp_name']) ? Core_Array::get($aFileData['tmp_name'], $key) : NULL,
+															"error" => isset($aFileData['error']) ? Core_Array::get($aFileData['error'], $key) : NULL,
+															"size" => isset($aFileData['size']) ? Core_Array::get($aFileData['size'], $key) : NULL
+														);
+
+														uploadImage($oSiteuser_Person, $aTmpFile);
+													}
+
+													$value = Core_Array::get($aSiteuserPeopleAddresses, $key, '', 'str');
+													if ($value != '')
+													{
+														$oDirectory_Address = Core_Entity::factory('Directory_Address');
+														$oDirectory_Address->country = Core_Array::get($aSiteuserPeopleCountries, $key, '', 'str');
+														$oDirectory_Address->postcode = Core_Array::get($aSiteuserPeoplePostcodes, $key, '', 'str');
+														$oDirectory_Address->city = Core_Array::get($aSiteuserPeopleCities, $key, '', 'str');
+														$oDirectory_Address->value = $value;
+														$oSiteuser_Person->add($oDirectory_Address);
+													}
+
+													applyDirectoryValues(0, $oSiteuser_Person, 'Directory_Phone');
+													applyDirectoryValues(0, $oSiteuser_Person, 'Directory_Email');
+													applyDirectoryValues(0, $oSiteuser_Person, 'Directory_Social');
+													applyDirectoryValues(0, $oSiteuser_Person, 'Directory_Messenger');
+													applyDirectoryValues(0, $oSiteuser_Person, 'Directory_Website');
+												}
+											}
+										}
+									}
+
+									// Регистрация нового пользователя
+									if ($bNewUser)
+									{
+										if ($bQuickRegistration)
+										{
+											// Авторизуем зарегистрированного пользователя
+											$oSiteuser
+												// Не привязывать сессию пользователя к IP
+												->attachSessionToIp($attachSessionToIp)
+												->setCurrent();
+
+											// Перенаправляем на страницу, с которой он пришел
+											!is_null(Core_Array::getPost('location')) && $Siteuser_Controller_Show->go(
+												Core_Array::getPost('location', '', 'str')
+											);
+										}
+
+										// Отправка письма
+										$oSite_Alias = $oSiteuser->Site->getCurrentAlias();
+										$Siteuser_Controller_Show
+											->setEntity($oSiteuser)
+											->applyAffiliate(Core_Array::get($_COOKIE, 'affiliate_name'))
+											->subject(
+												Core::_('Siteuser.confirm_subject', !is_null($oSite_Alias) ? $oSite_Alias->alias_name_without_mask : '')
+											)
+											->sendConfirmationMail(Core_Entity::factory('Xsl')->getByName($xsl_letter));
+
+										// Спасибо за регистрацию
+										$Siteuser_Controller_Show->addEntity(
+											Core::factory('Core_Xml_Entity')
+												->name('success_code')->value('successfulRegistration')
+										);
+									}
+									else
+									{
+										// Ваши анкетные данные успешно изменены
+										$Siteuser_Controller_Show->addEntity(
+											Core::factory('Core_Xml_Entity')
+												->name('success_code')->value('successfulUpdate')
+										);
+									}
+								}
+								else
+								{
+									// Пользователь не может быть зарегистрирован, запрещенные данные!
+									$Siteuser_Controller_Show->addEntity(
+										Core::factory('Core_Xml_Entity')
+											->name('error_code')->value('antispam')
+									);
+									
+									// Log action
+									Core_Log::instance()->clear()
+										->status(Core_Log::$MESSAGE)
+										->write(Core::_('Siteuser.antispam'));
 								}
 							}
 							else
 							{
+								// Повтор пароля введен неверно!
 								$Siteuser_Controller_Show->addEntity(
 									Core::factory('Core_Xml_Entity')
-										->name('error')->value('Пользователь не может быть зарегистрирован!')
+										->name('error_code')->value('repeatPasswordIncorrect')
 								);
+								
+								// Log action
+								Core_Log::instance()->clear()
+									->status(Core_Log::$MESSAGE)
+									->write(Core::_('Siteuser.repeatPasswordIncorrect'));
 							}
 						}
 						else
 						{
+							// Пользователь с указанным электронным адресом зарегистрирован ранее!
 							$Siteuser_Controller_Show->addEntity(
 								Core::factory('Core_Xml_Entity')
-									->name('error')->value('Повтор пароля введен неверно!')
+									->name('error_code')->value('userWithEmailAlreadyExists')
 							);
+							
+							// Log action
+							Core_Log::instance()->clear()
+								->status(Core_Log::$MESSAGE)
+								->write(Core::_('Siteuser.userWithEmailAlreadyExists'));
 						}
 					}
 					else
 					{
+						// Пользователь с таким логином зарегистрирован ранее!
 						$Siteuser_Controller_Show->addEntity(
 							Core::factory('Core_Xml_Entity')
-								->name('error')->value('Пользователь с указанным электронным адресом зарегистрирован ранее!')
+								->name('error_code')->value('userWithLoginAlreadyExists')
 						);
+						
+						// Log action
+						Core_Log::instance()->clear()
+							->status(Core_Log::$MESSAGE)
+							->write(Core::_('Siteuser.userWithLoginAlreadyExists'));
 					}
 				}
 				else
 				{
+					// Заполните, пожалуйста, все обязательные параметры!
 					$Siteuser_Controller_Show->addEntity(
 						Core::factory('Core_Xml_Entity')
-							->name('error')->value('Пользователь с таким логином зарегистрирован ранее!')
+							->name('error_code')->value('requiredFieldsNotFilled')
 					);
+					
+					// Log action
+					Core_Log::instance()->clear()
+						->status(Core_Log::$MESSAGE)
+						->write(Core::_('Siteuser.requiredFieldsNotFilled'));
 				}
 			}
 			else
 			{
+				// Неправильно введен код подтверждения!
 				$Siteuser_Controller_Show->addEntity(
 					Core::factory('Core_Xml_Entity')
-						->name('error')->value('Заполните, пожалуйста, все обязательные параметры!')
+						->name('error_code')->value('wrongCaptcha')
 				);
+				
+				// Log action
+				Core_Log::instance()->clear()
+					->status(Core_Log::$MESSAGE)
+					->write(Core::_('Siteuser.wrongCaptcha'));
 			}
 		}
 		else
 		{
+			// Форма устарела, обновите страницу и повторите вход!
 			$Siteuser_Controller_Show->addEntity(
 				Core::factory('Core_Xml_Entity')
-					->name('error')->value('Неправильно введен код подтверждения!')
+					->name('error_code')->value('wrongCsrf')
 			);
+			
+			// Log action
+			Core_Log::instance()->clear()
+				->status(Core_Log::$MESSAGE)
+				->write(Core::_('Siteuser.wrongCsrf'));
 		}
 	}
 	else
 	{
+		// Введен некорректный адрес электронной почты!
 		$Siteuser_Controller_Show->addEntity(
 			Core::factory('Core_Xml_Entity')
-				->name('error')->value('Введен некорректный электронный адрес!')
+				->name('error_code')->value('wrongEmail')
 		);
+		
+		// Log action
+		Core_Log::instance()->clear()
+			->status(Core_Log::$MESSAGE)
+			->write(Core::_('Siteuser.wrongEmail'));
 	}
 }
 

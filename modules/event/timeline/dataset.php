@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Event_Timeline_Dataset extends Admin_Form_Dataset
 {
@@ -263,17 +262,24 @@ class Event_Timeline_Dataset extends Admin_Form_Dataset
 
 			if (method_exists($this, $functionName))
 			{
-				$oQb = $this->$functionName($id);
-				$oDataBase = $oQb->execute();
+				if ($id)
+				{
+					$oQb = $this->$functionName($id);
+					$oDataBase = $oQb->execute();
 
-				$oObject = $oDataBase->asObject()->current();
+					$oObject = $oDataBase->asObject()->current();
+				}
+				else
+				{
+					$oObject = NULL;
+				}
 
 				if (!$oObject)
 				{
 					$oObject = new stdClass();
 					$oObject->type = $type;
 					$oObject->datetime = Core_Date::timestamp2sql(time());
-					$oObject->id = 0;
+					$oObject->id = NULL;
 				}
 
 				return $this->_getObjectByType($oObject);

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 
 if (is_dir('install/') && is_file('install/index.php'))
@@ -130,6 +130,9 @@ Core_Router::add('favicon.ico', '/favicon.ico')
 Core_Router::add('favicon.png', '/favicon.png')
 	->controller('Core_Command_Controller_Favicon');
 
+Core_Router::add('favicon.gif', '/favicon.gif')
+	->controller('Core_Command_Controller_Favicon');
+
 Core_Router::add('favicon.svg', '/favicon.svg')
 	->controller('Core_Command_Controller_Favicon');
 
@@ -203,29 +206,148 @@ if (strtoupper($oSite->coding) != 'UTF-8')
 	iconvArray($_FILES, $oSite->coding);
 }
 
-Core_I18n::instance()->setLng(!empty($_SESSION['current_lng']) ? strval($_SESSION['current_lng']) : DEFAULT_LNG);
+if (!empty($_SESSION['current_lng']))
+{
+	Core_I18n::instance()->setLng(strval($_SESSION['current_lng']));
+}
 
 // Check IP addresses
-$sRemoteAddr = Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1');
-$aIp = array($sRemoteAddr);
+$bBlockedIp = $bBlockedFilter = $bBlockedVisitorFilter = $bCaptchaVisitorFilter = FALSE;
 
-$HTTP_X_FORWARDED_FOR = Core_Array::get($_SERVER, 'HTTP_X_FORWARDED_FOR');
-if (!is_null($HTTP_X_FORWARDED_FOR) && $sRemoteAddr != $HTTP_X_FORWARDED_FOR)
+if (Core::moduleIsActive('ipaddress'))
 {
-	$aIp[] = $HTTP_X_FORWARDED_FOR;
+	$sRemoteAddr = Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1');
+	$aIp = array($sRemoteAddr);
+
+	$HTTP_X_FORWARDED_FOR = Core_Array::get($_SERVER, 'HTTP_X_FORWARDED_FOR');
+	if (!is_null($HTTP_X_FORWARDED_FOR) && $sRemoteAddr != $HTTP_X_FORWARDED_FOR)
+	{
+		$aIp[] = $HTTP_X_FORWARDED_FOR;
+	}
+
+	Core_Event::notify('Ipaddress.onIpIsBlocked', NULL, array($aIp));
+	$eventResult = Core_Event::getLastReturn();
+
+	$bBlockedIp = !is_bool($eventResult)
+		? Ipaddress_Controller::instance()->isBlocked($aIp)
+		: $eventResult;
+
+	Core_Event::notify('Ipaddress.onFilterIsBlocked');
+	$eventResult = Core_Event::getLastReturn();
+
+	$bBlockedFilter = !is_bool($eventResult)
+		? !$bBlockedIp && Ipaddress_Filter_Controller::instance()->isBlocked()
+		: $eventResult;
+}
+
+$userAgent = Core_Array::get($_SERVER, 'HTTP_USER_AGENT', '', 'str');
+$requestURI = Core_Array::get($_SERVER, 'REQUEST_URI', '', 'str');
+
+// Static files that should be ignored
+Core_Event::notify('Ipaddress.isStaticFile', NULL, array($requestURI));
+$eventResult = Core_Event::getLastReturn();
+
+$bStaticFiles = is_bool($eventResult)
+	? $eventResult
+	: in_array($requestURI, array('/favicon.ico', '/favicon.gif', '/favicon.png', '/favicon.svg', '/robots.txt', '/hostcms-benchmark.php'))
+		|| strpos($requestURI, '/apple-touch-icon') === 0
+		|| strpos($requestURI, '/.well-known') === 0;
+
+if (!$bBlockedIp && !$bBlockedFilter && !$bStaticFiles && Core::moduleIsActive('counter'))
+{
+	if (Core::moduleIsActive('ipaddress') && !Core::checkBot($userAgent))
+	{
+		$oIpaddress_Visitor_Filter_Controller = Ipaddress_Visitor_Filter_Controller::instance();
+		$bUseIpaddressVisitors = count($oIpaddress_Visitor_Filter_Controller->getFilters());
+
+		if ($bUseIpaddressVisitors)
+		{
+			// Save and reset timezone to GMT
+			$timezone = date_default_timezone_get();
+			date_default_timezone_set('GMT');
+
+			$timeGmt = time();
+
+			$oIpaddress_Visitor = Ipaddress_Visitor_Controller::getCurrentIpaddressVisitor();
+
+			// _h_tag устанавливаем до учета статистики
+			$bSecure = Core::httpsUses();
+			Core_Cookie::set('_h_tag', $oIpaddress_Visitor->id, array('expires' => $timeGmt + 2592000, 'path' => '/', 'samesite' => $bSecure ? 'None' : 'Lax', 'secure' => $bSecure));
+			$_COOKIE['_h_tag'] = $oIpaddress_Visitor->id;
+
+			// Restore timezone
+			date_default_timezone_set($timezone);
+		}
+	}
+	else
+	{
+		$bUseIpaddressVisitors = FALSE;
+	}
+
+	// Статистика учитывается для незаблокированных
+	Counter_Controller::instance()
+		->site($oSite)
+		->referrer(Core_Array::get($_SERVER, 'HTTP_REFERER'))
+		->page((Core::httpsUses() ? 'https' : 'http') . '://' . strtolower(Core_Array::get($_SERVER, 'HTTP_HOST')) . $requestURI)
+		->ip(Core::getClientIp())
+		->userAgent($userAgent)
+		->counterId(0)
+		->applyData();
+
+	// Проверку на посетителей делаем после учета данных статистики текущего посещения, а также если заданы фильтры.
+	if ($bUseIpaddressVisitors)
+	{
+		// Нет расчитанного результата для посетителя
+		if ($oIpaddress_Visitor->result_expired == 0 || $oIpaddress_Visitor->result_expired < $timeGmt)
+		{
+			// 0 - забанен, 1 - разрешен
+			if ($oIpaddress_Visitor_Filter_Controller->isBlocked())
+			{
+				$checkResult = $oIpaddress_Visitor_Filter_Controller->getBlockMode() == 0
+					? 0 // Block
+					: 2; // Captcha
+			}
+			else
+			{
+				// Не заблокирован
+				$checkResult = 1;
+			}
+
+			$oIpaddress_Visitor->result = $checkResult;
+			$oIpaddress_Visitor->ipaddress_visitor_filter_id = $oIpaddress_Visitor_Filter_Controller->getFilterId();
+
+			if ($oIpaddress_Visitor->result)
+			{
+				// Результат проверки на 5 минут
+				$oIpaddress_Visitor->result_expired = $timeGmt + 60 * 5;
+			}
+			else
+			{
+				// Результат проверки на $hours дней
+				$hours = $oIpaddress_Visitor_Filter_Controller->getHoursToBlock();
+				$oIpaddress_Visitor->result_expired = $timeGmt + 3600 * ($hours > 0 ? $hours : 24);
+			}
+
+			$oIpaddress_Visitor->save();
+		}
+
+		$bBlockedVisitorFilter = $oIpaddress_Visitor->result == 0;
+		$bCaptchaVisitorFilter = $oIpaddress_Visitor->result == 2;
+	}
 }
 
 if (Core::moduleIsActive('ipaddress'))
 {
-	$oIpaddress_Controller = new Ipaddress_Controller();
+	/*Core_Log::instance()->clear()
+		->status(Core_Log::$MESSAGE)
+		->write($bBlockedIp
+			? Core::_('Ipaddress.error_log_blocked_ip', implode(',', $aIp))
+			: Core::_('Ipaddress.error_log_blocked_useragent', implode(',', $aIp), $userAgent)
+		);*/
 
-	$bBlocked = $oIpaddress_Controller->isBlocked($aIp) || Ipaddress_Useragent_Controller::isBlocked();
-
-	//$aArray = array();
-
-	if ($bBlocked/* || in_array(md5(Core_Array::get($_SERVER, 'HTTP_HOST')), $aArray)*/)
+	if ($bBlockedIp || $bBlockedFilter || $bBlockedVisitorFilter)
 	{
-		// IP address found
+		// IP blocked
 		Core_Router::add('ip_blocked', '()')
 			->controller('Core_Command_Controller_Ip_Blocked')->execute()
 			->header('X-Powered-By', Core::xPoweredBy())
@@ -233,6 +355,27 @@ if (Core::moduleIsActive('ipaddress'))
 			->showBody();
 
 		exit();
+	}
+
+	if ($bCaptchaVisitorFilter)
+	{
+		if ($oSite->error_bot)
+		{
+			// Show captcha
+			Core_Router::add('check-bots', '()')
+				->controller('Core_Command_Controller_Check_Bots')->execute()
+				->header('X-Powered-By', Core::xPoweredBy())
+				->sendHeaders()
+				->showBody();
+
+			exit();
+		}
+		else
+		{
+			Core_Log::instance()->clear()
+				->status(Core_Log::$MESSAGE)
+				->write('Captcha is not configured, choose bot-page in the site settings!');
+		}
 	}
 }
 

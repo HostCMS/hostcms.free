@@ -63,7 +63,7 @@
 		<div style="clear: both; height: 10px"></div>
 
 		<form action="{url}" method="post">
-			
+
 			<table class="table_forum table_themes">
 				<tr class="row_title_themes">
 					<td align="center" class="theme_td_attribute"></td>
@@ -155,6 +155,10 @@
 										<input name="password" type="password" value="" /><xsl:text> </xsl:text>
 										<input name="apply" class="button" type="submit" value="&labelEnter;" />
 										<br />
+
+										<!-- CSRF-токен -->
+										<input name="csrf_token" type="hidden" value="{csrf_token}" />
+
 										<input type="hidden" name="location" value="{url}{forum_category/@id}/" />
 									</form>
 								</div>
@@ -261,9 +265,9 @@
 				<xsl:when test="7 &gt; $n">
 					<xsl:variable name="number_link">
 						<xsl:choose>
-							
+
 							<xsl:when test="$i != 0">page-<xsl:value-of select="$i + 1"/>/</xsl:when>
-							
+
 							<xsl:otherwise></xsl:otherwise>
 						</xsl:choose>
 					</xsl:variable>
@@ -327,7 +331,7 @@
 			</xsl:choose>
 		</xsl:variable>
 
-		
+
 		<xsl:if test="($moderator = 1) or (visible = 1)">
 			<tr class="{$color_theme}">
 				<!-- Атрибуты темы -->
@@ -505,9 +509,9 @@
 				<!-- Set $link variable -->
 				<xsl:variable name="number_link">
 					<xsl:choose>
-						
+
 						<xsl:when test="$i != 0">page-<xsl:value-of select="$i + 1"/>/</xsl:when>
-						
+
 						<xsl:otherwise></xsl:otherwise>
 					</xsl:choose>
 				</xsl:variable>

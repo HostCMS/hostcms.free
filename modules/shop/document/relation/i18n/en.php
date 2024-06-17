@@ -1,6 +1,7 @@
 <?php
 
 return array(
+	'model_name' => 'Related Documents',
 	'documents' => 'Document',
 	'add_purchaseorder' => 'Purchase order',
 	'add_shop_warehouse_invoice' => 'Supplier invoice',

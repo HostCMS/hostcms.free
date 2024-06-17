@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properties
 {
@@ -18,6 +17,8 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 	 * @var array
 	 */
 	protected $_allowedProperties = array(
+		'guidItemPosition',
+		'guidGroupPosition',
 		'separator',
 		'encoding',
 		'parentGroup',
@@ -58,14 +59,14 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 	 * Основные свойства элементов
 	 * @var array
 	 */
-	private $_aItemBase_Properties;
+	private $_aItemBaseProperties;
 
 	/**
 	 * Base properties of item groups
 	 * Основные свойства групп элементов
 	 * @var array
 	 */
-	private $_aGroupBase_Properties;
+	private $_aGroupBaseProperties;
 
 	/**
 	 * CSV data
@@ -78,6 +79,18 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 	 * @var int
 	 */
 	private $_iCurrentDataPosition;
+
+	/**
+	 * Кэш значений доп. св-в
+	 * @var array
+	 */
+	protected $_cachePropertyValues = array();
+
+	/**
+	 * Item CML ID Position
+	 * @var int
+	 */
+	//private $guidItemPosition = 0;
 
 	/**
 	 * Constructor.
@@ -106,56 +119,24 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 		$this->exportGroupExternalProperties
 			&& $this->_aGroup_Properties = Core_Entity::factory('Informationsystem_Group_Property_List', $this->informationsystemId)->Properties->findAll(FALSE);
 
-		// Название раздела - Порядок сортировки раздела
-		$this->_aGroupBase_Properties = array(
-			"", "", "", "", "", "", "", "", "", "", ""
-		);
-
-		// CML ID идентификатор элемента - Ярлыки
-		$this->_aItemBase_Properties = array(
-			"", "", "", "", "", "", "", "", "", "",
-			"", "", "", "", "", "", "", "", ""
-		);
-
 		$this->_iCurrentDataPosition = 0;
 
-		// 0-вая строка - заголовок CSV-файла
-		$this->_aCurrentData[$this->_iCurrentDataPosition] = array(
-			// 11 cells
-			Core::_('Informationsystem_Exchange.group_name'),
-			Core::_('Informationsystem_Exchange.group_guid'),
-			Core::_('Informationsystem_Exchange.group_parent_guid'),
-			Core::_('Informationsystem_Exchange.group_seo_title'),
-			Core::_('Informationsystem_Exchange.group_seo_description'),
-			Core::_('Informationsystem_Exchange.group_seo_keywords'),
-			Core::_('Informationsystem_Exchange.group_description'),
-			Core::_('Informationsystem_Exchange.group_path'),
-			Core::_('Informationsystem_Exchange.group_image_large'),
-			Core::_('Informationsystem_Exchange.group_image_small'),
-			Core::_('Informationsystem_Exchange.group_sorting'),
-			// 19
-			Core::_('Informationsystem_Exchange.item_guid'),
-			Core::_('Informationsystem_Exchange.item_path'),
-			Core::_('Informationsystem_Exchange.item_name'),
-			Core::_('Informationsystem_Exchange.item_description'),
-			Core::_('Informationsystem_Exchange.item_text'),
-			Core::_('Informationsystem_Exchange.item_tags'),
-			Core::_('Informationsystem_Exchange.item_active'),
-			Core::_('Informationsystem_Exchange.item_sorting'),
-			Core::_('Informationsystem_Exchange.item_seo_title'),
-			Core::_('Informationsystem_Exchange.item_seo_description'),
-			Core::_('Informationsystem_Exchange.item_seo_keywords'),
-			Core::_('Informationsystem_Exchange.item_indexing'),
-			Core::_('Informationsystem_Exchange.item_datetime'),
-			Core::_('Informationsystem_Exchange.item_start_datetime'),
-			Core::_('Informationsystem_Exchange.item_end_datetime'),
-			Core::_('Informationsystem_Exchange.item_image_large'),
-			Core::_('Informationsystem_Exchange.item_image_small'),
-			Core::_('Informationsystem_Exchange.item_additional_group'),
-			Core::_('Informationsystem_Exchange.item_siteuser_id'),
-		);
+		$aGroupTitles = array_map(array($this, 'prepareCell'), $this->getGroupTitles());
+		$aItemTitles = array_map(array($this, 'prepareCell'), $this->getItemTitles());
 
-		$this->_aCurrentData[$this->_iCurrentDataPosition] = array_map(array($this, 'prepareCell'), $this->_aCurrentData[$this->_iCurrentDataPosition]);
+		// Название раздела - Порядок сортировки раздела
+		$this->_aGroupBaseProperties = array_pad(array(), count($aGroupTitles), '');
+
+		$this->guidItemPosition = count($aGroupTitles);
+
+		// CML ID идентификатор элемента - Ярлыки
+		$this->_aItemBaseProperties = array_pad(array(), count($aItemTitles), '');
+
+		// 0-вая строка - заголовок CSV-файла
+		$this->_aCurrentData[$this->_iCurrentDataPosition] = array_merge(
+			$aGroupTitles,
+			$aItemTitles
+		);
 
 		// Добавляем в заголовок информацию о свойствах элементов
 		foreach ($this->_aItem_Properties as $oItem_Property)
@@ -191,96 +172,231 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 	}
 
 	/**
+	 * Get Group Titles
+	 * @return array
+	 * @hostcms-event Informationsystem_Item_Export_Csv_Controller.onGetGroupTitles
+	 */
+	public function getGroupTitles()
+	{
+		$return = array(
+			Core::_('Informationsystem_Exchange.group_name'),
+			Core::_('Informationsystem_Exchange.group_guid'),
+			Core::_('Informationsystem_Exchange.group_parent_guid'),
+			Core::_('Informationsystem_Exchange.group_seo_title'),
+			Core::_('Informationsystem_Exchange.group_seo_description'),
+			Core::_('Informationsystem_Exchange.group_seo_keywords'),
+			Core::_('Informationsystem_Exchange.group_description'),
+			Core::_('Informationsystem_Exchange.group_path'),
+			Core::_('Informationsystem_Exchange.group_image_large'),
+			Core::_('Informationsystem_Exchange.group_image_small'),
+			Core::_('Informationsystem_Exchange.group_sorting'),
+
+			Core::_('Informationsystem_Exchange.group_seo_group_title_template'),
+			Core::_('Informationsystem_Exchange.group_seo_group_keywords_template'),
+			Core::_('Informationsystem_Exchange.group_seo_group_description_template'),
+
+			Core::_('Informationsystem_Exchange.group_seo_item_title_template'),
+			Core::_('Informationsystem_Exchange.group_seo_item_keywords_template'),
+			Core::_('Informationsystem_Exchange.group_seo_item_description_template')
+		);
+
+		$this->guidGroupPosition = 1;
+
+		Core_Event::notify(get_class($this) . '.onGetGroupTitles', $this, array($return));
+
+		return !is_null(Core_Event::getLastReturn())
+			? Core_Event::getLastReturn()
+			: $return;
+	}
+
+	/**
+	 * Get Item Titles
+	 * @return array
+	 * @hostcms-event Informationsystem_Item_Export_Csv_Controller.onGetItemTitles
+	 */
+	public function getItemTitles()
+	{
+		$return = array(
+			Core::_('Informationsystem_Exchange.item_guid'),
+			Core::_('Informationsystem_Exchange.item_path'),
+			Core::_('Informationsystem_Exchange.item_name'),
+			Core::_('Informationsystem_Exchange.item_description'),
+			Core::_('Informationsystem_Exchange.item_text'),
+			Core::_('Informationsystem_Exchange.item_tags'),
+			Core::_('Informationsystem_Exchange.item_active'),
+			Core::_('Informationsystem_Exchange.item_sorting'),
+			Core::_('Informationsystem_Exchange.item_seo_title'),
+			Core::_('Informationsystem_Exchange.item_seo_description'),
+			Core::_('Informationsystem_Exchange.item_seo_keywords'),
+			Core::_('Informationsystem_Exchange.item_indexing'),
+			Core::_('Informationsystem_Exchange.item_datetime'),
+			Core::_('Informationsystem_Exchange.item_start_datetime'),
+			Core::_('Informationsystem_Exchange.item_end_datetime'),
+			Core::_('Informationsystem_Exchange.item_image_large'),
+			Core::_('Informationsystem_Exchange.item_image_small'),
+			Core::_('Informationsystem_Exchange.item_additional_group'),
+			Core::_('Informationsystem_Exchange.item_siteuser_id')
+		);
+		Core_Event::notify(get_class($this) . '.onGetItemTitles', $this, array($return));
+
+		return !is_null(Core_Event::getLastReturn())
+			? Core_Event::getLastReturn()
+			: $return;
+	}
+
+	/**
 	 * Get item data
 	 * @param object $oInformationsystem_Item item
 	 * @return array
+	 * @hostcms-event Informationsystem_Item_Export_Csv_Controller.onAfterGetItemData
 	 */
-	protected function _getItemData($oInformationsystem_Item)
+	public function getItemData($oInformationsystem_Item)
 	{
-		$aItemProperties = $aGroupProperties = array();
-
-		foreach ($this->_aItem_Properties as $oProperty)
-		{
-			$aProperty_Values = $oProperty->getValues($oInformationsystem_Item->id, FALSE);
-			$iProperty_Values_Count = count($aProperty_Values);
-
-			$aItemProperties[] = $this->prepareCell(
-				$iProperty_Values_Count > 0
-					? $this->_getPropertyValue($oProperty, $aProperty_Values[0], $oInformationsystem_Item)
-					: ''
-			);
-
-			if ($oProperty->type == 2)
-			{
-				$aItemProperties[] = $iProperty_Values_Count
-					? $this->prepareCell($aProperty_Values[0]->file_description)
-					: '';
-
-				$aItemProperties[] = $iProperty_Values_Count
-					? ($aProperty_Values[0]->file_small == '' ? '' : $this->prepareCell($aProperty_Values[0]->getSmallFileHref()))
-					: '';
-			}
-		}
-
-		for ($i = 0; $i < $this->_iGroup_Properties_Count; $i++)
-		{
-			$aGroupProperties[] = "";
-		}
-
-		$aTmpArray = $this->_aGroupBase_Properties;
-
-		$aTmpArray[1] = is_null($oInformationsystem_Item->Informationsystem_Group->id)
+		$aGroupData = $this->_aGroupBaseProperties;
+		$aGroupData[1] = is_null($oInformationsystem_Item->Informationsystem_Group->id)
 			? 'ID00000000'
 			: $oInformationsystem_Item->Informationsystem_Group->guid;
 
-		// У ИЭ нет необходимости дублировать данные о группе
-		/*if ($oInformationsystem_Item->Informationsystem_Group->id)
+		$result = array_merge(
+			$aGroupData,
+			$this->getItemBasicData($oInformationsystem_Item),
+			$this->getPropertiesData($this->_aItem_Properties, $oInformationsystem_Item),
+		);
+
+		Core_Event::notify(get_class($this) . '.onAfterGetItemData', $this, array($result, $oInformationsystem_Item));
+
+		if (!is_null(Core_Event::getLastReturn()))
 		{
-			$aTmpArray[3] = $this->prepareCell($oInformationsystem_Item->Informationsystem_Group->seo_title);
-			$aTmpArray[4] = $this->prepareCell($oInformationsystem_Item->Informationsystem_Group->seo_description);
-			$aTmpArray[5] = $this->prepareCell($oInformationsystem_Item->Informationsystem_Group->seo_keywords);
-		}*/
+			$result = Core_Event::getLastReturn();
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Get Basic Item Data
+	 * @param object $oInformationsystem_Item
+	 * @return array
+	 * @hostcms-event Informationsystem_Item_Export_Csv_Controller.onAfterItemBasicData
+	 */
+	public function getItemBasicData($oInformationsystem_Item)
+	{
+		// Метки
+		if (Core::moduleIsActive('tag'))
+		{
+			$aTmpTags = array();
+
+			$aTags = $oInformationsystem_Item->Tags->findAll(FALSE);
+			foreach ($aTags as $oTag)
+			{
+				$aTmpTags[] = $oTag->name;
+			}
+
+			$sTags = $this->prepareString(implode(',', $aTmpTags));
+			unset($aTags);
+			unset($aTmpTags);
+		}
+		else
+		{
+			$sTags = '';
+		}
 
 		// Ярлыки
 		$aTmpShortcuts = array();
 		$aShortcuts = $oInformationsystem_Item->Informationsystem_Items->findAll(FALSE);
 		foreach ($aShortcuts as $oShortcut_Item)
 		{
-			$aTmpShortcuts[] = $oShortcut_Item->guid;
+			$aTmpShortcuts[] = $oShortcut_Item->informationsystem_group_id
+					? $oShortcut_Item->Informationsystem_Group->guid
+					: 0;
+			$oShortcut_Item->clear();
 		}
 		unset($aShortcuts);
 
-		return array_merge($aTmpArray,
-			array(
-				$this->prepareCell($oInformationsystem_Item->guid),
-				$this->prepareCell($oInformationsystem_Item->path),
-				$this->prepareCell($oInformationsystem_Item->name),
-				$this->prepareCell($oInformationsystem_Item->description),
-				$this->prepareCell($oInformationsystem_Item->text),
-				$this->prepareCell(Core::moduleIsActive('tag') ? implode(',', $oInformationsystem_Item->Tags->findAll(FALSE)) : ''),
-				$oInformationsystem_Item->active,
-				$oInformationsystem_Item->sorting,
-				$this->prepareCell($oInformationsystem_Item->seo_title),
-				$this->prepareCell($oInformationsystem_Item->seo_description),
-				$this->prepareCell($oInformationsystem_Item->seo_keywords),
-				$this->prepareCell($oInformationsystem_Item->indexing),
-				$oInformationsystem_Item->datetime == '0000-00-00 00:00:00'
-					? '0000-00-00 00:00:00'
-					: Core_Date::sql2datetime($oInformationsystem_Item->datetime),
-				$oInformationsystem_Item->start_datetime == '0000-00-00 00:00:00'
-					? '0000-00-00 00:00:00'
-					: Core_Date::sql2datetime($oInformationsystem_Item->start_datetime),
-				$oInformationsystem_Item->end_datetime == '0000-00-00 00:00:00'
-					? '0000-00-00 00:00:00'
-					: Core_Date::sql2datetime($oInformationsystem_Item->end_datetime),
-				$this->prepareCell($oInformationsystem_Item->image_large == '' ? '' : $oInformationsystem_Item->getLargeFileHref()),
-				$this->prepareCell($oInformationsystem_Item->image_small == '' ? '' : $oInformationsystem_Item->getSmallFileHref()),
-				$this->prepareCell(implode(',', $aTmpShortcuts)),
-				$oInformationsystem_Item->siteuser_id
-			),
-			$aItemProperties,
-			$aGroupProperties
+		$result = array(
+			$this->prepareCell($oInformationsystem_Item->guid),
+			$this->prepareCell($oInformationsystem_Item->path),
+			$this->prepareCell($oInformationsystem_Item->name),
+			$this->prepareCell($oInformationsystem_Item->description),
+			$this->prepareCell($oInformationsystem_Item->text),
+			sprintf('"%s"', $sTags),
+			$oInformationsystem_Item->active,
+			$oInformationsystem_Item->sorting,
+			$this->prepareCell($oInformationsystem_Item->seo_title),
+			$this->prepareCell($oInformationsystem_Item->seo_description),
+			$this->prepareCell($oInformationsystem_Item->seo_keywords),
+			$this->prepareCell($oInformationsystem_Item->indexing),
+			$oInformationsystem_Item->datetime == '0000-00-00 00:00:00'
+				? '0000-00-00 00:00:00'
+				: Core_Date::sql2datetime($oInformationsystem_Item->datetime),
+			$oInformationsystem_Item->start_datetime == '0000-00-00 00:00:00'
+				? '0000-00-00 00:00:00'
+				: Core_Date::sql2datetime($oInformationsystem_Item->start_datetime),
+			$oInformationsystem_Item->end_datetime == '0000-00-00 00:00:00'
+				? '0000-00-00 00:00:00'
+				: Core_Date::sql2datetime($oInformationsystem_Item->end_datetime),
+			$this->prepareCell($oInformationsystem_Item->image_large == '' ? '' : $oInformationsystem_Item->getLargeFileHref()),
+			$this->prepareCell($oInformationsystem_Item->image_small == '' ? '' : $oInformationsystem_Item->getSmallFileHref()),
+			$this->prepareCell(implode(',', $aTmpShortcuts)),
+			$oInformationsystem_Item->siteuser_id
 		);
+
+		Core_Event::notify(get_class($this) . '.onAfterItemBasicData', $this, array($result, $oInformationsystem_Item));
+
+		if (!is_null(Core_Event::getLastReturn()))
+		{
+			$result = Core_Event::getLastReturn();
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Get block of Item/Group Property values
+	 * @param array $aProperties
+	 * @param object $object
+	 * @return array
+	 */
+	public function getPropertiesData(array $aProperties, $object)
+	{
+		$aRow = array();
+
+		foreach ($aProperties as $oProperty)
+		{
+			$oProperty_Value = isset($this->_cachePropertyValues[$object->id][$oProperty->id]) && is_array($this->_cachePropertyValues[$object->id][$oProperty->id])
+				? array_shift($this->_cachePropertyValues[$object->id][$oProperty->id])
+				: NULL;
+
+			$aRow[] = $this->prepareCell(
+				$oProperty_Value
+					? $this->_getPropertyValue($oProperty, $oProperty_Value, $object)
+					: ''
+			);
+
+			if ($oProperty->type == 2)
+			{
+				$aRow[] = $oProperty_Value
+					? $this->prepareCell($oProperty_Value->file_description)
+					: '';
+
+				$aRow[] = $oProperty_Value
+					? ($oProperty_Value->file_small == ''
+						? ''
+						: $this->prepareCell($oProperty_Value->getSmallFileHref())
+					)
+					: '';
+			}
+
+			$oProperty_Value && $oProperty_Value->clear();
+
+			// Удаляем пустой массив для свойств, чтобы определить, что значения закончились
+			if (isset($this->_cachePropertyValues[$object->id][$oProperty->id]) && !count($this->_cachePropertyValues[$object->id][$oProperty->id]))
+			{
+				unset($this->_cachePropertyValues[$object->id][$oProperty->id]);
+			}
+		}
+
+		return $aRow;
 	}
 
 	protected $_cacheGetListValue = array();
@@ -317,9 +433,15 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 				$result = $oProperty_Value->value;
 			break;
 			case 2: // File
+				$href = method_exists($object, 'getItemHref')
+					? $object->getItemHref()
+					: $object->getGroupHref();
+
 				$result = $oProperty_Value->file == ''
 					? ''
-					: $oProperty_Value->setHref($object->getItemHref())->getLargeFileHref();
+					: $oProperty_Value
+						->setHref($href)
+						->getLargeFileHref();
 			break;
 			case 3: // List
 				$result = $this->_getListValue($oProperty_Value->value);
@@ -381,6 +503,46 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 	}
 
 	/**
+	 * Get Basic Group Data
+	 * @param object $oInformationsystem_Group
+	 * @return array
+	 * @hostcms-event Informationsystem_Item_Export_Csv_Controller.onAfterGroupBasicData
+	 */
+	public function getGroupBasicData($oInformationsystem_Group)
+	{
+		$result = array(
+			$this->prepareCell($oInformationsystem_Group->name),
+			$this->prepareCell($oInformationsystem_Group->guid),
+			$this->prepareCell(is_null($oInformationsystem_Group->Informationsystem_Group->id) ? 'ID00000000' : $oInformationsystem_Group->Informationsystem_Group->guid),
+			$this->prepareCell($oInformationsystem_Group->seo_title),
+			$this->prepareCell($oInformationsystem_Group->seo_description),
+			$this->prepareCell($oInformationsystem_Group->seo_keywords),
+			$this->prepareCell($oInformationsystem_Group->description),
+			$this->prepareCell($oInformationsystem_Group->path),
+			$this->prepareCell($oInformationsystem_Group->image_large == '' ? '' : $oInformationsystem_Group->getLargeFileHref()),
+			$this->prepareCell($oInformationsystem_Group->image_small == '' ? '' : $oInformationsystem_Group->getSmallFileHref()),
+			$this->prepareCell($oInformationsystem_Group->sorting),
+
+			$this->prepareCell($oInformationsystem_Group->seo_group_title_template),
+			$this->prepareCell($oInformationsystem_Group->seo_group_keywords_template),
+			$this->prepareCell($oInformationsystem_Group->seo_group_description_template),
+
+			$this->prepareCell($oInformationsystem_Group->seo_item_title_template),
+			$this->prepareCell($oInformationsystem_Group->seo_item_keywords_template),
+			$this->prepareCell($oInformationsystem_Group->seo_item_description_template)
+		);
+
+		Core_Event::notify(get_class($this) . '.onAfterGroupBasicData', $this, array($result, $oInformationsystem_Group));
+
+		if (!is_null(Core_Event::getLastReturn()))
+		{
+			$result = Core_Event::getLastReturn();
+		}
+
+		return $result;
+	}
+
+	/**
 	 * Executes the business logic.
 	 */
 	public function execute()
@@ -435,29 +597,15 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 
 			$oInformationsystem_Items = $oInformationsystem_Group->Informationsystem_Items;
 			$oInformationsystem_Items->queryBuilder()
+				->where('informationsystem_id', '=', $this->informationsystemId)
 				->where('shortcut_id', '=', 0);
 
 			if ($iInformationsystemGroupId != 0)
 			{
-				$aTmpArray = array(
-					$this->prepareCell($oInformationsystem_Group->name),
-					$this->prepareCell($oInformationsystem_Group->guid),
-					$this->prepareCell(is_null($oInformationsystem_Group->Informationsystem_Group->id) ? 'ID00000000' : $oInformationsystem_Group->Informationsystem_Group->guid),
-					$this->prepareCell($oInformationsystem_Group->seo_title),
-					$this->prepareCell($oInformationsystem_Group->seo_description),
-					$this->prepareCell($oInformationsystem_Group->seo_keywords),
-					$this->prepareCell($oInformationsystem_Group->description),
-					$this->prepareCell($oInformationsystem_Group->path),
-					$this->prepareCell($oInformationsystem_Group->image_large == '' ? '' : $oInformationsystem_Group->getLargeFileHref()),
-					$this->prepareCell($oInformationsystem_Group->image_small == '' ? '' : $oInformationsystem_Group->getSmallFileHref()),
-					$this->prepareCell($oInformationsystem_Group->sorting)
+				$aTmpArray = array_merge(
+					$this->getGroupBasicData($oInformationsystem_Group),
+					$this->_aItemBaseProperties
 				);
-
-				// Пропускаем поля элемента
-				foreach ($this->_aItemBase_Properties as $sNullData)
-				{
-					$aTmpArray[] = $sNullData;
-				}
 
 				// Пропускаем поля дополнительных свойств элемента
 				for ($i = 0; $i < $this->_iItem_Properties_Count; $i++)
@@ -465,53 +613,38 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 					$aTmpArray[] = "";
 				}
 
-				// Выводим данные о дополнительных свойствах групп
-				foreach ($this->_aGroup_Properties as $oGroup_Property)
+				$iPropertyFieldOffsetOriginal = count($aTmpArray);
+
+				// Кэш всех значений свойств группы
+				$this->_cachePropertyValues[$oInformationsystem_Group->id] = array();
+				foreach ($this->_aGroup_Properties as $oProperty)
 				{
-					$aProperty_Values = $oGroup_Property->getValues($oInformationsystem_Group->id, FALSE);
-					$iProperty_Values_Count = count($aProperty_Values);
-
-					$aTmpArray[] = $this->prepareCell($iProperty_Values_Count > 0
-						? ($oGroup_Property->type != 2
-							? ($oGroup_Property->type == 3 && $aProperty_Values[0]->value != 0 && Core::moduleIsActive('list')
-								? $aProperty_Values[0]->List_Item->value
-								: ($oGroup_Property->type == 8
-									? Core_Date::sql2date($aProperty_Values[0]->value)
-									: ($oGroup_Property->type == 9
-										? Core_Date::sql2datetime($aProperty_Values[0]->value)
-										: $aProperty_Values[0]->value
-									)
-								)
-							)
-							: ($aProperty_Values[0]->file == ''
-								? ''
-								: $aProperty_Values[0]->setHref($oInformationsystem_Group->getGroupHref())->getLargeFileHref()
-							)
-						)
-						: ''
-					);
-
-					if ($oGroup_Property->type == 2)
-					{
-						$aTmpArray[] = $iProperty_Values_Count
-							? $this->prepareCell($aProperty_Values[0]->file_description)
-							: '';
-
-						$aTmpArray[] = $iProperty_Values_Count
-							? ($aProperty_Values[0]->file_small == ''
-								? ''
-								: $this->prepareCell($aProperty_Values[0]->setHref($oInformationsystem_Group->getGroupHref())->getSmallFileHref())
-							)
-							: '';
-					}
+					$this->_cachePropertyValues[$oInformationsystem_Group->id][$oProperty->id] = $oProperty->getValues($oInformationsystem_Group->id, FALSE);
 				}
 
+				$aTmpArray = array_merge(
+					$aTmpArray,
+					$this->getPropertiesData($this->_aGroup_Properties, $oInformationsystem_Group)
+				);
+
 				$this->_printRow($aTmpArray);
+
+				// Оставшиеся множественные значения свойств
+				while (count($this->_cachePropertyValues[$oInformationsystem_Group->id]))
+				{
+					$aCurrentPropertyLine = array_fill(0, $iPropertyFieldOffsetOriginal, '""');
+
+					// CML ID группы
+					$aCurrentPropertyLine[$this->guidGroupPosition] = $oInformationsystem_Group->guid;
+
+					$aCurrentPropertyLine = array_merge($aCurrentPropertyLine, $this->getPropertiesData($this->_aGroup_Properties, $oInformationsystem_Group));
+					$this->_printRow($aCurrentPropertyLine);
+				}
+
+				unset($this->_cachePropertyValues[$oInformationsystem_Group->id]);
 			}
-			else
-			{
-				$oInformationsystem_Items->queryBuilder()->where('informationsystem_id', '=', $this->informationsystemId);
-			}
+
+			$iPropertyFieldOffsetOriginal = count($this->_aGroupBaseProperties) + count($this->_aItemBaseProperties);
 
 			$offset = 0;
 			$limit = 500;
@@ -533,59 +666,32 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 						$oInformationsystem_Item->save();
 					}
 
-					$this->_printRow($this->_getItemData($oInformationsystem_Item));
+					$iPropertyFieldOffset = $iPropertyFieldOffsetOriginal;
 
-					$iPropertyFieldOffset = count($this->_aGroupBase_Properties) + count($this->_aItemBase_Properties);
+					$this->_cachePropertyValues[$oInformationsystem_Item->id] = array();
 
-					$aCurrentPropertyLine = array_fill(0, $iPropertyFieldOffset, '""');
-
-					// GUID элемента
-					$aCurrentPropertyLine[11] = $oInformationsystem_Item->guid;
-
-					foreach ($this->_aItem_Properties as $oItem_Property)
+					// Кэш всех значений свойств товара
+					$this->_cachePropertyValues[$oInformationsystem_Item->id] = array();
+					foreach ($this->_aItem_Properties as $oProperty)
 					{
-						$aProperty_Values = $oItem_Property->getValues($oInformationsystem_Item->id, FALSE);
-						array_shift($aProperty_Values);
-
-						if (count($aProperty_Values))
-						{
-							foreach ($aProperty_Values as $oProperty_Value)
-							{
-								$aCurrentPropertyLine[$iPropertyFieldOffset] = $this->prepareCell(
-									$this->_getPropertyValue($oItem_Property, $oProperty_Value, $oInformationsystem_Item)
-								);
-
-								if ($oItem_Property->type == 2)
-								{
-									$aCurrentPropertyLine[$iPropertyFieldOffset + 1] = $this->prepareCell($oProperty_Value->file_description);
-
-									$aCurrentPropertyLine[$iPropertyFieldOffset + 2] = $this->prepareCell($oProperty_Value->setHref($oInformationsystem_Item->getItemHref())->getSmallFileHref());
-								}
-
-								$this->_printRow($aCurrentPropertyLine);
-							}
-						}
-
-						if ($oItem_Property->type == 2)
-						{
-							// File
-							$aCurrentPropertyLine[$iPropertyFieldOffset] = '""';
-							$iPropertyFieldOffset++;
-
-							// Description
-							$aCurrentPropertyLine[$iPropertyFieldOffset] = '""';
-							$iPropertyFieldOffset++;
-
-							// Small File
-							$aCurrentPropertyLine[$iPropertyFieldOffset] = '""';
-							$iPropertyFieldOffset++;
-						}
-						else
-						{
-							$aCurrentPropertyLine[$iPropertyFieldOffset] = '""';
-							$iPropertyFieldOffset++;
-						}
+						$this->_cachePropertyValues[$oInformationsystem_Item->id][$oProperty->id] = $oProperty->getValues($oInformationsystem_Item->id, FALSE);
 					}
+
+					$this->_printRow($this->getItemData($oInformationsystem_Item));
+
+					// Оставшиеся множественные значения свойств
+					while (count($this->_cachePropertyValues[$oInformationsystem_Item->id]))
+					{
+						$aCurrentPropertyLine = array_fill(0, $iPropertyFieldOffset, '""');
+
+						// CML ID ТОВАРА
+						$aCurrentPropertyLine[$this->guidItemPosition] = $oInformationsystem_Item->guid;
+
+						$aCurrentPropertyLine = array_merge($aCurrentPropertyLine, $this->getPropertiesData($this->_aItem_Properties, $oInformationsystem_Item));
+						$this->_printRow($aCurrentPropertyLine);
+					}
+
+					unset($this->_cachePropertyValues[$oInformationsystem_Item->id]);
 				}
 				$offset += $limit;
 			}

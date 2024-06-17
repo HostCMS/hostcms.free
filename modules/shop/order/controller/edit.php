@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -114,6 +113,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainRow7 = Admin_Form_Entity::factory('Div')->class('row'))
 		;
 
 		$oItemsTab
@@ -199,7 +199,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$oMainRow1
 				->add(
 					Admin_Form_Entity::factory('Div')
-						->class('form-group col-xs-6 col-sm-6 col-md-3 no-padding siteuser-select2')
+						->class('form-group col-xs-12 col-sm-6 col-md-3 no-padding siteuser-select2')
 						->add($oSiteuserSelect)
 				);
 
@@ -211,7 +211,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$oMainRow1
 				->add(
 					Admin_Form_Entity::factory('Div')
-						->class('form-group col-xs-6 col-sm-6 col-md-3 margin-top-21 siteuser-representative-list')
+						->class('form-group col-xs-12 col-sm-6 col-md-3 margin-top-21 siteuser-representative-list')
 						->add(Admin_Form_Entity::factory('Code')->html($icons))
 				);
 		}
@@ -248,7 +248,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->value($this->_object->getWeight())
 			->readonly('readonly')
 			->caption(Core::_("Shop_Item.weight"))
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3'))
+			->divAttr(array('class' => 'form-group col-xs-6 col-sm-6 col-md-3'))
 			->add(
 				Core_Html_Entity::factory('Span')
 					->class('input-group-addon dimension_patch')
@@ -274,7 +274,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			$oItemsLink = Admin_Form_Entity::factory('Link');
 			$oItemsLink
-				->divAttr(array('class' => 'large-link margin-top-21 form-group col-xs-12 col-sm-6 col-md-3'))
+				->divAttr(array('class' => 'large-link margin-top-21 form-group col-xs-6 col-sm-6 col-md-3'))
 				->a
 					->class('btn btn-labeled btn-success')
 					->href(
@@ -381,7 +381,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->options($this->_fillCompanyAccounts($this->_object->company_id))
 				->name('company_account_id')
 				->value($this->_object->company_account_id)
-				->divAttr(array('class' => 'form-group col-xs-6 col-sm-6 col-md-3'))
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3'))
 		);
 
 		$Shop_Delivery_Controller_Edit = new Shop_Delivery_Controller_Edit($this->_Admin_Form_Action);
@@ -444,6 +444,53 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainTab->move($this->getField('coupon')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3')), $oMainRow6);
 		$oMainTab->move($this->getField('ip')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3')), $oMainRow6);
 
+		// Tags
+		if (Core::moduleIsActive('tag'))
+		{
+			$oAdditionalTagsSelect = Admin_Form_Entity::factory('Select')
+				->caption(Core::_('Shop_Order.tags'))
+				->options($this->_fillTagsList($this->_object))
+				->name('tags[]')
+				->class('shop-order-tags')
+				->style('width: 100%')
+				->multiple('multiple')
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
+
+			$oMainRow7->add($oAdditionalTagsSelect);
+
+			$html = '<script>
+			$(function(){
+				$("#' . $windowId . ' .shop-order-tags").select2({
+					dropdownParent: $("#' . $windowId . '"),
+					language: "' . Core_I18n::instance()->getLng() . '",
+					minimumInputLength: 1,
+					placeholder: "' . Core::_('Shop_Order.type_tag') . '",
+					tags: true,
+					allowClear: true,
+					multiple: true,
+					ajax: {
+						url: "/admin/tag/index.php?hostcms[action]=loadTagsList&hostcms[checked][0][0]=1",
+						dataType: "json",
+						type: "GET",
+						processResults: function (data) {
+							var aResults = [];
+							$.each(data, function (index, item) {
+								aResults.push({
+									"id": item.id,
+									"text": item.text
+								});
+							});
+							return {
+								results: aResults
+							};
+						}
+					}
+				});
+			});</script>';
+
+			$oMainRow7->add(Admin_Form_Entity::factory('Code')->html($html));
+		}
+
 		$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oDescriptionTabRow1);
 		$oMainTab->move($this->getField('system_information')->divAttr(array('class' => 'form-group col-xs-12')), $oDescriptionTabRow2);
 		$oMainTab->move($this->getField('delivery_information')->divAttr(array('class' => 'form-group col-xs-12')), $oDescriptionTabRow3);
@@ -476,6 +523,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->divAttr(array('class' => ''))
 			->options(array(
 				0 => Core::_('Shop_Order_Item.order_item_type_caption0'),
+				7 => Core::_('Shop_Order_Item.order_item_type_caption7'),
 				1 => Core::_('Shop_Order_Item.order_item_type_caption1'),
 				2 => Core::_('Shop_Order_Item.order_item_type_caption2'),
 				3 => Core::_('Shop_Order_Item.order_item_type_caption3'),
@@ -557,7 +605,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 			$link = '';
 
-			if ($oShop_Order_Item->type == 0)
+			if ($oShop_Order_Item->type == 0 && $oShop_Order_Item->shop_item_id)
 			{
 				$sShopItemPath = '/admin/shop/item/index.php';
 				$iShopItemId = intval($oShop_Order_Item->shop_item_id);
@@ -663,7 +711,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					switch (ui.item.type)
 					{
 						case 'item':
-							price = ui.item.price;
+							price = ui.item.price_with_tax_formatWithCurrency;
 						break;
 						case 'discount':
 							// Фиксированная скидка
@@ -1378,6 +1426,15 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			}
 		}
 
+		// Обработка меток
+		if (Core::moduleIsActive('tag'))
+		{
+			$aRecievedTags = Core_Array::getPost('tags', array());
+			!is_array($aRecievedTags) && $aRecievedTags = array();
+
+			$this->_object->applyTagsArray($aRecievedTags);
+		}
+
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 
 		return $this;
@@ -1567,11 +1624,11 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		';
 
 		$class = $bottomAction
-			? 'pull-left'
+			? 'pull-left hidden-xs'
 			: 'padding-left-15 padding-bottom-15';
 
 		return Admin_Form_Entity::factory('Div')
-			->class($class . ' hidden-xs')
+			->class($class)
 			->add(
 				Admin_Form_Entity::factory('Code')->html($printButton)
 			);
@@ -1592,5 +1649,27 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		}
 
 		return $oAdmin_Form_Entity_Buttons;
+	}
+
+	/**
+	 * Fill tags list
+	 * @param Shop_Order_Model $oShop_Order item
+	 * @return array
+	 */
+	protected function _fillTagsList(Shop_Order_Model $oShop_Order)
+	{
+		$aReturn = array();
+
+		$aTags = $oShop_Order->Tags->findAll(FALSE);
+
+		foreach ($aTags as $oTag)
+		{
+			$aReturn[$oTag->name] = array(
+				'value' => $oTag->name,
+				'attr' => array('selected' => 'selected')
+			);
+		}
+
+		return $aReturn;
 	}
 }

@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Online stores',
@@ -223,4 +222,11 @@ return array(
 
 	'shop_id' => 'Shop ID',
 	'updateCurrency' => 'Driver name',
+
+	'all_modifications_count' => 'Total modifications: %s',
+	'all_shortcuts_count' => 'Total shortcuts: %s',
+	'seo_template_filter_prices' => 'Filter by price',
+	'seo_template_filter_prices_from' => 'Price from',
+	'seo_template_filter_prices_to' => 'to',
+	'producer_structure_id' => "Producer structure node",
 );

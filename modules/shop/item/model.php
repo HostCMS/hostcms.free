@@ -5,11 +5,12 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 /**
  * Shop_Item_Model
  *
+ * Goods types: 1 - Digital, 2 - Divisible, 3 - Set, 4 - Certificate
+ *
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Item_Model extends Core_Entity
 {
@@ -97,6 +98,7 @@ class Shop_Item_Model extends Core_Entity
 		'shop_item' => array('foreign_key' => 'shortcut_id'),
 		'modification' => array('model' => 'Shop_Item', 'foreign_key' => 'modification_id'),
 		'media_shop_item' => array(),
+		'media_item' => array('through' => 'media_shop_item'),
 		'shop_price' => array('through' => 'shop_item_price'),
 		'shop_item_price' => array(),
 		'item_associated' => array('through' => 'shop_item_associated', 'through_table_name' => 'shop_item_associated', 'model' => 'Shop_Item', 'dependent_key' => 'shop_item_associated_id'),
@@ -403,6 +405,12 @@ class Shop_Item_Model extends Core_Entity
 					->setHref($this->getItemHref())
 					->setDir($this->getItemPath());
 			break;
+			case 5: // Элемент информационной системы
+			case 12: // Товар интернет-магазина
+			case 13: // Группа информационной системы
+			case 14: // Группа интернет-магазина
+				$oProperty_Value->showXmlMedia($this->_showXmlMedia);
+			break;
 			case 8:
 				$oProperty_Value->dateFormat($this->Shop->format_date);
 			break;
@@ -587,8 +595,7 @@ class Shop_Item_Model extends Core_Entity
 	 * Backend callback method
 	 * @param object $value value
 	 * @return string
-	 * @hostcms-event shop_item.onBeforeAdminPrice
-	 * @hostcms-event shop_item.onAfterAdminPrice
+	 * @see Shop_Item_Controller_Apply
 	 */
 	public function adminPrice($value = NULL)
 	{
@@ -602,7 +609,7 @@ class Shop_Item_Model extends Core_Entity
 			return Core_Str::hideZeros($oShop_Item->price);
 		}
 
-		if ($this->price != $value)
+		/*if ($this->price != $value)
 		{
 			Core_Event::notify($this->_modelName . '.onBeforeAdminPrice', $this);
 
@@ -618,7 +625,7 @@ class Shop_Item_Model extends Core_Entity
 			}
 
 			Core_Event::notify($this->_modelName . '.onAfterAdminPrice', $this);
-		}
+		}*/
 
 		return $this;
 	}
@@ -633,7 +640,9 @@ class Shop_Item_Model extends Core_Entity
 			? Core_Entity::factory('Shop_Item', $this->shortcut_id)
 			: $this;
 
-		return htmlspecialchars((string) $oShop_Item->Shop_Currency->sign);
+		return $oShop_Item->shop_currency_id
+			? htmlspecialchars((string) $oShop_Item->Shop_Currency->sign)
+			: '';
 	}
 
 	/**
@@ -1117,7 +1126,8 @@ class Shop_Item_Model extends Core_Entity
 		$this->shop_group_id && $this->Shop_Group->decCountItems();
 
 		$this->shop_group_id = $iShopGroupId;
-		$this->save()->clearCache();
+		//$this->path = $this->path; // add path to the _changedColumns array
+		$this->checkDuplicatePath()->save()->clearCache();
 
 		// Fast filter
 		if ($this->Shop->filter)
@@ -1200,7 +1210,7 @@ class Shop_Item_Model extends Core_Entity
 	{
 		if (Core::moduleIsActive('search'))
 		{
-			Search_Controller::deleteSearchPage(3, 2, $this->id);
+			Search_Controller::deleteSearchPage($this->Shop->site_id, 3, 2, $this->id);
 		}
 
 		return $this;
@@ -1215,6 +1225,21 @@ class Shop_Item_Model extends Core_Entity
 		$this->clearCache();
 
 		return parent::markDeleted();
+	}
+
+	/**
+	 * Change indexation mode
+	 *	@return self
+	 */
+	public function changeIndexation()
+	{
+		$this->indexing = 1 - $this->indexing;
+
+		$this->active && $this->indexing
+			? $this->index()
+			: $this->unindex();
+
+		return $this->save();
 	}
 
 	/**
@@ -1785,7 +1810,7 @@ class Shop_Item_Model extends Core_Entity
 		$this->Shop_Item_Certificate->delete();
 
 		// Fast filter
-		if ($this->Shop->filter)
+		if ($this->Shop->filter && $this->shop_id)
 		{
 			Core_DataBase::instance()->query("DELETE FROM `shop_filter" . intval($this->shop_id) . "` WHERE `shop_item_id` = " . intval($this->id));
 		}
@@ -1856,6 +1881,16 @@ class Shop_Item_Model extends Core_Entity
 
 		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')
 			->class('d-flex align-items-center');
+
+		if ($this->closed)
+		{
+			$oCore_Html_Entity_Div
+			->add(
+				Core_Html_Entity::factory('I')
+					->class('fa fa-lock darkorange locked-item order-first')
+					->title(Core::_('Shop_Item.closed'))
+			);
+		}
 
 		if (is_null(Core_Array::getGet('shop_item_id')) && $object->modification_id)
 		{
@@ -2235,6 +2270,42 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
+	 * Show media in XML
+	 * @var boolean
+	 */
+	protected $_showXmlMedia = FALSE;
+
+	/**
+	 * Show properties in XML
+	 * @param mixed $showXmlProperties array of allowed properties ID or boolean
+	 * @return self
+	 */
+	public function showXmlMedia($showXmlMedia = TRUE)
+	{
+		$this->_showXmlMedia = $showXmlMedia;
+
+		return $this;
+	}
+
+	/**
+	 * Show media in XML
+	 * @var string
+	 */
+	protected $_itemsActivity = 'active';
+
+	/**
+	 * Show properties in XML
+	 * @param mixed $showXmlProperties array of allowed properties ID or boolean
+	 * @return self
+	 */
+	public function itemsActivity($itemsActivity)
+	{
+		$this->_itemsActivity = strtolower($itemsActivity);
+
+		return $this;
+	}
+
+	/**
 	 * Количество товара в корзине
 	 */
 	protected $_cartQuantity = 1;
@@ -2419,6 +2490,7 @@ class Shop_Item_Model extends Core_Entity
 							$oTmp_Shop_Item
 								->id($oShop_Item->id)
 								->showXmlModifications(FALSE)
+								->showXmlProperties($this->_showXmlProperties, $this->_xmlSortPropertiesValues)
 								->showXmlAssociatedItems(FALSE)
 								->showXmlSpecialprices($this->_showXmlSpecialprices)
 								->addEntity(
@@ -2569,10 +2641,16 @@ class Shop_Item_Model extends Core_Entity
 						->orderBy('shop_items.sorting', $items_sorting_direction);
 			}
 
+			if ($this->_itemsActivity != 'all')
+			{
+				$oShop_Items_Modifications
+					->queryBuilder()
+					->where('shop_items.active', '=', $this->_itemsActivity == 'inactive' ? 0 : 1);
+			}
+
 			$dateTime = Core_Date::timestamp2sql(time());
 			$oShop_Items_Modifications
 				->queryBuilder()
-				->where('shop_items.active', '=', 1)
 				->open()
 					->where('shop_items.start_datetime', '<', $dateTime)
 					->setOr()
@@ -2622,6 +2700,7 @@ class Shop_Item_Model extends Core_Entity
 						->showXmlBonuses($this->_showXmlBonuses)
 						->showXmlSiteuser($this->_showXmlSiteuser)
 						->showXmlProperties($this->_showXmlProperties, $this->_xmlSortPropertiesValues)
+						->showXmlMedia($this->_showXmlMedia)
 						->cartQuantity(1);
 
 					Core_Event::notify($this->_modelName . '.onBeforeAddModification', $this, array(
@@ -2686,6 +2765,7 @@ class Shop_Item_Model extends Core_Entity
 							->showXmlWarehousesItems($this->_showXmlWarehousesItems)
 							->showXmlSiteuser($this->_showXmlSiteuser)
 							->showXmlProperties($this->_showXmlProperties, $this->_xmlSortPropertiesValues)
+							->showXmlMedia($this->_showXmlMedia)
 							->cartQuantity(1);
 
 						Core_Event::notify($this->_modelName . '.onBeforeAddAssociatedEntity', $this, array($oShop_Item_Associated));
@@ -2733,19 +2813,19 @@ class Shop_Item_Model extends Core_Entity
 
 			// Средняя оценка
 			$avgGrade = $gradeCount > 0
-				? $gradeSum / $gradeCount
+				? round($gradeSum / $gradeCount, 2)
 				: 0;
 
 			$fractionalPart = $avgGrade - floor($avgGrade);
-			$avgGrade = floor($avgGrade);
+			$avgGradeRounded = floor($avgGrade);
 
 			if ($fractionalPart >= 0.25 && $fractionalPart < 0.75)
 			{
-				$avgGrade += 0.5;
+				$avgGradeRounded += 0.5;
 			}
 			elseif ($fractionalPart >= 0.75)
 			{
-				$avgGrade += 1;
+				$avgGradeRounded += 1;
 			}
 
 			$this->_isTagAvailable('comments_count') && $this->addEntity(
@@ -2769,7 +2849,8 @@ class Shop_Item_Model extends Core_Entity
 			$this->_isTagAvailable('comments_average_grade') && $this->addEntity(
 				Core::factory('Core_Xml_Entity')
 					->name('comments_average_grade')
-					->value($avgGrade)
+					->addAttribute('value', $avgGrade)
+					->value($avgGradeRounded)
 			);
 
 			$this->_showXmlComments
@@ -2815,7 +2896,6 @@ class Shop_Item_Model extends Core_Entity
 			if (is_array($this->_showXmlProperties))
 			{
 				$aProperty_Values = Property_Controller_Value::getPropertiesValues($this->_showXmlProperties, $this->id, FALSE, $this->_xmlSortPropertiesValues);
-
 				foreach ($aProperty_Values as $oProperty_Value)
 				{
 					$this->_preparePropertyValue($oProperty_Value);
@@ -2856,13 +2936,13 @@ class Shop_Item_Model extends Core_Entity
 			}
 		}
 
-		if (Core::moduleIsActive('media'))
+		if ($this->_showXmlMedia && Core::moduleIsActive('media'))
 		{
 			$aEntities = Media_Item_Controller::getValues($this);
 			foreach ($aEntities as $oEntity)
 			{
 				$oMedia_Item = $oEntity->Media_Item;
-				$this->addEntity($oMedia_Item);
+				$this->addEntity($oMedia_Item->setCDN(Core_Page::instance()->shopCDN));
 			}
 		}
 
@@ -2985,7 +3065,7 @@ class Shop_Item_Model extends Core_Entity
 			? Core_Entity::factory('Shop_Item', $this->shortcut_id)
 			: $this;
 
-		$oShop_Item->shop_currency_id == 0 && Core_Html_Entity::factory('I')
+		!$oShop_Item->shop_currency_id && Core_Html_Entity::factory('I')
 			->class('fa fa-exclamation-triangle darkorange')
 			->title(Core::_('Shop_Item.shop_item_not_currency'))
 			->execute();
@@ -3031,8 +3111,17 @@ class Shop_Item_Model extends Core_Entity
 	 */
 	public function discountsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		$countDiscount = $this->Shop_Item_Discounts->getCountBySiteuser_id(0);
-		$countBonuses = $this->Shop_Item_Bonuses->getCount();
+		$oShop_Item_Discounts = $this->Shop_Item_Discounts;
+		$oShop_Item_Discounts->queryBuilder()
+			->join('shop_discounts', 'shop_item_discounts.shop_discount_id', '=', 'shop_discounts.id')
+			->where('shop_discounts.deleted', '=', 0);
+		$countDiscount = $oShop_Item_Discounts->getCountBySiteuser_id(0);
+
+		$oShop_Item_Bonuses = $this->Shop_Item_Bonuses;
+		$oShop_Item_Bonuses->queryBuilder()
+			->join('shop_bonuses', 'shop_item_bonuses.shop_bonus_id', '=', 'shop_bonuses.id')
+			->where('shop_bonuses.deleted', '=', 0);
+		$countBonuses = $oShop_Item_Bonuses->getCount();
 
 		$count = $countDiscount + $countBonuses;
 

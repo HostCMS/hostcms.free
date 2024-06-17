@@ -8,11 +8,16 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Sql
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
-class Sql_Table_Entity
+class Sql_Table_Entity extends Core_Empty_Entity
 {
+	/**
+	 * Name of the model
+	 * @var string
+	 */
+	protected $_modelName = 'sql_table';
+
 	//public $view = NULL;
 
 	public $name = NULL;
@@ -27,7 +32,7 @@ class Sql_Table_Entity
 	public $fragmented = NULL;
 	public $collation = NULL;
 
-	protected $_fields = array(
+	protected $_tableColums = array(
 		'name' => array(
 			'datatype' => 'string',
 			'type' => 'string',
@@ -56,21 +61,6 @@ class Sql_Table_Entity
 		// 'version', 'row_format', 'table_rows', 'avg_row_legth', 'data_length', 'index_length', 'fragmented'
 
 	);
-
-	/**
-	 * Get tableColumns
-	 * @return array
-	 */
-	public function getTableColumns()
-	{
-		// return array_combine($this->_fields, $this->_fields);
-		return $this->_fields;
-	}
-
-	public function getModelName()
-	{
-		return 'sql_table';
-	}
 
 	/**
 	 * Get primary key value
@@ -148,7 +138,7 @@ class Sql_Table_Entity
 	 */
 	public function __isset($property)
 	{
-		if (isset($this->_fields[$property]))
+		if (isset($this->_tableColums[$property]))
 		{
 			return TRUE;
 		}
@@ -163,7 +153,7 @@ class Sql_Table_Entity
 	 */
 	public function __get($property)
 	{
-		if (isset($this->_fields[$property]))
+		if (isset($this->_tableColums[$property]))
 		{
 			return '';
 		}
@@ -173,7 +163,7 @@ class Sql_Table_Entity
 	 * Delete
 	 * @return self
 	 */
-	public function delete()
+	public function delete($primaryKey = NULL)
 	{
 		$oDataBase = Core_DataBase::instance();
 

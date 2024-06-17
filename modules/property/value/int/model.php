@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Property
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Property_Value_Int_Model extends Core_Entity
 {
@@ -127,6 +126,24 @@ class Property_Value_Int_Model extends Core_Entity
 	}
 
 	/**
+	 * Show media in XML
+	 * @var boolean
+	 */
+	protected $_showXmlMedia = FALSE;
+
+	/**
+	 * Show properties in XML
+	 * @param mixed $showXmlProperties array of allowed properties ID or boolean
+	 * @return self
+	 */
+	public function showXmlMedia($showXmlMedia = TRUE)
+	{
+		$this->_showXmlMedia = $showXmlMedia;
+
+		return $this;
+	}
+
+	/**
 	 * Prepare entity and children entities
 	 * @return self
 	 * @hostcms-event property_value_int.onBeforeAddListItem
@@ -222,7 +239,8 @@ class Property_Value_Int_Model extends Core_Entity
 						$oNew_Informationsystem_Item
 							->id($oInformationsystem_Item->id)
 							->clearEntities()
-							->showXmlProperties(count($aTmp) ? $aTmp : FALSE);
+							->showXmlProperties(count($aTmp) ? $aTmp : FALSE)
+							->showXmlMedia($this->_showXmlMedia);
 
 						Core_Event::notify($this->_modelName . '.onBeforeAddInformationsystemItem', $this, array($oInformationsystem_Item));
 
@@ -272,7 +290,8 @@ class Property_Value_Int_Model extends Core_Entity
 						$oNew_Informationsystem_Group
 							->id($oInformationsystem_Group->id)
 							->clearEntities()
-							->showXmlProperties(count($aTmp) ? $aTmp : FALSE);
+							->showXmlProperties(count($aTmp) ? $aTmp : FALSE)
+							->showXmlMedia($this->_showXmlMedia);
 
 						Core_Event::notify($this->_modelName . '.onBeforeAddInformationsystemGroup', $this, array($oInformationsystem_Group));
 
@@ -333,7 +352,11 @@ class Property_Value_Int_Model extends Core_Entity
 						$oNew_Shop_Item
 							->id($oShop_Item->id)
 							->clearEntities()
-							->showXmlProperties(count($aTmp) ? $aTmp : FALSE);
+							->showXmlProperties(count($aTmp) ? $aTmp : FALSE)
+							->showXmlMedia($this->_showXmlMedia);
+
+						$oNew_Shop_Item->shop_currency_id
+							&& $oNew_Shop_Item->addEntity($oNew_Shop_Item->Shop_Currency->clearEntities());
 
 						Core_Event::notify($this->_modelName . '.onBeforeAddShopItem', $this, array($oShop_Item));
 
@@ -385,7 +408,8 @@ class Property_Value_Int_Model extends Core_Entity
 						$oNew_Shop_Group
 							->id($oShop_Group->id)
 							->clearEntities()
-							->showXmlProperties(count($aTmp) ? $aTmp : FALSE);
+							->showXmlProperties(count($aTmp) ? $aTmp : FALSE)
+							->showXmlMedia($this->_showXmlMedia);
 
 						Core_Event::notify($this->_modelName . '.onBeforeAddShopGroup', $this, array($oShop_Group));
 

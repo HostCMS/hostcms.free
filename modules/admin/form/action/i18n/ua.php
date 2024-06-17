@@ -43,5 +43,7 @@ return array(
 	'form_event_menu_admin_form_action' => 'Список дій форми "%s"',
 	'delete_success' => 'Елемент видалений!',
 	'undelete_success' => 'Елемент відновлено!',
-	'admin_form_action_dir_id' => 'Батьківський розділ'
+	'admin_form_action_dir_id' => 'Батьківський розділ',
+
+	'new_window' => 'Відкривати у новому вікні',
 );

@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -16,7 +15,7 @@ $sAdminFormAction = '/admin/report/index.php';
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create();
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title(Core::_('Report.title'));
@@ -25,7 +24,7 @@ ob_start();
 
 $oAdmin_View = Admin_View::create();
 $oAdmin_View
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->pageTitle(Core::_('Report.title'))
 	;
 
@@ -39,7 +38,7 @@ if (!is_null(Core_Array::getPost('ajaxLoadTabContent')))
 
 	if (!is_null($oModule))
 	{
-		$oCore_Module = Core_Module::factory($oModule->path);
+		$oCore_Module = Core_Module_Abstract::factory($oModule->path);
 		if ($oCore_Module)
 		{
 			$external_data = Core_Array::getPost('external_data');
@@ -87,7 +86,7 @@ $aModules = $oModules->findAll(FALSE);
 $bFirst = TRUE;
 foreach ($aModules as $oModule)
 {
-	$oCore_Module = Core_Module::factory($oModule->path);
+	$oCore_Module = Core_Module_Abstract::factory($oModule->path);
 	if ($oCore_Module)
 	{
 		if (method_exists($oCore_Module, 'getReports'))

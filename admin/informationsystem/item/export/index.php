@@ -5,7 +5,7 @@
 * @package HostCMS
 * @version 7.x
 * @author Hostmake LLC
-* @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2024, https://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -39,7 +39,7 @@ $oAdmin_Form_Controller = Admin_Form_Controller::create();
 
 // Контроллер формы
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path('/admin/informationsystem/item/export/index.php');
 
@@ -47,7 +47,7 @@ ob_start();
 
 $oAdmin_View = Admin_View::create();
 $oAdmin_View
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->pageTitle(Core::_('Informationsystem_Item.export'))
 	;
 
@@ -165,12 +165,12 @@ $oMainTab
 				Core::_('Informationsystem_Item.export_list_separator2')
 			))
 			->ico(array(
-				'fa-bolt',
-				'fa-bolt'
+				'fa-solid fa-bolt fa-fw',
+				'fa-solid fa-bolt fa-fw'
 			))
 			->name('export_separator')
 			->value(1)
-			->divAttr(array('class' => 'form-group col-xs-12', 'id' => 'export_separator'))
+			->divAttr(array('class' => 'form-group col-xs-12 rounded-radio-group', 'id' => 'export_separator'))
 			->caption(Core::_('Informationsystem_Item.export_list_separator'))))
 			->add(Admin_Form_Entity::factory('Div')->class('row')->add(
 				Admin_Form_Entity::factory('Code')->html("<script>$(function() { $('#{$windowId} #export_list_separator').buttonset(); });</script>"))

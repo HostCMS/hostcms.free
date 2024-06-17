@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -20,7 +19,7 @@ $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title(Core::_('Crm_Project.menu'))
@@ -30,12 +29,14 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 	&& !is_null(Core_Array::getGet('queryString'))
 )
 {
+	$aJSON = array();
+
 	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
 
-	$aJSON = array(
+	/*$aJSON[] = array(
 		'id' => 0,
-		'label' => Core::_('Crm_Project.root') . ' [0]'
-	);
+		'label' => Core::_('Crm_Project.root')
+	);*/
 
 	if (strlen($sQuery))
 	{
@@ -53,7 +54,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 		{
 			$aJSON[] = array(
 				'id' => $oCrm_Project->id,
-				'label' => $oCrm_Project->name . ' [' . $oCrm_Project->id . ']'
+				'label' => $oCrm_Project->name
 			);
 		}
 	}
@@ -157,13 +158,13 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 // Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
 !$oUser->superuser && $oUser->only_access_my_own
-	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
+	&& $oAdmin_Form_Dataset->addUserConditions();
 
 if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
 		->addCondition(array('open' => array()))
-			->addCondition(array('where' => array('crm_projects.id', '=', $sGlobalSearch)))
+			->addCondition(array('where' => array('crm_projects.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
 			->addCondition(array('setOr' => array()))
 			->addCondition(array('where' => array('crm_projects.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));

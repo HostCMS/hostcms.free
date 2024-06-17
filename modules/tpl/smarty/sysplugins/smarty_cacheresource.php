@@ -99,7 +99,7 @@ abstract class Smarty_CacheResource
      * @param Smarty  $smarty   Smarty object
      * @param integer $exp_time expiration time (number of seconds, not timestamp)
      *
-     * @return integer number of cache files deleted
+     * @return int number of cache files deleted
      */
     abstract public function clearAll(Smarty $smarty, $exp_time = null);
 
@@ -112,7 +112,7 @@ abstract class Smarty_CacheResource
      * @param string  $compile_id    compile id
      * @param integer $exp_time      expiration time (number of seconds, not timestamp)
      *
-     * @return integer number of cache files deleted
+     * @return int number of cache files deleted
      */
     abstract public function clear(Smarty $smarty, $resource_name, $cache_id, $compile_id, $exp_time);
 

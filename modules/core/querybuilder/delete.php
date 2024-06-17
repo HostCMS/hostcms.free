@@ -31,9 +31,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Querybuilder
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @version 7.x
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_QueryBuilder_Delete extends Core_QueryBuilder_Selection
 {
@@ -178,7 +177,7 @@ class Core_QueryBuilder_Delete extends Core_QueryBuilder_Selection
 
 		$aQuoteColumns = $this->_quoteTables($this->_tableName);
 
-		// Delte from first table when using JOIN
+		// Delete from first table when using JOIN
 		if (!empty($this->_join))
 		{
 			$query[] = $aQuoteColumns[0];

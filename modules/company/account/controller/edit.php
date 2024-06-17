@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Company
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Company_Account_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -59,7 +58,8 @@ class Company_Account_Controller_Edit extends Admin_Form_Action_Controller_Type_
 			->move($this->getField('bank_name')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow3)
 			->move($this->getField('bank_address')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow3)
 			->move($this->getField('bic')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow4)
-			->move($this->getField('default')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow5)
+			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow5)
+			->move($this->getField('default')->divAttr(array('class' => 'form-group col-xs-12 col-md-9 margin-top-21')), $oMainRow5)
 			;
 
 		return $this;

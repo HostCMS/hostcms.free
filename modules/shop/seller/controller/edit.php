@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Seller_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -102,9 +101,6 @@ class Shop_Seller_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainTab->move($this->getField('email')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow4);
 		$oMainTab->move($this->getField('tin')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow4);
 
-		// Добавляем новое поле типа файл
-		$oImageField = Admin_Form_Entity::factory('File');
-
 		$oLargeFilePath = $this->_object->image_large != '' && Core_File::isFile($this->_object->getLargeFilePath())
 			? $this->_object->getLargeFileHref()
 			: '';
@@ -117,8 +113,8 @@ class Shop_Seller_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
-		$oImageField
-			->divAttr(array('class' => ''))
+		$oImageField = Admin_Form_Entity::factory('File')
+			//->divAttr(array('class' => ''))
 			->name("image")
 			->id("image")
 			->largeImage(
@@ -134,8 +130,7 @@ class Shop_Seller_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					'preserve_aspect_ratio_checkbox_checked' => $oShop->preserve_aspect_ratio
 				)
 			)
-			->smallImage
-			(
+			->smallImage(
 				array('max_width' => $oShop->image_small_max_width,
 					'max_height' => $oShop->image_small_max_height,
 					'path' => $oSmallFilePath,

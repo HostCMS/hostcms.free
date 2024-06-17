@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Warehouse_Inventory_Model extends Core_Entity
 {
@@ -271,7 +270,7 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 	 */
 	public function shop_warehouse_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		return htmlspecialchars($this->Shop_Warehouse->name);
+		return $this->Shop_Warehouse->id ? htmlspecialchars((string) $this->Shop_Warehouse->name) : '';
 	}
 
 	/**
@@ -397,11 +396,10 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 		$position = 1;
 		$inv_amount_total = $amount_total = 0;
 
-		$aShop_Warehouse_Inventory_Items = $this->Shop_Warehouse_Inventory_Items->findAll();
-
 		$Shop_Price_Entry_Controller = new Shop_Price_Entry_Controller();
 		$Shop_Item_Controller = new Shop_Item_Controller();
 
+		$aShop_Warehouse_Inventory_Items = $this->Shop_Warehouse_Inventory_Items->findAll();
 		foreach ($aShop_Warehouse_Inventory_Items as $oShop_Warehouse_Inventory_Item)
 		{
 			$oShop_Item = $oShop_Warehouse_Inventory_Item->Shop_Item;
@@ -425,7 +423,7 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 			$node->position = $position++;
 			$node->item = $oShop_Item;
 			$node->name = htmlspecialchars((string) $oShop_Item->name);
-			$node->measure = htmlspecialchars((string) $oShop_Item->Shop_Measure->name);
+			$node->measure = $oShop_Item->shop_measure_id ? htmlspecialchars((string) $oShop_Item->Shop_Measure->name) : '';
 			$node->price = $aPrices['price_tax'];
 			$node->quantity = $rest;
 			$node->amount = Shop_Controller::instance()->round($node->quantity * $node->price);
@@ -444,15 +442,24 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 		$aReplace['amount'] = Shop_Controller::instance()->round($amount_total);
 		$aReplace['inv_amount'] = Shop_Controller::instance()->round($inv_amount_total);
 
-		$lng = $oShop->Site->lng;
+		$aReplace['amount_in_words'] = $aReplace['inv_amount_in_words'] = '';
 
-		$aReplace['amount_in_words'] = Core_Inflection::available($lng)
-			? Core_Str::ucfirst(Core_Inflection::instance($lng)->currencyInWords($aReplace['amount'], $oShop->Shop_Currency->code))
-			: $aReplace['amount'] . ' ' . $oShop->Shop_Currency->code;
+		if ($oShop->shop_currency_id)
+		{
+			$lng = $oShop->Site->lng;
 
-		$aReplace['inv_amount_in_words'] = Core_Inflection::available($lng)
-			? Core_Str::ucfirst(Core_Inflection::instance($lng)->currencyInWords($aReplace['inv_amount'], $oShop->Shop_Currency->code))
-			: $aReplace['inv_amount'] . ' ' . $oShop->Shop_Currency->code;
+			$aReplace['amount_in_words'] = Core_Inflection::available($lng)
+				? Core_Str::ucfirst(Core_Inflection::instance($lng)->currencyInWords($aReplace['amount'], $oShop->Shop_Currency->code))
+				: $aReplace['amount'] . ' ' . $oShop->Shop_Currency->code;
+
+			$aReplace['inv_amount_in_words'] = Core_Inflection::available($lng)
+				? Core_Str::ucfirst(Core_Inflection::instance($lng)->currencyInWords($aReplace['inv_amount'], $oShop->Shop_Currency->code))
+				: $aReplace['inv_amount'] . ' ' . $oShop->Shop_Currency->code;
+		}
+
+		$aReplace['year'] = date('Y');
+		$aReplace['month'] = date('m');
+		$aReplace['day'] = date('d');
 
 		Core_Event::notify($this->_modelName . '.onAfterGetPrintlayoutReplaces', $this, array($aReplace));
 		$eventResult = Core_Event::getLastReturn();

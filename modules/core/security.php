@@ -3,13 +3,12 @@
 defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 /**
- * Security helper
+ * Security helper. XSS protection. CSRF token.
  *
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Security
 {
@@ -25,8 +24,11 @@ class Core_Security
 			return FALSE;
 		}
 
+		// Double Encoding (before URL decode): Char '<' (Hex encode %3C), Then encoding '%' - %25, Double encode %253C
+		$decoded = preg_replace('/%25([0-9a-f]{2})/i', '%$1', $string);
 		// URL decode
-		$decoded = urldecode($string);
+		$decoded = rawurldecode($decoded);
+		//var_dump($decoded);
 		// Hexadecimals => single-byte string, e.g. &#x4f60;, \x4f60;
 		$decoded = preg_replace_callback('/(?:&#|\\\)[x]([0-9a-f]+);?/i', 'Core_Security::_chr_hexdec', $decoded);
 		// &#00 => &#00;
@@ -68,7 +70,87 @@ class Core_Security
 	static protected function _chr_hexdec($matches)
 	{
 		return chr(
-			hexdec($matches[1])
+			@hexdec($matches[1])
 		);
+	}
+
+	/**
+	 * Get CSRF token
+	 */
+	static public function getCsrfToken()
+	{
+		!Core_Session::hasSessionId() && Core_Session::start();
+
+		$time = time();
+
+		return $time . hash('sha256', session_id() . $time);
+	}
+
+	/**
+	 * The last CSRF error
+	 * @var NULL|string
+	 */
+	static protected $_checkCsrfError = NULL;
+
+	/**
+	 * Get last CSRF error
+	 */
+	static public function getCsrfError()
+	{
+		return self::$_checkCsrfError;
+	}
+
+	/**
+	 * Throw csrf error
+	 */
+	static public function throwCsrfError()
+	{
+		switch (self::getCsrfError())
+		{
+			case 'wrong-length':
+				throw new Core_Exception(Core::_('Core.csrf_wrong_token'), array(), 0, FALSE);
+			break;
+			case 'wrong-token':
+			default:
+				throw new Core_Exception(Core::_('Core.csrf_wrong_token'), array(), 0, FALSE);
+			break;
+			case 'timeout':
+				throw new Core_Exception(Core::_('Core.csrf_token_timeout'), array(), 0, FALSE);
+			break;
+		}
+	}
+
+	/**
+	 * Check valid CSRF-token
+	 * @param string $secret_csrf Token to check
+	 * @return boolean
+	 */
+	static public function checkCsrf($secret_csrf, $lifetime)
+	{
+		self::$_checkCsrfError = NULL;
+
+		if (strlen($secret_csrf) != 74)
+		{
+			self::$_checkCsrfError = 'wrong-length';
+			return FALSE;
+		}
+
+		$csrf_time = substr($secret_csrf, 0, 10);
+		$csrf_token = substr($secret_csrf, 10, strlen($secret_csrf));
+
+		$token = hash('sha256', session_id() . $csrf_time);
+		if ($token !== $csrf_token)
+		{
+			self::$_checkCsrfError = 'wrong-token';
+			return FALSE;
+		}
+
+		if (time() - $csrf_time > $lifetime)
+		{
+			self::$_checkCsrfError = 'timeout';
+			return FALSE;
+		}
+
+		return TRUE;
 	}
 }

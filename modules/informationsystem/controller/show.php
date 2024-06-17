@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * Доступные методы:
  *
- * - group($id) идентификатор информационной группы, если FALSE, то вывод информационных элементов осуществляется из всех групп
+ * - group($id|array) идентификатор информационной группы или массив идентификаторов, если FALSE, то вывод информационных элементов осуществляется из всех групп
  * - subgroups(TRUE|FALSE) отображать товары из подгрупп, доступно при указании в group() идентификатора родительской группы, по умолчанию FALSE
  * - groupsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств групп, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
  * - groupsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств групп информационных элементов, по умолчанию TRUE
@@ -22,6 +22,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - itemsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств информационных элементов, по умолчанию TRUE
  * - commentsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств комментариев, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
  * - commentsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств комментариев, по умолчанию TRUE.
+ * - groupsMedia(TRUE|FALSE) выводить значения библиотеки файлов для групп информационной системы, по умолчанию FALSE
+ * - itemsMedia(TRUE|FALSE) выводить значения библиотеки файлов для информационных элементов, по умолчанию FALSE
  * - addFilter() добавить условие отобра информационных элементов, может задавать условие отобра по значению свойства ->addFilter('property', 17, '=', 1)
  * - comments(TRUE|FALSE) показывать комментарии для выбранных информационных элементов, по умолчанию FALSE
  * - commentsRating(TRUE|FALSE) показывать оценки комментариев для выбранных информационных элементов, по умолчанию FALSE
@@ -46,6 +48,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - showPanel(TRUE|FALSE) показывать панель быстрого редактирования, по умолчанию TRUE
  * - addAllowedTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, разрешенных к передаче в генерируемый XML
  * - addForbiddenTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, запрещенных к передаче в генерируемый XML
+ * - getItemDataCallback($callback) callback-функция для обработки массива товаров для метода getData()/getJson(), по умолчанию _getItemData() текущего контроллера
+ * - getGroupDataCallback($callback) callback-функция для обработки массива групп для метода getData()/getJson(), по умолчанию _getGroupData() текущего контроллера
  *
  * Устаревшие методы:
  *
@@ -84,8 +88,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Informationsystem_Controller_Show extends Core_Controller
 {
@@ -107,6 +110,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 		'sortPropertiesValues',
 		'commentsProperties',
 		'commentsPropertiesList',
+		'groupsMedia',
+		'itemsMedia',
 		'itemsForbiddenTags',
 		'comments',
 		'commentsRating',
@@ -124,6 +129,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 		'pattern',
 		'patternExpressions',
 		'patternParams',
+		'patternPart',
+		'patternTag',
 		'tag',
 		'cache',
 		'itemsActivity',
@@ -131,6 +138,9 @@ class Informationsystem_Controller_Show extends Core_Controller
 		'commentsActivity',
 		'calculateTotal',
 		'showPanel',
+		'url',
+		'getItemDataCallback',
+		'getGroupDataCallback'
 	);
 
 	/**
@@ -263,6 +273,18 @@ class Informationsystem_Controller_Show extends Core_Controller
 	protected $_cacheName = 'informationsystem_show';
 
 	/**
+	 * Current Tag
+	 * @var NULL|Tag_Model
+	 */
+	protected $_oTag = NULL;
+
+	/**
+	 * Error code
+	 * @var int|NULL
+	 */
+	protected $_errorCode = NULL;
+
+	/**
 	 * Constructor.
 	 * @param Informationsystem_Model $oInformationsystem information system
 	 */
@@ -291,23 +313,55 @@ class Informationsystem_Controller_Show extends Core_Controller
 		$this->group = $this->offset = $this->page = 0;
 		$this->item = NULL;
 		$this->groupsProperties = $this->itemsProperties = $this->commentsProperties = $this->propertiesForGroups = $this->comments = $this->commentsRating
-			= $this->tags = $this->calculateCounts = $this->siteuserProperties = FALSE;
+			= $this->tags = $this->calculateCounts = $this->siteuserProperties = $this->groupsMedia = $this->itemsMedia = FALSE;
 
 		$this->siteuser = $this->cache = $this->itemsPropertiesList = $this->commentsPropertiesList = $this->groupsPropertiesList
-			= $this->votes = $this->showPanel = $this->calculateTotal = $this->parts = $this->sortPropertiesValues = TRUE;
+			= $this->votes = $this->showPanel = $this->calculateTotal = $this->parts = $this->sortPropertiesValues
+			= $this->patternPart = $this->patternTag = TRUE;
 
 		$this->groupsMode = 'tree';
 		$this->part = 1;
 
 		$this->itemsActivity = $this->groupsActivity = $this->commentsActivity = 'active'; // inactive, all
 
-		// Named subpatterns {name} can consist of up to 32 alphanumeric characters and underscores, but must start with a non-digit.
-		$this->pattern = rawurldecode(Core_Str::rtrimUri($this->getEntity()->Structure->getPath())) . '({path}/)(part-{part}/)(page-{page}/)(tag/{tag}/)';
+		// see parseUrl()
+		//$this->pattern = $this->getPattern();
 
 		$this->patternExpressions = array(
 			'part' => '\d+',
 			'page' => '\d+',
 		);
+
+		$this->url = Core::$url['path'];
+
+		$this->getItemDataCallback = array($this, '_getItemData');
+		$this->getGroupDataCallback = array($this, '_getGroupData');
+	}
+
+	/**
+	 * Clone controller
+	 * @return void
+	 * @ignore
+	 */
+	public function __clone()
+	{
+		$this->_setInformationsystemItems()->_setInformationsystemGroups();
+	}
+
+	/**
+	 * Get Pattern
+	 * @return string
+	 */
+	public function getPattern()
+	{
+		// Named subpatterns {name} can consist of up to 32 alphanumeric characters and underscores, but must start with a non-digit.
+		$pattern = rawurldecode(Core_Str::rtrimUri($this->getEntity()->Structure->getPath())) . '({path}/)';
+
+		$this->patternPart && $pattern .= '(part-{part}/)';
+		$pattern .= '(page-{page}/)';
+		$this->patternTag && $pattern .= '(tag/{tag}/)';
+
+		return $pattern;
 	}
 
 	/**
@@ -538,14 +592,390 @@ class Informationsystem_Controller_Show extends Core_Controller
 	}
 
 	/**
+	 * Get SEO Items's H1
+	 * @return string|NULL
+	 */
+	public function getSeoItemH1()
+	{
+		if ($this->_seoItemH1 != '')
+		{
+			$oInformationsystem = $this->getEntity();
+
+			$oInformationsystem_Item = Core_Entity::factory('Informationsystem_Item', $this->item);
+			$oCore_Meta = new Core_Meta();
+			$oCore_Meta
+				->addObject('informationsystem', $oInformationsystem)
+				->addObject('group', $oInformationsystem_Item->Informationsystem_Group)
+				->addObject('item', $oInformationsystem_Item)
+				->addObject('this', $this);
+
+			return $oCore_Meta->apply($this->_seoItemH1);
+		}
+
+		return NULL;
+	}
+
+	/**
+	 * Get SEO Group's H1
+	 * @return string|NULL
+	 */
+	public function getSeoGroupH1()
+	{
+		if ($this->_seoGroupH1 != '')
+		{
+			$oInformationsystem = $this->getEntity();
+
+			$oCore_Meta = new Core_Meta();
+			$oCore_Meta
+				->addObject('informationsystem', $oInformationsystem)
+				->addObject('this', $this);
+
+			if ($this->group)
+			{
+				$oInformationsystem_Group = Core_Entity::factory('Informationsystem_Group', $this->group);
+				$oCore_Meta->addObject('group', $oInformationsystem_Group);
+			}
+
+			return $oCore_Meta->apply($this->_seoGroupH1);
+		}
+
+		return NULL;
+	}
+
+	/**
+	 * Prepare date
+	 * @return array
+	 */
+	public function getData()
+	{
+		$this->total = 0;
+
+		if ($this->_errorCode)
+		{
+			$aReturn = array(
+				'error' => array(
+					'code' => $this->_errorCode
+				)
+			);
+
+			switch ($this->_errorCode)
+			{
+				case 403:
+					$aReturn['error']['message'] = "Access forbidden, url '{$this->url}'";
+				break;
+				case 410:
+				case 404:
+					$aReturn['error']['message'] = "Path '{$this->url}' Not Found";
+				break;
+				default:
+					$aReturn['error']['message'] = "Unknown Error";
+				break;
+			}
+
+			return $aReturn;
+		}
+
+		$oInformationsystem = $this->getEntity();
+
+		if ($this->item)
+		{
+			$model = 'informationsystem_item';
+			$id = $this->item;
+			//$oShop_Item = Core_Entity::factory('')
+		}
+		elseif ($this->group)
+		{
+			$model = 'informationsystem_group';
+			$id = $this->group;
+		}
+		else
+		{
+			$model = 'informationsystem';
+			$id = $oInformationsystem->id;
+		}
+
+		// До applyFilter()
+		if (!is_null($this->tag) && Core::moduleIsActive('tag'))
+		{
+			// Заново получаем $this->_oTag, т.к. он может быть изменен между parseUrl() и show()
+			$this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
+		}
+
+		// Независимо от limit, т.к. может использоваться отдельно для фильтра
+		!$this->item
+			&& $this->applyFilter();
+
+		// До вывода свойств групп
+		if ($this->limit > 0 || $this->item)
+		{
+			$aInformationsystem_Items = $this->getInformationsystemItems();
+
+			if (!$this->item)
+			{
+				if (!count($aInformationsystem_Items) && ($this->page || $this->_oTag))
+				{
+					return $this->error410();
+				}
+
+				if ($this->calculateTotal)
+				{
+					$this->total = Core_QueryBuilder::select()->getFoundRows();
+				}
+			}
+		}
+		else
+		{
+			$aInformationsystem_Items = array();
+		}
+
+		// Строка навигации
+		$aBreadcrumbs = array();
+		if ($this->group)
+		{
+			$oInformationsystem_Group = Core_Entity::factory('Informationsystem_Group', $this->group);
+
+			do {
+				$aBreadcrumbs[] = array(
+					'id' => $oInformationsystem_Group->id,
+					'name' => $oInformationsystem_Group->name,
+					'url' => $oInformationsystem->Structure->getPath() . $oInformationsystem_Group->getPath(),
+					'path' => $oInformationsystem_Group->path
+				);
+				$oInformationsystem_Group = $oInformationsystem_Group->getParent();
+			} while ($oInformationsystem_Group);
+		}
+
+		$aReturn = array(
+			'entity' => array(
+				'model' => $model,
+				'id' => $id
+			),
+			'pagination' => array(
+				'total' => intval($this->total),
+				'pages' => $this->limit > 0 ? ceil($this->total / $this->limit) : 0,
+				'current' => intval($this->page) + 1,
+				'limit' => $this->limit
+			),
+			'url' => $this->url,
+			'breadcrumbs' => array_reverse($aBreadcrumbs),
+			'seo' => array(
+				'seoItemH1' => $this->getSeoItemH1(),
+				'seoGroupH1' => $this->getSeoGroupH1()
+			),
+			'sorting' => $oInformationsystem->items_sorting_field,
+			'sorting_direction' => $oInformationsystem->items_sorting_direction,
+		);
+
+		// Устанавливаем активность групп
+		$this->_setGroupsActivity();
+
+		// Группы информационной системы
+		switch ($this->groupsMode)
+		{
+			case 'none':
+			break;
+			// По одной группе от корня до текущего раздела, все потомки текущего раздела
+			case 'tree':
+				$this->addTreeGroups();
+			break;
+			// Все группы
+			case 'all':
+				$this->addAllGroups();
+			break;
+			default:
+				throw new Core_Exception('Group mode "%groupsMode" does not allow', array('%groupsMode' => $this->groupsMode));
+			break;
+		}
+
+		$aInformationsystem_Grpoups = call_user_func_array('array_merge', $this->_aInformationsystem_Groups);
+
+		// Группы
+		$aReturn['groups'] = call_user_func($this->getGroupDataCallback, $aInformationsystem_Grpoups);
+
+		// Товары
+		$aReturn['items'] = call_user_func($this->getItemDataCallback, $aInformationsystem_Items);
+
+		if ($this->itemsProperties || $this->itemsPropertiesList)
+		{
+			$this->_itemsProperties();
+
+			$aProperties = array();
+			foreach ($this->_aItem_Properties as $property_dir_id => $aTmp_Properties)
+			{
+				foreach ($aTmp_Properties as $oProperty)
+				{
+					$aProperties[] = $oProperty;
+				}
+			}
+
+			$aReturn['properties'] = $this->_getPropertyData($aProperties);
+		}
+
+		// Filter
+		foreach ($this->_aFilterProperties as $property_id => $aTmpProperties)
+		{
+			foreach ($aTmpProperties as $aTmpProperty)
+			{
+				list($oProperty, $condition, $aPropertyValues) = $aTmpProperty;
+
+				foreach ($aPropertyValues as $propertyValue)
+				{
+					$aReturn['filter']['properties'][$property_id][] = array($condition, $propertyValue);
+				}
+			}
+		}
+
+		return $aReturn;
+	}
+
+	/**
+	 * Typical conversion of Shop_Items to an array
+	 * @param array $aShop_Items
+	 * @return array
+	 */
+	protected function _getItemData(array $aShop_Items)
+	{
+		$aReturn = array();
+		foreach ($aShop_Items as $oShop_Item)
+		{
+			$aReturn[] = $oShop_Item->toArray();
+		}
+
+		return $aReturn;
+	}
+
+	/**
+	 * Typical conversion of Shop_Groups to an array
+	 * @param array $aShop_Items
+	 * @return array
+	 */
+	protected function _getGroupData(array $aShop_Grpoups)
+	{
+		$aReturn = array();
+		foreach ($aShop_Grpoups as $oShop_Grpoup)
+		{
+			$aReturn[] = $oShop_Grpoup->toArray();
+		}
+
+		return $aReturn;
+	}
+
+	/**
+	 * Typical conversion of Property to an array
+	 * @param array $aProperties
+	 * @return array
+	 */
+	protected function _getPropertyData(array $aProperties)
+	{
+		$aReturn = array();
+		foreach ($aProperties as $oProperty)
+		{
+			$aProperty = $oProperty->toArray();
+
+			if ($oProperty->type == 3 && $oProperty->list_id && Core::moduleIsActive('list'))
+			{
+				if ($this->itemsPropertiesListJustAvailable
+					// 3 - List
+					//&& $oProperty->type == 3 && $oProperty->list_id
+					// 0 - Hide; 1 - Input; 2,3,4 - Select
+					&& $oProperty->Shop_Item_Property->filter > 1)
+				{
+					$this->_setLimitListItems($oProperty);
+				}
+				elseif ($this->itemsPropertiesListJustAvailable)
+				{
+					// Запрещаем показ элементов списка
+					$oProperty->limitListItems(array());
+				}
+
+				$aList_Items = $oProperty->getListItems();
+				$aProperty['values'] = $this->_getListItemData($aList_Items);
+
+				// Counts
+				if (isset($this->_itemsPropertiesListCount[$oProperty->id]))
+				{
+					foreach ($this->_itemsPropertiesListCount[$oProperty->id] as $value => $count)
+					{
+						$aProperty['counts'][$value] = $count;
+					}
+				}
+			}
+
+			$aReturn[] = $aProperty;
+		}
+
+		return $aReturn;
+	}
+
+	/**
+	 * Typical conversion of List_Item to an array
+	 * @param array $aList_Items
+	 * @return array
+	 */
+	protected function _getListItemData(array $aList_Items)
+	{
+		$aReturn = array();
+		foreach ($aList_Items as $oList_Item)
+		{
+			$aReturn[] = $oList_Item->toArray();
+		}
+
+		return $aReturn;
+	}
+
+	/**
+	 * Get JSON
+	 * @return string
+	 */
+	public function getJson()
+	{
+		return json_encode(
+			$this->getData()
+		);
+	}
+
+	/**
+	 * Get Informationsystem_Items
+	 * @return array
+	 * @hostcms-event Informationsystem_Controller_Show.onBeforeSelectInformationsystemItems
+	 */
+	public function getInformationsystemItems()
+	{
+		$this->_itemCondition();
+
+		if (!$this->item)
+		{
+			// Group condition for informationsystem item
+			if ($this->group !== FALSE)
+			{
+				$this->applyGroupCondition();
+			}
+			else
+			{
+				// при выборе из всей ИС ярлыки не требуются, так как будут присутствовать оригинальные инфоэлементы
+				$this->forbidSelectShortcuts();
+			}
+
+			$this->_setLimits();
+
+			$this->_Informationsystem_Items
+				->queryBuilder()
+				->where('informationsystem_items.closed', '=', 0);
+		}
+
+		Core_Event::notify(get_class($this) . '.onBeforeSelectInformationsystemItems', $this, array($this->_Informationsystem_Items));
+
+		return $this->_Informationsystem_Items->findAll();
+	}
+
+	/**
 	 * Show built data
 	 * @return self
 	 * @hostcms-event Informationsystem_Controller_Show.onBeforeRedeclaredShow
-	 * @hostcms-event Informationsystem_Controller_Show.onBeforeSelectInformationsystemItems
 	 * @hostcms-event Informationsystem_Controller_Show.onBeforeAddGroupsPropertiesList
-	 * @hostcms-event Informationsystem_Controller_Show.onBeforeAddItemsPropertiesList
 	 * @hostcms-event Informationsystem_Controller_Show.onBeforeAddCommentsPropertiesList
 	 * @hostcms-event Informationsystem_Controller_Show.onBeforeAddInformationsystemItems
+	 * @hostcms-event Informationsystem_Controller_Show.onBeforeAddInformationsystemItem
 	 * @hostcms-event Informationsystem_Controller_Show.onAfterAddInformationsystemItems
 	 * @hostcms-event Informationsystem_Controller_Show.onBeforeAddShortcut
 	 */
@@ -630,84 +1060,45 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 		if ($this->item)
 		{
-			if ($this->_seoItemH1 != '')
+			$seoItemH1 = $this->getSeoItemH1();
+
+			if (!is_null($seoItemH1))
 			{
-				$oInformationsystem_Item = Core_Entity::factory('Informationsystem_Item', $this->item);
-
-				$oCore_Meta = new Core_Meta();
-				$oCore_Meta
-					->addObject('informationsystem', $oInformationsystem)
-					->addObject('group', $oInformationsystem_Item->Informationsystem_Group)
-					->addObject('item', $oInformationsystem_Item)
-					->addObject('this', $this);
-
 				$this->addEntity(
 					Core::factory('Core_Xml_Entity')
 						->name('seo_item_h1')
-						->value($oCore_Meta->apply($this->_seoItemH1))
+						->value($seoItemH1)
 				);
 			}
 		}
 		elseif ($this->_seoGroupH1 != '')
 		{
-			$oCore_Meta = new Core_Meta();
-			$oCore_Meta
-				->addObject('informationsystem', $oInformationsystem)
-				->addObject('this', $this);
+			$seoGroupH1 = $this->getSeoGroupH1();
 
-			if ($this->group)
+			if (!is_null($seoGroupH1))
 			{
-				$oInformationsystem_Group = Core_Entity::factory('Informationsystem_Group', $this->group);
-				$oCore_Meta->addObject('group', $oInformationsystem_Group);
+				$this->addEntity(
+					Core::factory('Core_Xml_Entity')
+						->name('seo_group_h1')
+						->value($seoGroupH1)
+				);
 			}
-
-			$this->addEntity(
-				Core::factory('Core_Xml_Entity')
-					->name('seo_group_h1')
-					->value($oCore_Meta->apply($this->_seoGroupH1))
-			);
 		}
 
 		// Независимо от limit, т.к. может использоваться отдельно для фильтра
-		if (!$this->item)
-		{
-			$this->applyFilter();
-		}
+		!$this->item
+			&& $this->applyFilter();
 
 		// До вывода свойств групп
 		if ($this->limit > 0 || $this->item)
 		{
-			$this->_itemCondition();
-
-			if (!$this->item)
-			{
-				// Group condition for informationsystem item
-				if ($this->group !== FALSE)
-				{
-					$this->applyGroupCondition();
-				}
-				else
-				{
-					// при выборе из всей ИС ярлыки не требуются, так как будут присутствовать оригинальные инфоэлементы
-					$this->forbidSelectShortcuts();
-				}
-
-				$this->_setLimits();
-
-				$this->_Informationsystem_Items
-					->queryBuilder()
-					->where('informationsystem_items.closed', '=', 0);
-			}
-
-			Core_Event::notify(get_class($this) . '.onBeforeSelectInformationsystemItems', $this, array($this->_Informationsystem_Items));
-
-			$aInformationsystem_Items = $this->_Informationsystem_Items->findAll();
+			$aInformationsystem_Items = $this->getInformationsystemItems();
 
 			if (!$this->item)
 			{
 				if ($this->page && !count($aInformationsystem_Items))
 				{
-					return $this->error404();
+					return $this->error410();
 				}
 
 				if ($this->calculateTotal)
@@ -789,42 +1180,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 		// Показывать дополнительные свойства информационного элемента
 		if ($this->itemsProperties && $this->itemsPropertiesList)
 		{
-			$oInformationsystem_Item_Property_List = Core_Entity::factory('Informationsystem_Item_Property_List', $oInformationsystem->id);
-
-			$oProperties = $oInformationsystem_Item_Property_List->Properties;
-			if (is_array($this->itemsPropertiesList) && count($this->itemsPropertiesList))
-			{
-				$oProperties->queryBuilder()
-					->where('properties.id', 'IN', $this->itemsPropertiesList);
-			}
-			$aProperties = $oProperties->findAll();
-
-			foreach ($aProperties as $oProperty)
-			{
-				$oProperty->clearEntities();
-				$this->applyForbiddenAllowedTags('/informationsystem/informationsystem_item_properties/property', $oProperty);
-				$this->_aItem_Properties[$oProperty->property_dir_id][] = $oProperty;
-			}
-
-			$aProperty_Dirs = $oInformationsystem_Item_Property_List->Property_Dirs->findAll();
-			foreach ($aProperty_Dirs as $oProperty_Dir)
-			{
-				$oProperty_Dir->clearEntities();
-				$this->applyForbiddenAllowedTags('/informationsystem/informationsystem_item_properties/property_dir', $oProperty_Dir);
-				$this->_aItem_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
-			}
-
-			if (!$bTpl)
-			{
-				$Informationsystem_Item_Properties = Core::factory('Core_Xml_Entity')
-					->name('informationsystem_item_properties');
-
-				$this->addEntity($Informationsystem_Item_Properties);
-
-				Core_Event::notify(get_class($this) . '.onBeforeAddItemsPropertiesList', $this, array($Informationsystem_Item_Properties));
-
-				$this->_addItemsPropertiesList(0, $Informationsystem_Item_Properties);
-			}
+			$this->_itemsProperties();
 		}
 
 		// Показывать дополнительные свойства комментариев
@@ -874,6 +1230,23 @@ class Informationsystem_Controller_Show extends Core_Controller
 			$this->assign('aInformationsystem_Items', array());
 		}
 
+		if ($this->limit == 0 && $this->page)
+		{
+			return $this->error404();
+		}
+
+		if (!is_null($this->tag) && Core::moduleIsActive('tag'))
+		{
+			// Заново получаем $this->_oTag, т.к. он может быть изменен между parseUrl() и show()
+			$this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
+
+			if ($this->_oTag)
+			{
+				$this->applyForbiddenAllowedTags('/informationsystem/tag', $this->_oTag);
+				$this->addEntity($this->_oTag);
+			}
+		}
+
 		if ($this->limit > 0)
 		{
 			// Ярлык может ссылаться на элемент с истекшим или не наступившим сроком публикации
@@ -881,23 +1254,25 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 			Core_Event::notify(get_class($this) . '.onBeforeAddInformationsystemItems', $this, array($aInformationsystem_Items));
 
-			foreach ($aInformationsystem_Items as $oInformationsystem_Item)
+			foreach ($aInformationsystem_Items as $oOriginal_Informationsystem_Item)
 			{
-				$this->_shownIDs[] = $oInformationsystem_Item->id;
+				$this->_shownIDs[] = $oOriginal_Informationsystem_Item->id;
 
 				// Tagged cache
-				$bCache && $this->_cacheTags[] = 'informationsystem_item_' . $oInformationsystem_Item->id;
+				$bCache && $this->_cacheTags[] = 'informationsystem_item_' . $oOriginal_Informationsystem_Item->id;
 
 				// Shortcut
-				$iShortcut = $oInformationsystem_Item->shortcut_id;
+				$iShortcut = $oOriginal_Informationsystem_Item->shortcut_id;
 
 				if ($iShortcut)
 				{
-					$oShortcut_Item = $oInformationsystem_Item;
-					$oInformationsystem_Item = $oInformationsystem_Item->Informationsystem_Item;
+					$oShortcut_Item = $oOriginal_Informationsystem_Item;
+					$oOriginal_Informationsystem_Item = $oOriginal_Informationsystem_Item->Informationsystem_Item;
 				}
 
+				$oInformationsystem_Item = clone $oOriginal_Informationsystem_Item;
 				$oInformationsystem_Item
+					->id($oOriginal_Informationsystem_Item->id)
 					->clearEntities()
 					->clearEntitiesAfterGetXml(FALSE);
 
@@ -954,6 +1329,10 @@ class Informationsystem_Controller_Show extends Core_Controller
 						$oInformationsystem_Item->showXmlProperties($this->itemsProperties, $this->sortPropertiesValues);
 						$oInformationsystem_Item->showXmlCommentProperties($this->commentsProperties);
 
+						// Media
+						$this->itemsMedia
+							&& $oInformationsystem_Item->showXmlMedia($this->itemsMedia);
+
 						// Tags
 						$oInformationsystem_Item->showXmlTags($this->tags);
 
@@ -970,6 +1349,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 							? $this->part
 							: 0
 						);
+
+						Core_Event::notify(get_class($this) . '.onBeforeAddInformationsystemItem', $this, array($oInformationsystem_Item));
 
 						$this->addEntity($oInformationsystem_Item);
 					}
@@ -1029,6 +1410,54 @@ class Informationsystem_Controller_Show extends Core_Controller
 	}
 
 	/**
+	 * Add list of item properties
+	 * @hostcms-event Informationsystem_Controller_Show.onBeforeAddItemsPropertiesList
+	 */
+	protected function _itemsProperties()
+	{
+		$oInformationsystem = $this->getEntity();
+
+		$bTpl = $this->_mode == 'tpl';
+
+		$oInformationsystem_Item_Property_List = Core_Entity::factory('Informationsystem_Item_Property_List', $oInformationsystem->id);
+
+		$oProperties = $oInformationsystem_Item_Property_List->Properties;
+		if (is_array($this->itemsPropertiesList) && count($this->itemsPropertiesList))
+		{
+			$oProperties->queryBuilder()
+				->where('properties.id', 'IN', $this->itemsPropertiesList);
+		}
+		$aProperties = $oProperties->findAll();
+
+		foreach ($aProperties as $oProperty)
+		{
+			$oProperty->clearEntities();
+			$this->applyForbiddenAllowedTags('/informationsystem/informationsystem_item_properties/property', $oProperty);
+			$this->_aItem_Properties[$oProperty->property_dir_id][] = $oProperty;
+		}
+
+		$aProperty_Dirs = $oInformationsystem_Item_Property_List->Property_Dirs->findAll();
+		foreach ($aProperty_Dirs as $oProperty_Dir)
+		{
+			$oProperty_Dir->clearEntities();
+			$this->applyForbiddenAllowedTags('/informationsystem/informationsystem_item_properties/property_dir', $oProperty_Dir);
+			$this->_aItem_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
+		}
+
+		if (!$bTpl)
+		{
+			$Informationsystem_Item_Properties = Core::factory('Core_Xml_Entity')
+				->name('informationsystem_item_properties');
+
+			$this->addEntity($Informationsystem_Item_Properties);
+
+			Core_Event::notify(get_class($this) . '.onBeforeAddItemsPropertiesList', $this, array($Informationsystem_Item_Properties));
+
+			$this->_addItemsPropertiesList(0, $Informationsystem_Item_Properties);
+		}
+	}
+
+	/**
 	 * Inc Informationsystem_Item->showed
 	 * @return self
 	 */
@@ -1055,22 +1484,34 @@ class Informationsystem_Controller_Show extends Core_Controller
 				->queryBuilder()
 				->where('informationsystem_items.id', '=', intval($this->item));
 		}
-		elseif (!is_null($this->tag) && Core::moduleIsActive('tag'))
+		elseif (!is_null($this->tag))
 		{
-			$oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
-
-			if ($oTag)
+			if (Core::moduleIsActive('tag'))
 			{
-				$this->applyForbiddenAllowedTags('/informationsystem/tag', $oTag);
-				$this->addEntity($oTag);
+				// тег получен в parseUrl()
+				is_null($this->_oTag)
+					&& $this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
 
-				$this->_Informationsystem_Items
-					->queryBuilder()
-					->leftJoin('tag_informationsystem_items', 'informationsystem_items.id', '=', 'tag_informationsystem_items.informationsystem_item_id')
-					->where('tag_informationsystem_items.tag_id', '=', $oTag->id);
+				if ($this->_oTag)
+				{
+					// moved to the show()
+					//$this->addEntity($this->_oTag);
 
-				// В корне при фильтрации по меткам вывод идет из всех групп ИС
-				$this->group == 0 && $this->group = FALSE;
+					$this->_Informationsystem_Items
+						->queryBuilder()
+						->join('tag_informationsystem_items', 'informationsystem_items.id', '=', 'tag_informationsystem_items.informationsystem_item_id')
+						->leftJoin('informationsystem_groups', 'informationsystem_groups.id', '=', 'informationsystem_items.informationsystem_group_id')
+						->where('tag_informationsystem_items.tag_id', '=', $this->_oTag->id)
+						->open()
+							->where('informationsystem_groups.active', '=', 1)
+							->where('informationsystem_groups.deleted', '=', 0)
+							->setOr()
+							->where('informationsystem_items.informationsystem_group_id', '=', 0)
+						->close();
+
+					// В корне при фильтрации по меткам вывод идет из всех групп ИС
+					$this->group == 0 && $this->group = FALSE;
+				}
 			}
 		}
 
@@ -1083,7 +1524,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 	 * Disable shortcuts
 	 * @return self
 	 */
-	protected function forbidSelectShortcuts()
+	public function forbidSelectShortcuts()
 	{
 		// Отключаем выбор ярлыков
 		$this->_Informationsystem_Items
@@ -1155,8 +1596,11 @@ class Informationsystem_Controller_Show extends Core_Controller
 		$oInformationsystem->seo_item_h1_template != ''
 			&& $this->_seoItemH1 = $oInformationsystem->seo_item_h1_template;
 
+		// If no custom pattern has been specified
+		is_null($this->pattern) && $this->pattern = $this->getPattern();
+
 		$Core_Router_Route = new Core_Router_Route($this->pattern, $this->patternExpressions);
-		$this->patternParams = $matches = $Core_Router_Route->applyPattern(Core::$url['path']);
+		$this->patternParams = $matches = $Core_Router_Route->applyPattern($this->url);
 
 		if (isset($matches['page']) && is_numeric($matches['page']))
 		{
@@ -1167,7 +1611,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			}
 			else
 			{
-				return $this->error404();
+				return $this->error410();
 			}
 		}
 
@@ -1179,8 +1623,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 		{
 			$this->tag($matches['tag']);
 
-			$oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
-			if (is_null($oTag))
+			$this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
+			if (is_null($this->_oTag))
 			{
 				return $this->error404();
 			}
@@ -1273,14 +1717,13 @@ class Informationsystem_Controller_Show extends Core_Controller
 					}
 					else
 					{
-						$this->group = FALSE;
-						$this->item = FALSE;
-						return $this->error404();
+						$this->group = $this->item = FALSE;
+						return $this->error410();
 					}
 				}
 			}
 		}
-		elseif (is_null($path) && Core::$url['path'] != '/')
+		elseif (is_null($path) && $this->url != '/')
 		{
 			return $this->error404();
 		}
@@ -1424,17 +1867,17 @@ class Informationsystem_Controller_Show extends Core_Controller
 			}
 			elseif (!is_null($this->tag) && Core::moduleIsActive('tag'))
 			{
-				$seo_title = $oTag->seo_title != ''
-					? $oTag->seo_title
-					: Core::_('Informationsystem.tag', $oTag->name, FALSE);
+				$seo_title = $this->_oTag->seo_title != ''
+					? $this->_oTag->seo_title
+					: Core::_('Informationsystem.tag', $this->_oTag->name, FALSE);
 
-				$seo_description = $oTag->seo_description != ''
-					? $oTag->seo_description
-					: $oTag->name;
+				$seo_description = $this->_oTag->seo_description != ''
+					? $this->_oTag->seo_description
+					: $this->_oTag->name;
 
-				$seo_keywords = $oTag->seo_keywords != ''
-					? $oTag->seo_keywords
-					: $oTag->name;
+				$seo_keywords = $this->_oTag->seo_keywords != ''
+					? $this->_oTag->seo_keywords
+					: $this->_oTag->name;
 			}
 		}
 
@@ -1502,12 +1945,29 @@ class Informationsystem_Controller_Show extends Core_Controller
 	}
 
 	/**
+	 * Define handler for 410 error
+	 * @return self
+	 */
+	public function error410()
+	{
+		$this->_errorCode = 410;
+
+		!is_null(Core_Page::instance()->response)
+			&& Core_Page::instance()->error410();
+
+		return $this;
+	}
+
+	/**
 	 * Define handler for 404 error
 	 * @return self
 	 */
 	public function error404()
 	{
-		Core_Page::instance()->error404();
+		$this->_errorCode = 404;
+
+		!is_null(Core_Page::instance()->response)
+			&& Core_Page::instance()->error404();
 
 		return $this;
 	}
@@ -1518,7 +1978,10 @@ class Informationsystem_Controller_Show extends Core_Controller
 	 */
 	public function error403()
 	{
-		Core_Page::instance()->error403();
+		$this->_errorCode = 403;
+
+		!is_null(Core_Page::instance()->response)
+			&& Core_Page::instance()->error403();
 
 		return $this;
 	}
@@ -1599,13 +2062,10 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 		if ($group_id != 0)
 		{
-			$oInformationsystem_Group = Core_Entity::factory('Informationsystem_Group', $group_id)
-				->clearEntities();
+			$oInformationsystem_Group = Core_Entity::factory('Informationsystem_Group', $group_id);
 
 			do {
-				$this->applyGroupsForbiddenTags($oInformationsystem_Group);
-
-				$this->_aInformationsystem_Groups[$oInformationsystem_Group->parent_id][] = $oInformationsystem_Group;
+				$this->_groupIntoArray($oInformationsystem_Group);
 			} while ($oInformationsystem_Group = $oInformationsystem_Group->getParent());
 		}
 
@@ -1620,23 +2080,20 @@ class Informationsystem_Controller_Show extends Core_Controller
 	}
 
 	/**
-	 * Add group $oInformationsystem_Group into $this->_aInformationsystem_Groups
-	 * @param Informationsystem_Group_Model $oInformationsystem_Group
+	 * Add group $oOriginal_Informationsystem_Group into $this->_aInformationsystem_Groups
+	 * @param Informationsystem_Group_Model $oOriginal_Informationsystem_Group
 	 * @return self
 	 */
-	protected function _groupIntoArray($oInformationsystem_Group)
+	protected function _groupIntoArray($oOriginal_Informationsystem_Group)
 	{
-		$oInformationsystem_Group->clearEntities();
-		$this->applyGroupsForbiddenTags($oInformationsystem_Group);
-
-		$parent_id = $oInformationsystem_Group->parent_id;
+		$parent_id = $oOriginal_Informationsystem_Group->parent_id;
 
 		// Shortcut
-		if ($oInformationsystem_Group->shortcut_id
-			&& $oInformationsystem_Group->shortcut_id != $oInformationsystem_Group->parent_id)
+		if ($oOriginal_Informationsystem_Group->shortcut_id
+			&& $oOriginal_Informationsystem_Group->shortcut_id != $oOriginal_Informationsystem_Group->parent_id)
 		{
-			$oShortcut_Group = $oInformationsystem_Group;
-			$oOriginal_Informationsystem_Group = $oInformationsystem_Group->Shortcut;
+			$oShortcut_Group = $oOriginal_Informationsystem_Group;
+			$oOriginal_Informationsystem_Group = $oOriginal_Informationsystem_Group->Shortcut;
 
 			if ($oOriginal_Informationsystem_Group->active
 				&& (!$oOriginal_Informationsystem_Group->parent_id || $oOriginal_Informationsystem_Group->getParent()->active)
@@ -1646,6 +2103,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 				$oInformationsystem_Group
 					->id($oOriginal_Informationsystem_Group->id)
+					->clearEntities()
 					->addForbiddenTag('parent_id')
 					->addForbiddenTag('shortcut_id')
 					->addEntity(
@@ -1664,9 +2122,21 @@ class Informationsystem_Controller_Show extends Core_Controller
 				$oInformationsystem_Group = NULL;
 			}
 		}
+		else
+		{
+			$oInformationsystem_Group = clone $oOriginal_Informationsystem_Group;
+			$oInformationsystem_Group
+				->id($oOriginal_Informationsystem_Group->id)
+				->clearEntities();
+		}
 
-		!is_null($oInformationsystem_Group)
-			&& $this->_aInformationsystem_Groups[$parent_id][] = $oInformationsystem_Group;
+		if (!is_null($oInformationsystem_Group))
+		{
+			// After check shortcut
+			$this->applyGroupsForbiddenTags($oInformationsystem_Group);
+
+			$this->_aInformationsystem_Groups[$parent_id][] = $oInformationsystem_Group;
+		}
 
 		return $this;
 	}
@@ -1682,10 +2152,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 	{
 		if (isset($this->_aInformationsystem_Groups[$parent_id]))
 		{
-			$bIsArrayGroupsProperties = is_array($this->groupsProperties);
+			//$bIsArrayGroupsProperties = is_array($this->groupsProperties);
 			$bIsArrayPropertiesForGroups = is_array($this->propertiesForGroups);
-
-			$oInformationsystem = $this->getEntity();
 
 			foreach ($this->_aInformationsystem_Groups[$parent_id] as $oInformationsystem_Group)
 			{
@@ -1724,6 +2192,10 @@ class Informationsystem_Controller_Show extends Core_Controller
 				{
 					$oInformationsystem_Group->showXmlProperties(FALSE);
 				}
+
+				// Media
+				$this->groupsMedia
+					&& $oInformationsystem_Group->showXmlMedia($this->groupsMedia);
 
 				$parentObject->addEntity($oInformationsystem_Group);
 
@@ -1900,7 +2372,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			{
 				// Delete
 				$sPath = '/admin/informationsystem/item/index.php';
-				$sAdditional = "hostcms[action]=markDeleted&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystem_Group->parent_id}&hostcms[checked][0][{$this->group}]=1";
+				$sAdditional = "hostcms[action]=markDeleted&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystem_Group->parent_id}&hostcms[checked][0][{$this->group}]=1&secret_csrf=" . Core_Security::getCsrfToken();
 				$sTitle = Core::_('Informationsystem_Group.markDeleted');
 
 				$oXslSubPanel->add(
@@ -1952,7 +2424,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 			// Copy
 			$sPath = '/admin/informationsystem/item/index.php';
-			$sAdditional = "hostcms[action]=copy&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$this->group}&hostcms[checked][1][{$this->item}]=1";
+			$sAdditional = "hostcms[action]=copy&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$this->group}&hostcms[checked][1][{$this->item}]=1&secret_csrf=" . Core_Security::getCsrfToken();
 			$sTitle = Core::_('Informationsystem_Item.information_items_copy_form_title');
 
 			$oXslSubPanel->add(
@@ -2000,7 +2472,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 			// Delete
 			$sPath = '/admin/informationsystem/item/index.php';
-			$sAdditional = "hostcms[action]=markDeleted&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$this->group}&hostcms[checked][1][{$this->item}]=1";
+			$sAdditional = "hostcms[action]=markDeleted&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$this->group}&hostcms[checked][1][{$this->item}]=1&secret_csrf=" . Core_Security::getCsrfToken();
 			$sTitle = Core::_('Informationsystem_Item.markDeleted');
 
 			$oXslSubPanel->add(
@@ -2059,7 +2531,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 	}
 
 	/**
-	 * Set goods sorting
+	 * Set items sorting
 	 * @param $column Column name
 	 * @return self
 	 */

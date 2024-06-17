@@ -22,6 +22,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - showShopGroupProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств групп магазина, по умолчанию FALSE
  * - showShopItemProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств товаров, по умолчанию FALSE
  * - showShopItemAssociated(TRUE|FALSE) выводить сопутствующие товары, по умолчанию FALSE
+ * - showMedia(TRUE|FALSE) выводить значения библиотеки файлов для узлов структры, по умолчанию FALSE
+ * - showInformationsystemGroupMedia(TRUE|FALSE) выводить значения библиотеки файлов для групп информационной системы, по умолчанию FALSE
+ * - showInformationsystemItemMedia(TRUE|FALSE) выводить значения библиотеки файлов для информационных элементов, по умолчанию FALSE
+ * - showShopGroupMedia(TRUE|FALSE) выводить значения библиотеки файлов для групп магазина, по умолчанию FALSE
+ * - showShopItemMedia(TRUE|FALSE) выводить значения библиотеки файлов для товаров, по умолчанию FALSE
  * - cache(TRUE|FALSE) использовать кэширование, по умолчанию TRUE
  * - showPanel(TRUE|FALSE) показывать панель быстрого редактирования, по умолчанию TRUE
  * - onStep(3000) количество элементов, выбираемых запросом за 1 шаг, по умолчанию 500
@@ -60,8 +65,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Structure
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Structure_Controller_Show extends Core_Controller
 {
@@ -85,6 +89,11 @@ class Structure_Controller_Show extends Core_Controller
 		'showShopGroupProperties',
 		'showShopItemProperties',
 		'showShopItemAssociated',
+		'showMedia',
+		'showInformationsystemGroupMedia',
+		'showInformationsystemItemMedia',
+		'showShopGroupMedia',
+		'showShopItemMedia',
 		'forbiddenTags',
 		'cache',
 		'currentStructureId',
@@ -150,7 +159,8 @@ class Structure_Controller_Show extends Core_Controller
 
 		$this->showProperties = $this->structurePropertiesList = $this->showInformationsystemGroups = $this->showInformationsystemItems
 			= $this->showShopGroups = $this->showShopItems = $this->showInformationsystemGroupProperties = $this->showInformationsystemItemProperties
-			= $this->showShopGroupProperties = $this->showShopItemProperties = $this->showShopItemAssociated = FALSE;
+			= $this->showShopGroupProperties = $this->showShopItemProperties = $this->showShopItemAssociated
+			= $this->showMedia = $this->showInformationsystemGroupMedia = $this->showInformationsystemItemMedia = $this->showShopGroupMedia = $this->showShopItemMedia = FALSE;
 
 		$this->showPanel = $this->cache = $this->sortPropertiesValues = TRUE;
 
@@ -459,6 +469,7 @@ class Structure_Controller_Show extends Core_Controller
 
 					$oStructure
 						->id($oOriginal_Structure->id)
+						->clearEntities()
 						->shortcut_id($oShortcut_Structure->id)
 						// влияет на формирование пути, нельзя явно указывать
 						//->parent_id($oShortcut_Structure->parent_id)
@@ -482,6 +493,9 @@ class Structure_Controller_Show extends Core_Controller
 
 				// Properties for structure entity
 				$oStructure->showXmlProperties($this->showProperties, $this->sortPropertiesValues);
+				
+				$this->showMedia
+					&& $oStructure->showXmlMedia($this->showMedia);
 
 				// For Shortcuts children are not selected to avoid looping!
 				if ($oOriginal_Structure === $oStructure
@@ -735,28 +749,23 @@ class Structure_Controller_Show extends Core_Controller
 
 					$oInformationsystem_Group
 						->id($oOriginal_Informationsystem_Group->id)
+						->clearEntities()
 						->parent_id($oShortcut_Group->parent_id)
-						->shortcut_id($oShortcut_Group->id)
-						/*->addForbiddenTag('parent_id')
-						->addForbiddenTag('shortcut_id')
-						->addEntity(
-							Core::factory('Core_Xml_Entity')
-								->name('shortcut_id')
-								->value($oShortcut_Group->id)
-						)
-						->addEntity(
-							Core::factory('Core_Xml_Entity')
-								->name('parent_id')
-								->value($oShortcut_Group->parent_id)
-						)*/;
+						->shortcut_id($oShortcut_Group->id);
 				}
 				else
 				{
 					$oOriginal_Informationsystem_Group = $oInformationsystem_Group;
+					$oInformationsystem_Group = clone $oOriginal_Informationsystem_Group;
+					$oInformationsystem_Group
+						->id($oOriginal_Informationsystem_Group->id);
 				}
 
 				$this->showInformationsystemGroupProperties
 					&& $oInformationsystem_Group->showXmlProperties($this->showInformationsystemGroupProperties);
+					
+				$this->showInformationsystemGroupMedia
+					&& $oInformationsystem_Group->showXmlMedia($this->showInformationsystemGroupMedia);
 
 				$oInformationsystem_Group
 					->clearEntities()
@@ -773,7 +782,6 @@ class Structure_Controller_Show extends Core_Controller
 							->value($oInformationsystem_Group->active)
 					);
 
-				//$this->applyForbiddenTags($oInformationsystem_Group);
 				$this->applyForbiddenAllowedTags('/site/structure/informationsystem_group|/site/structure', $oInformationsystem_Group);
 
 				$parentObject->addEntity($oInformationsystem_Group);
@@ -815,9 +823,12 @@ class Structure_Controller_Show extends Core_Controller
 							->value($oInformationsystem_Item->active)
 					);
 
-				$this->showInformationsystemItemProperties && $oInformationsystem_Item->showXmlProperties($this->showInformationsystemItemProperties);
+				$this->showInformationsystemItemProperties
+					&& $oInformationsystem_Item->showXmlProperties($this->showInformationsystemItemProperties);
+					
+				$this->showInformationsystemItemMedia
+					&& $oInformationsystem_Item->showXmlMedia($this->showInformationsystemItemMedia);
 
-				//$this->applyForbiddenTags($oInformationsystem_Item);
 				$this->applyForbiddenAllowedTags('/site/structure/informationsystem_item|/site/structure', $oInformationsystem_Item);
 
 				$parentObject->addEntity($oInformationsystem_Item);
@@ -1050,30 +1061,24 @@ class Structure_Controller_Show extends Core_Controller
 					$oShop_Group
 						->id($oOriginal_Shop_Group->id)
 						->parent_id($oShortcut_Group->parent_id)
-						->shortcut_id($oShortcut_Group->id)
-						/*->addForbiddenTag('parent_id')
-						->addForbiddenTag('shortcut_id')
-						->addEntity(
-							Core::factory('Core_Xml_Entity')
-								->name('shortcut_id')
-								->value($oShortcut_Group->id)
-						)
-						->addEntity(
-							Core::factory('Core_Xml_Entity')
-								->name('parent_id')
-								->value($oShortcut_Group->parent_id)
-						)*/;
+						->shortcut_id($oShortcut_Group->id);
 				}
 				else
 				{
 					$oOriginal_Shop_Group = $oShop_Group;
+					$oShop_Group = clone $oOriginal_Shop_Group;
+					$oShop_Group
+						->id($oOriginal_Shop_Group->id);
 				}
 
 				$this->showShopGroupProperties
 					&& $oShop_Group->showXmlProperties($this->showShopGroupProperties);
+					
+				$this->showShopGroupMedia
+					&& $oShop_Group->showXmlMedia($this->showShopGroupMedia);
 
 				$oShop_Group
-					// ->clearEntities()
+					->clearEntities()
 					->addForbiddenTag('url')
 					->addEntity(
 						Core::factory('Core_Xml_Entity')
@@ -1087,7 +1092,6 @@ class Structure_Controller_Show extends Core_Controller
 							->value($oShop_Group->active)
 					);
 
-				//$this->applyForbiddenTags($oShop_Group);
 				$this->applyForbiddenAllowedTags('/site/structure/shop_group|/site/structure', $oShop_Group);
 
 				$parentObject->addEntity($oShop_Group);
@@ -1130,11 +1134,15 @@ class Structure_Controller_Show extends Core_Controller
 							->value($oShop_Item->active)
 					);
 
-				$this->showShopItemProperties && $oShop_Item->showXmlProperties($this->showShopItemProperties);
+				$this->showShopItemProperties
+					&& $oShop_Item->showXmlProperties($this->showShopItemProperties);
+					
+				$this->showShopItemMedia
+					&& $oShop_Item->showXmlMedia($this->showShopItemMedia);
 
-				$this->showShopItemAssociated && $oShop_Item->showXmlAssociatedItems($this->showShopItemAssociated);
+				$this->showShopItemAssociated
+					&& $oShop_Item->showXmlAssociatedItems($this->showShopItemAssociated);
 
-				//$this->applyForbiddenTags($oShop_Item);
 				$this->applyForbiddenAllowedTags('/site/structure/shop_item|/site/structure', $oShop_Item);
 
 				$parentObject->addEntity($oShop_Item);

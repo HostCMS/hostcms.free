@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -244,7 +243,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				$this->getField('indexing')
 					->divAttr(array('class' => 'form-group col-xs-6 col-sm-4'));
 				$this->getField('closed')
-					->divAttr(array('class' => 'form-group col-xs-6 col-sm-4'));
+					->divAttr(array('class' => 'form-group col-xs-6 col-sm-4'))->class('form-control colored-blue lock');
 
 				$oMainTab->move($this->getField('active'), $oMainRow5);
 				$oMainTab->move($this->getField('indexing'), $oMainRow5);
@@ -291,10 +290,6 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					Siteuser_Controller_Edit::addSiteuserSelect2($oSiteuserSelect, $oSiteuser, $this->_Admin_Form_Controller);
 				}
 
-				// Добавляем новое поле типа файл
-				$oImageField = Admin_Form_Entity::factory('File')
-					->divAttr(array('class' => ''));
-
 				$oLargeFilePath = $this->_object->image_large != '' && Core_File::isFile($this->_object->getLargeFilePath())
 					? $this->_object->getLargeFileHref()
 					: '';
@@ -305,11 +300,13 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 				$sFormPath = $this->_Admin_Form_Controller->getPath();
 
-				$oImageField
+				$oImageField = Admin_Form_Entity::factory('File')
+					//->divAttr(array('class' => ''))
 					//->caption(Core::_('Informationsystem_Group.image_large'))
 					->name("image")
 					->id("image")
-					->largeImage(array(
+					->largeImage(
+						array(
 							// image_big_max_width - значение максимальной ширины большого изображения;
 							'max_width' => $oInformationsystem->image_large_max_width,
 
@@ -340,7 +337,9 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 							'preserve_aspect_ratio_checkbox_checked' => $oInformationsystem->preserve_aspect_ratio
 						)
 					)
-					->smallImage(array(			// image_small_max_width - значение максимальной ширины малого изображения;
+					->smallImage(
+						array(
+							// image_small_max_width - значение максимальной ширины малого изображения;
 							'max_width' => $oInformationsystem->image_small_max_width,
 
 							// image_small_max_height - значение максимальной высоты малого изображения;
@@ -380,7 +379,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					$this->getField('path')->add(
 						$pathLink = Admin_Form_Entity::factory('A')
 							->id('pathLink')
-							->class('input-group-addon bg-blue bordered-blue')
+							->class('input-group-addon blue')
 							->value('<i class="fa fa-external-link"></i>')
 					);
 
@@ -433,7 +432,6 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 				$oMainRow9->add($oSelect_SiteuserGroups);
 
-				$oAdditionalTab = $this->getTab('additional');
 				$oAdditionalTab->delete($this->getField('siteuser_group_id'));
 
 				$this->getField('informationsystem_id')->divAttr(array('style' => 'display: none'));
@@ -648,7 +646,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				$oMainTab
 					->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-					//->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -747,6 +745,52 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					$oMainRow2->add($resultItem);
 				}
 
+				// Группы ярлыков
+				$oAdditionalGroupsSelect = Admin_Form_Entity::factory('Select')
+					->caption(Core::_('Informationsystem_Item.shortcut_group_tags'))
+					->options($this->_fillShortcutGroupList($this->_object))
+					->name('shortcut_group_id[]')
+					->class('shortcut-group-tags')
+					->style('width: 100%')
+					->multiple('multiple')
+					->divAttr(array('class' => 'form-group col-xs-12'));
+
+				$this->addField($oAdditionalGroupsSelect);
+
+				$oMainRow3->add($oAdditionalGroupsSelect);
+
+				$html2 = '<script>
+				$(function(){
+					$("#' . $windowId . ' .shortcut-group-tags").select2({
+						dropdownParent: $("#' . $windowId . '"),
+						language: "' . Core_I18n::instance()->getLng() . '",
+						minimumInputLength: 2,
+						placeholder: "' . Core::_('Informationsystem_Item.select_group') . '",
+						tags: true,
+						allowClear: true,
+						multiple: true,
+						ajax: {
+							url: "/admin/informationsystem/item/index.php?shortcuts&informationsystem_id=' . $this->_object->informationsystem_id .'",
+							dataType: "json",
+							type: "GET",
+							processResults: function (data) {
+								var aResults = [];
+								$.each(data, function (index, item) {
+									aResults.push({
+										"id": item.id,
+										"text": item.text
+									});
+								});
+								return {
+									results: aResults
+								};
+							}
+						}
+					});
+				});</script>';
+
+				$oMainRow3->add(Admin_Form_Entity::factory('Code')->html($html2));
+
 				$oMainTab
 					->move($this->getField('description'), $oInformationsystemGroupDescriptionTabRow1);
 
@@ -787,10 +831,6 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 						->add($oUseTrailingPunctuation);
 				}
 
-				// Добавляем новое поле типа файл
-				$oImageField = Admin_Form_Entity::factory('File')
-					->divAttr(array('class' => ''));;
-
 				$oLargeFilePath = $this->_object->image_large != '' && Core_File::isFile($this->_object->getLargeFilePath())
 					? $this->_object->getLargeFileHref()
 					: '';
@@ -802,7 +842,8 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				$sFormPath = $this->_Admin_Form_Controller->getPath();
 				$windowId = $this->_Admin_Form_Controller->getWindowId();
 
-				$oImageField
+				$oImageField = Admin_Form_Entity::factory('File')
+					//->divAttr(array('class' => ''))
 					//->caption(Core::_('Informationsystem_Group.image_large'))
 					->style("width: 400px;")
 					->name("image")
@@ -881,7 +922,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					$this->getField('path')->add(
 						$pathLink = Admin_Form_Entity::factory('A')
 							->id('pathLink')
-							->class('input-group-addon bg-blue bordered-blue')
+							->class('input-group-addon blue')
 							->value('<i class="fa fa-external-link"></i>')
 					);
 
@@ -1020,7 +1061,8 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 			$oInformationsystemGroupInput = Admin_Form_Entity::factory('Input')
 				->caption(Core::_($i18n . '.' . $fieldName))
 				->divAttr(array('class' => 'form-group col-xs-12'))
-				->name('informationsystem_group_name');
+				->name('informationsystem_group_name')
+				->placeholder(Core::_('Admin.autocomplete_placeholder'));
 
 			$this->_object->$fieldName
 				&& $oInformationsystemGroupInput->value($oInformationsystem_Group->name . ' [' . $oInformationsystem_Group->id . ']');
@@ -1052,9 +1094,10 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					minLength: 1,
 					create: function() {
 						$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
-							return $('<li></li>')
+							return $('<li class=\"autocomplete-suggestion\"></li>')
 								.data('item.autocomplete', item)
-								.append($('<a>').text(item.label))
+								.append($('<div class=\"name\">').html($.escapeHtml(item.label)))
+								.append($('<div class=\"id\">').html('[' + $.escapeHtml(item.id) + ']'))
 								.appendTo(ul);
 						}
 
@@ -1358,6 +1401,39 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					->setObject($this->_object)
 					->linkedObject(Core_Entity::factory('Informationsystem_Group_Property_List', $oInformationsystem->id))
 					->applyObjectProperty();
+
+				$aShortcutGroupIds = Core_Array::getPost('shortcut_group_id', array());
+				!is_array($aShortcutGroupIds) && $aShortcutGroupIds = array();
+
+				$aTmp = array();
+
+				// Выбранные группы
+				$aShortcuts = $oInformationsystem->Informationsystem_Groups->getAllByShortcut_id($this->_object->id, FALSE);
+				foreach ($aShortcuts as $oShortcut)
+				{
+					!in_array($oShortcut->parent_id, $aShortcutGroupIds)
+						? $oShortcut->markDeleted()
+						: $aTmp[] = $oShortcut->parent_id;
+				}
+
+				$aNewShortcutGroupIDs = array_diff($aShortcutGroupIds, $aTmp);
+				foreach ($aNewShortcutGroupIDs as $iShortcutGroupId)
+				{
+					$oInformationsystem_Group = $oInformationsystem->Informationsystem_Groups->getById($iShortcutGroupId);
+					if (!is_null($oInformationsystem_Group))
+					{
+						$oInformationsystem_GroupShortcut = Core_Entity::factory('Informationsystem_Group');
+
+						$oInformationsystem_GroupShortcut->informationsystem_id = $this->_object->informationsystem_id;
+						$oInformationsystem_GroupShortcut->shortcut_id = $this->_object->id;
+						$oInformationsystem_GroupShortcut->parent_id = $iShortcutGroupId;
+						$oInformationsystem_GroupShortcut->name = '';
+						$oInformationsystem_GroupShortcut->path = '';
+						$oInformationsystem_GroupShortcut->indexing = 0;
+
+						$oInformationsystem_GroupShortcut->save()->clearCache();
+					}
+				}
 		}
 
 		if (Core::moduleIsActive('media'))
@@ -1690,7 +1766,32 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 			);
 		}
 
+		if ($bNewObject && Core::moduleIsActive('media'))
+		{
+			ob_start();
+			$this->_fillMedia()->execute();
+			$this->_Admin_Form_Controller->addMessage(ob_get_clean());
+		}
+
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
+	}
+
+	/*
+	 * Add shop documents
+	 * @return Admin_Form_Entity
+	 */
+	protected function _fillMedia()
+	{
+		$modalWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('modalWindowId', '', 'str'));
+		$windowId = $modalWindowId ? $modalWindowId : $this->_Admin_Form_Controller->getWindowId();
+
+		$modelName = $this->_object->getModelName();
+
+		return Admin_Form_Entity::factory('Script')
+			->value("$(function (){
+				mainFormLocker.unlock();
+				$.adminLoad({ path: '/admin/media/index.php', additionalParams: 'entity_id=" . $this->_object->id . "&type=" . $modelName . "&dataset_id=" . $this->getDatasetId() . "&parentWindowId=" . $windowId . "&_module=0', windowId: '{$windowId}-media-items', loadingScreen: false });
+			});");
 	}
 
 	/**
@@ -1698,13 +1799,26 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 	 * @param Informationsystem_Item_Model $oInformationsystem_Item item
 	 * @return array
 	 */
-	protected function _fillShortcutGroupList($oInformationsystem_Item)
+	protected function _fillShortcutGroupList($oObject)
 	{
 		$aReturnArray = array();
 
-		$oInformationsystem = $oInformationsystem_Item->Informationsystem;
+		$oInformationsystem = $oObject->Informationsystem;
 
-		$aShortcuts = $oInformationsystem->Informationsystem_Items->getAllByShortcut_id($oInformationsystem_Item->id, FALSE);
+		$modelName = $oObject->getModelName();
+
+		switch ($modelName)
+		{
+			case 'shop_item':
+				$oObjects = $oInformationsystem->Informationsystem_Items;
+			break;
+			case 'shop_group':
+			default:
+				$oObjects = $oInformationsystem->Informationsystem_Groups;
+			break;
+		}
+
+		$aShortcuts = $oObjects->getAllByShortcut_id($oObject->id, FALSE);
 		foreach ($aShortcuts as $oShortcut)
 		{
 			$oInformationsystem_Group = $oShortcut->Informationsystem_Group;

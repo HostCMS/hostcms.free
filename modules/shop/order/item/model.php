@@ -9,13 +9,16 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * 0 - Товар
  * 1 - Доставка
  * 2 - Пополнение лицевого счета
- * 3 - Списание бонусов в счет оплаты счета
+ * 3 - Скидка от суммы заказа
+ * 4 - Скидка по дисконтной карте
+ * 5 - Списание бонусов
+ * 6 - Частичная оплата с лицевого счета
+ * 7 - Услуга
  *
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Order_Item_Model extends Core_Entity
 {
@@ -388,7 +391,7 @@ class Shop_Order_Item_Model extends Core_Entity
 	 */
 	public function getTax()
 	{
-		return Shop_Controller::instance()->round($this->price * $this->rate / 100);
+		return Shop_Controller::instance()->round($this->price * $this->rate / (100 + $this->rate));
 	}
 
 	/**
@@ -397,7 +400,7 @@ class Shop_Order_Item_Model extends Core_Entity
 	 */
 	public function getPrice()
 	{
-		return Shop_Controller::instance()->round($this->price + $this->getTax());
+		return Shop_Controller::instance()->round($this->price);
 	}
 
 	/**
@@ -408,7 +411,7 @@ class Shop_Order_Item_Model extends Core_Entity
 	{
 		return Shop_Controller::instance()->round(
 			// Цена каждого товара откругляется
-			Shop_Controller::instance()->round($this->price + $this->getTax()) * $this->quantity
+			$this->getPrice() * $this->quantity
 		);
 	}
 
@@ -436,6 +439,24 @@ class Shop_Order_Item_Model extends Core_Entity
 			: $showXmlProperties;
 
 		$this->_xmlSortPropertiesValues = $xmlSortPropertiesValues;
+
+		return $this;
+	}
+
+	/**
+	 * Show media in XML
+	 * @var boolean
+	 */
+	protected $_showXmlMedia = FALSE;
+
+	/**
+	 * Show properties in XML
+	 * @param mixed $showXmlProperties array of allowed properties ID or boolean
+	 * @return self
+	 */
+	public function showXmlMedia($showXmlMedia = TRUE)
+	{
+		$this->_showXmlMedia = $showXmlMedia;
 
 		return $this;
 	}
@@ -483,14 +504,17 @@ class Shop_Order_Item_Model extends Core_Entity
 				$oShop_Item
 					->clearEntities()
 					->cartQuantity($this->quantity)
-					->showXmlProperties($this->_showXmlProperties, $this->_xmlSortPropertiesValues);
+					->showXmlProperties($this->_showXmlProperties, $this->_xmlSortPropertiesValues)
+					->showXmlMedia($this->_showXmlMedia);
 
 				// Parent item for modification
 				if ($oShop_Item->modification_id)
 				{
 					$oModification = Core_Entity::factory('Shop_Item')->find($oShop_Item->modification_id);
 					!is_null($oModification->id) && $oShop_Item->addEntity(
-						$oModification->showXmlProperties($this->_showXmlProperties, $this->_xmlSortPropertiesValues)
+						$oModification
+							->showXmlProperties($this->_showXmlProperties, $this->_xmlSortPropertiesValues)
+							->showXmlMedia($this->_showXmlMedia)
 					);
 				}
 

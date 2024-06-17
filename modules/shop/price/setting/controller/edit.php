@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -286,7 +285,7 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 					? $oShop_Item->Shop_Item
 					: $oShop_Item;
 
-				$currencyName = $oShop_Item->Shop_Currency->sign != ''
+				$currencyName = $oShop_Item->shop_currency_id && $oShop_Item->Shop_Currency->sign != ''
 					? htmlspecialchars($oShop_Item->Shop_Currency->sign)
 					: '<i class="fa fa-exclamation-triangle darkorange" title="' . Core::_('Shop_Item.shop_item_not_currency') . '"></i>';
 

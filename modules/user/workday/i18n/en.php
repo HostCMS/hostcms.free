@@ -31,4 +31,9 @@ return array(
 	'fio' => 'Name',
 	'days' => 'Days',
 	'hours' => 'Hours',
+	'date' => 'Date',
+	'begin' => 'Start time',
+	'end' => 'End time',
+	'approved' => 'Approved',
+	'model_name' => 'Employees, working hours',
 );

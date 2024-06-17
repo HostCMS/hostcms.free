@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Cart_Model extends Core_Entity
 {
@@ -292,6 +291,41 @@ class Shop_Cart_Model extends Core_Entity
 	}
 
 	/**
+	 * Show modifications data in XML
+	 * @var boolean
+	 */
+	protected $_showXmlModifications = FALSE;
+
+	/**
+	 * Add modifications XML to item
+	 * @param boolean $showXmlModifications mode
+	 * @return self
+	 */
+	public function showXmlModifications($showXmlModifications = TRUE)
+	{
+		$this->_showXmlModifications = $showXmlModifications;
+		return $this;
+	}
+
+	/**
+	 * Show media in XML
+	 * @var boolean
+	 */
+	protected $_showXmlMedia = FALSE;
+
+	/**
+	 * Show properties in XML
+	 * @param mixed $showXmlProperties array of allowed properties ID or boolean
+	 * @return self
+	 */
+	public function showXmlMedia($showXmlMedia = TRUE)
+	{
+		$this->_showXmlMedia = $showXmlMedia;
+
+		return $this;
+	}
+
+	/**
 	 * Get XML for entity and children entities
 	 * @return string
 	 * @hostcms-event shop_cart.onBeforeRedeclaredGetXml
@@ -333,6 +367,8 @@ class Shop_Cart_Model extends Core_Entity
 			->showXmlSpecialprices($this->_showXmlSpecialprices)
 			->showXmlAssociatedItems($this->_showXmlAssociatedItems)
 			->showXmlWarehousesItems($this->_showXmlWarehousesItems)
+			->showXmlMedia($this->_showXmlMedia)
+			->showXmlModifications($this->_showXmlModifications)
 			->cartQuantity($this->quantity);
 
 		// Parent item for modification

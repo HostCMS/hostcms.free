@@ -9,6 +9,7 @@ return array(
 	'id' => 'Form field id',
 	'name' => 'Name',
 	'icon' => '<acronym title="CSS style icon for the action in the action list, e.g. fa fa-pencil">Icon</acronym>',
+	'color' => '<acronym title="CSS class, e.g. success">Color</acronym>',
 	'sorting' => 'Sort order',
 	'edit_success' => 'Form action section added!',
 	'edit_error' => 'Error! Form action section not added!',

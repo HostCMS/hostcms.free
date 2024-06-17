@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -51,7 +50,7 @@ $bShow_subs = !is_null(Core_Array::getGet('show_subs'));
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title(Core::_('Event.events_title'))
@@ -67,6 +66,8 @@ if ($bShow_subs && $parent_id)
 		->addView('event', 'Event_Controller_Related_Event')
 		->view('event');
 }
+
+$oAdmin_Form_Controller->showTopFilterTags = 'event';
 
 $windowId = $oAdmin_Form_Controller->getWindowId();
 
@@ -143,6 +144,43 @@ if (Core_Array::getPost('id') && (Core_Array::getPost('target_id') || Core_Array
 	Core::showJson($aJSON);
 }
 
+if (!is_null(Core_Array::getRequest('add_checklist')))
+{
+	$index = Core_Array::getPost('index', 0, 'int');
+	ob_start();
+	echo Event_Checklist_Controller::addBlock($oAdmin_Form_Controller, $index, 'new_checklist');
+	Core::showJson(
+		array(
+			'html' => ob_get_clean()
+		)
+	);
+}
+
+if (!is_null(Core_Array::getRequest('load_checklists')))
+{
+	$content = '';
+
+	$event_id = Core_Array::getPost('event_id', 0, 'int');
+	$oEvent = Core_Entity::factory('Event')->getById($event_id);
+
+	if (!is_null($oEvent))
+	{
+		ob_start();
+		$aEvent_Checklists = $oEvent->Event_Checklists->findAll(FALSE);
+		foreach ($aEvent_Checklists as $oEvent_Checklist)
+		{
+			echo Event_Checklist_Controller::addBlock($oAdmin_Form_Controller, $oEvent_Checklist->id, 'checklist', $oEvent_Checklist);
+		}
+		$content = ob_get_clean();
+	}
+
+	Core::showJson(
+		array(
+			'html' => $content
+		)
+	);
+}
+
 $oCurrentUser = Core_Auth::getCurrentUser();
 
 $additionalParams = Core_Str::escapeJavascriptVariable(
@@ -157,7 +195,7 @@ $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Event.events_menu_add_event'))
 		->icon('fa fa-plus')
-		->class($bShow_subs && $parent_id ? 'btn btn-white' : NULL)
+		->class($bShow_subs && $parent_id ? 'btn btn-gray' : NULL)
 		->href(
 			$bShow_subs
 				? NULL
@@ -224,8 +262,8 @@ if (!$siteuser_id && !$oCurrentUser->read_only && is_null(Core_Array::getGet('hi
 				<form action="/admin/event/index.php" method="POST">
 					<div class="input-group">
 						<input type="text" name="event_name" class="form-control" placeholder="' . Core::_('Event.placeholderEventName') . '">
-						<span class="input-group-btn bg-azure bordered-azure">
-							<button id="sendForm" class="btn btn-azure" type="submit" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('addEvent', NULL, '') . '">
+						<span class="input-group-btn">
+							<button id="sendForm" class="btn btn-gray" type="submit" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('addEvent', NULL, '') . '">
 								<i class="fa fa-check no-margin"></i>
 							</button>
 						</span>
@@ -426,6 +464,11 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 $parent_id
 	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('parent_id', '=', $parent_id)));
 
+if ($oAdmin_Form_Controller->view == 'kanban')
+{
+	$oAdmin_Form_Dataset->addCondition(array('where' => array('completed', '=', 0)));
+}
+
 // Только если идет фильтрация, Контрагент TopFilter, фильтр по идентификатору
 if (isset($oAdmin_Form_Controller->request['topFilter_1582'])
 	&& $oAdmin_Form_Controller->request['topFilter_1582'] != '')
@@ -499,6 +542,24 @@ if ($siteuser_id)
 	$oAdmin_Form_Dataset->changeAction('edit', 'modal', 1);
 }
 
+if (isset($oAdmin_Form_Controller->request['topFilter_filter_tags'])
+	&& is_array($oAdmin_Form_Controller->request['topFilter_filter_tags']))
+{
+	$aValues = $oAdmin_Form_Controller->request['topFilter_filter_tags'];
+	$aValues = array_filter($aValues, 'strlen');
+
+	if (count($aValues))
+	{
+		$oAdmin_Form_Dataset->addCondition(
+			array('join' => array('tag_events', 'events.id', '=', 'tag_events.event_id'))
+		)->addCondition(
+			array('join' => array('tags', 'tags.id', '=', 'tag_events.tag_id'))
+		)->addCondition(
+			array('where' => array('tags.name', 'IN', $aValues))
+		);
+	}
+}
+
 // Список значений для фильтра и поля
 $aList = array(0 => '—');
 $aEvent_Groups = Core_Entity::factory('Event_Group')->findAll();
@@ -553,7 +614,9 @@ foreach ($aEvent_Types as $oEvent_Type)
 
 $oAdmin_Form_Dataset
 	->changeField('event_type_id', 'type', 8)
-	->changeField('event_type_id', 'list', $aList);
+	->changeField('event_type_id', 'list', $aList)
+	->changeField('important', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'))
+	->changeField('completed', 'list', "0=" . Core::_('Event.in_process') . "\n" . "1=" . Core::_('Event.complete') . "\n" . "-1=" . Core::_('Event.failed'));
 
 $aEvent_Statuses = Core_Entity::factory('Event_Status')->findAll(FALSE);
 $aList = array();

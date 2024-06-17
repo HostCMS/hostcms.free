@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once ('../bootstrap.php');
 
@@ -69,7 +68,7 @@ elseif (isset($_SESSION['skin']))
 
 $oAdmin_Answer = Core_Skin::instance()->answer();
 
-if (!is_null(Core_Array::getPost('submit')))
+if (!is_null(Core_Array::getPost('submit')) && !Core_Auth::logged())
 {
 	$bDeviceTracking = isset($_POST['ip']);
 
@@ -85,10 +84,28 @@ if (!is_null(Core_Array::getPost('submit')))
 			'secure' => $aConfig['secure'],
 			'httponly' => $aConfig['httponly'])
 		);*/
-		
-		$authResult = Core_Auth::login(
-			Core_Array::getPost('login', '', 'str'), Core_Array::getPost('password', '', 'str'), $bDeviceTracking
-		);
+
+		if (!Core_Security::checkCsrf(Core_Array::getPost('secret_csrf', '', 'str'), Core::$mainConfig['csrf_lifetime']))
+		{
+			switch (Core_Security::getCsrfError())
+			{
+				case 'wrong-length':
+					throw new Core_Exception(Core::_('Core.csrf_wrong_token'), array(), 0, FALSE);
+				break;
+				case 'wrong-token':
+				default:
+					throw new Core_Exception(Core::_('Core.csrf_wrong_token'), array(), 0, FALSE);
+				break;
+				case 'timeout':
+					throw new Core_Exception(Core::_('Core.csrf_token_timeout'), array(), 0, FALSE);
+				break;
+			}
+		}
+
+		$login = Core_Array::getPost('login', '', 'str');
+		$password = Core_Array::getPost('password', '', 'str');
+
+		$authResult = Core_Auth::login($login, $password, $bDeviceTracking);
 
 		Core_Auth::setCurrentSite();
 	}
@@ -111,11 +128,11 @@ if (!Core_Auth::logged())
 			Core_Log::instance()->clear()
 				->status(Core_Log::$ERROR)
 				//->notify(FALSE)
-				->write(Core::_('Core.error_log_authorization_error'));
+				->write(Core::_('Core.error_log_authorization_error', $login, FALSE));
 
 			$oAdmin_Answer->message(
 				Core_Message::get(
-					Core::_('Admin.authorization_error_valid_user', Core_Array::get($_SERVER, 'REMOTE_ADDR', 'undefined'))
+					Core::_('Admin.authorization_error_valid_user', $login, Core_Array::get($_SERVER, 'REMOTE_ADDR', 'undefined'))
 				, 'error')
 			);
 		}

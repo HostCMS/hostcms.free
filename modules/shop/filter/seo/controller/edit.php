@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -167,6 +166,18 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 
 				$oMainRowButton->add(Admin_Form_Entity::factory('Code')->html(ob_get_clean()));
 
+				$linkedObject = Core_Entity::factory('Shop_Item_Property_List', $this->_object->shop_id);
+
+				// Массив свойств товаров, разрешенных для группы $shop_group_id
+				$aProperties = $linkedObject->getPropertiesForGroup($this->_object->shop_group_id);
+
+				$aAvailableProperyIDs = array();
+				foreach ($aProperties as $oProperty)
+				{
+					$aAvailableProperyIDs[] = $oProperty->id;
+				}
+
+				// Заданные опции
 				$aShop_Filter_Seo_Properties = $this->_object->Shop_Filter_Seo_Properties->findAll(FALSE);
 
 				ob_start();
@@ -187,94 +198,93 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 
 								if (in_array($oProperty->type, $aAvailableProperties))
 								{
-									$onclick = $this->_Admin_Form_Controller->getAdminActionLoadAjax('/admin/shop/filter/seo/index.php', 'deleteCondition', NULL, 0, $this->_object->id, "shop_filter_seo_property_id={$oShop_Filter_Seo_Property->id}");
+									$csrf = Core_Security::getCsrfToken();
+									$onclick = $this->_Admin_Form_Controller->getAdminActionLoadAjax('/admin/shop/filter/seo/index.php', 'deleteCondition', NULL, 0, $this->_object->id, "shop_filter_seo_property_id={$oShop_Filter_Seo_Property->id}&secret_csrf={$csrf}");
 
 									?>
 									<div class="dd">
 										<ol class="dd-list">
-											<li class="dd-item bordered-palegreen" data-sorting="<?php echo $key?>" data-id="<?php echo $oShop_Filter_Seo_Property->id?>">
+											<li class="dd-item bordered-palegreen<?php echo !in_array($oProperty->id, $aAvailableProperyIDs) ? ' opacity' : ''?>" data-sorting="<?php echo $key?>" data-id="<?php echo $oShop_Filter_Seo_Property->id?>">
 												<div class="dd-handle">
 													<div id="<?php echo $oShop_Filter_Seo_Property->id?>" class="form-horizontal">
 														<div class="form-group no-margin-bottom">
 															<label for="property_value<?php echo $oShop_Filter_Seo_Property->id?>" class="col-xs-12 col-sm-2 control-label text-align-left"><?php echo htmlspecialchars($oProperty->name)?></label>
-															<!-- <div class="col-xs-12 col-sm-4 property-data"> -->
-																<?php
-																switch ($oProperty->type)
-																{
-																	case 3:
-																		if (Core::moduleIsActive('list'))
+															<?php
+															switch ($oProperty->type)
+															{
+																case 3:
+																	if (Core::moduleIsActive('list'))
+																	{
+																		$aList_Items = $oProperty->List->List_Items->findAll(FALSE);
+
+																		$aValues = array();
+																		foreach ($aList_Items as $oList_Item)
 																		{
-																			$aList_Items = $oProperty->List->List_Items->findAll(FALSE);
-
-																			$aValues = array();
-																			foreach ($aList_Items as $oList_Item)
-																			{
-																				$aValues[$oList_Item->id] = $oList_Item->value;
-																			}
-
-																			$oAdmin_Form_Entity = Admin_Form_Entity::factory('Select')
-																				->options($aValues);
-
-																			$value = $oShop_Filter_Seo_Property->value;
+																			$aValues[$oList_Item->id] = $oList_Item->value;
 																		}
-																	break;
-																	case 7:
-																		$value = $oShop_Filter_Seo_Property->value;
 
-																		$oAdmin_Form_Entity = Admin_Form_Entity::factory('Checkbox')
-																			->checked(intval($value));
-																	break;
-																	case 8: // Date
-																		$oAdmin_Form_Entity = Admin_Form_Entity::factory('Date');
-
-																		$value = $oShop_Filter_Seo_Property->value == '0000-00-00 00:00:00'
-																			? ''
-																			: Core_Date::sql2date($oShop_Filter_Seo_Property->value);
-
-																		$value_to = $oShop_Filter_Seo_Property->value_to == '0000-00-00 00:00:00'
-																			? ''
-																			: Core_Date::sql2date($oShop_Filter_Seo_Property->value_to);
-																	break;
-																	case 9: // Datetime
-																		$oAdmin_Form_Entity = Admin_Form_Entity::factory('Datetime');
-
-																		$value = $oShop_Filter_Seo_Property->value == '0000-00-00 00:00:00'
-																			? ''
-																			: Core_Date::sql2datetime($oShop_Filter_Seo_Property->value);
-
-																		$value_to = $oShop_Filter_Seo_Property->value_to == '0000-00-00 00:00:00'
-																			? ''
-																			: Core_Date::sql2datetime($oShop_Filter_Seo_Property->value_to);
-																	break;
-																	default:
-																		$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input');
+																		$oAdmin_Form_Entity = Admin_Form_Entity::factory('Select')
+																			->options($aValues);
 
 																		$value = $oShop_Filter_Seo_Property->value;
-																		$value_to = $oShop_Filter_Seo_Property->value_to;
-																}
+																	}
+																break;
+																case 7:
+																	$value = $oShop_Filter_Seo_Property->value;
 
+																	$oAdmin_Form_Entity = Admin_Form_Entity::factory('Checkbox')
+																		->checked(intval($value));
+																break;
+																case 8: // Date
+																	$oAdmin_Form_Entity = Admin_Form_Entity::factory('Date');
+
+																	$value = $oShop_Filter_Seo_Property->value == '0000-00-00 00:00:00'
+																		? ''
+																		: Core_Date::sql2date($oShop_Filter_Seo_Property->value);
+
+																	$value_to = $oShop_Filter_Seo_Property->value_to == '0000-00-00 00:00:00'
+																		? ''
+																		: Core_Date::sql2date($oShop_Filter_Seo_Property->value_to);
+																break;
+																case 9: // Datetime
+																	$oAdmin_Form_Entity = Admin_Form_Entity::factory('Datetime');
+
+																	$value = $oShop_Filter_Seo_Property->value == '0000-00-00 00:00:00'
+																		? ''
+																		: Core_Date::sql2datetime($oShop_Filter_Seo_Property->value);
+
+																	$value_to = $oShop_Filter_Seo_Property->value_to == '0000-00-00 00:00:00'
+																		? ''
+																		: Core_Date::sql2datetime($oShop_Filter_Seo_Property->value_to);
+																break;
+																default:
+																	$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input');
+
+																	$value = $oShop_Filter_Seo_Property->value;
+																	$value_to = $oShop_Filter_Seo_Property->value_to;
+															}
+
+															$oAdmin_Form_Entity
+																->id('property_value' . $oShop_Filter_Seo_Property->id)
+																->name('property_value' . $oShop_Filter_Seo_Property->id)
+																->class('form-control')
+																->divAttr(array('class' => 'col-xs-12 col-sm-4 property-data'))
+																->value($value)
+																->controller($this->_Admin_Form_Controller)
+																->execute();
+
+															// от-до
+															if ($oProperty->Shop_Item_Property->filter == 6)
+															{
 																$oAdmin_Form_Entity
-																	->id('property_value' . $oShop_Filter_Seo_Property->id)
-																	->name('property_value' . $oShop_Filter_Seo_Property->id)
-																	->class('form-control')
-																	->divAttr(array('class' => 'col-xs-12 col-sm-4 property-data'))
-																	->value($value)
+																	->id('property_value_to' . $oShop_Filter_Seo_Property->id)
+																	->name('property_value_to' . $oShop_Filter_Seo_Property->id)
+																	->divAttr(array('class' => 'col-xs-12 col-sm-4'))
+																	->value($value_to)
 																	->controller($this->_Admin_Form_Controller)
 																	->execute();
-
-																// от-до
-																if ($oProperty->Shop_Item_Property->filter == 6)
-																{
-																	$oAdmin_Form_Entity
-																		->id('property_value_to' . $oShop_Filter_Seo_Property->id)
-																		->name('property_value_to' . $oShop_Filter_Seo_Property->id)
-																		->divAttr(array('class' => 'col-xs-12 col-sm-4'))
-																		->value($value_to)
-																		->controller($this->_Admin_Form_Controller)
-																		->execute();
-																}
-																?>
-															<!-- </div> -->
+															}
+															?>
 															<a class="delete-associated-item" onclick="<?php echo $onclick?>"><i class="fa fa-times-circle darkorange"></i></a>
 														</div>
 														<input type="hidden" name="property_value_sorting<?php echo $oShop_Filter_Seo_Property->id?>" value="<?php echo $oShop_Filter_Seo_Property->sorting?>"/>
@@ -552,7 +562,8 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 			$oShopGroupInput = Admin_Form_Entity::factory('Input')
 				->caption(Core::_($i18n . '.' . $fieldName))
 				->divAttr(array('class' => 'form-group col-xs-12'))
-				->name('shop_group_name');
+				->name('shop_group_name')
+				->placeholder(Core::_('Admin.autocomplete_placeholder'));
 
 			$this->_object->$fieldName
 				&& $oShopGroupInput->value($oShop_Group->name . ' [' . $oShop_Group->id . ']');
@@ -581,9 +592,10 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 						minLength: 1,
 						create: function() {
 							$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
-								return $('<li></li>')
+								return $('<li class=\"autocomplete-suggestion\"></li>')
 									.data('item.autocomplete', item)
-									.append($('<a>').text(item.label))
+									.append($('<div class=\"name\">').html($.escapeHtml(item.label)))
+									.append($('<div class=\"id\">').html('[' + $.escapeHtml(item.id) + ']'))
 									.appendTo(ul);
 							}
 

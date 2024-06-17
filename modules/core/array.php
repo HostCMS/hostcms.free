@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Array
 {
@@ -30,7 +29,7 @@ class Core_Array
 	 * @param array $array array
 	 * @param string $key key
 	 * @param mixed $defaultValue default value
-	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim', 'array'
+	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim', 'array', 'filterVarInt', 'filterVarFloat', 'filterVarBoolean'
 	 * @return mixed
 	 */
 	static public function get($array, $key, $defaultValue = NULL, $filter = NULL)
@@ -46,7 +45,7 @@ class Core_Array
 	/**
 	 * Filter Value
 	 * @param mixed $value
-	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim', 'array'
+	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim', 'array', 'filterVarInt', 'filterVarFloat', 'filterVarBoolean'
 	 * @return mixed
 	 */
 	static protected function _filter($value, $filter)
@@ -74,11 +73,17 @@ class Core_Array
 						? intval($value)
 						: 0;
 				break;
+				case 'filterVarInt':
+					$value = filter_var($value, FILTER_VALIDATE_INT);
+				break;
 				case 'float':
 				case 'floatval':
 					$value = is_scalar($value)
 						? floatval($value)
 						: 0.0;
+				break;
+				case 'filterVarFloat':
+					$value = filter_var($value, FILTER_VALIDATE_FLOAT);
 				break;
 				case 'bool':
 				case 'boolean':
@@ -89,6 +94,9 @@ class Core_Array
 							: (bool)$value
 						)
 						: FALSE;
+				break;
+				case 'filterVarBoolean':
+					$value = filter_var($value, FILTER_VALIDATE_BOOLEAN);
 				break;
 				case 'array':
 					$value = is_array($value)
@@ -185,7 +193,7 @@ class Core_Array
 	{
 		return self::get($_GET, $key, $defaultValue, $filter);
 	}
-	
+
 	/**
 	 * Get value for $key in array $_COOKIE. If value does not exist will return defaultValue.
 	 *
@@ -324,7 +332,7 @@ class Core_Array
 
 		return $array;
 	}
-	
+
 	/**
 	 * Возвращает случайное значение из массива
 	 *
@@ -486,7 +494,7 @@ class Core_Array
 
 		return implode(', ', $aReturn);
 	}
-	
+
 	/**
 	 * Find value by key in multidimensional array
 	 * @param array $array
@@ -516,5 +524,42 @@ class Core_Array
 		}
 
 		return NULL;
+	}
+
+	/**
+	 * Checks whether a given array is a list and values are scalar
+	 * @param array $array
+	 * @return bool
+	 */
+	static public function isList(array $array)
+	{
+		$bIsList = function_exists('array_is_list')
+			? array_is_list($array)
+			: ($array === array() || (array_keys($array) === range(0, count($array) - 1)));
+
+		return $bIsList && ($array === array_filter($array, 'is_scalar'));
+	}
+
+	/**
+	 * Change $oldKey to the $newKey with $newValue (optional)
+	 * @param array $array
+	 * @param mixed $oldKey Old Key
+	 * @param mixed $newKey New Key
+	 * @param mixed $newValue New Value, if NULL the old value is used
+	 */
+	static public function changeKey(array $array, $oldKey, $newKey, $newValue = NULL)
+	{
+		if (!array_key_exists($oldKey, $array))
+		{
+			return $array;
+		}
+
+		is_null($newValue) && $newValue = $array[$oldKey];
+
+		$keyPosition = array_search($oldKey, array_keys($array));
+
+		return array_slice($array, 0, $keyPosition)
+			+ array($newKey => $newValue)
+			+ array_slice($array, $keyPosition + 1);
 	}
 }
