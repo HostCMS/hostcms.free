@@ -1,12 +1,5 @@
 <?php
-/**
- * Online shop.
- *
- * @package HostCMS
- * @subpackage Shop
- * @version 7.x
- * @copyright © 2005-2024 ООО 'Хостмэйк' (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'Warehouses',
 	'main_menu_warehouses_list' => 'Warehouses',

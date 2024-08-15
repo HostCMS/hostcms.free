@@ -21,8 +21,8 @@ class Shop_Warehouse_Purchasereturn_Controller_Edit extends Admin_Form_Action_Co
 	{
 		parent::_prepareForm();
 
-		$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0));
-		$oShop_Group = Core_Entity::factory('Shop_Group', Core_Array::getGet('shop_group_id', 0));
+		$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0, 'int'));
+		$shop_group_id = Core_Array::getGet('shop_group_id', 0, 'int');
 
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
@@ -39,10 +39,8 @@ class Shop_Warehouse_Purchasereturn_Controller_Edit extends Admin_Form_Action_Co
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oCompanyRow = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oSiteuserRow = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oRegistrationRow = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oShopItemBlock = Admin_Form_Entity::factory('Div')->class('well with-header'))
 			->add($oShopDocumentRelationRow = Admin_Form_Entity::factory('Div')->class('row'));
 
@@ -60,8 +58,7 @@ class Shop_Warehouse_Purchasereturn_Controller_Edit extends Admin_Form_Action_Co
 
 		$aCompanies = $oSite->Companies->findAll();
 
-		$aTmp = [];
-
+		$aTmp = array();
 		foreach($aCompanies as $oCompany)
 		{
 			$aTmp[$oCompany->id] = $oCompany->name;
@@ -134,10 +131,7 @@ class Shop_Warehouse_Purchasereturn_Controller_Edit extends Admin_Form_Action_Co
 							processResults: function (data) {
 								var aResults = [];
 								$.each(data, function (index, item) {
-									aResults.push({
-										"id": item.id,
-										"text": item.text
-									});
+									aResults.push(item);
 								});
 								return {
 									results: aResults
@@ -170,7 +164,6 @@ class Shop_Warehouse_Purchasereturn_Controller_Edit extends Admin_Form_Action_Co
 				->add(
 					Admin_Form_Entity::factory('Div')
 						->class('form-group col-xs-12 col-sm-6 no-padding')
-						//->add($oScriptContracts)
 						->add($oSelectSiteusers)
 						->add($oScriptSiteusers)
 				)
@@ -178,7 +171,6 @@ class Shop_Warehouse_Purchasereturn_Controller_Edit extends Admin_Form_Action_Co
 					Admin_Form_Entity::factory('Div')
 						->class('form-group col-xs-12 col-sm-6 no-padding')
 						->add($oSelectContracts)
-						//->add($oScriptContracts)
 				);
 		}
 
@@ -278,7 +270,7 @@ class Shop_Warehouse_Purchasereturn_Controller_Edit extends Admin_Form_Action_Co
 
 			if (!is_null($oModule))
 			{
-				$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, $this->_object->getEntityType(), 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
+				$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, $this->_object->getEntityType(), 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $shop_group_id);
 			}
 
 			$printlayoutsButton .= '
@@ -331,8 +323,6 @@ class Shop_Warehouse_Purchasereturn_Controller_Edit extends Admin_Form_Action_Co
 
 		$limit = 100;
 		$offset = 0;
-
-		// $createFromSupply = intval(Core_Array::getGet('createFromSupply'));
 
 		$createFrom = Core_Array::getGet('createFrom', '', 'trim');
 		$createFromId = Core_Array::getGet('createFromId', 0, 'int');
@@ -484,8 +474,6 @@ class Shop_Warehouse_Purchasereturn_Controller_Edit extends Admin_Form_Action_Co
 	 */
 	public function execute($operation = NULL)
 	{
-		// $createFromSupply = intval(Core_Array::getGet('createFromSupply'));
-
 		$createFrom = Core_Array::getGet('createFrom', '', 'trim');
 		$createFromId = Core_Array::getGet('createFromId', 0, 'int');
 
@@ -574,8 +562,6 @@ class Shop_Warehouse_Purchasereturn_Controller_Edit extends Admin_Form_Action_Co
 
 		$this->addSkipColumn('posted');
 
-		$iOldWarehouse = intval($this->_object->shop_warehouse_id);
-
 		$this->_object->user_id = intval(Core_Array::getPost('user_id'));
 
 		parent::_applyObjectProperty();
@@ -596,8 +582,6 @@ class Shop_Warehouse_Purchasereturn_Controller_Edit extends Admin_Form_Action_Co
 			$this->_object->number = $this->_object->id;
 			$this->_object->save();
 		}
-
-		$bNeedsRePost = FALSE;
 
 		$Shop_Item_Controller = new Shop_Item_Controller();
 
@@ -629,12 +613,10 @@ class Shop_Warehouse_Purchasereturn_Controller_Edit extends Admin_Form_Action_Co
 
 		if (count($aAddShopItems))
 		{
-			$bNeedsRePost = TRUE;
-
 			$script = "var jShopItemId = $(\"#{$windowId} input[name='shop_item_id\\[\\]']\"),
-						jShopItemPrice = $(\"#{$windowId} input[name='shop_item_price\\[\\]']\"),
-						jShopItemQuantity = $(\"#{$windowId} input[name='shop_item_quantity\\[\\]']\"),
-						aMapShopItemId = {};";
+				jShopItemPrice = $(\"#{$windowId} input[name='shop_item_price\\[\\]']\"),
+				jShopItemQuantity = $(\"#{$windowId} input[name='shop_item_quantity\\[\\]']\"),
+				aMapShopItemId = {};";
 
 			$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
 
@@ -700,13 +682,6 @@ class Shop_Warehouse_Purchasereturn_Controller_Edit extends Admin_Form_Action_Co
 					->execute();
 			$this->_Admin_Form_Controller->addMessage(ob_get_clean());
 		}
-
-		// Было изменение склада
-		/*$iOldWarehouse != $this->_object->shop_warehouse_id
-			&& $bNeedsRePost = TRUE;
-
-		($bNeedsRePost || !Core_Array::getPost('posted')) && $this->_object->unpost();
-		Core_Array::getPost('posted') && $this->_object->post();*/
 
 		Core_Array::getPost('posted')
 			? $this->_object->post()

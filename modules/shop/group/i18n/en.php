@@ -64,4 +64,5 @@ return array(
 	'seo_group_h1_template' => 'H1 Template',
 	'seo_item_h1_template' => 'H1 Template',
 	'changeIndexation_success' => 'The indexing of the shop group has been changed.',
+	'fields' => "User fields of groups",
 );

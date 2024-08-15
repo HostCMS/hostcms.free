@@ -235,8 +235,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 							//$iValuesCount = count($oShop_Item_Import_Csv_Controller->aCaptions);
 
 							// Генерируем массив для выпадающего списка с цветными элементами
-							$aOptions = array();
-							$aAllCaptions = array();
+							$aOptions = $aAllCaptions = array();
 
 							//for ($j = 0; $j < $iValuesCount; $j++)
 							foreach ($oShop_Item_Import_Csv_Controller->aEntities as $optionValue => $aTmpOptions)
@@ -258,11 +257,25 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 
 							$oMainTab = Admin_Form_Entity::factory('Tab')->name('main');
 
+							$oMainTab->add(
+								Admin_Form_Entity::factory('Div')
+									->class('row')
+									->add(
+										Admin_Form_Entity::factory('Span')
+											->value(Core::_('shop_exchange.clear_matches'))
+											->divAttr(array('class' => 'col-xs-12'))
+											->class('pull-right pointer underline-dashed darkgray margin-right-20')
+											->onclick('$("#' . $windowId . ' select[id^=field_id_]").val("").trigger("change")')
+									)
+							);
+
+							$aForbiddenFields = array(Core::_('Shop_Exchange.item_full_path'));
+							$aForbiddenFields = array_map('mb_strtolower', $aForbiddenFields);
+
 							for ($i = 0; $i < $iFieldCount; $i++)
 							{
-								$oCurrentRow = Admin_Form_Entity::factory('Div')->class('row');
-
-								$oCurrentRow
+								$oCurrentRow = Admin_Form_Entity::factory('Div')
+									->class('row')
 									->add(Admin_Form_Entity::factory('Span')
 										->value($aCsvLine[$i])
 										->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
@@ -286,6 +299,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 									if (!$aAlreadySelected && ($aCsvLine[$i] == $sCaption
 										|| (strlen($sCaption) > 0 && strlen($aCsvLine[$i]) > 0
 											&& (strpos($aCsvLine[$i], $sCaption) !== FALSE || strpos($sCaption, $aCsvLine[$i]) !== FALSE)
+											&& !in_array($aCsvLine[$i], $aForbiddenFields)
 											// Чтобы не было срабатывания "Город" -> "Городской телефон"
 											// Если есть целиком подходящее поле
 											&& !array_search($aCsvLine[$i], $aAllCaptions))
@@ -338,6 +352,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('search_event_indexation')->value(isset($_POST['search_event_indexation']) ? 1 : 0))
 								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('import_price_action_delete_image')->value(isset($_POST['import_price_action_delete_image']) ? 1 : 0))
 								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('delete_property_values')->value(isset($_POST['delete_property_values']) ? 1 : 0))
+								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('delete_field_values')->value(isset($_POST['delete_field_values']) ? 1 : 0))
 								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('delete_unsent_modifications_by_properties')->value(isset($_POST['delete_unsent_modifications_by_properties']) ? 1 : 0))
 							);
 
@@ -464,6 +479,7 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 				->searchIndexation(Core_Array::getPost('search_event_indexation'))
 				->deleteImage(Core_Array::getPost('import_price_action_delete_image') == 1)
 				->deletePropertyValues(Core_Array::getPost('delete_property_values') == 1)
+				->deleteFieldValues(Core_Array::getPost('delete_field_values') == 1)
 				->deleteUnsentModificationsByProperties(Core_Array::getPost('delete_unsent_modifications_by_properties') == 1);
 
 			if (Core_Array::getPost('firstlineheader', 0))
@@ -728,6 +744,13 @@ else
 		->value(1))
 	)
 	->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
+		->name("delete_field_values")
+		->class('form-control colored-danger times')
+		->caption(Core::_('Shop_Item.delete_field_values'))
+		->divAttr(array('class' => 'form-group col-xs-12 hidden-1'))
+		->value(1))
+	)
+	->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
 		->name("delete_unsent_modifications_by_properties")
 		->class('form-control colored-danger times')
 		->caption(Core::_('Shop_Item.delete_unsent_modifications_by_properties'))
@@ -804,13 +827,11 @@ if ($sOnClick)
 $oAdmin_Form_Entity_Form->add(
 	Core_Html_Entity::factory('Script')
 		->type("text/javascript")
-		->value("
-			(function($){
-				$('select.import-select').each(function(index, obj){
-					setIColor(obj);
-				})
-			})(jQuery);
-		")
+		->value("(function($){
+			$('select.import-select').each(function(index, obj){
+				setIColor(obj);
+			})
+		})(jQuery);")
 );
 
 $oAdmin_Form_Entity_Form->execute();

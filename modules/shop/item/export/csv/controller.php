@@ -39,13 +39,13 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 			&& function_exists('set_time_limit') && ini_get('safe_mode') != 1 && @set_time_limit(3600);
 	}
 
-	/** 
+	/**
 	 * Get File Name
 	 * @var string|NULL
 	 */
 	//protected $_fileName = NULL;
 
-	/** 
+	/**
 	 * Get File Name
 	 * @return string
 	 */
@@ -124,7 +124,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 				$href = method_exists($object, 'getItemHref')
 					? $object->getItemHref()
 					: $object->getGroupHref();
-				
+
 				$result = $oProperty_Value->file == ''
 					? ''
 					: $oProperty_Value
@@ -154,6 +154,71 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 				$result = $oProperty_Value->value;
 
 				Core_Event::notify(get_class($this) . '.onGetPropertyValueDefault', $this, array($oProperty, $oProperty_Value, $object));
+
+				if (!is_null(Core_Event::getLastReturn()))
+				{
+					$result = Core_Event::getLastReturn();
+				}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Get value of Property_Value
+	 * @param Property_Model $oField
+	 * @param mixed $oField_Value
+	 * @param mixed $object
+	 * @return string
+	 * @hostcms-event Shop_Item_Export_Csv_Controller.onGetFieldValueDefault
+	 */
+	protected function _getFieldValue($oField, $oField_Value, $object)
+	{
+		switch ($oField->type)
+		{
+			case 0: // Int
+			case 1: // String
+			case 4: // Textarea
+			case 6: // Wysiwyg
+			case 7: // Checkbox
+			case 10: // Hidden field
+			case 11: // Float
+				$result = $oField_Value->value;
+			break;
+			case 2: // File
+				$href = method_exists($object, 'getItemHref')
+					? $object->getItemHref()
+					: $object->getGroupHref();
+
+				$result = $oField_Value->file == ''
+					? ''
+					: $oField_Value
+						->setHref($href)
+						->getLargeFileHref();
+			break;
+			case 3: // List
+				$result = $this->_getListValue($oField_Value->value);
+			break;
+			case 5: // Informationsystem
+				$result = $oField_Value->value
+					? $oField_Value->Informationsystem_Item->name
+					: '';
+			break;
+			case 8: // Date
+				$result = Core_Date::sql2date($oField_Value->value);
+			break;
+			case 9: // Datetime
+				$result = Core_Date::sql2datetime($oField_Value->value);
+			break;
+			case 12: // Shop
+				$result = $oField_Value->value
+					? $oField_Value->Shop_Item->name
+					: '';
+			break;
+			default:
+				$result = $oField_Value->value;
+
+				Core_Event::notify(get_class($this) . '.onGetFieldValueDefault', $this, array($oField, $oField_Value, $object));
 
 				if (!is_null(Core_Event::getLastReturn()))
 				{

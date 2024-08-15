@@ -136,5 +136,7 @@ return array(
 	'file_does_not_specified' => 'Файл не указан',
 	'shortcut' => 'Ярлык',
 
-	'closed' => 'Закрыт'
+	'closed' => 'Закрыт',
+	'export_fields_allow_items' => 'Экспортировать пользовательские поля элементов',
+	'export_fields_allow_groups' => 'Экспортировать пользовательские поля групп',
 );

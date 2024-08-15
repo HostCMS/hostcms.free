@@ -152,6 +152,21 @@ class Shop_Purchase_Discount_Coupon_Controller_Edit extends Admin_Form_Action_Co
 	}
 
 	/**
+	 * Processing of the form. Apply object fields.
+	 * @hostcms-event Shop_Purchase_Discount_Coupon_Controller_Edit.onAfterRedeclaredApplyObjectProperty
+	 */
+	protected function _applyObjectProperty()
+	{
+		parent::_applyObjectProperty();
+
+		Core::moduleIsActive('wysiwyg') && Wysiwyg_Controller::uploadImages($this->_formValues, $this->_object, $this->_Admin_Form_Controller);
+
+		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
+
+		return $this;
+	}
+
+	/**
 	 * Redirect groups tree
 	 * @var array
 	 */
@@ -161,7 +176,7 @@ class Shop_Purchase_Discount_Coupon_Controller_Edit extends Admin_Form_Action_Co
 	 * Build visual representation of group tree
 	 * @param int $iShopId shop ID
 	 * @param int $iDirParentId parent ID
-	 * @param int $aExclude exclude group ID
+	 * @param array $aExclude exclude group ID
 	 * @param int $iLevel current nesting level
 	 * @return array
 	 */

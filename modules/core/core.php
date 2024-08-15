@@ -219,7 +219,7 @@ class Core
 			'backendContentSecurityPolicy' => "default-src 'self' www.hostcms.ru www.youtube.com youtube.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: *.cloudflare.com *.kaspersky-labs.com; img-src 'self' chart.googleapis.com data: blob: www.hostcms.ru; font-src 'self'; connect-src 'self' blob:; style-src 'self' 'unsafe-inline'"
 		);
 	}
-	
+
 	static public function addContentSecurityPolicy($directive, $value)
 	{
 		$aDirectives = array();
@@ -228,14 +228,14 @@ class Core
 		foreach ($aTmp as $sTmp)
 		{
 			//$aExp = explode(' ', $sTmp, 2);
-			
+
 			if (strpos($sTmp, $directive) === 0)
 			{
 				$sTmp .= ' ' . $value;
 			}
 			$aDirectives[] = $sTmp;
 		}
-		
+
 		self::$mainConfig['backendContentSecurityPolicy'] = implode('; ', $aDirectives);
 	}
 
@@ -916,6 +916,29 @@ class Core
 	static public function isIIS()
 	{
 		return strpos(strtolower(Core_Array::get($_SERVER, 'SERVER_SOFTWARE')), 'microsoft-iis') !== FALSE;
+	}
+
+	/**
+	 * Fetch all HTTP request headers
+	 * @return array
+	 */
+	static public function getallheaders()
+	{
+		if (function_exists('getallheaders'))
+		{
+			return getallheaders();
+		}
+
+		$aHeaders = array();
+		foreach ($_SERVER as $name => $value)
+		{
+			if (substr($name, 0, 5) == 'HTTP_')
+			{
+				$aHeaders[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+			}
+		}
+
+		return $aHeaders;
 	}
 
 	/**

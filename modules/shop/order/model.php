@@ -1441,7 +1441,6 @@ class Shop_Order_Model extends Core_Entity
 				->where('notification_subscribers.entity_id', '=', $this->Shop->id);
 
 			$aNotification_Subscribers = $oNotification_Subscribers->findAll(FALSE);
-
 			foreach ($aNotification_Subscribers as $oNotification_Subscriber)
 			{
 				$aUserIDs[] = $oNotification_Subscriber->user_id;
@@ -3493,7 +3492,7 @@ class Shop_Order_Model extends Core_Entity
 	/**
 	 * Get property value for SEO-templates
 	 * @param int $property_id Property ID
-	 * @param strint $format string format, e.g. '%s: %s'. %1$s - Property Name, %2$s - List of Values
+	 * @param string $format string format, e.g. '%s: %s'. %1$s - Property Name, %2$s - List of Values
 	 * @param string $separator separator
 	 * @return string
 	 */

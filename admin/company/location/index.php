@@ -122,9 +122,7 @@ if ($parent_id)
 $oAdmin_Form_Controller->addEntity($oAdminFormEntityBreadcrumbs);
 
 // Действие редактирования
-$oAdminFormAction = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdminFormAction = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdminFormAction && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -140,9 +138,7 @@ if ($oAdminFormAction && $oAdmin_Form_Controller->getAction() == 'edit')
 }
 
 // Действие "Применить"
-$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdminFormActionApply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {

@@ -567,7 +567,7 @@ class Core_Str
 	 *
 	 * @param int $int число, с которым связано существительное
 	 * @param string $word основа слова
-	 * @param array $aEndings массив окончаний слова
+	 * @param array $aEndings массив окончаний слова c 0 до 9
 	 * <code>
 	 * <?php
 	 *
@@ -734,7 +734,7 @@ class Core_Str
 
 		return $size . ' ' . $textSize;
 	}
-	
+
 	/**
 	 * Convert count from int to K thousands, M million and B billion suffix, e.g. 102010 => 102K
 	 *
@@ -1818,7 +1818,7 @@ class Core_Str
 
 		$text = implode("\n", array_map('rtrim', explode("\n", $text)));
 
-		$text = preg_replace("'\n\s+\n|[\n]{3,}'", "\n\n", $text);
+		$text = preg_replace("/\n\s+\n|[\n]{3,}/", "\n\n", $text);
 
 		return trim($text);
 	}
@@ -1831,6 +1831,7 @@ class Core_Str
 	static public function convertSpaces($str)
 	{
 		/*
+		" "						NBSP
 		U+1680		e1 9A 80	Ogham Space Mark
 		U+2000	 	e2 80 80	En Quad
 		U+2001	 	e2 80 81	Em Quad
@@ -1848,7 +1849,7 @@ class Core_Str
 		U+200D		e2 80 8d	ZERO WIDTH JOINER
 		U+2800		e2 A0 80	Braille Pattern Blank
 		*/
-		return str_replace(array("\xE1\x9A\x80", "\xE2\x80\x80", "\xE2\x80\x81", "\xE2\x80\x82", "\xE2\x80\x83", "\xE2\x80\x84", "\xE2\x80\x85", "\xE2\x80\x86", "\xE2\x80\x87", "\xE2\x80\x88", "\xE2\x80\x89", "\xE2\x80\x8A", "\xE2\x80\x8B", "\xE2\x80\x8C", "\xE2\x80\x8D", "\xE2\xA0\x80"), ' ', $str);
+		return str_replace(array(" ", "\xE1\x9A\x80", "\xE2\x80\x80", "\xE2\x80\x81", "\xE2\x80\x82", "\xE2\x80\x83", "\xE2\x80\x84", "\xE2\x80\x85", "\xE2\x80\x86", "\xE2\x80\x87", "\xE2\x80\x88", "\xE2\x80\x89", "\xE2\x80\x8A", "\xE2\x80\x8B", "\xE2\x80\x8C", "\xE2\x80\x8D", "\xE2\xA0\x80"), ' ', $str);
 	}
 
 	/**

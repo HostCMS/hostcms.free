@@ -245,6 +245,8 @@ class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 	{
 		$aReturn = array();
 
+		$oShop_Item->shortcut_id && $oShop_Item = $oShop_Item->Shop_Item;
+
 		$shop_producer_id = Core_Array::getPost('shop_producer_id', 0 , 'int');
 
 		if ($shop_producer_id)

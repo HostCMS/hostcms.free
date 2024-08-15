@@ -54,9 +54,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
 // Действие "Применить"
-$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdminFormActionApply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
@@ -84,8 +82,11 @@ $oAdmin_Form_Dataset ->addCondition(
 )->addCondition(array('where' => array('company_sites.site_id', '=', CURRENT_SITE)));
 
 // Фильтр по дебету
-if (isset($oAdmin_Form_Controller->request['admin_form_filter_2151']) && ($oAdmin_Form_Controller->request['admin_form_filter_2151'] != '')
-	|| isset($oAdmin_Form_Controller->request['topFilter_2151']) && $oAdmin_Form_Controller->request['topFilter_2151'] != ''
+if (isset($oAdmin_Form_Controller->request['admin_form_filter_2151'])
+		&& $oAdmin_Form_Controller->request['admin_form_filter_2151'] != ''
+	|| isset($oAdmin_Form_Controller->request['topFilter_2151'])
+		&& $oAdmin_Form_Controller->request['topFilter_2151'] != ''
+	|| $oAdmin_Form_Controller->sortingFieldId == 2151
 )
 {
 	$value = isset($oAdmin_Form_Controller->request['topFilter_2151'])
@@ -108,8 +109,11 @@ if (isset($oAdmin_Form_Controller->request['admin_form_filter_2151']) && ($oAdmi
 }
 
 // Фильтр по кредиту
-if (isset($oAdmin_Form_Controller->request['admin_form_filter_2152']) && ($oAdmin_Form_Controller->request['admin_form_filter_2152'] != '')
-	|| isset($oAdmin_Form_Controller->request['topFilter_2152']) && $oAdmin_Form_Controller->request['topFilter_2152'] != ''
+if (isset($oAdmin_Form_Controller->request['admin_form_filter_2152'])
+		&& $oAdmin_Form_Controller->request['admin_form_filter_2152'] != ''
+	|| isset($oAdmin_Form_Controller->request['topFilter_2152'])
+		&& $oAdmin_Form_Controller->request['topFilter_2152'] != ''
+	|| $oAdmin_Form_Controller->sortingFieldId == 2152
 )
 {
 	$value = isset($oAdmin_Form_Controller->request['topFilter_2152'])

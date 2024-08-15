@@ -49,10 +49,15 @@ class Core_Image_Imagick extends Core_Image
 		$sourceX = $picsize['width'];
 		$sourceY = $picsize['height'];
 
+		$iSourceImagetype = self::exifImagetype($sourceFile);
+
+		// Change output format
+		$iDestImagetype = !is_null($outputFormat)
+			? self::getImagetypeByFormat($outputFormat)
+			: $iSourceImagetype;
+
 		if ($sourceX > $maxWidth || $sourceY > $maxHeight)
 		{
-			$iImagetype = $iSourceImageType = self::exifImagetype($sourceFile);
-
 			if ($preserveAspectRatio)
 			{
 				$destX = $sourceX;
@@ -137,36 +142,39 @@ class Core_Image_Imagick extends Core_Image
 
 			$oImagick = new Imagick($sourceFile);
 
-			// Change output format
-			if (!is_null($outputFormat))
-			{
-				$iImagetype = self::getImagetypeByFormat($outputFormat);
-			}
-
 			// PNG => another types
-			$iSourceImageType == IMAGETYPE_PNG && $iSourceImageType != $iImagetype
+			$iSourceImagetype == IMAGETYPE_PNG && $iSourceImagetype != $iDestImagetype
 				&& $oImagick->setBackgroundColor(new ImagickPixel('#FFFFFF'));
 
-			if ($iImagetype == IMAGETYPE_JPEG)
+			if ($iDestImagetype == IMAGETYPE_JPEG)
 			{
 				$oImagick->setImageFormat('jpg');
 				$oImagick->setImageCompression(Imagick::COMPRESSION_JPEG);
 				$oImagick->setImageCompressionQuality(is_null($quality) ? (defined('JPG_QUALITY') ? JPG_QUALITY : 60) : intval($quality));
 			}
-			elseif ($iImagetype == IMAGETYPE_PNG)
+			elseif ($iDestImagetype == IMAGETYPE_PNG)
 			{
 				$oImagick->setImageFormat('png');
 				$oImagick->setImageCompression(Imagick::COMPRESSION_ZIP);
 				$oImagick->setImageCompressionQuality(is_null($quality) ? (defined('PNG_QUALITY') ? PNG_QUALITY : 6) : intval($quality));
 			}
-			elseif (defined('IMAGETYPE_WEBP') && $iImagetype == IMAGETYPE_WEBP)
+			elseif (defined('IMAGETYPE_WEBP') && $iDestImagetype == IMAGETYPE_WEBP)
 			{
 				$oImagick->setImageFormat('webp');
 				$oImagick->setImageCompressionQuality(is_null($quality) ? (defined('WEBP_QUALITY') ? WEBP_QUALITY : 80) : intval($quality));
 			}
-			elseif ($iImagetype == IMAGETYPE_GIF)
+			elseif ($iDestImagetype == IMAGETYPE_GIF)
 			{
-				$oImagick->setImageFormat('gif');
+				// Detect animated GIF
+				if ($oImagick->getNumberImages() < 2)
+				{
+					$oImagick->setImageFormat('gif');
+				}
+				else
+				{
+					Core_File::copy($sourceFile, $targetFile);
+					return TRUE;
+				}
 			}
 			else
 			{
@@ -248,7 +256,12 @@ class Core_Image_Imagick extends Core_Image
 			$oImagick = new Imagick($source);
 			$watermarkImage = new Imagick($watermark);
 
-			$iImagetype = $iSourceImageType = self::exifImagetype($source);
+			$iSourceImagetype = self::exifImagetype($source);
+			
+			// Change output format
+			$iDestImagetype = !is_null($outputFormat)
+				? self::getImagetypeByFormat($outputFormat)
+				: $iSourceImagetype;
 
 			if (!is_null($watermarkX))
 			{
@@ -285,34 +298,28 @@ class Core_Image_Imagick extends Core_Image
 			$watermarkImage->clear();
 			$watermarkImage->destroy();
 
-			// Change output format
-			if (!is_null($outputFormat))
-			{
-				$iImagetype = self::getImagetypeByFormat($outputFormat);
-			}
-
 			// PNG => another types
-			$iSourceImageType == IMAGETYPE_PNG && $iSourceImageType != $iImagetype
+			$iSourceImagetype == IMAGETYPE_PNG && $iSourceImagetype != $iDestImagetype
 				&& $oImagick->setBackgroundColor(new ImagickPixel('#FFFFFF'));
 
-			if ($iImagetype == IMAGETYPE_JPEG)
+			if ($iDestImagetype == IMAGETYPE_JPEG)
 			{
 				$oImagick->setImageFormat('jpg');
 				$oImagick->setImageCompression(Imagick::COMPRESSION_JPEG);
 				$oImagick->setImageCompressionQuality(defined('JPG_QUALITY') ? JPG_QUALITY : 60);
 			}
-			elseif ($iImagetype == IMAGETYPE_PNG)
+			elseif ($iDestImagetype == IMAGETYPE_PNG)
 			{
 				$oImagick->setImageFormat('png');
 				$oImagick->setImageCompression(Imagick::COMPRESSION_ZIP);
 				$oImagick->setImageCompressionQuality(defined('PNG_QUALITY') ? PNG_QUALITY : 6);
 			}
-			elseif (defined('IMAGETYPE_WEBP') && $iImagetype == IMAGETYPE_WEBP)
+			elseif (defined('IMAGETYPE_WEBP') && $iDestImagetype == IMAGETYPE_WEBP)
 			{
 				$oImagick->setImageFormat('webp');
 				$oImagick->setImageCompressionQuality(defined('WEBP_QUALITY') ? WEBP_QUALITY : 80);
 			}
-			elseif ($iImagetype == IMAGETYPE_GIF)
+			elseif ($iDestImagetype == IMAGETYPE_GIF)
 			{
 				$oImagick->setImageFormat('gif');
 			}
@@ -420,7 +427,7 @@ class Core_Image_Imagick extends Core_Image
 		$im = new Imagick();
 		return Core_Array::get($im->getVersion(), 'versionString', '');
 	}
-	
+
 	/**
 	 * Check Imagick-Module Availability
 	 * @return bool

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Benchmark
  * @version 7.x
- * @copyright © 2005-2024 ООО "Хостмэйк"(Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Benchmark_Controller
 {

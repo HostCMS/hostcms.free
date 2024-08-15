@@ -324,9 +324,7 @@ if ($parent_id)
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
 // Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -344,9 +342,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 	$oAdmin_Form_Controller->addAction($oEvent_Controller_Edit);
 }
 
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('markDeleted');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('markDeleted');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'markDeleted')
 {
@@ -359,9 +355,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'markDeleted'
 }
 
 // Действие "Применить"
-$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdminFormActionApply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
@@ -374,9 +368,7 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 }
 
 // Действие "Копировать"
-$oAdminFormActionCopy = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('copy');
+$oAdminFormActionCopy = $oAdmin_Form->Admin_Form_Actions->getByName('copy');
 
 if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 {
@@ -389,9 +381,7 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 }
 
 // Действие "Изменить группу"
-$oAdminFormActionChangeGroup = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('changeGroup');
+$oAdminFormActionChangeGroup = $oAdmin_Form->Admin_Form_Actions->getByName('changeGroup');
 
 if ($oAdminFormActionChangeGroup && $oAdmin_Form_Controller->getAction() == 'changeGroup')
 {
@@ -404,9 +394,7 @@ if ($oAdminFormActionChangeGroup && $oAdmin_Form_Controller->getAction() == 'cha
 }
 
 // Действие "Изменить статус"
-$oAdminFormActionChangeStatus = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('changeStatus');
+$oAdminFormActionChangeStatus = $oAdmin_Form->Admin_Form_Actions->getByName('changeStatus');
 
 if ($oAdminFormActionChangeStatus && $oAdmin_Form_Controller->getAction() == 'changeStatus')
 {
@@ -419,9 +407,7 @@ if ($oAdminFormActionChangeStatus && $oAdmin_Form_Controller->getAction() == 'ch
 }
 
 // Действие "Удалить файл"
-$oAdminFormActionDeleteFile = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deleteFile');
+$oAdminFormActionDeleteFile = $oAdmin_Form->Admin_Form_Actions->getByName('deleteFile');
 
 if ($oAdminFormActionDeleteFile && $oAdmin_Form_Controller->getAction() == 'deleteFile')
 {
@@ -438,9 +424,7 @@ if ($oAdminFormActionDeleteFile && $oAdmin_Form_Controller->getAction() == 'dele
 }
 
 // Действие "Добавить дело"
-$oAdminFormActionAddEvent = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('addEvent');
+$oAdminFormActionAddEvent = $oAdmin_Form->Admin_Form_Actions->getByName('addEvent');
 
 if ($oAdminFormActionAddEvent && $oAdmin_Form_Controller->getAction() == 'addEvent')
 {
@@ -480,7 +464,9 @@ if (isset($oAdmin_Form_Controller->request['topFilter_1582'])
 
 // Только если идет фильтрация, Контрагент, фильтр по тексту
 if (isset($oAdmin_Form_Controller->request['admin_form_filter_1497'])
-	&& $oAdmin_Form_Controller->request['admin_form_filter_1497'] != '')
+	&& $oAdmin_Form_Controller->request['admin_form_filter_1497'] != ''
+	|| $oAdmin_Form_Controller->sortingFieldId == 1497
+)
 {
 	$oAdmin_Form_Dataset
 		->addCondition(

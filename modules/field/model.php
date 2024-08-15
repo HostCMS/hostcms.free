@@ -102,7 +102,7 @@ class Field_Model extends Core_Entity
 
 			$aField_Values = Field_Controller_Value::factory($this->type)
 				->setField($this)
-				->getFieldValueObject()->findAll();
+				->getFieldValueObject()->findAll(FALSE);
 
 			foreach ($aField_Values as $oField_Value)
 			{
@@ -212,9 +212,33 @@ class Field_Model extends Core_Entity
 		}
 	}
 
+	/**
+	 * Type backend
+	 * @return string
+	 */
 	public function typeBackend()
 	{
-		return Core::_('Field.type' . $this->type);
+		$color = Core_Str::createColor($this->type);
+
+		$return = '<span class="badge badge-round badge-max-width" style="border-color: ' . $color . '; color: ' . Core_Str::hex2darker($color, 0.2) . '; background-color: ' . Core_Str::hex2lighter($color, 0.88) . '">'
+		. Core::_('Property.type' . $this->type)
+		. '</span>';
+
+		if ($this->type == 3 && $this->list_id && Core::moduleIsActive('list'))
+		{
+			$return .= '<a href="/admin/list/item/index.php?list_id=' . $this->list_id . '" target="_blank"><i title="' . Core::_('Property.move_to_list') . '" class="fa fa-external-link margin-left-5"></i></a>';
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Descroption backend
+	 * @return string
+	 */
+	public function descriptionBackend()
+	{
+		return Core_Str::cut(strip_tags((string) $this->description), 100);
 	}
 
 	/**

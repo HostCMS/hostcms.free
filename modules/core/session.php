@@ -377,6 +377,7 @@ abstract class Core_Session
 			/*}
 			else
 			{
+				// PHP 7 >= 7.1.0
 				$new_session_id = session_create_id();
 
 				// backup session variables
@@ -429,7 +430,8 @@ abstract class Core_Session
 			$oCore_Session = self::$_handler = new $sessionClass();
 
 			// Callables $validate_sid and $update_timestamp are supported since PHP 7.0
-			PHP_VERSION_ID >= 70000
+			// session_create_id() PHP 7 >= 7.1.0
+			PHP_VERSION_ID >= 70100
 				? session_set_save_handler(
 					array($oCore_Session, 'sessionOpen'),
 					array($oCore_Session, 'sessionClose'),

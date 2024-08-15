@@ -257,7 +257,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->add($oMainRow3_1 = Admin_Form_Entity::factory('Div')->class('row margin-top-20'))
 				->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row profile-container'))
 				->add($oMainClientsRow = Admin_Form_Entity::factory('Div')->class('row event-clients-row'))
-				->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
+				->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row '))
 				->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
 				->add($oMainRow7 = Admin_Form_Entity::factory('Div')->class('row profile-container'))
 				->add($oMainRow8 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -918,11 +918,11 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->add($oMainRowSettingsShow = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow3_2 = Admin_Form_Entity::factory('Div')->class('row settings-row hidden'))
 			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row multiple-representative'))
 			->add($oMainRowAdditionalShow = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row additional-row' . ($bHideAdditionalRow ? ' hidden' : '')))
 			->add($oMainRow7 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow8 = Admin_Form_Entity::factory('Div')->class('row additional-row event-user-id' . ($bHideAdditionalRow ? ' hidden' : '')))
+			->add($oMainRow8 = Admin_Form_Entity::factory('Div')->class('row additional-row multiple-users' . ($bHideAdditionalRow ? ' hidden' : '')))
 			->add($oMainRowProjects = Admin_Form_Entity::factory('Div')->class('row additional-row' . ($bHideAdditionalRow ? ' hidden' : '')))
 			->add($oMainRowCalendar = Admin_Form_Entity::factory('Div')->class('row additional-row' . ($bHideAdditionalRow ? ' hidden' : '')))
 			->add($oMainRowTags = Admin_Form_Entity::factory('Div')->class('row'))
@@ -975,10 +975,8 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$startDayNum++;
 		}
 
-		$oAdmin_Form_Entity_Code = Admin_Form_Entity::factory('Code');
-
-		$oAdmin_Form_Entity_Code->html(
-			'<div class="col-xs-12 col-lg-9" style="z-index: 10">
+		$oAdmin_Form_Entity_Code = Admin_Form_Entity::factory('Code')->html(
+			'<div class="col-xs-12" style="z-index: 10">
 				<div id="eventStartButtonsGroup" class="btn-group margin-bottom-15">' . $htmlEventStartButtons . '</div>
 			</div>
 			<script>
@@ -995,12 +993,10 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oMainRowEventStartButtons->add($oAdmin_Form_Entity_Code);
 
-		$oMainTab->move($this->getField('all_day')->divAttr(array('class' => 'form-group col-xs-12 col-lg-3 margin-top-5 text-align-right')), $oMainRowEventStartButtons);
-
 		$aDurationTypes = array(Core::_('Event.periodMinutes'), Core::_('Event.periodHours'), Core::_('Event.periodDays'));
 
 		$oDiv_Duration = Admin_Form_Entity::factory('Div')
-			->class('form-group col-xs-12 col-sm-6 col-lg-4 amount-currency')
+			->class('form-group col-xs-12 col-sm-6 col-md-6 col-lg-3 amount-currency')
 			->add(Admin_Form_Entity::factory('Input')
 				->name('duration')
 				->id('duration')
@@ -1022,7 +1018,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainTab->delete($this->getField('reminder_value'));
 
 		$oDiv_ReminderValue = Admin_Form_Entity::factory('Div')
-			->class('form-group col-xs-12 col-sm-6 col-md-4 amount-currency')
+			->class('form-group col-xs-12 col-sm-6 col-md-6 col-lg-3 amount-currency')
 			->add(Admin_Form_Entity::factory('Input')
 				->name('reminder_value')
 				->id('reminder_value')
@@ -1042,8 +1038,9 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainRowDuration->add($oDiv_ReminderValue);
 
 		$oMainTab
-			->move($this->getField('busy')->divAttr(array('class' => 'form-group col-xs-6 col-lg-2 margin-top-21')), $oMainRowDuration)
-			->move($this->getField('important')->class('colored-danger')->divAttr(array('class' => 'form-group col-xs-6 col-lg-2 margin-top-21')), $oMainRowDuration);
+			->move($this->getField('all_day')->divAttr(array('class' => 'form-group col-xs-4 col-sm-4 col-lg-2 margin-top-21')), $oMainRowDuration)
+			->move($this->getField('busy')->divAttr(array('class' => 'form-group col-xs-4 col-sm-4 col-lg-2 margin-top-21')), $oMainRowDuration)
+			->move($this->getField('important')->class('colored-danger')->divAttr(array('class' => 'form-group col-xs-4 col-sm-4 col-lg-2 margin-top-21')), $oMainRowDuration);
 
 		$oMainRowSettingsShow->add(Admin_Form_Entity::factory('Span')
 			->divAttr(array('class' => 'form-group col-xs-12'))
@@ -1100,7 +1097,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->name('event_type_id')
 			->value($this->_object->event_type_id)
 			->caption(Core::_('Event.event_type_id'))
-			->divAttr(array('class' => 'form-group col-md-4 col-sm-4 col-xs-6'));
+			->divAttr(array('class' => 'form-group col-xs-6 col-sm-4 col-md-4'));
 
 		$oMainRow4->add($oDropdownlistEventTypes);
 
@@ -1118,7 +1115,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->name('event_group_id')
 			->value($this->_object->event_group_id)
 			->caption(Core::_('Event.event_group_id'))
-			->divAttr(array('class' => 'form-group col-md-4 col-sm-5 col-xs-6'));
+			->divAttr(array('class' => 'form-group col-xs-6 col-sm-4 col-md-4'));
 
 		$oMainRow4->add($oDropdownlistEventGroups);
 
@@ -1142,7 +1139,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->name('event_status_id')
 			->value($this->_object->event_status_id)
 			->caption(Core::_('Event.event_status_id'))
-			->divAttr(array('class' => 'form-group col-md-4 col-sm-4 col-xs-6'));
+			->divAttr(array('class' => 'form-group col-xs-6 col-sm-4 col-md-4'));
 
 		$oMainRow4->add($oDropdownlistEventStatuses);
 
@@ -1255,8 +1252,12 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$aSiteuserCompanies = $oSiteuser->Siteuser_Companies->findAll();
 					foreach ($aSiteuserCompanies as $oSiteuserCompany)
 					{
+						$tin = !empty($oSiteuserCompany->tin)
+							? $oSiteuserCompany->tin
+							: '';
+
 						$oOptgroupSiteuser->children['company_' . $oSiteuserCompany->id] = array(
-							'value' => $oSiteuserCompany->name . '%%%' . $oSiteuserCompany->getAvatar(),
+							'value' => $oSiteuserCompany->name . '%%%' . $oSiteuserCompany->getAvatar() . '%%%' . ' 👤 ' . $oSiteuserCompany->Siteuser->login . '%%%' . $tin,
 							'attr' => array('class' => 'siteuser-company')
 						);
 					}
@@ -1265,7 +1266,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					foreach ($aSiteuserPeople as $oSiteuserPerson)
 					{
 						$oOptgroupSiteuser->children['person_' . $oSiteuserPerson->id] = array(
-							'value' => $oSiteuserPerson->getFullName() . '%%%' . $oSiteuserPerson->getAvatar(),
+							'value' => $oSiteuserPerson->getFullName() . '%%%' . $oSiteuserPerson->getAvatar() . '%%%' . ' 👤 ' . $oSiteuserPerson->Siteuser->login,
 							'attr' => array('class' => 'siteuser-person')
 						);
 					}
@@ -1298,10 +1299,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							processResults: function (data) {
 								var aResults = [];
 								$.each(data, function (index, item) {
-									aResults.push({
-										"id": item.id,
-										"text": item.text
-									});
+									aResults.push(item);
 								});
 								return {
 									results: aResults
@@ -1633,17 +1631,14 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			)
 			->add(Admin_Form_Entity::factory('Span')
 				->divAttr(array('class' => 'form-group col-xs-12'))
-				->add(Admin_Form_Entity::factory('A')
-					->value(Core::_("Event.add_checklist"))
-					->class('representative-show-link darkgray')
-					->onclick("$.addEventChecklist('{$windowId}', '#{$windowId} .event-checklist-wrapper')")
-		));
-
-		ob_start();
-		Core_Html_Entity::factory('Script')
-			->value("$.loadEventChecklists('{$windowId}', '#{$windowId} .event-checklist-wrapper', {$this->_object->id});")
-			->execute();
-		$this->_Admin_Form_Controller->addMessage(ob_get_clean());
+				->class('btn-group')
+				->add(Admin_Form_Entity::factory('Code')
+					->html('<a class="add-event-checklist btn btn-gray" onclick="$.addEventChecklist(\'' . $windowId . '\', \'#' . $windowId . ' .event-checklist-wrapper\')"><i class="fa fa-plus icon-separator"></i>' . Core::_("Event.add_checklist") . '</a>')
+				)
+			)
+			->add(
+				Core_Html_Entity::factory('Script')->value("$.loadEventChecklists('{$windowId}', '#{$windowId} .event-checklist-wrapper', {$this->_object->id});")
+			);
 
 		if (Core::moduleIsActive('dms'))
 		{
@@ -1706,11 +1701,11 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 			$oEvent_Type = $this->_object->Event_Type;
 
-			$successfully = strlen(trim($oEvent_Type->successfully))
+			$successfully = $oEvent_Type->successfully !== ''
 				? htmlspecialchars($oEvent_Type->successfully)
 				: Core::_('Event_Type.successfully');
 
-			$failed = strlen(trim($oEvent_Type->failed))
+			$failed = $oEvent_Type->failed !== ''
 				? htmlspecialchars($oEvent_Type->failed)
 				: Core::_('Event_Type.failed');
 
@@ -1972,7 +1967,8 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					function showTimeslider() {
 
-						var oEventStartDate = new Date(+$(\'#' . $windowId . ' input[name="start"]\').parent().data("DateTimePicker").date()),
+						var
+							oEventStartDate = new Date(+$(\'#' . $windowId . ' input[name="start"]\').parent().data("DateTimePicker").date()),
 							timeZoneOffset = (oEventStartDate.getTimezoneOffset() * 60 * 1000 * -1),
 							eventStartTime = oEventStartDate.getTime() + timeZoneOffset,
 
@@ -2191,7 +2187,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							{
 								var inputField = $("#' . $windowId . ' input.hasDatetimepicker", this),
 									inputFieldName = inputField.attr("name"),
-									startTimeCell = +$(\'#' . $windowId . ' input[name="start"]\').parent().data("DateTimePicker").date()
+									startTimeCell = +$(\'#' . $windowId . ' input[name="start"]\').parent().data("DateTimePicker").date(),
 									stopTimeCell = +$(\'#' . $windowId . ' input[name="deadline"]\').parent().data("DateTimePicker").date(),
 									startTimestampRuler;
 
@@ -3081,7 +3077,8 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						{
 							$aNewChecklists[$value][] = array(
 								'name' => $checklist_item_name,
-								'completed' => isset($_POST['new_checklist_item_completed' . $index][$i]) ? intval($_POST['new_checklist_item_completed' . $index][$i]) : 0
+								'completed' => isset($_POST['new_checklist_item_completed' . $index][$i]) ? intval($_POST['new_checklist_item_completed' . $index][$i]) : 0,
+								'important' => isset($_POST['new_checklist_item_important' . $index][$i]) ? intval($_POST['new_checklist_item_important' . $index][$i]) : 0
 							);
 						}
 					}
@@ -3107,7 +3104,8 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						{
 							$aTmp[$i] = array(
 								'name' => $checklist_item_name,
-								'completed' => isset($_POST['checklist_item_completed' . $event_checklist_id][$i]) ? intval($_POST['checklist_item_completed' . $event_checklist_id][$i]) : 0
+								'completed' => isset($_POST['checklist_item_completed' . $event_checklist_id][$i]) ? intval($_POST['checklist_item_completed' . $event_checklist_id][$i]) : 0,
+								'important' => isset($_POST['checklist_item_important' . $event_checklist_id][$i]) ? intval($_POST['checklist_item_important' . $event_checklist_id][$i]) : 0
 							);
 						}
 					}
@@ -3123,11 +3121,13 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							$oEvent_Checklist_Item->event_checklist_id = $event_checklist_id;
 							$oEvent_Checklist_Item->name = $checklist_item_name;
 							$oEvent_Checklist_Item->completed = isset($_POST['new_checklist_item_completed' . $event_checklist_id][$i]) ? intval($_POST['new_checklist_item_completed' . $event_checklist_id][$i]) : 0;
+							$oEvent_Checklist_Item->important = isset($_POST['new_checklist_item_important' . $event_checklist_id][$i]) ? intval($_POST['new_checklist_item_important' . $event_checklist_id][$i]) : 0;
 							$oEvent_Checklist_Item->save();
 
 							$aTmp[$oEvent_Checklist_Item->id] = array(
 								'name' => $oEvent_Checklist_Item->name,
-								'completed' => $oEvent_Checklist_Item->completed
+								'completed' => $oEvent_Checklist_Item->completed,
+								'important' => $oEvent_Checklist_Item->important
 							);
 						}
 					}
@@ -3165,6 +3165,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 						$oEvent_Checklist_Item->name = Core_Array::get($aItem, 'name', '', 'trim');
 						$oEvent_Checklist_Item->completed = Core_Array::get($aItem, 'completed', '', 'int');
+						$oEvent_Checklist_Item->important = Core_Array::get($aItem, 'important', '', 'int');
 						$oEvent_Checklist_Item->save();
 					}
 					else
@@ -3190,6 +3191,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oEvent_Checklist_Item = Core_Entity::factory('Event_Checklist_Item');
 				$oEvent_Checklist_Item->name = Core_Array::get($aChecklistItem, 'name', '', 'trim');
 				$oEvent_Checklist_Item->completed = Core_Array::get($aChecklistItem, 'completed', '', 'int');
+				$oEvent_Checklist_Item->important = Core_Array::get($aChecklistItem, 'important', '', 'int');
 				$oEvent_Checklist->add($oEvent_Checklist_Item);
 			}
 		}

@@ -33,7 +33,7 @@
 		
 		<span><xsl:text> → </xsl:text></span>
 		
-		<xsl:variable name="child" select="*[@id][link/node() or url/node()][name(.) != 'shop_discount']" />
+		<xsl:variable name="child" select="*[@id][link/node() or url/node()][name(.) != 'shop_discount'][name(.) != 'shop_producer']" />
 		
 		<!-- Показывать ссылку? -->
 		<xsl:choose>

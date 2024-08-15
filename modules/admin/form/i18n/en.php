@@ -164,5 +164,8 @@ return array(
 	'admin_form_field_settings' => 'Form field settings',
 	'setting_modal_title' => 'Form field "%s" settings',
 	'select_all' => 'Select all',
-	'disable_all' => 'Disable all'
+	'disable_all' => 'Disable all',
+
+	'upload_files' => 'Upload files',
+	'rename' => 'Rename'
 );

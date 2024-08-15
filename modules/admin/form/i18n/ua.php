@@ -152,5 +152,8 @@ return array(
 	'admin_form_field_settings' => 'Налаштування полів форми',
 	'setting_modal_title' => 'Налаштування полів форми "%s"',
 	'select_all' => 'Вибрати все',
-	'disable_all' => 'Скасувати все'
+	'disable_all' => 'Скасувати все',
+
+	'upload_files' => 'Завантажити файли',
+	'rename' => 'Перейменувати'
 );

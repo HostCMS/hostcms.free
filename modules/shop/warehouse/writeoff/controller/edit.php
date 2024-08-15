@@ -21,8 +21,8 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 	{
 		parent::_prepareForm();
 
-		$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0));
-		$oShop_Group = Core_Entity::factory('Shop_Group', Core_Array::getGet('shop_group_id', 0));
+		$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0, 'int'));
+		$shop_group_id = Core_Array::getGet('shop_group_id', 0, 'int');
 
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
@@ -61,7 +61,7 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 
 			if (!is_null($oModule))
 			{
-				$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, $this->_object->getEntityType(), 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
+				$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, $this->_object->getEntityType(), 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $shop_group_id);
 			}
 
 			$printlayoutsButton .= '
@@ -100,8 +100,6 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 			);
 
 		$oMainRow2->add($oShop_Warehouse_Select);
-
-		// $oMainTab->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow2);
 
 		// Удаляем поле с идентификатором ответственного сотрудника
 		$oAdditionalTab->delete($this->getField('user_id'));
@@ -285,7 +283,6 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 					newRow
 				);
 				ui.item.value = '';
-
 
 				$.changeWarehouseCounts(jNewItemCount, 2);
 				jNewItemCount.change();

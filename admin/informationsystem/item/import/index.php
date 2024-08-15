@@ -164,7 +164,7 @@ $aLangConstNames = array(
 );
 
 $aColors = array(
-	'#999999',
+	'#F5F5F5',
 	'#E7A1B0',
 	'#E7A1B0',
 	'#E7A1B0',
@@ -285,14 +285,65 @@ foreach ($aItemProperties as $oItemProperty)
 	}
 }
 
+if (Core::moduleIsActive('field'))
+{
+	$aGroupFields = Field_Controller::getFields('informationsystem_group', $oInformationsystem->site_id);
+	foreach ($aGroupFields as $oGroupField)
+	{
+		$oFieldDir = $oGroupField->Field_Dir;
+
+		$aLangConstNames[] = $oGroupField->name . " [" . ($oFieldDir->id ? $oFieldDir->name : Core::_('Informationsystem_Item.root_folder')) . "]";
+		$aColors[] = "#BBCEF2";
+		$aEntities[] = 'field_group-' . $oGroupField->id;
+
+		if ($oGroupField->type == 2)
+		{
+			// Description
+			$aLangConstNames[] = Core::_('Informationsystem_Item.import_file_description', $oGroupField->name) . " [" . ($oFieldDir->id ? $oFieldDir->name : Core::_('Informationsystem_Item.root_folder')) . "]";
+			$aColors[] = "#BBCEF2";
+			$aEntities[] = 'fielddesc-' . $oGroupField->id;
+
+			// Small Image
+			$aLangConstNames[] = Core::_('Informationsystem_Item.import_small_images', $oGroupField->name) .  " [" . ($oFieldDir->id ? $oFieldDir->name : Core::_('Informationsystem_Item.root_folder')) . "]";
+			$aColors[] = "#BBCEF2";
+			$aEntities[] = 'fieldsmall-' . $oGroupField->id;
+		}
+	}
+
+	$aItemFields = Field_Controller::getFields('informationsystem_item', $oInformationsystem->site_id);
+	foreach ($aItemFields as $oItemField)
+	{
+		$oFieldDir = $oItemField->Field_Dir;
+
+		$aLangConstNames[] = $oItemField->name . " [" . ($oFieldDir->id ? $oFieldDir->name : Core::_('Informationsystem_Item.root_folder')) . "]";
+		$aColors[] = "#BBCEF2";
+		$aEntities[] = 'field-' . $oItemField->id;
+
+		if ($oItemField->type == 2)
+		{
+			// Description
+			$aLangConstNames[] = Core::_('Informationsystem_Item.import_file_description', $oItemField->name) . " [" . ($oFieldDir->id ? $oFieldDir->name : Core::_('Informationsystem_Item.root_folder')) . "]";
+			$aColors[] = "#BBCEF2";
+			$aEntities[] = 'fielddesc-' . $oItemField->id;
+
+			// Small Image
+			$aLangConstNames[] = Core::_('Informationsystem_Item.import_small_images', $oItemField->name) . " [" . ($oFieldDir->id ? $oFieldDir->name : Core::_('Informationsystem_Item.root_folder')) . "]";
+			$aColors[] = "#BBCEF2";
+			$aEntities[] = 'fieldsmall-' . $oItemField->id;
+		}
+	}
+}
+
 $oUserCurrent = Core_Auth::getCurrentUser();
 
 $oAdmin_Form_Entity_Form = Admin_Form_Entity::factory('Form')
-		->controller($oAdmin_Form_Controller)
-		->action($oAdmin_Form_Controller->getPath())
-		->enctype('multipart/form-data');
+	->controller($oAdmin_Form_Controller)
+	->action($oAdmin_Form_Controller->getPath())
+	->enctype('multipart/form-data');
 
 $oAdmin_View->addChild($oAdmin_Form_Entity_Breadcrumbs);
+
+$windowId = $oAdmin_Form_Controller->getWindowId();
 
 // Количество полей
 $iFieldCount = 0;
@@ -412,16 +463,26 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 
 						$oMainTab = Admin_Form_Entity::factory('Tab')->name('main');
 
+						$oMainTab->add(
+							Admin_Form_Entity::factory('Div')
+								->class('row')
+								->add(
+									Admin_Form_Entity::factory('Span')
+										->value(Core::_('shop_exchange.clear_matches'))
+										->divAttr(array('class' => 'col-xs-12'))
+										->class('pull-right pointer underline-dashed darkgray margin-right-20')
+										->onclick('$("#' . $windowId . ' select[id^=field_id_]").val("").trigger("change")')
+								)
+						);
+
 						for($i = 0; $i < $iFieldCount; $i++)
 						{
-							$oCurrentRow = Admin_Form_Entity::factory('Div')->class('row');
-
-							$oCurrentRow
+							$oCurrentRow = Admin_Form_Entity::factory('Div')
+								->class('row')
 								->add(Admin_Form_Entity::factory('Span')
-									//->caption('')
 									->value($aCsvLine[$i])
 									->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
-									);
+								);
 
 							$aOptions = array();
 
@@ -454,18 +515,28 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 									$selected = -1;
 								}
 
-								$aOptions[$aEntities[$j]] = array('value' => $aLangConstNames[$j], 'attr' => array('style' => 'background-color: ' . (!empty($aColors[$pos]) ? $aColors[$j] : '#000')));
+								$aOptions[$aEntities[$j]] = array(
+									'value' => $aLangConstNames[$j],
+									'attr' => array('style' => 'background-color: ' . (!empty($aColors[$pos]) ? $aColors[$j] : '#F5F5F5'))
+								);
 
 								$pos++;
 							}
 
 							$pos = 0;
 
-							$oCurrentRow->add(Admin_Form_Entity::factory('Select')
-								->name("field{$i}")
-								->options($aOptions)
-								->value($selected)
-								->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')));
+							$oCurrentRow
+								->class('d-flex align-items-center import-row')
+								->add(Core_Html_Entity::factory('I')->class('fa-solid fa-circle fa-xs'))
+								->add(
+									Admin_Form_Entity::factory('Select')
+										->name("field{$i}")
+										->options($aOptions)
+										->value($selected)
+										->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
+										->class('form-control import-select')
+										->onchange('setIColor(this)')
+								);
 
 							$oMainTab->add($oCurrentRow);
 						}
@@ -621,8 +692,6 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 }
 else
 {
-	$windowId = $oAdmin_Form_Controller->getWindowId();
-
 	$oMainTab = Admin_Form_Entity::factory('Tab')->name('main');
 
 	$aConfig = Core_Config::instance()->get('informationsystem_csv', array()) + array(
@@ -794,6 +863,16 @@ if ($sOnClick)
 		->onclick($sOnClick)
 	);
 }
+
+$oAdmin_Form_Entity_Form->add(
+	Core_Html_Entity::factory('Script')
+		->type("text/javascript")
+		->value("(function($){
+			$('select.import-select').each(function(index, obj){
+				setIColor(obj);
+			})
+		})(jQuery);")
+);
 
 $oAdmin_Form_Entity_Form->execute();
 $content = ob_get_clean();

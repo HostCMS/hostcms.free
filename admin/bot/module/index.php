@@ -412,9 +412,7 @@ if (Core_Array::getPost('save_sorting'))
 }
 
 // Добавление модуля
-$oAdminFormActionAdd = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('addBot');
+$oAdminFormActionAdd = $oAdmin_Form->Admin_Form_Actions->getByName('addBot');
 
 if ($oAdminFormActionAdd && $oAdmin_Form_Controller->getAction() == 'addBot')
 {
@@ -426,9 +424,7 @@ if ($oAdminFormActionAdd && $oAdmin_Form_Controller->getAction() == 'addBot')
 }
 
 // Удаление модуля
-$oAdminFormActionDelete = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deleteModule');
+$oAdminFormActionDelete = $oAdmin_Form->Admin_Form_Actions->getByName('deleteModule');
 
 if ($oAdminFormActionDelete && $oAdmin_Form_Controller->getAction() == 'deleteModule')
 {

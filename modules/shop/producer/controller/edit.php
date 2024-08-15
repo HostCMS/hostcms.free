@@ -394,10 +394,8 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 					$oShop_Tab_Producer->shop_tab_id = $iNewShopTabId;
 					$oShop_Tab_Producer->save();
 				}
-				
-				$large_image = $small_image = '';
 
-				$aCore_Config = Core::$mainConfig;
+				$large_image = $small_image = '';
 
 				$create_small_image_from_large = Core_Array::getPost('create_small_image_from_large_small_image');
 
@@ -410,8 +408,7 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 				if ($bLargeImageIsCorrect)
 				{
 					// Проверка на допустимый тип файла
-					if (Core_File::isValidExtension($aFileData['name'],
-					$aCore_Config['availableExtension']))
+					if (Core_File::isValidExtension($aFileData['name'], Core::$mainConfig['availableExtension']))
 					{
 						// Удаление файла большого изображения
 						if ($this->_object->image_large)
@@ -458,8 +455,8 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 
 					// Явно указано малое изображение
 					if ($bSmallImageIsCorrect
-						&& Core_File::isValidExtension($aSmallFileData['name'],
-						$aCore_Config['availableExtension']))
+						&& Core_File::isValidExtension($aSmallFileData['name'], Core::$mainConfig['availableExtension'])
+					)
 					{
 						$file_name = $aSmallFileData['name'];
 
@@ -484,7 +481,7 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 				}
 
 				$param = array();
-				
+
 				if ($bLargeImageIsCorrect || $bSmallImageIsCorrect)
 				{
 					if ($bLargeImageIsCorrect)
@@ -570,13 +567,17 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 				}
 
 				$this->_object->save();
-				
+
 				// Index item
 				$this->_object->index();
 			break;
 		}
 
+		Core::moduleIsActive('wysiwyg') && Wysiwyg_Controller::uploadImages($this->_formValues, $this->_object, $this->_Admin_Form_Controller);
+
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
+
+		return $this;
 	}
 
 	/**

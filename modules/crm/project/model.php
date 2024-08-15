@@ -261,7 +261,7 @@ class Crm_Project_Model extends Core_Entity
 	 */
 	public function getHref()
 	{
-		 return 'upload/private/crm/projects/' . Core_File::getNestingDirPath($this->id, 3) . '/project_' . $this->id . '/';
+		 return $this->Site->uploaddir . 'private/crm/projects/' . Core_File::getNestingDirPath($this->id, 3) . '/project_' . $this->id . '/';
 	}
 
 	/**

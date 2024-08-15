@@ -33,6 +33,28 @@ $oAdmin_Form_Controller
 	->title($title)
 	->pageTitle($title);
 
+// Глобальный поиск
+$additionalParams = 'shop_id=' . $shop_id . '&shop_group_id=' . $shop_group_id;
+
+$sGlobalSearch = Core_Array::getGet('globalSearch', '', 'trim');
+
+$oAdmin_Form_Controller->addEntity(
+	Admin_Form_Entity::factory('Code')
+		->html('
+			<div class="row search-field margin-bottom-20">
+				<div class="col-xs-12">
+					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
+						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
+						<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
+						<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '"><i class="fa-solid fa-magnifying-glass fa-fw"></i></button>
+					</form>
+				</div>
+			</div>
+		')
+);
+
+$sGlobalSearch = str_replace(' ', '%', Core_DataBase::instance()->escapeLike($sGlobalSearch));
+
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
@@ -166,9 +188,7 @@ if ($property_dir_id)
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
 // Действие "Применить"
-$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdminFormActionApply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
@@ -181,9 +201,7 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 }
 
 // Действие "Копировать"
-$oAdminFormActionCopy = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('copy');
+$oAdminFormActionCopy = $oAdmin_Form->Admin_Form_Actions->getByName('copy');
 
 if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 {
@@ -205,11 +223,11 @@ $oAdmin_Form_Dataset->addCondition(
 	array('select' => array('property_dirs.*'))
 )->addCondition(
 	array('join' => array('shop_item_property_dirs', 'shop_item_property_dirs.property_dir_id', '=', 'property_dirs.id'))
-)->addCondition(
+)/*->addCondition(
 	array('where' =>
 		array('parent_id', '=', $property_dir_id)
 	)
-)->addCondition(
+)*/->addCondition(
 	array('where' =>
 		array('shop_item_property_dirs.shop_id', '=', $shop_id)
 	)
@@ -219,6 +237,20 @@ $oAdmin_Form_Dataset->addCondition(
 ->changeField('name', 'link', "/admin/shop/item/property/for/group/index.php?shop_id=" . $shop_id . "&shop_group_id=" . $shop_group_id . "&property_dir_id={id}")
 ->changeField('name', 'onclick', "$.adminLoad({path: '/admin/shop/item/property/for/group/index.php', additionalParams: 'shop_id=" . $shop_id . "&shop_group_id=" . $shop_group_id ."&property_dir_id={id}', windowId: '{windowId}'}); return false")
 ;
+
+if (strlen($sGlobalSearch))
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('open' => array()))
+			->addCondition(array('where' => array('property_dirs.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('property_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
+}
+else
+{
+	$oAdmin_Form_Dataset->addCondition(array('where' => array('parent_id', '=', $property_dir_id)));
+}
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(
@@ -244,15 +276,33 @@ $oAdmin_Form_Dataset->addCondition(
 		)
 	))
 )
-->addCondition(
+/*->addCondition(
 	array('where' =>
 		array('property_dir_id', '=', $property_dir_id)
 	)
-)->addCondition(
+)*/->addCondition(
 	array('where' =>
 		array('shop_item_properties.shop_id', '=', $shop_id)
 	)
 );
+
+if (strlen($sGlobalSearch))
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('open' => array()))
+			->addCondition(array('where' => array('properties.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('properties.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('properties.guid', '=', $sGlobalSearch)))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('properties.tag_name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
+}
+else
+{
+	$oAdmin_Form_Dataset->addCondition(array('where' => array('property_dir_id', '=', $property_dir_id)));
+}
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(

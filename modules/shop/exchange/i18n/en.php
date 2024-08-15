@@ -130,4 +130,5 @@ return array(
 	'order_item_type' => "Type of order's item",
 	'shop_warehouse_inventory' => "Inventory by importing goods",
 	'shop_price_setting' => "Set prices by importing goods",
+	'clear_matches' => 'clear matches',
 );

@@ -24,7 +24,7 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$object->lng = Core::_('Site.lng_default');
 		}
 
-		$this->addSkipColumn('favicon');
+		$this->addSkipColumn('~favicon');
 
 		return parent::setObject($object);
 	}
@@ -99,7 +99,13 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'));
+			->add($oFaviconBlock = Admin_Form_Entity::factory('Div')->class('well with-header'));
+
+		$oFaviconBlock
+			->add(Admin_Form_Entity::factory('Div')
+				->class('header bordered-yellow')
+				->value(Core::_("Site.favicon_header"))
+			);
 
 		$oSiteTabProtects
 			->add($oSiteTabProtectsRow1 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -247,32 +253,12 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$this->getField('nesting_level')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-2'));
 		$oMainTab->move($this->getField('nesting_level'), $oMainRow5);
 
-		/* $oMainRow6 */
-		$sFormPath = $this->_Admin_Form_Controller->getPath();
+		$oSite_Favicon_Controller_Tab = new Site_Favicon_Controller_Tab($this->_Admin_Form_Controller);
+		$oSiteFavicon = $oSite_Favicon_Controller_Tab
+			->site_id($this->_object->id)
+			->execute();
 
-		$oFavicon = Admin_Form_Entity::factory('File');
-		$oFavicon
-			->type('file')
-			->caption(Core::_('Site.favicon'))
-			// ->divAttr(array('class' => 'input-group col-xs-12 col-sm-6'))
-			->name("icofile")
-			->id("icofile")
-			->largeImage(
-				array(
-					'path' => $this->_object->favicon != '' && Core_File::isFile($this->_object->getFaviconPath())
-						? $this->_object->getFaviconHref()
-						: '',
-					'show_params' => FALSE,
-					'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteFavicon', windowId: '{$windowId}'}); return false",
-				)
-			)
-			->smallImage(
-				array(
-					'show' => FALSE
-				)
-			);
-
-		$oMainRow6->add($oFavicon);
+		$oFaviconBlock->add($oSiteFavicon);
 
 		/* $oSiteTabFormatsRow1 */
 		$this->getField('date_format')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
@@ -596,6 +582,11 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		}
 
 		$this->addMessage('<script>$.loadSiteList()</script>');
+
+		$oSite_Favicon_Controller_Tab = new Site_Favicon_Controller_Tab($this->_Admin_Form_Controller);
+		$oSite_Favicon_Controller_Tab
+			->site_id($this->_object->id)
+			->applyObjectProperty();
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 	}

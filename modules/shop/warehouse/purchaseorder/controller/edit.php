@@ -21,8 +21,8 @@ class Shop_Warehouse_Purchaseorder_Controller_Edit extends Admin_Form_Action_Con
 	{
 		parent::_prepareForm();
 
-		$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0));
-		$oShop_Group = Core_Entity::factory('Shop_Group', Core_Array::getGet('shop_group_id', 0));
+		$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0, 'int'));
+		$shop_group_id = Core_Array::getGet('shop_group_id', 0, 'int');
 
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
@@ -37,7 +37,6 @@ class Shop_Warehouse_Purchaseorder_Controller_Edit extends Admin_Form_Action_Con
 			->add($oSiteuserRow = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oShopItemBlock = Admin_Form_Entity::factory('Div')->class('well with-header'));
 
 		$oMainTab
@@ -54,8 +53,7 @@ class Shop_Warehouse_Purchaseorder_Controller_Edit extends Admin_Form_Action_Con
 
 		$aCompanies = $oSite->Companies->findAll();
 
-		$aTmp = [];
-
+		$aTmp = array();
 		foreach($aCompanies as $oCompany)
 		{
 			$aTmp[$oCompany->id] = $oCompany->name;
@@ -76,8 +74,6 @@ class Shop_Warehouse_Purchaseorder_Controller_Edit extends Admin_Form_Action_Con
 
 		if (Core::moduleIsActive('siteuser'))
 		{
-			//$oAdditionalTab->delete($this->getField('siteuser_id'));
-
 			$oAdditionalTab->delete($this->getField('siteuser_company_id'));
 
 			$aMasSiteusers = array();
@@ -132,10 +128,7 @@ class Shop_Warehouse_Purchaseorder_Controller_Edit extends Admin_Form_Action_Con
 							processResults: function (data) {
 								var aResults = [];
 								$.each(data, function (index, item) {
-									aResults.push({
-										"id": item.id,
-										"text": item.text
-									});
+									aResults.push(item);
 								});
 								return {
 									results: aResults
@@ -166,7 +159,6 @@ class Shop_Warehouse_Purchaseorder_Controller_Edit extends Admin_Form_Action_Con
 				->add(
 					Admin_Form_Entity::factory('Div')
 						->class('form-group col-xs-12 col-sm-6 no-padding')
-						//->add($oScriptContracts)
 						->add($oSelectSiteusers)
 						->add($oScriptSiteusers)
 				)
@@ -276,7 +268,7 @@ class Shop_Warehouse_Purchaseorder_Controller_Edit extends Admin_Form_Action_Con
 
 			if (!is_null($oModule))
 			{
-				$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, $this->_object->getEntityType(), 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
+				$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, $this->_object->getEntityType(), 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $shop_group_id);
 			}
 
 			$printlayoutsButton .= '
@@ -492,8 +484,6 @@ class Shop_Warehouse_Purchaseorder_Controller_Edit extends Admin_Form_Action_Con
 
 		$this->addSkipColumn('posted');
 
-		$iOldWarehouse = intval($this->_object->shop_warehouse_id);
-
 		$this->_object->user_id = intval(Core_Array::getPost('user_id'));
 
 		parent::_applyObjectProperty();
@@ -510,8 +500,6 @@ class Shop_Warehouse_Purchaseorder_Controller_Edit extends Admin_Form_Action_Con
 			$this->_object->number = $this->_object->id;
 			$this->_object->save();
 		}
-
-		$bNeedsRePost = FALSE;
 
 		$Shop_Item_Controller = new Shop_Item_Controller();
 
@@ -546,12 +534,10 @@ class Shop_Warehouse_Purchaseorder_Controller_Edit extends Admin_Form_Action_Con
 
 		if (count($aAddShopItems))
 		{
-			$bNeedsRePost = TRUE;
-
 			$script = "var jShopItemId = $(\"#{$windowId} input[name='shop_item_id\\[\\]']\"),
-						jShopItemPrice = $(\"#{$windowId} input[name='shop_item_price\\[\\]']\"),
-						jShopItemQuantity = $(\"#{$windowId} input[name='shop_item_quantity\\[\\]']\"),
-						aMapShopItemId = {};";
+				jShopItemPrice = $(\"#{$windowId} input[name='shop_item_price\\[\\]']\"),
+				jShopItemQuantity = $(\"#{$windowId} input[name='shop_item_quantity\\[\\]']\"),
+				aMapShopItemId = {};";
 
 			$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
 
@@ -614,8 +600,9 @@ class Shop_Warehouse_Purchaseorder_Controller_Edit extends Admin_Form_Action_Con
 			})";
 
 			Core_Html_Entity::factory('Script')
-					->value($script)
-					->execute();
+				->value($script)
+				->execute();
+
 			$this->_Admin_Form_Controller->addMessage(ob_get_clean());
 		}
 

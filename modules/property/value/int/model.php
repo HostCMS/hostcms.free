@@ -242,7 +242,7 @@ class Property_Value_Int_Model extends Core_Entity
 							->showXmlProperties(count($aTmp) ? $aTmp : FALSE)
 							->showXmlMedia($this->_showXmlMedia);
 
-						Core_Event::notify($this->_modelName . '.onBeforeAddInformationsystemItem', $this, array($oInformationsystem_Item));
+						Core_Event::notify($this->_modelName . '.onBeforeAddInformationsystemItem', $this, array($oNew_Informationsystem_Item));
 
 						$oLastReturn = Core_Event::getLastReturn();
 
@@ -293,7 +293,7 @@ class Property_Value_Int_Model extends Core_Entity
 							->showXmlProperties(count($aTmp) ? $aTmp : FALSE)
 							->showXmlMedia($this->_showXmlMedia);
 
-						Core_Event::notify($this->_modelName . '.onBeforeAddInformationsystemGroup', $this, array($oInformationsystem_Group));
+						Core_Event::notify($this->_modelName . '.onBeforeAddInformationsystemGroup', $this, array($oNew_Informationsystem_Group));
 
 						$oLastReturn = Core_Event::getLastReturn();
 
@@ -358,7 +358,7 @@ class Property_Value_Int_Model extends Core_Entity
 						$oNew_Shop_Item->shop_currency_id
 							&& $oNew_Shop_Item->addEntity($oNew_Shop_Item->Shop_Currency->clearEntities());
 
-						Core_Event::notify($this->_modelName . '.onBeforeAddShopItem', $this, array($oShop_Item));
+						Core_Event::notify($this->_modelName . '.onBeforeAddShopItem', $this, array($oNew_Shop_Item));
 
 						$oLastReturn = Core_Event::getLastReturn();
 
@@ -411,7 +411,7 @@ class Property_Value_Int_Model extends Core_Entity
 							->showXmlProperties(count($aTmp) ? $aTmp : FALSE)
 							->showXmlMedia($this->_showXmlMedia);
 
-						Core_Event::notify($this->_modelName . '.onBeforeAddShopGroup', $this, array($oShop_Group));
+						Core_Event::notify($this->_modelName . '.onBeforeAddShopGroup', $this, array($oNew_Shop_Group));
 
 						$oLastReturn = Core_Event::getLastReturn();
 

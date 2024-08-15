@@ -21,4 +21,10 @@ return array(
 	'markDeleted_success' => 'Stopword deleted successfully.',
 	'export' => 'Export',
 	'link' => 'Stopword',
+	'type' => 'Type',
+	'type0' => 'String',
+	'type1' => 'Regular expression',
+	'case_sensitive' => 'Case sensitive',
+	'active' => 'Activity',
+	'changeActive_success' => 'Activity changed successfully!',
 );

@@ -385,4 +385,9 @@ return array(
 	'export_in_stock_items' => 'Export in stock items',
 	'closed' => 'Closed',
 	'changeIndexation_success' => 'Product indexation has been changed.',
+
+	'export_fields_allow_items' => 'Export custom product fields',
+	'export_fields_allow_groups' => 'Export user field groups',
+	'delete_field_values' => 'Delete existing values of custom fields',
+	'shops_add_form_link_fields' => "Custom product fields",
 );

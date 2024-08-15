@@ -1559,6 +1559,12 @@ class Shop_Controller_Show extends Core_Controller
 				count($hostcmsFavorite) && $this->addCacheSignature('hostcmsFavorite=' . implode(',', $hostcmsFavorite));
 			}
 
+			if ($this->viewed)
+			{
+				$hostcmsViewed = Core_Array::get(Core_Array::getSession('hostcmsViewed', array()), $oShop->id, array());
+				count($hostcmsViewed) && $this->addCacheSignature('hostcmsViewed=' . implode(',', $hostcmsViewed));
+			}
+
 			if (isset($_SESSION['hostcmsOrder']['coupon_text']))
 			{
 				$this->addCacheSignature('coupon=' . $_SESSION['hostcmsOrder']['coupon_text']);
@@ -1754,7 +1760,7 @@ class Shop_Controller_Show extends Core_Controller
 			$this->assign('aShop_Items', array());
 		}
 
-		if ($this->limit == 0 && $this->page)
+		if (!$this->checkPaginationConditions())
 		{
 			return $this->error404();
 		}
@@ -2114,6 +2120,15 @@ class Shop_Controller_Show extends Core_Controller
 			= $this->_aGroup_Properties = $this->_aGroup_Property_Dirs = $this->_cacheTags = $this->_itemsPropertiesListJustAvailable = array();
 
 		return $this;
+	}
+
+	/**
+	 * Check pagination conditions
+	 * @return boolean
+	 */
+	public function checkPaginationConditions()
+	{
+		return !($this->limit == 0 && $this->page);
 	}
 
 	/**
@@ -3114,7 +3129,7 @@ class Shop_Controller_Show extends Core_Controller
 			$this->producer($matches['producer']);
 
 			$oShop_Producer = Core_Entity::factory('Shop_Producer')->find($this->producer);
-			if (is_null($oShop_Producer->id))
+			if (is_null($oShop_Producer->id) || !$oShop_Producer->active)
 			{
 				return $this->error410();
 			}
@@ -4118,6 +4133,15 @@ class Shop_Controller_Show extends Core_Controller
 	public function addAllGroups()
 	{
 		$this->_aShop_Groups = array();
+
+		// Load all values for properties
+		if (is_array($this->groupsProperties))
+		{
+			foreach ($this->groupsProperties as $propertyId)
+			{
+				Core_Entity::factory('Property', $propertyId)->loadAllValues();
+			}
+		}
 
 		$aShop_Groups = $this->_Shop_Groups->findAll();
 		foreach ($aShop_Groups as $oShop_Group)

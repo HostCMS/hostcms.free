@@ -1840,8 +1840,6 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 		$large_image = $small_image = '';
 
-		$aCore_Config = Core::$mainConfig;
-
 		$create_small_image_from_large = $this->_getEachPost("create_small_image_from_large_small_{$sPropertyName}");
 
 		$bLargeImageIsCorrect =
@@ -1853,7 +1851,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		if ($bLargeImageIsCorrect)
 		{
 			// Проверка на допустимый тип файла
-			if (Core_File::isValidExtension($aFileData['name'], $aCore_Config['availableExtension']))
+			if (Core_File::isValidExtension($aFileData['name'], Core::$mainConfig['availableExtension']))
 			{
 				// Удаление файла большого изображения
 				if ($oProperty_Value->file)
@@ -1900,7 +1898,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 			// Явно указано малое изображение
 			if ($bSmallImageIsCorrect
-				&& Core_File::isValidExtension($aSmallFileData['name'], $aCore_Config['availableExtension']))
+				&& Core_File::isValidExtension($aSmallFileData['name'], Core::$mainConfig['availableExtension']))
 			{
 				// задано изображение
 				if ($oProperty_Value->file != '')

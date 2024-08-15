@@ -174,4 +174,19 @@ class Informationsystem_Controller
 
 		return $html;
 	}
+	
+	/**
+	 * Get informationsystem_config
+	 * @return array
+	 */
+	static public function getConfig()
+	{
+		return Core_Config::instance()->get('informationsystem_config', array()) + array(
+			'smallImagePrefix' => 'small_',
+			'itemLargeImage' => 'item_%d.%s',
+			'itemSmallImage' => 'small_item_%d.%s',
+			'groupLargeImage' => 'group_%d.%s',
+			'groupSmallImage' => 'small_group_%d.%s',
+		);
+	}
 }

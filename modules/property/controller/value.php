@@ -63,8 +63,15 @@ class Property_Controller_Value
 				$oProperty = self::_getProperty($iPropertyId);
 				if (!is_null($oProperty))
 				{
-					$oPropertyValue = self::factory($oProperty->type);
-					$aSelect[$oPropertyValue->getModelName()][] = $iPropertyId;
+					if ($oProperty->issetAllValues())
+					{
+						$aReturn = array_merge($aReturn, $oProperty->getValues($entityId));
+					}
+					else
+					{
+						$oPropertyValue = self::factory($oProperty->type);
+						$aSelect[$oPropertyValue->getModelName()][] = $iPropertyId;
+					}
 				}
 			}
 

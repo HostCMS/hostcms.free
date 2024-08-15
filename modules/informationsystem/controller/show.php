@@ -681,7 +681,6 @@ class Informationsystem_Controller_Show extends Core_Controller
 		{
 			$model = 'informationsystem_item';
 			$id = $this->item;
-			//$oShop_Item = Core_Entity::factory('')
 		}
 		elseif ($this->group)
 		{
@@ -829,32 +828,32 @@ class Informationsystem_Controller_Show extends Core_Controller
 	}
 
 	/**
-	 * Typical conversion of Shop_Items to an array
-	 * @param array $aShop_Items
+	 * Typical conversion of Informationsystem_Items to an array
+	 * @param array $aInformationsystem_Items
 	 * @return array
 	 */
-	protected function _getItemData(array $aShop_Items)
+	protected function _getItemData(array $aInformationsystem_Items)
 	{
 		$aReturn = array();
-		foreach ($aShop_Items as $oShop_Item)
+		foreach ($aInformationsystem_Items as $oInformationsystem_Item)
 		{
-			$aReturn[] = $oShop_Item->toArray();
+			$aReturn[] = $oInformationsystem_Item->toArray();
 		}
 
 		return $aReturn;
 	}
 
 	/**
-	 * Typical conversion of Shop_Groups to an array
-	 * @param array $aShop_Items
+	 * Typical conversion of Informationsystem_Groups to an array
+	 * @param array $aInformationsystem_Grpoups
 	 * @return array
 	 */
-	protected function _getGroupData(array $aShop_Grpoups)
+	protected function _getGroupData(array $aInformationsystem_Grpoups)
 	{
 		$aReturn = array();
-		foreach ($aShop_Grpoups as $oShop_Grpoup)
+		foreach ($aInformationsystem_Grpoups as $oInformationsystem_Grpoup)
 		{
-			$aReturn[] = $oShop_Grpoup->toArray();
+			$aReturn[] = $oInformationsystem_Grpoup->toArray();
 		}
 
 		return $aReturn;
@@ -1230,7 +1229,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			$this->assign('aInformationsystem_Items', array());
 		}
 
-		if ($this->limit == 0 && $this->page)
+		if (!$this->checkPaginationConditions())
 		{
 			return $this->error404();
 		}
@@ -1380,6 +1379,15 @@ class Informationsystem_Controller_Show extends Core_Controller
 			= $this->_aGroup_Properties = $this->_aGroup_Property_Dirs = $this->_cacheTags = array();
 
 		return $this;
+	}
+
+	/**
+	 * Check pagination conditions
+	 * @return boolean
+	 */
+	public function checkPaginationConditions()
+	{
+		return !($this->limit == 0 && $this->page);
 	}
 
 	/**
@@ -2025,8 +2033,16 @@ class Informationsystem_Controller_Show extends Core_Controller
 	{
 		$this->_aInformationsystem_Groups = array();
 
-		$aInformationsystem_Groups = $this->_Informationsystem_Groups->findAll();
+		// Load all values for properties
+		if (is_array($this->groupsProperties))
+		{
+			foreach ($this->groupsProperties as $propertyId)
+			{
+				Core_Entity::factory('Property', $propertyId)->loadAllValues();
+			}
+		}
 
+		$aInformationsystem_Groups = $this->_Informationsystem_Groups->findAll();
 		foreach ($aInformationsystem_Groups as $oInformationsystem_Group)
 		{
 			$this->_groupIntoArray($oInformationsystem_Group);

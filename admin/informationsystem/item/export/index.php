@@ -206,6 +206,18 @@ $oMainTab
 			->caption(Core::_('Informationsystem_Item.export_external_properties_allow_groups'))
 			->divAttr(array('class' => 'form-group col-xs-12', 'id' => 'export_external_properties_allow_groups'))
 			->value(TRUE)))
+	->add(Admin_Form_Entity::factory('Div')->class('row')->add(
+		Admin_Form_Entity::factory('Checkbox')
+			->name("export_fields_allow_items")
+			->caption(Core::_('Informationsystem_Item.export_fields_allow_items'))
+			->divAttr(array('class' => 'form-group col-xs-12', 'id' => 'export_fields_allow_items'))
+			->value(TRUE)))
+	->add(Admin_Form_Entity::factory('Div')->class('row')->add(
+		Admin_Form_Entity::factory('Checkbox')
+			->name("export_fields_allow_groups")
+			->caption(Core::_('Informationsystem_Item.export_fields_allow_groups'))
+			->divAttr(array('class' => 'form-group col-xs-12', 'id' => 'export_fields_allow_groups'))
+			->value(TRUE)))
 	->add(Admin_Form_Entity::factory('Div')->class('row')
 		->add(Core_Html_Entity::factory('Input')->type('hidden')->name('action')->value('export'))
 		->add(Core_Html_Entity::factory('Input')->type('hidden')->name('informationsystem_group_id')->value(Core_Array::getGet('informationsystem_group_id')))

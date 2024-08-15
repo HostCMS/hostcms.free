@@ -71,9 +71,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
 // Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -87,9 +85,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 	$oAdmin_Form_Controller->addAction($oSql_Table_Controller_Edit);
 }
 
-$oAdmin_Form_Action_Dump = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('dump');
+$oAdmin_Form_Action_Dump = $oAdmin_Form->Admin_Form_Actions->getByName('dump');
 
 if ($oAdmin_Form_Action_Dump && $oAdmin_Form_Controller->getAction() == 'dump')
 {
@@ -101,9 +97,7 @@ if ($oAdmin_Form_Action_Dump && $oAdmin_Form_Controller->getAction() == 'dump')
 	$oAdmin_Form_Controller->addAction($oSql_Table_Controller_Dump);
 }
 
-$oAdmin_Form_Action_DumpStructure = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('dumpStructure');
+$oAdmin_Form_Action_DumpStructure = $oAdmin_Form->Admin_Form_Actions->getByName('dumpStructure');
 
 if ($oAdmin_Form_Action_DumpStructure && $oAdmin_Form_Controller->getAction() == 'dumpStructure')
 {

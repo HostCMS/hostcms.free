@@ -72,9 +72,7 @@ if ($document_id)
 
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 
-$oAdminFormActionEdit = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdminFormActionEdit = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdminFormActionEdit && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -87,9 +85,7 @@ if ($oAdminFormActionEdit && $oAdmin_Form_Controller->getAction() == 'edit')
 }
 
 // Удаление
-$oAdminFormActionDelete = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('delete');
+$oAdminFormActionDelete = $oAdmin_Form->Admin_Form_Actions->getByName('delete');
 
 if ($oAdminFormActionDelete && $oAdmin_Form_Controller->getAction() == 'delete')
 {

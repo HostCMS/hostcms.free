@@ -39,6 +39,7 @@ if (strlen($tableName))
 		$oAdmin_Form_Field->id = $key;
 		$oAdmin_Form_Field->admin_form_id = $iAdmin_Form_Id;
 		$oAdmin_Form_Field->name = $aRow['name'];
+		$oAdmin_Form_Field->caption = $aRow['name'];
 		$oAdmin_Form_Field->type = 1;
 		$oAdmin_Form_Field->filter_type = 0;
 		$oAdmin_Form_Field->allow_filter = 1;
@@ -128,6 +129,12 @@ $oAdmin_Form_Entity_Menus->add(
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 
+$oAdmin_Form_Controller->addEntity(
+	Sql_Controller::getFieldsIcon($tableName)
+)->addEntity(
+	Sql_Controller::getIndexesIcon($tableName)
+);
+
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
@@ -164,9 +171,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
 // Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -181,9 +186,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 }
 
 // Действие "Применить"
-$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdminFormActionApply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {

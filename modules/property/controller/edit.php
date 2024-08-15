@@ -726,6 +726,10 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$this->linkedObject->add($this->_object);
 		}
 
+		Core::moduleIsActive('wysiwyg') && Wysiwyg_Controller::uploadImages($this->_formValues, $this->_object, $this->_Admin_Form_Controller);
+
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
+
+		return $this;
 	}
 }

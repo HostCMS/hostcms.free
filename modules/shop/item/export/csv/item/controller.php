@@ -41,6 +41,20 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 	private $_aGroup_Properties = array();
 
 	/**
+	 * Additional properties of items
+	 * Пользовательские поля товаров
+	 * @var array
+	 */
+	private $_aItem_Fields	= array();
+
+	/**
+	 * Additional properties of item groups
+	 * Пользовательские поля групп товаров
+	 * @var array
+	 */
+	private $_aGroup_Fields = array();
+
+	/**
 	 * Item properties count
 	 * Требуется хранить количество свойств отдельно, т.к. количество полей файла CSV для свойств не равно количеству свойств (из-за файлов)
 	 * @var int
@@ -48,10 +62,23 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 	private $_iItem_Properties_Count;
 
 	/**
+	 * Item properties count
+	 * Требуется хранить количество свойств отдельно, т.к. количество полей файла CSV для свойств не равно количеству свойств (из-за файлов)
+	 * @var int
+	 */
+	private $_iItem_Fields_Count;
+
+	/**
 	 * Group properties count
 	 * @var int
 	 */
 	private $_iGroup_Properties_Count;
+
+	/**
+	 * Group properties count
+	 * @var int
+	 */
+	private $_iGroup_Fields_Count;
 
 	/**
 	 * Base properties of items
@@ -101,6 +128,12 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 	protected $_cachePropertyValues = array();
 
 	/**
+	 * Кэш значений доп. св-в
+	 * @var array
+	 */
+	protected $_cacheFieldValues = array();
+
+	/**
 	 * Constructor.
 	 * @param int $iShopId shop ID
 	 */
@@ -119,7 +152,9 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 			'exportGroupExternalProperties',
 			'exportItemModifications',
 			'exportItemShortcuts',
-			'exportInStock'
+			'exportInStock',
+			'exportItemFields',
+			'exportGroupFields'
 		));
 
 		parent::__construct($iShopId);
@@ -258,10 +293,10 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 	 */
 	public function clear()
 	{
-		$this->_aShopWarehouses = $this->_aItem_Properties = $this->_aGroup_Properties = $this->_aShopPrices
+		$this->_aShopWarehouses = $this->_aItem_Properties = $this->_aGroup_Properties = $this->_aItem_Fields = $this->_aGroup_Fields = $this->_aShopPrices
 			= $this->_aGroupBaseProperties = $this->_aCurrentData = array();
 
-		$this->_iCurrentDataPosition = $this->_iItem_Properties_Count = $this->_iGroup_Properties_Count = 0;
+		$this->_iCurrentDataPosition = $this->_iItem_Properties_Count = $this->_iGroup_Properties_Count = $this->_iItem_Fields_Count = $this->_iGroup_Fields_Count = 0;
 
 		return $this;
 	}
@@ -303,16 +338,60 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 		$this->exportGroupExternalProperties
 			&& $this->_aGroup_Properties = Core_Entity::factory('Shop_Group_Property_List', $this->shopId)->Properties->findAll(FALSE);
 
+		// Заполняем пользовательские поля товаров
+		$this->exportItemFields
+			&& $this->_aItem_Fields = Field_Controller::getFields('shop_item', $oShop->site_id);
+
+		// Заполняем пользовательские поля групп товаров
+		$this->exportGroupFields
+			&& $this->_aGroup_Fields = Field_Controller::getFields('shop_group', $oShop->site_id);
+
 		$this->_aShopPrices = $oShop->Shop_prices->findAll(FALSE);
 
+		// Группы
 		$aGroupTitles = array_map(array($this, 'prepareCell'), $this->getGroupTitles());
-		$aItemTitles = array_map(array($this, 'prepareCell'), $this->getItemTitles());
-		$aItemSpecialpricesTitles = array_map(array($this, 'prepareCell'), $this->getItemSpecialpricesTitles());
+
+		$this->_aCurrentData[$this->_iCurrentDataPosition] = $aGroupTitles;
 
 		// Название раздела - Порядок сортировки раздела
 		$this->_aGroupBaseProperties = array_pad(array(), count($aGroupTitles), '');
 
-		$this->guidItemPosition = count($aGroupTitles);
+		// Добавляем в заголовок информацию о свойствах группы товаров
+		foreach ($this->_aGroup_Properties as $oGroup_Property)
+		{
+			$this->_aCurrentData[$this->_iCurrentDataPosition][] = $this->prepareCell($oGroup_Property->name);
+			$this->_iGroup_Properties_Count++;
+
+			if ($oGroup_Property->type == 2)
+			{
+				$this->_aCurrentData[$this->_iCurrentDataPosition][] = $this->prepareCell(Core::_('Shop_Item.import_file_description', $oGroup_Property->name));
+				$this->_iGroup_Properties_Count++;
+
+				$this->_aCurrentData[$this->_iCurrentDataPosition][] = $this->prepareCell(Core::_('Shop_Item.import_small_images', $oGroup_Property->name));
+				$this->_iGroup_Properties_Count++;
+			}
+		}
+
+		foreach ($this->_aGroup_Fields as $oField)
+		{
+			$this->_aCurrentData[$this->_iCurrentDataPosition][] = $this->prepareCell($oField->name);
+			$this->_iGroup_Fields_Count++;
+
+			if ($oField->type == 2)
+			{
+				$this->_aCurrentData[$this->_iCurrentDataPosition][] = $this->prepareCell(Core::_('Shop_Item.import_file_description', $oField->name));
+				$this->_iGroup_Fields_Count++;
+
+				$this->_aCurrentData[$this->_iCurrentDataPosition][] = $this->prepareCell(Core::_('Shop_Item.import_small_images', $oField->name));
+				$this->_iGroup_Fields_Count++;
+			}
+		}
+
+		// Товары
+		$this->guidItemPosition = count($aGroupTitles) + $this->_iGroup_Properties_Count + $this->_iGroup_Fields_Count;
+
+		$aItemTitles = array_map(array($this, 'prepareCell'), $this->getItemTitles());
+		$aItemSpecialpricesTitles = array_map(array($this, 'prepareCell'), $this->getItemSpecialpricesTitles());
 
 		// CML ID идентификатор товара - Ярлыки
 		$this->_aItemBaseProperties = array_pad(array(), count($aItemTitles), '');
@@ -321,7 +400,7 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 
 		// 0-вая строка - заголовок CSV-файла
 		$this->_aCurrentData[$this->_iCurrentDataPosition] = array_merge(
-			$aGroupTitles,
+			$this->_aCurrentData[$this->_iCurrentDataPosition],
 			$aItemTitles,
 			$aItemSpecialpricesTitles
 		);
@@ -342,19 +421,18 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 			}
 		}
 
-		// Добавляем в заголовок информацию о свойствах группы товаров
-		foreach ($this->_aGroup_Properties as $oGroup_Property)
+		foreach ($this->_aItem_Fields as $oField)
 		{
-			$this->_aCurrentData[$this->_iCurrentDataPosition][] = $this->prepareCell($oGroup_Property->name);
-			$this->_iGroup_Properties_Count++;
+			$this->_aCurrentData[$this->_iCurrentDataPosition][] = $this->prepareCell($oField->name);
+			$this->_iItem_Fields_Count++;
 
-			if ($oGroup_Property->type == 2)
+			if ($oField->type == 2)
 			{
-				$this->_aCurrentData[$this->_iCurrentDataPosition][] = $this->prepareCell(Core::_('Shop_Item.import_file_description', $oGroup_Property->name));
-				$this->_iGroup_Properties_Count++;
+				$this->_aCurrentData[$this->_iCurrentDataPosition][] = $this->prepareCell(Core::_('Shop_Item.import_file_description', $oField->name));
+				$this->_iItem_Fields_Count++;
 
-				$this->_aCurrentData[$this->_iCurrentDataPosition][] = $this->prepareCell(Core::_('Shop_Item.import_small_images', $oGroup_Property->name));
-				$this->_iGroup_Properties_Count++;
+				$this->_aCurrentData[$this->_iCurrentDataPosition][] = $this->prepareCell(Core::_('Shop_Item.import_small_images', $oField->name));
+				$this->_iItem_Fields_Count++;
 			}
 		}
 
@@ -393,10 +471,12 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 
 		$result = array_merge(
 			$aGroupData,
+			array_pad(array(), $this->_iGroup_Properties_Count, ''),
+			array_pad(array(), $this->_iGroup_Fields_Count, ''),
 			$this->getItemBasicData($oShopItem),
 			$this->_aSpecialPriceBaseProperties,
 			$this->getPropertiesData($this->_aItem_Properties, $oShopItem),
-			array_pad(array(), $this->_iGroup_Properties_Count, ''),
+			$this->getFieldsData($this->_aItem_Fields, $oShopItem),
 			$this->getWarehouseItems($oShopItem),
 			$this->getPrices($oShopItem)
 		);
@@ -617,6 +697,54 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 		return $aRow;
 	}
 
+	/**
+	 * Get block of Item/Group Property values
+	 * @param array $aFields
+	 * @param object $object
+	 * @return array
+	 */
+	public function getFieldsData(array $aFields, $object)
+	{
+		$aRow = array();
+
+		foreach ($aFields as $oField)
+		{
+			$oField_Value = isset($this->_cacheFieldValues[$object->id][$oField->id]) && is_array($this->_cacheFieldValues[$object->id][$oField->id])
+				? array_shift($this->_cacheFieldValues[$object->id][$oField->id])
+				: NULL;
+
+			$aRow[] = $this->prepareCell(
+				$oField_Value
+					? $this->_getFieldValue($oField, $oField_Value, $object)
+					: ''
+			);
+
+			if ($oField->type == 2)
+			{
+				$aRow[] = $oField_Value
+					? $this->prepareCell($oField_Value->file_description)
+					: '';
+
+				$aRow[] = $oField_Value
+					? ($oField_Value->file_small == ''
+						? ''
+						: $this->prepareCell($oField_Value->getSmallFileHref())
+					)
+					: '';
+			}
+
+			$oField_Value && $oField_Value->clear();
+
+			// Удаляем пустой массив для свойств, чтобы определить, что значения закончились
+			if (isset($this->_cacheFieldValues[$object->id][$oField->id]) && !count($this->_cacheFieldValues[$object->id][$oField->id]))
+			{
+				unset($this->_cacheFieldValues[$object->id][$oField->id]);
+			}
+		}
+
+		return $aRow;
+	}
+
 	public function getWarehouseItems($oShopItem)
 	{
 		$aWarehouses = array();
@@ -654,6 +782,8 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 
 		$aTmpArray = array_merge(
 			$this->_aGroupBaseProperties,
+			array_pad(array(), $this->_iGroup_Properties_Count, ''),
+			array_pad(array(), $this->_iGroup_Fields_Count, ''),
 			$this->_aItemBaseProperties
 		);
 
@@ -862,8 +992,25 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 
 			if ($iShopGroupId != 0)
 			{
+				// Кэш всех значений свойств группы
+				$this->_cachePropertyValues[$oShopGroup->id] = array();
+				foreach ($this->_aGroup_Properties as $oProperty)
+				{
+					$this->_cachePropertyValues[$oShopGroup->id][$oProperty->id] = $oProperty->getValues($oShopGroup->id, FALSE);
+				}
+
+				$this->_cacheFieldValues[$oShopGroup->id] = array();
+				foreach ($this->_aGroup_Fields as $oField)
+				{
+					$this->_cacheFieldValues[$oShopGroup->id][$oField->id] = $oField->getValues($oShopGroup->id, FALSE);
+				}
+
+				$aBasicGroupData = $this->getGroupBasicData($oShopGroup);
+
 				$aTmpArray = array_merge(
-					$this->getGroupBasicData($oShopGroup),
+					$aBasicGroupData,
+					$this->getPropertiesData($this->_aGroup_Properties, $oShopGroup),
+					$this->getFieldsData($this->_aGroup_Fields, $oShopGroup),
 					$this->_aItemBaseProperties,
 					$this->_aSpecialPriceBaseProperties
 				);
@@ -874,26 +1021,20 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 					$aTmpArray[] = "";
 				}
 
-				$iPropertyFieldOffsetOriginal = count($aTmpArray);
-
-				// Кэш всех значений свойств группы
-				$this->_cachePropertyValues[$oShopGroup->id] = array();
-				foreach ($this->_aGroup_Properties as $oProperty)
+				// Пропускаем поля пользовательских полей товара
+				for ($i = 0; $i < $this->_iItem_Fields_Count; $i++)
 				{
-					$this->_cachePropertyValues[$oShopGroup->id][$oProperty->id] = $oProperty->getValues($oShopGroup->id, FALSE);
+					$aTmpArray[] = "";
 				}
 
-				$aTmpArray = array_merge(
-					$aTmpArray,
-					$this->getPropertiesData($this->_aGroup_Properties, $oShopGroup)
-				);
-
 				$this->_printRow($aTmpArray);
+
+				$iPropertyOffset = count($aBasicGroupData);
 
 				// Оставшиеся множественные значения свойств
 				while (count($this->_cachePropertyValues[$oShopGroup->id]))
 				{
-					$aCurrentPropertyLine = array_fill(0, $iPropertyFieldOffsetOriginal, '""');
+					$aCurrentPropertyLine = array_fill(0, $iPropertyOffset, '""');
 
 					// CML ID группы
 					$aCurrentPropertyLine[$this->guidGroupPosition] = $oShopGroup->guid;
@@ -901,11 +1042,25 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 					$aCurrentPropertyLine = array_merge($aCurrentPropertyLine, $this->getPropertiesData($this->_aGroup_Properties, $oShopGroup));
 					$this->_printRow($aCurrentPropertyLine);
 				}
-
 				unset($this->_cachePropertyValues[$oShopGroup->id]);
+
+				// Оставшиеся множественные значения полей
+				while (count($this->_cacheFieldValues[$oShopGroup->id]))
+				{
+					$aCurrentFieldLine = array_fill(0, $iPropertyOffset + $this->_iGroup_Properties_Count, '""');
+
+					// CML ID группы
+					$aCurrentFieldLine[$this->guidGroupPosition] = $oShopGroup->guid;
+
+					$aCurrentFieldLine = array_merge($aCurrentFieldLine, $this->getFieldsData($this->_aGroup_Fields, $oShopGroup));
+					$this->_printRow($aCurrentFieldLine);
+				}
+				unset($this->_cacheFieldValues[$oShopGroup->id]);
 			}
 
-			$iPropertyFieldOffsetOriginal = count($this->_aGroupBaseProperties)
+			$iPropertyOffset = count($this->_aGroupBaseProperties)
+				+ $this->_iGroup_Properties_Count
+				+ $this->_iGroup_Fields_Count
 				+ count($this->_aItemBaseProperties)
 				+ count($this->_aSpecialPriceBaseProperties);
 
@@ -946,10 +1101,6 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 						$oShopItem->save();
 					}
 
-					$iPropertyFieldOffset = $iPropertyFieldOffsetOriginal;
-
-					$this->_cachePropertyValues[$oShopItem->id] = array();
-
 					// Кэш всех значений свойств товара
 					$this->_cachePropertyValues[$oShopItem->id] = array();
 					foreach ($this->_aItem_Properties as $oProperty)
@@ -957,11 +1108,11 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 						$this->_cachePropertyValues[$oShopItem->id][$oProperty->id] = $oProperty->getValues($oShopItem->id, FALSE);
 					}
 
-					/*$aProperty_Values = $oShopItem->getPropertyValues(FALSE);
-					foreach ($aProperty_Values as $oProperty_Value)
+					$this->_cacheFieldValues[$oShopItem->id] = array();
+					foreach ($this->_aItem_Fields as $oField)
 					{
-						$this->_cachePropertyValues[$oShopItem->id][$oProperty_Value->property_id][] = $oProperty_Value;
-					}*/
+						$this->_cacheFieldValues[$oShopItem->id][$oField->id] = $oField->getValues($oShopItem->id, FALSE);
+					}
 
 					// Строка с основными данными о товаре
 					$this->_printRow($this->getItemData($oShopItem));
@@ -969,7 +1120,7 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 					// Оставшиеся множественные значения свойств
 					while (count($this->_cachePropertyValues[$oShopItem->id]))
 					{
-						$aCurrentPropertyLine = array_fill(0, $iPropertyFieldOffset, '""');
+						$aCurrentPropertyLine = array_fill(0, $iPropertyOffset, '""');
 
 						// CML ID ТОВАРА
 						$aCurrentPropertyLine[$this->guidItemPosition] = $oShopItem->guid;
@@ -979,6 +1130,20 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 					}
 					unset($this->_cachePropertyValues[$oShopItem->id]);
 
+					// Оставшиеся множественные значения полей
+					while (count($this->_cacheFieldValues[$oShopItem->id]))
+					{
+						$aCurrentFieldLine = array_fill(0, $iPropertyOffset + $this->_iItem_Properties_Count, '""');
+
+						// CML ID ТОВАРА
+						$aCurrentFieldLine[$this->guidItemPosition] = $oShopItem->guid;
+
+						$aCurrentFieldLine = array_merge($aCurrentFieldLine, $this->getFieldsData($this->_aItem_Fields, $oShopItem));
+						$this->_printRow($aCurrentFieldLine);
+					}
+					unset($this->_cacheFieldValues[$oShopItem->id]);
+
+					// Выгружается отдельными строками
 					$this->exportSpecialPriceData($oShopItem);
 
 					// Получаем список всех модификаций
@@ -1004,13 +1169,17 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 						// Добавляем информацию о модификациях
 						foreach ($aModifications as $oModification)
 						{
-							$iPropertyFieldOffset = $iPropertyFieldOffsetOriginal;
-
 							// Кэш всех значений свойств товара
 							$this->_cachePropertyValues[$oModification->id] = array();
 							foreach ($this->_aItem_Properties as $oProperty)
 							{
 								$this->_cachePropertyValues[$oModification->id][$oProperty->id] = $oProperty->getValues($oModification->id, FALSE);
+							}
+
+							$this->_cacheFieldValues[$oModification->id] = array();
+							foreach ($this->_aItem_Fields as $oField)
+							{
+								$this->_cacheFieldValues[$oModification->id][$oField->id] = $oField->getValues($oModification->id, FALSE);
 							}
 
 							// Строка с основными данными о модификаций
@@ -1019,7 +1188,7 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 							// Оставшиеся множественные значения свойств
 							while (count($this->_cachePropertyValues[$oModification->id]))
 							{
-								$aCurrentPropertyLine = array_fill(0, $iPropertyFieldOffset, '""');
+								$aCurrentPropertyLine = array_fill(0, $iPropertyOffset, '""');
 
 								// CML ID ТОВАРА
 								$aCurrentPropertyLine[$this->guidItemPosition] = $oModification->guid;
@@ -1028,6 +1197,19 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 								$this->_printRow($aCurrentPropertyLine);
 							}
 							unset($this->_cachePropertyValues[$oModification->id]);
+
+							// Оставшиеся множественные значения полей
+							while (count($this->_cacheFieldValues[$oModification->id]))
+							{
+								$aCurrentFieldLine = array_fill(0, $iPropertyOffset + $this->_iItem_Properties_Count, '""');
+
+								// CML ID ТОВАРА
+								$aCurrentFieldLine[$this->guidItemPosition] = $oModification->guid;
+
+								$aCurrentFieldLine = array_merge($aCurrentFieldLine, $this->getFieldsData($this->_aItem_Fields, $oModification));
+								$this->_printRow($aCurrentFieldLine);
+							}
+							unset($this->_cacheFieldValues[$oModification->id]);
 
 							$oModification->clear();
 						}

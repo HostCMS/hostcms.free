@@ -92,9 +92,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
 // Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -114,9 +112,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 }
 
 // Действие "Применить"
-$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdminFormActionApply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
@@ -129,9 +125,7 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 }
 
 // Действие "Копировать"
-$oAdminFormActionCopy = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('copy');
+$oAdminFormActionCopy = $oAdmin_Form->Admin_Form_Actions->getByName('copy');
 
 if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 {
@@ -143,9 +137,7 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 	$oAdmin_Form_Controller->addAction($oControllerCopy);
 }
 
-$oAdminFormActionFormat = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('format');
+$oAdminFormActionFormat = $oAdmin_Form->Admin_Form_Actions->getByName('format');
 
 if ($oAdminFormActionFormat && $oAdmin_Form_Controller->getAction() == 'format')
 {

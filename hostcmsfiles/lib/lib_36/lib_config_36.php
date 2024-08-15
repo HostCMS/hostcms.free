@@ -182,7 +182,9 @@ elseif ($sType == 'catalog' && $sMode == 'file' && ($sFileName = Core_Array::get
 	parse_str($sFileName, $_myGet);
 	$sFileName = $_myGet['filename'];
 
-	$sFullFileName = $sCmsFolderTemporaryDirectory . $sFileName;
+	$sessionId = preg_replace('/[^A-Za-z0-9_-]/', '', session_id());
+
+	$sFullFileName = $sCmsFolderTemporaryDirectory . $sessionId . '_' . $sFileName;
 	Core_File::mkdir(dirname($sFullFileName), CHMOD, TRUE);
 
 	clearstatcache();
@@ -233,7 +235,9 @@ elseif ($sType == 'catalog' && $sMode == 'import' && !is_null($sFileName = Core_
 
 	try
 	{
-		$sFullPath = $sCmsFolderTemporaryDirectory . Core_File::filenameCorrection($sFileName);
+		$sessionId = preg_replace('/[^A-Za-z0-9_-]/', '', session_id());
+		
+		$sFullPath = $sCmsFolderTemporaryDirectory . $sessionId . '_' . Core_File::filenameCorrection($sFileName);
 
 		$oShop_Item_Import_Cml_Controller = new Shop_Item_Import_Cml_Controller($sFullPath);
 		$oShop_Item_Import_Cml_Controller->iShopId = $oShop->id;
@@ -363,7 +367,9 @@ elseif ($sType == 'sale' && $sMode == 'file' && ($sFileName = Core_Array::get($_
 	parse_str($sFileName, $_myGet);
 	$sFileName = $_myGet['filename'];
 
-	$sFullFileName = $sCmsFolderTemporaryDirectory . Core_File::filenameCorrection($sFileName);
+	$sessionId = preg_replace('/[^A-Za-z0-9_-]/', '', session_id());
+
+	$sFullFileName = $sCmsFolderTemporaryDirectory . $sessionId . '_' . Core_File::filenameCorrection($sFileName);
 	Core_File::mkdir(dirname($sFullFileName), CHMOD, TRUE);
 
 	$bDebug && Core_Log::instance()->clear()
@@ -386,7 +392,9 @@ elseif ($sType == 'sale' && $sMode == 'import' && !is_null($sFileName = Core_Arr
 		->status(Core_Log::$MESSAGE)
 		->write('1С, type=sale, mode=import, file=' . $sFileName);
 
-	$sFullFileName = $sCmsFolderTemporaryDirectory . Core_File::filenameCorrection($sFileName);
+	$sessionId = preg_replace('/[^A-Za-z0-9_-]/', '', session_id());
+
+	$sFullFileName = $sCmsFolderTemporaryDirectory . $sessionId . '_' . Core_File::filenameCorrection($sFileName);
 
 	try
 	{

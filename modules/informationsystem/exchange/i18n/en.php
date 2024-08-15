@@ -44,5 +44,6 @@ return array(
 	'item_image_large' => 'Item image file',
 	'item_image_small' => 'Item small image file',
 	'item_additional_group' => 'Shortcute\'s GUID',
-	'item_siteuser_id' => 'Client ID'
+	'item_siteuser_id' => 'Client ID',
+	'clear_matches' => 'clear matches',
 );

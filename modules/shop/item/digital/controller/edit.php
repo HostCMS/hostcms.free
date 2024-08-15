@@ -94,20 +94,16 @@ class Shop_Item_Digital_Controller_Edit extends Admin_Form_Action_Controller_Typ
 	{
 		parent::_applyObjectProperty();
 
-		// Обработка картинок
-		$aCore_Config = Core::$mainConfig;
-
 		$bLargeImageIsCorrect =
-		// Поле файла большого изображения существует
-		!is_null($aFileData = Core_Array::getFiles('image', NULL))
-		// и передан файл
-		&& intval($aFileData['size']) > 0;
+			// Поле файла большого изображения существует
+			!is_null($aFileData = Core_Array::getFiles('image', NULL))
+			// и передан файл
+			&& intval($aFileData['size']) > 0;
 
 		if ($bLargeImageIsCorrect)
 		{
 			// Проверка на допустимый тип файла
-			if (Core_File::isValidExtension($aFileData['name'],
-			$aCore_Config['availableExtension']))
+			if (Core_File::isValidExtension($aFileData['name'], Core::$mainConfig['availableExtension']))
 			{
 				// Удаление файла большого изображения
 				if ($this->_object->filename)

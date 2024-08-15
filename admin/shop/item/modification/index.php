@@ -184,9 +184,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
 // Действие "Редактировать"
-$oAdmin_Form_Action_Edit = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action_Edit = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action_Edit && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -198,9 +196,7 @@ if ($oAdmin_Form_Action_Edit && $oAdmin_Form_Controller->getAction() == 'edit')
 }
 
 // Действие "Применить"
-$oAdmin_Form_Action_Apply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdmin_Form_Action_Apply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdmin_Form_Action_Apply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
@@ -212,9 +208,7 @@ if ($oAdmin_Form_Action_Apply && $oAdmin_Form_Controller->getAction() == 'apply'
 }
 
 // Действие "Копировать"
-$oAdminFormActionCopy = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('copy');
+$oAdminFormActionCopy = $oAdmin_Form->Admin_Form_Actions->getByName('copy');
 
 if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 {
@@ -226,9 +220,7 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 	$oAdmin_Form_Controller->addAction($oControllerCopy);
 }
 
-$oAdmin_Form_Action_generateModifications = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('generateModifications');
+$oAdmin_Form_Action_generateModifications = $oAdmin_Form->Admin_Form_Actions->getByName('generateModifications');
 
 if ($oAdmin_Form_Action_generateModifications && $oAdmin_Form_Controller->getAction() == 'generateModifications')
 {
@@ -240,9 +232,7 @@ if ($oAdmin_Form_Action_generateModifications && $oAdmin_Form_Controller->getAct
 }
 
 // Действие "Скидка"
-$oAdminFormActionApplyDiscount = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply_discount');
+$oAdminFormActionApplyDiscount = $oAdmin_Form->Admin_Form_Actions->getByName('apply_discount');
 
 if ($oAdminFormActionApplyDiscount && $oAdmin_Form_Controller->getAction() == 'apply_discount')
 {
@@ -259,9 +249,7 @@ if ($oAdminFormActionApplyDiscount && $oAdmin_Form_Controller->getAction() == 'a
 }
 
 // Действие "Удаление значения свойства"
-$oAction = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deletePropertyValue');
+$oAction = $oAdmin_Form->Admin_Form_Actions->getByName('deletePropertyValue');
 
 if ($oAction && $oAdmin_Form_Controller->getAction() == 'deletePropertyValue')
 {
@@ -278,9 +266,7 @@ if ($oAction && $oAdmin_Form_Controller->getAction() == 'deletePropertyValue')
 }
 
 // Действие "Удаление файла большого изображения"
-$oAction = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deleteLargeImage');
+$oAction = $oAdmin_Form->Admin_Form_Actions->getByName('deleteLargeImage');
 
 if ($oAction && $oAdmin_Form_Controller->getAction() == 'deleteLargeImage')
 {
@@ -297,9 +283,7 @@ if ($oAction && $oAdmin_Form_Controller->getAction() == 'deleteLargeImage')
 }
 
 // Действие "Удаление файла малого изображения"
-$oAction = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deleteSmallImage');
+$oAction = $oAdmin_Form->Admin_Form_Actions->getByName('deleteSmallImage');
 
 if ($oAction && $oAdmin_Form_Controller->getAction() == 'deleteSmallImage')
 {
@@ -315,9 +299,7 @@ if ($oAction && $oAdmin_Form_Controller->getAction() == 'deleteSmallImage')
 }
 
 // Удаление сопутствующих товаров с вкладки
-$oAdminFormActionDeleteAssociated = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deleteAssociated');
+$oAdminFormActionDeleteAssociated = $oAdmin_Form->Admin_Form_Actions->getByName('deleteAssociated');
 
 if ($oAdminFormActionDeleteAssociated && $oAdmin_Form_Controller->getAction() == 'deleteAssociated')
 {
@@ -329,9 +311,7 @@ if ($oAdminFormActionDeleteAssociated && $oAdmin_Form_Controller->getAction() ==
 }
 
 // Удаление товаров из комплекта
-$oAdminFormActionDeleteSet = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deleteSetItem');
+$oAdminFormActionDeleteSet = $oAdmin_Form->Admin_Form_Actions->getByName('deleteSetItem');
 
 if ($oAdminFormActionDeleteSet && $oAdmin_Form_Controller->getAction() == 'deleteSetItem')
 {
@@ -343,9 +323,7 @@ if ($oAdminFormActionDeleteSet && $oAdmin_Form_Controller->getAction() == 'delet
 }
 
 // Действие "Изменить атрибуты"
-$oAdminFormActionChangeAttribute = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('change_attributes');
+$oAdminFormActionChangeAttribute = $oAdmin_Form->Admin_Form_Actions->getByName('change_attributes');
 
 if ($oAdminFormActionChangeAttribute && $oAdmin_Form_Controller->getAction() == 'change_attributes')
 {
@@ -360,6 +338,34 @@ if ($oAdminFormActionChangeAttribute && $oAdmin_Form_Controller->getAction() == 
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($oShop_Item_Controller_Change_Attribute);
+}
+
+// Действие "Создать ярлык"
+$oAction = $oAdmin_Form->Admin_Form_Actions->getByName('shortcut');
+
+if ($oAction && $oAdmin_Form_Controller->getAction() == 'shortcut' && $oAdmin_Form_Action_Edit)
+{
+	$oShortcutController = Admin_Form_Action_Controller::factory(
+		'Admin_Form_Action_Controller_Type_Shortcut', $oAction
+	);
+
+	$oShortcutController
+		->title(Core::_('Shop_Item.shortcut_creation_window_caption'))
+		->selectCaption(Core::_('Shop_Item.add_item_shortcut_shop_groups_id'))
+		->value($oShopGroup->id);
+
+	$iCount = $oShop->Shop_Groups->getCount();
+
+	if ($iCount < Core::$mainConfig['switchSelectToAutocomplete'])
+	{
+		$oShortcutController->selectOptions(array(' … ') + Shop_Item_Controller_Edit::fillShopGroup($oShop->id));
+	}
+	else
+	{
+		$oShortcutController->autocomplete(TRUE);
+	}
+
+	$oAdmin_Form_Controller->addAction($oShortcutController);
 }
 
 // Источник данных 0

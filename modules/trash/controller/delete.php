@@ -26,6 +26,8 @@ class Trash_Controller_Delete extends Admin_Form_Action_Controller
 			? ini_get('max_execution_time')
 			: 25;
 
+		$iMaxTime > 30 && $iMaxTime = 30;
+
 		$timeout = Core::getmicrotime();
 
 		$iCount = 0;

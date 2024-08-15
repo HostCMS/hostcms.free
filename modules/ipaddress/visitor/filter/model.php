@@ -119,7 +119,7 @@ class Ipaddress_Visitor_Filter_Model extends Core_Entity
 		}
 
 		$color = $this->mode
-			? 'blue'
+			? 'green'
 			: 'gray';
 
 		Core_Html_Entity::factory('Span')

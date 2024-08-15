@@ -137,6 +137,7 @@ class Site_Model extends Core_Entity
 		'siteuser_identity_provider' => array(),
 		'siteuser_relationship_type' => array(),
 		'site_alias' => array(),
+		'site_favicon' => array(),
 		'structure' => array(),
 		'structure_property' => array(),
 		'structure_property_dir' => array(),
@@ -434,6 +435,7 @@ class Site_Model extends Core_Entity
 		}
 
 		$this->Site_Aliases->deleteAll(FALSE);
+		$this->Site_Favicons->deleteAll(FALSE);
 
 		$this->Structures->deleteAll(FALSE);
 		$this->Structure_Menus->deleteAll(FALSE);
@@ -453,29 +455,7 @@ class Site_Model extends Core_Entity
 			Core_File::deleteDir(CMS_FOLDER . $this->uploaddir . 'structure_' . intval($this->id));
 		} catch (Exception $e) {}
 
-		$this->deleteFavicon();
-
 		return parent::delete($primaryKey);
-	}
-
-	/**
-	 * Delete favicon file
-	 * @return self
-	 */
-	public function deleteFavicon()
-	{
-		if ($this->favicon != '')
-		{
-			try
-			{
-				Core_File::delete($this->getFaviconPath());
-
-				$this->favicon = '';
-				$this->save();
-			} catch (Exception $e) {}
-		}
-
-		return $this;
 	}
 
 	/**
@@ -546,21 +526,38 @@ class Site_Model extends Core_Entity
 	}
 
 	/**
+	 * Get first favicon
+	 * @return Site_Favicon_Model|NULL
+	 */
+	protected function _getFirstFavicon()
+	{
+		return $this->Site_Favicons->getFirst();
+	}
+
+	/**
 	 * Get favicon file path
-	 * @return string
+	 * @return string|NULL
 	 */
 	public function getFaviconPath()
 	{
-		return $this->_getFaviconPath() . '/' . $this->favicon;
+		$oSite_Favicon = $this->_getFirstFavicon();
+
+		return $oSite_Favicon
+			? $this->_getFaviconPath() . '/' . $oSite_Favicon->filename
+			: NULL;
 	}
 
 	/**
 	 * Get favicon file href
-	 * @return string
+	 * @return string|NULL
 	 */
 	public function getFaviconHref()
 	{
-		return '/' . $this->uploaddir . "favicon/" . $this->favicon;
+		$oSite_Favicon = $this->_getFirstFavicon();
+
+		return  $oSite_Favicon
+			? '/' . $this->uploaddir . "favicon/" . $oSite_Favicon->filename
+			: NULL;
 	}
 
 	/**
@@ -572,28 +569,45 @@ class Site_Model extends Core_Entity
 	{
 		$this->deleteFavicon();
 
-		$this->favicon = $name;
-		$this->save();
+		$oSite_Favicon = $this->_getFirstFavicon();
 
-		$faviconPath = $this->_getFaviconPath();
+		if (!$oSite_Favicon)
+		{
+			$oSite_Favicon = Core_Entity::factory('Site_Favicon');
+			$oSite_Favicon->site_id = $this->id;
+			$oSite_Favicon->rel = 'shortcut_icon';
+			$oSite_Favicon->save();
+		}
 
-		if (!Core_File::isDir($faviconPath))
+		$oSite_Favicon->saveFavicon($name, $fileSourcePath);
+
+		return $this;
+	}
+
+	/**
+	 * Delete favicon file
+	 * @return self
+	 */
+	public function deleteFavicon()
+	{
+		$oSite_Favicon = $this->_getFirstFavicon();
+
+		if ($oSite_Favicon)
 		{
 			try
 			{
-				Core_File::mkdir($faviconPath);
+				$oSite_Favicon->deleteFavicon();
 			} catch (Exception $e) {}
 		}
-
-		Core_File::upload($fileSourcePath, $this->getFaviconPath());
 
 		return $this;
 	}
 
 	public function imgBackend()
 	{
-		return $this->favicon != ''
-			? '<img width="16" src="' . $this->getFaviconHref() . '"/>'
+		$oSite_Favicon = $this->_getFirstFavicon();
+		return $oSite_Favicon && $oSite_Favicon->filename !== ''
+			? '<img width="16" src="' . $oSite_Favicon->getFaviconHref() . '"/>'
 			: '';
 	}
 

@@ -1,4 +1,4 @@
-/*global i18n ace Notify bootbox themeprimary readCookie createCookie revertFunc tinyMCE */
+/*global i18n ace Notify bootbox themeprimary readCookie createCookie revertFunc tinyMCE tinymce */
 
 function isEmpty(str) {
 	return (!str || 0 === str.length);
@@ -291,21 +291,23 @@ function isEmpty(str) {
 					$.loadingScreen('hide');
 
 					$(container).append(result.html);
-					$(container).find('a.add-checklist-item').click();
+					// $(container).find('a.add-checklist-item').click();
+					$('#' + windowId + ' .event-checklist-wrapper > .well').last().find('a.add-checklist-item').click();
 					$(container).find('input[name *= new_checklist_item_name' + index + ']').eq(0).focus();
 				}
 			});
 		},
 		removeEventChecklist: function ($object)
 		{
-			$.loadingScreen('show');
-			$object.parents('.well').remove();
-			$.loadingScreen('hide');
+			if (confirm(i18n.confirm_delete))
+			{
+				$.loadingScreen('show');
+				$object.parents('.well').remove();
+				$.loadingScreen('hide');
+			}
 		},
 		loadEventChecklists: function (windowId, container, event_id)
 		{
-			console.log(event_id);
-
 			$.loadingScreen('show');
 
 			$.ajax({
@@ -321,6 +323,29 @@ function isEmpty(str) {
 					$(container).append(result.html);
 				}
 			});
+		},
+		recountEventChecklistProgress: function ($object)
+		{
+			var $wrapper = $object.parents('.event-cheklist-items-wrapper'),
+				$progressbar = $wrapper.find('.progress-bar'),
+				completed = 0,
+				total = $wrapper.find('.form-group .checkbox-inline input:visible').length;
+
+			$.each($wrapper.find('.form-group .checkbox-inline input'), function(i, item){
+				var checked = $(item).is(':checked');
+
+				if (checked)
+				{
+					completed++;
+				}
+			});
+
+			var width = parseFloat((completed * 100) / total).toFixed(2);
+
+			$progressbar.css('width', width + '%').attr('aria-valuenow', width);
+
+			$wrapper.find('.progress-completed').text(completed);
+			$wrapper.find('.progress-total').text(total);
 		},
 		addEventChecklistItem: function ($object, windowId, prefix, index)
 		{
@@ -339,28 +364,49 @@ function isEmpty(str) {
 			$cloneRow.attr('data-index', newIndex);
 
 			$cloneRow.find('input[name *= ' + prefix + '_item_completed' + index + ']').removeAttr('disabled');
+			$cloneRow.find('input[name *= ' + prefix + '_item_important' + index + ']').removeAttr('disabled');
 			$cloneRow.find('input[name *= ' + prefix + '_item_name' + index + ']').removeAttr('disabled');
+
 			$cloneRow.find('input[name *= ' + prefix + '_item_completed' + index + ']').parents('.form-group').removeClass('hidden');
 			$cloneRow.find('input[name *= ' + prefix + '_item_name' + index + ']').parents('.form-group').removeClass('hidden');
 
 			$cloneRow.find('input[name *= ' + prefix + '_item_name' + index + ']').attr('name', prefix + '_item_name' + index + '[' + newIndex + ']');
 			$cloneRow.find('input[name *= ' + prefix + '_item_completed' + index + ']').attr('name', prefix + '_item_completed' + index + '[' + newIndex + ']');
+			$cloneRow.find('input[name *= ' + prefix + '_item_important' + index + ']').attr('name', prefix + '_item_important' + index + '[' + newIndex + ']');
 
 			$cloneRow.find('.remove-event-checklist-item').removeClass('hidden');
+			$cloneRow.find('.event-checklist-item-important').removeClass('hidden');
 
 			$cloneRow.insertBefore($wrapper.find('.justify-content-between'));
 
 			$wrapper.find('input[name *= ' + prefix + '_item_name' + index + ']').last().focus();
 
+			$.recountEventChecklistProgress($wrapper.find('input[name *= ' + prefix + '_item_completed' + index + ']').last());
+
 			$.loadingScreen('hide');
+		},
+		changeEventItemImportant: function ($object)
+		{
+			var $parent = $object.parents('.event-checklist-item-row');
+
+			$object.toggleClass('selected');
+
+			$parent.find('.event-checklist-important .checkbox-inline input').prop('checked', $object.hasClass('selected'));
 		},
 		removeEventChecklistItem: function ($object)
 		{
-			$.loadingScreen('show');
+			if (confirm(i18n.confirm_delete))
+			{
+				$.loadingScreen('show');
 
-			$object.parents('.event-checklist-item-row').remove();
+				var $wrapper = $object.parents('.event-cheklist-items-wrapper');
 
-			$.loadingScreen('hide');
+				$object.parents('.event-checklist-item-row').remove();
+
+				$.recountEventChecklistProgress($wrapper.find('.checkbox-inline input').last());
+
+				$.loadingScreen('hide');
+			}
 		},
 		toggleBackspace: function() {
 			var phone = $('.phone-number').val();
@@ -386,10 +432,11 @@ function isEmpty(str) {
 			// iPad on iOS 13 detection
 			|| (navigator.userAgent.includes("Mac") && "ontouchend" in document)
 		},
-		showAdminFormSettings: function(admin_form_id) {
+		showAdminFormSettings: function(admin_form_id, site_id, modelsNames)
+		{
 			$.ajax({
 				url: '/admin/admin_form/index.php',
-				data: { 'showAdminFormSettingsModal': 1, 'admin_form_id': admin_form_id },
+				data: { 'showAdminFormSettingsModal': 1, 'admin_form_id': admin_form_id, 'site_id': site_id, 'modelsNames': modelsNames },
 				dataType: 'json',
 				type: 'POST',
 				success: function(response){
@@ -661,26 +708,33 @@ function isEmpty(str) {
 				type: "POST",
 				data: { 'add_production_process_plan': 1, 'production_process_plan_id': id, 'production_task_id': production_task_id },
 				dataType: 'json',
-				error: function(){},
-				success: function (result) {
-					$('#' + modalWindowId).parents('.modal').modal('hide');
+				error: function() {},
+				success: function(result) {
 
-					console.log('result', result);
+					$('#' + modalWindowId).parents('.modal').modal('hide');
 
 					if (result['result'] && result['result']['status'] && result['result']['status'] == 'ok')
 					{
 						var aProcessPlanInfo = result['result']['data']['process_plan'],
 							oPlanManufacturesTableBody = $('#' + windowId + ' .plan-manufactures-table > tbody'),
 							countManufactures,
-							// oPlanMaterialsTableBody = $('#' + windowId + ' .plan-manufactures-table > tbody'),
-							countMaterials;
+							oPlanMaterialsTableBody = $('#id_content_materials .plan-materials-table > tbody'),
+							oPlanMaterialsTr = oPlanMaterialsTableBody.find('tr'),
+							oExistingPlanMaterialsTr, oSpanMaterialCountValue,
+							oSpanMaterialCostValue, materialCostValue,
+							aPlanMaterialsIds = [],
+							countMaterials,
+							newTableRow;
 
-						!oPlanManufacturesTableBody.data('aAddedProcessPlansId') && oPlanManufacturesTableBody.data('aAddedProcessPlansId', []);
+							//console.log('oPlanMaterialsTr = ', oPlanMaterialsTr);
+
+						!oPlanManufacturesTableBody.data('aAddedProcessPlansId') && oPlanManufacturesTableBody.data({'aAddedProcessPlansId': [], 'aMapProcessPlanMaterials': []});
 
 						// Добавляемая техкарта отсутствует среди ранее добавленных и для техкарты задана продукция (товары)
 						if (!~$.inArray(aProcessPlanInfo['id'], oPlanManufacturesTableBody.data('aAddedProcessPlansId'))
 							&& (countManufactures = result['result']['data']['process_plan']['manufacture'].length))
 						{
+							// Продукция
 							for (var i = 0; i < countManufactures; i++)
 							{
 								var manufactureData = result['result']['data']['process_plan']['manufacture'][i],
@@ -688,7 +742,7 @@ function isEmpty(str) {
 
 									!Number.isInteger(manufactureRate) && (manufactureRate = manufactureRate.toFixed(2));
 
-									var newTableRow = $('<tr data-process-plan-id="' + result['result']['data']['process_plan']['id'] + '" data-item-id="' + manufactureData['shop_item_id'] + '"><td>' + manufactureData['shop_item_id'] + '</td>' + (!i ? ('<td rowspan="' + countManufactures + '">' + result['result']['data']['process_plan']['name'] + '</td>') : '') + '<td>' + manufactureData['shop_item_name'] + '</td>' + (!i ? ('<td rowspan="' + countManufactures + '" width="110"><input type="text" class="price manufacture-volume form-control" name="manufacture_volume_' + result['result']['data']['process_plan']['id'] + '" value="1"/></td>') : '') + ' <!--<td width="110"><input type="text" class="price manufacture-volume form-control" name="manufacture_volume_' + result['result']['data']['process_plan']['id'] + '" value="1"/></td>--><td class="manufacture_rate"><span class="manufacture_rate_value">' + manufactureRate + '</span> <span class="manufacture_measure_name">' + manufactureData['measure_name'] + '</span></td><td class="manufacture_count"><span class="manufacture_count_value">' + manufactureRate + '</span> <span class="manufacture_measure_name">' + manufactureData['measure_name'] + '</span></td><td></td><td></td>' + (!i ? '<td rowspan="' + countManufactures + '"><a class="delete-associated-item" onclick="$.deleteProductionTaskProcessPlan(this) /*var oTr = $(this).parents(\'tr\'), processPlanId = oTr.data(\'process-plan-id\'), oTrSiblings = oTr.siblings(\'[data-process-plan-id=\' + processPlanId + \']\'); console.log(oTrSiblings); next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)*/"><i class="fa fa-times-circle darkorange"></i></a></td>' : '') + '</tr>');
+									newTableRow = $('<tr data-process-plan-id="' + result['result']['data']['process_plan']['id'] + '" data-item-id="' + manufactureData['shop_item_id'] + '"><td>' + manufactureData['shop_item_id'] + '</td>' + (!i ? ('<td rowspan="' + countManufactures + '">' + $.escapeHtml(result['result']['data']['process_plan']['name']) + '</td>') : '') + '<td>' + $.escapeHtml(manufactureData['shop_item_name']) + '</td>' + (!i ? ('<td rowspan="' + countManufactures + '" width="110"><input type="text" class="price manufacture-volume form-control" name="manufacture_volume_' + result['result']['data']['process_plan']['id'] + '" value="1"/></td>') : '') + ' <!--<td width="110"><input type="text" class="price manufacture-volume form-control" name="manufacture_volume_' + result['result']['data']['process_plan']['id'] + '" value="1"/></td>--><td class="manufacture_rate"><span class="manufacture_rate_value">' + manufactureRate + '</span>&nbsp;<span class="manufacture_measure_name">' + $.escapeHtml(manufactureData['measure_name']) + '</span></td><td class="manufacture_count"><span class="manufacture_count_value">' + manufactureRate + '</span>&nbsp;<span class="manufacture_measure_name">' + $.escapeHtml(manufactureData['measure_name']) + '</span></td><td></td><td></td>' + (!i ? '<td rowspan="' + countManufactures + '"><a class="delete-associated-item" onclick="$.deleteProductionTaskProcessPlan(this) /*var oTr = $(this).parents(\'tr\'), processPlanId = oTr.data(\'process-plan-id\'), oTrSiblings = oTr.siblings(\'[data-process-plan-id=\' + processPlanId + \']\'); console.log(oTrSiblings); next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)*/"><i class="fa fa-times-circle darkorange"></i></a></td>' : '') + '</tr>');
 
 									oPlanManufacturesTableBody.append(newTableRow);
 
@@ -696,10 +750,53 @@ function isEmpty(str) {
 
 							}
 
+							// Материалы
+
+							// Идентификаторы ранее добавленных материалов
+							oPlanMaterialsTr.each(function() {
+
+								aPlanMaterialsIds.push($(this).data('itemId'));
+							});
+
+
+							// console.log('aPlanMaterialsIds', aPlanMaterialsIds);
+
 							countMaterials = result['result']['data']['process_plan']['materials'].length;
 
-							for (var j = 0; j < countMaterials; j++)
+							//var oMapProcessPlanMaterials = {'process_plan_id': aProcessPlanInfo['id'], 'materials': []};
+
+							var aTmpMaterials = [];
+
+							for (var i = 0; i < countMaterials; i++)
 							{
+								var materialsData = result['result']['data']['process_plan']['materials'][i],
+									materialCostValue = materialsData['price'] * materialsData['rate'];
+
+								aTmpMaterials.push({'id': materialsData['shop_item_id'], 'count': materialsData['rate'], 'price': materialsData['price']});
+
+								// Материал уже есть в списке (относится к ранее добавленной техкарте)
+								if (aPlanMaterialsIds.includes(materialsData['shop_item_id']))
+								{
+									// Строка с существующим материалом
+									oExistingPlanMaterialsTr = oPlanMaterialsTr.filter('[data-item-id = "' + materialsData['shop_item_id'] + '"]');
+
+									// Количество
+									oSpanMaterialCountValue = oExistingPlanMaterialsTr.find('.material_count_value');
+									oSpanMaterialCountValue.text(+materialsData['rate'] + +oSpanMaterialCountValue.text());
+
+									// Общая стоимость
+									oSpanMaterialCostValue = oExistingPlanMaterialsTr.find('.material_cost_value');
+									oSpanMaterialCostValue.text(materialCostValue + +oSpanMaterialCostValue.text());
+
+									continue;
+								}
+
+								//<td class="manufacture_count"><span class="manufacture_count_value">35</span> <span class="manufacture_measure_name">шт</span></td>
+
+								newTableRow = $('<tr data-item-id="' + materialsData['shop_item_id'] + '"><td>' + materialsData['shop_item_id'] + '</td><td>' + $.escapeHtml(materialsData['name']) + '</td><td class="material_count"><span class="material_count_value">' + materialsData['rate'] + '</span>&nbsp;<span class="material_measure_name">' + $.escapeHtml(materialsData['measure_name']) + '</span></td><td class="material_price"><span class="material_price_value">' + $.escapeHtml(materialsData['price']) + '</span>&nbsp;<span class="material_currency_sign">' + $.escapeHtml(materialsData['currency_sign']) + '</span></td><td class="material_cost"><span class="material_cost_value">' + materialCostValue + '</span>&nbsp;<span class="material_currency_sign">' + $.escapeHtml(materialsData['currency_sign']) + '</span></td><td></td><td></td>');
+
+								oPlanMaterialsTableBody.append(newTableRow);
+
 								/* var manufactureData = result['result']['data']['process_plan']['manufacture'][i],
 									manufactureRate = parseFloat(manufactureData['rate']);
 
@@ -713,7 +810,10 @@ function isEmpty(str) {
 
 							}
 
+							var oMapProcessPlanMaterials = {'process_plan_id': aProcessPlanInfo['id'], 'materials': aTmpMaterials};
+
 							oPlanManufacturesTableBody.data('aAddedProcessPlansId').push(aProcessPlanInfo['id']);
+							oPlanManufacturesTableBody.data('aMapProcessPlanMaterials').push(oMapProcessPlanMaterials);
 						}
 					}
 
@@ -724,29 +824,101 @@ function isEmpty(str) {
 				}
 			});
 		},
+
+		taskManufactureVolumeIsValid: function(manufactureVolume) {
+
+			return !isNaN(manufactureVolume) && manufactureVolume >= 0;
+		},
+
 		// Удаление техкарты из производственного задания
 		deleteProductionTaskProcessPlan: function(oDelteButton) {
 
-			if (confirm(i18n.confirm_delete)) {
+			// Запрос на удаление техкарты
+			if (confirm(i18n.confirm_delete))
+			{
 
-				var oTr = $(oDelteButton).parents('tr'),
-					oTableBody = oTr.closest('tbody'),
-					processPlanId = oTr.data('process-plan-id'),
-					oTrSiblings = oTr.siblings('[data-process-plan-id=' + processPlanId + ']'),
-					aAddedProcessPlansId = oTableBody.data('aAddedProcessPlansId'),
-					iIndex = aAddedProcessPlansId.indexOf(processPlanId);
+				var oTaskPlanManufactureTr = $(oDelteButton).parents('tr'),
+					oTaskPlanManufacturesTableBody = oTaskPlanManufactureTr.closest('tbody'),
+					processPlanId = oTaskPlanManufactureTr.data('process-plan-id'),
+					aAddedProcessPlansId = oTaskPlanManufacturesTableBody.data('aAddedProcessPlansId'),
+					iIndexOfDeletedProcessPlans = aAddedProcessPlansId.indexOf(processPlanId),
+					aMapProcessPlanMaterials = oTaskPlanManufacturesTableBody.data('aMapProcessPlanMaterials'),
 
-					oTr.remove();
-					oTrSiblings.length && oTrSiblings.remove();
+					oTaskPlanMaterialsTr = oTaskPlanManufacturesTableBody.closest('[id $= "_manufactures"].tab-pane.active').siblings('[id $= "_materials"]').find('.plan-materials-table > tbody tr'),
+					// aDeletedMaterials = [],
+					aDeletedProcessPlanMaterials = [],
+					iMapProcessPlanMaterialsLength = aMapProcessPlanMaterials.length,
+					iIndexOfDeletedMapProcessPlanMaterials = -1;
 
-					// Запрос на удаление техкарты
 
+				oTaskPlanManufactureTr = oTaskPlanManufactureTr.siblings('[data-process-plan-id=' + processPlanId + ']').addBack();
 
-					if (~iIndex)
+				if (iMapProcessPlanMaterialsLength)
+				{
+					// Создаем ссылку на массив материалов удаляемой техкарты и получаем индекс элемента (объекта) в массиве соответствий для удаляемой техкарты
+					for (var i = 0; i < iMapProcessPlanMaterialsLength; i++)
 					{
-						aAddedProcessPlansId.splice(iIndex, 1);
-						oTableBody.data('aAddedProcessPlansId', aAddedProcessPlansId);
+						if (aMapProcessPlanMaterials[i]['process_plan_id'] == processPlanId)
+						{
+							aDeletedProcessPlanMaterials = aMapProcessPlanMaterials[i]['materials'];
+							iIndexOfDeletedMapProcessPlanMaterials = i;
+							break;
+						}
 					}
+
+					// Цикл по материалам, используемым в удаляемой техкарте
+					aDeletedProcessPlanMaterials.forEach(function(oDeletedMaterial) {
+
+						var aIndexesOfMapProcessPlanMaterials = [], bMaterialUsedInOtherProcessPlan = false;
+
+						// Проверяем, используется ли в других техкартах данного техзадания удаляемый материал
+						for (var i = 0; i < iMapProcessPlanMaterialsLength; i++)
+						{
+							if (i != iIndexOfDeletedMapProcessPlanMaterials &&
+								(bMaterialUsedInOtherProcessPlan = aMapProcessPlanMaterials[i]['materials'].some(function(oTaskProcessPlanMaterial) {
+
+									return oTaskProcessPlanMaterial.id == oDeletedMaterial.id;
+								}))
+							)
+							{
+								break;
+							}
+						}
+
+						oTaskPlanMaterialsTr.each(function(){
+
+							var oTr = $(this), oTaskPlanMaterialCount, oTaskPlanMaterialCostValue;
+
+							if (oTr.data('itemId') == oDeletedMaterial.id)
+							{
+								if (bMaterialUsedInOtherProcessPlan)
+								{
+									oTaskPlanMaterialCount = oTr.find('.material_count_value');
+									oTaskPlanMaterialCostValue = oTr.find('.material_cost_value');
+
+									oTaskPlanMaterialCount.text(+(oTaskPlanMaterialCount.text() - oDeletedMaterial['count']).toFixed(2));
+									oTaskPlanMaterialCostValue.text(oTaskPlanMaterialCostValue.text() - oDeletedMaterial['count'] * oDeletedMaterial['price']);
+								}
+								else
+								{
+									oTr.remove();
+								}
+
+								oTaskPlanMaterialsTr = oTaskPlanMaterialsTr.not(oTr);
+
+								return false;
+							}
+						});
+					});
+				}
+
+				oTaskPlanManufactureTr.remove();
+
+				~iIndexOfDeletedProcessPlans && aAddedProcessPlansId.splice(iIndexOfDeletedProcessPlans, 1);
+
+				~iIndexOfDeletedMapProcessPlanMaterials && aMapProcessPlanMaterials.splice(iIndexOfDeletedMapProcessPlanMaterials, 1);
+
+				oTaskPlanManufacturesTableBody.data({'aAddedProcessPlansId': aAddedProcessPlansId, 'aMapProcessPlanMaterials': aMapProcessPlanMaterials});
 			}
 		},
 
@@ -1458,6 +1630,7 @@ function isEmpty(str) {
 			var $checkbox = $(checkbox),
 				$targetInput = $('input[name = name]'),
 				jSelectOptions = $('select[name = "' + selectName + '"] option'),
+				jSelectOptionsSelected = $('select[name = "' + selectName + '"] option:selected'),
 				delimiter = $('input[name = delimiter]').val() || ' ',
 				str = $targetInput.val(),
 				bUsePropertyName = $('input[name = use_property_name]').is(':checked'),
@@ -1468,7 +1641,7 @@ function isEmpty(str) {
 				if (str.indexOf(pattern) == -1)
 				{
 					$targetInput.val(str + pattern);
-					jSelectOptions.prop('selected', true);
+					!jSelectOptionsSelected.length && jSelectOptions.prop('selected', true);
 				}
 			}
 			else
@@ -2674,6 +2847,49 @@ function isEmpty(str) {
 			$('.navbar li#bookmarks').on('shown.bs.dropdown', function (){
 				// Устанавливаем полосу прокрутки
 				$.setBookmarksSlimScroll();
+
+				$('.scroll-bookmarks .bookmarks-list').sortable({
+					connectWith: '.bookmarks-list',
+					items: '.bookmark-item',
+					scroll: false,
+					placeholder: 'placeholder',
+					tolerance: 'pointer',
+					start: function(evt, ui) {
+						var link = ui.item.find('a');
+						link.data('click-event', link.attr('onclick'));
+						link.attr('onclick', '');
+					},
+					stop: function(evt, ui) {
+						setTimeout(function(){
+							var link = ui.item.find('a');
+							link.attr('onclick', link.data('click-event'));
+						}, 200);
+
+						setTimeout(function(){
+							var aIds = [];
+
+							$.each($('.bookmarks-list li.bookmark-item'), function(i, object){
+								var aStr = $(object).attr('id').split('-');
+								aIds.push(aStr[1]);
+							});
+
+							$.ajax({
+								url: '/admin/user/index.php',
+								type: 'POST',
+								data: { 'sortableBookmarks': 1, 'bookmarks': aIds },
+								dataType: 'json',
+								error: function(){},
+								success: function(result){
+									if (result.status == 'success')
+									{
+										$.removeLocalStorageItem('bookmarks');
+										$.refreshBookmarksList();
+									}
+								}
+							});
+						}, 500);
+					}
+				}).disableSelection();
 			});
 		},
 		refreshBookmarksCallback: function(resultData)
@@ -2803,7 +3019,7 @@ function isEmpty(str) {
 		},
 		addBookmark: function (oBookmark, jBox){
 			jBox.append(
-				'<li id="bookmark-' + oBookmark['id'] + '">\
+				'<li id="bookmark-' + oBookmark['id'] + '" class="bookmark-item">\
 					<a href="' + (oBookmark['href'].length ? $.escapeHtml(oBookmark['href']) : '#') + '" onclick="' + (oBookmark['onclick'].length ? $.escapeHtml(oBookmark['onclick']) : '') + '">\
 						<div class="clearfix notification-bookmark">\
 							<div class="notification-icon">\
@@ -4567,99 +4783,78 @@ function isEmpty(str) {
 				$("#chat-link").addClass("wave in");
 			}
 		},
-
-		/* // Замена первого нового сообщения
-		changeFirstNewMessage: function(iNewFirstMessageId) {
-
-			var jMessagesList = $('.chatbar-messages .messages-list'),
-				iFormerFirstNewMessageId = jMessagesList.data('firstNewMessageId'),
-				oFormerFirstNewMessage = jMessagesList.find("#m" + iFormerFirstNewMessageId);
-
-			if (!oFormerFirstNewMessage.length)
-				return;
-
-			jMessagesList.data('firstNewMessageId', iNewFirstMessageId);
-
-		}, */
-
 		// Сихронизировать прочитанные сообщения
 		syncReadMessages: function() {
-
 			var jMessagesList = $('.chatbar-messages .messages-list'),
 				storageChatReadMessages = localStorage.getItem('chat_read_messages_list'),
 				storageChatReadMessagesObj = storageChatReadMessages ? JSON.parse(storageChatReadMessages) : null,
 				storageLength, iSyncMessageId, oSyncChatMessage, oMessagesAfterSyncChatMessage, iNewFirstMessageId,
-				// iCountNewMessagesBeforeSynchronization,
 				changeTitles;
-				// iFormerFirstNewMessageId;
-
-			var indexOfLastReadMessageId = storageChatReadMessagesObj['messages_id'].indexOf(jMessagesList.data('lastReadMessageId'));
 
 			// В хранилище идентификаторов прочитанных сообщений есть элементы
 			// и в чате нет прочитанных сообщений или последнее прочитанное сообщение чата уже не является таковым
-			if (storageChatReadMessagesObj && storageChatReadMessagesObj['messages_id'].length
-			&& (indexOfLastReadMessageId != storageChatReadMessagesObj['messages_id'].length - 1 ))
+			if (storageChatReadMessagesObj && storageChatReadMessagesObj['messages_id'].length)
 			{
-				// console.log('--syncReadMessages');
+				var indexOfLastReadMessageId = storageChatReadMessagesObj['messages_id'].indexOf(jMessagesList.data('lastReadMessageId'));
 
-				storageLength = storageChatReadMessagesObj['messages_id'].length;
-
-				for (var i = indexOfLastReadMessageId + 1; i < storageLength; i++)
+				if (indexOfLastReadMessageId != storageChatReadMessagesObj['messages_id'].length - 1)
 				{
-					//storageChatReadMessagesObj['messages_id'][i]
-					iSyncMessageId = storageChatReadMessagesObj['messages_id'][i];
+					// console.log('--syncReadMessages');
+					storageLength = storageChatReadMessagesObj['messages_id'].length;
 
-					oSyncChatMessage = jMessagesList.find("#m" + iSyncMessageId + ":not(.mark-read)");
-
-					// Синхронизируемое сообщение загружено в чат
-					if (oSyncChatMessage.length)
+					for (var i = indexOfLastReadMessageId + 1; i < storageLength; i++)
 					{
-						// Синхронизируемое сообщение находится в нижней части чата
-						//if ( $.chatMessageBelowVisibleArea(oSyncChatMessage) )
+						//storageChatReadMessagesObj['messages_id'][i]
+						iSyncMessageId = storageChatReadMessagesObj['messages_id'][i];
+
+						oSyncChatMessage = jMessagesList.find("#m" + iSyncMessageId + ":not(.mark-read)");
+
+						// Синхронизируемое сообщение загружено в чат
+						if (oSyncChatMessage.length)
+						{
+							// Синхронизируемое сообщение находится в нижней части чата
+							//if ( $.chatMessageBelowVisibleArea(oSyncChatMessage) )
+							//{
+								// Синхронизируемое сообщение является новым
+								if ( iSyncMessageId >= jMessagesList.data('firstNewMessageId') )
+								{
+									// Определяем оставшее число новых сообщений, следующих за синхронизируемым
+									oMessagesAfterSyncChatMessage = oSyncChatMessage.nextAll('.message.unread:not(.mark-read)');
+
+									// Идентификатор нового первого нового сообщения
+									iNewFirstMessageId = oMessagesAfterSyncChatMessage.length
+										? $.getChatMessageId($(oMessagesAfterSyncChatMessage[0]))
+										: jMessagesList.data('firstNewMessageId', 0);
+
+									jMessagesList.data('firstNewMessageId', iNewFirstMessageId);
+									//$.changeAllInformationAboutNewMessages();
+								}
+							//}
+
+							oSyncChatMessage.removeClass('unread');
+						}
+						//else // Синхронизируемый элемент не загружен в чат
 						//{
-							// Синхронизируемое сообщение является новым
-							if ( iSyncMessageId >= jMessagesList.data('firstNewMessageId') )
-							{
-								// Определяем оставшее число новых сообщений, следующих за синхронизируемым
-								oMessagesAfterSyncChatMessage = oSyncChatMessage.nextAll('.message.unread:not(.mark-read)');
-
-								// Идентификатор бывшего первого нового сообщения
-								//iFormerFirstNewMessageId = jMessagesList.data('firstNewMessageId');
-
-								// Идентификатор нового первого нового сообщения
-								iNewFirstMessageId = oMessagesAfterSyncChatMessage.length
-									? $.getChatMessageId($(oMessagesAfterSyncChatMessage[0]))
-									: jMessagesList.data('firstNewMessageId', 0);
-
-								jMessagesList.data('firstNewMessageId', iNewFirstMessageId);
-
-								//$.changeAllInformationAboutNewMessages();
-							}
+							jMessagesList.data('countUnreadMessages', jMessagesList.data('countUnreadMessages') - 1);
 						//}
 
-						oSyncChatMessage.removeClass('unread');
+						//$.changeTitleUnreadMessages();
+
+						//$.changeTitleNewMessages();
+
+						changeTitles = true;
 					}
-					//else // Синхронизируемый элемент не загружен в чат
-					//{
-						jMessagesList.data('countUnreadMessages', jMessagesList.data('countUnreadMessages') - 1);
-					//}
 
-					//$.changeTitleUnreadMessages();
+					// console.log("syncReadMessages jMessagesList.data('countUnreadMessages'"), jMessagesList.data('countUnreadMessages');
 
-					//$.changeTitleNewMessages();
+					if (changeTitles)
+					{
+						$.changeTitleUnreadMessages();
+						$.changeTitleNewMessages();
+					}
 
-					changeTitles = true;
+					jMessagesList.data('lastReadMessageId', storageChatReadMessagesObj['messages_id'][storageLength - 1]);
 				}
-
-				// console.log("syncReadMessages jMessagesList.data('countUnreadMessages'"), jMessagesList.data('countUnreadMessages');
-
-				if (changeTitles)
-				{
-					$.changeTitleUnreadMessages();
-					$.changeTitleNewMessages();
-				}
-
-				jMessagesList.data('lastReadMessageId', storageChatReadMessagesObj['messages_id'][storageLength - 1]);
 			}
 		},
 
@@ -6876,7 +7071,8 @@ function isEmpty(str) {
 			var jNewObject = jQuery(jQuery.parseHTML(html, document, true)),
 				//iNewId = index + 'group' + Math.floor(Math.random() * 999999),
 				jDir = jNewObject.find("select[onchange]"),
-				jItem = jNewObject.find("select:not([onchange])");
+				jItem = jNewObject.find("select:not([onchange])"),
+				jItemInput = jNewObject.find("input:not([onchange])");
 
 			// Свойство - инфоэлемент
 			if (jDir.length)
@@ -6892,6 +7088,8 @@ function isEmpty(str) {
 			jItem
 				.attr('name', 'property_' + index + '[]')
 				.val();
+
+			jItemInput.val(null).trigger("change");
 
 			jNewObject
 				.find('.add-remove-property > div')
@@ -6934,6 +7132,8 @@ function isEmpty(str) {
 				newRow.find('input[name *= "#"], select[name *= "#"]').each(function(){
 					this.name = this.name.split('#')[0] + '[]';
 				});
+
+				newRow.find('#pathLink').attr('href', '/');
 
 				newRow.find('.btn-delete').removeClass('hide');
 				newRow.find('.add-remove-property').addClass('btn-group');
@@ -7091,7 +7291,8 @@ function isEmpty(str) {
 			var jNewObject = jQuery(jQuery.parseHTML(html, document, true)),
 				//iNewId = index + 'group' + Math.floor(Math.random() * 999999),
 				jDir = jNewObject.find("select[onchange]"),
-				jItem = jNewObject.find("select:not([onchange])");
+				jItem = jNewObject.find("select:not([onchange])"),
+				jItemInput = jNewObject.find("input:not([onchange])");
 
 			// Свойство - инфоэлемент
 			if (jDir.length)
@@ -7107,6 +7308,8 @@ function isEmpty(str) {
 			jItem
 				.attr('name', 'field_' + index + '[]')
 				.val();
+
+			jItemInput.val(null).trigger("change");
 
 			jNewObject
 				.find('.add-remove-property > div')
@@ -7316,14 +7519,24 @@ function isEmpty(str) {
 				return '';
 			}
 
-			var arraySelectItemParts = data.text.split("%%%");
+			var arraySelectItemParts = data.text.split("%%%"),
+				className = data.element && $(data.element).attr("class");
+
+			if (typeof className == 'undefined')
+			{
+				className = '';
+			}
 
 			// Компания/ФИО клиента
-			var resultHtml = '<span>' + $.escapeHtml(arraySelectItemParts[0]) + '</span>';
+			var resultHtml = '<div class="user-name ' + className + '">' + $.escapeHtml(arraySelectItemParts[0]) + '</div>';
+
+			resultHtml += '<div class="user-post">' + (typeof data.tin != 'undefined' ? $.escapeHtml(data.tin) : '') + (typeof data.login != 'undefined' ? $.escapeHtml(data.login) : '') + '</div>';
+
+			resultHtml = '<div class="user-info">' + resultHtml + '</div>';
 
 			if (arraySelectItemParts[1])
 			{
-				resultHtml = '<img src="' + $.escapeHtml(arraySelectItemParts[1]) + '" height="20px" class="margin-right-5 img-circle">' + resultHtml;
+				resultHtml = '<img src="' + $.escapeHtml(arraySelectItemParts[1]) + '" height="30px" class="user-image pull-left img-circle">' + resultHtml;
 			}
 
 			return resultHtml;
@@ -7332,18 +7545,31 @@ function isEmpty(str) {
 		// Формирование результатов выбора клиентов в select2
 		templateSelectionItemSiteusers: function (data)
 		{
+			// console.log(data);
 			var arraySelectItemParts = data.text.split("%%%"),
 				className = data.element && $(data.element).attr("class");
 
+			if (typeof className == 'undefined')
+			{
+				className = '';
+			}
+
 			// Компания/ФИО клиента
-			var resultHtml = '<span class="' + className + '">' + $.escapeHtml(arraySelectItemParts[0]) + '</span>';
+			var resultHtml = '<div class="user-name ' + className + '">' + $.escapeHtml(arraySelectItemParts[0]) + '</div>';
+
+			data.login = $.escapeHtml(arraySelectItemParts[2]);
+			data.tin = $.escapeHtml(arraySelectItemParts[3]);
+
+			resultHtml += '<div class="user-post">' + (typeof data.tin != 'undefined' ? $.escapeHtml(data.tin) : '') + (typeof data.login != 'undefined' ? $.escapeHtml(data.login) : '') + '</div>';
 
 			// Устанавливает title для элемента
 			data.title = $.escapeHtml(arraySelectItemParts[0]);
 
+			resultHtml = '<div class="user-info">' + resultHtml + '</div>';
+
 			if (arraySelectItemParts[1])
 			{
-				resultHtml = '<img src="' + $.escapeHtml(arraySelectItemParts[1]) + '" height="20px" class="margin-top-5 margin-right-5 margin-bottom-5 img-circle">' + resultHtml;
+				resultHtml = '<img src="' + $.escapeHtml(arraySelectItemParts[1]) + '" height="30px" class="user-image pull-left img-circle">' + resultHtml;
 			}
 
 			return resultHtml;
@@ -7456,7 +7682,7 @@ function isEmpty(str) {
 										<div class="databox-left no-padding">\
 											<img class="databox-user-avatar" src="' + $.escapeHtml(oUser['avatar']) + '">\
 										</div>\
-										<div class="databox-right bg-whitesmoke">\
+										<div class="databox-right">\
 											<div class="orange radius-bordered" style="right: 0; left: 7px">\
 												<div class="databox-text black semi-bold"><a data-popover="hover" data-user-id="' + oUser['id'] + '" class="black" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][' + oUser['id'] + ']=1" onclick="$.modalLoad({path: \'/admin/user/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' + oUser['id'] + ']=1\', windowId: \'id_content\'}); return false">' + $.escapeHtml(oUser['name']) + '</a></div>\
 												<div class="databox-text darkgray">' + $.escapeHtml(oUser['post']) + '</div>\
@@ -7496,7 +7722,7 @@ function isEmpty(str) {
 								</a>\
 							</div>\
 						</div>\
-						<div class="databox-right bg-whitesmoke">\
+						<div class="databox-right">\
 							<div class="databox-text">\
 								<div class="semi-bold">' + $.escapeHtml(name) + '</div>\
 								<div class="darkgray">' + $.escapeHtml(object.phone) + '</div>\
@@ -8130,14 +8356,14 @@ function isEmpty(str) {
 					.attr("style", 'display: none')
 					.append(Check_0_0)
 					.appendTo(
-						jQuery("#"+settings.windowId)
+						jQuery("#" + settings.windowId)
 					);
 
 				// After insert into DOM
 				Check_0_0.prop('checked', true);
 			}
 
-			$("#"+settings.windowId).setTopCheckbox();
+			$("#" + settings.windowId).setTopCheckbox();
 		},
 		requestSettings: function(settings) {
 			settings = jQuery.extend({
@@ -8688,7 +8914,7 @@ function isEmpty(str) {
 				$this.empty().appendOptions(data);
 			}
 
-			var setOptionId = $this.data('setOptionId');
+			var setOptionId = $this.data('setOptionId') || $this.data('setoptionid');
 			setOptionId && $this.val(setOptionId).removeData('setOptionId');
 
 			// Call change
@@ -8778,6 +9004,36 @@ function isEmpty(str) {
 		{
 			jQuery(object).closest('.delivery_options').remove();
 		},
+		cloneSiteFavicon: function(windowId, cloneDelete)
+		{
+			var jSiteFavicon = jQuery(cloneDelete).closest('.site_favicons'),
+			jNewObject = jSiteFavicon.clone();
+
+			// Change input name
+			jNewObject.find(':regex(name, ^\\S+_\\d+$)').each(function(index, object){
+				var reg = /^(\S+)_(\d+)$/;
+				var arr = reg.exec(object.name);
+				jQuery(object).prop('name', arr[1] + '_' + '[]');
+			});
+			jNewObject.find("input,select").val('');
+
+			// Удаляем элементы просмотра и удаления загруженнного изображения
+			jNewObject
+				.find("[id ^= 'preview_large_'], [id ^= 'delete_large_'], [id ^= 'file_preview_large_']")
+				.remove();
+			// Удаляем скрипт просмотра загуженного изображения
+			jNewObject
+				.find("[type='file'] ~ script")
+				.remove();
+
+			jNewObject.find("[type='file']").removeClass('hidden');
+
+			jNewObject.insertAfter(jSiteFavicon);
+		},
+		deleteNewSiteFavicon: function(object)
+		{
+			jQuery(object).closest('.site_favicons').remove();
+		},
 		cloneDeliveryInterval: function(windowId, cloneDelete)
 		{
 			var jDeliveryInterval = jQuery(cloneDelete).closest('.delivery_intervals'),
@@ -8847,6 +9103,20 @@ function isEmpty(str) {
 				)
 			}
 		},
+		/*example_image_upload_handler: function(blobInfo)
+		{
+			// console.log(blobInfo);
+			console.log(blobInfo.blob());
+			console.log(blobInfo.filename());
+
+			// resolve('/images/logo.png');
+
+			new Promise((resolve, reject) => {
+				console.log(resolve);
+
+				return resolve('/images/logo.png');
+			});
+		},*/
 		showWindow: function(windowId, content, settings) {
 			settings = jQuery.extend({
 				/*modal: true, */autoOpen: true, addContentPadding: false, resizable: true, draggable: true, Minimize: false, Closable: true
@@ -9423,6 +9693,8 @@ function isEmpty(str) {
 				dropdownParent: $(this).closest('.modal').length ? $(this).closest('.modal') : null
 			}, settings);
 
+			//settings
+
 			settings = $.extend({
 				ajax: {
 					url: settings.url,
@@ -9439,6 +9711,8 @@ function isEmpty(str) {
 					}
 				}
 			}, settings);
+
+			// console.log(settings.dropdownParent);
 
 			return this.each(function(){
 				jQuery(this)
@@ -10037,6 +10311,8 @@ $(function(){
 			$('.modal:visible').length && $(document.body).addClass('modal-open');
 		});
 
+	var dropdownMenu2;
+
 	//$('.page-content')
 	$('body')
 		.on('click', '[id ^= \'file_\'][id *= \'_settings_\']', function() {
@@ -10123,6 +10399,12 @@ $(function(){
 			{
 				// Убираем контекстные меню
 				$('.context-menu').hide();
+			}
+
+			if (!$(event.target).parents('.event-checklist-item-row').length)
+			{
+				// Убираем контекстные меню
+				$('.event-checklist-item-panel').remove();
 			}
 		})
 		.on('keyup', function(event) {
@@ -10611,8 +10893,32 @@ $(function(){
 				}
 				else
 				{
-					dropdownMenu.css({'bottom': 0, 'top': 'auto', 'right':'100%'});
+					// dropdownMenu.css({'bottom': 0, 'top': 'auto', 'right':'100%'});
+
+					// grab the menu
+					dropdownMenu2 = $(event.target).find('.dropdown-menu');
+
+					// detach it and append it to the body
+					$('body').append(dropdownMenu2.detach());
+
+					// grab the new offset position
+					var eOffset = $(event.target).offset();
+
+					// make sure to place it where it would normally go (this could be improved)
+					dropdownMenu2.css({
+						'display': 'block',
+						'top': eOffset.top + $(event.target).outerHeight(),
+						//'right': eOffset.right - $(event.target).outerWidth()
+						'left': eOffset.left - dropdownMenu2.outerWidth() + $(event.target).outerWidth(),
+						'width': dropdownMenu2.outerWidth()
+					});
 				}
+			}
+		})
+		.on('hide.bs.dropdown', '.table-scrollable', function (event) {
+			if (typeof dropdownMenu2 != 'undefined')
+			{
+				$(event.target).append(dropdownMenu2.removeAttr('style').detach());
 			}
 		})
 		.on('click', '.page-selector-show-button', function() {
@@ -11270,13 +11576,15 @@ function setResizableAdminTableTh()
 		stop: function(event, ui) {
 			var admin_form_id = $('table.admin-table').data('admin-form-id'),
 				admin_form_field_id = ui.originalElement.eq(0).data('admin-form-field-id'),
+				modelsNames = $('table.admin-table').data('models-names'),
+				site_id = $('table.admin-table').data('site-id'),
 				width = ui.size.width;
 
 			$.loadingScreen('show');
 
 			$.ajax({
 				url: '/admin/admin_form/index.php',
-				data: { 'saveAdminFieldWidth': 1, 'admin_form_id': admin_form_id, 'admin_form_field_id': admin_form_field_id, 'width': width },
+				data: { 'saveAdminFieldWidth': 1, 'admin_form_id': admin_form_id, 'admin_form_field_id': admin_form_field_id, 'site_id': site_id, 'modelsNames': modelsNames, 'width': width },
 				dataType: 'json',
 				type: 'POST',
 				success: function(){
@@ -12167,6 +12475,7 @@ function cSelectFilter(windowId, sObjectId) // eslint-disable-line
 			icon.removeClass('fa-spinner fa-spin').addClass('fa-search');
 
 			self.oCurrentSelectObject.get(0).options.selectedIndex = 0;
+			self.oCurrentSelectObject.trigger('change');
 			//self.oCurrentSelectObject.val(self.sSelectedValue);
 			//jImg.remove();
 		}, 100);
@@ -12416,6 +12725,7 @@ function fieldChecker()
 		if ($input.getInputType() == 'text')
 		{
 			mainFieldChecker.check($input);
+			$input.change();
 		}
 
 		if ($input.getInputType() == 'select')
@@ -12940,3 +13250,93 @@ jQuery.expr[':'].icontains = function(a, i, m) {
 	return jQuery(a).text().toUpperCase()
 		.indexOf(m[3].toUpperCase()) >= 0;
 };
+
+// Загрузка изображений в TinyMCE6
+const hostcms_image_upload_handler = (blobInfo, progress) => new Promise((resolve, reject) => { // eslint-disable-line
+	const xhr = new XMLHttpRequest();
+	xhr.withCredentials = false;
+	xhr.open('POST', '/admin/wysiwyg/upload.php');
+
+	xhr.upload.onprogress = (e) => {
+		progress(e.loaded / e.total * 100);
+	};
+
+	xhr.onload = () => {
+		if (xhr.status === 403) {
+			reject({ message: 'HTTP Error: ' + xhr.status, remove: true });
+			return;
+		}
+
+		if (xhr.status < 200 || xhr.status >= 300) {
+			reject('HTTP Error: ' + xhr.status);
+			return;
+		}
+
+		// console.log(xhr);
+
+		const json = JSON.parse(xhr.responseText);
+
+		if (!json || typeof json.location != 'string') {
+			reject('Invalid JSON: ' + xhr.responseText);
+			return;
+		}
+
+		// console.log(json);
+
+		if (json.status == 'success' && json.location != '')
+		{
+			// console.log(entity_id);
+
+			if (entity_id == '')
+			{
+				// Добавляем скрытое поле
+				$form.append('<input type="hidden" name="wysiwyg_images[]" value="' + json.location + '"/>');
+			}
+
+			resolve(json.location);
+		}
+		else
+		{
+			reject();
+			return;
+		}
+	};
+
+	xhr.onerror = () => {
+		reject('Image upload failed due to a XHR Transport error. Code: ' + xhr.status);
+	};
+
+	let textarea = tinymce.activeEditor.getElement();
+	let $form = $(textarea).parents('form');
+	let entity_id = $form.data('entity_id');
+	let entity_type = $form.data('entity_type');
+
+	const formData = new FormData();
+	formData.append('entity_type', entity_type);
+	formData.append('entity_id', entity_id);
+	formData.append('filename', blobInfo.filename());
+	formData.append('blob', blobInfo.blob());
+
+	xhr.send(formData);
+});
+
+function replaceWysiwygImages(aConform) // eslint-disable-line
+{
+	if (typeof tinyMCE != 'undefined')
+	{
+		$('textarea, div[wysiwyg = "1"]').each(function(){
+			var elementId = this.id;
+
+			if (tinyMCE.get(elementId) != null)
+			{
+				var content = tinyMCE.get(elementId).getContent();
+
+				$.each(aConform, function(index, object){
+					content = content.replace(object.source, object.destination);
+				});
+
+				tinyMCE.get(elementId).setContent(content);
+			}
+		});
+	}
+}

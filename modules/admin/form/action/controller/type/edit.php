@@ -390,6 +390,12 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 
 		parent::setObject($object);
 
+		if ($object instanceof Core_ORM)
+		{
+			$this->_Admin_Form_Entity_Form->data('entity_type', $object->getModelName());
+			$this->_Admin_Form_Entity_Form->data('entity_id', $object->getPrimaryKey());
+		}
+
 		$className = get_class($this);
 
 		$oReflectionClass = new ReflectionClass($className);

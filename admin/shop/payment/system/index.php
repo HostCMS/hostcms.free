@@ -141,9 +141,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 );
 
 // Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -159,9 +157,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 }
 
 // Действие "Применить"
-$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdminFormActionApply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
@@ -174,9 +170,7 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 }
 
 // Действие "Копировать"
-$oAdminFormActionCopy = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('copy');
+$oAdminFormActionCopy = $oAdmin_Form->Admin_Form_Actions->getByName('copy');
 
 if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 {
@@ -189,9 +183,7 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 }
 
 // Действие "Удаление файла изображения"
-$oAdminFormActionDeleteImage = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deleteImage');
+$oAdminFormActionDeleteImage = $oAdmin_Form->Admin_Form_Actions->getByName('deleteImage');
 
 if ($oAdminFormActionDeleteImage && $oAdmin_Form_Controller->getAction() == 'deleteImage')
 {
@@ -207,9 +199,7 @@ if ($oAdminFormActionDeleteImage && $oAdmin_Form_Controller->getAction() == 'del
 	$oAdmin_Form_Controller->addAction($oDeleteLargeImage);
 }
 
-$oAdminFormActionRollback = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('rollback');
+$oAdminFormActionRollback = $oAdmin_Form->Admin_Form_Actions->getByName('rollback');
 
 if ($oAdminFormActionRollback && $oAdmin_Form_Controller->getAction() == 'rollback')
 {

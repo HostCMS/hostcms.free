@@ -686,8 +686,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						$setTable .= '
 							<tr id="' . $oShop_Item_Set->id . '">
 								<td>' . $smallImage . '</td>
-								<td>' . htmlspecialchars($oShop_Item->name) . $externalLink . '</td>
-								<td>' . htmlspecialchars($oShop_Item->marking) . '</td>
+								<td>' . htmlspecialchars((string) $oShop_Item->name) . $externalLink . '</td>
+								<td>' . htmlspecialchars((string) $oShop_Item->marking) . '</td>
 								<td width="25"><input class="set-item-count form-control" name="set_count_' . $oShop_Item_Set->id . '" value="' . $oShop_Item_Set->count . '" /></td>
 								<td>' . htmlspecialchars($oShop_Item->Shop_Currency->formatWithCurrency($price)) . '</td>
 								<td><a class="delete-associated-item" onclick="' . $onclick . '"><i class="fa fa-times-circle darkorange"></i></a></td>
@@ -1238,7 +1238,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				// Получаем список складов магазина
 				$aWarehouses = $oShop->Shop_Warehouses->findAll(FALSE);
-				$aConfig = $this->_getConfig();
+				$aConfig = Shop_Controller::getConfig();
 
 				if (count($aWarehouses) <= $aConfig['itemEditWarehouseLimit'])
 				{
@@ -2039,18 +2039,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		return $this;
 	}
 
-	protected function _getConfig()
-	{
-		return Core_Config::instance()->get('shop_config', array()) + array(
-			'itemEditWarehouseLimit' => 20,
-			'smallImagePrefix' => 'small_',
-			'itemLargeImage' => 'item_%d.%s',
-			'itemSmallImage' => 'small_item_%d.%s',
-			'groupLargeImage' => 'group_%d.%s',
-			'groupSmallImage' => 'small_group_%d.%s',
-		);
-	}
-
 	/**
 	 * Processing of the form. Apply object fields.
 	 * @hostcms-event Shop_Item_Controller_Edit.onAfterRedeclaredApplyObjectProperty
@@ -2097,7 +2085,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			? Core_Entity::factory('Shop', intval(Core_Array::getGet('shop_id', 0)))
 			: */ $this->_object->Shop;
 
-		$aConfig = $this->_getConfig();
+		$aConfig = Shop_Controller::getConfig();
 
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
@@ -2344,7 +2332,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							->save();
 					}
 				}
-				
+
 				// Существующие товары комплекта
 				$aShop_Item_Sets = $this->_object->Shop_Item_Sets->findAll(FALSE);
 				foreach ($aShop_Item_Sets as $oShop_Item_Set)
@@ -2861,10 +2849,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$large_image = $small_image = '';
 
-		$aCore_Config = Core::$mainConfig;
-
-		$create_small_image_from_large = Core_Array::getPost(
-		'create_small_image_from_large_small_image');
+		$create_small_image_from_large = Core_Array::getPost('create_small_image_from_large_small_image');
 
 		$bLargeImageIsCorrect =
 			// Поле файла большого изображения существует
@@ -2875,7 +2860,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		if ($bLargeImageIsCorrect)
 		{
 			// Проверка на допустимый тип файла
-			if (Core_File::isValidExtension($aFileData['name'], $aCore_Config['availableExtension']))
+			if (Core_File::isValidExtension($aFileData['name'], Core::$mainConfig['availableExtension']))
 			{
 				// Удаление файла большого изображения
 				if ($this->_object->image_large)
@@ -2922,14 +2907,12 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			// Удаление файла малого изображения
 			if ($this->_object->image_small)
 			{
-				// !! дописать метод
 				$this->_object->deleteSmallImage();
 			}
 
 			// Явно указано малое изображение
 			if ($bSmallImageIsCorrect
-				&& Core_File::isValidExtension($aSmallFileData['name'],
-				$aCore_Config['availableExtension']))
+				&& Core_File::isValidExtension($aSmallFileData['name'], Core::$mainConfig['availableExtension']))
 			{
 				// Для инфогруппы ранее задано изображение
 				if ($this->_object->image_large != '')
@@ -2965,7 +2948,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$small_image = $modelName == 'shop_item'
 						? sprintf($aConfig['itemSmallImage'], $this->_object->id, $ext)
 						: sprintf($aConfig['groupSmallImage'], $this->_object->id, $ext);
-
 				}
 			}
 			elseif ($create_small_image_from_large && $bLargeImageIsCorrect)
@@ -3143,6 +3125,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$this->_fillMedia()->execute();
 			$this->_Admin_Form_Controller->addMessage(ob_get_clean());
 		}
+
+		Core::moduleIsActive('wysiwyg') && Wysiwyg_Controller::uploadImages($this->_formValues, $this->_object, $this->_Admin_Form_Controller);
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 
@@ -3391,7 +3375,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 * Build visual representation of producer dirs tree
 	 * @param int $iShopId shop ID
 	 * @param int $iShopProducerDirParentId parent ID
-	 * @param int $aExclude exclude group ID
+	 * @param array $aExclude exclude group ID
 	 * @param int $iLevel current nesting level
 	 * @return array
 	 */

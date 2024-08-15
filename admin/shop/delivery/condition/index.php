@@ -213,9 +213,7 @@ if ($shop_delivery_condition_dir_id)
 }
 
  // Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -231,9 +229,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 }
 
 // Действие "Загрузка списка местоположений"
-$oAdminFormActionLoadCountryLocationsList = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('loadList2');
+$oAdminFormActionLoadCountryLocationsList = $oAdmin_Form->Admin_Form_Actions->getByName('loadList2');
 
 if ($oAdminFormActionLoadCountryLocationsList && $oAdmin_Form_Controller->getAction() == 'loadList2')
 {
@@ -252,9 +248,7 @@ if ($oAdminFormActionLoadCountryLocationsList && $oAdmin_Form_Controller->getAct
 }
 
 // Действие "Загрузка списка городов"
-$oAdminFormActionLoadCountryLocationCitiesList = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('loadList3');
+$oAdminFormActionLoadCountryLocationCitiesList = $oAdmin_Form->Admin_Form_Actions->getByName('loadList3');
 
 if ($oAdminFormActionLoadCountryLocationCitiesList && $oAdmin_Form_Controller->getAction() == 'loadList3')
 {
@@ -273,9 +267,7 @@ if ($oAdminFormActionLoadCountryLocationCitiesList && $oAdmin_Form_Controller->g
 }
 
 // Действие "Загрузка списка районов"
-$oAdminFormActionLoadCountryLocationCitiesList = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('loadList4');
+$oAdminFormActionLoadCountryLocationCitiesList = $oAdmin_Form->Admin_Form_Actions->getByName('loadList4');
 
 if ($oAdminFormActionLoadCountryLocationCitiesList && $oAdmin_Form_Controller->getAction() == 'loadList4')
 {
@@ -294,9 +286,7 @@ if ($oAdminFormActionLoadCountryLocationCitiesList && $oAdmin_Form_Controller->g
 }
 
 // Действие "Импорт условий доставки"
-$oAdminFormActionImport = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('import');
+$oAdminFormActionImport = $oAdmin_Form->Admin_Form_Actions->getByName('import');
 
 if ($oAdminFormActionImport && $oAdmin_Form_Controller->getAction() == 'import')
 {
@@ -312,9 +302,7 @@ if ($oAdminFormActionImport && $oAdmin_Form_Controller->getAction() == 'import')
 }
 
 // Действие "Применить"
-$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdminFormActionApply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
@@ -327,9 +315,7 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 }
 
 // Действие "Копировать"
-$oAdminFormActionCopy = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('copy');
+$oAdminFormActionCopy = $oAdmin_Form->Admin_Form_Actions->getByName('copy');
 
 if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 {
@@ -342,9 +328,7 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 }
 
 // Действие "Копировать"
-$oAdminFormActionCopy = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('copy');
+$oAdminFormActionCopy = $oAdmin_Form->Admin_Form_Actions->getByName('copy');
 
 if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 {

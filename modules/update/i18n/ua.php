@@ -43,4 +43,5 @@ return array(
 	'system_notification_description' => 'Доступно оновлення %s',
 	'add_module_notification' => 'Оновлення модуля %s',
 	'module_notification_description' => 'Доступна нова версія %s',
+	'not_writable' => 'Оновлення не можна встановити. Файли недоступні для запису: %s',
 );

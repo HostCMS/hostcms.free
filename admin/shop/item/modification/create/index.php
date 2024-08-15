@@ -10,7 +10,7 @@ require_once('../../../../../bootstrap.php');
 
 Core_Auth::authorization($sModule = 'shop');
 
-$oShopItemParent = Core_Entity::factory('Shop_Item', intval(Core_Array::getGet('shop_item_id', 0)));
+$oShopItemParent = Core_Entity::factory('Shop_Item', Core_Array::getGet('shop_item_id', 0, 'int'));
 $oShop = $oShopItemParent->Shop;
 $oShopGroup = $oShopItemParent->Shop_Group;
 $oShopDir = $oShop->Shop_Dir;
@@ -152,6 +152,17 @@ foreach ($aProperties as $oProperty)
 				->onchange("$.toggleModificationPattern(this, '{$oProperty->id}', '" . Core_Str::escapeJavascriptVariable($oProperty->name) . "', '{$selectName}')")
 		);
 
+		$aShop_Item_Property_Values = array();
+		if ($oShopItemParent)
+		{
+			$aProperty_Values = $oProperty->getValues($oShopItemParent->id, FALSE);
+			foreach ($aProperty_Values as $oProperty_Value)
+			{
+				$oProperty_Value->value
+					&& $aShop_Item_Property_Values[] = $oProperty_Value->value;
+			}
+		}
+
 		$oRow2->add(
 			Admin_Form_Entity::factory('Select')
 				->options($aValues)
@@ -160,6 +171,7 @@ foreach ($aProperties as $oProperty)
 				->style('width:300px;')
 				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
 				->filter(FALSE)
+				->value($aShop_Item_Property_Values)
 		);
 	}
 }

@@ -64,4 +64,5 @@ return array(
 	'change_attributes_success' => 'Атрибуты изменены успешно!',
 	'items_total_count' => 'Количество активных товаров',
 	'changeIndexation_success' => 'Индексация группы магазина изменена.',
+	'fields' => "Пользовательские поля групп",
 );

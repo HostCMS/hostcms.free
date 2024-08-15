@@ -146,108 +146,95 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 
 						$aPaidAmount = $aPaid = $aOrderedAmount = $aOrdered;
 
-						$limit = 1000;
-						$offset = 0;
+						$aShops = $iShopId
+							? Core_Entity::factory('Site', CURRENT_SITE)->Shops->getAllById($iShopId)
+							: Core_Entity::factory('Site', CURRENT_SITE)->Shops->findAll();
 
 						// Ordered
-						do {
+						foreach ($aShops as $oShop)
+						{
 							$oShop_Orders = Core_Entity::factory('Shop_Order');
 							$oShop_Orders
 								->queryBuilder()
-								->straightJoin()
-								->join('shops', 'shops.id', '=', 'shop_orders.shop_id')
-								->where('shops.site_id', '=', CURRENT_SITE)
-								->where('shops.deleted', '=', 0)
+								->select(
+									array(Core_QueryBuilder::raw('DATE_FORMAT(datetime, "%Y-%m-%d")'), 'dataDate'),
+									array('SUM(shop_order_items.price * shop_order_items.quantity)', 'dataSum'),
+									array(Core_QueryBuilder::raw('COUNT(DISTINCT shop_orders.id)'), 'dataCount')
+								)
+								->join('shop_order_items', 'shop_order_items.shop_order_id', '=', 'shop_orders.id')
+								->where('shop_orders.shop_id', '=', $oShop->id)
 								->where('shop_orders.datetime', '>=', date('Y-m-d 00:00:00', $iBeginTimestamp))
 								->where('shop_orders.canceled', '=', 0)
-								->offset($offset)
-								->limit($limit)
-								->clearOrderBy()
-								->orderBy('id', 'ASC');
-
-							$iShopId && $oShop_Orders
-								->queryBuilder()
-								->where('shops.id', '=', $iShopId);
+								->where('shop_order_items.deleted', '=', 0)
+								->groupBy('dataDate')
+								->groupBy('shop_currency_id');
 
 							!$oUser->superuser && $oUser->only_access_my_own
 								&& $oShop_Orders->queryBuilder()->where('shop_orders.user_id', '=', $oUser->id);
 
 							$aShop_Orders = $oShop_Orders->findAll(FALSE);
-
 							foreach ($aShop_Orders as $oShop_Order)
 							{
-								$sDate = date('Y-m-d', Core_Date::sql2timestamp($oShop_Order->datetime));
+								$sDate = $oShop_Order->dataDate;
 
-								isset($aOrdered[$sDate])
-									? $aOrdered[$sDate]++
-									: $aOrdered[$sDate] = 1;
+								!isset($aOrdered[$sDate]) && $aOrdered[$sDate] = 0;
+								$aOrdered[$sDate] += $oShop_Order->dataCount;
 
-								$fCurrencyCoefficient = $oShop_Order->Shop_Currency->id > 0 && $oDefault_Currency->id > 0
+								$fCurrencyCoefficient = $oShop_Order->shop_currency_id > 0 && $oDefault_Currency->id > 0
 									? Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
 										$oShop_Order->Shop_Currency, $oDefault_Currency
 									)
-									: 0;
+									: 1;
 
-								$fAmount = $oShop_Order->getAmount() * $fCurrencyCoefficient;
+								$fAmount = $oShop_Order->dataSum * $fCurrencyCoefficient;
 
-								isset($aOrderedAmount[$sDate])
-									? $aOrderedAmount[$sDate] += $fAmount
-									: $aOrderedAmount[$sDate] = $fAmount;
+								!isset($aOrderedAmount[$sDate]) && $aOrderedAmount[$sDate] = 0;
+								$aOrderedAmount[$sDate] += $fAmount;
 							}
-
-							$offset += $limit;
 						}
-						while (count($aShop_Orders) == $limit);
-
-						$offset = 0;
 
 						// Paid
-						do {
+						foreach ($aShops as $oShop)
+						{
 							$oShop_Orders = Core_Entity::factory('Shop_Order');
 							$oShop_Orders
 								->queryBuilder()
-								->join('shops', 'shops.id', '=', 'shop_orders.shop_id')
-								->where('shops.site_id', '=', CURRENT_SITE)
-								->where('shops.deleted', '=', 0)
+								->select(
+									array(Core_QueryBuilder::raw('DATE_FORMAT(payment_datetime, "%Y-%m-%d")'), 'dataDate'),
+									array('SUM(shop_order_items.price * shop_order_items.quantity)', 'dataSum'),
+									array(Core_QueryBuilder::raw('COUNT(DISTINCT shop_orders.id)'), 'dataCount')
+								)
+								->join('shop_order_items', 'shop_order_items.shop_order_id', '=', 'shop_orders.id')
+								->where('shop_orders.shop_id', '=', $oShop->id)
 								->where('shop_orders.payment_datetime', '>=', date('Y-m-d 00:00:00', $iBeginTimestamp))
 								->where('shop_orders.paid', '=', 1)
-								->offset($offset)
-								->limit($limit)
-								->clearOrderBy()
-								->orderBy('id', 'ASC');
-
-							$iShopId && $oShop_Orders
-								->queryBuilder()
-								->where('shops.id', '=', $iShopId);
+								->where('shop_order_items.deleted', '=', 0)
+								->groupBy('dataDate')
+								->groupBy('shop_currency_id');
 
 							!$oUser->superuser && $oUser->only_access_my_own
 								&& $oShop_Orders->queryBuilder()->where('shop_orders.user_id', '=', $oUser->id);
 
 							$aShop_Orders = $oShop_Orders->findAll(FALSE);
-
 							foreach ($aShop_Orders as $oShop_Order)
 							{
-								$sDate = date('Y-m-d', Core_Date::sql2timestamp($oShop_Order->payment_datetime));
+								$sDate = $oShop_Order->dataDate;
 
-								isset($aPaid[$sDate])
-									? $aPaid[$sDate]++
-									: $aPaid[$sDate] = 1;
+								!isset($aPaid[$sDate]) && $aPaid[$sDate] = 0;
+								$aPaid[$sDate] += $oShop_Order->dataCount;
 
-								$fCurrencyCoefficient = $oShop_Order->Shop_Currency->id > 0 && $oDefault_Currency->id > 0
+								$fCurrencyCoefficient = $oShop_Order->shop_currency_id > 0 && $oDefault_Currency->id > 0
 									? Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
 										$oShop_Order->Shop_Currency, $oDefault_Currency
 									)
-									: 0;
+									: 1;
 
-								$fAmount = $oShop_Order->getAmount() * $fCurrencyCoefficient;
-								isset($aPaidAmount[$sDate])
-									? $aPaidAmount[$sDate] += $fAmount
-									: $aPaidAmount[$sDate] = $fAmount;
+								$fAmount = $oShop_Order->dataSum * $fCurrencyCoefficient;
+
+								!isset($aPaidAmount[$sDate]) && $aPaidAmount[$sDate] = 0;
+								$aPaidAmount[$sDate] += $fAmount;
 							}
-
-							$offset += $limit;
 						}
-						while (count($aShop_Orders) == $limit);
 
 						?><div class="dashboard-box">
 							<div class="box-header">
@@ -341,7 +328,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 											</div>
 											<div class="databox-bottom no-padding text-align-center">
 												<span class="databox-number lightcarbon no-margin"><?php echo htmlspecialchars(
-													number_format(array_sum($aOrderedAmount), 2, '.', ' ') . ' ' . $oDefault_Currency->name
+													$oDefault_Currency->formatWithCurrency(array_sum($aOrderedAmount))
 												)?></span>
 												<span class="databox-text lightcarbon no-margin"><?php echo Core::_('Shop.orders_amount')?></span>
 											</div>
@@ -362,7 +349,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 											</div>
 											<div class="databox-bottom no-padding text-align-center">
 												<span class="databox-number lightcarbon no-margin"><?php echo htmlspecialchars(
-													number_format(array_sum($aPaidAmount), 2, '.', ' ') . ' ' . $oDefault_Currency->name
+													$oDefault_Currency->formatWithCurrency(array_sum($aPaidAmount))
 												)?></span>
 												<span class="databox-text lightcarbon no-margin"><?php echo Core::_('Shop.paid_orders_amount')?></span>
 											</div>
@@ -398,11 +385,12 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 							$oMost_Ordered_Shop_Items = Core_Entity::factory('Shop_Order_Item');
 							$oMost_Ordered_Shop_Items
 								->queryBuilder()
-								->select(array(Core_QueryBuilder::expression('SUM(shop_order_items.quantity)'), 'sum'))
+								->select(array(Core_QueryBuilder::raw('SUM(shop_order_items.quantity)'), 'dataSumQuantity'))
 								->join('shop_orders', 'shop_orders.id', '=', 'shop_order_items.shop_order_id')
 								->join('shops', 'shops.id', '=', 'shop_orders.shop_id')
 								->where('shops.site_id', '=', CURRENT_SITE)
 								->where('shops.deleted', '=', 0)
+								->where('shop_order_items.shop_item_id', '!=', 0)
 								->where('shop_order_items.type', '=', 0)
 								->where('shop_order_items.price', '>', 0)
 								->where('shop_orders.datetime', '>', date('Y-m-d 00:00:00', strtotime("-{$aConfig['indexMostOrderedDays']} day")))
@@ -410,7 +398,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 								->limit(10)
 								->groupBy('shop_order_items.shop_item_id')
 								->clearOrderBy()
-								->orderBy('sum', 'DESC');
+								->orderBy('dataSumQuantity', 'DESC');
 
 							$iShopId && $oMost_Ordered_Shop_Items
 								->queryBuilder()
@@ -421,7 +409,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 							$oBrand_Shop_Items = Core_Entity::factory('Shop_Order_Item');
 							$oBrand_Shop_Items
 								->queryBuilder()
-								->select(array(Core_QueryBuilder::expression('SUM(shop_order_items.quantity)'), 'sum'))
+								->select(array(Core_QueryBuilder::raw('SUM(shop_order_items.quantity)'), 'dataSumQuantity'))
 								->join('shop_items', 'shop_items.id', '=', 'shop_order_items.shop_item_id')
 								->join('shop_orders', 'shop_orders.id', '=', 'shop_order_items.shop_order_id')
 								->join('shops', 'shops.id', '=', 'shop_orders.shop_id')
@@ -434,7 +422,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 								->limit(10)
 								->groupBy('shop_items.shop_producer_id')
 								->clearOrderBy()
-								->orderBy('sum', 'DESC');
+								->orderBy('dataSumQuantity', 'DESC');
 
 							$iShopId && $oBrand_Shop_Items
 								->queryBuilder()
@@ -469,7 +457,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 														?>
 														mostOrderedDiagramData.push({
 															label:'<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars(Core_Str::cut($oShop_Order_Item->name, $aConfig['cutNames'])))?>',
-															data:[<?php echo $oShop_Order_Item->sum?>],
+															data:[<?php echo $oShop_Order_Item->dataSumQuantity?>],
 															color: '#<?php echo $iCountColors ? $aColors[$key % $iCountColors] : 'E75B8D'?>'
 														});
 														<?php
@@ -550,7 +538,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 														?>
 														brandsDiagramData.push({
 															label:'<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars(Core_Str::cut($oShop_Order_Item->Shop_Item->Shop_Producer->name, $aConfig['cutNames'])))?>',
-															data:[<?php echo $oShop_Order_Item->sum?>],
+															data:[<?php echo $oShop_Order_Item->dataSumQuantity?>],
 															color: '#<?php echo $iCountColors ? $aColors[$key % $iCountColors] : 'E75B8D'?>'
 														});
 														<?php
@@ -587,7 +575,6 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 															grid: {
 																hoverable: true,
 															}
-
 														});
 
 														placeholderBrandsDiagram.bind("plothover", function (event, pos, obj) {

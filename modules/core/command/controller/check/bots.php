@@ -40,6 +40,20 @@ class Core_Command_Controller_Check_Bots extends Core_Command_Controller
 
 			if (!is_null($oStructure->id))
 			{
+				// Если доступ к узлу структуры только по HTTPS, а используется HTTP,
+				// то делаем 301 редирект
+				if ($oStructure->https == 1 && !Core::httpsUses())
+				{
+					$url = Core::$url['host'] . $this->_uri;
+					isset(Core::$url['query']) && $url .= '?' . Core::$url['query'];
+
+					$oCore_Response
+						->status(301)
+						->header('Location', 'https://' . Core_Http::sanitizeHeader($url));
+
+					return $oCore_Response;
+				}
+		
 				define('CURRENT_STRUCTURE_ID', $oStructure->id);
 
 				$oCore_Response->status(503);

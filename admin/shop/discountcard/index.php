@@ -169,9 +169,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
 // Действие "Редактировать"
-$oAdmin_Form_Action_Edit = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action_Edit = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action_Edit && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -183,9 +181,7 @@ if ($oAdmin_Form_Action_Edit && $oAdmin_Form_Controller->getAction() == 'edit')
 }
 
 // Действие "Применить"
-$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdminFormActionApply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
@@ -198,9 +194,7 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 }
 
 // Действие импорта
-$oAdminFormActionEdit = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('importDiscountcards');
+$oAdminFormActionEdit = $oAdmin_Form->Admin_Form_Actions->getByName('importDiscountcards');
 
 if ($oAdminFormActionEdit && $oAdmin_Form_Controller->getAction() == 'importDiscountcards')
 {
@@ -216,9 +210,7 @@ if ($oAdminFormActionEdit && $oAdmin_Form_Controller->getAction() == 'importDisc
 }
 
 // Действие экспорта
-$oAdminFormActionExport = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('exportDiscountcards');
+$oAdminFormActionExport = $oAdmin_Form->Admin_Form_Actions->getByName('exportDiscountcards');
 
 if ($oAdminFormActionExport && $oAdmin_Form_Controller->getAction() == 'exportDiscountcards')
 {
@@ -262,7 +254,9 @@ else
 	if (isset($oAdmin_Form_Controller->request['admin_form_filter_1399'])
 		&& $oAdmin_Form_Controller->request['admin_form_filter_1399'] != ''
 	|| isset($oAdmin_Form_Controller->request['topFilter_1399'])
-		&& $oAdmin_Form_Controller->request['topFilter_1399'] != '')
+		&& $oAdmin_Form_Controller->request['topFilter_1399'] != ''
+	|| $oAdmin_Form_Controller->sortingFieldId == 1399
+	)
 	{
 		$oAdmin_Form_Dataset->addCondition(
 			array(

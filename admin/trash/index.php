@@ -26,9 +26,7 @@ $oAdmin_Form_Controller
 	->pageTitle(Core::_('Trash.title'));
 
 // Действие "Удалить"
-$oAdminFormActionDelete = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('delete');
+$oAdminFormActionDelete = $oAdmin_Form->Admin_Form_Actions->getByName('delete');
 
 if ($oAdminFormActionDelete && $oAdmin_Form_Controller->getAction() == 'delete')
 {
@@ -43,10 +41,10 @@ if ($oAdminFormActionDelete && $oAdmin_Form_Controller->getAction() == 'delete')
 if ($oAdmin_Form_Controller->getAction() == 'deleteAll')
 {
 	ob_start();
-	
+
 	try {
 		$secret_csrf = Core_Array::getGet('secret_csrf', '', 'trim');
-				
+
 		if (!Core_Security::checkCsrf($secret_csrf, Core::$mainConfig['csrf_lifetime']))
 		{
 			Core_Security::throwCsrfError();
@@ -56,6 +54,8 @@ if ($oAdmin_Form_Controller->getAction() == 'deleteAll')
 		$iMaxTime = (!defined('DENY_INI_SET') || !DENY_INI_SET)
 			? ini_get('max_execution_time')
 			: 25;
+
+		$iMaxTime > 30 && $iMaxTime = 30;
 
 		$timeout = Core::getmicrotime();
 

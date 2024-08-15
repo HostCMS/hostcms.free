@@ -546,8 +546,6 @@ abstract class Shop_Payment_System_Handler
 	/**
 	 * Создание нового заказа на основе данных, указанных в orderParams
 	 * @hostcms-event Shop_Payment_System_Handler.onBeforeProcessOrder
-	 * @hostcms-event Shop_Payment_System_Handler.onAfterItemGetPrices
-	 * @hostcms-event Shop_Payment_System_Handler.onAfterAddShopOrderItem
 	 * @hostcms-event Shop_Payment_System_Handler.onAfterProcessOrder
 	 */
 	protected function _processOrder()
@@ -567,17 +565,8 @@ abstract class Shop_Payment_System_Handler
 		$this->_quantityPurchaseDiscount = $this->_amountPurchaseDiscount
 			= $this->_quantity = $this->_amount = $this->_weight = 0;
 
-		Core::moduleIsActive('siteuser')
-			&& $oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
-
 		// Массив цен для расчета скидок каждый N-й со скидкой N%
 		$this->_aDiscountPrices = array();
-
-		// Есть скидки на N-й товар, доступные для текущей даты
-		$bPositionDiscount = $oShop->Shop_Purchase_Discounts->checkAvailableWithPosition();
-
-		// Prices
-		$oShop_Item_Controller = new Shop_Item_Controller();
 
 		$Shop_Cart_Controller = Shop_Cart_Controller::instance();
 
@@ -590,81 +579,7 @@ abstract class Shop_Payment_System_Handler
 			{
 				if ($oShop_Cart->postpone == 0)
 				{
-					$bSkipItem = $oShop_Item->type == 4;
-
-					$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
-					$oShop_Order_Item->quantity = $oShop_Cart->quantity;
-					$oShop_Order_Item->shop_measure_id = $oShop_Item->shop_measure_id;
-					$oShop_Order_Item->shop_item_id = $oShop_Cart->shop_item_id;
-					$oShop_Order_Item->shop_warehouse_id = intval($oShop_Cart->shop_warehouse_id);
-
-					Core::moduleIsActive('siteuser') && $oSiteuser
-						&& $oShop_Item_Controller->siteuser($oSiteuser);
-
-					$oShop_Item_Controller->count($oShop_Cart->quantity);
-
-					$aPrices = $oShop_Item_Controller->getPrices($oShop_Item, $this->_round);
-
-					Core_Event::notify('Shop_Payment_System_Handler.onAfterItemGetPrices', $this, array($aPrices, $oShop_Cart));
-
-					$eventResult = Core_Event::getLastReturn();
-					is_array($eventResult) && $aPrices = $eventResult;
-
-					$this->_quantity += $oShop_Cart->quantity;
-
-					$this->_amount += $aPrices['price_discount'] * $oShop_Cart->quantity;
-
-					$this->_weight += $oShop_Item->weight * $oShop_Cart->quantity;
-
-					if ($bPositionDiscount && !$bSkipItem)
-					{
-						// По каждой единице товара добавляем цену в массив, т.к. может быть N единиц одого товара
-						for ($i = 0; $i < $oShop_Cart->quantity; $i++)
-						{
-							$this->_aDiscountPrices[] = $aPrices['price_discount'];
-						}
-					}
-
-					if ($oShop_Item->apply_purchase_discount && !$bSkipItem)
-					{
-						$bApplyPurchaseDiscount = TRUE;
-						foreach ($aPrices['discounts'] as $oShop_Discount)
-						{
-							if ($oShop_Discount->not_apply_purchase_discount)
-							{
-								$bApplyPurchaseDiscount = FALSE;
-								break;
-							}
-						}
-
-						if ($bApplyPurchaseDiscount)
-						{
-							// Сумма для скидок от суммы заказа рассчитывается отдельно
-							$this->_amountPurchaseDiscount += $aPrices['price_discount'] * $oShop_Cart->quantity;
-
-							// Количество для скидок от суммы заказа рассчитывается отдельно
-							$this->_quantityPurchaseDiscount += $oShop_Cart->quantity;
-						}
-					}
-
-					$oShop_Order_Item->price = $aPrices['price_discount'];
-					$oShop_Order_Item->rate = $aPrices['rate'];
-					$oShop_Order_Item->name = $oShop_Item->name;
-					$oShop_Order_Item->type = 0;
-					$oShop_Order_Item->marking = strlen((string) $oShop_Cart->marking)
-						? $oShop_Cart->marking
-						: $oShop_Item->marking;
-
-					// Статус товаров по умолчанию.
-					if ($oShop->shop_order_status_id
-						&& $oShop->shop_order_status_id == $this->_shopOrder->shop_order_status_id
-						&& $this->_shopOrder->Shop_Order_Status->shop_order_item_status_id
-					)
-					{
-						$oShop_Order_Item->shop_order_item_status_id = $this->_shopOrder->Shop_Order_Status->shop_order_item_status_id;
-					}
-
-					$this->_shopOrder->add($oShop_Order_Item);
+					$this->createOrderItem($oShop_Cart, $oShop_Item);
 
 					// Save coupon
 					if (isset($aPrices['coupon']))
@@ -672,8 +587,6 @@ abstract class Shop_Payment_System_Handler
 						$this->_shopOrder->coupon = $aPrices['coupon'];
 						$this->_shopOrder->save();
 					}
-
-					Core_Event::notify('Shop_Payment_System_Handler.onAfterAddShopOrderItem', $this, array($oShop_Order_Item, $oShop_Cart));
 
 					// Delete item from the cart
 					$Shop_Cart_Controller
@@ -743,6 +656,108 @@ abstract class Shop_Payment_System_Handler
 		Core_Event::notify('Shop_Payment_System_Handler.onAfterProcessOrder', $this);
 
 		return $this;
+	}
+
+	/**
+	 * Create Shop_Order_Item
+	 * @param Shop_Cart_Model $oShop_Cart
+	 * @param Shop_Item_Model $oShop_Item
+	 * @return Shop_Order_Item_Model
+	 * @hostcms-event Shop_Payment_System_Handler.onAfterItemGetPrices
+	 * @hostcms-event Shop_Payment_System_Handler.onAfterAddShopOrderItem
+	 */
+	public function createOrderItem($oShop_Cart, $oShop_Item)
+	{
+		$oShop = $this->_Shop_Payment_System_Model->Shop;
+
+		$bSkipItem = $oShop_Item->type == 4;
+
+		$oShop_Item_Controller = new Shop_Item_Controller();
+
+		$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
+		$oShop_Order_Item->quantity = $oShop_Cart->quantity;
+		$oShop_Order_Item->shop_measure_id = $oShop_Item->shop_measure_id;
+		$oShop_Order_Item->shop_item_id = $oShop_Item->id;
+		$oShop_Order_Item->shop_warehouse_id = intval($oShop_Cart->shop_warehouse_id);
+
+		if (Core::moduleIsActive('siteuser'))
+		{
+			$oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
+
+			$oSiteuser
+				&& $oShop_Item_Controller->siteuser($oSiteuser);
+		}
+
+		$oShop_Item_Controller->count($oShop_Order_Item->quantity);
+
+		$aPrices = $oShop_Item_Controller->getPrices($oShop_Item, $this->_round);
+
+		Core_Event::notify('Shop_Payment_System_Handler.onAfterItemGetPrices', $this, array($aPrices, $oShop_Cart));
+
+		$eventResult = Core_Event::getLastReturn();
+		is_array($eventResult) && $aPrices = $eventResult;
+
+		$this->_quantity += $oShop_Order_Item->quantity;
+
+		$this->_amount += $aPrices['price_discount'] * $oShop_Order_Item->quantity;
+
+		$this->_weight += $oShop_Item->weight * $oShop_Order_Item->quantity;
+
+		// Есть скидки на N-й товар, доступные для текущей даты
+		$bPositionDiscount = $oShop->Shop_Purchase_Discounts->checkAvailableWithPosition();
+		if ($bPositionDiscount && !$bSkipItem)
+		{
+			// По каждой единице товара добавляем цену в массив, т.к. может быть N единиц одого товара
+			for ($i = 0; $i < $oShop_Order_Item->quantity; $i++)
+			{
+				$this->_aDiscountPrices[] = $aPrices['price_discount'];
+			}
+		}
+
+		if ($oShop_Item->apply_purchase_discount && !$bSkipItem)
+		{
+			$bApplyPurchaseDiscount = TRUE;
+			foreach ($aPrices['discounts'] as $oShop_Discount)
+			{
+				if ($oShop_Discount->not_apply_purchase_discount)
+				{
+					$bApplyPurchaseDiscount = FALSE;
+					break;
+				}
+			}
+
+			if ($bApplyPurchaseDiscount)
+			{
+				// Сумма для скидок от суммы заказа рассчитывается отдельно
+				$this->_amountPurchaseDiscount += $aPrices['price_discount'] * $oShop_Order_Item->quantity;
+
+				// Количество для скидок от суммы заказа рассчитывается отдельно
+				$this->_quantityPurchaseDiscount += $oShop_Order_Item->quantity;
+			}
+		}
+
+		$oShop_Order_Item->price = $aPrices['price_discount'];
+		$oShop_Order_Item->rate = $aPrices['rate'];
+		$oShop_Order_Item->name = $oShop_Item->name;
+		$oShop_Order_Item->type = 0;
+		$oShop_Order_Item->marking = strlen((string) $oShop_Cart->marking)
+			? $oShop_Cart->marking
+			: $oShop_Item->marking;
+
+		// Статус товаров по умолчанию.
+		if ($oShop->shop_order_status_id
+			&& $oShop->shop_order_status_id == $this->_shopOrder->shop_order_status_id
+			&& $this->_shopOrder->Shop_Order_Status->shop_order_item_status_id
+		)
+		{
+			$oShop_Order_Item->shop_order_item_status_id = $this->_shopOrder->Shop_Order_Status->shop_order_item_status_id;
+		}
+
+		$this->_shopOrder->add($oShop_Order_Item);
+
+		Core_Event::notify('Shop_Payment_System_Handler.onAfterAddShopOrderItem', $this, array($oShop_Order_Item, $oShop_Cart));
+
+		return $oShop_Order_Item;
 	}
 
 	/**

@@ -288,17 +288,18 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 						->filterSettings(is_array($aFilter) ? $aFilter : array())
 						->limit($this->_oAdmin_Form_Setting->on_page)
 						->current($this->_oAdmin_Form_Setting->page_number)
-						->sortingFieldId($this->_oAdmin_Form_Setting->order_field_id)
-						->sortingDirection($this->_oAdmin_Form_Setting->order_direction)
 						->view($this->_oAdmin_Form_Setting->view);
+
+					$this->sortingFieldId($this->_oAdmin_Form_Setting->order_field_id)
+						&& $this->sortingDirection($this->_oAdmin_Form_Setting->order_direction);
 				}
 				else
 				{
 					$oAdmin_Form_Field = $this->getAdminFormFieldByName($this->_Admin_Form->default_order_field);
 
 					// Данные по умолчанию из настроек формы
-					$oAdmin_Form_Field
-						&& $this->sortingFieldId($oAdmin_Form_Field->id)->sortingDirection($this->_Admin_Form->default_order_direction);
+					$oAdmin_Form_Field && $this->sortingFieldId($oAdmin_Form_Field->id)
+						&& $this->sortingDirection($this->_Admin_Form->default_order_direction);
 				}
 			}
 		}
@@ -333,18 +334,17 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		$formSettings['limit'] > 0 && $this->limit($formSettings['limit']);
 		$formSettings['current'] > 0 && $this->current($formSettings['current']);
 
-		// может быть строковым
+		// Может быть строковым
 		if ($formSettings['sortingfield'] != '')
 		{
-			$oAdmin_Form_Field_Sorting = $this->getAdminFormFieldById($formSettings['sortingfield']);
-
-			if ($oAdmin_Form_Field_Sorting && $oAdmin_Form_Field_Sorting->allow_sorting)
-			{
-				$this->sortingFieldId($formSettings['sortingfield']);
-
-				is_numeric($formSettings['sortingdirection'])
+			// sortingFieldId() возвращает результат замены поля сортировки
+			// Установка sortingdirection возможна только в случае, если пришедшее поле сортировки принадлежит отображаемой форме
+			//$oAdmin_Form_Field_Sorting = $this->getAdminFormFieldById($formSettings['sortingfield']);
+			//if ($oAdmin_Form_Field_Sorting && $oAdmin_Form_Field_Sorting->allow_sorting || strpos($formSettings['sortingfield'], 'uf_') === 0)
+			//{
+				$this->sortingFieldId($formSettings['sortingfield']) && is_numeric($formSettings['sortingdirection'])
 					&& $this->sortingDirection($formSettings['sortingdirection']);
-			}
+			//}
 		}
 
 		$formSettings['view'] != '' && $this->view($formSettings['view']);
@@ -391,6 +391,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 		// Добавляем замену для windowId
 		$this->_externalReplace['{windowId}'] = $this->getWindowId();
+		$this->_externalReplace['{secret_csrf}'] =  Core_Security::getCsrfToken();
 
 		return $this;
 	}
@@ -1268,44 +1269,22 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		Core_Event::notify('Admin_Form_Controller.onBeforeShowContent', $this);
 
 		// Пользовательские поля для каждого dataset
-		/*foreach ($this->_datasets as $datasetKey => $oAdmin_Form_Dataset)
+		if (Core::moduleIsActive('field'))
 		{
-			$oEntity = $oAdmin_Form_Dataset->getEntity();
-
-			$oFields = Core_Entity::factory('Field');
-			$oFields->queryBuilder()
-				->where('fields.model', '=', $oEntity->getModelName())
-				->open()
-					->where('fields.site_id', '=', CURRENT_SITE)
-					->setOr()
-					->where('fields.site_id', '=', 0)
-				->close()
-				->clearOrderBy()
-				->orderBy('sorting', 'ASC');
-
-			$aFields = $oFields->findAll();
-
-			foreach ($aFields as $oField)
+			foreach ($this->_datasets as $datasetKey => $oAdmin_Form_Dataset)
 			{
-				$oNew = new stdClass();
-				$oNew->id = 'uf_' . $oField->id;
-				$oNew->name = $oField->name;
-				$oNew->allow_filter = TRUE;
-				$oNew->view = 0;
-				$oNew->type = 1;
-				$oNew->filter_type = 0;
-				$oNew->filter_condition = 0;
-				$oNew->show_by_default = 0;
-				$oNew->width = '';
-				$oNew->ico = '';
-				$oNew->format = '';
-				$oNew->class = '';
-				$oNew->allow_sorting = 0;
-
-				$this->_Admin_Form_Fields[] = $oNew;
+				$oEntity = $oAdmin_Form_Dataset->getEntity();
+				if ($oEntity instanceof Core_Entity)
+				{
+					$aFields = self::getFields(CURRENT_SITE, $oEntity->getModelName());
+					foreach ($aFields as $oField)
+					{
+						$this->_Admin_Form_Fields[$oField->id] = $oField;
+					}
+				}
 			}
-		}*/
-		
+		}
+
 		$viewAdmin_Form_Controller = new $className($this);
 		$viewAdmin_Form_Controller->execute();
 
@@ -1315,6 +1294,55 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 			->addContent(ob_get_clean());
 
 		return $this;
+	}
+
+	/**
+	 * Get fields
+	 * @param string|array $modelNames
+	 * @return array
+	 */
+	static public function getFields($site_id, $modelNames)
+	{
+		$aReturn = array();
+		if (is_scalar($modelNames) || is_array($modelNames) && count($modelNames))
+		{
+			$oFields = Core_Entity::factory('Field');
+			$oFields->queryBuilder()
+				->where('fields.model', is_array($modelNames) ? 'IN' : '=', $modelNames)
+				->open()
+					->where('fields.site_id', '=', $site_id)
+					->setOr()
+					->where('fields.site_id', '=', 0)
+				->close()
+				->clearOrderBy()
+				->orderBy('sorting', 'ASC');
+
+			$aFields = $oFields->findAll();
+			foreach ($aFields as $oField)
+			{
+				$oNew = new stdClass();
+				$oNew->id = 'uf_' . $oField->id;
+				$oNew->name = 'datauf_' . $oField->id;
+				$oNew->caption = $oField->name;
+				$oNew->allow_filter = TRUE;
+				$oNew->view = 0;
+				$oNew->type = 1;
+				$oNew->editable = 0;
+				$oNew->filter_type = 1; // HAVING
+				$oNew->filter_condition = 0;
+				$oNew->show_by_default = 0;
+				$oNew->width = '';
+				$oNew->ico = '';
+				$oNew->format = '';
+				$oNew->class = '';
+				$oNew->allow_sorting = 1;
+				$oNew->_model_name = $oField->model;
+
+				$aReturn[$oNew->id] = $oNew;
+			}
+		}
+
+		return $aReturn;
 	}
 
 	/**
@@ -1557,13 +1585,13 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 			// Оставшиеся поля моделей
 			foreach ($this->_datasets as $datasetKey => $oAdmin_Form_Dataset)
 			{
-				$oEntitity = $oAdmin_Form_Dataset->getEntity();
+				$oEntity = $oAdmin_Form_Dataset->getEntity();
 
-				if ($oEntitity instanceof Core_Entity)
+				if ($oEntity instanceof Core_Entity)
 				{
-					$modelName = $oEntitity->getModelName();
+					$modelName = $oEntity->getModelName();
 
-					$aColumns = $oEntitity->getTableColumns();
+					$aColumns = $oEntity->getTableColumns();
 
 					foreach ($aColumns as $columnName => $aColumn)
 					{
@@ -1858,27 +1886,35 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	/**
 	 * Set sorting field by ID
 	 * @param int $sortingFieldId field ID
-	 * @return self
+	 * @return bool
 	 */
 	public function sortingFieldId($sortingFieldId)
 	{
+		$bCorrect = FALSE;
+
 		if (!is_null($sortingFieldId) && $this->_Admin_Form)
 		{
-			$sortingFieldId = preg_replace('/[^A-Za-z0-9_-]/', '', $sortingFieldId);
-
-			// Проверка принадлежности форме
-			$oAdmin_Form_Field = $this->getAdminFormFieldById($sortingFieldId);
-
-			if ($oAdmin_Form_Field && $this->_Admin_Form->id == $oAdmin_Form_Field->admin_form_id)
+			// User field
+			if (strpos($sortingFieldId, 'uf_') === 0)
 			{
-				$this->sortingFieldId = $sortingFieldId;
+				$bCorrect = TRUE;
+				$sortingFieldId = 'uf_' . intval(filter_var($sortingFieldId, FILTER_SANITIZE_NUMBER_INT));
 			}
 			else
 			{
-				$this->sortingFieldId = $this->sortingDirection = NULL;
+				$sortingFieldId = preg_replace('/[^A-Za-z0-9_-]/', '', $sortingFieldId);
+
+				// Проверка принадлежности форме
+				$oAdmin_Form_Field = $this->getAdminFormFieldById($sortingFieldId);
+
+				$bCorrect = $oAdmin_Form_Field && $this->_Admin_Form->id == $oAdmin_Form_Field->admin_form_id;
 			}
+
+			$bCorrect
+				&& $this->sortingFieldId = $sortingFieldId;
 		}
-		return $this;
+
+		return $bCorrect;
 	}
 
 	/**
@@ -2803,7 +2839,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			$bMain = $tabName === 'main';
 
 			$bCurrent = $this->filterId === $tabName || $this->filterId === '' && $bMain;
- 
+
 			// Значение вначале берется из $this->request, если его там нет, то из данных в JSON
 			$mValue = !$bHide
 				? (array_key_exists('topFilter_' . $oAdmin_Form_Field->id, $this->request) && $bCurrent
@@ -2949,6 +2985,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 					}
 				}
 
+				$aFieldIDs = $aAnotherDatasetFieldIDs = array();
 				foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 				{
 					// Перекрытие параметров для данного поля
@@ -2956,6 +2993,16 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 					foreach ($this->_datasets as $datasetKey => $oTmpAdmin_Form_Dataset)
 					{
 						$oAdmin_Form_Field_Changed = $this->changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
+					}
+
+					if (is_string($oAdmin_Form_Field->id) && strpos($oAdmin_Form_Field->id, 'uf_') === 0
+						&& $oEntity instanceof Core_Entity
+					)
+					{
+						// Пользовательское свойство соответствует модели из датасета
+						$oEntity->getModelName() == $oAdmin_Form_Field->_model_name
+							? $aFieldIDs[] = substr($oAdmin_Form_Field->id, 3)
+							: $aAnotherDatasetFieldIDs[] = substr($oAdmin_Form_Field->id, 3);
 					}
 
 					if ($oAdmin_Form_Field_Changed->allow_filter)
@@ -3140,6 +3187,84 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 								}
 							}
 						}
+					}
+				}
+				// var_dump($aFieldIDs);
+
+				// Необходимо объединять с таблицами пользовательских полей
+				if (count($aFieldIDs) || count($aAnotherDatasetFieldIDs))
+				{
+					//$aTables = array();
+					$entityTableName = $oEntity->getTableName();
+
+					$aConditions = $oAdmin_Form_Dataset->getConditions();
+
+					$issetSelect = $issetGroupBy = FALSE;
+					foreach ($aConditions as $condition)
+					{
+						if (isset($condition['select']))
+						{
+							$issetSelect = TRUE;
+						}
+						elseif (isset($condition['groupBy']))
+						{
+							$issetGroupBy = TRUE;
+						}
+
+						if ($issetSelect && $issetGroupBy)
+						{
+							break;
+						}
+					}
+
+					if (!$issetSelect)
+					{
+						$oAdmin_Form_Dataset->addCondition(
+							array('select' => array($entityTableName . '.*'))
+						);
+					}
+
+					$bMultiple = FALSE;
+					// Поля, связанные с датасетом
+					foreach ($aFieldIDs as $field_id)
+					{
+						$oField = Core_Entity::factory('Field', $field_id);
+
+						if ($oField->type != 2)
+						{
+							$tableName = Field_Controller_Value::factory($oField->type)->getTableName();
+
+							$tableNameAlias = 'uf' . $field_id;
+
+							$oField->multiple && $bMultiple = TRUE;
+
+							$oAdmin_Form_Dataset->addCondition(
+								array('select' => array(array($oField->multiple ? Core_QueryBuilder::expression('GROUP_CONCAT(DISTINCT `' . $tableNameAlias . '`.`value` SEPARATOR ", ")') : $tableNameAlias . '.value', 'datauf_' . $field_id)))
+							)
+							->addCondition(
+								array(
+									'leftJoin' => array(array($tableName, $tableNameAlias), $tableNameAlias . '.entity_id', '=', $entityTableName . '.id', array(
+										array('AND' => array($tableNameAlias . '.field_id', '=', $field_id))
+									))
+								)
+							);
+						}
+					}
+
+					// Поля других датасетов
+					foreach ($aAnotherDatasetFieldIDs as $field_id)
+					{
+						$oAdmin_Form_Dataset->addCondition(
+							array('select' => array(array(Core_QueryBuilder::expression("''"), 'datauf_' . $field_id)))
+						);
+					}
+
+					if ($bMultiple && !$issetGroupBy)
+					{
+						// Необходима группировка для GROUP_CONCAT(DISTINCT ...)
+						$oAdmin_Form_Dataset->addCondition(
+							array('groupBy' => array($entityTableName . '.' . $oEntity->getPrimaryKeyName()))
+						);
 					}
 				}
 			}

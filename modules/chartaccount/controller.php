@@ -332,10 +332,7 @@ class Chartaccount_Controller
 											processResults: function (data) {
 												var aResults = [];
 												$.each(data, function (index, item) {
-													aResults.push({
-														"id": item.id,
-														"text": item.text
-													});
+													aResults.push(item);
 												});
 												return {
 													results: aResults

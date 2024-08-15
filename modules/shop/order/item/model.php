@@ -182,11 +182,13 @@ class Shop_Order_Item_Model extends Core_Entity
 			$sShopItemPath = '/admin/shop/item/index.php';
 			$iShopItemId = $this->Shop_Item->id;
 
-			return sprintf(
+			echo sprintf(
 				'<a href="%s" target="_blank">%s <i class="fa fa-external-link"></i></a>',
 				htmlspecialchars($oAdmin_Form_Controller->getAdminActionLoadHref($sShopItemPath, 'edit', NULL, 1, $iShopItemId)),
 				htmlspecialchars($this->name)
 			);
+
+			$this->Shop_Item->showSetBadges();
 		}
 	}
 

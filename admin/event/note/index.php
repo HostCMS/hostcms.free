@@ -36,9 +36,7 @@ $oAdmin_Form_Controller
 $oAdmin_Form_Controller->addExternalReplace('{event_id}', $oEvent->id);
 
 // Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -51,9 +49,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 }
 
 // Добавление заметки
-$oAdmin_Form_Action_Add_Event_Note = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('addNote');
+$oAdmin_Form_Action_Add_Event_Note = $oAdmin_Form->Admin_Form_Actions->getByName('addNote');
 
 if ($oAdmin_Form_Action_Add_Event_Note && $oAdmin_Form_Controller->getAction() == 'addNote')
 {
@@ -66,9 +62,7 @@ if ($oAdmin_Form_Action_Add_Event_Note && $oAdmin_Form_Controller->getAction() =
 }
 
 // Действие "Удалить файл"
-$oAdminFormActionDeleteFile = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deleteFile');
+$oAdminFormActionDeleteFile = $oAdmin_Form->Admin_Form_Actions->getByName('deleteFile');
 
 if ($oAdminFormActionDeleteFile && $oAdmin_Form_Controller->getAction() == 'deleteFile')
 {
@@ -86,9 +80,7 @@ if ($oAdminFormActionDeleteFile && $oAdmin_Form_Controller->getAction() == 'dele
 }
 
 // Действие "Отметить удаленным"
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('markDeleted');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('markDeleted');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'markDeleted')
 {

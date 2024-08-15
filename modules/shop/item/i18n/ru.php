@@ -391,4 +391,9 @@ return array(
 
 	'closed' => 'Закрыт',
 	'changeIndexation_success' => 'Индексация товара изменена.',
+
+	'export_fields_allow_items' => 'Экспортировать пользовательские поля товаров',
+	'export_fields_allow_groups' => 'Экспортировать пользовательские поля групп',
+	'delete_field_values' => 'Удалять существующие значения пользовательских полей',
+	'shops_add_form_link_fields' => "Пользовательские поля товара",
 );

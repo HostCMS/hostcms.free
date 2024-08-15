@@ -43,4 +43,19 @@ class Company_Post_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 
 		return $this;
 	}
+
+	/**
+	 * Processing of the form. Apply object fields.
+	 * @hostcms-event Company_Post_Controller_Edit.onAfterRedeclaredApplyObjectProperty
+	 */
+	protected function _applyObjectProperty()
+	{
+		parent::_applyObjectProperty();
+
+		Core::moduleIsActive('wysiwyg') && Wysiwyg_Controller::uploadImages($this->_formValues, $this->_object, $this->_Admin_Form_Controller);
+
+		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
+
+		return $this;
+	}
 }

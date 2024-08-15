@@ -20,6 +20,9 @@
 	<?php Core_Browser::check()?>
 
 	<link rel="shortcut icon" href="/favicon.ico" />
+
+	<?php echo Core_Page::instance()->showFavicons()?>
+
 	<link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/news/rss/" />
 
 	<?php
@@ -41,9 +44,9 @@
 
 		// jQuery.Autocomplete
 		->js('/hostcmsfiles/jquery/jquery.autocomplete.min.js')
-		
+
 		->js('/hostcmsfiles/jquery/wickedpicker/wickedpicker.js')
-		
+
 		->showJs();
 	?>
 	<script type="text/javascript">

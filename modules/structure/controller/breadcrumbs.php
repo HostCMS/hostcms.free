@@ -318,6 +318,14 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 
 				$oShop_Filter_Seo
 					->clearEntities()
+					->addForbiddenTag('url')
+					->addEntity(
+						Core::factory('Core_Xml_Entity')
+							->name('link')
+							->value(
+								$oShop_Filter_Seo->Shop->Structure->getPath() . $oShop_Filter_Seo->getUrl()
+							)
+					)
 					->addEntity(
 						Core::factory('Core_Xml_Entity')
 							->name('show')
@@ -578,8 +586,11 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 			method_exists($oEntity, 'showXmlProperties')
 				&& $oEntity->showXmlProperties($this->showProperties);
 
-			$object->addEntity($oEntity);
-			$object = $oEntity;
+			if ($object !== $oEntity)
+			{
+				$object->addEntity($oEntity);
+				$object = $oEntity;
+			}
 		}
 
 		$oSite = $this->getEntity();

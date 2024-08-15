@@ -582,6 +582,7 @@ class Comment_Model extends Core_Entity
 	/**
 	 * Prepare entity and children entities
 	 * @return self
+	 * @hostcms-event comment.onBeforeAddPropertyValues
 	 */
 	protected function _prepareData()
 	{
@@ -617,6 +618,8 @@ class Comment_Model extends Core_Entity
 				// Add all values
 				//$this->addEntities($aProperty_Values);
 			}
+
+			Core_Event::notify($this->_modelName . '.onBeforeAddPropertyValues', $this, array($aProperty_Values));
 
 			$aListIDs = array();
 

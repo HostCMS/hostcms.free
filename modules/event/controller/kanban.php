@@ -128,8 +128,11 @@ class Event_Controller_Kanban extends Skin_Bootstrap_Admin_Form_Controller_List
 
 		// Устанавливаем ограничения на источники
 		$oAdmin_Form_Controller->setDatasetConditions();
+		$oAdmin_Form_Controller->setDatasetLimits();
 
 		$aDatasets = $oAdmin_Form_Controller->getDatasets();
+
+		$aFields = $this->_getFields($oAdmin_Form_Controller);
 
 		$aDatasets[0]->addCondition(
 				array('clearOrderBy' => array(''))
@@ -215,8 +218,11 @@ class Event_Controller_Kanban extends Skin_Bootstrap_Admin_Form_Controller_List
 												<!-- <span data-popover="hover" data-user-id="<?php echo $oUser->id?>"><img src="<?php echo $oUser->getAvatar()?>" title="<?php echo htmlspecialchars($oUser->getFullName())?>"/></span> -->
 											</div>
 										</div>
-										<div class="well-body">
+										<div class="d-flex align-items-center justify-content-between">
 											<a class="evetn-title name" onclick="$.modalLoad({path: '/admin/event/index.php', action: 'edit',operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oEntity->id?>]=1&parentWindowId=id_content', windowId: 'id_content', width: '90%'});"><?php echo htmlspecialchars($oEntity->name)?></a>
+											<?php
+											echo $oEntity->showChecklists(TRUE);
+											?>
 										</div>
 										<?php
 										if ($oEntity->description != '')
@@ -228,7 +234,7 @@ class Event_Controller_Kanban extends Skin_Bootstrap_Admin_Form_Controller_List
 
 										if (Core::moduleIsActive('tag'))
 										{
-											?><div class="row"><div class="col-xs-12"><?php
+											?><div class="row kanban-tags"><div class="col-xs-12"><?php
 											$aTags = $oEntity->Tags->findAll(FALSE);
 
 											foreach ($aTags as $oTag)
@@ -240,6 +246,23 @@ class Event_Controller_Kanban extends Skin_Bootstrap_Admin_Form_Controller_List
 											?></div></div><?php
 										}
 
+										foreach ($aFields as $oField)
+										{
+											$aField_Values = $oField->getValues($oEntity->id, FALSE);
+											if (count($aField_Values))
+											{
+												?><div class="kanban-user-field-wrapper"><?php
+												echo htmlspecialchars($oField->name), ': ';
+
+												$aValues = array();
+												foreach ($aField_Values as $oField_Value)
+												{
+													$aValues[] = htmlspecialchars($this->_getFieldValue($oField, $oField_Value, $oEntity));
+												}
+
+												?><span><?php echo implode(',', $aValues)?></span></div><?php
+											}
+										}
 										?>
 
 										<div class="crm-description">

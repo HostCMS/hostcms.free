@@ -22,9 +22,9 @@ class Event_Checklist_Controller
 
 		ob_start();
 		?><div class="well with-header" data-index="<?php echo $index?>" <?php echo $data_new?>>
-			<div class="header"><?php
+			<div class="header d-flex align-items-center"><?php
 				$oInputName = Admin_Form_Entity::factory('Input')
-					->divAttr(array('class' => ''))
+					->divAttr(array('class' => '', 'style' => 'width: 90%'))
 					->class('form-control checklist-name')
 					->name("{$prefix}_name{$index}")
 					->placeholder(Core::_('Event.checklist_name'))
@@ -34,7 +34,7 @@ class Event_Checklist_Controller
 					&& $oInputName->value = $oEvent_Checklist->name;
 
 				$oInputName->execute();
-			?></div>
+			?><div title="<?php echo Core::_('Event.remove_checklist')?>" class="remove-event-checklist"><i class="fa-solid fa-trash" onclick="$.removeEventChecklist($(this))"></i></div></div>
 			<div class="event-cheklist-items-wrapper">
 				<?php
 					if (!is_null($oEvent_Checklist))
@@ -59,9 +59,29 @@ class Event_Checklist_Controller
 						?></div><?php
 					}
 				?>
-				<div class="d-flex align-items-center justify-content-between">
+				<div class="event-checklist-info d-flex align-items-center justify-content-between">
 					<a onclick="$.addEventChecklistItem($(this), '<?php echo $windowId?>', 'new_checklist', <?php echo $index?>)" class="add-checklist-item representative-show-link darkgray"><?php echo Core::_('Event.add_checklist_item')?></a>
-					<span class="representative-show-link darkorange" onclick="$.removeEventChecklist($(this))"><?php echo Core::_('Event.remove_checklist')?></span>
+					<div class="progress-wrapper">
+						<div class="progress progress-striped progress-xs">
+							<?php
+								$iTotalCount = $iCompletedCount = $width = 0;
+
+								if (!is_null($oEvent_Checklist))
+								{
+									$iCompletedCount = $oEvent_Checklist->Event_Checklist_Items->getCountByCompleted(1, FALSE);
+									$iTotalCount = $oEvent_Checklist->Event_Checklist_Items->getCount(FALSE);
+
+									$width = round(($iCompletedCount * 100) / $iTotalCount, 2);
+								}
+							?>
+							<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="<?php echo $width?>" aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $width?>%">
+								<span class="sr-only">0%</span>
+							</div>
+						</div>
+					</div>
+					<div class="progress-info-row">
+						выполнено <span class="progress-completed"><?php echo $iCompletedCount?></span> из <span class="progress-total"><?php echo $iTotalCount?></span>
+					</div>
 				</div>
 			</div>
 		</div></div><?php
@@ -80,27 +100,51 @@ class Event_Checklist_Controller
 
 		ob_start();
 
-		$oCheckbox = Admin_Form_Entity::factory('Checkbox')
-			->divAttr(array('class' => 'form-group col-xs-1' . $hidden))
-			->name("{$prefix}_completed{$suffix}")
+		$oCheckboxImportant = Admin_Form_Entity::factory('Checkbox')
+			->divAttr(array('class' => 'event-checklist-important hidden'))
+			->name("{$prefix}_important{$suffix}")
 			->value(1)
 			->controller($oAdmin_Form_Controller)
 			->checked(FALSE);
 
 		is_null($oEvent_Checklist_Item)
-			&& $oCheckbox->disabled('disabled');
+			&& $oCheckboxImportant->disabled('disabled');
+
+		!is_null($oEvent_Checklist_Item) && $oEvent_Checklist_Item->important == 1
+			&& $oCheckboxImportant->checked('checked');
+
+		$oCheckboxImportant->execute();
+
+		$oCheckboxCompleted = Admin_Form_Entity::factory('Checkbox')
+			->divAttr(array('class' => 'form-group col-xs-1' . $hidden))
+			->name("{$prefix}_completed{$suffix}")
+			->value(1)
+			->controller($oAdmin_Form_Controller)
+			->onchange('$.recountEventChecklistProgress($(this));')
+			->checked(FALSE);
+
+		is_null($oEvent_Checklist_Item)
+			&& $oCheckboxCompleted->disabled('disabled');
 
 		!is_null($oEvent_Checklist_Item) && $oEvent_Checklist_Item->completed == 1
-			&& $oCheckbox->checked('checked');
+			&& $oCheckboxCompleted->checked('checked');
 
-		$oCheckbox->execute();
+		$oCheckboxCompleted->execute();
+
+		$classImportant = !is_null($oEvent_Checklist_Item) && $oEvent_Checklist_Item->important == 1
+			? ' selected'
+			: '';
+
+		?><span class="event-checklist-item-important <?php echo $classImportant?> <?php echo $hidden?>" onclick="$.changeEventItemImportant($(this))"><i class="fa-solid fa-fire"></i></span><?php
 
 		$oInput = Admin_Form_Entity::factory('Input')
 			->divAttr(array('class' => 'form-group col-xs-10' . $hidden))
 			->class('form-control checklist-item-name')
 			->name("{$prefix}_name{$suffix}")
 			->placeholder(Core::_('Event.checklist_item_name'))
-			->controller($oAdmin_Form_Controller);
+			->controller($oAdmin_Form_Controller)
+			// ->onfocus('$.addEventCheclistItemPanel($(this))')
+			;
 
 		is_null($oEvent_Checklist_Item)
 			&& $oInput->disabled('disabled');
@@ -111,7 +155,7 @@ class Event_Checklist_Controller
 		$oInput->execute();
 
 		?>
-		<div class="col-xs-1 remove-event-checklist-item<?php echo $hidden?>"><i class="fa-solid fa-trash darkorange" onclick="$.removeEventChecklistItem($(this))"></i></div>
+		<div title="<?php echo Core::_('Event.remove_checklist_item')?>" class="col-xs-1 remove-event-checklist-item<?php echo $hidden?>"><i class="fa-solid fa-trash" onclick="$.removeEventChecklistItem($(this))"></i></div>
 		<?php
 
 		return ob_get_clean();

@@ -158,7 +158,7 @@ class Ipaddress_Filter_Controller_Edit extends Admin_Form_Action_Controller_Type
 
 														Admin_Form_Entity::factory('Input')
 															->name('value[]')
-															->value(Core_Array::get($aCondition, 'value', '', 'trim'))
+															->value(Core_Array::get($aCondition, 'value', '', 'str')) // trim нельзя, может быть 2 пробела
 															->divAttr(array('class' => 'col-xs-12 col-sm-3 property-data'))
 															->placeholder(Core::_('Ipaddress_Filter.placeholder_value'))
 															->controller($this->_Admin_Form_Controller)
@@ -300,6 +300,8 @@ class Ipaddress_Filter_Controller_Edit extends Admin_Form_Action_Controller_Type
 		Ipaddress_Filter_Controller::instance()->clearCache();
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
+
+		return $this;
 	}
 
 	/**
@@ -311,7 +313,7 @@ class Ipaddress_Filter_Controller_Edit extends Admin_Form_Action_Controller_Type
 	/**
 	 * Build visual representation of group tree
 	 * @param int $iIpaddressFilterDirParentId parent ID
-	 * @param int $aExclude exclude group ID
+	 * @param array $aExclude exclude group ID
 	 * @param int $iLevel current nesting level
 	 * @return array
 	 */

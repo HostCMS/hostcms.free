@@ -21,6 +21,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - importAction($int) действие с существующими товарами: 1 - обновить существующие товары, 2 - не обновлять существующие товары, 3 - удалить содержимое магазина до импорта. По умолчанию 1
  * - searchIndexation(TRUE|FALSE) индексировать импортируемые данные, по умолчанию FALSE
  * - deletePropertyValues(TRUE|FALSE|array()) удалять существующие значения дополнительных свойств перед импортом новых, по умолчанию TRUE
+ * - deleteFieldValues(TRUE|FALSE|array()) удалять существующие значения пользовательских полей перед импортом новых, по умолчанию TRUE
  * - deleteUnsentModificationsByProperties(TRUE|FALSE) удалять непереданные модификации, созданные по дополнительным свойствам, по умолчанию FALSE
  * - deleteImage(TRUE|FALSE) удалять основные изображения
  *
@@ -48,6 +49,18 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 	 * @var array
 	 */
 	protected $_aClearedGroupsPropertyValues = array();
+
+	/**
+	 * Array of ID's and GUIDs of cleared item's properties
+	 * @var array
+	 */
+	protected $_aClearedItemsFieldValues = array();
+
+	/**
+	 * Array of ID's and GUIDs of cleared groups's properties
+	 * @var array
+	 */
+	protected $_aClearedGroupsFieldValues = array();
 
 	/**
 	 * Array of updated groups
@@ -168,10 +181,34 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 	protected $_aExternalPropertiesDesc = array();
 
 	/**
+	 * List of goods' external properties
+	 * @var array
+	 */
+	protected $_aExternalFields = array();
+
+	/**
+	 * List of small parts of external properties
+	 * @var array
+	 */
+	protected $_aExternalFieldsSmall = array();
+
+	/**
+	 * List of descriptions of external properties
+	 * @var array
+	 */
+	protected $_aExternalFieldsDesc = array();
+
+	/**
 	 * List of group's external properties
 	 * @var array
 	 */
 	protected $_aGroupExternalProperties = array();
+
+	/**
+	 * List of group's external properties
+	 * @var array
+	 */
+	protected $_aGroupExternalFields = array();
 
 	/**
 	 * List of modification by properties
@@ -212,6 +249,9 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 	protected $_aPropertiesTree = array();
 	protected $_aPropertyDirsTree = array();
 
+	protected $_aFieldsTree = array();
+	protected $_aFieldDirsTree = array();
+
 	/**
 	 * Allowed object properties
 	 * @var array
@@ -231,6 +271,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 		'importAction',
 		'searchIndexation',
 		'deletePropertyValues',
+		'deleteFieldValues',
 		'deleteUnsentModificationsByProperties',
 		'deleteImage'
 	);
@@ -503,7 +544,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 
 		//$this->_aCreatedItemIDs = array();
 
-		$this->deletePropertyValues = TRUE;
+		$this->deletePropertyValues = $this->deleteFieldValues = TRUE;
 		$this->searchIndexation = $this->deleteUnsentModificationsByProperties = FALSE;
 
 		$oShop = Core_Entity::factory('Shop', $iCurrentShopId);
@@ -612,6 +653,37 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 			$this->_aPropertiesTree = $this->_aPropertyDirsTree = array();
 			unset($aGroupProperties);
 			unset($aGroupPropertyDirs);
+		}
+
+		if (Core::moduleIsActive('field'))
+		{
+			$aGroupFields = Field_Controller::getFields('shop_group', $oShop->site_id);
+			if (count($aGroupFields))
+			{
+				// Общий заголовок
+				$this->aEntities['caption-group-fields'] = array(
+					'caption' => Core::_('Shop_Group.fields'),
+					'attr' => array('disabled' => 'disabled', 'class' => 'semi-bold')
+				);
+
+				$this->_aFieldsTree = $this->_aFieldDirsTree = array();
+				foreach ($aGroupFields as $oField)
+				{
+					$this->_aFieldsTree[$oField->field_dir_id][] = $oField;
+				}
+
+				$aGroupFieldDirs = Field_Controller::getFieldDirs('shop_group');
+				foreach ($aGroupFieldDirs as $oField_Dir)
+				{
+					$this->_aFieldDirsTree[$oField_Dir->parent_id][] = $oField_Dir;
+				}
+
+				$this->_addEntitiesOfFields('field_group', '#BBCEF2', 0);
+
+				$this->_aFieldsTree = $this->_aFieldDirsTree = array();
+				unset($aGroupFields);
+				unset($aGroupFieldDirs);
+			}
 		}
 
 		$this->aEntities = array_merge($this->aEntities, array(
@@ -874,6 +946,37 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 			unset($aItemPropertyDirs);
 		}
 
+		if (Core::moduleIsActive('field'))
+		{
+			// Пользовательские поля товаров
+			$aItemFields = Field_Controller::getFields('shop_item', $oShop->site_id);
+			if (count($aItemFields))
+			{
+				$this->aEntities['caption-item-fields'] = array(
+					'caption' => Core::_('Shop_Item.shops_add_form_link_fields'),
+					'attr' => array('disabled' => 'disabled', 'class' => 'semi-bold')
+				);
+
+				$this->_aFieldsTree = $this->_aFieldDirsTree = array();
+				foreach ($aItemFields as $oField)
+				{
+					$this->_aFieldsTree[$oField->field_dir_id][] = $oField;
+				}
+
+				$aItemFieldDirs = Field_Controller::getFieldDirs('shop_item');
+				foreach ($aItemFieldDirs as $oField_Dir)
+				{
+					$this->_aFieldDirsTree[$oField_Dir->parent_id][] = $oField_Dir;
+				}
+
+				$this->_addEntitiesOfFields('field', '#BBCEF2', 0);
+
+				$this->_aFieldsTree = $this->_aFieldDirsTree = array();
+				unset($aItemFields);
+				unset($aItemFieldDirs);
+			}
+		}
+
 		// Цены для клиентов
 		$aShop_Prices = $oShop->Shop_Prices->findAll(FALSE);
 		if (count($aShop_Prices))
@@ -1130,6 +1233,13 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 		Core_Event::notify('Shop_Item_Import_Csv_Controller.onAfterConstruct', $this);
 	}
 
+	/**
+	 * Add entitites of properties
+	 * @param string $prefix
+	 * @param string $color
+	 * @param integer $parent_id
+	 * @param integer $level
+	 */
 	protected function _addEntitiesOfProperties($prefix, $color, $parent_id = 0, $level = 0)
 	{
 		if (isset($this->_aPropertiesTree[$parent_id]))
@@ -1173,6 +1283,61 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 					);
 
 					$this->_addEntitiesOfProperties($prefix, $color, $oProperty_Dir->id, $level + 1);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Add entitites of fields
+	 * @param string $prefix
+	 * @param string $color
+	 * @param integer $parent_id
+	 * @param integer $level
+	 */
+	protected function _addEntitiesOfFields($prefix, $color, $parent_id = 0, $level = 0)
+	{
+		if (isset($this->_aFieldsTree[$parent_id]))
+		{
+			foreach ($this->_aFieldsTree[$parent_id] as $oField)
+			{
+				$this->aEntities[$prefix . '-' . $oField->id] = array(
+					'caption' => str_repeat('  ', $level) . $oField->name . " [{$oField->id}]",
+					'attr' => array('style' => 'background-color: ' . $color)
+				);
+
+				if ($oField->type == 2)
+				{
+					$subcolor = Core_Str::hex2darker($color, 0.1);
+
+					// Description
+					$this->aEntities['fielddesc-' . $oField->id] = array(
+						'caption' => str_repeat('  ', $level) . Core::_('Shop_Item.import_file_description', $oField->name),
+						'attr' => array('style' => 'background-color: ' . $subcolor)
+					);
+
+					// Small Image
+					$this->aEntities['fieldsmall-' . $oField->id] = array(
+						'caption' => str_repeat('  ', $level) . Core::_('Shop_Item.import_small_images', $oField->name),
+						'attr' => array('style' => 'background-color: ' . $subcolor)
+					);
+				}
+			}
+		}
+
+		if (isset($this->_aFieldDirsTree[$parent_id]))
+		{
+			foreach ($this->_aFieldDirsTree[$parent_id] as $oField_Dir)
+			{
+				// Заголовок выводим, если есть или элементы, или группы
+				if (isset($this->_aFieldsTree[$oField_Dir->id]) || isset($this->_aFieldDirsTree[$oField_Dir->id]))
+				{
+					$this->aEntities['caption-group-field-dir-' . $oField_Dir->id] = array(
+						'caption' => str_repeat('  ', $level + 1) . $oField_Dir->name,
+						'attr' => array('disabled' => 'disabled', 'class' => 'semi-bold')
+					);
+
+					$this->_addEntitiesOfFields($prefix, $color, $oField_Dir->id, $level + 1);
 				}
 			}
 		}
@@ -2632,11 +2797,39 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 								$this->_aModificationsByProperties[$aTmpExplode[1]] = $sData;
 							}
 
+							// Дополнительный файл пользовательского поля/Малое изображение картинки пользовательского поля
+							if (strpos($sFieldName, "fieldsmall-") === 0)
+							{
+								$aTmpExplode = explode('-', $sFieldName, 2);
+								$this->_aExternalFieldsSmall[$aTmpExplode[1]][] = $sData;
+							}
+
+							// Описание пользовательского поля
+							if (strpos($sFieldName, "fielddesc-") === 0)
+							{
+								$aTmpExplode = explode('-', $sFieldName, 2);
+								$this->_aExternalFieldsDesc[$aTmpExplode[1]][] = $sData;
+							}
+
+							// Основной файл пользовательского поля/Большое изображение картинки пользовательского поля
+							if (strpos($sFieldName, "field-") === 0)
+							{
+								$aTmpExplode = explode('-', $sFieldName, 2);
+								$this->_aExternalFields[$aTmpExplode[1]][] = $sData;
+							}
+
 							// Дополнительное свойство группы товаров
 							if (strpos($sFieldName, "prop_group-") === 0)
 							{
 								$aTmpExplode = explode('-', $sFieldName, 2);
 								$this->_aGroupExternalProperties[$aTmpExplode[1]][] = $sData;
+							}
+
+							// Пользовательские поля группы товаров
+							if (strpos($sFieldName, "field_group-") === 0)
+							{
+								$aTmpExplode = explode('-', $sFieldName, 2);
+								$this->_aGroupExternalFields[$aTmpExplode[1]][] = $sData;
 							}
 						break;
 					}
@@ -2667,6 +2860,24 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 							Core_Event::notify('Shop_Item_Import_Csv_Controller.onBeforeImportGroupProperty', $this, array($this->_oCurrentShop, $this->_oCurrentGroup, $oProperty, $sPropertyValue));
 
 							$this->_addGroupPropertyValue($this->_oCurrentGroup, $oProperty, $sPropertyValue, $key);
+						}
+					}
+				}
+
+				if (count($this->_aGroupExternalFields))
+				{
+					$this->_incUpdatedGroups($this->_oCurrentGroup->id);
+
+					// Импорт пользовательских полей с передачей вызова в метод _addGroupFieldValue
+					foreach ($this->_aGroupExternalFields as $iFieldID => $aFieldValue)
+					{
+						$oField = Core_Entity::factory('Field')->find($iFieldID);
+
+						foreach ($aFieldValue as $key => $sFieldValue)
+						{
+							Core_Event::notify('Shop_Item_Import_Csv_Controller.onBeforeImportGroupField', $this, array($this->_oCurrentShop, $this->_oCurrentGroup, $oField, $sFieldValue));
+
+							$this->_addGroupFieldValue($this->_oCurrentGroup, $oField, $sFieldValue, $key);
 						}
 					}
 				}
@@ -3065,7 +3276,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 
 						// Создаем массив параметров для загрузки картинок элементу
 						$aPicturesParam = array();
-						
+
 						$aPicturesParam['large_image_source'] = (string) $sSourceFile;
 						$aPicturesParam['large_image_name'] = $sSourceFileBaseName;
 						$aPicturesParam['large_image_target'] = $sDestinationFolder . $sTargetFileName;
@@ -3127,7 +3338,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 							$this->_oCurrentItem->image_small = "small_{$sTargetFileName}";
 							$this->_oCurrentItem->setSmallImageSizes();
 						}
-						
+
 						$this->_oCurrentItem->save();
 
 						if (!is_null($sSourceFile) && strpos(basename($sSourceFile), "CMS") === 0)
@@ -3289,6 +3500,19 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 					}
 				}
 
+				// Импорт пользовательских полей с передачей вызова в метод _addItemFieldValue
+				foreach ($this->_aExternalFields as $iFieldID => $aFieldValue)
+				{
+					$oField = Core_Entity::factory('Field')->find($iFieldID);
+
+					foreach ($aFieldValue as $key => $sFieldValue)
+					{
+						Core_Event::notify('Shop_Item_Import_Csv_Controller.onBeforeImportItemField', $this, array($this->_oCurrentShop, $this->_oCurrentItem, $oField, $sFieldValue));
+
+						$this->_addItemFieldValue($this->_oCurrentItem, $oField, $sFieldValue, $key);
+					}
+				}
+
 				// Отдельный импорт малых изображений, когда большие не были проимпортированы
 				foreach ($this->_aExternalPropertiesSmall as $iPropertyID => $aPropertyValue)
 				{
@@ -3411,6 +3635,128 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 					}
 				}
 
+				// Отдельный импорт малых изображений, когда большие не были проимпортированы
+				foreach ($this->_aExternalFieldsSmall as $iFieldID => $aFieldValue)
+				{
+					$oField = Core_Entity::factory('Field')->find($iFieldID);
+
+					// Разрешаем свойство для группы
+					// $this->_allowFieldForGroup($oField, $this->_oCurrentGroup->id);
+
+					foreach ($aFieldValue as $sFieldValue)
+					{
+						/*$aFieldValues = $oField->getValues($this->_oCurrentItem->id, FALSE);
+
+						$oField_Value = isset($aFieldValues[0])
+							? $aFieldValues[0]
+							: $oField->createNewValue($this->_oCurrentItem->id);*/
+
+						// При отдельном импорте малых изображений, всегда создаются новые значения,
+						// при совместном импорте с большими, малые изображения обрабатываются в _addItemFieldValue()
+						$oField_Value = $oField->createNewValue($this->_oCurrentItem->id);
+
+						// Папка назначения
+						$sDestinationFolder = $this->_oCurrentItem->getItemPath();
+
+						// Файл-источник
+						$sTmpFilePath = $this->imagesPath . $sFieldValue;
+
+						$sSourceFileBaseName = basename($sTmpFilePath, '');
+
+						$bHttp = strpos(strtolower($sTmpFilePath), "http://") === 0 || strpos(strtolower($sTmpFilePath), "https://") === 0;
+
+						if (Core_File::isValidExtension($sTmpFilePath, Core::$mainConfig['availableExtension']) || $bHttp)
+						{
+							// Создаем папку назначения
+							$this->_oCurrentItem->createDir();
+
+							if ($bHttp)
+							{
+								try {
+									$sSourceFile = $this->_downloadHttpFile($sTmpFilePath);
+								}
+								catch (Exception $e)
+								{
+									Core_Message::show($e->getMessage(), 'error');
+									$sSourceFile = NULL;
+								}
+							}
+							else
+							{
+								$sSourceFile = CMS_FOLDER . $sTmpFilePath;
+							}
+
+							if (!$this->_oCurrentShop->change_filename)
+							{
+								$sTargetFileName = "small_{$sSourceFileBaseName}";
+							}
+							else
+							{
+								$sTargetFileExtension = Core_File::getExtension($sSourceFileBaseName);
+								$sTargetFileExtension = $sTargetFileExtension == '' || strlen($sTargetFileExtension) > 5
+									? '.jpg'
+									: ".{$sTargetFileExtension}";
+
+								$oField_Value->save();
+								$sTargetFileName = "small_shop_field_file_{$this->_oCurrentItem->id}_{$oField_Value->id}{$sTargetFileExtension}";
+							}
+
+							$aPicturesParam = array();
+							$aPicturesParam['small_image_source'] = $sSourceFile;
+							$aPicturesParam['small_image_name'] = $sSourceFileBaseName;
+							$aPicturesParam['small_image_target'] = $sDestinationFolder . $sTargetFileName;
+							$aPicturesParam['create_small_image_from_large'] = FALSE;
+							$aPicturesParam['small_image_max_width'] = $this->_oCurrentShop->image_small_max_width;
+							$aPicturesParam['small_image_max_height'] = $this->_oCurrentShop->image_small_max_height;
+							$aPicturesParam['small_image_watermark'] = $this->_oCurrentShop->watermark_default_use_small_image;
+							$aPicturesParam['watermark_file_path'] = $this->_oCurrentShop->getWatermarkFilePath();
+							$aPicturesParam['watermark_position_x'] = $this->_oCurrentShop->watermark_default_position_x;
+							$aPicturesParam['watermark_position_y'] = $this->_oCurrentShop->watermark_default_position_y;
+							$aPicturesParam['small_image_preserve_aspect_ratio'] = $this->_oCurrentShop->preserve_aspect_ratio;
+
+							// Удаляем старое малое изображение
+							if ($oField_Value->file_small != '')
+							{
+								try
+								{
+									Core_File::delete($sDestinationFolder . $oField_Value->file_small);
+								} catch (Exception $e) {}
+							}
+
+							try {
+								Core_Event::notify('Shop_Item_Import_Csv_Controller.onBeforeAdminUpload', $this, array($aPicturesParam));
+								$aTmpReturn = Core_Event::getLastReturn();
+								is_array($aTmpReturn) && $aPicturesParam = $aTmpReturn;
+
+								$aResult = Core_File::adminUpload($aPicturesParam);
+							}
+							catch (Exception $e)
+							{
+								Core_Message::show(strtoupper($this->encoding) == 'UTF-8'
+									? $e->getMessage()
+									: @iconv($this->encoding, "UTF-8//IGNORE//TRANSLIT", $e->getMessage())
+								, 'error');
+
+								$aResult = array('large_image' => FALSE, 'small_image' => FALSE);
+							}
+
+							if ($aResult['small_image'])
+							{
+								$oField_Value->file_small = $sTargetFileName;
+								$oField_Value->file_small_name = '';
+							}
+
+							if (!is_null($sSourceFile) && strpos(basename($sSourceFile), "CMS") === 0)
+							{
+								// Файл временный, подлежит удалению
+								Core_File::delete($sSourceFile);
+							}
+						}
+
+						$oField_Value->save();
+					}
+				}
+
 				// Устанавливаем цены из $this->_aExternalPrices
 				$this->_setPrices($this->_oCurrentItem);
 
@@ -3443,11 +3789,11 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 										$oList_Item = Core_Entity::factory('List_Item');
 										$oList_Item->list_id = $oProperty->list_id;
 										$oList_Item->value = $tmpValue;
-										
+
 										// Apache %2F (/) is forbidden
 										strpos($tmpValue, '/') !== FALSE
 											&& $oList_Item->path = trim(str_replace('/', ' ', $tmpValue));
-										
+
 										$oList_Item->save();
 									}
 
@@ -3714,8 +4060,12 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 			$this->_aExternalPropertiesSmall =
 			$this->_aExternalProperties =
 			$this->_aExternalPropertiesDesc =
+			$this->_aExternalFieldsSmall =
+			$this->_aExternalFields =
+			$this->_aExternalFieldsDesc =
 			$this->_aModificationsByProperties =
 			$this->_aGroupExternalProperties =
+			$this->_aGroupExternalFields =
 			$this->_aAdditionalGroups =
 			$this->_aBarcodes =
 			$this->_aItemTabs =
@@ -3787,11 +4137,11 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 						$oList_Item = Core_Entity::factory('List_Item')
 							->list_id($oProperty->list_id)
 							->value($sPropertyValue);
-						
+
 						// Apache %2F (/) is forbidden
 						strpos($sPropertyValue, '/') !== FALSE
 							&& $oList_Item->path = trim(str_replace('/', ' ', $sPropertyValue));
-											
+
 						$changedValue = $oList_Item->save()
 							->id;
 					}
@@ -3884,7 +4234,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 
 				foreach ($aPropertyValues as $oProperty_Value)
 				{
-					if ($oProperty->type == 2 && $oProperty_Value->file_name == ($bHttp ? $changedValue : basename($changedValue))
+					if ($oProperty->type == 2 && basename($oProperty_Value->file_name) == basename($changedValue)
 						|| $oProperty->type != 2 && $oProperty_Value->value == $changedValue)
 					{
 						return $oProperty_Value;
@@ -3919,7 +4269,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 				$bHttp = strpos(strtolower($sTmpFilePath), "http://") === 0 || strpos(strtolower($sTmpFilePath), "https://") === 0;
 
 				$sSourceFileName = $bHttp
-					? $sPropertyValue
+					? basename($sPropertyValue)
 					: $sSourceFileBaseName;
 
 				if (Core_File::isValidExtension($sTmpFilePath, Core::$mainConfig['availableExtension']) || $bHttp)
@@ -4140,6 +4490,418 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 			}
 
 			return $oProperty_Value;
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * Add field to item
+	 * @param Shop_Item_Model $oShopItem item
+	 * @param Field_Model $oField
+	 * @param string $sFieldValue field value
+	 * @hostcms-event Shop_Item_Import_Csv_Controller.onAddItemFieldValueDefault
+	 */
+	protected function _addItemFieldValue(Shop_Item_Model $oShopItem, Field_Model $oField, $sFieldValue, $position = 0)
+	{
+		$aFieldValues = $oField->getValues($oShopItem->id, FALSE);
+
+		// Удалять ранее загруженные свойства или свойство в массиве у удалению перед загрузкой
+		if ($this->deleteFieldValues === TRUE
+			|| is_array($this->deleteFieldValues) && in_array($oField->id, $this->deleteFieldValues))
+		{
+			// Свойство для данного товара не было очищено
+			if (!isset($this->_aClearedItemsFieldValues[$oShopItem->id])
+				|| !in_array($oField->id, $this->_aClearedItemsFieldValues[$oShopItem->id]))
+			{
+				foreach ($aFieldValues as $oFieldValue)
+				{
+					$oField->type == 2
+						&& $oFieldValue->setDir($oShopItem->getItemPath());
+					$oFieldValue->delete();
+				}
+
+				$aFieldValues = array();
+
+				$this->_aClearedItemsFieldValues[$oShopItem->id][] = $oField->id;
+			}
+		}
+
+		switch ($oField->type)
+		{
+			case 0: // Int
+				$changedValue = Shop_Controller::convertDecimal($sFieldValue);
+			break;
+			case 2: // Файл
+				$changedValue = $sFieldValue;
+			break;
+			case 3: // Список
+				if (Core::moduleIsActive('list'))
+				{
+					$oList_Item = $oField->List->List_Items->getByValue($sFieldValue, FALSE);
+
+					if ($oList_Item)
+					{
+						$changedValue = $oList_Item->id;
+					}
+					else
+					{
+						$oList_Item = Core_Entity::factory('List_Item')
+							->list_id($oField->list_id)
+							->value($sFieldValue);
+
+						// Apache %2F (/) is forbidden
+						strpos($sFieldValue, '/') !== FALSE
+							&& $oList_Item->path = trim(str_replace('/', ' ', $sFieldValue));
+
+						$changedValue = $oList_Item->save()
+							->id;
+					}
+				}
+				else
+				{
+					$changedValue = NULL;
+				}
+			break;
+			case 5: // Informationsystem
+				$oInformationsystem_Item = $oField->Informationsystem->Informationsystem_Items->getByName($sFieldValue);
+				if ($oInformationsystem_Item)
+				{
+					$changedValue = $oInformationsystem_Item->id;
+				}
+				elseif (is_numeric($sFieldValue))
+				{
+					$oInformationsystem_Item = $oField->Informationsystem->Informationsystem_Items->getById($sFieldValue);
+
+					$changedValue = $oInformationsystem_Item
+						? $oInformationsystem_Item->id
+						: NULL;
+				}
+				else
+				{
+					$changedValue = NULL;
+				}
+			break;
+			case 7: // Checkbox
+				$changedValue = $sFieldValue == 1 || strtolower($sFieldValue) === 'true'
+					? 1
+					: 0;
+			break;
+			case 8:
+				$changedValue = preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/", $sFieldValue)
+					? $sFieldValue
+					: Core_Date::datetime2sql($sFieldValue);
+			break;
+			case 9:
+				$changedValue = preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})/", $sFieldValue)
+					? $sFieldValue
+					: Core_Date::datetime2sql($sFieldValue);
+			break;
+			case 11: // Float
+				$changedValue = Shop_Controller::convertDecimal($sFieldValue);
+			break;
+			case 12: // Shop
+				// by Name
+				$oShop_Item = $oField->Shop->Shop_Items->getByName($sFieldValue);
+				if ($oShop_Item)
+				{
+					$changedValue = $oShop_Item->id;
+				}
+				else
+				{
+					// by Marking
+					$oShop_Item = $oField->Shop->Shop_Items->getByMarking($sFieldValue);
+					if ($oShop_Item)
+					{
+						$changedValue = $oShop_Item->id;
+					}
+					// by ID
+					elseif (is_numeric($sFieldValue))
+					{
+						$oShop_Item = $oField->Shop->Shop_Items->getById($sFieldValue);
+
+						$changedValue = $oShop_Item
+							? $oShop_Item->id
+							: NULL;
+					}
+					else
+					{
+						$changedValue = NULL;
+					}
+				}
+			break;
+			default:
+				Core_Event::notify(get_class($this) . '.onAddItemFieldValueDefault', $this, array($oShopItem, $oField, $sFieldValue));
+
+				$changedValue = is_null(Core_Event::getLastReturn())
+					? $sFieldValue
+					: Core_Event::getLastReturn();
+		}
+
+		if (!is_null($changedValue))
+		{
+			if ($oField->multiple)
+			{
+				$bHttp = strpos(strtolower($changedValue), "http://") === 0 || strpos(strtolower($changedValue), "https://") === 0;
+
+				foreach ($aFieldValues as $oField_Value)
+				{
+					if ($oField->type == 2 && basename($oField_Value->file_name) == basename($changedValue)
+						|| $oField->type != 2 && $oField_Value->value == $changedValue)
+					{
+						return $oField_Value;
+					}
+				}
+
+				$oField_Value = $oField->createNewValue($oShopItem->id);
+			}
+			else
+			{
+				$oField_Value = isset($aFieldValues[0])
+					? $aFieldValues[0]
+					: $oField->createNewValue($oShopItem->id);
+			}
+
+			// File
+			if ($oField->type == 2)
+			{
+				// Папка назначения
+				$sDestinationFolder = $oShopItem->getItemPath();
+
+				// Файл-источник
+				$sTmpFilePath = $this->imagesPath . (
+					/*strtoupper($this->encoding) == 'UTF-8'
+						? $sFieldValue
+						: Core_File::convertfileNameFromLocalEncoding($sFieldValue)*/
+					$sFieldValue
+				);
+
+				$sSourceFileBaseName = basename($sTmpFilePath, '');
+
+				$bHttp = strpos(strtolower($sTmpFilePath), "http://") === 0 || strpos(strtolower($sTmpFilePath), "https://") === 0;
+
+				$sSourceFileName = $bHttp
+					? basename($sFieldValue)
+					: $sSourceFileBaseName;
+
+				if (Core_File::isValidExtension($sTmpFilePath, Core::$mainConfig['availableExtension']) || $bHttp)
+				{
+					// Создаем папку назначения
+					$oShopItem->createDir();
+
+					if ($bHttp)
+					{
+						try {
+							$sSourceFile = $this->_downloadHttpFile($sTmpFilePath);
+						}
+						catch (Exception $e)
+						{
+							Core_Message::show($e->getMessage(), 'error');
+							$sSourceFile = NULL;
+						}
+					}
+					else
+					{
+						$sSourceFile = CMS_FOLDER . ltrim($sTmpFilePath, '/\\');
+					}
+
+					if (!$this->_oCurrentShop->change_filename)
+					{
+						$sTargetFileName = $sSourceFileBaseName;
+					}
+					else
+					{
+						$sTargetFileExtension = Core_File::getExtension($sSourceFileBaseName);
+						$sTargetFileExtension = $sTargetFileExtension == '' || strlen($sTargetFileExtension) > 5
+							? '.jpg'
+							: ".{$sTargetFileExtension}";
+
+						$oField_Value->save();
+						$sTargetFileName = "shop_field_file_{$oShopItem->id}_{$oField_Value->id}{$sTargetFileExtension}";
+						//$sTargetFileName = "shop_field_file_{$oShopItem->id}_{$oField->id}{$sTargetFileExtension}";
+					}
+
+					// Создаем массив параметров для загрузки картинок элементу
+					$aPicturesParam = array();
+					$aPicturesParam['large_image_source'] = $sSourceFile;
+					$aPicturesParam['large_image_name'] = $sSourceFileBaseName;
+					$aPicturesParam['large_image_target'] = $sDestinationFolder . $sTargetFileName;
+					$aPicturesParam['watermark_file_path'] = $this->_oCurrentShop->getWatermarkFilePath();
+					$aPicturesParam['watermark_position_x'] = $this->_oCurrentShop->watermark_default_position_x;
+					$aPicturesParam['watermark_position_y'] = $this->_oCurrentShop->watermark_default_position_y;
+					$aPicturesParam['large_image_preserve_aspect_ratio'] = $this->_oCurrentShop->preserve_aspect_ratio;
+					//$aPicturesParam['large_image_max_width'] = $this->_oCurrentShop->image_large_max_width;
+					$aPicturesParam['large_image_max_width'] = $oField->image_large_max_width;
+					//$aPicturesParam['large_image_max_height'] = $this->_oCurrentShop->image_large_max_height;
+					$aPicturesParam['large_image_max_height'] = $oField->image_large_max_height;
+					$aPicturesParam['large_image_watermark'] = $this->_oCurrentShop->watermark_default_use_large_image;
+
+					if (isset($this->_aExternalFieldsSmall[$oField->id][$position]))
+					{
+						// Малое изображение передано
+						$aPicturesParam['create_small_image_from_large'] = FALSE;
+
+						// Файл-источник
+						$sTmpFilePath = $this->imagesPath . $this->_aExternalFieldsSmall[$oField->id][$position];
+
+						$sSourceFileBaseNameSmall = basename($sTmpFilePath, '');
+
+						$bHttp = strpos(strtolower($sTmpFilePath), "http://") === 0 || strpos(strtolower($sTmpFilePath), "https://") === 0;
+
+						if (Core_File::isValidExtension($sTmpFilePath, Core::$mainConfig['availableExtension']) || $bHttp)
+						{
+							// Создаем папку назначения
+							$oShopItem->createDir();
+
+							if ($bHttp)
+							{
+								try {
+									$sSourceFileSmall = $this->_downloadHttpFile($sTmpFilePath);
+								}
+								catch (Exception $e)
+								{
+									Core_Message::show($e->getMessage(), 'error');
+									$sSourceFileSmall = NULL;
+								}
+							}
+							else
+							{
+								$sSourceFileSmall = CMS_FOLDER . $sTmpFilePath;
+							}
+
+							if (!$this->_oCurrentShop->change_filename)
+							{
+								$sTargetFileNameSmall = "small_{$sSourceFileBaseNameSmall}";
+							}
+							else
+							{
+								$sTargetFileExtension = Core_File::getExtension($sSourceFileBaseNameSmall);
+								$sTargetFileExtension = $sTargetFileExtension == '' || strlen($sTargetFileExtension) > 5
+									? '.jpg'
+									: ".{$sTargetFileExtension}";
+
+								$oField_Value->save();
+								$sTargetFileNameSmall = "small_shop_field_file_{$oShopItem->id}_{$oField_Value->id}{$sTargetFileExtension}";
+							}
+
+							$aPicturesParam['small_image_source'] = $sSourceFileSmall;
+							$aPicturesParam['small_image_name'] = $sSourceFileBaseNameSmall;
+							$aPicturesParam['small_image_target'] = $sDestinationFolder . $sTargetFileNameSmall;
+
+							// Удаляем старое малое изображение
+							/*if ($oField_Value->file_small != '')
+							{
+								try
+								{
+									Core_File::delete($sDestinationFolder . $oField_Value->file_small);
+								} catch (Exception $e) {}
+							}*/
+						}
+
+						// ------------------------------------------
+						// Исключаем из отдельного импорта малых изображений
+						unset($this->_aExternalFieldsSmall[$oField->id][$position]);
+					}
+					else
+					{
+						// Малое изображение не передано
+						$aPicturesParam['create_small_image_from_large'] = TRUE;
+						$aPicturesParam['small_image_source'] = $aPicturesParam['large_image_source'];
+						$aPicturesParam['small_image_name'] = $aPicturesParam['large_image_name'];
+						$aPicturesParam['small_image_target'] = $sDestinationFolder . "small_{$sTargetFileName}";
+
+						$sSourceFileSmall = NULL;
+						$sTargetFileNameSmall = "small_{$sTargetFileName}";
+					}
+
+					$aPicturesParam['small_image_max_width'] = $oField->image_small_max_width;
+					$aPicturesParam['small_image_max_height'] = $oField->image_small_max_height;
+					$aPicturesParam['small_image_watermark'] = $this->_oCurrentShop->watermark_default_use_small_image;
+					$aPicturesParam['small_image_preserve_aspect_ratio'] = $aPicturesParam['large_image_preserve_aspect_ratio'];
+
+					// Удаляем старое большое изображение
+					if ($oField_Value->file != '')
+					{
+						if ($sDestinationFolder . $oField_Value->file != $sSourceFile)
+						{
+							try
+							{
+								Core_File::delete($sDestinationFolder . $oField_Value->file);
+							} catch (Exception $e) {}
+						}
+					}
+
+					// Удаляем старое малое изображение
+					if ($oField_Value->file_small != '')
+					{
+						if ($sDestinationFolder . $oField_Value->file_small != $sSourceFileSmall)
+						{
+							try
+							{
+								Core_File::delete($sDestinationFolder . $oField_Value->file_small);
+							} catch (Exception $e) {}
+						}
+					}
+
+					try {
+						Core_Event::notify('Shop_Item_Import_Csv_Controller.onBeforeAdminUpload', $this, array($aPicturesParam));
+						$aTmpReturn = Core_Event::getLastReturn();
+						is_array($aTmpReturn) && $aPicturesParam = $aTmpReturn;
+
+						$aResult = Core_File::adminUpload($aPicturesParam);
+					}
+					catch (Exception $e)
+					{
+						Core_Message::show(strtoupper($this->encoding) == 'UTF-8'
+							? $e->getMessage()
+							: @iconv($this->encoding, "UTF-8//IGNORE//TRANSLIT", $e->getMessage())
+						, 'error');
+
+						$aResult = array('large_image' => FALSE, 'small_image' => FALSE);
+					}
+
+					if ($aResult['large_image'])
+					{
+						$oField_Value->file = $sTargetFileName;
+						$oField_Value->file_name = $sSourceFileName;
+					}
+
+					if ($aResult['small_image'])
+					{
+						$oField_Value->file_small = $sTargetFileNameSmall;
+						$oField_Value->file_small_name = '';
+					}
+
+					if (isset($this->_aExternalFieldsDesc[$oField->id][$position]))
+					{
+						$oField_Value->file_description = $this->_aExternalFieldsDesc[$oField->id][$position];
+						unset($this->_aExternalFieldsDesc[$oField->id][$position]);
+					}
+
+					$oField_Value->save();
+
+					clearstatcache();
+
+					if (!is_null($sSourceFile) && strpos(basename($sSourceFile), "CMS") === 0 && Core_File::isFile($sSourceFile))
+					{
+						// Файл временный, подлежит удалению
+						Core_File::delete($sSourceFile);
+					}
+
+					if (!is_null($sSourceFile) && strpos(basename($sSourceFileSmall), "CMS") === 0 && Core_File::isFile($sSourceFileSmall))
+					{
+						// Файл временный, подлежит удалению
+						Core_File::delete($sSourceFileSmall);
+					}
+				}
+			}
+			else
+			{
+				$oField_Value->setValue($changedValue);
+				$oField_Value->save();
+			}
+
+			return $oField_Value;
 		}
 
 		return FALSE;
@@ -4546,6 +5308,406 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 	}
 
 	/**
+	 * Add field to group
+	 * @param Shop_Group_Model $oShop_Group
+	 * @param Field_Model $oField
+	 * @param string $sFieldValue field value
+	 * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeImportGroupField
+	 * @hostcms-event Shop_Item_Import_Csv_Controller.onAddGroupFieldValueDefault
+	 */
+	protected function _addGroupFieldValue(Shop_Group_Model $oShop_Group, Field_Model $oField, $sFieldValue, $position = 0)
+	{
+		Core_Event::notify('Shop_Item_Import_Csv_Controller.onBeforeImportGroupField', $this, array($this->_oCurrentShop, $oShop_Group, $oField, $sFieldValue));
+
+		$aFieldValues = $oField->getValues($oShop_Group->id, FALSE);
+
+		if ($this->deleteFieldValues === TRUE
+			|| is_array($this->deleteFieldValues) && in_array($oField->id, $this->deleteFieldValues))
+		{
+			if (!isset($this->_aClearedGroupsFieldValues[$oShop_Group->id])
+				|| !in_array($oField->id, $this->_aClearedGroupsFieldValues[$oShop_Group->id]))
+			{
+				foreach ($aFieldValues as $oFieldValue)
+				{
+					$oField->type == 2
+						&& $oFieldValue->setDir($oShop_Group->getGroupPath());
+					$oFieldValue->delete();
+				}
+
+				$aFieldValues = array();
+
+				$this->_aClearedGroupsFieldValues[$oShop_Group->id][] = $oField->id;
+			}
+		}
+
+		// File
+		if ($oField->type == 2)
+		{
+			if ($oField->multiple)
+			{
+				$oField_Value = $oField->createNewValue($oShop_Group->id);
+			}
+			else
+			{
+				$oField_Value = isset($aFieldValues[0])
+					? $aFieldValues[0]
+					: $oField->createNewValue($oShop_Group->id);
+			}
+
+			// Папка назначения
+			$sDestinationFolder = $oShop_Group->getGroupPath();
+
+			// Файл-источник
+			$sTmpFilePath = $this->imagesPath . (
+				/*strtoupper($this->encoding) == 'UTF-8'
+					? $sFieldValue
+					: Core_File::convertfileNameFromLocalEncoding($sFieldValue)*/
+				$sFieldValue
+			);
+
+			$sSourceFileBaseName = basename($sTmpFilePath, '');
+
+			$bHttp = strpos(strtolower($sTmpFilePath), "http://") === 0 || strpos(strtolower($sTmpFilePath), "https://") === 0;
+
+			if (Core_File::isValidExtension($sTmpFilePath, Core::$mainConfig['availableExtension']) || $bHttp)
+			{
+				// Создаем папку назначения
+				$oShop_Group->createDir();
+
+				if ($bHttp)
+				{
+					try {
+						$sSourceFile = $this->_downloadHttpFile($sTmpFilePath);
+					}
+					catch (Exception $e)
+					{
+						Core_Message::show($e->getMessage(), 'error');
+						$sSourceFile = NULL;
+					}
+				}
+				else
+				{
+					$sSourceFile = CMS_FOLDER . ltrim($sTmpFilePath, '/\\');
+				}
+
+				if (!$this->_oCurrentShop->change_filename)
+				{
+					$sTargetFileName = $sSourceFileBaseName;
+				}
+				else
+				{
+					$sTargetFileExtension = Core_File::getExtension($sSourceFileBaseName);
+					$sTargetFileExtension = $sTargetFileExtension == '' || strlen($sTargetFileExtension) > 5
+						? '.jpg'
+						: ".{$sTargetFileExtension}";
+
+					$oField_Value->save();
+					$sTargetFileName = "shop_field_file_{$oShop_Group->id}_{$oField_Value->id}{$sTargetFileExtension}";
+				}
+
+				// Создаем массив параметров для загрузки картинок элементу
+				$aPicturesParam = array();
+				$aPicturesParam['large_image_source'] = $sSourceFile;
+				$aPicturesParam['large_image_name'] = $sSourceFileBaseName;
+				$aPicturesParam['large_image_target'] = $sDestinationFolder . $sTargetFileName;
+				$aPicturesParam['watermark_file_path'] = $this->_oCurrentShop->getWatermarkFilePath();
+				$aPicturesParam['watermark_position_x'] = $this->_oCurrentShop->watermark_default_position_x;
+				$aPicturesParam['watermark_position_y'] = $this->_oCurrentShop->watermark_default_position_y;
+				$aPicturesParam['large_image_preserve_aspect_ratio'] = $this->_oCurrentShop->preserve_aspect_ratio;
+				$aPicturesParam['large_image_max_width'] = $oField->image_large_max_width;
+				$aPicturesParam['large_image_max_height'] = $oField->image_large_max_height;
+				$aPicturesParam['large_image_watermark'] = $this->_oCurrentShop->watermark_default_use_large_image;
+
+				if (isset($this->_aExternalFieldsSmall[$oField->id][$position]))
+				{
+					// Малое изображение передано
+					$aPicturesParam['create_small_image_from_large'] = FALSE;
+
+					// Файл-источник
+					$sTmpFilePath = $this->imagesPath . $this->_aExternalFieldsSmall[$oField->id][$position];
+
+					$sSourceFileBaseNameSmall = basename($sTmpFilePath, '');
+
+					$bHttp = strpos(strtolower($sTmpFilePath), "http://") === 0 || strpos(strtolower($sTmpFilePath), "https://") === 0;
+
+					if (Core_File::isValidExtension($sTmpFilePath, Core::$mainConfig['availableExtension']) || $bHttp)
+					{
+						// Создаем папку назначения
+						$oShop_Group->createDir();
+
+						if ($bHttp)
+						{
+							try {
+								$sSourceFileSmall = $this->_downloadHttpFile($sTmpFilePath);
+							}
+							catch (Exception $e)
+							{
+								Core_Message::show($e->getMessage(), 'error');
+								$sSourceFileSmall = NULL;
+							}
+						}
+						else
+						{
+							$sSourceFileSmall = CMS_FOLDER . $sTmpFilePath;
+						}
+
+						if (!$this->_oCurrentShop->change_filename)
+						{
+							$sTargetFileNameSmall = "small_{$sSourceFileBaseNameSmall}";
+						}
+						else
+						{
+							$sTargetFileExtension = Core_File::getExtension($sSourceFileBaseNameSmall);
+							$sTargetFileExtension = $sTargetFileExtension == '' || strlen($sTargetFileExtension) > 5
+								? '.jpg'
+								: ".{$sTargetFileExtension}";
+
+							$oField_Value->save();
+							$sTargetFileNameSmall = "small_shop_field_file_{$oShop_Group->id}_{$oField_Value->id}{$sTargetFileExtension}";
+						}
+
+						$aPicturesParam['small_image_source'] = $sSourceFileSmall;
+						$aPicturesParam['small_image_name'] = $sSourceFileBaseNameSmall;
+						$aPicturesParam['small_image_target'] = $sDestinationFolder . $sTargetFileNameSmall;
+
+						// Удаляем старое малое изображение
+						/*if ($oField_Value->file_small != '')
+						{
+							try
+							{
+								Core_File::delete($sDestinationFolder . $oField_Value->file_small);
+							} catch (Exception $e) {}
+						}*/
+					}
+
+					// ------------------------------------------
+					// Исключаем из отдельного импорта малых изображений
+					unset($this->_aExternalFieldsSmall[$oField->id][$position]);
+				}
+				else
+				{
+					// Малое изображение не передано
+					$aPicturesParam['create_small_image_from_large'] = TRUE;
+					$aPicturesParam['small_image_source'] = $aPicturesParam['large_image_source'];
+					$aPicturesParam['small_image_name'] = $aPicturesParam['large_image_name'];
+					$aPicturesParam['small_image_target'] = $sDestinationFolder . "small_{$sTargetFileName}";
+
+					$sSourceFileSmall = NULL;
+				}
+
+				$aPicturesParam['small_image_max_width'] = $oField->image_small_max_width;
+				$aPicturesParam['small_image_max_height'] = $oField->image_small_max_height;
+				$aPicturesParam['small_image_watermark'] = $this->_oCurrentShop->watermark_default_use_small_image;
+				$aPicturesParam['small_image_preserve_aspect_ratio'] = $aPicturesParam['large_image_preserve_aspect_ratio'];
+
+				// Удаляем старое большое изображение
+				if ($oField_Value->file != '')
+				{
+					if ($sDestinationFolder . $oField_Value->file != $sSourceFile)
+					{
+						try
+						{
+							Core_File::delete($sDestinationFolder . $oField_Value->file);
+						} catch (Exception $e) {}
+					}
+				}
+
+				// Удаляем старое малое изображение
+				if ($oField_Value->file_small != '')
+				{
+					if ($sDestinationFolder . $oField_Value->file_small != $sSourceFileSmall)
+					{
+						try
+						{
+							Core_File::delete($sDestinationFolder . $oField_Value->file_small);
+						} catch (Exception $e) {}
+					}
+				}
+
+				try {
+					Core_Event::notify('Shop_Item_Import_Csv_Controller.onBeforeAdminUpload', $this, array($aPicturesParam));
+					$aTmpReturn = Core_Event::getLastReturn();
+					is_array($aTmpReturn) && $aPicturesParam = $aTmpReturn;
+					$aResult = Core_File::adminUpload($aPicturesParam);
+				}
+				catch (Exception $e)
+				{
+					Core_Message::show(strtoupper($this->encoding) == 'UTF-8'
+						? $e->getMessage()
+						: @iconv($this->encoding, "UTF-8//IGNORE//TRANSLIT", $e->getMessage())
+					, 'error');
+
+					$aResult = array('large_image' => FALSE, 'small_image' => FALSE);
+				}
+
+				if ($aResult['large_image'])
+				{
+					$oField_Value->file = $sTargetFileName;
+					$oField_Value->file_name = '';
+				}
+
+				if ($aResult['small_image'])
+				{
+					$oField_Value->file_small = "small_{$sTargetFileName}";
+					$oField_Value->file_small_name = '';
+				}
+
+				// Для групп описания не передаются сейчас, только для товаров
+				if (isset($this->_aExternalFieldsDesc[$oField->id][$position]))
+				{
+					$oField_Value->file_description = $this->_aExternalFieldsDesc[$oField->id][$position];
+					unset($this->_aExternalFieldsDesc[$oField->id][$position]);
+				}
+
+				$oField_Value->save();
+
+				clearstatcache();
+
+				if (!is_null($sSourceFile) && strpos(basename($sSourceFile), "CMS") === 0 && Core_File::isFile($sSourceFile))
+				{
+					// Файл временный, подлежит удалению
+					Core_File::delete($sSourceFile);
+				}
+
+				if (!is_null($sSourceFile) && strpos(basename($sSourceFileSmall), "CMS") === 0 && Core_File::isFile($sSourceFileSmall))
+				{
+					// Файл временный, подлежит удалению
+					Core_File::delete($sSourceFileSmall);
+				}
+			}
+		}
+		else
+		{
+			switch ($oField->type)
+			{
+				case 0: // Int
+					$changedValue = Shop_Controller::convertDecimal($sFieldValue);
+				break;
+				// Файл
+				case 2:
+					$changedValue = NULL;
+				break;
+				// Список
+				case 3:
+					if (Core::moduleIsActive('list'))
+					{
+						$oList_Item = $oField->List->List_Items->getByValue($sFieldValue, FALSE);
+
+						if ($oList_Item)
+						{
+							$changedValue = $oList_Item->id;
+						}
+						else
+						{
+							$oList_Item = Core_Entity::factory('List_Item')
+								->list_id($oField->list_id)
+								->value($sFieldValue);
+
+							// Apache %2F (/) is forbidden
+							strpos($sFieldValue, '/') !== FALSE
+								&& $oList_Item->path = trim(str_replace('/', ' ', $sFieldValue));
+
+							$changedValue = $oList_Item->save()
+								->id;
+						}
+					}
+				break;
+				case 5: // Informationsystem
+					$oInformationsystem_Item = $oField->Informationsystem->Informationsystem_Items->getByName($sFieldValue);
+					if ($oInformationsystem_Item)
+					{
+						$changedValue = $oInformationsystem_Item->id;
+					}
+					elseif (is_numeric($sFieldValue))
+					{
+						$oInformationsystem_Item = $oField->Informationsystem->Informationsystem_Items->getById($sFieldValue);
+
+						$changedValue = $oInformationsystem_Item
+							? $oInformationsystem_Item->id
+							: NULL;
+					}
+					else
+					{
+						$changedValue = NULL;
+					}
+				break;
+				case 7: // Checkbox
+					$changedValue = $sFieldValue == 1 || strtolower($sFieldValue) === 'true'
+						? 1
+						: 0;
+				break;
+				case 8:
+					$changedValue = preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/", $sFieldValue)
+						? $sFieldValue
+						: Core_Date::datetime2sql($sFieldValue);
+				break;
+				case 9:
+					$changedValue = preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})/", $sFieldValue)
+						? $sFieldValue
+						: Core_Date::datetime2sql($sFieldValue);
+				break;
+				case 11: // Float
+					$changedValue = Shop_Controller::convertDecimal($sFieldValue);
+				break;
+				case 12: // Shop
+					$oShop_Item = $oField->Shop->Shop_Items->getByName($sFieldValue);
+					if ($oShop_Item)
+					{
+						$changedValue = $oShop_Item->id;
+					}
+					elseif (is_numeric($sFieldValue))
+					{
+						$oShop_Item = $oField->Shop->Shop_Items->getById($sFieldValue);
+
+						$changedValue = $oShop_Item
+							? $oShop_Item->id
+							: NULL;
+					}
+					else
+					{
+						$changedValue = NULL;
+					}
+				break;
+				default:
+					Core_Event::notify(get_class($this) . '.onAddGroupFieldValueDefault', $this, array($oShop_Group, $oField, $sFieldValue));
+
+					$changedValue = is_null(Core_Event::getLastReturn())
+						? $sFieldValue
+						: Core_Event::getLastReturn();
+			}
+
+			//$oField_Value->save();
+			if (!is_null($changedValue))
+			{
+				//$aFieldValues = $oField->getValues($oShop_Group->id, FALSE);
+				if ($oField->multiple)
+				{
+					foreach ($aFieldValues as $oField_Value)
+					{
+						if ($oField_Value->value == $changedValue)
+						{
+							return $this;
+						}
+					}
+
+					$oField_Value = $oField->createNewValue($oShop_Group->id);
+				}
+				else
+				{
+					$oField_Value = isset($aFieldValues[0])
+						? $aFieldValues[0]
+						: $oField->createNewValue($oShop_Group->id);
+				}
+
+				$oField_Value->setValue($changedValue);
+				$oField_Value->save();
+			}
+		}
+
+		return $this;
+	}
+
+	/**
 	 * Array of cached tags
 	 */
 	protected $_aTags = NULL;
@@ -4624,11 +5786,11 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 
 		$this->_aTags = NULL;
 
-		$this->_aClearedItemsPropertyValues = $this->_aClearedGroupsPropertyValues = array();
+		$this->_aClearedItemsPropertyValues = $this->_aClearedGroupsPropertyValues = $this->_aClearedItemsFieldValues = $this->_aClearedGroupsFieldValues = array();
 
 		// see __sleep()/__wakeup()
-		$this->_aInsertedGroupIDs = $this->_aClearedItemsPropertyValues = $this->_aClearedGroupsPropertyValues
-			= $this->_aUpdatedGroupIDs = $this->_aInsertedItemIDs = $this->_aUpdatedItemIDs = $this->_aCreatedItemIDs = array();
+		$this->_aInsertedGroupIDs = $this->_aClearedItemsPropertyValues = $this->_aClearedGroupsPropertyValues = $this->_aClearedItemsFieldValues =
+		$this->_aClearedGroupsFieldValues = $this->_aUpdatedGroupIDs = $this->_aInsertedItemIDs = $this->_aUpdatedItemIDs = $this->_aCreatedItemIDs = array();
 
 		return $this;
 	}
@@ -4644,6 +5806,8 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 				'_aInsertedGroupIDs' => $this->_aInsertedGroupIDs,
 				'_aClearedItemsPropertyValues' => $this->_aClearedItemsPropertyValues,
 				'_aClearedGroupsPropertyValues' => $this->_aClearedGroupsPropertyValues,
+				'_aClearedItemsFieldValues' => $this->_aClearedItemsFieldValues,
+				'_aClearedGroupsFieldValues' => $this->_aClearedGroupsFieldValues,
 				'_aUpdatedGroupIDs' => $this->_aUpdatedGroupIDs,
 				'_aInsertedItemIDs' => $this->_aInsertedItemIDs,
 				'_aUpdatedItemIDs' => $this->_aUpdatedItemIDs,
@@ -4692,6 +5856,8 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 			$this->_aInsertedGroupIDs = Core_Array::get($aJSON, '_aInsertedGroupIDs', array());
 			$this->_aClearedItemsPropertyValues = Core_Array::get($aJSON, '_aClearedItemsPropertyValues', array());
 			$this->_aClearedGroupsPropertyValues = Core_Array::get($aJSON, '_aClearedGroupsPropertyValues', array());
+			$this->_aClearedItemsFieldValues = Core_Array::get($aJSON, '_aClearedItemsFieldValues', array());
+			$this->_aClearedGroupsFieldValues = Core_Array::get($aJSON, '_aClearedGroupsFieldValues', array());
 			$this->_aUpdatedGroupIDs = Core_Array::get($aJSON, '_aUpdatedGroupIDs', array());
 			$this->_aInsertedItemIDs = Core_Array::get($aJSON, '_aInsertedItemIDs', array());
 			$this->_aUpdatedItemIDs = Core_Array::get($aJSON, '_aUpdatedItemIDs', array());

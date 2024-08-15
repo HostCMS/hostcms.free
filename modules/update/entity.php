@@ -252,63 +252,120 @@ class Update_Entity extends Core_Empty_Entity
 						$aUpdateItems[] = $aTmpUpdateItem;
 					}
 
-					// Extract and execute after load
+
+					// Check permitions
+					$aNotWritable = array();
 					foreach ($aUpdateItems as $aTmpUpdateItem)
 					{
 						if (isset($aTmpUpdateItem['tar']))
 						{
 							$Core_Tar = new Core_Tar($aTmpUpdateItem['tar'], 'gz');
+							$aListContents = $Core_Tar->listContent();
 
-							Core_Log::instance()->clear()
-								->status(Core_Log::$MESSAGE)
-								->write(Core::_('Update.msg_unpack_package', basename($aTmpUpdateItem['tar'])));
-
-							// Распаковываем файлы
-							if (!$Core_Tar->extractModify(CMS_FOLDER, CMS_FOLDER))
+							foreach ($aListContents as $aListContent)
 							{
-								$error_update = TRUE;
+								if (isset($aListContent['filename']))
+								{
+									$filename = CMS_FOLDER . $aListContent['filename'];
 
-								$message = Core::_('Update.update_files_error');
+									if (file_exists($filename) && !is_writable($filename))
+									{
+										$aNotWritable[] = $aListContent['filename'];
+									}
+								}
+							}
+						}
+					}
+
+					if (!count($aNotWritable))
+					{
+						// Extract and execute after load
+						foreach ($aUpdateItems as $aTmpUpdateItem)
+						{
+							if (isset($aTmpUpdateItem['tar']))
+							{
+								$Core_Tar = new Core_Tar($aTmpUpdateItem['tar'], 'gz');
 
 								Core_Log::instance()->clear()
 									->status(Core_Log::$MESSAGE)
-									->write($message);
+									->write(Core::_('Update.msg_unpack_package', basename($aTmpUpdateItem['tar'])));
 
-								// Возникла ошибка распаковки
-								Core_Message::show($message, 'error');
+								// Распаковываем файлы
+								if (!$Core_Tar->extractModify(CMS_FOLDER, CMS_FOLDER))
+								{
+									$error_update = TRUE;
 
-								try {
-									Core_File::copy($aTmpUpdateItem['tar'], tempnam(CMS_FOLDER . TMP_DIR, 'update'));
-								} catch (Exception $e) {}
+									$message = Core::_('Update.update_files_error');
+
+									Core_Log::instance()->clear()
+										->status(Core_Log::$MESSAGE)
+										->write($message);
+
+									// Возникла ошибка распаковки
+									Core_Message::show($message, 'error');
+
+									try {
+										Core_File::copy($aTmpUpdateItem['tar'], tempnam(CMS_FOLDER . TMP_DIR, 'update'));
+									} catch (Exception $e) {}
+								}
 							}
-						}
 
-						if (isset($aTmpUpdateItem['sql']) && strlen($aTmpUpdateItem['sql']))
-						{
-							Core_Log::instance()->clear()
-								->status(Core_Log::$MESSAGE)
-								->write(Core::_('Update.msg_execute_sql'));
+							if (isset($aTmpUpdateItem['sql']) && strlen($aTmpUpdateItem['sql']))
+							{
+								Core_Log::instance()->clear()
+									->status(Core_Log::$MESSAGE)
+									->write(Core::_('Update.msg_execute_sql'));
 
-							Sql_Controller::instance()->executeByString($aTmpUpdateItem['sql']);
+								Sql_Controller::instance()->executeByString($aTmpUpdateItem['sql']);
+							}
+
+							// Clear Core_ORM_ColumnCache, Core_ORM_RelationCache
+							Core_ORM::clearColumnCache();
+							Core_ORM::clearRelationModelCache();
+
+							if (function_exists('opcache_reset'))
+							{
+								opcache_reset();
+							}
+
+							if (isset($aTmpUpdateItem['file']))
+							{
+								Core_Log::instance()->clear()
+									->status(Core_Log::$MESSAGE)
+									->write(Core::_('Update.msg_execute_file'));
+
+								include($aTmpUpdateItem['file']);
+							}
 						}
 
 						// Clear Core_ORM_ColumnCache, Core_ORM_RelationCache
 						Core_ORM::clearColumnCache();
 						Core_ORM::clearRelationModelCache();
 
-						if (function_exists('opcache_reset'))
+						// Rebuild Shortcodes
+						if (Core::moduleIsActive('shortcode'))
 						{
-							opcache_reset();
+							Shortcode_Controller::instance()->rebuild();
 						}
 
-						if (isset($aTmpUpdateItem['file']))
+						// Если не было ошибок
+						if (!$error_update)
 						{
+							$oHOSTCMS_UPDATE_NUMBER = Core_Entity::factory('Constant')->getByName('HOSTCMS_UPDATE_NUMBER');
+							!is_null($oHOSTCMS_UPDATE_NUMBER) && $oHOSTCMS_UPDATE_NUMBER->value($current_update_id)->save();
+
+							$message = Core::_('Update.install_success', $this->name);
+
 							Core_Log::instance()->clear()
-								->status(Core_Log::$MESSAGE)
-								->write(Core::_('Update.msg_execute_file'));
+								->status(Core_Log::$SUCCESS)
+								->write($message);
 
-							include($aTmpUpdateItem['file']);
+							Core_Message::show($message);
 						}
+					}
+					else
+					{
+						Core_Message::show(Core::_('Update.not_writable', implode(', ', $aNotWritable)), 'error');
 					}
 
 					// Удаляем папку с файлами
@@ -316,31 +373,6 @@ class Update_Entity extends Core_Empty_Entity
 					// Удаляем XML обновления
 					$update_file = Update_Controller::instance()->getFilePath();
 					Core_File::isFile($update_file) && Core_File::delete($update_file);
-
-					// Clear Core_ORM_ColumnCache, Core_ORM_RelationCache
-					Core_ORM::clearColumnCache();
-					Core_ORM::clearRelationModelCache();
-
-					// Rebuild Shortcodes
-					if (Core::moduleIsActive('shortcode'))
-					{
-						Shortcode_Controller::instance()->rebuild();
-					}
-
-					// Если не было ошибок
-					if (!$error_update)
-					{
-						$oHOSTCMS_UPDATE_NUMBER = Core_Entity::factory('Constant')->getByName('HOSTCMS_UPDATE_NUMBER');
-						!is_null($oHOSTCMS_UPDATE_NUMBER) && $oHOSTCMS_UPDATE_NUMBER->value($current_update_id)->save();
-
-						$message = Core::_('Update.install_success', $this->name);
-
-						Core_Log::instance()->clear()
-							->status(Core_Log::$SUCCESS)
-							->write($message);
-
-						Core_Message::show($message);
-					}
 				}
 			}
 

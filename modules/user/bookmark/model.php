@@ -21,6 +21,14 @@ class User_Bookmark_Model extends Core_Entity
 	);
 
 	/**
+	 * Default sorting for models
+	 * @var array
+	 */
+	protected $_sorting = array(
+		'user_bookmarks.sorting' => 'ASC',
+	);
+
+	/**
 	 * Constructor.
 	 * @param int $id entity ID
 	 */

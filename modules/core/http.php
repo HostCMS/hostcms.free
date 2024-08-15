@@ -532,12 +532,17 @@ abstract class Core_Http
 	/**
 	 * Parse HTTP status code
 	 * @param string $status status code, e.g. 'HTTP/1.1 200 OK'
-	 * @return int e.g. '200'
+	 * @return int|NULL e.g. '200'
 	 */
 	public function parseHttpStatusCode($status)
 	{
-		preg_match('|HTTP/\d(?:\.\d)?\s+(\d+)|', $status, $match);
-		return Core_Array::get($match, 1);
+		if (is_string($status))
+		{
+			preg_match('|HTTP/\d(?:\.\d)?\s+(\d+)|', $status, $match);
+			return Core_Array::get($match, 1);
+		}
+		
+		return NULL;
 	}
 
 	/**
@@ -620,7 +625,7 @@ abstract class Core_Http
 	static public function getOs($browser, $version = NULL)
 	{
 		is_null($version) && $browser == 'firefox'
-			&& $version = rand(40, 108) . '.' . rand(0, 9);
+			&& $version = rand(110, 128) . '.' . rand(0, 9);
 
 		switch (rand(0, 2))
 		{
@@ -637,8 +642,10 @@ abstract class Core_Http
 				$os = 'Macintosh; Intel Mac OS X ';
 
 				$os .= $browser == 'firefox'
-					? rand(10, 12) . '.' . rand(0,2) . "; rv:{$version}"
-					: rand(10, 12) . '_' . rand(0,2);
+					// Mozilla/5.0 (Macintosh; Intel Mac OS X 14.5; rv:128.0)
+					? rand(10, 14) . '.' . rand(0, 5) . "; rv:{$version}"
+					// Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5)
+					: rand(10, 14) . '_' . rand(0, 5);
 			break;
 			// Linux
 			case 2:
@@ -665,14 +672,14 @@ abstract class Core_Http
 
 		if ($browser == 'chrome')
 		{
-			$version = rand(60, 118) . '.0.' . rand(1000, 5000) . '.' . rand(10, 400);
+			$version = rand(110, 128) . '.0.' . rand(1000, 5000) . '.' . rand(10, 400);
 			$os = self::getOs($browser, $version);
 			$appleVersion = (rand(0, 1) ? rand(533, 537) : rand(600, 603)) . '.' . rand(30, 50);
 			$userAgent = "Mozilla/5.0 ({$os}) AppleWebKit/{$appleVersion} (KHTML, like Gecko) Chrome/{$version} Safari/{$appleVersion}";
 		}
 		elseif ($browser == 'firefox')
 		{
-			$version = rand(60, 108) . '.' . rand(0, 9);
+			$version = rand(110, 128) . '.' . rand(0, 9);
 			$os = self::getOs($browser, $version);
 			$userAgent = "Mozilla/5.0 ({$os}) Gecko/20100101 Firefox/{$version}";
 		}
@@ -682,5 +689,169 @@ abstract class Core_Http
 		}
 
 		return $userAgent;
+	}
+
+	/**
+	 * POST of requestParseBody()
+	 * @var array
+	 */
+	static protected $_requestParseBodyPost = array();
+
+	/**
+	 * FILE of requestParseBody()
+	 * @var array
+	 */
+	static protected $_requestParseBodyFile = array();
+
+	/**
+	 * Parse and consume php://input and return the values for $_POST and $_FILES variables.
+	 *
+	 * @param string $boundary
+	 * @return array Array with key 0 being the post data (similar to $_POST), and key 1 being the files ($_FILES).
+	 */
+	static public function requestParseBody($boundary)
+	{
+		self::$_requestParseBodyPost = self::$_requestParseBodyFile = array();
+
+		if ($fp = @fopen("php://input", "r"))
+		{
+			$prevTail = '';
+
+			// Read the data 4KB
+			while ($chunk = fread($fp, 4096))
+			{
+				$prevTail = self::_parseChunk($prevTail . $chunk, $boundary);
+			}
+
+			fclose($fp);
+		}
+
+		$return = array(self::$_requestParseBodyPost, self::$_requestParseBodyFile);
+		
+		self::$_requestParseBodyPost = self::$_requestParseBodyFile = array();
+		
+		return $return;
+	}
+
+	/**
+	 * Pointer for _parseChunk()
+	 * @var NULL|string|resource
+	 */
+	static protected $_parseFieldLink = NULL;
+
+	/**
+	 * Parse chunk for requestParseBody()
+	 * @param string $chunk
+	 * @param string $boundary
+	 * @return rest of chunk
+	 */
+	static protected function _parseChunk($chunk, $boundary)
+	{
+		$eol = "\r\n";
+		$boundaryLine = "--" . $boundary /*. $eol*/;
+
+		do {
+			$boundaryPos = strpos($chunk, $boundaryLine);
+
+			if (!is_null(self::$_parseFieldLink))
+			{
+				$content = $boundaryPos !== FALSE
+					? substr($chunk, 0, $boundaryPos - 2)
+					: $chunk;
+
+				if (is_resource(self::$_parseFieldLink))
+				{
+					@fwrite(self::$_parseFieldLink, $content);
+				}
+				else
+				{
+					self::$_parseFieldLink .= $content;
+				}
+			}
+
+			if ($boundaryPos !== FALSE)
+			{
+				// Reset pointer and close file
+				is_resource(self::$_parseFieldLink) && fclose(self::$_parseFieldLink);
+
+				$value = NULL;
+				self::$_parseFieldLink = & $value;
+
+				$dataPos = strpos($chunk, $eol . $eol, $boundaryPos + strlen($boundaryLine) + 2);
+				if ($dataPos !== FALSE)
+				{
+					$chunk = substr($chunk, $boundaryPos + strlen($boundaryLine));
+
+					// $dataPos была расчитана относительно смещения $boundaryPos + strlen($boundaryLine)
+					$dataPos -= ($boundaryPos + strlen($boundaryLine));
+
+					$headerData = substr($chunk, 2, $dataPos);
+
+					$chunk = substr($chunk, $dataPos + 4);
+
+					$fieldFilename = $fieldIndex = NULL;
+					preg_match('/^(.+); *name="([^"]+)"(; *filename="([^"]+)")?/', $headerData, $matches);
+
+					if (isset($matches[2]))
+					{
+						list(, $fieldType, $fieldName) = $matches;
+						isset($matches[4]) && $fieldFilename = $matches[4];
+
+						if (is_null($fieldFilename))
+						{
+							// aaaa[xxx] только для POST
+							preg_match('/^(.*?)\[(.*?)\]$/u', $fieldName, $match);
+							if (isset($match[2]))
+							{
+								$fieldName = $match[1];
+								$fieldIndex = $match[2];
+							}
+
+							if (is_null($fieldIndex))
+							{
+								self::$_requestParseBodyPost[$fieldName] = '';
+								self::$_parseFieldLink = & self::$_requestParseBodyPost[$fieldName];
+							}
+							else
+							{
+								$fieldIndex = max(array_keys(
+									isset(self::$_requestParseBodyPost[$fieldName]) && count(self::$_requestParseBodyPost[$fieldName])
+										? self::$_requestParseBodyPost[$fieldName]
+										: array(-1 => '')
+								)) + 1;
+
+								self::$_requestParseBodyPost[$fieldName][$fieldIndex] = '';
+								self::$_parseFieldLink = & self::$_requestParseBodyPost[$fieldName][$fieldIndex];
+							}
+						}
+						else
+						{
+							$temp_file = tempnam(sys_get_temp_dir(), 'restapi');
+
+							self::$_parseFieldLink = NULL;
+
+							$aTmp = array(
+								'name' => $fieldFilename,
+								'tmp_name' => $temp_file
+							);
+							self::$_requestParseBodyFile[$fieldName] = $aTmp;
+
+							self::$_parseFieldLink = @fopen($temp_file, 'w');
+						}
+					}
+				}
+				else
+				{
+					break;
+				}
+			}
+			else
+			{
+				$chunk = '';
+			}
+		}
+		while ($boundaryPos !== FALSE);
+
+		return $chunk;
 	}
 }

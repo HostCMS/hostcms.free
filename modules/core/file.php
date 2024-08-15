@@ -215,7 +215,7 @@ class Core_File
 	{
 		if (self::isFile($oldname) || self::isDir($oldname))
 		{
-			if (!rename($oldname, $newname))
+			if (!@rename($oldname, $newname))
 			{
 				throw new Core_Exception("Rename file/dir '%oldname' error.",
 					array('%oldname' => Core::cutRootPath($oldname)));
@@ -239,7 +239,7 @@ class Core_File
 			if (!@unlink($filePath))
 			{
 				$aError = error_get_last();
-					
+
 				throw new Core_Exception("Delete file '%filePath' error. %reason",
 					array('%filePath' => Core::cutRootPath($filePath), '%reason' => isset($aError['message']) ? $aError['message'] : ''));
 			}
@@ -547,6 +547,27 @@ class Core_File
 	}
 
 	/**
+	 * Get file name from path
+	 * @param string $path path
+	 * @param bool $fullExt return 'foo.tar' for path '/www/foo.tar.gz' if false and 'foo' otherwise
+	 * @return string
+	 */
+	static public function getName($path, $fullExt = FALSE)
+	{
+		$path = (string) $path;
+
+		if (!$fullExt)
+		{
+			return pathinfo($path, PATHINFO_FILENAME);
+		}
+
+		$fileName = basename($path);
+		return strpos($fileName, '.') === FALSE
+			? $fileName
+			: substr($fileName, 0, strpos($fileName, '.'));
+	}
+
+	/**
 	 * Checks if the extension is valid
 	 * @param string $path file path
 	 * @param array $aExtensions array of valid extensions
@@ -845,6 +866,8 @@ class Core_File
 	 * - $param['small_image_target'] путь к создаваемому файлу малого изображения
 	 * - $param['large_image_output_format'] формат создаваемого большого изображения
 	 * - $param['small_image_output_format'] формат создаваемого малого изображения
+	 * - $param['large_image_output_quality'] степень сжатия создаваемого большого изображения
+	 * - $param['small_image_output_quality'] степень сжатия создаваемого малого изображения
 	 * - $param['create_small_image_from_large'] использовать большое изображение для создания малого (TRUE - использовать (по умолчанию), FALSE - не использовать)
 	 * - $param['large_image_max_width'] значение максимальной ширины большого изображения
 	 * - $param['large_image_max_height'] значение максимальной высоты большого изображения
@@ -1022,12 +1045,18 @@ class Core_File
 			? $param['small_image_output_format']
 			: NULL;
 
-		$aCore_Config = Core::$mainConfig;
+		$large_image_output_quality = isset($param['large_image_output_quality'])
+			? $param['large_image_output_quality']
+			: NULL;
+
+		$small_image_output_quality = isset($param['small_image_output_quality'])
+			? $param['small_image_output_quality']
+			: NULL;
 
 		// Задан файл-источник большого изображения
 		if ($large_image_source != '')
 		{
-			if (self::isValidExtension($large_image_target, $aCore_Config['availableExtension']))
+			if (self::isValidExtension($large_image_target, Core::$mainConfig['availableExtension']))
 			{
 				$large_image_created = $small_image_created = TRUE;
 
@@ -1035,7 +1064,7 @@ class Core_File
 
 				// Уменьшаем большую картинку до максимального размера.
 				if (self::isValidExtension($large_image_target, self::getResizeExtensions())
-					&& !Core_Image::instance()->resizeImage($large_image_target, $large_image_max_width, $large_image_max_height, $large_image_target, NULL, $large_image_preserve_aspect_ratio, $large_image_output_format))
+					&& !Core_Image::instance()->resizeImage($large_image_target, $large_image_max_width, $large_image_max_height, $large_image_target, $large_image_output_quality, $large_image_preserve_aspect_ratio, $large_image_output_format))
 				{
 					throw new Core_Exception(Core::_('Core.error_resize'));
 				}
@@ -1065,7 +1094,7 @@ class Core_File
 						if (self::isValidExtension($small_image_target, self::getResizeExtensions()))
 						{
 							// Делаем уменьшенный файл.
-							if (!Core_Image::instance()->resizeImage($source_file_path, $small_image_max_width, $small_image_max_height, $small_image_target, NULL, $small_image_preserve_aspect_ratio, $small_image_output_format))
+							if (!Core_Image::instance()->resizeImage($source_file_path, $small_image_max_width, $small_image_max_height, $small_image_target, $small_image_output_quality, $small_image_preserve_aspect_ratio, $small_image_output_format))
 							{
 								throw new Core_Exception(Core::_('Core.error_resize'));
 							}
@@ -1085,7 +1114,7 @@ class Core_File
 				elseif ($create_small_image_from_large && !empty($small_image_target) && !$large_image_watermark)
 				{
 					// Создаем малое изображение из большого
-					$create_small_from_small = Core_Image::instance()->resizeImage($large_image_target, $large_image_max_width, $large_image_max_height, $small_image_target, NULL, $small_image_preserve_aspect_ratio, $small_image_output_format);
+					$create_small_from_small = Core_Image::instance()->resizeImage($large_image_target, $large_image_max_width, $large_image_max_height, $small_image_target, $small_image_output_quality, $small_image_preserve_aspect_ratio, $small_image_output_format);
 				}
 
 				// Накладываем Watermark на большое изображение и указан ватермарк
@@ -1107,12 +1136,12 @@ class Core_File
 						{
 							Core_Image::instance()->addWatermark($small_image_target, $small_image_target, $watermark_file_path, $watermark_position_x, $watermark_position_y, $small_image_output_format);
 
-							$bSuccess = Core_Image::instance()->resizeImage($small_image_target, $small_image_max_width, $small_image_max_height, $small_image_target, NULL, $small_image_preserve_aspect_ratio, $small_image_output_format);
+							$bSuccess = Core_Image::instance()->resizeImage($small_image_target, $small_image_max_width, $small_image_max_height, $small_image_target, $small_image_output_quality, $small_image_preserve_aspect_ratio, $small_image_output_format);
 						}
 						else
 						{
 							// Создать малое изображение из большого
-							$bSuccess = Core_Image::instance()->resizeImage($large_image_target, $small_image_max_width, $small_image_max_height, $small_image_target, NULL, $small_image_preserve_aspect_ratio, $small_image_output_format);
+							$bSuccess = Core_Image::instance()->resizeImage($large_image_target, $small_image_max_width, $small_image_max_height, $small_image_target, $small_image_output_quality, $small_image_preserve_aspect_ratio, $small_image_output_format);
 						}
 
 						if (!$bSuccess)
@@ -1148,7 +1177,7 @@ class Core_File
 			// Не создаем большое изображение из малого
 			$create_large_image = FALSE;
 
-			if (self::isValidExtension($small_image_target, $aCore_Config['availableExtension']))
+			if (self::isValidExtension($small_image_target, Core::$mainConfig['availableExtension']))
 			{
 				self::upload($small_image_source, $small_image_target);
 
@@ -1157,7 +1186,7 @@ class Core_File
 				{
 					if (self::isValidExtension($small_image_target, self::getResizeExtensions()))
 					{
-						if (!Core_Image::instance()->resizeImage($small_image_target, $small_image_max_width, $small_image_max_height, $small_image_target, NULL, $small_image_preserve_aspect_ratio, $small_image_output_format))
+						if (!Core_Image::instance()->resizeImage($small_image_target, $small_image_max_width, $small_image_max_height, $small_image_target, $small_image_output_quality, $small_image_preserve_aspect_ratio, $small_image_output_format))
 						{
 							throw new Core_Exception(Core::_('Core.error_resize'));
 						}
@@ -1173,7 +1202,7 @@ class Core_File
 
 					if ($bSuccess)
 					{
-						$bSuccess = Core_Image::instance()->resizeImage($small_image_target, $small_image_max_width, $small_image_max_height, $small_image_target, NULL, $small_image_preserve_aspect_ratio, $small_image_output_format);
+						$bSuccess = Core_Image::instance()->resizeImage($small_image_target, $small_image_max_width, $small_image_max_height, $small_image_target, $small_image_output_quality, $small_image_preserve_aspect_ratio, $small_image_output_format);
 
 						$bSuccess
 							? @chmod($small_image_target, CHMOD_FILE)

@@ -58,6 +58,14 @@ class Directory_Controller_Tab_Website extends Directory_Controller_Tab
 					->divAttr(array('class' => 'form-group ' . ($this->showPublicityControlElement ? 'col-xs-5 col-lg-4' : 'col-lg-4 col-xs-5')))
 					->placeholder('https://')
 					->class('form-control bold')
+					->add(
+						Admin_Form_Entity::factory('A')
+							->id('pathLink')
+							->class('input-group-addon blue')
+							->value('<i class="fa fa-external-link"></i>')
+							->target('_blank')
+							->href($oUser_Directory_Website ? $oUser_Directory_Website->Directory_Website->value : '/')
+					)
 			)
 			->add(
 				Admin_Form_Entity::factory('Input')
@@ -178,6 +186,16 @@ class Directory_Controller_Tab_Website extends Directory_Controller_Tab
 					$i++;
 				}
 			}
+		}
+
+		$aDirectory_Websites = $object->Directory_Websites->findAll(FALSE);
+		foreach ($aDirectory_Websites as $oDirectory_Website)
+		{
+			$Admin_Form_Controller->addMessage(
+				Core_Html_Entity::factory('Script')
+					->value("$(\"#{$windowId} input[name='" . $prefix . 'website_address#' . $oDirectory_Website->id . "']\").parent().find('a#pathLink').attr('href', '" . Core_Str::escapeJavascriptVariable($oDirectory_Website->value) . "').attr('target', '_blank')")
+				->execute()
+			);
 		}
 	}
 }

@@ -1015,6 +1015,30 @@ if (!is_null(Core_Array::getPost('generate-password')))
 	);
 }
 
+if (!is_null(Core_Array::getPost('sortableBookmarks')))
+{
+	$aJSON = array('status' => 'error');
+
+	$aIds = Core_Array::getPost('bookmarks', array(), 'array');
+
+	if (count($aIds))
+	{
+		foreach ($aIds as $key => $id)
+		{
+			$oUser_Bookmark = Core_Entity::factory('User_Bookmark')->getById($id, FALSE);
+			if (!is_null($oUser_Bookmark))
+			{
+				$oUser_Bookmark->sorting = $key + 1;
+				$oUser_Bookmark->save();
+			}
+		}
+
+		$aJSON['status'] = 'success';
+	}
+
+	Core::showJson($aJSON);
+}
+
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
@@ -1078,9 +1102,7 @@ $oAdmin_Form_Entity_Breadcrumbs
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
 // Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -1096,9 +1118,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 }
 
 // Действие "Применить"
-$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdminFormActionApply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
@@ -1111,9 +1131,7 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 }
 
 // Действие "Просмотр"
-$oAdminFormActionView = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('view');
+$oAdminFormActionView = $oAdmin_Form->Admin_Form_Actions->getByName('view');
 
 if ($oAdminFormActionView && $oAdmin_Form_Controller->getAction() == 'view')
 {
@@ -1129,9 +1147,7 @@ if ($oAdminFormActionView && $oAdmin_Form_Controller->getAction() == 'view')
 }
 
 // Действие "Копировать"
-$oAdminFormActionCopy = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('copy');
+$oAdminFormActionCopy = $oAdmin_Form->Admin_Form_Actions->getByName('copy');
 
 if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 {
@@ -1144,9 +1160,7 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 }
 
 // Действие "Удалить файл изображения"
-$oAdminFormActionDeleteImageFile = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deleteImageFile');
+$oAdminFormActionDeleteImageFile = $oAdmin_Form->Admin_Form_Actions->getByName('deleteImageFile');
 
 if ($oAdminFormActionDeleteImageFile && $oAdmin_Form_Controller->getAction() == 'deleteImageFile')
 {

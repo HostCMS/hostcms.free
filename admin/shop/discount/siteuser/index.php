@@ -136,9 +136,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
 // Действие "Редактировать"
-$oAdmin_Form_Action_Edit = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action_Edit = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action_Edit && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -152,9 +150,7 @@ if ($oAdmin_Form_Action_Edit && $oAdmin_Form_Controller->getAction() == 'edit')
 }
 
 // Действие "Применить"
-$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdminFormActionApply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
@@ -167,9 +163,7 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 }
 
 // Действие удаления
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('markDeleted');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('markDeleted');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'markDeleted')
 {
@@ -220,11 +214,9 @@ if (isset($oAdmin_Form_Controller->request['admin_form_filter_1967'])
 	&& $oAdmin_Form_Controller->request['topFilter_1967'] != '')
 {
 	$oAdmin_Form_Dataset->addCondition(
-		array(
-			'select' => array(
-				'shop_item_discounts.*', array('COUNT(*)', 'dataCount'), array('siteusers.login', 'dataLogin'),
-			)
-		)
+		array('select' => array(
+			'shop_item_discounts.*', array('COUNT(*)', 'dataCount'), array('siteusers.login', 'dataLogin'),
+		))
 	)
 	->addCondition(
 		array('groupBy' => array('siteusers.id'))
@@ -272,11 +264,9 @@ if (isset($oAdmin_Form_Controller->request['admin_form_filter_1967'])
 	&& $oAdmin_Form_Controller->request['topFilter_1967'] != '')
 {
 	$oAdmin_Form_Dataset->addCondition(
-		array(
-			'select' => array(
-				'shop_group_discounts.*', array('COUNT(*)', 'dataCount'), array('siteusers.login', 'dataLogin'),
-			)
-		)
+		array('select' => array(
+			'shop_group_discounts.*', array('COUNT(*)', 'dataCount'), array('siteusers.login', 'dataLogin'),
+		))
 	)
 	->addCondition(
 		array('groupBy' => array('siteusers.id'))
@@ -324,11 +314,9 @@ if (isset($oAdmin_Form_Controller->request['admin_form_filter_1967'])
 	&& $oAdmin_Form_Controller->request['topFilter_1967'] != '')
 {
 	$oAdmin_Form_Dataset->addCondition(
-		array(
-			'select' => array(
-				'shop_producer_discounts.*', array('COUNT(*)', 'dataCount'), array('siteusers.login', 'dataLogin'),
-			)
-		)
+		array('select' => array(
+			'shop_producer_discounts.*', array('COUNT(*)', 'dataCount'), array('siteusers.login', 'dataLogin'),
+		))
 	)
 	->addCondition(
 		array('groupBy' => array('siteusers.id'))

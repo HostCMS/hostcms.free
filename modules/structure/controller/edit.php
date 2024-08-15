@@ -714,7 +714,11 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$this->_Admin_Form_Controller->addMessage(ob_get_clean());
 		}
 
+		Core::moduleIsActive('wysiwyg') && Wysiwyg_Controller::uploadImages($this->_formValues, $this->_object, $this->_Admin_Form_Controller);
+
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
+
+		return $this;
 	}
 
 	/*

@@ -45,4 +45,5 @@ return array(
 	'item_image_small' => 'Файл малого зображення для елемента',
 	'item_additional_group' => 'Ярлики GUID',
 	'item_siteuser_id' => 'Ідентифікатор користувача сайту',
+	'clear_matches' => 'очистити відповідності',
 );

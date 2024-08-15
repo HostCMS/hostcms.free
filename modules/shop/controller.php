@@ -163,9 +163,17 @@ class Shop_Controller
 	 */
 	static public function convertDecimal($value)
 	{
-		$value = preg_replace('/[^0-9.,\-]/u', '', $value);
-		$value = str_replace(array(',', '-'), '.', $value);
-		$value === '' && $value = 0;
+		if (!is_null($value))
+		{
+			$value = preg_replace('/[^0-9.,\-]/u', '', $value);
+			$value = str_replace(array(',', '-'), '.', $value);
+			$value === '' && $value = 0;
+		}
+		else
+		{
+			$value = 0;
+		}
+
 		return $value;
 	}
 
@@ -579,5 +587,21 @@ class Shop_Controller
 		}
 
 		return $model;
+	}
+	
+	/**
+	 * Get shop_config
+	 * @return array
+	 */
+	static public function getConfig()
+	{
+		return Core_Config::instance()->get('shop_config', array()) + array(
+			'itemEditWarehouseLimit' => 20,
+			'smallImagePrefix' => 'small_',
+			'itemLargeImage' => 'item_%d.%s',
+			'itemSmallImage' => 'small_item_%d.%s',
+			'groupLargeImage' => 'group_%d.%s',
+			'groupSmallImage' => 'small_group_%d.%s',
+		);
 	}
 }

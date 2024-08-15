@@ -484,7 +484,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	{
 		return $this->_join('RIGHT OUTER JOIN', $table, $column, $expression, $value, $additionalConditions);
 	}
-	
+
 	/**
 	 * Add RIGHT OUTER JOIN first
 	 *
@@ -632,7 +632,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 		array_pop($this->_where);
 		return $this;
 	}
-	
+
 	/**
 	 * Delete first WHERE condition
 	 * @return self
@@ -1211,6 +1211,19 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	}
 
 	/**
+	 * Get limit
+	 *
+	 * <code>
+	 * $limit = $Core_QueryBuilder_Select->getLimit();
+	 * </code>
+	 * @return int|NULL
+	 */
+	public function getLimit()
+	{
+		return $this->_limit;
+	}
+
+	/**
 	 * Set offset
 	 *
 	 * <code>
@@ -1225,8 +1238,21 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 		$this->_offset = is_null($offset)
 			? NULL
 			: intval($offset);
-			
+
 		return $this;
+	}
+
+	/**
+	 * Get offset
+	 *
+	 * <code>
+	 * $offset = $Core_QueryBuilder_Select->getOffset();
+	 * </code>
+	 * @return int|NULL
+	 */
+	public function getOffset()
+	{
+		return $this->_offset;
 	}
 
 	/**

@@ -258,9 +258,7 @@ if ($parent_id)
 }
 
 // Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -275,9 +273,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 }
 
 // Действие "Применить"
-$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdminFormActionApply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
@@ -290,9 +286,7 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 }
 
 // Действие "Копировать"
-$oAdminFormActionCopy = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('copy');
+$oAdminFormActionCopy = $oAdmin_Form->Admin_Form_Actions->getByName('copy');
 
 if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 {
@@ -305,9 +299,7 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 }
 
 // Действие "Загрузка списка документов"
-$oAdminFormActionLoadDocumentList = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('loadDocumentList');
+$oAdminFormActionLoadDocumentList = $oAdmin_Form->Admin_Form_Actions->getByName('loadDocumentList');
 
 if ($oAdminFormActionLoadDocumentList && $oAdmin_Form_Controller->getAction() == 'loadDocumentList')
 {
@@ -334,9 +326,7 @@ if ($oAdminFormActionLoadDocumentList && $oAdmin_Form_Controller->getAction() ==
 }
 
 // Действие "Загрузка списка типовых динамических страниц"
-$oAdminFormActionLoadLibList = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('loadLibList');
+$oAdminFormActionLoadLibList = $oAdmin_Form->Admin_Form_Actions->getByName('loadLibList');
 
 if ($oAdminFormActionLoadLibList && $oAdmin_Form_Controller->getAction() == 'loadLibList')
 {
@@ -354,9 +344,7 @@ if ($oAdminFormActionLoadLibList && $oAdmin_Form_Controller->getAction() == 'loa
 }
 
 // Действие "Загрузка свойств типовых динамических страниц"
-$oAdminFormActionLoadLibList = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('loadLibProperties');
+$oAdminFormActionLoadLibList = $oAdmin_Form->Admin_Form_Actions->getByName('loadLibProperties');
 
 if ($oAdminFormActionLoadLibList && $oAdmin_Form_Controller->getAction() == 'loadLibProperties')
 {
@@ -372,9 +360,7 @@ if ($oAdminFormActionLoadLibList && $oAdmin_Form_Controller->getAction() == 'loa
 }
 
 // Действие "Загрузка списка XSL-шаблонов для раздела"
-$oAdminFormActionLoadXslList = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('loadXslList');
+$oAdminFormActionLoadXslList = $oAdmin_Form->Admin_Form_Actions->getByName('loadXslList');
 
 if ($oAdminFormActionLoadXslList && $oAdmin_Form_Controller->getAction() == 'loadXslList')
 {
@@ -393,9 +379,7 @@ if ($oAdminFormActionLoadXslList && $oAdmin_Form_Controller->getAction() == 'loa
 }
 
 // Действие "Загрузка списка TPL-шаблонов для раздела"
-$oAdminFormActionLoadTplList = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('loadTplList');
+$oAdminFormActionLoadTplList = $oAdmin_Form->Admin_Form_Actions->getByName('loadTplList');
 
 if ($oAdminFormActionLoadTplList && $oAdmin_Form_Controller->getAction() == 'loadTplList')
 {
@@ -414,9 +398,7 @@ if ($oAdminFormActionLoadTplList && $oAdmin_Form_Controller->getAction() == 'loa
 }
 
 // Действие "Удаление значения свойства"
-$oAdminFormActiondeletePropertyValue = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deletePropertyValue');
+$oAdminFormActiondeletePropertyValue = $oAdmin_Form->Admin_Form_Actions->getByName('deletePropertyValue');
 
 if ($oAdminFormActiondeletePropertyValue && $oAdmin_Form_Controller->getAction() == 'deletePropertyValue')
 {
@@ -433,9 +415,7 @@ if ($oAdminFormActiondeletePropertyValue && $oAdmin_Form_Controller->getAction()
 	$oAdmin_Form_Controller->addAction($oStructureControllerdeletePropertyValue);
 }
 
-$oAdminFormActionRollback = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('rollback');
+$oAdminFormActionRollback = $oAdmin_Form->Admin_Form_Actions->getByName('rollback');
 
 if ($oAdminFormActionRollback && $oAdmin_Form_Controller->getAction() == 'rollback')
 {
@@ -448,9 +428,7 @@ if ($oAdminFormActionRollback && $oAdmin_Form_Controller->getAction() == 'rollba
 }
 
 // Действие "Удаление файла"
-$oAdminFormActionDeleteLibFile = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deleteLibFile');
+$oAdminFormActionDeleteLibFile = $oAdmin_Form->Admin_Form_Actions->getByName('deleteLibFile');
 
 if ($oAdminFormActionDeleteLibFile && $oAdmin_Form_Controller->getAction() == 'deleteLibFile')
 {
@@ -463,9 +441,7 @@ if ($oAdminFormActionDeleteLibFile && $oAdmin_Form_Controller->getAction() == 'd
 }
 
 // Действие "Создать ярлык"
-$oAdminFormActionShortcut = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('shortcut');
+$oAdminFormActionShortcut = $oAdmin_Form->Admin_Form_Actions->getByName('shortcut');
 
 if ($oAdminFormActionShortcut && $oAdmin_Form_Controller->getAction() == 'shortcut')
 {

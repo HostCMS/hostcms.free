@@ -144,6 +144,7 @@ class Core_Mime
 		'hs' => 'text/x-haskell',
 		'htm' => 'text/html',
 		'html' => 'text/html',
+		'htaccess' => 'application/x-extension-htaccess',
 		'icb' => 'image/x-icb',
 		'ico' => 'image/x-icon',
 		'ics' => 'text/calendar',

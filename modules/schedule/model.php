@@ -105,6 +105,7 @@ class Schedule_Model extends Core_Entity
 	 */
 	public function getInterval()
 	{
+		// Seconds
 		$aReturn = array(
 			'value' => $this->interval,
 			'type' => 0
@@ -132,12 +133,6 @@ class Schedule_Model extends Core_Entity
 		{
 			$aReturn['value'] = $this->interval / 60;
 			$aReturn['type'] = 1;
-		}
-		// Seconds
-		else
-		{
-			$aReturn['value'] = $this->interval;
-			$aReturn['type'] = 0;
 		}
 
 		return $aReturn;

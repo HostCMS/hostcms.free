@@ -37,4 +37,5 @@ return array(
 	'upload_message' => 'Drop files here or click to upload',
 	'apply_success' => "Information has been successfully changed",
 	'extract_success' => "The archive was successfully unpacked",
+	'new_name' => "New name",
 );

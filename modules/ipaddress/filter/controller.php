@@ -128,177 +128,181 @@ class Ipaddress_Filter_Controller
 	{
 		$bBlocked = FALSE;
 
-		$aHeaders = array_change_key_case(getallheaders());
-
 		$aFilters = $this->getFilters();
-		foreach ($aFilters as $aFilter)
+
+		if (count($aFilters))
 		{
-			$bBlocked = NULL;
+			$aHeaders = array_change_key_case(Core::getallheaders());
 
-			if ($aFilter['json'] != '')
+			foreach ($aFilters as $aFilter)
 			{
-				$aJson = @json_decode($aFilter['json'], TRUE);
-				if (is_array($aJson) && count($aJson))
+				$bBlocked = NULL;
+
+				if ($aFilter['json'] != '')
 				{
-					foreach ($aJson as $aCondition)
+					$aJson = @json_decode($aFilter['json'], TRUE);
+					if (is_array($aJson) && count($aJson))
 					{
-						if (isset($aCondition['type']) && isset($aCondition['condition']) && isset($aCondition['value']))
+						foreach ($aJson as $aCondition)
 						{
-							//var_dump($aCondition);
-							$bCaseSensitive = isset($aCondition['case_sensitive']) && $aCondition['case_sensitive'] == 1;
-
-							switch ($aCondition['type'])
+							if (isset($aCondition['type']) && isset($aCondition['condition']) && isset($aCondition['value']))
 							{
-								case 'referer':
-									$compared = Core_Array::get($_SERVER, 'HTTP_REFERER', '', 'str');
-								break;
-								case 'user_agent':
-									$compared = Core_Array::get($_SERVER, 'HTTP_USER_AGENT', '', 'str');
-								break;
-								case 'host':
-									$compared = Core_Array::get($_SERVER, 'HTTP_HOST', '', 'str');
-								break;
-								case 'uri':
-									$compared = Core_Array::get($_SERVER, 'REQUEST_URI', '', 'str');
-								break;
-								case 'ip':
-									$compared = Core_Array::get($_SERVER, 'REMOTE_ADDR', '', 'str');
-								break;
-								case 'get':
-									$compared = isset($aCondition['get'])
-										? Core_Array::getGet($aCondition['get']/*, '', 'str'*/) // Нужен NULL
-										: NULL;
-								break;
-								case 'header':
-									$compared = isset($aCondition['header'])
-										? Core_Array::get($aHeaders, strtolower($aCondition['header'])/*, '', 'str'*/) // Нужен NULL
-										: NULL;
-								break;
-								case 'lang':
-									$compared = strtolower(
-										substr(Core_Array::get($_SERVER, 'HTTP_ACCEPT_LANGUAGE', '', 'str'), 0, 2)
-									);
-								break;
-								default:
-									$compared = NULL;
-							}
+								//var_dump($aCondition);
+								$bCaseSensitive = isset($aCondition['case_sensitive']) && $aCondition['case_sensitive'] == 1;
 
-							// NULL может проверяться в режимах содержит/не содержит
-							if (!is_null($compared) || $aCondition['condition'] == 'like' || $aCondition['condition'] == 'not-like')
-							{
-								if (!is_null($compared) && $aCondition['condition'] !== 'reg' && !$bCaseSensitive)
+								switch ($aCondition['type'])
 								{
-									$compared = mb_strtolower($compared);
-									$aCondition['value'] = mb_strtolower($aCondition['value']);
-								}
-
-								switch ($aCondition['condition'])
-								{
-									case '=':
-										// Не IP или IP не содержит подсеть
-										if ($aCondition['type'] != 'ip' || strpos($aCondition['value'], '/') === FALSE)
-										{
-											$bReturn = $compared == $aCondition['value'];
-										}
-										else
-										{
-											$bReturn = Ipaddress_Controller::instance()->ipCheck($compared, $aCondition['value']);
-										}
+									case 'referer':
+										$compared = Core_Array::get($_SERVER, 'HTTP_REFERER', '', 'str');
 									break;
-									case '!=':
-										// Не IP или IP не содержит подсеть
-										if ($aCondition['type'] != 'ip' || strpos($aCondition['value'], '/') === FALSE)
-										{
-											$bReturn = $compared != $aCondition['value'];
-										}
-										else
-										{
-											$bReturn = !Ipaddress_Controller::instance()->ipCheck($compared, $aCondition['value']);
-										}
+									case 'user_agent':
+										$compared = Core_Array::get($_SERVER, 'HTTP_USER_AGENT', '', 'str');
 									break;
-									case 'like':
-										$bReturn = is_scalar($compared) // NULL not scalar
-											? ($aCondition['value'] != ''
-												? mb_strpos($compared, $aCondition['value']) !== FALSE
-												: TRUE // для пустоты содержит будет TRUE
-											)
-											: FALSE; // содержит для отсутствующего значения будет FALSE
+									case 'host':
+										$compared = Core_Array::get($_SERVER, 'HTTP_HOST', '', 'str');
 									break;
-									case 'not-like':
-										$bReturn = is_scalar($compared) // NULL not scalar
-											? ($aCondition['value'] != ''
-												? mb_strpos($compared, $aCondition['value']) === FALSE
-												: FALSE // для пустоты НЕ содержит будет FALSE
-											)
-											: TRUE; // не содержит для отсутствующего значения будет TRUE
+									case 'uri':
+										$compared = Core_Array::get($_SERVER, 'REQUEST_URI', '', 'str');
 									break;
-									case '^':
-										$bReturn = $aCondition['value'] != ''
-											? mb_strpos($compared, $aCondition['value']) === 0
-											: FALSE;
+									case 'ip':
+										$compared = Core_Array::get($_SERVER, 'REMOTE_ADDR', '', 'str');
 									break;
-									case '!^':
-										$bReturn = $aCondition['value'] != ''
-											? mb_strpos($compared, $aCondition['value']) !== 0
-											: FALSE;
+									case 'get':
+										$compared = isset($aCondition['get'])
+											? Core_Array::getGet($aCondition['get']/*, '', 'str'*/) // Нужен NULL
+											: NULL;
 									break;
-									case '$':
-										$bReturn = $aCondition['value'] != ''
-											? mb_strpos($compared, $aCondition['value']) === (mb_strlen($compared) - mb_strlen($aCondition['value']))
-											: FALSE;
+									case 'header':
+										$compared = isset($aCondition['header'])
+											? Core_Array::get($aHeaders, strtolower($aCondition['header'])/*, '', 'str'*/) // Нужен NULL
+											: NULL;
 									break;
-									case '!$':
-										$bReturn = $aCondition['value'] != ''
-											? mb_strpos($compared, $aCondition['value']) !== (mb_strlen($compared) - mb_strlen($aCondition['value']))
-											: FALSE;
-									break;
-									case 'reg':
-										//$pattern = '/' . preg_quote($aCondition['value'], '/') . '/' . ($bCaseSensitive ? '' : 'i');
-										$pattern = '/' . str_replace('/', '\/', $aCondition['value']) . '/' . ($bCaseSensitive ? '' : 'i');
-										$bReturn = preg_match($pattern, $compared, $matches) > 0;
-										//var_dump($pattern, $compared, $bReturn);
+									case 'lang':
+										$compared = strtolower(
+											substr(Core_Array::get($_SERVER, 'HTTP_ACCEPT_LANGUAGE', '', 'str'), 0, 2)
+										);
 									break;
 									default:
-										$bReturn = FALSE;
+										$compared = NULL;
 								}
 
-								if ($bReturn)
+								// NULL может проверяться в режимах содержит/не содержит
+								if (!is_null($compared) || $aCondition['condition'] == 'like' || $aCondition['condition'] == 'not-like')
 								{
-									// NULL => TRUE, TRUE => TRUE
-									$bBlocked = TRUE;
-								}
-								// 0 - AND, 1 - OR
-								elseif ($aFilter['mode'] == 0)
-								{
-									// Прерываем, если не совпало хоть одно условие
-									$bBlocked = FALSE;
-									break;
+									if (!is_null($compared) && $aCondition['condition'] !== 'reg' && !$bCaseSensitive)
+									{
+										$compared = mb_strtolower($compared);
+										$aCondition['value'] = mb_strtolower($aCondition['value']);
+									}
+
+									switch ($aCondition['condition'])
+									{
+										case '=':
+											// Не IP или IP не содержит подсеть
+											if ($aCondition['type'] != 'ip' || strpos($aCondition['value'], '/') === FALSE)
+											{
+												$bReturn = $compared == $aCondition['value'];
+											}
+											else
+											{
+												$bReturn = Ipaddress_Controller::instance()->ipCheck($compared, $aCondition['value']);
+											}
+										break;
+										case '!=':
+											// Не IP или IP не содержит подсеть
+											if ($aCondition['type'] != 'ip' || strpos($aCondition['value'], '/') === FALSE)
+											{
+												$bReturn = $compared != $aCondition['value'];
+											}
+											else
+											{
+												$bReturn = !Ipaddress_Controller::instance()->ipCheck($compared, $aCondition['value']);
+											}
+										break;
+										case 'like':
+											$bReturn = is_scalar($compared) // NULL not scalar
+												? ($aCondition['value'] != ''
+													? mb_strpos($compared, $aCondition['value']) !== FALSE
+													: TRUE // для пустоты содержит будет TRUE
+												)
+												: FALSE; // содержит для отсутствующего значения будет FALSE
+										break;
+										case 'not-like':
+											$bReturn = is_scalar($compared) // NULL not scalar
+												? ($aCondition['value'] != ''
+													? mb_strpos($compared, $aCondition['value']) === FALSE
+													: FALSE // для пустоты НЕ содержит будет FALSE
+												)
+												: TRUE; // не содержит для отсутствующего значения будет TRUE
+										break;
+										case '^':
+											$bReturn = $aCondition['value'] != ''
+												? mb_strpos($compared, $aCondition['value']) === 0
+												: FALSE;
+										break;
+										case '!^':
+											$bReturn = $aCondition['value'] != ''
+												? mb_strpos($compared, $aCondition['value']) !== 0
+												: FALSE;
+										break;
+										case '$':
+											$bReturn = $aCondition['value'] != ''
+												? mb_strpos($compared, $aCondition['value']) === (mb_strlen($compared) - mb_strlen($aCondition['value']))
+												: FALSE;
+										break;
+										case '!$':
+											$bReturn = $aCondition['value'] != ''
+												? mb_strpos($compared, $aCondition['value']) !== (mb_strlen($compared) - mb_strlen($aCondition['value']))
+												: FALSE;
+										break;
+										case 'reg':
+											//$pattern = '/' . preg_quote($aCondition['value'], '/') . '/' . ($bCaseSensitive ? '' : 'i');
+											$pattern = '/' . str_replace('/', '\/', $aCondition['value']) . '/' . ($bCaseSensitive ? '' : 'i');
+											$bReturn = preg_match($pattern, $compared, $matches) > 0;
+											//var_dump($pattern, $compared, $bReturn);
+										break;
+										default:
+											$bReturn = FALSE;
+									}
+
+									if ($bReturn)
+									{
+										// NULL => TRUE, TRUE => TRUE
+										$bBlocked = TRUE;
+									}
+									// 0 - AND, 1 - OR
+									elseif ($aFilter['mode'] == 0)
+									{
+										// Прерываем, если не совпало хоть одно условие
+										$bBlocked = FALSE;
+										break;
+									}
 								}
 							}
 						}
-					}
 
-					if ($bBlocked === TRUE)
-					{
-						$this->incFilterBanned($aFilter['id']);
-
-						// Блокировать IP, соответствующий фильтру
-						if ($aFilter['block_ip'])
+						if ($bBlocked === TRUE)
 						{
-							$ip = Core_Array::get($_SERVER, 'REMOTE_ADDR', '', 'str');
-							if ($ip != '' && !Ipaddress_Controller::instance()->isBlocked(array($ip)))
-							{
-								$oIpaddress = Core_Entity::factory('Ipaddress');
-								$oIpaddress->ip = $ip;
-								$oIpaddress->deny_access = 1;
-								$oIpaddress->comment = "Blocked by filter '{$aFilter['name']}'";
-								$oIpaddress->save();
+							$this->incFilterBanned($aFilter['id']);
 
-								Ipaddress_Controller::instance()->clearCache();
+							// Блокировать IP, соответствующий фильтру
+							if ($aFilter['block_ip'])
+							{
+								$ip = Core_Array::get($_SERVER, 'REMOTE_ADDR', '', 'str');
+								if ($ip != '' && !Ipaddress_Controller::instance()->isBlocked(array($ip)))
+								{
+									$oIpaddress = Core_Entity::factory('Ipaddress');
+									$oIpaddress->ip = $ip;
+									$oIpaddress->deny_access = 1;
+									$oIpaddress->comment = "Blocked by filter '{$aFilter['name']}'";
+									$oIpaddress->save();
+
+									Ipaddress_Controller::instance()->clearCache();
+								}
 							}
+							// прерываем, один из фильтров полностью совпал
+							break;
 						}
-						// прерываем, один из фильтров полностью совпал
-						break;
 					}
 				}
 			}

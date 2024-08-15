@@ -142,9 +142,7 @@ $oAdminFormEntityBreadcrumbs
 $oAdmin_Form_Controller->addEntity($oAdminFormEntityBreadcrumbs);
 
 // Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deleteEntity');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('deleteEntity');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'deleteEntity')
 {
