@@ -63,7 +63,7 @@ return array(
 	'error_log_module_access_allowed' => "Доступ до модуля \"%s\" дозволений",
 	'error_log_action_access_allowed' => "Дію \"%s\" форми \"%s\"",
 	'error_log_logged' => "Вхід в систему управління",
-	'error_log_authorization_error' => 'Невірні дані для аутентифікації',
+	'error_log_authorization_error' => "Невірні дані для аутентифікації, логін '%s'",
 	'error_log_exit' => 'Вихід із системи управління',
 	'session_destroy_error' => 'Помилка закриття сеансу',
 	'session_change_ip' => 'Спроба використання сесії %s з IP %s',
@@ -103,7 +103,7 @@ return array(
 	'deleteNote' => 'Видалити замітку',
 
 	'key_not_found' => 'Не вдалося знайти ліцензійний ключ!',
-	'getting_key' => '<div style="margin-top: 20px; overflow: auto; z-index: 9999; background-color: rgba(255, 255, 255, .8); padding: 0 20px; text-shadow: 1px 1px 0 rgba(255, 255, 255, .4)">
+	'getting_key' => '<div style="width: 100%; margin-top: 20px; overflow: auto; z-index: 9999; background-color: rgba(255, 255, 255, .8); padding: 0 20px; text-shadow: 1px 1px 0 rgba(255, 255, 255, .4)">
 
 	<h2>Отримання номера ліцензії та PIN-коду <a href="https://www.hostcms.ru/documentation/introduction/licenses/licenses/" target="_blank"><i class="fa fa-external-link"></i></a></h2>
 
@@ -234,7 +234,7 @@ return array(
 	'missing_template_for_page' => 'Відсутня макет для сторінки!',
 	'change template instruction' => 'Вам необхідно змінити макет для даної сторінки в <b>"Розділ адміністрування" → "Структура сайту"</b>. Для статичних сторінок макет вказуєте в <b>"Розділ адміністрування" → "Сторінки і документи"</b>.',
 	'hosting_mismatch_system_requirements' => 'Невідповідність хостингу системним вимогам!',
-	'requires_php5' => 'Для роботи системи управління сайтом HostCMS необхідний PHP 5 з встановленою підтримкою <a href="https://www.hostcms.ru/documentation/server/ibxslt/" target="_blank">Libxslt</a>.',
+	'requires_php5' => 'Для роботи системи управління сайтом HostCMS необхідний PHP 5/7/8 з встановленою підтримкою <a href="https://www.hostcms.ru/documentation/server/ibxslt/" target="_blank">Libxslt</a>.',
 	'list_tested_hosting' => 'На нашому сайті також розміщений <a href="https://www.hostcms.ru/hosting/" target="_blank"> список протестованих хостингів</a>, придатних для роботи HostCMS.',
 
 	'show_title' => 'Показувати',
@@ -247,4 +247,9 @@ return array(
 	'unpack_error_creating_dir' => 'Помилка створення директорії для %s',
 	'unpack_error_opening_binary_mode' => 'Помилка відкриття файлу %s у бінарному режимі',
 	'unpack_file_incorrect_size' => 'Вийнятий файл %s має некоректний розмір %d, очікується %d. Архів може бути пошкоджений.',
+
+	'error_log_backend_blocked_ip' => "Доступ до центру адміністрування заблокований, IP '%s'",
+	'error_log_backend_blocked_useragent' => "Доступ до центру адміністрування заблокований, IP '%s', User Agent '%s'",
+	'csrf_wrong_token' => 'Неправильний CSRF-токен, оновіть форму!',
+	'csrf_token_timeout' => 'CSRF-токен закінчився, оновіть форму!',
 );

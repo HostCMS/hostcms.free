@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 {
@@ -249,7 +248,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 
 		?><label><?php
 		Core_Html_Entity::factory('Select')
-			->class('form-control input-sm')
+			->class('form-control input-sm admin-page-selector')
 			->onchange("mainFormLocker.unlock(); $.adminLoad({path: '{$path}', additionalParams: '{$additionalParams}', limit: this.options[this.selectedIndex].value, view: '{$view}', windowId : '{$windowId}'}); return false")
 			->options($this->_onPage)
 			->value($sCurrentValue)
@@ -574,14 +573,16 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 	 * @param string $class
 	 * @return Admin_Form_Entity
 	 */
-	public function getTitleEditIcon($href, $onclick, $class = 'fa fa-pencil-square-o h5-edit-icon palegreen')
+	public function getTitleEditIcon($href, $onclick, $class = 'fa fa-pencil-square-o h5-edit-icon palegreen', $selector = 'h5.row-title', $target = "")
 	{
 		// .attr("onclick", "' . $onclick . '")
 		return Admin_Form_Entity::factory('Code')
 			->html('
 				<script>
-					$(\'h5.row-title\').append(
+					$("' . $selector . ' > a").remove();
+					$("' . $selector . '").append(
 						$("<a>")
+							.attr("target", "' . $target . '")
 							.attr("href", "' . $href . '")
 							.attr("onclick", "' . Core_Str::escapeJavascriptVariable($onclick) . '")
 							.append(\'<i class="' . htmlspecialchars($class) . '"></i>\')

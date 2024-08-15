@@ -6,8 +6,7 @@
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Информационные системы',
@@ -155,7 +154,8 @@ return array(
 	'seo_template_property_value' => 'Значение свойства',
 
 	'all_groups_count' => 'Всего групп: %s',
-	'all_items_count' => 'Всего элементов: %s',
+	'all_items_count' => 'Всего элементов, исключая ярлыки: %s',
+	'all_shortcuts_count' => 'Всего ярлыков: %s',
 
 	'create_small_image' => 'Создавать малое изображение из большого',
 

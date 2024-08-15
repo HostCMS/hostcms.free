@@ -63,7 +63,9 @@ return array(
 	'error_log_module_access_allowed' => "Доступ к модулю \"%s\" разрешен",
 	'error_log_action_access_allowed' => "Действие \"%s\" формы \"%s\"",
 	'error_log_logged' => "Вход в систему управления",
-	'error_log_authorization_error' => 'Неверные данные для аутентификации',
+	'error_log_authorization_error' => "Неверные данные для аутентификации, логин '%s'",
+	'error_log_backend_blocked_ip' => "Доступ в центр администрирования заблокирован, IP '%s'",
+	'error_log_backend_blocked_useragent' => "Доступ в центр администрирования заблокирован, IP '%s', User Agent '%s'",
 	'error_log_exit' => 'Выход из системы управления',
 	'session_destroy_error' => 'Ошибка закрытия сеанса',
 	'session_change_ip' => 'Попытка использования сессии %s с IP %s',
@@ -103,7 +105,7 @@ return array(
 	'deleteNote' => 'Удалить заметку',
 
 	'key_not_found' => 'Не найден лицензионный ключ!',
-	'getting_key' => '<div style="margin-top: 20px; overflow: auto; z-index: 9999; background-color: rgba(255, 255, 255, .8); padding: 0 20px; text-shadow: 1px 1px 0 rgba(255, 255, 255, .4)">
+	'getting_key' => '<div style="width: 100%; margin-top: 20px; overflow: auto; z-index: 9999; background-color: rgba(255, 255, 255, .8); padding: 0 20px; text-shadow: 1px 1px 0 rgba(255, 255, 255, .4)">
 
 	<h2>Получение номера лицензии и PIN-кода <a href="https://www.hostcms.ru/documentation/introduction/licenses/licenses/" target="_blank"><i class="fa fa-external-link"></i></a></h2>
 
@@ -214,7 +216,7 @@ return array(
 	'month' => 'Месяц',
 	'year' => 'Год',
 	'quarter' => 'Квартал',
-	
+
 	'random' => 'Случайный',
 	'generateChars' => 'Символы',
 
@@ -234,12 +236,12 @@ return array(
 	'missing_template_for_page' => 'Отсутствует макет для страницы!',
 	'change template instruction' => 'Вам необходимо изменить макет для данной страницы в <b>"Раздел администрирования" → "Структура сайта" → "Структура сайта"</b>.',
 	'hosting_mismatch_system_requirements' => 'Несоответствие хостинга системным требованиям!',
-	'requires_php5' => 'Для работы системы управления сайтом HostCMS необходим PHP 5 или PHP 7 с установленной поддержкой <a href="https://www.hostcms.ru/documentation/server/ibxslt/" target="_blank">Libxslt</a>.',
+	'requires_php5' => 'Для работы системы управления сайтом HostCMS необходим PHP 5 или PHP 7/8 с установленной поддержкой <a href="https://www.hostcms.ru/documentation/server/ibxslt/" target="_blank">Libxslt</a>.',
 	'list_tested_hosting' => 'На нашем сайте также размещен <a href="https://www.hostcms.ru/hosting/" target="_blank">список протестированных хостингов</a>, подходящих для HostCMS.',
 
 	'show_title' => 'Показывать',
 	'data_show_title' => 'Показывать на сайте',
-	
+
 	'unpack_wrong_crc' => 'Ошибка расчета контрольной суммы %s: %d рассчитана, %d фактически указана',
 	'unpack_file_already_exists_and_directory' => 'Файл %s уже существует и является директорией',
 	'unpack_dir_already_exists_and_file' => 'Директория %s уже существует и является файлом',
@@ -247,4 +249,7 @@ return array(
 	'unpack_error_creating_dir' => 'Ошибка создания директории для %s',
 	'unpack_error_opening_binary_mode' => 'Ошибка открытия файла %s в бинарном режиме',
 	'unpack_file_incorrect_size' => 'Извлеченный файл %s имеет некорректный размер %d, ожидается %d. Архив может быть поврежден.',
+
+	'csrf_wrong_token' => 'Неправильный CSRF-токен, обновите форму!',
+	'csrf_token_timeout' => 'CSRF-токен истек, обновите форму!',
 );

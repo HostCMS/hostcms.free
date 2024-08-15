@@ -26,8 +26,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Sitemap extends Core_Servant_Properties
 {
@@ -246,12 +245,7 @@ class Core_Sitemap extends Core_Servant_Properties
 	 */
 	protected function _structure($structure_id = 0)
 	{
-		$oSite = $this->getSite();
-
 		$aStructure = $this->_selectStructuresByParentId($structure_id);
-
-		$dateTime = Core_Date::timestamp2sql(time());
-
 		foreach ($aStructure as $oStructure)
 		{
 			if ($oStructure->indexing)

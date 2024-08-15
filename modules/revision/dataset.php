@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Revision
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Revision_Dataset extends Admin_Form_Dataset
 {

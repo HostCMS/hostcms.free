@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -22,11 +21,49 @@ $tag_dir_id = intval(Core_Array::getGet('tag_dir_id', 0));
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title(Core::_('Tag.main_form_caption_h1'))
 	->pageTitle(Core::_('Tag.main_form_caption_h1'));
+
+if (!is_null(Core_Array::getGet('loadFilterTagsList')) && !is_null(Core_Array::getGet('term')))
+{
+	$aJSON = array();
+
+	$entity = Core_Array::getGet('entity', '', 'trim');
+
+	$sQuery = Core_Str::stripTags(Core_Array::getGet('term', '', 'trim'));
+
+	if ($entity != '' && in_array($entity, array('lead', 'deal', 'event', 'shop_order', 'shop_warehouse'))
+		&& $sQuery != ''
+	)
+	{
+		$oTags = Core_Entity::factory('Tag');
+		$oTags->queryBuilder()
+			->join('tag_' . $entity . 's', 'tag_' . $entity . 's.tag_id', '=', 'tags.id')
+			->where('tags.name', 'LIKE', '%' . $sQuery . '%')
+			->limit(10)
+			->clearOrderBy()
+			->orderBy('tags.name', 'ASC');
+
+		$aTags = $oTags->findAll(FALSE);
+
+		foreach ($aTags as $oTag)
+		{
+			$sParents = $oTag->Tag_Dir->dirPathWithSeparator();
+
+			$postfix = strlen($sParents) ? ' [' . $sParents . ']' : '';
+
+			$aJSON[] = array(
+				'id' => $oTag->name,
+				'text' => $oTag->name . $postfix,
+			);
+		}
+	}
+
+	Core::showJson($aJSON);
+}
 
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
@@ -262,7 +299,7 @@ if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
 		->addCondition(array('open' => array()))
-			->addCondition(array('where' => array('tag_dirs.id', '=', $sGlobalSearch)))
+			->addCondition(array('where' => array('tag_dirs.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
 			->addCondition(array('setOr' => array()))
 			->addCondition(array('where' => array('tag_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
@@ -287,7 +324,7 @@ if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
 		->addCondition(array('open' => array()))
-			->addCondition(array('where' => array('tags.id', '=', $sGlobalSearch)))
+			->addCondition(array('where' => array('tags.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
 			->addCondition(array('setOr' => array()))
 			->addCondition(array('where' => array('tags.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 			->addCondition(array('setOr' => array()))
@@ -305,7 +342,7 @@ $oAdmin_Form_Dataset->changeField('name', 'type', 1);
 // Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
 !$oUser->superuser && $oUser->only_access_my_own
-	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
+	&& $oAdmin_Form_Dataset->addUserConditions();
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(

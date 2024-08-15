@@ -97,4 +97,6 @@ $Shop_Order_Controller_Show
 	)
 	->itemsProperties(TRUE)
 	->ordersPropertiesList(TRUE)
+	->comments(TRUE)
+	->commentsProperties(TRUE)
 	->show();

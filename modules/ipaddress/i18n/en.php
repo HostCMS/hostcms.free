@@ -1,13 +1,5 @@
 <?php
-/**
- * IP addresses.
- *
- * @package HostCMS
- * @subpackage Ipaddress
- * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'IP addresses',
 	'menu' => 'IP addresses',
@@ -25,8 +17,6 @@ return array(
 	'main_menu' => 'IP address',
 	'ip' => '<acronym title="IP addres e.g. 192.168.0.1 or CIDR notation e.g. 192.168.0.0/24">IP address or CIDR </acronym>',
 	'id' => 'ID',
-	'ip_apply' => 'Apply',
-	'ip_save' => 'Save',
 	'show_ip_title' => 'IP addresses',
 	'add' => 'Add',
 	'comment' => 'Comment',
@@ -39,5 +29,22 @@ return array(
 	'allowAllAccess_success' => 'Information modified successfully!',
 	'denyAllBackendAccess_success' => 'Information modified successfully!',
 	'allowAllBackendAccess_success' => 'Information modified successfully!',
-	'useragent_menu' => 'Useragent',
+	'filter_menu' => 'Filter',
+	'confirm_ban' => 'Are you sure you want to ban the IP address?',
+	'error_log_blocked_ip' => "Access to the site restricted, IP '%s'",
+	'error_log_blocked_useragent' => "Access to the site restricted, IP '%s', User Agent '%s'",
+	'datetime' => "Date",
+	'visitor_menu' => "Visitors",
+	'add_dir' => "Group",
+	'ipaddress_dir_id' => "Group",
+	'move_items_groups_title' => "Move IP addresses",
+	'move_items_groups_ipaddress_dir_id' => "IP address group",
+	'move_success' => 'IP addresses have been moved',
+	'merge_success' => 'IP addresses merged',
+
+	'bot_page_tab_title' => 'Just a moment …',
+	'bot_page_title' => 'Verifying you are human. Please click the "I\'m not a robot":',
+	'bot_page_description' => '%s needs to review the security of your connection before proceeding.',
+	'bot_page_button' => 'I\'m a Human Being &#187;',
+	'bot_page_button_wait' => 'Please wait ...',
 );

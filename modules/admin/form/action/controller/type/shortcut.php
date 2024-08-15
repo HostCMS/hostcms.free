@@ -9,8 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Type_Shortcut extends Admin_Form_Action_Controller
 {
@@ -94,6 +93,7 @@ class Admin_Form_Action_Controller_Type_Shortcut extends Admin_Form_Action_Contr
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-8'))
 					->class('form-control')
 					->name('destinationName')
+					->placeholder(Core::_('Admin.autocomplete_placeholder'))
 					->controller($window_Admin_Form_Controller);
 
 				$oAdmin_Form_Entity_Autocomplete_Select = Admin_Form_Entity::factory('Select')
@@ -154,11 +154,13 @@ class Admin_Form_Action_Controller_Type_Shortcut extends Admin_Form_Action_Contr
 							minLength: 1,
 							create: function() {
 								$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
-									return $('<li></li>')
+									return $('<li class=\"autocomplete-suggestion\"></li>')
 										.data('item.autocomplete', item)
-										.append($('<a>').text(item.label))
+										.append($('<div class=\"name\">').html($.escapeHtml(item.label)))
+										.append($('<div class=\"id\">').html('[' + $.escapeHtml(item.id) + ']'))
 										.appendTo(ul);
 								}
+
 								$(this).prev('.ui-helper-hidden-accessible').remove();
 							},
 							select: function(event, ui) {

@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -17,7 +16,7 @@ $sAdminFormAction = '/admin/revision/list/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
-$tableName = Core_Array::getRequest('table');
+$tableName = Core_Array::getRequest('table', '', 'trim');
 $singular = Core_Inflection::getSingular($tableName);
 
 $titleName = class_exists($singular . '_Model')
@@ -27,7 +26,7 @@ $titleName = class_exists($singular . '_Model')
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title(Core::_('Revision_List.title', $titleName))
@@ -69,7 +68,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 // Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
 !$oUser->superuser && $oUser->only_access_my_own
-	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
+	&& $oAdmin_Form_Dataset->addUserConditions();
 
 if (!class_exists($singular . '_Model'))
 {
@@ -82,6 +81,8 @@ $getPrimaryKeyName = $oModel->getPrimaryKeyName();
 
 // Добавляем внешнее поле, доступное для сортировки и фильтрации
 $oAdmin_Form_Dataset->addExternalField('name');
+
+$oAdmin_Form_Controller->addFilter('user_id', array($oAdmin_Form_Controller, '_filterCallbackUser'));
 
 $oAdmin_Form_Dataset->addCondition(
 		array('select' => array(

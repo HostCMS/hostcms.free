@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Crm_Project_Controller_Note extends Admin_Form_Controller_View
 {
@@ -110,7 +109,7 @@ class Crm_Project_Controller_Note extends Admin_Form_Controller_View
 
 		$aEntities = $aDatasets[0]->load();
 
-		$additionalParams = 'crm_project_id={crm_project_id}';
+		$additionalParams = 'crm_project_id={crm_project_id}&secret_csrf=' . Core_Security::getCsrfToken();
 		$externalReplace = $oAdmin_Form_Controller->getExternalReplace();
 		foreach ($externalReplace as $replace_key => $replace_value)
 		{
@@ -144,7 +143,7 @@ class Crm_Project_Controller_Note extends Admin_Form_Controller_View
 							<?php
 								Admin_Form_Entity::factory('Textarea')
 									->name('text_note')
-									->rows(7)
+									->rows(5)
 									->wysiwyg(Core::moduleIsActive('wysiwyg'))
 									->wysiwygOptions(array(
 										'menubar' => 'false',
@@ -176,7 +175,7 @@ class Crm_Project_Controller_Note extends Admin_Form_Controller_View
 									echo Crm_Note_Controller::getCompletedDropdown($this->_Admin_Form_Controller);
 									?>
 								</div>
-								<button id="sendForm" class="btn btn-palegreen btn-sm" type="submit">
+								<button id="sendForm" class="btn btn-primary btn-sm" type="submit">
 									<?php echo Core::_('Crm_Note.send')?>
 								</button>
 							</div>
@@ -195,7 +194,7 @@ class Crm_Project_Controller_Note extends Admin_Form_Controller_View
 						$form.dropzone({
 							url: $form.attr('action'),
 							parallelUploads: 10,
-							maxFilesize: 5,
+							maxFilesize: <?php echo Core::$mainConfig['dropzoneMaxFilesize']?>,
 							paramName: 'file',
 							uploadMultiple: true,
 							clickable: '#<?php echo $windowId?> .dropzone-form-note #dropzone',
@@ -290,7 +289,7 @@ class Crm_Project_Controller_Note extends Admin_Form_Controller_View
 						}
 						?>
 						<li class="timeline-inverted <?php echo $class?>">
-							<div class="timeline-badge palegreen">
+							<div class="timeline-badge yellow">
 								<img class="img-circle" src="<?php echo $oUser->getAvatar()?>" width="30" height="30"/>
 							</div>
 							<div class="timeline-panel">
@@ -325,7 +324,7 @@ class Crm_Project_Controller_Note extends Admin_Form_Controller_View
 
 												$onclick = $oAdmin_Form_Action->name == 'edit'
 													? "$.modalLoad({path: '{$oAdmin_Form_Controller->getPath()}', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][{$oEntity->id}]=1&crm_project_id={$oCrm_Project->id}', windowId: '{$windowId}', width: '90%'}); return false"
-													: $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), $oAdmin_Form_Action->name, NULL, 0, intval($oEntity->id));
+													: $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), $oAdmin_Form_Action->name, NULL, 0, intval($oEntity->id), $additionalParams);
 
 												// Добавляем установку метки для чекбокса и строки + добавлем уведомление, если необходимо
 												if ($oAdmin_Form_Action->confirm)

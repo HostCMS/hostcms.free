@@ -7,7 +7,7 @@ return array(
 	'authorization_form_ip' => 'Attach session to IP address',
 	'authorization_form_button' => 'Enter',
 	'themes' => 'Themes',
-	'authorization_error_valid_user' => 'Error! Invalid login and password!<br />Your IP is <b>%s</b>, administrator informed of this event.',
+	'authorization_error_valid_user' => "Error! Incorrect data, login <b>%s</b>!<br />Your IP is <b>%s</b>, administrator is notified of this event.",
 	'authorization_error_access_temporarily_unavailable' => 'Access temporarily unavailable. Please try again in %s seconds',
 	'authorization_title' => 'HostCMS Backend',
 	'authorization_notice' => '* In order to enter back-end, your browser should support Cookies.',
@@ -78,8 +78,8 @@ return array(
 	'selectSite' => 'Select Site',
 
 	'company' => 'Hostmake LLC',
-	'company-website' => 'www.hostcms.ru',
-	'company-support' => 'support@hostcms.ru',
+	'company-website' => 'www.hostcms.org',
+	'company-support' => 'support@hostcms.org',
 	'copy' => '%s [Copy %s]',
 	'exit' => 'Exit',
 	'home' => 'Home',
@@ -107,4 +107,10 @@ return array(
 	'no_title' => '<No title>',
 
 	'root' => "Root",
+	'autocomplete_placeholder' => "Start typing…",
+	'time' => 'time',
+	'day' => 'day',
+	'days' => '%d days',
+	'hour' => 'hour',
+	'hours' => '%d hours',
 );

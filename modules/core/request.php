@@ -58,14 +58,13 @@ class Core_Request
 		if (is_null($this->_rawPost))
 		{
 			$this->_rawPost = strcasecmp(Core_Array::get($_SERVER, 'REQUEST_METHOD'), 'POST') == 0
-				? (isset($GLOBALS['HTTP_RAW_POST_DATA'])
+				? trim(isset($GLOBALS['HTTP_RAW_POST_DATA'])
 					? $GLOBALS['HTTP_RAW_POST_DATA']
 					: @file_get_contents("php://input")
 				)
-				: NULL;
-
-			$this->_rawPost = trim($this->_rawPost);
+				: '';
 		}
+
 		return $this->_rawPost;
 	}
 

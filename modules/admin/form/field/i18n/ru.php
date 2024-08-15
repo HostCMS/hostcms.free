@@ -5,9 +5,8 @@
  *
  * @package HostCMS
  * @subpackage Admin
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @version 7.x
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Поля формы центра администрирования',
@@ -81,4 +80,8 @@ return array(
 	'filter_having' => 'HAVING',
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
+	'filter_condition' => 'Условие фильтрации',
+
+	'show_by_default' => 'Показывать по умолчанию',
+	'not_show_by_default' => 'Не показывать по умолчанию',
 );

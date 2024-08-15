@@ -7,17 +7,20 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @version 7.x
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Breadcrumbs extends Admin_Form_Entity
 {
 	/**
 	 * Executes the business logic.
+	 * @hostcms-event Skin_Bootstrap_Admin_Form_Entity_Breadcrumbs.onBeforeExecute
+	 * @hostcms-event Skin_Bootstrap_Admin_Form_Entity_Breadcrumbs.onAfterExecute
 	 */
 	public function execute()
 	{
+		Core_Event::notify(get_class($this) . '.onBeforeExecute', $this);
+
 		$count = count($this->_children);
 
 		foreach ($this->_children as $key => $oAdmin_Form_Entity)
@@ -26,5 +29,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Breadcrumbs extends Admin_Form_Entity
 
 			$oAdmin_Form_Entity->execute();
 		}
+
+		Core_Event::notify(get_class($this) . '.onAfterExecute', $this);
 	}
 }

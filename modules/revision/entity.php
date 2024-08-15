@@ -8,10 +8,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Revision
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
-class Revision_Entity
+class Revision_Entity extends Core_Empty_Entity
 {
 	/**
 	 * Backend property
@@ -42,59 +41,6 @@ class Revision_Entity
 	 * @var string
 	 */
 	protected $_modelName = 'revision';
-
-	/**
-	 * Get model name, e.g. 'book' for 'Book_Model'
-	 * @return string
-	 */
-	public function getModelName()
-	{
-		return $this->_modelName;
-	}
-
-	/**
-	 * Load columns list
-	 * @return self
-	 */
-	protected function _loadColumns()
-	{
-		return $this;
-	}
-
-	/**
-	 * Get primary key name
-	 * @return string
-	 */
-	public function getPrimaryKeyName()
-	{
-		return 'id';
-	}
-
-	/**
-	 * Table columns
-	 * @var array
-	 */
-	protected $_tableColums = array();
-
-	/**
-	 * Set table columns
-	 * @param array $tableColums columns
-	 * @return self
-	 */
-	public function setTableColums($tableColums)
-	{
-		$this->_tableColums = $tableColums;
-		return $this;
-	}
-
-	/**
-	 * Get table columns
-	 * @return array
-	 */
-	public function getTableColumns()
-	{
-		return $this->_tableColums;
-	}
 
 	/**
 	 * Delete object from database

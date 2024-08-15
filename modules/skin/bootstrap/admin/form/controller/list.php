@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_View
 {
@@ -69,6 +68,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 	public function execute()
 	{
 		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
+		$oAdmin_Form = $oAdmin_Form_Controller->getAdminForm();
 
 		$sAdmin_View = $this->_Admin_Form_Controller->getWindowId() == 'id_content'
 			? $this->_Admin_Form_Controller->Admin_View
@@ -97,14 +97,33 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 		// При показе формы могут быть добавлены сообщения в message, поэтому message показывается уже после отработки формы
 		ob_start();
-		$this->_topMenuBar();
-		foreach ($aAdminFormControllerChildren as $oAdmin_Form_Entity)
+
+		$bShowForm = TRUE;
+
+		$oAdmin_Form_Action_View = $oAdmin_Form->Admin_Form_Actions->getByName('viewForm');
+
+		if ($oAdmin_Form_Action_View)
 		{
-			$oAdmin_Form_Entity->execute();
+			$oUser = Core_Auth::getCurrentUser();
+			$bShowForm = $oAdmin_Form->Admin_Form_Actions->checkAllowedActionForUser($oUser, 'viewForm');
 		}
 
-		$this->_showContent();
-		$this->_showFooter();
+		if ($bShowForm)
+		{
+			$this->_topMenuBar();
+			foreach ($aAdminFormControllerChildren as $oAdmin_Form_Entity)
+			{
+				$oAdmin_Form_Entity->execute();
+			}
+
+			$this->_showContent();
+			$this->_showFooter();
+		}
+		else
+		{
+			Core_Message::show(Core::_('Admin_Form.viewForm_disallow'), 'error');
+		}
+
 		$content = ob_get_clean();
 
 		$oAdmin_View
@@ -125,18 +144,20 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 	protected function _pageSelector()
 	{
 		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
+		$oAdmin_Form = $oAdmin_Form_Controller->getAdminForm();
 
-		$sCurrentValue = $oAdmin_Form_Controller->limit;
+		// $sCurrentValue = $oAdmin_Form_Controller->limit;
 
-		$windowId = Core_Str::escapeJavascriptVariable($oAdmin_Form_Controller->getWindowId());
-		$additionalParams = Core_Str::escapeJavascriptVariable(
-			str_replace(array('"'), array('&quot;'), $oAdmin_Form_Controller->additionalParams)
-		);
- 		$path = Core_Str::escapeJavascriptVariable($oAdmin_Form_Controller->getPath());
+		// $windowId = Core_Str::escapeJavascriptVariable($oAdmin_Form_Controller->getWindowId());
+		// $additionalParams = Core_Str::escapeJavascriptVariable(
+		// 	str_replace(array('"'), array('&quot;'), $oAdmin_Form_Controller->additionalParams)
+		// );
 
 		// TOP FILTER
 		if ($this->_filterAvailable())
 		{
+			$path = Core_Str::escapeJavascriptVariable($oAdmin_Form_Controller->getPath());
+
 			$oCore_Html_Entity_Span = Core_Html_Entity::factory('Span')
 				->class('btn btn-sm btn-default margin-right-10')
 				->id('showTopFilterButton')
@@ -161,7 +182,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 		}
 
 		// CSV Export
-		$oCore_Html_Entity_Span = Core_Html_Entity::factory('A')
+		Core_Html_Entity::factory('A')
 			->class('btn btn-sm btn-default margin-right-10')
 			->id('exportCsvButton')
 			->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath()) . '&hostcms[export]=csv')
@@ -169,6 +190,19 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 			->target('_blank')
 			->add(
 				Core_Html_Entity::factory('I')->class('fa fa-upload no-margin')
+			)
+			->execute();
+
+		// $oUser = Core_Auth::getCurrentUser();
+
+		// Settings
+		Core_Html_Entity::factory('Span')
+			->class('btn btn-sm btn-default margin-right-10')
+			->id('adminFormSettings')
+			->title(Core::_('Admin_Form.admin_form_field_settings'))
+			->onclick('$.showAdminFormSettings(' . $oAdmin_Form->id . ')')
+			->add(
+				Core_Html_Entity::factory('I')->class('fa-solid fa-cog no-margin')
 			)
 			->execute();
 
@@ -227,7 +261,6 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 		return $this;
 	}
 
-
 	/**
 	 * Check filter availability
 	 * @return boolean
@@ -256,6 +289,295 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 		}
 
 		return FALSE;
+	}
+
+	/**
+	 * Show top filter form
+	 * @return self
+	 */
+	protected function _showTopFilter()
+	{
+		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
+		$oAdmin_Form = $oAdmin_Form_Controller->getAdminForm();
+
+		$oAdmin_Language = $oAdmin_Form_Controller->getAdminLanguage();
+
+		$aAdmin_Form_Fields = $this->_Admin_Form_Controller->getAdminFormFields();
+		if (empty($aAdmin_Form_Fields))
+		{
+			throw new Core_Exception('Admin form does not have fields.');
+		}
+
+		$windowId = $oAdmin_Form_Controller->getWindowId();
+
+		$aHide = array();
+		$path = Core_Str::escapeJavascriptVariable($oAdmin_Form_Controller->getPath());
+
+		$aTabs = Core_Array::get($oAdmin_Form_Controller->getFilterSettings(), 'tabs', array());
+		?>
+		<div class="tabbable topFilter" style="display: none" id="top-filter-<?php echo $oAdmin_Form->id?>">
+			<ul class="nav nav-tabs tabs-flat" id="filterTabs">
+				<?php
+				!isset($aTabs['main']) && $aTabs['main'] = array();
+
+				foreach ($aTabs as $tabName => $aTab)
+				{
+					$tabName = strval($tabName);
+					$bMain = $tabName === 'main';
+
+					$bCurrent = $oAdmin_Form_Controller->filterId === $tabName
+						|| $oAdmin_Form_Controller->filterId === '' && $bMain;
+
+					?><li id="filter-li-<?php echo htmlspecialchars($tabName)?>" <?php echo $bCurrent ? ' class="active tab-orange"' : ''?> data-filter-id="<?php echo htmlspecialchars($tabName)?>">
+						<a data-toggle="tab" href="#filter-<?php echo htmlspecialchars($tabName)?>">
+							<?php echo htmlspecialchars(
+								$bMain
+									? Core::_('Admin_Form.filter')
+									: $aTab['caption']
+							)?>
+						</a>
+					</li>
+					<?php
+				}
+				?>
+			</ul>
+			<div class="tab-content tabs-flat">
+				<?php
+				$filterPrefix = 'topFilter_';
+				foreach ($aTabs as $tabName => $aTab)
+				{
+					$tabName = strval($tabName);
+					$bMain = $tabName === 'main';
+
+					$bCurrent = $oAdmin_Form_Controller->filterId === $tabName
+						|| $oAdmin_Form_Controller->filterId === '' && $bMain;
+
+					?><div id="filter-<?php echo htmlspecialchars($tabName)?>" class="tab-pane<?php echo $bCurrent ? ' in active' : ''?>">
+						<div id="horizontal-form">
+							<form class="form-horizontal" role="form" action="<?php echo htmlspecialchars($oAdmin_Form_Controller->getPath())?>" data-filter-id="<?php echo htmlspecialchars($tabName)?>" method="POST">
+								<?php
+								// Top Filter
+								foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
+								{
+									// Перекрытие параметров для данного поля
+									$oAdmin_Form_Field_Changed = $oAdmin_Form_Field;
+
+									$aDatasets = $oAdmin_Form_Controller->getDatasets();
+									foreach ($aDatasets as $datasetKey => $oTmpAdmin_Form_Dataset)
+									{
+										$oAdmin_Form_Field_Changed = $oAdmin_Form_Controller->changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
+									}
+
+									if ($oAdmin_Form_Field_Changed->allow_filter && $oAdmin_Form_Field_Changed->view != 2 || $oAdmin_Form_Field_Changed->view == 1)
+									{
+										$fieldName = $oAdmin_Form_Field instanceof Admin_Form_Field_Model
+											? $oAdmin_Form_Field->getCaption($oAdmin_Language->id)
+											: $oAdmin_Form_Field->name;
+
+										if (!is_null($fieldName))
+										{
+											$sFormGroupId = $tabName . '-field-' . $oAdmin_Form_Field_Changed->id;
+
+											$bHide = isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field_Changed->name]['show'])
+												&& $aTabs[$tabName]['fields'][$oAdmin_Form_Field_Changed->name]['show'] == 0;
+
+											$bHide && $aHide[] = '#' . $sFormGroupId;
+
+											$sInputId = "id_{$filterPrefix}{$oAdmin_Form_Field_Changed->id}";
+
+											?><div class="form-group" id="<?php echo htmlspecialchars($sFormGroupId)?>">
+												<label for="<?php echo htmlspecialchars($sInputId)?>" class="col-sm-3 col-lg-2 control-label no-padding-right">
+													<?php echo htmlspecialchars($fieldName)?>
+												</label>
+												<div class="col-sm-9 col-lg-10">
+													<div class="row">
+														<?php
+															if ($oAdmin_Form_Field_Changed->filter_condition)
+															{
+																?>
+																<div class="col-xs-2 col-md-1 no-padding-right">
+																<?php
+																$aOptions = array(
+																	'=' => '=',
+																	'>' => '>',
+																	'<' => '<',
+																	'>=' => '≥',
+																	'<=' => '≤',
+																);
+																?>
+																<select name="<?php echo $filterPrefix, $oAdmin_Form_Field_Changed->id, '_condition'?>" class="form-control input-sm">
+																	<?php
+																	$filterCondition = Core_Array::get($oAdmin_Form_Controller->request, "{$filterPrefix}{$oAdmin_Form_Field_Changed->id}_condition", '=');
+
+																	foreach ($aOptions as $key => $value)
+																	{
+
+																		$selected = $filterCondition == $key ? 'selected="selected"' : '';
+
+																		?><option <?php echo $selected?> value="<?php echo $key?>"><?php echo $value?></option><?php
+																	}
+																	?>
+																</select>
+
+																</div>
+																<?php
+															}
+														?>
+														<div class="<?php echo $oAdmin_Form_Field_Changed->filter_condition ? 'col-xs-10 col-md-11' : 'col-sm-12'?>">
+															<?php
+															$oAdmin_Form_Controller->showFilterField($oAdmin_Form_Field_Changed, $filterPrefix, $tabName);
+															?>
+														</div>
+													</div>
+												</div>
+											</div><?php
+										}
+									}
+								}
+
+								if (Core::moduleIsActive('tag') && !is_null($oAdmin_Form_Controller->showTopFilterTags))
+								{
+									$aOptionTags = array();
+
+									$aFilterValues = Core_Array::getPost($filterPrefix . 'filter_tags', array(), 'array');
+
+									foreach ($aFilterValues as $tag_name)
+									{
+										$oTag = Core_Entity::factory('Tag')->getByName($tag_name);
+
+										if (!is_null($oTag))
+										{
+											$aOptionTags[$oTag->name] = array(
+												'value' => $oTag->name,
+												'attr' => array('selected' => 'selected')
+											);
+										}
+									}
+
+									?><div class="form-group" id="filter_tags">
+										<label for="id_<?php echo $filterPrefix?>_filter_tags" class="col-sm-3 col-lg-2 control-label no-padding-right">
+											Метки
+										</label>
+										<div class="col-sm-9 col-lg-10">
+											<div class="row">
+												<div class="col-sm-12"><?php
+													Admin_Form_Entity::factory('Select')
+														->options($aOptionTags)
+														->name($filterPrefix . 'filter_tags[]')
+														->class('filter-tags')
+														->style('width: 100%')
+														->multiple('multiple')
+														->divAttr(array('class' => ''))
+														->execute();
+												?></div>
+												<script>
+												$(function(){
+													$("#<?php echo $windowId?> .filter-tags").select2({
+														dropdownParent: $("#<?php echo $windowId?>"),
+														language: "<?php echo Core_I18n::instance()->getLng()?>",
+														minimumInputLength: 1,
+														placeholder: "<?php echo Core::_('Shop_Item.type_tag')?>",
+														tags: true,
+														allowClear: true,
+														multiple: true,
+														ajax: {
+															url: "/admin/tag/index.php?loadFilterTagsList&entity=<?php echo $oAdmin_Form_Controller->showTopFilterTags?>",
+															dataType: "json",
+															type: "GET",
+															processResults: function (data) {
+																var aResults = [];
+																$.each(data, function (index, item) {
+																	aResults.push({
+																		"id": item.id,
+																		"text": item.text
+																	});
+																});
+																return {
+																	results: aResults
+																};
+															}
+														}
+													});
+												});</script>
+											</div>
+										</div>
+									</div><?php
+								}
+								?>
+								<div class="form-group text-align-right">
+									<div class="col-sm-offset-2 col-sm-10">
+										<button type="submit" class="btn btn-default" onclick="mainFormLocker.unlock(); <?php echo $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath())?>"><?php echo Core::_('Admin_Form.button_to_filter')?></button>
+										<div class="btn-group">
+											<a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+												<i class="fa fa-plus"></i>
+											</a>
+											<ul class="dropdown-menu dropdown-menu-right">
+												<?php
+												foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
+												{
+													if ($oAdmin_Form_Field->allow_filter && $oAdmin_Form_Field->view != 2 || $oAdmin_Form_Field->view == 1)
+													{
+														$fieldName = $oAdmin_Form_Field instanceof Admin_Form_Field_Model
+															? $oAdmin_Form_Field->getCaption($oAdmin_Language->id)
+															: $oAdmin_Form_Field->name;
+
+														if (!is_null($fieldName))
+														{
+															$class = isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['show'])
+																&& $aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['show'] == 0
+																? ''
+																: ' fa-check';
+
+															?><li>
+																<a data-filter-field-id="<?php echo htmlspecialchars($tabName) . '-field-' . $oAdmin_Form_Field->id?>" onclick="$.changeFilterField({ path: '<?php echo $path?>', tab: '<?php echo htmlspecialchars($tabName)?>', field: '<?php echo Core_Str::escapeJavascriptVariable($oAdmin_Form_Field->name)?>', context: this })"><i class="dropdown-icon fa<?php echo $class?>"></i> <?php echo htmlspecialchars($fieldName)?></a>
+															</li><?php
+														}
+													}
+												}
+												?>
+											</ul>
+										</div>
+
+										<div class="btn-group">
+											<a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+												<i class="fa fa-gear"></i>
+											</a>
+											<ul class="dropdown-menu dropdown-menu-right">
+												<li>
+													<a href="javascript:void(0);" onclick="$.filterSaveAs('<?php echo Core::_('Admin_Form.filter_enter_title')?>', $(this), '<?php echo Core_Str::escapeJavascriptVariable(str_replace(array('"'), array('&quot;'), $oAdmin_Form_Controller->additionalParams))?>')"><?php echo Core::_('Admin_Form.saveAs')?></a>
+													<?php if (!$bMain) {
+													?>
+													<a href="javascript:void(0);" onclick="$.filterSave($(this))"><?php echo Core::_('Admin_Form.save')?></a>
+													<?php
+													$sDelete = Core::_('Admin_Form.delete');
+													?>
+													<a href="javascript:void(0);" onclick="res = confirm('<?php echo htmlspecialchars(Core::_('Admin_Form.confirm_dialog', $sDelete))?>'); if (res) { $.filterDelete($(this)) } return res;"><?php echo $sDelete?></a>
+													<?php
+													}
+													?>
+												</li>
+											</ul>
+										</div>
+
+										<a class="btn btn-default" title="<?php echo Core::_('Admin_Form.clear')?>" onclick="$.clearTopFilter('<?php echo Core_Str::escapeJavascriptVariable($windowId)?>')"><i class="fa fa-times-circle no-margin"></i></a>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+					<?php
+				}
+
+				if (count($aHide))
+				{
+					?><script>$('<?php echo implode(',', $aHide)?>').hide();</script><?php
+				}
+				?>
+			</div>
+		</div>
+		<?php
+
+		return $this;
 	}
 
 	/**
@@ -291,169 +613,26 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 		if ($this->_filterAvailable())
 		{
-			$aHide = array();
-			$path = Core_Str::escapeJavascriptVariable($oAdmin_Form_Controller->getPath());
-
-			$aTabs = Core_Array::get($oAdmin_Form_Controller->getFilterSettings(), 'tabs', array());
-			?>
-			<div class="tabbable topFilter" style="display: none" id="top-filter-<?php echo $oAdmin_Form->id?>">
-				<ul class="nav nav-tabs tabs-flat" id="filterTabs">
-					<?php
-					//print_r($aTabs);
-					!isset($aTabs['main']) && $aTabs['main'] = array();
-
-					foreach ($aTabs as $tabName => $aTab)
-					{
-						$tabName = strval($tabName);
-						$bMain = $tabName === 'main';
-
-						$bCurrent = $oAdmin_Form_Controller->filterId === $tabName
-							|| $oAdmin_Form_Controller->filterId === '' && $bMain;
-
-						?><li id="filter-li-<?php echo htmlspecialchars($tabName)?>" <?php echo $bCurrent ? ' class="active tab-orange"' : ''?> data-filter-id="<?php echo htmlspecialchars($tabName)?>">
-							<a data-toggle="tab" href="#filter-<?php echo htmlspecialchars($tabName)?>">
-								<?php echo htmlspecialchars(
-									$bMain
-										? Core::_('Admin_Form.filter')
-										: $aTab['caption']
-								)?>
-							</a>
-						</li>
-						<?php
-					}
-					?>
-				</ul>
-				<div class="tab-content tabs-flat">
-					<?php
-					$filterPrefix = 'topFilter_';
-					foreach ($aTabs as $tabName => $aTab)
-					{
-						$tabName = strval($tabName);
-						$bMain = $tabName === 'main';
-
-						$bCurrent = $oAdmin_Form_Controller->filterId === $tabName
-							|| $oAdmin_Form_Controller->filterId === '' && $bMain;
-
-						?><div id="filter-<?php echo htmlspecialchars($tabName)?>" class="tab-pane<?php echo $bCurrent ? ' in active' : ''?>">
-							<div id="horizontal-form">
-								<form class="form-horizontal" role="form" action="<?php echo htmlspecialchars($oAdmin_Form_Controller->getPath())?>" data-filter-id="<?php echo htmlspecialchars($tabName)?>" method="POST">
-									<?php
-									// Top Filter
-									foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
-									{
-										// Перекрытие параметров для данного поля
-										$oAdmin_Form_Field_Changed = $oAdmin_Form_Field;
-
-										$aDatasets = $oAdmin_Form_Controller->getDatasets();
-										foreach ($aDatasets as $datasetKey => $oTmpAdmin_Form_Dataset)
-										{
-											$oAdmin_Form_Field_Changed = $oAdmin_Form_Controller->changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
-										}
-
-										if ($oAdmin_Form_Field_Changed->allow_filter && $oAdmin_Form_Field_Changed->view != 2 || $oAdmin_Form_Field_Changed->view == 1)
-										{
-											$fieldName = $oAdmin_Form_Field->getCaption($oAdmin_Language->id);
-
-											if (!is_null($fieldName))
-											{
-												$sFormGroupId = $tabName . '-field-' . $oAdmin_Form_Field_Changed->id;
-
-												$bHide = isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field_Changed->name]['show'])
-													&& $aTabs[$tabName]['fields'][$oAdmin_Form_Field_Changed->name]['show'] == 0;
-
-												$bHide && $aHide[] = '#' . $sFormGroupId;
-
-												$sInputId = "id_{$filterPrefix}{$oAdmin_Form_Field_Changed->id}";
-												?><div class="form-group" id="<?php echo htmlspecialchars($sFormGroupId)?>">
-													<label for="<?php echo htmlspecialchars($sInputId)?>" class="col-sm-2 control-label no-padding-right">
-														<?php echo htmlspecialchars($fieldName)?>
-													</label>
-													<div class="col-sm-10">
-														<?php
-														$oAdmin_Form_Controller->showFilterField($oAdmin_Form_Field_Changed, $filterPrefix, $tabName);
-														?>
-													</div>
-												</div><?php
-											}
-										}
-									}
-									?>
-									<div class="form-group text-align-right">
-										<div class="col-sm-offset-2 col-sm-10">
-											<button type="submit" class="btn btn-default" onclick="mainFormLocker.unlock(); <?php echo $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath())?>"><?php echo Core::_('Admin_Form.button_to_filter')?></button>
-											<div class="btn-group">
-												<a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-													<i class="fa fa-plus"></i>
-												</a>
-												<ul class="dropdown-menu dropdown-menu-right">
-													<?php
-													foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
-													{
-														if ($oAdmin_Form_Field->allow_filter && $oAdmin_Form_Field->view != 2 || $oAdmin_Form_Field->view == 1)
-														{
-															$fieldName = $oAdmin_Form_Field->getCaption($oAdmin_Language->id);
-
-															if (!is_null($fieldName))
-															{
-																$class = isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['show'])
-																	&& $aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['show'] == 0
-																	? ''
-																	: ' fa-check';
-
-																?><li>
-																	<a data-filter-field-id="<?php echo htmlspecialchars($tabName) . '-field-' . $oAdmin_Form_Field->id?>" onclick="$.changeFilterField({ path: '<?php echo $path?>', tab: '<?php echo htmlspecialchars($tabName)?>', field: '<?php echo Core_Str::escapeJavascriptVariable($oAdmin_Form_Field->name)?>', context: this })"><i class="dropdown-icon fa<?php echo $class?>"></i> <?php echo htmlspecialchars($fieldName)?></a>
-																</li><?php
-															}
-														}
-													}
-													?>
-												</ul>
-											</div>
-
-											<div class="btn-group">
-												<a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-													<i class="fa fa-gear"></i>
-												</a>
-												<ul class="dropdown-menu dropdown-menu-right">
-													<li>
-														<a href="javascript:void(0);" onclick="$.filterSaveAs('<?php echo Core::_('Admin_Form.filter_enter_title')?>', $(this), '<?php echo Core_Str::escapeJavascriptVariable(str_replace(array('"'), array('&quot;'), $oAdmin_Form_Controller->additionalParams))?>')"><?php echo Core::_('Admin_Form.saveAs')?></a>
-														<?php if (!$bMain) {
-														?>
-														<a href="javascript:void(0);" onclick="$.filterSave($(this))"><?php echo Core::_('Admin_Form.save')?></a>
-														<?php
-														$sDelete = Core::_('Admin_Form.delete');
-														?>
-														<a href="javascript:void(0);" onclick="res = confirm('<?php echo htmlspecialchars(Core::_('Admin_Form.confirm_dialog', $sDelete))?>'); if (res) { $.filterDelete($(this)) } return res;"><?php echo $sDelete?></a>
-														<?php
-														}
-														?>
-													</li>
-												</ul>
-											</div>
-
-											<a class="btn btn-default" title="<?php echo Core::_('Admin_Form.clear')?>" onclick="$.clearTopFilter('<?php echo Core_Str::escapeJavascriptVariable($windowId)?>')"><i class="fa fa-times-circle no-margin"></i></a>
-										</div>
-									</div>
-								</form>
-							</div>
-						</div>
-						<?php
-					}
-
-					if (count($aHide))
-					{
-						?><script>$('<?php echo implode(',', $aHide)?>').hide();</script><?php
-					}
-					?>
-				</div>
-			</div>
-		<?php
+			$this->_showTopFilter();
 		}
 
 		$oSortingField = $oAdmin_Form_Controller->getSortingField();
+
+		// Available Fields for User
+		$aAvailableFields = $oAdmin_Form->getAvailableFieldsForUser($oUser->id);
+
+		if (!count($aAvailableFields))
+		{
+			foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
+			{
+				$oAdmin_Form_Field->show_by_default
+					&& $aAvailableFields[$oAdmin_Form_Field->id] = $oAdmin_Form_Field->id;
+			}
+		}
+
 		?>
 		<div class="admin-table-wrap table-scrollable no-border">
-			<table class="admin-table table table-hover table-striped" id="admin-table-<?php echo $oAdmin_Form->id?>">
+			<table class="admin-table table table-hover table-striped" data-admin-form-id="<?php echo $oAdmin_Form->id?>" id="admin-table-<?php echo $oAdmin_Form->id?>">
 				<thead>
 				<tr>
 					<?php
@@ -466,71 +645,87 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 					$allow_filter = FALSE;
 					foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 					{
-						// 0 - Столбец и фильтр, 2 - Столбец
-						if ($oAdmin_Form_Field->view == 0 || $oAdmin_Form_Field->view == 2)
+						if (isset($aAvailableFields[$oAdmin_Form_Field->id]))
 						{
-							// There is at least one filter
-							$oAdmin_Form_Field->allow_filter && $allow_filter = TRUE;
-
-							// Перекрытие параметров для данного поля
-							$oAdmin_Form_Field_Changed = $oAdmin_Form_Field;
-
-							$aDatasets = $oAdmin_Form_Controller->getDatasets();
-							foreach ($aDatasets as $datasetKey => $oTmpAdmin_Form_Dataset)
+							// 0 - Столбец и фильтр, 2 - Столбец
+							if ($oAdmin_Form_Field->view == 0 || $oAdmin_Form_Field->view == 2)
 							{
-								$oAdmin_Form_Field_Changed = $oAdmin_Form_Controller->changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
+								// There is at least one filter
+								$oAdmin_Form_Field->allow_filter && $allow_filter = TRUE;
+
+								// Перекрытие параметров для данного поля
+								$oAdmin_Form_Field_Changed = $oAdmin_Form_Field;
+
+								$aDatasets = $oAdmin_Form_Controller->getDatasets();
+								foreach ($aDatasets as $datasetKey => $oTmpAdmin_Form_Dataset)
+								{
+									$oAdmin_Form_Field_Changed = $oAdmin_Form_Controller->changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
+								}
+
+								$oAdmin_Form_Field_Settings = Core_Entity::factory('Admin_Form_Field_Setting');
+								$oAdmin_Form_Field_Settings->queryBuilder()
+									->where('admin_form_id', '=', $oAdmin_Form->id)
+									->where('admin_form_field_id', '=', $oAdmin_Form_Field_Changed->id)
+									->where('user_id', '=', $oUser->id);
+
+								$oAdmin_Form_Field_Setting = $oAdmin_Form_Field_Settings->getFirst(FALSE);
+
+								$width = !is_null($oAdmin_Form_Field_Setting) && intval($oAdmin_Form_Field_Setting->width)
+									? $oAdmin_Form_Field_Setting->width . 'px'
+									: htmlspecialchars((string) $oAdmin_Form_Field_Changed->width);
+
+								$class = htmlspecialchars((string) $oAdmin_Form_Field_Changed->class);
+
+								$fieldName = $oAdmin_Form_Field instanceof Admin_Form_Field_Model
+									? $oAdmin_Form_Field->getCaption($oAdmin_Language->id)
+									: $oAdmin_Form_Field->name;
+
+								$fieldName = !is_null($fieldName) && $fieldName !== ''
+									? htmlspecialchars($fieldName)
+									: '—';
+
+								$oAdmin_Form_Field_Changed->allow_sorting
+									&& is_object($oSortingField)
+									&& $oAdmin_Form_Field->id == $oSortingField->id
+									&& $class .= ' highlight';
+
+								$sSortingOnClick = '';
+
+								if ($oAdmin_Form_Field_Changed->allow_sorting)
+								{
+									//$hrefDown = $oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, NULL, NULL, NULL, $oAdmin_Form_Field->id, 1);
+									$onclickDown = $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, NULL, NULL, NULL, $oAdmin_Form_Field->id, 1);
+
+									//$hrefUp = $oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, NULL, NULL, NULL, $oAdmin_Form_Field->id, 0);
+									$onclickUp = $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, NULL, NULL, NULL, $oAdmin_Form_Field->id, 0);
+
+									if ($oAdmin_Form_Field->id == $oAdmin_Form_Controller->sortingFieldId)
+									{
+										$class .= $oAdmin_Form_Controller->sortingDirection == 1
+											? ' sorting_desc'
+											: ' sorting_asc';
+
+										$sSortingOnClick = $oAdmin_Form_Controller->sortingDirection == 1
+											? $onclickUp
+											: $onclickDown;
+									}
+									else
+									{
+										$class .= ' sorting';
+										$sSortingOnClick = $onclickUp;
+									}
+								}
+								?><th title="<?php echo $fieldName?>" class="<?php echo trim($class)?>" <?php echo !empty($width) ? "width=\"{$width}\"" : ''?> onclick="if (event.target != event.currentTarget) return false; <?php echo $sSortingOnClick?>" data-admin-form-field-id="<?php echo $oAdmin_Form_Field_Changed->id?>"><?php
+									if ($oAdmin_Form_Field_Changed->ico !='')
+									{
+										echo '<i class="' . htmlspecialchars((string) $oAdmin_Form_Field_Changed->ico) . '" title="' . $fieldName . '"></i>';
+									}
+									else
+									{
+										echo $fieldName;
+									}
+								?></th><?php
 							}
-
-							$width = htmlspecialchars((string) $oAdmin_Form_Field_Changed->width);
-							$class = htmlspecialchars((string) $oAdmin_Form_Field_Changed->class);
-
-							$fieldName = $oAdmin_Form_Field->getCaption($oAdmin_Language->id);
-
-							$fieldName = !is_null($fieldName) && $fieldName !== ''
-								? htmlspecialchars($fieldName)
-								: '—';
-
-							$oAdmin_Form_Field_Changed->allow_sorting
-								&& is_object($oSortingField)
-								&& $oAdmin_Form_Field->id == $oSortingField->id
-								&& $class .= ' highlight';
-
-							$sSortingOnClick = '';
-
-							if ($oAdmin_Form_Field_Changed->allow_sorting)
-							{
-								//$hrefDown = $oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, NULL, NULL, NULL, $oAdmin_Form_Field->id, 1);
-								$onclickDown = $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, NULL, NULL, NULL, $oAdmin_Form_Field->id, 1);
-
-								//$hrefUp = $oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, NULL, NULL, NULL, $oAdmin_Form_Field->id, 0);
-								$onclickUp = $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, NULL, NULL, NULL, $oAdmin_Form_Field->id, 0);
-
-								if ($oAdmin_Form_Field->id == $oAdmin_Form_Controller->sortingFieldId)
-								{
-									$class .= $oAdmin_Form_Controller->sortingDirection == 1
-										? ' sorting_desc'
-										: ' sorting_asc';
-
-									$sSortingOnClick = $oAdmin_Form_Controller->sortingDirection == 1
-										? $onclickUp
-										: $onclickDown;
-								}
-								else
-								{
-									$class .= ' sorting';
-									$sSortingOnClick = $onclickUp;
-								}
-							}
-							?><th title="<?php echo $fieldName?>" class="<?php echo trim($class)?>" <?php echo !empty($width) ? "width=\"{$width}\"" : ''?> onclick="if (event.target != event.currentTarget) return false; <?php echo $sSortingOnClick?>"><?php
-								if ($oAdmin_Form_Field_Changed->ico !='')
-								{
-									echo '<i class="' . htmlspecialchars((string) $oAdmin_Form_Field_Changed->ico) . '" title="' . $fieldName . '"></i>';
-								}
-								else
-								{
-									echo $fieldName;
-								}
-							?></th><?php
 						}
 					}
 
@@ -540,12 +735,12 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 					if ($oAdmin_Form->show_operations && $oAdmin_Form_Controller->showOperations
 						|| $allow_filter && $this->showFilter)
 					{
-							$iSingleActionCount = 0;
+						$iSingleActionCount = 0;
 
-							foreach ($aAllowed_Admin_Form_Actions as $oAdmin_Form_Action)
-							{
-								$oAdmin_Form_Action->single && $iSingleActionCount++;
-							}
+						foreach ($aAllowed_Admin_Form_Actions as $oAdmin_Form_Action)
+						{
+							$oAdmin_Form_Action->single && $iSingleActionCount++;
+						}
 
 						?><th class="filter-action-<?php echo $iSingleActionCount?> sticky-column">&nbsp;</th><?php
 					}
@@ -562,7 +757,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 			foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 			{
 				// 0 - Столбец и фильтр, 2 - Столбец
-				if ($oAdmin_Form_Field->view == 0 || $oAdmin_Form_Field->view == 2)
+				if (isset($aAvailableFields[$oAdmin_Form_Field->id]) && ($oAdmin_Form_Field->view == 0 || $oAdmin_Form_Field->view == 2))
 				{
 					// Перекрытие параметров для данного поля
 					$oAdmin_Form_Field_Changed = $oAdmin_Form_Field;
@@ -613,6 +808,8 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 			}
 			?></tr>
 			</thead><?php
+
+			$oAdmin_Form_Controller->addAdditionalParam('secret_csrf', Core_Security::getCsrfToken());
 
 			// Устанавливаем ограничения на источники
 			$oAdmin_Form_Controller->setDatasetConditions();
@@ -681,13 +878,15 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 						foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 						{
 							// 0 - Столбец и фильтр, 2 - Столбец
-							if ($oAdmin_Form_Field->view == 0 || $oAdmin_Form_Field->view == 2)
+							if (isset($aAvailableFields[$oAdmin_Form_Field->id])
+								&& ($oAdmin_Form_Field->view == 0 || $oAdmin_Form_Field->view == 2)
+							)
 							{
 								// Перекрытие параметров для данного поля
 								$oAdmin_Form_Field_Changed = $oAdmin_Form_Controller->changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field);
 
 								// Параметры поля.
-								$width = htmlspecialchars(trim((string) $oAdmin_Form_Field_Changed->width));
+								// $width = htmlspecialchars(trim((string) $oAdmin_Form_Field_Changed->width));
 								$class = htmlspecialchars((string) $oAdmin_Form_Field_Changed->class);
 
 								$oAdmin_Form_Field->allow_sorting
@@ -695,7 +894,8 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 									&& $oAdmin_Form_Field->id == $oSortingField->id
 									&& $class .= ' highlight';
 
-								?><td class="<?php echo trim($class)?>" <?php echo !empty($width) ? "width=\"{$width}\"" : ''?>><?php
+								/*?><td class="<?php echo trim($class)?>" <?php echo !empty($width) ? "width=\"{$width}\"" : ''?>><?php*/
+								?><td class="<?php echo trim($class)?>"><?php
 
 								$fieldName = $oAdmin_Form_Controller->getFieldName($oAdmin_Form_Field_Changed->name);
 
@@ -913,7 +1113,9 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 												}
 
 												// Получаем заголовок столбца на случай, если для IMG не было указано alt-а или title
-												$fieldCaption = $oAdmin_Form_Field->getCaption($oAdmin_Language->id);
+												$fieldCaption = $oAdmin_Form_Field instanceof Admin_Form_Field_Model
+													? $oAdmin_Form_Field->getCaption($oAdmin_Language->id)
+													: $oAdmin_Form_Field->name;
 
 												$fieldCaption = $fieldCaption != ''
 													? $fieldCaption
@@ -1024,7 +1226,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 											case 9: // Текст "AS IS"
 												if (mb_strlen($value) != 0)
 												{
-													echo html_entity_decode($value, ENT_COMPAT, 'UTF-8');
+													echo '<span>' . html_entity_decode($value, ENT_COMPAT, 'UTF-8') . '</span>';
 												}
 												else
 												{
@@ -1055,7 +1257,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 										}
 										elseif (property_exists($oEntity, $fieldName))
 										{
-											echo $oEntity->$fieldName;
+											echo '<span>' . htmlspecialchars($oEntity->$fieldName) . '</span>';
 										}
 									}
 									Core_Event::notify('Admin_Form_Controller.onAfterShowField', $oAdmin_Form_Controller, array($oEntity, $oAdmin_Form_Field));
@@ -1098,7 +1300,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 							!is_array($aActions)
 								&& $aActions = $aAllowed_Admin_Form_Actions;
 
-							foreach ($aActions as $key => $oAdmin_Form_Action)
+							foreach ($aActions as $oAdmin_Form_Action)
 							{
 								// Перекрытие параметров для данного поля
 								$oAdmin_Form_Action_Changed = $oAdmin_Form_Controller->changeAction($oAdmin_Form_Dataset, $oAdmin_Form_Action);
@@ -1164,6 +1366,9 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 									)
 									: $mReturn;
 
+								// Change onclick to true
+								$oAdmin_Form_Action_Changed->new_window && $onclick = 'return true;';
+
 								// Добавляем установку метки для чекбокса и строки + добавлем уведомление, если необходимо
 								if ($oAdmin_Form_Action_Changed->confirm)
 								{
@@ -1172,9 +1377,29 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 										"'); if (!res) { $('#{$windowId} #row_{$escapedDatasetKey}_{$escapedEntityKey}').toggleHighlight(); } else {{$onclick}} return res;";
 								}
 
-								$sActionsFullView .= '<a class="btn btn-xs btn-' . htmlspecialchars($oAdmin_Form_Action_Changed->color) .' " title="' . $name . '" href="' . $href . '" onclick="mainFormLocker.unlock(); ' . $onclick .'"><i class="' . htmlspecialchars($oAdmin_Form_Action_Changed->icon) . '"></i></a>';
+								is_null($oAdmin_Form_Action_Changed->color) && $oAdmin_Form_Action_Changed->color = 'info';
+								is_null($oAdmin_Form_Action_Changed->icon) && $oAdmin_Form_Action_Changed->icon = 'fa fa-bar';
 
-								$sActionsShortView .= '<li><a title="' . $name . '" href="' . htmlspecialchars($href) . '" onclick="mainFormLocker.unlock(); ' . $onclick .'"><i class="' . htmlspecialchars($oAdmin_Form_Action_Changed->icon) . ' fa-fw btn-sm btn-' . htmlspecialchars($oAdmin_Form_Action_Changed->color) . '"></i>' . $name . '</a></li>';
+								$aAttrs = isset($oAdmin_Form_Action_Changed->attrs)
+									? $oAdmin_Form_Action_Changed->attrs
+									: array();
+
+								$aAttrs += array(
+									'title' => $name,
+									'href' => $href,
+									'onclick' => "mainFormLocker.unlock(); $onclick"
+								);
+
+								$oAdmin_Form_Action_Changed->new_window
+									&& $aAttrs['target'] = '_blank';
+
+								$sActionsFullView .= '<a ' . $this->getAttrString($aAttrs) . ' class="btn btn-xs btn-' . htmlspecialchars($oAdmin_Form_Action_Changed->color) .' "><i class="' . htmlspecialchars($oAdmin_Form_Action_Changed->icon) . '"></i></a>';
+
+								$sActionsShortView .= '<li><a ' . $this->getAttrString($aAttrs) . '><i class="' . htmlspecialchars($oAdmin_Form_Action_Changed->icon) . ' fa-fw btn-sm btn-' . htmlspecialchars($oAdmin_Form_Action_Changed->color) . '"></i>' . $name . '</a></li>';
+
+								/*$sActionsFullView .= '<a title="' . $name . '" href="' . $href . '" onclick="mainFormLocker.unlock(); ' . $onclick .'" class="btn btn-xs btn-' . htmlspecialchars($oAdmin_Form_Action_Changed->color) .' "><i class="' . htmlspecialchars($oAdmin_Form_Action_Changed->icon) . '"></i></a>';
+
+								$sActionsShortView .= '<li><a title="' . $name . '" href="' . htmlspecialchars($href) . '" onclick="mainFormLocker.unlock(); ' . $onclick .'"><i class="' . htmlspecialchars($oAdmin_Form_Action_Changed->icon) . ' fa-fw btn-sm btn-' . htmlspecialchars($oAdmin_Form_Action_Changed->color) . '"></i>' . $name . '</a></li>';*/
 							}
 
 							if ($iActionsCount)
@@ -1212,6 +1437,17 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 		return $this;
 	}
 
+	protected function getAttrString(array $attr)
+	{
+		$return = '';
+		foreach ($attr as $key => $value)
+		{
+			$return .= ' ' . $key . '="' . $value . '"';
+		}
+
+		return $return;
+	}
+
 	/**
 	 * Show action panel in administration center
 	 * @return self
@@ -1226,7 +1462,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 		// Строка с действиями
 		//if ($this->_showBottomActions)
 		//{
-			$windowId = $oAdmin_Form_Controller->getWindowId();
+			// $windowId = $oAdmin_Form_Controller->getWindowId();
 
 			// Текущий пользователь
 			$oUser = Core_Auth::getCurrentUser();
@@ -1265,6 +1501,8 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 							// Нужно подтверждение для действия
 							if ($oAdmin_Form_Action->confirm)
 							{
+								// $href .= '';
+
 								$onclick = "res = confirm('" . Core::_('Admin_Form.confirm_dialog', htmlspecialchars($text)) . "'); if (res) { {$onclick} } else {return false}";
 
 								// $link_class = 'admin_form_action_alert_link';
@@ -1290,55 +1528,57 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 				}
 
 				// Сгруппированные действия
-				if (defined('HOSTCMS_UPDATE_NUMBER') && HOSTCMS_UPDATE_NUMBER > 195) // Проверку удалить в 7.0.7
+				$aAdmin_Form_Action_Dirs = $oAdmin_Form->Admin_Form_Action_Dirs->findAll();
+				foreach ($aAdmin_Form_Action_Dirs as $oAdmin_Form_Action_Dir)
 				{
-					$aAdmin_Form_Action_Dirs = $oAdmin_Form->Admin_Form_Action_Dirs->findAll();
-					foreach ($aAdmin_Form_Action_Dirs as $oAdmin_Form_Action_Dir)
+					if (isset($aAdminFormActionsByDir[$oAdmin_Form_Action_Dir->id]))
 					{
-						if (isset($aAdminFormActionsByDir[$oAdmin_Form_Action_Dir->id]))
+						$icon = $oAdmin_Form_Action_Dir->icon != ''
+							? htmlspecialchars($oAdmin_Form_Action_Dir->icon)
+							: 'fa fa-bars';
+
+						$additionalClass = $oAdmin_Form_Action_Dir->getWordName() == ''
+							? ' no-margin-right no-padding-right'
+							: '';
+
+						$color = $oAdmin_Form_Action_Dir->color != ''
+							? htmlspecialchars($oAdmin_Form_Action_Dir->color)
+							: 'palegreen';
+
+						$sActionsShortView .= '<div class="btn-group dropup">
+							<a class="btn btn-' . $color . ' dropdown-toggle" data-toggle="dropdown">
+								<i class="' . $icon . ' icon-separator ' . $additionalClass . '"></i>' .
+								htmlspecialchars($oAdmin_Form_Action_Dir->getWordName()) .
+							'</a>
+							<ul class="dropdown-menu">';
+
+						foreach ($aAdminFormActionsByDir[$oAdmin_Form_Action_Dir->id] as $key => $oAdmin_Form_Action)
 						{
-							$icon = $oAdmin_Form_Action_Dir->icon != ''
-								? htmlspecialchars($oAdmin_Form_Action_Dir->icon)
-								: 'fa fa-bars';
+							$text = htmlspecialchars($oAdmin_Form_Action->getCaption($oAdmin_Language->id));
 
-							$additionalClass = $oAdmin_Form_Action_Dir->getWordName() == ''
-								? ' no-margin-right no-padding-right'
-								: '';
+							$href = $oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), $oAdmin_Form_Action->name);
+							$onclick = $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), $oAdmin_Form_Action->name);
 
-							$sActionsShortView .= '<div class="btn-group dropup">
-								<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown">
-									<i class="' . $icon . ' icon-separator ' . $additionalClass . '"></i>' .
-									htmlspecialchars($oAdmin_Form_Action_Dir->getWordName()) .
-								'</a>
-								<ul class="dropdown-menu">';
-
-							foreach ($aAdminFormActionsByDir[$oAdmin_Form_Action_Dir->id] as $key => $oAdmin_Form_Action)
+							// Нужно подтверждение для действия
+							if ($oAdmin_Form_Action->confirm)
 							{
-								$text = htmlspecialchars($oAdmin_Form_Action->getCaption($oAdmin_Language->id));
-
-								$href = $oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), $oAdmin_Form_Action->name);
-								$onclick = $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), $oAdmin_Form_Action->name);
-
-								// Нужно подтверждение для действия
-								if ($oAdmin_Form_Action->confirm)
-								{
-									$onclick = "res = confirm('" . Core::_('Admin_Form.confirm_dialog', htmlspecialchars($text)) . "'); if (res) { {$onclick} } else {return false}";
-								}
-
-								$divider = $key == 0
-									? '<li class="divider"></li>'
-									: '';
-
-								$sActionsFullView .= $divider . '<li><a title="' . htmlspecialchars($text) . '" href="' . $href . '" onclick="mainFormLocker.unlock(); ' . $onclick .'"><i class="' . htmlspecialchars($oAdmin_Form_Action->icon) . ' fa-fw btn-sm btn-' . htmlspecialchars($oAdmin_Form_Action->color) . '"></i>' . htmlspecialchars($text) . '</a></li>';
-
-								$sActionsShortView .= '<li><a title="' . htmlspecialchars($text) . '" href="' . $href . '" onclick="mainFormLocker.unlock(); ' . $onclick .'"><i class="' . htmlspecialchars($oAdmin_Form_Action->icon) . ' fa-fw btn-sm btn-' . htmlspecialchars($oAdmin_Form_Action->color) . '"></i>' . htmlspecialchars($text) . '</a></li>';
+								$onclick = "res = confirm('" . Core::_('Admin_Form.confirm_dialog', htmlspecialchars($text)) . "'); if (res) { {$onclick} } else {return false}";
 							}
 
-							$sActionsShortView .= '</ul>
-							</div>';
+							$divider = $key == 0
+								? '<li class="divider"></li>'
+								: '';
+
+							$sActionsFullView .= $divider . '<li><a title="' . htmlspecialchars($text) . '" href="' . $href . '" onclick="mainFormLocker.unlock(); ' . $onclick .'"><i class="' . htmlspecialchars($oAdmin_Form_Action->icon) . ' fa-fw btn-sm btn-' . htmlspecialchars($oAdmin_Form_Action->color) . '"></i>' . htmlspecialchars($text) . '</a></li>';
+
+							$sActionsShortView .= '<li><a title="' . htmlspecialchars($text) . '" href="' . $href . '" onclick="mainFormLocker.unlock(); ' . $onclick .'"><i class="' . htmlspecialchars($oAdmin_Form_Action->icon) . ' fa-fw btn-sm btn-' . htmlspecialchars($oAdmin_Form_Action->color) . '"></i>' . htmlspecialchars($text) . '</a></li>';
 						}
+
+						$sActionsShortView .= '</ul>
+						</div>';
 					}
 				}
+
 
 				if ($iGroupCount > 1)
 				{

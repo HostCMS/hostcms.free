@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Update
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Update_Controller extends Core_Servant_Properties
 {
@@ -246,7 +245,7 @@ class Update_Controller extends Core_Servant_Properties
 
 		$Core_Http
 			->url($url)
-			->referer(Core_Array::get($_SERVER, 'HTTP_HOST'))
+			->referer(Core_Array::get($_SERVER, 'REQUEST_SCHEME', 'http') . '://' . Core_Array::get($_SERVER, 'HTTP_HOST'))
 			->execute();
 
 		$sBody = $Core_Http->getDecompressedBody();
@@ -293,7 +292,7 @@ class Update_Controller extends Core_Servant_Properties
 		$Core_Http = Core_Http::instance()
 			->url($url)
 			->timeout(15)
-			->referer(Core_Array::get($_SERVER, 'HTTP_HOST'))
+			->referer(Core_Array::get($_SERVER, 'REQUEST_SCHEME', 'http') . '://' . Core_Array::get($_SERVER, 'HTTP_HOST'))
 			->execute();
 
 		return $Core_Http->getDecompressedBody();
@@ -407,7 +406,7 @@ class Update_Controller extends Core_Servant_Properties
 		$Core_Http = Core_Http::instance()
 			->url($url)
 			->timeout(20)
-			->referer(Core_Array::get($_SERVER, 'HTTP_HOST'))
+			->referer(Core_Array::get($_SERVER, 'REQUEST_SCHEME', 'http') . '://' . Core_Array::get($_SERVER, 'HTTP_HOST'))
 			->execute();
 
 		return $Core_Http;

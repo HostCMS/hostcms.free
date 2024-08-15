@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Report_Controller
 {
@@ -101,6 +100,7 @@ class Shop_Report_Controller
 			->where('shops.site_id', '=', CURRENT_SITE)
 			->where('shops.deleted', '=', 0)
 			->where('shop_orders.datetime', 'BETWEEN', array($startDatetime . ' 00:00:00', $endDatetime . ' 23:59:59'))
+			->where('shop_orders.deleted', '=', 0)
 			->clearOrderBy()
 			->orderBy('id', 'ASC');
 
@@ -143,6 +143,7 @@ class Shop_Report_Controller
 						->where('shops.deleted', '=', 0)
 						->where('shop_orders.id', 'BETWEEN', array($fromId, $toId))
 						->where('shop_orders.datetime', 'BETWEEN', array($startDatetime . ' 00:00:00', $endDatetime . ' 23:59:59'))
+						->where('shop_orders.deleted', '=', 0)
 						->clearOrderBy()
 						->orderBy('id', 'ASC')
 						// ->offset($offset)
@@ -153,6 +154,7 @@ class Shop_Report_Controller
 				)
 			))
 			->where('shop_order_items.type', '!=', 2) // Не учитывать пополнение лицевого счета
+			->where('shop_order_items.deleted', '=', 0)
 			;
 
 		self::$_shop_id && $oInnerQB->where('shops.id', '=', self::$_shop_id);
@@ -172,6 +174,7 @@ class Shop_Report_Controller
 			->where('shops.deleted', '=', 0)
 			->where('shop_orders.paid', '=', 1)
 			->where('shop_orders.payment_datetime', 'BETWEEN', array($startDatetime . ' 00:00:00', $endDatetime . ' 23:59:59'))
+			->where('shop_orders.deleted', '=', 0)
 			->clearOrderBy()
 			->orderBy('id', 'ASC');
 
@@ -207,6 +210,7 @@ class Shop_Report_Controller
 						->where('shop_orders.paid', '=', 1)
 						->where('shop_orders.id', 'BETWEEN', array($fromId, $toId))
 						->where('shop_orders.datetime', 'BETWEEN', array($startDatetime . ' 00:00:00', $endDatetime . ' 23:59:59'))
+						->where('shop_orders.deleted', '=', 0)
 						->clearOrderBy()
 						->orderBy('id', 'ASC')
 						// ->offset($offset)
@@ -217,6 +221,7 @@ class Shop_Report_Controller
 				)
 			))
 			->where('shop_order_items.type', '!=', 2) // Не учитывать пополнение лицевого счета
+			->where('shop_order_items.deleted', '=', 0)
 			;
 
 		self::$_shop_id && $oInnerQB->where('shops.id', '=', self::$_shop_id);
@@ -235,6 +240,7 @@ class Shop_Report_Controller
 			->where('shops.deleted', '=', 0)
 			->where('shop_orders.canceled', '=', 1)
 			->where('shop_orders.datetime', 'BETWEEN', array($startDatetime . ' 00:00:00', $endDatetime . ' 23:59:59'))
+			->where('shop_orders.deleted', '=', 0)
 			->clearOrderBy()
 			->orderBy('shop_orders.id', 'ASC');
 
@@ -259,6 +265,7 @@ class Shop_Report_Controller
 			->where('shops.deleted', '=', 0)
 			->where('shop_order_items.type', '=', 0)
 			->where('shop_order_items.price', '>', 0)
+			->where('shop_order_items.deleted', '=', 0)
 			->where('shop_orders.paid', '=', 1)
 			->where('shop_orders.payment_datetime', 'BETWEEN', array($startDatetime . ' 00:00:00', $endDatetime . ' 23:59:59'))
 			->where('shop_orders.deleted', '=', 0)
@@ -296,11 +303,12 @@ class Shop_Report_Controller
 			->join('shop_items', 'shop_items.id', '=', 'shop_order_items.shop_item_id')
 			->where('shops.site_id', '=', CURRENT_SITE)
 			->where('shops.deleted', '=', 0)
+			->where('shop_order_items.deleted', '=', 0)
 			->where('shop_order_items.type', '=', 0)
 			->where('shop_order_items.price', '>', 0)
+			->where('shop_orders.deleted', '=', 0)
 			->where('shop_orders.paid', '=', 1)
 			->where('shop_orders.payment_datetime', 'BETWEEN', array($startDatetime . ' 00:00:00', $endDatetime . ' 23:59:59'))
-			->where('shop_orders.deleted', '=', 0)
 			->clearOrderBy()
 			->orderBy('dataQuantityAmount', 'DESC');
 
@@ -345,6 +353,7 @@ class Shop_Report_Controller
 			->join('shops', 'shops.id', '=', 'shop_orders.shop_id')
 			->where('shops.site_id', '=', CURRENT_SITE)
 			->where('shops.deleted', '=', 0)
+			->where('shop_orders.deleted', '=', 0)
 			->where('shop_orders.datetime', 'BETWEEN', array($startDatetime . ' 00:00:00', $endDatetime . ' 23:59:59'))
 			// ->groupBy('shop_order1s.siteuser_id')
 			;
@@ -604,10 +613,10 @@ class Shop_Report_Controller
 				{
 					$sDate = date($groupDate, Core_Date::sql2timestamp($aShop_Order_Item['datetime']));
 
-					$tax = $oShop_Controller->round($aShop_Order_Item['price'] * $aShop_Order_Item['rate'] / 100);
+					$tax = $oShop_Controller->round($aShop_Order_Item['price'] * $aShop_Order_Item['rate'] / (100 + $aShop_Order_Item['rate']));
 
 					$fAmount = self::$_allow_delivery || $aShop_Order_Item['type'] != 1
-						? $oShop_Controller->round($oShop_Controller->round($aShop_Order_Item['price'] + $tax) * $aShop_Order_Item['quantity'])
+						? $oShop_Controller->round($oShop_Controller->round($aShop_Order_Item['price']) * $aShop_Order_Item['quantity'])
 						: 0;
 
 					// Закупочная цена

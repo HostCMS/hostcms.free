@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Group_Discount_Model extends Core_Entity
 {
@@ -23,7 +22,7 @@ class Shop_Group_Discount_Model extends Core_Entity
 	 * Callback property_id
 	 * @var int
 	 */
-	public $shop_groups = 0;
+	public $shop_items = 0;
 
 	/**
 	 * Belongs to relations
@@ -83,9 +82,20 @@ class Shop_Group_Discount_Model extends Core_Entity
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function shop_group_nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function shop_item_nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		return $this->Shop_Group->nameBackend();
+		return $this->Shop_Group->name;
+	}
+
+	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function shop_item_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return $this->Shop_Group->id;
 	}
 
 	/**
@@ -192,12 +202,41 @@ class Shop_Group_Discount_Model extends Core_Entity
 	}
 
 	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function shop_itemsBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$shop_id = Core_Array::getGet('shop_id', 0, 'int');
+		$shop_group_id = Core_Array::getGet('shop_group_id', 0, 'int');
+
+		$additionalParam = "shop_group_discount_id={$this->id}&siteuser_id={$this->siteuser_id}&shop_id={$shop_id}&shop_group_id={$shop_group_id}";
+
+		$link = $oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/discount/siteuser/group/index.php', NULL, NULL, $additionalParam);
+		$onclick = $oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/discount/siteuser/group/index.php', NULL, NULL, $additionalParam);
+
+		ob_start();
+
+		Core_Html_Entity::factory('A')
+			->href($link)
+			->onclick($onclick)
+			->add(
+				Core_Html_Entity::factory('I')->class('fa-solid fa-bars')
+			)
+			->execute();
+
+		return ob_get_clean();
+	}
+
+	/**
 	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function shop_groupsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function shop_itemsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$count = $this->dataCount;
 		$count && Core_Html_Entity::factory('Span')
@@ -219,6 +258,17 @@ class Shop_Group_Discount_Model extends Core_Entity
 		{
 			return htmlspecialchars($this->dataLogin);
 		}
+	}
+
+	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function imgBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return '<i class="fa-regular fa-folder-open"></i>';
 	}
 
 	/**

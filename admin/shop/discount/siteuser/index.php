@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -26,11 +25,16 @@ $sFormTitle = Core::_('Shop_Discount_Siteuser.title');
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sFormAction)
 	->title($sFormTitle)
 	->pageTitle($sFormTitle);
+
+if (!Core::moduleIsActive('siteuser'))
+{
+	throw new Core_Exception('Siteuser module doesn`t exist!');
+}
 
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
@@ -185,7 +189,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 // Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
 !$oUser->superuser && $oUser->only_access_my_own
-	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
+	&& $oAdmin_Form_Dataset->addUserConditions();
 
 $oAdmin_Form_Dataset
 	->addCondition(
@@ -219,6 +223,110 @@ if (isset($oAdmin_Form_Controller->request['admin_form_filter_1967'])
 		array(
 			'select' => array(
 				'shop_item_discounts.*', array('COUNT(*)', 'dataCount'), array('siteusers.login', 'dataLogin'),
+			)
+		)
+	)
+	->addCondition(
+		array('groupBy' => array('siteusers.id'))
+	);
+}
+
+$oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
+
+// Источник данных 1
+$oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
+	Core_Entity::factory('Shop_Group_Discount')
+);
+
+// Доступ только к своим
+$oUser = Core_Auth::getCurrentUser();
+!$oUser->superuser && $oUser->only_access_my_own
+	&& $oAdmin_Form_Dataset->addUserConditions();
+
+$oAdmin_Form_Dataset
+	->addCondition(
+		array('select' => array('shop_group_discounts.*', array('COUNT(*)', 'dataCount'), array('siteusers.login', 'dataLogin')))
+	)
+	->addCondition(
+		array('join' => array('shop_discounts', 'shop_group_discounts.shop_discount_id', '=', 'shop_discounts.id',
+			array(
+				array('AND' => array('shop_discounts.deleted', '=', 0))
+			))
+		)
+	)
+	->addCondition(
+		array('join' => array('siteusers', 'shop_group_discounts.siteuser_id', '=', 'siteusers.id',
+			array(
+				array('AND' => array('siteusers.deleted', '=', 0))
+			))
+		)
+	)
+	->addCondition(array('where' => array('shop_discounts.shop_id', '=', $oShop->id)))
+	->addCondition(array('where' => array('shop_group_discounts.siteuser_id', '>', 0)))
+	->addCondition(array('where' => array('shop_group_discounts.shop_group_id', '>', 0)))
+	->addCondition(array('groupBy' => array('shop_group_discounts.siteuser_id')));
+
+if (isset($oAdmin_Form_Controller->request['admin_form_filter_1967'])
+	&& $oAdmin_Form_Controller->request['admin_form_filter_1967'] != ''
+|| isset($oAdmin_Form_Controller->request['topFilter_1967'])
+	&& $oAdmin_Form_Controller->request['topFilter_1967'] != '')
+{
+	$oAdmin_Form_Dataset->addCondition(
+		array(
+			'select' => array(
+				'shop_group_discounts.*', array('COUNT(*)', 'dataCount'), array('siteusers.login', 'dataLogin'),
+			)
+		)
+	)
+	->addCondition(
+		array('groupBy' => array('siteusers.id'))
+	);
+}
+
+$oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
+
+// Источник данных 2
+$oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
+	Core_Entity::factory('Shop_Producer_Discount')
+);
+
+// Доступ только к своим
+$oUser = Core_Auth::getCurrentUser();
+!$oUser->superuser && $oUser->only_access_my_own
+	&& $oAdmin_Form_Dataset->addUserConditions();
+
+$oAdmin_Form_Dataset
+	->addCondition(
+		array('select' => array('shop_producer_discounts.*', array('COUNT(*)', 'dataCount'), array('siteusers.login', 'dataLogin')))
+	)
+	->addCondition(
+		array('join' => array('shop_discounts', 'shop_producer_discounts.shop_discount_id', '=', 'shop_discounts.id',
+			array(
+				array('AND' => array('shop_discounts.deleted', '=', 0))
+			))
+		)
+	)
+	->addCondition(
+		array('join' => array('siteusers', 'shop_producer_discounts.siteuser_id', '=', 'siteusers.id',
+			array(
+				array('AND' => array('siteusers.deleted', '=', 0))
+			))
+		)
+	)
+	->addCondition(array('where' => array('shop_discounts.shop_id', '=', $oShop->id)))
+	->addCondition(array('where' => array('shop_producer_discounts.siteuser_id', '>', 0)))
+	->addCondition(array('where' => array('shop_producer_discounts.shop_producer_id', '>', 0)))
+	->addCondition(array('groupBy' => array('shop_producer_discounts.siteuser_id')));
+
+if (isset($oAdmin_Form_Controller->request['admin_form_filter_1967'])
+	&& $oAdmin_Form_Controller->request['admin_form_filter_1967'] != ''
+|| isset($oAdmin_Form_Controller->request['topFilter_1967'])
+	&& $oAdmin_Form_Controller->request['topFilter_1967'] != '')
+{
+	$oAdmin_Form_Dataset->addCondition(
+		array(
+			'select' => array(
+				'shop_producer_discounts.*', array('COUNT(*)', 'dataCount'), array('siteusers.login', 'dataLogin'),
 			)
 		)
 	)

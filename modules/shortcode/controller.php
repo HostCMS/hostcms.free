@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shortcode
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shortcode_Controller
 {
@@ -108,8 +107,7 @@ defined(\'HOSTCMS\') || exit(\'HostCMS: access denied.\');
  *
  * @package HostCMS\Shortcode
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 
 class Shortcode_List

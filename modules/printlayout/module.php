@@ -8,10 +8,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Printlayout
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
-class Printlayout_Module extends Core_Module
+class Printlayout_Module extends Core_Module_Abstract
 {
 	/**
 	 * Module version
@@ -23,7 +22,7 @@ class Printlayout_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2023-07-17';
+	public $date = '2024-06-06';
 
 	/**
 	 * Module name
@@ -41,7 +40,7 @@ class Printlayout_Module extends Core_Module
 			array(
 				'sorting' => 60,
 				'block' => 1,
-				'ico' => 'fa fa-file-word-o',
+				'ico' => 'fa-regular fa-file-word',
 				'name' => Core::_('Printlayout.menu'),
 				'href' => "/admin/printlayout/index.php",
 				'onclick' => "$.adminLoad({path: '/admin/printlayout/index.php'}); return false"

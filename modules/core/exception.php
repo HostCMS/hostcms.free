@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Exception extends Exception
 {
@@ -29,7 +28,7 @@ class Core_Exception extends Exception
 		{
 			$values = array_map('strval', $values);
 			$values = array_map('htmlspecialchars', $values);
-			$message = str_replace(array_keys($values), array_values($values), $message);
+			$message = nl2br(str_replace(array_keys($values), array_values($values), $message));
 		}
 
 		if ($bShowDebugTrace)

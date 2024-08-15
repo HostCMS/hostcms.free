@@ -36,9 +36,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Querybuilder
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @version 7.x
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_QueryBuilder_Insert extends Core_QueryBuilder_Replace
 {
@@ -98,6 +97,30 @@ class Core_QueryBuilder_Insert extends Core_QueryBuilder_Replace
 	}
 
 	/**
+	 * Build VALUES expression
+	 * @param array $aValue
+	 * @return string
+	 */
+	protected function _buildValues(array $aValue)
+	{
+		$sql = array();
+
+		foreach ($aValue as $value)
+		{
+			$value = is_object($value)
+				? ($this->_isObjectSelect($value)
+					? '(' . $value->build() . ')'
+					: $value->build()
+				)
+				: $this->_dataBase->quote($value);
+
+			$sql[] = $value;
+		}
+
+		return implode(', ', $sql);
+	}
+
+	/**
 	 * Build the SQL query
 	 *
 	 * @return string The SQL query
@@ -121,7 +144,7 @@ class Core_QueryBuilder_Insert extends Core_QueryBuilder_Replace
 			$aValues = array();
 			foreach ($this->_values as $aValue)
 			{
-				$aValues[] = '(' . implode(', ', $this->_quoteValues($aValue)) . ')';
+				$aValues[] = '(' . $this->_buildValues($aValue) . ')';
 			}
 
 			$query[] = implode(",\n", $aValues);

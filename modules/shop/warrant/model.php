@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Warrant_Model extends Core_Entity
 {
@@ -452,7 +451,7 @@ class Shop_Warrant_Model extends Core_Entity
 			'tax' => Shop_Controller::instance()->round($this->tax),
 			'amount' => Shop_Controller::instance()->round($this->amount),
 			'amount_with_hyphen' => str_replace('.', '-', Shop_Controller::instance()->round($this->amount)),
-			'code' => Core::moduleIsActive('chartaccount') && $this->chartaccount_id ? htmlspecialchars($this->Chartaccount->code) : ''
+			'code' => Core::moduleIsActive('chartaccount') && $this->chartaccount_id ? htmlspecialchars((string) $this->Chartaccount->code) : ''
 		);
 
 		$oChartaccount_Cashflow = $this->chartaccount_cashflow_id
@@ -468,17 +467,26 @@ class Shop_Warrant_Model extends Core_Entity
 			? $oSiteuser_Company
 			: new Core_Meta_Empty();
 
-		$lng = $this->Shop->Site->lng;
+		$aReplace['amount_in_words'] = '';
 
-		$aReplace['amount_in_words'] = Core_Inflection::available($lng)
-			? Core_Str::ucfirst(Core_Inflection::instance($lng)->currencyInWords($aReplace['amount'], $this->Shop->Shop_Currency->code))
-			: $aReplace['amount'] . ' ' . $this->Shop_Currency->sign;
+		if ($this->Shop->shop_currency_id)
+		{
+			$lng = $this->Shop->Site->lng;
+
+			$aReplace['amount_in_words'] = Core_Inflection::available($lng)
+				? Core_Str::ucfirst(Core_Inflection::instance($lng)->currencyInWords($aReplace['amount'], $this->Shop->Shop_Currency->code))
+				: $aReplace['amount'] . ' ' . $this->Shop_Currency->sign;
+		}
 
 		$amount_integer = floor($this->amount);
 		$amount_fractional = floor((ceil(($this->amount - $amount_integer) * 100) / 100) * 100);
 
 		$aReplace['amount_integer'] = $amount_integer;
 		$aReplace['amount_fractional'] = $amount_fractional;
+
+		$aReplace['year'] = date('Y');
+		$aReplace['month'] = date('m');
+		$aReplace['day'] = date('d');
 
 		Core_Event::notify($this->_modelName . '.onAfterGetPrintlayoutReplaces', $this, array($aReplace));
 		$eventResult = Core_Event::getLastReturn();

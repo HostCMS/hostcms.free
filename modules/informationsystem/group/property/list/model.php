@@ -7,9 +7,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Informationsystem
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @version 7.x
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Informationsystem_Group_Property_List_Model extends Informationsystem_Model
 {
@@ -18,7 +17,7 @@ class Informationsystem_Group_Property_List_Model extends Informationsystem_Mode
 	 * @var string
 	 */
 	protected $_tableName = 'informationsystems';
-	
+
 	/**
 	 * Name of the model
 	 * @var string
@@ -30,7 +29,7 @@ class Informationsystem_Group_Property_List_Model extends Informationsystem_Mode
 	 * @var mixed
 	 */
 	public $changeFilename = TRUE;
-	
+
 	/**
 	 * Backend property
 	 * @var mixed
@@ -142,7 +141,7 @@ class Informationsystem_Group_Property_List_Model extends Informationsystem_Mode
 	 */
 	public function getLargeFileName(Core_Entity $object, $oFileValue, $originalFileName)
 	{
-		return 'information_groups_property_' . $oFileValue->id . '.' . Core_File::getExtension($originalFileName);
+		return Property_Controller::getLargeFileName($object, $oFileValue, $originalFileName);
 	}
 
 	/**
@@ -154,7 +153,7 @@ class Informationsystem_Group_Property_List_Model extends Informationsystem_Mode
 	 */
 	public function getSmallFileName(Core_Entity $object, $oFileValue, $originalFileName)
 	{
-		return 'small_information_groups_property_' . $oFileValue->id . '.' . Core_File::getExtension($originalFileName);
+		return Property_Controller::getSmallFileName($object, $oFileValue, $originalFileName);
 	}
 
 	/**

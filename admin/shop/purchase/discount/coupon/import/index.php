@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../../../../bootstrap.php');
 
@@ -20,7 +19,7 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
 // Контроллер формы
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path('/admin/shop/purchase/discount/coupon/import/index.php');
 
@@ -28,7 +27,7 @@ ob_start();
 
 $oAdmin_View = Admin_View::create();
 $oAdmin_View
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->pageTitle(Core::_('Shop_Purchase_Discount_Coupon.import'));
 
 // Первая крошка на список магазинов

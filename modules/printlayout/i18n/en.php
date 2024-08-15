@@ -4,9 +4,8 @@
  *
  * @package HostCMS
  * @subpackage Printlayout
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @version 7.x
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Printlayouts',
@@ -43,4 +42,5 @@ return array(
 	'sendMail_error' => 'Not listed mail addresses!',
 	'subject' => 'Subject',
 	'from' => 'From',
+	'settings_title' => 'Document Matching',
 );

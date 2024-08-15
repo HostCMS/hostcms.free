@@ -5,8 +5,7 @@
  * @package HostCMS
  * @subpackage Property
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Дополнительные свойства',
@@ -99,4 +98,7 @@ return array(
 	'move_to_list' => 'Перейти в список',
 	'add_to_list' => 'Добавить элемент в список',
 	'insert_value' => 'Введите значение',
+
+	'prefix_large_file' => 'Префикс имени большого файла',
+	'prefix_small_file' => 'Префикс имени малого файла',
 );

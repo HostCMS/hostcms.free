@@ -3,9 +3,8 @@
  * Market.
  *
  * @package HostCMS
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @version 7.x
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -29,7 +28,7 @@ $additionalParam .= $sQuery ? '&search_query=' . $sQuery . '&hostcms[action]=sen
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title(Core::_('Market.title'))
@@ -50,7 +49,7 @@ if ($oAdmin_Form_Controller->getAction() == 'sendSearchQuery'
 	$oMarket_Controller->search($sQuery);
 }
 
-$oAdmin_View = Admin_View::create()->module(Core_Module::factory($sModule));
+$oAdmin_View = Admin_View::create()->module(Core_Module_Abstract::factory($sModule));
 
 $category_id
 	&& $oMarket_Controller->order('price');

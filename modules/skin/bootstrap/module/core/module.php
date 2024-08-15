@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Core_Module extends Core_Module
 {
@@ -345,7 +344,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 										<span class="user-company"><?php echo $dbVersion ?></span>
 									</div>
 									<?php
-									if (version_compare($dbVersion, '5.1.0', '>='))
+									if (!is_null($dbVersion) && version_compare($dbVersion, '5.1.0', '>='))
 									{
 										$divClass = ' bg-palegreen';
 										$iClass = ' fa-check';
@@ -368,7 +367,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 										<span class="user-company"><?php echo $gdVersion ?></span>
 									</div>
 									<?php
-									if (version_compare($gdVersion, '2.0', '>='))
+									if (!is_null($gdVersion) && version_compare($gdVersion, '2.0', '>='))
 									{
 										$divClass = ' bg-palegreen';
 										$iClass = ' fa-check';
@@ -392,7 +391,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 									</div>
 
 									<?php
-									if (version_compare($pcreVersion, '7.0', '>='))
+									if (!is_null($pcreVersion) && version_compare($pcreVersion, '7.0', '>='))
 									{
 										$divClass = ' bg-palegreen';
 										$iClass = ' fa-check';
@@ -691,16 +690,20 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 					</span>
 				</div>';
 
+				$classInactive = !$oSite->active
+					? 'site-inactive'
+					: '';
+
 				if ($oSite->id != CURRENT_SITE)
 				{
-					$sListSitesContent .= '<li>
+					$sListSitesContent .= '<li class="' . $classInactive . '">
 						<a href="/admin/index.php?changeSiteId=' . $oSite->id . '" onmousedown="$(window).off(\'beforeunload\')">
 							<div class="clearfix">' . $sSite . '</div>
 						</a></li>';
 				}
 				else
 				{
-					$sListSitesContent = '<li>
+					$sListSitesContent = '<li class="' . $classInactive . '">
 						<a>
 							<div class="clearfix">
 								' . $sSite . '

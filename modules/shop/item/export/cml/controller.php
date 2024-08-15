@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Item_Export_Cml_Controller extends Core_Servant_Properties
 {
@@ -40,6 +39,7 @@ class Shop_Item_Export_Cml_Controller extends Core_Servant_Properties
 		'shop',
 		'exportItemExternalProperties',
 		'exportItemModifications',
+		'exportInStock',
 		'producer'
 	);
 
@@ -105,6 +105,7 @@ class Shop_Item_Export_Cml_Controller extends Core_Servant_Properties
 		$this->_retailPriceGUID = Core_Guid::get();
 		$this->exportItemExternalProperties = TRUE;
 		$this->exportItemModifications = TRUE;
+		$this->exportInStock = FALSE;
 	}
 
 	/**
@@ -186,16 +187,21 @@ class Shop_Item_Export_Cml_Controller extends Core_Servant_Properties
 
 		$oShop_Items = Core_Entity::factory('Shop_Item');
 		$oShop_Items->queryBuilder()
-			->where('shop_id', '=', $this->shop->id)
-			->where('modification_id', '=', 0)
+			->where('shop_items.shop_id', '=', $this->shop->id)
+			->where('shop_items.modification_id', '=', 0)
 			->clearOrderBy()
-			->orderBy('id', 'ASC');
+			->orderBy('shop_items.id', 'ASC');
 
 		$this->group->id
-			&& $oShop_Items->queryBuilder()->where('shop_group_id', 'IN', $this->_groupsID);
+			&& $oShop_Items->queryBuilder()->where('shop_items.shop_group_id', 'IN', $this->_groupsID);
 
 		$this->producer
-			&& $oShop_Items->queryBuilder()->where('shop_producer_id', '=', $this->producer);
+			&& $oShop_Items->queryBuilder()->where('shop_items.shop_producer_id', '=', $this->producer);
+
+		if ($this->exportInStock)
+		{
+			$this->applyInStockConditions($oShop_Items);
+		}
 
 		$offset = 0;
 		$limit = 100;
@@ -215,7 +221,14 @@ class Shop_Item_Export_Cml_Controller extends Core_Servant_Properties
 				// Модификации
 				if ($this->exportItemModifications)
 				{
-					$aModifications = $oShop_Item->Modifications->findAll(FALSE);
+					$oModifications = $oShop_Item->Modifications;
+
+					if ($this->exportInStock)
+					{
+						$this->applyInStockConditions($oModifications);
+					}
+
+					$aModifications = $oModifications->findAll(FALSE);
 					foreach ($aModifications as $oModification)
 					{
 						$this->_addImportItem($oModification, $xmlGoods);
@@ -361,15 +374,20 @@ class Shop_Item_Export_Cml_Controller extends Core_Servant_Properties
 
 		$oShop_Items = $this->shop->Shop_Items;
 		$oShop_Items->queryBuilder()
-			->where('modification_id', '=', 0)
+			->where('shop_items.modification_id', '=', 0)
 			->clearOrderBy()
 			->orderBy('id', 'ASC');
 
 		$this->group->id
-			&& $oShop_Items->queryBuilder()->where('shop_group_id', 'IN', $this->_groupsID);
+			&& $oShop_Items->queryBuilder()->where('shop_items.shop_group_id', 'IN', $this->_groupsID);
 
 		$this->producer
-			&& $oShop_Items->queryBuilder()->where('shop_producer_id', '=', $this->producer);
+			&& $oShop_Items->queryBuilder()->where('shop_items.shop_producer_id', '=', $this->producer);
+
+		if ($this->exportInStock)
+		{
+			$this->applyInStockConditions($oShop_Items);
+		}
 
 		$packageOfProposals = $packageOfProposals->addChild('Предложения');
 
@@ -390,7 +408,14 @@ class Shop_Item_Export_Cml_Controller extends Core_Servant_Properties
 				// Модификации
 				if ($this->exportItemModifications)
 				{
-					$aModifications = $oShop_Item->Modifications->findAll(FALSE);
+					$oModifications = $oShop_Item->Modifications;
+
+					if ($this->exportInStock)
+					{
+						$this->applyInStockConditions($oModifications);
+					}
+
+					$aModifications = $oModifications->findAll(FALSE);
 					foreach ($aModifications as $oModification)
 					{
 						$this->_addOffersItem($oModification, $packageOfProposals);
@@ -466,6 +491,26 @@ class Shop_Item_Export_Cml_Controller extends Core_Servant_Properties
 		}
 
 		$xmlItem->addChild('Количество', $oShop_Item->getRest());
+
+		return $this;
+	}
+
+	/**
+	 * Apply in stock conditions
+	 * @param object $oShop_Items
+	 * @return self
+	 */
+	public function applyInStockConditions($oShop_Items)
+	{
+		$oShop_Items
+			->queryBuilder()
+			->select('shop_items.*')
+			->join('shop_warehouse_items', 'shop_warehouse_items.shop_item_id', '=', 'shop_items.id')
+			->join('shop_warehouses', 'shop_warehouses.id', '=', 'shop_warehouse_items.shop_warehouse_id')
+			->where('shop_warehouses.active', '=', 1)
+			->where('shop_warehouses.deleted', '=', 0)
+			->groupBy('shop_items.id')
+			->having(Core_QueryBuilder::expression('SUM(shop_warehouse_items.count)'), '>', 0);
 
 		return $this;
 	}

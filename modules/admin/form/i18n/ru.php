@@ -6,8 +6,7 @@
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 return array(
 	'save' => 'Сохранить',
@@ -155,5 +154,12 @@ return array(
 	'successfully' => 'Успешно',
 	'failed' => 'Не успешно',
 
-	'timeline_empty' => 'Лента действий пуста!'
+	'timeline_empty' => 'Лента действий пуста!',
+
+	'viewForm_disallow' => 'Просмотр формы запрещен!',
+
+	'admin_form_field_settings' => 'Настройки полей формы',
+	'setting_modal_title' => 'Настройки полей формы "%s"',
+	'select_all' => 'Выбрать все',
+	'disable_all' => 'Отменить все'
 );

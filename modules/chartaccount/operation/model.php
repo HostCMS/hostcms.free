@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Chartaccount
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Chartaccount_Operation_Model extends Core_Entity
 {
@@ -88,6 +87,8 @@ class Chartaccount_Operation_Model extends Core_Entity
 		{
 			$document_id = Chartaccount_Controller::getDocumentId($this->id, $this->getEntityType());
 
+			$aEntries = array();
+
 			$aChartaccount_Operation_Items = $this->Chartaccount_Operation_Items->findAll(FALSE);
 			foreach ($aChartaccount_Operation_Items as $oChartaccount_Operation_Item)
 			{
@@ -96,7 +97,7 @@ class Chartaccount_Operation_Model extends Core_Entity
 					$oDChartaccount = $oChartaccount_Operation_Item->Chartaccount_Debit;
 					$oCChartaccount = $oChartaccount_Operation_Item->Chartaccount_Credit;
 
-					$aEntry = array(
+					$aEntries[] = array(
 						'debit' => $oDChartaccount->code,
 						'debit_sc' => array(
 							$oDChartaccount->sc0 => $oChartaccount_Operation_Item->dsc0,
@@ -110,12 +111,13 @@ class Chartaccount_Operation_Model extends Core_Entity
 							$oCChartaccount->sc2 => $oChartaccount_Operation_Item->csc2
 						),
 						'amount' => $oChartaccount_Operation_Item->amount,
+						'description' => $oChartaccount_Operation_Item->description,
 						'datetime' => $this->datetime
 					);
-
-					Chartaccount_Entry_Controller::insertEntries($document_id, $this->company_id, array($aEntry));
 				}
 			}
+
+			Chartaccount_Entry_Controller::insertEntries($document_id, $this->company_id, $aEntries);
 
 			$this->posted = 1;
 			$this->save();

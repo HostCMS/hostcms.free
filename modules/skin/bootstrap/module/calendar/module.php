@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 {
@@ -203,13 +202,11 @@ class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 				<div id='calendar'></div>
 			</div><!--Widget Body-->
 			<script>
-				var aScripts = [
+				$.getMultiContent([
 					//'moment.min.js', // see bootstrap.php => datetime/moment.js
 					'fullcalendar.min.js',
 					'locale-all.js'
-				];
-
-				$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/fullcalendar/').done(function() {
+					], '/modules/skin/bootstrap/js/fullcalendar/').done(function() {
 					// all scripts loaded
 					var date = new Date(),
 						d = date.getDate(),

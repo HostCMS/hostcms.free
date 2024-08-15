@@ -143,9 +143,9 @@ return array(
 	'import_price_list_separator3' => "Табуляція",
 	'import_price_list_separator4' => 'Інший',
 	'import_price_list_separator' => "Роздільник",
-	'import_price_list_stop' => "Обмежувач",
-	'import_price_list_stop1' => "Лапки",
-	'import_price_list_stop2' => 'Інший',
+	'limiter' => "Обмежувач",
+	'limiter1' => "Лапки",
+	'limiter2' => 'Інший',
 	'delete_success' => 'Елемент видалений!',
 	'undelete_success' => 'Елемент відновлено!',
 	'price_list_encoding' => "Кодування",
@@ -377,4 +377,15 @@ return array(
 
 	'set_modification_items_title' => 'Призначити модифікацією',
 	'set_modification_success' => 'Модифікації призначені успішно!',
+
+	'item_barcodes' => 'Штрихкод',
+	'barcode_type' => 'Тип штрих-коду',
+	'barcode_prefix' => 'Префікс',
+	'barcode_generate' => 'Сгенерувати',
+	'shop_item_barcode_set' => 'Штрихкоди згенеровані успішно!',
+
+	'export_in_stock_items' => 'Експортувати товари в наявності',
+
+	'closed' => 'Закрито',
+	'changeIndexation_success' => 'Індексація товару змінена.',
 );

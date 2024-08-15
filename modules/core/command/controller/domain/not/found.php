@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Command
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Command_Controller_Domain_Not_Found extends Core_Command_Controller
 {
@@ -46,10 +45,13 @@ class Core_Command_Controller_Domain_Not_Found extends Core_Command_Controller
 
 		Core_Html_Entity::factory('Div')
 			->class('indexMessage')
-			->add(Core_Html_Entity::factory('H1')->value($title))
-			->add(Core_Html_Entity::factory('P')->value(Core::_('Core.message_domain_must_be_added', $domain)))
-			->add(Core_Html_Entity::factory('P')->value(Core::_('Core.add_domain_instruction1')))
-			->add(Core_Html_Entity::factory('P')->value(Core::_('Core.add_domain_instruction2')))
+			->add(
+				Core_Html_Entity::factory('Div')
+					->add(Core_Html_Entity::factory('H1')->value($title))
+					->add(Core_Html_Entity::factory('P')->value(Core::_('Core.message_domain_must_be_added', $domain)))
+					->add(Core_Html_Entity::factory('P')->value(Core::_('Core.add_domain_instruction1')))
+					->add(Core_Html_Entity::factory('P')->value(Core::_('Core.add_domain_instruction2')))
+			)
 			->execute();
 
 		$oSkin->footer();

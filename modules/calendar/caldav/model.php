@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Calendar
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Calendar_Caldav_Model extends Core_Entity
 {
@@ -19,7 +18,8 @@ class Calendar_Caldav_Model extends Core_Entity
 	 */
 	protected $_hasMany = array(
 		'calendar_caldav_user' => array(),
-		'user' => array('through' => 'calendar_caldav_user')
+		'user' => array('through' => 'calendar_caldav_user'),
+		'event_calendar_caldav' => array()
 	);
 
 	/**
@@ -82,7 +82,7 @@ class Calendar_Caldav_Model extends Core_Entity
 					: date('Y-m-d H:i:s', strtotime('-6 month'));
 
 				// Выгрузка событий во внешний календарь
-				$aCalendarEntities = Calendar_Controller::getUploadCalendarEntities($last_modified);
+				$aCalendarEntities = Calendar_Controller::getUploadCalendarEntities($last_modified, $this->id);
 
 				if (count($aCalendarEntities))
 				{
@@ -240,6 +240,22 @@ EOD;
 	}
 
 	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$link = $oAdmin_Form_Field->link;
+		$onclick = $oAdmin_Form_Field->onclick;
+
+		$link = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $link);
+		$onclick = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $onclick);
+
+		return '<i class="fa fa-circle" style="margin-right: 5px; color: ' . ($this->color ? htmlspecialchars($this->color) : '#aebec4') . '"></i> '
+			. '<a href="' . $link . '" onclick="' . $onclick . '">' . htmlspecialchars($this->name) . '</a>';
+	}
+
+	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return self
@@ -257,6 +273,7 @@ EOD;
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
 
 		$this->Calendar_Caldav_Users->deleteAll(FALSE);
+		$this->Event_Calendar_Caldavs->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);
 	}

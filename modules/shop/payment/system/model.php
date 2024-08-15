@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Payment_System_Model extends Core_Entity
 {
@@ -24,7 +23,8 @@ class Shop_Payment_System_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_hasMany = array(
-		'shop_delivery_payment_system' => array()
+		'shop_delivery_payment_system' => array(),
+		'shop_payment_system_siteuser_group' => array()
 	);
 
 	/**
@@ -102,6 +102,42 @@ class Shop_Payment_System_Model extends Core_Entity
 			->title($name)
 			->value($name)
 			->execute();
+
+		$oShop_Payment_System_Siteuser_Groups = $this->Shop_Payment_System_Siteuser_Groups;
+
+		$oShop_Payment_System_Siteuser_Groups->queryBuilder()
+			->clearOrderBy()
+			->orderBy('siteuser_group_id', 'ASC');
+
+		$aShop_Payment_System_Siteuser_Groups = $oShop_Payment_System_Siteuser_Groups->findAll(FALSE);
+		if (count($aShop_Payment_System_Siteuser_Groups))
+		{
+			foreach ($aShop_Payment_System_Siteuser_Groups as $oShop_Payment_System_Siteuser_Group)
+			{
+				$siteuserGroupName = $oShop_Payment_System_Siteuser_Group->siteuser_group_id
+					? htmlspecialchars($oShop_Payment_System_Siteuser_Group->Siteuser_Group->name)
+					: Core::_('Shop_Discount.all');
+
+				Core_Html_Entity::factory('Span')
+					->class('badge badge-square badge-hostcms')
+					->value('<i class="fa fa-users darkgray"></i> ' . $siteuserGroupName)
+					->execute();
+
+				// Если "Все", то прерываем формирование списка
+				if (!$oShop_Payment_System_Siteuser_Group->siteuser_group_id)
+				{
+					break;
+				}
+			}
+		}
+		else
+		{
+			Core_Html_Entity::factory('Span')
+				->class('badge badge-darkorange badge-ico white')
+				->add(Core_Html_Entity::factory('I')->class('fa fa-exclamation-triangle'))
+				->title('Empty group list!')
+				->execute();
+		}
 	}
 
 	/**
@@ -218,6 +254,7 @@ class Shop_Payment_System_Model extends Core_Entity
 		} catch (Exception $e) {}
 
 		$this->Shop_Delivery_Payment_Systems->deleteAll(FALSE);
+		$this->Shop_Payment_System_Siteuser_Groups->deleteAll(FALSE);
 
 		// Удаляем файл изображения
 		$this->deleteImage();

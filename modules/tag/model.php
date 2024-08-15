@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Tag
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Tag_Model extends Core_Entity
 {
@@ -44,8 +43,15 @@ class Tag_Model extends Core_Entity
 	protected $_hasMany = array(
 		'informationsystem_item' => array('through' => 'tag_informationsystem_item'),
 		'shop_item' => array('through' => 'tag_shop_item'),
+		'shop_warehouse' => array('through' => 'tag_shop_warehouse'),
+		'lead' => array('through' => 'tag_lead'),
 		'tag_informationsystem_item' => array(),
-		'tag_shop_item' => array()
+		'tag_shop_item' => array(),
+		'tag_shop_warehouse' => array(),
+		'tag_lead' => array(),
+		'tag_deal' => array(),
+		'tag_event' => array(),
+		'tag_shop_order' => array()
 	);
 
 	/**
@@ -155,6 +161,100 @@ class Tag_Model extends Core_Entity
 
 			$row = $queryBuilder->execute()->asAssoc()->current();
 			$this->_site_count += $row['count'];
+
+			// Warehouse
+			$queryBuilder = Core_QueryBuilder::select(
+				array('COUNT(*)', 'count'))
+				->from('tags')
+				->leftJoin('tag_shop_warehouses', 'tags.id', '=', 'tag_shop_warehouses.tag_id')
+				->where('tag_shop_warehouses.tag_id', '=', $this->id)
+				->where('tags.deleted', '=', 0);
+
+			$row = $queryBuilder->execute()->asAssoc()->current();
+			$this->_all_count += $row['count'];
+
+			$queryBuilder
+				->where('tag_shop_warehouses.site_id', '=', CURRENT_SITE);
+
+			$row = $queryBuilder->execute()->asAssoc()->current();
+			$this->_site_count += $row['count'];
+
+			// Orders
+			$queryBuilder = Core_QueryBuilder::select(
+				array('COUNT(*)', 'count'))
+				->from('tags')
+				->leftJoin('tag_shop_orders', 'tags.id', '=', 'tag_shop_orders.tag_id')
+				->where('tag_shop_orders.tag_id', '=', $this->id)
+				->where('tags.deleted', '=', 0);
+
+			$row = $queryBuilder->execute()->asAssoc()->current();
+			$this->_all_count += $row['count'];
+
+			$queryBuilder
+				->where('tag_shop_orders.site_id', '=', CURRENT_SITE);
+
+			$row = $queryBuilder->execute()->asAssoc()->current();
+			$this->_site_count += $row['count'];
+
+			// Lead
+			if (Core::moduleIsActive('lead'))
+			{
+				$queryBuilder = Core_QueryBuilder::select(
+					array('COUNT(*)', 'count'))
+					->from('tags')
+					->leftJoin('tag_leads', 'tags.id', '=', 'tag_leads.tag_id')
+					->where('tag_leads.tag_id', '=', $this->id)
+					->where('tags.deleted', '=', 0);
+
+				$row = $queryBuilder->execute()->asAssoc()->current();
+				$this->_all_count += $row['count'];
+
+				$queryBuilder
+					->where('tag_leads.site_id', '=', CURRENT_SITE);
+
+				$row = $queryBuilder->execute()->asAssoc()->current();
+				$this->_site_count += $row['count'];
+			}
+
+			// Deal
+			if (Core::moduleIsActive('deal'))
+			{
+				$queryBuilder = Core_QueryBuilder::select(
+					array('COUNT(*)', 'count'))
+					->from('tags')
+					->leftJoin('tag_deals', 'tags.id', '=', 'tag_deals.tag_id')
+					->where('tag_deals.tag_id', '=', $this->id)
+					->where('tags.deleted', '=', 0);
+
+				$row = $queryBuilder->execute()->asAssoc()->current();
+				$this->_all_count += $row['count'];
+
+				$queryBuilder
+					->where('tag_deals.site_id', '=', CURRENT_SITE);
+
+				$row = $queryBuilder->execute()->asAssoc()->current();
+				$this->_site_count += $row['count'];
+			}
+
+			// Event
+			if (Core::moduleIsActive('event'))
+			{
+				$queryBuilder = Core_QueryBuilder::select(
+					array('COUNT(*)', 'count'))
+					->from('tags')
+					->leftJoin('tag_events', 'tags.id', '=', 'tag_events.tag_id')
+					->where('tag_events.tag_id', '=', $this->id)
+					->where('tags.deleted', '=', 0);
+
+				$row = $queryBuilder->execute()->asAssoc()->current();
+				$this->_all_count += $row['count'];
+
+				$queryBuilder
+					->where('tag_events.site_id', '=', CURRENT_SITE);
+
+				$row = $queryBuilder->execute()->asAssoc()->current();
+				$this->_site_count += $row['count'];
+			}
 		}
 	}
 
@@ -235,8 +335,8 @@ class Tag_Model extends Core_Entity
 	 */
 	public function merge(Tag_Model $oObject)
 	{
-		$aTag_Informationsystem_Item = $oObject->Tag_Informationsystem_Items->findAll(FALSE);
-		foreach ($aTag_Informationsystem_Item as $oTag_Informationsystem_Item)
+		$aTag_Informationsystem_Items = $oObject->Tag_Informationsystem_Items->findAll(FALSE);
+		foreach ($aTag_Informationsystem_Items as $oTag_Informationsystem_Item)
 		{
 			$oTmp = $this->Tag_Informationsystem_Items->getByInformationsystem_item_id($oTag_Informationsystem_Item->informationsystem_item_id, FALSE);
 
@@ -245,14 +345,73 @@ class Tag_Model extends Core_Entity
 				: $oTag_Informationsystem_Item->delete();
 		}
 
-		$aTag_Shop_Item = $oObject->Tag_Shop_Items->findAll(FALSE);
-		foreach ($aTag_Shop_Item as $oTag_Shop_Item)
+		$aTag_Shop_Items = $oObject->Tag_Shop_Items->findAll(FALSE);
+		foreach ($aTag_Shop_Items as $oTag_Shop_Item)
 		{
 			$oTmp = $this->Tag_Shop_Items->getByShop_item_id($oTag_Shop_Item->shop_item_id, FALSE);
 
 			is_null($oTmp)
 				? $this->add($oTag_Shop_Item)
 				: $oTag_Shop_Item->delete();
+		}
+
+		$aTag_Shop_Warehouses = $oObject->Tag_Shop_Warehouses->findAll(FALSE);
+		foreach ($aTag_Shop_Warehouses as $oTag_Shop_Warehouse)
+		{
+			$oTmp = $this->Tag_Shop_Warehouses->getByShop_warehouse_id($oTag_Shop_Warehouse->shop_warehouse_id, FALSE);
+
+			is_null($oTmp)
+				? $this->add($oTag_Shop_Warehouse)
+				: $oTag_Shop_Warehouse->delete();
+		}
+
+		$aTag_Shop_Orders = $oObject->Tag_Shop_Orders->findAll(FALSE);
+		foreach ($aTag_Shop_Orders as $oTag_Shop_Order)
+		{
+			$oTmp = $this->Tag_Shop_Orders->getByShop_order_id($oTag_Shop_Order->shop_order_id, FALSE);
+
+			is_null($oTmp)
+				? $this->add($oTag_Shop_Order)
+				: $oTag_Shop_Order->delete();
+		}
+
+		if (Core::moduleIsActive('lead'))
+		{
+			$aTag_Leads = $oObject->Tag_Leads->findAll(FALSE);
+			foreach ($aTag_Leads as $oTag_Lead)
+			{
+				$oTmp = $this->Tag_Leads->getByLead_id($oTag_Lead->lead_id, FALSE);
+
+				is_null($oTmp)
+					? $this->add($oTag_Lead)
+					: $oTag_Lead->delete();
+			}
+		}
+
+		if (Core::moduleIsActive('deal'))
+		{
+			$aTag_Deals = $oObject->Tag_Deals->findAll(FALSE);
+			foreach ($aTag_Deals as $oTag_Deal)
+			{
+				$oTmp = $this->Tag_Deals->getByDeal_id($oTag_Deal->deal_id, FALSE);
+
+				is_null($oTmp)
+					? $this->add($oTag_Deal)
+					: $oTag_Deal->delete();
+			}
+		}
+
+		if (Core::moduleIsActive('event'))
+		{
+			$aTag_Events = $oObject->Tag_Events->findAll(FALSE);
+			foreach ($aTag_Events as $oTag_Event)
+			{
+				$oTmp = $this->Tag_Events->getByEvent_id($oTag_Deal->event_id, FALSE);
+
+				is_null($oTmp)
+					? $this->add($oTag_Event)
+					: $oTag_Event->delete();
+			}
 		}
 
 		$oObject->markDeleted();
@@ -291,6 +450,23 @@ class Tag_Model extends Core_Entity
 
 		$this->Tag_Informationsystem_Items->deleteAll(FALSE);
 		$this->Tag_Shop_Items->deleteAll(FALSE);
+		$this->Tag_Shop_Warehouses->deleteAll(FALSE);
+		$this->Tag_Shop_Orders->deleteAll(FALSE);
+
+		if (Core::moduleIsActive('lead'))
+		{
+			$this->Tag_Leads->deleteAll(FALSE);
+		}
+
+		if (Core::moduleIsActive('deal'))
+		{
+			$this->Tag_Deals->deleteAll(FALSE);
+		}
+
+		if (Core::moduleIsActive('event'))
+		{
+			$this->Tag_Events->deleteAll(FALSE);
+		}
 
 		return parent::delete($primaryKey);
 	}

@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Crm_Note_Model extends Core_Entity
 {
@@ -40,6 +39,8 @@ class Crm_Note_Model extends Core_Entity
 		'crm_project' => array('through' => 'crm_project_crm_note'),
 		'deal_crm_note' => array('foreign_key' => 'crm_note_id'),
 		'deal' => array('through' => 'deal_crm_note'),
+		'siteuser_crm_note' => array('foreign_key' => 'crm_note_id'),
+		'siteuser' => array('through' => 'siteuser_crm_note'),
 	);
 
 	/**
@@ -133,9 +134,18 @@ class Crm_Note_Model extends Core_Entity
 
 			foreach ($aCrm_Note_Attachments as $oCrm_Note_Attachment)
 			{
+				$path = $oObject->getModelName() == 'siteuser'
+					? $oObject->getDirPath()
+					: $oObject->getPath();
+
+				$href = $oObject->getModelName() == 'siteuser'
+					? $oObject->getDirHref()
+					: $oObject->getHref();
+
+				$file = $oCrm_Note_Attachment->setDir($path)->setHref($href)->getSmallFileHref();
+
 				if ($bModuleAccess)
 				{
-					$file = $oCrm_Note_Attachment->setDir($oObject->getPath())->setHref($oObject->getHref())->getSmallFileHref();
 					$src = '/admin/crm/note/index.php?&' . $oObject->getModelName() . '_id=' . $oObject->id . '&crm_note_attachment_id=' . $oCrm_Note_Attachment->id . '&rand=' . time();
 
 					if (!is_null($file))
@@ -165,7 +175,8 @@ class Crm_Note_Model extends Core_Entity
 				{
 					?><div class="crm-note-attachment-item" title="<?php echo htmlspecialchars($oCrm_Note_Attachment->file_name)?>">
 					<div class="image">
-						<i class="fa-solid fa-image gray"></i>
+						<!-- <i class="fa-solid fa-image gray"></i> -->
+						<i class="<?php echo Core_File::getIcon($oCrm_Note_Attachment->file_name)?>"></i>
 						<span class="size"><?php echo $oCrm_Note_Attachment->getTextSize()?></span>
 					</div>
 					<div class="name"><?php echo htmlspecialchars($oCrm_Note_Attachment->file_name)?></div>

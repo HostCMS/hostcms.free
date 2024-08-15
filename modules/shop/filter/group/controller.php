@@ -7,9 +7,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @version 7.x
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Filter_Group_Controller
 {
@@ -84,8 +83,16 @@ class Shop_Filter_Group_Controller
 		return $this;
 	}
 
+	/**
+	 * Groups tree
+	 * @var mixed
+	 */
 	protected $_tree = NULL;
 
+	/**
+	 * Fill groups tree
+	 * @return self
+	 */
 	protected function _fillTree()
 	{
 		if (is_null($this->_tree))
@@ -94,12 +101,12 @@ class Shop_Filter_Group_Controller
 			$limit = 1000;
 
 			do {
-				$oCore_QueryBuilder_Select = Core_QueryBuilder::select('id', 'parent_id');
+				$oCore_QueryBuilder_Select = Core_QueryBuilder::select('id', 'parent_id', 'shortcut_id');
 				$oCore_QueryBuilder_Select
 					->from('shop_groups')
 					->where('shop_groups.shop_id', '=', $this->_oShop->id)
 					->where('shop_groups.active', '=', 1)
-					->where('shop_groups.shortcut_id', '=', 0)
+					// ->where('shop_groups.shortcut_id', '=', 0)
 					->where('shop_groups.deleted', '=', 0)
 					->clearOrderBy()
 					->orderBy('shop_groups.id', 'ASC')
@@ -113,12 +120,14 @@ class Shop_Filter_Group_Controller
 				foreach ($aRows as $aRow)
 				{
 					// Если у группы нет подгрупп, то создаем пустой массив, чтобы при заполнении упомянуть саму группу в своих же потомках
-					if (!isset($this->_tree[$aRow['id']]))
+					if (!$aRow['shortcut_id'] && !isset($this->_tree[$aRow['id']]))
 					{
 						$this->_tree[$aRow['id']] = array();
 					}
 
-					$this->_tree[$aRow['parent_id']][] = $aRow['id'];
+					$this->_tree[$aRow['parent_id']][] = $aRow['shortcut_id']
+						? $aRow['shortcut_id']
+						: $aRow['id'];
 				}
 			} while(count($aRows) == $limit);
 		}
@@ -126,6 +135,10 @@ class Shop_Filter_Group_Controller
 		return $this;
 	}
 
+	/**
+	 * Rebuild groups
+	 * @return self
+	 */
 	public function rebuild()
 	{
 		$this->_fillTree();
@@ -158,6 +171,10 @@ class Shop_Filter_Group_Controller
 
 			$this->_fillTree();
 
+			// echo "<pre>";
+			// var_dump($this->_tree);
+			// echo "</pre>";
+
 			// remove
 			Core_QueryBuilder::delete($tableName)
 				->where('shop_group_id', '=', $shop_group_id)
@@ -172,6 +189,8 @@ class Shop_Filter_Group_Controller
 					//$aValues[] = $child_id;
 					$aValues = array_merge($aValues, $this->fill($child_id));
 				}
+
+				$aValues = array_unique($aValues);
 			}
 
 			$oCore_DataBase = Core_DataBase::instance();

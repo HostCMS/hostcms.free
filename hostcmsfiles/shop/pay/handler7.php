@@ -58,9 +58,9 @@ class Shop_Payment_System_Handler7 extends Shop_Payment_System_Handler
 	/* обработка ответа от платёжной системы */
 	public function paymentProcessing()
 	{
-			$this->ProcessResult();
+		$this->ProcessResult();
 
-			return TRUE;
+		return TRUE;
 	}
 
 	public function getInvoice()
@@ -117,7 +117,7 @@ class Shop_Payment_System_Handler7 extends Shop_Payment_System_Handler
 	}
 
 	 /* оплачивает заказ */
-	function ProcessResult()
+	public function ProcessResult()
 	{
 		$oSiteuser = Core_Entity::factory('Siteuser', 0)->getCurrent();
 
@@ -133,7 +133,7 @@ class Shop_Payment_System_Handler7 extends Shop_Payment_System_Handler
 				$this->_shopOrder->Shop->Shop_Currency
 			) : 0) * $sum;
 
-		if($this->_shopOrder->paid || $sum_currency == 0 || $oSiteuser->getTransactionsAmount($this->_shopOrder->Shop) < $sum_currency)
+		if ($this->_shopOrder->paid || $sum_currency == 0 || $oSiteuser->getTransactionsAmount($this->_shopOrder->Shop) < $sum_currency)
 		{
 			return FALSE;
 		}

@@ -29,4 +29,5 @@ return array(
 	'seo_title' => "Заголовок (title)",
 	'seo_description' => "Опис (description)",
 	'seo_keywords' => "Ключові слова (keywords)",
+	'h1' => "Заголовок H1",
 );

@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -23,6 +22,7 @@ if (Core_Array::getGet('crm_note_attachment_id'))
 		$lead_id = Core_Array::getGet('lead_id', 0, 'int');
 		$crm_project_id = Core_Array::getGet('crm_project_id', 0, 'int');
 		$deal_id = Core_Array::getGet('deal_id', 0, 'int');
+		$siteuser_id = Core_Array::getGet('siteuser_id', 0, 'int');
 
 		if ($event_id)
 		{
@@ -44,11 +44,20 @@ if (Core_Array::getGet('crm_note_attachment_id'))
 			$oObject = Core_Entity::factory('Deal')->getById($deal_id);
 			$bAvailable = !is_null($oObject) && $oObject->id == $oCrm_Note_Attachment->Crm_Note->Deal_Crm_Note->deal_id;
 		}
+		elseif ($siteuser_id)
+		{
+			$oObject = Core_Entity::factory('Siteuser')->getById($siteuser_id);
+			$bAvailable = !is_null($oObject) && $oObject->id == $oCrm_Note_Attachment->Crm_Note->Siteuser_Crm_Note->siteuser_id;
+		}
 
 		if ($bAvailable)
 		{
+			$path = $oObject->getModelName() == 'siteuser'
+				? $oObject->getDirPath()
+				: $oObject->getPath();
+
 			$oCrm_Note_Attachment
-				->setDir($oObject->getPath());
+				->setDir($path);
 
 			$filePath = is_null(Core_Array::getGet('preview'))
 				? $oCrm_Note_Attachment->getFilePath()
@@ -97,16 +106,19 @@ if (Core_Array::getPost('showCrmNoteAttachment'))
 				<div class="modal-content no-padding-bottom">
 					<div class="modal-header">
 						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<a target="_blank" href="<?php echo $src . '&download'?>" class="palegreen btn-sm pull-right">
+							<i class="fa fa-download"></i>
+						</a>
 						<h4 class="modal-title"><?php echo htmlspecialchars($oCrm_Note_Attachment->file_name)?></h4>
 					</div>
-					<div class="modal-body">
+					<div class="modal-body padding-bottom-15">
 						<img style="max-width: 100%;" src="<?php echo $src?>"/>
 					</div>
-					<div class="modal-footer">
+					<!-- <div class="modal-footer">
 						<a target="_blank" href="<?php echo $src . '&download'?>" class="btn btn-palegreen btn-sm">
 							<i class="fa fa-download"></i> <?php echo Core::_('Crm_Note.download')?>
 						</a>
-					</div>
+					</div> -->
 				</div>
 			</div>
 		</div>

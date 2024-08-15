@@ -91,4 +91,7 @@ return array(
 	'move_to_list' => 'Перейти до списку',
 	'add_to_list' => 'Додати елемент до списку',
 	'insert_value' => 'Введіть значення',
+
+	'prefix_large_file' => 'Префікс імені великого файлу',
+	'prefix_small_file' => 'Префікс імені малого файлу',
 );

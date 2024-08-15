@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Order_Model extends Core_Entity
 {
@@ -24,6 +23,12 @@ class Shop_Order_Model extends Core_Entity
 	 * @var int
 	 */
 	public $order_items = 1;
+
+	/**
+	 * Callback property_id
+	 * @var int
+	 */
+	public $reviews = 1;
 
 	/**
 	 * Backend property
@@ -42,13 +47,16 @@ class Shop_Order_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_hasMany = array(
+		'comment' => array('through' => 'comment_shop_order'),
 		'shop_order_item' => array(),
 		'shop_item_reserved' => array(),
 		'shop_siteuser_transaction' => array(),
 		'shop_discountcard_bonus' => array(),
 		'shop_discountcard_bonus_transaction' => array(),
 		'shop_purchase_discount_coupon' => array(),
-		'shop_order_history' => array()
+		'shop_order_history' => array(),
+		'tag' => array('through' => 'tag_shop_order'),
+		'tag_shop_order' => array()
 	);
 
 	/**
@@ -90,7 +98,7 @@ class Shop_Order_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_sorting = array(
-		'shop_orders.datetime' => 'ASC',
+		'shop_orders.datetime' => 'DESC',
 	);
 
 	/**
@@ -189,6 +197,18 @@ class Shop_Order_Model extends Core_Entity
 				break;
 			}
 		}
+
+		if (Core::moduleIsActive('tag'))
+		{
+			$aTags = $this->Tags->findAll(FALSE);
+
+			foreach ($aTags as $oTag)
+			{
+				Core_Html_Entity::factory('Code')
+					->value('<span class="badge badge-square badge-tag badge-max-width badge-lightgray margin-left-5" title="' . htmlspecialchars($oTag->name) . '"><i class="fa fa-tag"></i> ' . htmlspecialchars($oTag->name) . '</span>')
+					->execute();
+			}
+		}
 	}
 
 	/**
@@ -218,6 +238,12 @@ class Shop_Order_Model extends Core_Entity
 			$oPropertyValue->delete();
 		}
 
+		if (Core::moduleIsActive('comment'))
+		{
+			// Удаляем комментарии
+			$this->Comments->deleteAll(FALSE);
+		}
+
 		$this->Shop_Order_Items->deleteAll(FALSE);
 		$this->Shop_Order_Histories->deleteAll(FALSE);
 
@@ -228,6 +254,12 @@ class Shop_Order_Model extends Core_Entity
 
 		$this->Shop_Discountcard_Bonuses->deleteAll(FALSE);
 		$this->Shop_Discountcard_Bonus_Transactions->deleteAll(FALSE);
+
+		if (Core::moduleIsActive('tag'))
+		{
+			// Удаляем метки
+			$this->Tag_Shop_Orders->deleteAll(FALSE);
+		}
 
 		$this->source_id && $this->Source->delete();
 
@@ -367,9 +399,7 @@ class Shop_Order_Model extends Core_Entity
 	 */
 	public function sum()
 	{
-		return $this->Shop_Currency->formatWithCurrency(
-			Shop_Controller::instance()->round($this->getAmount())
-		);
+		return '<span>' . $this->Shop_Currency->formatWithCurrency($this->getAmount()) . '</span>';
 	}
 
 	/**
@@ -398,7 +428,7 @@ class Shop_Order_Model extends Core_Entity
 	 */
 	public function weightBackend()
 	{
-		return Core_Str::hideZeros($this->getWeight());
+		return '<span>' . Core_Str::hideZeros($this->getWeight()) . '</span>';
 	}
 
 	public function smallAvatarBackend()
@@ -856,6 +886,113 @@ class Shop_Order_Model extends Core_Entity
 	}
 
 	/**
+	 * Show media in XML
+	 * @var boolean
+	 */
+	protected $_showXmlMedia = FALSE;
+
+	/**
+	 * Show properties in XML
+	 * @param mixed $showXmlProperties array of allowed properties ID or boolean
+	 * @return self
+	 */
+	public function showXmlMedia($showXmlMedia = TRUE)
+	{
+		$this->_showXmlMedia = $showXmlMedia;
+
+		return $this;
+	}
+
+	/**
+	 * Show comments data in XML
+	 * @var boolean
+	 */
+	protected $_showXmlComments = FALSE;
+
+	/**
+	 * Add comments XML to item
+	 * @param boolean $showXmlComments mode
+	 * @return self
+	 */
+	public function showXmlComments($showXmlComments = TRUE)
+	{
+		$this->_showXmlComments = $showXmlComments;
+		return $this;
+	}
+
+	/**
+	 * Show comments rating data in XML
+	 * @var boolean
+	 */
+	protected $_showXmlCommentsRating = FALSE;
+
+	/**
+	 * Add Comments Rating XML to item
+	 * @param boolean $showXmlComments mode
+	 * @return self
+	 */
+	public function showXmlCommentsRating($showXmlCommentsRating = TRUE)
+	{
+		$this->_showXmlCommentsRating = $showXmlCommentsRating;
+		return $this;
+	}
+
+	/**
+	 * What comments show in XML? (active|inactive|all)
+	 * @var string
+	 */
+	protected $_commentsActivity = 'active';
+
+	/**
+	 * Set comments filter rule
+	 * @param string $commentsActivity (active|inactive|all)
+	 * @return self
+	 */
+	public function commentsActivity($commentsActivity = 'active')
+	{
+		$this->_commentsActivity = $commentsActivity;
+		return $this;
+	}
+
+	/**
+	 * Show shop order properties in XML
+	 * @var boolean
+	 */
+	protected $_showXmlCommentProperties = FALSE;
+
+	/**
+	 * Show shop order properties in XML
+	 * @param boolean $showXmlCommentProperties mode
+	 * @return self
+	 */
+	public function showXmlCommentProperties($showXmlCommentProperties = TRUE)
+	{
+		$this->_showXmlCommentProperties = is_array($showXmlCommentProperties)
+			? array_combine($showXmlCommentProperties, $showXmlCommentProperties)
+			: $showXmlCommentProperties;
+
+		return $this;
+	}
+
+	/**
+	 * Array of comments, [parent_id] => array(comments)
+	 * @var array
+	 */
+	protected $_aComments = array();
+
+	/**
+	 * Set array of comments for getXml()
+	 * @param array $aComments
+	 * @return self
+	 */
+	public function setComments(array $aComments)
+	{
+		$this->_aComments = $aComments;
+		return $this;
+	}
+
+
+	/**
 	 * Get XML for entity and children entities
 	 * @return string
 	 * @hostcms-event shop_order.onBeforeRedeclaredGetXml
@@ -925,6 +1062,87 @@ class Shop_Order_Model extends Core_Entity
 		$this->source_id && $this->addEntity(
 			$this->Source->clearEntities()
 		);
+
+		if (($this->_showXmlComments || $this->_showXmlCommentsRating) && Core::moduleIsActive('comment'))
+		{
+			$this->_aComments = array();
+
+			$gradeSum = $gradeCount = 0;
+
+			$oComments = $this->Comments;
+			$oComments->queryBuilder()
+				->orderBy('datetime', 'DESC');
+
+			// учитываем заданную активность комментариев
+			$this->_commentsActivity = strtolower($this->_commentsActivity);
+			if ($this->_commentsActivity != 'all')
+			{
+				$oComments->queryBuilder()
+					->where('active', '=', $this->_commentsActivity == 'inactive' ? 0 : 1);
+			}
+
+			Core_Event::notify($this->_modelName . '.onBeforeSelectComments', $this, array($oComments));
+
+			$aComments = $oComments->findAll();
+			foreach ($aComments as $oComment)
+			{
+				if ($oComment->grade > 0)
+				{
+					$gradeSum += $oComment->grade;
+					$gradeCount++;
+				}
+
+				$this->_showXmlComments
+					&& $this->_aComments[$oComment->parent_id][] = $oComment;
+			}
+
+			// Средняя оценка
+			$avgGrade = $gradeCount > 0
+				? $gradeSum / $gradeCount
+				: 0;
+
+			$fractionalPart = $avgGrade - floor($avgGrade);
+			$avgGradeRounded = floor($avgGrade);
+
+			if ($fractionalPart >= 0.25 && $fractionalPart < 0.75)
+			{
+				$avgGradeRounded += 0.5;
+			}
+			elseif ($fractionalPart >= 0.75)
+			{
+				$avgGradeRounded += 1;
+			}
+
+			$this->_isTagAvailable('comments_count') && $this->addEntity(
+				Core::factory('Core_Xml_Entity')
+					->name('comments_count')
+					->value(count($aComments))
+			);
+
+			$this->_isTagAvailable('comments_grade_sum') && $this->addEntity(
+				Core::factory('Core_Xml_Entity')
+					->name('comments_grade_sum')
+					->value($gradeSum)
+			);
+
+			$this->_isTagAvailable('comments_grade_count') && $this->addEntity(
+				Core::factory('Core_Xml_Entity')
+					->name('comments_grade_count')
+					->value($gradeCount)
+			);
+
+			$this->_isTagAvailable('comments_average_grade') && $this->addEntity(
+				Core::factory('Core_Xml_Entity')
+					->name('comments_average_grade')
+					->addAttribute('value', $avgGrade)
+					->value($avgGradeRounded)
+			);
+
+			$this->_showXmlComments
+				&& $this->_addComments(0, $this);
+
+			$this->_aComments = array();
+		}
 
 		if ($this->_showXmlProperties)
 		{
@@ -996,6 +1214,7 @@ class Shop_Order_Model extends Core_Entity
 					$this->addEntity(
 						$oShop_Order_Item->clearEntities()
 							->showXmlProperties($this->_showXmlProperties, $this->_xmlSortPropertiesValues)
+							->showXmlMedia($this->_showXmlMedia)
 							->showXmlItem(TRUE)
 					);
 
@@ -1027,6 +1246,44 @@ class Shop_Order_Model extends Core_Entity
 	}
 
 	/**
+	 * Add comments into object XML
+	 * @param int $parent_id parent comment id
+	 * @param Core_Entity $parentObject object
+	 * @return self
+	 * @hostcms-event shop_item.onBeforeAddComments
+	 * @hostcms-event shop_item.onAfterAddComments
+	 */
+	protected function _addComments($parent_id, $parentObject)
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeAddComments', $this, array(
+			$parent_id, $parentObject, $this->_aComments
+		));
+
+		if (isset($this->_aComments[$parent_id]))
+		{
+			foreach ($this->_aComments[$parent_id] as $oComment)
+			{
+				$parentObject->addEntity($oComment
+					->clearEntities()
+					->showXmlProperties($this->_showXmlCommentProperties, $this->_xmlSortPropertiesValues)
+					// ->showXmlSiteuserProperties($this->_showXmlSiteuserProperties)
+					// ->showXmlVotes($this->_showXmlVotes)
+					->dateFormat($this->Shop->format_date)
+					->dateTimeFormat($this->Shop->format_datetime)
+				);
+
+				$this->_addComments($oComment->id, $oComment);
+			}
+		}
+
+		Core_Event::notify($this->_modelName . '.onAfterAddComments', $this, array(
+			$parent_id, $parentObject, $this->_aComments
+		));
+
+		return $this;
+	}
+
+	/**
 	 * Prepare Property Value
 	 * @param Property_Value_Model $oProperty_Value
 	 */
@@ -1038,6 +1295,12 @@ class Shop_Order_Model extends Core_Entity
 				$oProperty_Value
 					->setHref($this->getOrderHref())
 					->setDir($this->getOrderPath());
+			break;
+			case 5: // Элемент информационной системы
+			case 12: // Товар интернет-магазина
+			case 13: // Группа информационной системы
+			case 14: // Группа интернет-магазина
+				$oProperty_Value->showXmlMedia($this->_showXmlMedia);
 			break;
 			case 8:
 				$oProperty_Value->dateFormat($this->Shop->format_date);
@@ -1202,7 +1465,7 @@ class Shop_Order_Model extends Core_Entity
 				$oNotification = Core_Entity::factory('Notification');
 				$oNotification
 					->title(Core::_('Shop_Order.notification_paid_order', strip_tags($this->invoice), FALSE))
-					->description(Core::_('Shop_Order.notification_new_order_description', strip_tags($sCompany), $this->sum(), FALSE))
+					->description(Core::_('Shop_Order.notification_new_order_description', strip_tags($sCompany), $this->Shop_Currency->formatWithCurrency($this->getAmount()), FALSE))
 					->datetime(Core_Date::timestamp2sql(time()))
 					->module_id($oModule->id)
 					->type(2) // Оплаченный заказ
@@ -1393,6 +1656,7 @@ class Shop_Order_Model extends Core_Entity
 	/**
 	 * Списание или возврат товара на склад, начисление и стронирование операций по лицевому счету
 	 * @return self
+	 * @hostcms-event shop_order.onAfterSaveShopPurchaseDiscountCoupon
 	 * @hostcms-event shop_order.onAfterSaveSiteuserTransaction
 	 */
 	protected function _paidTransaction()
@@ -1410,7 +1674,7 @@ class Shop_Order_Model extends Core_Entity
 		{
 			$oShop_Item = $oShop_Order_Item->Shop_Item;
 
-			$fAmount = Shop_Controller::instance()->round($oShop_Order_Item->price + $oShop_Order_Item->getTax()) * $oShop_Order_Item->quantity;
+			$fAmount = $oShop_Order_Item->getAmount();
 
 			// Электронный товар
 			if ($oShop_Item->type == 1)
@@ -1438,7 +1702,7 @@ class Shop_Order_Model extends Core_Entity
 
 				$oShop_Siteuser_Transaction->amount = $fAmount * $mode;
 				$oShop_Siteuser_Transaction->shop_currency_id = $this->shop_currency_id;
-				$oShop_Siteuser_Transaction->amount_base_currency = $fAmount * $mode * $fCurrencyCoefficient;
+				$oShop_Siteuser_Transaction->amount_base_currency = $oShop_Siteuser_Transaction->amount * $fCurrencyCoefficient;
 				$oShop_Siteuser_Transaction->shop_order_id = $this->id;
 				$oShop_Siteuser_Transaction->type = 0;
 				$oShop_Siteuser_Transaction->description = $oShop_Order_Item->name;
@@ -1472,6 +1736,8 @@ class Shop_Order_Model extends Core_Entity
 					$oShop_Purchase_Discount_Coupon->count = $oShop_Order_Item->quantity;
 					$oShop_Purchase_Discount_Coupon->save();
 
+					Core_Event::notify($this->_modelName . '.onAfterSaveShopPurchaseDiscountCoupon', $this, array($oShop_Purchase_Discount_Coupon, $oShop_Item));
+
 					if (strlen($oShop->certificate_template))
 					{
 						$oCore_Templater = new Core_Templater();
@@ -1495,7 +1761,9 @@ class Shop_Order_Model extends Core_Entity
 						$oCore_Meta = new Core_Meta();
 						$oCore_Meta
 							->addObject('shop', $oShop)
+							->addObject('shop_item', $oShop_Item)
 							->addObject('this', $this)
+							->addObject('coupon', $oShop_Purchase_Discount_Coupon)
 							->addObject('code', $coupon);
 
 						$senderName = $oShop->Site->sender_name != ''
@@ -1548,7 +1816,7 @@ class Shop_Order_Model extends Core_Entity
 						// Начисление/стронирование бонусов
 						if ($oShop_Item->id)
 						{
-							$fAmount = Shop_Controller::instance()->round($oShop_Order_Item->price + $oShop_Order_Item->getTax()) * $oShop_Order_Item->quantity * $multiplier;
+							$fAmount = $oShop_Order_Item->getAmount() * $multiplier;
 
 							$oShop_Item_Controller = new Shop_Item_Controller();
 							$aBonuses = $oShop_Item_Controller->getBonuses($oShop_Item, $fAmount);
@@ -1648,9 +1916,7 @@ class Shop_Order_Model extends Core_Entity
 							// Товар является доставкой
 							if ($oShop_Order_Item->type == 1)
 							{
-								$fOrderAmount -= Shop_Controller::instance()->round(
-									Shop_Controller::instance()->round($oShop_Order_Item->price + $oShop_Order_Item->getTax()) * $oShop_Order_Item->quantity
-								);
+								$fOrderAmount -= $oShop_Order_Item->getAmount();
 							}
 						}
 					}
@@ -2299,7 +2565,7 @@ class Shop_Order_Model extends Core_Entity
 					$oShop_Measure = $oShop_Item->Shop_Measure;
 					$oXmlMeasure = $oCurrentItemXml->addChild('БазоваяЕдиница', $oShop_Measure->name);
 					$oShop_Measure->okei && $oXmlMeasure->addAttribute('Код', $oShop_Measure->okei);
-					strlen($oShop_Measure->description) && $oXmlMeasure->addAttribute('НаименованиеПолное', $oShop_Measure->description);
+					$oShop_Measure->description != '' && $oXmlMeasure->addAttribute('НаименованиеПолное', $oShop_Measure->description);
 				}
 
 				$oCurrentItemXml->addChild('ЦенаЗаЕдиницу', $oShop_Order_Item->getPrice());
@@ -2429,7 +2695,7 @@ class Shop_Order_Model extends Core_Entity
 			{
 				$oCurrentItemXml = $oDiscountXml->addChild('Скидка');
 				$oCurrentItemXml->addChild('Наименование', $oShop_Order_Item->name);
-				$oCurrentItemXml->addChild('Сумма', -1 * $oShop_Order_Item->getPrice() * $oShop_Order_Item->quantity);
+				$oCurrentItemXml->addChild('Сумма', -1 * $oShop_Order_Item->getAmount());
 				// https://v8.1c.ru/upload/integraciya/realizovannye-resheniya/commerceml_2_10_2.pdf страница 43
 				// Сумма	СуммаТип	[0..1]
 				// Общая сумма по документу. Налоги, скидки и дополнительные расходы включаются в данную сумму в зависимости от установок "УчтеноВСумме", поэтому true
@@ -2515,11 +2781,11 @@ class Shop_Order_Model extends Core_Entity
 				<b><?php echo Core::_('Shop_Order.order_card_status_of_pay')?>:</b> <?php echo Core_Date::sql2datetime($this->payment_datetime)?>
 			</div><?php
 		}
-		
+
 		$sig = $this->shop_currency_id
 			? htmlspecialchars((string) $this->Shop_Currency->sign)
 			: '';
-			
+
 		?>
 		<div class="row">
 			<div class="col-xs-12 table-responsive">
@@ -2568,7 +2834,7 @@ class Shop_Order_Model extends Core_Entity
 							$sShopTaxRate = $oShop_Order_Item->rate;
 
 							$fShopTaxValue = $sShopTaxRate
-								? $oShop_Order_Item->getTax() * $oShop_Order_Item->quantity
+								? $oShop_Order_Item->getTax()
 								: 0;
 
 							// Не установлен статус у товара или статус НЕ отмененный
@@ -2606,7 +2872,7 @@ class Shop_Order_Model extends Core_Entity
 									<?php echo htmlspecialchars((string) $oShop_Order_Item->marking)?>
 								</td>
 								<td>
-									<?php echo number_format(Shop_Controller::instance()->round($oShop_Order_Item->price), 2, '.', '')?>
+									<?php echo number_format(Shop_Controller::instance()->round($oShop_Order_Item->getPrice()), 2, '.', '')?>
 								</td>
 								<td>
 									<?php echo Core_Str::hideZeros($oShop_Order_Item->quantity)?>
@@ -2700,6 +2966,25 @@ class Shop_Order_Model extends Core_Entity
 			->value($count < 100 ? $count : '∞')
 			->title($count)
 			->execute();
+	}
+
+	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function reviewsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		if (Core::moduleIsActive('comment'))
+		{
+			$count = $this->Comments->getCount();
+			$count && Core_Html_Entity::factory('Span')
+				->class('badge badge-ico white')
+				->value($count < 100 ? $count : '∞')
+				->title($count)
+				->execute();
+		}
 	}
 
 	/**
@@ -2806,7 +3091,8 @@ class Shop_Order_Model extends Core_Entity
 
 					// Сумма скидки по дисконтной карте
 					$fDiscountcard = $amount * ($oShop_Discountcard_Level->discount / 100);
-					
+
+					// Округляем до целых
 					$oShop_Discountcard_Level->round
 						&& $fDiscountcard = round($fDiscountcard);
 				}
@@ -2846,11 +3132,10 @@ class Shop_Order_Model extends Core_Entity
 
 				$aShop_Purchase_Discounts = $oShop_Purchase_Discount_Controller->getDiscounts();
 
-				// Если применять только максимальную скидку, то считаем сумму скидок по скидкам от суммы заказа
+				// Вычисляем сумму скидок по скидкам от суммы заказа и по уровню дисконтной карты, применяется наибольшее из рассчитанных скидок
 				if ($bApplyMaxDiscount)
 				{
 					$totalPurchaseDiscount = 0;
-
 					foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
 					{
 						$totalPurchaseDiscount += $oShop_Purchase_Discount->getDiscountAmount();
@@ -2921,13 +3206,18 @@ class Shop_Order_Model extends Core_Entity
 
 					if ($fAmountForCard > 0)
 					{
+						// Рассчитываем от новой суммы, без учета примененных выше скидок от суммы заказа
+						$fDiscountcard = $fAmountForCard * ($oShop_Discountcard_Level->discount / 100);
+
+						// Округляем до целых
+						$oShop_Discountcard_Level->round
+							&& $fDiscountcard = round($fDiscountcard);
+
 						$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
 						$oShop_Order_Item->name = Core::_('Shop_Discountcard.shop_order_item_name', $oShop_Discountcard->number);
 						$oShop_Order_Item->quantity = 1;
 						$oShop_Order_Item->type = 4; // 4 - Скидка по дисконтной карте
-						$oShop_Order_Item->price = -1 * Shop_Controller::instance()->round(
-							$fAmountForCard * ($oShop_Discountcard_Level->discount / 100)
-						);
+						$oShop_Order_Item->price = -1 * Shop_Controller::instance()->round($fDiscountcard);
 
 						$this->add($oShop_Order_Item);
 					}
@@ -3031,21 +3321,90 @@ class Shop_Order_Model extends Core_Entity
 	}
 
 	/**
+	 * Get text values of property
+	 * @param int $property_id property ID
+	 * @param string $separator
+	 * @return string
+	 */
+	public function getTextPropertyValue($property_id, $separator = ', ')
+	{
+		$aReturn = array();
+
+		$oProperty = Core_Entity::factory('Property', $property_id);
+
+		$aProperty_Values = $oProperty->getValues($this->id, FALSE);
+		foreach ($aProperty_Values as $oProperty_Value)
+		{
+			// Дополнительные свойства
+			switch ($oProperty->type)
+			{
+				case 2: // File
+					if ($oProperty_Value->file_name != '')
+					{
+						$aReturn[] = $oProperty_Value->file_name;
+					}
+				break;
+				case 3: // List
+					$oProperty_Value->value
+						&& $aReturn[] = Core_Entity::factory('List_Item', intval($oProperty_Value->value))->value;
+				break;
+				case 5: // Information system
+					if ($oProperty_Value->value)
+					{
+						$oPropertyInformationsystemItem = Core_Entity::factory('Informationsystem_Item', intval($oProperty_Value->value));
+						$aReturn[] = $oPropertyInformationsystemItem->name;
+					}
+				break;
+				case 7: // Checkbox
+					$aReturn[] = $oProperty_Value->value ? '✓' : '×';
+				break;
+				case 8: // Date
+					$oProperty_Value->value != '0000-00-00 00:00:00'
+						&& $aReturn[] = Core_Date::sql2date($oProperty_Value->value);
+				break;
+				case 9: // Datetime
+					$oProperty_Value->value != '0000-00-00 00:00:00'
+						&& $aReturn[] = Core_Date::sql2datetime($oProperty_Value->value);
+				break;
+				case 12: // Shop
+					if ($oProperty_Value->value)
+					{
+						$oPropertyShopItem = Core_Entity::factory('Shop_Item', intval($oProperty_Value->value));
+						$aReturn[] = $oPropertyShopItem->name;
+					}
+				break;
+				default:
+					$oProperty_Value->value !== ''
+						&& $aReturn[] = $oProperty_Value->value;
+			}
+		}
+
+		return count($aReturn) ? implode($separator, $aReturn) : '';
+	}
+
+	/**
 	 * Get printlayout replaces
 	 * @return array
 	 * @hostcms-event shop_order.onAfterGetPrintlayoutReplaces
 	 */
 	public function getPrintlayoutReplaces()
 	{
-		$oCompany = $this->company_id
+		$oShop_Company = $this->company_id
 			? $this->Shop_Company
 			: $this->Shop->Shop_Company;
+
+		$oCompany = Core_Entity::factory('Company', $oShop_Company->id);
+
+		$oCompany_Account = !is_null($oCompany)
+			? $oCompany->Company_Accounts->getDefault()
+			: NULL;
 
 		$aReplace = array(
 			// Core_Meta
 			'this' => $this,
 			'shop_order' => $this,
 			'company' => !is_null($oCompany) ? $oCompany : new Core_Meta_Empty(),
+			'company_account' => !is_null($oCompany_Account) ? $oCompany_Account : new Core_Meta_Empty(),
 			'shop' => $this->Shop,
 			'total_count' => 0,
 		);
@@ -3064,16 +3423,29 @@ class Shop_Order_Model extends Core_Entity
 			$node->item = $oShop_Item;
 			$node->id = $oShop_Item->id;
 			$node->name = htmlspecialchars((string) $oShop_Order_Item->name);
-			$node->measure = htmlspecialchars((string) $oShop_Item->Shop_Measure->name);
-			$node->okei = htmlspecialchars((string) $oShop_Item->Shop_Measure->okei);
-			$node->price = $oShop_Order_Item->price;
+
+			$node->measure = $node->okei = '';
+
+			if ($oShop_Item->shop_measure_id)
+			{
+				$node->measure = htmlspecialchars((string) $oShop_Item->Shop_Measure->name);
+				$node->okei = htmlspecialchars((string) $oShop_Item->Shop_Measure->okei);
+			}
+
+			$price = $oShop_Order_Item->getPrice();
+			$tax = $oShop_Order_Item->getTax();
+			$amount = $oShop_Order_Item->getAmount();
+
+			$node->price = $price - $tax;
+			$node->price_tax = $tax;
+			$node->price_tax_included = $price;
 			$node->quantity = $oShop_Order_Item->quantity;
 			$node->marking = htmlspecialchars((string) $oShop_Order_Item->marking);
 			$node->rate = $oShop_Order_Item->rate;
 			$node->rate_percent = $oShop_Order_Item->rate ? $oShop_Order_Item->rate . '%' : '';
-			$node->amount = Shop_Controller::instance()->round($oShop_Order_Item->quantity * $oShop_Order_Item->price);
-			$node->tax = Shop_Controller::instance()->round($node->amount * $oShop_Order_Item->rate / 100);
-			$node->amount_tax_included = Shop_Controller::instance()->round($node->amount + $node->tax);
+			$node->amount = $amount - ($tax * $oShop_Order_Item->quantity);
+			$node->tax = $tax * $oShop_Order_Item->quantity;
+			$node->amount_tax_included = $amount;
 			$node->warehouse_cell = !is_null($oShop_Order_Item->getCellName()) ? htmlspecialchars($oShop_Order_Item->getCellName()) : '';
 
 			$aReplace['Items'][] = $node;
@@ -3105,6 +3477,10 @@ class Shop_Order_Model extends Core_Entity
 
 		$aReplace['status_date'] = $this->status_datetime != '0000-00-00 00:00:00' ? Core_Date::sql2date($this->status_datetime) : '';
 		$aReplace['status_datetime'] = $this->status_datetime != '0000-00-00 00:00:00' ? Core_Date::sql2datetime($this->status_datetime) : '';
+
+		$aReplace['year'] = date('Y');
+		$aReplace['month'] = date('m');
+		$aReplace['day'] = date('d');
 
 		Core_Event::notify($this->_modelName . '.onAfterGetPrintlayoutReplaces', $this, array($aReplace));
 		$eventResult = Core_Event::getLastReturn();
@@ -3691,6 +4067,67 @@ class Shop_Order_Model extends Core_Entity
 			if ($this->Shop_Order_Status->deadline_shop_order_status_id)
 			{
 				Core_Entity::factory('Shop_Order_Status', $this->Shop_Order_Status->deadline_shop_order_status_id)->setStatus($this);
+			}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Show content
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function showContent($oAdmin_Form_Controller)
+	{
+		ob_start();
+		?>
+
+		<div class="event-title"><?php echo htmlspecialchars(Core::_('Shop_Order.popover_title', $this->invoice, Core_Date::sql2date($this->datetime)))?></div>
+		<div class="small"><?php echo Core::_('Shop_Order.table_amount_value')?>: <?php echo $this->sum()?></div>
+
+		<?php
+		return	ob_get_clean();
+	}
+
+	/**
+	 * Apply tags for item
+	 * @param string $sTags string of tags, separated by comma
+	 * @return self
+	 */
+	public function applyTags($sTags)
+	{
+		$aTags = explode(',', $sTags);
+
+		return $this->applyTagsArray($aTags);
+	}
+
+	/**
+	 * Apply array tags for item
+	 * @param array $aTags array of tags
+	 * @return self
+	 */
+	public function applyTagsArray(array $aTags)
+	{
+		// Удаляем связь метками
+		$this->Tag_Shop_Orders->deleteAll(FALSE);
+
+		foreach ($aTags as $tag_name)
+		{
+			$tag_name = trim($tag_name);
+
+			if ($tag_name != '')
+			{
+				$oTag = Core_Entity::factory('Tag')->getByName($tag_name, FALSE);
+
+				if (is_null($oTag))
+				{
+					$oTag = Core_Entity::factory('Tag');
+					$oTag->name = $oTag->path = $tag_name;
+					$oTag->save();
+				}
+
+				$this->add($oTag);
 			}
 		}
 

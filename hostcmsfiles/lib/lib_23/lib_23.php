@@ -187,7 +187,8 @@ if ($oSiteuser->id)
 	);
 }
 
-$Siteuser_Controller_Show->xsl(
+$Siteuser_Controller_Show
+	->xsl(
 		Core_Entity::factory('Xsl')->getByName($xslUserAuthorization)
 	)
 	->showGroups(TRUE)

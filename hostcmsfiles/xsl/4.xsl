@@ -18,7 +18,15 @@
 		<!-- Store parent id in a variable -->
 		<!-- <xsl:variable name="group" select="informationsystem_group_id"/> -->
 
-		<h1 hostcms:id="{@id}" hostcms:field="name" hostcms:entity="informationsystem_item"><xsl:value-of select="name"/></h1>
+		<!-- Название информационного элемента или SEO-шаблон для H1 -->
+		<xsl:choose>
+			<xsl:when test="/informationsystem/seo_item_h1/node()">
+				<h1><xsl:value-of select="/informationsystem/seo_item_h1"/></h1>
+			</xsl:when>
+			<xsl:otherwise>
+				<h1 hostcms:id="{@id}" hostcms:field="name" hostcms:entity="informationsystem_item"><xsl:value-of select="name"/></h1>
+			</xsl:otherwise>
+		</xsl:choose>
 
 		<!-- Breadcrumbs -->
 		<!-- <xsl:apply-templates select="//informationsystem_group[@id=$group]" mode="breadCrumbs"/> -->

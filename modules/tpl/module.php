@@ -8,10 +8,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Tpl
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
-class Tpl_Module extends Core_Module
+class Tpl_Module extends Core_Module_Abstract
 {
 	/**
 	 * Module version
@@ -23,7 +22,7 @@ class Tpl_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2023-07-17';
+	public $date = '2024-06-06';
 
 	/**
 	 * Module name
@@ -41,7 +40,7 @@ class Tpl_Module extends Core_Module
 			array(
 				'sorting' => 100,
 				'block' => 0,
-				'ico' => 'fa fa-lightbulb-o',
+				'ico' => 'fa-solid fa-code',
 				'name' => Core::_('Tpl.menu'),
 				'href' => "/admin/tpl/index.php",
 				'onclick' => "$.adminLoad({path: '/admin/tpl/index.php'}); return false"
@@ -54,12 +53,13 @@ class Tpl_Module extends Core_Module
 	/**
 	 * Функция обратного вызова для поисковой индексации
 	 *
-	 * @param $offset
-	 * @param $limit
+	 * @param int $site_id
+	 * @param int $offset
+	 * @param int $limit
 	 * @return array
 	 * @hostcms-event Tpl_Module.indexing
 	 */
-	public function indexing($offset, $limit)
+	public function indexing($site_id, $offset, $limit)
 	{
 		$offset = intval($offset);
 		$limit = intval($limit);

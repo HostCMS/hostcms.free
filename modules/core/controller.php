@@ -27,8 +27,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Controller extends Core_Servant_Properties
 {
@@ -351,8 +350,6 @@ class Core_Controller extends Core_Servant_Properties
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeShow', $this);
 
-		//if (!is_null($this->_xsl))
-		//{
 		switch ($this->_mode)
 		{
 			case 'xsl':

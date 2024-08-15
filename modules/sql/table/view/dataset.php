@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Sql
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Sql_Table_View_Dataset extends Admin_Form_Dataset
 {
@@ -130,7 +129,7 @@ class Sql_Table_View_Dataset extends Admin_Form_Dataset
 			// Warning
 			if (!is_null(Core_Array::getRequest('debug')))
 			{
-				echo '<p><b>getCount Query</b>: <pre>', $Core_DataBase->getLastQuery(), '</pre></p>';
+				echo '<p><b>getCount Query</b>, result ' . $row['count'] . ': <pre>', $Core_DataBase->getLastQuery(), '</pre></p>';
 			}
 
 			$count = $row['count'];
@@ -214,7 +213,7 @@ class Sql_Table_View_Dataset extends Admin_Form_Dataset
 			// Warning
 			if (!is_null(Core_Array::getRequest('debug')))
 			{
-				echo '<p><b>Select Query</b>: <pre>', Core_DataBase::instance()->getLastQuery(), '</pre></p>';
+				echo '<p><b>Select Query</b>, found ' . count($this->_objects) . ' row(s): <pre>', Core_DataBase::instance()->getLastQuery(), '</pre></p>';
 			}
 
 			$this->_loaded = TRUE;
@@ -240,6 +239,8 @@ class Sql_Table_View_Dataset extends Admin_Form_Dataset
 		// Уточнение таблицы при поиске WHERE
 		if (isset($condition['where']))
 		{
+			
+			//
 			if (isset($condition['where'][0]))
 			{
 				if (is_string($condition['where'][0])
@@ -248,6 +249,11 @@ class Sql_Table_View_Dataset extends Admin_Form_Dataset
 				{
 					$condition['where'][0] = $this->_tableName . '.' . $condition['where'][0];
 				}
+			}
+
+			if (isset($condition['where'][2]) && is_string($condition['where'][2]) && strpos($condition['where'][2], '0x') === 0)
+			{
+				$condition['where'][2] = Core_QueryBuilder::raw('UNHEX(' . Core_DataBase::instance()->escape(substr($condition['where'][2], 2)) . ')');
 			}
 		}
 

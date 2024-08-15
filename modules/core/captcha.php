@@ -9,9 +9,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Kruglov Sergei
- * @author Hostmake LLC
  * @copyright © 2006, 2007, 2008, 2011 Kruglov Sergei, http://www.captcha.ru
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Captcha
 {
@@ -185,14 +184,15 @@ class Core_Captcha
 	{
 		$length = mt_rand(self::$_config['minLenght'], self::$_config['maxLenght']);
 
-		$allowedCharactersLength = strlen(self::$_config['allowedCharacters']);
+		$allowedCharacters = strval(self::$_config['allowedCharacters']);
+		$allowedCharactersLength = strlen($allowedCharacters);
 
 		while (TRUE)
 		{
 			$value = '';
 			for ($i = 0; $i < $length; $i++)
 			{
-				$value .= self::$_config['allowedCharacters'][mt_rand(0, $allowedCharactersLength - 1)];
+				$value .= $allowedCharacters[mt_rand(0, $allowedCharactersLength - 1)];
 			}
 
 			// Исключаем сочетания символов, сложные для распознавания пользователем

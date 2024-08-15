@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage User
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class User_Session_Model extends Core_Entity
 {
@@ -55,6 +54,15 @@ class User_Session_Model extends Core_Entity
 			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 			$this->_preloadValues['time'] = time();
 		}
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function idBackend()
+	{
+		return Core_Str::stringToSecret($this->id, 14);
 	}
 
 	/**
@@ -143,15 +151,15 @@ class User_Session_Model extends Core_Entity
 		$browser = !is_null($this->user_agent)
 			? Core_Browser::getBrowser($this->user_agent)
 			: '—';
-			
+
 		if (!is_null($browser))
 		{
 			$ico = Core_Browser::getBrowserIco($browser);
-			
+
 			!is_null($ico)
 				&& $browser = '<i class="' . $ico . '"></i> ' . $browser;
 		}
-			
+
 		return $browser;
 	}
 

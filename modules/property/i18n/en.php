@@ -1,13 +1,5 @@
 <?php
-/**
- * Properties.
- *
- * @package HostCMS
- * @subpackage Property
- * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'Properties',
 	'title' => 'Additional properties',
@@ -104,4 +96,7 @@ return array(
 	'move_to_list' => 'Move to list',
 	'add_to_list' => 'Add item to list',
 	'insert_value' => 'Insert value',
+
+	'prefix_large_file' => 'Large file name prefix',
+	'prefix_small_file' => 'Small file name prefix',
 );

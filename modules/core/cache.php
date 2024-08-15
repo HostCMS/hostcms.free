@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Cache
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 abstract class Core_Cache
 {
@@ -100,7 +99,7 @@ abstract class Core_Cache
 	/**
 	 * Get a count of keys in cache $cacheName
 	 * @param string $cacheName cache name
-	 * @return integer
+	 * @return int
 	 */
 	abstract public function getCount($cacheName = 'default');
 
@@ -295,7 +294,7 @@ abstract class Core_Cache
 	 */
 	public function deleteByTag($tag)
 	{
-		$limit = 1000;
+		$limit = 500;
 
 		$crc32 = Core::crc32($tag);
 
@@ -306,6 +305,7 @@ abstract class Core_Cache
 				->limit($limit);
 
 			$aCache_Tags = $oCache_Tags->findAll(FALSE);
+			
 			foreach ($aCache_Tags as $oCache_Tag)
 			{
 				$this->_deleteByTag($oCache_Tag);

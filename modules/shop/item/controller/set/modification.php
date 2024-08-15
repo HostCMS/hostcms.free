@@ -7,8 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Item_Controller_Set_Modification extends Admin_Form_Action_Controller
 {
@@ -76,7 +75,8 @@ class Shop_Item_Controller_Set_Modification extends Admin_Form_Action_Controller
 			$oModificationInput = Admin_Form_Entity::factory('Input')
 				->caption(Core::_('Shop_Item.shop_item_catalog_modification_flag'))
 				->divAttr(array('class' => 'form-group col-xs-12'))
-				->name('modification_name');
+				->name('modification_name')
+				->placeholder(Core::_('Admin.autocomplete_placeholder'));
 
 			$oModificationInputHidden = Admin_Form_Entity::factory('Input')
 				->divAttr(array('class' => 'form-group col-xs-12 hidden'))
@@ -104,7 +104,8 @@ class Shop_Item_Controller_Set_Modification extends Admin_Form_Action_Controller
 							$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
 								return $('<li class=\"autocomplete-suggestion\"></li>')
 									.data('item.autocomplete', item)
-									.append($('<div class=\"name\">').text(item.label))
+									.append($('<div class=\"name\">').html($.escapeHtml(item.label)))
+									.append($('<div class=\"id\">').html('[' + $.escapeHtml(item.id) + ']'))
 									.appendTo(ul);
 							}
 
@@ -184,15 +185,15 @@ class Shop_Item_Controller_Set_Modification extends Admin_Form_Action_Controller
 		{
 			$shop_item_id = Core_Array::getPost('shop_item_id', 0, 'int');
 
-			if (is_null($shop_item_id))
-			{
-				throw new Core_Exception("shop_item_id is NULL");
-			}
-
 			if ($shop_item_id)
 			{
 				$this->_object->modification_id = $shop_item_id;
+				$this->_object->shop_group_id = 0;
 				$this->_object->save();
+			}
+			else
+			{
+				throw new Core_Exception("shop_item_id is empty!");
 			}
 		}
 

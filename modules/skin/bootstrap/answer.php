@@ -7,9 +7,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @version 7.x
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Answer extends Admin_Answer
 {
@@ -25,8 +24,8 @@ class Skin_Bootstrap_Answer extends Admin_Answer
 
 		?><div id="id_content"><?php echo $this->content?></div><?php
 
-		// При смене статуса в новом окне сообщения задваиваются
-		/*<script>$('#id_message').append('<?php echo Core_Str::escapeJavascriptVariable($this->message)?>');</script>*/
+		// При смене статуса в новом окне сообщения задваиваются, при удалении в новом не выводятся
+		?><script>$('#id_message').html('<?php echo Core_Str::escapeJavascriptVariable($this->message)?>');</script><?php
 
 		$this
 			->_afterLoad()

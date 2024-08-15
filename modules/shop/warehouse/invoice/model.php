@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Warehouse_Invoice_Model extends Core_Entity
 {
@@ -355,7 +354,7 @@ class Shop_Warehouse_Invoice_Model extends Core_Entity
 	 */
 	public function shop_warehouse_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		return htmlspecialchars($this->Shop_Warehouse->name);
+		return $this->Shop_Warehouse->id ? htmlspecialchars((string) $this->Shop_Warehouse->name) : '';
 	}
 
 	/**
@@ -498,7 +497,6 @@ class Shop_Warehouse_Invoice_Model extends Core_Entity
 		$Shop_Item_Controller = new Shop_Item_Controller();
 
 		$aShop_Warehouse_Invoice_Items = $this->Shop_Warehouse_Invoice_Items->findAll();
-
 		foreach ($aShop_Warehouse_Invoice_Items as $oShop_Warehouse_Invoice_Item)
 		{
 			$oShop_Item = $oShop_Warehouse_Invoice_Item->Shop_Item;
@@ -520,13 +518,13 @@ class Shop_Warehouse_Invoice_Model extends Core_Entity
 			$node->position = $position++;
 			// $node->item = $oShop_Item;
 			$node->name = htmlspecialchars($oShop_Item->name);
-			$node->measure = htmlspecialchars((string) $oShop_Item->Shop_Measure->name);
-			$node->currency = htmlspecialchars($oShop_Item->Shop_Currency->sign);
-			$node->price = $oShop_Item->Shop_Currency->format($aPrices['price_tax']);
+			$node->measure = $oShop_Item->shop_measure_id ? htmlspecialchars((string) $oShop_Item->Shop_Measure->name) : '';
+			$node->currency = $oShop_Item->shop_currency_id ? htmlspecialchars((string) $oShop_Item->Shop_Currency->sign) : '';
+			$node->price = $oShop_Item->shop_currency_id ? $oShop_Item->Shop_Currency->format($aPrices['price_tax']) : 0;
 			$node->quantity = Core_Str::hideZeros($oShop_Warehouse_Invoice_Item->count);
-			$node->amount = $oShop_Item->Shop_Currency->format($amount);
+			$node->amount = $oShop_Item->shop_currency_id ? $oShop_Item->Shop_Currency->format($amount) : 0;
 			$node->tax = $oShop_Item->shop_tax_id && $oShop_Item->Shop_Tax->rate ? Shop_Controller::instance()->round($amount * $oShop_Item->Shop_Tax->rate / 100) : 0;
-			$node->amount_tax_included = $oShop_Item->Shop_Currency->format(Shop_Controller::instance()->round($amount + $node->tax));
+			$node->amount_tax_included = $oShop_Item->shop_currency_id ? $oShop_Item->Shop_Currency->format(Shop_Controller::instance()->round($amount + $node->tax)) : 0;
 			$node->barcodes = implode(', ', $aBarcodes);
 
 			$aReplace['Items'][] = $node;
@@ -540,14 +538,23 @@ class Shop_Warehouse_Invoice_Model extends Core_Entity
 
 		$aReplace['quantity'] = $total_quantity;
 		$aReplace['tax'] = Shop_Controller::instance()->round($total_tax);
-		$aReplace['amount'] = $oShop_Item->Shop_Currency->format(Shop_Controller::instance()->round($total_amount));
-		$aReplace['amount_tax_included'] = $oShop_Item->Shop_Currency->format(Shop_Controller::instance()->round($this->getAmount()));
+		$aReplace['amount'] = $oShop_Item->shop_currency_id ? $oShop_Item->Shop_Currency->format(Shop_Controller::instance()->round($total_amount)) : 0;
+		$aReplace['amount_tax_included'] = $oShop_Item->shop_currency_id ? $oShop_Item->Shop_Currency->format(Shop_Controller::instance()->round($this->getAmount())) : 0;
 
-		$lng = $oShop->Site->lng;
+		$aReplace['amount_in_words'] = '';
 
-		$aReplace['amount_in_words'] = Core_Inflection::available($lng)
-			? Core_Str::ucfirst(Core_Inflection::instance($lng)->currencyInWords($total_amount, $oShop->Shop_Currency->code))
-			: $total_amount . ' ' . $oShop->Shop_Currency->sign;
+		if ($oShop->shop_currency_id)
+		{
+			$lng = $oShop->Site->lng;
+
+			$aReplace['amount_in_words'] = Core_Inflection::available($lng)
+				? Core_Str::ucfirst(Core_Inflection::instance($lng)->currencyInWords($total_amount, $oShop->Shop_Currency->code))
+				: $total_amount . ' ' . $oShop->Shop_Currency->sign;
+		}
+
+		$aReplace['year'] = date('Y');
+		$aReplace['month'] = date('m');
+		$aReplace['day'] = date('d');
 
 		Core_Event::notify($this->_modelName . '.onAfterGetPrintlayoutReplaces', $this, array($aReplace));
 		$eventResult = Core_Event::getLastReturn();

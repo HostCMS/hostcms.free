@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Item_Comment_Controller_Edit extends Comment_Controller_Edit
 {
@@ -70,7 +69,7 @@ class Shop_Item_Comment_Controller_Edit extends Comment_Controller_Edit
 			->add(
 				Admin_Form_Entity::factory('A')
 					->id('pathLink')
-					->class('input-group-addon bg-blue bordered-blue')
+					->class('input-group-addon blue')
 					->value('<i class="fa fa-external-link"></i>')
 					->target('_blank')
 					->href("/admin/shop/item/index.php?hostcms[action]=edit&hostcms[window]=id_content&shop_id={$oShop->id}&shop_group_id={$oShop_Item->shop_group_id}&hostcms[checked][1][{$shop_item_id}]=1")

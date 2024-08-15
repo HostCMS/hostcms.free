@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Crm_Project_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -37,17 +36,21 @@ class Crm_Project_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->add(Admin_Form_Entity::factory('Script')
 				->value('
 					$(function(){
-						var timer = setInterval(function(){
-							if ($("#' . $windowId . ' .left-block").height())
-							{
-								clearInterval(timer);
+						var bodyWidth = parseInt($("body").width()),
+							timer = setInterval(function(){
+								if (bodyWidth >= 992)
+								{
+									if ($("#' . $windowId . ' .left-block").height())
+									{
+										clearInterval(timer);
 
-								$("#' . $windowId . ' .right-block").find("#' . $windowId . '_notes").slimscroll({
-									height: $("#' . $windowId . ' .left-block").height() - 75,
-									color: "rgba(0, 0, 0, 0.3)",
-									size: "5px"
-								});
-							}
+										$("#' . $windowId . ' .right-block").find("#' . $windowId . '_notes").slimscroll({
+											height: $("#' . $windowId . ' .left-block").height() - 75,
+											color: "rgba(0, 0, 0, 0.3)",
+											size: "5px"
+										});
+									}
+								}
 						}, 500);
 					});
 				'));
@@ -81,7 +84,7 @@ class Crm_Project_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		$countNotes = $this->_object->Crm_Notes->getCount()
-			? '<span class="badge badge-palegreen">' . $this->_object->Crm_Notes->getCount() . '</span>'
+			? '<span class="badge badge-yellow">' . $this->_object->Crm_Notes->getCount() . '</span>'
 			: '';
 
 		ob_start();

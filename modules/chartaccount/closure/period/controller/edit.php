@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Chartaccount
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Chartaccount_Closure_Period_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -72,9 +71,9 @@ class Chartaccount_Closure_Period_Controller_Edit extends Admin_Form_Action_Cont
 
 		$oMainTab
 			->move($this->getField('posted')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-lg-3 margin-top-21')), $oMainRow2)
-			->move($this->getField('сlosure_cost_accounting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-lg-3')), $oMainRow3)
-			->move($this->getField('financial_result')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-lg-3')), $oMainRow4)
-			->move($this->getField('balance_reformation')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-lg-3')), $oMainRow5)
+			->move($this->getField('сlosure_cost_accounting')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow3)
+			->move($this->getField('financial_result')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow4)
+			->move($this->getField('balance_reformation')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow5)
 			->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow6);
 			;
 

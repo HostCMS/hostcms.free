@@ -37,8 +37,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Informationsystem_Controller_Tag_Show extends Core_Controller
 {
@@ -75,6 +74,32 @@ class Informationsystem_Controller_Tag_Show extends Core_Controller
 	public function __construct(Informationsystem_Model $oInformationsystem)
 	{
 		parent::__construct($oInformationsystem->clearEntities());
+
+		$this->_setTags();
+
+		$this->group = NULL;
+		$this->tag_dirs = $this->tag_dir = FALSE;
+		$this->offset = 0;
+		$this->cache = TRUE;
+	}
+
+	/**
+	 * Clone controller
+	 * @return void
+	 * @ignore
+	 */
+	public function __clone()
+	{
+		$this->_setTags();
+	}
+
+	/**
+	 * Prepare items for showing
+	 * @return self
+	 */
+	protected function _setTags()
+	{
+		$oInformationsystem = $this->getEntity();
 
 		$siteuser_id = 0;
 		$aSiteuserGroups = array(0, -1);
@@ -122,10 +147,7 @@ class Informationsystem_Controller_Tag_Show extends Core_Controller
 			->having('count', '>', 0)
 			->orderBy('tags.name', 'ASC');
 
-		$this->group = NULL;
-		$this->tag_dirs = $this->tag_dir = FALSE;
-		$this->offset = 0;
-		$this->cache = TRUE;
+		return $this;
 	}
 
 	/**
@@ -157,8 +179,6 @@ class Informationsystem_Controller_Tag_Show extends Core_Controller
 				return $this;
 			}
 		}
-
-		$oInformationsystem = $this->getEntity();
 
 		if ($this->tag_dirs)
 		{

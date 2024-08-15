@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Warehouse_Movement_Model extends Core_Entity
 {
@@ -298,7 +297,7 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 	 */
 	public function source_shop_warehouse_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		return htmlspecialchars($this->Source_Shop_Warehouse->name);
+		return $this->Source_Shop_Warehouse->id ? htmlspecialchars((string) $this->Source_Shop_Warehouse->name) : '';
 	}
 
 	/**
@@ -307,7 +306,7 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 	 */
 	public function destination_shop_warehouse_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		return htmlspecialchars($this->Destination_Shop_Warehouse->name);
+		return $this->Destination_Shop_Warehouse->id ? htmlspecialchars((string) $this->Destination_Shop_Warehouse->name) : '';
 	}
 
 	/**
@@ -439,7 +438,6 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 		$Shop_Item_Controller = new Shop_Item_Controller();
 
 		$aShop_Warehouse_Movement_Items = $this->Shop_Warehouse_Movement_Items->findAll(FALSE);
-
 		foreach ($aShop_Warehouse_Movement_Items as $oShop_Warehouse_Movement_Item)
 		{
 			$oShop_Item = $oShop_Warehouse_Movement_Item->Shop_Item;
@@ -460,8 +458,8 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 			$node->position = $position++;
 			$node->item = $oShop_Item;
 			$node->name = htmlspecialchars($oShop_Item->name);
-			$node->measure = htmlspecialchars((string) $oShop_Item->Shop_Measure->name);
-			$node->currency = htmlspecialchars($oShop_Item->Shop_Currency->sign);
+			$node->measure = $oShop_Item->shop_measure_id ? htmlspecialchars((string) $oShop_Item->Shop_Measure->name) : '';
+			$node->currency = $oShop_Item->shop_currency_id ? htmlspecialchars((string) $oShop_Item->Shop_Currency->sign) : '';
 			$node->price = $aPrices['price_tax'];
 			$node->quantity = $oShop_Warehouse_Movement_Item->count;
 			$node->amount = Shop_Controller::instance()->round($node->quantity * $node->price);
@@ -475,6 +473,10 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 		}
 
 		$aReplace['quantity'] = $total_quantity;
+
+		$aReplace['year'] = date('Y');
+		$aReplace['month'] = date('m');
+		$aReplace['day'] = date('d');
 
 		Core_Event::notify($this->_modelName . '.onAfterGetPrintlayoutReplaces', $this, array($aReplace));
 		$eventResult = Core_Event::getLastReturn();

@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -62,6 +61,7 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oSiteuserGroupBlock = Admin_Form_Entity::factory('Div')->class('well with-header well-sm'))
 			->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
 		;
@@ -135,7 +135,7 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		$oImageField
-			->divAttr(array('class' => 'input-group col-xs-12'))
+			// ->divAttr(array('class' => 'input-group col-xs-12'))
 			->name("image")
 			->id("image")
 			->largeImage(array(
@@ -156,13 +156,49 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 
 		$oMainRow4->add($oImageField);
 
+		// Группа доступа
+		$aSiteuser_Groups = array(0 => Core::_('Shop_Discount.all'));
+
+		if (Core::moduleIsActive('siteuser'))
+		{
+			$oSiteuser_Controller_Edit = new Siteuser_Controller_Edit($this->_Admin_Form_Action);
+			$aSiteuser_Groups = $aSiteuser_Groups + $oSiteuser_Controller_Edit->fillSiteuserGroups($this->_object->Shop->site_id);
+		}
+
+		$oSiteuserGroupBlock
+			->add(Admin_Form_Entity::factory('Div')
+				->class('header bordered-azure')
+				->value(Core::_("Shop_Payment_System.siteuser_groups"))
+			)
+			->add($oSiteuserGroupBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'));
+
+		$aTmp = array();
+
+		$aShop_Payment_System_Siteuser_Groups = $this->_object->Shop_Payment_System_Siteuser_Groups->findAll(FALSE);
+		foreach ($aShop_Payment_System_Siteuser_Groups as $oShop_Payment_System_Siteuser_Group)
+		{
+			!in_array($oShop_Payment_System_Siteuser_Group->siteuser_group_id, $aTmp)
+				&& $aTmp[] = $oShop_Payment_System_Siteuser_Group->siteuser_group_id;
+		}
+
+		foreach ($aSiteuser_Groups as $siteuser_group_id => $name)
+		{
+			$oSiteuserGroupBlockRow1->add($oCheckbox = Admin_Form_Entity::factory('Checkbox')
+				->divAttr(array('class' => 'form-group col-xs-12 col-md-4'))
+				->name('siteuser_group_' . $siteuser_group_id)
+				->caption(htmlspecialchars($name))
+			);
+
+			(!$this->_object->id || in_array($siteuser_group_id, $aTmp))
+				&& $oCheckbox->checked('checked');
+		}
+
 		$oMainTab->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow5);
 
 		$Admin_Form_Entity_Textarea = Admin_Form_Entity::factory('Textarea');
 
 		$oTmpOptions = $Admin_Form_Entity_Textarea->syntaxHighlighterOptions;
-		// $oTmpOptions['mode'] = 'application/x-httpd-php';
-		$oTmpOptions['mode'] = 'ace/mode/php';
+		$oTmpOptions['mode'] = '"ace/mode/php"';
 
 		$Admin_Form_Entity_Textarea
 			->value($fileContent)
@@ -326,6 +362,50 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 			}
 
 			$this->_object->save();
+		}
+
+		// Группа доступа
+		$aSiteuser_Groups = array(0 => Core::_('Structure.all'));
+
+		if (Core::moduleIsActive('siteuser'))
+		{
+			$oSiteuser_Controller_Edit = new Siteuser_Controller_Edit($this->_Admin_Form_Action);
+			$aSiteuser_Groups = $aSiteuser_Groups + $oSiteuser_Controller_Edit->fillSiteuserGroups($this->_object->Shop->site_id);
+		}
+
+		$aTmp = array();
+
+		$aShop_Payment_System_Siteuser_Groups = $this->_object->Shop_Payment_System_Siteuser_Groups->findAll(FALSE);
+		foreach ($aShop_Payment_System_Siteuser_Groups as $oShop_Payment_System_Siteuser_Group)
+		{
+			!in_array($oShop_Payment_System_Siteuser_Group->siteuser_group_id, $aTmp)
+				&& $aTmp[] = $oShop_Payment_System_Siteuser_Group->siteuser_group_id;
+		}
+
+		foreach ($aSiteuser_Groups as $siteuser_group_id => $name)
+		{
+			$bSiteuserGroupChecked = Core_Array::getPost('siteuser_group_' . $siteuser_group_id);
+
+			if ($bSiteuserGroupChecked)
+			{
+				if (!in_array($siteuser_group_id, $aTmp))
+				{
+
+					$oShop_Payment_System_Siteuser_Group = Core_Entity::factory('Shop_Payment_System_Siteuser_Group');
+					$oShop_Payment_System_Siteuser_Group->siteuser_group_id = $siteuser_group_id;
+					$this->_object->add($oShop_Payment_System_Siteuser_Group);
+				}
+			}
+			else
+			{
+				if (in_array($siteuser_group_id, $aTmp))
+				{
+					$oShop_Payment_System_Siteuser_Group = $this->_object->Shop_Payment_System_Siteuser_Groups->getObject($this->_object, $siteuser_group_id);
+
+					!is_null($oShop_Payment_System_Siteuser_Group)
+						&& $oShop_Payment_System_Siteuser_Group->delete();
+				}
+			}
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));

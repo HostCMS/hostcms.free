@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Tag
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Tag_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -73,10 +72,18 @@ class Tag_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					)
 					->name('tag_dir_id')
 					->value($this->_object->tag_dir_id)
-					->caption(Core::_('Tag_Dir.parent_name'));
+					->caption(Core::_('Tag_Dir.parent_name'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
 
 				$oMainTab->addBefore(
-					$oSelect_Dirs, $this->getField('path')->format(array('lib' => array()))
+					$oSelect_Dirs, $this->getField('path')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))->format(array('lib' => array()))
+				);
+
+				$oMainTab->delete($this->getField('h1'));
+
+				$oMainTab->addAfter(
+					$this->getField('h1')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))->format(array('lib' => array())),
+					$this->getField('path')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))->format(array('lib' => array()))
 				);
 
 				$this->getField('description')

@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Property
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -252,7 +251,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$pathLink = Admin_Form_Entity::factory('A')
 						->id('pathLink')
-						->class('input-group-addon bg-blue bordered-blue')
+						->class('input-group-addon blue')
 						->value('<i class="fa fa-external-link"></i>');
 
 					if ($this->_object->id && $this->_object->list_id)
@@ -286,7 +285,8 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							->caption(Core::_('Property.list_id'))
 							->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'))
 							->name('list_name')
-							->add($pathLink);
+							->add($pathLink)
+							->placeholder(Core::_('Admin.autocomplete_placeholder'));
 
 						$this->_object->list_id
 							&& $oListInput->value($oList->name . ' [' . $oList->id . ']');
@@ -317,7 +317,8 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 										$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
 											return $('<li class=\"autocomplete-suggestion\"></li>')
 												.data('item.autocomplete', item)
-												.append($('<div class=\"name\">').text(item.label))
+												.append($('<div class=\"name\">').html($.escapeHtml(item.label)))
+												.append($('<div class=\"id\">').html('[' + $.escapeHtml(item.id) + ']'))
 												.appendTo(ul);
 										}
 										$(this).prev('.ui-helper-hidden-accessible').remove();
@@ -434,6 +435,8 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainTab
 					->move($this->getField('tag_name'), $oMainRow11)
 					->move($this->getField('sorting'), $oMainRow11)
+					->move($this->getField('prefix_large_file')->divAttr(array('class' => 'form-group col-xs-12 col-md-6 hidden-0 hidden-1 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14')), $oMainRow11)
+					->move($this->getField('prefix_small_file')->divAttr(array('class' => 'form-group col-xs-12 col-md-6 hidden-0 hidden-1 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14')), $oMainRow11)
 					->move($this->getField('multiple'), $oMainRow12)
 					->move($this->getField('obligatory'), $oMainRow13)
 					->move($this->getField('indexing'), $oMainRow14);
@@ -572,7 +575,8 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$oPropertyDirInput = Admin_Form_Entity::factory('Input')
 				->caption(Core::_('Property_Dir.parent_id'))
 				->divAttr(array('class' => $class))
-				->name('property_dir_name');
+				->name('property_dir_name')
+				->placeholder(Core::_('Admin.autocomplete_placeholder'));
 
 			$this->_object->$fieldName
 				&& $oPropertyDirInput->value($oProperty_Dir->name . ' [' . $oProperty_Dir->id . ']');
@@ -601,9 +605,10 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						minLength: 1,
 						create: function() {
 							$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
-								return $('<li></li>')
+								return $('<li class=\"autocomplete-suggestion\"></li>')
 									.data('item.autocomplete', item)
-									.append($('<a>').text(item.label))
+									.append($('<div class=\"name\">').html($.escapeHtml(item.label)))
+									.append($('<div class=\"id\">').html('[' + $.escapeHtml(item.id) + ']'))
 									.appendTo(ul);
 							}
 							$(this).prev('.ui-helper-hidden-accessible').remove();

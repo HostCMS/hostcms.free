@@ -9,8 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Type_Apply extends Admin_Form_Action_Controller
 {
@@ -23,9 +22,6 @@ class Admin_Form_Action_Controller_Type_Apply extends Admin_Form_Action_Controll
 	 */
 	public function execute($operation = NULL)
 	{
-		// Получение списка полей объекта
-		//$aColumns = $this->_object->getTableColumns();
-
 		Core_Event::notify(get_class($this) . '.onBeforeExecute', $this, array($this->_object));
 
 		$aAdmin_Form_Fields = $this->_Admin_Form_Action->Admin_Form->Admin_Form_Fields->findAll();
@@ -48,9 +44,10 @@ class Admin_Form_Action_Controller_Type_Apply extends Admin_Form_Action_Controll
 			$this->_object->clearCache();
 		}
 
-		return $this;
+		return isset($_POST['hostcms']['filterId'])
+			? $this
+			: TRUE;
 	}
-
 
 	/**
 	 * Apply

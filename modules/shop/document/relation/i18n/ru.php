@@ -1,6 +1,7 @@
 <?php
 
 return array(
+	'model_name' => 'Связанные документы',
 	'documents' => 'Документ',
 	'add_purchaseorder' => 'Заказ поставщика',
 	'add_shop_warehouse_invoice' => 'Счет поставщика',

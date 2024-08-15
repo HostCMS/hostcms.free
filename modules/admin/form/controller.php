@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 abstract class Admin_Form_Controller extends Core_Servant_Properties
 {
@@ -150,7 +149,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 				unset($_GET[$key]);
 				unset($_REQUEST[$key]);
 			}
-			elseif (!is_array($value) && $key != '_' && strpos($key, 'admin_form_filter_') === FALSE && strpos($key, 'topFilter_') === FALSE)
+			elseif (!is_array($value) && $key != '_' && $key != 'secret_csrf' && strpos($key, 'admin_form_filter_') === FALSE && strpos($key, 'topFilter_') === FALSE)
 			{
 				//$aTmp[] = htmlspecialchars($key, ENT_QUOTES) . '=' . htmlspecialchars($value, ENT_QUOTES);
 				$aTmp[] = htmlspecialchars($key) . '=' . rawurlencode($value);
@@ -248,6 +247,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		//'filterSettings',
 		// Admin_View
 		'Admin_View',
+		'showTopFilterTags',
 	);
 
 	/**
@@ -750,7 +750,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	 * @param Core_Module $oModule
 	 * @return self
 	 */
-	public function module(Core_Module $oModule)
+	public function module(Core_Module_Abstract $oModule)
 	{
 		$this->module = $oModule;
 		return $this;
@@ -1267,6 +1267,45 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		ob_start();
 		Core_Event::notify('Admin_Form_Controller.onBeforeShowContent', $this);
 
+		// Пользовательские поля для каждого dataset
+		/*foreach ($this->_datasets as $datasetKey => $oAdmin_Form_Dataset)
+		{
+			$oEntity = $oAdmin_Form_Dataset->getEntity();
+
+			$oFields = Core_Entity::factory('Field');
+			$oFields->queryBuilder()
+				->where('fields.model', '=', $oEntity->getModelName())
+				->open()
+					->where('fields.site_id', '=', CURRENT_SITE)
+					->setOr()
+					->where('fields.site_id', '=', 0)
+				->close()
+				->clearOrderBy()
+				->orderBy('sorting', 'ASC');
+
+			$aFields = $oFields->findAll();
+
+			foreach ($aFields as $oField)
+			{
+				$oNew = new stdClass();
+				$oNew->id = 'uf_' . $oField->id;
+				$oNew->name = $oField->name;
+				$oNew->allow_filter = TRUE;
+				$oNew->view = 0;
+				$oNew->type = 1;
+				$oNew->filter_type = 0;
+				$oNew->filter_condition = 0;
+				$oNew->show_by_default = 0;
+				$oNew->width = '';
+				$oNew->ico = '';
+				$oNew->format = '';
+				$oNew->class = '';
+				$oNew->allow_sorting = 0;
+
+				$this->_Admin_Form_Fields[] = $oNew;
+			}
+		}*/
+		
 		$viewAdmin_Form_Controller = new $className($this);
 		$viewAdmin_Form_Controller->execute();
 
@@ -1338,6 +1377,17 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 							{
 								if (isset($this->_datasets[$datasetKey]))
 								{
+									// Проверка CSRF
+									if ($oAdmin_Form_Action->confirm)
+									{
+										$secret_csrf = Core_Array::getGet('secret_csrf', '', 'trim');
+
+										if (!Core_Security::checkCsrf($secret_csrf, Core::$mainConfig['csrf_lifetime']))
+										{
+											Core_Security::throwCsrfError();
+										}
+									}
+
 									$oObject = $this->_datasets[$datasetKey]->getObject($checkedItemId);
 
 									// Проверка на наличие объекта и доступность действия к dataset
@@ -1485,17 +1535,45 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 			$oAdmin_Language = $this->getAdminLanguage();
 			$this->limit = NULL;
 
-			$aData = array();
+			$aData = $aFields = array();
 
+			// Поля формы
 			$aAdmin_Form_Fields = $this->getAdminFormFields();
 			foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 			{
 				// 0 - Столбец и фильтр, 2 - Столбец
 				if ($oAdmin_Form_Field->view == 0 || $oAdmin_Form_Field->view == 2)
 				{
-					$fieldName = $oAdmin_Form_Field->getCaption($oAdmin_Language->id);
+					$fieldName = $oAdmin_Form_Field instanceof Admin_Form_Field_Model
+						? $oAdmin_Form_Field->getCaption($oAdmin_Language->id)
+						: $oAdmin_Form_Field->name;
 
-					$aData[] = $this->prepareString($fieldName);
+					$aData[] = $this->prepareCell($fieldName);
+
+					$aFields[$oAdmin_Form_Field->name] = $oAdmin_Form_Field;
+				}
+			}
+
+			// Оставшиеся поля моделей
+			foreach ($this->_datasets as $datasetKey => $oAdmin_Form_Dataset)
+			{
+				$oEntitity = $oAdmin_Form_Dataset->getEntity();
+
+				if ($oEntitity instanceof Core_Entity)
+				{
+					$modelName = $oEntitity->getModelName();
+
+					$aColumns = $oEntitity->getTableColumns();
+
+					foreach ($aColumns as $columnName => $aColumn)
+					{
+						if (!isset($aFields[$columnName]) && Core_I18n::instance()->check($modelName . '.' . $columnName))
+						{
+							$aData[] = $this->prepareCell(strip_tags(Core::_($modelName . '.' . $columnName)));
+
+							$aFields[$columnName] = NULL;
+						}
+					}
 				}
 			}
 
@@ -1523,43 +1601,51 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 						foreach ($aEntities as $oEntity)
 						{
 							$aData = array();
-							foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
+							//foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
+							foreach ($aFields as $fieldName => $mixed)
 							{
 								// 0 - Столбец и фильтр, 2 - Столбец
-								if ($oAdmin_Form_Field->view == 0 || $oAdmin_Form_Field->view == 2)
-								{
-									// Перекрытие параметров для данного поля
-									$oAdmin_Form_Field_Changed = $this->changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field);
-
-									$fieldName = $oAdmin_Form_Field_Changed->name;
-
-									if (isset($oEntity->$fieldName))
+								//if ($oAdmin_Form_Field->view == 0 || $oAdmin_Form_Field->view == 2)
+								//{
+									// Перекрытие параметров для данного поля. Может быть $oAdmin_Form_Field или NULL
+									if ($mixed)
 									{
-										// значение свойства
-										$value = $oEntity->$fieldName;
-									}
-									elseif ($this->isCallable($oEntity, $fieldName))
-									{
-										// Выполним функцию обратного вызова
-										$value = $oEntity->$fieldName($oAdmin_Form_Field_Changed, $this);
+										$oAdmin_Form_Field_Changed = $this->changeField($oAdmin_Form_Dataset, $mixed);
+										$fieldName = $oAdmin_Form_Field_Changed->name;
+
+										if (isset($oEntity->$fieldName))
+										{
+											// значение свойства
+											$value = $oEntity->$fieldName;
+										}
+										elseif ($this->isCallable($oEntity, $fieldName))
+										{
+											// Выполним функцию обратного вызова
+											$value = $oEntity->$fieldName($oAdmin_Form_Field_Changed, $this);
+										}
+										else
+										{
+											$value = NULL;
+										}
 									}
 									else
 									{
-										$value = NULL;
+										$oAdmin_Form_Field_Changed = NULL;
+
+										$value = isset($oEntity->$fieldName) ? $oEntity->$fieldName : NULL;
 									}
 
-									$sFormat = $oAdmin_Form_Field_Changed->format;
+									$iType = $oAdmin_Form_Field_Changed ? $oAdmin_Form_Field_Changed->type : 1;
+									$sFormat = $oAdmin_Form_Field_Changed ? $oAdmin_Form_Field_Changed->format : '';
 
-									switch ($oAdmin_Form_Field_Changed->type)
+									switch ($iType)
 									{
 										case 1: // Текст.
 										case 2: // Поле ввода.
 										case 4: // Ссылка.
 										case 7: // Картинка-ссылка.
-											if (!is_null($value))
-											{
-												$value = $this->applyFormat($value, $sFormat);
-											}
+											!is_null($value)
+												&& $value = $this->applyFormat($value, $sFormat);
 										break;
 										case 3: // Checkbox.
 											$value = $value == 1 ? Core::_('Admin_Form.yes') : Core::_('Admin_Form.no');
@@ -1610,8 +1696,8 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 										break;
 									}
 
-									$aData[] = $value;
-								}
+									$aData[] = $this->prepareCell($value);
+								//}
 							}
 
 							$this->_printRow($aData);
@@ -1645,7 +1731,17 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	 */
 	public function prepareString($string)
 	{
-		return str_replace('"', '""', trim($string));
+		return str_replace('"', '""', trim((string) $string));
+	}
+
+	/**
+	 * Prepare cell
+	 * @param string $string
+	 * @return string
+	 */
+	public function prepareCell($string)
+	{
+		return sprintf('"%s"', $this->prepareString($string));
 	}
 
 	/**
@@ -1726,8 +1822,9 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 			$subject = str_replace($replace_key, strval($replace_value), $subject);
 		}
 
-		$aColumns = $oEntity->getTableColumns();
-		foreach ($aColumns as $columnName => $columnArray)
+		// Columns + Data-attributes
+		$aColumns = array_merge(array_keys($oEntity->getTableColumns()), array_keys($oEntity->getDataValues()));
+		foreach ($aColumns as $columnName)
 		{
 			if (isset($oEntity->$columnName))
 			{
@@ -1735,7 +1832,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 					'{' . $columnName . '}',
 					$mode == 'link'
 						? htmlspecialchars((string) $oEntity->$columnName)
-						: Core_Str::escapeJavascriptVariable($this->jQueryEscape($oEntity->$columnName)),
+						: Core_Str::escapeJavascriptVariable(/*$this->jQueryEscape(*/$oEntity->$columnName/*)*/), // jQueryEscape() wrong with filemanager and dir with '+' char
 					$subject
 				);
 			}
@@ -2206,6 +2303,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 				&& !isset($_GET[$key])
 				&& (strpos($key, 'admin_form_filter_') === 0 || strpos($key, 'topFilter_') === 0)
 				&& $value != 'HOST_CMS_ALL'
+				&& $key != 'secret_csrf'
 			)
 			{
 				$aData[] = htmlspecialchars($key) . '=' . rawurlencode($value);
@@ -2527,6 +2625,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			</select>
 			<script>
 				$('#<?php echo $windowId?> #<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectSiteuser({
+					url: '/admin/siteuser/index.php?loadSiteusers&types[]=siteuser',
 					language: '<?php echo $language?>',
 					placeholder: '<?php echo $placeholder?>',
 					dropdownParent: $('#<?php echo $windowId?>')
@@ -2704,11 +2803,11 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			$bMain = $tabName === 'main';
 
 			$bCurrent = $this->filterId === $tabName || $this->filterId === '' && $bMain;
-
-			// Значение вначале берется из POST, если его там нет, то из данных в JSON
+ 
+			// Значение вначале берется из $this->request, если его там нет, то из данных в JSON
 			$mValue = !$bHide
-				? (isset($_POST['topFilter_' . $oAdmin_Form_Field->id]) && $bCurrent
-					? $_POST['topFilter_' . $oAdmin_Form_Field->id]
+				? (array_key_exists('topFilter_' . $oAdmin_Form_Field->id, $this->request) && $bCurrent
+					? Core_Array::get($this->request, 'topFilter_' . $oAdmin_Form_Field->id)
 					: (
 						isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['value'])
 							? $aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['value']
@@ -2799,7 +2898,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 	{
 		return str_replace(array('*', '?'), array('%', '_'), Core_DataBase::instance()->escapeLike(trim($str)));
 	}
-	
+
 	/**
 	 * setDatasetConditions() has been called
 	 * @var boolean
@@ -2816,7 +2915,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		{
 			return $this;
 		}
-		
+
 		$aAdmin_Form_Fields = $this->getAdminFormFields();
 
 		$oAdmin_Form_Field_Sorting = $this->getAdminFormFieldById($this->sortingFieldId);
@@ -2831,11 +2930,13 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 					// Check field exists in the model
 					$fieldName = $this->getFieldName($oAdmin_Form_Field_Sorting->name);
 
-					if (isset($oEntity->$fieldName) || method_exists($oEntity, $fieldName)
+					if (isset($oEntity->$fieldName)
+						|| method_exists($oEntity, $fieldName)
 						// Для сортировки должно существовать св-во модели
 						// || property_exists($oEntity, $fieldName)
 						|| $oAdmin_Form_Dataset->issetExternalField($fieldName)
 						|| strpos($oAdmin_Form_Field_Sorting->name, '.') !== FALSE
+						|| $oAdmin_Form_Field_Sorting->filter_type == 1 // поле использует псевдоним и фильтруется через HAVING
 					)
 					{
 						$oAdmin_Form_Dataset->addCondition(array(
@@ -2869,6 +2970,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 							: 'topFilter_';
 
 						$mFilterValue = Core_Array::get($this->request, "{$filterPrefix}{$oAdmin_Form_Field_Changed->id}", NULL);
+						$filterCondition = Core_Array::get($this->request, "{$filterPrefix}{$oAdmin_Form_Field_Changed->id}_condition", '=');
 
 						// Функция обратного вызова для значения в фильтре
 						if (isset($this->_filterCallbacks[$oAdmin_Form_Field_Changed->name]))
@@ -2906,11 +3008,15 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 										$mLikeFilterValue = $this->convertLike($mFilterValue);
 
+										$condition = in_array($filterCondition, array('=', '<', '>', '<=', '>='))
+											? $filterCondition
+											: '=';
+
 										$oAdmin_Form_Dataset->addCondition(
 											array($sFilterType => array($oAdmin_Form_Field_Changed->name,
 												$mFilterValue !== $mLikeFilterValue
 													? 'LIKE'
-													: '=',
+													: $condition, // : '=',
 												$mLikeFilterValue))
 										);
 									break;
@@ -3042,7 +3148,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 				Core_Message::show($e->getMessage(), 'error');
 			}
 		}
-		
+
 		$this->_setDatasetConditions = TRUE;
 
 		return $this;

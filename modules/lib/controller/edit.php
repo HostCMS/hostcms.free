@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Lib
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -53,8 +52,7 @@ class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oAdmin_Form_Entity_Textarea_Lib = Admin_Form_Entity::factory('Textarea');
 
 				$oTmpOptions = $oAdmin_Form_Entity_Textarea_Lib->syntaxHighlighterOptions;
-				// $oTmpOptions['mode'] = 'application/x-httpd-php';
-				$oTmpOptions['mode'] = 'ace/mode/php';
+				$oTmpOptions['mode'] = '"ace/mode/php"';
 
 				$oAdmin_Form_Entity_Textarea_Lib
 					->value(
@@ -81,8 +79,7 @@ class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oAdmin_Form_Entity_Textarea_Lib_Config = Admin_Form_Entity::factory('Textarea');
 
 				$oTmpOptions = $oAdmin_Form_Entity_Textarea_Lib_Config->syntaxHighlighterOptions;
-				// $oTmpOptions['mode'] = 'application/x-httpd-php';
-				$oTmpOptions['mode'] = 'ace/mode/php';
+				$oTmpOptions['mode'] = '"ace/mode/php"';
 
 				$oAdmin_Form_Entity_Textarea_Lib_Config
 					->value(

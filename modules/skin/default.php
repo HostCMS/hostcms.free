@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Skin_Default extends Core_Skin
 {
@@ -122,10 +121,11 @@ class Skin_Default extends Core_Skin
 		<?php
 		$this->addJs("/modules/skin/bootstrap/js/lng/{$lng}/{$lng}.js");
 		$aJs = $this->getJs();
-		foreach ($aJs as $sPath)
+		foreach ($aJs as $aJs)
 		{
 			Core_Html_Entity::factory('Script')
-				->src($sPath . '?' . $timestamp)
+				->src($aJs['src'] . '?' . $timestamp)
+				->type($aJs['type'])
 				->execute();
 		}
 		?>
@@ -179,9 +179,8 @@ class Skin_Default extends Core_Skin
 <head>
 	<title><?php echo htmlspecialchars($this->_title)?></title>
 	<meta content="text/html; charset=UTF-8" http-equiv="Content-Type"></meta>
-	<link rel="apple-touch-icon" href="/modules/skin/bootstrap/ico/icon-iphone-retina.png" />
-	<link rel="shortcut icon" type="image/x-icon" href="/modules/skin/bootstrap/ico/favicon.ico" />
-	<link rel="icon" type="image/png" href="/modules/skin/bootstrap/ico/favicon.png" />
+	<link rel="icon" type="image/svg+xml" href="/modules/skin/bootstrap/ico/favicon.svg" />
+	
 	<?php $this->showHead()?>
 </head>
 <body class="body-<?php echo htmlspecialchars($this->_mode)?> hostcms6 backendBody">
@@ -614,7 +613,7 @@ if ($this->_mode != 'blank')
 			$aModules = $this->_getAllowedModules();
 			foreach ($aModules as $oModule)
 			{
-				$oCore_Module = Core_Module::factory($oModule->path);
+				$oCore_Module = Core_Module_Abstract::factory($oModule->path);
 
 				if ($oModule->active && $oCore_Module)
 				{
@@ -910,7 +909,7 @@ if ($this->_mode != 'blank')
 		if ($this->_mode != 'blank')
 		{
 		?><div id="footer">
-			<div id="copyright">&copy; 2005–2023 ООО «Хостмэйк»</div>
+			<div id="copyright">&copy; 2005–2024 ООО «Хостмэйк»</div>
 			<div id="links">
 				<p><?php echo Core::_('Admin.website')?> <a href="http://www.hostcms.ru" target="_blank">www.hostcms.ru</a></p>
 				<p><?php echo Core::_('Admin.support_email')?> <a href="mailto:support@hostcms.ru">support@hostcms.ru</a></p>

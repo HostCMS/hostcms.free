@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage User
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class User_Controller_Timesheet extends Admin_Form_Controller_View
 {
@@ -381,6 +380,12 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 
 				$.modalLoad({title: '<?php echo Core::_('User_Workday.approval_another_time_modal_title')?>', path: '/admin/user/index.php', additionalParams: 'showAnotherTimeDetailsApprovalForm&workdayId=' + iWorkdayId, width: '50%', windowId: 'id_content', onHide: function(){$(".wickedpicker").remove();}});
 			});
+
+			$('[data-action="editAnotherTimeDetailsApprovalForm"]').on('click', function() {
+				var iWorkdayId = +$(this).data('workday-id');
+
+				$.modalLoad({title: '<?php echo Core::_('User_Workday.approval_another_time_modal_title')?>', path: '/admin/user/workday/index.php', 'action': 'edit', 'operation': 'modal', 'datasetKey': 0, 'datasetValue': iWorkdayId, additionalParams: 'hostcms[checked][0][' + iWorkdayId + ']', width: '90%', windowId: 'id_content', onHide: function(){$(".wickedpicker").remove();}});
+			});
 		})
 		</script>
 		<?php
@@ -564,7 +569,7 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 					else
 					{
 						$iWorkdayDurationInMinutes = $aUserWorkdayInfo[$i]['duration'] / 60;
-						$iWorkdayDurationInMinutesMod = $iWorkdayDurationInMinutes % 60;
+						$iWorkdayDurationInMinutesMod = intval($iWorkdayDurationInMinutes) % 60;
 
 						$sDuration = floor($iWorkdayDurationInMinutes / 60) . ' : '
 							. ($iWorkdayDurationInMinutesMod < 10
@@ -583,7 +588,11 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 
 					$pointer = $bSelfHead ? 'pointer' : '';
 
-					$sWorkdayDurationInfo = '<span class="semi-bold">' . $sDuration . '</span>'
+					$sDurationHtml = $bSelfHead
+						? '<span class="semi-bold pointer" data-action="editAnotherTimeDetailsApprovalForm" data-workday-id="' . $aUserWorkdayInfo[$i]['id'] . '">' . $sDuration . '</span></a>'
+						: '<span class="semi-bold">' . $sDuration . '</span>';
+
+					$sWorkdayDurationInfo = $sDurationHtml
 					. ($bShowExclamation
 						? ' <i class="fa fa-exclamation-triangle ' . $pointer . ' danger"'
 							. ($bSelfHead ? ' data-action="showAnotherTimeDetailsApprovalForm" data-workday-id="' : '')
@@ -737,8 +746,6 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 	 */
 	protected function _showDepartmentTimesheet(Company_Model $oCompany, User_Model $oUser, $aDepartmentsId = array(), $bShow = FALSE, $aDepartment = NULL, $aDepartmentNamePath = array(), $colspan = 0, $iMonth = NULL, $iYear = NULL)
 	{
-		$bShowTimesheetCurrentUser = FALSE;
-
 		if (is_null($aDepartment))
 		{
 			// Построение массива, содержащего структуру компании и сотрудников
@@ -748,8 +755,6 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 			{
 				return NULL;
 			}
-
-			$bShowTimesheetCurrentUser = TRUE;
 		}
 
 		if (is_array($aDepartment) && count($aDepartment))
@@ -762,11 +767,12 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 				{
 					?>
 					<tr id="deals-aggregate-department-<?php echo $aDepartment["department"]->id?>">
-						<td class="deals-aggregate-user-department" colspan="<?php echo $colspan?>">
+						<td class="deals-aggregate-user-department" colspan="2">
 						<?php
 							echo implode(' - ', $aDepartmentNamePath);
 						?>
 						</td>
+						<td colspan="<?php echo $colspan - 2?>">
 					</tr>
 					<?php
 					foreach ($aDepartment["users"] as $aUserInfo)

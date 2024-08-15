@@ -1,6 +1,7 @@
 <?php
 
 return array(
+	'model_name' => 'Адреси',
 	'addresses' => 'Адреси',
 	'type_address' => 'Тип',
 	'address' => 'Адреса',
@@ -11,4 +12,6 @@ return array(
 	'address_city' => 'Місто',
 	'latitude' => 'Широта',
 	'longitude' => 'Довгота',
+	'house' => 'Дім',
+	'flat' => 'Квартира',
 );

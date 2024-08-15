@@ -307,7 +307,8 @@ else
 	$Shop_Controller_Show->group(FALSE)->forbidSelectModifications();
 }*/
 
-$Shop_Controller_Show->itemsForbiddenTags(array('shop_producer'));
+//$Shop_Controller_Show->itemsForbiddenTags(array('shop_producer'));
+
 $Shop_Controller_Show
 	->xsl(
 		Core_Entity::factory('Xsl')->getByName($xslName)

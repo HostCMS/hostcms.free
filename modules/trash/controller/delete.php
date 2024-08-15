@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Trash
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Trash_Controller_Delete extends Admin_Form_Action_Controller
 {
@@ -58,15 +57,17 @@ class Trash_Controller_Delete extends Admin_Form_Action_Controller
 			<script type="text/javascript">
 			function set_location()
 			{
-				<?php echo $oAdmin_Form_Controller->getAdminActionLoadAjax(
-					array(
-						'path' => $oAdmin_Form_Controller->getPath(),
-						'action' => 'delete',
-						'datasetKey' => 0,
-						'datasetValue' => $this->_object->id,
-						'additionalParams' => 'offset=' . $offset
-					)
-				)?>
+				<?php echo $oAdmin_Form_Controller
+					//->addAdditionalParam('secret_csrf', Core_Security::getCsrfToken())
+					->getAdminActionLoadAjax(
+						array(
+							'path' => $oAdmin_Form_Controller->getPath(),
+							'action' => 'delete',
+							'datasetKey' => 0,
+							'datasetValue' => $this->_object->id,
+							'additionalParams' => "offset={$offset}&secret_csrf=" . Core_Security::getCsrfToken()
+						)
+					)?>
 			}
 			setTimeout('set_location()', <?php echo $iDelay * 1000?>);
 			</script><?php

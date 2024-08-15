@@ -8,10 +8,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Report
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
-class Report_Module extends Core_Module{	/**
+class Report_Module extends Core_Module_Abstract
+{
+	/**
 	 * Module version
 	 * @var string
 	 */
@@ -21,7 +22,8 @@ class Report_Module extends Core_Module{	/**
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2023-07-17';
+	public $date = '2024-06-06';
+
 	/**
 	 * Module name
 	 * @var string
@@ -46,4 +48,5 @@ class Report_Module extends Core_Module{	/**
 		);
 
 		return parent::getMenu();
-	}}
+	}
+}

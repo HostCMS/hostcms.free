@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -26,7 +25,7 @@ $oInformationsystem = Core_Entity::factory('Informationsystem')->find($informati
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title(Core::_('Informationsystem_Item.show_information_item_comments_propertys_title', $oInformationsystem->name))
@@ -388,7 +387,7 @@ if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
 		->addCondition(array('open' => array()))
-			->addCondition(array('where' => array('property_dirs.id', '=', $sGlobalSearch)))
+			->addCondition(array('where' => array('property_dirs.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
 			->addCondition(array('setOr' => array()))
 			->addCondition(array('where' => array('property_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
@@ -410,7 +409,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 
 $oUser = Core_Auth::getCurrentUser();
 !$oUser->superuser && $oUser->only_access_my_own
-	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
+	&& $oAdmin_Form_Dataset->addUserConditions();
 
 // Ограничение источника 1
 $oAdmin_Form_Dataset->addCondition(
@@ -427,13 +426,13 @@ if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
 		->addCondition(array('open' => array()))
-			->addCondition(array('where' => array('properties.id', '=', $sGlobalSearch)))
+			->addCondition(array('where' => array('properties.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
 			->addCondition(array('setOr' => array()))
 			->addCondition(array('where' => array('properties.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 			->addCondition(array('setOr' => array()))
 			->addCondition(array('where' => array('properties.guid', '=', $sGlobalSearch)))
 			->addCondition(array('setOr' => array()))
-			->addCondition(array('where' => array('properties.tag_name', '=', $sGlobalSearch)))
+			->addCondition(array('where' => array('properties.tag_name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
 }
 else

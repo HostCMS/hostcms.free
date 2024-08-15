@@ -1,12 +1,5 @@
 <?php
-/**
- * Online shop.
- *
- * @package HostCMS
- * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'Условия доставки',
 	'show_cond_of_delivery_title' => "Список условий доставки типа доставки \"%s\"",
@@ -33,6 +26,7 @@ return array(
 	'shop_delivery_id' => "Тип доставки, к которому относится условие доставки",
 	'id' => 'Идентификатор',
 	'edit_success' => "Данные об условиях доставки успешно добавлены!",
+	'copy_success' => "Информация успешно скопирована!",
 	'shop_measure_not_checked' => "Единица измерения не указана для магазина",
 	'markDeleted_success' => "Данные об условиях доставки успешно удалены!",
 	'import_button' => "Импорт",

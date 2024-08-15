@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Session_Database extends Core_Session
 {
@@ -199,6 +198,8 @@ class Core_Session_Database extends Core_Session
 			// при регенерации идентификаора очищать не следует
 			//$_SESSION = array();
 
+			$this->_unlock($id);
+
 			return TRUE;
 		}
 
@@ -244,6 +245,35 @@ class Core_Session_Database extends Core_Session
 		$oDataBase->free();
 
 		return TRUE;
+	}
+	
+	/**
+	 * This callback is executed when a new session ID is required.
+	 * @return string
+	 */
+	public function sessionCreateSid()
+	{
+		return session_create_id();
+	}
+	
+	/**
+	 * This callback is executed when a session is to be started, a session ID is supplied and session.use_strict_mode is enabled
+	 * @param string $id Session ID
+	 * @return bool
+	 */
+	public function sessionValidateSid($id)
+	{
+		$queryBuilder = Core_QueryBuilder::select('id')
+			->from('sessions')
+			->where('id', '=', $id)
+			->limit(1);
+
+		$oDataBase = $queryBuilder->execute();
+		$row = $oDataBase->asAssoc()->current();
+
+		$oDataBase->free();
+
+		return $row === FALSE;
 	}
 
 	/**

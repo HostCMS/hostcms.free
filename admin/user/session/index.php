@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -19,7 +18,7 @@ $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title(Core::_('User_Session.title'))
@@ -28,16 +27,19 @@ $oAdmin_Form_Controller
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
+$secret_csrf = Core_Security::getCsrfToken();
+$additionalParams = "secret_csrf={$secret_csrf}";
+
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('User_Session.destroy_all'))
 		->icon('fa fa-times')
 		->class('btn btn-danger')
 		->href(
-			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'destroyAll', NULL, 0, 0)
+			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'destroyAll', NULL, 0, 0, $additionalParams)
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'destroyAll', NULL, 0, 0)
+			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'destroyAll', NULL, 0, 0, $additionalParams)
 		)
 );
 
@@ -101,7 +103,7 @@ $oAdmin_Form_Dataset
 // Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
 !$oUser->superuser && $oUser->only_access_my_own
-	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
+	&& $oAdmin_Form_Dataset->addUserConditions();
 
 $oAdmin_Form_Controller->addFilter('user_id', array($oAdmin_Form_Controller, '_filterCallbackUser'));
 

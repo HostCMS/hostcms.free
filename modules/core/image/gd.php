@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Image_Gd extends Core_Image
 {
@@ -33,7 +32,7 @@ class Core_Image_Gd extends Core_Image
 	 * </code>
 	 * @return bool
 	 */
-	static public function resizeImage($sourceFile, $maxWidth, $maxHeight, $targetFile, $quality = NULL, $preserveAspectRatio = TRUE, $outputFormat = NULL)
+	public function resizeImage($sourceFile, $maxWidth, $maxHeight, $targetFile, $quality = NULL, $preserveAspectRatio = TRUE, $outputFormat = NULL)
 	{
 		$maxWidth = intval($maxWidth);
 		$maxHeight = intval($maxHeight);
@@ -69,6 +68,10 @@ class Core_Image_Gd extends Core_Image
 			elseif (defined('IMAGETYPE_WEBP') && $iImagetype == IMAGETYPE_WEBP && function_exists('imagecreatefromwebp'))
 			{
 				$sourceResource = imagecreatefromwebp($sourceFile);
+			}
+			elseif (defined('IMAGETYPE_AVIF') && $iImagetype == IMAGETYPE_AVIF && function_exists('imagecreatefromavif'))
+			{
+				$sourceResource = imagecreatefromavif($sourceFile);
 			}
 			else
 			{
@@ -280,7 +283,7 @@ class Core_Image_Gd extends Core_Image
 			}
 			elseif ($iImagetype == IMAGETYPE_GIF)
 			{
-				self::setTransparency($targetResourceStep1, $sourceResource);
+				$this->setTransparency($targetResourceStep1, $sourceResource);
 
 				imagecopyresampled($targetResourceStep1, $sourceResource, 0, 0, 0, 0, $destX, $destY, $sourceX, $sourceY);
 				//imagecopyresampled($targetResourceStep1, $sourceResource, 0, 0, 0, 0, $destX, $destY, $sourceX, $sourceY);
@@ -304,7 +307,7 @@ class Core_Image_Gd extends Core_Image
 			elseif (defined('IMAGETYPE_WEBP') && $iImagetype == IMAGETYPE_WEBP)
 			{
 				$quality = is_null($quality)
-					? (defined('WEBP_QUALITY') ? WEBP_QUALITY : 80)
+					? (defined('WEBP_QUALITY') ? WEBP_QUALITY : 50)
 					: intval($quality);
 
 				imagealphablending($targetResourceStep1, FALSE);
@@ -326,6 +329,37 @@ class Core_Image_Gd extends Core_Image
 					imagecopyresampled($targetResourceStep2, $targetResourceStep1, 0, 0, $src_x, $src_y, $destX_step2, $destY_step2, $destX_step2, $destY_step2);
 
 					imagewebp($targetResourceStep2, $targetFile, $quality);
+					imagedestroy($targetResourceStep2);
+				}
+				@chmod($targetFile, CHMOD_FILE);
+
+				imagedestroy($sourceResource);
+			}
+			elseif (defined('IMAGETYPE_AVIF') && $iImagetype == IMAGETYPE_AVIF)
+			{
+				$quality = is_null($quality)
+					? (defined('AVIF_QUALITY') ? AVIF_QUALITY : 50)
+					: intval($quality);
+
+				imagealphablending($targetResourceStep1, FALSE);
+				imagesavealpha($targetResourceStep1, TRUE);
+
+				// Изменяем размер оригинальной картинки и копируем в созданую картинку
+				imagecopyresampled($targetResourceStep1, $sourceResource, 0, 0, 0, 0, $destX, $destY, $sourceX, $sourceY);
+
+				if ($preserveAspectRatio)
+				{
+					imageavif($targetResourceStep1, $targetFile, $quality);
+				}
+				else
+				{
+					imagealphablending($targetResourceStep2, FALSE);
+					imagesavealpha($targetResourceStep2, TRUE);
+
+					// imagecopy($targetResourceStep2, $targetResourceStep1, 0, 0, $src_x, $src_y, $destX_step2, $destY_step2);
+					imagecopyresampled($targetResourceStep2, $targetResourceStep1, 0, 0, $src_x, $src_y, $destX_step2, $destY_step2, $destX_step2, $destY_step2);
+
+					imageavif($targetResourceStep2, $targetFile, $quality);
 					imagedestroy($targetResourceStep2);
 				}
 				@chmod($targetFile, CHMOD_FILE);
@@ -374,7 +408,7 @@ class Core_Image_Gd extends Core_Image
 	 * </code>
 	 * @return bool
 	 */
-	static public function addWatermark($source, $target, $watermark, $watermarkX = NULL, $watermarkY = NULL, $outputFormat = NULL)
+	public function addWatermark($source, $target, $watermark, $watermarkX = NULL, $watermarkY = NULL, $outputFormat = NULL)
 	{
 		if (!Core_File::isFile($source))
 		{
@@ -397,7 +431,7 @@ class Core_Image_Gd extends Core_Image
 
 				if ($sourceResource)
 				{
-					$sourceResource = self::_addWatermark($sourceResource, $watermarkResource, $watermarkX, $watermarkY);
+					$sourceResource = $this->_addWatermark($sourceResource, $watermarkResource, $watermarkX, $watermarkY);
 				}
 			}
 			elseif ($iImagetype == IMAGETYPE_PNG)
@@ -409,7 +443,7 @@ class Core_Image_Gd extends Core_Image
 					imagealphablending($sourceResource, FALSE);
 					imagesavealpha($sourceResource, TRUE);
 
-					$sourceResource = self::_addWatermark($sourceResource, $watermarkResource, $watermarkX, $watermarkY);
+					$sourceResource = $this->_addWatermark($sourceResource, $watermarkResource, $watermarkX, $watermarkY);
 				}
 			}
 			elseif (defined('IMAGETYPE_WEBP') && $iImagetype == IMAGETYPE_WEBP && function_exists('imagecreatefromwebp'))
@@ -421,7 +455,19 @@ class Core_Image_Gd extends Core_Image
 					imagealphablending($sourceResource, FALSE);
 					imagesavealpha($sourceResource, TRUE);
 
-					$sourceResource = self::_addWatermark($sourceResource, $watermarkResource, $watermarkX, $watermarkY);
+					$sourceResource = $this->_addWatermark($sourceResource, $watermarkResource, $watermarkX, $watermarkY);
+				}
+			}
+			elseif (defined('IMAGETYPE_AVIF') && $iImagetype == IMAGETYPE_AVIF && function_exists('imagecreatefromavif'))
+			{
+				$sourceResource = imagecreatefromavif($source);
+
+				if ($sourceResource)
+				{
+					imagealphablending($sourceResource, FALSE);
+					imagesavealpha($sourceResource, TRUE);
+
+					$sourceResource = $this->_addWatermark($sourceResource, $watermarkResource, $watermarkX, $watermarkY);
 				}
 			}
 			elseif ($iImagetype == IMAGETYPE_GIF)
@@ -436,12 +482,12 @@ class Core_Image_Gd extends Core_Image
 
 					// New Image
 					$sourceResource = imagecreatetruecolor($width, $height);
-					self::setTransparency($sourceResource, $sourceResourceTmp);
+					$this->setTransparency($sourceResource, $sourceResourceTmp);
 
 					imagecopyresampled($sourceResource, $sourceResourceTmp, 0, 0, 0, 0, $width, $height, $width, $height);
 					imagedestroy($sourceResourceTmp);
 
-					$sourceResource = self::_addWatermark($sourceResource, $watermarkResource, $watermarkX, $watermarkY);
+					$sourceResource = $this->_addWatermark($sourceResource, $watermarkResource, $watermarkX, $watermarkY);
 				}
 			}
 			else
@@ -470,7 +516,11 @@ class Core_Image_Gd extends Core_Image
 				}
 				elseif (defined('IMAGETYPE_WEBP') && $iImagetype == IMAGETYPE_WEBP && function_exists('imagecreatefromwebp'))
 				{
-					$return = imagewebp($sourceResource, $target, defined('WEBP_QUALITY') ? WEBP_QUALITY : 80);
+					$return = imagewebp($sourceResource, $target, defined('WEBP_QUALITY') ? WEBP_QUALITY : 50);
+				}
+				elseif (defined('IMAGETYPE_AVIF') && $iImagetype == IMAGETYPE_AVIF && function_exists('imagecreatefromavif'))
+				{
+					$return = imageavif($sourceResource, $target, defined('AVIF_QUALITY') ? 'AVIF_QUALITY' : 50);
 				}
 				elseif ($iImagetype == IMAGETYPE_GIF)
 				{
@@ -502,7 +552,7 @@ class Core_Image_Gd extends Core_Image
 	 * @param int $watermarkY позиция по оси Y
 	 * @return GdImage
 	 */
-	static protected function _addWatermark($sourceResource, $watermarkResource, $watermarkX = NULL, $watermarkY = NULL)
+	protected function _addWatermark($sourceResource, $watermarkResource, $watermarkX = NULL, $watermarkY = NULL)
 	{
 		// Высота и ширина основной картинки
 		$sourceResource_w = imagesx($sourceResource);
@@ -547,7 +597,7 @@ class Core_Image_Gd extends Core_Image
 		// Convert source image to true-color image
 		if (!imageistruecolor($sourceResource))
 		{
-			self::imagepalettetotruecolor($sourceResource);
+			$this->imagepalettetotruecolor($sourceResource);
 		}
 
 		imagecopy($sourceResource, $watermarkResource, (int) $watermarkX, (int) $watermarkY, 0, 0, $watermarkResource_w, $watermarkResource_h);
@@ -560,7 +610,7 @@ class Core_Image_Gd extends Core_Image
 	 * @param GdImage $src
 	 * @return bool
 	 */
-	static public function imagepalettetotruecolor(&$src)
+	public function imagepalettetotruecolor(&$src)
 	{
 		if (function_exists('imagepalettetotruecolor'))
 		{
@@ -587,7 +637,7 @@ class Core_Image_Gd extends Core_Image
 	 * @param $image_target Ресурс изображения получателя
 	 * @param $image_source Ресурс изображения источника
 	 */
-	static public function setTransparency($image_target, $image_source)
+	public function setTransparency($image_target, $image_source)
 	{
 		$transparencyIndex = imagecolortransparent($image_source);
 
@@ -607,7 +657,7 @@ class Core_Image_Gd extends Core_Image
 	 * @param string $path path
 	 * @return mixed
 	 */
-	static public function getImageSize($path)
+	public function getImageSize($path)
 	{
 		if (Core_File::isFile($path) && is_readable($path) && filesize($path) > 12 && self::exifImagetype($path))
 		{
@@ -625,11 +675,11 @@ class Core_Image_Gd extends Core_Image
 
 	/**
 	 * Get Image Type: 0 = UNKNOWN, 1 = GIF, 2 = JPG, 3 = PNG, 4 = SWF, 5 = PSD, 6 = BMP, 7 = TIFF (orden de bytes intel), 8 = TIFF (orden de bytes motorola),
-	 * 9 = JPC, 10 = JP2, 11 = JPX, 12 = JB2, 13 = SWC, 14 = IFF, 15 = WBMP, 16 = XBM, 17 = ICO, 18 = WEBP
+	 * 9 = JPC, 10 = JP2, 11 = JPX, 12 = JB2, 13 = SWC, 14 = IFF, 15 = WBMP, 16 = XBM, 17 = ICO, 18 = WEBP, 19 = AVIF, 20 = COUNT
 	 * @param string $path
 	 * @return mixed
 	 */
-	static public function getImageType($path)
+	public function getImageType($path)
 	{
 		if ((list($width, $height, $type, $attr) = @getimagesize($path)) !== FALSE)
 		{
@@ -643,7 +693,7 @@ class Core_Image_Gd extends Core_Image
 	 * Get GD version
 	 * @return string
 	 */
-	static public function getVersion()
+	public function getVersion()
 	{
 		if (function_exists('gd_info'))
 		{
@@ -652,5 +702,14 @@ class Core_Image_Gd extends Core_Image
 		}
 
 		return NULL;
+	}
+
+	/**
+	 * Check GD-Module Availability
+	 * @return bool
+	 */
+	public function isAvailable()
+	{
+		return function_exists('gd_info');
 	}
 }

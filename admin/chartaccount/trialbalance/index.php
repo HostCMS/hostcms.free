@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -16,7 +15,7 @@ $sAdminFormAction = '/admin/chartaccount/trialbalance/index.php';
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create();
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title(Core::_('Chartaccount_Trialbalance.title'));
@@ -37,7 +36,7 @@ if (!is_null(Core_Array::getPost('ajaxLoadTabContent')))
 
 $oAdmin_View = Admin_View::create();
 $oAdmin_View
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->pageTitle(Core::_('Chartaccount_Trialbalance.title'))
 	;
 

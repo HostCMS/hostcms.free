@@ -10,8 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controller
 {
@@ -53,6 +52,15 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 	protected $_formValues = NULL;
 
 	/**
+	 * Get _formValues
+	 * @return array
+	 */
+	public function getFormValues()
+	{
+		return $this->_formValues;
+	}
+
+	/**
 	 * Set _formValues
 	 * @param array $values
 	 * @return self
@@ -64,12 +72,15 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 	}
 
 	/**
-	 * Get _formValues
-	 * @return array
+	 * Set _formValues $key
+	 * @param string $key
+	 * @param string $value
+	 * @return self
 	 */
-	public function getFormValues()
+	public function setFormValue($key, $value)
 	{
-		return $this->_formValues;
+		$this->_formValues[$key] = $value;
+		return $this;
 	}
 
 	/**
@@ -123,9 +134,11 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 	 */
 	public function removeSkipColumn($column)
 	{
-		if (isset($this->skipColumns[$column]))
+		$aSkipColumns = $this->skipColumns;
+		if (isset($aSkipColumns[$column]))
 		{
-			unset($this->skipColumns[$column]);
+			unset($aSkipColumns[$column]);
+			$this->skipColumns = $aSkipColumns;
 		}
 		return $this;
 	}
@@ -196,7 +209,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 
 		return $this;
 	}
-	
+
 	/**
 	 * Get all tabs
 	 * @return array
@@ -223,7 +236,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 
 		throw new Core_Exception("Tab %tab does not exist.", array('%tab' => $tabName));
 	}
-	
+
 	/**
 	 * Check is tab isset
 	 * @param string $tabName tab name
@@ -640,9 +653,25 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 			}
 		}
 
+		$this->_addCsrfToken();
+
 		Core_Event::notify('Admin_Form_Action_Controller_Type_Edit.onAfterPrepareForm', $this, array($this->_object, $this->_Admin_Form_Controller));
 
 		return $this;
+	}
+
+	/**
+	 * Add CSRF token
+	 */
+	protected function _addCsrfToken()
+	{
+		$this->_Admin_Form_Entity_Form->add(
+			Admin_Form_Entity::factory('Input')
+				->type('hidden')
+				->name('secret_csrf')
+				->value(Core_Security::getCsrfToken())
+				->divAttr(array('class' => ''))
+		);
 	}
 
 	/**
@@ -684,19 +713,21 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 					->value($this->_object->$columnName);
 
 				$oScript = Admin_Form_Entity::factory('Script')
-					->value("$('#{$windowId} #responsible_user').selectUser({
-							language: '" . $language . "',
-							placeholder: '" . $placeholder . "',
-							dropdownParent: $('#" . $windowId . "')
-						})
-						.val('" . $this->_object->$columnName . "')
-						.trigger('change.select2')
-						.on('select2:unselect', function (){
-							$(this)
-								.next('.select2-container')
-								.find('.select2-selection--single')
-								.removeClass('user-container');
-						});"
+					->value("setTimeout(function() {
+							$('#" . $windowId . " #responsible_user').selectUser({
+								language: '" . $language . "',
+								placeholder: '" . $placeholder . "',
+								dropdownParent: $('#" . $windowId . "')
+							})
+							.val('" . $this->_object->$columnName . "')
+							.trigger('change.select2')
+							.on('select2:unselect', function (){
+								$(this)
+									.next('.select2-container')
+									.find('.select2-selection--single')
+									.removeClass('user-container');
+							});
+						}, 100);"
 					);
 
 				$this->_tabs[$sTabName]->add(
@@ -817,44 +848,61 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				// Значение первичного ключа до сохранения
 				$prevPrimaryKeyValue = $this->_object->$primaryKeyName;
 
-				$this->_applyObjectProperty();
+				try {
+					$this->_applyObjectProperty();
 
-				$parentWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('parentWindowId', '', 'str'));
+					$parentWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('parentWindowId', '', 'str'));
 
-				ob_start();
-				$modelName = $this->_object->getModelName();
-				$actionName = $this->_Admin_Form_Controller->getAction();
+					ob_start();
+					$modelName = $this->_object->getModelName();
+					$actionName = $this->_Admin_Form_Controller->getAction();
 
-				// При модальном показе $parentWindowId будет название окна родителя
-				$parentWindowId == ''
-					&& Core_Message::show(Core::_("{$modelName}.{$actionName}_success"));
+					// При модальном показе $parentWindowId будет название окна родителя
+					$parentWindowId == ''
+						&& Core_Message::show(Core::_("{$modelName}.{$actionName}_success"));
 
-				if (is_null($prevPrimaryKeyValue))
-				{
-					$windowId = $this->_Admin_Form_Controller->getWindowId();
-					$modalWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('modalWindowId', '', 'str'));
+					if (is_null($prevPrimaryKeyValue))
+					{
+						$windowId = $this->_Admin_Form_Controller->getWindowId();
+						$modalWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('modalWindowId', '', 'str'));
 
-					?><script><?php
-					?>$.appendInput('<?php echo Core_Str::escapeJavascriptVariable($modalWindowId ? $modalWindowId : $windowId)?>', '<?php echo Core_Str::escapeJavascriptVariable($primaryKeyName)?>', '<?php echo Core_Str::escapeJavascriptVariable($this->_object->$primaryKeyName)?>');<?php
-					?>$.addHostcmsChecked('<?php echo Core_Str::escapeJavascriptVariable($modalWindowId ? $modalWindowId : $windowId)?>', '<?php echo Core_Str::escapeJavascriptVariable($this->getDatasetId())?>', '<?php echo Core_Str::escapeJavascriptVariable($this->_object->$primaryKeyName)?>');<?php
-					?></script><?php
+						?><script><?php
+						?>$.appendInput('<?php echo Core_Str::escapeJavascriptVariable($modalWindowId ? $modalWindowId : $windowId)?>', '<?php echo Core_Str::escapeJavascriptVariable($primaryKeyName)?>', '<?php echo Core_Str::escapeJavascriptVariable($this->_object->$primaryKeyName)?>');<?php
+						?>$.addHostcmsChecked('<?php echo Core_Str::escapeJavascriptVariable($modalWindowId ? $modalWindowId : $windowId)?>', '<?php echo Core_Str::escapeJavascriptVariable($this->getDatasetId())?>', '<?php echo Core_Str::escapeJavascriptVariable($this->_object->$primaryKeyName)?>');<?php
+						?></script><?php
+					}
+					$this->addMessage(ob_get_clean());
+
+					// При сохранении title остается оригинальный
+					$this->_Admin_Form_Controller->title = '';
+
+					$this->_return = $parentWindowId == '';
+					// $this->_return = TRUE;
 				}
-				$this->addMessage(ob_get_clean());
-
-				$this->_return = $parentWindowId == '';
-				// $this->_return = TRUE;
+				catch (Exception $e)
+				{
+					$this->addMessage(Core_Message::get($e->getMessage(), 'error'));
+					$this->_return = TRUE;
+				}
 			break;
 			case 'applyModal':
-				$this->_applyObjectProperty();
+				try {
+					$this->_applyObjectProperty();
 
-				//$windowId = $this->_Admin_Form_Controller->getWindowId();
-				$modalWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('modalWindowId', '', 'str'));
-				$parentWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('parentWindowId', '', 'str'));
-				$this->addContent("<script>$('#" . Core_Str::escapeJavascriptVariable($modalWindowId) . "').parents('.bootbox').modal('hide');</script>");
+					//$windowId = $this->_Admin_Form_Controller->getWindowId();
+					$modalWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('modalWindowId', '', 'str'));
+					$parentWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('parentWindowId', '', 'str'));
+					$this->addContent("<script>$('#" . Core_Str::escapeJavascriptVariable($modalWindowId) . "').parents('.bootbox').modal('hide');</script>");
 
-				// При модальном показе $parentWindowId будет название окна родителя
-				$this->_return = $parentWindowId == '';
-				//$this->_return = TRUE;
+					// При модальном показе $parentWindowId будет название окна родителя
+					$this->_return = $parentWindowId == '';
+					//$this->_return = TRUE;
+				}
+				catch (Exception $e)
+				{
+					$this->addMessage(Core_Message::get($e->getMessage(), 'error'));
+					$this->_return = TRUE;
+				}
 			break;
 			case 'markDeleted':
 				// Закрытие окна происходит на самой кнопке удаления справа от основных кнопок
@@ -863,8 +911,15 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				$this->_return = TRUE;
 			break;
 			default:
-				$this->_applyObjectProperty();
-				$this->_return = FALSE; // Показываем форму
+				try {
+					$this->_applyObjectProperty();
+					$this->_return = FALSE; // Показываем форму
+				}
+				catch (Exception $e)
+				{
+					$this->addMessage(Core_Message::get($e->getMessage(), 'error'));
+					$this->_return = TRUE;
+				}
 			break;
 		}
 
@@ -977,6 +1032,9 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 		ob_start();
 
 		Core_Event::notify('Admin_Form_Action_Controller_Type_Edit.onBeforeApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
+
+		$secret_csrf = Core_Array::getPost('secret_csrf', '', 'trim');
+		$this->_checkCsrf($secret_csrf);
 
 		$aColumns = $this->_object->getTableColumns();
 
@@ -1160,7 +1218,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				$this->_Admin_Form_Controller
 					->windowId(strlen($parentWindowId) ? $parentWindowId : $windowId)
 					//->additionalParams($additionalParams)
-					->getAdminSendForm(array('operation' => 'save' . $sOperaionSufix))
+					->getAdminSendForm(array('operation' => 'save' . $sOperaionSufix, 'additionalParams' => '')) // additionalParams уже задан в action формы
 			);
 
 		return $oAdmin_Form_Entity_Button_Save;
@@ -1192,7 +1250,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				$this->_Admin_Form_Controller
 					->windowId(strlen($parentWindowId) ? $parentWindowId : $windowId)
 					//->additionalParams($additionalParams)
-					->getAdminSendForm(array('operation' => 'apply' . $sOperaionSufix))
+					->getAdminSendForm(array('operation' => 'apply' . $sOperaionSufix, 'additionalParams' => '')) // additionalParams уже задан в action формы
 			);
 
 		return $oAdmin_Form_Entity_Button_Apply;
@@ -1204,6 +1262,8 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 	 */
 	protected function _addButtons()
 	{
+		// $this->_Admin_Form_Controller->addAdditionalParam('secret_csrf', Core_Security::getCsrfToken());
+
 		$sOperaion = $this->_Admin_Form_Controller->getOperation();
 		//$sOperaionSufix = $sOperaion == 'modal' ? 'Modal' : '';
 
@@ -1227,30 +1287,60 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 		// Удалить
 		if (is_array($aFirst) && key($aFirst))
 		{
-			$onclick = $this->_Admin_Form_Controller
-				->windowId(strlen($parentWindowId) ? $parentWindowId : $windowId)
-				->getAdminSendForm($sOperaion == 'modal'
-					? array('action' => 'edit', 'operation' => 'markDeleted')
-					: array('action' => 'markDeleted')
-				);
+			$bMarkDeletedAllowed = FALSE;
 
-			if ($sOperaion == 'modal')
+			// Доступные действия для пользователя
+			$aAllowed_Admin_Form_Actions = $this->_Admin_Form_Controller->getAdminFormActions();
+			foreach ($aAllowed_Admin_Form_Actions as $oAllowed_Admin_Form_Action)
 			{
-				$modalWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('modalWindowId', '', 'str'));
-				$modalWindowId != ''
-					&& $onclick = "$('#{$modalWindowId}').parents('.bootbox').modal('hide'); " . $onclick;
+				if ($oAllowed_Admin_Form_Action->name == 'markDeleted')
+				{
+					$bMarkDeletedAllowed = TRUE;
+					break;
+				}
 			}
 
-			$oAdmin_Form_Entity_Button_Delete = Admin_Form_Entity::factory('A')
-				->id('action-button-delete')
-				->class('btn btn-darkorange pull-right')
-				->onclick("res = confirm('" . Core::_('Admin_Form.confirm_dialog', Core::_('Admin_Form.delete')) . "'); if (res) {" . $onclick . " } else { return false }")
-				->add(
-					Admin_Form_Entity::factory('Code')
-						->html('<i class="fa fa-trash no-margin-right"></i>')
-				);
+			if ($bMarkDeletedAllowed)
+			{
+				$oUser = Core_Auth::getCurrentUser();
 
-			$oAdmin_Form_Entity_Buttons->add($oAdmin_Form_Entity_Button_Delete);
+				if (($this->_object instanceof Core_Entity) && $oUser->checkObjectAccess($this->_object))
+				{
+					// Если у модели есть метод checkBackendAccess(), то проверяем права на это действие, совершаемое текущим пользователем
+					if (!method_exists($this->_object, 'checkBackendAccess') || $this->_object->checkBackendAccess('markDeleted', $oUser))
+					{
+						// additionalParams
+
+						$aOptions = $sOperaion == 'modal'
+							? array('action' => 'edit', 'operation' => 'markDeleted')
+							: array('action' => 'markDeleted');
+
+						$aOptions['additionalParams'] = $this->_Admin_Form_Controller->additionalParams . '&secret_csrf=' . Core_Security::getCsrfToken();
+
+						$onclick = $this->_Admin_Form_Controller
+							->windowId(strlen($parentWindowId) ? $parentWindowId : $windowId)
+							->getAdminSendForm($aOptions);
+
+						if ($sOperaion == 'modal')
+						{
+							$modalWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('modalWindowId', '', 'str'));
+							$modalWindowId != ''
+								&& $onclick = "$('#{$modalWindowId}').parents('.bootbox').modal('hide'); " . $onclick;
+						}
+
+						$oAdmin_Form_Entity_Button_Delete = Admin_Form_Entity::factory('A')
+							->id('action-button-delete')
+							->class('btn btn-darkorange pull-right')
+							->onclick("res = confirm('" . Core::_('Admin_Form.confirm_dialog', Core::_('Admin_Form.delete')) . "'); if (res) {" . $onclick . " } else { return false }")
+							->add(
+								Admin_Form_Entity::factory('Code')
+									->html('<i class="fa fa-trash no-margin-right"></i>')
+							);
+
+						$oAdmin_Form_Entity_Buttons->add($oAdmin_Form_Entity_Button_Delete);
+					}
+				}
+			}
 		}
 
 		// Возвращаем оригинальный windowId

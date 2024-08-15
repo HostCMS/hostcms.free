@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Revision
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Revision_Model extends Core_Entity
 {
@@ -75,13 +74,14 @@ class Revision_Model extends Core_Entity
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function userBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function user_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		$oUser = $this->User;
+		/*$oUser = $this->User;
 
 		return '<span class="badge badge-hostcms badge-square">' . htmlspecialchars(
 				!is_null($oUser->id) ? $oUser->login : 'Unknown User'
-			) . '</span>';
+			) . '</span>';*/
+		return $this->User->getAvatarWithName();
 	}
 
 	/**
@@ -105,7 +105,7 @@ class Revision_Model extends Core_Entity
 		elseif (is_string($value) || is_numeric($value))
 		{
 			$iLen = strlen($value);
-			echo '<span class="pre-wrap">' . ($iLen <= 30000 ? htmlspecialchars($value) : Core_Str::getTextSize($iLen)) . '</span>';
+			echo '<span class="pre-wrap">' . ($iLen <= 102400 ? htmlspecialchars($value) : Core_Str::getTextSize($iLen)) . '</span>';
 		}
 		elseif (is_object($value))
 		{

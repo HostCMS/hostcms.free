@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 abstract class Shop_Payment_System_Handler
 {
@@ -394,7 +393,7 @@ abstract class Shop_Payment_System_Handler
 			$oCompany = $oShop->Company;
 			$oCompany_Account = $oCompany->Company_Accounts->getDefault();
 
-			$this->_shopOrder->company_id = $oCompany->id;
+			$this->_shopOrder->company_id = $oShop->shop_company_id;
 			$this->_shopOrder->company_account_id = !is_null($oCompany_Account)
 				? $oCompany_Account->id
 				: 0;
@@ -548,8 +547,8 @@ abstract class Shop_Payment_System_Handler
 	 * Создание нового заказа на основе данных, указанных в orderParams
 	 * @hostcms-event Shop_Payment_System_Handler.onBeforeProcessOrder
 	 * @hostcms-event Shop_Payment_System_Handler.onAfterItemGetPrices
-	 * @hostcms-event Shop_Payment_System_Handler.onAfterProcessOrder
 	 * @hostcms-event Shop_Payment_System_Handler.onAfterAddShopOrderItem
+	 * @hostcms-event Shop_Payment_System_Handler.onAfterProcessOrder
 	 */
 	protected function _processOrder()
 	{
@@ -585,12 +584,12 @@ abstract class Shop_Payment_System_Handler
 		$aShop_Cart = $Shop_Cart_Controller->getAll($oShop);
 		foreach ($aShop_Cart as $oShop_Cart)
 		{
-			if ($oShop_Cart->Shop_Item->id)
+			$oShop_Item = $oShop_Cart->Shop_Item;
+
+			if ($oShop_Item->id)
 			{
 				if ($oShop_Cart->postpone == 0)
 				{
-					$oShop_Item = $oShop_Cart->Shop_Item;
-
 					$bSkipItem = $oShop_Item->type == 4;
 
 					$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
@@ -648,7 +647,7 @@ abstract class Shop_Payment_System_Handler
 						}
 					}
 
-					$oShop_Order_Item->price = $aPrices['price_discount'] - $aPrices['tax'];
+					$oShop_Order_Item->price = $aPrices['price_discount'];
 					$oShop_Order_Item->rate = $aPrices['rate'];
 					$oShop_Order_Item->name = $oShop_Item->name;
 					$oShop_Order_Item->type = 0;
@@ -791,7 +790,7 @@ abstract class Shop_Payment_System_Handler
 				$oNotification = Core_Entity::factory('Notification');
 				$oNotification
 					->title(Core::_('Shop_Order.notification_new_order', strip_tags($this->_shopOrder->invoice), FALSE))
-					->description(Core::_('Shop_Order.notification_new_order_description', strip_tags($sCompany), $this->_shopOrder->sum(), FALSE))
+					->description(Core::_('Shop_Order.notification_new_order_description', strip_tags($sCompany), $this->_shopOrder->Shop_Currency->formatWithCurrency($this->_shopOrder->getAmount()), FALSE))
 					->datetime(Core_Date::timestamp2sql(time()))
 					->module_id($oModule->id)
 					->type(1) // Новый заказ
@@ -1039,6 +1038,7 @@ abstract class Shop_Payment_System_Handler
 		// Доставка может прийти как сущесвтующий shop_delivery_condition_id, так и shop_delivery_id + название рассчитанного условия доставки
 		if ($shop_delivery_condition_id || $shop_delivery_id)
 		{
+			// Цена доставки передается БЕЗ налога, налог необходимо дополнительно суммировать к цене
 			if ($shop_delivery_condition_id)
 			{
 				$oShop_Delivery_Condition = Core_Entity::factory('Shop_Delivery_Condition', $shop_delivery_condition_id);
@@ -1074,7 +1074,7 @@ abstract class Shop_Payment_System_Handler
 			$oShop_Order_Item->name = $this->_getDeliveryName($oShop_Delivery, $shop_delivery_condition_name);
 			$oShop_Order_Item->quantity = 1;
 			$oShop_Order_Item->rate = $rate;
-			$oShop_Order_Item->price = $price;
+			$oShop_Order_Item->price = $price + $price * $rate / 100;
 			$oShop_Order_Item->marking = $marking;
 			$oShop_Order_Item->type = 1;
 			$this->_shopOrder->add($oShop_Order_Item);

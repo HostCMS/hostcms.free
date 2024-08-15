@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Zip_Pclzip
 {
@@ -83,7 +82,7 @@ class Core_Zip_Pclzip
 	const OPSYS_OS_400 = 18;
 	const OPSYS_OS_X = 19;
 	const OPSYS_DEFAULT = 3;
-	
+
 	/**
 	 * @var PclZip
 	 */
@@ -93,6 +92,18 @@ class Core_Zip_Pclzip
 	 * @var string
 	 */
 	protected $_tmpDir;
+
+	/**
+     * Number of files (emulate ZipArchive::$numFiles)
+     * @var int
+     */
+    public $numFiles = 0;
+
+    /**
+     * Archive filename (emulate ZipArchive::$filename)
+     * @var string
+     */
+    public $filename;
 
 	public function __construct()
 	{
@@ -107,7 +118,12 @@ class Core_Zip_Pclzip
 
 	public function open($filename, $flags = NULL)
 	{
+		$this->filename = $filename;
+		
 		$this->_oPclZip = new PclZip($filename);
+
+		$this->numFiles = count($this->_oPclZip->listContent());
+
 		return TRUE;
 	}
 

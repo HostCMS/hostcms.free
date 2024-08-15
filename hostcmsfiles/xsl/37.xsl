@@ -6,7 +6,7 @@
 		doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" encoding="utf-8"
 		indent="yes" method="html" omit-xml-declaration="no" version="1.0"
 		media-type="text/xml" />
-	
+
 	<xsl:template match="/forum">
 		<h1>&labelForums;</h1>
 		<xsl:if test="error != ''">
@@ -14,17 +14,17 @@
 				<xsl:value-of disable-output-escaping="yes" select="error" />
 			</div>
 		</xsl:if>
-		
+
 		<xsl:if test = "siteuser/node()">
 	<div style="float: right"><strong><a href="{url}myPosts/">&labelMyMessages;</a></strong></div>
 		</xsl:if>
-		
+
 		<div style="clear: both; height: 10px"></div>
-		
+
 		<table class="table_group_forums" width="100%">
 			<xsl:apply-templates select="forum_group"></xsl:apply-templates>
 		</table>
-		
+
 		<xsl:if	test="last_siteuser/siteuser/node()">
 			<p>
 				<xsl:text>&labelLastUser; </xsl:text><img style="margin: 0px 5px -4px 0px;" src="/hostcmsfiles/images/user.gif" /><a href="/users/info/{last_siteuser/siteuser/path}/">
@@ -32,7 +32,7 @@
 				</a>
 			</p>
 		</xsl:if>
-		
+
 		<!--
 		Форма идентификации пользователя на сайте или приветствия
 		залогинившегося пользователя
@@ -76,7 +76,7 @@
 							</xsl:choose>
 						</div>
 					</xsl:if>
-					
+
 					<div id="div_form" style="margin-top: 10px; margin-bottom: 5px;">
 						<xsl:choose>
 							<xsl:when test="not(siteuser/node())">
@@ -86,14 +86,14 @@
 									</xsl:if>
 								</input>
 								<label for="rad1" id="lab1">&labelRegistered;</label>
-								
+
 								<input id="rad2" type="radio" name="autoriz" value="new_user" onclick="HideShow('auto', 'new')">
 									<xsl:if test="/forum/quick/node() and /forum/quick='quick'">
 										<xsl:attribute name="checked">checked</xsl:attribute>
 									</xsl:if>
 								</input>
 								<label for="rad2" id="lab2">&labelNewUser;</label>
-								
+
 								<div id="auto" style="margin-left: 0px">
 									<form name="mainform" action="/users/" method="post">
 										&labelLogin;
@@ -102,10 +102,14 @@
 										<input name="password" type="password" size="12" value="" /><xsl:text> </xsl:text>
 										<input name="apply" class="button" type="submit" value="&labelEnter;" />
 										<br />
+
+										<!-- CSRF-токен -->
+										<input name="csrf_token" type="hidden" value="{csrf_token}" />
+
 										<input type="hidden" name="location" value="{url}" />
 									</form>
 								</div>
-								
+
 								<div id="new" style="display: none; margin-left: 0px">
 									<div class="comment" style="width: 430px">
 										<form name="mainform1" action="/users/registration/" method="post">
@@ -114,15 +118,14 @@
 												<div class="field"><input type="text" size="40" value="" name="login" /></div>
 											</div>
 											<div class="row">
-										<div class="caption">&labelPassword;<sup><font color="red">*</font></sup></div>
+												<div class="caption">&labelPassword;<sup><font color="red">*</font></sup></div>
 												<div class="field"><input type="password" size="40" value="" name="password"/></div>
 											</div>
 											<div class="row">
-										<div class="caption">&labelEmail;<sup><font color="red">*</font></sup></div>
+												<div class="caption">&labelEmail;<sup><font color="red">*</font></sup></div>
 												<div class="field"><input type="text" size="40" value="" name="email" /></div>
 											</div>
-											
-											
+
 											<div class="row">
 												<div class="caption"></div>
 												<div class="field">
@@ -134,8 +137,7 @@
 												</div>
 											</div>
 											<div class="row">
-												<div class="caption">
-										&labelCaptchaId;<sup><font color="red">*</font></sup></div>
+												<div class="caption">&labelCaptchaId;<sup><font color="red">*</font></sup></div>
 												<div class="field">
 													<input type="hidden" name="captcha_id" value="{captcha_id}"/>
 													<input type="text" size="15" name="captcha" />
@@ -186,7 +188,7 @@
 			</tr>
 		</table>
 	</xsl:template>
-	
+
 	<!-- Форумы -->
 	<xsl:template match="forum_category">
 		<!-- Шаблон для вывода строки форума -->
@@ -224,17 +226,17 @@
 					<xsl:when test="forum_topic/node()">
 						<!-- Длина названия темы -->
 						<xsl:variable name="lenght_theme_name" select="string-length(forum_topic/last/forum_topic_post/subject)"/>
-						
+
 						<!-- Формируем название темы -->
 						<xsl:variable name="total_theme_name"><xsl:choose>
 								<!-- Длина названия темы больше 30 символов -->
 								<xsl:when test="$lenght_theme_name > 50">
 									<!-- Получаем первые 30 символов названия темы -->
 									<xsl:variable name="theme_name_30" select="substring(forum_topic/last/forum_topic_post/subject, 1, 30)" />
-									
+
 									<!-- Получаем подстроку из названия темы начиная с 30 символа до первого пробела -->
 									<xsl:variable name="theme_name_appendix" select="substring-before(substring(forum_topic/last/forum_topic_post/subject, 31), ' ')" />
-									
+
 									<!-- После 30 символа в названиии темы отсутствуют пробелы -->
 									<xsl:choose>
 										<xsl:when test="string-length($theme_name_appendix) = 0">
@@ -244,18 +246,18 @@
 											<xsl:value-of select="$theme_name_30"/> <xsl:value-of select="$theme_name_appendix"/>
 										</xsl:otherwise>
 									</xsl:choose>
-									
+
 									<xsl:if test="$lenght_theme_name > 50">...</xsl:if>
-									
+
 								</xsl:when>
 								<xsl:otherwise><xsl:value-of select="forum_topic/last/forum_topic_post/subject"/></xsl:otherwise>
 						</xsl:choose></xsl:variable>
-						
-						
+
+
 					<strong><a href="{/forum/url}{@id}/{forum_topic/@id}/"><xsl:value-of select="$total_theme_name" /></a></strong>
 						<br />
 					&labelFrom;<xsl:text> </xsl:text><img src="/hostcmsfiles/images/user.gif" style="margin: 0px 5px -4px 0px;"/>
-						
+
 						<!-- Автор последнего сообщения -->
 						<xsl:choose>
 							<xsl:when test="not(forum_topic/last/forum_topic_post/siteuser/login/node())">
@@ -265,13 +267,13 @@
 								<a href="/users/info/{forum_topic/last/forum_topic_post/siteuser/path}/"><xsl:value-of select="forum_topic/last/forum_topic_post/siteuser/login" /></a>
 							</xsl:otherwise>
 						</xsl:choose>
-						
+
 						<!-- Дата последнего сообщения -->
 						<br /><xsl:value-of select="forum_topic/last/forum_topic_post/datetime" />
 					</xsl:when>
 					<xsl:otherwise>&labelNone;</xsl:otherwise>
 				</xsl:choose>
-				
+
 			</td>
 			<td align="center" width="40">
 				<xsl:value-of select="count_topics" />
@@ -280,10 +282,10 @@
 				<!-- Количество тем и сообщений в форуме -->
 				<xsl:value-of select="count_topic_posts" />
 			</td>
-			
+
 		</tr>
 	</xsl:template>
-	
+
 	<!-- Конец шаблона вывода строк форумов -->
 	<xsl:template match="forum_group">
 		<tr>

@@ -5,9 +5,8 @@
  *
  * @package HostCMS
  * @subpackage Admin
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @version 7.x
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Back-end form fields',
@@ -81,4 +80,8 @@ return array(
 	'filter_having' => 'HAVING',
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
+	'filter_condition' => 'Filter condition',
+
+	'show_by_default' => 'Show by default',
+	'not_show_by_default' => 'Do not show by default',
 );

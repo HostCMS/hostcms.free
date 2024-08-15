@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -17,17 +16,17 @@ $sAdminFormAction = '/admin/trash/table/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
-$tableName = Core_Array::getRequest('table');
-$singular = Core_Inflection::getSingular($tableName);
+$tableName = Core_Array::getRequest('table', '', 'trim');
+$modelName = Core_Inflection::getSingular($tableName);
 
-$titleName = class_exists($singular . '_Model')
-	? Core::_($singular . '.model_name')
-	: NULL;
+$titleName = class_exists($modelName . '_Model')
+	? Core::_($modelName . '.model_name')
+	: $modelName;
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title(Core::_('Trash_Table.title', $titleName))
@@ -61,42 +60,49 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 // Добавляем все хлебные крошки контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
-// Источник данных 0
-$oAdmin_Form_Dataset = new Trash_Table_Dataset($tableName);
-
-// Добавляем источник данных контроллеру формы
-$oAdmin_Form_Controller->addDataset(
-	$oAdmin_Form_Dataset
-);
-
-// Фильтр по дебету
-if (isset($oAdmin_Form_Controller->request['admin_form_filter_1015']) && ($oAdmin_Form_Controller->request['admin_form_filter_1015'] != '')
-	|| isset($oAdmin_Form_Controller->request['topFilter_1015']) && $oAdmin_Form_Controller->request['topFilter_1015'] != ''
-)
+if (!class_exists($modelName . '_Model'))
 {
-	$value = isset($oAdmin_Form_Controller->request['topFilter_1015'])
-		? $oAdmin_Form_Controller->request['topFilter_1015']
-		: $oAdmin_Form_Controller->request['admin_form_filter_1015'];
+	$oAdmin_Form_Controller->addMessage(Core_Message::get(Core::_('Trash_Table.model_unavailable', $modelName), 'error'));
+}
+else
+{
+	// Источник данных 0
+	$oAdmin_Form_Dataset = new Trash_Table_Dataset($tableName);
 
-	if ($value !== '')
+	// Добавляем источник данных контроллеру формы
+	$oAdmin_Form_Controller->addDataset(
+		$oAdmin_Form_Dataset
+	);
+
+	// Фильтр
+	if (isset($oAdmin_Form_Controller->request['admin_form_filter_1015']) && ($oAdmin_Form_Controller->request['admin_form_filter_1015'] != '')
+		|| isset($oAdmin_Form_Controller->request['topFilter_1015']) && $oAdmin_Form_Controller->request['topFilter_1015'] != ''
+	)
 	{
-		$mFilterValue = $oAdmin_Form_Controller->convertLike(strval($value));
+		$value = isset($oAdmin_Form_Controller->request['topFilter_1015'])
+			? $oAdmin_Form_Controller->request['topFilter_1015']
+			: $oAdmin_Form_Controller->request['admin_form_filter_1015'];
 
-		$oEntity = $oAdmin_Form_Dataset->getEntity();
+		if ($value !== '')
+		{
+			$mFilterValue = $oAdmin_Form_Controller->convertLike(strval($value));
 
-		$oAdmin_Form_Dataset->addCondition(
-			array(
-				'where' => array($tableName . '.' . $oEntity->getNameColumn(), 'LIKE', $mFilterValue)
-			)
-		);
+			$oEntity = $oAdmin_Form_Dataset->getEntity();
+
+			$oAdmin_Form_Dataset->addCondition(
+				array(
+					'where' => array($tableName . '.' . $oEntity->getNameColumn(), 'LIKE', $mFilterValue)
+				)
+			);
+		}
+		
+		function getName($value, $oAdmin_Form_Field)
+		{
+			return '';
+		}
+
+		$oAdmin_Form_Controller->addFilterCallback('getName', 'getName');
 	}
-	
-	function getName($value, $oAdmin_Form_Field)
-	{
-		return '';
-	}
-
-	$oAdmin_Form_Controller->addFilterCallback('getName', 'getName');
 }
 
 // Показ формы

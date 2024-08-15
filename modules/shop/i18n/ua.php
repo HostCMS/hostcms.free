@@ -220,4 +220,11 @@ return array(
 
 	'shop_id' => 'Ідентифікатор магазину',
 	'updateCurrency' => 'Назва драйвера',
+
+	'all_modifications_count' => 'Всього модифікацій: %s',
+	'all_shortcuts_count' => 'Всього ярликів: %s',
+	'seo_template_filter_prices' => 'Фільтр за ціною',
+	'seo_template_filter_prices_from' => 'Ціна від',
+	'seo_template_filter_prices_to' => 'до',
+	'producer_structure_id' => "Вузол структури виробників",
 );

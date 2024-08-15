@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Warehouse_Purchaseorder_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -290,36 +289,6 @@ class Shop_Warehouse_Purchaseorder_Controller_Edit extends Admin_Form_Action_Con
 			);
 		}
 
-		/*$options = array('path' => '/admin/shop/warehouse/invoice/index.php', 'action' => 'edit', 'datasetKey' => 0, 'datasetValue' => 0, 'additionalParams' => "shop_id={$oShop->id}&shop_group_id=$oShop_Group->id&createFromPurchaseorder={$this->_object->id}");
-
-		$href = $oAdmin_Form_Controller->getAdminActionLoadHref($options);
-
-		$options['operation'] = 'modal';
-		$onclick = $oAdmin_Form_Controller->getAdminActionModalLoad($options);
-
-		$sLinkCreateInvoice = '<a href="' . $href . '" onclick="' . $onclick . '"><i class="fa-solid fa-fw fa-file-invoice-dollar"></i>' . Core::_('Shop_Warehouse_Purchaseorder.create_invoice') . '</a>';
-
-		$options['path'] = '/admin/shop/warehouse/supply/index.php';
-		$onclick = $oAdmin_Form_Controller->getAdminActionModalLoad($options);
-
-		unset($options['operation']);
-
-		$href = $oAdmin_Form_Controller->getAdminActionLoadHref($options);
-
-		$sLinkCreateSupply = '<a href="' . $href . '" onclick="' . $onclick . '"><i class="fa-solid fa-fw fa-cart-flatbed"></i>' . Core::_('Shop_Warehouse_Purchaseorder.create_supply') . '</a>';
-
-		$createDocumentButton = '
-				<div id="create-document-button" class="btn-group btn-group-short ' . (!$this->_object->id ? ' hidden' : '') . '">
-					<a class="btn btn-labeled btn-info" href="javascript:void(0);"><i class="btn-label fa-solid fa-file-import"></i><span>' . Core::_('Shop_Warehouse_Purchaseorder.create_document') . '<span></a>
-					<a class="btn btn-azure dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
-					<ul class="dropdown-menu dropdown-default">
-						<li id="create-invoice">' . $sLinkCreateInvoice . '</li>
-						<li id="create-supply">' . $sLinkCreateSupply . '</li>
-					</ul>
-				</div>
-			';
-		*/
-
 		$oDivActions->add(
 			// Admin_Form_Entity::factory('Code')->html($createDocumentButton)
 			Admin_Form_Entity::factory('Code')->html(Shop_Warehouse_Controller::createDocumentButton($oAdmin_Form_Controller, $this->_object, array('invoice', 'supply', 'warrant_order', 'warrant_pay')))
@@ -491,47 +460,6 @@ class Shop_Warehouse_Purchaseorder_Controller_Edit extends Admin_Form_Action_Con
 
 		if ($bChangeCreateDocumentButton)
 		{
-			/*$windowId = $this->_Admin_Form_Controller->getWindowId();
-
-			$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0));
-			$oShop_Group = Core_Entity::factory('Shop_Group', Core_Array::getGet('shop_group_id', 0));
-
-			$options = array('path' => '/admin/shop/warehouse/invoice/index.php', 'action' => 'edit', 'datasetKey' => 0, 'datasetValue' => 0, 'additionalParams' => "shop_id={$oShop->id}&shop_group_id=$oShop_Group->id&createFromPurchaseorder={$this->_object->id}");
-
-			$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
-
-			$hrefWarehouseInvoice = $oAdmin_Form_Controller->getAdminActionLoadHref($options);
-
-			$options['operation'] = 'modal';
-			$onclickWarehouseInvoice = $oAdmin_Form_Controller->getAdminActionModalLoad($options);
-
-			$options['path'] = '/admin/shop/warehouse/supply/index.php';
-			$onclickWarehouseSupply = $oAdmin_Form_Controller->getAdminActionModalLoad($options);
-
-			unset($options['operation']);
-
-			$hrefWarehouseSupply = $oAdmin_Form_Controller->getAdminActionLoadHref($options);
-
-			$sJsRefresh = "<script>
-				var jCreateDocumentButton = $('#{$windowId} #create-document-button');
-
-					jCreateDocumentButton
-						.find('#create-invoice a')
-						.attr({
-							href: \"{$hrefWarehouseInvoice}\",
-							onclick: \"{$onclickWarehouseInvoice}\"
-						});
-
-					jCreateDocumentButton
-						.find('#create-supply a')
-						.attr({
-							href: \"{$hrefWarehouseSupply}\",
-							onclick: \"{$onclickWarehouseSupply}\"
-						});
-
-				jCreateDocumentButton.removeClass('hidden');
-			</script>";*/
-
 			$sJsRefresh = Shop_Warehouse_Controller::getJsRefresh($this->_Admin_Form_Controller, $this->_object, array('invoice', 'supply'));
 
 			$this->_Admin_Form_Controller->addMessage($sJsRefresh);
@@ -690,13 +618,6 @@ class Shop_Warehouse_Purchaseorder_Controller_Edit extends Admin_Form_Action_Con
 					->execute();
 			$this->_Admin_Form_Controller->addMessage(ob_get_clean());
 		}
-
-		// Было изменение склада
-		/*$iOldWarehouse != $this->_object->shop_warehouse_id
-			&& $bNeedsRePost = TRUE;
-
-		($bNeedsRePost || !Core_Array::getPost('posted')) && $this->_object->unpost();
-		Core_Array::getPost('posted') && $this->_object->post();*/
 
 		Core_Array::getPost('posted')
 			? $this->_object->post()

@@ -34,8 +34,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Compare_Controller_Show extends Core_Controller
 {
@@ -55,7 +54,8 @@ class Shop_Compare_Controller_Show extends Core_Controller
 		'total',
 		'pattern',
 		'patternParams',
-		'limit'
+		'limit',
+		'url'
 	);
 
 	/**
@@ -106,6 +106,8 @@ class Shop_Compare_Controller_Show extends Core_Controller
 
 		// Named subpatterns {name} can consist of up to 32 alphanumeric characters and underscores, but must start with a non-digit.
 		$this->pattern = rawurldecode($this->getEntity()->Structure->getPath()) . '({path})(page-{page}/)';
+		
+		$this->url = Core::$url['path'];
 	}
 
 	public function parseUrl()
@@ -113,7 +115,7 @@ class Shop_Compare_Controller_Show extends Core_Controller
 		$oShop = $this->getEntity();
 
 		$Core_Router_Route = new Core_Router_Route($this->pattern);
-		$this->patternParams = $matches = $Core_Router_Route->applyPattern(Core::$url['path']);
+		$this->patternParams = $matches = $Core_Router_Route->applyPattern($this->url);
 
 		if (isset($matches['page']) && is_numeric($matches['page']))
 		{

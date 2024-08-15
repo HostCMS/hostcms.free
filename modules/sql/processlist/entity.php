@@ -8,11 +8,16 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Sql
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
-class Sql_Processlist_Entity
+class Sql_Processlist_Entity extends Core_Empty_Entity
 {
+	/**
+	 * Name of the model
+	 * @var string
+	 */
+	protected $_modelName = 'sql_processlist';
+	
 	protected $_fields = array('id', 'user', 'host', 'db', 'command', 'time', 'state', 'info');
 
 	public $id = NULL;
@@ -31,11 +36,6 @@ class Sql_Processlist_Entity
 	public function getTableColumns()
 	{
 		return array_combine($this->_fields, $this->_fields);
-	}
-
-	public function getModelName()
-	{
-		return 'sql_processlist';
 	}
 
 	/**

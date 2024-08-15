@@ -3,5 +3,6 @@
 return array (
 	'thumbnails' => TRUE,
 	'parallelUploads' => 10,
-	'maxFilesize' => 25
+	'maxFilesize' => 25,
+	'reloadAfterUpload' => FALSE
 );

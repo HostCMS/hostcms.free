@@ -19,9 +19,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @version 7.x
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Response
 {
@@ -272,7 +271,7 @@ class Core_Response
 
 		foreach ($this->_headers as $value)
 		{
-			header($value[0] . ': ' . str_replace(array("\r", "\n", "\0"), '', $value[1]));
+			header($value[0] . ': ' . Core_Http::sanitizeHeader($value[1]));
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterSendHeaders', $this);

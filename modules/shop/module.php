@@ -22,10 +22,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
-class Shop_Module extends Core_Module
+class Shop_Module extends Core_Module_Abstract
 {
 	/**
 	 * Module version
@@ -37,7 +36,7 @@ class Shop_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2023-07-17';
+	public $date = '2024-06-06';
 
 	/**
 	 * Module name
@@ -149,11 +148,12 @@ class Shop_Module extends Core_Module
 	/**
 	 * Функция обратного вызова для поисковой индексации данных модуля
 	 *
-	 * @param $offset
-	 * @param $limit
+	 * @param int $site_id
+	 * @param int $offset
+	 * @param int $limit
 	 * @return array
 	 */
-	public function indexing($offset, $limit)
+	public function indexing($site_id, $offset, $limit)
 	{
 		if (!isset($_SESSION['search_block']))
 		{
@@ -174,7 +174,7 @@ class Shop_Module extends Core_Module
 					->status(Core_Log::$MESSAGE)
 					->write("indexingShopGroups({$offset}, {$limit})");
 
-				$aPages = $this->indexingShopGroups($offset, $limit);
+				$aPages = $this->indexingShopGroups($site_id, $offset, $limit);
 
 				$currentStepCount = count($aPages);
 
@@ -196,7 +196,7 @@ class Shop_Module extends Core_Module
 					->status(Core_Log::$MESSAGE)
 					->write("indexingShopItems({$offset}, {$limit})");
 
-				$aTmpResult = $this->indexingShopItems($offset, $limit);
+				$aTmpResult = $this->indexingShopItems($site_id, $offset, $limit);
 
 				$aPages = array_merge($aPages, $aTmpResult);
 
@@ -221,7 +221,7 @@ class Shop_Module extends Core_Module
 					->status(Core_Log::$MESSAGE)
 					->write("indexingShopSellers({$offset}, {$limit})");
 
-				$aTmpResult = $this->indexingShopSellers($offset, $limit);
+				$aTmpResult = $this->indexingShopSellers($site_id, $offset, $limit);
 
 				$aPages = array_merge($aPages, $aTmpResult);
 
@@ -246,7 +246,7 @@ class Shop_Module extends Core_Module
 					->status(Core_Log::$MESSAGE)
 					->write("indexingShopProducers({$offset}, {$limit})");
 
-				$aTmpResult = $this->indexingShopProducers($offset, $limit);
+				$aTmpResult = $this->indexingShopProducers($site_id, $offset, $limit);
 
 				$aPages = array_merge($aPages, $aTmpResult);
 
@@ -271,7 +271,7 @@ class Shop_Module extends Core_Module
 					->status(Core_Log::$MESSAGE)
 					->write("indexingShopFilterSeos({$offset}, {$limit})");
 
-				$aTmpResult = $this->indexingShopFilterSeos($offset, $limit);
+				$aTmpResult = $this->indexingShopFilterSeos($site_id, $offset, $limit);
 
 				$currentStepCount = count($aTmpResult);
 
@@ -284,13 +284,15 @@ class Shop_Module extends Core_Module
 	/**
 	 * Индексация групп
 	 *
+	 * @param int $site_id
 	 * @param int $offset
 	 * @param int $limit
 	 * @return array
 	 * @hostcms-event Shop_Module.indexingShopGroups
 	 */
-	public function indexingShopGroups($offset, $limit)
+	public function indexingShopGroups($site_id, $offset, $limit)
 	{
+		$site_id = intval($site_id);
 		$offset = intval($offset);
 		$limit = intval($limit);
 
@@ -308,6 +310,7 @@ class Shop_Module extends Core_Module
 			->where('shop_groups.active', '=', 1)
 			->where('shop_groups.deleted', '=', 0)
 			->where('shops.deleted', '=', 0)
+			->where('shops.site_id', '=', $site_id)
 			->where('structures.deleted', '=', 0)
 			->orderBy('shop_groups.id', 'DESC')
 			->limit($offset, $limit);
@@ -328,13 +331,15 @@ class Shop_Module extends Core_Module
 	/**
 	 * Индексация товаров
 	 *
+	 * @param int $site_id
 	 * @param int $offset
 	 * @param int $limit
 	 * @return array
 	 * @hostcms-event Shop_Module.indexingShopItems
 	 */
-	public function indexingShopItems($offset, $limit)
+	public function indexingShopItems($site_id, $offset, $limit)
 	{
+		$site_id = intval($site_id);
 		$limit = intval($limit);
 		$offset = intval($offset);
 
@@ -354,6 +359,7 @@ class Shop_Module extends Core_Module
 			->where('shop_items.indexing', '=', 1)
 			->where('shop_items.shortcut_id', '=', 0)
 			->where('shop_items.active', '=', 1)
+			->where('shop_items.closed', '=', 0)
 			->where('shop_items.deleted', '=', 0)
 			->open()
 				->where('shop_items.start_datetime', '<', $dateTime)
@@ -370,9 +376,11 @@ class Shop_Module extends Core_Module
 			->open()
 				->where('shop_groups.id', 'IS', NULL)
 				->setOr()
+				->where('shop_groups.deleted', '=', 0)
 				->where('shop_groups.active', '=', 1)
 				->where('shop_groups.indexing', '=', 1)
 			->close()
+			->where('shops.site_id', '=', $site_id)
 			->where('shops.deleted', '=', 0)
 			->where('structures.deleted', '=', 0)
 			->orderBy('shop_items.id', 'DESC')
@@ -395,13 +403,15 @@ class Shop_Module extends Core_Module
 	/**
 	 * Индексация продавцов
 	 *
+	 * @param int $site_id
 	 * @param int $offset
 	 * @param int $limit
 	 * @return array
 	 * @hostcms-event Shop_Module.indexingShopSellers
 	 */
-	public function indexingShopSellers($offset, $limit)
+	public function indexingShopSellers($site_id, $offset, $limit)
 	{
+		$site_id = intval($site_id);
 		$offset = intval($offset);
 		$limit = intval($limit);
 
@@ -415,6 +425,7 @@ class Shop_Module extends Core_Module
 			->where('structures.indexing', '=', 1)
 			->where('structures.shortcut_id', '=', 0)
 			->where('shop_sellers.deleted', '=', 0)
+			->where('shops.site_id', '=', $site_id)
 			->where('shops.deleted', '=', 0)
 			->where('structures.deleted', '=', 0)
 			->orderBy('shop_sellers.id')
@@ -436,13 +447,15 @@ class Shop_Module extends Core_Module
 	/**
 	 * Индексация производителей
 	 *
+	 * @param int $site_id
 	 * @param int $offset
 	 * @param int $limit
 	 * @return array
 	 * @hostcms-event Shop_Module.indexingShopProducers
 	 */
-	public function indexingShopProducers($offset, $limit)
+	public function indexingShopProducers($site_id, $offset, $limit)
 	{
+		$site_id = intval($site_id);
 		$offset = intval($offset);
 		$limit = intval($limit);
 
@@ -458,6 +471,7 @@ class Shop_Module extends Core_Module
 			->where('shop_producers.indexing', '=', 1)
 			->where('shop_producers.active', '=', 1)
 			->where('shop_producers.deleted', '=', 0)
+			->where('shops.site_id', '=', $site_id)
 			->where('shops.deleted', '=', 0)
 			->where('structures.deleted', '=', 0)
 			->orderBy('shop_producers.id')
@@ -479,13 +493,15 @@ class Shop_Module extends Core_Module
 	/**
 	 * Индексация seo-фильтров
 	 *
+	 * @param int $site_id
 	 * @param int $offset
 	 * @param int $limit
 	 * @return array
 	 * @hostcms-event Shop_Module.indexingShopFilterSeos
 	 */
-	public function indexingShopFilterSeos($offset, $limit)
+	public function indexingShopFilterSeos($site_id, $offset, $limit)
 	{
+		$site_id = intval($site_id);
 		$offset = intval($offset);
 		$limit = intval($limit);
 
@@ -496,6 +512,7 @@ class Shop_Module extends Core_Module
 			->where('shop_filter_seos.deleted', '=', 0)
 			->where('shop_filter_seos.active', '=', 1)
 			->where('shop_filter_seos.indexing', '=', 1)
+			->where('shops.site_id', '=', $site_id)
 			->where('shops.deleted', '=', 0)
 			->clearOrderBy()
 			->orderBy('shop_filter_seos.id')

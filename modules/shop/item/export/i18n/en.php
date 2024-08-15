@@ -37,4 +37,11 @@ return array(
 	'order_item_price' => 'Item Price',
 	'order_item_tax' => 'Item Tax',
 	'order_item_type' => 'Item Type',
+	'begin_file_export_orders' => 'Export orders to the file %s',
+	'begin_file_export' => 'Export to the file %s, group "%s"',
+	'end_file_export' => 'Export to file %s completed',
+	'export_mode' => 'Upload',
+	'export_mode1' => 'to file',
+	'export_mode2' => 'to server',
+	'property_header' => 'Additional properties of products in the order',
 );

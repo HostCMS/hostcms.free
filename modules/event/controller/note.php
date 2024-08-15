@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Event_Controller_Note extends Admin_Form_Controller_View
 {
@@ -110,7 +109,7 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 
 		$aEntities = $aDatasets[0]->load();
 
-		$additionalParams = 'event_id={event_id}';
+		$additionalParams = 'event_id={event_id}&secret_csrf=' . Core_Security::getCsrfToken();
 		$externalReplace = $oAdmin_Form_Controller->getExternalReplace();
 		foreach ($externalReplace as $replace_key => $replace_value)
 		{
@@ -134,6 +133,22 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 		<div class="deal-note-board">
 			<div class="">
 				<div>
+					<?php
+					$aAdmin_Form_Actions = $oAdmin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser);
+
+					$bAddNoteAccess = FALSE;
+					foreach ($aAdmin_Form_Actions as $aAdmin_Form_Action)
+					{
+						if ($aAdmin_Form_Action->name == 'addNote')
+						{
+							$bAddNoteAccess = TRUE;
+							break;
+						}
+					}
+
+					if ($bAddNoteAccess)
+					{
+					?>
 					<form action="/admin/event/note/index.php?hostcms[action]=addNote&_=<?php echo time()?>&hostcms[checked][0][0]=1&event_id=<?php echo $event_id?>&parentWindowId=<?php echo htmlspecialchars($windowId)?>" method="POST" enctype='multipart/form-data' class="padding-bottom-10 dropzone-form dropzone-form-note">
 						<div class="timeline-comment-wrapper">
 							<?php
@@ -170,7 +185,7 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 									echo $oEvent->getCompletedDropdown($this->_Admin_Form_Controller);
 									?>
 								</div>
-								<button id="sendForm" class="btn btn-palegreen btn-sm" type="submit">
+								<button id="sendForm" class="btn btn-primary btn-sm" type="submit">
 									<?php echo Core::_('Crm_Note.send')?>
 								</button>
 							</div>
@@ -190,7 +205,7 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 						$form.dropzone({
 							url: $form.attr('action'),
 							parallelUploads: 10,
-							maxFilesize: 5,
+							maxFilesize: <?php echo Core::$mainConfig['dropzoneMaxFilesize']?>,
 							paramName: 'file',
 							uploadMultiple: true,
 							clickable: '#<?php echo $windowId?> .dropzone-form-note #dropzone',
@@ -235,15 +250,24 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 							},
 							success : function(file, response){
 								var $window = $("#<?php echo $oAdmin_Form_Controller->getWindowId()?>"),
-									window_id = $('li[data-type="timeline"] > a').data('window-id');
+									$timeline = $window.find('li[data-type="timeline"]');
 
 								$.beforeContentLoad($window);
 								$.insertContent($window, response.form_html);
-								$.adminLoad({ path: '/admin/event/timeline/index.php', additionalParams: 'event_id=<?php echo $event_id?>', windowId: window_id });
+
+								// View mode doesn't have `timeline` tab
+								if ($timeline.length)
+								{
+									window_id = $timeline.find('a').data('window-id');
+									$.adminLoad({ path: '/admin/event/timeline/index.php', additionalParams: 'event_id=<?php echo $event_id?>', windowId: window_id });
+								}
 							}
 						});
 					});
 					</script>
+					<?php
+					}
+					?>
 				</div>
 
 				<?php
@@ -285,7 +309,7 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 						}
 						?>
 						<li class="timeline-inverted <?php echo $class?>">
-							<div class="timeline-badge palegreen">
+							<div class="timeline-badge yelllow">
 								<img class="img-circle" src="<?php echo $oEntity->User->getAvatar()?>" width="30" height="30"/>
 							</div>
 							<div class="timeline-panel">
@@ -320,7 +344,7 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 
 												$onclick = $oAdmin_Form_Action->name == 'edit'
 													? "$.modalLoad({path: '{$oAdmin_Form_Controller->getPath()}', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][{$oEntity->id}]=1&event_id={$oEvent->id}&parentWindowId={$windowId}', windowId: '{$windowId}', width: '90%'}); return false"
-													: $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), $oAdmin_Form_Action->name, NULL, 0, intval($oEntity->id));
+													: $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), $oAdmin_Form_Action->name, NULL, 0, intval($oEntity->id), $additionalParams);
 
 												// Добавляем установку метки для чекбокса и строки + добавлем уведомление, если необходимо
 												if ($oAdmin_Form_Action->confirm)

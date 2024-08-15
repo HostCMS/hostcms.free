@@ -25,16 +25,27 @@ usleep(10);
 
 $BOM = "\xEF\xBB\xBF";
 
-// Решение проблемы авторизации при PHP в режиме CGI
-if (isset($_REQUEST['authorization'])
-|| (isset($_SERVER['argv'][0])
-	&& empty($_SERVER['PHP_AUTH_USER'])
-	&& empty($_SERVER['PHP_AUTH_PW']))
-)
+// Решение проблемы авторизации при PHP в режиме CGI (два варианта через authorization и E=HTTP_AUTHORIZATION)
+if (
+	// RewriteRule /index.php?authorization=
+	isset($_REQUEST['authorization'])
+	// RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+	|| isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])
+	|| (isset($_SERVER['argv'][0])
+		&& empty($_SERVER['PHP_AUTH_USER'])
+		&& empty($_SERVER['PHP_AUTH_PW']))
+	)
 {
-	$authorization_base64 = isset($_REQUEST['authorization'])
-		? $_REQUEST['authorization']
-		: mb_substr($_SERVER['argv'][0], 14);
+	if (isset($_REQUEST['authorization']) || isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION']))
+	{
+		$authorization_base64 = isset($_REQUEST['authorization'])
+			? $_REQUEST['authorization']
+			: $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+	}
+	else
+	{
+		$authorization_base64 = mb_substr($_SERVER['argv'][0], 14);
+	}
 
 	$authorization = base64_decode(mb_substr($authorization_base64, 6));
 	$authorization_explode = explode(':', $authorization);
@@ -233,8 +244,12 @@ elseif ($sType == 'catalog' && $sMode == 'import' && !is_null($sFileName = Core_
 		$oShop_Item_Import_Cml_Controller->sShopDefaultPriceName = defined('DEFAULT_CML_PRICE_NAME')
 			? DEFAULT_CML_PRICE_NAME
 			: 'Розничная';
+		// Массив полей товара, которые необходимо обновлять при импорте CML товара, если не заполнен, то обновляются все поля
 		//$oShop_Item_Import_Cml_Controller->updateFields = array('marking', 'name', 'shop_group_id', 'text', 'description', 'images', 'taxes', 'shop_producer_id');
+		// Массив названий свойств, которые исключаются из импорта
 		//$oShop_Item_Import_Cml_Controller->skipProperties = array('Свойство1');
+		// Включать товары, которые ранее были выключены
+		// $oShop_Item_Import_Cml_Controller->reActivateItems = TRUE;
 		$oShop_Item_Import_Cml_Controller->debug = $bDebug;
 		$oShop_Item_Import_Cml_Controller->timeout = $iTimeout;
 		// Событийная индексация

@@ -16,6 +16,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - pattern($pattern) шаблон разбора данных в URI, см. __construct()
  * - addAllowedTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, разрешенных к передаче в генерируемый XML
  * - addForbiddenTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, запрещенных к передаче в генерируемый XML
+ * - commentsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств комментариев, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
+ * - commentsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств комментариев, по умолчанию TRUE. Ограничения на список свойств в виде массива влияет и на выборку значений свойств товара.
+ * - comments(TRUE|FALSE) показывать комментарии для выбранных товаров, по умолчанию FALSE
+ * - commentsRating(TRUE|FALSE) показывать оценки комментариев для выбранных товаров, по умолчанию FALSE
+ * - commentsActivity('active'|'inactive'|'all') отображать комментарии: active — только активные, inactive — только неактивные, all — все, по умолчанию - active
  *
  * Доступные пути для методов addAllowedTags/addForbiddenTags:
  *
@@ -28,8 +33,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Order_Controller_Show extends Core_Controller
 {
@@ -48,6 +52,12 @@ class Shop_Order_Controller_Show extends Core_Controller
 		'pattern',
 		'patternExpressions',
 		'patternParams',
+		'commentsProperties',
+		'commentsPropertiesList',
+		'comments',
+		'commentsRating',
+		'commentsActivity',
+		'url'
 	);
 
 	/**
@@ -119,9 +129,11 @@ class Shop_Order_Controller_Show extends Core_Controller
 			->where('shop_orders.siteuser_id', '=', $siteuser_id)
 			->orderBy('shop_orders.datetime', 'DESC');
 
-		$this->itemsProperties = $this->ordersPropertiesList = FALSE;
+		$this->itemsProperties = $this->ordersPropertiesList = $this->commentsProperties = $this->comments = $this->commentsRating = FALSE;
 
-		$this->sortPropertiesValues = TRUE;
+		$this->sortPropertiesValues = $this->commentsPropertiesList = TRUE;
+
+		$this->commentsActivity = 'active'; // inactive, all
 
 		$this->limit = 999;
 		$this->offset = 0;
@@ -143,6 +155,8 @@ class Shop_Order_Controller_Show extends Core_Controller
 		$this->patternExpressions = array(
 			'page' => '\d+',
 		);
+		
+		$this->url = Core::$url['path'];
 	}
 
 	/**
@@ -192,7 +206,7 @@ class Shop_Order_Controller_Show extends Core_Controller
 
 		if ($this->page && !count($aShop_Orders))
 		{
-			return $this->error404();
+			return $this->error410();
 		}
 
 		$this->total = Core_QueryBuilder::select()->getFoundRows();
@@ -241,6 +255,12 @@ class Shop_Order_Controller_Show extends Core_Controller
 			$this->_addOrdersPropertiesList(0, $Shop_Order_Properties);
 		}
 
+		// Показывать дополнительные свойства комментариев
+		if ($this->commentsProperties || $this->commentsPropertiesList)
+		{
+			$aShowCommentPropertyIDs = $this->_commentsProperties();
+		}
+
 		// Paymentsystems
 		$oShopPaymentSystemsEntity = Core::factory('Core_Xml_Entity')
 			->name('shop_payment_systems');
@@ -257,6 +277,19 @@ class Shop_Order_Controller_Show extends Core_Controller
 			$oShopPaymentSystemsEntity->addEntity($oShop_Payment_System);
 		}
 
+		if ($this->commentsProperties)
+		{
+			$mShowCommentPropertyIDs = is_array($this->commentsProperties)
+				? $this->commentsProperties
+				: $aShowCommentPropertyIDs;
+
+			is_array($mShowCommentPropertyIDs) && !count($mShowCommentPropertyIDs) && $mShowCommentPropertyIDs = FALSE;
+		}
+		else
+		{
+			$mShowCommentPropertyIDs = FALSE;
+		}
+
 		foreach ($aShop_Orders as $oShop_Order)
 		{
 			$oShop_Order
@@ -266,10 +299,15 @@ class Shop_Order_Controller_Show extends Core_Controller
 				->showXmlItems(TRUE)
 				->showXmlDelivery(TRUE)
 				->showXmlPaymentSystem(TRUE)
-				->showXmlOrderStatus(TRUE);
+				->showXmlOrderStatus(TRUE)
+				->showXmlComments($this->comments)
+				->showXmlCommentsRating($this->commentsRating)
+				->commentsActivity($this->commentsActivity);
 
 			$this->itemsProperties
 				&& $oShop_Order->showXmlProperties($this->itemsProperties, $this->sortPropertiesValues);
+
+			$oShop_Order->showXmlCommentProperties($mShowCommentPropertyIDs);
 
 			$this->applyForbiddenAllowedTags('/shop/shop_order', $oShop_Order);
 
@@ -277,6 +315,113 @@ class Shop_Order_Controller_Show extends Core_Controller
 		}
 
 		return parent::show();
+	}
+
+	/**
+	 * List of properties for item
+	 * @var array
+	 */
+	protected $_aComment_Properties = array();
+
+	/**
+	 * List of property directories for item
+	 * @var array
+	 */
+	protected $_aComment_Property_Dirs = array();
+
+	/**
+	 * Get _aComment_Properties set
+	 * @return array
+	 */
+	public function getCommentProperties()
+	{
+		return $this->_aComment_Properties;
+	}
+
+	/**
+	 * Get _aItem_Property_Dirs set
+	 * @return array
+	 */
+	public function getCommentPropertyDirs()
+	{
+		return $this->_aComment_Property_Dirs;
+	}
+
+	/**
+	 * Add list of comment properties
+	 * @return array
+	 * @hostcms-event Shop_Order_Controller_Show.onBeforeAddCommentsPropertiesList
+	 */
+	protected function _commentsProperties()
+	{
+		$aShowPropertyIDs = array();
+
+		$oShop = $this->getEntity();
+
+		$oShop_Order_Comment_Property_List = Core_Entity::factory('Shop_Order_Comment_Property_List', $oShop->id);
+
+		$bTpl = $this->_mode == 'tpl';
+
+		$aProperties = is_array($this->commentsPropertiesList) && count($this->commentsPropertiesList)
+			? $oShop_Order_Comment_Property_List->Properties->getAllByid($this->commentsPropertiesList, FALSE, 'IN')
+			: $oShop_Order_Comment_Property_List->Properties->findAll();
+
+		foreach ($aProperties as $oProperty)
+		{
+			$oProperty->clearEntities();
+			$aShowPropertyIDs[] = $oProperty->id;
+			$this->_aComment_Properties[$oProperty->property_dir_id][] = $oProperty;
+		}
+
+		// Список свойств комментариев
+		if ($this->commentsPropertiesList)
+		{
+			$aProperty_Dirs = $oShop_Order_Comment_Property_List->Property_Dirs->findAll();
+			foreach ($aProperty_Dirs as $oProperty_Dir)
+			{
+				$oProperty_Dir->clearEntities();
+				$this->_aComment_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
+			}
+
+			if (!$bTpl)
+			{
+				$Comment_Properties = Core::factory('Core_Xml_Entity')
+					->name('comment_properties');
+
+				$this->addEntity($Comment_Properties);
+
+				Core_Event::notify(get_class($this) . '.onBeforeAddCommentsPropertiesList', $this, array($Comment_Properties));
+
+				$this->_addCommentsPropertiesList(0, $Comment_Properties);
+			}
+		}
+
+		return $aShowPropertyIDs;
+	}
+
+	/**
+	 * Add items properties to XML
+	 * @param int $parent_id
+	 * @param object $parentObject
+	 * @return self
+	 */
+	protected function _addCommentsPropertiesList($parent_id, $parentObject)
+	{
+		if (isset($this->_aComment_Property_Dirs[$parent_id]))
+		{
+			foreach ($this->_aComment_Property_Dirs[$parent_id] as $oProperty_Dir)
+			{
+				$parentObject->addEntity($oProperty_Dir);
+				$this->_addCommentsPropertiesList($oProperty_Dir->id, $oProperty_Dir);
+			}
+		}
+
+		if (isset($this->_aComment_Properties[$parent_id]))
+		{
+			$parentObject->addEntities($this->_aComment_Properties[$parent_id]);
+		}
+
+		return $this;
 	}
 
 	/**
@@ -315,7 +460,7 @@ class Shop_Order_Controller_Show extends Core_Controller
 		Core_Event::notify(get_class($this) . '.onBeforeParseUrl', $this);
 
 		$Core_Router_Route = new Core_Router_Route($this->pattern, $this->patternExpressions);
-		$this->patternParams = $matches = $Core_Router_Route->applyPattern(Core::$url['path']);
+		$this->patternParams = $matches = $Core_Router_Route->applyPattern($this->url);
 
 		if (isset($matches['page']) && is_numeric($matches['page']))
 		{
@@ -326,7 +471,7 @@ class Shop_Order_Controller_Show extends Core_Controller
 			}
 			else
 			{
-				return $this->error404();
+				return $this->error410();
 			}
 		}
 
@@ -335,6 +480,17 @@ class Shop_Order_Controller_Show extends Core_Controller
 		return $this;
 	}
 
+	/**
+	 * Define handler for 410 error
+	 * @return self
+	 */
+	public function error410()
+	{
+		Core_Page::instance()->error410();
+
+		return $this;
+	}
+	
 	/**
 	 * Define handler for 404 error
 	 * @return self

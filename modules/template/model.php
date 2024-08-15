@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Template
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Template_Model extends Core_Entity
 {
@@ -30,6 +29,12 @@ class Template_Model extends Core_Entity
 	 * @var int
 	 */
 	public $template_sections = 1;
+
+	/**
+	 * Backward compatibility
+	 * @var NULL
+	 */
+	public $data_template_id = NULL;
 
 	/**
 	 * Belongs to relations
@@ -57,8 +62,7 @@ class Template_Model extends Core_Entity
 	 */
 	protected $_preloadValues = array(
 		'type' => 0,
-		'sorting' => 0,
-		'data_template_id' => 0
+		'sorting' => 0
 	);
 
 	/**
@@ -499,27 +503,6 @@ class Template_Model extends Core_Entity
 			return Core_Entity::factory('Template', $this->template_id);
 		}
 		return NULL;
-	}
-
-	/**
-	 * Used when transferring templates for layouts
-	 * Используется при переносе шаблонов к макетам
-	 * @param int $data_template_id template ID
-	 * @return Template_Model|NULL
-	 */
-	public function getByDataTemplateId($data_template_id)
-	{
-		$oTemplates = $this->Templates;
-		$oTemplates->queryBuilder()
-			//->clear()
-			->where('data_template_id', '=', $data_template_id)
-			->limit(1);
-
-		$aTemplates = $oTemplates->findAll(FALSE);
-
-		return isset($aTemplates[0])
-			? $aTemplates[0]
-			: NULL;
 	}
 
 	/**

@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -42,7 +41,7 @@ $sFormTitle = Core::_('Shop_Warehouse_Cell.title', $oShop_Warehouse_Cell->nameWi
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title($sFormTitle)
@@ -63,7 +62,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 	{
 		$aJSON[0] = array(
 			'id' => 0,
-			'label' => Core::_('Shop_Warehouse_Cell.root') . ' [0]'
+			'label' => Core::_('Shop_Warehouse_Cell.root')
 		);
 
 		$oShop_Warehouse_Cells = $oShop_Warehouse->Shop_Warehouse_Cells;
@@ -81,7 +80,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 			$aJSON[] = array(
 				'id' => $oShop_Warehouse_Cell->id,
-				'label' => $sParents . ' [' . $oShop_Warehouse_Cell->id . ']'
+				'label' => $sParents
 			);
 		}
 	}

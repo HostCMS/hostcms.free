@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -395,186 +394,187 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 					$oShop_Tab_Producer->shop_tab_id = $iNewShopTabId;
 					$oShop_Tab_Producer->save();
 				}
-			break;
-		}
+				
+				$large_image = $small_image = '';
 
-		$param = array();
+				$aCore_Config = Core::$mainConfig;
 
-		$large_image = '';
-		$small_image = '';
+				$create_small_image_from_large = Core_Array::getPost('create_small_image_from_large_small_image');
 
-		$aCore_Config = Core::$mainConfig;
+				$bLargeImageIsCorrect =
+					// Поле файла большого изображения существует
+					!is_null($aFileData = Core_Array::getFiles('image', NULL))
+					// и передан файл
+					&& intval($aFileData['size']) > 0;
 
-		$create_small_image_from_large = Core_Array::getPost(
-		'create_small_image_from_large_small_image');
-
-		$bLargeImageIsCorrect =
-			// Поле файла большого изображения существует
-			!is_null($aFileData = Core_Array::getFiles('image', NULL))
-			// и передан файл
-			&& intval($aFileData['size']) > 0;
-
-		if ($bLargeImageIsCorrect)
-		{
-			// Проверка на допустимый тип файла
-			if (Core_File::isValidExtension($aFileData['name'],
-			$aCore_Config['availableExtension']))
-			{
-				// Удаление файла большого изображения
-				if ($this->_object->image_large)
+				if ($bLargeImageIsCorrect)
 				{
-					$this->_object->deleteLargeImage();
+					// Проверка на допустимый тип файла
+					if (Core_File::isValidExtension($aFileData['name'],
+					$aCore_Config['availableExtension']))
+					{
+						// Удаление файла большого изображения
+						if ($this->_object->image_large)
+						{
+							$this->_object->deleteLargeImage();
+						}
+
+						$file_name = $aFileData['name'];
+
+						$ext = Core_File::getExtension($file_name);
+
+						$large_image = 'shop_producer_image' . $this->_object->id . '.' . $ext;
+					}
+					else
+					{
+						$this->addMessage(	Core_Message::get(		Core::_('Core.extension_does_not_allow',
+								Core_File::getExtension($aFileData['name'])),
+								'error'
+							)
+						);
+					}
 				}
 
-				$file_name = $aFileData['name'];
+				$aSmallFileData = Core_Array::getFiles('small_image', NULL);
+				$bSmallImageIsCorrect =
+					// Поле файла малого изображения существует
+					!is_null($aSmallFileData)
+					&& $aSmallFileData['size'];
 
-				$ext = Core_File::getExtension($file_name);
 
-				$large_image = 'shop_producer_image' . $this->_object->id . '.' . $ext;
-			}
-			else
-			{
-				$this->addMessage(	Core_Message::get(		Core::_('Core.extension_does_not_allow',
-						Core_File::getExtension($aFileData['name'])),
-						'error'
-					)
-				);
-			}
+				// Задано малое изображение и при этом не задано создание малого изображения
+				// из большого или задано создание малого изображения из большого и
+				// при этом не задано большое изображение.
+
+				if ($bSmallImageIsCorrect
+				|| $create_small_image_from_large
+				&& $bLargeImageIsCorrect)
+				{
+					// Удаление файла малого изображения
+					if ($this->_object->image_small)
+					{
+						$this->_object->deleteSmallImage();
+					}
+
+					// Явно указано малое изображение
+					if ($bSmallImageIsCorrect
+						&& Core_File::isValidExtension($aSmallFileData['name'],
+						$aCore_Config['availableExtension']))
+					{
+						$file_name = $aSmallFileData['name'];
+
+						// Определяем расширение файла
+						$ext = Core_File::getExtension($file_name);
+
+						$small_image = 'small_shop_producer_image' . $this->_object->id . '.' . $ext;
+					}
+					elseif ($create_small_image_from_large && $bLargeImageIsCorrect)
+					{
+						$small_image = 'small_' . $large_image;
+					}
+					// Тип загружаемого файла является недопустимым для загрузки файла
+					else
+					{
+						$this->addMessage(Core_Message::get(Core::_('Core.extension_does_not_allow',
+								Core_File::getExtension($aSmallFileData['name'])),
+								'error'
+							)
+						);
+					}
+				}
+
+				$param = array();
+				
+				if ($bLargeImageIsCorrect || $bSmallImageIsCorrect)
+				{
+					if ($bLargeImageIsCorrect)
+					{
+						// Путь к файлу-источнику большого изображения;
+						$param['large_image_source'] = $aFileData['tmp_name'];
+						// Оригинальное имя файла большого изображения
+						$param['large_image_name'] = $aFileData['name'];
+					}
+
+					if ($bSmallImageIsCorrect)
+					{
+						// Путь к файлу-источнику малого изображения;
+						$param['small_image_source'] = $aSmallFileData['tmp_name'];
+						// Оригинальное имя файла малого изображения
+						$param['small_image_name'] = $aSmallFileData['name'];
+					}
+
+					// Путь к создаваемому файлу большого изображения;
+					$param['large_image_target'] = !empty($large_image)
+						? $this->_object->getProducerPath() . $large_image
+						: '';
+
+					// Путь к создаваемому файлу малого изображения;
+					$param['small_image_target'] = !empty($small_image)
+						? $this->_object->getProducerPath() . $small_image
+						: '' ;
+
+					// Использовать большое изображение для создания малого
+					$param['create_small_image_from_large'] = !is_null(Core_Array::getPost('create_small_image_from_large_small_image'));
+
+					// Значение максимальной ширины большого изображения
+					$param['large_image_max_width'] = Core_Array::getPost('large_max_width_image', 0);
+
+					// Значение максимальной высоты большого изображения
+					$param['large_image_max_height'] = Core_Array::getPost('large_max_height_image', 0);
+
+					// Значение максимальной ширины малого изображения;
+					$param['small_image_max_width'] = Core_Array::getPost('small_max_width_small_image');
+
+					// Значение максимальной высоты малого изображения;
+					$param['small_image_max_height'] = Core_Array::getPost('small_max_height_small_image');
+
+					// Путь к файлу с "водяным знаком"
+					$param['watermark_file_path'] = "";
+
+					// Позиция "водяного знака" по оси X
+					$param['watermark_position_x'] = 0;
+
+					// Позиция "водяного знака" по оси Y
+					$param['watermark_position_y'] = 0;
+
+					// Наложить "водяной знак" на большое изображение (true - наложить (по умолчанию), false - не наложить);
+					$param['large_image_watermark'] = FALSE;
+
+					// Наложить "водяной знак" на малое изображение (true - наложить (по умолчанию), false - не наложить);
+					$param['small_image_watermark'] = FALSE;
+
+					// Сохранять пропорции изображения для большого изображения
+					$param['large_image_preserve_aspect_ratio'] = !is_null(Core_Array::getPost('large_preserve_aspect_ratio_image'));
+
+					// Сохранять пропорции изображения для малого изображения
+					$param['small_image_preserve_aspect_ratio'] = !is_null(Core_Array::getPost('small_preserve_aspect_ratio_small_image'));
+
+					$this->_object->createDir();
+
+					$result = Core_File::adminUpload($param);
+
+					if ($result['large_image'])
+					{
+						$this->_object->image_large = $large_image;
+
+						// WARNING: Закомментировано до добавления полей для хранения
+						// размеров изображений производителя
+						//$this->_object->setLargeImageSizes();
+					}
+
+					if ($result['small_image'])
+					{
+						$this->_object->image_small = $small_image;
+						//$this->_object->setSmallImageSizes();
+					}
+				}
+
+				$this->_object->save();
+				
+				// Index item
+				$this->_object->index();
+			break;
 		}
-
-		$aSmallFileData = Core_Array::getFiles('small_image', NULL);
-		$bSmallImageIsCorrect =
-			// Поле файла малого изображения существует
-			!is_null($aSmallFileData)
-			&& $aSmallFileData['size'];
-
-
-		// Задано малое изображение и при этом не задано создание малого изображения
-		// из большого или задано создание малого изображения из большого и
-		// при этом не задано большое изображение.
-
-		if ($bSmallImageIsCorrect
-		|| $create_small_image_from_large
-		&& $bLargeImageIsCorrect)
-		{
-			// Удаление файла малого изображения
-			if ($this->_object->image_small)
-			{
-				$this->_object->deleteSmallImage();
-			}
-
-			// Явно указано малое изображение
-			if ($bSmallImageIsCorrect
-				&& Core_File::isValidExtension($aSmallFileData['name'],
-				$aCore_Config['availableExtension']))
-			{
-				$file_name = $aSmallFileData['name'];
-
-				// Определяем расширение файла
-				$ext = Core_File::getExtension($file_name);
-
-				$small_image = 'small_shop_producer_image' . $this->_object->id . '.' . $ext;
-			}
-			elseif ($create_small_image_from_large && $bLargeImageIsCorrect)
-			{
-				$small_image = 'small_' . $large_image;
-			}
-			// Тип загружаемого файла является недопустимым для загрузки файла
-			else
-			{
-				$this->addMessage(Core_Message::get(Core::_('Core.extension_does_not_allow',
-						Core_File::getExtension($aSmallFileData['name'])),
-						'error'
-					)
-				);
-			}
-		}
-
-		if ($bLargeImageIsCorrect || $bSmallImageIsCorrect)
-		{
-			if ($bLargeImageIsCorrect)
-			{
-				// Путь к файлу-источнику большого изображения;
-				$param['large_image_source'] = $aFileData['tmp_name'];
-				// Оригинальное имя файла большого изображения
-				$param['large_image_name'] = $aFileData['name'];
-			}
-
-			if ($bSmallImageIsCorrect)
-			{
-				// Путь к файлу-источнику малого изображения;
-				$param['small_image_source'] = $aSmallFileData['tmp_name'];
-				// Оригинальное имя файла малого изображения
-				$param['small_image_name'] = $aSmallFileData['name'];
-			}
-
-			// Путь к создаваемому файлу большого изображения;
-			$param['large_image_target'] = !empty($large_image)
-				? $this->_object->getProducerPath() . $large_image
-				: '';
-
-			// Путь к создаваемому файлу малого изображения;
-			$param['small_image_target'] = !empty($small_image)
-				? $this->_object->getProducerPath() . $small_image
-				: '' ;
-
-			// Использовать большое изображение для создания малого
-			$param['create_small_image_from_large'] = !is_null(Core_Array::getPost('create_small_image_from_large_small_image'));
-
-			// Значение максимальной ширины большого изображения
-			$param['large_image_max_width'] = Core_Array::getPost('large_max_width_image', 0);
-
-			// Значение максимальной высоты большого изображения
-			$param['large_image_max_height'] = Core_Array::getPost('large_max_height_image', 0);
-
-			// Значение максимальной ширины малого изображения;
-			$param['small_image_max_width'] = Core_Array::getPost('small_max_width_small_image');
-
-			// Значение максимальной высоты малого изображения;
-			$param['small_image_max_height'] = Core_Array::getPost('small_max_height_small_image');
-
-			// Путь к файлу с "водяным знаком"
-			$param['watermark_file_path'] = "";
-
-			// Позиция "водяного знака" по оси X
-			$param['watermark_position_x'] = 0;
-
-			// Позиция "водяного знака" по оси Y
-			$param['watermark_position_y'] = 0;
-
-			// Наложить "водяной знак" на большое изображение (true - наложить (по умолчанию), false - не наложить);
-			$param['large_image_watermark'] = FALSE;
-
-			// Наложить "водяной знак" на малое изображение (true - наложить (по умолчанию), false - не наложить);
-			$param['small_image_watermark'] = FALSE;
-
-			// Сохранять пропорции изображения для большого изображения
-			$param['large_image_preserve_aspect_ratio'] = !is_null(Core_Array::getPost('large_preserve_aspect_ratio_image'));
-
-			// Сохранять пропорции изображения для малого изображения
-			$param['small_image_preserve_aspect_ratio'] = !is_null(Core_Array::getPost('small_preserve_aspect_ratio_small_image'));
-
-			$this->_object->createDir();
-
-			$result = Core_File::adminUpload($param);
-
-			if ($result['large_image'])
-			{
-				$this->_object->image_large = $large_image;
-
-				// WARNING: Закомментировано до добавления полей для хранения
-				// размеров изображений производителя
-				//$this->_object->setLargeImageSizes();
-			}
-
-			if ($result['small_image'])
-			{
-				$this->_object->image_small = $small_image;
-				//$this->_object->setSmallImageSizes();
-			}
-		}
-
-		$this->_object->save();
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 	}

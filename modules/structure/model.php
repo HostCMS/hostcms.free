@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Structure
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Structure_Model extends Core_Entity
 {
@@ -18,6 +17,12 @@ class Structure_Model extends Core_Entity
 	 * @var mixed
 	 */
 	public $rollback = 0;
+
+	/**
+	 * Backward compatibility
+	 * @var NULL
+	 */
+	public $data_template_id = NULL;
 
 	/**
 	 * Model name
@@ -43,8 +48,6 @@ class Structure_Model extends Core_Entity
 		'priority' => 0.5,
 		'siteuser_group_id' => 0,
 		'template_id' => 0,
-		// Warning: Удалить после объединения
-		'data_template_id' => 0,
 		'show' => 1,
 		'url' => ''
 	);
@@ -76,7 +79,8 @@ class Structure_Model extends Core_Entity
 	protected $_hasMany = array(
 		'structure' => array('foreign_key' => 'parent_id'),
 		'shortcut' => array('model' => 'Structure', 'foreign_key' => 'shortcut_id'),
-		'media_structure' => array()
+		'media_structure' => array(),
+		'media_item' => array('through' => 'media_structure')
 	);
 
 	/**
@@ -99,7 +103,6 @@ class Structure_Model extends Core_Entity
 
 	/**
 	 * Has revisions
-	 *
 	 * @param boolean
 	 */
 	protected $_hasRevisions = TRUE;
@@ -180,6 +183,12 @@ class Structure_Model extends Core_Entity
 					->setHref('/' . $this->getDirHref())
 					->setDir($this->getDirPath());
 			break;
+			case 5: // Элемент информационной системы
+			case 12: // Товар интернет-магазина
+			case 13: // Группа информационной системы
+			case 14: // Группа интернет-магазина
+				$oProperty_Value->showXmlMedia($this->_showXmlMedia);
+			break;
 			case 8:
 				$oProperty_Value->dateFormat($this->Site->date_format);
 			break;
@@ -188,8 +197,6 @@ class Structure_Model extends Core_Entity
 			break;
 		}
 	}
-
-
 
 	/**
 	 * Create directory for item
@@ -538,7 +545,7 @@ class Structure_Model extends Core_Entity
 					Core_Html_Entity::factory('A')
 						->href(($object->https ? 'https://' : 'http://') . $oSite_Alias->name . $sPath)
 						->target("_blank")
-						->value(htmlspecialchars(urldecode($sPath)))
+						->value(htmlspecialchars(rawurldecode($sPath)))
 				);
 
 			!$object->active
@@ -548,7 +555,7 @@ class Structure_Model extends Core_Entity
 		}
 		else
 		{
-			echo htmlspecialchars(urldecode($sPath));
+			echo htmlspecialchars(rawurldecode($sPath));
 		}
 	}
 
@@ -665,11 +672,18 @@ class Structure_Model extends Core_Entity
 	/**
 	 * Change status of activity for structure node
 	 * @return self
+	 * @hostcms-event structure.onBeforeChangeStatus
+	 * @hostcms-event structure.onAfterChangeStatus
 	 */
 	public function changeStatus()
 	{
+		Core_Event::notify($this->_modelName . '.onBeforeChangeStatus', $this);
+
 		$this->active = 1 - $this->active;
 		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterChangeStatus', $this);
+
 		return $this;
 	}
 
@@ -722,6 +736,14 @@ class Structure_Model extends Core_Entity
 	{
 		$this->indexing = 1 - $this->indexing;
 		$this->save();
+
+		if ($this->indexing && Core::moduleIsActive('search'))
+		{
+			Search_Controller::indexingSearchPages(array(
+				$this->indexing()
+			));
+		}
+
 		return $this;
 	}
 
@@ -851,6 +873,24 @@ class Structure_Model extends Core_Entity
 	}
 
 	/**
+	 * Show media in XML
+	 * @var boolean
+	 */
+	protected $_showXmlMedia = FALSE;
+
+	/**
+	 * Show properties in XML
+	 * @param mixed $showXmlProperties array of allowed properties ID or boolean
+	 * @return self
+	 */
+	public function showXmlMedia($showXmlMedia = TRUE)
+	{
+		$this->_showXmlMedia = $showXmlMedia;
+
+		return $this;
+	}
+
+	/**
 	 * Get XML for entity and children entities
 	 * @return string
 	 * @hostcms-event structure.onBeforeRedeclaredGetXml
@@ -906,6 +946,16 @@ class Structure_Model extends Core_Entity
 
 			// Add all values
 			$this->addEntities($aProperty_Values);
+		}
+
+		if ($this->_showXmlMedia && Core::moduleIsActive('media'))
+		{
+			$aEntities = Media_Item_Controller::getValues($this);
+			foreach ($aEntities as $oEntity)
+			{
+				$oMedia_Item = $oEntity->Media_Item;
+				$this->addEntity($oMedia_Item->setCDN(Core_Page::instance()->structureCDN));
+			}
 		}
 
 		return $this;

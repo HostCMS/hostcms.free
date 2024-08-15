@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Revision
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Revision_Controller
 {
@@ -30,16 +29,22 @@ class Revision_Controller
 	/**
 	 * Get revision
 	 * @param object $oModel model for revision
+	 * @param int $limit limit, default 20
+	 * @param array $aFields list of fields
 	 * @return array
 	 */
-	static public function getRevisions($oModel)
+	static public function getRevisions($oModel, $limit = 20, array $aFields = array())
 	{
 		$oRevisions = Core_Entity::factory('Revision');
 		$oRevisions->queryBuilder()
 			->where('revisions.model', '=', $oModel->getModelName())
 			->where('revisions.entity_id', '=', $oModel->getPrimaryKey())
+			->limit($limit)
 			->clearOrderBy()
 			->orderBy('revisions.datetime', 'DESC');
+
+		count($aFields)
+			&& call_user_func_array(array($oRevisions->queryBuilder()->clearSelect(), 'columns'), $aFields);
 
 		return $oRevisions->findAll(FALSE);
 	}

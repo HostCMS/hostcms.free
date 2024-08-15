@@ -5,7 +5,7 @@
 * @package HostCMS
 * @version 7.x
 * @author Hostmake LLC
-* @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2024, https://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -20,7 +20,7 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
 // Контроллер формы
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path('/admin/informationsystem/item/import/index.php')
 ;
@@ -29,7 +29,7 @@ ob_start();
 
 $oAdmin_View = Admin_View::create();
 $oAdmin_View
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->pageTitle(Core::_('Informationsystem_Item.import'));
 
 // Первая крошка на список магазинов
@@ -303,9 +303,46 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 {
 	if (!$oUserCurrent->read_only && !$oUserCurrent->only_access_my_own)
 	{
-		$sFileName = isset($_FILES['csv_file']) && intval($_FILES['csv_file']['size']) > 0
+		/*$sFileName = isset($_FILES['csv_file']) && intval($_FILES['csv_file']['size']) > 0
 			? $_FILES['csv_file']['tmp_name']
-			: CMS_FOLDER . Core_Array::getPost('alternative_file_pointer');
+			: CMS_FOLDER . Core_Array::getPost('alternative_file_pointer');*/
+
+		$sFileName = $sTmpPath = NULL;
+
+		// Uploaded File
+		if (isset($_FILES['csv_file']) && intval($_FILES['csv_file']['size']) > 0)
+		{
+			$sFileName = $_FILES['csv_file']['tmp_name'];
+		}
+		// External file
+		else
+		{
+			$altFile = Core_Array::getPost('alternative_file_pointer');
+
+			if (strpos($altFile, 'http://') === 0 || strpos($altFile, 'https://') === 0)
+			{
+				$Core_Http = Core_Http::instance('curl')
+					->url($altFile)
+					->port(80)
+					->timeout(20)
+					->execute();
+
+				$aHeaders = $Core_Http->parseHeaders();
+
+				if ($Core_Http->parseHttpStatusCode($aHeaders['status']) != 200)
+				{
+					Core_Message::show('Wrong status: ' . htmlspecialchars($aHeaders['status']), "error");
+				}
+
+				$sFileName = $sTmpPath = tempnam(CMS_FOLDER . TMP_DIR, 'CSV');
+
+				Core_File::write($sTmpPath, $Core_Http->getDecompressedBody());
+			}
+			else
+			{
+				$sFileName = CMS_FOLDER . $altFile;
+			}
+		}
 
 		if (Core_File::isFile($sFileName) && is_readable($sFileName))
 		{
@@ -338,7 +375,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 						break;
 					}
 
-					$sLimiter = Core_Array::getPost('import_stop');
+					$sLimiter = Core_Array::getPost('limiter');
 
 					switch ($sLimiter)
 					{
@@ -347,7 +384,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 							$sLimiter = '"';
 						break;
 						case 1:
-							$sLimiter = Core_Array::getPost('import_stop_text');
+							$sLimiter = Core_Array::getPost('limiter');
 						break;
 					}
 
@@ -437,8 +474,8 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('informationsystem_group_id')->value($oInformationsystem_Group->id))
 							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('csv_filename')->value($sTmpFileName))
 							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('import_separator')->value($sSeparator))
-							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('import_stop')->value($sLimiter))
-							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('firstlineheader')->value(isset($_POST['import_name_field_f']) ? 1 : 0))
+							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('limiter')->value($sLimiter))
+							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('firstlineheader')->value(isset($_POST['firstlineheader']) ? 1 : 0))
 							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('locale')->value($sLocale))
 							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('import_max_time')->value(Core_Array::getPost('import_max_time')))
 							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('import_max_count')->value(Core_Array::getPost('import_max_count')))
@@ -507,7 +544,7 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 
 			$iNextSeekPosition = 0;
 
-			$sCsvFilename = Core_Array::getPost('csv_filename');
+			$sCsvFilename = basename(Core_Array::getPost('csv_filename', '', 'str'));
 
 			$Informationsystem_Item_Import_Csv_Controller
 				->file($sCsvFilename)
@@ -516,7 +553,7 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 				->time(Core_Array::getPost('import_max_time'))
 				->step(Core_Array::getPost('import_max_count'))
 				->separator(Core_Array::getPost('import_separator'))
-				->limiter(Core_Array::getPost('import_stop'))
+				->limiter(Core_Array::getPost('limiter'))
 				->imagesPath(Core_Array::getPost('import_load_files_path'))
 				->importAction(Core_Array::getPost('import_action_items'))
 				->searchIndexation(Core_Array::getPost('search_event_indexation'))
@@ -525,7 +562,7 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 
 			if (Core_Array::getPost('firstlineheader', 0))
 			{
-				$fInputFile = fopen($Informationsystem_Item_Import_Csv_Controller->file, 'rb');
+				$fInputFile = fopen($Informationsystem_Item_Import_Csv_Controller->getFilePath(), 'rb');
 				@fgetcsv($fInputFile, 0, $Informationsystem_Item_Import_Csv_Controller->separator, $Informationsystem_Item_Import_Csv_Controller->limiter);
 				$iNextSeekPosition = ftell($fInputFile);
 				fclose($fInputFile);
@@ -556,6 +593,8 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 			$sRedirectAction = "";
 			Core_Message::show(Core::_('Informationsystem_Item.msg_download_complete'));
 			showStat($Informationsystem_Item_Import_Csv_Controller);
+
+			$Informationsystem_Item_Import_Csv_Controller->deleteUploadedFile();
 		}
 
 		$oAdmin_Form_Entity_Form->add(
@@ -591,26 +630,38 @@ else
 		'maxCount' => 100
 	);
 
-	$oAdmin_Form_Entity_Form->add($oMainTab
-		->add(
+	$oAdmin_Form_Entity_Form->add(
+		$oMainTab->add(
 			Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('File')
 				->name("csv_file")
 				->caption(Core::_('Informationsystem_Item.import_list_file'))
 				->largeImage(array('show_params' => FALSE))
 				->smallImage(array('show' => FALSE))
-				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')))
-				->add(
-					Admin_Form_Entity::factory('Input')
-						->name("alternative_file_pointer")
-						->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
-						->caption(Core::_('Informationsystem_Item.alternative_file_pointer_form_import'))
-				)
+				->divAttr(array('class' => 'col-xs-12 col-sm-6 col-md-5'))
+			)
+			->add(
+				Admin_Form_Entity::factory('Input')
+					->name("alternative_file_pointer")
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-5'))
+					->caption(Core::_('Informationsystem_Item.alternative_file_pointer_form_import'))
+			)
+			->add(Admin_Form_Entity::factory('Select')
+				->name("import_encoding")
+				->options(array(
+					'UTF-8' => Core::_('Informationsystem_Item.input_file_encoding1'),
+					'Windows-1251' => Core::_('Informationsystem_Item.input_file_encoding0')
+				))
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-md-2'))
+				->caption(Core::_('Informationsystem_Item.import_encoding'))
+			)
 		)
 		->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
-			->name("import_name_field_f")
+			->name("firstlineheader")
 			->caption(Core::_('Informationsystem_Item.import_list_name_field_f'))
-			->value(TRUE)
-			->divAttr(array('id' => 'import_name_field_f','class' => 'form-group col-xs-12'))))
+			->value(1)
+			->checked(TRUE)
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 ')))
+		)
 		->add(Admin_Form_Entity::factory('Div')->class('row')
 			->add(Admin_Form_Entity::factory('Radiogroup')
 				->radio(array(
@@ -620,56 +671,53 @@ else
 					Core::_('Informationsystem_Item.import_separator4')
 				))
 				->ico(array(
-					'fa-asterisk',
-					'fa-asterisk',
-					'fa-asterisk',
-					'fa-asterisk'
+					'fa-solid fa-asterisk fa-fw',
+					'fa-solid fa-asterisk fa-fw',
+					'fa-solid fa-asterisk fa-fw',
+					'fa-solid fa-asterisk fa-fw'
 				))
 				->caption(Core::_('Informationsystem_Item.import_separator'))
-				->divAttr(array('class' => 'no-padding-right form-group col-xs-10 col-sm-9', 'id' => 'import_separator'))
+				->divAttr(array('class' => 'no-padding-right form-group col-xs-10 col-sm-9 rounded-radio-group', 'id' => 'import_separator'))
 				->name('import_separator')
 				// Разделитель ';'
-				->value(1))
-			->add(Admin_Form_Entity::factory('Code')
-				->html("<script>$(function() {
-					$('#{$windowId} #import_separator').buttonset();
-				});</script>"))
-			->add(Admin_Form_Entity::factory('Input')
-				->name("import_separator_text")
-				->caption('&nbsp;')
-				->divAttr(array('id' => 'import_separator_text','class' => 'no-padding-left form-group col-xs-1'))))
-		->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Radiogroup')
-			->radio(array(
-				Core::_('Informationsystem_Item.import_stop1'),
-				Core::_('Informationsystem_Item.import_stop2')
-			))
-			->ico(array(
-				'fa-quote-right',
-				'fa-bolt'
-			))
-			->caption(Core::_('Informationsystem_Item.import_stop'))
-			->name('import_stop')
-			->divAttr(array('class' => 'no-padding-right form-group col-xs-10 col-sm-9', 'id' => 'import_stop')))
-			->add(Admin_Form_Entity::factory('Code')
-			->html("<script>$(function() {
-				$('#{$windowId} #import_stop').buttonset();
-			});</script>"))
-			->add(Admin_Form_Entity::factory('Input')
-			->name("import_stop_text")
-			->caption('&nbsp;')
-			->divAttr(array('id' => 'import_stop_text','class' => 'no-padding-left form-group col-xs-1'))))
-		->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Select')
-			->name("import_encoding")
-			->options(array(
-				'UTF-8' => Core::_('Informationsystem_Item.input_file_encoding1'),
-				'Windows-1251' => Core::_('Informationsystem_Item.input_file_encoding0')
-			))
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6', 'id' => 'import_encoding'))
-			->caption(Core::_('Informationsystem_Item.import_encoding')))
+				->value(1)
+				->add(
+					Admin_Form_Entity::factory('Input')
+						->name("import_separator_text")
+						//->caption('&nbsp;')
+						->size(3)
+						->divAttr(array('class' => 'form-group d-inline-block margin-left-10'))
+				)
+			)
+		)
+		->add(Admin_Form_Entity::factory('Div')->class('row')->add(
+				Admin_Form_Entity::factory('Radiogroup')
+					->radio(array(
+						Core::_('Informationsystem_Item.limiter1'),
+						Core::_('Informationsystem_Item.limiter2')
+					))
+					->ico(array(
+						'fa-solid fa-quote-right fa-fw',
+						'fa-solid fa-bolt fa-fw'
+					))
+					->caption(Core::_('Informationsystem_Item.limiter'))
+					->name('limiter')
+					->divAttr(array('class' => 'no-padding-right form-group col-xs-10 col-sm-9 rounded-radio-group'))
+					->add(
+						Admin_Form_Entity::factory('Input')
+							->name("limiter")
+							//->caption('&nbsp;')
+							->size(3)
+							->divAttr(array('class' => 'form-group d-inline-block margin-left-10'))
+					)
+			)
+		)
+		->add(Admin_Form_Entity::factory('Div')->class('row')
 			->add(Admin_Form_Entity::factory('Select')
 			->name("informationsystem_groups_parent_id")
 			->options(array(' … ') + Informationsystem_Item_Controller_Edit::fillInformationsystemGroup($oInformationsystem->id))
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
+			->filter(TRUE)
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-12'))
 			->caption(Core::_('Informationsystem_Item.import_parent_group'))
 			->value($oInformationsystem_Group->id)))
 		->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Input')
@@ -684,13 +732,13 @@ else
 					3 => Core::_('Informationsystem_Item.import_action_items0')
 				))
 				->ico(array(
-					1 => 'fa-refresh',
-					2 => 'fa-ban',
-					3 => 'fa-trash',
+					1 => 'fa-solid fa-refresh fa-fw',
+					2 => 'fa-solid fa-ban fa-fw',
+					3 => 'fa-solid fa-trash fa-fw',
 				))
 				->caption(Core::_('Informationsystem_Item.import_action_items'))
 				->name('import_action_items')
-				->divAttr(array('id' => 'import_action_items','class' => 'form-group col-xs-12'))
+				->divAttr(array('id' => 'import_action_items','class' => 'form-group col-xs-12 rounded-radio-group'))
 				->value(1)
 				->onclick("if (this.value == 3) { res = confirm('" . Core::_('Informationsystem_Item.empty_informationsystem') . "'); if (!res) { return false; } } ")
 			)
@@ -711,12 +759,12 @@ else
 			->name("import_max_time")
 			->caption(Core::_('Informationsystem_Item.import_max_time'))
 			->value($aConfig['maxTime'])
-			->divAttr(array('id' => 'import_max_time', 'class' => 'form-group col-xs-12 col-sm-6')))
+			->divAttr(array('id' => 'import_max_time', 'class' => 'form-group col-xs-12 col-sm-6 col-md-3')))
 			->add(Admin_Form_Entity::factory('Input')
 			->name("import_max_count")
 			->caption(Core::_('Informationsystem_Item.import_max_count'))
 			->value($aConfig['maxCount'])
-			->divAttr(array('id' => 'import_max_count', 'class' => 'form-group col-xs-12 col-sm-6')))))
+			->divAttr(array('id' => 'import_max_count', 'class' => 'form-group col-xs-12 col-sm-6 col-md-3')))))
 	;
 
 	$sOnClick = $oAdmin_Form_Controller->getAdminSendForm('show_form');

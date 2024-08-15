@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Admin_Form_Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -194,7 +193,7 @@ class Admin_Form_Field_Controller_Edit extends Admin_Form_Action_Controller_Type
 
 		$oMainTab->move($this->getField('format'), $oMainRow2);
 
-		$oMainTab->move($this->getField('allow_filter')->divAttr(array('class' => 'form-group col-xs-12 col-md-4')), $oMainRow7);
+		$oMainTab->move($this->getField('show_by_default')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow7);
 		$oMainTab->move($this->getField('allow_sorting')->divAttr(array('class' => 'form-group col-xs-12 col-md-4')), $oMainRow7);
 		$oMainTab->move($this->getField('editable')->divAttr(array('class' => 'form-group col-xs-12 col-md-4')), $oMainRow7);
 
@@ -220,6 +219,9 @@ class Admin_Form_Field_Controller_Edit extends Admin_Form_Action_Controller_Type
 			->move($this->getField('onclick'), $oMainRow5)
 			->move($this->getField('list'), $oMainRow6);
 
+		$oMainTab->move($this->getField('allow_filter')->divAttr(array('class' => 'form-group col-xs-12 col-md-4 margin-top-21')), $oMainRow8);
+		$oMainTab->move($this->getField('filter_condition')->divAttr(array('class' => 'form-group col-xs-12 col-md-4 margin-top-21')), $oMainRow8);
+
 		$oMainTab->delete($this->getField('filter_type'));
 		$oMainRow8->add(
 			Admin_Form_Entity::factory('Select')
@@ -232,6 +234,7 @@ class Admin_Form_Field_Controller_Edit extends Admin_Form_Action_Controller_Type
 				->caption(Core::_('Admin_Form_Field.filter_type'))
 				->divAttr(array('class' => 'form-group col-xs-12 col-md-4'))
 		);
+
 
 		$this->getField('class')
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));

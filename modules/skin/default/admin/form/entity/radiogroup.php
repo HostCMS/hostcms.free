@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Radiogroup extends Admin_Form_Entity_Input
 {
@@ -40,9 +39,13 @@ class Skin_Default_Admin_Form_Entity_Radiogroup extends Admin_Form_Entity_Input
 
 	/**
 	 * Executes the business logic.
+	 * @hostcms-event Skin_Default_Admin_Form_Entity_Radiogroup.onBeforeExecute
+	 * @hostcms-event Skin_Default_Admin_Form_Entity_Radiogroup.onAfterExecute
 	 */
 	public function execute()
 	{
+		Core_Event::notify(get_class($this) . '.onBeforeExecute', $this);
+
 		/*if (is_null($this->checked)
 			&& $this->value != 0)
 		{
@@ -84,7 +87,7 @@ class Skin_Default_Admin_Form_Entity_Radiogroup extends Admin_Form_Entity_Input
 			$sButtonsetId = 'buttonset_' . Core_Array::get($aDivAttr, 'id');
 			?><div id="<?php echo htmlspecialchars($sButtonsetId)?>"><?php
 		}
-		
+
 		?><span class="caption"><?php echo $this->caption?></span><?php
 
 		foreach ($this->radio as $key => $value)
@@ -111,7 +114,9 @@ class Skin_Default_Admin_Form_Entity_Radiogroup extends Admin_Form_Entity_Input
 				$('#<?php echo Core_Str::escapeJavascriptVariable($windowId)?> #<?php echo Core_Str::escapeJavascriptVariable($sButtonsetId)?>').buttonset();
 			});</script><?php
 		}
-		
+
 		?></div><?php
+
+		Core_Event::notify(get_class($this) . '.onAfterExecute', $this);
 	}
 }

@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Crm_Project_Entity_View extends Admin_Form_Controller_View
 {
@@ -341,10 +340,15 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 						$entityPath = '/admin/dms/document/index.php';
 					break;
 				}
+
+				$badge = isset($oObject->user_id) && $oObject->user_id
+					? '<img class="img-circle" src="' . $oObject->User->getAvatar() . '" width="30" height="30"/>'
+					: '<i class="' . $badge . '"></i>';
+
 				?>
 				<li class="timeline-inverted <?php echo $class?>">
 					<div class="timeline-badge <?php echo $color?>">
-						<i class="<?php echo $badge?>"></i>
+						<?php echo $badge?>
 					</div>
 					<div class="timeline-panel">
 						<div class="timeline-header">
@@ -377,7 +381,7 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 													? $Admin_Word_Value->name
 													: '';
 
-												$additionalParams = "hostcms[checked][0][{$oEntity->id}]=1&crm_project_id={$crm_project_id}";
+												$additionalParams = "hostcms[checked][0][{$oEntity->id}]=1&crm_project_id={$crm_project_id}&secret_csrf=" . Core_Security::getCsrfToken();
 
 												$href = $oAdmin_Form_Controller->getAdminActionLoadHref($entityPath, $oAdmin_Form_Action->name, NULL, 0, intval($oEntity->id), $additionalParams, 10, 1, NULL, NULL, 'list');
 
@@ -409,7 +413,7 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 											: '';
 
 										$path = '/admin/crm/project/entity/index.php';
-										$additionalParams = "type={$oEntity->type}&entity_id={$oEntity->id}&crm_project_id={$crm_project_id}";
+										$additionalParams = "type={$oEntity->type}&entity_id={$oEntity->id}&crm_project_id={$crm_project_id}&secret_csrf=" . Core_Security::getCsrfToken();
 
 										$href = $oAdmin_Form_Controller->getAdminActionLoadHref($path, $oAdmin_Form_Action->name, NULL, 0, intval($oEntity->id), $additionalParams, 10, 1, NULL, NULL, 'entity');
 

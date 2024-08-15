@@ -1,6 +1,7 @@
 <?php
 
 return array(
+	'model_name' => 'Боти, модулі',
 	'settings_modal_title' => 'Налаштування бота "%s"',
 	'delay_type0' => 'відразу',
 	'delay_type1' => 'через',

@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Delivery conditions',
@@ -33,6 +32,7 @@ return array(
 	'shop_delivery_id' => "Delivery condition belongs to",
 	'id' => 'ID',
 	'edit_success' => "Delivery condition information added successfully!",
+	'copy_success' => 'Information has been copied successfully!',
 	'shop_measure_not_checked' => "The measure is not selected for shop",
 	'markDeleted_success' => "Delivery conditions deleted successfully!",
 	'import_button' => "Import",

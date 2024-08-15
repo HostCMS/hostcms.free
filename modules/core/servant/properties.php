@@ -24,8 +24,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Servant_Properties
 {
@@ -215,11 +214,27 @@ class Core_Servant_Properties
 
 		if (!empty($this->_allowedProperties))
 		{
-			foreach ($this->_allowedProperties as $key => $value)
+			foreach ($this->_allowedProperties as $propertyName)
 			{
-				$return[] = $key . '=' . (is_array($this->$value)
-					? Core_Array::implode('', $this->$value)
-					: $this->$value);
+				// before is_array() cause array() may be static class method call array('MyClass', 'myCallbackMethod')
+				if (is_callable($this->$propertyName, FALSE, $callableName))
+				{
+					$value = $callableName;
+				}
+				elseif (is_array($this->$propertyName))
+				{
+					$value = Core_Array::implode('', $this->$propertyName);
+				}
+				elseif (is_resource($this->$propertyName))
+				{
+					$value = get_resource_type($this->$propertyName);
+				}
+				else
+				{
+					$value = $this->$propertyName;
+				}
+
+				$return[] = $propertyName . '=' . $value;
 			}
 
 			return implode(",", $return);

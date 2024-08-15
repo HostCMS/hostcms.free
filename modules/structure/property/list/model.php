@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Structure
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Structure_Property_List_Model extends Site_Model
 {
@@ -138,7 +137,7 @@ class Structure_Property_List_Model extends Site_Model
 	 */
 	public function getLargeFileName(Core_Entity $object, $oFileValue, $originalFileName)
 	{
-		return 'structure_property_image_' . $oFileValue->id . '.' . Core_File::getExtension($originalFileName);
+		return Property_Controller::getLargeFileName($object, $oFileValue, $originalFileName);
 	}
 
 	/**
@@ -150,6 +149,6 @@ class Structure_Property_List_Model extends Site_Model
 	 */
 	public function getSmallFileName(Core_Entity $object, $oFileValue, $originalFileName)
 	{
-		return 'structure_property_small_image_' . $oFileValue->id . '.' . Core_File::getExtension($originalFileName);
+		return Property_Controller::getSmallFileName($object, $oFileValue, $originalFileName);
 	}
 }

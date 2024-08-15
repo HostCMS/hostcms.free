@@ -44,4 +44,6 @@ return array(
 	'form_event_menu_admin_form_action' => 'Список действий формы "%s"',
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
+
+	'new_window' => 'Открывать в новом окне',
 );

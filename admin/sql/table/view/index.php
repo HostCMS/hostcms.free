@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -17,7 +16,7 @@ $sAdminFormAction = '/admin/sql/table/view/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
-$tableName = preg_replace('/[^A-Za-z0-9$_]/', '', Core_Array::getRequest('table'));
+$tableName = Sql_Controller::sanitizeIdentifiers(Core_Array::getRequest('table'));
 
 $aAdmin_Form_Fields = array();
 if (strlen($tableName))
@@ -44,6 +43,7 @@ if (strlen($tableName))
 		$oAdmin_Form_Field->filter_type = 0;
 		$oAdmin_Form_Field->allow_filter = 1;
 		$oAdmin_Form_Field->allow_sorting = 1;
+		$oAdmin_Form_Field->show_by_default = 1;
 		$oAdmin_Form_Field->view = 0;
 		$oAdmin_Form_Field->editable = 1;
 		$oAdmin_Form_Field->ico = '';
@@ -62,6 +62,12 @@ if (strlen($tableName))
 					$oAdmin_Form_Field->width = $aRow['defined_max_length'] <= 3
 						? '35px'
 						: ($aRow['defined_max_length'] * 10) . 'px';
+				}
+				else
+				{
+					$oAdmin_Form_Field->width = $aRow['defined_max_length'] <= 10 && $aRow['defined_max_length'] > 0
+						? ($aRow['defined_max_length'] * 10) . 'px'
+						: '95px';
 				}
 			break;
 		}
@@ -82,6 +88,11 @@ if (strlen($tableName))
 			break;
 		}
 
+		if ($aRow['type'] == 'int')
+		{
+			$oAdmin_Form_Field->filter_condition = 1;
+		}
+
 		//$oAdmin_Form_Field->class = $aRow['max_length'] > 1000 ? 'truncated' : '';
 		$oAdmin_Form_Field->class = 'truncated' . ($aRow['key'] == 'PRI' ? ' semi-bold' : '');
 		$aAdmin_Form_Fields[$oAdmin_Form_Field->id] = $oAdmin_Form_Field;
@@ -91,7 +102,7 @@ if (strlen($tableName))
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setAdminFormFields($aAdmin_Form_Fields)
 	->setUp()
 	->path($sAdminFormAction)

@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Item_Discount_Model extends Core_Entity
 {
@@ -205,6 +204,17 @@ class Shop_Item_Discount_Model extends Core_Entity
 			->value($count < 100 ? $count : '∞')
 			->title($count)
 			->execute();
+	}
+
+	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function imgBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return '<i class="fa-solid fa-box icon-separator"></i>';
 	}
 
 	/**

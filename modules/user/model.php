@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage User
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class User_Model extends Core_Entity
 {
@@ -42,6 +41,7 @@ class User_Model extends Core_Entity
 	protected $_hasMany = array(
 		'admin_form_setting' => array(),
 		'admin_form_autosave' => array(),
+		'admin_form_field_setting' => array(),
 		'company_post' => array('through' => 'company_department_post_user'),
 		'company_department' => array('through' => 'company_department_post_user'),
 		'company_department_post_user' => array(),
@@ -91,6 +91,7 @@ class User_Model extends Core_Entity
 		'deal_step_user' => array(),
 		'user_note' => array(),
 		'user_setting' => array(),
+		'user_session' => array(),
 		'user_message' => array(),
 		'siteuser_user' => array(),
 		'calendar_caldav_user' => array(),
@@ -108,6 +109,8 @@ class User_Model extends Core_Entity
 		'shop_warehouse_invoice' => array(),
 		'shop_warehouse_supply' => array(),
 		'shop_warehouse_purchasereturn' => array(),
+		'telephony' => array(),
+		'telephony_line' => array(),
 	);
 
 	/**
@@ -187,8 +190,8 @@ class User_Model extends Core_Entity
 	{
 		Core_Session::hasSessionId() && Core_Session::start();
 
-		if (isset($_SESSION['current_users_id']) && isset($_SESSION['valid_user'])
-			&& isset($_SESSION['date_user']) && isset($_SESSION['is_superuser'])
+		if (isset($_SESSION['current_users_id']) && $_SESSION['current_users_id'] > 0
+			&& isset($_SESSION['valid_user']) && isset($_SESSION['date_user']) && isset($_SESSION['is_superuser'])
 		)
 		{
 			$oUser = $this->find(intval($_SESSION['current_users_id']));
@@ -417,17 +420,6 @@ class User_Model extends Core_Entity
 	}
 
 	/**
-	 * Get user avatar
-	 * @return string
-	 */
-	public function getAvatar()
-	{
-		return $this->image != '' && strlen($this->image)
-			? $this->getImageHref()
-			: "/admin/user/index.php?loadUserAvatar={$this->id}";
-	}
-
-	/**
 	 * Get image href
 	 * @return string
 	 */
@@ -525,6 +517,7 @@ class User_Model extends Core_Entity
 		$this->User_Notes->deleteAll(FALSE);
 		$this->User_Settings->deleteAll(FALSE);
 		$this->Admin_Form_Settings->deleteAll(FALSE);
+		$this->Admin_Form_Field_Settings->deleteAll(FALSE);
 		$this->Admin_Form_Autosaves->deleteAll(FALSE);
 
 		// Helpdesks
@@ -615,10 +608,17 @@ class User_Model extends Core_Entity
 			$this->Sql_User_Tabs->deleteAll(FALSE);
 		}
 
+		if (Core::moduleIsActive('telephony'))
+		{
+			$this->Telephonies->deleteAll(FALSE);
+			$this->Telephony_Lines->deleteAll(FALSE);
+		}
+
 		$this->User_Bookmarks->deleteAll(FALSE);
 		$this->User_Worktimes->deleteAll(FALSE);
 		$this->User_Workdays->deleteAll(FALSE);
 		$this->User_Absences->deleteAll(FALSE);
+		$this->User_Sessions->deleteAll(FALSE);
 
 		// Удаляем директорию
 		$this->deleteDir();
@@ -667,7 +667,7 @@ class User_Model extends Core_Entity
 	 */
 	public function getLastActivity()
 	{
-		return !is_null($this->last_activity)
+		return !is_null($this->last_activity) && $this->last_activity != '0000-00-00 00:00:00'
 			? time() - Core_Date::sql2timestamp($this->last_activity)
 			: NULL;
 	}
@@ -761,6 +761,17 @@ class User_Model extends Core_Entity
 	}
 
 	/**
+	 * Get user avatar
+	 * @return string
+	 */
+	public function getAvatar()
+	{
+		return $this->image != '' && strlen($this->image)
+			? $this->getImageHref()
+			: "/admin/user/index.php?loadUserAvatar={$this->id}";
+	}
+
+	/**
 	 * Backend
 	 * @return self
 	 */
@@ -781,6 +792,52 @@ class User_Model extends Core_Entity
 				);
 
 			$oCore_Html_Entity_Div->execute();
+		}
+	}
+
+	/**
+	 * Get avatar with name
+	 * @return string|NULL
+	 */
+	public function getAvatarWithName()
+	{
+		if ($this->id)
+		{
+			$oCurrentUser = Core_Auth::getCurrentUser();
+
+			$link = $oCurrentUser && !$oCurrentUser->only_access_my_own
+				? '<a data-popover="hover" data-user-id="' . $this->id . '" style="color: inherit" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][' . $this->id . ']=1" onclick="$.modalLoad({path: \'/admin/user/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $this->id . ']=1\', windowId: \'id_content\', width: \'90%\'}); return false">' . htmlspecialchars($this->getFullName()) . '</a>'
+				: '<span>' . htmlspecialchars($this->getFullName()) . '</span>';
+
+			return '<div class="contracrot">
+				<div class="user-image"><img class="contracrot-ico" src="' . $this->getAvatar() . '"></div>
+				<div class="user-name">' . $link . '</div>
+			</div>';
+		}
+
+		return NULL;
+	}
+
+	/**
+	 * Show avatar with name
+	 */
+	public function showAvatarWithName()
+	{
+		return $this->getAvatarWithName();
+	}
+
+	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 */
+	public function fullnameBadge()
+	{
+		if ($this->dismissed)
+		{
+			$dismissedColor = '#ed4e2a';
+
+			?><span class="badge badge-round badge-max-width margin-left-5" title="<?php echo Core::_('Mail.create_leads')?>" style="border-color: <?php echo $dismissedColor?>; color: <?php echo Core_Str::hex2darker($dismissedColor, 0.2)?>; background-color:<?php echo Core_Str::hex2lighter($dismissedColor, 0.88)?>"><?php echo Core::_('User.dismissed')?></span><?php
 		}
 	}
 
@@ -808,7 +865,7 @@ class User_Model extends Core_Entity
 
 		$lng = $isOnline ? 'user_active' : 'user_last_activity';
 
-		$sStatusTitle = !is_null($this->last_activity)
+		$sStatusTitle = !is_null($this->last_activity) && $this->last_activity != '0000-00-00 00:00:00'
 			? Core::_('User.' . $lng, Core_Date::sql2datetime($this->last_activity))
 			: '';
 
@@ -1154,37 +1211,6 @@ class User_Model extends Core_Entity
 	}
 
 	/**
-	 * Get avatar with name
-	 * @return string|NULL
-	 */
-	public function getAvatarWithName()
-	{
-		if ($this->id)
-		{
-			$oCurrentUser = Core_Auth::getCurrentUser();
-
-			$link = $oCurrentUser && !$oCurrentUser->only_access_my_own
-				? '<a data-popover="hover" data-user-id="' . $this->id . '" style="color: inherit" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][' . $this->id . ']=1" onclick="$.modalLoad({path: \'/admin/user/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $this->id . ']=1\', windowId: \'id_content\', width: \'90%\'}); return false">' . htmlspecialchars($this->getFullName()) . '</a>'
-				: '<span>' . htmlspecialchars($this->getFullName()) . '</span>';
-
-			return '<div class="contracrot">
-				<div class="user-image"><img class="contracrot-ico" src="' . $this->getAvatar() . '"></div>
-				<div class="user-name">' . $link . '</div>
-			</div>';
-		}
-
-		return NULL;
-	}
-
-	/**
-	 * Show avatar with name
-	 */
-	public function showAvatarWithName()
-	{
-		return $this->getAvatarWithName();
-	}
-
-	/**
 	 * Get XML for entity and children entities
 	 * @return string
 	 * @hostcms-event user.onBeforeRedeclaredGetXml
@@ -1222,9 +1248,9 @@ class User_Model extends Core_Entity
 
 		$this->clearXmlTags()
 			->addXmlTag('dir', '/' . $this->getHref())
-			->addXmlTag('last_activity', $this->last_activity == '0000-00-00 00:00:00'
-				? $this->last_activity
-				: Core_Date::strftime($oSite->date_time_format, Core_Date::sql2timestamp($this->last_activity))
+			->addXmlTag('last_activity', !is_null($this->last_activity) && $this->last_activity != '0000-00-00 00:00:00'
+				? Core_Date::strftime($oSite->date_time_format, Core_Date::sql2timestamp($this->last_activity))
+				: $this->last_activity
 			)
 			->addXmlTag('birthday', $this->birthday == '0000-00-00'
 				? $this->birthday
@@ -1326,6 +1352,42 @@ class User_Model extends Core_Entity
 	}
 
 	/**
+	 * Show in line
+	 * @param integer $imageSize
+	 */
+	public function showInLine($imageSize = 20)
+	{
+		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')
+			->class('avatar-user avatar-user-users')
+			->title($this->getFullName());
+
+		$oCore_Html_Entity_Div
+			->add(
+				Core_Html_Entity::factory('A')
+					->href("/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][" . $this->id . "]=1")
+					->onclick("$.modalLoad({path: '/admin/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][" . $this->id . "]=1', windowId: 'id_content'}); return false")
+					->add(
+						Core_Html_Entity::factory('Img')
+							->src($this->getAvatar())
+							->width($imageSize)
+							->height($imageSize)
+					)
+			)
+			->add(
+				Core_Html_Entity::factory('A')
+					->href("/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][" . $this->id . "]=1")
+					->onclick("$.modalLoad({path: '/admin/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][" . $this->id . "]=1', windowId: 'id_content'}); return false")
+					->add(
+						Core_Html_Entity::factory('Span')
+						->value(htmlspecialchars($this->getFullName()))
+						->class('darkgray margin-left-5')
+					)
+			);
+
+		$oCore_Html_Entity_Div->execute();
+	}
+
+	/**
 	 * Show user link
 	 * @param string $windowId window id
 	 * @param string|NULL $content content
@@ -1338,7 +1400,7 @@ class User_Model extends Core_Entity
 
 		$oUser = Core_Auth::getCurrentUser();
 
-		?><a data-popover="hover" data-user-id="<?php echo $this->id?>" style="color: inherit" <?php
+		?><a data-popover="hover" data-container="body" data-user-id="<?php echo $this->id?>" style="color: inherit" <?php
 		if ($oUser->checkModuleAccess(array('user'), Core_Entity::factory('Site', CURRENT_SITE)))
 		{
 			?>href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][<?php echo $this->id?>]=1" onclick="$.modalLoad({path: '/admin/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $this->id?>]=1', windowId: '<?php echo $windowId?>', width: '<?php echo $width?>'}); return false"<?php

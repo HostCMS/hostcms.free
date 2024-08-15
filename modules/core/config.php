@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Config
 {
@@ -49,6 +48,24 @@ class Core_Config
 	}
 
 	/**
+	 * Config types
+	 * @var array
+	 */
+	protected $_type = array();
+
+	/**
+	 * Set config type, e.g. array('curl')
+	 * @param array $array
+	 * @return self
+	 */
+	public function type(array $array)
+	{
+		$this->_type = $array;
+
+		return $this;
+	}
+
+	/**
 	 * Get config, e.g. 'Core_Myconfig' requires modules/core/config/myconfig.php
 	 * @param string $name, e.g. 'Core_Myconfig'
 	 * @param mixed $defaultValue
@@ -67,6 +84,8 @@ class Core_Config
 
 		if (!isset($this->_values[$name]))
 		{
+			clearstatcache();
+
 			$path = $this->getPath($name);
 
 			$this->_values[$name] = Core_File::isFile($path)
@@ -76,6 +95,12 @@ class Core_Config
 
 		return $this->_values[$name];
 	}
+
+	/**
+	 * Defined constants
+	 * @var array
+	 */
+	protected $_definedConstants = array();
 
 	/**
 	 * Set config value
@@ -95,6 +120,10 @@ class Core_Config
 
 		// Create destination dir
 		Core_File::mkdir(dirname($path), CHMOD, TRUE);
+
+		// Категоризированный массив констант, используется для определения имени константы по числовому значению
+		!count($this->_definedConstants)
+			&& $this->_definedConstants = get_defined_constants(TRUE);
 
 		$content = "<?php\n\nreturn " . $this->_toString($value) . ";";
 
@@ -125,9 +154,10 @@ class Core_Config
 		$aConfig = explode('_', $name);
 		$sFileName = array_pop($aConfig);
 
-		$path = Core::$modulesPath;
-		$path .= implode(DIRECTORY_SEPARATOR, $aConfig) . DIRECTORY_SEPARATOR;
-		$path .= 'config' . DIRECTORY_SEPARATOR . $sFileName . '.php';
+		$path = Core::$modulesPath
+			. implode(DIRECTORY_SEPARATOR, $aConfig) . DIRECTORY_SEPARATOR
+			. 'config' . DIRECTORY_SEPARATOR . $sFileName . '.php';
+
 		$path = Core_File::pathCorrection($path);
 
 		return $path;
@@ -145,13 +175,45 @@ class Core_Config
 		{
 			$sTabs = str_repeat("\t", $level);
 
-			$aTmp = array();
-			foreach ($value as $tmpKey => $tmpValue)
+			if (Core_Array::isList($value))
 			{
-				$aTmp[] = $sTabs . $this->_escape($tmpKey) . " => " . $this->_toString($tmpValue, $level + 1);
+				$value = array_map(array($this, '_escape'), $value);
+				return "array(" . implode(", ", array_values($value)) . ")";
 			}
+			else
+			{
+				$aTmp = array();
+				foreach ($value as $tmpKey => $tmpValue)
+				{
+					$name = $this->_escape($tmpKey);
 
-			return "array(\n" . implode(",\n", $aTmp) . "\n" . str_repeat("\t", $level - 1) . ")";
+					if (is_numeric($tmpKey) && count($this->_type))
+					{
+						foreach ($this->_type as $configType)
+						{
+							if (isset($this->_definedConstants[$configType]))
+							{
+								// without escape, e.g. CURLOPT_PROXY not 'CURLOPT_PROXY'
+								$name = array_search($tmpKey, $this->_definedConstants[$configType]);
+								break;
+							}
+						}
+					}
+
+					if (in_array($tmpKey, array('dirMode', 'fileMode'), TRUE) && is_numeric($tmpValue))
+					{
+						$tmpValue = '0' . decoct($tmpValue);
+					}
+					else
+					{
+						$tmpValue = $this->_toString($tmpValue, $level + 1);
+					}
+
+					$aTmp[] = $sTabs . $name . " => " . $tmpValue;
+				}
+
+				return "array(\n" . implode(",\n", $aTmp) . "\n" . str_repeat("\t", $level - 1) . ")";
+			}
 		}
 		else
 		{
@@ -172,7 +234,16 @@ class Core_Config
 		}
 		elseif (is_string($value))
 		{
-			return "'" . str_replace("'", "\'", $value) . "'";
+			if (strpos($value, CMS_FOLDER) === 0)
+			{
+				$value = substr($value, strlen(CMS_FOLDER));
+				$prefix = 'CMS_FOLDER . ';
+			}
+			else
+			{
+				$prefix = '';
+			}
+			return "{$prefix}'" . str_replace("'", "\'", $value) . "'";
 		}
 		elseif (is_null($value))
 		{

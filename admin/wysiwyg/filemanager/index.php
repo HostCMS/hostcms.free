@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -20,7 +19,7 @@ $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title(Core::_('Wysiwyg_Filemanager.title'))
@@ -88,7 +87,8 @@ $oAdmin_Form_Controller->addExternalReplace('{cdir}', rawurlencode($cdir));
 $aConfig = Core_Config::instance()->get('wysiwyg_filemanager_config', array()) + array(
 	'thumbnails' => TRUE,
 	'parallelUploads' => 10,
-	'maxFilesize' => 5
+	'maxFilesize' => 5,
+	'reloadAfterUpload' => FALSE
 );
 
 // Хлебные крошки
@@ -150,7 +150,7 @@ if (!$oUser->read_only)
 		->action($sAdminFormAction)
 		->method('post')
 		->enctype('multipart/form-data')
-		->class('margin-top-40 margin-bottom-20')
+		->class('margin-top-10 margin-bottom-20')
 		// Load file
 		->add($oMainTabs)
 		;
@@ -171,24 +171,24 @@ if (!$oUser->read_only)
 			<script type="text/javascript">
 				$(function() {
 					$("#' . $windowId . ' #dropzone").dropzone({
-						url: "/admin/wysiwyg/filemanager/index.php?hostcms[action]=uploadFile&hostcms[checked][1][0]=1&cdir=' . rawurlencode($cdir) .'",
+						url: "/admin/wysiwyg/filemanager/index.php?hostcms[action]=uploadFile&hostcms[checked][1][0]=1&cdir=' . rawurlencode($cdir) . '&secret_csrf=' . Core_Security::getCsrfToken() . '",
 						parallelUploads: ' . $aConfig['parallelUploads'] . ',
 						maxFilesize: ' . $aConfig['maxFilesize'] . ',
 						paramName: "file",
 						uploadMultiple: true,
 						clickable: true,
 						init: function() {
-							this.on("thumbnail", function(file) {
+							this.on("addedfile", function(file) {
 								var thumbnail = $(file.previewElement);
 
 								thumbnail.on("click", function(){
-								window.opener.HostCMSFileManager.insertFile("' . rawurlencode(DIRECTORY_SEPARATOR . ltrim($cdir, DIRECTORY_SEPARATOR)) . '" + file.name); return false;
+									window.opener.HostCMSFileManager.insertFile("' . rawurlencode(DIRECTORY_SEPARATOR . ltrim($cdir, DIRECTORY_SEPARATOR)) . '" + file.name); return false;
 								});
-							});
-
+							});' .
+							(isset($aConfig['reloadAfterUpload']) && $aConfig['reloadAfterUpload'] ? '
 							this.on("queuecomplete", function() {
 								$("#' . $windowId . ' #admin_forms_apply_button").click();
-							});
+							});' : '') . '
 						}
 					});
 				});
@@ -233,6 +233,15 @@ if (!$oUser->read_only)
 
 	// Restore checked list
 	$oAdmin_Form_Controller->checked($aChecked);
+
+	$oCore_Html_Entity_Form_File->add(
+		Admin_Form_Entity::factory('Input')
+			->type('hidden')
+			->name('secret_csrf')
+			->value(Core_Security::getCsrfToken())
+			->divAttr(array('class' => ''))
+			->class('')
+	);
 
 	ob_start();
 	$oCore_Html_Entity_Form_File->execute();

@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Group_Model extends Core_Entity
 {
@@ -104,6 +103,7 @@ class Shop_Group_Model extends Core_Entity
 		'shop_tab' => array('through' => 'shop_tab_group'),
 		'shop_tab_group' => array(),
 		'media_shop_group' => array(),
+		'media_item' => array('through' => 'media_shop_group'),
 		'shop_bonus' => array('through' => 'shop_group_bonus'),
 		'shop_discount' => array('through' => 'shop_group_discount'),
 		'shop_group_discount' => array(),
@@ -245,7 +245,7 @@ class Shop_Group_Model extends Core_Entity
 		$oPreviousParent = clone $this;
 
 		$this->parent_id = $parent_id;
-		$this->save()->clearCache();
+		$this->checkDuplicatePath()->save()->clearCache();
 
 		// Fast filter
 		if ($this->Shop->filter)
@@ -545,7 +545,7 @@ class Shop_Group_Model extends Core_Entity
 	{
 		if (Core::moduleIsActive('search'))
 		{
-			Search_Controller::deleteSearchPage(3, 1, $this->id);
+			Search_Controller::deleteSearchPage($this->Shop->site_id, 3, 1, $this->id);
 		}
 
 		return $this;
@@ -560,6 +560,16 @@ class Shop_Group_Model extends Core_Entity
 		$this->clearCache();
 
 		return parent::markDeleted();
+	}
+
+	/**
+	 * Switch indexation mode
+	 * @return self
+	 */
+	public function changeIndexation()
+	{
+		$this->indexing = 1 - $this->indexing;
+		return $this->save();
 	}
 
 	/**
@@ -1236,6 +1246,24 @@ class Shop_Group_Model extends Core_Entity
 	}
 
 	/**
+	 * Show media in XML
+	 * @var boolean
+	 */
+	protected $_showXmlMedia = FALSE;
+
+	/**
+	 * Show properties in XML
+	 * @param mixed $showXmlProperties array of allowed properties ID or boolean
+	 * @return self
+	 */
+	public function showXmlMedia($showXmlMedia = TRUE)
+	{
+		$this->_showXmlMedia = $showXmlMedia;
+
+		return $this;
+	}
+
+	/**
 	 * Get XML for entity and children entities
 	 * @return string
 	 * @hostcms-event shop_group.onBeforeRedeclaredGetXml
@@ -1297,13 +1325,13 @@ class Shop_Group_Model extends Core_Entity
 			}
 		}
 
-		if (Core::moduleIsActive('media'))
+		if ($this->_showXmlMedia && Core::moduleIsActive('media'))
 		{
 			$aEntities = Media_Item_Controller::getValues($this);
 			foreach ($aEntities as $oEntity)
 			{
 				$oMedia_Item = $oEntity->Media_Item;
-				$this->addEntity($oMedia_Item);
+				$this->addEntity($oMedia_Item->setCDN(Core_Page::instance()->shopCDN));
 			}
 		}
 
@@ -1323,6 +1351,12 @@ class Shop_Group_Model extends Core_Entity
 					->setHref($this->getGroupHref())
 					->setDir($this->getGroupPath());
 			break;
+			case 5: // Элемент информационной системы
+			case 12: // Товар интернет-магазина
+			case 13: // Группа информационной системы
+			case 14: // Группа интернет-магазина
+				$oProperty_Value->showXmlMedia($this->_showXmlMedia);
+			break;
 			case 8:
 				$oProperty_Value->dateFormat($this->Shop->format_date);
 			break;
@@ -1340,9 +1374,13 @@ class Shop_Group_Model extends Core_Entity
 	{
 		if (Core::moduleIsActive('cache'))
 		{
-			Core_Cache::instance(Core::$mainConfig['defaultCache'])
-				->deleteByTag('shop_group_' . $this->id)
-				->deleteByTag('shop_group_' . $this->parent_id);
+			$oCache = Core_Cache::instance(Core::$mainConfig['defaultCache']);
+
+			$oCache->deleteByTag('shop_group_' . $this->id);
+
+			// When importing on the popular sites new data is permanently write for the root-group.
+			$this->parent_id != 0
+				&& $oCache->deleteByTag('shop_group_' . $this->parent_id);
 
 			// Static cache
 			$oSite = $this->Shop->Site;
@@ -1554,26 +1592,29 @@ class Shop_Group_Model extends Core_Entity
 	 */
 	public function discountsBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		$link = '/admin/shop/group/discount/index.php?shop_group_id={id}';
-		$onclick = "$.adminLoad({path: '/admin/shop/group/discount/index.php',additionalParams: 'shop_group_id={id}', windowId: '{windowId}'}); return false";
+		if (!$this->shortcut_id)
+		{
+			$link = '/admin/shop/group/discount/index.php?shop_group_id={id}';
+			$onclick = "$.adminLoad({path: '/admin/shop/group/discount/index.php',additionalParams: 'shop_group_id={id}', windowId: '{windowId}'}); return false";
 
-		$link = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $link);
-		$onclick = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $onclick);
+			$link = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $link);
+			$onclick = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $onclick);
 
-		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div');
+			$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div');
 
-		$oCore_Html_Entity_Div
-			->add(
-				Core_Html_Entity::factory('A')
-					->href($link)
-					->onclick($onclick)
-					->add(
-						Core_Html_Entity::factory('I')
-							->class('fa-regular fa-money-bill-1')
-					)
-			);
+			$oCore_Html_Entity_Div
+				->add(
+					Core_Html_Entity::factory('A')
+						->href($link)
+						->onclick($onclick)
+						->add(
+							Core_Html_Entity::factory('I')
+								->class('fa-regular fa-money-bill-1')
+						)
+				);
 
-		$oCore_Html_Entity_Div->execute();
+			$oCore_Html_Entity_Div->execute();
+		}
 	}
 
 	/**
@@ -1584,8 +1625,17 @@ class Shop_Group_Model extends Core_Entity
 	 */
 	public function discountsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		$countDiscount = $this->Shop_Group_Discounts->getCountBySiteuser_id(0);
-		$countBonuses = $this->Shop_Group_Bonuses->getCount();
+		$oShop_Group_Discounts = $this->Shop_Group_Discounts;
+		$oShop_Group_Discounts->queryBuilder()
+			->join('shop_discounts', 'shop_group_discounts.shop_discount_id', '=', 'shop_discounts.id')
+			->where('shop_discounts.deleted', '=', 0);
+		$countDiscount = $oShop_Group_Discounts->getCountBySiteuser_id(0);
+
+		$oShop_Group_Bonuses = $this->Shop_Group_Bonuses;
+		$oShop_Group_Bonuses->queryBuilder()
+			->join('shop_bonuses', 'shop_group_bonuses.shop_bonus_id', '=', 'shop_bonuses.id')
+			->where('shop_bonuses.deleted', '=', 0);
+		$countBonuses = $oShop_Group_Bonuses->getCount();
 
 		$count = $countDiscount + $countBonuses;
 

@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Printlayout
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Printlayout_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -83,7 +82,7 @@ class Printlayout_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oImageField = Admin_Form_Entity::factory('File')
 					->type('file')
-					->divAttr(array('class' => 'input-group col-xs-12 col-sm-6'))
+					//->divAttr(array('class' => 'col-xs-12'))
 					->name('file')
 					->id('file')
 					->caption(Core::_('Printlayout.file'))

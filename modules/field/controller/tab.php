@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Field
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Field_Controller_Tab
 {
@@ -904,7 +903,9 @@ class Field_Controller_Tab
 				->divAttr(array('class' => 'form-group col-xs-12 hidden'))
 				->options(array($value => $oList_Item->id));
 
-			$oAdmin_Form_Entity_ListItemsInput->value($oList_Item->value);
+			$oAdmin_Form_Entity_ListItemsInput
+				->placeholder(Core::_('Admin.autocomplete_placeholder'))
+				->value($oList_Item->value);
 
 			$oField->obligatory
 				&& $oAdmin_Form_Entity_ListItemsInput->format(array('minlen' => array('value' => 1)));
@@ -942,9 +943,10 @@ class Field_Controller_Tab
 					minLength: 1,
 					create: function() {
 						$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
-							return $('<li></li>')
+							return $('<li class=\"autocomplete-suggestion\"></li>')
 								.data('item.autocomplete', item)
-								.append($('<a>').text(item.label))
+								.append($('<div class=\"name\">').html($.escapeHtml(item.label)))
+								.append($('<div class=\"id\">').html('[' + $.escapeHtml(item.id) + ']'))
 								.appendTo(ul);
 						}
 
@@ -1025,11 +1027,13 @@ class Field_Controller_Tab
 				->divAttr(array('class' => 'form-group col-xs-12 hidden'))
 				->options(array($value => $oInformationsystem_Group->name));
 
-			$oAdmin_Form_Entity_InfGroupsInput->value(
-				!is_null($oInformationsystem_Group->id)
-					? $oInformationsystem_Group->name . ' [' . $oInformationsystem_Group->id . ']'
-					: ''
-			);
+			$oAdmin_Form_Entity_InfGroupsInput
+				->placeholder(Core::_('Admin.autocomplete_placeholder'))
+				->value(
+					!is_null($oInformationsystem_Group->id)
+						? $oInformationsystem_Group->name . ' [' . $oInformationsystem_Group->id . ']'
+						: ''
+				);
 		}
 
 		$oDiv_Group = Admin_Form_Entity::factory('Div')
@@ -1061,9 +1065,10 @@ class Field_Controller_Tab
 					minLength: 1,
 					create: function() {
 						$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
-							return $('<li></li>')
+							return $('<li class=\"autocomplete-suggestion\"></li>')
 								.data('item.autocomplete', item)
-								.append($('<a>').text(item.label))
+								.append($('<div class=\"name\">').html($.escapeHtml(item.label)))
+								.append($('<div class=\"id\">').html('[' + $.escapeHtml(item.id) + ']'))
 								.appendTo(ul);
 						}
 
@@ -1215,7 +1220,9 @@ class Field_Controller_Tab
 				->divAttr(array('class' => 'form-group col-xs-12 hidden'))
 				->options(array($value => $Informationsystem_Item->name));
 
-			$oAdmin_Form_Entity_InfItemsInput->value($Informationsystem_Item->name);
+			$oAdmin_Form_Entity_InfItemsInput
+				->placeholder(Core::_('Admin.autocomplete_placeholder'))
+				->value($Informationsystem_Item->name);
 		}
 
 		$oDiv_Group = Admin_Form_Entity::factory('Div')
@@ -1250,9 +1257,10 @@ class Field_Controller_Tab
 					minLength: 1,
 					create: function() {
 						$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
-							return $('<li></li>')
+							return $('<li class=\"autocomplete-suggestion\"></li>')
 								.data('item.autocomplete', item)
-								.append($('<a>').text(item.label))
+								.append($('<div class=\"name\">').html($.escapeHtml(item.label)))
+								.append($('<div class=\"id\">').html('[' + $.escapeHtml(item.id) + ']'))
 								.appendTo(ul);
 						}
 
@@ -1391,11 +1399,13 @@ class Field_Controller_Tab
 				->divAttr(array('class' => 'form-group col-xs-12 hidden'))
 				->options(array($value => $oShop_Group->name));
 
-			$oAdmin_Form_Entity_Shop_Groups_Input->value(
-				!is_null($oShop_Group->id)
-					? $oShop_Group->name . ' [' . $oShop_Group->id . ']'
-					: ''
-			);
+			$oAdmin_Form_Entity_Shop_Groups_Input
+				->placeholder(Core::_('Admin.autocomplete_placeholder'))
+				->value(
+					!is_null($oShop_Group->id)
+						? $oShop_Group->name . ' [' . $oShop_Group->id . ']'
+						: ''
+				);
 		}
 
 		$oDiv_Group = Admin_Form_Entity::factory('Div')
@@ -1429,9 +1439,10 @@ class Field_Controller_Tab
 				minLength: 1,
 				create: function() {
 					$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
-						return $('<li></li>')
+						return $('<li class=\"autocomplete-suggestion\"></li>')
 							.data('item.autocomplete', item)
-							.append($('<a>').text(item.label))
+							.append($('<div class=\"name\">').html($.escapeHtml(item.label)))
+							.append($('<div class=\"id\">').html('[' + $.escapeHtml(item.id) + ']'))
 							.appendTo(ul);
 					}
 
@@ -1578,7 +1589,9 @@ class Field_Controller_Tab
 				->divAttr(array('class' => 'form-group col-xs-12 hidden'))
 				->options(array($value => $Shop_Item->name));
 
-			$oAdmin_Form_Entity_Shop_Items_Input->value($Shop_Item->name);
+			$oAdmin_Form_Entity_Shop_Items_Input
+				->placeholder(Core::_('Admin.autocomplete_placeholder'))
+				->value($Shop_Item->name);
 		}
 
 		$oDiv_Group = Admin_Form_Entity::factory('Div')
@@ -1611,9 +1624,10 @@ class Field_Controller_Tab
 				minLength: 1,
 				create: function() {
 					$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
-						return $('<li></li>')
+						return $('<li class=\"autocomplete-suggestion\"></li>')
 							.data('item.autocomplete', item)
-							.append($('<a>').text(item.label))
+							.append($('<div class=\"name\">').html($.escapeHtml(item.label)))
+							.append($('<div class=\"id\">').html('[' + $.escapeHtml(item.id) + ']'))
 							.appendTo(ul);
 					}
 

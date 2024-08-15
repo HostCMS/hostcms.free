@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -17,8 +16,8 @@ $sAdminFormAction = '/admin/informationsystem/item/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
-$iInformationsystemId = intval(Core_Array::getGet('informationsystem_id'));
-$iInformationsystemGroupId = intval(Core_Array::getGet('informationsystem_group_id', 0));
+$iInformationsystemId = Core_Array::getGet('informationsystem_id', 0, 'int');
+$iInformationsystemGroupId = Core_Array::getGet('informationsystem_group_id', 0, 'int');
 
 $oInformationsystem_Group = Core_Entity::factory('Informationsystem_Group', $iInformationsystemGroupId);
 
@@ -31,7 +30,7 @@ $sFormTitle = $oInformationsystem_Group->id
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title($sFormTitle)
@@ -91,7 +90,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 	{
 		$aJSON[0] = array(
 			'id' => 0,
-			'label' => Core::_('Informationsystem_Item.root') . ' [0]'
+			'label' => Core::_('Informationsystem_Item.root')
 		);
 
 		$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
@@ -131,7 +130,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 			$aJSON[] = array(
 				'id' => $oInformationsystem_Group->id,
-				'label' => $sParents . ' [' . $oInformationsystem_Group->id . ']'
+				'label' => $sParents
 			);
 		}
 	}
@@ -157,7 +156,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 	{
 		$aJSON[0] = array(
 			'id' => 0,
-			'label' => Core::_('Informationsystem_Item.root') . ' [0]'
+			'label' => Core::_('Informationsystem_Item.root')
 		);
 
 		$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
@@ -194,7 +193,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 			$aJSON[] = array(
 				'id' => $oInformationsystem_Group->id,
-				'label' => $sParents . ' [' . $oInformationsystem_Group->id . ']'
+				'label' => $sParents
 			);
 		}
 	}
@@ -238,7 +237,7 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 		}
 		elseif (!is_null(Core_Array::getGet('show_group')))
 		{
-			$aJSON = array(
+			$aJSON[] = array(
 				'id' => 0,
 				'label' => Core::_('Informationsystem_Item.root')
 			);
@@ -268,7 +267,7 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 
 				$aJSON[] = array(
 					'id' => $oInformationsystem_Group->id,
-					'label' => $sParents . ' [' . $oInformationsystem_Group->id . ']',
+					'label' => $sParents
 				);
 			}
 		}
@@ -750,7 +749,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 );
 
 $oAdmin_Form_Dataset->addCondition(
-	array('select' => array('*', array(Core_QueryBuilder::expression("''"), 'datetime')))
+	array('select' => array('informationsystem_groups.*', array(Core_QueryBuilder::expression("''"), 'datetime')))
 )->addCondition(
 	array('where' => array('informationsystem_id', '=', $iInformationsystemId))
 )
@@ -762,7 +761,7 @@ if (strlen($sGlobalSearch))
 	{
 		$oAdmin_Form_Dataset
 			->addCondition(array('open' => array()))
-				->addCondition(array('where' => array('informationsystem_groups.id', '=', $sGlobalSearch)))
+				->addCondition(array('where' => array('informationsystem_groups.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
 				->addCondition(array('setOr' => array()))
 				->addCondition(array('where' => array('informationsystem_groups.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 				->addCondition(array('setOr' => array()))
@@ -801,7 +800,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 
 $oUser = Core_Auth::getCurrentUser();
 !$oUser->superuser && $oUser->only_access_my_own
-	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
+	&& $oAdmin_Form_Dataset->addUserConditions();
 
 $oAdmin_Form_Dataset
 	->addCondition(
@@ -818,7 +817,7 @@ if (strlen($sGlobalSearch))
 	{
 		$oAdmin_Form_Dataset
 			->addCondition(array('open' => array()))
-				->addCondition(array('where' => array('informationsystem_items.id', '=', $sGlobalSearch)))
+				->addCondition(array('where' => array('informationsystem_items.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
 				->addCondition(array('setOr' => array()))
 				->addCondition(array('where' => array('informationsystem_items.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 				->addCondition(array('setOr' => array()))

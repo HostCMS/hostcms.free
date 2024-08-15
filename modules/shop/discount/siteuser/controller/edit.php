@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Discount_Siteuser_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -35,7 +34,10 @@ class Shop_Discount_Siteuser_Controller_Edit extends Admin_Form_Action_Controlle
 
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'));
+			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
+			;
 
 		$oMainRow1->add(
 				Admin_Form_Entity::factory('Select')
@@ -120,6 +122,92 @@ class Shop_Discount_Siteuser_Controller_Edit extends Admin_Form_Action_Controlle
 
 		$oMainRow2->add(Admin_Form_Entity::factory('Code')->html($html));
 
+		$oGroupsSelect = Admin_Form_Entity::factory('Select')
+			->name('shop_groups_id[]')
+			->class('shop-groups')
+			->style('width: 100%')
+			->multiple('multiple')
+			->value(3)
+			->divAttr(array('class' => 'form-group col-xs-12'));
+
+		$this->addField($oGroupsSelect);
+		$oMainRow3->add($oGroupsSelect);
+
+		$html = '<script>
+		$(function(){
+			$("#' . $windowId . ' .shop-groups").select2({
+				dropdownParent: $("#' . $windowId . '"),
+				language: "' . Core_I18n::instance()->getLng() . '",
+				minimumInputLength: 1,
+				placeholder: "' . Core::_('Shop_Discount_Siteuser.select_group') . '",
+				tags: true,
+				allowClear: true,
+				multiple: true,
+				ajax: {
+					url: "/admin/shop/item/index.php?shortcuts&shop_id=' . $shop_id .'",
+					dataType: "json",
+					type: "GET",
+					processResults: function (data) {
+						var aResults = [];
+						$.each(data, function (index, item) {
+							aResults.push({
+								"id": item.id,
+								"text": item.text
+							});
+						});
+						return {
+							results: aResults
+						};
+					}
+				}
+			});
+		});</script>';
+
+		$oMainRow3->add(Admin_Form_Entity::factory('Code')->html($html));
+
+		$oProducersSelect = Admin_Form_Entity::factory('Select')
+			->name('shop_producers_id[]')
+			->class('shop-producers')
+			->style('width: 100%')
+			->multiple('multiple')
+			->value(3)
+			->divAttr(array('class' => 'form-group col-xs-12'));
+
+		$this->addField($oProducersSelect);
+		$oMainRow4->add($oProducersSelect);
+
+		$html = '<script>
+		$(function(){
+			$("#' . $windowId . ' .shop-producers").select2({
+				dropdownParent: $("#' . $windowId . '"),
+				language: "' . Core_I18n::instance()->getLng() . '",
+				minimumInputLength: 1,
+				placeholder: "' . Core::_('Shop_Discount_Siteuser.select_producer') . '",
+				tags: true,
+				allowClear: true,
+				multiple: true,
+				ajax: {
+					url: "/admin/shop/item/index.php?producers&shop_id=' . $shop_id .'",
+					dataType: "json",
+					type: "GET",
+					processResults: function (data) {
+						var aResults = [];
+						$.each(data, function (index, item) {
+							aResults.push({
+								"id": item.id,
+								"text": item.text
+							});
+						});
+						return {
+							results: aResults
+						};
+					}
+				}
+			});
+		});</script>';
+
+		$oMainRow4->add(Admin_Form_Entity::factory('Code')->html($html));
+
 		$this->title($this->_object->id
 			? Core::_('Shop_Discount_Siteuser.edit_title')
 			: Core::_('Shop_Discount_Siteuser.add_title')
@@ -156,10 +244,11 @@ class Shop_Discount_Siteuser_Controller_Edit extends Admin_Form_Action_Controlle
 		$siteuser_id = intval(Core_Array::get($this->_formValues, 'siteuser_id'));
 		$shop_discount_id = intval(Core_Array::get($this->_formValues, 'shop_discount_id'));
 
-		// parent::_applyObjectProperty();
+		//parent::_applyObjectProperty();
 
 		if ($siteuser_id)
 		{
+			// Товары
 			$aItemIds = Core_Array::getPost('shop_items_id', array());
 			!is_array($aItemIds) && $aItemIds = array();
 
@@ -181,6 +270,56 @@ class Shop_Discount_Siteuser_Controller_Edit extends Admin_Form_Action_Controlle
 					$oShop_Item_Discount->siteuser_id = $siteuser_id;
 					$oShop_Item_Discount->shop_item_id = $shop_item_id;
 					$oShop_Item_Discount->save();
+				}
+			}
+
+			// Группы
+			$aGroupIds = Core_Array::getPost('shop_groups_id', array());
+			!is_array($aGroupIds) && $aGroupIds = array();
+
+			foreach ($aGroupIds as $shop_group_id)
+			{
+				$oShop_Group_Discounts = Core_Entity::factory('Shop_Group_Discount');
+				$oShop_Group_Discounts->queryBuilder()
+					->where('shop_group_discounts.shop_group_id', '=', $shop_group_id)
+					->where('shop_group_discounts.shop_discount_id', '=', $shop_discount_id)
+					->where('shop_group_discounts.siteuser_id', '=', $siteuser_id)
+					->limit(1);
+
+				$oShop_Group_Discount = $oShop_Group_Discounts->getLast(FALSE);
+
+				if (is_null($oShop_Group_Discount))
+				{
+					$oShop_Group_Discount = Core_Entity::factory('Shop_Group_Discount');
+					$oShop_Group_Discount->shop_discount_id = $shop_discount_id;
+					$oShop_Group_Discount->siteuser_id = $siteuser_id;
+					$oShop_Group_Discount->shop_group_id = $shop_group_id;
+					$oShop_Group_Discount->save();
+				}
+			}
+
+			// Производители
+			$aProducerIds = Core_Array::getPost('shop_producers_id', array());
+			!is_array($aProducerIds) && $aProducerIds = array();
+
+			foreach ($aProducerIds as $shop_producer_id)
+			{
+				$oShop_Producer_Discounts = Core_Entity::factory('Shop_Producer_Discount');
+				$oShop_Producer_Discounts->queryBuilder()
+					->where('shop_producer_discounts.shop_producer_id', '=', $shop_producer_id)
+					->where('shop_producer_discounts.shop_discount_id', '=', $shop_discount_id)
+					->where('shop_producer_discounts.siteuser_id', '=', $siteuser_id)
+					->limit(1);
+
+				$oShop_Producer_Discount = $oShop_Producer_Discounts->getLast(FALSE);
+
+				if (is_null($oShop_Producer_Discount))
+				{
+					$oShop_Producer_Discount = Core_Entity::factory('Shop_Producer_Discount');
+					$oShop_Producer_Discount->shop_discount_id = $shop_discount_id;
+					$oShop_Producer_Discount->siteuser_id = $siteuser_id;
+					$oShop_Producer_Discount->shop_producer_id = $shop_producer_id;
+					$oShop_Producer_Discount->save();
 				}
 			}
 		}

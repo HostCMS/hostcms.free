@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -311,6 +310,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->delete($this->getField('shop_dir_id'))
 					// Удаляем структуру
 					->delete($this->getField('structure_id'))
+					->delete($this->getField('producer_structure_id'))
 					// Удаляем страну
 					->delete($this->getField('shop_country_id'))
 					// Удаляем группу пользователей сайта
@@ -363,9 +363,20 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						array(' … ') + $Structure_Controller_Edit->fillStructureList($this->_object->site_id)
 					)
 					->value($this->_object->structure_id)
-					->divAttr(array('class' => 'form-group col-xs-12 col-lg-6'));
+					->divAttr(array('class' => 'form-group col-xs-12 col-lg-3'));
 
 				$oMainRow3->add($oStructureSelectField);
+
+				$oProducerStructureSelectField = Admin_Form_Entity::factory('Select')
+					->name('producer_structure_id')
+					->caption(Core::_('Shop.producer_structure_id'))
+					->options(
+						array(' … ') + $Structure_Controller_Edit->fillStructureList($this->_object->site_id)
+					)
+					->value($this->_object->producer_structure_id)
+					->divAttr(array('class' => 'form-group col-xs-12 col-lg-3'));
+
+				$oMainRow3->add($oProducerStructureSelectField);
 
 				// Добавляем группу магазинов
 				$oMainRow3->add(Admin_Form_Entity::factory('Select')
@@ -900,6 +911,12 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	protected function _applyObjectProperty()
 	{
+		// Backup revision
+		if (Core::moduleIsActive('revision') && $this->_object->id)
+		{
+			$this->_object->backupRevision();
+		}
+
 		parent::_applyObjectProperty();
 
 		$modelName = $this->_object->getModelName();

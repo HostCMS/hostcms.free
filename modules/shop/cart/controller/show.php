@@ -11,6 +11,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - sortPropertiesValues(TRUE|FALSE) сортировать значения дополнительных свойств, по умолчанию TRUE.
  * - itemsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств товаров, по умолчанию TRUE
  * - orderProperties(TRUE|FALSE|array()) выводить список дополнительных свойств заказа, по умолчанию FALSE.
+ * - itemsMedia(TRUE|FALSE) выводить значения библиотеки файлов для товаров, по умолчанию FALSE
+ * - modifications(TRUE|FALSE) показывать модификации для выбранных товаров, по умолчанию FALSE
  * - itemsForbiddenTags(array('description')) массив тегов товаров, запрещенных к передаче в генерируемый XML
  * - warehousesItems(TRUE|FALSE) выводить остаток на каждом складе для товара, по умолчанию TRUE
  * - taxes(TRUE|FALSE) выводить список налогов, по умолчанию FALSE
@@ -53,8 +55,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Cart_Controller_Show extends Core_Controller
 {
@@ -68,6 +69,8 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		'itemsPropertiesList',
 		'sortPropertiesValues',
 		'orderProperties',
+		'itemsMedia',
+		'modifications',
 		'itemsForbiddenTags',
 		'warehousesItems',
 		'taxes',
@@ -78,6 +81,9 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		'tax',
 		'quantity',
 		'weight',
+		'volume',
+		'packageWeight',
+		'packageVolume',
 		'calculateCounts',
 		'applyDiscounts',
 		'applyDiscountCards',
@@ -165,7 +171,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 
 		$this->itemsProperties = $this->taxes = $this->specialprices
 			= $this->calculateCounts = $this->associatedItems
-			= $this->orderProperties = FALSE;
+			= $this->orderProperties = $this->modifications = $this->itemsMedia = FALSE;
 
 		$this->itemsPropertiesList = $this->warehousesItems
 			= $this->applyDiscounts = $this->applyDiscountCards = $this->sortPropertiesValues = TRUE;
@@ -312,7 +318,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 			}
 		}
 
-		$quantityPurchaseDiscount = $amountPurchaseDiscount = $this->quantity = $this->amount = $this->tax = $this->weight = 0;
+		$quantityPurchaseDiscount = $amountPurchaseDiscount = $this->quantity = $this->amount = $this->tax = $this->weight = $this->volume = $this->packageWeight = $this->packageVolume = 0;
 
 		// Массив цен для расчета скидок каждый N-й со скидкой N%
 		//$this->_aDiscountPrices = array();
@@ -333,7 +339,9 @@ class Shop_Cart_Controller_Show extends Core_Controller
 					->showXmlProperties($this->itemsProperties, $this->sortPropertiesValues)
 					->showXmlSpecialprices($this->specialprices)
 					->showXmlAssociatedItems($this->associatedItems)
-					->setItemsForbiddenTags($this->itemsForbiddenTags);
+					->setItemsForbiddenTags($this->itemsForbiddenTags)
+					->showXmlModifications($this->modifications)
+					->showXmlMedia($this->itemsMedia);
 
 				$this->applyForbiddenAllowedTags('/shop/shop_cart', $oShop_Cart);
 
@@ -347,6 +355,9 @@ class Shop_Cart_Controller_Show extends Core_Controller
 
 		$this->tax = $Shop_Cart_Controller->totalTax;
 		$this->weight = $Shop_Cart_Controller->totalWeight;
+		$this->volume = $Shop_Cart_Controller->totalVolume;
+		$this->packageWeight = $Shop_Cart_Controller->totalPackageWeight;
+		$this->packageVolume = $Shop_Cart_Controller->totalPackageVolume;
 		$this->amount = $Shop_Cart_Controller->totalAmount;
 		$this->quantity = $Shop_Cart_Controller->totalQuantity;
 		// Массив цен для расчета скидок каждый N-й со скидкой N%
@@ -430,6 +441,18 @@ class Shop_Cart_Controller_Show extends Core_Controller
 			Core::factory('Core_Xml_Entity')
 				->name('total_weight')
 				->value($this->weight)
+		)->addEntity(
+			Core::factory('Core_Xml_Entity')
+				->name('total_volume')
+				->value($this->volume)
+		)->addEntity(
+			Core::factory('Core_Xml_Entity')
+				->name('total_package_weight')
+				->value($this->packageWeight)
+		)->addEntity(
+			Core::factory('Core_Xml_Entity')
+				->name('total_package_volume')
+				->value($this->packageVolume)
 		);
 
 		return parent::show();
@@ -528,8 +551,14 @@ class Shop_Cart_Controller_Show extends Core_Controller
 
 				if ($fAmountForCard > 0)
 				{
+					$fDiscountcard = $fAmountForCard * ($oShop_Discountcard_Level->discount / 100);
+					
+					// Округляем до целых
+					$oShop_Discountcard_Level->round
+						&& $fDiscountcard = round($fDiscountcard);
+							
 					$oShop_Discountcard->discountAmount(
-						Shop_Controller::instance()->round($fAmountForCard * ($oShop_Discountcard_Level->discount / 100))
+						Shop_Controller::instance()->round($fDiscountcard)
 					);
 
 					if (!$bTpl)

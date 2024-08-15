@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Print_Form_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -72,8 +71,7 @@ class Shop_Print_Form_Controller_Edit extends Admin_Form_Action_Controller_Type_
 		$Admin_Form_Entity_Textarea = Admin_Form_Entity::factory('Textarea');
 
 		$oTmpOptions = $Admin_Form_Entity_Textarea->syntaxHighlighterOptions;
-		// $oTmpOptions['mode'] = 'application/x-httpd-php';
-		$oTmpOptions['mode'] = 'ace/mode/php';
+		$oTmpOptions['mode'] = '"ace/mode/php"';
 
 		$Admin_Form_Entity_Textarea
 			->value(

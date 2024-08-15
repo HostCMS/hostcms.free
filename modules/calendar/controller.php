@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Calendar
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Calendar_Controller
 {
@@ -88,7 +87,7 @@ class Calendar_Controller
 	 * @param string $last_modified
 	 * @return array
 	 */
-	static public function getUploadCalendarEntities($last_modified)
+	static public function getUploadCalendarEntities($last_modified, $calendar_caldav_id)
 	{
 		$aReturn = array();
 
@@ -100,7 +99,7 @@ class Calendar_Controller
 			$oModule->loadModule();
 			if (!is_null($oModule->Core_Module) && method_exists($oModule->Core_Module, 'getUploadCalendarEvents'))
 			{
-				$aReturn = array_merge($aReturn, $oModule->Core_Module->getUploadCalendarEvents($last_modified));
+				$aReturn = array_merge($aReturn, $oModule->Core_Module->getUploadCalendarEvents($last_modified, $calendar_caldav_id));
 			}
 		}
 
@@ -126,7 +125,7 @@ class Calendar_Controller
 						$oCalendar_Caldav_User->Calendar_Caldav->sync($oCalendar_Caldav_User);
 					}
 					catch (Exception $e){
-						//Core_Message::show($e->getMessage(), 'error');
+						// Core_Message::show($e->getMessage(), 'error');
 					}
 				}
 			}

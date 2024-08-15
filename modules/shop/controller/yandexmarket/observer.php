@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Controller_Yandexmarket_Observer
 {
@@ -57,7 +56,7 @@ class Shop_Controller_Yandexmarket_Observer
 
 		$oShop_Order = $object->getShopOrder();
 
-		preg_match('/\d+/', $oShop_Order->system_information, $matches);
+		preg_match('/\d+/', (string) $oShop_Order->system_information, $matches);
 
 		if (isset($matches[0]))
 		{

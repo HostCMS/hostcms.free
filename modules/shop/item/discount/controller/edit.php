@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -94,7 +93,7 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 				)
 			)
 			->name('apply_for_modifications')
-			->divAttr(array('class' => 'form-group col-xs-12'))
+			->divAttr(array('class' => 'form-group col-xs-12 rounded-radio-group'))
 		);
 
 		$this->title($title);

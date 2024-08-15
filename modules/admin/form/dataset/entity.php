@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 {
@@ -38,15 +37,54 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 	}
 
 	/**
+	 * Add user condition
+	 * @return self
+	 */
+	public function addUserConditions()
+	{
+		$oUser = Core_Auth::getCurrentUser();
+
+		$tableName = $this->_entity->getTableName();
+
+		$this
+			->addCondition(array('open' => array()))
+			->addCondition(array('where' => array('user_id', '=', $oUser->id)))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('user_id', '=', 0)))
+			->addCondition(array('close' => array()));
+
+		return $this;
+	}
+
+	/**
 	 * Check if entity conditions consist of having/groupBy
 	 * @return boolean
 	 */
 	protected function _issetHavingOrGroupBy()
 	{
-		$issetHaving = FALSE;
+		$issetHavingOrGroupBy = FALSE;
 		foreach ($this->_conditions as $condition)
 		{
 			if (isset($condition['having']) || isset($condition['groupBy']))
+			{
+				$issetHavingOrGroupBy = TRUE;
+				break;
+			}
+		}
+
+		return $issetHavingOrGroupBy;
+	}
+
+	/**
+	 * Check if entity conditions consist of having
+	 * @return boolean
+	 */
+	protected function _issetHaving()
+	{
+		$issetHaving = FALSE;
+		foreach ($this->_conditions as $condition)
+		{
+			if (isset($condition['having']))
 			{
 				$issetHaving = TRUE;
 				break;
@@ -54,6 +92,25 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 		}
 
 		return $issetHaving;
+	}
+
+	/**
+	 * Check if entity conditions consist of groupBy
+	 * @return boolean
+	 */
+	protected function _issetGroupBy()
+	{
+		$issetGroupBy = FALSE;
+		foreach ($this->_conditions as $condition)
+		{
+			if (isset($condition['groupBy']))
+			{
+				$issetGroupBy = TRUE;
+				break;
+			}
+		}
+
+		return $issetGroupBy;
 	}
 
 	/**
@@ -119,6 +176,56 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 	}
 
 	/**
+	 * Check if not use join or use without where conditions
+	 * @return boolean
+	 */
+	protected function _allJoinsNotUsed()
+	{
+		$issetHaving = $this->_issetHaving();
+
+		if ($issetHaving)
+		{
+			return FALSE;
+		}
+
+		$aJoins = array();
+		foreach ($this->_conditions as $condition)
+		{
+			// При наличии прямого объединения простой подсчет количества невозможен
+			if (isset($condition['join']))
+			{
+				return FALSE;
+			}
+			elseif (isset($condition['leftJoin']))
+			{
+				//if (count($condition['leftJoin']) == 3)
+				$aJoins[] = $condition['leftJoin'][0];
+			}
+			elseif (isset($condition['rightJoin']))
+			{
+				$aJoins[] = $condition['rightJoin'][0];
+			}
+		}
+
+		foreach ($aJoins as $join)
+		{
+			foreach ($this->_conditions as $condition)
+			{
+				if (isset($condition['where']))
+				{
+					// $join может быть как именем таблицы, так и массивом с псевдонимом
+					if (isset($condition['where'][0]) && (!is_scalar($join) || strpos($condition['where'][0], $join) !== FALSE))
+					{
+						return FALSE;
+					}
+				}
+			}
+		}
+
+		return TRUE;
+	}
+
+	/**
 	 * Get items count
 	 * @return int
 	 */
@@ -131,10 +238,22 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 
 			$this->_entity->applyMarksDeleted();
 
-			$issetHaving = $this->_issetHavingOrGroupBy();
+			$issetHavingOrGroupBy = $this->_issetHavingOrGroupBy();
 
-			if (!$issetHaving)
+			// Нет смысла считать, если !$issetHavingOrGroupBy
+			$allJoinsNotUsed = $issetHavingOrGroupBy
+				? $this->_allJoinsNotUsed()
+				: NULL;
+
+			//var_dump('_allJoinsNotUsed', $allJoinsNotUsed);
+
+			if (!$issetHavingOrGroupBy || $allJoinsNotUsed)
 			{
+				$allJoinsNotUsed
+					&& $this->_entity->queryBuilder()
+						->clearJoin()
+						->clearGroupBy(); // без удаления groupBy() количество найдет 1
+
 				$this->_count = $this->_getTotalCountByCount();
 			}
 			else
@@ -145,13 +264,17 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 					&& $fBeginTime = Core::getmicrotime();
 
 				$queryBuilder = $this->_entity->queryBuilder()
-					//->clearSelect()
+					//->clearSelect() // see below
 					->clearOrderBy()
 					->sqlCalcFoundRows()
 					->from($this->_entity->getTableName())
 					->limit(1)
 					->offset(0)
 					->asAssoc();
+
+				!$this->_issetHaving()
+					&& $this->_entity->queryBuilder()
+						->clearSelect();
 
 				//$this->_applyRestrictAccess($queryBuilder);
 
@@ -212,9 +335,9 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 
 				if (is_null($this->_count))
 				{
-					$issetHaving = $this->_issetHavingOrGroupBy();
+					$issetHavingOrGroupBy = $this->_issetHavingOrGroupBy();
 
-					if ($issetHaving)
+					if ($issetHavingOrGroupBy)
 					{
 						$queryBuilder->sqlCalcFoundRows();
 					}
@@ -236,7 +359,7 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 			// Расчет количества
 			if (is_null($this->_count))
 			{
-				$this->_count = $issetHaving
+				$this->_count = $issetHavingOrGroupBy
 					? $this->_getFoundRows()
 					: $this->_getTotalCountByCount();
 			}

@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Document
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Document_Model extends Core_Entity
 {
@@ -127,7 +126,7 @@ class Document_Model extends Core_Entity
 	{
 		if (Core::moduleIsActive('search'))
 		{
-			Search_Controller::deleteSearchPage(6, 0, $this->id);
+			Search_Controller::deleteSearchPage($this->site_id, 6, 0, $this->id);
 		}
 
 		return $this;

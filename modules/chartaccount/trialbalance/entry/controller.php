@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Chartaccount
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Chartaccount_Trialbalance_Entry_Controller extends Chartaccount_Trialbalance_Controller
 {
@@ -23,6 +22,24 @@ class Chartaccount_Trialbalance_Entry_Controller extends Chartaccount_Trialbalan
 	{
 		$code = Core_Array::getGet('code', '', 'strval');
 		$sc = Core_Array::getGet('sc', array(), 'array');
+
+		$aOptionSubcounts = $aSubcountsValue = array();
+
+		$aFilterSubcounts = Core_Array::getPost('subcounts', array(), 'array');
+		foreach ($aFilterSubcounts as $aFilterSubcount)
+		{
+			if ($aFilterSubcount['value'])
+			{
+				$aOptionSubcounts[$aFilterSubcount['type']] = $aFilterSubcount['value'];
+				$aSubcountsValue[$aFilterSubcount['sc']] = $aFilterSubcount['value'];
+			}
+		}
+
+		// echo "<pre>";
+		// var_dump($aOptionSubcounts);
+		// echo "</pre>";
+
+		$windowId = self::$_Admin_Form_Controller->getWindowId();
 
 		$additionalParams = '';
 
@@ -70,6 +87,37 @@ class Chartaccount_Trialbalance_Entry_Controller extends Chartaccount_Trialbalan
 								<th scope="col" style="width: 5%"><?php echo Core::_('Chartaccount_Trialbalance_Entry.account')?></th>
 								<th scope="col" style="width: 10%"></th>
 								<th scope="col"></th>
+							</tr>
+							<tr>
+								<th scope="col" colspan="9" style="text-align: left">
+									<?php
+									$aSubcounts = array();
+
+									for ($i = 0; $i < 3; $i++)
+									{
+										$subcountName = 'sc' . $i;
+
+										if ($oChartaccount->$subcountName)
+										{
+											$aSubcounts[$oChartaccount->$subcountName] = Core_Array::get($aSubcountsValue, $subcountName, 0, 'int');
+											// $aSubcounts[$oChartaccount->$subcountName] = '';
+										}
+									}
+
+									$oSubcounts = Admin_Form_Entity::factory('Div')->class('chartaccount-trialbalance-entry-subcounts')->add(Admin_Form_Entity::factory('Span'));
+
+									Chartaccount_Controller::showSubcounts($aSubcounts, $oChartaccount->id, $oSubcounts, self::$_Admin_Form_Controller, array('company_id' => self::$company_id));
+
+									$oSubcounts->add(
+										Admin_Form_Entity::factory('Span')
+											->class('btn btn-sm btn-default margin-right-10')
+											->add(Core_Html_Entity::factory('I')->class('fa fa-filter no-margin'))
+											->onclick("$.filterChartaccountTrialbalanceEntries(this, '" . $windowId . "', " . $code . ")")
+									);
+
+									$oSubcounts->execute();
+									?>
+								</th>
 							</tr>
 							<tr>
 								<th scope="col" colspan="2" style="text-align: left"><?php echo Core::_('Chartaccount_Trialbalance_Entry.start_balance')?></th>
@@ -140,6 +188,10 @@ class Chartaccount_Trialbalance_Entry_Controller extends Chartaccount_Trialbalan
 								// Дебет
 								$aOptions = array('company_id' => self::$company_id, 'dchartaccount_id' => $oChartaccount->id, 'date_from' => self::$startDatetime, 'date_to' => self::$endDatetime);
 								$aOptions['debit_sc'] = $sc;
+
+								// test
+								count($aOptionSubcounts) && $aOptions['subcount'] = $aOptionSubcounts;
+
 								$aDChartaccount_Entries = Chartaccount_Entry_Controller::getEntries($aOptions);
 
 								foreach ($aDChartaccount_Entries as $oChartaccount_Entry)
@@ -152,6 +204,10 @@ class Chartaccount_Trialbalance_Entry_Controller extends Chartaccount_Trialbalan
 								// Кредит
 								$aOptions = array('company_id' => self::$company_id, 'cchartaccount_id' => $oChartaccount->id, 'date_from' => self::$startDatetime, 'date_to' => self::$endDatetime);
 								$aOptions['credit_sc'] = $sc;
+
+								// test
+								count($aOptionSubcounts) && $aOptions['subcount'] = $aOptionSubcounts;
+
 								$aCChartaccount_Entries = Chartaccount_Entry_Controller::getEntries($aOptions);
 
 								foreach ($aCChartaccount_Entries as $oChartaccount_Entry)
@@ -185,7 +241,14 @@ class Chartaccount_Trialbalance_Entry_Controller extends Chartaccount_Trialbalan
 
 									?><tr>
 										<td><?php echo Core_Date::sql2date($oChartaccount_Entry->datetime)?></td>
-										<td><?php echo $name?></td>
+										<td><?php
+											echo $name;
+
+											if ($oChartaccount_Entry->description != '')
+											{
+												?><span class="small gray margin-left-5"><?php echo htmlspecialchars($oChartaccount_Entry->description)?></span><?php
+											}
+										?></td>
 										<td><?php
 											if (isset($aSubcounts['debit']))
 											{

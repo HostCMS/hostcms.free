@@ -7,9 +7,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @version 7.x
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Siteuser_Module extends Siteuser_Module
 {
@@ -78,11 +77,7 @@ class Skin_Bootstrap_Module_Siteuser_Module extends Siteuser_Module
 
 		<script>
 		$(function() {
-			var aScripts = [
-				'jquery.sparkline.js'
-			];
-
-			$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/sparkline/').done(function() {
+			$.getMultiContent(['jquery.sparkline.js'], '/modules/skin/bootstrap/js/charts/sparkline/').done(function() {
 				// all scripts loaded
 				setTimeout(function() {
 					var siteuserWidget = $('#siteuserWidget');

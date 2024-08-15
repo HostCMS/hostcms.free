@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -20,7 +19,7 @@ $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title(Core::_('Benchmark.title'))
@@ -391,10 +390,10 @@ function benchmarkShow($oAdmin_Form_Controller)
 					if (is_null($status))
 					{
 						$sBuyLink = defined('HOSTCMS_CONTRACT_NUMBER') && HOSTCMS_CONTRACT_NUMBER
-							? 'http://www.hostcms.ru/users/licence/redaction/'
+							? 'https://www.hostcms.ru/users/licence/redaction/'
 								. urlencode(str_replace('/', ' ', HOSTCMS_CONTRACT_NUMBER))
 								. '/'
-							: 'http://www.hostcms.ru/shop/';
+							: 'https://www.hostcms.ru/shop/';
 
 						// Купить
 						?>
@@ -453,11 +452,19 @@ function benchmarkShow($oAdmin_Form_Controller)
 
 		if (in_array($sEngine, $aAllowedEngines))
 		{
-			$sNewStorageEngine = strtolower($sEngine);
+			// Set default storageEngine
+			$aConfig = Core::$config->get('core_database', array());
+			if (isset($aConfig['default']))
+			{
+				$aConfig['default']['storageEngine'] = $sEngine;
+				
+				Core::$config->set('core_database', $aConfig);
+			}
 
 			$oCore_DataBase = Core_DataBase::instance();
 
 			$aChanged = array();
+			$sNewStorageEngine = strtolower($sEngine);
 
 			$aTables = Benchmark_Controller::getTables();
 			foreach ($aTables as $aRow)

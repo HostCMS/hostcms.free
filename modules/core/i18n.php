@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_I18n
 {
@@ -53,6 +52,30 @@ class Core_I18n
 	 */
 	public function getLng()
 	{
+		if (is_null($this->_lng))
+		{
+			if (!empty($_SESSION['current_lng']))
+			{
+				$this->setLng(strval($_SESSION['current_lng']));
+			}
+			elseif (defined('CURRENT_LNG'))
+			{
+				$this->setLng(CURRENT_LNG);
+			}
+			else
+			{
+				$lng = strtolower(
+					substr(Core_Array::get($_SERVER, 'HTTP_ACCEPT_LANGUAGE', '', 'str'), 0, 2)
+				);
+
+				$oAdmin_Language = $lng !== ''
+					? Core_Entity::factory('Admin_Language')->getByShortname($lng)
+					: NULL;
+
+				$this->setLng($oAdmin_Language ? $oAdmin_Language->shortname : $this->_defaultLng);
+			}
+		}
+
 		return $this->_lng;
 	}
 
@@ -62,19 +85,6 @@ class Core_I18n
 	protected function __construct()
 	{
 		defined('DEFAULT_LNG') && $this->_defaultLng = DEFAULT_LNG;
-
-		if (!empty($_SESSION['current_lng']))
-		{
-			$this->setLng(strval($_SESSION['current_lng']));
-		}
-		elseif (defined('CURRENT_LNG'))
-		{
-			$this->setLng(CURRENT_LNG);
-		}
-		else
-		{
-			$this->setLng($this->_defaultLng);
-		}
 	}
 
 	/**
@@ -99,16 +109,16 @@ class Core_I18n
 	 */
 	public function expandLng($className, array $value, $lng = NULL)
 	{
-		$lng = is_null($lng)
-			? $this->getLng()
-			: basename($lng);
-
 		$className = basename(strtolower($className));
 
 		if ($className == '')
 		{
 			throw new Core_Exception('Classname is empty.');
 		}
+
+		$lng = is_null($lng)
+			? $this->getLng()
+			: basename($lng);
 
 		$this->loadLng($lng, $className);
 

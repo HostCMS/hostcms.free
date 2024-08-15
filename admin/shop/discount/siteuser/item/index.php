@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../../../bootstrap.php');
 
@@ -19,6 +18,7 @@ $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
 $oShop = Core_Entity::factory('Shop', intval(Core_Array::getGet('shop_id', 0)));
 $oShopGroup = Core_Entity::factory('Shop_Group', intval(Core_Array::getGet('shop_group_id', 0)));
+$oSiteuser = Core_Entity::factory('Siteuser', intval(Core_Array::getGet('siteuser_id', 0)));
 $oShop_Item_Discount = Core_Entity::factory('Shop_Item_Discount', intval(Core_Array::getGet('shop_item_discount_id', 0)));
 $oShopDir = $oShop->Shop_Dir;
 
@@ -27,7 +27,7 @@ $sFormTitle = Core::_('Shop_Discount_Siteuser_Item.title', $oShop_Item_Discount-
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sFormAction)
 	->title($sFormTitle)
@@ -133,8 +133,8 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($sFormTitle)
-		->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_item_discount_id={$oShop_Item_Discount->id}&shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
-		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_item_discount_id={$oShop_Item_Discount->id}&shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
+		->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_item_discount_id={$oShop_Item_Discount->id}&siteuser_id={$oSiteuser->id}&shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_item_discount_id={$oShop_Item_Discount->id}&siteuser_id={$oSiteuser->id}&shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
 );
 
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
@@ -193,7 +193,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 // Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
 !$oUser->superuser && $oUser->only_access_my_own
-	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
+	&& $oAdmin_Form_Dataset->addUserConditions();
 
 $oAdmin_Form_Dataset
 	->addCondition(

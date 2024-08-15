@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -29,7 +28,7 @@ $sFormTitle = Core::_('Shop_Discount.show_producer_discount_title', $oShop_Produ
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sFormAction)
 	->title($sFormTitle)
@@ -142,6 +141,11 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 		->name($oShop->name)
 		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"))
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"))
+)->add(
+	Admin_Form_Entity::factory('Breadcrumb')
+		->name(Core::_('Shop_Producer.show_producers_title'))
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/producer/index.php', NULL, NULL, "shop_id={$oShop->id}"))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/producer/index.php', NULL, NULL, "shop_id={$oShop->id}"))
 );
 
 // Крошки по группам товаров
@@ -255,7 +259,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 // Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
 !$oUser->superuser && $oUser->only_access_my_own
-	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
+	&& $oAdmin_Form_Dataset->addUserConditions();
 
 $oAdmin_Form_Dataset
 	->addCondition(
@@ -279,7 +283,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 // Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
 !$oUser->superuser && $oUser->only_access_my_own
-	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
+	&& $oAdmin_Form_Dataset->addUserConditions();
 
 $oAdmin_Form_Dataset
 	->addCondition(

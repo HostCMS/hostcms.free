@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Property
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Property_Model extends Core_Entity
 {
@@ -64,6 +63,7 @@ class Property_Model extends Core_Entity
 		'shop_group_property' => array(),
 		'shop_order_property' => array(),
 		'shop_comment_property' => array(),
+		'shop_order_comment_property' => array(),
 		'deal_template_property' => array()
 	);
 
@@ -594,6 +594,50 @@ class Property_Model extends Core_Entity
 	}
 
 	/**
+	 * Get List Items by $this->_limitListItems conditions
+	 * @return array
+	 */
+	public function getListItems()
+	{
+		$oList_Items = $this->List->List_Items;
+		$oList_Items->queryBuilder()
+			->where('list_items.active', '=', 1);
+
+		// MySQL 5.7 very slow with this subquery, changed to FROM (subquery) as prop_tmp
+		/*if (!is_null($this->_limitListItems))
+		{
+			$oList_Items->queryBuilder()
+				->where('list_items.id', 'IN', $this->_limitListItems);
+		}*/
+
+		if (is_array($this->_limitListItems))
+		{
+			if (count($this->_limitListItems))
+			{
+				$oList_Items->queryBuilder()
+					->where('list_items.id', 'IN', $this->_limitListItems);
+			}
+			else
+			{
+				// Передан пустой массив, нет элементов для добавления
+				return array();
+			}
+		}
+		elseif (is_object($this->_limitListItems))
+		{
+			$oList_Items->queryBuilder()
+				->select('list_items.*')
+				->from('list_items')
+				->from(array($this->_limitListItems, 'prop_tmp'))
+				->where('list_items.id', '=', Core_QueryBuilder::expression('`prop_tmp`.`value`'));
+		}
+
+		Core_Event::notify($this->_modelName . '.onBeforeGetXmlAddListItems', $this, array($oList_Items));
+
+		return $oList_Items->findAll(FALSE);
+	}
+
+	/**
 	 * Prepare entity and children entities
 	 * @return self
 	 */
@@ -610,7 +654,7 @@ class Property_Model extends Core_Entity
 				->addForbiddenTag('hide_small_image');
 		}*/
 
-		$bIsList = $this->type == 3 && $this->list_id != 0 && Core::moduleIsActive('list');
+		$bIsList = $this->type == 3 && $this->list_id && Core::moduleIsActive('list');
 
 		// List
 		if ($bIsList)
@@ -625,51 +669,20 @@ class Property_Model extends Core_Entity
 				)
 			)
 			{
-				$oList_Items = $this->List->List_Items;
-				$oList_Items->queryBuilder()
-					->where('list_items.active', '=', 1);
+				$aList_Items = $this->getListItems();
 
-				// MySQL 5.7 very slow with this subquery, changed to FROM (subquery) as prop_tmp
-				/*if (!is_null($this->_limitListItems))
+				if (count($aList_Items))
 				{
-					$oList_Items->queryBuilder()
-						->where('list_items.id', 'IN', $this->_limitListItems);
-				}*/
-
-				if (is_array($this->_limitListItems))
-				{
-					if (count($this->_limitListItems))
+					foreach ($aList_Items as $oList_Item)
 					{
-						$oList_Items->queryBuilder()
-							->where('list_items.id', 'IN', $this->_limitListItems);
+						$this->_aListItemsTree[$oList_Item->parent_id][] = $oList_Item->clearEntities();
+
+						// Добавить родителей иерархических значений, когда родители не были упомянуты в фильтрации
+						$this->_addParentListItem($oList_Item);
 					}
-					else
-					{
-						// Передан пустой массив, нет элементов для добавления
-						return $this;
-					}
+
+					$this->_addListItems(0, $this->List);
 				}
-				elseif (is_object($this->_limitListItems))
-				{
-					$oList_Items->queryBuilder()
-						->select('list_items.*')
-						->from('list_items')
-						->from(array($this->_limitListItems, 'prop_tmp'))
-						->where('list_items.id', '=', Core_QueryBuilder::expression('`prop_tmp`.`value`'));
-				}
-
-				Core_Event::notify($this->_modelName . '.onBeforeGetXmlAddListItems', $this, array($oList_Items));
-
-				$aList_Items = $oList_Items->findAll(FALSE);
-				foreach ($aList_Items as $oList_Item)
-				{
-					$this->_aListItemsTree[$oList_Item->parent_id][] = $oList_Item->clearEntities();
-
-					// Добавить родителей иерархических значений, когда родители не были упомянуты в фильтрации
-					$this->_addParentListItem($oList_Item);
-				}
-
-				$this->_addListItems(0, $this->List);
 
 				$this->_aListItemsTree = array();
 			}
@@ -816,5 +829,82 @@ class Property_Model extends Core_Entity
 				->add(Core_Html_Entity::factory('I')->class('fa fa-chain-broken'))
 				->execute();
 		}
+
+		if ($this->type == 2)
+		{
+			if ($this->prefix_large_file != '')
+			{
+				$color = '#53a93f';
+
+				Core_Html_Entity::factory('Span')
+					->class('badge badge-round badge-max-width')
+					->style("border-color: " . $color . "; color: " . Core_Str::hex2darker($color, 0.2) . "; background-color: " . Core_Str::hex2lighter($color, 0.88))
+					->title(Core::_('Property.prefix_large_file'))
+					->value($this->prefix_large_file)
+					->execute();
+			}
+
+			if ($this->prefix_small_file != '')
+			{
+				$smallColor = '#57b5e3';
+
+				Core_Html_Entity::factory('Span')
+					->class('badge badge-round badge-max-width')
+					->style("border-color: " . $smallColor . "; color: " . Core_Str::hex2darker($smallColor, 0.2) . "; background-color: " . Core_Str::hex2lighter($smallColor, 0.88))
+					->title(Core::_('Property.prefix_small_file'))
+					->value($this->prefix_small_file)
+					->execute();
+			}
+		}
+	}
+
+	/**
+	 * Convert Object to Array
+	 * @return array
+	 */
+	public function toArray()
+	{
+		$return = parent::toArray();
+
+		// List
+		if ($this->type != 3 && isset($return['list_id']))
+		{
+			unset($return['list_id']);
+		}
+
+		// Information_System
+		if ($this->type != 5 && $this->type != 13)
+		{
+			unset($return['informationsystem_id']);
+		}
+
+		// Shop
+		if ($this->type != 12 && $this->type != 14)
+		{
+			unset($return['shop_id']);
+		}
+
+		// File
+		if ($this->type != 2)
+		{
+			unset($return['image_large_max_width']);
+			unset($return['image_large_max_height']);
+			unset($return['image_small_max_width']);
+			unset($return['image_small_max_height']);
+			unset($return['hide_small_image']);
+			unset($return['preserve_aspect_ratio']);
+			unset($return['preserve_aspect_ratio_small']);
+			unset($return['watermark_default_use_large_image']);
+			unset($return['watermark_default_use_small_image']);
+		}
+
+		// Wysiwyg
+		if ($this->type != 6)
+		{
+			unset($return['typograph']);
+			unset($return['trailing_punctuation']);
+		}
+
+		return $return;
 	}
 }

@@ -7,13 +7,13 @@
  * /usr/bin/php --php-ini /etc/php.ini /var/www/site.ru/httpdocs/cron/getmessages.php
  * Реальный путь на сервере к корневой директории сайта уточните в службе поддержки хостинга.
  *
- * @package HostCMS 6\cron
- * @version 6.x
+ * @package HostCMS 7\cron
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2014 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 
-@set_time_limit(28800);
+@set_time_limit(900);
 
 require_once(dirname(__FILE__) . '/../' . 'bootstrap.php');
 
@@ -26,7 +26,7 @@ $oSite = Core_Entity::factory('Site', CURRENT_SITE);
 
 Core::initConstants($oSite);
 
-Core_Database::instance()->query('SET SESSION wait_timeout = 28800');
+Core_Database::instance()->query('SET SESSION wait_timeout = 900');
 
 // Получаем список всех служб технической поддержки сайта
 $aHelpdesks = $oSite->Helpdesks->findAll();
@@ -52,7 +52,7 @@ foreach ($aHelpdesks as $oHelpdesk)
 
 		$counter += $count;
 
-		printf("\nAccount '%s', received %d messages.", $oHelpdesk_Account->email, $count);
+		printf("\nAccount '%s', received %d messages.", $oHelpdesk_Account->Mail->email, $count);
 	}
 
 	// Закрываем старые тикеты

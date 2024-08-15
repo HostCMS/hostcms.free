@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
  class Shop_Discount_Model extends Core_Entity
 {
@@ -271,8 +270,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 			: Core_Date::strftime($oShop->format_datetime, Core_Date::sql2timestamp($this->end_datetime)));
 
 		$this->type == 0
-			? $this->addXmlTag('percent', $this->value)
-			: $this->addXmlTag('amount', $this->value);
+			? $this->addXmlTag('percent', Core_Str::hideZeros($this->value))
+			: $this->addXmlTag('amount', Core_Str::hideZeros($this->value));
 
 		return $this;
 	}

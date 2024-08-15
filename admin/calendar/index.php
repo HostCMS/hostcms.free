@@ -5,8 +5,7 @@
  * @package HostCMS
  * @subpackage Calendar
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -22,7 +21,7 @@ $oSite = Core_Entity::factory('Site', CURRENT_SITE);
 
 // Контроллер формы
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->title(Core::_('Calendar.title'))
 	->setUp();
 
@@ -134,8 +133,8 @@ if (!is_null(Core_Array::getRequest('loadEvents')))
 
 	$aJson = array();
 
-	$start = intval(Core_Array::getPost('start'));
-	$end = intval(Core_Array::getPost('end'));
+	$start = Core_Array::getPost('start', 0, 'int');
+	$end = Core_Array::getPost('end', 0, 'int');
 
 	$aJson['events'] = Calendar_Controller::getCalendarEntities(Core_Date::timestamp2sql($start), Core_Date::timestamp2sql($end));
 	$aJson['countEvents'] = count($aJson['events']);
@@ -155,7 +154,7 @@ if (!is_null(Core_Array::getPost('updateCaldav')))
 
 $oAdmin_View = Admin_View::create();
 $oAdmin_View
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->pageTitle(Core::_('Calendar.title'));
 
 // Элементы строки навигации

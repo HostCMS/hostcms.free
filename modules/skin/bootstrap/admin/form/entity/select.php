@@ -8,16 +8,19 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Select extends Skin_Default_Admin_Form_Entity_Select
 {
 	/**
 	 * Executes the business logic.
+	 * @hostcms-event Skin_Bootstrap_Admin_Form_Entity_Select.onBeforeExecute
+	 * @hostcms-event Skin_Bootstrap_Admin_Form_Entity_Select.onAfterExecute
 	 */
 	public function execute()
 	{
+		Core_Event::notify(get_class($this) . '.onBeforeExecute', $this);
+
 		$aAttr = $this->getAttrsString();
 
 		// Установим атрибуты div'a.
@@ -81,6 +84,8 @@ class Skin_Bootstrap_Admin_Form_Entity_Select extends Skin_Default_Admin_Form_En
 
 		// Clear
 		$this->_aAlreadySelected = array();
+
+		Core_Event::notify(get_class($this) . '.onAfterExecute', $this);
 	}
 
 	/**
@@ -125,7 +130,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Select extends Skin_Default_Admin_Form_En
 			->class($this->caseSensitive ? 'col-xs-10 col-sm-5' : 'col-xs-5 col-sm-4 no-padding-left')
 			->add(
 				Admin_Form_Entity::factory('Div')
-					->class('input-group' . ($this->caption != '' ? ' margin-top-21' : ''))
+					->class('input-group input-group-filter' . ($this->caption != '' ? ' margin-top-21' : ''))
 					->add(
 						Admin_Form_Entity::factory('Code')
 							->html('<span class="input-group-addon"><i class="fa-solid fa-magnifying-glass"></i></span>

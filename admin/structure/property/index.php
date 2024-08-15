@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -20,7 +19,7 @@ $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title(Core::_('Property.title'))
@@ -62,7 +61,7 @@ $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
-$structure_id = intval(Core_Array::getGet('structure_id', 0));
+$structure_id = Core_Array::getGet('structure_id', 0, 'int');
 
 // Строка навигации для структуры
 $oAdmin_Form_Entity_Breadcrumbs->add(
@@ -111,7 +110,7 @@ if ($structure_id)
 }
 
 // Строка навигации для свойств
-$property_dir_id = intval(Core_Array::getGet('property_dir_id', 0));
+$property_dir_id = Core_Array::getGet('property_dir_id', 0, 'int');
 
 $additionalParams = 'structure_id=' . $structure_id;
 
@@ -163,6 +162,28 @@ if ($property_dir_id)
 
 // Добавляем все хлебные крошки контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
+
+// Глобальный поиск
+$additionalParams = 'structure_id=' . $structure_id;
+
+$sGlobalSearch = Core_Array::getGet('globalSearch', '', 'trim');
+
+$oAdmin_Form_Controller->addEntity(
+	Admin_Form_Entity::factory('Code')
+		->html('
+			<div class="row search-field margin-bottom-20">
+				<div class="col-xs-12">
+					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
+						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
+						<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
+						<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '"><i class="fa-solid fa-magnifying-glass fa-fw"></i></button>
+					</form>
+				</div>
+			</div>
+		')
+);
+
+$sGlobalSearch = str_replace(' ', '%', Core_DataBase::instance()->escapeLike($sGlobalSearch));
 
 // Действие редактирования
 $oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
@@ -310,29 +331,42 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 // Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
 !$oUser->superuser && $oUser->only_access_my_own
-	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
+	&& $oAdmin_Form_Dataset->addUserConditions();
 
 // Ограничение источника 1
 $oAdmin_Form_Dataset->addCondition(
 	array('select' => array('properties.*'))
 )->addCondition(
 	array('join' => array('structure_properties', 'structure_properties.property_id', '=', 'properties.id'))
-)->addCondition(
-	array('where' =>
-		array('property_dir_id', '=', $property_dir_id)
-	)
-)->addCondition(
-	array('where' =>
-		array('structure_properties.site_id', '=', CURRENT_SITE)
-	)
+)/*->addCondition(
+	array('where' => array('property_dir_id', '=', $property_dir_id))
+)*/->addCondition(
+	array('where' => array('structure_properties.site_id', '=', CURRENT_SITE))
 );
 
+if (strlen($sGlobalSearch))
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('open' => array()))
+			->addCondition(array('where' => array('properties.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('properties.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('properties.guid', '=', $sGlobalSearch)))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('properties.tag_name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
+}
+else
+{
+	$oAdmin_Form_Dataset->addCondition(array('where' => array('property_dir_id', '=', $property_dir_id)));
+}
+
 $oAdmin_Form_Dataset
-->changeField('multiple', 'link', "/admin/structure/property/index.php?hostcms[action]=changeMultiple&hostcms[checked][{dataset_key}][{id}]=1&property_dir_id={property_dir_id}")
-->changeField('multiple', 'onclick', "$.adminLoad({path: '/admin/structure/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&property_dir_id={property_dir_id}', action: 'changeMultiple', windowId: '{windowId}'}); return false")
-->changeField('indexing', 'link', "/admin/structure/property/index.php?hostcms[action]=changeIndexing&hostcms[checked][{dataset_key}][{id}]=1&property_dir_id={property_dir_id}")
-->changeField('indexing', 'onclick', "$.adminLoad({path: '/admin/structure/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&property_dir_id={property_dir_id}', action: 'changeIndexing', windowId: '{windowId}'}); return false")
-;
+	->changeField('multiple', 'link', "/admin/structure/property/index.php?hostcms[action]=changeMultiple&hostcms[checked][{dataset_key}][{id}]=1&property_dir_id={property_dir_id}")
+	->changeField('multiple', 'onclick', "$.adminLoad({path: '/admin/structure/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&property_dir_id={property_dir_id}', action: 'changeMultiple', windowId: '{windowId}'}); return false")
+	->changeField('indexing', 'link', "/admin/structure/property/index.php?hostcms[action]=changeIndexing&hostcms[checked][{dataset_key}][{id}]=1&property_dir_id={property_dir_id}")
+	->changeField('indexing', 'onclick', "$.adminLoad({path: '/admin/structure/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&property_dir_id={property_dir_id}', action: 'changeIndexing', windowId: '{windowId}'}); return false");
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(

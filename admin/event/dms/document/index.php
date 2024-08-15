@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -24,7 +23,7 @@ $oEvent = Core_Entity::factory('Event', $iEventId);
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title(Core::_('Event_Dms_Document.title'))
@@ -54,7 +53,7 @@ if (is_null(Core_Array::getGet('hideMenu')))
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Admin_Form.add'))
 				->icon('fa fa-plus')
-				->class('btn btn-white')
+				->class('btn btn-gray')
 				->onclick(
 					$oAdmin_Form_Controller->getAdminActionModalLoad(array('path' => $oAdmin_Form_Controller->getPath(), 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => 0, 'additionalParams' => $additionalParams, 'width' => '90%'))
 				)

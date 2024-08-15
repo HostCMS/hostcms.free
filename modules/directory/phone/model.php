@@ -7,9 +7,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Directory
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @version 7.x
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Directory_Phone_Model extends Core_Entity
 {
@@ -139,5 +138,19 @@ class Directory_Phone_Model extends Core_Entity
 			->addXmlTag('name', $this->Directory_Phone_Type->name);
 
 		return $this;
+	}
+
+	/**
+	 * Save object.
+	 * @return self
+	 */
+	public function save()
+	{
+		if (in_array('value', $this->_changedColumns))
+		{
+			$this->value = Directory_Phone_Controller::format($this->value);
+		}
+
+		return parent::save();
 	}
 }

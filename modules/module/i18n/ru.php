@@ -4,9 +4,8 @@
  *
  * @package HostCMS
  * @subpackage Module
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @version 7.x
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Модули',
@@ -45,4 +44,5 @@ return array(
 	'modules_active_unset' => 'Активность модуля "%s" снята',
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
+	'add_error' => 'Модуль с таким путем уже существует!',
 );

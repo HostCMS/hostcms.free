@@ -26,8 +26,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Structure
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Structure_Controller_Breadcrumbs extends Core_Controller
 {
@@ -41,6 +40,7 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 		'showInformationsystem',
 		'showShop',
 		'showProducer',
+		'showSeoFilter',
 		'showForum',
 		'showMessage',
 		'showHelpdesk',
@@ -49,6 +49,7 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 		'informationsystem_group_id',
 		'shop_item_id',
 		'shop_group_id',
+		'filter_seo',
 		'shop_producer_id',
 		'forum_category_id',
 		'forum_topic_id',
@@ -86,7 +87,7 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 
 		$this->current = Core_Page::instance()->structure->id;
 
-		$this->showInformationsystem = $this->showShop = $this->showProducer = $this->showForum
+		$this->showInformationsystem = $this->showShop = $this->showProducer = $this->showSeoFilter = $this->showForum
 			= $this->showMessage = $this->showHelpdesk = TRUE;
 
 		$this->cache = TRUE;
@@ -139,10 +140,17 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 	 * Show built data
 	 * @return self
 	 * @hostcms-event Structure_Controller_Breadcrumbs.onBeforeRedeclaredShow
+	 * @hostcms-event Structure_Controller_Breadcrumbs.onBeforeAddInformationsystemItem
 	 * @hostcms-event Structure_Controller_Breadcrumbs.onAfterAddInformationsystemItem
+	 * @hostcms-event Structure_Controller_Breadcrumbs.onBeforeAddInformationsystemGroups
 	 * @hostcms-event Structure_Controller_Breadcrumbs.onAfterAddInformationsystemGroups
+	 * @hostcms-event Structure_Controller_Breadcrumbs.onBeforeAddShopItem
 	 * @hostcms-event Structure_Controller_Breadcrumbs.onAfterAddShopItem
+	 * @hostcms-event Structure_Controller_Breadcrumbs.onBeforeAddShopGroups
 	 * @hostcms-event Structure_Controller_Breadcrumbs.onAfterAddShopGroups
+	 * @hostcms-event Structure_Controller_Breadcrumbs.onBeforeAddShopFilterSeo
+	 * @hostcms-event Structure_Controller_Breadcrumbs.onAfterAddShopFilterSeo
+	 * @hostcms-event Structure_Controller_Breadcrumbs.onBeforeAddStructure
 	 * @hostcms-event Structure_Controller_Breadcrumbs.onAfterAddStructure
 	 * @hostcms-event Structure_Controller_Breadcrumbs.onAfterAddBreadcrumbs
 	 */
@@ -177,6 +185,11 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 				if (Core_Page::instance()->object->group)
 				{
 					$this->shop_group_id = Core_Page::instance()->object->group;
+				}
+
+				if ($this->showSeoFilter && Core_Page::instance()->object->filterSeo)
+				{
+					$this->filter_seo = Core_Page::instance()->object->filterSeo->id;
 				}
 			}
 
@@ -297,6 +310,25 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 
 		if ($this->showShop)
 		{
+			if ($this->showSeoFilter && $this->filter_seo)
+			{
+				$oShop_Filter_Seo = Core_Entity::factory('Shop_Filter_Seo', $this->filter_seo);
+
+				Core_Event::notify(get_class($this) . '.onBeforeAddShopFilterSeo', $this, array($oShop_Filter_Seo));
+
+				$oShop_Filter_Seo
+					->clearEntities()
+					->addEntity(
+						Core::factory('Core_Xml_Entity')
+							->name('show')
+							->value(1)
+					);
+
+				$this->addBreadcrumb($oShop_Filter_Seo);
+
+				Core_Event::notify(get_class($this) . '.onAfterAddShopFilterSeo', $this, array($oShop_Filter_Seo));
+			}
+
 			if ($this->shop_item_id)
 			{
 				$oShop_Item = Core_Entity::factory('Shop_Item', $this->shop_item_id);

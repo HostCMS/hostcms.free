@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Event_Controller_Related_Event extends Admin_Form_Controller_View
 {
@@ -67,8 +66,7 @@ class Event_Controller_Related_Event extends Admin_Form_Controller_View
 		{
 		?><div class="DTTTFooter">
 			<div class="row">
-				<div class="col-xs-12 col-sm-6 col-md-8"></div>
-				<div class="col-xs-12 col-sm-6 col-md-4">
+				<div class="col-xs-12">
 					<?php $oAdmin_Form_Controller->pageNavigation()?>
 				</div>
 			</div>
@@ -122,6 +120,7 @@ class Event_Controller_Related_Event extends Admin_Form_Controller_View
 		$additionalParams = Core_Str::escapeJavascriptVariable(
 			str_replace(array('"'), array('&quot;'), $oAdmin_Form_Controller->additionalParams)
 		);
+		$additionalParams .= '&secret_csrf=' . Core_Security::getCsrfToken();
 
 		$aEntities = $aDatasets[0]->load();
 
@@ -163,7 +162,7 @@ class Event_Controller_Related_Event extends Admin_Form_Controller_View
 				}
 				?>
 				<li class="timeline-inverted">
-					<div class="timeline-badge palegreen">
+					<div class="timeline-badge orange">
 							<i class="fa fa-tasks"></i>
 					</div>
 					<div class="timeline-panel">

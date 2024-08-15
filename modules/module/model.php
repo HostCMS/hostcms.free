@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Module
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Module_Model extends Core_Entity
 {
@@ -125,7 +124,7 @@ class Module_Model extends Core_Entity
 	{
 		if (is_null($this->Core_Module))
 		{
-			$this->Core_Module = Core_Module::factory($this->path);
+			$this->Core_Module = Core_Module_Abstract::factory($this->path);
 		}
 
 		return $this;
@@ -325,5 +324,27 @@ class Module_Model extends Core_Entity
 		$this->uninstall();
 
 		return parent::delete($primaryKey);
+	}
+
+	/**
+	 * Check user access to admin form action
+	 * @param string $actionName admin form action name
+	 * @param User_Model $oUser user object
+	 * @return bool
+	 */
+	public function checkBackendAccess($actionName, User_Model $oUser)
+	{
+		switch ($actionName)
+		{
+			case 'markDeleted':
+			case 'changeActive':
+				if (in_array($this->path, array('core', 'module', 'admin_form', 'user', 'site', 'trash', 'constant', 'template')))
+				{
+					return FALSE;
+				}
+			break;
+		}
+
+		return TRUE;
 	}
 }

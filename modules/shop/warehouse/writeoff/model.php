@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Warehouse_Writeoff_Model extends Core_Entity
 {
@@ -271,7 +270,7 @@ class Shop_Warehouse_Writeoff_Model extends Core_Entity
 	 */
 	public function shop_warehouse_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		return htmlspecialchars($this->Shop_Warehouse->name);
+		return $this->Shop_Warehouse->id ? htmlspecialchars((string) $this->Shop_Warehouse->name) : '';
 	}
 
 	/**
@@ -403,7 +402,6 @@ class Shop_Warehouse_Writeoff_Model extends Core_Entity
 		$position = 1;
 
 		$aShop_Warehouse_Writeoff_Items = $this->Shop_Warehouse_Writeoff_Items->findAll(FALSE);
-
 		foreach ($aShop_Warehouse_Writeoff_Items as $oShop_Warehouse_Writeoff_Item)
 		{
 			$oShop_Item = $oShop_Warehouse_Writeoff_Item->Shop_Item;
@@ -421,8 +419,8 @@ class Shop_Warehouse_Writeoff_Model extends Core_Entity
 			$node->position = $position++;
 			$node->item = $oShop_Item;
 			$node->name = htmlspecialchars($oShop_Item->name);
-			$node->measure = htmlspecialchars((string) $oShop_Item->Shop_Measure->name);
-			$node->currency = htmlspecialchars($oShop_Item->Shop_Currency->sign);
+			$node->measure = $oShop_Item->shop_measure_id ? htmlspecialchars((string) $oShop_Item->Shop_Measure->name) : '';
+			$node->currency = $oShop_Item->shop_currency_id ? htmlspecialchars((string) $oShop_Item->Shop_Currency->sign) : '';
 			$node->price = $oShop_Warehouse_Writeoff_Item->price;
 			$node->quantity = $oShop_Warehouse_Writeoff_Item->count;
 			$node->amount = $amount;
@@ -432,6 +430,10 @@ class Shop_Warehouse_Writeoff_Model extends Core_Entity
 
 			$aReplace['total_count']++;
 		}
+
+		$aReplace['year'] = date('Y');
+		$aReplace['month'] = date('m');
+		$aReplace['day'] = date('d');
 
 		Core_Event::notify($this->_modelName . '.onAfterGetPrintlayoutReplaces', $this, array($aReplace));
 		$eventResult = Core_Event::getLastReturn();

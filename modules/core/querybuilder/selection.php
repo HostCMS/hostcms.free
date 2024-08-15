@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Querybuilder
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 {
@@ -834,7 +833,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 */
 	public function whereNotIn($column, array $value)
 	{
-		return $this->where($column, 'IN', $value);
+		return $this->where($column, 'NOT IN', $value);
 	}
 
 	/**
@@ -1037,8 +1036,9 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 				if (is_array($value) && count($value) == 2)
 				{
 					// Escape values
-					$aValue = $this->_quoteValues($value);
-					$value = $aValue[0] . ' AND ' . $aValue[1];
+					$value = (is_object($value[0]) ? $value[0]->build() : $this->_dataBase->quote($value[0]))
+						. ' AND '
+						. (is_object($value[1]) ? $value[1]->build() : $this->_dataBase->quote($value[1]));
 				}
 				else
 				{

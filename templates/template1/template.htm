@@ -208,7 +208,9 @@
 							->xsl(
 								Core_Entity::factory('Xsl')->getByName('МагазинКорзинаКраткая')
 							)
-							->couponText(isset($_SESSION) ? Core_Array::get($_SESSION, 'coupon_text') : '')
+							->couponText(
+								Core_Array::get(Core_Array::getSession('hostcmsOrder', array()), 'coupon_text')
+							)
 							->show()
 							->refreshLittleCart();
 					}

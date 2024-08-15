@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Informationsystem_Group_Model extends Core_Entity
 {
@@ -57,7 +56,8 @@ class Informationsystem_Group_Model extends Core_Entity
 		'informationsystem_item' => array(),
 		'informationsystem_group' => array('foreign_key' => 'parent_id'),
 		'shortcut' => array('model' => 'Informationsystem_Group', 'foreign_key' => 'shortcut_id'),
-		'media_informationsystem_group' => array()
+		'media_informationsystem_group' => array(),
+		'media_item' => array('through' => 'media_informationsystem_group')
 	);
 
 	/**
@@ -309,6 +309,12 @@ class Informationsystem_Group_Model extends Core_Entity
 				$oProperty_Value
 					->setHref($this->getGroupHref())
 					->setDir($this->getGroupPath());
+			break;
+			case 5: // Элемент информационной системы
+			case 12: // Товар интернет-магазина
+			case 13: // Группа информационной системы
+			case 14: // Группа интернет-магазина
+				$oProperty_Value->showXmlMedia($this->_showXmlMedia);
 			break;
 			case 8:
 				$oProperty_Value->dateFormat($this->Informationsystem->format_date);
@@ -593,7 +599,7 @@ class Informationsystem_Group_Model extends Core_Entity
 		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($parent_id));
 
 		$this->parent_id = $parent_id;
-		$this->save()->clearCache();
+		$this->checkDuplicatePath()->save()->clearCache();
 
 		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
 
@@ -722,7 +728,7 @@ class Informationsystem_Group_Model extends Core_Entity
 	{
 		if (Core::moduleIsActive('search'))
 		{
-			Search_Controller::deleteSearchPage(1, 1, $this->id);
+			Search_Controller::deleteSearchPage($this->Informationsystem->site_id, 1, 1, $this->id);
 		}
 
 		return $this;
@@ -1127,6 +1133,24 @@ class Informationsystem_Group_Model extends Core_Entity
 	}
 
 	/**
+	 * Show media in XML
+	 * @var boolean
+	 */
+	protected $_showXmlMedia = FALSE;
+
+	/**
+	 * Show properties in XML
+	 * @param mixed $showXmlProperties array of allowed properties ID or boolean
+	 * @return self
+	 */
+	public function showXmlMedia($showXmlMedia = TRUE)
+	{
+		$this->_showXmlMedia = $showXmlMedia;
+
+		return $this;
+	}
+
+	/**
 	 * Get XML for entity and children entities
 	 * @return string
 	 * @hostcms-event informationsystem_group.onBeforeRedeclaredGetXml
@@ -1189,6 +1213,16 @@ class Informationsystem_Group_Model extends Core_Entity
 			}
 		}
 
+		if ($this->_showXmlMedia && Core::moduleIsActive('media'))
+		{
+			$aEntities = Media_Item_Controller::getValues($this);
+			foreach ($aEntities as $oEntity)
+			{
+				$oMedia_Item = $oEntity->Media_Item;
+				$this->addEntity($oMedia_Item->setCDN(Core_Page::instance()->informationsystemCDN));
+			}
+		}
+
 		return $this;
 	}
 
@@ -1233,9 +1267,13 @@ class Informationsystem_Group_Model extends Core_Entity
 	{
 		if (Core::moduleIsActive('cache'))
 		{
-			Core_Cache::instance(Core::$mainConfig['defaultCache'])
-				->deleteByTag('informationsystem_group_' . $this->id)
-				->deleteByTag('informationsystem_group_' . $this->parent_id);
+			$oCache = Core_Cache::instance(Core::$mainConfig['defaultCache']);
+
+			$oCache->deleteByTag('informationsystem_group_' . $this->id);
+
+			// When importing on the popular sites new data is permanently write for the root-group.
+			$this->parent_id != 0
+				&& $oCache->deleteByTag('informationsystem_group_' . $this->parent_id);
 
 			// Static cache
 			$oSite = $this->Informationsystem->Site;

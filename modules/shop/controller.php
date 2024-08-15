@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Controller
 {
@@ -266,6 +265,9 @@ class Shop_Controller
 					</li>
 					<li>
 						<a onclick="$.insertSeoTemplate(lastFocusedGroup, \'\{this.seoFilter \x22: \x22 \x22, \x22\}\')">' . Core::_("Shop.seo_template_filter") . '</a>
+					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedGroup, \'\{this.seoFilterPrices \x22' . Core::_('Shop.seo_template_filter_prices_from') . '\x22 \x22' . Core::_('Shop.seo_template_filter_prices_to') . '\x22\}\')">' . Core::_("Shop.seo_template_filter_prices") . '</a>
 					</li>
 					<li>
 						<a onclick="$.insertSeoTemplate(lastFocusedGroup, \'\{this.filterProducer}\')">' . Core::_("Shop.seo_template_filter_producer") . '</a>
@@ -530,8 +532,8 @@ class Shop_Controller
 		* 5 - Shop_Order_Model
 		* 6 - Shop_Warehouse_Purchaseorder_Model
 		* 7 - Shop_Warehouse_Invoice_Model
-		* 8 - Shop_Warehouse_Supply
-		* 9 - Shop_Warehouse_Purchasereturn
+		* 8 - Shop_Warehouse_Supply_Model
+		* 9 - Shop_Warehouse_Purchasereturn_Model
 		* 30 - Shop_Warrant_Model
 		* 31 - Shop_Warrant_Model
 		* 32 - Shop_Warrant_Model

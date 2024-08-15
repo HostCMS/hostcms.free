@@ -14,6 +14,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - pattern($pattern) шаблон разбора данных в URI, см. __construct()
  * - cache(TRUE|FALSE) использовать кэширование, по умолчанию TRUE
  * - calculateTotal(TRUE|FALSE) вычислять общее количество найденных, по умолчанию TRUE
+ * - commentsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств комментариев, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
+ * - commentsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств комментариев, по умолчанию TRUE. Ограничения на список свойств в виде массива влияет и на выборку значений свойств товара.
  * - addAllowedTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, разрешенных к передаче в генерируемый XML
  * - addForbiddenTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, запрещенных к передаче в генерируемый XML
  *
@@ -38,18 +40,16 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * );
  *
  * $Shop_Comment_Controller_Show
- * 	->xsl(
- * 		Core_Entity::factory('Xsl')->getByName('СписокКомментариевНаГлавной')
- * 	)
+ * 	->xsl('СписокКомментариевНаГлавной')
  * 	->limit(5)
+ * 	->commentsProperties(TRUE)
  * 	->show();
  * </code>
  *
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Comment_Controller_Show extends Core_Controller
 {
@@ -69,6 +69,9 @@ class Shop_Comment_Controller_Show extends Core_Controller
 		'commentsForbiddenTags',
 		'commentsActivity',
 		'calculateTotal',
+		'commentsProperties',
+		'commentsPropertiesList',
+		'url'
 	);
 
 	/**
@@ -82,6 +85,36 @@ class Shop_Comment_Controller_Show extends Core_Controller
 	 * @var string
 	 */
 	protected $_cacheName = 'shop_comment_show';
+
+	/**
+	 * List of properties for item
+	 * @var array
+	 */
+	protected $_aComment_Properties = array();
+
+	/**
+	 * List of property directories for item
+	 * @var array
+	 */
+	protected $_aComment_Property_Dirs = array();
+
+	/**
+	 * Get _aComment_Properties set
+	 * @return array
+	 */
+	public function getCommentProperties()
+	{
+		return $this->_aComment_Properties;
+	}
+
+	/**
+	 * Get _aItem_Property_Dirs set
+	 * @return array
+	 */
+	public function getCommentPropertyDirs()
+	{
+		return $this->_aComment_Property_Dirs;
+	}
 
 	/**
 	 * Constructor.
@@ -99,9 +132,13 @@ class Shop_Comment_Controller_Show extends Core_Controller
 		);
 
 		$this->limit = 5;
-		$this->calculateTotal = TRUE;
-		
+		$this->commentsPropertiesList = $this->calculateTotal = TRUE;
+
 		$this->commentsActivity = 'active';
+
+		$this->commentsProperties = FALSE;
+		
+		$this->url = Core::$url['path'];
 	}
 
 	/**
@@ -212,6 +249,12 @@ class Shop_Comment_Controller_Show extends Core_Controller
 
 		$oShop = $this->getEntity();
 
+		// Показывать дополнительные свойства комментариев
+		if ($this->commentsProperties || $this->commentsPropertiesList)
+		{
+			$aShowCommentPropertyIDs = $this->_commentsProperties();
+		}
+
 		$this->addEntity(
 			Core::factory('Core_Xml_Entity')
 				->name('page')
@@ -230,7 +273,7 @@ class Shop_Comment_Controller_Show extends Core_Controller
 
 			if ($this->page && !count($aComments))
 			{
-				return $this->error404();
+				return $this->error410();
 			}
 
 			if ($this->calculateTotal)
@@ -242,6 +285,19 @@ class Shop_Comment_Controller_Show extends Core_Controller
 						->name('total')
 						->value(intval($this->total))
 				);
+			}
+
+			if ($this->commentsProperties)
+			{
+				$mShowCommentPropertyIDs = is_array($this->commentsProperties)
+					? $this->commentsProperties
+					: $aShowCommentPropertyIDs;
+
+				is_array($mShowCommentPropertyIDs) && !count($mShowCommentPropertyIDs) && $mShowCommentPropertyIDs = FALSE;
+			}
+			else
+			{
+				$mShowCommentPropertyIDs = FALSE;
 			}
 
 			$this->_shownIDs = array();
@@ -260,6 +316,8 @@ class Shop_Comment_Controller_Show extends Core_Controller
 
 				$oComment->clearEntities();
 				$this->applyforbiddenTags($oComment);
+
+				$oComment->showXmlProperties($mShowCommentPropertyIDs);
 
 				$oComment->addEntity($oShop_Item);
 
@@ -299,7 +357,7 @@ class Shop_Comment_Controller_Show extends Core_Controller
 		$oShop = $this->getEntity();
 
 		$Core_Router_Route = new Core_Router_Route($this->pattern, $this->patternExpressions);
-		$this->patternParams = $matches = $Core_Router_Route->applyPattern(Core::$url['path']);
+		$this->patternParams = $matches = $Core_Router_Route->applyPattern($this->url);
 
 		if (isset($matches['page']) && is_numeric($matches['page']))
 		{
@@ -310,11 +368,88 @@ class Shop_Comment_Controller_Show extends Core_Controller
 			}
 			else
 			{
-				return $this->error404();
+				return $this->error410();
 			}
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterParseUrl', $this);
+
+		return $this;
+	}
+
+	/**
+	 * Add list of comment properties
+	 * @return array
+	 * @hostcms-event Shop_Controller_Show.onBeforeAddCommentsPropertiesList
+	 */
+	protected function _commentsProperties()
+	{
+		$aShowPropertyIDs = array();
+
+		$oShop = $this->getEntity();
+
+		$oShop_Comment_Property_List = Core_Entity::factory('Shop_Comment_Property_List', $oShop->id);
+
+		$bTpl = $this->_mode == 'tpl';
+
+		$aProperties = is_array($this->commentsPropertiesList) && count($this->commentsPropertiesList)
+			? $oShop_Comment_Property_List->Properties->getAllByid($this->commentsPropertiesList, FALSE, 'IN')
+			: $oShop_Comment_Property_List->Properties->findAll();
+
+		foreach ($aProperties as $oProperty)
+		{
+			$oProperty->clearEntities();
+			$aShowPropertyIDs[] = $oProperty->id;
+			$this->_aComment_Properties[$oProperty->property_dir_id][] = $oProperty;
+		}
+
+		// Список свойств комментариев
+		if ($this->commentsPropertiesList)
+		{
+			$aProperty_Dirs = $oShop_Comment_Property_List->Property_Dirs->findAll();
+			foreach ($aProperty_Dirs as $oProperty_Dir)
+			{
+				$oProperty_Dir->clearEntities();
+				$this->_aComment_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
+			}
+
+			if (!$bTpl)
+			{
+				$Comment_Properties = Core::factory('Core_Xml_Entity')
+					->name('comment_properties');
+
+				$this->addEntity($Comment_Properties);
+
+				Core_Event::notify(get_class($this) . '.onBeforeAddCommentsPropertiesList', $this, array($Comment_Properties));
+
+				$this->_addCommentsPropertiesList(0, $Comment_Properties);
+			}
+		}
+
+		return $aShowPropertyIDs;
+	}
+
+	/**
+	 * Add items properties to XML
+	 * @param int $parent_id
+	 * @param object $parentObject
+	 * @return self
+	 */
+	protected function _addCommentsPropertiesList($parent_id, $parentObject)
+	{
+		if (isset($this->_aComment_Property_Dirs[$parent_id]))
+		{
+			foreach ($this->_aComment_Property_Dirs[$parent_id] as $oProperty_Dir)
+			{
+				$parentObject->addEntity($oProperty_Dir);
+				$this->_addCommentsPropertiesList($oProperty_Dir->id, $oProperty_Dir);
+			}
+		}
+
+		if (isset($this->_aComment_Properties[$parent_id]))
+		{
+			$parentObject->addEntities($this->_aComment_Properties[$parent_id]);
+		}
 
 		return $this;
 	}
@@ -327,6 +462,17 @@ class Shop_Comment_Controller_Show extends Core_Controller
 	public function applyforbiddenTags($oComment)
 	{
 		$this->applyForbiddenAllowedTags('/shop/comment', $oComment);
+		return $this;
+	}
+
+	/**
+	 * Define handler for 410 error
+	 * @return self
+	 */
+	public function error410()
+	{
+		Core_Page::instance()->error410();
+
 		return $this;
 	}
 

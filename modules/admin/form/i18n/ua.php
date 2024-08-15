@@ -146,5 +146,11 @@ return array(
 	'successfully' => 'Успішно',
 	'failed' => 'Не успішно',
 
-	'timeline_empty' => 'Лента дії пуста!'
+	'timeline_empty' => 'Лента дії пуста!',
+	'viewForm_disallow' => 'Перегляд форми заборонено!',
+
+	'admin_form_field_settings' => 'Налаштування полів форми',
+	'setting_modal_title' => 'Налаштування полів форми "%s"',
+	'select_all' => 'Вибрати все',
+	'disable_all' => 'Скасувати все'
 );

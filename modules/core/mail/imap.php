@@ -18,14 +18,16 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - search($str) строка поиска для imap_search(), если не указана, то в зависимости от опции delete значение будет 'ALL' или 'UNSEEN'
  * - folder($str) папка для поиска, по умолчанию INBOX
  * - move($str) папка для перемещения, например Trash
- * - ssl($str) SSL соединение
+ * - validateCert(TRUE|FALSE) проверять сертификаты серверов TLS/SSL, по умолчанию FALSE
+ * - ssl(TRUE|FALSE) использовать SSL для шифрования сессии
+ * - tls(TRUE|FALSE) принудительно использовать start-TLS для шифрования сессии и отвергать соединения с серверами его не поддерживающими
+ * - notls(TRUE|FALSE) не применять start-TLS для шифрования сессии, даже если сервер его поддерживает
  * - delete(TRUE|FALSE) удалять сообщения после получения, по умолчанияю FALSE
  *
  * @package HostCMS
  * @subpackage Core\Mail
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Mail_Imap extends Core_Servant_Properties
 {
@@ -44,7 +46,10 @@ class Core_Mail_Imap extends Core_Servant_Properties
 		'search',
 		'folder',
 		'move',
+		'validateCert',
 		'ssl',
+		'tls',
+		'notls',
 		'delete'
 	);
 
@@ -55,7 +60,8 @@ class Core_Mail_Imap extends Core_Servant_Properties
 	{
 		parent::__construct();
 
-		$this->delete = $this->ssl = FALSE;
+		$this->delete = $this->validateCert
+			= $this->ssl = $this->tls = $this->notls = FALSE;
 
 		$this->folder = 'INBOX';
 
@@ -125,6 +131,8 @@ class Core_Mail_Imap extends Core_Servant_Properties
 	 */
 	public function execute()
 	{
+		$this->_aMessages = array();
+
 		// Если указан нестандартный порт, записываем его номер
 		$aServer = explode(':', $this->server);
 
@@ -156,9 +164,21 @@ class Core_Mail_Imap extends Core_Servant_Properties
 		}
 
 		// Use TSL/SSL
-		$this->ssl && $protocol .= '/ssl';
+		if ($this->ssl)
+		{
+			$protocol .= '/ssl';
+		}
+		elseif ($this->tls)
+		{
+			$protocol .= '/tls';
+		}
+		elseif ($this->notls)
+		{
+			$protocol .= '/notls';
+		}
 
-		$protocol .= '/novalidate-cert/notls';
+		!$this->validateCert
+			&& $protocol .= '/novalidate-cert';
 
 		$mailbox = '{' . $this->server . ':' . intval($this->port) . $protocol . '}' . $this->folder;
 
@@ -166,7 +186,8 @@ class Core_Mail_Imap extends Core_Servant_Properties
 			? array('DISABLE_AUTHENTICATOR' => 'GSSAPI') // PLAIN
 			: array();
 
-		$this->_stream = @imap_open($mailbox, $this->login, $this->password, 0, 0, $aParam);
+		$retries = 1;
+		$this->_stream = @imap_open($mailbox, $this->login, $this->password, 0, $retries, $aParam);
 
 		// Соединение с почтовым сервером не установлено
 		if (!$this->_stream)
@@ -186,8 +207,6 @@ class Core_Mail_Imap extends Core_Servant_Properties
 			imap_close($this->_stream);
 			return $this;
 		}
-
-		$this->_aMessages = array();
 
 		// POP3 has no concept of read and unread messages
 		$aMailIds = imap_search($this->_stream, !is_null($this->search)
@@ -216,7 +235,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 			$structure = imap_fetchstructure($this->_stream, $i);
 
 			// Тип сообщения
-			$this->_aMessages[$i]['type'] = $structure->subtype;
+			$this->_aMessages[$i]['type'] = is_object($structure) ? $structure->subtype : 'text';
 
 			// Разбираем сообщение на части
 			$this->_parseMessage($i);
@@ -282,6 +301,11 @@ class Core_Mail_Imap extends Core_Servant_Properties
 			$this->_aMessages[$i]['subject'] = isset($header_message->subject)
 				? iconv_mime_decode($header_message->subject, 0, 'UTF-8')
 				: '';
+
+			// Make unseen
+			imap_clearflag_full($this->_stream, $i, '\\Seen');
+
+			//var_dump($this->_aMessages[$i]); die();
 		}
 
 		// Пометить сообщения прочитанными
@@ -507,32 +531,37 @@ class Core_Mail_Imap extends Core_Servant_Properties
 							imap_fetchbody($this->_stream, $i, $messageNumber), $aPart['encoding']
 						);
 
-						!is_null($partCharset)
+						!is_null($partCharset) && strtolower($partCharset) != 'utf-8'
 							&& $sPartBody = mb_convert_encoding($sPartBody, 'UTF-8', $partCharset);
 
-						$this->_aMessages[$i]['multipart'][$aPart['subtype']] = $sPartBody;
+						$subtypeId = isset($aPart['id'])
+							? trim($aPart['id'], '<>')
+							: $aPart['subtype'];
+
+						$aPart['body'] = $sPartBody;
+
+						$this->_aMessages[$i]['multipart'][$subtypeId] = $aPart;
 					}
+
+					//var_dump($this->_aMessages[$i]['multipart']); die();
 
 					if (isset($this->_aMessages[$i]['multipart']['HTML']))
 					{
 						$this->_aMessages[$i]['subtype'] = 'HTML';
-						$this->_aMessages[$i]['body'] = $this->_aMessages[$i]['multipart']['HTML'];
+						$this->_aMessages[$i]['body'] = $this->_aMessages[$i]['multipart']['HTML']['body'];
 					}
 					elseif (isset($this->_aMessages[$i]['multipart']['PLAIN']))
 					{
 						$this->_aMessages[$i]['subtype'] = 'PLAIN';
-						$this->_aMessages[$i]['body'] = $this->_aMessages[$i]['multipart']['PLAIN'];
+						$this->_aMessages[$i]['body'] = $this->_aMessages[$i]['multipart']['PLAIN']['body'];
 					}
 					else
 					{
 						// В сообщение идет первый блок
 						$defaultPart = $aStructurePart['parts'][0];
 
-						$this->_aMessages[$i]['body'] = $this->_aMessages[$i]['multipart'][
-							$defaultPart['subtype']
-						];
-
 						$this->_aMessages[$i]['subtype'] = $defaultPart['subtype'];
+						$this->_aMessages[$i]['body'] = $this->_aMessages[$i]['multipart'][$defaultPart['subtype']]['body'];
 					}
 				}
 			}
@@ -551,7 +580,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 						? $aStructurePart['parameters']['charset']
 						: NULL;
 
-				!is_null($charset)
+				!is_null($charset) && strtolower($charset) != 'utf-8'
 					&& $body = mb_convert_encoding($body, 'UTF-8', $charset);
 
 				switch ($partType)

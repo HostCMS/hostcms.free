@@ -1,6 +1,6 @@
 <?php
 
-return array (
+return array(
 	'recursive_properties' => TRUE,
-	'add_list_items' => TRUE,
+	'add_list_items' => TRUE
 );

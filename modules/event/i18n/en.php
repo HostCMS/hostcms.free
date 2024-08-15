@@ -102,6 +102,7 @@ return array(
 	'notSetResponsibleEmployees' => 'Identify responsible employees',
 	'creatorNotDefined' => 'Among the responsible collaborators there is no creator of event',
 	'copy_success' => "Event copied successfully!",
+	'delete_success' => 'Item deleted!',
 	'undelete_success' => "Event restore successfully!",
 	'apply_success' => "Event changed successfully!",
 	'in_process' => 'In process',
@@ -155,4 +156,11 @@ return array(
 	'tabDmsDocuments' => 'Documents',
 	'guid' => 'GUID',
 	'last_modified' => 'Last modified',
+
+	'event_calendar_caldav_id' => 'Calendars',
+	'select_calendar' => 'Select calendar',
+
+	'tags' => "Labels (tags)",
+	'type_tag' => 'Type tag ...',
+	'without_deadline' => 'Without deadline',
 );

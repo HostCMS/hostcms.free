@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Http
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Http_Curl extends Core_Http
 {
@@ -156,15 +155,15 @@ class Core_Http_Curl extends Core_Http
 				$code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 				if ($code == 301 || $code == 302)
 				{
-					preg_match('/Location:(.*?)\n/', $datastr, $matches);
-					$newurl = trim(array_pop($matches));
-					if (strlen($newurl))
+					preg_match('/Location:\s*(.*?)\n/i', $datastr, $matches);
+					$newurl = array_pop($matches);
+					if (!is_null($newurl) && strlen(trim($newurl)))
 					{
 						$rch = curl_copy_handle($curl);
 						@curl_close($curl);
 						$curl = $rch;
 						//curl_setopt($rch, CURLOPT_FORBID_REUSE, TRUE);
-						curl_setopt($curl, CURLOPT_URL, $newurl);
+						curl_setopt($curl, CURLOPT_URL, trim($newurl));
 
 						// follow location
 						$datastr = @curl_exec($curl);

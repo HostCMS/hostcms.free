@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -20,7 +19,7 @@ $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title(Core::_('Sql.manage_title'))
@@ -86,6 +85,34 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($oSql_Table_Controller_Edit);
+}
+
+$oAdmin_Form_Action_Dump = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('dump');
+
+if ($oAdmin_Form_Action_Dump && $oAdmin_Form_Controller->getAction() == 'dump')
+{
+	$oSql_Table_Controller_Dump = Admin_Form_Action_Controller::factory(
+		'Sql_Table_Controller_Dump', $oAdmin_Form_Action_Dump
+	);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oSql_Table_Controller_Dump);
+}
+
+$oAdmin_Form_Action_DumpStructure = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('dumpStructure');
+
+if ($oAdmin_Form_Action_DumpStructure && $oAdmin_Form_Controller->getAction() == 'dumpStructure')
+{
+	$oSql_Table_Controller_Structure = Admin_Form_Action_Controller::factory(
+		'Sql_Table_Controller_Structure', $oAdmin_Form_Action_DumpStructure
+	);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oSql_Table_Controller_Structure);
 }
 
 // Источник данных 0

@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Mail
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Mail_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -74,9 +73,25 @@ class Mail_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->move($this->getField('pop3')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow3)
 			->move($this->getField('smtp')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow3);
 
+		$oMainTab->delete($this->getField('encryption'));
+
+		$oMainRow4->add(Admin_Form_Entity::factory('Select')
+			->name('encryption')
+			->caption(Core::_('Mail.encryption'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+			->options(array(
+				'' => Core::_('Admin_Form.no'),
+				'ssl' => 'SSL',
+				'tls' => 'TLS',
+				'notls' => 'NOTLS',
+			))
+			->value($this->_object->encryption)
+		);
+
 		$oMainTab
+			->move($this->getField('folders')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow4)
 			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow4)
-			->move($this->getField('ssl')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow5)
+			->move($this->getField('cert_validation')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow5)
 			->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow6)
 			->move($this->getField('default')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow7);
 

@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -19,7 +18,7 @@ $sAdminFormAction = '/admin/sql/index.php';
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create();
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title(Core::_('sql.title'));
@@ -99,7 +98,7 @@ ob_start();
 
 $oAdmin_View = Admin_View::create();
 $oAdmin_View
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->pageTitle(Core::_('sql.title'));
 
 // Меню формы
@@ -152,6 +151,17 @@ $oAdmin_Form_Entity_Menus->add(
 		)
 		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/sql/table/index.php', '', NULL)
+		)
+)
+->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Sql.variables'))
+		->icon('fa fa-list')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/admin/sql/variable/index.php', '', NULL)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/sql/variable/index.php', '', NULL)
 		)
 )
 ->add(
@@ -396,7 +406,11 @@ if ($bExec)
 
 								$oTr->add(
 									Core_Html_Entity::factory('Td')
-										->value(Core_Str::cut(htmlspecialchars($value), 100))
+										->value(Core_Str::cut(htmlspecialchars(
+											mb_check_encoding($value, 'UTF-8')
+												? $value
+												: '0x' . bin2hex($value)
+										), 100))
 								);
 							}
 						}
@@ -511,7 +525,7 @@ foreach ($aSql_User_Tabs as $key => $oSql_User_Tab)
 					->caption(Core::_('sql.load_file'))
 					->largeImage(array('show_params' => FALSE))
 					->smallImage(array('show' => FALSE))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-8 no-padding-left no-margin-bottom'))
+					->divAttr(array('class' => 'col-xs-12 no-margin-bottom'))
 			)
 		);
 

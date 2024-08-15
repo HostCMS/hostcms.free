@@ -30,9 +30,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Querybuilder
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @version 7.x
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_QueryBuilder_Update extends Core_QueryBuilder_Selection
 {
@@ -169,7 +168,7 @@ class Core_QueryBuilder_Update extends Core_QueryBuilder_Selection
 	/**
 	 * Build SET expression
 	 * @param array $columns columns list
-	 * @return string The SQL query
+	 * @return string
 	 */
 	protected function _buildSet(array $columns)
 	{

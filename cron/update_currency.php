@@ -3,10 +3,10 @@
 /**
  * Обновление валют на текущий день по курсу ЦБ.
  *
- * @package HostCMS 6\cron
- * @version 6.x
+ * @package HostCMS 7\cron
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2014 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 
 require_once(dirname(__FILE__) . '/../' . 'bootstrap.php');
@@ -25,14 +25,14 @@ $Core_Http = Core_Http::instance()
 	->userAgent('Mozilla/5.0 (Windows NT 5.1; rv:26.0) Gecko/20100101 Firefox/26.0')
 	->execute();
 
-$xml = $Core_Http->getBody();
+$xml = $Core_Http->getDecompressedBody();
 
 $oXml = @simplexml_load_string($xml);
 
 if (is_object($oXml))
 {
 	$fDate = Core_Date::date2sql($oXml->attributes()->Date);
-	
+
 	$oDefaultCurrency = Core_Entity::factory('Shop_Currency')->getBydefault(1);
 
 	foreach ($oXml->Valute as $Valute)
@@ -63,7 +63,7 @@ if (is_object($oXml))
 
 		$oRubCurrency = Core_Entity::factory('Shop_Currency')->getByCode('RUB');
 		is_null($oRubCurrency) && $oRubCurrency = Core_Entity::factory('Shop_Currency')->getByCode('RUR');
-		
+
 		!is_null($oRubCurrency)
 			&& $oRubCurrency
 				->exchange_rate($fRubRate)

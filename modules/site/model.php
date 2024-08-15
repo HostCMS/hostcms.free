@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Site
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Site_Model extends Core_Entity
 {
@@ -144,6 +143,7 @@ class Site_Model extends Core_Entity
 		'structure_menu' => array(),
 		'template' => array(),
 		'template_dir' => array(),
+		'telephony' => array(),
 		'webhook' => array(),
 	);
 
@@ -426,6 +426,11 @@ class Site_Model extends Core_Entity
 			$this->Media_Formats->deleteAll(FALSE);
 			$this->Media_Groups->deleteAll(FALSE);
 			$this->Media_Items->deleteAll(FALSE);
+		}
+
+		if (Core::moduleIsActive('telephony'))
+		{
+			$this->Telephonies->deleteAll(FALSE);
 		}
 
 		$this->Site_Aliases->deleteAll(FALSE);
@@ -1911,6 +1916,44 @@ class Site_Model extends Core_Entity
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Check if $uri satisfy $requirements
+	 * @param string $uri URI
+	 * @param string $requirements Requirements separated with "\n"
+	 */
+	public function uriSatisfyRequirements($uri, $requirements)
+	{
+		$aRules = !is_null($requirements) && $requirements !== ''
+			? explode("\n", str_replace("\r", '', trim($requirements)))
+			: array();
+
+		$bSatisfy = FALSE;
+
+		$iUriLen = mb_strlen($uri);
+
+		foreach ($aRules as $rule)
+		{
+			$iRuleLen = mb_strlen($rule);
+
+			$star = $iRuleLen > 1 && mb_substr($rule, -1) == '*';
+			if ($star)
+			{
+				// В правиле отрезаем звездочку
+				$rule = mb_substr($rule, 0, -1);
+			}
+
+			// Если запрошенный URL начинается с указанного шаблона
+			// и длина правила равна длине запроса или есть звездочка в правиле
+			if (mb_strpos($uri, $rule) === 0 && ($star || $iRuleLen == $iUriLen))
+			{
+				$bSatisfy = TRUE;
+				break;
+			}
+		}
+
+		return $bSatisfy;
 	}
 
 	/**

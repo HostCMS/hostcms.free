@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 {
@@ -69,7 +68,7 @@ class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 			$aShop_Discounts = $this->Shop->Shop_Discounts->findAll(FALSE);
 			foreach ($aShop_Discounts as $oShop_Discount)
 			{
-				$aDiscounts[$oShop_Discount->id] = $oShop_Discount->name;
+				$aDiscounts[$oShop_Discount->id] = $oShop_Discount->getOptions();
 			}
 
 			$oAdmin_Form_Entity_Select_Discount = Admin_Form_Entity::factory('Select')
@@ -101,7 +100,7 @@ class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 				$aShop_Bonuses = $this->Shop->Shop_Bonuses->findAll(FALSE);
 				foreach ($aShop_Bonuses as $oShop_Bonus)
 				{
-					$aBonuses[$oShop_Bonus->id] = $oShop_Bonus->name;
+					$aBonuses[$oShop_Bonus->id] = $oShop_Bonus->getOptions();
 				}
 
 				$oAdmin_Form_Entity_Select_Bonus = Admin_Form_Entity::factory('Select')
@@ -127,6 +126,15 @@ class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 					->add($oAdmin_Form_Entity_Select_Bounus_Modifications_Checkbox)
 					->add($oAdmin_Form_Entity_Select_Bonus_Checkbox);
 			}
+
+			$oCore_Html_Entity_Form->add(
+				Admin_Form_Entity::factory('Select')
+					->name('shop_producer_id')
+					->caption(Core::_('Shop_Item.shop_producer_id'))
+					->options(Shop_Item_Controller_Edit::fillProducersList($this->Shop->id))
+					->controller($window_Admin_Form_Controller)
+					->filter(TRUE)
+			);
 
 			// Идентификаторы переносимых указываем скрытыми полями в форме, чтобы не превысить лимит GET
 			$aChecked = $this->_Admin_Form_Controller->getChecked();
@@ -177,7 +185,7 @@ class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 
 			Core_Html_Entity::factory('Script')
 				->value("$(function() {
-					$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . Core_Str::escapeJavascriptVariable($this->title) . "', AppendTo: '#{$windowId}', width: 750, height: 350, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
+					$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . Core_Str::escapeJavascriptVariable($this->title) . "', AppendTo: '#{$windowId}', width: 750, height: 400, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
 				->execute();
 
 			$this->addMessage(ob_get_clean());
@@ -187,79 +195,151 @@ class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 		}
 		else
 		{
-			$iDiscountID = Core_Array::getPost('discount_id');
-			$iBonusID = Core_Array::getPost('bonus_id');
+			$iDiscountID = Core_Array::getPost('discount_id', 0, 'int');
+			$iBonusID = Core_Array::getPost('bonus_id', 0, 'int');
 
 			$oShop_Item = $this->_object;
 
 			if ($iDiscountID)
 			{
-				$oShop_Discount = Core_Entity::factory('Shop_Discount', $iDiscountID);
-
-				$aObjects = array($oShop_Item);
-
-				if (!is_null(Core_Array::getPost('flag_include_modifications')))
-				{
-					$aModifications = $oShop_Item->Modifications->findAll(FALSE);
-					foreach ($aModifications as $oModification)
-					{
-						$aObjects[] = $oModification;
-					}
-				}
-
-				foreach ($aObjects as $oShop_Item)
-				{
-					if (!is_null(Core_Array::getPost('flag_delete_discount')))
-					{
-						$oShop_Item->remove($oShop_Discount);
-					}
-					else
-					{
-						// Устанавливаем скидку товару
-						is_null($oShop_Item->Shop_Item_Discounts->getByShop_discount_id($iDiscountID))
-							&& $oShop_Item->add($oShop_Discount);
-					}
-				}
+				$this->_applyDiscounts($oShop_Item, $iDiscountID);
 			}
 
 			if (Core::moduleIsActive('siteuser') && $iBonusID)
 			{
-				$oShop_Bonus = Core_Entity::factory('Shop_Bonus', $iBonusID);
-
-				$aBonusObjects = array($oShop_Item);
-
-				if (!is_null(Core_Array::getPost('flag_bonus_include_modifications')))
-				{
-					$aBonusModifications = $oShop_Item->Modifications->findAll(FALSE);
-					foreach ($aBonusModifications as $oBonusModification)
-					{
-						$aBonusObjects[] = $oBonusModification;
-					}
-				}
-
-				foreach ($aBonusObjects as $oShop_Item)
-				{
-					if (!is_null(Core_Array::getPost('flag_delete_bonus')))
-					{
-						$oShop_Item->remove($oShop_Bonus);
-					}
-					else
-					{
-						// Устанавливаем бонус товару
-						$oShop_Item->add($oShop_Bonus)
-							&& is_null($oShop_Item->Shop_Item_Bonuses->getByShop_bonus_id($iBonusID));
-					}
-				}
+				$this->_applyBonuses($oShop_Item, $iBonusID);
 			}
 
-			$oShop_Item->clearCache();
+			$this->_clear($oShop_Item);
+		}
 
-			// Fast filter
-			if ($oShop_Item->Shop->filter)
+		return $this;
+	}
+
+	/**
+	 * Clear shop item
+	 * @param Shop_Item_Model $oShop_Item
+	 * @return self
+	 */
+	protected function _clear(Shop_Item_Model $oShop_Item)
+	{
+		$oShop_Item->clearCache();
+
+		// Fast filter
+		if ($this->Shop->filter)
+		{
+			$oShop_Filter_Controller = new Shop_Filter_Controller($this->Shop);
+			$oShop_Filter_Controller->fill($oShop_Item);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Get shop items
+	 * @param Shop_Item_Model $oShop_Item
+	 * @param int $flag_include_modifications
+	 * @return array
+	 */
+	protected function _getShopItems(Shop_Item_Model $oShop_Item, $flag_include_modifications = 0)
+	{
+		$aReturn = array();
+
+		$shop_producer_id = Core_Array::getPost('shop_producer_id', 0 , 'int');
+
+		if ($shop_producer_id)
+		{
+			if ($oShop_Item->shop_producer_id == $shop_producer_id)
 			{
-				$oShop_Filter_Controller = new Shop_Filter_Controller($oShop_Item->Shop);
-				$oShop_Filter_Controller->fill($oShop_Item);
+				$aReturn[] = $oShop_Item;
 			}
+
+			if ($flag_include_modifications)
+			{
+				$aModifications = $oShop_Item->Modifications->findAll(FALSE);
+				foreach ($aModifications as $oModification)
+				{
+					if ($oModification->shop_producer_id == $shop_producer_id)
+					{
+						$aReturn[] = $oModification;
+					}
+				}
+			}
+		}
+		else
+		{
+			$aReturn[] = $oShop_Item;
+
+			if ($flag_include_modifications)
+			{
+				$aModifications = $oShop_Item->Modifications->findAll(FALSE);
+				foreach ($aModifications as $oModification)
+				{
+					$aReturn[] = $oModification;
+				}
+			}
+		}
+
+		return $aReturn;
+	}
+
+	/**
+	 * Apply discounts
+	 * @param Shop_Item_Model $oShop_Item
+	 * @param int $iDiscountID
+	 * @return self
+	 */
+	protected function _applyDiscounts(Shop_Item_Model $oShop_Item, $iDiscountID)
+	{
+		$oShop_Discount = Core_Entity::factory('Shop_Discount', $iDiscountID);
+
+		$aObjects = $this->_getShopItems($oShop_Item, !is_null(Core_Array::getPost('flag_include_modifications')));
+
+		foreach ($aObjects as $oShop_Item)
+		{
+			if (!is_null(Core_Array::getPost('flag_delete_discount')))
+			{
+				$oShop_Item->remove($oShop_Discount);
+			}
+			else
+			{
+				// Устанавливаем скидку товару
+				is_null($oShop_Item->Shop_Item_Discounts->getByShop_discount_id($iDiscountID))
+					&& $oShop_Item->add($oShop_Discount);
+			}
+
+			$this->_clear($oShop_Item);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Apply bonuses
+	 * @param Shop_Item_Model $oShop_Item
+	 * @param int $iBonusID
+	 * @return self
+	 */
+	protected function _applyBonuses(Shop_Item_Model $oShop_Item, $iBonusID)
+	{
+		$oShop_Bonus = Core_Entity::factory('Shop_Bonus', $iBonusID);
+
+		$aBonusObjects = $this->_getShopItems($oShop_Item, !is_null(Core_Array::getPost('flag_bonus_include_modifications')));
+
+		foreach ($aBonusObjects as $oShop_Item)
+		{
+			if (!is_null(Core_Array::getPost('flag_delete_bonus')))
+			{
+				$oShop_Item->remove($oShop_Bonus);
+			}
+			else
+			{
+				// Устанавливаем бонус товару
+				$oShop_Item->add($oShop_Bonus)
+					&& is_null($oShop_Item->Shop_Item_Bonuses->getByShop_bonus_id($iBonusID));
+			}
+
+			$this->_clear($oShop_Item);
 		}
 
 		return $this;

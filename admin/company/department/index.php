@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -45,7 +44,7 @@ if (Core_Array::getRequest('_', FALSE) && !is_null(Core_Array::getGet('loadDepar
 
 // Контроллер формы
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->title(Core::_('Company_Department.title', $oCompany->name))
 	->setUp()
 	->path($sAdminFormAction)
@@ -151,7 +150,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 
 $oUser = Core_Auth::getCurrentUser();
 !$oUser->superuser && $oUser->only_access_my_own
-	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
+	&& $oAdmin_Form_Dataset->addUserConditions();
 
 // Ограничение источника 0 по родительской группе
 $oAdmin_Form_Dataset->addCondition(

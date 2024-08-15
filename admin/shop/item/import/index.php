@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -21,7 +20,7 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
 // Контроллер формы
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path('/admin/shop/item/import/index.php');
 
@@ -29,7 +28,7 @@ ob_start();
 
 $oAdmin_View = Admin_View::create();
 $oAdmin_View
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->pageTitle(Core::_('Shop_Item.import_price_list_link'))
 	;
 
@@ -200,11 +199,11 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 								$sSeparator = "\t";
 							break;
 							case 3:
-								$sSeparator = Core_Array::getPost('import_price_separator_text');
+								$sSeparator = Core_Array::getPost('import_separator_text');
 							break;
 						}
 
-						$sLimiter = Core_Array::getPost('import_price_stop');
+						$sLimiter = Core_Array::getPost('limiter');
 
 						switch ($sLimiter)
 						{
@@ -213,7 +212,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 								$sLimiter = '"';
 							break;
 							case 1:
-								$sLimiter = Core_Array::getPost('import_price_stop_text');
+								$sLimiter = Core_Array::getPost('limiter_text');
 							break;
 						}
 
@@ -304,15 +303,20 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 									}
 								}
 
-								$oCurrentRow->add(
-									Admin_Form_Entity::factory('Select')
-										->name("field{$i}")
-										->options($aOptions)
-										->value($selected)
-										->filter(TRUE)
-										->caseSensitive(FALSE)
-										->divAttr(array('class' => 'form-group col-xs-12 col-sm-8'))
-								);
+								$oCurrentRow
+									->class('d-flex align-items-center import-row')
+									->add(Core_Html_Entity::factory('I')->class('fa-solid fa-circle fa-xs'))
+									->add(
+										Admin_Form_Entity::factory('Select')
+											->name("field{$i}")
+											->options($aOptions)
+											->value($selected)
+											->filter(TRUE)
+											->caseSensitive(FALSE)
+											->divAttr(array('class' => 'form-group col-xs-12 col-sm-8'))
+											->class('form-control import-select')
+											->onchange('setIColor(this)')
+									);
 
 								$oMainTab->add($oCurrentRow);
 							}
@@ -321,8 +325,8 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('shop_group_id')->value($oShopGroup->id))
 								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('csv_filename')->value($sTmpFileName))
 								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('import_price_separator')->value($sSeparator))
-								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('import_price_stop')->value($sLimiter))
-								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('firstlineheader')->value(isset($_POST['import_price_name_field_f']) ? 1 : 0))
+								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('limiter')->value($sLimiter))
+								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('firstlineheader')->value(isset($_POST['firstlineheader']) ? 1 : 0))
 								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('locale')->value($sLocale))
 								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('import_price_max_time')->value(Core_Array::getPost('import_price_max_time')))
 								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('import_price_delay')->value(Core_Array::getPost('import_price_delay')))
@@ -374,7 +378,8 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 					$oShop_Item_Import_Cml_Controller = new Shop_Item_Import_Cml_Controller($sTmpFileFullpath);
 					$oShop_Item_Import_Cml_Controller->timeout = 0;
 					$oShop_Item_Import_Cml_Controller->iShopId = $oShop->id;
-					$oShop_Item_Import_Cml_Controller->iShopGroupId = $shop_groups_parent_id;
+					$oShop_Item_Import_Cml_Controller->iShopGroupId = 0;
+					//$oShop_Item_Import_Cml_Controller->iShopGroupId = $shop_groups_parent_id; // CML импортирует группы на основании дерева из файла, снаружи указывать нельзя
 					$oShop_Item_Import_Cml_Controller->sPicturesPath = Core_Array::getPost('import_price_load_files_path');
 					$oShop_Item_Import_Cml_Controller->importAction = Core_Array::getPost('import_price_action_items');
 
@@ -443,7 +448,7 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 
 			$iNextSeekPosition = 0;
 
-			$sTmpFileName = basename(Core_Array::getPost('csv_filename'));
+			$sTmpFileName = basename(Core_Array::getPost('csv_filename', '', 'str'));
 
 			$Shop_Item_Import_Csv_Controller
 				->file($sTmpFileName)
@@ -453,7 +458,7 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 				->step(Core_Array::getPost('import_price_max_count'))
 				->entriesLimit($import_entries_limit > 100 ? $import_entries_limit : 100)
 				->separator(Core_Array::getPost('import_price_separator'))
-				->limiter(Core_Array::getPost('import_price_stop'))
+				->limiter(Core_Array::getPost('limiter'))
 				->imagesPath(Core_Array::getPost('import_price_load_files_path'))
 				->importAction(Core_Array::getPost('import_price_action_items'))
 				->searchIndexation(Core_Array::getPost('search_event_indexation'))
@@ -463,7 +468,7 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 
 			if (Core_Array::getPost('firstlineheader', 0))
 			{
-				$fInputFile = fopen(CMS_FOLDER . TMP_DIR . $Shop_Item_Import_Csv_Controller->file, 'rb');
+				$fInputFile = fopen($Shop_Item_Import_Csv_Controller->getFilePath(), 'rb');
 				@fgetcsv($fInputFile, 0, $Shop_Item_Import_Csv_Controller->separator, $Shop_Item_Import_Csv_Controller->limiter);
 				$iNextSeekPosition = ftell($fInputFile);
 				fclose($fInputFile);
@@ -566,188 +571,200 @@ else
 {
 	$oMainTab = Admin_Form_Entity::factory('Tab')->name('main');
 
+	$oAdmin_Form_Entity_Form->add($oMainTab);
+
 	$aConfig = Core_Config::instance()->get('shop_csv', array()) + array(
 		'maxTime' => 20,
 		'maxCount' => 100,
 		'entriesLimit' => 5000,
 	);
 
-	$oAdmin_Form_Entity_Form->add($oMainTab
-		->add(
-			Admin_Form_Entity::factory('Div')->class('row')->add(
-				Admin_Form_Entity::factory('Radiogroup')
-					->radio(array(
-						Core::_('Shop_Item.import_price_list_file_type1'),
-						Core::_('Shop_Item.import_price_list_file_type2')
-					))
-					->ico(array('fa-file-excel-o', 'fa-file-code-o'))
-					->caption(Core::_('Shop_Item.export_file_type'))
-					->divAttr(array('class' => 'form-group col-xs-12'))
-					->name('import_price_type')
-					->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [0,1])")
-			)
+	$oMainTab->add(
+		Admin_Form_Entity::factory('Div')->class('row')->add(
+			Admin_Form_Entity::factory('Radiogroup')
+				->radio(array(
+					Core::_('Shop_Item.import_price_list_file_type1'),
+					Core::_('Shop_Item.import_price_list_file_type2')
+				))
+				->ico(array('fa-solid fa-file-csv fa-fw', 'fa-solid fa-code fa-fw'))
+				->caption(Core::_('Shop_Item.export_file_type'))
+				->divAttr(array('class' => 'form-group col-xs-12 rounded-radio-group'))
+				->name('import_price_type')
+				->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [0,1])")
+		)
+	)
+	->add(
+		Admin_Form_Entity::factory('Div')->class('row')->add(
+			Admin_Form_Entity::factory('File')
+				->name("csv_file")
+				->divAttr(array('class' => 'col-xs-12 col-sm-4 col-md-5'))
+				->caption(Core::_('Shop_Item.import_price_list_file'))
+				->largeImage(array('show_params' => FALSE))
+				->smallImage(array('show' => FALSE))
 		)
 		->add(
-			Admin_Form_Entity::factory('Div')->class('row')->add(
-				Admin_Form_Entity::factory('File')
-					->name("csv_file")
-					->caption(Core::_('Shop_Item.import_price_list_file'))
-					->largeImage(array('show_params' => FALSE))
-					->smallImage(array('show' => FALSE))
-					->divAttr(array('class' => 'col-xs-12 col-sm-6'))
-			)
-			->add(
-				Admin_Form_Entity::factory('Input')
-					->name("alternative_file_pointer")
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
-					->caption(Core::_('Shop_Item.alternative_file_pointer_form_import'))
-			)
+			Admin_Form_Entity::factory('Input')
+				->name("alternative_file_pointer")
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-md-5'))
+				->caption(Core::_('Shop_Item.alternative_file_pointer_form_import'))
 		)
 		->add(
-			Admin_Form_Entity::factory('Div')->class('row')->add(
-				Admin_Form_Entity::factory('Checkbox')
-					->name("import_price_name_field_f")
-					->caption(Core::_('Shop_Item.import_price_list_name_field_f'))
-					->value(TRUE)
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 hidden-1'))
-			)
-			->add(
-				Admin_Form_Entity::factory('Select')
+			Admin_Form_Entity::factory('Select')
 				->name("import_price_encoding")
 				->options(array(
 					'UTF-8' => Core::_('Shop_Item.input_file_encoding1'),
 					'Windows-1251' => Core::_('Shop_Item.input_file_encoding0')
 				))
-				->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 col-lg-2 hidden-1'))
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-md-2 hidden-1'))
 				->caption(Core::_('Shop_Item.price_list_encoding'))
-			)
 		)
-		->add(Admin_Form_Entity::factory('Div')->class('row')
-			->add(Admin_Form_Entity::factory('Radiogroup')
-				->radio(array(
-					Core::_('Shop_Item.import_price_list_separator1'),
-					Core::_('Shop_Item.import_price_list_separator2'),
-					Core::_('Shop_Item.import_price_list_separator3'),
-					Core::_('Shop_Item.import_price_list_separator4')
-				))
-				->ico(array(
-					'fa-asterisk',
-					'fa-asterisk',
-					'fa-asterisk',
-					'fa-asterisk'
-				))
-				->caption(Core::_('Shop_Item.import_price_list_separator'))
-				->divAttr(array('class' => 'no-padding-right form-group col-xs-10 col-sm-9 hidden-1'))
-				->name('import_price_separator')
-				// Разделитель ';'
+	)
+	->add(
+		Admin_Form_Entity::factory('Div')->class('row')->add(
+			Admin_Form_Entity::factory('Checkbox')
+				->name("firstlineheader")
+				->caption(Core::_('Shop_Item.import_price_list_name_field_f'))
 				->value(1)
-			)
-			->add(Admin_Form_Entity::factory('Input')
-				->name("import_price_separator_text")
-				->caption('&nbsp;')
-				->divAttr(array('class' => 'no-padding-left form-group col-xs-1 hidden-1')))
+				->checked(TRUE)
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 hidden-1'))
 		)
-		->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Radiogroup')
-			->radio(array(
-				Core::_('Shop_Item.import_price_list_stop1'),
-				Core::_('Shop_Item.import_price_list_stop2')
+	)
+	->add(
+		Admin_Form_Entity::factory('Div')->class('row')->add(
+			Admin_Form_Entity::factory('Radiogroup')->radio(array(
+				Core::_('Shop_Item.import_price_list_separator1'),
+				Core::_('Shop_Item.import_price_list_separator2'),
+				Core::_('Shop_Item.import_price_list_separator3'),
+				Core::_('Shop_Item.import_price_list_separator4')
 			))
 			->ico(array(
-				'fa-quote-right',
-				'fa-bolt'
+				'fa-solid fa-asterisk fa-fw',
+				'fa-solid fa-asterisk fa-fw',
+				'fa-solid fa-asterisk fa-fw',
+				'fa-solid fa-asterisk fa-fw'
 			))
-			->caption(Core::_('Shop_Item.import_price_list_stop'))
-			->name('import_price_stop')
-			->divAttr(array('class' => 'no-padding-right form-group col-xs-10 col-sm-9 hidden-1')))
-			->add(Admin_Form_Entity::factory('Input')
-			->name("import_price_stop_text")
-			->caption('&nbsp;')
-			->divAttr(array('class' => 'no-padding-left form-group col-xs-1 hidden-1')))
+			->caption(Core::_('Shop_Item.import_price_list_separator'))
+			->divAttr(array('class' => 'no-padding-right form-group col-xs-10 col-sm-9 rounded-radio-group hidden-1'))
+			->name('import_price_separator')
+			// Разделитель ';'
+			->value(1)
+			->add(
+				Admin_Form_Entity::factory('Input')
+					->name("import_separator_text")
+					//->caption('&nbsp;')
+					->size(3)
+					->divAttr(array('class' => 'form-group d-inline-block margin-left-10 hidden-1'))
+			)
 		)
-		->add(
-			Admin_Form_Entity::factory('Div')->class('row')
-			->add(Admin_Form_Entity::factory('Select')
-			->name("shop_groups_parent_id")
-			->options(array(' … ') + Shop_Item_Controller_Edit::fillShopGroup($oShop->id))
-			->filter(TRUE)
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-10'))
-			->caption(Core::_('Shop_Item.import_price_list_parent_group'))
-			->value($oShopGroup->id)))
-		->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Input')
-			->name("import_price_load_files_path")
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
-			->caption(Core::_('Shop_Item.import_price_list_images_path'))))
-		->add(Admin_Form_Entity::factory('Div')->class('row')->add(
+	)
+	->add(
+		Admin_Form_Entity::factory('Div')->class('row')->add(
+			Admin_Form_Entity::factory('Radiogroup')->radio(array(
+				Core::_('Shop_Item.limiter1'),
+				Core::_('Shop_Item.limiter2')
+			))
+			->ico(array(
+				'fa-solid fa-quote-right fa-fw',
+				'fa-solid fa-bolt fa-fw'
+			))
+			->caption(Core::_('Shop_Item.limiter'))
+			->name('limiter')
+			->divAttr(array('class' => 'no-padding-right form-group col-xs-10 col-sm-9 rounded-radio-group hidden-1'))
+			->add(
+				Admin_Form_Entity::factory('Input')
+					->name("limiter_text")
+					//->caption('&nbsp;')
+					->size(3)
+					->divAttr(array('class' => 'form-group d-inline-block margin-left-10 hidden-1'))
+			)
+		)
+	)
+	->add(
+		Admin_Form_Entity::factory('Div')->class('row')
+		->add(Admin_Form_Entity::factory('Select')
+		->name("shop_groups_parent_id")
+		->options(array(' … ') + Shop_Item_Controller_Edit::fillShopGroup($oShop->id))
+		->filter(TRUE)
+		->divAttr(array('class' => 'form-group col-xs-12 col-sm-12 hidden-1'))
+		->caption(Core::_('Shop_Item.import_price_list_parent_group'))
+		->value($oShopGroup->id))
+	)
+	->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Input')
+		->name("import_price_load_files_path")
+		->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
+		->caption(Core::_('Shop_Item.import_price_list_images_path')))
+	)
+	->add(
+		Admin_Form_Entity::factory('Div')->class('row')->add(
 			Admin_Form_Entity::factory('Radiogroup')
-				->radio(array(
-					1 => Core::_('Shop_Item.import_price_action_items1'),
-					2 => Core::_('Shop_Item.import_price_action_items2'),
-					3 => Core::_('Shop_Item.import_price_action_items0')
-				))
-				->ico(array(
-					1 => 'fa-refresh',
-					2 => 'fa-ban',
-					3 => 'fa-trash',
-				))
-				->caption(Core::_('Shop_Item.import_price_list_action_items'))
-				->name('import_price_action_items')
-				->divAttr(array('class' => 'form-group col-xs-12 hidden-1'))
-				->value(1)
-				->onclick("if (this.value == 3) { res = confirm('" . Core::_('Shop_Item.empty_shop') . "'); if (!res) { return false; } } ")
-			)
+			->radio(array(
+				1 => Core::_('Shop_Item.import_price_action_items1'),
+				2 => Core::_('Shop_Item.import_price_action_items2'),
+				3 => Core::_('Shop_Item.import_price_action_items0')
+			))
+			->ico(array(
+				1 => 'fa-solid fa-refresh fa-fw',
+				2 => 'fa-solid fa-ban fa-fw',
+				3 => 'fa-solid fa-trash fa-fw',
+			))
+			->caption(Core::_('Shop_Item.import_price_list_action_items'))
+			->name('import_price_action_items')
+			->divAttr(array('class' => 'form-group col-xs-12 rounded-radio-group hidden-1'))
+			->value(1)
+			->onclick("if (this.value == 3) { res = confirm('" . Core::_('Shop_Item.empty_shop') . "'); if (!res) { return false; } } ")
 		)
-		->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
-			->name("import_price_action_delete_image")
-			->class('form-control colored-danger times')
-			->caption(Core::_('Shop_Item.import_price_list_action_delete_image'))
-			->divAttr(array('class' => 'form-group col-xs-12 hidden-1')))
-		)
-		->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
-			->name("delete_property_values")
-			->class('form-control colored-danger times')
-			->caption(Core::_('Shop_Item.delete_property_values'))
-			->divAttr(array('class' => 'form-group col-xs-12 hidden-1'))
-			->value(1))
-		)
-		->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
-			->name("delete_unsent_modifications_by_properties")
-			->class('form-control colored-danger times')
-			->caption(Core::_('Shop_Item.delete_unsent_modifications_by_properties'))
-			->divAttr(array('class' => 'form-group col-xs-12 hidden-1')))
-		)
-		->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
-			->name("search_event_indexation")
-			->caption(Core::_('Shop_Item.search_event_indexation_import'))
-			->divAttr(array('class' => 'form-group col-xs-12 hidden-1')))
+	)
+	->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
+		->name("import_price_action_delete_image")
+		->class('form-control colored-danger times')
+		->caption(Core::_('Shop_Item.import_price_list_action_delete_image'))
+		->divAttr(array('class' => 'form-group col-xs-12 hidden-1')))
+	)
+	->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
+		->name("delete_property_values")
+		->class('form-control colored-danger times')
+		->caption(Core::_('Shop_Item.delete_property_values'))
+		->divAttr(array('class' => 'form-group col-xs-12 hidden-1'))
+		->value(1))
+	)
+	->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
+		->name("delete_unsent_modifications_by_properties")
+		->class('form-control colored-danger times')
+		->caption(Core::_('Shop_Item.delete_unsent_modifications_by_properties'))
+		->divAttr(array('class' => 'form-group col-xs-12 hidden-1')))
+	)
+	->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
+		->name("search_event_indexation")
+		->caption(Core::_('Shop_Item.search_event_indexation_import'))
+		->divAttr(array('class' => 'form-group col-xs-12 hidden-1')))
+	)
+	->add(
+		Admin_Form_Entity::factory('Div')->class('row')->add(
+			Admin_Form_Entity::factory('Input')
+				->name('import_price_max_time')
+				->caption(Core::_('Shop_Item.import_price_list_max_time'))
+				->value($aConfig['maxTime'])
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 hidden-1'))
 		)
 		->add(
-			Admin_Form_Entity::factory('Div')->class('row')->add(
-				Admin_Form_Entity::factory('Input')
-					->name('import_price_max_time')
-					->caption(Core::_('Shop_Item.import_price_list_max_time'))
-					->value($aConfig['maxTime'])
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 hidden-1'))
-			)
-			->add(
-				Admin_Form_Entity::factory('Input')
-					->name('import_price_max_count')
-					->caption(Core::_('Shop_Item.import_price_list_max_count'))
-					->value($aConfig['maxCount'])
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 hidden-1'))
-			)
-			->add(
-				Admin_Form_Entity::factory('Input')
-					->name('import_price_delay')
-					->caption(Core::_('Shop_Item.import_price_list_delay'))
-					->value(1)
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 hidden-1'))
-			)->add(
-				Admin_Form_Entity::factory('Input')
-					->name('import_entries_limit')
-					->caption(Core::_('Shop_Item.import_entries_limit'))
-					->value($aConfig['entriesLimit'])
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 hidden-1'))
-			)
+			Admin_Form_Entity::factory('Input')
+				->name('import_price_max_count')
+				->caption(Core::_('Shop_Item.import_price_list_max_count'))
+				->value($aConfig['maxCount'])
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 hidden-1'))
+		)
+		->add(
+			Admin_Form_Entity::factory('Input')
+				->name('import_price_delay')
+				->caption(Core::_('Shop_Item.import_price_list_delay'))
+				->value(1)
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 hidden-1'))
+		)->add(
+			Admin_Form_Entity::factory('Input')
+				->name('import_entries_limit')
+				->caption(Core::_('Shop_Item.import_entries_limit'))
+				->value($aConfig['entriesLimit'])
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 hidden-1'))
 		)
 	);
 
@@ -783,6 +800,18 @@ if ($sOnClick)
 			->value("radiogroupOnChange('{$windowId}', 0, [0,1])")
 	);
 }
+
+$oAdmin_Form_Entity_Form->add(
+	Core_Html_Entity::factory('Script')
+		->type("text/javascript")
+		->value("
+			(function($){
+				$('select.import-select').each(function(index, obj){
+					setIColor(obj);
+				})
+			})(jQuery);
+		")
+);
 
 $oAdmin_Form_Entity_Form->execute();
 $oAdmin_Form_Entity_Form->clear();

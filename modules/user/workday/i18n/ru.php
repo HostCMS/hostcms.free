@@ -1,14 +1,7 @@
 <?php
-/**
- * Administration center users.
- *
- * @package HostCMS
- * @subpackage User
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
+	'model_name' => 'Сотрудники, рабочее время',
 	'time' => 'Время',
 	'start_day' => 'Начать день',
 	'continue_day' => 'Продолжить',
@@ -39,4 +32,8 @@ return array(
 	'fio' => 'ФИО',
 	'days' => 'Дней',
 	'hours' => 'Часов',
+	'date' => 'Дата',
+	'begin' => 'Время начала',
+	'end' => 'Время завершения',
+	'approved' => 'Подтверждено',
 );

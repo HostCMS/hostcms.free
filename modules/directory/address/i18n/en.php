@@ -1,6 +1,7 @@
 <?php
 
 return array(
+	'model_name' => 'Addresses',
 	'addresses' => 'Addresses',
 	'type_address' => 'Type',
 	'address' => 'Address',
@@ -11,4 +12,6 @@ return array(
 	'address_city' => 'City',
 	'latitude' => 'Latitude',
 	'longitude' => 'Longitude',
+	'house' => 'House',
+	'flat' => 'Flat'
 );

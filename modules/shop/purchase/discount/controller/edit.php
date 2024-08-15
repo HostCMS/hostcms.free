@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -126,12 +125,12 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 						))
 						->ico(
 							array(
-								'fa-chevron-up',
-								'fa-chevron-down',
-								'fa-shopping-cart',
+								'fa-solid fa-chevron-up',
+								'fa-solid fa-chevron-down',
+								'fa-solid fa-shopping-cart',
 							)
 						)
-						->divAttr(array('class' => 'form-group col-xs-12'))
+						->divAttr(array('class' => 'form-group col-xs-12 rounded-radio-group'))
 						->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [0,1,2]); window.dispatchEvent(new Event('resize'));")
 				);
 

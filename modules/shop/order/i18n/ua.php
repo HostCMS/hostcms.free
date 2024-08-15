@@ -164,4 +164,12 @@ return array(
 	'merge_success' => 'Одиниці вимірювання об\'єднані!',
 	'shop_order_status_deadline' => 'Час життя статусу',
 	'company_account_id' => 'Розрахунковий рахунок',
+
+	'show_orders_comment' => 'Коментарі',
+	'show_comments_title' => 'Коментарі до замовлень магазину "%s"',
+	'show_list_of_item_comments_properties_title' => "Список властивостей відгуків про замовлення інтернет-магазину \"%s\"",
+	'add_value' => 'Додати відсутні значення значення за замовчуванням у замовлень',
+	'show_item_comment_title' => 'Коментарі замовлення %s',
+	'tags' => "Мітки (теги)",
+	'type_tag' => 'Введіть тег ...',
 );

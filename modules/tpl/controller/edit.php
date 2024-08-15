@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Tpl
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Tpl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -63,7 +62,7 @@ class Tpl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oTmpOptions = $oTextarea_Tpl->syntaxHighlighterOptions;
 				// $oTmpOptions['mode'] = 'smarty';
-				$oTmpOptions['mode'] = 'ace/mode/smarty';
+				$oTmpOptions['mode'] = '"ace/mode/smarty"';
 
 				$tplContent = $this->_object->id
 					? $this->_object->loadTplFile()

@@ -140,9 +140,9 @@ return array(
 	'import_price_list_separator3' => "Tab",
 	'import_price_list_separator4' => 'Other',
 	'import_price_list_separator' => "Separation character",
-	'import_price_list_stop' => "Mark",
-	'import_price_list_stop1' => "Quotations",
-	'import_price_list_stop2' => 'Other',
+	'limiter' => "Mark",
+	'limiter1' => "Quotations",
+	'limiter2' => 'Other',
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
 	'price_list_encoding' => "Encoding",
@@ -159,7 +159,7 @@ return array(
 	'import_price_list_max_time' => "<acronym title=\"Maximum execution time (in seconds)\">Maximum execution time</acronym>",
 	'import_price_list_max_count' => "<acronym title=\"Maximum products imported per step\">Import per step</acronym>",
 	'import_price_list_button_load' => "Upload",
-	'move_success' => 'Pruducts transferred successfully',
+	'move_success' => 'Products transferred successfully',
 	'root_folder' => 'Root folder',
 	'import_small_images' => "Small image for %s",
 	'import_file_description' => "Description for %s",
@@ -375,4 +375,14 @@ return array(
 
 	'set_modification_items_title' => 'Set as Modification',
 	'set_modification_success' => 'Modifications applied successfully!',
+
+	'item_barcodes' => 'Barcodes',
+	'barcode_type' => 'Barcode type',
+	'barcode_prefix' => 'Prefix',
+	'barcode_generate' => 'Generate',
+	'shop_item_barcode_set' => 'Barcodes generated successfully!',
+
+	'export_in_stock_items' => 'Export in stock items',
+	'closed' => 'Closed',
+	'changeIndexation_success' => 'Product indexation has been changed.',
 );

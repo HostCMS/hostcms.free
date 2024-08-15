@@ -8,10 +8,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shortcode
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
-class Shortcode_Module extends Core_Module{
+class Shortcode_Module extends Core_Module_Abstract
+{
 	/**
 	 * Module version
 	 * @var string
@@ -22,7 +22,7 @@ class Shortcode_Module extends Core_Module{
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2023-07-17';
+	public $date = '2024-06-06';
 
 
 	/**
@@ -41,7 +41,7 @@ class Shortcode_Module extends Core_Module{
 			array(
 				'sorting' => 150,
 				'block' => 3,
-				'ico' => 'fa fa-file-code-o',
+				'ico' => 'fa-regular fa-file-code',
 				'name' => Core::_('Shortcode.menu'),
 				'href' => "/admin/shortcode/index.php",
 				'onclick' => "$.adminLoad({path: '/admin/shortcode/index.php'}); return false"
@@ -49,4 +49,5 @@ class Shortcode_Module extends Core_Module{
 		);
 
 		return parent::getMenu();
-	}}
+	}
+}

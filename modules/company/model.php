@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Company
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Company_Model extends Core_Entity
 {
@@ -55,8 +54,8 @@ class Company_Model extends Core_Entity
 		'chartaccount_operation' => array(),
 		'chartaccount_closure_period' => array(),
 		'chartaccount_entry' => array(),
-		'shop' => array(),
-		'shop_warehouse' => array(),
+		'shop' => array('model' => 'Shop', 'foreign_key' => 'shop_company_id'),
+		'shop_warehouse' => array('model' => 'Shop_Warehouse', 'foreign_key' => 'shop_company_id'),
 		'shop_warrant' => array(),
 		'shop_warehouse_purchaseorder' => array(),
 		'shop_warehouse_invoice' => array(),
@@ -1121,12 +1120,6 @@ class Company_Model extends Core_Entity
 
 	public function __get($property)
 	{
-		// Before table changed
-		if (isset($this->$property))
-		{
-			return parent::__get($property);
-		}
-
 		if (in_array($property, self::$_oldCompanyFields))
 		{
 			switch ($property)
@@ -1166,6 +1159,12 @@ class Company_Model extends Core_Entity
 			}
 
 			return $return;
+		}
+
+		// Before table changed
+		if (isset($this->$property))
+		{
+			return parent::__get($property);
 		}
 
 		return parent::__get($property);

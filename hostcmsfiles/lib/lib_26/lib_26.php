@@ -10,62 +10,56 @@ if (!Core::moduleIsActive('siteuser'))
 	return ;
 }
 
+$oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
+is_null($oSiteuser) && $oSiteuser = Core_Entity::factory('Siteuser');
+
+$Siteuser_Controller_Restore_Password = new Siteuser_Controller_Restore_Password(
+	$oSiteuser
+);
+
+$xslRestorePasswordXsl = Core_Array::get(Core_Page::instance()->libParams, 'xslRestorePasswordXsl');
 $xslRestorePasswordMailXsl = Core_Array::get(Core_Page::instance()->libParams, 'xslRestorePasswordMailXsl');
+$subject = Core_Array::get(Core_Page::instance()->libParams, 'subject', 'Восстановление пароля');
 
 if (!is_null(Core_Array::getPost('apply')))
 {
-	$login = Core_Array::getPost('login', '', 'str');
-	$email = Core_Array::getPost('email', '', 'str');
-	$oSiteuser = Core_Entity::factory('Site', CURRENT_SITE)->Siteusers->getByLoginAndEmail($login, $email);
-
-	if (!is_null($oSiteuser) && $oSiteuser->active)
+	// Проверка CSRF-токена
+	if ($Siteuser_Controller_Restore_Password->checkCsrf(Core_Array::getPost('csrf_token', '', 'str')))
 	{
-		$Siteuser_Controller_Restore_Password = new Siteuser_Controller_Restore_Password(
-			$oSiteuser
-		);
-		$Siteuser_Controller_Restore_Password
-			->subject('Восстановление пароля')
-			->xsl(
-				Core_Entity::factory('Xsl')->getByName($xslRestorePasswordMailXsl)
-			)
-			->sendNewPassword();
+		$login = Core_Array::getPost('login', '', 'str');
+		$email = Core_Array::getPost('email', '', 'str');
 
-		$path = '../';
-		?>
-		<h1>Восстановление пароля прошло успешно</h1>
-		<p>В Ваш адрес отправлено письмо, содержащее Ваш новый пароль.</p>
-		<p>Если Ваш браузер поддерживает автоматическое перенаправление через 3 секунды Вы перейдёте на страницу <a href="../">идентификации пользователя</a>. Если Вы не хотите ждать перейдите по соответствующей ссылке.</p>
-		<script type="text/javascript">setTimeout(function(){ location = '<?php echo $path?>' }, 3000);</script>
-		<?php
+		$oSiteuser = Core_Entity::factory('Site', CURRENT_SITE)->Siteusers->getByLoginAndEmail($login, $email);
 
-		return;
+		if (!is_null($oSiteuser) && $oSiteuser->active)
+		{
+			$Siteuser_Controller_Restore_Password
+				->setEntity($oSiteuser)
+				->subject($subject)
+				->xslMail(
+					Core_Entity::factory('Xsl')->getByName($xslRestorePasswordMailXsl)
+				)
+				->sendNewPassword();
+		}
+		else
+		{
+			$Siteuser_Controller_Restore_Password->addEntity(
+				Core::factory('Core_Xml_Entity')
+					->name('error_code')->value('wrongUser')
+			);
+		}
 	}
 	else
 	{
-		$error = 'Пользователь с такими параметрами не зарегистрирован или на указанный e-mail не может быть отправлено письмо.';
+		$Siteuser_Controller_Restore_Password->addEntity(
+			Core::factory('Core_Xml_Entity')
+				->name('error_code')->value('wrongCsrf')
+		);
 	}
 }
 
-?>
-<h1>Восстановление пароля</h1>
-<?php
-if (!empty($error))
-{
-	?><div id="error"><?php echo $error?></div><?php
-}
-?>
-<form action="/users/restore_password/" method="post">
-<p>
-	Пользователь:
-	<br />
-	<input name="login" type="text" size="30" class="large">
-</p>
-<p>
-	E-mail:
-	<br />
-	<input name="email" type="text" size="30" class="large">
-</p>
-<p>
-<input name="apply" type="submit" value="Восстановить" class="button" />
-</p>
-</form>
+$Siteuser_Controller_Restore_Password
+	->xsl(
+		Core_Entity::factory('Xsl')->getByName($xslRestorePasswordXsl)
+	)
+	->show();

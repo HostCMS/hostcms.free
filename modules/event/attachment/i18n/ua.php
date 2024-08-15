@@ -1,5 +1,5 @@
 <?php
 
-return array(	
-
+return array(
+	'model_name' => 'Справи, файли',
 );

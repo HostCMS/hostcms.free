@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Trash
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Trash_Table_Dataset extends Admin_Form_Dataset
 {
@@ -132,7 +131,7 @@ class Trash_Table_Dataset extends Admin_Form_Dataset
 
 			$objects->queryBuilder()
 				->clear()
-				->where('deleted', '=', 1)
+				->where($this->_tableName . '.deleted', '=', 1)
 				->clearOrderBy();
 
 			$this->_applyConditions($objects->queryBuilder());
@@ -145,7 +144,7 @@ class Trash_Table_Dataset extends Admin_Form_Dataset
 			}
 
 			!is_null($id) && $objects->queryBuilder()
-				->where('id', '=', $id);
+				->where($this->_tableName . '.id', '=', $id);
 
 			$aObjects = $objects->findAll(FALSE);
 		}
@@ -212,8 +211,8 @@ class Trash_Table_Dataset extends Admin_Form_Dataset
 	{
 		if (!defined('DENY_INI_SET') || !DENY_INI_SET)
 		{
-			ini_set("memory_limit", "512M");
-			ini_set("max_execution_time", "240");
+			ini_set('memory_limit', '512M');
+			ini_set('max_execution_time', '240');
 		}
 
 		!is_array($this->_objects) && $this->load();

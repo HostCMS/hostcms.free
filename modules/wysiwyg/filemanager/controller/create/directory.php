@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Wysiwyg
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Wysiwyg_Filemanager_Controller_Create_Directory extends Admin_Form_Action_Controller
 {
@@ -38,35 +37,47 @@ class Wysiwyg_Filemanager_Controller_Create_Directory extends Admin_Form_Action_
 	 */
 	public function execute($operation = NULL)
 	{
-		if (is_null($this->cdir))
-		{
-			throw new Core_Exception('cdir is NULL.');
-		}
+		try {
+			$secret_csrf = Core_Array::getPost('secret_csrf', '', 'trim');
+			$this->_checkCsrf($secret_csrf);
 
-		if (is_null($this->name))
-		{
-			throw new Core_Exception('name is NULL.');
-		}
-
-		$dirName = Core_File::pathCorrection(/*Core_File::convertfileNameToLocalEncoding(*/$this->name/*)*/);
-		$newDir = CMS_FOLDER . $this->cdir . $dirName;
-
-		if (!file_exists($newDir) && !Core_File::isDir($newDir))
-		{
-			try
+			if (is_null($this->cdir))
 			{
-				$dirMode = octdec(Core_Array::getPost('dir_mode'));
-				Core_File::mkdir($newDir, $dirMode);
+				throw new Core_Exception('cdir is NULL.');
 			}
-			catch (Exception $e)
+
+			if (is_null($this->name))
 			{
-				Core_Message::show($e->getMessage(), 'error');
+				throw new Core_Exception('name is NULL.');
+			}
+
+			$dirName = Core_File::pathCorrection(/*Core_File::convertfileNameToLocalEncoding(*/$this->name/*)*/);
+			$newDir = CMS_FOLDER . $this->cdir . $dirName;
+
+			if (!file_exists($newDir) && !Core_File::isDir($newDir))
+			{
+				/*try
+				{*/
+					$dirMode = octdec(Core_Array::getPost('dir_mode'));
+					Core_File::mkdir($newDir, $dirMode);
+				/*}
+				catch (Exception $e)
+				{
+					Core_Message::show($e->getMessage(), 'error');
+					return TRUE;
+				}*/
+			}
+			else
+			{
+				throw new Core_Exception(Core::_('Wysiwyg_Filemanager.isset_dir'), array(), 0, FALSE);
 			}
 		}
-		else
+		catch (Exception $e)
 		{
-			throw new Core_Exception(Core::_('Wysiwyg_Filemanager.isset_dir'), array(), 0, FALSE);
+			$this->addMessage(Core_Message::get($e->getMessage(), 'error'));
+			return TRUE;
 		}
+
 		return FALSE;
 	}
 }

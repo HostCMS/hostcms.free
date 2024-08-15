@@ -3,13 +3,12 @@
 defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 /**
- * Shop_Warehouse_Purchaseorder_Item_Model
+ * Chartaccount_Operation_Item_Model
  *
  * @package HostCMS
- * @subpackage Shop
+ * @subpackage Chartaccount
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Chartaccount_Operation_Item_Model extends Core_Entity
 {

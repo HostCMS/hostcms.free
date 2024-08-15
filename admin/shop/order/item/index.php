@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -18,21 +17,27 @@ $sAdminFormAction = '/admin/shop/order/item/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
-$shop_id = intval(Core_Array::getGet('shop_id'));
-$shop_group_id = intval(Core_Array::getGet('shop_group_id'));
-$shop_dir_id = intval(Core_Array::getGet('shop_dir_id'));
-$shop_order_id = intval(Core_Array::getGet('shop_order_id'));
+$shop_id = Core_Array::getGet('shop_id', 0, 'int');
+$shop_group_id = Core_Array::getGet('shop_group_id', 0, 'int');
+$shop_dir_id = Core_Array::getGet('shop_dir_id', 0, 'int');
+$shop_order_id = Core_Array::getGet('shop_order_id', 0, 'int');
+
+$oShop = Core_Entity::factory('Shop')->find($shop_id);
+$oShop_Order = Core_Entity::factory('Shop_Order')->getById($shop_order_id);
+
+if (!$oShop_Order || $oShop_Order->Shop->site_id != CURRENT_SITE)
+{
+	throw new Core_Exception("Order does not exist or access forbidden!");
+}
 
 $oShopDir = Core_Entity::factory('Shop_Dir', $shop_dir_id);
-$oShop = Core_Entity::factory('Shop')->find($shop_id);
-$oShop_Order = Core_Entity::factory('Shop_Order', $shop_order_id);
 
 $sFormTitle = Core::_('Shop_Order_Item.show_order_items_title', $oShop_Order->invoice, FALSE);
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title($sFormTitle)

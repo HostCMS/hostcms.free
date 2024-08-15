@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Crm_Project_Attachment_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -68,7 +67,7 @@ class Crm_Project_Attachment_Controller_Edit extends Admin_Form_Action_Controlle
 				$("#<?php echo $windowId?> #dropzone").dropzone({
 					url: '/admin/crm/project/attachment/index.php?hostcms[action]=uploadFiles&hostcms[checked][0][0]=1&crm_project_id=<?php echo $object->crm_project_id?>',
 					parallelUploads: 10,
-					maxFilesize: 5,
+					maxFilesize: <?php echo Core::$mainConfig['dropzoneMaxFilesize']?>,
 					paramName: 'file',
 					uploadMultiple: true,
 					autoProcessQueue: false,

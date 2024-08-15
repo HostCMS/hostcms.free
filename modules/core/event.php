@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Core_Event
 {
@@ -92,6 +91,72 @@ class Core_Event
 	}
 
 	/**
+	 * List of disabled events
+	 * @var array
+	 */
+	static protected $_disabled = array();
+
+	/**
+	 * Disable event
+	 * @param string $eventName event name
+	 * @return boolean TRUE if it was not previously disabled, FALSE otherwise
+	 * <code>
+	 * // Disable event
+	 * Core_Event::off('Class.onBeforeDelete');
+	 * </code>
+	 */
+	static public function disable($eventName)
+	{
+		if (!isset(self::$_disabled[$eventName]))
+		{
+			self::$_disabled[$eventName] = $eventName;
+			return TRUE;
+		}
+		
+		return FALSE;
+	}
+
+	/**
+	 * Disable event. Alias of disable()
+	 * @param string $eventName event name
+	 * @see Event::disable
+	 */
+	static public function off($eventName)
+	{
+		return self::disable($eventName);
+	}
+
+	/**
+	 * Enable event
+	 * @param string $eventName event name
+	 *
+	 * <code>
+	 * // Enable event
+	 * Core_Event::enable('Class.onBeforeDelete');
+	 * </code>
+	 */
+	static public function enable($eventName)
+	{
+		if (isset(self::$_disabled[$eventName]))
+		{
+			unset(self::$_disabled[$eventName]);
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * Enable event. Alias of enable()
+	 * @param string $eventName event name
+	 * @see Event::enable
+	 */
+	static public function on($eventName)
+	{
+		return self::enable($eventName);
+	}
+
+	/**
 	 * Last returned value
 	 * @var misex
 	 */
@@ -127,7 +192,7 @@ class Core_Event
 	{
 		self::$_lastReturn = NULL;
 
-		if (isset(self::$_attached[$eventName]))
+		if (isset(self::$_attached[$eventName]) && !isset(self::$_disabled[$eventName]))
 		{
 			foreach (self::$_attached[$eventName] as $aValue)
 			{

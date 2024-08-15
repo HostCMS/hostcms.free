@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Model extends Core_Entity
 {
@@ -88,6 +87,7 @@ class Shop_Model extends Core_Entity
 		'shop_comment_property_dir' => array(),
 		'shop_order_status' => array(),
 		'shop_order_item_status' => array(),
+		'production_process' => array()
 	);
 
 	/**
@@ -145,6 +145,7 @@ class Shop_Model extends Core_Entity
 		'shop_codetype' => array(),
 		'shop_measure' => array(), // weight
 		'default_shop_measure' => array('model' => 'Shop_Measure', 'foreign_key' => 'default_shop_measure_id'), // item's default measure
+		'producer_structure' => array('model' => 'Structure', 'foreign_key' => 'producer_structure_id'), // item's default measure
 		'user' => array(),
 		'siteuser_group' => array(),
 		'shop_company' => array(), // old relation
@@ -381,6 +382,16 @@ class Shop_Model extends Core_Entity
 		$this->Shop_Filter_Seos->deleteAll(FALSE);
 		$this->Shop_Tab_Dirs->deleteAll(FALSE);
 		$this->Shop_Tabs->deleteAll(FALSE);
+
+		// Fast filter tables
+		if ($this->filter)
+		{
+			Core_QueryBuilder::drop('shop_filter' . $this->id)
+				->table('shop_filter_group' . $this->id)
+				->table('shop_filter_price' . $this->id)
+				->ifExists(TRUE)
+				->execute();
+		}
 
 		// Shop dir
 		Core_File::deleteDir($this->getPath());
@@ -859,7 +870,6 @@ class Shop_Model extends Core_Entity
 			->where('shop_groups.deleted', '=', 0);
 
 		$aShop_Groups = $queryBuilder->execute()->asAssoc()->result();
-
 		foreach ($aShop_Groups as $aShop_Group)
 		{
 			$this->_groupsTree[$aShop_Group['parent_id']][] = $aShop_Group['id'];
@@ -867,17 +877,28 @@ class Shop_Model extends Core_Entity
 
 		$this->_cacheGroups = array();
 
-		$queryBuilder = Core_QueryBuilder::select('parent_id', array('COUNT(id)', 'count'))
+		$queryBuilder = Core_QueryBuilder::select('shop_groups.parent_id', array('COUNT(shop_groups.id)', 'count'))
 			->from('shop_groups')
+			// Активность ярлыков
+			->leftJoin(array('shop_groups', 'shortcuts'), 'shortcuts.id', '=', 'shop_groups.shortcut_id',
+				array(
+					array('AND' => array('shortcuts.active', '=', 1))
+				)
+			)
 			->where('shop_groups.shop_id', '=', $shop_id)
 			->where('shop_groups.active', '=', 1)
+			// Активность ярлыков
+			->open()
+				->where('shop_groups.shortcut_id', '=', 0)
+				->setOr()
+				->where('shortcuts.id', 'IS NOT', NULL)
+			->close()
 			->where('shop_groups.deleted', '=', 0)
 			->groupBy('parent_id');
 
 		Core_Event::notify($this->_modelName . '.onBeforeSelectCountGroupsInRecount', $this, array($queryBuilder));
 
 		$aShop_Groups = $queryBuilder->execute()->asAssoc()->result();
-
 		foreach ($aShop_Groups as $aShop_Group)
 		{
 			$this->_cacheGroups[$aShop_Group['parent_id']] = $aShop_Group['count'];
@@ -888,13 +909,26 @@ class Shop_Model extends Core_Entity
 		$current_date = date('Y-m-d H:i:s');
 
 		$queryBuilder->clear()
-			->select('shop_group_id', array('COUNT(id)', 'count'))
+			->select('shop_items.shop_group_id', array('COUNT(shop_items.id)', 'count'))
 			->from('shop_items')
+			// Активность ярлыков
+			->leftJoin(array('shop_items', 'shortcuts'), 'shortcuts.id', '=', 'shop_items.shortcut_id',
+				array(
+					array('AND' => array('shortcuts.active', '=', 1))
+				)
+			)
 			->where('shop_items.shop_id', '=', $shop_id)
 			->where('shop_items.active', '=', 1)
 			->where('shop_items.modification_id', '=', 0)
 			->where('shop_items.deleted', '=', 0)
 			->where('shop_items.start_datetime', '<=', $current_date)
+			// Активность ярлыков
+			->open()
+				->where('shop_items.shortcut_id', '=', 0)
+				->setOr()
+				->where('shortcuts.id', 'IS NOT', NULL)
+			->close()
+			// Дата-время
 			->open()
 				->where('shop_items.end_datetime', '>=', $current_date)
 				->setOr()
@@ -1143,6 +1177,7 @@ class Shop_Model extends Core_Entity
 		$this->clearXmlTags()
 			->addXmlTag('http', '//' . Core_Array::get($_SERVER, 'SERVER_NAME'))
 			->addXmlTag('url', $this->Structure->getPath())
+			->addXmlTag('producer_url', $this->Producer_Structure->getPath())
 			->addXmlTag('captcha_id', $this->use_captcha ? Core_Captcha::getCaptchaId() : 0);
 
 		$this->shop_currency_id && $this->addEntity($this->Shop_Currency->clearEntities());
@@ -1224,11 +1259,43 @@ class Shop_Model extends Core_Entity
 			->title(Core::_('Shop.all_groups_count', $countShopGroups))
 			->execute();
 
-		$countShopItems = $this->Shop_Items->getCount();
+		$oShopItems = $this->Shop_Items;
+		$oShopItems->queryBuilder()
+			->where('shop_items.modification_id', '=', 0)
+			->where('shop_items.shortcut_id', '=', 0);
+
+		$countShopItems = $oShopItems->getCount();
+
 		$countShopItems && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
-			->value('<i class="fa fa-file-o"></i> ' . $countShopItems)
+			->value('<i class="fa-solid fa-box"></i> ' . $countShopItems)
 			->title(Core::_('Shop.all_items_count', $countShopItems))
+			->execute();
+
+		$oShopItems = $this->Shop_Items;
+		$oShopItems->queryBuilder()
+			->where('shop_items.modification_id', '!=', 0)
+			->where('shop_items.shortcut_id', '=', 0);
+
+		$countModifications = $oShopItems->getCount();
+
+		$countModifications && Core_Html_Entity::factory('Span')
+			->class('badge badge-hostcms badge-square')
+			->value('<i class="fa-solid fa-code-fork"></i> ' . $countModifications)
+			->title(Core::_('Shop.all_modifications_count', $countModifications))
+			->execute();
+
+		$oShopItems = $this->Shop_Items;
+		$oShopItems->queryBuilder()
+			->where('shop_items.modification_id', '=', 0)
+			->where('shop_items.shortcut_id', '!=', 0);
+
+		$countShortcuts = $oShopItems->getCount();
+
+		$countShortcuts && Core_Html_Entity::factory('Span')
+			->class('badge badge-hostcms badge-square')
+			->value('<i class="fa-solid fa-link"></i> ' . $countShortcuts)
+			->title(Core::_('Shop.all_shortcuts_count', $countShortcuts))
 			->execute();
 	}
 
@@ -1320,6 +1387,232 @@ class Shop_Model extends Core_Entity
 		$this->Shop_Currency->id == 0 && Core_Html_Entity::factory('I')
 			->class('fa fa-exclamation-triangle darkorange')
 			->execute();
+	}
+
+	/**
+	 * Backup revision
+	 * @return self
+	 */
+	public function backupRevision()
+	{
+		if (Core::moduleIsActive('revision'))
+		{
+			$aBackup = array(
+				'shop_dir_id' => $this->shop_dir_id,
+				'shop_company_id' => $this->shop_company_id,
+				'site_id' => $this->site_id,
+				'name' => $this->name,
+				'description' => $this->description,
+				'yandex_market_name' => $this->yandex_market_name,
+				'image_small_max_width' => $this->image_small_max_width,
+				'image_small_max_height' => $this->image_small_max_height,
+				'image_large_max_width' => $this->image_large_max_width,
+				'image_large_max_height' => $this->image_large_max_height,
+				'structure_id' => $this->structure_id,
+				'producer_structure_id' => $this->producer_structure_id,
+				'shop_country_id' => $this->shop_country_id,
+				'shop_currency_id' => $this->shop_currency_id,
+				'shop_tax_id' => $this->shop_tax_id,
+				'shop_order_status_id' => $this->shop_order_status_id,
+				'shop_codetype_id' => $this->shop_codetype_id,
+				'shop_measure_id' => $this->shop_measure_id,
+				'default_shop_measure_id' => $this->default_shop_measure_id,
+				'email' => $this->email,
+				'items_on_page' => $this->items_on_page,
+				'url_type' => $this->url_type,
+				'reserve' => $this->reserve,
+				'send_order_email_admin' => $this->send_order_email_admin,
+				'send_order_email_user' => $this->send_order_email_user,
+				'items_sorting_field' => $this->items_sorting_field,
+				'items_sorting_direction' => $this->items_sorting_direction,
+				'groups_sorting_field' => $this->groups_sorting_field,
+				'groups_sorting_direction' => $this->groups_sorting_direction,
+				'user_id' => $this->user_id,
+				'comment_active' => $this->comment_active,
+				'watermark_file' => $this->watermark_file,
+				'watermark_default_use_large_image' => $this->watermark_default_use_large_image,
+				'watermark_default_use_small_image' => $this->watermark_default_use_small_image,
+				'watermark_default_position_x' => $this->watermark_default_position_x,
+				'watermark_default_position_y' => $this->watermark_default_position_y,
+				'create_small_image' => $this->create_small_image,
+				'guid' => $this->guid,
+				'format_date' => $this->format_date,
+				'format_datetime' => $this->format_datetime,
+				'typograph_default_items' => $this->typograph_default_items,
+				'typograph_default_groups' => $this->typograph_default_groups,
+				'apply_tags_automatically' => $this->apply_tags_automatically,
+				'write_off_paid_items' => $this->write_off_paid_items,
+				'apply_keywords_automatically' => $this->apply_keywords_automatically,
+				'change_filename' => $this->change_filename,
+				'attach_digital_items' => $this->attach_digital_items,
+				'yandex_market_sales_notes_default' => $this->yandex_market_sales_notes_default,
+				'siteuser_group_id' => $this->siteuser_group_id,
+				'use_captcha' => $this->use_captcha,
+				'group_image_small_max_width' => $this->group_image_small_max_width,
+				'group_image_large_max_width' => $this->group_image_large_max_width,
+				'group_image_small_max_height' => $this->group_image_small_max_height,
+				'group_image_large_max_height' => $this->group_image_large_max_height,
+				'producer_image_small_max_width' => $this->producer_image_small_max_width,
+				'producer_image_large_max_width' => $this->producer_image_large_max_width,
+				'producer_image_small_max_height' => $this->producer_image_small_max_height,
+				'producer_image_large_max_height' => $this->producer_image_large_max_height,
+				'preserve_aspect_ratio' => $this->preserve_aspect_ratio,
+				'preserve_aspect_ratio_small' => $this->preserve_aspect_ratio_small,
+				'preserve_aspect_ratio_group' => $this->preserve_aspect_ratio_group,
+				'preserve_aspect_ratio_group_small' => $this->preserve_aspect_ratio_group_small,
+				'size_measure' => $this->size_measure,
+				'reserve_hours' => $this->reserve_hours,
+				'max_bonus' => $this->max_bonus,
+				'adult' => $this->adult,
+				'cpa' => $this->cpa,
+				'issue_discountcard' => $this->issue_discountcard,
+				'filter' => $this->filter,
+				'discountcard_template' => $this->discountcard_template,
+				'invoice_template' => $this->invoice_template,
+				'order_admin_subject' => $this->order_admin_subject,
+				'order_user_subject' => $this->order_user_subject,
+				'confirm_admin_subject' => $this->confirm_admin_subject,
+				'confirm_user_subject' => $this->confirm_user_subject,
+				'cancel_admin_subject' => $this->cancel_admin_subject,
+				'cancel_user_subject' => $this->cancel_user_subject,
+				'filter_mode' => $this->filter_mode,
+				'seo_group_title_template' => $this->seo_group_title_template,
+				'seo_group_keywords_template' => $this->seo_group_keywords_template,
+				'seo_group_description_template' => $this->seo_group_description_template,
+				'seo_group_h1_template' => $this->seo_group_h1_template,
+				'seo_item_title_template' => $this->seo_item_title_template,
+				'seo_item_keywords_template' => $this->seo_item_keywords_template,
+				'seo_item_description_template' => $this->seo_item_description_template,
+				'seo_item_h1_template' => $this->seo_item_h1_template,
+				'seo_root_title_template' => $this->seo_root_title_template,
+				'seo_root_keywords_template' => $this->seo_root_keywords_template,
+				'seo_root_description_template' => $this->seo_root_description_template,
+				'seo_root_h1_template' => $this->seo_root_h1_template,
+				'certificate_template' => $this->certificate_template,
+				'certificate_subject' => $this->certificate_subject,
+				'certificate_text' => $this->certificate_text
+			);
+
+			Revision_Controller::backup($this, $aBackup);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Rollback Revision
+	 * @param int $revision_id Revision ID
+	 * @return self
+	 */
+	public function rollbackRevision($revision_id)
+	{
+		if (Core::moduleIsActive('revision'))
+		{
+			$oRevision = Core_Entity::factory('Revision', $revision_id);
+
+			$aBackup = json_decode($oRevision->value, TRUE);
+
+			if (is_array($aBackup))
+			{
+				$this->shop_dir_id = Core_Array::get($aBackup, 'shop_dir_id');
+				$this->shop_company_id = Core_Array::get($aBackup, 'shop_company_id');
+				$this->site_id = Core_Array::get($aBackup, 'site_id');
+				$this->name = Core_Array::get($aBackup, 'name');
+				$this->description = Core_Array::get($aBackup, 'description');
+				$this->yandex_market_name = Core_Array::get($aBackup, 'yandex_market_name');
+				$this->image_small_max_width = Core_Array::get($aBackup, 'image_small_max_width');
+				$this->image_small_max_height = Core_Array::get($aBackup, 'image_small_max_height');
+				$this->image_large_max_width = Core_Array::get($aBackup, 'image_large_max_width');
+				$this->image_large_max_height = Core_Array::get($aBackup, 'image_large_max_height');
+				$this->structure_id = Core_Array::get($aBackup, 'structure_id');
+				$this->producer_structure_id = Core_Array::get($aBackup, 'producer_structure_id');
+				$this->shop_country_id = Core_Array::get($aBackup, 'shop_country_id');
+				$this->shop_currency_id = Core_Array::get($aBackup, 'shop_currency_id');
+				$this->shop_tax_id = Core_Array::get($aBackup, 'shop_tax_id');
+				$this->shop_order_status_id = Core_Array::get($aBackup, 'shop_order_status_id');
+				$this->shop_codetype_id = Core_Array::get($aBackup, 'shop_codetype_id');
+				$this->shop_measure_id = Core_Array::get($aBackup, 'shop_measure_id');
+				$this->default_shop_measure_id = Core_Array::get($aBackup, 'default_shop_measure_id');
+				$this->email = Core_Array::get($aBackup, 'email');
+				$this->items_on_page = Core_Array::get($aBackup, 'items_on_page');
+				$this->url_type = Core_Array::get($aBackup, 'url_type');
+				$this->reserve = Core_Array::get($aBackup, 'reserve');
+				$this->send_order_email_admin = Core_Array::get($aBackup, 'send_order_email_admin');
+				$this->send_order_email_user = Core_Array::get($aBackup, 'send_order_email_user');
+				$this->items_sorting_field = Core_Array::get($aBackup, 'items_sorting_field');
+				$this->items_sorting_direction = Core_Array::get($aBackup, 'items_sorting_direction');
+				$this->groups_sorting_field = Core_Array::get($aBackup, 'groups_sorting_field');
+				$this->groups_sorting_direction = Core_Array::get($aBackup, 'groups_sorting_direction');
+				$this->user_id = Core_Array::get($aBackup, 'user_id');
+				$this->comment_active = Core_Array::get($aBackup, 'comment_active');
+				$this->watermark_file = Core_Array::get($aBackup, 'watermark_file');
+				$this->watermark_default_use_large_image = Core_Array::get($aBackup, 'watermark_default_use_large_image');
+				$this->watermark_default_use_small_image = Core_Array::get($aBackup, 'watermark_default_use_small_image');
+				$this->watermark_default_position_x = Core_Array::get($aBackup, 'watermark_default_position_x');
+				$this->watermark_default_position_y = Core_Array::get($aBackup, 'watermark_default_position_y');
+				$this->create_small_image = Core_Array::get($aBackup, 'create_small_image');
+				$this->guid = Core_Array::get($aBackup, 'guid');
+				$this->format_date = Core_Array::get($aBackup, 'format_date');
+				$this->format_datetime = Core_Array::get($aBackup, 'format_datetime');
+				$this->typograph_default_items = Core_Array::get($aBackup, 'typograph_default_items');
+				$this->typograph_default_groups = Core_Array::get($aBackup, 'typograph_default_groups');
+				$this->apply_tags_automatically = Core_Array::get($aBackup, 'apply_tags_automatically');
+				$this->write_off_paid_items = Core_Array::get($aBackup, 'write_off_paid_items');
+				$this->apply_keywords_automatically = Core_Array::get($aBackup, 'apply_keywords_automatically');
+				$this->change_filename = Core_Array::get($aBackup, 'change_filename');
+				$this->attach_digital_items = Core_Array::get($aBackup, 'attach_digital_items');
+				$this->yandex_market_sales_notes_default = Core_Array::get($aBackup, 'yandex_market_sales_notes_default');
+				$this->siteuser_group_id = Core_Array::get($aBackup, 'siteuser_group_id');
+				$this->use_captcha = Core_Array::get($aBackup, 'use_captcha');
+				$this->group_image_small_max_width = Core_Array::get($aBackup, 'group_image_small_max_width');
+				$this->group_image_large_max_width = Core_Array::get($aBackup, 'group_image_large_max_width');
+				$this->group_image_small_max_height = Core_Array::get($aBackup, 'group_image_small_max_height');
+				$this->group_image_large_max_height = Core_Array::get($aBackup, 'group_image_large_max_height');
+				$this->producer_image_small_max_width = Core_Array::get($aBackup, 'producer_image_small_max_width');
+				$this->producer_image_large_max_width = Core_Array::get($aBackup, 'producer_image_large_max_width');
+				$this->producer_image_small_max_height = Core_Array::get($aBackup, 'producer_image_small_max_height');
+				$this->producer_image_large_max_height = Core_Array::get($aBackup, 'producer_image_large_max_height');
+				$this->preserve_aspect_ratio = Core_Array::get($aBackup, 'preserve_aspect_ratio');
+				$this->preserve_aspect_ratio_small = Core_Array::get($aBackup, 'preserve_aspect_ratio_small');
+				$this->preserve_aspect_ratio_group = Core_Array::get($aBackup, 'preserve_aspect_ratio_group');
+				$this->preserve_aspect_ratio_group_small = Core_Array::get($aBackup, 'preserve_aspect_ratio_group_small');
+				$this->size_measure = Core_Array::get($aBackup, 'size_measure');
+				$this->reserve_hours = Core_Array::get($aBackup, 'reserve_hours');
+				$this->max_bonus = Core_Array::get($aBackup, 'max_bonus');
+				$this->adult = Core_Array::get($aBackup, 'adult');
+				$this->cpa = Core_Array::get($aBackup, 'cpa');
+				$this->issue_discountcard = Core_Array::get($aBackup, 'issue_discountcard');
+				$this->filter = Core_Array::get($aBackup, 'filter');
+				$this->discountcard_template = Core_Array::get($aBackup, 'discountcard_template');
+				$this->invoice_template = Core_Array::get($aBackup, 'invoice_template');
+				$this->order_admin_subject = Core_Array::get($aBackup, 'order_admin_subject');
+				$this->order_user_subject = Core_Array::get($aBackup, 'order_user_subject');
+				$this->confirm_admin_subject = Core_Array::get($aBackup, 'confirm_admin_subject');
+				$this->confirm_user_subject = Core_Array::get($aBackup, 'confirm_user_subject');
+				$this->cancel_admin_subject = Core_Array::get($aBackup, 'cancel_admin_subject');
+				$this->cancel_user_subject = Core_Array::get($aBackup, 'cancel_user_subject');
+				$this->filter_mode = Core_Array::get($aBackup, 'filter_mode');
+				$this->seo_group_title_template = Core_Array::get($aBackup, 'seo_group_title_template');
+				$this->seo_group_keywords_template = Core_Array::get($aBackup, 'seo_group_keywords_template');
+				$this->seo_group_description_template = Core_Array::get($aBackup, 'seo_group_description_template');
+				$this->seo_group_h1_template = Core_Array::get($aBackup, 'seo_group_h1_template');
+				$this->seo_item_title_template = Core_Array::get($aBackup, 'seo_item_title_template');
+				$this->seo_item_keywords_template = Core_Array::get($aBackup, 'seo_item_keywords_template');
+				$this->seo_item_description_template = Core_Array::get($aBackup, 'seo_item_description_template');
+				$this->seo_item_h1_template = Core_Array::get($aBackup, 'seo_item_h1_template');
+				$this->seo_root_title_template = Core_Array::get($aBackup, 'seo_root_title_template');
+				$this->seo_root_keywords_template = Core_Array::get($aBackup, 'seo_root_keywords_template');
+				$this->seo_root_description_template = Core_Array::get($aBackup, 'seo_root_description_template');
+				$this->seo_root_h1_template = Core_Array::get($aBackup, 'seo_root_h1_template');
+				$this->certificate_template = Core_Array::get($aBackup, 'certificate_template');
+				$this->certificate_subject = Core_Array::get($aBackup, 'certificate_subject');
+				$this->certificate_text = Core_Array::get($aBackup, 'certificate_text');
+
+				$this->save();
+			}
+		}
+
+		return $this;
 	}
 
 	/**

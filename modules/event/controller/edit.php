@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -52,6 +51,8 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
 
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
+
 		$oAdditionalTab
 			->add($oAdditionalRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oAdditionalRow2 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -63,7 +64,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$oAdditionalTab->move($this->getField('id')->divAttr(array('class' => 'form-group col-xs-12')), $oAdditionalRow1);
 		}
 
-		if (Core::moduleIsActive('crm_project'))
+		/*if (Core::moduleIsActive('crm_project'))
 		{
 			$oAdditionalTab->delete($this->getField('crm_project_id'));
 
@@ -94,7 +95,8 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oCrmProjectInput = Admin_Form_Entity::factory('Input')
 					->caption(Core::_('Event.crm_project_id'))
 					->divAttr(array('class' => 'form-group col-xs-12'))
-					->name('crm_project_name');
+					->name('crm_project_name')
+					->placeholder(Core::_('Admin.autocomplete_placeholder'));
 
 				if ($this->_object->crm_project_id)
 				{
@@ -126,9 +128,10 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						minLength: 1,
 						create: function() {
 							$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
-								return $('<li></li>')
+								return $('<li class=\"autocomplete-suggestion\"></li>')
 									.data('item.autocomplete', item)
-									.append($('<a>').text(item.label))
+									.append($('<div class=\"name\">').html($.escapeHtml(item.label)))
+									.append($('<div class=\"id\">').html('[' + $.escapeHtml(item.id) + ']'))
 									.appendTo(ul);
 							}
 
@@ -151,7 +154,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->add($oCrmProjectInputHidden)
 					->add($oCore_Html_Entity_Script_Crm_Project);
 			}
-		}
+		}*/
 
 		$oMainTab
 			->move($this->getField('guid')->divAttr(array('class' => 'form-group col-xs-12')), $oAdditionalRow3)
@@ -228,17 +231,21 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->add(Admin_Form_Entity::factory('Script')
 					->value('
 						$(function(){
-							var timer = setInterval(function(){
-								if ($("#' . $windowId . ' .left-block").height())
-								{
-									clearInterval(timer);
+							var bodyWidth = parseInt($("body").width()),
+								timer = setInterval(function(){
+									if (bodyWidth >= 992)
+									{
+										if ($("#' . $windowId . ' .left-block").height())
+										{
+											clearInterval(timer);
 
-									$("#' . $windowId . ' .right-block").find("#' . $windowId . '-event-notes").slimscroll({
-										height: $("#' . $windowId . ' .left-block").height() + 150,
-										color: "rgba(0, 0, 0, 0.3)",
-										size: "5px"
-									});
-								}
+											$("#' . $windowId . ' .right-block").find("#' . $windowId . '-event-notes").slimscroll({
+												height: $("#' . $windowId . ' .left-block").height() + 150,
+												color: "rgba(0, 0, 0, 0.3)",
+												size: "5px"
+											});
+										}
+									}
 							}, 500);
 						});
 					'));
@@ -254,18 +261,61 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
 				->add($oMainRow7 = Admin_Form_Entity::factory('Div')->class('row profile-container'))
 				->add($oMainRow8 = Admin_Form_Entity::factory('Div')->class('row'))
+				->add($oMainRowProjects = Admin_Form_Entity::factory('Div')->class('row'))
+				->add($oMainRowCalendar = Admin_Form_Entity::factory('Div')->class('row'))
 				->add($oMainRow9 = Admin_Form_Entity::factory('Div')->class('row hidden'))
 				->add($oMainRow10 = Admin_Form_Entity::factory('Div')->class('row profile-container'))
 				->add($oMainRow11 = Admin_Form_Entity::factory('Div')->class('row'))
 				;
 
-			$oDivRight
-				->add($oMainRowNotes = Admin_Form_Entity::factory('Div')->class('row'));
+			$aEvent_Attachments = $this->_object->Event_Attachments->findAll();
 
-			$oMainRowNotes->add(
-				Admin_Form_Entity::factory('Div')
-					->class('col-xs-12')
-					->add(
+			$countFiles = count($aEvent_Attachments)
+				? '<span class="badge badge-azure">' . count($aEvent_Attachments) . '</span>'
+				: '';
+
+			$countNotes = ($count = $this->_object->Crm_Notes->getCount())
+				? '<span class="badge badge-yellow">' . $count . '</span>'
+				: '';
+
+			ob_start();
+			?>
+			<div class="tabbable">
+				<ul class="nav nav-tabs tabs-flat" id="eventTabs">
+					<li class="active" data-type="timeline">
+						<a data-toggle="tab" href="#<?php echo $windowId?>_timeline" data-path="/admin/event/timeline/index.php" data-window-id="<?php echo $windowId?>-event-timeline" data-additional="event_id=<?php echo $this->_object->id?>">
+							<i class="fa fa-bars"></i>
+						</a>
+					</li>
+					<li data-type="note">
+						<a data-toggle="tab" href="#<?php echo $windowId?>_notes" data-path="/admin/event/note/index.php" data-window-id="<?php echo $windowId?>-event-notes" data-additional="event_id=<?php echo $this->_object->id?>">
+							<?php echo Core::_("Event.tabNotes")?> <?php echo $countNotes?>
+						</a>
+					</li>
+					<li>
+						<a data-toggle="tab" href="#<?php echo $windowId?>_files">
+							<?php echo Core::_("Event.attachment_header")?> <?php echo $countFiles?>
+						</a>
+					</li>
+				</ul>
+				<div class="tab-content tabs-flat">
+					<div id="<?php echo $windowId?>_timeline" class="tab-pane in active">
+						<?php
+							Admin_Form_Entity::factory('Div')
+								->controller($this->_Admin_Form_Controller)
+								->id("{$windowId}-event-timeline")
+								->add(
+									$this->_object->id
+										? $this->_addEventTimeline()
+										: Admin_Form_Entity::factory('Code')->html(
+											Core_Message::get(Core::_('Event.enable_after_save'), 'warning')
+										)
+								)
+								->execute();
+						?>
+					</div>
+					<div id="<?php echo $windowId?>_notes" class="tab-pane">
+						<?php
 						Admin_Form_Entity::factory('Div')
 							->controller($this->_Admin_Form_Controller)
 							->id("{$windowId}-event-notes")
@@ -276,8 +326,48 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 										Core_Message::get(Core::_('Event.enable_after_save'), 'warning')
 									)
 							)
-					)
-					// ->execute()
+							->execute();
+						?>
+					</div>
+					<div id="<?php echo $windowId?>_files" class="tab-pane">
+						<?php
+						foreach ($aEvent_Attachments as $oEvent_Attachment)
+						{
+							$textSize = $oEvent_Attachment->getTextSize();
+
+							Admin_Form_Entity::factory('File')
+								->controller($this->_Admin_Form_Controller)
+								->type('file')
+								->caption("{$oEvent_Attachment->file_name} ({$textSize})")
+								->name("file_{$oEvent_Attachment->id}")
+								->largeImage(
+									array(
+										'path' => '/admin/event/index.php?downloadFile=' . $oEvent_Attachment->id . '&filename=' . $oEvent_Attachment->file_name,
+										'show_params' => FALSE,
+										'show_actions' => FALSE,
+										'originalName' => $oEvent_Attachment->file_name,
+									)
+								)
+								->smallImage(
+									array('show' => FALSE)
+								)
+								->divAttr(array('id' => "file_{$oEvent_Attachment->id}"))
+								->execute();
+						}
+						?>
+					</div>
+				</div>
+			</div>
+			<?php
+			$oDivRight
+				->add($oMainRowNotes = Admin_Form_Entity::factory('Div')->class('row'));
+
+			$oMainRowNotes->add(Admin_Form_Entity::factory('Div')
+				->class('form-group col-xs-12 margin-top-20')
+				->add(
+					Admin_Form_Entity::factory('Code')
+						->html(ob_get_clean())
+				)
 			);
 
 			$oMainRow1->add(
@@ -411,7 +501,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			);
 
 			// Статус
-			if ($this->_object->event_status_id)
+			/*if ($this->_object->event_status_id)
 			{
 				$oEvent_Status = Core_Entity::factory('Event_Status', $this->_object->event_status_id);
 
@@ -435,21 +525,48 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								</div>
 							')
 					)
-			);
+			);*/
 
-			$oMainRow3_1->add(
-				Admin_Form_Entity::factory('Div')
-					->class('col-xs-12 col-md-4')
-					->add(
-						Admin_Form_Entity::factory('Code')
-							->html('
-								<div class="form-group">
-									<span class="caption">' . Core::_('Event.finish_view') . '</span>
-									<span class="darkgray"><i class="fa fa-clock-o" style="margin-right: 5px;"></i><span>' . Event_Controller::getDateTime($this->_object->finish) . '</span></span>
-								</div>
-							')
-					)
-			);
+			$aMasEventStatuses = array(array('value' => Core::_('Event.notStatus'), 'color' => '#aebec4'));
+
+			// При добавлении дела отображаем статусы, которые не являются завершающими
+			$aEventStatuses = is_null($this->_object->id)
+				? Core_Entity::factory('Event_Status')->getAllByFinal(0)
+				: Core_Entity::factory('Event_Status')->findAll();
+
+			foreach ($aEventStatuses as $oEventStatus)
+			{
+				$aMasEventStatuses[$oEventStatus->id] = array(
+					'value' => $oEventStatus->name,
+					'color' => $oEventStatus->color
+				);
+			}
+
+			$oDropdownlistEventStatuses = Admin_Form_Entity::factory('Dropdownlist')
+				->options($aMasEventStatuses)
+				->name('event_status_id')
+				->value($this->_object->event_status_id)
+				// ->caption(Core::_('Event.event_status_id'))
+				->divAttr(array('class' => 'col-md-4 col-xs-12'));
+
+			$oMainRow3->add($oDropdownlistEventStatuses);
+
+			if ($this->_object->finish != '0000-00-00 00:00:00')
+			{
+				$oMainRow3_1->add(
+					Admin_Form_Entity::factory('Div')
+						->class('col-xs-12 col-md-4')
+						->add(
+							Admin_Form_Entity::factory('Code')
+								->html('
+									<div class="form-group">
+										<span class="caption">' . Core::_('Event.finish_view') . '</span>
+										<span class="darkgray"><i class="fa fa-clock-o" style="margin-right: 5px;"></i><span>' . Event_Controller::getDateTime($this->_object->finish) . '</span></span>
+									</div>
+								')
+						)
+				);
+			}
 
 			// Важное
 			if ($this->_object->important)
@@ -680,16 +797,16 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 			$oEvent_Type = $this->_object->Event_Type;
 
-			$successfully = strlen(trim($oEvent_Type->successfully))
+			$successfully = $oEvent_Type->successfully != ''
 				? htmlspecialchars($oEvent_Type->successfully)
 				: Core::_('Event_Type.successfully');
 
-			$failed = strlen(trim($oEvent_Type->failed))
+			$failed = $oEvent_Type->failed != ''
 				? htmlspecialchars($oEvent_Type->failed)
 				: Core::_('Event_Type.failed');
 
 			// Файлы
-			$aEvent_Attachments = $this->_object->Event_Attachments->findAll(FALSE);
+			/*$aEvent_Attachments = $this->_object->Event_Attachments->findAll(FALSE);
 			if (count($aEvent_Attachments))
 			{
 				$oMainRow10->add(
@@ -725,7 +842,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							')
 					);
 				}
-			}
+			}*/
 
 			$oMainRow10->add(
 				Admin_Form_Entity::factory('Radiogroup')
@@ -739,7 +856,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					))
 					->colors(array('btn-palegreen', 'btn-darkorange'))
 					->name('completed')
-					->divAttr(array('class' => 'form-group col-xs-12 type-states'))
+					->divAttr(array('class' => 'form-group col-xs-12 type-states rounded-radio-group'))
 					->value($this->_object->completed)
 			)->add(Admin_Form_Entity::factory('Script')
 				->value("
@@ -794,6 +911,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oDivLeft
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainRowChecklist = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRowEventStartButtons = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRowDuration = Admin_Form_Entity::factory('Div')->class('row duration-row'))
 			->add($oMainRowTimeSlider = Admin_Form_Entity::factory('Div')->class('row'))
@@ -805,7 +923,10 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row additional-row' . ($bHideAdditionalRow ? ' hidden' : '')))
 			->add($oMainRow7 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow8 = Admin_Form_Entity::factory('Div')->class('row additional-row event-user-id' . ($bHideAdditionalRow ? ' hidden' : '')))
-			// ->add($oMainRowResultShow = Admin_Form_Entity::factory('Div')->class('row' . ($this->_object->completed ? ' hidden' : '')))
+			->add($oMainRowProjects = Admin_Form_Entity::factory('Div')->class('row additional-row' . ($bHideAdditionalRow ? ' hidden' : '')))
+			->add($oMainRowCalendar = Admin_Form_Entity::factory('Div')->class('row additional-row' . ($bHideAdditionalRow ? ' hidden' : '')))
+			->add($oMainRowTags = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainRowResultShow = Admin_Form_Entity::factory('Div')->class('row' . ($this->_object->completed ? ' hidden' : '')))
 			->add($oMainRow9 = Admin_Form_Entity::factory('Div')->class('row result-row hidden'))
 			->add($oMainRowScripts = Admin_Form_Entity::factory('Div')->class('row'));
 
@@ -838,13 +959,14 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		//Массив названий кнопок быстрого переключения даты начала события
 		$masEventStartButtonTitle = array();
+		$masEventStartButtonTitle[""] = Core::_('Event.without_deadline');
 		$masEventStartButtonTitle["'" . Core_Date::timestamp2date(time()) . "'"] = Core::_('Event.eventStartButtonTitleToday');
 		$masEventStartButtonTitle["'" . Core_Date::timestamp2date(time() + 3600 * 24) . "'"] = Core::_('Event.eventStartButtonTitleTomorrow');
 		$masEventStartButtonTitle["'" . Core_Date::timestamp2date(time() + 3600 * 24 * 2) . "'"] = Core::_('Event.eventStartButtonTitleDayAfterTomorrow');
 		$masEventStartButtonTitle["'" . Core_Date::timestamp2date(time() + 3600 * 24 * 3) . "'"] = Core::_('Event.eventStartButtonTitle3Days');
 
 		$htmlEventStartButtons = '';
-		$startDayNum = 0;
+		$startDayNum = -1;
 
 		// Формирование кнопок быстрого переключения даты начала события
 		foreach ($masEventStartButtonTitle as $eventStartDate => $eventStartTitle)
@@ -856,7 +978,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oAdmin_Form_Entity_Code = Admin_Form_Entity::factory('Code');
 
 		$oAdmin_Form_Entity_Code->html(
-			'<div class="col-xs-12 col-md-9 !text-center" style="z-index: 10">
+			'<div class="col-xs-12 col-lg-9" style="z-index: 10">
 				<div id="eventStartButtonsGroup" class="btn-group margin-bottom-15">' . $htmlEventStartButtons . '</div>
 			</div>
 			<script>
@@ -873,12 +995,12 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oMainRowEventStartButtons->add($oAdmin_Form_Entity_Code);
 
-		$oMainTab->move($this->getField('all_day')->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 margin-top-5 text-align-right')), $oMainRowEventStartButtons);
+		$oMainTab->move($this->getField('all_day')->divAttr(array('class' => 'form-group col-xs-12 col-lg-3 margin-top-5 text-align-right')), $oMainRowEventStartButtons);
 
 		$aDurationTypes = array(Core::_('Event.periodMinutes'), Core::_('Event.periodHours'), Core::_('Event.periodDays'));
 
 		$oDiv_Duration = Admin_Form_Entity::factory('Div')
-			->class('form-group col-xs-12 col-sm-6 col-md-4 amount-currency')
+			->class('form-group col-xs-12 col-sm-6 col-lg-4 amount-currency')
 			->add(Admin_Form_Entity::factory('Input')
 				->name('duration')
 				->id('duration')
@@ -920,8 +1042,8 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainRowDuration->add($oDiv_ReminderValue);
 
 		$oMainTab
-			->move($this->getField('busy')->divAttr(array('class' => 'form-group col-md-2 col-xs-6 margin-top-21')), $oMainRowDuration)
-			->move($this->getField('important')->class('colored-danger')->divAttr(array('class' => 'form-group col-md-2 col-xs-6 margin-top-21')), $oMainRowDuration);
+			->move($this->getField('busy')->divAttr(array('class' => 'form-group col-xs-6 col-lg-2 margin-top-21')), $oMainRowDuration)
+			->move($this->getField('important')->class('colored-danger')->divAttr(array('class' => 'form-group col-xs-6 col-lg-2 margin-top-21')), $oMainRowDuration);
 
 		$oMainRowSettingsShow->add(Admin_Form_Entity::factory('Span')
 			->divAttr(array('class' => 'form-group col-xs-12'))
@@ -944,9 +1066,9 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		}
 
 		$oMainTab
-			->move($this->getField('start')->divAttr(array('class' => 'form-group col-xs-6')), $oMainRow3_2)
-			->move($this->getField('deadline')->divAttr(array('class' => 'form-group col-xs-6')), $oMainRow3_2)
-			->move($this->getField('finish')->divAttr(array('class' => 'form-group col-xs-6'))->disabled('disabled'), $oMainRow3_2);
+			->move($this->getField('start')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow3_2)
+			->move($this->getField('deadline')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow3_2)
+			->move($this->getField('finish')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))->disabled('disabled'), $oMainRow3_2);
 
 		$oAdmin_Form_Entity_Code = Admin_Form_Entity::factory('Code');
 		$oAdmin_Form_Entity_Code->html(
@@ -1199,6 +1321,239 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->add($oScriptSiteusers);
 		}
 
+		if (Core::moduleIsActive('crm_project'))
+		{
+			$oAdditionalTab->delete($this->getField('crm_project_id'));
+
+			$windowId = $this->_Admin_Form_Controller->getWindowId();
+
+			$aCrmProjectsOptions = array(' … ');
+
+			$aCrm_Projects = Core_Entity::factory('Crm_Project')->getAllBySite_id(CURRENT_SITE);
+			foreach ($aCrm_Projects as $oCrm_Project)
+			{
+				$aCrmProjectsOptions[$oCrm_Project->id] = $oCrm_Project->name;
+			}
+
+			if (count($aCrm_Projects) < Core::$mainConfig['switchSelectToAutocomplete'])
+			{
+				$oSelect_Projects = Admin_Form_Entity::factory('Select');
+				$oSelect_Projects
+					->options($aCrmProjectsOptions)
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
+					->name('crm_project_id')
+					->value($this->_object->crm_project_id)
+					->caption(Core::_('Event.crm_project_id'));
+
+				$oMainRowProjects->add($oSelect_Projects);
+			}
+			else
+			{
+				$oCrmProjectInput = Admin_Form_Entity::factory('Input')
+					->caption(Core::_('Event.crm_project_id'))
+					->divAttr(array('class' => 'form-group col-xs-12'))
+					->name('crm_project_name')
+					->placeholder(Core::_('Admin.autocomplete_placeholder'));
+
+				if ($this->_object->crm_project_id)
+				{
+					$oCrm_Project = $this->_object->Crm_Project;
+					$oCrmProjectInput->value($oCrm_Project->name . ' [' . $oCrm_Project->id . ']');
+				}
+
+				$oCrmProjectInputHidden = Admin_Form_Entity::factory('Input')
+					->divAttr(array('class' => 'form-group col-xs-12 hidden'))
+					->name('crm_project_id')
+					->value($this->_object->crm_project_id)
+					->type('hidden');
+
+				$oCore_Html_Entity_Script_Crm_Project = Core_Html_Entity::factory('Script')
+				->value("
+					$('#" . $windowId . " [name = crm_project_name]').autocomplete({
+						source: function(request, response) {
+							$.ajax({
+								url: '/admin/crm/project/index.php?autocomplete=1',
+								dataType: 'json',
+								data: {
+									queryString: request.term
+								},
+								success: function(data) {
+									response(data);
+								}
+							});
+						},
+						minLength: 1,
+						create: function() {
+							$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
+								return $('<li class=\"autocomplete-suggestion\"></li>')
+									.data('item.autocomplete', item)
+									.append($('<div class=\"name\">').html($.escapeHtml(item.label)))
+									.append($('<div class=\"id\">').html('[' + $.escapeHtml(item.id) + ']'))
+									.appendTo(ul);
+							}
+
+							$(this).prev('.ui-helper-hidden-accessible').remove();
+						},
+						select: function(event, ui) {
+							$('#" . $windowId . " [name = crm_project_id]').val(ui.item.id);
+						},
+						open: function() {
+							$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
+						},
+						close: function() {
+							$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
+						}
+					});
+				");
+
+				$oMainRowProjects
+					->add($oCrmProjectInput)
+					->add($oCrmProjectInputHidden)
+					->add($oCore_Html_Entity_Script_Crm_Project);
+			}
+		}
+
+		// Tags
+		if (Core::moduleIsActive('tag'))
+		{
+			$oAdditionalTagsSelect = Admin_Form_Entity::factory('Select')
+				->caption(Core::_('Event.tags'))
+				->options($this->_fillTagsList($this->_object))
+				->name('tags[]')
+				->class('event-tags')
+				->style('width: 100%')
+				->multiple('multiple')
+				->divAttr(array('class' => 'form-group col-xs-12'));
+
+			$oMainRowTags->add($oAdditionalTagsSelect);
+
+			$html = '<script>
+			$(function(){
+				$("#' . $windowId . ' .event-tags").select2({
+					dropdownParent: $("#' . $windowId . '"),
+					language: "' . Core_I18n::instance()->getLng() . '",
+					minimumInputLength: 1,
+					placeholder: "' . Core::_('Event.type_tag') . '",
+					tags: true,
+					allowClear: true,
+					multiple: true,
+					ajax: {
+						url: "/admin/tag/index.php?hostcms[action]=loadTagsList&hostcms[checked][0][0]=1",
+						dataType: "json",
+						type: "GET",
+						processResults: function (data) {
+							var aResults = [];
+							$.each(data, function (index, item) {
+								aResults.push({
+									"id": item.id,
+									"text": item.text
+								});
+							});
+							return {
+								results: aResults
+							};
+						}
+					}
+				});
+			});</script>';
+
+			$oMainRowTags->add(Admin_Form_Entity::factory('Code')->html($html));
+		}
+
+		if (Core::moduleIsActive('calendar'))
+		{
+			$aCalendar_Caldavs = Core_Entity::factory('Calendar_Caldav')->getAllByActive(1, FALSE);
+
+			if (count($aCalendar_Caldavs))
+			{
+				$aEvent_Calendar_Caldavs = $this->_object->Event_Calendar_Caldavs->findAll(FALSE);
+
+				$aCalendar_Options = array();
+
+				if (!count($aEvent_Calendar_Caldavs))
+				{
+					foreach ($aCalendar_Caldavs as $oCalendar_Caldav)
+					{
+						$aCalendar_Options[$oCalendar_Caldav->id] = array(
+							'value' => ($oCalendar_Caldav->icon != '' ? '<i class="' . $oCalendar_Caldav->icon . '"></i> ' : '') . $oCalendar_Caldav->name,
+							'attr' => array('selected' => 'selected')
+						);
+
+						if ($oCalendar_Caldav->color != '')
+						{
+							$aCalendar_Options[$oCalendar_Caldav->id]['attr']['data-color'] = $oCalendar_Caldav->color;
+						}
+					}
+				}
+				else
+				{
+					foreach ($aEvent_Calendar_Caldavs as $oEvent_Calendar_Caldav)
+					{
+						$oCalendar_Caldav = $oEvent_Calendar_Caldav->Calendar_Caldav;
+
+						$aCalendar_Options[$oCalendar_Caldav->id] = array(
+							'value' => ($oCalendar_Caldav->icon != '' ? '<i class="' . $oCalendar_Caldav->icon . '"></i> ' : '') . $oCalendar_Caldav->name,
+							'attr' => array('selected' => 'selected')
+						);
+
+						if ($oCalendar_Caldav->color != '')
+						{
+							$aCalendar_Options[$oCalendar_Caldav->id]['attr']['data-color'] = $oCalendar_Caldav->color;
+						}
+					}
+				}
+
+				$oSelectCalendars = Admin_Form_Entity::factory('Select')
+					->id($windowId . '-event_calendar_caldav_id')
+					->multiple('multiple')
+					->options($aCalendar_Options)
+					->name('event_calendar_caldav_id[]')
+					->caption(Core::_('Event.event_calendar_caldav_id'))
+					->style("width: 100%");
+
+				$oScriptCalendars = Admin_Form_Entity::factory('Script')
+					->value('
+						$("#' . $windowId . '-event_calendar_caldav_id").select2({
+							dropdownParent: $("#' . $windowId . '"),
+							minimumInputLength: 1,
+							placeholder: "' . Core::_('Event.select_calendar') . '",
+							allowClear: true,
+							multiple: true,
+							ajax: {
+								url: "/admin/calendar/caldav/index.php?loadCalendars",
+								dataType: "json",
+								type: "GET",
+								processResults: function (data) {
+									var aResults = [];
+									$.each(data, function (index, item) {
+										aResults.push({
+											"id": item.id,
+											"text": item.text
+										});
+									});
+									return {
+										results: aResults
+									};
+								}
+							},
+							escapeMarkup: function(m) { return m; },
+							templateSelection: function (data, container) {
+								if (data.element && typeof $(data.element).data("color") != "undefined") {
+									container[0].setAttribute("style", "background-color:" +  $(data.element).data(\'color\') + " !important; color: #FFF !important; border-color: " + $(data.element).data(\'color\') + " !important;");
+									container[0].getElementsByTagName("span")[0].setAttribute("style", "color: #FFF !important");
+								}
+								return data.text;
+							},
+							language: "' . Core_I18n::instance()->getLng() . '"
+						});'
+					);
+
+				$oMainRowCalendar
+					->add($oSelectCalendars)
+					->add($oScriptCalendars);
+			}
+		}
+
 		$aLead_Events = Core::moduleIsActive('Lead')
 			? $this->_object->Lead_Events->findAll(FALSE)
 			:array();
@@ -1272,22 +1627,45 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->move($this->getField('place')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow6)
 			;
 
+		$oMainRowChecklist
+			->add(Admin_Form_Entity::factory('Div')
+				->class('event-checklist-wrapper col-xs-12')
+			)
+			->add(Admin_Form_Entity::factory('Span')
+				->divAttr(array('class' => 'form-group col-xs-12'))
+				->add(Admin_Form_Entity::factory('A')
+					->value(Core::_("Event.add_checklist"))
+					->class('representative-show-link darkgray')
+					->onclick("$.addEventChecklist('{$windowId}', '#{$windowId} .event-checklist-wrapper')")
+		));
+
+		ob_start();
+		Core_Html_Entity::factory('Script')
+			->value("$.loadEventChecklists('{$windowId}', '#{$windowId} .event-checklist-wrapper', {$this->_object->id});")
+			->execute();
+		$this->_Admin_Form_Controller->addMessage(ob_get_clean());
+
 		if (Core::moduleIsActive('dms'))
 		{
-			$oMainRow2->add(
-				Admin_Form_Entity::factory('Code')
-					->html('<div class="form-group col-xs-12">' . $this->_object->showDocuments($this->_Admin_Form_Controller) . '</div>')
-			);
+			$documents = $this->_object->showDocuments($this->_Admin_Form_Controller);
+
+			if (strlen($documents))
+			{
+				$oMainRow2->add(
+					Admin_Form_Entity::factory('Code')
+						->html('<div class="form-group col-xs-12">' . $documents . '</div>')
+				);
+			}
 		}
 
-		// $oMainRowResultShow->add(Admin_Form_Entity::factory('Span')
-		// 	->divAttr(array('class' => 'form-group col-xs-12'))
-		// 	->add(Admin_Form_Entity::factory('A')
-		// 		->value(Core::_("Event.show_results"))
-		// 		->class('representative-show-link darkgray')
-		// 		->onclick("$.toggleEventFields($(this), '#{$windowId} .result-row')")
-		// 	)
-		// );
+		$oMainRowResultShow->add(Admin_Form_Entity::factory('Span')
+			->divAttr(array('class' => 'form-group col-xs-12'))
+			->add(Admin_Form_Entity::factory('A')
+				->value(Core::_("Event.show_results"))
+				->class('representative-show-link darkgray')
+				->onclick("$.toggleEventFields($(this), '#{$windowId} .result-row')")
+			)
+		);
 
 		// Если сотрудник является участником дела, но не его создателем, то возможен только просмотр информации о деле.
 		if ($this->_object->id && $iCreatorUserId != $oUser->id)
@@ -1324,7 +1702,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			$oMainTab->delete($this->getField('completed'));
 
-			/*$oDivLeft->add($oMainRow10 = Admin_Form_Entity::factory('Div')->class('row result-row' . (!$this->_object->completed ? ' hidden' : '')));
+			// $oDivLeft->add($oMainRow9 = Admin_Form_Entity::factory('Div')->class('row result-row' . (!$this->_object->completed ? ' hidden' : '')));
 
 			$oEvent_Type = $this->_object->Event_Type;
 
@@ -1336,7 +1714,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				? htmlspecialchars($oEvent_Type->failed)
 				: Core::_('Event_Type.failed');
 
-			$oMainRow10->add(
+			$oMainRow9->add(
 				Admin_Form_Entity::factory('Radiogroup')
 					->radio(array(
 						1 => $successfully,
@@ -1348,7 +1726,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					))
 					->colors(array('btn-palegreen', 'btn-darkorange'))
 					->name('completed')
-					->divAttr(array('class' => 'form-group col-xs-12 type-states'))
+					->divAttr(array('class' => 'form-group col-xs-12 type-states rounded-radio-group'))
 					->value($this->_object->completed)
 			)->add(Admin_Form_Entity::factory('Script')
 				->value("
@@ -1360,7 +1738,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							radio.prop('checked', !radio.is(':checked'));
 						});
 					});")
-			);*/
+			);
 		}
 
 		$aEvent_Attachments = $this->_object->Event_Attachments->findAll();
@@ -1372,11 +1750,11 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			: '';
 
 		$countNotes = ($count = $this->_object->Crm_Notes->getCount())
-			? '<span class="badge badge-palegreen">' . $count . '</span>'
+			? '<span class="badge badge-yellow">' . $count . '</span>'
 			: '';
 
 		$countEvents = ($count = $this->_object->Events->getCount())
-			? '<span class="badge badge-yellow">' . $count . '</span>'
+			? '<span class="badge badge-orange">' . $count . '</span>'
 			: '';
 
 		ob_start();
@@ -1455,21 +1833,16 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->execute();
 					?>
 				</div>
-				<div id="<?php echo $windowId?>_files" class="row tab-pane">
+				<div id="<?php echo $windowId?>_files" class="tab-pane">
 					<?php
 					foreach ($aEvent_Attachments as $oEvent_Attachment)
 					{
 						$textSize = $oEvent_Attachment->getTextSize();
 
-						ob_start();
-						Core_Html_Entity::factory('Strong')
-							->value(" ({$textSize})")
-							->execute();
-
 						Admin_Form_Entity::factory('File')
 							->controller($this->_Admin_Form_Controller)
 							->type('file')
-							->caption(/*$icon_file_img . ' ' . */$oEvent_Attachment->file_name . ob_get_clean())
+							->caption("{$oEvent_Attachment->file_name} ({$textSize})")
 							->name("file_{$oEvent_Attachment->id}")
 							->largeImage(
 								array(
@@ -1483,25 +1856,42 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							->smallImage(
 								array('show' => FALSE)
 							)
-							->divAttr(array('id' => "file_{$oEvent_Attachment->id}", 'class' => 'input-group col-xs-12'))
+							->divAttr(array('id' => "file_{$oEvent_Attachment->id}"))
 							->execute();
 					}
 
-					$oAdmin_Form_Entity_Code = Admin_Form_Entity::factory('Code');
-					$oAdmin_Form_Entity_Code->html('<div class="input-group-addon no-padding add-remove-property"><div class="no-padding-left col-lg-12"><div class="btn btn-palegreen inverted" onclick="$.cloneFile(\'' . $windowId . '\'); event.stopPropagation();"><i class="fa fa-plus-circle close"></i></div>
-						<div class="btn btn-darkorange inverted" onclick="$(this).parents(\'#file\').remove(); event.stopPropagation();"><i class="fa fa-minus-circle close"></i></div>
-						</div>
-						</div>');
-
-					Admin_Form_Entity::factory('File')
+					$oAdmin_Form_Entity = Admin_Form_Entity::factory('File')
 						->controller($this->_Admin_Form_Controller)
 						->type('file')
 						->name("file[]")
 						->caption(Core::_('Event.attachment'))
-						->largeImage(array('show_params' => FALSE))
-						->smallImage(array('show' => FALSE))
-						->divAttr(array('id' => 'file', 'class' => 'col-xs-12 col-sm-6'))
-						->add($oAdmin_Form_Entity_Code)
+						->largeImage(
+							array(
+								'show_params' => FALSE,
+								'show_description' => TRUE
+							)
+						)
+						->smallImage(
+							array('show' => FALSE)
+						)
+						->divAttr(array('class' => 'form-group col-xs-12'));
+
+					Admin_Form_Entity::factory('Div')
+						->class('row')
+						->add(
+							Admin_Form_Entity::factory('Div')
+								->class('input-group')
+								->id('file')
+								->add($oAdmin_Form_Entity)
+								->add(
+									Admin_Form_Entity::factory('Code')->html('<div class="input-group-addon add-remove-property">
+									<div class="no-padding-left col-lg-12">
+									<div class="btn btn-palegreen inverted" onclick="$.cloneFile(\'' . $windowId . '\'); event.stopPropagation();"><i class="fa fa-plus-circle close"></i></div>
+									<div class="btn btn-darkorange inverted" onclick="$(this).parents(\'#file\').remove(); event.stopPropagation();"><i class="fa fa-minus-circle close"></i></div>
+									</div>
+									</div>')
+								)
+						)
 						->execute();
 					?>
 				</div>
@@ -1874,58 +2264,67 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								.siblings(".active")
 								.removeClass("active");
 
-							var koef = +$(this).data("startDay"),
-								millisecondsDay = 3600 * 24 * 1000,
+							var koef = +$(this).data("startDay");
 
-								// Текущая дата-время
-								oCurrentDate = new Date(),
-
-								// Текущая дата без времени
-								oCurrentDateWithoutTime = new Date(oCurrentDate.getFullYear(), oCurrentDate.getMonth(), oCurrentDate.getDate()),
-
-								// Текущая дата-время начала события
-								//oCurrentStartDate = new Date(+$("#' . $windowId . ' #" + cellId).attr("start_timestamp")),
-								oCurrentStartDate = new Date(+$("#' . $windowId . ' #" + cellId).attr("start_timestamp") - timeZoneOffset),
-
-								// Текущая дата начала события без времени
-								oCurrentStartDateWithoutTime = new Date(oCurrentStartDate.getFullYear(), oCurrentStartDate.getMonth(), oCurrentStartDate.getDate()),
-
-								// Новая дата начала события без времени
-								// oNewStartDateWithoutTime = new Date(+oCurrentDate + millisecondsDay * koef);
-								oNewStartDateWithoutTime = new Date(+oCurrentDateWithoutTime + millisecondsDay * koef);
-
-							// Текущая и новая даты начала действия совпадают
-							if (+oCurrentStartDateWithoutTime == +oNewStartDateWithoutTime)
+							if (koef >= 0)
 							{
-								return false;
+								var millisecondsDay = 3600 * 24 * 1000,
+
+									// Текущая дата-время
+									oCurrentDate = new Date(),
+
+									// Текущая дата без времени
+									oCurrentDateWithoutTime = new Date(oCurrentDate.getFullYear(), oCurrentDate.getMonth(), oCurrentDate.getDate()),
+
+									// Текущая дата-время начала события
+									//oCurrentStartDate = new Date(+$("#' . $windowId . ' #" + cellId).attr("start_timestamp")),
+									oCurrentStartDate = new Date(+$("#' . $windowId . ' #" + cellId).attr("start_timestamp") - timeZoneOffset),
+
+									// Текущая дата начала события без времени
+									oCurrentStartDateWithoutTime = new Date(oCurrentStartDate.getFullYear(), oCurrentStartDate.getMonth(), oCurrentStartDate.getDate()),
+
+									// Новая дата начала события без времени
+									// oNewStartDateWithoutTime = new Date(+oCurrentDate + millisecondsDay * koef);
+									oNewStartDateWithoutTime = new Date(+oCurrentDateWithoutTime + millisecondsDay * koef);
+
+								// Текущая и новая даты начала действия совпадают
+								if (+oCurrentStartDateWithoutTime == +oNewStartDateWithoutTime)
+								{
+									return false;
+								}
+
+								var	newStartCell = +oCurrentDateWithoutTime + (oCurrentStartDate - oCurrentStartDateWithoutTime) + millisecondsDay * koef, // левая граница ползунка
+									newStartRuler = ($(\'#' . $windowId . ' input[name="all_day"]\').prop("checked")
+										? (+oNewStartDateWithoutTime - 3600 * 1000)
+										: (newStartCell - millisecondsDay / 2 )) + timeZoneOffset, //левая граница полосы прокрутки
+									newStopCell = newStartCell + getDurationMilliseconds(\'' . $windowId . '\'); //duration * durationMillisecondsKoef,
+
+									timeCellOptions = {
+										"_id": cellId,
+										"start": newStartCell + timeZoneOffset,
+										"stop": newStopCell + timeZoneOffset
+									};
+
+								// Изменяем границу полосы прокрутки
+								jTimeSlider.TimeSlider("new_start_timestamp", newStartRuler);
+
+								// Изменяем положение ползунка
+								jTimeSlider.TimeSlider("edit", timeCellOptions);
+
+								var eventStartButtonsGroup = $("#' . $windowId . ' #eventStartButtonsGroup");
+
+								eventStartButtonsGroup.data("clickStartButton", true);
+
+								//setStartAndDeadline(newStartCell - timeZoneOffset, newStopCell - timeZoneOffset, \'' . $windowId . '\');
+								setStartAndDeadline(newStartCell, newStopCell, \'' . $windowId . '\');
+
+								eventStartButtonsGroup.removeData("clickStartButton");
 							}
-
-							var	newStartCell = +oCurrentDateWithoutTime + (oCurrentStartDate - oCurrentStartDateWithoutTime) + millisecondsDay * koef, // левая граница ползунка
-								newStartRuler = ($(\'#' . $windowId . ' input[name="all_day"]\').prop("checked")
-									? (+oNewStartDateWithoutTime - 3600 * 1000)
-									: (newStartCell - millisecondsDay / 2 )) + timeZoneOffset, //левая граница полосы прокрутки
-								newStopCell = newStartCell + getDurationMilliseconds(\'' . $windowId . '\'); //duration * durationMillisecondsKoef,
-
-								timeCellOptions = {
-									"_id": cellId,
-									"start": newStartCell + timeZoneOffset,
-									"stop": newStopCell + timeZoneOffset
-								};
-
-							// Изменяем границу полосы прокрутки
-							jTimeSlider.TimeSlider("new_start_timestamp", newStartRuler);
-
-							// Изменяем положение ползунка
-							jTimeSlider.TimeSlider("edit", timeCellOptions);
-
-							var eventStartButtonsGroup = $("#' . $windowId . ' #eventStartButtonsGroup");
-
-							eventStartButtonsGroup.data("clickStartButton", true);
-
-							//setStartAndDeadline(newStartCell - timeZoneOffset, newStopCell - timeZoneOffset, \'' . $windowId . '\');
-							setStartAndDeadline(newStartCell, newStopCell, \'' . $windowId . '\');
-
-							eventStartButtonsGroup.removeData("clickStartButton");
+							else
+							{
+								$(\'#' . $windowId . ' input[name="duration"]\').val(0).keyup();
+								$(\'#' . $windowId . ' input[name="deadline"]\').val(\'\');
+							}
 						});
 
 						// $("#' . $windowId . ' .page-body").on("mouseup touchend", function (){
@@ -1991,8 +2390,8 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						);
 
 						$("#' . $windowId . ' input[name=\'all_day\']").on("click", function (){
-							$("#' . $windowId . ' input[name=\'duration\']").parents(".form-group").toggleClass("invisible");
-							// $("#' . $windowId . ' select[name=\'duration_type\']").parents(".form-group").toggleClass("invisible");
+							$("#' . $windowId . ' input[name=\'duration\']").val(1);
+							$("#' . $windowId . ' select[name=\'duration_type\']").val(2); // Дни
 
 							var formatDateTimePicker,
 								oNewTimestampStartEvent,
@@ -2075,18 +2474,22 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->value('
 					$(function(){
 						var leftBlockHeight,
+							bodyWidth = parseInt($("body").width()),
 							timer = setInterval(function(){
 
-							leftBlockHeight = $("#' . $windowId . ' .left-block").height();
-							if (leftBlockHeight)
+							if (bodyWidth >= 992)
 							{
-								clearInterval(timer);
+								leftBlockHeight = $("#' . $windowId . ' .left-block").height();
+								if (leftBlockHeight)
+								{
+									clearInterval(timer);
 
-								$("#' . $windowId . ' .right-block").find("#' . $windowId . '-event-notes, #' . $windowId . '-event-timeline").slimscroll({
-									height: leftBlockHeight - 75,
-									color: "rgba(0, 0, 0, 0.3)",
-									size: "5px"
-								});
+									$("#' . $windowId . ' .right-block").find("#' . $windowId . '-event-notes, #' . $windowId . '-event-timeline").slimscroll({
+										height: leftBlockHeight - 75,
+										color: "rgba(0, 0, 0, 0.3)",
+										size: "5px"
+									});
+								}
 							}
 						}, 500);
 					});
@@ -2202,11 +2605,14 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			throw new Core_Exception('Error, the event has no creator!', array(), 0, FALSE);
 		}
 
+		$iEventStatusId = Core_Array::getPost('event_status_id', 0, 'int');
+
 		// Запрещаем редактировать дело не его создателю
 		if (!$bAddEvent /*&& !is_null($oEventCreator)*/ && $oEventCreator->id != $oCurrentUser->id)
 		{
 			$this->_object->completed = strval(Core_Array::get($this->_formValues, 'completed'));
 			// $this->_object->result = strval(Core_Array::get($this->_formValues, 'result'));
+			$this->_object->event_status_id = $iEventStatusId;
 			$this->_object->save();
 
 			// Завершенность изменена
@@ -2236,7 +2642,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$this->_formValues['last_modified'] = Core_Date::timestamp2sql(time());
 
-		if ($iEventStatusId = intval(Core_Array::getPost('event_status_id', 0)))
+		if ($iEventStatusId)
 		{
 			$oEventStatus = Core_Entity::factory('Event_Status', $iEventStatusId);
 			$oEventStatus->final &&	$this->_formValues['completed']	= 1;
@@ -2261,10 +2667,10 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				{
 					case 1: // Часы
 						$iSecondsReminderValue = 60 * 60 * $reminderValue;
-						break;
+					break;
 					case 2: // Дни
 						$iSecondsReminderValue = 60 * 60 * 24 * $reminderValue;
-						break;
+					break;
 
 					default: // Минуты
 						$iSecondsReminderValue = 60 * $reminderValue;
@@ -2517,6 +2923,39 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			}
 		}
 
+		if (Core::moduleIsActive('calendar'))
+		{
+			$aCalendarIds = Core_Array::getPost('event_calendar_caldav_id', array());
+			!is_array($aCalendarIds) && $aCalendarIds = array();
+
+			$aTmp = array();
+
+			$aEvent_Calendar_Caldavs = $this->_object->Event_Calendar_Caldavs->findAll(FALSE);
+			foreach ($aEvent_Calendar_Caldavs as $oEvent_Calendar_Caldav)
+			{
+				$oCalendar_Caldav = $oEvent_Calendar_Caldav->Calendar_Caldav;
+
+				if (!in_array($oCalendar_Caldav->id, $aCalendarIds))
+				{
+					$oEvent_Calendar_Caldav->delete();
+				}
+				else
+				{
+					$aTmp[] = $oCalendar_Caldav->id;
+				}
+			}
+
+			// Новые
+			$aNewCalendarIds = array_diff($aCalendarIds, $aTmp);
+			foreach ($aNewCalendarIds as $iNewCalendarId)
+			{
+				$oEvent_Calendar_Caldav = Core_Entity::factory('Event_Calendar_Caldav');
+				$oEvent_Calendar_Caldav->event_id = $this->_object->id;
+				$oEvent_Calendar_Caldav->calendar_caldav_id = $iNewCalendarId;
+				$oEvent_Calendar_Caldav->save();
+			}
+		}
+
 		// Связывание дела со сделкой
 		if (Core::moduleIsActive('deal') && $bAddEvent)
 		{
@@ -2609,6 +3048,158 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			$this->_object->pushHistory(Core::_('Event.history_change_completed' . $this->_object->completed));
 		}
+
+		// Обработка меток
+		if (Core::moduleIsActive('tag'))
+		{
+			$aRecievedTags = Core_Array::getPost('tags', array());
+			!is_array($aRecievedTags) && $aRecievedTags = array();
+
+			$this->_object->applyTagsArray($aRecievedTags);
+		}
+
+		// Обработчка чек-листов
+		$aChecklists = $aNewChecklists = array();
+
+		// echo "<pre>";
+		// var_dump($_POST);
+		// echo "</pre>";
+
+
+		foreach ($_POST as $key => $value)
+		{
+			// Новые
+			if (strpos($key, 'new_checklist_name') === 0)
+			{
+				$index = intval(filter_var($key, FILTER_SANITIZE_NUMBER_INT));
+
+				if (isset($_POST['new_checklist_item_name' . $index]))
+				{
+					foreach ($_POST['new_checklist_item_name' . $index] as $i => $checklist_item_name)
+					{
+						if ($checklist_item_name != '')
+						{
+							$aNewChecklists[$value][] = array(
+								'name' => $checklist_item_name,
+								'completed' => isset($_POST['new_checklist_item_completed' . $index][$i]) ? intval($_POST['new_checklist_item_completed' . $index][$i]) : 0
+							);
+						}
+					}
+				}
+			}
+
+			// Существующие
+			if (strpos($key, 'checklist_name') === 0)
+			{
+				$event_checklist_id = intval(filter_var($key, FILTER_SANITIZE_NUMBER_INT));
+
+				$aChecklists[$event_checklist_id] = array(
+					'name' => $value
+				);
+
+				$aTmp = array();
+
+				if (isset($_POST['checklist_item_name' . $event_checklist_id]))
+				{
+					foreach ($_POST['checklist_item_name' . $event_checklist_id] as $i => $checklist_item_name)
+					{
+						if ($checklist_item_name != '')
+						{
+							$aTmp[$i] = array(
+								'name' => $checklist_item_name,
+								'completed' => isset($_POST['checklist_item_completed' . $event_checklist_id][$i]) ? intval($_POST['checklist_item_completed' . $event_checklist_id][$i]) : 0
+							);
+						}
+					}
+				}
+
+				if (isset($_POST['new_checklist_item_name' . $event_checklist_id]))
+				{
+					foreach ($_POST['new_checklist_item_name' . $event_checklist_id] as $i => $checklist_item_name)
+					{
+						if ($checklist_item_name != '')
+						{
+							$oEvent_Checklist_Item = Core_Entity::factory('Event_Checklist_Item');
+							$oEvent_Checklist_Item->event_checklist_id = $event_checklist_id;
+							$oEvent_Checklist_Item->name = $checklist_item_name;
+							$oEvent_Checklist_Item->completed = isset($_POST['new_checklist_item_completed' . $event_checklist_id][$i]) ? intval($_POST['new_checklist_item_completed' . $event_checklist_id][$i]) : 0;
+							$oEvent_Checklist_Item->save();
+
+							$aTmp[$oEvent_Checklist_Item->id] = array(
+								'name' => $oEvent_Checklist_Item->name,
+								'completed' => $oEvent_Checklist_Item->completed
+							);
+						}
+					}
+				}
+
+				$aChecklists[$event_checklist_id]['items'] = $aTmp;
+			}
+		}
+
+		// echo "<pre>";
+		// var_dump($aChecklists);
+		// echo "</pre>";
+
+		// echo "<pre>";
+		// var_dump($aNewChecklists);
+		// echo "</pre>";
+
+		$aEvent_Checklists = $this->_object->Event_Checklists->findAll(FALSE);
+		foreach ($aEvent_Checklists as $oEvent_Checklist)
+		{
+			// Обновляем значение
+			if (isset($aChecklists[$oEvent_Checklist->id]))
+			{
+				$aChecklist = $aChecklists[$oEvent_Checklist->id];
+
+				$oEvent_Checklist->name = Core_Array::get($aChecklist, 'name', '', 'trim');
+				$oEvent_Checklist->save();
+
+				$aEvent_Checklist_Items = $oEvent_Checklist->Event_Checklist_Items->findAll(FALSE);
+				foreach ($aEvent_Checklist_Items as $oEvent_Checklist_Item)
+				{
+					if (isset($aChecklist['items'][$oEvent_Checklist_Item->id]))
+					{
+						$aItem = $aChecklist['items'][$oEvent_Checklist_Item->id];
+
+						$oEvent_Checklist_Item->name = Core_Array::get($aItem, 'name', '', 'trim');
+						$oEvent_Checklist_Item->completed = Core_Array::get($aItem, 'completed', '', 'int');
+						$oEvent_Checklist_Item->save();
+					}
+					else
+					{
+						$oEvent_Checklist_Item->markDeleted();
+					}
+				}
+			}
+			else
+			{
+				$oEvent_Checklist->markDeleted();
+			}
+		}
+
+		foreach ($aNewChecklists as $checklist_name => $aChecklistItems)
+		{
+			$oEvent_Checklist = Core_Entity::factory('Event_Checklist');
+			$oEvent_Checklist->name = $checklist_name;
+			$this->_object->add($oEvent_Checklist);
+
+			foreach ($aChecklistItems as $aChecklistItem)
+			{
+				$oEvent_Checklist_Item = Core_Entity::factory('Event_Checklist_Item');
+				$oEvent_Checklist_Item->name = Core_Array::get($aChecklistItem, 'name', '', 'trim');
+				$oEvent_Checklist_Item->completed = Core_Array::get($aChecklistItem, 'completed', '', 'int');
+				$oEvent_Checklist->add($oEvent_Checklist_Item);
+			}
+		}
+
+
+		ob_start();
+		Core_Html_Entity::factory('Script')
+			->value("$.loadEventChecklists('{$windowId}', '#{$windowId} .event-checklist-wrapper', {$this->_object->id});")
+			->execute();
+		$this->_Admin_Form_Controller->addMessage(ob_get_clean());
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 	}
@@ -2780,5 +3371,27 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		}
 
 		return $oAdmin_Form_Entity_Buttons;
+	}
+
+	/**
+	 * Fill tags list
+	 * @param Event_Model $oEvent item
+	 * @return array
+	 */
+	protected function _fillTagsList(Event_Model $oEvent)
+	{
+		$aReturn = array();
+
+		$aTags = $oEvent->Tags->findAll(FALSE);
+
+		foreach ($aTags as $oTag)
+		{
+			$aReturn[$oTag->name] = array(
+				'value' => $oTag->name,
+				'attr' => array('selected' => 'selected')
+			);
+		}
+
+		return $aReturn;
 	}
 }

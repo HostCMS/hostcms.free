@@ -3,9 +3,8 @@
  * SQL.
  *
  * @package HostCMS
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @version 7.x
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -17,35 +16,16 @@ $sAdminFormAction = '/admin/sql/table/index/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
-$tableName = preg_replace('/[^A-Za-z0-9$_]/', '', Core_Array::getRequest('table'));
+$tableName = Sql_Controller::sanitizeIdentifiers(Core_Array::getRequest('table'));
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
-	->module(Core_Module::factory($sModule))
+	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
 	->title(Core::_('Sql_Table_Index.title', $tableName))
 	->pageTitle(Core::_('Sql_Table_Index.title', $tableName));
-
-// Меню формы
-/*$oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
-
-// Элементы меню
-$oAdmin_Form_Entity_Menus->add(
-	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Admin_Form.add'))
-		->icon('fa fa-plus')
-		->href(
-			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-		)
-);
-
-// Добавляем все меню контроллеру
-$oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);*/
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
@@ -81,23 +61,6 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 );
 
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
-
-// Действие редактирования
-/*$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
-
-if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
-{
-	$oSql_Table_Field_Controller_Edit = Admin_Form_Action_Controller::factory(
-		'Sql_Table_Field_Controller_Edit', $oAdmin_Form_Action
-	);
-
-	$oSql_Table_Field_Controller_Edit->addEntity($oAdmin_Form_Entity_Breadcrumbs);
-
-	// Добавляем типовой контроллер редактирования контроллеру формы
-	$oAdmin_Form_Controller->addAction($oSql_Table_Field_Controller_Edit);
-}*/
 
 // Источник данных 0
 $oAdmin_Form_Dataset = new Sql_Table_Index_Dataset();

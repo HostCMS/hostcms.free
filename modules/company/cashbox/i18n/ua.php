@@ -15,4 +15,5 @@ return array(
 	'undelete_success' => 'Елемент відновлений!',
 	'apply_success' => "Інформація успішно змінена",
 	'changeDefaultStatus_success' => "Інформація успішно змінена",
+	'sorting' => 'Порядок сортування',
 );

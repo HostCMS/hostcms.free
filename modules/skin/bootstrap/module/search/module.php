@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Search_Module extends Search_Module
 {
@@ -52,12 +51,7 @@ class Skin_Bootstrap_Module_Search_Module extends Search_Module
 			case 1:
 				if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet('queryString')))
 				{
-					$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
-					$oSite = Core_Entity::factory('Site', CURRENT_SITE);
-
-					$aConfig = Core::$config->get('search_config', array()) + array(
-						'modules' => array()
-					);
+					$sQuery = trim(Core_Str::stripTags(Core_Array::getGet('queryString', '', 'trim')));
 
 					$aJson = array();
 
@@ -65,46 +59,66 @@ class Skin_Bootstrap_Module_Search_Module extends Search_Module
 					{
 						$Search_Controller = Search_Controller::instance();
 
+						// Current Site
 						$Search_Controller
-							->site($oSite)
-							->offset(0)
-							->page(1)
+							->site_id(CURRENT_SITE)
 							->limit(10)
 							->inner('all');
 
 						$aSearch_Pages = $Search_Controller->find($sQuery);
 
-						foreach ($aSearch_Pages as $oSearch_Page)
-						{
-							$aReturn = array();
+						$aJson = $this->_getJson($aSearch_Pages);
 
-							if (isset($aConfig['modules'][$oSearch_Page->module]))
-							{
-								$oCore_Module = Core_Module::factory($aConfig['modules'][$oSearch_Page->module]);
+						// Zero Site
+						$Search_Controller
+							->site_id(0)
+							->limit(10)
+							->inner('all');
 
-								if ($oCore_Module && method_exists($oCore_Module, 'backendSearchCallback'))
-								{
-									$aReturn = $oCore_Module->backendSearchCallback($oSearch_Page);
-									
-									if (isset($aReturn['onclick']))
-									{
-										$aJson[] = array(
-											'id' => $oSearch_Page->id,
-											'label' => strlen($oSearch_Page->title) ? $oSearch_Page->title : Core::_('Admin.no_title'),
-											'href' => Core_Array::get($aReturn, 'href'),
-											'onclick' => Core_Array::get($aReturn, 'onclick'),
-											'icon' => 'fa ' . Core_Array::get($aReturn, 'icon')
-										);
-									}
-								}
-							}
-						}
+						$aSearch_Pages = $Search_Controller->find($sQuery);
+
+						$aJson = array_merge($aJson, $this->_getJson($aSearch_Pages));
 					}
 
 					Core::showJson($aJson);
 				}
 			break;
 		}
+	}
+
+	protected function _getJson($aSearch_Pages)
+	{
+		$aJson = array();
+
+		$aConfig = Core::$config->get('search_config', array()) + array(
+			'modules' => array()
+		);
+
+		foreach ($aSearch_Pages as $oSearch_Page)
+		{
+			if (isset($aConfig['modules'][$oSearch_Page->module]))
+			{
+				$oCore_Module = Core_Module_Abstract::factory($aConfig['modules'][$oSearch_Page->module]);
+
+				if ($oCore_Module && method_exists($oCore_Module, 'backendSearchCallback'))
+				{
+					$aReturn = $oCore_Module->backendSearchCallback($oSearch_Page);
+
+					if (isset($aReturn['onclick']))
+					{
+						$aJson[] = array(
+							'id' => $oSearch_Page->id,
+							'label' => strlen($oSearch_Page->title) ? $oSearch_Page->title : Core::_('Admin.no_title'),
+							'href' => Core_Array::get($aReturn, 'href'),
+							'onclick' => Core_Array::get($aReturn, 'onclick'),
+							'icon' => 'fa ' . Core_Array::get($aReturn, 'icon')
+						);
+					}
+				}
+			}
+		}
+
+		return $aJson;
 	}
 
 	public function widget()

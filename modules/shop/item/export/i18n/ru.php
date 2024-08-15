@@ -37,4 +37,11 @@ return array(
 	'order_item_price' => 'Цена товара заказа',
 	'order_item_tax' => 'Налог на товар заказа',
 	'order_item_type' => 'Тип товара',
+	'begin_file_export_orders' => 'Выгрузка заказов в файл %s',
+	'begin_file_export' => 'Выгрузка в файл %s, группа "%s"',
+	'end_file_export' => 'Выгрузка в файл %s завершена',
+	'export_mode' => 'Выгрузить',
+	'export_mode1' => 'в файл',
+	'export_mode2' => 'на сервер',
+	'property_header' => 'Дополнительные свойства товаров в заказе',
 );

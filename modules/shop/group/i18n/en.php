@@ -5,8 +5,7 @@
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Products groups',
@@ -64,4 +63,5 @@ return array(
 	'items_total_count' => 'Number of active items',
 	'seo_group_h1_template' => 'H1 Template',
 	'seo_item_h1_template' => 'H1 Template',
+	'changeIndexation_success' => 'The indexing of the shop group has been changed.',
 );

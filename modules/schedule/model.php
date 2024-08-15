@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Schedule
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Schedule_Model extends Core_Entity
 {
@@ -196,6 +195,24 @@ class Schedule_Model extends Core_Entity
 		return $this->interval
 			? $aInterval['value'] . ' ' . $type
 			: '';
+	}
+
+	/**
+	 * Change item status
+	 * @return self
+	 * @hostcms-event schedule.onBeforeChangeActive
+	 * @hostcms-event schedule.onAfterChangeActive
+	 */
+	public function changeActive()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeChangeActive', $this);
+
+		$this->active = 1 - $this->active;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterChangeActive', $this);
+
+		return $this;
 	}
 
 	/**

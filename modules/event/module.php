@@ -8,10 +8,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
-class Event_Module extends Core_Module
+class Event_Module extends Core_Module_Abstract
 {
 	/**
 	 * Module version
@@ -23,7 +22,7 @@ class Event_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2023-07-17';
+	public $date = '2024-06-06';
 
 	/**
 	 * Module name
@@ -74,7 +73,7 @@ class Event_Module extends Core_Module
 				$sNotificationColor = 'azure';
 			break;
 			default:
-				$sIconIco = "fa-info";
+				$sIconIco = "fa-tasks";
 				$sIconColor = "white";
 				$sBackgroundColor = "bg-themeprimary";
 				$sNotificationColor = 'info';
@@ -169,9 +168,13 @@ class Event_Module extends Core_Module
 		}
 	}
 
+	/**
+	 * Get calendar context menu actions
+	 * @return void
+	 */
 	public function getCalendarContextMenuActions()
 	{
-		return array('<a href="javascript:void(0);" onclick="$.modalLoad({path: \'/admin/event/index.php\', action: \'edit\', operation: \'modal\', additionalParams: \'hostcms[checked][0][0]=1&date=\' + $(this).parents(\'ul\').data(\'timestamp\') + \'&parentWindowId=id_content\', windowId: \'id_content\'}); return false">' . Core::_('Event.add_event') . '</a>');
+		return array('<a href="javascript:void(0);" onclick="$.modalLoad({path: \'/admin/event/index.php\', action: \'edit\', operation: \'modal\', additionalParams: \'hostcms[checked][0][0]=1&date=\' + $(this).parents(\'ul\').data(\'timestamp\') + \'&parentWindowId=id_content&from_calendar=1\', windowId: \'id_content\'}); return false">' . Core::_('Event.add_event') . '</a>');
 	}
 
 	/**
@@ -257,7 +260,7 @@ class Event_Module extends Core_Module
 	 * @param int $last_modified datetime of period start
 	 * @return array
 	 */
-	public function getUploadCalendarEvents($last_modified)
+	public function getUploadCalendarEvents($last_modified, $calendar_caldav_id)
 	{
 		$oUser = Core_Auth::getCurrentUser();
 
@@ -265,7 +268,9 @@ class Event_Module extends Core_Module
 
 		$oEvents
 			->queryBuilder()
+			->join('event_calendar_caldavs', 'events.id', '=', 'event_calendar_caldavs.event_id')
 			->where('last_modified', '>', $last_modified)
+			->where('event_calendar_caldavs.calendar_caldav_id', '=', $calendar_caldav_id)
 			->where('completed', '=', 0);
 
 		$aEvents = $oEvents->findAll();
@@ -446,7 +451,7 @@ class Event_Module extends Core_Module
 		// Контроллер формы
 		$oAdmin_Form_Entity_Controller = Admin_Form_Controller::create($oAdmin_Form);
 		$oAdmin_Form_Entity_Controller
-			->module(Core_Module::factory($sModule))
+			->module(Core_Module_Abstract::factory($sModule))
 			->ajax(TRUE)
 			//->setUp()
 			->checked(array(0 => array($entity_id)))

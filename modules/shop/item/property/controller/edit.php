@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Item_Property_Controller_Edit extends Property_Controller_Edit
 {
@@ -110,14 +109,19 @@ class Shop_Item_Property_Controller_Edit extends Property_Controller_Edit
 
 				$oMainRow3->add($oShopShowInItemCheckbox);
 
-				$oAddValueCheckbox = Admin_Form_Entity::factory('Checkbox')
-					->value(1)
-					->checked(is_null($object->id))
-					->caption(Core::_("Shop_Item.add_value"))
-					->class('colored-danger')
-					->name("add_value");
+				// Для установки значений свойство должно быть разрешено для групп
+				if (!is_null($object->id))
+				{
+					$oAddValueCheckbox = Admin_Form_Entity::factory('Checkbox')
+						->value(1)
+						//->checked(is_null($object->id))
+						->checked(FALSE)
+						->caption(Core::_("Shop_Item.add_value"))
+						->class('colored-danger')
+						->name("add_value");
 
-				$oMainRow4->add($oAddValueCheckbox);
+					$oMainRow4->add($oAddValueCheckbox);
+				}
 
 				$oShopItemTabExportImport->move($this->getField('guid'), $oShopItemTabExportImportRow1);
 			break;
@@ -137,6 +141,8 @@ class Shop_Item_Property_Controller_Edit extends Property_Controller_Edit
 	 */
 	protected function _applyObjectProperty()
 	{
+		$bNewObject = is_null($this->_object->id);
+
 		parent::_applyObjectProperty();
 
 		$modelName = $this->_object->getModelName();
@@ -145,12 +151,15 @@ class Shop_Item_Property_Controller_Edit extends Property_Controller_Edit
 		{
 			case 'property':
 				$Shop_Item_Property = $this->_object->Shop_Item_Property;
-				$Shop_Item_Property->shop_measure_id = intval(Core_Array::getPost('shop_measure_id'));
-				$Shop_Item_Property->prefix = Core_Array::getPost('prefix');
-				$Shop_Item_Property->filter = intval(Core_Array::getPost('filter'));
-				$Shop_Item_Property->show_in_group = intval(Core_Array::getPost('show_in_group'));
-				$Shop_Item_Property->show_in_item = intval(Core_Array::getPost('show_in_item'));
-				$Shop_Item_Property->save();
+				if ($Shop_Item_Property->id)
+				{
+					$Shop_Item_Property->shop_measure_id = Core_Array::getPost('shop_measure_id', 0, 'int');
+					$Shop_Item_Property->prefix = Core_Array::getPost('prefix');
+					$Shop_Item_Property->filter = Core_Array::getPost('filter', 0, 'int');
+					$Shop_Item_Property->show_in_group = Core_Array::getPost('show_in_group', 0, 'int');
+					$Shop_Item_Property->show_in_item = Core_Array::getPost('show_in_item', 0, 'int');
+					$Shop_Item_Property->save();
+				}
 
 				// Fast filter
 				if ($this->linkedObject->filter)
@@ -187,20 +196,30 @@ class Shop_Item_Property_Controller_Edit extends Property_Controller_Edit
 						break;
 					}
 
+					$oQB = Core_QueryBuilder::select(intval($this->_object->id), 'shop_items.id', Core_QueryBuilder::raw(Core_DataBase::instance()->quote($defaultValue)))
+						->from('shop_items')
+						->leftJoin($tableName, $tableName . '.entity_id', '=', 'shop_items.id',
+							array(
+								array('AND' => array($tableName . '.property_id', '=', intval($this->_object->id)))
+							)
+						)
+						->where($tableName . '.entity_id', 'IS', NULL)
+						->where('shop_items.shop_id', '=', $Shop_Item_Property->shop_id)
+						->where('shop_items.deleted', '=', 0);
+
+					// Для существующих свойств значения создаются только с учетом разрешенных для групп свойств
+					if (!$bNewObject)
+					{
+						$oQB->join('shop_item_property_for_groups', 'shop_item_property_for_groups.shop_group_id', '=', 'shop_items.shop_group_id',
+							array(
+								array('AND' => array('shop_item_property_for_groups.shop_item_property_id', '=', $Shop_Item_Property->id))
+							)
+						);
+					}
+
 					Core_QueryBuilder::insert($tableName)
 						->columns('property_id', 'entity_id', 'value')
-						->select(
-							Core_QueryBuilder::select(intval($this->_object->id), 'shop_items.id', Core_QueryBuilder::raw(Core_DataBase::instance()->quote($defaultValue)))
-								->from('shop_items')
-								->leftJoin($tableName, $tableName . '.entity_id', '=', 'shop_items.id',
-									array(
-										array('AND' => array($tableName . '.property_id', '=', intval($this->_object->id)))
-									)
-								)
-								->where($tableName . '.entity_id', 'IS', NULL)
-								->where('shop_items.shop_id', '=', $Shop_Item_Property->shop_id)
-								->where('shop_items.deleted', '=', 0)
-						)
+						->select($oQB)
 						->execute();
 				}
 			break;

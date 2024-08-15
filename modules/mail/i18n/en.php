@@ -20,7 +20,6 @@ return array(
 	'smtp' => 'SMTP server',
 	'pop3' => 'POP3 server',
 	'imap' => 'IMAP server',
-	'ssl' => 'Use secure protocol SSL/TSL',
 	'delete_messages' => 'Delete messages from server',
 	'sorting' => 'Sort order',
 	'active' => 'Active',
@@ -33,4 +32,8 @@ return array(
 	'process_mails' => 'Process emails for',
 	'days' => 'days',
 	'password' => 'Password',
+
+	'encryption' => 'Encryption',
+	'cert_validation' => 'Certificate Validation',
+	'folders' => 'Folders',
 );

@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Shop_Filter_Seo_Model extends Core_Entity
 {
@@ -36,7 +35,7 @@ class Shop_Filter_Seo_Model extends Core_Entity
 		'shop_group' => array(),
 		'shop_producer' => array(),
 		'shop_filter_seo_dir' => array(),
-		'user' => array(),
+		'user' => array()
 	);
 
 	/**
@@ -109,6 +108,14 @@ class Shop_Filter_Seo_Model extends Core_Entity
 	{
 		$this->indexing = 1 - $this->indexing;
 		$this->save();
+
+		if ($this->indexing && Core::moduleIsActive('search'))
+		{
+			Search_Controller::indexingSearchPages(array(
+				$this->indexing()
+			));
+		}
+
 		return $this;
 	}
 
@@ -171,29 +178,43 @@ class Shop_Filter_Seo_Model extends Core_Entity
 	{
 		$aValues = $aValuesTo = array();
 
+		$aProperties = array();
+
 		$aShop_Filter_Seo_Properties = $this->Shop_Filter_Seo_Properties->findAll(FALSE);
 
 		foreach ($aShop_Filter_Seo_Properties as $oShop_Filter_Seo_Property)
 		{
 			$aValues[$oShop_Filter_Seo_Property->property_id][] = $oShop_Filter_Seo_Property->value;
 			$aValuesTo[$oShop_Filter_Seo_Property->property_id][] = $oShop_Filter_Seo_Property->value_to;
+
+			$oProperty = $oShop_Filter_Seo_Property->Property;
+
+			$aProperties[$oProperty->id] = $oProperty;
 		}
 
 		$linkedObject = Core_Entity::factory('Shop_Item_Property_List', $this->shop_id);
 
 		// Массив свойств товаров, разрешенных для группы $shop_group_id
-		$aProperties = $linkedObject->getPropertiesForGroup($this->shop_group_id);
+		$aPropertiesForGroup = $linkedObject->getPropertiesForGroup($this->shop_group_id);
+
+		$aAvailableProperyIDs = array();
+		foreach ($aPropertiesForGroup as $oProperty)
+		{
+			$aAvailableProperyIDs[] = $oProperty->id;
+		}
 
 		$aAvailableProperties = array(0, 11, 1, 7, 8, 9);
 		Core::moduleIsActive('list') && $aAvailableProperties[] = 3;
 		?>
 		<div class="fill-form-text">
+			<div>
 			<?php
 
 			if ($this->price_to > 0)
 			{
 				echo Core::_('Shop_Filter_Seo.prices', floatval($this->price_from), floatval($this->price_to));
 			}
+			?></div><?php
 
 			// Условия
 			foreach ($aProperties as $oProperty)
@@ -203,7 +224,7 @@ class Shop_Filter_Seo_Model extends Core_Entity
 					if (isset($aValues[$oProperty->id]))
 					{
 						?>
-						<span class="field-name"><?php echo htmlspecialchars($oProperty->name) . ': '?></span>
+						<div class="<?php echo !in_array($oProperty->id, $aAvailableProperyIDs) ? ' line-through' : ''?>"><span class="field-name"><?php echo htmlspecialchars($oProperty->name) . ': '?></span>
 						<?php
 							$aResult = array();
 
@@ -217,7 +238,7 @@ class Shop_Filter_Seo_Model extends Core_Entity
 								);
 							}
 						?>
-						<span><?php echo htmlspecialchars(implode(', ', $aResult))?></span>
+						<span><?php echo htmlspecialchars(implode(', ', $aResult))?></span></div>
 						<?php
 					}
 				}
@@ -564,7 +585,7 @@ class Shop_Filter_Seo_Model extends Core_Entity
 	{
 		if (Core::moduleIsActive('search'))
 		{
-			Search_Controller::deleteSearchPage(3, 4, $this->id);
+			Search_Controller::deleteSearchPage($this->Shop->site_id, 3, 4, $this->id);
 		}
 
 		return $this;

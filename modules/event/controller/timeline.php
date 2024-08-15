@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Event_Controller_Timeline extends Admin_Form_Controller_View
 {
@@ -104,7 +103,7 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 
 		$oCurrentUser = Core_Auth::getCurrentUser();
 
-		$additionalParams = 'event_id={event_id}';
+		$additionalParams = 'event_id={event_id}&secret_csrf=' . Core_Security::getCsrfToken();
 		$externalReplace = $oAdmin_Form_Controller->getExternalReplace();
 
 		foreach ($externalReplace as $replace_key => $replace_value)
@@ -136,10 +135,26 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 		$event_id = intval(Core_Array::getGet('event_id', 0));
 		$oEventParent = Core_Entity::factory('Event', $event_id);
 
-		if ($oEventParent->checkPermission2Edit($oCurrentUser))
-		{
+		// if ($oEventParent->checkPermission2Edit($oCurrentUser))
+		// {
 			?>
 			<div>
+				<?php
+					$aAdmin_Form_Actions = $oAdmin_Form->Admin_Form_Actions->getAllowedActionsForUser($oCurrentUser);
+
+					$bAddNoteAccess = FALSE;
+					foreach ($aAdmin_Form_Actions as $aAdmin_Form_Action)
+					{
+						if ($aAdmin_Form_Action->name == 'addNote')
+						{
+							$bAddNoteAccess = TRUE;
+							break;
+						}
+					}
+
+					if ($bAddNoteAccess)
+					{
+				?>
 				<form action="/admin/event/timeline/index.php?hostcms[action]=addNote&_=<?php echo time()?>&hostcms[checked][0][1-0]=1&event_id=<?php echo $event_id?>&parentWindowId=<?php echo htmlspecialchars($windowId)?>" method="POST" enctype='multipart/form-data' class="padding-bottom-10 dropzone-form dropzone-form-timeline">
 					<div class="timeline-comment-wrapper">
 						<?php
@@ -177,15 +192,83 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 									echo $oEventParent->getCompletedDropdown($this->_Admin_Form_Controller);
 								?>
 							</div>
-							<button id="sendForm" class="btn btn-palegreen btn-sm" type="submit">
+							<button id="sendForm" class="btn btn-primary btn-sm" type="submit">
 								<?php echo Core::_('Crm_Note.send')?>
 							</button>
 						</div>
 					</div>
 				</form>
+
+				<script>
+					$(function() {
+						// Кнопка "+" в заметках сделки
+						$('#<?php echo $windowId?> .formButtons :input').on('click', function() { mainFormLocker.unlock() });
+
+						var $form = $("#<?php echo $windowId?> .dropzone-form-timeline");
+						$form.dropzone({
+							url: $form.attr('action'),
+							parallelUploads: 10,
+							maxFilesize: <?php echo Core::$mainConfig['dropzoneMaxFilesize']?>,
+							paramName: 'file',
+							uploadMultiple: true,
+							clickable: '#<?php echo $windowId?> .dropzone-form-timeline #dropzone',
+							previewsContainer: '#<?php echo $windowId?> .dropzone-form-timeline #dropzone',
+							autoProcessQueue: false,
+							autoDiscover: false,
+							previewTemplate:'<div class="dz-preview dz-file-preview"> <i class="fa fa-times darkorange dz-file-remove" data-dz-remove></i><div class="dz-image"><img data-dz-thumbnail/></div> <div class="dz-details"> <div class="dz-size"><span data-dz-size></span></div> <div class="dz-filename"><span data-dz-name></span></div> </div> <div class="dz-progress"> <span class="dz-upload" data-dz-uploadprogress></span> </div> <div class="dz-error-message"><span data-dz-errormessage></span></div> <div class="dz-success-mark"> <svg width="54px" height="54px" viewBox="0 0 54 54" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"> <title>Check</title> <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <path d="M23.5,31.8431458 L17.5852419,25.9283877 C16.0248253,24.3679711 13.4910294,24.366835 11.9289322,25.9289322 C10.3700136,27.4878508 10.3665912,30.0234455 11.9283877,31.5852419 L20.4147581,40.0716123 C20.5133999,40.1702541 20.6159315,40.2626649 20.7218615,40.3488435 C22.2835669,41.8725651 24.794234,41.8626202 26.3461564,40.3106978 L43.3106978,23.3461564 C44.8771021,21.7797521 44.8758057,19.2483887 43.3137085,17.6862915 C41.7547899,16.1273729 39.2176035,16.1255422 37.6538436,17.6893022 L23.5,31.8431458 Z M27,53 C41.3594035,53 53,41.3594035 53,27 C53,12.6405965 41.3594035,1 27,1 C12.6405965,1 1,12.6405965 1,27 C1,41.3594035 12.6405965,53 27,53 Z" stroke-opacity="0.198794158" stroke="#747474" fill-opacity="0.816519475" fill="#FFFFFF"></path> </g> </svg> </div> <div class="dz-error-mark"> <svg width="54px" height="54px" viewBox="0 0 54 54" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"> <title>Error</title> <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g stroke="#747474" stroke-opacity="0.198794158" fill="#FFFFFF" fill-opacity="0.816519475"> <path d="M32.6568542,29 L38.3106978,23.3461564 C39.8771021,21.7797521 39.8758057,19.2483887 38.3137085,17.6862915 C36.7547899,16.1273729 34.2176035,16.1255422 32.6538436,17.6893022 L27,23.3431458 L21.3461564,17.6893022 C19.7823965,16.1255422 17.2452101,16.1273729 15.6862915,17.6862915 C14.1241943,19.2483887 14.1228979,21.7797521 15.6893022,23.3461564 L21.3431458,29 L15.6893022,34.6538436 C14.1228979,36.2202479 14.1241943,38.7516113 15.6862915,40.3137085 C17.2452101,41.8726271 19.7823965,41.8744578 21.3461564,40.3106978 L27,34.6568542 L32.6538436,40.3106978 C34.2176035,41.8744578 36.7547899,41.8726271 38.3137085,40.3137085 C39.8758057,38.7516113 39.8771021,36.2202479 38.3106978,34.6538436 L32.6568542,29 Z M27,53 C41.3594035,53 53,41.3594035 53,27 C53,12.6405965 41.3594035,1 27,1 C12.6405965,1 1,12.6405965 1,27 C1,41.3594035 12.6405965,53 27,53 Z"></path> </g> </g> </svg> </div> </div>',
+							init: function() {
+								var dropzone = this;
+
+								$("#<?php echo $windowId?> .dropzone-form-timeline button#sendForm").on("click", function(e) {
+									e.preventDefault();
+									e.stopPropagation();
+
+									// Сохраним из визуальных редакторов данные
+									if (typeof tinyMCE != 'undefined')
+									{
+										tinyMCE.triggerSave();
+									}
+
+									if (dropzone.getQueuedFiles().length)
+									{
+										$form.append('<input type="hidden" name="hostcms[window]" value="<?php echo htmlspecialchars($windowId)?>-event-timeline">');
+										//$form.append('<input type="hidden" name="parentWindowId" value="<?php echo htmlspecialchars($windowId)?>">');
+										dropzone.processQueue();
+									}
+									else
+									{
+										<?php echo $oAdmin_Form_Controller->checked(array(0 => array('1-0')))->getAdminSendForm(array('action' => 'addNote', 'additionalParams' => $additionalParams))?>
+									}
+								});
+
+								dropzone.on('addedfile', function(file){
+									$(dropzone.previewsContainer).addClass('dz-started');
+								});
+
+								dropzone.on('removedfile', function(file){
+									if (dropzone.getQueuedFiles().length == 0)
+									{
+										$(dropzone.previewsContainer).removeClass('dz-started');
+									}
+								});
+							},
+							success : function(file, response){
+								var $window = $("#<?php echo $oAdmin_Form_Controller->getWindowId()?>"),
+									window_id = $window.parents('.tabbable').find('li[data-type="note"] > a').data('window-id');
+
+								$.beforeContentLoad($window);
+								$.insertContent($window, response.form_html);
+								$.adminLoad({ path: '/admin/event/note/index.php', additionalParams: 'event_id=<?php echo $event_id?>', windowId: window_id });
+							}
+						});
+					});
+				</script>
+				<?php
+				}
+				?>
 			</div>
 			<?php
-		}
+		// }
 
 		if (count($aTmp))
 		{
@@ -209,7 +292,7 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 							$iEntityAdminFormId = 0;
 							$path = '';
 							$additionalParams = '';
-							$class = '';
+							$class = $textColor = '';
 
 							$iDatetime = Core_Date::sql2timestamp($oTmpEntity->dataDatetime);
 							$time = date('H:i', Core_Date::sql2timestamp($oTmpEntity->dataDatetime));
@@ -221,11 +304,13 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 									$badge = 'fa fa-history';
 
 									$text = '<span style="color: ' . $oTmpEntity->color . '">' . $oTmpEntity->text . '</span>';
+									$textColor = ' style="color: ' . $oTmpEntity->color . ' !important"';
 
 								break;
 								// Crm notes
 								case 'Crm_Note_Model':
 									$badge = 'fa fa-comment-o';
+									$color = 'yellow';
 
 									//$oCrm_Note = Core_Entity::factory('Crm_Note', $oTmpEntity->id);
 
@@ -259,6 +344,7 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 								// Events
 								case 'Event_Model':
 									$badge = 'fa fa-tasks';
+									$color = 'orange';
 
 									$oEvent = Core_Entity::factory('Event', $oTmpEntity->id);
 
@@ -272,6 +358,7 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 								break;
 								case 'Dms_Document_Model':
 									$badge = 'fa fa-columns';
+									$color = 'purple';
 
 									// $color = 'danger';
 
@@ -319,10 +406,14 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 									$path = '/admin/event/timeline/index.php';
 								break;
 							}
+
+							$badge = isset($oTmpEntity->user_id) && $oTmpEntity->user_id
+								? '<img class="img-circle" src="' . $oTmpEntity->User->getAvatar() . '" width="30" height="30"/>'
+								: '<i class="' . $badge . '"></i>';
 							?>
 							<li class="timeline-inverted <?php echo $class?>">
-								<div class="timeline-badge <?php echo $color?>">
-									<i class="<?php echo $badge?>"></i>
+								<div class="timeline-badge <?php echo $color?>" <?php echo $textColor?>>
+									<?php echo $badge?>
 								</div>
 								<div class="timeline-panel">
 									<div class="timeline-header">
@@ -357,7 +448,7 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 														: '';
 
 													// $additionalParams = "type={$oTmpEntity->type}&entity_id={$key}&event_id={$oEventParent->id}";
-													$additionalParams = "event_id={$oEventParent->id}&parentWindowId={$windowId}";
+													$additionalParams = "event_id={$oEventParent->id}&parentWindowId={$windowId}&secret_csrf=" . Core_Security::getCsrfToken();
 
 													$href = $oAdmin_Form_Controller->getAdminActionLoadHref($path, $oAdmin_Form_Action->name, NULL, $datasetId, $key, $additionalParams, 10, 1, NULL, NULL, 'list');
 
@@ -425,73 +516,6 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 		{
 			Core_Message::show(Core::_('Admin_Form.timeline_empty'), 'warning');
 		}
-		?>
-
-		<script>
-			$(function() {
-				// Кнопка "+" в заметках сделки
-				$('#<?php echo $windowId?> .formButtons :input').on('click', function() { mainFormLocker.unlock() });
-
-				var $form = $("#<?php echo $windowId?> .dropzone-form-timeline");
-				$form.dropzone({
-					url: $form.attr('action'),
-					parallelUploads: 10,
-					maxFilesize: 5,
-					paramName: 'file',
-					uploadMultiple: true,
-					clickable: '#<?php echo $windowId?> .dropzone-form-timeline #dropzone',
-					previewsContainer: '#<?php echo $windowId?> .dropzone-form-timeline #dropzone',
-					autoProcessQueue: false,
-					autoDiscover: false,
-					previewTemplate:'<div class="dz-preview dz-file-preview"> <i class="fa fa-times darkorange dz-file-remove" data-dz-remove></i><div class="dz-image"><img data-dz-thumbnail/></div> <div class="dz-details"> <div class="dz-size"><span data-dz-size></span></div> <div class="dz-filename"><span data-dz-name></span></div> </div> <div class="dz-progress"> <span class="dz-upload" data-dz-uploadprogress></span> </div> <div class="dz-error-message"><span data-dz-errormessage></span></div> <div class="dz-success-mark"> <svg width="54px" height="54px" viewBox="0 0 54 54" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"> <title>Check</title> <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <path d="M23.5,31.8431458 L17.5852419,25.9283877 C16.0248253,24.3679711 13.4910294,24.366835 11.9289322,25.9289322 C10.3700136,27.4878508 10.3665912,30.0234455 11.9283877,31.5852419 L20.4147581,40.0716123 C20.5133999,40.1702541 20.6159315,40.2626649 20.7218615,40.3488435 C22.2835669,41.8725651 24.794234,41.8626202 26.3461564,40.3106978 L43.3106978,23.3461564 C44.8771021,21.7797521 44.8758057,19.2483887 43.3137085,17.6862915 C41.7547899,16.1273729 39.2176035,16.1255422 37.6538436,17.6893022 L23.5,31.8431458 Z M27,53 C41.3594035,53 53,41.3594035 53,27 C53,12.6405965 41.3594035,1 27,1 C12.6405965,1 1,12.6405965 1,27 C1,41.3594035 12.6405965,53 27,53 Z" stroke-opacity="0.198794158" stroke="#747474" fill-opacity="0.816519475" fill="#FFFFFF"></path> </g> </svg> </div> <div class="dz-error-mark"> <svg width="54px" height="54px" viewBox="0 0 54 54" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"> <title>Error</title> <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g stroke="#747474" stroke-opacity="0.198794158" fill="#FFFFFF" fill-opacity="0.816519475"> <path d="M32.6568542,29 L38.3106978,23.3461564 C39.8771021,21.7797521 39.8758057,19.2483887 38.3137085,17.6862915 C36.7547899,16.1273729 34.2176035,16.1255422 32.6538436,17.6893022 L27,23.3431458 L21.3461564,17.6893022 C19.7823965,16.1255422 17.2452101,16.1273729 15.6862915,17.6862915 C14.1241943,19.2483887 14.1228979,21.7797521 15.6893022,23.3461564 L21.3431458,29 L15.6893022,34.6538436 C14.1228979,36.2202479 14.1241943,38.7516113 15.6862915,40.3137085 C17.2452101,41.8726271 19.7823965,41.8744578 21.3461564,40.3106978 L27,34.6568542 L32.6538436,40.3106978 C34.2176035,41.8744578 36.7547899,41.8726271 38.3137085,40.3137085 C39.8758057,38.7516113 39.8771021,36.2202479 38.3106978,34.6538436 L32.6568542,29 Z M27,53 C41.3594035,53 53,41.3594035 53,27 C53,12.6405965 41.3594035,1 27,1 C12.6405965,1 1,12.6405965 1,27 C1,41.3594035 12.6405965,53 27,53 Z"></path> </g> </g> </svg> </div> </div>',
-					init: function() {
-						var dropzone = this;
-
-						$("#<?php echo $windowId?> .dropzone-form-timeline button#sendForm").on("click", function(e) {
-							e.preventDefault();
-							e.stopPropagation();
-
-							// Сохраним из визуальных редакторов данные
-							if (typeof tinyMCE != 'undefined')
-							{
-								tinyMCE.triggerSave();
-							}
-
-							if (dropzone.getQueuedFiles().length)
-							{
-								$form.append('<input type="hidden" name="hostcms[window]" value="<?php echo htmlspecialchars($windowId)?>-event-timeline">');
-								//$form.append('<input type="hidden" name="parentWindowId" value="<?php echo htmlspecialchars($windowId)?>">');
-								dropzone.processQueue();
-							}
-							else
-							{
-								<?php echo $oAdmin_Form_Controller->checked(array(0 => array('1-0')))->getAdminSendForm(array('action' => 'addNote', 'additionalParams' => $additionalParams))?>
-							}
-						});
-
-						dropzone.on('addedfile', function(file){
-							$(dropzone.previewsContainer).addClass('dz-started');
-						});
-
-						dropzone.on('removedfile', function(file){
-							if (dropzone.getQueuedFiles().length == 0)
-							{
-								$(dropzone.previewsContainer).removeClass('dz-started');
-							}
-						});
-					},
-					success : function(file, response){
-						var $window = $("#<?php echo $oAdmin_Form_Controller->getWindowId()?>"),
-							window_id = $window.parents('.tabbable').find('li[data-type="note"] > a').data('window-id');
-
-						$.beforeContentLoad($window);
-						$.insertContent($window, response.form_html);
-						$.adminLoad({ path: '/admin/event/note/index.php', additionalParams: 'event_id=<?php echo $event_id?>', windowId: window_id });
-					}
-				});
-			});
-		</script>
-		<?php
 
 		return $this;
 	}

@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Informationsystem_Item_Model extends Core_Entity
 {
@@ -41,7 +40,8 @@ class Informationsystem_Item_Model extends Core_Entity
 		'tag_informationsystem_item' => array(),
 		'comment' => array('through' => 'comment_informationsystem_item'),
 		'vote' => array('through' => 'vote_informationsystem_item'),
-		'media_informationsystem_item' => array()
+		'media_informationsystem_item' => array(),
+		'media_item' => array('through' => 'media_informationsystem_item')
 	);
 
 	/**
@@ -251,6 +251,12 @@ class Informationsystem_Item_Model extends Core_Entity
 					->setHref($this->getItemHref())
 					->setDir($this->getItemPath());
 			break;
+			case 5: // Элемент информационной системы
+			case 12: // Товар интернет-магазина
+			case 13: // Группа информационной системы
+			case 14: // Группа интернет-магазина
+				$oProperty_Value->showXmlMedia($this->_showXmlMedia);
+			break;
 			case 8:
 				$oProperty_Value->dateFormat($this->Informationsystem->format_date);
 			break;
@@ -389,7 +395,7 @@ class Informationsystem_Item_Model extends Core_Entity
 
 		$this->informationsystem_group_id = $informationsystem_group_id;
 
-		$this->save()->clearCache();
+		$this->checkDuplicatePath()->save()->clearCache();
 
 		$informationsystem_group_id && $oInformationsystem_Group->incCountItems();
 
@@ -610,7 +616,6 @@ class Informationsystem_Item_Model extends Core_Entity
 		{
 			$oInformationsystem = $this->InformationSystem;
 
-			// Search the same item or group
 			$oSameInformationsystemItem = $oInformationsystem->Informationsystem_Items->getByGroupIdAndPath($this->informationsystem_group_id, $this->path);
 			if (!is_null($oSameInformationsystemItem) && $oSameInformationsystemItem->id != $this->id)
 			{
@@ -831,7 +836,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	{
 		if (Core::moduleIsActive('search'))
 		{
-			Search_Controller::deleteSearchPage(1, 2, $this->id);
+			Search_Controller::deleteSearchPage($this->Informationsystem->site_id, 1, 2, $this->id);
 		}
 
 		return $this;
@@ -1329,6 +1334,24 @@ class Informationsystem_Item_Model extends Core_Entity
 	}
 
 	/**
+	 * Show media in XML
+	 * @var boolean
+	 */
+	protected $_showXmlMedia = FALSE;
+
+	/**
+	 * Show properties in XML
+	 * @param mixed $showXmlProperties array of allowed properties ID or boolean
+	 * @return self
+	 */
+	public function showXmlMedia($showXmlMedia = TRUE)
+	{
+		$this->_showXmlMedia = $showXmlMedia;
+
+		return $this;
+	}
+
+	/**
 	 * Show siteuser properties in XML
 	 * @var boolean
 	 */
@@ -1546,15 +1569,15 @@ class Informationsystem_Item_Model extends Core_Entity
 				: 0;
 
 			$fractionalPart = $avgGrade - floor($avgGrade);
-			$avgGrade = floor($avgGrade);
+			$avgGradeRounded = floor($avgGrade);
 
 			if ($fractionalPart >= 0.25 && $fractionalPart < 0.75)
 			{
-				$avgGrade += 0.5;
+				$avgGradeRounded += 0.5;
 			}
 			elseif ($fractionalPart >= 0.75)
 			{
-				$avgGrade += 1;
+				$avgGradeRounded += 1;
 			}
 
 			$this->_isTagAvailable('comments_count') && $this->addEntity(
@@ -1578,7 +1601,8 @@ class Informationsystem_Item_Model extends Core_Entity
 			$this->_isTagAvailable('comments_average_grade') && $this->addEntity(
 				Core::factory('Core_Xml_Entity')
 					->name('comments_average_grade')
-					->value($avgGrade)
+					->addAttribute('value', $avgGrade)
+					->value($avgGradeRounded)
 			);
 
 			$this->_showXmlComments
@@ -1627,6 +1651,16 @@ class Informationsystem_Item_Model extends Core_Entity
 					->clearOrderBy();
 
 				$oList_Items->findAll(TRUE);
+			}
+		}
+
+		if ($this->_showXmlMedia && Core::moduleIsActive('media'))
+		{
+			$aEntities = Media_Item_Controller::getValues($this);
+			foreach ($aEntities as $oEntity)
+			{
+				$oMedia_Item = $oEntity->Media_Item;
+				$this->addEntity($oMedia_Item->setCDN(Core_Page::instance()->informationsystemCDN));
 			}
 		}
 

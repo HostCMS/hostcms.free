@@ -27,10 +27,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
-class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
+class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 {
 	/**
 	 * Array of inserted groups
@@ -1223,52 +1222,6 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 	}
 
 	/**
-	 * Convert url to Punycode
-	 * @param string $url
-	 * @return string
-	 */
-	protected function _convertToPunycode($url)
-	{
-		return preg_replace_callback('~(https?://)([^/]*)~', function($a) {
-			return preg_match('/[А-Яа-яЁё]/u', $a[0])
-				? $a[1] . Core_Str::idnToAscii($a[2])
-				: $a[0];
-			}, $url
-		);
-	}
-
-	protected function _uploadHttpFile($sSourceFile)
-	{
-		$sSourceFile = $this->_convertToPunycode($sSourceFile);
-
-		$Core_Http = Core_Http::instance()
-			->clear()
-			->url($sSourceFile)
-			->timeout(10)
-			->addOption(CURLOPT_FOLLOWLOCATION, TRUE)
-			->execute();
-
-		$aHeaders = $Core_Http->parseHeaders();
-		$sStatus = Core_Array::get($aHeaders, 'status');
-		$iStatusCode = $Core_Http->parseHttpStatusCode($sStatus);
-
-		if ($iStatusCode != 200)
-		{
-			throw new Core_Exception("Shop_Item_Import_Csv_Controller::_uploadHttpFile error, code: %code. Source URL: %url\nHeaders: %headers.",
-				array('%code' => $iStatusCode, '%headers' => $Core_Http->getHeaders(), '%url' => $sSourceFile));
-		}
-
-		$content = $Core_Http->getDecompressedBody();
-
-		// Файл из WEB'а, создаем временный файл
-		$sTempFileName = tempnam(CMS_FOLDER . TMP_DIR, "CMS");
-
-		Core_File::write($sTempFileName, $content);
-
-		return $sTempFileName;
-	}
-
-	/**
 	 * Get the full path of the CSV file
 	 * @return string
 	 */
@@ -1855,7 +1808,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 								if ($bHttp)
 								{
 									try {
-										$sSourceFile = $this->_uploadHttpFile($sTmpFilePath);
+										$sSourceFile = $this->_downloadHttpFile($sTmpFilePath);
 									}
 									catch (Exception $e)
 									{
@@ -1970,7 +1923,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 									$this->_oCurrentGroup->id && $this->_oCurrentGroup->setSmallImageSizes() && $this->_incUpdatedGroups($this->_oCurrentGroup->id);
 								}
 
-								if (strpos(basename($sSourceFile), "CMS") === 0)
+								if (!is_null($sSourceFile) && strpos(basename($sSourceFile), "CMS") === 0)
 								{
 									// Файл временный, подлежит удалению
 									Core_File::delete($sSourceFile);
@@ -2005,7 +1958,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 								if ($bHttp)
 								{
 									try {
-										$sSourceFile = $this->_uploadHttpFile($sTmpFilePath);
+										$sSourceFile = $this->_downloadHttpFile($sTmpFilePath);
 									}
 									catch (Exception $e)
 									{
@@ -2078,7 +2031,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 									$this->_oCurrentGroup->id && $this->_oCurrentGroup->setSmallImageSizes() && $this->_incUpdatedGroups($this->_oCurrentGroup->id);
 								}
 
-								if (strpos(basename($sSourceFile), "CMS") === 0)
+								if (!is_null($sSourceFile) && strpos(basename($sSourceFile), "CMS") === 0)
 								{
 									// Файл временный, подлежит удалению
 									Core_File::delete($sSourceFile);
@@ -3072,7 +3025,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						if ($bHttp)
 						{
 							try {
-								$sSourceFile = $this->_uploadHttpFile($sTmpFilePath);
+								$sSourceFile = $this->_downloadHttpFile($sTmpFilePath);
 							}
 							catch (Exception $e)
 							{
@@ -3112,7 +3065,8 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 						// Создаем массив параметров для загрузки картинок элементу
 						$aPicturesParam = array();
-						$aPicturesParam['large_image_source'] = $sSourceFile;
+						
+						$aPicturesParam['large_image_source'] = (string) $sSourceFile;
 						$aPicturesParam['large_image_name'] = $sSourceFileBaseName;
 						$aPicturesParam['large_image_target'] = $sDestinationFolder . $sTargetFileName;
 						$aPicturesParam['watermark_file_path'] = $this->_oCurrentShop->getWatermarkFilePath();
@@ -3173,8 +3127,10 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 							$this->_oCurrentItem->image_small = "small_{$sTargetFileName}";
 							$this->_oCurrentItem->setSmallImageSizes();
 						}
+						
+						$this->_oCurrentItem->save();
 
-						if (strpos(basename($sSourceFile), "CMS") === 0)
+						if (!is_null($sSourceFile) && strpos(basename($sSourceFile), "CMS") === 0)
 						{
 							// Файл временный, подлежит удалению
 							Core_File::delete($sSourceFile);
@@ -3209,7 +3165,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						if ($bHttp)
 						{
 							try {
-								$sSourceFile = $this->_uploadHttpFile($sTmpFilePath);
+								$sSourceFile = $this->_downloadHttpFile($sTmpFilePath);
 							}
 							catch (Exception $e)
 							{
@@ -3287,7 +3243,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 							}
 						}
 
-						if (strpos(basename($sSourceFile), "CMS") === 0)
+						if (!is_null($sSourceFile) && strpos(basename($sSourceFile), "CMS") === 0)
 						{
 							// Файл временный, подлежит удалению
 							Core_File::delete($sSourceFile);
@@ -3371,7 +3327,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 							if ($bHttp)
 							{
 								try {
-									$sSourceFile = $this->_uploadHttpFile($sTmpFilePath);
+									$sSourceFile = $this->_downloadHttpFile($sTmpFilePath);
 								}
 								catch (Exception $e)
 								{
@@ -3444,7 +3400,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 								$oProperty_Value->file_small_name = '';
 							}
 
-							if (strpos(basename($sSourceFile), "CMS") === 0)
+							if (!is_null($sSourceFile) && strpos(basename($sSourceFile), "CMS") === 0)
 							{
 								// Файл временный, подлежит удалению
 								Core_File::delete($sSourceFile);
@@ -3714,7 +3670,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 			$newPrice = Shop_Controller::instance()->convertPrice($sPriceValue);
 
-			if ($old_price != $newPrice)
+			if (floatval($old_price) != floatval($newPrice))
 			{
 				$oShop_Price_Setting = $this->_getPriceSetting();
 
@@ -3974,7 +3930,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 					if ($bHttp)
 					{
 						try {
-							$sSourceFile = $this->_uploadHttpFile($sTmpFilePath);
+							$sSourceFile = $this->_downloadHttpFile($sTmpFilePath);
 						}
 						catch (Exception $e)
 						{
@@ -4038,7 +3994,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 							if ($bHttp)
 							{
 								try {
-									$sSourceFileSmall = $this->_uploadHttpFile($sTmpFilePath);
+									$sSourceFileSmall = $this->_downloadHttpFile($sTmpFilePath);
 								}
 								catch (Exception $e)
 								{
@@ -4164,17 +4120,13 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 					clearstatcache();
 
-					if (strpos(basename($sSourceFile), "CMS") === 0
-						&& Core_File::isFile($sSourceFile)
-					)
+					if (!is_null($sSourceFile) && strpos(basename($sSourceFile), "CMS") === 0 && Core_File::isFile($sSourceFile))
 					{
 						// Файл временный, подлежит удалению
 						Core_File::delete($sSourceFile);
 					}
 
-					if (strpos(basename($sSourceFileSmall), "CMS") === 0
-						&& Core_File::isFile($sSourceFileSmall)
-					)
+					if (!is_null($sSourceFile) && strpos(basename($sSourceFileSmall), "CMS") === 0 && Core_File::isFile($sSourceFileSmall))
 					{
 						// Файл временный, подлежит удалению
 						Core_File::delete($sSourceFileSmall);
@@ -4263,7 +4215,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				if ($bHttp)
 				{
 					try {
-						$sSourceFile = $this->_uploadHttpFile($sTmpFilePath);
+						$sSourceFile = $this->_downloadHttpFile($sTmpFilePath);
 					}
 					catch (Exception $e)
 					{
@@ -4324,7 +4276,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						if ($bHttp)
 						{
 							try {
-								$sSourceFileSmall = $this->_uploadHttpFile($sTmpFilePath);
+								$sSourceFileSmall = $this->_downloadHttpFile($sTmpFilePath);
 							}
 							catch (Exception $e)
 							{
@@ -4449,17 +4401,13 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 				clearstatcache();
 
-				if (strpos(basename($sSourceFile), "CMS") === 0
-					&& Core_File::isFile($sSourceFile)
-				)
+				if (!is_null($sSourceFile) && strpos(basename($sSourceFile), "CMS") === 0 && Core_File::isFile($sSourceFile))
 				{
 					// Файл временный, подлежит удалению
 					Core_File::delete($sSourceFile);
 				}
 
-				if (strpos(basename($sSourceFileSmall), "CMS") === 0
-					&& Core_File::isFile($sSourceFileSmall)
-				)
+				if (!is_null($sSourceFile) && strpos(basename($sSourceFileSmall), "CMS") === 0 && Core_File::isFile($sSourceFileSmall))
 				{
 					// Файл временный, подлежит удалению
 					Core_File::delete($sSourceFileSmall);

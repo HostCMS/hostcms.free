@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Site
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Site_Controller_AccountInfo extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -78,6 +77,9 @@ class Site_Controller_AccountInfo extends Admin_Form_Action_Controller_Type_Edit
 	protected function _applyObjectProperty()
 	{
 		//parent::_applyObjectProperty();
+		
+		$secret_csrf = Core_Array::getPost('secret_csrf', '', 'trim');
+		$this->_checkCsrf($secret_csrf);
 
 		$oConstantLogin = Core_Entity::factory('Constant')->getByName('HOSTCMS_USER_LOGIN');
 		$oConstantNumber = Core_Entity::factory('Constant')->getByName('HOSTCMS_CONTRACT_NUMBER');

@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
  class Shop_Bonus_Model extends Core_Entity
 {
@@ -215,6 +214,33 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
 
 		return $this;
+	}
+
+	/**
+	 * Get options for select
+	 * @return array
+	 */
+	public function getOptions()
+	{
+		$aReturn = array(" … ");
+
+		$name = $this->name;
+		$attr = array();
+
+		$bRightTime = ($this->start_datetime == '0000-00-00 00:00:00' || time() > Core_Date::sql2timestamp($this->start_datetime))
+			&& ($this->end_datetime == '0000-00-00 00:00:00' || time() < Core_Date::sql2timestamp($this->end_datetime));
+
+		if (!$this->active || !$bRightTime)
+		{
+			$attr = array('class' => 'gray');
+		}
+
+		$aReturn = array(
+			'value' => htmlspecialchars($name),
+			'attr' => $attr
+		);
+
+		return $aReturn;
 	}
 
 	/**

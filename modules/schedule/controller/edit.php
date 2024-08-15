@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Schedule
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Schedule_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -37,7 +36,8 @@ class Schedule_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		$this->getField('start_datetime')
 			->class('form-control input-lg')
@@ -119,7 +119,9 @@ class Schedule_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oMainTab->move($this->getField('entity_id')->id('entity_id')->caption($caption !== '' ? $caption : Core::_('Schedule.entity_id'))->divAttr(array('class' => 'form-group col-xs-12 col-sm-4' . $hidden)), $oMainRow2);
 
-		$oMainTab->move($this->getField('description'), $oMainRow3);
+		$oMainTab
+			->move($this->getField('description'), $oMainRow3)
+			->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow4);
 
 		return $this;
 	}
@@ -150,7 +152,7 @@ class Schedule_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$aObjects = Core_Entity::factory('Module')->getAllByActive(1);
 		foreach ($aObjects as $oObject)
 		{
-			$oCore_Module = Core_Module::factory($oObject->path);
+			$oCore_Module = Core_Module_Abstract::factory($oObject->path);
 			if ($oCore_Module)
 			{
 				$aScheduleActions = $oCore_Module->getScheduleActions();

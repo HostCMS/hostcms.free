@@ -8,16 +8,19 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Tabs extends Skin_Default_Admin_Form_Entity_Tabs
 {
 	/**
 	 * Executes the business logic.
+	 * @hostcms-event Skin_Bootstrap_Admin_Form_Entity_Tabs.onBeforeExecute
+	 * @hostcms-event Skin_Bootstrap_Admin_Form_Entity_Tabs.onAfterExecute
 	 */
 	public function execute()
 	{
+		Core_Event::notify(get_class($this) . '.onBeforeExecute', $this);
+
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		// Tab-ы выводим только если их больше 1-го.
@@ -85,5 +88,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Tabs extends Skin_Default_Admin_Form_Enti
 			$tab_id++;
 		}
 		?></div><?php
+
+		Core_Event::notify(get_class($this) . '.onAfterExecute', $this);
 	}
 }

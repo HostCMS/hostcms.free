@@ -8,10 +8,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Update
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
-class Update_Module_Entity extends Core_Entity
+class Update_Module_Entity extends Core_Empty_Entity
 {
 	/**
 	 * Backend property
@@ -68,47 +67,22 @@ class Update_Module_Entity extends Core_Entity
 	protected $_modelName = 'update_module';
 
 	/**
-	 * Load columns list
-	 * @return self
-	 */
-	protected function _loadColumns()
-	{
-		return $this;
-	}
-
-	/**
-	 * Get primary key name
+	 * Processing update description
 	 * @return string
 	 */
-	public function getPrimaryKeyName()
+	public function description()
 	{
-		return 'id';
-	}
-
-	/**
-	 * Table columns
-	 * @var array
-	 */
-	protected $_tableColums = array();
-
-	/**
-	 * Set table columns
-	 * @param array $tableColums columns
-	 * @return self
-	 */
-	public function setTableColums($tableColums)
-	{
-		$this->_tableColums = $tableColums;
-		return $this;
-	}
-
-	/**
-	 * Get table colums
-	 * @return array
-	 */
-	public function getTableColumns()
-	{
-		return $this->_tableColums;
+		return nl2br(
+			str_replace(array(
+				'[+]',
+				'[*]',
+				'[!]',
+			), array(
+				'<i class="fa-solid fa-circle-plus success"></i>',
+				'<i class="fa-solid fa-circle-check warning"></i>',
+				'<i class="fa-solid fa-circle-exclamation danger"></i>',
+			), $this->description)
+		);
 	}
 
 	/**
@@ -215,20 +189,11 @@ class Update_Module_Entity extends Core_Entity
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function numberBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$this->beta && Core_Html_Entity::factory('Span')
 			->class('badge badge-darkorange')
 			->value('β')
 			->execute();
-	}
-
-	/**
-	 * Get Related Site
-	 * @return NULL
-	 */
-	public function getRelatedSite()
-	{
-		return NULL;
 	}
 }

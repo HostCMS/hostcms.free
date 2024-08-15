@@ -8,10 +8,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Field
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
-class Field_Entity extends Core_Entity
+class Field_Entity extends Core_Empty_Entity
 {
 	/**
 	 * Backend property
@@ -50,50 +49,6 @@ class Field_Entity extends Core_Entity
 	protected $_modelName = 'field';
 
 	/**
-	 * Load columns list
-	 * @return self
-	 */
-	protected function _loadColumns()
-	{
-		return $this;
-	}
-
-	/**
-	 * Get primary key name
-	 * @return string
-	 */
-	public function getPrimaryKeyName()
-	{
-		return 'id';
-	}
-
-	/**
-	 * Table columns
-	 * @var array
-	 */
-	protected $_tableColums = array();
-
-	/**
-	 * Set table columns
-	 * @param array $tableColums columns
-	 * @return self
-	 */
-	public function setTableColums($tableColums)
-	{
-		$this->_tableColums = $tableColums;
-		return $this;
-	}
-
-	/**
-	 * Get table columns
-	 * @return array
-	 */
-	public function getTableColumns()
-	{
-		return $this->_tableColums;
-	}
-
-	/**
 	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
@@ -105,14 +60,5 @@ class Field_Entity extends Core_Entity
 			->class('badge badge-azure badge-square')
 			->value($this->count)
 			->execute();
-	}
-	
-	/**
-	 * Get Related Site
-	 * @return NULL
-	 */
-	public function getRelatedSite()
-	{
-		return NULL;
 	}
 }

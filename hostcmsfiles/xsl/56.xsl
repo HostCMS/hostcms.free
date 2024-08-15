@@ -27,7 +27,15 @@
 
 	<xsl:template match="shop_item">
 
-		<h1 hostcms:id="{@id}" hostcms:field="name" hostcms:entity="shop_item"><xsl:value-of select="name"/></h1>
+		<!-- Название товара или SEO-шаблон для H1 товара -->
+		<xsl:choose>
+			<xsl:when test="/shop/seo_item_h1/node()">
+				<h1><xsl:value-of select="/shop/seo_item_h1"/></h1>
+			</xsl:when>
+			<xsl:otherwise>
+				<h1 hostcms:id="{@id}" hostcms:field="name" hostcms:entity="shop_item"><xsl:value-of select="name"/></h1>
+			</xsl:otherwise>
+		</xsl:choose>
 
 		<!-- Store parent id in a variable -->
 		<xsl:variable name="group" select="/shop/group"/>
@@ -289,7 +297,7 @@
 										type = 0 - простой тип товара
 										type = 1 - электронный товар, при этом остаток на складе больше 0 или -1,
 										что означает неограниченное количество -->
-										<xsl:if test="type = 0 or (type = 1 and (digitals > 0 or digitals = -1))">
+										1	<xsl:if test="type = 0 or (type = 1 and (digitals > 0 or digitals = -1))">
 											<a href="{/shop/url}cart/?add={@id}" onclick="return $.addIntoCart('{/shop/url}cart/', {@id}, 1)">
 												<img src="/images/add_to_cart.gif" alt="&labelAddIntoCart;" title="&labelAddIntoCart;" />
 											</a>

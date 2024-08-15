@@ -8,8 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Chartaccount
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 class Chartaccount_Operation_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -107,7 +106,8 @@ class Chartaccount_Operation_Item_Controller_Edit extends Admin_Form_Action_Cont
 		$oMainRow2->add($oCreditSelect);
 
 		$oMainTab
-			->move($this->getField('amount')->divAttr(array('class' => 'form-group col-xs-12 col-lg-3')), $oMainRow3);
+			->move($this->getField('amount')->divAttr(array('class' => 'form-group col-xs-12 col-lg-3')), $oMainRow3)
+			->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12 col-lg-9'))->class('form-control input-lg'), $oMainRow3);
 
 		$oMainRow3
 			->add(
