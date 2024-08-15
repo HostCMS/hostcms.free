@@ -45,9 +45,7 @@ $oAdmin_Form_Entity_Menus->add(
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 
 // Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -78,9 +76,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 }
 
 // Действие "Загрузка списка XSL-шаблонов для раздела"
-$oAdminFormActionLoadModuleActions = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('loadModuleActions');
+$oAdminFormActionLoadModuleActions = $oAdmin_Form->Admin_Form_Actions->getByName('loadModuleActions');
 
 if ($oAdminFormActionLoadModuleActions && $oAdmin_Form_Controller->getAction() == 'loadModuleActions')
 {
@@ -95,9 +91,7 @@ if ($oAdminFormActionLoadModuleActions && $oAdmin_Form_Controller->getAction() =
 }
 
 // Действие "Применить"
-$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdminFormActionApply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {

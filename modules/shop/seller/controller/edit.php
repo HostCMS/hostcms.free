@@ -168,10 +168,7 @@ class Shop_Seller_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		// Обработка картинок
 		$param = array();
 
-		$large_image = '';
-		$small_image = '';
-
-		$aCore_Config = Core::$mainConfig;
+		$large_image = $small_image = '';
 
 		$create_small_image_from_large = Core_Array::getPost('create_small_image_from_large_small_image');
 
@@ -184,8 +181,7 @@ class Shop_Seller_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		if ($bLargeImageIsCorrect)
 		{
 			// Проверка на допустимый тип файла
-			if (Core_File::isValidExtension($aFileData['name'],
-			$aCore_Config['availableExtension']))
+			if (Core_File::isValidExtension($aFileData['name'], Core::$mainConfig['availableExtension']))
 			{
 				// Удаление файла большого изображения
 				if ($this->_object->image_large)
@@ -239,8 +235,8 @@ class Shop_Seller_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 			// Явно указано малое изображение
 			if ($bSmallImageIsCorrect
-			&& Core_File::isValidExtension($aSmallFileData['name'],
-			$aCore_Config['availableExtension']))
+				&& Core_File::isValidExtension($aSmallFileData['name'], Core::$mainConfig['availableExtension'])
+			)
 			{
 				// Для инфогруппы ранее задано изображение
 				if ($this->_object->image_large != '')

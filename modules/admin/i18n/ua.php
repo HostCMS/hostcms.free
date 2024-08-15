@@ -114,4 +114,8 @@ return array(
 	'days' => '%d днів',
 	'hour' => 'година',
 	'hours' => '%d годин',
+	'minute' => 'хвилина',
+	'minutes' => '%d хвилини',
+	'second' => 'секунда',
+	'seconds' => '%d секунди',
 );

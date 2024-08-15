@@ -134,5 +134,7 @@ return array(
 
 	'shortcut' => 'Shortcut',
 
-	'closed' => 'Closed'
+	'closed' => 'Closed',
+	'export_fields_allow_items' => 'Export custom fields of items',
+	'export_fields_allow_groups' => 'Export user field groups',
 );

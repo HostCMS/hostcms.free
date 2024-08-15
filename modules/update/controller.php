@@ -222,7 +222,7 @@ class Update_Controller extends Core_Servant_Properties
 			'&update_id=' . $this->update_id .
 			'&install_beta_update=' . rawurlencode($this->install_beta);
 
-		$Core_Http = Core_Http::instance('curl')
+		$Core_Http = Core_Http::instance()
 			->timeout(15)
 			->method('POST');
 

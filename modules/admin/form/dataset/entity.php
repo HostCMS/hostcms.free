@@ -48,9 +48,9 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 
 		$this
 			->addCondition(array('open' => array()))
-			->addCondition(array('where' => array('user_id', '=', $oUser->id)))
-			->addCondition(array('setOr' => array()))
-			->addCondition(array('where' => array('user_id', '=', 0)))
+				->addCondition(array('where' => array('user_id', '=', $oUser->id)))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('user_id', '=', 0)))
 			->addCondition(array('close' => array()));
 
 		return $this;

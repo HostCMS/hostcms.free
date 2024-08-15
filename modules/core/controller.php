@@ -214,7 +214,7 @@ class Core_Controller extends Core_Servant_Properties
 		// Apply Forbidden-Allowed tags for root entity
 		$this->applyForbiddenAllowedTags('/', $this->_entity);
 
-		return $this->_entity->getXml();
+		return '<?xml version="1.0" encoding="utf-8"?>' . "\n" . $this->_entity->getXml();
 	}
 
 	/**

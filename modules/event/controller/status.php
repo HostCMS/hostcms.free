@@ -93,8 +93,7 @@ class Event_Controller_Status extends Admin_Form_Action_Controller
 			// Связываем уведомление с ответственными сотрудниками
 			foreach ($aEventUsers as $oEventUser)
 			{
-				Core_Entity::factory('User', $oEventUser->user_id)
-					->add($oNotification);
+				Core_Entity::factory('User', $oEventUser->user_id)->add($oNotification);
 			}
 
 			return TRUE;

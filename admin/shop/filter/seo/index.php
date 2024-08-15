@@ -399,9 +399,7 @@ if ($shop_filter_seo_dir_id)
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
 // Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
  if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -420,9 +418,7 @@ $oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 }
 
 // Действие "Применить"
-$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdminFormActionApply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
@@ -435,9 +431,7 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 }
 
 // Удаление условий
-$oAdminFormActionDeleteCondition = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deleteCondition');
+$oAdminFormActionDeleteCondition = $oAdmin_Form->Admin_Form_Actions->getByName('deleteCondition');
 
 if ($oAdminFormActionDeleteCondition && $oAdmin_Form_Controller->getAction() == 'deleteCondition')
 {
@@ -466,8 +460,7 @@ $oUser = Core_Auth::getCurrentUser();
 	&& $oAdmin_Form_Dataset->addUserConditions();
 
 // Фильтр по группе
-if (isset($oAdmin_Form_Controller->request['admin_form_filter_1556'])
-	&& $oAdmin_Form_Controller->request['admin_form_filter_1556'] != '')
+if (isset($oAdmin_Form_Controller->request['admin_form_filter_1556']) && $oAdmin_Form_Controller->request['admin_form_filter_1556'] != ''
 {
 	$mFilterValue = $oAdmin_Form_Controller->convertLike(strval($oAdmin_Form_Controller->request['admin_form_filter_1556']));
 

@@ -29,20 +29,29 @@ class Core_Command_Controller_Favicon extends Core_Command_Controller
 
 		$oSite = Core_Entity::factory('Site')->getByAlias(Core::$url['host']);
 
-		if ($oSite && $oSite->favicon != '')
+		if ($oSite)
 		{
-			$faviconPath = $oSite->getFaviconPath();
-
-			$oCore_Response
-				->header('Last-Modified', gmdate('D, d M Y H:i:s', time()) . ' GMT')
-				->header('X-Powered-By', 'HostCMS');
-
-			if (is_readable($faviconPath))
+			$oSite_Favicon = $oSite->Site_Favicons->getFirst();
+			
+			if ($oSite_Favicon && $oSite_Favicon->filename !== '')
 			{
+				$faviconPath = $oSite_Favicon->getFaviconPath();
+
 				$oCore_Response
-					->status(200)
-					->header('Content-Type', Core_Mime::getFileMime($faviconPath))
-					->body(Core_File::read($faviconPath));
+					->header('Last-Modified', gmdate('D, d M Y H:i:s', time()) . ' GMT')
+					->header('X-Powered-By', 'HostCMS');
+
+				if (is_readable($faviconPath))
+				{
+					$oCore_Response
+						->status(200)
+						->header('Content-Type', Core_Mime::getFileMime($faviconPath))
+						->body(Core_File::read($faviconPath));
+				}
+				else
+				{
+					$oCore_Response->status(404);
+				}
 			}
 			else
 			{

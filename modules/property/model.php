@@ -168,22 +168,34 @@ class Property_Model extends Core_Entity
 	protected $_aAllValues = NULL;
 
 	/**
+	 * Isset all values for property
+	 * @return boolean
+	 */
+	public function issetAllValues()
+	{
+		return !is_null($this->_aAllValues);
+	}
+
+	/**
 	 * Load all values for property
 	 * @return self
 	 */
 	public function loadAllValues()
 	{
-		if (is_null($this->_aAllValues))
+		if (!$this->issetAllValues())
 		{
 			$this->_aAllValues = array();
 
-			$aProperty_Values = Property_Controller_Value::factory($this->type)
-				->setProperty($this)
-				->getPropertyValueObject()->findAll();
-
-			foreach ($aProperty_Values as $oProperty_Value)
+			if (is_numeric($this->type))
 			{
-				$this->_aAllValues[$oProperty_Value->entity_id][] = $oProperty_Value;
+				$aProperty_Values = Property_Controller_Value::factory($this->type)
+					->setProperty($this)
+					->getPropertyValueObject()->findAll(FALSE);
+
+				foreach ($aProperty_Values as $oProperty_Value)
+				{
+					$this->_aAllValues[$oProperty_Value->entity_id][] = $oProperty_Value;
+				}
 			}
 		}
 

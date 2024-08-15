@@ -18,6 +18,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - removeForbiddenTag(name) удалить тег из списка запрещенных к передаче в генерируемый YML.
  * - modifications(TRUE|FALSE) экспортировать модификации, по умолчанию TRUE.
  * - media(TRUE|FALSE) выгружать изображения из библиотеки, по умолчанию FALSE.
+ * - closed(TRUE|FALSE) выгружать закрытые товаров, по умолчанию FALSE.
  * - surcharge(200|'20%') дополнительная наценка на все товары, может быть указана в абсолютном значении, либо процентом, по умолчанию 0.
  * - rootItems(TRUE|FALSE) экспортировать корневые товары, по умолчанию FALSE.
  * - groupModifications(TRUE|FALSE) группировать модификации (атрибут group_id у offer, используется только в категориях Одежда, обувь и аксессуары, Мебель, Косметика, парфюмерия и уход, Детские товары, Аксессуары для портативной электроники), по умолчанию FALSE.
@@ -76,7 +77,6 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	 * @var array
 	 */
 	protected $_allowedProperties = array(
-		'media',
 		'additionalImages',
 		'additionalTagNames',
 		'cdata',
@@ -85,6 +85,8 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		'outlets',
 		'paymentMethod',
 		'modifications',
+		'media',
+		'closed',
 		'surcharge',
 		'rootItems',
 		'groupModifications',
@@ -364,7 +366,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 		$this->itemsProperties = $this->modifications = $this->deliveryOptions = $this->checkAvailable = TRUE;
 
-		$this->groupModifications = $this->rootItems = $this->recommended = $this->checkRest = $this->outlets = $this->debug = $this->media = FALSE;
+		$this->groupModifications = $this->rootItems = $this->recommended = $this->checkRest = $this->outlets = $this->debug = $this->media = $this->closed = FALSE;
 
 		$this->paymentMethod = $this->cdata = $this->itemsForbiddenProperties = array();
 
@@ -447,6 +449,10 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			->where('shop_items.yandex_market', '=', 1)
 			//->where('shop_items.price', '>', 0)
 			->where('shop_items.modification_id', '=', 0);
+
+		!$this->closed && $oShop_Item
+			->queryBuilder()
+			->where('shop_items.closed', '=', 0);
 
 		Core_Event::notify(get_class($this) . '.onBeforeSelectShopItems', $this, array($oShop_Item));
 
@@ -722,7 +728,6 @@ class Shop_Controller_YandexMarket extends Core_Controller
 				: $this->_Shop_Items->queryBuilder()->offset($iFrom)->limit($this->onStep);
 
 			$aShop_Items = $this->_Shop_Items->findAll(FALSE);
-
 			foreach ($aShop_Items as $oShop_Item)
 			{
 				if (isset($this->_aCategoriesId[$oShop_Item->shop_group_id]) || $oShop_Item->shop_group_id == 0 && $this->rootItems)
@@ -768,8 +773,11 @@ class Shop_Controller_YandexMarket extends Core_Controller
 									->having(Core_QueryBuilder::expression('SUM(shop_warehouse_items.count)'), '>', 0);
 							}
 
-							$aModifications = $oModifications->findAll(FALSE);
+							!$this->closed && $oModifications
+								->queryBuilder()
+								->where('shop_items.closed', '=', 0);
 
+							$aModifications = $oModifications->findAll(FALSE);
 							foreach ($aModifications as $oModification)
 							{
 								if ($this->_checkPrice($oModification))
@@ -826,8 +834,8 @@ class Shop_Controller_YandexMarket extends Core_Controller
 				!is_null($this->utm_medium)
 					? '&utm_medium=' . $this->utm_medium
 						. '&utm_campaign=' . (
-							$oShop_Item->shop_group_id
-								? $oShop_Item->Shop_Group->path
+							($oItem = $oShop_Item->modification_id ? $oShop_Item->Modification : $oShop_Item)->shop_group_id
+								? $oItem->Shop_Group->path
 								: ''
 						)
 						. '&utm_term=' . $oShop_Item->id
@@ -1234,7 +1242,6 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			}
 
 			$aItem_Associateds = $oItem_Associateds->findAll(FALSE);
-
 			foreach ($aItem_Associateds as $oTmp_Shop_Item)
 			{
 				if ($oTmp_Shop_Item->price > 0)
@@ -2597,7 +2604,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			->orderBy('shop_discounts.id');
 
 		$aShop_Discounts = $oShop_Discounts->findAll(FALSE);
-
+		
 		if (count($aShop_Discounts))
 		{
 			$this->write("<promos>\n");
@@ -2615,7 +2622,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 	/**
 	 * Show promo
-	 * @var $oShop_Discount Shop_Discount_Model
+	 * @param Shop_Discount_Model $oShop_Discount
 	 * @return self
 	 */
 	protected function _showPromo(Shop_Discount_Model $oShop_Discount)
@@ -2669,7 +2676,6 @@ class Shop_Controller_YandexMarket extends Core_Controller
 				->offset($offset);
 
 			$aShop_Item_Discounts = $oShop_Item_Discounts->findAll(FALSE);
-
 			foreach ($aShop_Item_Discounts as $oShop_Item_Discount)
 			{
 				$this->write('<product offer-id="' . Core_Str::xml($oShop_Item_Discount->shop_item_id) . '" />' . "\n");

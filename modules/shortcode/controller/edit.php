@@ -149,7 +149,7 @@ class Shortcode_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	/**
 	 * Build visual representation of group tree
 	 * @param int $iShortcodeDirParentId parent ID
-	 * @param int $aExclude exclude group ID
+	 * @param array $aExclude exclude group ID
 	 * @param int $iLevel current nesting level
 	 * @return array
 	 */

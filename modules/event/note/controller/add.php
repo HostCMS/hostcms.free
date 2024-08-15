@@ -68,11 +68,18 @@ class Event_Note_Controller_Add extends Crm_Note_Controller_Add
 			}
 		}
 
-		$oModule = Core_Entity::factory('Module')->getByPath('event');
-
+		$aUserIDs = array();
 		$aEvent_Users = $oEvent->Event_Users->findAll();
 		foreach ($aEvent_Users as $oEvent_User)
 		{
+			$aUserIDs[] = $oEvent_User->user_id;
+		}
+		
+		$aUserIDs = array_unique($aUserIDs);
+		if (count($aUserIDs))
+		{
+			$oModule = Core_Entity::factory('Module')->getByPath('event');
+			
 			// Добавляем уведомление
 			$oNotification = Core_Entity::factory('Notification')
 				->title(Core::_('Event_Note.add_notification', $oEvent->name, FALSE))
@@ -85,8 +92,11 @@ class Event_Note_Controller_Add extends Crm_Note_Controller_Add
 				->entity_id($oEvent->id)
 				->save();
 
-			// Связываем уведомление с сотрудниками
-			Core_Entity::factory('User', $oEvent_User->user_id)->add($oNotification);
+			foreach ($aUserIDs as $user_id)
+			{
+				// Связываем уведомление с сотрудниками
+				Core_Entity::factory('User', $user_id)->add($oNotification);
+			}
 		}
 
 		$windowId = $this->_Admin_Form_Controller->getWindowId();

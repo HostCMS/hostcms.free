@@ -259,7 +259,10 @@ class Shop_Warehouse_Entry_Model extends Core_Entity
 
 		if ($path != '' && $id)
 		{
-			return '<span class="badge badge-round badge-max-width" style="border-color: ' . $color . '; color: ' . Core_Str::hex2darker($color, 0.2) . '; background-color: ' . Core_Str::hex2lighter($color, 0.88) . '"><a style="color: ' . $color . '" href="' . $path . '?hostcms[action]=edit&hostcms[checked][0][' . $id . ']=1" onclick="$.modalLoad({path: \'' . $path . '\', action: \'edit\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $id . ']=1\', windowId: \'modal' . $this->document_id . '\', width: \'90%\'}); return false">' . Core::_('Shop_Document_Relation.type' . $type) . ' ' . $id . '</a></span>';
+			$shop_id = Core_Array::getGet('shop_id', 0, 'int');
+			$shop_group_id = Core_Array::getGet('shop_group_id', 0, 'int');
+
+			return '<span class="badge badge-round badge-max-width" style="border-color: ' . $color . '; color: ' . Core_Str::hex2darker($color, 0.2) . '; background-color: ' . Core_Str::hex2lighter($color, 0.88) . '"><a style="color: ' . $color . '" href="' . $path . '?hostcms[action]=edit&hostcms[checked][0][' . $id . ']=1" onclick="$.modalLoad({path: \'' . $path . '\', action: \'edit\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $id . ']=1&shop_id=' . $shop_id . '&shop_group_id=' . $shop_group_id . '\', windowId: \'modal' . $this->document_id . '\', width: \'90%\'}); return false">' . Core::_('Shop_Document_Relation.type' . $type) . ' ' . $id . '</a></span>';
 		}
 	}
 

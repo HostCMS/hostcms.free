@@ -27,6 +27,12 @@ $oAdmin_Form_Controller
 	->title(Core::_('Sql_Table_Index.title', $tableName))
 	->pageTitle(Core::_('Sql_Table_Index.title', $tableName));
 
+$oAdmin_Form_Controller->addEntity(
+	Sql_Controller::getTableViewIcon($tableName)
+)->addEntity(
+	Sql_Controller::getFieldsIcon($tableName)
+);
+
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 

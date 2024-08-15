@@ -163,7 +163,7 @@ class Ipaddress_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	/**
 	 * Build visual representation of group tree
 	 * @param int $iIpaddressDirParentId parent ID
-	 * @param int $aExclude exclude group ID
+	 * @param array $aExclude exclude group ID
 	 * @param int $iLevel current nesting level
 	 * @return array
 	 */
@@ -244,9 +244,9 @@ class Ipaddress_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					//$this->_formValues['ip'] = $this->_prettifyList($this->_formValues['ip']);
 				}
-				
+
 				$this->_formValues['ip'] = $this->_prettifyList($this->_formValues['ip']);
-				
+
 			break;
 		}
 

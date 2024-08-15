@@ -246,9 +246,7 @@ if ($oIpaddress_Filter_Dir->id)
 
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('importFilters');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('importFilters');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'importFilters')
 {
@@ -280,9 +278,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'importFilter
 }
 
 // Действие "Экспорт"
-$oAdminFormActionExportFilters = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('exportFilters');
+$oAdminFormActionExportFilters = $oAdmin_Form->Admin_Form_Actions->getByName('exportFilters');
 
 if ($oAdminFormActionExportFilters && $oAdmin_Form_Controller->getAction() == 'exportFilters')
 {
@@ -296,9 +292,7 @@ if ($oAdminFormActionExportFilters && $oAdmin_Form_Controller->getAction() == 'e
 }
 
 // Действие "Применить"
-$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdminFormActionApply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
@@ -311,9 +305,7 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 }
 
 // Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -332,9 +324,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 }
 
 // Действие "Копировать"
-$oAdminFormActionCopy = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('copy');
+$oAdminFormActionCopy = $oAdmin_Form->Admin_Form_Actions->getByName('copy');
 
 if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 {
@@ -347,9 +337,7 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 }
 
 // Действие "Перенести"
-$oAdminFormActionMove = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('move');
+$oAdminFormActionMove = $oAdmin_Form->Admin_Form_Actions->getByName('move');
 
 if ($oAdminFormActionMove && $oAdmin_Form_Controller->getAction() == 'move')
 {

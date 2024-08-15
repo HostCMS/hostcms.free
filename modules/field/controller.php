@@ -20,6 +20,42 @@ class Field_Controller
 
 	/**
 	 * Fill Model's Fields Cache
+	 */
+	static protected function _fillFieldDirs()
+	{
+		$aReturn = array();
+
+		$oField_Dirs = Core_Entity::factory('Field_Dir');
+		$oField_Dirs->queryBuilder()
+			->clearOrderBy()
+			->orderBy('sorting', 'ASC');
+
+		$aField_Dirs = $oField_Dirs->findAll(FALSE);
+
+		foreach ($aField_Dirs as $oField_Dir)
+		{
+			$aReturn[$oField_Dir->model][] = $oField_Dir;
+		}
+
+		return $aReturn;
+	}
+
+	/**
+	 * Get Model Filelds
+	 * @param string $modelName Model name
+	 * @return array
+	 */
+	static public function getFieldDirs($modelName)
+	{
+		$aField_Dirs = self::_fillFieldDirs();
+
+		return isset($aField_Dirs[$modelName])
+			? $aField_Dirs[$modelName]
+			: array();
+	}
+
+	/**
+	 * Fill Model's Fields Cache
 	 * @param int $site_id
 	 */
 	static protected function _fillFields($site_id)

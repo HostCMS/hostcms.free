@@ -388,4 +388,9 @@ return array(
 
 	'closed' => 'Закрито',
 	'changeIndexation_success' => 'Індексація товару змінена.',
+
+	'export_fields_allow_items' => 'Експортувати власні поля товарів',
+	'export_fields_allow_groups' => 'Експортувати групи користувачів поля',
+	'delete_field_values' => 'Удаляти існуючі значення користувацьких полів',
+	'shops_add_form_link_fields' => "Користувачські поля товару",
 );

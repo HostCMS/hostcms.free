@@ -146,38 +146,40 @@ class Admin_Form_Model extends Core_Entity
 	}
 
 	/**
+	 * Cache for getAvailableFieldsForUser()
+	 * @var array
+	 * @see getAvailableFieldsForUser()
+	 */
+	static protected $_cacheAvailableFields = array();
+
+	/**
 	 * Get available fields for user
 	 * @param int $user_id
 	 * @return array
 	 */
 	public function getAvailableFieldsForUser($user_id)
 	{
-		$aAvailableFields = array();
+		if (!isset(self::$_cacheAvailableFields[$this->id][$user_id]))
+		{
+			self::$_cacheAvailableFields[$this->id][$user_id] = array();
 
-		// Available Fields for User
-		$oAdmin_Form_Field_Settings = Core_Entity::factory('Admin_Form_Field_Setting');
-		$oAdmin_Form_Field_Settings->queryBuilder()
-			->where('admin_form_field_settings.admin_form_id', '=', $this->id)
-			->where('admin_form_field_settings.user_id', '=', $user_id);
+			// Available Fields for User
+			$oAdmin_Form_Field_Settings = Core_Entity::factory('Admin_Form_Field_Setting');
+			$oAdmin_Form_Field_Settings->queryBuilder()
+				->where('admin_form_field_settings.admin_form_id', '=', $this->id)
+				->where('admin_form_field_settings.user_id', '=', $user_id);
 
-		$aAdmin_Form_Field_Settings = $oAdmin_Form_Field_Settings->findAll(FALSE);
-		/*if (count($aAdmin_Form_Field_Settings))
-		{*/
+			$aAdmin_Form_Field_Settings = $oAdmin_Form_Field_Settings->findAll(FALSE);
 			foreach ($aAdmin_Form_Field_Settings as $oAdmin_Form_Field_Setting)
 			{
-				$aAvailableFields[$oAdmin_Form_Field_Setting->admin_form_field_id] = $oAdmin_Form_Field_Setting->admin_form_field_id;
-			}
-		/*}
-		else
-		{
-			// Поля могут быть заданы самому контроллеру (например в SQL), получение перенесено в list
-			$aAdmin_Form_Fields = $this->Admin_Form_Fields->findAll(FALSE);
-			foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
-			{
-				$aAvailableFields[$oAdmin_Form_Field->id] = $oAdmin_Form_Field->id;
-			}
-		}*/
+				$oAdmin_Form_Field_Setting->admin_form_field_id
+					&& self::$_cacheAvailableFields[$this->id][$user_id][$oAdmin_Form_Field_Setting->admin_form_field_id] = $oAdmin_Form_Field_Setting->admin_form_field_id;
 
-		return $aAvailableFields;
+				Core::moduleIsActive('field') && $oAdmin_Form_Field_Setting->field_id
+					&& self::$_cacheAvailableFields[$this->id][$user_id]['uf_' . $oAdmin_Form_Field_Setting->field_id] = 'uf_' . $oAdmin_Form_Field_Setting->field_id;
+			}
+		}
+
+		return self::$_cacheAvailableFields[$this->id][$user_id];
 	}
 }

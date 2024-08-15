@@ -246,8 +246,6 @@ class Core_Date
 
 		$sReturn = '';
 
-		// Прошло дней
-		//$estimate_days = floor($estimate_time / 86400);
 		$dateZ = date('z', $timestamp);
 		$currentZ = date('z');
 
@@ -319,6 +317,8 @@ class Core_Date
 	 */
 	static public function getDuration($duration)
 	{
+		$duration = intval($duration);
+		
 		$duration < 0 && $duration = 0;
 
 		$aReturn = array(
@@ -459,7 +459,8 @@ class Core_Date
 					$pattern = $intl_formats[$format];
 				}
 
-				return (new IntlDateFormatter($locale, $date_type, $time_type, $tz, null, $pattern))->format($timestamp);
+				$oIntlDateFormatter = new IntlDateFormatter($locale, $date_type, $time_type, $tz, null, $pattern);
+				return $oIntlDateFormatter->format($timestamp);
 			};
 
 			// Same order as https://www.php.net/manual/en/function.strftime.php

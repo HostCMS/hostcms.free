@@ -167,15 +167,20 @@ class Event_Model extends Core_Entity
 			? 'opacity'
 			: '';
 
-		?><div class="d-flex align-items-center <?php echo $opacity?>"><?php
+		?><div class="d-flex align-items-center justify-content-between <?php echo $opacity?>"><?php
+		
+		// Название вместе с attachments в одном div
+		?><div><?php
 		if ($this->Event_Attachments->getCount(FALSE))
 		{
 			?><i class="fa fa-paperclip name-attachments"></i><?php
 		}
-
 		?><div class="semi-bold editable" style="display: inline-block;" id="apply_check_0_<?php echo $this->id?>_fv_1226"><?php echo htmlspecialchars((string) $this->name)?></div><?php
-		echo $this->_showChecklists();
 		?></div><?php
+		
+		echo $this->showChecklists();
+		?></div><?php
+		
 		if ($this->description != '')
 		{
 			?><div class="event-description"><?php echo nl2br(htmlspecialchars((string) $this->description))?></div><?php
@@ -234,9 +239,10 @@ class Event_Model extends Core_Entity
 
 	/**
 	 * Show event checklists
+	 * @param bool $kanban
 	 * @return string
 	 */
-	protected function _showChecklists()
+	public function showChecklists($kanban = FALSE)
 	{
 		$iTotalCount = $iCompletedCount = 0;
 
@@ -247,15 +253,36 @@ class Event_Model extends Core_Entity
 			$iTotalCount += $oEvent_Checklist->Event_Checklist_Items->getCount(FALSE);
 		}
 
-		// var_dump('completed', $iCompletedCount);
-		// var_dump('total', $iTotalCount);
-
 		if ($iTotalCount)
 		{
-			$color = '#777';
-			$style = "border-color: " . $color . "; color: " . Core_Str::hex2darker($color, 0.2) . "; background-color: " . Core_Str::hex2lighter($color, 0.88);
+			$completed = $iCompletedCount / $iTotalCount;
 
-			return '<span class="badge badge-round badge-max-width margin-left-5" style="' . $style . '"><i class="fa-regular fa-square-check margin-right-5"></i>' . $iCompletedCount . '/' . $iTotalCount . '</span>';
+			if ($completed == 1)
+			{
+				$color = '#61ec02';
+			}
+			elseif ($completed >= 0.67)
+			{
+				$color = '#ecdd02';
+			}
+			elseif ($completed >= 0.34)
+			{
+				$color = '#ec9c02';
+			}
+			else
+			{
+				$color = '#ec4402';
+			}
+
+			$style = "min-width: 45px; color: " . Core_Str::hex2darker($color, 0.2) . "; background-color: " . Core_Str::hex2lighter($color, 0.88) . ';';
+
+			$margin = !$kanban
+				? ' margin-left: 5px;'
+				: ' margin-bottom: 5px; margin-top: 5px;';
+
+			$style .= $margin;
+
+			return '<span class="badge badge-round badge-max-width" style="' . $style . '"><i class="fa-regular fa-square-check margin-right-5"></i>' . $iCompletedCount . '/' . $iTotalCount . '</span>';
 		}
 	}
 
@@ -772,8 +799,7 @@ class Event_Model extends Core_Entity
 			// Связываем уведомление с ответственными сотрудниками
 			foreach ($aEventUsers as $oEventUser)
 			{
-				Core_Entity::factory('User', $oEventUser->user_id)
-					->add($oNotification);
+				Core_Entity::factory('User', $oEventUser->user_id)->add($oNotification);
 			}
 		}
 	}
@@ -933,8 +959,7 @@ class Event_Model extends Core_Entity
 			// Связываем уведомление с ответственными сотрудниками
 			foreach ($aEventUsers as $oEventUser)
 			{
-				Core_Entity::factory('User', $oEventUser->user_id)
-					->add($oNotification);
+				Core_Entity::factory('User', $oEventUser->user_id)->add($oNotification);
 			}
 		}
 	}
@@ -1025,11 +1050,8 @@ class Event_Model extends Core_Entity
 		$this->Event_Checklists->deleteAll(FALSE);
 
 		$this->Event_Dms_Documents->deleteAll(FALSE);
-
-		if (Core::moduleIsActive('siteuser'))
-		{
-			$this->Event_Siteusers->deleteAll(FALSE);
-		}
+		$this->Event_Siteusers->deleteAll(FALSE);
+		$this->Event_Calendar_Caldavs->deleteAll(FALSE);
 
 		if (Core::moduleIsActive('deal'))
 		{
@@ -1041,14 +1063,8 @@ class Event_Model extends Core_Entity
 			$this->Lead_Events->deleteAll(FALSE);
 		}
 
-		if (Core::moduleIsActive('calendar'))
-		{
-			$this->Event_Calendar_Caldavs->deleteAll(FALSE);
-		}
-
 		if (Core::moduleIsActive('tag'))
 		{
-			// Удаляем метки
 			$this->Tag_Events->deleteAll(FALSE);
 		}
 

@@ -176,18 +176,11 @@ $oAdmin_Form_Entity_Menus->add(
 		)
 );
 
-// var_dump($oAdmin_Form_Controller->limit);
 $oAdmin_Form_Controller->limit = 20;
-// Добавляем все меню контроллеру
-//$oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
-//$oAdmin_View->addChild($oAdmin_Form_Entity_Menus);
-//ob_start();
+
 ?>
 <div class="table-toolbar">
 	<?php $oAdmin_Form_Entity_Menus->execute()?>
-	<!--<div class="table-toolbar-right pull-right">
-		<?php $oAdmin_Form_Controller->pageSelector()?>
-	</div>-->
 	<div class="clear"></div>
 </div>
 <?php
@@ -211,7 +204,7 @@ if ($formSettings['action'] == 'duplicate')
 
 	foreach ($aRows as $row)
 	{
-		$sTableName = $oCore_DataBase->quoteColumnName($row->Name);
+		$sTableName = $oCore_DataBase->quoteTableName($row->Name);
 
 		try
 		{

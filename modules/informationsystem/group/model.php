@@ -1367,7 +1367,7 @@ class Informationsystem_Group_Model extends Core_Entity
 	/**
 	 * Get property value for SEO-templates
 	 * @param int $property_id Property ID
-	 * @param strint $format string format, e.g. '%s: %s'. %1$s - Property Name, %2$s - List of Values
+	 * @param string $format string format, e.g. '%s: %s'. %1$s - Property Name, %2$s - List of Values
 	 * @param int $property_id Property ID
 	 * @return string
 	 */
@@ -1477,6 +1477,91 @@ class Informationsystem_Group_Model extends Core_Entity
 		$oInformationsystem_GroupShortcut->indexing = 0;
 
 		return $oInformationsystem_GroupShortcut->save()->clearCache();
+	}
+
+	/**
+	 * RestApi Upload Large Image from $_FILES['image']
+	 * @retrun string|NULL Uploaded image path
+	 */
+	public function uploadLargeImage()
+	{
+		if (isset($_FILES['image']['tmp_name']))
+		{
+			$file_name = $_FILES['image']['name'];
+
+			// Проверка на допустимый тип файла
+			if (Core_File::isValidExtension($file_name, Core::$mainConfig['availableExtension']))
+			{
+				$oInformationsystem = $this->Informationsystem;
+
+				// Удаление файла большого изображения
+				$this->image_large && $this->deleteLargeImage();
+
+				// Не преобразовываем название загружаемого файла
+				if (!$oInformationsystem->change_filename)
+				{
+					$fileName = $file_name;
+				}
+				else
+				{
+					$aConfig = Informationsystem_Controller::getConfig();
+
+					// Определяем расширение файла
+					$ext = Core_File::getExtension($file_name);
+
+					$fileName = sprintf($aConfig['groupLargeImage'], $this->id, $ext);
+				}
+
+				$this->saveLargeImageFile($_FILES['image']['tmp_name'], $fileName);
+
+				if ($this->image_small == '' && $oInformationsystem->create_small_image)
+				{
+					$this->uploadSmallImage();
+				}
+
+				return $this->getLargeFileHref();
+			}
+		}
+	}
+
+	/**
+	 * RestApi Upload Small Image from $_FILES['image']
+	 * @retrun string|NULL Uploaded image path
+	 */
+	public function uploadSmallImage()
+	{
+		if (isset($_FILES['image']['tmp_name']))
+		{
+			$file_name = $_FILES['image']['name'];
+
+			// Проверка на допустимый тип файла
+			if (Core_File::isValidExtension($file_name, Core::$mainConfig['availableExtension']))
+			{
+				$oInformationsystem = $this->Informationsystem;
+
+				// Удаление файла малого изображения
+				$this->image_small && $this->deleteSmallImage();
+
+				// Не преобразовываем название загружаемого файла
+				if (!$oInformationsystem->change_filename)
+				{
+					$fileName = $file_name;
+				}
+				else
+				{
+					$aConfig = Informationsystem_Controller::getConfig();
+
+					// Определяем расширение файла
+					$ext = Core_File::getExtension($file_name);
+
+					$fileName = sprintf($aConfig['groupSmallImage'], $this->id, $ext);
+				}
+
+				$this->saveSmallImageFile($_FILES['image']['tmp_name'], $fileName);
+
+				return $this->getSmallFileHref();
+			}
+		}
 	}
 
 	/**

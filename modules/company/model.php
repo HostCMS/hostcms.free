@@ -466,7 +466,8 @@ class Company_Model extends Core_Entity
 			{
 				if (!$countExclude || !in_array($childrenDepartment['id'], $aExclude))
 				{
-					$iMarginLeft = ($iLevel + 1) * 15;
+					// $iMarginLeft = ($iLevel + 1) * 15;
+					$iMarginLeft = $iLevel * 15;
 
 					$oOptgroup = new stdClass();
 					$oOptgroup->attributes = array(

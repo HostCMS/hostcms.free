@@ -8,8 +8,6 @@
  */
 require_once('../../../bootstrap.php');
 
-Core_Auth::authorization($sModule = 'field');
-
 // Код формы
 $iAdmin_Form_Id = 320;
 $sAdminFormAction = '/admin/field/modelfield/index.php';
@@ -18,6 +16,78 @@ $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
 $field_dir_id = Core_Array::getGet('field_dir_id', 0, 'int');
 $model = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getRequest('model', '', 'string'));
+
+if (Core_Auth::logged())
+{
+	Core_Auth::checkBackendBlockedIp();
+
+	// Контроллер формы
+	$oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
+
+	$oAdmin_Form_Controller->formSettings();
+
+	// Действие "Удаление значения поля"
+	if ($oAdmin_Form_Controller->getAction() == 'deleteFieldValue')
+	{
+		ob_start();
+
+		$oAdmin_Form_Action = $oAdmin_Form
+			->Admin_Form_Actions
+			->getByName('deleteFieldValue');
+
+		$oUser = Core_Auth::getCurrentUser();
+
+		$oField_Controller_Delete_Value = Admin_Form_Action_Controller::factory(
+				'Field_Controller_Delete_Value', $oAdmin_Form_Action
+			)
+			->controller($oAdmin_Form_Controller)
+			->model($model);
+
+		try
+		{
+			foreach ($oAdmin_Form_Controller->checked as $datasetKey => $checkedItems)
+			{
+				foreach ($checkedItems as $checkedItemId => $v1)
+				{
+					$oFields = Core_Entity::factory('Field');
+					$oFields->queryBuilder()
+						->where('model', '=', $model)
+						->where('id', '=', $checkedItemId)
+						->limit(1);
+
+					$aFields = $oFields->findAll(FALSE);
+
+					if (isset($aFields[0]))
+					{
+						$oField_Controller_Delete_Value
+							->setDatasetId($datasetKey)
+							->setObject($aFields[0])
+							->execute($oAdmin_Form_Controller->operation);
+
+						$oAdmin_Form_Controller->addMessage(
+							$oField_Controller_Delete_Value->getMessage()
+						);
+					}
+				}
+			}
+		}
+		catch (Exception $e)
+		{
+			$oAdmin_Form_Controller->addMessage(Core_Message::get($e->getMessage(), 'error'));
+		}
+
+		Core::showJson(
+			array(
+				'error' => ob_get_clean() . $oAdmin_Form_Controller->getMessage(),
+				'form_html' => '',
+				'title' => '',
+				'module' => 'field'
+			)
+		);
+	}
+}
+
+Core_Auth::authorization($sModule = 'field');
 
 $titleName = class_exists($model . '_Model')
 	? Core::_($model . '.model_name')
@@ -126,9 +196,7 @@ if ($field_dir_id)
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
 // Действие "Перенести"
-$oAdminFormActionMove = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('move');
+$oAdminFormActionMove = $oAdmin_Form->Admin_Form_Actions->getByName('move');
 
 if ($oAdminFormActionMove && $oAdmin_Form_Controller->getAction() == 'move')
 {
@@ -170,9 +238,7 @@ if ($oAdminFormActionMove && $oAdmin_Form_Controller->getAction() == 'move')
 }
 
 // Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -188,9 +254,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 }
 
 // Действие "Применить"
-$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdminFormActionApply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
@@ -203,9 +267,7 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 }
 
 // Действие "Копировать"
-$oAdminFormActionCopy = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('copy');
+$oAdminFormActionCopy = $oAdmin_Form->Admin_Form_Actions->getByName('copy');
 
 if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 {
@@ -218,9 +280,7 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 }
 
 // Действие "Удаление значения поля"
-$oAction = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deleteFieldValue');
+/*$oAction = $oAdmin_Form->Admin_Form_Actions->getByName('deleteFieldValue');
 
 if ($oAction && $oAdmin_Form_Controller->getAction() == 'deleteFieldValue')
 {
@@ -230,7 +290,7 @@ if ($oAction && $oAdmin_Form_Controller->getAction() == 'deleteFieldValue')
 	->model($model);
 
 	$oAdmin_Form_Controller->addAction($Field_Controller_Delete_Value);
-}
+}*/
 
 // Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(

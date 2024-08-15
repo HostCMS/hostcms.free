@@ -225,8 +225,6 @@ class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [{$sRadiogroupOnChangeList}])")
 					->divAttr(array('class' => 'form-group col-xs-12 col-md-4'));
 
-				// $oMainTab->addBefore($oSelect_Type, $this->getField('description'));
-
 				$oMainRow2->add($oSelect_Type);
 
 				$oMainTab->delete($this->getField('site_id'));
@@ -381,8 +379,13 @@ class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oMainTab->add($oAdmin_Form_Entity_Code);
 
+				$this->getField('description')
+					->divAttr(array('class' => 'form-group col-xs-12'))
+					->rows(7)
+					->wysiwyg(Core::moduleIsActive('wysiwyg'));
+
 				$oMainTab
-					->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow6)
+					->move($this->getField('description'), $oMainRow6)
 					->move($this->getField('tag_name')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow7)
 					->move($this->getField('default_value')->class('form-control')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 hidden-2 hidden-5 hidden-7 hidden-8 hidden-9 hidden-12 hidden-13 hidden-14')), $oMainRow7)
 					->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow7)
@@ -593,6 +596,10 @@ class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			break;
 		}
 
+		Core::moduleIsActive('wysiwyg') && Wysiwyg_Controller::uploadImages($this->_formValues, $this->_object, $this->_Admin_Form_Controller);
+
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
+
+		return $this;
 	}
 }

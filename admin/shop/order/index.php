@@ -356,9 +356,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 );
 
  // Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -379,9 +377,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 }
 
 // Действие "Копировать"
-$oAdminFormActionCopy = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('copy');
+$oAdminFormActionCopy = $oAdmin_Form->Admin_Form_Actions->getByName('copy');
 
 if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 {
@@ -393,9 +389,7 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 }
 
 // Действие "Пересчет стоимости доставки"
-$oAdminFormActionrecalcDelivery = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('recalcDelivery');
+$oAdminFormActionrecalcDelivery = $oAdmin_Form->Admin_Form_Actions->getByName('recalcDelivery');
 
 if ($oAdminFormActionrecalcDelivery && $oAdmin_Form_Controller->getAction() == 'recalcDelivery')
 {
@@ -407,9 +401,7 @@ if ($oAdminFormActionrecalcDelivery && $oAdmin_Form_Controller->getAction() == '
 }
 
 // Действие "Загрузка списка условий доставки"
-$oAdminFormActionloadDeliveryConditionsList = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('loadDeliveryConditionsList');
+$oAdminFormActionloadDeliveryConditionsList = $oAdmin_Form->Admin_Form_Actions->getByName('loadDeliveryConditionsList');
 
 if ($oAdminFormActionloadDeliveryConditionsList && $oAdmin_Form_Controller->getAction() == 'loadDeliveryConditionsList')
 {
@@ -433,15 +425,14 @@ if ($oAdminFormActionloadDeliveryConditionsList && $oAdmin_Form_Controller->getA
 }
 
 // Действие "Загрузка списка условий доставки"
-$oAdminFormActionloadCompanyAccountList = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('loadCompanyAccountList');
+$oAdminFormActionloadCompanyAccountList = $oAdmin_Form->Admin_Form_Actions->getByName('loadCompanyAccountList');
 
 if ($oAdminFormActionloadCompanyAccountList && $oAdmin_Form_Controller->getAction() == 'loadCompanyAccountList')
 {
 	$oControllerloadCompanyAccountList = Admin_Form_Action_Controller::factory(
 		'Admin_Form_Action_Controller_Type_Load_Select_Options', $oAdminFormActionloadCompanyAccountList
 	);
+
 	$oControllerloadCompanyAccountList
 		->model(Core_Entity::factory('Company_Account'))
 		->defaultValue(' … ')
@@ -453,9 +444,7 @@ if ($oAdminFormActionloadCompanyAccountList && $oAdmin_Form_Controller->getActio
 }
 
 // Действие "Загрузка списка местоположений"
-$oAdminFormActionLoadCountryLocationsList = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('loadList2');
+$oAdminFormActionLoadCountryLocationsList = $oAdmin_Form->Admin_Form_Actions->getByName('loadList2');
 
 if ($oAdminFormActionLoadCountryLocationsList && $oAdmin_Form_Controller->getAction() == 'loadList2')
 {
@@ -473,9 +462,7 @@ if ($oAdminFormActionLoadCountryLocationsList && $oAdmin_Form_Controller->getAct
 }
 
 // Действие "Загрузка списка городов"
-$oAdminFormActionLoadCountryLocationCitiesList = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('loadList3');
+$oAdminFormActionLoadCountryLocationCitiesList = $oAdmin_Form->Admin_Form_Actions->getByName('loadList3');
 
 if ($oAdminFormActionLoadCountryLocationCitiesList && $oAdmin_Form_Controller->getAction() == 'loadList3')
 {
@@ -493,9 +480,7 @@ if ($oAdminFormActionLoadCountryLocationCitiesList && $oAdmin_Form_Controller->g
 }
 
 // Действие "Загрузка списка районов"
-$oAdminFormActionLoadCountryLocationCitiesList = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('loadList4');
+$oAdminFormActionLoadCountryLocationCitiesList = $oAdmin_Form->Admin_Form_Actions->getByName('loadList4');
 
 if ($oAdminFormActionLoadCountryLocationCitiesList && $oAdmin_Form_Controller->getAction() == 'loadList4')
 {
@@ -514,9 +499,7 @@ if ($oAdminFormActionLoadCountryLocationCitiesList && $oAdmin_Form_Controller->g
 }
 
 // Действие "Применить"
-$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdminFormActionApply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
@@ -529,9 +512,7 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 }
 
 // Действие "Копировать"
-$oAdminFormActionCopy = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('copy');
+$oAdminFormActionCopy = $oAdmin_Form->Admin_Form_Actions->getByName('copy');
 
 if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 {
@@ -544,9 +525,7 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 }
 
 // Действие "Удаление значения свойства"
-$oAction = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deletePropertyValue');
+$oAction = $oAdmin_Form->Admin_Form_Actions->getByName('deletePropertyValue');
 
 if ($oAction && $oAdmin_Form_Controller->getAction() == 'deletePropertyValue')
 {
@@ -560,9 +539,7 @@ if ($oAction && $oAdmin_Form_Controller->getAction() == 'deletePropertyValue')
 	$oAdmin_Form_Controller->addAction($oDeletePropertyValueController);
 }
 
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('print');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('print');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'print')
 {
@@ -580,9 +557,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'print')
 	$oAdmin_Form_Controller->addAction($Shop_Order_Controller_Print);
 }
 
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('sendMail');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('sendMail');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'sendMail')
 {
@@ -600,9 +575,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'sendMail')
 	$oAdmin_Form_Controller->addAction($Shop_Order_Controller_Print);
 }
 
-$oAdminFormActionRollback = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('rollback');
+$oAdminFormActionRollback = $oAdmin_Form->Admin_Form_Actions->getByName('rollback');
 
 if ($oAdminFormActionRollback && $oAdmin_Form_Controller->getAction() == 'rollback')
 {
@@ -615,9 +588,7 @@ if ($oAdminFormActionRollback && $oAdmin_Form_Controller->getAction() == 'rollba
 }
 
 // Действие "Объединить"
-$oAdminFormActionMerge = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('merge');
+$oAdminFormActionMerge = $oAdmin_Form->Admin_Form_Actions->getByName('merge');
 
 if ($oAdminFormActionMerge && $oAdmin_Form_Controller->getAction() == 'merge')
 {

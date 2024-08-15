@@ -150,6 +150,7 @@ return array(
 	'filter_enter_title' => 'Введите название фильтра',
 
 	'upload_file' => 'Загрузить файл',
+	'upload_files' => 'Загрузить файлы',
 
 	'successfully' => 'Успешно',
 	'failed' => 'Не успешно',
@@ -161,5 +162,7 @@ return array(
 	'admin_form_field_settings' => 'Настройки полей формы',
 	'setting_modal_title' => 'Настройки полей формы "%s"',
 	'select_all' => 'Выбрать все',
-	'disable_all' => 'Отменить все'
+	'disable_all' => 'Отменить все',
+
+	'rename' => 'Переименовать'
 );

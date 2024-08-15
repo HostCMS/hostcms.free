@@ -22,7 +22,7 @@ class Informationsystem_Module extends Core_Module_Abstract
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2024-06-06';
+	public $date = '2024-07-09';
 
 	/**
 	 * Module name

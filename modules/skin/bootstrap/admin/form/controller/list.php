@@ -195,12 +195,24 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 		// $oUser = Core_Auth::getCurrentUser();
 
+
+		$aModelNames = array();
+		$aDatasets = $oAdmin_Form_Controller->getDatasets();
+		foreach ($aDatasets as $datasetKey => $oAdmin_Form_Dataset)
+		{
+			$oEntity = $oAdmin_Form_Dataset->getEntity();
+			if ($oEntity instanceof Core_Entity)
+			{
+				$aModelNames[] = $oEntity->getModelName();
+			}
+		}
+
 		// Settings
 		Core_Html_Entity::factory('Span')
 			->class('btn btn-sm btn-default margin-right-10')
 			->id('adminFormSettings')
 			->title(Core::_('Admin_Form.admin_form_field_settings'))
-			->onclick('$.showAdminFormSettings(' . $oAdmin_Form->id . ')')
+			->onclick('$.showAdminFormSettings(' . $oAdmin_Form->id . ', ' . CURRENT_SITE . ', \'' . implode(',', $aModelNames) . '\')')
 			->add(
 				Core_Html_Entity::factory('I')->class('fa-solid fa-cog no-margin')
 			)
@@ -372,7 +384,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 									{
 										$fieldName = $oAdmin_Form_Field instanceof Admin_Form_Field_Model
 											? $oAdmin_Form_Field->getCaption($oAdmin_Language->id)
-											: $oAdmin_Form_Field->name;
+											: $oAdmin_Form_Field->caption;
 
 										if (!is_null($fieldName))
 										{
@@ -618,9 +630,21 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 		$oSortingField = $oAdmin_Form_Controller->getSortingField();
 
+		$aModelNames = array();
+		$aDatasets = $oAdmin_Form_Controller->getDatasets();
+		foreach ($aDatasets as $datasetKey => $oAdmin_Form_Dataset)
+		{
+			$oEntity = $oAdmin_Form_Dataset->getEntity();
+			if ($oEntity instanceof Core_Entity)
+			{
+				$aModelNames[] = $oEntity->getModelName();
+			}
+		}
+
 		// Available Fields for User
 		$aAvailableFields = $oAdmin_Form->getAvailableFieldsForUser($oUser->id);
 
+		// IF Not available fields show default fields
 		if (!count($aAvailableFields))
 		{
 			foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
@@ -629,10 +653,9 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 					&& $aAvailableFields[$oAdmin_Form_Field->id] = $oAdmin_Form_Field->id;
 			}
 		}
-
 		?>
 		<div class="admin-table-wrap table-scrollable no-border">
-			<table class="admin-table table table-hover table-striped" data-admin-form-id="<?php echo $oAdmin_Form->id?>" id="admin-table-<?php echo $oAdmin_Form->id?>">
+			<table class="admin-table table table-hover table-striped" data-admin-form-id="<?php echo $oAdmin_Form->id?>" data-site-id="<?php echo CURRENT_SITE?>" data-models-names="<?php echo implode(',', $aModelNames)?>" id="admin-table-<?php echo $oAdmin_Form->id?>">
 				<thead>
 				<tr>
 					<?php
@@ -665,8 +688,11 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 								$oAdmin_Form_Field_Settings = Core_Entity::factory('Admin_Form_Field_Setting');
 								$oAdmin_Form_Field_Settings->queryBuilder()
 									->where('admin_form_id', '=', $oAdmin_Form->id)
-									->where('admin_form_field_id', '=', $oAdmin_Form_Field_Changed->id)
 									->where('user_id', '=', $oUser->id);
+
+								strpos($oAdmin_Form_Field_Changed->id, 'uf_') === 0
+									? $oAdmin_Form_Field_Settings->queryBuilder()->where('field_id', '=', intval(filter_var($oAdmin_Form_Field_Changed->id, FILTER_SANITIZE_NUMBER_INT)))
+									: $oAdmin_Form_Field_Settings->queryBuilder()->where('admin_form_field_id', '=', $oAdmin_Form_Field_Changed->id);
 
 								$oAdmin_Form_Field_Setting = $oAdmin_Form_Field_Settings->getFirst(FALSE);
 
@@ -678,7 +704,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 								$fieldName = $oAdmin_Form_Field instanceof Admin_Form_Field_Model
 									? $oAdmin_Form_Field->getCaption($oAdmin_Language->id)
-									: $oAdmin_Form_Field->name;
+									: $oAdmin_Form_Field->caption;
 
 								$fieldName = !is_null($fieldName) && $fieldName !== ''
 									? htmlspecialchars($fieldName)
@@ -813,7 +839,6 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 			// Устанавливаем ограничения на источники
 			$oAdmin_Form_Controller->setDatasetConditions();
-
 			$oAdmin_Form_Controller->setDatasetLimits();
 
 			$aDatasets = $oAdmin_Form_Controller->getDatasets();
@@ -916,6 +941,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 								{
 									Core_Event::notify('Admin_Form_Controller.onBeforeShowField', $oAdmin_Form_Controller, array($oEntity, $oAdmin_Form_Field));
 
+									// Не вычисляемое поле и нет Backend-метода
 									if ($oAdmin_Form_Field_Changed->type != 10 && !$oAdmin_Form_Controller->isCallable($oEntity, $backendName))
 									{
 										if (isset($oEntity->$fieldName))
@@ -923,6 +949,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 											// значение свойства
 											$value = htmlspecialchars((string) $oEntity->$fieldName);
 										}
+										//elseif (strpos($fieldName, 'uf_') === 0 && isset($oEntity->$fieldName))
 										elseif ($oAdmin_Form_Controller->isCallable($oEntity, $fieldName))
 										{
 											// Выполним функцию обратного вызова
@@ -946,7 +973,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 												if (!is_null($value))
 												{
 													?><span id="<?php echo $element_name?>"<?php echo $oAdmin_Form_Field_Changed->editable ? ' class="editable"' : ''?>><?php
-													echo $oAdmin_Form_Controller->applyFormat($value, $sFormat)?></span><?php
+													echo $oAdmin_Form_Controller->applyFormat(nl2br($value), $sFormat)?></span><?php
 												}
 											break;
 											case 2: // Поле ввода.
@@ -1115,7 +1142,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 												// Получаем заголовок столбца на случай, если для IMG не было указано alt-а или title
 												$fieldCaption = $oAdmin_Form_Field instanceof Admin_Form_Field_Model
 													? $oAdmin_Form_Field->getCaption($oAdmin_Language->id)
-													: $oAdmin_Form_Field->name;
+													: $oAdmin_Form_Field->caption;
 
 												$fieldCaption = $fieldCaption != ''
 													? $fieldCaption
@@ -1257,7 +1284,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 										}
 										elseif (property_exists($oEntity, $fieldName))
 										{
-											echo '<span>' . htmlspecialchars($oEntity->$fieldName) . '</span>';
+											echo '<span>' . htmlspecialchars((string) $oEntity->$fieldName) . '</span>';
 										}
 									}
 									Core_Event::notify('Admin_Form_Controller.onAfterShowField', $oAdmin_Form_Controller, array($oEntity, $oAdmin_Form_Field));
@@ -1606,4 +1633,126 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 		return $this;
 	}
 
+	/**
+	 * Get user fields
+	 * @param object $oAdmin_Form_Controller
+	 * @return array
+	 */
+	protected function _getFields($oAdmin_Form_Controller)
+	{
+		$aFields = array();
+
+		if (Core::moduleIsActive('field'))
+		{
+			$oAdmin_Form = $oAdmin_Form_Controller->getAdminForm();
+			$oUser = Core_Auth::getCurrentUser();
+
+			$aAvailableFields = $oAdmin_Form->getAvailableFieldsForUser($oUser->id);
+
+			$aModelNames = array();
+			$aDatasets = $oAdmin_Form_Controller->getDatasets();
+			foreach ($aDatasets as $datasetKey => $oAdmin_Form_Dataset)
+			{
+				$oEntity = $oAdmin_Form_Dataset->getEntity();
+				if ($oEntity instanceof Core_Entity)
+				{
+					$aModelNames[] = $oEntity->getModelName();
+				}
+			}
+
+			$aAdmin_Form_Fields = Admin_Form_Controller::getFields(CURRENT_SITE, $aModelNames);
+			foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
+			{
+				if (isset($aAvailableFields[$oAdmin_Form_Field->id]))
+				{
+					$field_id = intval(filter_var($oAdmin_Form_Field->id, FILTER_SANITIZE_NUMBER_INT));
+
+					$oField = Core_Entity::factory('Field')->getById($field_id, FALSE);
+
+					if (!is_null($oField))
+					{
+						$aFields[] = $oField;
+					}
+				}
+			}
+		}
+
+		return $aFields;
+	}
+
+	/**
+	 * Get value of Field_Value
+	 * @param Field_Model $oField
+	 * @param mixed $oField_Value
+	 * @param mixed $object
+	 * @return string
+	 */
+	protected function _getFieldValue($oField, $oField_Value, $object)
+	{
+		switch ($oField->type)
+		{
+			case 0: // Int
+			case 1: // String
+			case 4: // Textarea
+			case 6: // Wysiwyg
+			case 7: // Checkbox
+			case 10: // Hidden field
+			case 11: // Float
+				$result = $oField_Value->value;
+			break;
+			/*case 2: // File
+				$href = method_exists($object, 'getItemHref')
+					? $object->getItemHref()
+					: $object->getGroupHref();
+
+				$result = $oField_Value->file == ''
+					? ''
+					: $oField_Value
+						->setHref($href)
+						->getLargeFileHref();
+			break;*/
+			case 3: // List
+				$result = $this->_getListValue($oField_Value->value);
+			break;
+			case 5: // Informationsystem
+				$result = $oField_Value->value
+					? $oField_Value->Informationsystem_Item->name
+					: '';
+			break;
+			case 8: // Date
+				$result = Core_Date::sql2date($oField_Value->value);
+			break;
+			case 9: // Datetime
+				$result = Core_Date::sql2datetime($oField_Value->value);
+			break;
+			case 12: // Shop
+				$result = $oField_Value->value
+					? $oField_Value->Shop_Item->name
+					: '';
+			break;
+			default:
+				$result = $oField_Value->value;
+		}
+
+		return $result;
+	}
+
+	protected $_cacheGetListValue = array();
+
+	protected function _getListValue($list_item_id)
+	{
+		if ($list_item_id && Core::moduleIsActive('list'))
+		{
+			if (!isset($this->_cacheGetListValue[$list_item_id]))
+			{
+				$oList_Item = Core_Entity::factory('List_Item')->getByid($list_item_id, FALSE);
+
+				$this->_cacheGetListValue[$list_item_id] = $oList_Item ? $oList_Item->value : '';
+			}
+
+			return $this->_cacheGetListValue[$list_item_id];
+		}
+
+		return '';
+	}
 }

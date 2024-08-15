@@ -219,9 +219,7 @@ if ($oIpaddress_Dir->id)
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
 // Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -236,9 +234,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 }
 
 // Действие "Применить"
-$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdminFormActionApply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
@@ -251,9 +247,7 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 }
 
 // Действие "Копировать"
-$oAdminFormActionCopy = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('copy');
+$oAdminFormActionCopy = $oAdmin_Form->Admin_Form_Actions->getByName('copy');
 
 if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 {
@@ -266,9 +260,7 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 }
 
 // Действие "Объединить"
-$oAdminFormActionMerge = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('merge');
+$oAdminFormActionMerge = $oAdmin_Form->Admin_Form_Actions->getByName('merge');
 
 if ($oAdminFormActionMerge && $oAdmin_Form_Controller->getAction() == 'merge')
 {
@@ -279,9 +271,7 @@ if ($oAdminFormActionMerge && $oAdmin_Form_Controller->getAction() == 'merge')
 }
 
 // Действие "Перенести"
-$oAdminFormActionMove = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('move');
+$oAdminFormActionMove = $oAdmin_Form->Admin_Form_Actions->getByName('move');
 
 if ($oAdminFormActionMove && $oAdmin_Form_Controller->getAction() == 'move')
 {
@@ -355,8 +345,10 @@ else
 	$oAdmin_Form_Dataset->addCondition(array('where' => array('parent_id', '=', $oIpaddress_Dir->id)));
 }
 
-if (isset($oAdmin_Form_Controller->request['admin_form_filter_89']) && ($oAdmin_Form_Controller->request['admin_form_filter_89'] != '')
-	|| isset($oAdmin_Form_Controller->request['topFilter_89']) && $oAdmin_Form_Controller->request['topFilter_89'] != ''
+if (isset($oAdmin_Form_Controller->request['admin_form_filter_89'])
+		&& ($oAdmin_Form_Controller->request['admin_form_filter_89'] != '')
+	|| isset($oAdmin_Form_Controller->request['topFilter_89'])
+		&& $oAdmin_Form_Controller->request['topFilter_89'] != ''
 )
 {
 	$value = isset($oAdmin_Form_Controller->request['topFilter_89'])
@@ -401,8 +393,10 @@ else
 	$oAdmin_Form_Dataset->addCondition(array('where' => array('ipaddress_dir_id', '=', $oIpaddress_Dir->id)));
 }
 
-if (isset($oAdmin_Form_Controller->request['admin_form_filter_89']) && ($oAdmin_Form_Controller->request['admin_form_filter_89'] != '')
-	|| isset($oAdmin_Form_Controller->request['topFilter_89']) && $oAdmin_Form_Controller->request['topFilter_89'] != ''
+if (isset($oAdmin_Form_Controller->request['admin_form_filter_89'])
+		&& ($oAdmin_Form_Controller->request['admin_form_filter_89'] != '')
+	|| isset($oAdmin_Form_Controller->request['topFilter_89'])
+		&& $oAdmin_Form_Controller->request['topFilter_89'] != ''
 )
 {
 	$value = isset($oAdmin_Form_Controller->request['topFilter_89'])

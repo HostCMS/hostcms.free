@@ -163,25 +163,7 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 
 		$this->_importFilePath = $sXMLFilePath;
 
-		$lockFile = $this->_importFilePath . '.lock';
-
-		if (Core_File::isFile($lockFile))
-		{
-			// прошло 5 минут
-			if ((filemtime($lockFile) + 60 * 5) < time())
-			{
-				Core_File::delete($lockFile);
-			}
-			else
-			{
-				throw new Core_Exception('The previous import has not completed. Wait until it finishes.');
-			}
-		}
-
-		Core_File::write($lockFile, time());
-
 		$str = Core_File::read($sXMLFilePath);
-
 		$str = Core_Str::removeBOM($str);
 
 		$this->_oSimpleXMLElement = new SimpleXMLElement($str, defined('LIBXML_PARSEHUGE') ? LIBXML_PARSEHUGE : 0);
@@ -242,6 +224,10 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 		$lockFile = $this->_importFilePath . '.lock';
 		if (Core_File::isFile($lockFile))
 		{
+			$this->debug && Core_Log::instance()->clear()
+				->status(Core_Log::$MESSAGE)
+				->write(sprintf('1С, удаление lock-файла %s', Core::cutRootPath($lockFile)));
+
 			Core_File::delete($lockFile);
 		}
 
@@ -1405,6 +1391,23 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 			throw new Core_Exception(Core::_('Shop_Item.error_parent_directory'));
 		}
 
+		// Lock after read, $sXMLFilePath may not exists
+		$lockFile = $this->_importFilePath . '.lock';
+		if (Core_File::isFile($lockFile))
+		{
+			// прошло 5 минут
+			if ((filemtime($lockFile) + 60 * 5) < time())
+			{
+				Core_File::delete($lockFile);
+			}
+			else
+			{
+				throw new Core_Exception('The previous import has not completed. Wait until it finishes.');
+			}
+		}
+		Core_File::write($lockFile, time());
+		// end lock
+
 		/*
 		 Удаляем товары/группы только при получении import.xml
 		*/
@@ -1902,6 +1905,8 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 						return $this->_aReturn;
 					}
 				}
+
+				$this->deleteLockFile();
 			}
 			// Файл offers.xml
 			elseif (
@@ -2401,6 +2406,8 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 						return $this->_aReturn;
 					}
 				}
+
+				$this->deleteLockFile();
 			}
 		}
 		// Файл 1C v.7.xx
@@ -3240,6 +3247,8 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 
 			Core_Event::notify('Shop_Item_Import_Cml_Controller.onAfterImportShopOrder', $this, array($oDocument, $oShop_Order));
 		}
+	
+		$this->deleteLockFile();
 	}
 
 	/**

@@ -172,9 +172,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 );
 
 // Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -189,9 +187,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 }
 
 // Действие "Применить"
-$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdminFormActionApply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
@@ -204,9 +200,7 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 }
 
 // Удаление товаров из комплекта
-$oAdminFormActionDeleteShopItem = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deleteShopItem');
+$oAdminFormActionDeleteShopItem = $oAdmin_Form->Admin_Form_Actions->getByName('deleteShopItem');
 
 if ($oAdminFormActionDeleteShopItem && $oAdmin_Form_Controller->getAction() == 'deleteShopItem')
 {
@@ -217,9 +211,7 @@ if ($oAdminFormActionDeleteShopItem && $oAdmin_Form_Controller->getAction() == '
 	$oAdmin_Form_Controller->addAction($oShop_Warehouse_Supply_Item_Controller_Delete);
 }
 
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('print');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('print');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'print')
 {
@@ -235,9 +227,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'print')
 	$oAdmin_Form_Controller->addAction($Shop_Warehouse_Supply_Controller_Print);
 }
 
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('sendMail');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('sendMail');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'sendMail')
 {
@@ -253,9 +243,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'sendMail')
 	$oAdmin_Form_Controller->addAction($Shop_Warehouse_Supply_Controller_Print);
 }
 
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('post');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('post');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'post')
 {
@@ -267,9 +255,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'post')
 	$oAdmin_Form_Controller->addAction($Admin_Form_Action_Controller_Type_Post);
 }
 
-$oAdminFormActionRollback = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('rollback');
+$oAdminFormActionRollback = $oAdmin_Form->Admin_Form_Actions->getByName('rollback');
 
 if ($oAdminFormActionRollback && $oAdmin_Form_Controller->getAction() == 'rollback')
 {
@@ -325,8 +311,7 @@ if (Core::moduleIsActive('siteuser'))
 $oAdmin_Form_Controller->addFilter('user_id', array($oAdmin_Form_Controller, '_filterCallbackUser'));
 
 // Только если идет фильтрация, Компания (клиент), фильтр по тексту
-if (isset($oAdmin_Form_Controller->request['admin_form_filter_2080'])
-	&& $oAdmin_Form_Controller->request['admin_form_filter_2080'] != '')
+if (isset($oAdmin_Form_Controller->request['admin_form_filter_2080']) && $oAdmin_Form_Controller->request['admin_form_filter_2080'] != '')
 {
 	$oAdmin_Form_Dataset->addCondition(
 		array('select' => array(array('siteuser_companies.name', 'siteuserCompanyName')))

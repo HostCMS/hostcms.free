@@ -45,7 +45,7 @@ class Ipaddress_Visitor_Controller
 			$oIpaddress_Visitor->visits = 1;
 			$oIpaddress_Visitor->result = 1;
 			
-			$aHeaders = getallheaders();
+			$aHeaders = Core::getallheaders();
 			$oIpaddress_Visitor->headers = json_encode($aHeaders, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 			
 			$oIpaddress_Visitor->create();
@@ -76,7 +76,7 @@ class Ipaddress_Visitor_Controller
 	{
 		$cleaningDate = date('Y-m-d', strtotime("-10 day"));
 
-		$iLimit = intval(self::$_cleaningFrequency * 1.1);
+		$iLimit = intval(self::$_cleaningFrequency * 1.2);
 
 		Core_DataBase::instance()->setQueryType(3)
 			->query("DELETE LOW_PRIORITY QUICK FROM `ipaddress_visitors` WHERE `datetime` < '{$cleaningDate} 00:00:00' LIMIT {$iLimit}");

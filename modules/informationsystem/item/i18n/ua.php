@@ -136,4 +136,6 @@ return array(
 	'shortcut' => 'Ярлик',
 
 	'closed' => 'Закритий',
+	'export_fields_allow_items' => 'Експортувати поля користувача елементів',
+	'export_fields_allow_groups' => 'Експортувати поля користувача груп',
 );

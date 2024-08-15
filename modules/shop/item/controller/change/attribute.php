@@ -198,6 +198,13 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 
 			$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0));
 
+			// Находимся в списке модификаций и там нет shop_id
+			$oShop_Item = Core_Entity::factory('Shop_Item', Core_Array::getGet('shop_item_id', 0));
+			if (!$oShop->id && $oShop_Item->id)
+			{
+				$oShop = $oShop_Item->Shop;
+			}
+
 			// Select на всплывающем окне должен быть найден через ID нового окна, а не id_content
 			$window_Admin_Form_Controller->window($newWindowId);
 

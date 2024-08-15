@@ -43,4 +43,5 @@ return array(
 	'system_notification_description' => 'Update %s available',
 	'add_module_notification' => 'Module update %s',
 	'module_notification_description' => 'New version %s available',
+	'not_writable' => 'The update cannot be installed. Files not available for writing: %s',
 );

@@ -22,7 +22,7 @@ class Shop_Warehouse_Supply_Controller_Edit extends Admin_Form_Action_Controller
 		parent::_prepareForm();
 
 		$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0));
-		$oShop_Group = Core_Entity::factory('Shop_Group', Core_Array::getGet('shop_group_id', 0));
+		$shop_group_id = Core_Array::getGet('shop_group_id', 0, 'int');
 
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
@@ -42,7 +42,6 @@ class Shop_Warehouse_Supply_Controller_Edit extends Admin_Form_Action_Controller
 			->add($oRegistrationRow = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oShopItemBlock = Admin_Form_Entity::factory('Div')->class('well with-header'))
 			->add($oShopDocumentRelationRow = Admin_Form_Entity::factory('Div')->class('row'));
 
@@ -60,8 +59,7 @@ class Shop_Warehouse_Supply_Controller_Edit extends Admin_Form_Action_Controller
 
 		$aCompanies = $oSite->Companies->findAll();
 
-		$aTmp = [];
-
+		$aTmp = array();
 		foreach($aCompanies as $oCompany)
 		{
 			$aTmp[$oCompany->id] = $oCompany->name;
@@ -134,10 +132,7 @@ class Shop_Warehouse_Supply_Controller_Edit extends Admin_Form_Action_Controller
 							processResults: function (data) {
 								var aResults = [];
 								$.each(data, function (index, item) {
-									aResults.push({
-										"id": item.id,
-										"text": item.text
-									});
+									aResults.push(item);
 								});
 								return {
 									results: aResults
@@ -296,7 +291,7 @@ class Shop_Warehouse_Supply_Controller_Edit extends Admin_Form_Action_Controller
 
 			if (!is_null($oModule))
 			{
-				$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, $this->_object->getEntityType(), 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
+				$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, $this->_object->getEntityType(), 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $shop_group_id);
 			}
 
 			$printlayoutsButton .= '
@@ -308,35 +303,6 @@ class Shop_Warehouse_Supply_Controller_Edit extends Admin_Form_Action_Controller
 				Admin_Form_Entity::factory('Code')->html($printlayoutsButton)
 			);
 		}
-
-		/*$options = array('path' => '/admin/shop/warehouse/invoice/index.php', 'action' => 'edit', 'datasetKey' => 0, 'datasetValue' => 0, 'additionalParams' => "shop_id={$oShop->id}&shop_group_id=$oShop_Group->id&createFromSupply={$this->_object->id}");
-
-		$href = $oAdmin_Form_Controller->getAdminActionLoadHref($options);
-
-		$options['operation'] = 'modal';
-		$onclick = $oAdmin_Form_Controller->getAdminActionModalLoad($options);
-
-		$sLinkCreateInvoice = '<a href="' . $href . '" onclick="' . $onclick . '"><i class="fa-solid fa-fw fa-file-invoice-dollar"></i>' . Core::_('Shop_Warehouse_Supply.create_invoice') . '</a>';
-
-		$options['path'] = '/admin/shop/warehouse/purchasereturn/index.php';
-		$onclick = $oAdmin_Form_Controller->getAdminActionModalLoad($options);
-
-		unset($options['operation']);
-
-		$href = $oAdmin_Form_Controller->getAdminActionLoadHref($options);
-
-		$sLinkCreatePurchasereturn = '<a href="' . $href . '" onclick="' . $onclick . '"><i class="fa-solid fa-fw fa-cart-flatbed"></i>' . Core::_('Shop_Warehouse_Supply.create_purchasereturn') . '</a>';
-
-		$createDocumentButton = '
-				<div id="create-document-button" class="btn-group btn-group-short ' . (!$this->_object->id ? ' hidden' : '') . '">
-					<a class="btn btn-labeled btn-info" href="javascript:void(0);"><i class="btn-label fa-solid fa-file-import"></i><span>' . Core::_('Shop_Warehouse_Supply.create_document') . '</span></a>
-					<a class="btn btn-azure dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
-					<ul class="dropdown-menu dropdown-default">
-						<li id="create-invoice">' . $sLinkCreateInvoice . '</li>
-						<li id="create-purchasereturn">' . $sLinkCreatePurchasereturn . '</li>
-					</ul>
-				</div>
-			';*/
 
 		$oDivActions->add(
 			// Admin_Form_Entity::factory('Code')->html($createDocumentButton)
@@ -353,7 +319,6 @@ class Shop_Warehouse_Supply_Controller_Edit extends Admin_Form_Action_Controller
 				->value(Core::_('Shop_Warehouse_Supply.shop_item_header'))
 			)
 			->add($oShopItemRow1 = Admin_Form_Entity::factory('Div')->class('row'))
-			// ->add($oShopItemRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 			;
 
 		$itemTable = '
@@ -384,13 +349,6 @@ class Shop_Warehouse_Supply_Controller_Edit extends Admin_Form_Action_Controller
 		$limit = 100;
 		$offset = 0;
 
-		// $Shop_Item_Controller = new Shop_Item_Controller();
-
-		// $createFromPurchaseorder = intval(Core_Array::getGet('createFromPurchaseorder'));
-		// $createFromInvoice = intval(Core_Array::getGet('createFromInvoice'));
-
-		// $createFromDocument = $createFromPurchaseorder || $createFromInvoice;
-
 		$createFrom = Core_Array::getGet('createFrom', '', 'trim');
 		$createFromId = Core_Array::getGet('createFromId', 0, 'int');
 
@@ -398,20 +356,6 @@ class Shop_Warehouse_Supply_Controller_Edit extends Admin_Form_Action_Controller
 
 			if ($createFrom && !$this->_object->id)
 			{
-
-				/*if ($createFromPurchaseorder)
-				{
-					$oShop_Warehouse_Purchaseorder = Core_Entity::factory('Shop_Warehouse_Purchaseorder', $createFromPurchaseorder);
-
-					$aShop_Warehouse_Supply_Items = $oShop_Warehouse_Purchaseorder->Shop_Warehouse_Purchaseorder_Items->findAll();
-				}
-				else
-				{
-					$oShop_Warehouse_Invoice = Core_Entity::factory('Shop_Warehouse_Invoice', $createFromInvoice);
-
-					$aShop_Warehouse_Supply_Items = $oShop_Warehouse_Invoice->Shop_Warehouse_Invoice_Items->findAll();
-				}*/
-
 				switch ($createFrom)
 				{
 					case 'purchaseorder':
@@ -648,11 +592,6 @@ class Shop_Warehouse_Supply_Controller_Edit extends Admin_Form_Action_Controller
 	 */
 	protected function _applyObjectProperty()
 	{
-		// $createFromPurchaseorder = intval(Core_Array::getGet('createFromPurchaseorder'));
-		// $createFromInvoice = intval(Core_Array::getGet('createFromInvoice'));
-
-		// $iBaseDocumentId = $createFromPurchaseorder ? $createFromPurchaseorder : $createFromInvoice;
-
 		$modelName = $this->_object->getModelName();
 
 		// Backup revision
@@ -668,8 +607,6 @@ class Shop_Warehouse_Supply_Controller_Edit extends Admin_Form_Action_Controller
 		$this->_formValues['siteuser_company_id'] = $siteuser_company_id;
 
 		$this->addSkipColumn('posted');
-
-		// $iOldWarehouse = intval($this->_object->shop_warehouse_id);
 
 		$this->_object->user_id = intval(Core_Array::getPost('user_id'));
 
@@ -691,8 +628,6 @@ class Shop_Warehouse_Supply_Controller_Edit extends Admin_Form_Action_Controller
 			$this->_object->number = $this->_object->id;
 			$this->_object->save();
 		}
-
-		$bNeedsRePost = FALSE;
 
 		$Shop_Item_Controller = new Shop_Item_Controller();
 
@@ -724,12 +659,10 @@ class Shop_Warehouse_Supply_Controller_Edit extends Admin_Form_Action_Controller
 
 		if (count($aAddShopItems))
 		{
-			$bNeedsRePost = TRUE;
-
 			$script = "var jShopItemId = $(\"#{$windowId} input[name='shop_item_id\\[\\]']\"),
-						jShopItemPrice = $(\"#{$windowId} input[name='shop_item_price\\[\\]']\"),
-						jShopItemQuantity = $(\"#{$windowId} input[name='shop_item_quantity\\[\\]']\"),
-						aMapShopItemId = {};";
+				jShopItemPrice = $(\"#{$windowId} input[name='shop_item_price\\[\\]']\"),
+				jShopItemQuantity = $(\"#{$windowId} input[name='shop_item_quantity\\[\\]']\"),
+				aMapShopItemId = {};";
 
 			$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
 
@@ -797,13 +730,6 @@ class Shop_Warehouse_Supply_Controller_Edit extends Admin_Form_Action_Controller
 					->execute();
 			$this->_Admin_Form_Controller->addMessage(ob_get_clean());
 		}
-
-		// Было изменение склада
-		/*$iOldWarehouse != $this->_object->shop_warehouse_id
-			&& $bNeedsRePost = TRUE;
-
-		($bNeedsRePost || !Core_Array::getPost('posted')) && $this->_object->unpost();
-		Core_Array::getPost('posted') && $this->_object->post();*/
 
 		Core_Array::getPost('posted')
 			? $this->_object->post()

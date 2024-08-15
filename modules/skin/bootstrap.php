@@ -253,20 +253,7 @@ class Skin_Bootstrap extends Core_Skin
 										$aLines = array();
 										foreach ($aTelephonies as $oTelephony)
 										{
-											$oTelephony_Lines = $oTelephony->Telephony_Lines;
-											$oTelephony_Lines->queryBuilder()
-												->where('user_id', '=', $oUser->id)
-												->where('active', '=', 1);
-
-											$aTelephony_Lines = $oTelephony_Lines->findAll(FALSE);
-
-											foreach ($aTelephony_Lines as $oTelephony_Line)
-											{
-												if ($oTelephony_Line->login != '' && $oTelephony_Line->password != '')
-												{
-													$aLines[] = $oTelephony_Line;
-												}
-											}
+											$aLines = array_merge($aLines, $oTelephony->getLines($oUser));
 										}
 
 										if (count($aLines))
@@ -372,7 +359,7 @@ class Skin_Bootstrap extends Core_Skin
 									</a>
 									<div id="bookmarksListBox" class="pull-left dropdown-menu dropdown-arrow dropdown-bookmark dropdown-notifications">
 										<div class="scroll-bookmarks">
-											<ul>
+											<ul class="bookmarks-list">
 												<li id="bookmark-0">
 													<a href="#">
 														<div class="clearfix">

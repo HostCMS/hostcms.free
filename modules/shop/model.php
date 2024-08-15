@@ -1196,13 +1196,16 @@ class Shop_Model extends Core_Entity
 		);
 
 		// Warehouses
-		$oShop_Warehouses = $this->Shop_Warehouses;
+		if ($this->_isTagAvailable('shop_warehouse'))
+		{
+			$oShop_Warehouses = $this->Shop_Warehouses;
 
-		Core_Event::notify($this->_modelName . '.onBeforeSelectShopWarehouses', $this, array($oShop_Warehouses));
+			Core_Event::notify($this->_modelName . '.onBeforeSelectShopWarehouses', $this, array($oShop_Warehouses));
 
-		$aShop_Warehouses = $oShop_Warehouses->findAll();
+			$aShop_Warehouses = $oShop_Warehouses->findAll();
 
-		$this->addEntities($aShop_Warehouses);
+			$this->addEntities($aShop_Warehouses);
+		}
 
 		$this->_showXmlTaxes && $this->addEntities(Core_Entity::factory('Shop_Tax')->findAll());
 

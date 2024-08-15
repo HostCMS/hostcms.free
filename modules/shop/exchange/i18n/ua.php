@@ -130,4 +130,5 @@ return array(
 	'order_item_type' => "Тип товару",
 	'shop_warehouse_inventory' => "Інвентаризація при імпорті товару",
 	'shop_price_setting' => "Установка ціни при імпорті товару",
+	'clear_matches' => 'очистити відповідності',
 );

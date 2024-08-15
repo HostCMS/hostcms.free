@@ -81,9 +81,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
 // Действие "Добавить/редактировать отдел"
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('editDepartment');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('editDepartment');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'editDepartment')
 {
@@ -96,9 +94,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'editDepartme
 }
 
 // Действие "Удалить отдел"
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deleteDepartment');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('deleteDepartment');
 
 // Действие "Удалить отдел"
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'deleteDepartment')
@@ -112,9 +108,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'deleteDepart
 }
 
 // Действие "Добавить/редактировать должность сотрудника в отделе"
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('editUserDepartment');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('editUserDepartment');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'editUserDepartment')
 {
@@ -127,9 +121,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'editUserDepa
 }
 
 // Действие "Добавить/редактировать должность сотрудника в отделе"
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deleteUserFromDepartment');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('deleteUserFromDepartment');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'deleteUserFromDepartment')
 {

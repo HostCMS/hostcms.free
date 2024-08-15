@@ -145,6 +145,10 @@ class Comment_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		// Informationsystem_Item_Comment_Controller_Edit + Shop_Item_Comment_Controller_Edit Clears Cache
 
+		Core::moduleIsActive('wysiwyg') && Wysiwyg_Controller::uploadImages($this->_formValues, $this->_object, $this->_Admin_Form_Controller);
+
+		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
+
 		return $this;
 	}
 }

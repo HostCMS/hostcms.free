@@ -171,9 +171,10 @@ return array(
 	'type_tag' => 'Введите тэг ...',
 
 	'without_deadline' => 'Без срока',
-	'add_checklist' => 'добавить чек-лист',
+	'add_checklist' => 'Добавить чек-лист',
 	'remove_checklist' => 'удалить чек-лист',
 	'checklist_name' => 'Название чек-листа',
 	'checklist_item_name' => 'Название пункта',
-	'add_checklist_item' => 'Добавить пункт',
+	'add_checklist_item' => 'добавить пункт',
+	'remove_checklist_item' => 'удалить пункт',
 );

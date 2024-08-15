@@ -211,7 +211,7 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 					{
 						$iRecipientUserId = intval(Core_Array::getPost('recipient-user-id'));
 
-						/* $dateTime = date("Y-m-d H:i:s");						
+						/* $dateTime = date("Y-m-d H:i:s");
 						var_dump($dateTime); */
 
 						$oUser_Message = Core_Entity::factory('User_Message');
@@ -446,9 +446,9 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 					$aJson['Bookmarks'] = array();
 
 					$oUser_Bookmarks = $oCurrentUser->User_Bookmarks;
-					$oUser_Bookmarks->queryBuilder()
+					/*$oUser_Bookmarks->queryBuilder()
 						->clearOrderBy()
-						->orderBy('user_bookmarks.id', 'ASC');
+						->orderBy('user_bookmarks.id', 'ASC');*/
 
 					$aUser_Bookmarks = $oUser_Bookmarks->findAll(FALSE);
 

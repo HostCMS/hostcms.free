@@ -120,4 +120,5 @@ return array(
 	'protect_frame_exclusions' => 'Не защищать страницы',
 
 	'error_bot' => 'Страница для проверки ботов',
+	'favicon_header' => 'Favicon',
 );

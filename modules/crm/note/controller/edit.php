@@ -135,7 +135,7 @@ class Crm_Note_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 	/**
 	 * Processing of the form. Apply object fields.
-	 * @hostcms-event Crm_Project_Controller_Edit.onAfterRedeclaredApplyObjectProperty
+	 * @hostcms-event Crm_Note_Controller_Edit.onAfterRedeclaredApplyObjectProperty
 	 */
 	protected function _applyObjectProperty()
 	{
@@ -230,5 +230,11 @@ class Crm_Note_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$this->_Admin_Form_Controller->addMessage(ob_get_clean());
 			}
 		}
+
+		Core::moduleIsActive('wysiwyg') && Wysiwyg_Controller::uploadImages($this->_formValues, $this->_object, $this->_Admin_Form_Controller);
+
+		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
+
+		return $this;
 	}
 }

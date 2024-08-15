@@ -116,9 +116,18 @@ class Admin_Form_Action_Controller_Type_Shortcut extends Admin_Form_Action_Contr
 
 				$entity_id = 0;
 
-				if (Core_Array::getGet('shop_id'))
+				if (Core_Array::getGet('shop_id') || Core_Array::getGet('shop_item_id'))
 				{
+					$shop_item_id = Core_Array::getGet('shop_item_id', 0, 'int');
+
 					$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0));
+
+					if ($shop_item_id)
+					{
+						$oShop_Item = Core_Entity::factory('Shop_Item', $shop_item_id);
+						$oShop = $oShop_Item->Shop;
+					}
+
 					$entity_id = $oShop->id;
 					$path = '/admin/shop/item/index.php?autocomplete=1&show_shortcut_groups=1';
 				}

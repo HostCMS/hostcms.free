@@ -93,9 +93,9 @@ class Shop_Payment_System_Handler31 extends Shop_Payment_System_Handler
 	 */
 	public function checkPaymentBeforeContent()
 	{
-		Core_Log::instance()->clear()
-			->status(Core_Log::$MESSAGE)
-			->write('VTB GET: ' . var_export($_GET, true));
+		// Core_Log::instance()->clear()
+		// 	->status(Core_Log::$MESSAGE)
+		// 	->write('VTB GET: ' . var_export($_GET, true));
 
 		// Получаем ID заказа
 		$order_id = Core_Array::getRequest('orderNumber', 0, 'int');

@@ -174,6 +174,15 @@ abstract class Admin_Form_Dataset
 	}
 
 	/**
+	 * Get conditions
+	 * @return array
+	 */
+	public function getConditions()
+	{
+		return $this->_conditions;
+	}
+
+	/**
 	 * Add orderBy
 	 * @param string $column column
 	 * @param string $direction sorting direction

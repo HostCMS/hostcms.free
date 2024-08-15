@@ -40,20 +40,22 @@ if (!is_null(Core_Array::getGet('shortcuts')) && !is_null(Core_Array::getGet('te
 {
 	$aJSON = array();
 
-	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('term'))));
-	$iInformationsystemId = intval(Core_Array::getGet('informationsystem_id'));
-	$oInformationsystem = Core_Entity::factory('Informationsystem', $iInformationsystemId);
-
-	if (strlen($sQuery))
+	$sQuery = Core_Str::stripTags(Core_Array::getGet('term', '', 'trim'));
+	$iInformationsystemId = Core_Array::getGet('informationsystem_id', 0, 'int');
+	
+	if ($iInformationsystemId && strlen($sQuery))
 	{
+		$sQueryLike = '%' . str_replace(' ', '%', $sQuery) . '%';
+		
+		$oInformationsystem = Core_Entity::factory('Informationsystem', $iInformationsystemId);
+		
 		$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
 		$oInformationsystem_Groups->queryBuilder()
-			->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery . '%')
+			->where('informationsystem_groups.name', 'LIKE', $sQueryLike)
 			->where('informationsystem_groups.shortcut_id', '=', 0)
 			->limit(Core::$mainConfig['autocompleteItems']);
 
 		$aInformationsystem_Groups = $oInformationsystem_Groups->findAll(FALSE);
-
 		foreach ($aInformationsystem_Groups as $oInformationsystem_Group)
 		{
 			$sParents = $oInformationsystem_Group->groupPathWithSeparator();
@@ -74,36 +76,32 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 	&& Core_Array::getGet('entity_id')
 )
 {
-	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
-	$entity_id = intval(Core_Array::getGet('entity_id'));
-	$mode = intval(Core_Array::getGet('mode'));
-
-	$oInformationsystem = Core_Entity::factory('Informationsystem', $entity_id);
-
-	$aExclude = strlen(Core_Array::getGet('exclude'))
-		? json_decode(Core_Array::getGet('exclude'), TRUE)
-		: array();
+	$sQuery = Core_Str::stripTags(Core_Array::getGet('queryString', '', 'trim'));
+	$entity_id = Core_Array::getGet('entity_id', 0, 'int');
 
 	$aJSON = array();
 
-	if (strlen($sQuery))
+	if ($entity_id && strlen($sQuery))
 	{
 		$aJSON[0] = array(
 			'id' => 0,
 			'label' => Core::_('Informationsystem_Item.root')
 		);
 
+		$oInformationsystem = Core_Entity::factory('Informationsystem', $entity_id);
+		
 		$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
 		$oInformationsystem_Groups->queryBuilder()
 			->where('informationsystem_groups.shortcut_id', '=', 0)
 			->limit(Core::$mainConfig['autocompleteItems']);
 
+		$mode = Core_Array::getGet('mode', 0, 'int');
 		switch ($mode)
 		{
 			// Вхождение
 			case 0:
 			default:
-				$oInformationsystem_Groups->queryBuilder()->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery . '%');
+				$oInformationsystem_Groups->queryBuilder()->where('informationsystem_groups.name', 'LIKE', '%' . str_replace(' ', '%', $sQuery) . '%');
 			break;
 			// Вхождение с начала
 			case 1:
@@ -119,11 +117,14 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 			break;
 		}
 
+		$aExclude = strlen(Core_Array::getGet('exclude'))
+			? json_decode(Core_Array::getGet('exclude'), TRUE)
+			: array();
+			
 		count($aExclude) && $oInformationsystem_Groups->queryBuilder()
 			->where('informationsystem_groups.id', 'NOT IN', $aExclude);
 
-		$aInformationsystem_Groups = $oInformationsystem_Groups->findAll();
-
+		$aInformationsystem_Groups = $oInformationsystem_Groups->findAll(FALSE);
 		foreach ($aInformationsystem_Groups as $oInformationsystem_Group)
 		{
 			$sParents = $oInformationsystem_Group->groupPathWithSeparator();
@@ -144,26 +145,26 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 	&& Core_Array::getGet('entity_id')
 )
 {
-	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
-	$entity_id = intval(Core_Array::getGet('entity_id'));
-	$mode = intval(Core_Array::getGet('mode'));
-
-	$oInformationsystem = Core_Entity::factory('Informationsystem', $entity_id);
-
+	$sQuery = Core_Str::stripTags(Core_Array::getGet('queryString', '', 'trim'));
+	$entity_id = Core_Array::getGet('entity_id', 0, 'int');
+	
 	$aJSON = array();
 
-	if (strlen($sQuery))
+	if ($entity_id && strlen($sQuery))
 	{
 		$aJSON[0] = array(
 			'id' => 0,
 			'label' => Core::_('Informationsystem_Item.root')
 		);
 
+		$oInformationsystem = Core_Entity::factory('Informationsystem', $entity_id);
+		
 		$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
 		$oInformationsystem_Groups->queryBuilder()
 			->where('informationsystem_groups.shortcut_id', '=', 0)
 			->limit(Core::$mainConfig['autocompleteItems']);
 
+		$mode = Core_Array::getGet('mode', 0, 'int');
 		switch ($mode)
 		{
 			// Вхождение
@@ -185,8 +186,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 			break;
 		}
 
-		$aInformationsystem_Groups = $oInformationsystem_Groups->findAll();
-
+		$aInformationsystem_Groups = $oInformationsystem_Groups->findAll(FALSE);
 		foreach ($aInformationsystem_Groups as $oInformationsystem_Group)
 		{
 			$sParents = $oInformationsystem_Group->groupPathWithSeparator();
@@ -203,14 +203,17 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet('queryString')))
 {
-	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
-	$iInformationsystemId = intval(Core_Array::getGet('informationsystem_id'));
-	$oInformationsystem = Core_Entity::factory('Informationsystem', $iInformationsystemId);
+	$sQuery = Core_DataBase::instance()->escapeLike(Core_Str::stripTags(Core_Array::getGet('queryString', '', 'trim')));
+	$iInformationsystemId = Core_Array::getGet('informationsystem_id', 0, 'int');
 
 	$aJSON = array();
 
-	if (strlen($sQuery))
+	if ($iInformationsystemId && strlen($sQuery))
 	{
+		$oInformationsystem = Core_Entity::factory('Informationsystem', $iInformationsystemId);
+
+		$sQueryLike = '%' . str_replace(' ', '%', $sQuery) . '%';
+
 		if (is_null(Core_Array::getGet('show_group')))
 		{
 			$iInformationsystemGroupId = intval(Core_Array::getGet('informationsystem_group_id'));
@@ -219,9 +222,9 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 			$oInformationsystem_Items->queryBuilder()
 				->where('informationsystem_items.informationsystem_group_id', '=', $iInformationsystemGroupId)
 				->open()
-					->where('informationsystem_items.name', 'LIKE', '%' . $sQuery . '%')
+					->where('informationsystem_items.name', 'LIKE', $sQueryLike)
 					->setOr()
-					->where('informationsystem_items.path', 'LIKE', '%' . $sQuery . '%')
+					->where('informationsystem_items.path', 'LIKE', $sQueryLike)
 				->close()
 				->limit(Core::$mainConfig['autocompleteItems']);
 
@@ -244,25 +247,23 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 
 			$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
 			$oInformationsystem_Groups->queryBuilder()
-				->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery . '%')
 				->where('informationsystem_groups.shortcut_id', '=', 0)
+				->open()
+					->where('informationsystem_groups.name', 'LIKE', $sQueryLike);
+
+			is_numeric($sQuery) && $oInformationsystem_Groups->queryBuilder()
+				->setOr()
+				->where('informationsystem_groups.id', '=', $sQuery);
+
+			$oInformationsystem_Groups->queryBuilder()
+				->close()
+				->clearOrderBy()
+				->orderBy('items_total_count', 'DESC')
 				->limit(Core::$mainConfig['autocompleteItems']);
 
 			$aInformationsystem_Groups = $oInformationsystem_Groups->findAll(FALSE);
-
 			foreach ($aInformationsystem_Groups as $oInformationsystem_Group)
 			{
-				/*$aParentGroups = array();
-
-				$aTmpGroup = $oInformationsystem_Group;
-
-				// Добавляем все директории от текущей до родителя.
-				do {
-					$aParentGroups[] = $aTmpGroup->name;
-				} while ($aTmpGroup = $aTmpGroup->getParent());
-
-				$sParents = implode(' → ', array_reverse($aParentGroups));*/
-
 				$sParents = $oInformationsystem_Group->groupPathWithSeparator();
 
 				$aJSON[] = array(
@@ -552,9 +553,7 @@ if ($iInformationsystemGroupId)
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
 // Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action/* && $oAdmin_Form_Controller->getAction() == 'edit'*/)
 {
@@ -570,9 +569,7 @@ if ($oAdmin_Form_Action/* && $oAdmin_Form_Controller->getAction() == 'edit'*/)
 }
 
 // Действие "Применить"
-$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdminFormActionApply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
@@ -585,9 +582,7 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 }
 
 // Действие "Копировать"
-$oAdminFormActionCopy = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('copy');
+$oAdminFormActionCopy = $oAdmin_Form->Admin_Form_Actions->getByName('copy');
 
 if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 {
@@ -600,9 +595,7 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 }
 
 // Действие "Перенести"
-$oAdminFormActionMove = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('move');
+$oAdminFormActionMove = $oAdmin_Form->Admin_Form_Actions->getByName('move');
 
 if ($oAdminFormActionMove && $oAdmin_Form_Controller->getAction() == 'move')
 {
@@ -651,9 +644,7 @@ if ($oAdminFormActionMove && $oAdmin_Form_Controller->getAction() == 'move')
 }
 
 // Действие "Создать ярлык"
-$oAdminFormActionShortcut = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('shortcut');
+$oAdminFormActionShortcut = $oAdmin_Form->Admin_Form_Actions->getByName('shortcut');
 
 if ($oAdminFormActionShortcut && $oAdmin_Form_Controller->getAction() == 'shortcut')
 {
@@ -683,9 +674,7 @@ if ($oAdminFormActionShortcut && $oAdmin_Form_Controller->getAction() == 'shortc
 }
 
 // Действие "Загрузка элементов ИС"
-$oAdminFormActionLoadInformationItemList = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('loadInformationItemList');
+$oAdminFormActionLoadInformationItemList = $oAdmin_Form->Admin_Form_Actions->getByName('loadInformationItemList');
 
 if ($oAdminFormActionLoadInformationItemList && $oAdmin_Form_Controller->getAction() == 'loadInformationItemList')
 {
@@ -708,9 +697,7 @@ if ($oAdminFormActionLoadInformationItemList && $oAdmin_Form_Controller->getActi
 }
 
 // Действие "Удаление значения свойства"
-$oAdminFormActiondeletePropertyValue = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deletePropertyValue');
+$oAdminFormActiondeletePropertyValue = $oAdmin_Form->Admin_Form_Actions->getByName('deletePropertyValue');
 
 if ($oAdminFormActiondeletePropertyValue && $oAdmin_Form_Controller->getAction() == 'deletePropertyValue')
 {
@@ -729,9 +716,7 @@ if ($oAdminFormActiondeletePropertyValue && $oAdmin_Form_Controller->getAction()
 	$oAdmin_Form_Controller->addAction($oInformationsystemControllerdeletePropertyValue);
 }
 
-$oAdminFormActionRollback = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('rollback');
+$oAdminFormActionRollback = $oAdmin_Form->Admin_Form_Actions->getByName('rollback');
 
 if ($oAdminFormActionRollback && $oAdmin_Form_Controller->getAction() == 'rollback')
 {
@@ -751,7 +736,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 $oAdmin_Form_Dataset->addCondition(
 	array('select' => array('informationsystem_groups.*', array(Core_QueryBuilder::expression("''"), 'datetime')))
 )->addCondition(
-	array('where' => array('informationsystem_id', '=', $iInformationsystemId))
+	array('where' => array('informationsystem_groups.informationsystem_id', '=', $iInformationsystemId))
 )
 ->changeField('name', 'class', 'semi-bold');
 
@@ -803,6 +788,9 @@ $oUser = Core_Auth::getCurrentUser();
 	&& $oAdmin_Form_Dataset->addUserConditions();
 
 $oAdmin_Form_Dataset
+	->addCondition(
+		array('select' => array('informationsystem_items.*'))
+	)
 	->addCondition(
 		array('where' => array('informationsystem_id', '=', $iInformationsystemId))
 	)
@@ -862,9 +850,7 @@ $oAdmin_Form_Controller->addDataset(
 );
 
 // Действие "Удаление файла большого изображения"
-$oAdminFormActionDeleteLargeImage = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deleteLargeImage');
+$oAdminFormActionDeleteLargeImage = $oAdmin_Form->Admin_Form_Actions->getByName('deleteLargeImage');
 
 if ($oAdminFormActionDeleteLargeImage && $oAdmin_Form_Controller->getAction() == 'deleteLargeImage')
 {
@@ -881,9 +867,7 @@ if ($oAdminFormActionDeleteLargeImage && $oAdmin_Form_Controller->getAction() ==
 }
 
 // Действие "Удаление файла малого изображения"
-$oAdminFormActionDeleteSmallImage = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deleteSmallImage');
+$oAdminFormActionDeleteSmallImage = $oAdmin_Form->Admin_Form_Actions->getByName('deleteSmallImage');
 
 if ($oAdminFormActionDeleteSmallImage && $oAdmin_Form_Controller->getAction() == 'deleteSmallImage')
 {

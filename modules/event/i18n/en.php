@@ -163,4 +163,11 @@ return array(
 	'tags' => "Labels (tags)",
 	'type_tag' => 'Type tag ...',
 	'without_deadline' => 'Without deadline',
+
+	'add_checklist' => 'add checklist',
+	'remove_checklist' => 'remove checklist',
+	'checklist_name' => 'Checklist name',
+	'checklist_item_name' => 'Item name',
+	'add_checklist_item' => 'add item',
+	'remove_checklist_item' => 'remove item',
 );

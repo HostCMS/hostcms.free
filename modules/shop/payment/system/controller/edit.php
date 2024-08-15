@@ -249,8 +249,6 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 
 		$image = '';
 
-		$aCore_Config = Core::$mainConfig;
-
 		$bImageIsCorrect =
 			// Поле файла большого изображения существует
 			!is_null($aFileData = Core_Array::getFiles('image', NULL))
@@ -260,8 +258,7 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 		if ($bImageIsCorrect)
 		{
 			// Проверка на допустимый тип файла
-			if (Core_File::isValidExtension($aFileData['name'],
-			$aCore_Config['availableExtension']))
+			if (Core_File::isValidExtension($aFileData['name'], Core::$mainConfig['availableExtension']))
 			{
 				// Удаление файла большого изображения
 				if ($this->_object->image)

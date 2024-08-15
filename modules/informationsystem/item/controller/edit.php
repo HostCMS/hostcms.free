@@ -1131,7 +1131,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 	 * Build visual representation of group tree
 	 * @param int $iInformationsystemId information system ID
 	 * @param int $iInformationsystemGroupParentId parent ID
-	 * @param int $aExclude exclude group ID
+	 * @param array $aExclude exclude group ID
 	 * @param int $iLevel current nesting level
 	 * @return array
 	 */
@@ -1306,13 +1306,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 			}
 		}
 
-		$aConfig = Core_Config::instance()->get('informationsystem_config', array()) + array(
-			'smallImagePrefix' => 'small_',
-			'itemLargeImage' => 'item_%d.%s',
-			'itemSmallImage' => 'small_item_%d.%s',
-			'groupLargeImage' => 'group_%d.%s',
-			'groupSmallImage' => 'small_group_%d.%s',
-		);
+		$aConfig = Informationsystem_Controller::getConfig();
 
 		switch ($modelName)
 		{
@@ -1450,8 +1444,6 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 		$large_image = $small_image = '';
 
-		$aCore_Config = Core::$mainConfig;
-
 		$create_small_image_from_large = Core_Array::getPost('create_small_image_from_large_small_image');
 
 		$bLargeImageIsCorrect =
@@ -1463,7 +1455,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 		if ($bLargeImageIsCorrect)
 		{
 			// Проверка на допустимый тип файла
-			if (Core_File::isValidExtension($aFileData['name'], $aCore_Config['availableExtension']))
+			if (Core_File::isValidExtension($aFileData['name'], Core::$mainConfig['availableExtension']))
 			{
 				// Удаление файла большого изображения
 				if ($this->_object->image_large)
@@ -1518,7 +1510,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 			// Явно указано малое изображение
 			if ($bSmallImageIsCorrect
-				&& Core_File::isValidExtension($aSmallFileData['name'], $aCore_Config['availableExtension']))
+				&& Core_File::isValidExtension($aSmallFileData['name'], Core::$mainConfig['availableExtension']))
 			{
 				// Для инфогруппы ранее задано изображение
 				if ($this->_object->image_large != '')
@@ -1773,7 +1765,11 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 			$this->_Admin_Form_Controller->addMessage(ob_get_clean());
 		}
 
+		Core::moduleIsActive('wysiwyg') && Wysiwyg_Controller::uploadImages($this->_formValues, $this->_object, $this->_Admin_Form_Controller);
+
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
+
+		return $this;
 	}
 
 	/*
@@ -1809,10 +1805,10 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 		switch ($modelName)
 		{
-			case 'shop_item':
+			case 'informationsystem_item':
 				$oObjects = $oInformationsystem->Informationsystem_Items;
 			break;
-			case 'shop_group':
+			case 'informationsystem_group':
 			default:
 				$oObjects = $oInformationsystem->Informationsystem_Groups;
 			break;

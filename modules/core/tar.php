@@ -219,6 +219,24 @@ class Core_Tar
 	}
 
 	/**
+     * @return array|int
+     */
+    public function listContent()
+    {
+        $v_list_detail = array();
+
+        if ($this->_openRead()) {
+            if (!$this->_extractList('', $v_list_detail, "list", '', '')) {
+                unset($v_list_detail);
+                $v_list_detail = 0;
+            }
+            $this->_close();
+        }
+
+        return $v_list_detail;
+    }
+	
+	/**
 	* This method creates the archive file and add the files / directories
 	* that are listed in $p_filelist.
 	* If the file уже существует and is writable, it is replaced by the

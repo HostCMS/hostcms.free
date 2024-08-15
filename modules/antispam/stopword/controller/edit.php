@@ -24,7 +24,10 @@ class Antispam_Stopword_Controller_Edit extends Admin_Form_Action_Controller_Typ
 		$oMainTab = $this->getTab('main');
 
 		$oMainTab
-			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'));
+			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+			;
 
 		if (!$this->_object->id)
 		{
@@ -40,6 +43,26 @@ class Antispam_Stopword_Controller_Edit extends Admin_Form_Action_Controller_Typ
 
 			$oMainRow1->add($oTextarea);
 		}
+
+		$oMainTab->delete($this->getField('type'));
+
+		$oSelect_Type = Admin_Form_Entity::factory('Select')
+			->options(
+				array(
+					0 => Core::_('Antispam_Stopword.type0'),
+					1 => Core::_('Antispam_Stopword.type1')
+				)
+			)
+			->name('type')
+			->value($this->_object->type)
+			->caption(Core::_('Antispam_Stopword.type'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'));
+
+		$oMainRow2->add($oSelect_Type);
+
+		$oMainTab
+			->move($this->getField('case_sensitive')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 margin-top-21')), $oMainRow2)
+			->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow3);
 
 		$this->title(
 			$this->_object->id

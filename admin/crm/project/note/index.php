@@ -36,9 +36,7 @@ $oAdmin_Form_Controller
 $oAdmin_Form_Controller->addExternalReplace('{crm_project_id}', $oCrm_Project->id);
 
 // Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -51,9 +49,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 }
 
 // Добавление заметки
-$oAdmin_Form_Action_Add_Note = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('addNote');
+$oAdmin_Form_Action_Add_Note = $oAdmin_Form->Admin_Form_Actions->getByName('addNote');
 
 if ($oAdmin_Form_Action_Add_Note && $oAdmin_Form_Controller->getAction() == 'addNote')
 {

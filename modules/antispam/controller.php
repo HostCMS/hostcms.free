@@ -143,12 +143,22 @@ class Antispam_Controller extends Core_Servant_Properties
 	/**
 	 * Get Antispam_Stopwords
 	 * @return array
+	 * @see getAntispamStopwords()
 	 */
 	public function getAntispamStopword()
 	{
+		return $this->getAntispamStopwords();
+	}
+
+	/**
+	 * Get Antispam_Stopwords
+	 * @return array
+	 */
+	public function getAntispamStopwords()
+	{
 		if (is_null($this->_aAntispam_Stopwords))
 		{
-			$this->_aAntispam_Stopwords = Core_Entity::factory('Antispam_Stopword')->findAll(FALSE);
+			$this->_aAntispam_Stopwords = Core_Entity::factory('Antispam_Stopword')->getAllByActive(1, FALSE);
 		}
 
 		return $this->_aAntispam_Stopwords;
@@ -200,14 +210,34 @@ class Antispam_Controller extends Core_Servant_Properties
 		if ($result)
 		{
 			$text = implode(' ', $this->_text);
+			$textLower = mb_strtolower($text);
 
-			$aAntispam_Stopwords = $this->getAntispamStopword();
+			$aAntispam_Stopwords = $this->getAntispamStopwords();
 			foreach ($aAntispam_Stopwords as $oAntispam_Stopword)
 			{
-				if ($oAntispam_Stopword->value != '' && strpos($text, $oAntispam_Stopword->value) !== FALSE)
+				if ($oAntispam_Stopword->value != '')
 				{
-					$result = FALSE;
-					break;
+					switch ($oAntispam_Stopword->type)
+					{
+						case 0: // string
+							if (($oAntispam_Stopword->case_sensitive
+								? mb_strpos($text, $oAntispam_Stopword->value)
+								: mb_strpos($textLower, mb_strtolower($oAntispam_Stopword->value))
+							) !== FALSE)
+							{
+								$result = FALSE;
+								break 2;
+							}
+						break;
+						case 1: // reg
+							$pattern = '/' . str_replace('/', '\/', $oAntispam_Stopword->value) . '/u' . ($oAntispam_Stopword->case_sensitive ? '' : 'i');
+							if (preg_match($pattern, $text) > 0)
+							{
+								$result = FALSE;
+								break 2;
+							}
+						break;
+					}
 				}
 			}
 		}

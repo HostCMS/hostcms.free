@@ -21,8 +21,8 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 	{
 		parent::_prepareForm();
 
-		$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0));
-		$oShop_Group = Core_Entity::factory('Shop_Group', Core_Array::getGet('shop_group_id', 0));
+		$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0, 'int'));
+		$shop_group_id = Core_Array::getGet('shop_group_id', 0, 'int');
 
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
@@ -61,7 +61,7 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 
 			if (!is_null($oModule))
 			{
-				$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, $this->_object->getEntityType(), 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
+				$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, $this->_object->getEntityType(), 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $shop_group_id);
 			}
 
 			$printlayoutsButton .= '
@@ -180,12 +180,11 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 				->class('fa fa-plus');
 
 		$oShopItemBlock
-			->add($oHeaderDiv = Admin_Form_Entity::factory('Div')
+			->add(Admin_Form_Entity::factory('Div')
 				->class('header bordered-palegreen')
 				->value(Core::_('Shop_Warehouse_Regrade.shop_item_header'))
 				->add($oAddItemLink)
 			)
-			->add($oShopItemRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oShopItemRow2 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		$itemTable = '

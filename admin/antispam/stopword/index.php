@@ -81,9 +81,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
 // Действие "Применить"
-$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdminFormActionApply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
@@ -96,9 +94,7 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 }
 
 // Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -117,9 +113,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 }
 
 // Действие экспорта
-$oAdminFormActionExport = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('exportStopwordsList');
+$oAdminFormActionExport = $oAdmin_Form->Admin_Form_Actions->getByName('exportStopwordsList');
 
 if ($oAdminFormActionExport && $oAdmin_Form_Controller->getAction() == 'exportStopwordsList')
 {
@@ -141,6 +135,12 @@ $oUser = Core_Auth::getCurrentUser();
 $oAdmin_Form_Controller->addDataset(
 	$oAdmin_Form_Dataset
 );
+
+$oAdmin_Form_Dataset
+	->changeField('case_sensitive', 'type', 8)
+	->changeField('case_sensitive', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'))
+	->changeField('type', 'type', 8)
+	->changeField('type', 'list', "1=" . Core::_('Antispam_Stopword.type1') . "\n" . "0=" . Core::_('Antispam_Stopword.type0'));
 
 // Показ формы
 $oAdmin_Form_Controller->execute();

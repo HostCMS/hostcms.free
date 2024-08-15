@@ -1919,7 +1919,8 @@ class Shop_Item_Model extends Core_Entity
 		{
 			$oCore_Html_Entity_Div->add(
 				Core_Html_Entity::factory('Span')
-					->class('label label-sm darkgray bordered-1 bordered-gray margin-left-5')
+					// ->class('label label-sm darkgray bordered-1 bordered-gray margin-left-5')
+					->class('badge badge-gray inverted margin-left-5')
 					->value($oShop_Item_Barcode->value)
 			);
 		}
@@ -1964,6 +1965,55 @@ class Shop_Item_Model extends Core_Entity
 		}
 
 		$oCore_Html_Entity_Div->execute();
+
+		$this->showSetBadges();
+	}
+
+	/**
+	 * Show set badges
+	 * @return string
+	 */
+	public function showSetBadges()
+	{
+		if ($this->type == 3)
+		{
+			$aSets = array();
+
+			$aShop_Item_Sets = $this->Shop_Item_Sets->findAll(FALSE);
+			foreach ($aShop_Item_Sets as $oShop_Item_Set)
+			{
+				$oShop_Item = Core_Entity::factory('Shop_Item', $oShop_Item_Set->shop_item_set_id);
+
+				if (!is_null($oShop_Item->id))
+				{
+					$aSets[] = htmlspecialchars($oShop_Item->name);
+				}
+			}
+
+			if (count($aSets))
+			{
+				$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')
+					->class('d-flex align-items-center small darkgray margin-top-5')
+					->style('flex-wrap: wrap; gap: 2px;');
+
+				$oCore_Html_Entity_Div->add(
+					Core_Html_Entity::factory('Span')
+						->class('badge badge-sky inverted')
+						->value('<i class="fa fa-archive fa-fw no-margin"></i>')
+				);
+
+				foreach ($aSets as $name)
+				{
+					$oCore_Html_Entity_Div->add(
+						Core_Html_Entity::factory('Span')
+							->class('badge badge-sky inverted')
+							->value($name)
+					);
+				}
+
+				$oCore_Html_Entity_Div->execute();
+			}
+		}
 	}
 
 	/**
@@ -2386,6 +2436,7 @@ class Shop_Item_Model extends Core_Entity
 	 * @hostcms-event shop_item.onBeforeSelectComments
 	 * @hostcms-event shop_item.onBeforeSelectShopWarehouseItems
 	 * @hostcms-event shop_item.onAfterAddSetEntity
+	 * @hostcms-event shop_item.onBeforeAddPropertyValues
 	 */
 	protected function _prepareData()
 	{
@@ -2563,7 +2614,7 @@ class Shop_Item_Model extends Core_Entity
 					'formattedWithCurrency' => $oShopCurrency->formatWithCurrency($aPrices['price_tax']))
 				);
 
-				count($aPrices['discounts'])
+				$this->_isTagAvailable('shop_discount') && count($aPrices['discounts'])
 					&& $this->addEntities($aPrices['discounts']);
 
 				// Валюта от магазина
@@ -2907,6 +2958,8 @@ class Shop_Item_Model extends Core_Entity
 				// Add all values
 				//$this->addEntities($aProperty_Values);
 			}
+
+			Core_Event::notify($this->_modelName . '.onBeforeAddPropertyValues', $this, array($aProperty_Values));
 
 			$aListIDs = array();
 
@@ -3461,7 +3514,7 @@ class Shop_Item_Model extends Core_Entity
 	/**
 	 * Get property value for SEO-templates
 	 * @param int $property_id Property ID
-	 * @param strint $format string format, e.g. '%s: %s'. %1$s - Property Name, %2$s - List of Values
+	 * @param string $format string format, e.g. '%s: %s'. %1$s - Property Name, %2$s - List of Values
 	 * @param string $separator separator
 	 * @return string
 	 */
@@ -3553,23 +3606,6 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
-	 * Get Related Site
-	 * @return Site_Model|NULL
-	 * @hostcms-event shop_item.onBeforeGetRelatedSite
-	 * @hostcms-event shop_item.onAfterGetRelatedSite
-	 */
-	public function getRelatedSite()
-	{
-		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
-
-		$oSite = $this->Shop->Site;
-
-		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
-
-		return $oSite;
-	}
-
-	/**
 	 * Check activity of item and parent groups
 	 * @return bool
 	 */
@@ -3603,5 +3639,107 @@ class Shop_Item_Model extends Core_Entity
 		}
 
 		return TRUE;
+	}
+
+	/**
+	 * RestApi Upload Large Image from $_FILES['image']
+	 * @retrun string|NULL Uploaded image path
+	 */
+	public function uploadLargeImage()
+	{
+		if (isset($_FILES['image']['tmp_name']))
+		{
+			$file_name = $_FILES['image']['name'];
+
+			// Проверка на допустимый тип файла
+			if (Core_File::isValidExtension($file_name, Core::$mainConfig['availableExtension']))
+			{
+				$oShop = $this->Shop;
+
+				// Удаление файла большого изображения
+				$this->image_large && $this->deleteLargeImage();
+
+				// Не преобразовываем название загружаемого файла
+				if (!$oShop->change_filename)
+				{
+					$fileName = $file_name;
+				}
+				else
+				{
+					$aConfig = Shop_Controller::getConfig();
+
+					// Определяем расширение файла
+					$ext = Core_File::getExtension($file_name);
+
+					$fileName = sprintf($aConfig['itemLargeImage'], $this->id, $ext);
+				}
+
+				$this->saveLargeImageFile($_FILES['image']['tmp_name'], $fileName);
+
+				if ($this->image_small == '' && $oShop->create_small_image)
+				{
+					$this->uploadSmallImage();
+				}
+
+				return $this->getLargeFileHref();
+			}
+		}
+	}
+
+	/**
+	 * RestApi Upload Small Image from $_FILES['image']
+	 * @retrun string|NULL Uploaded image path
+	 */
+	public function uploadSmallImage()
+	{
+		if (isset($_FILES['image']['tmp_name']))
+		{
+			$file_name = $_FILES['image']['name'];
+
+			// Проверка на допустимый тип файла
+			if (Core_File::isValidExtension($file_name, Core::$mainConfig['availableExtension']))
+			{
+				$oShop = $this->Shop;
+
+				// Удаление файла малого изображения
+				$this->image_small && $this->deleteSmallImage();
+
+				// Не преобразовываем название загружаемого файла
+				if (!$oShop->change_filename)
+				{
+					$fileName = $file_name;
+				}
+				else
+				{
+					$aConfig = Shop_Controller::getConfig();
+
+					// Определяем расширение файла
+					$ext = Core_File::getExtension($file_name);
+
+					$fileName = sprintf($aConfig['itemSmallImage'], $this->id, $ext);
+				}
+
+				$this->saveSmallImageFile($_FILES['image']['tmp_name'], $fileName);
+
+				return $this->getSmallFileHref();
+			}
+		}
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event shop_item.onBeforeGetRelatedSite
+	 * @hostcms-event shop_item.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Shop->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
 	}
 }

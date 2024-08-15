@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2024 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 
 if (is_dir('install/') && is_file('install/index.php'))
@@ -363,6 +362,7 @@ if (Core::moduleIsActive('ipaddress'))
 		{
 			// Show captcha
 			Core_Router::add('check-bots', '()')
+				->setUri(Core::$url['path'])
 				->controller('Core_Command_Controller_Check_Bots')->execute()
 				->header('X-Powered-By', Core::xPoweredBy())
 				->sendHeaders()

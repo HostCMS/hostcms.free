@@ -241,7 +241,7 @@ class Sql_Controller
 
 		return FALSE;
 	}
-	
+
 	/**
 	 * Sanitize MySQL Identifiers
 	 * @param string
@@ -252,10 +252,88 @@ class Sql_Controller
 		// https://dev.mysql.com/doc/refman/8.0/en/identifiers.html
 		/* Permitted characters in unquoted identifiers:
 			ASCII: [0-9,a-z,A-Z$_] (basic Latin letters, digits 0-9, dollar, underscore)
-			Extended: U+0080 .. U+FFFF 
+			Extended: U+0080 .. U+FFFF
 		Permitted characters in quoted identifiers include the full Unicode Basic Multilingual Plane (BMP), except U+0000:
 			ASCII: U+0001 .. U+007F
 			Extended: U+0080 .. U+FFFF */
 		return !is_null($str) ? preg_replace('/[^A-Za-z0-9$_\x{0001}-\x{007F}\x{0080}-\x{FFFF}]/u', '', $str) : '';
+	}
+
+	/**
+	 * Get fields icon
+	 * @param string $href
+	 * @param string $class
+	 * @return Admin_Form_Entity
+	 */
+	static public function getTableViewIcon($tableName, $class = 'fa fa-table h5-edit-icon warning')
+	{
+		$href = '/admin/sql/table/view/index.php?table=' . $tableName;
+		$onclick = "$.adminLoad({path: '/admin/sql/table/view/index.php',additionalParams: 'table={$tableName}', windowId: 'id_content'}); return false";
+
+		return Admin_Form_Entity::factory('Code')
+			->html('
+				<script>
+					$(\'h5.row-title\').append(
+						$("<a>")
+							.attr("href", "' . $href . '")
+							.attr("title", "' . Core::_('Sql_Table_View.title', $tableName) . '")
+							.attr("target", "_blank")
+							.attr("onclick", "' . Core_Str::escapeJavascriptVariable($onclick) . '")
+							.append(\'<i class="' . htmlspecialchars($class) . '"></i>\')
+						);
+				</script>
+		');
+	}
+
+	/**
+	 * Get fields icon
+	 * @param string $href
+	 * @param string $class
+	 * @return Admin_Form_Entity
+	 */
+	static public function getFieldsIcon($tableName, $class = 'fa fa-th-list h5-edit-icon azure')
+	{
+		$href = '/admin/sql/table/field/index.php?table=' . $tableName;
+		$onclick = "$.adminLoad({path: '/admin/sql/table/field/index.php',additionalParams: 'table={$tableName}', windowId: 'id_content'}); return false";
+
+		return Admin_Form_Entity::factory('Code')
+			->html('
+				<script>
+					$(\'h5.row-title\').append(
+						$("<a>")
+							.attr("href", "' . $href . '")
+							.attr("title", "' . Core::_('Sql_Table_Field.title', $tableName) . '")
+							.attr("target", "_blank")
+							.attr("onclick", "' . Core_Str::escapeJavascriptVariable($onclick) . '")
+							.append(\'<i class="' . htmlspecialchars($class) . '"></i>\')
+						);
+				</script>
+		');
+	}
+
+	/**
+	 * Get indexes icon
+	 * @param string $href
+	 * @param string $class
+	 * @return Admin_Form_Entity
+	 */
+	static public function getIndexesIcon($tableName, $class = 'fas fa-key h5-edit-icon success')
+	{
+		$href = '/admin/sql/table/index/index.php?table=' . $tableName;
+		$onclick = "$.adminLoad({path: '/admin/sql/table/index/index.php',additionalParams: 'table={$tableName}', windowId: 'id_content'}); return false";
+
+		return Admin_Form_Entity::factory('Code')
+			->html('
+				<script>
+					$(\'h5.row-title\').append(
+						$("<a>")
+							.attr("href", "' . $href . '")
+							.attr("title", "' . Core::_('Sql_Table_Index.title', $tableName) . '")
+							.attr("target", "_blank")
+							.attr("onclick", "' . Core_Str::escapeJavascriptVariable($onclick) . '")
+							.append(\'<i class="' . htmlspecialchars($class) . '"></i>\')
+						);
+				</script>
+		');
 	}
 }

@@ -21,8 +21,8 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 	{
 		parent::_prepareForm();
 
-		$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0));
-		$oShop_Group = Core_Entity::factory('Shop_Group', Core_Array::getGet('shop_group_id', 0));
+		$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0, 'int'));
+		$shop_group_id = Core_Array::getGet('shop_group_id', 0, 'int');
 
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
@@ -60,7 +60,7 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 
 			if (!is_null($oModule))
 			{
-				$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, $this->_object->getEntityType(), 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
+				$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, $this->_object->getEntityType(), 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $shop_group_id);
 			}
 
 			$printlayoutsButton .= '
@@ -134,7 +134,7 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 		$oMainTab->move($this->getField('posted')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-lg-3 margin-top-21')), $oMainRow2);
 
 		$oShopItemBlock
-			->add($oHeaderDiv = Admin_Form_Entity::factory('Div')
+			->add(Admin_Form_Entity::factory('Div')
 				->class('header bordered-palegreen')
 				->value(Core::_('Shop_Warehouse_Inventory.shop_item_header'))
 			)
@@ -239,7 +239,7 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 			</div>
 		';
 
-		$oShopItemRow2->add(
+		$oShopItemRow1->add(
 			Admin_Form_Entity::factory('Input')
 				->divAttr(array('class' => 'form-group col-xs-12'))
 				->class('add-shop-item form-control')
@@ -263,7 +263,6 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 						newRow,
 						warehouseId = $('#{$windowId} select.select-warehouse').val(),
 						foundRest = ui.item.aWarehouses.find(x => x.id === warehouseId);
-
 
 					if (!addedShopItemTr.length)
 					{

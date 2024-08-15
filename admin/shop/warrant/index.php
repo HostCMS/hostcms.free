@@ -184,9 +184,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 );
 
 // Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -201,9 +199,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 }
 
 // Действие "Применить"
-$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdminFormActionApply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
@@ -216,9 +212,7 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 }
 
 // Действие "Пересчитать"
-$oAdminFormActionRecount = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('recountAmount');
+$oAdminFormActionRecount = $oAdmin_Form->Admin_Form_Actions->getByName('recountAmount');
 
 if ($oAdminFormActionRecount && $oAdmin_Form_Controller->getAction() == 'recountAmount')
 {
@@ -230,9 +224,7 @@ if ($oAdminFormActionRecount && $oAdmin_Form_Controller->getAction() == 'recount
 	$oAdmin_Form_Controller->addAction($oShop_Warrant_Controller_Recount);
 }
 
-$oAdminFormActionChangeDefaultStatus = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdminFormActionChangeDefaultStatus = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdminFormActionChangeDefaultStatus && $oAdmin_Form_Controller->getAction() == 'apply')
 {
@@ -244,9 +236,7 @@ if ($oAdminFormActionChangeDefaultStatus && $oAdmin_Form_Controller->getAction()
 	$oAdmin_Form_Controller->addAction($Admin_Form_Action_Controller_Type_Apply);
 }
 
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('print');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('print');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'print')
 {
@@ -262,9 +252,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'print')
 	$oAdmin_Form_Controller->addAction($Shop_Warrant_Controller_Print);
 }
 
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('sendMail');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('sendMail');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'sendMail')
 {
@@ -301,8 +289,10 @@ $oAdmin_Form_Controller
 	->addExternalReplace('{shop_id}', $shop_id)
 	;
 
-if (isset($oAdmin_Form_Controller->request['admin_form_filter_2007']) && $oAdmin_Form_Controller->request['admin_form_filter_2007'] != ''
-	|| isset($oAdmin_Form_Controller->request['topFilter_2007']) && $oAdmin_Form_Controller->request['topFilter_2007'] != ''
+if (isset($oAdmin_Form_Controller->request['admin_form_filter_2007'])
+		&& $oAdmin_Form_Controller->request['admin_form_filter_2007'] != ''
+	|| isset($oAdmin_Form_Controller->request['topFilter_2007'])
+		&& $oAdmin_Form_Controller->request['topFilter_2007'] != ''
 )
 {
 	$value = isset($oAdmin_Form_Controller->request['admin_form_filter_2007'])

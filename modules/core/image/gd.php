@@ -47,29 +47,43 @@ class Core_Image_Gd extends Core_Image
 		$sourceX = $picsize['width'];
 		$sourceY = $picsize['height'];
 
+		$iSourceImagetype = self::exifImagetype($sourceFile);
+		
+		// Change output format
+		$iDestImagetype = !is_null($outputFormat)
+			? self::getImagetypeByFormat($outputFormat)
+			: $iSourceImagetype;
+
 		/* Если размеры исходного файла больше максимальных, тогда масштабируем*/
-		if (($sourceX > $maxWidth || $sourceY > $maxHeight) /*&& $maxWidth != 0 && $maxHeight != 0*/)
+		if (($sourceX > $maxWidth || $sourceY > $maxHeight) /*&& $maxWidth != 0 && $maxHeight != 0*/ || $iSourceImagetype != $iDestImagetype)
 		{
 			//$ext = Core_File::getExtension($targetFile);
-			$iImagetype = self::exifImagetype($sourceFile);
-
-			if ($iImagetype == IMAGETYPE_JPEG)
+			if ($iSourceImagetype == IMAGETYPE_JPEG)
 			{
 				$sourceResource = imagecreatefromjpeg($sourceFile);
 			}
-			elseif ($iImagetype == IMAGETYPE_PNG)
+			elseif ($iSourceImagetype == IMAGETYPE_PNG)
 			{
 				$sourceResource = imagecreatefrompng($sourceFile);
 			}
-			elseif ($iImagetype == IMAGETYPE_GIF)
+			elseif ($iSourceImagetype == IMAGETYPE_GIF)
 			{
-				$sourceResource = imagecreatefromgif($sourceFile);
+				// Detect animated GIF
+				if (!$this->isAnimatedGif($sourceFile))
+				{
+					$sourceResource = imagecreatefromgif($sourceFile);
+				}
+				else
+				{
+					Core_File::copy($sourceFile, $targetFile);
+					return TRUE;
+				}
 			}
-			elseif (defined('IMAGETYPE_WEBP') && $iImagetype == IMAGETYPE_WEBP && function_exists('imagecreatefromwebp'))
+			elseif (defined('IMAGETYPE_WEBP') && $iSourceImagetype == IMAGETYPE_WEBP && function_exists('imagecreatefromwebp'))
 			{
 				$sourceResource = imagecreatefromwebp($sourceFile);
 			}
-			elseif (defined('IMAGETYPE_AVIF') && $iImagetype == IMAGETYPE_AVIF && function_exists('imagecreatefromavif'))
+			elseif (defined('IMAGETYPE_AVIF') && $iSourceImagetype == IMAGETYPE_AVIF && function_exists('imagecreatefromavif'))
 			{
 				$sourceResource = imagecreatefromavif($sourceFile);
 			}
@@ -81,7 +95,7 @@ class Core_Image_Gd extends Core_Image
 			if ($sourceResource)
 			{
 				// Image Rotate
-				if ($iImagetype == IMAGETYPE_JPEG)
+				if ($iSourceImagetype == IMAGETYPE_JPEG)
 				{
 					if (function_exists('exif_read_data'))
 					{
@@ -213,18 +227,13 @@ class Core_Image_Gd extends Core_Image
 				if ($destX_step2 == 0 || $destY_step2 == 0)
 				{
 					imagedestroy($targetResourceStep1);
+					$targetResourceStep1 = NULL;
 					return FALSE;
 				}
 				$targetResourceStep2 = imagecreatetruecolor($destX_step2, $destY_step2);
 			}
 
-			// Change output format
-			if (!is_null($outputFormat))
-			{
-				$iImagetype = self::getImagetypeByFormat($outputFormat);
-			}
-
-			if ($iImagetype == IMAGETYPE_JPEG)
+			if ($iDestImagetype == IMAGETYPE_JPEG)
 			{
 				$quality = is_null($quality)
 					? (defined('JPG_QUALITY') ? JPG_QUALITY : 60)
@@ -243,12 +252,14 @@ class Core_Image_Gd extends Core_Image
 
 					imagejpeg($targetResourceStep2, $targetFile, $quality);
 					imagedestroy($targetResourceStep2);
+					$targetResourceStep2 = NULL;
 				}
 				@chmod($targetFile, CHMOD_FILE);
 
 				imagedestroy($sourceResource);
+				$sourceResource = NULL;
 			}
-			elseif ($iImagetype == IMAGETYPE_PNG)
+			elseif ($iDestImagetype == IMAGETYPE_PNG)
 			{
 				$quality = is_null($quality)
 					? (defined('PNG_QUALITY') ? PNG_QUALITY : 6)
@@ -276,12 +287,14 @@ class Core_Image_Gd extends Core_Image
 
 					imagepng($targetResourceStep2, $targetFile, $quality);
 					imagedestroy($targetResourceStep2);
+					$targetResourceStep2 = NULL;
 				}
 				@chmod($targetFile, CHMOD_FILE);
 
 				imagedestroy($sourceResource);
+				$sourceResource = NULL;
 			}
-			elseif ($iImagetype == IMAGETYPE_GIF)
+			elseif ($iDestImagetype == IMAGETYPE_GIF)
 			{
 				$this->setTransparency($targetResourceStep1, $sourceResource);
 
@@ -299,12 +312,14 @@ class Core_Image_Gd extends Core_Image
 
 					imagegif($targetResourceStep2, $targetFile);
 					imagedestroy($targetResourceStep2);
+					$targetResourceStep2 = NULL;
 				}
 				@chmod($targetFile, CHMOD_FILE);
 
 				imagedestroy($sourceResource);
+				$sourceResource = NULL;
 			}
-			elseif (defined('IMAGETYPE_WEBP') && $iImagetype == IMAGETYPE_WEBP)
+			elseif (defined('IMAGETYPE_WEBP') && $iDestImagetype == IMAGETYPE_WEBP)
 			{
 				$quality = is_null($quality)
 					? (defined('WEBP_QUALITY') ? WEBP_QUALITY : 50)
@@ -330,12 +345,14 @@ class Core_Image_Gd extends Core_Image
 
 					imagewebp($targetResourceStep2, $targetFile, $quality);
 					imagedestroy($targetResourceStep2);
+					$targetResourceStep2 = NULL;
 				}
 				@chmod($targetFile, CHMOD_FILE);
 
 				imagedestroy($sourceResource);
+				$sourceResource = NULL;
 			}
-			elseif (defined('IMAGETYPE_AVIF') && $iImagetype == IMAGETYPE_AVIF)
+			elseif (defined('IMAGETYPE_AVIF') && $iDestImagetype == IMAGETYPE_AVIF)
 			{
 				$quality = is_null($quality)
 					? (defined('AVIF_QUALITY') ? AVIF_QUALITY : 50)
@@ -361,24 +378,29 @@ class Core_Image_Gd extends Core_Image
 
 					imageavif($targetResourceStep2, $targetFile, $quality);
 					imagedestroy($targetResourceStep2);
+					$targetResourceStep2 = NULL;
 				}
 				@chmod($targetFile, CHMOD_FILE);
 
 				imagedestroy($sourceResource);
+				$sourceResource = NULL;
 			}
 			/*else
 			{
 				imagedestroy($targetResourceStep1);
+				$targetResourceStep1 = NULL;
 
 				if (!$preserveAspectRatio)
 				{
 					imagedestroy($targetResourceStep2);
+					$targetResourceStep2 = NULL;
 				}
 
 				return FALSE;
 			}*/
 
 			imagedestroy($targetResourceStep1);
+			$targetResourceStep1 = NULL;
 		}
 		else
 		{
@@ -423,9 +445,14 @@ class Core_Image_Gd extends Core_Image
 			$watermarkResource = imagecreatefrompng($watermark);
 
 			//$ext = Core_File::getExtension($target);
-			$iImagetype = self::exifImagetype($source);
+			$iSourceImagetype = self::exifImagetype($source);
+			
+			// Change output format
+			$iDestImagetype = !is_null($outputFormat)
+				? self::getImagetypeByFormat($outputFormat)
+				: $iSourceImagetype;
 
-			if ($iImagetype == IMAGETYPE_JPEG)
+			if ($iSourceImagetype == IMAGETYPE_JPEG)
 			{
 				$sourceResource = imagecreatefromjpeg($source);
 
@@ -434,7 +461,7 @@ class Core_Image_Gd extends Core_Image
 					$sourceResource = $this->_addWatermark($sourceResource, $watermarkResource, $watermarkX, $watermarkY);
 				}
 			}
-			elseif ($iImagetype == IMAGETYPE_PNG)
+			elseif ($iSourceImagetype == IMAGETYPE_PNG)
 			{
 				$sourceResource = imagecreatefrompng($source);
 
@@ -446,7 +473,7 @@ class Core_Image_Gd extends Core_Image
 					$sourceResource = $this->_addWatermark($sourceResource, $watermarkResource, $watermarkX, $watermarkY);
 				}
 			}
-			elseif (defined('IMAGETYPE_WEBP') && $iImagetype == IMAGETYPE_WEBP && function_exists('imagecreatefromwebp'))
+			elseif (defined('IMAGETYPE_WEBP') && $iSourceImagetype == IMAGETYPE_WEBP && function_exists('imagecreatefromwebp'))
 			{
 				$sourceResource = imagecreatefromwebp($source);
 
@@ -458,7 +485,7 @@ class Core_Image_Gd extends Core_Image
 					$sourceResource = $this->_addWatermark($sourceResource, $watermarkResource, $watermarkX, $watermarkY);
 				}
 			}
-			elseif (defined('IMAGETYPE_AVIF') && $iImagetype == IMAGETYPE_AVIF && function_exists('imagecreatefromavif'))
+			elseif (defined('IMAGETYPE_AVIF') && $iSourceImagetype == IMAGETYPE_AVIF && function_exists('imagecreatefromavif'))
 			{
 				$sourceResource = imagecreatefromavif($source);
 
@@ -470,7 +497,7 @@ class Core_Image_Gd extends Core_Image
 					$sourceResource = $this->_addWatermark($sourceResource, $watermarkResource, $watermarkX, $watermarkY);
 				}
 			}
-			elseif ($iImagetype == IMAGETYPE_GIF)
+			elseif ($iSourceImagetype == IMAGETYPE_GIF)
 			{
 				$sourceResourceTmp = imagecreatefromgif($source);
 
@@ -486,6 +513,7 @@ class Core_Image_Gd extends Core_Image
 
 					imagecopyresampled($sourceResource, $sourceResourceTmp, 0, 0, 0, 0, $width, $height, $width, $height);
 					imagedestroy($sourceResourceTmp);
+					$sourceResourceTmp = NULL;
 
 					$sourceResource = $this->_addWatermark($sourceResource, $watermarkResource, $watermarkX, $watermarkY);
 				}
@@ -497,38 +525,35 @@ class Core_Image_Gd extends Core_Image
 			}
 
 			imagedestroy($watermarkResource);
+			$watermarkResource = NULL;
 
 			if ($sourceResource)
 			{
-				// Change output format
-				if (!is_null($outputFormat))
-				{
-					$iImagetype = self::getImagetypeByFormat($outputFormat);
-				}
 
-				if ($iImagetype == IMAGETYPE_JPEG)
+				if ($iDestImagetype == IMAGETYPE_JPEG)
 				{
 					$return = imagejpeg($sourceResource, $target, intval(JPG_QUALITY));
 				}
-				elseif ($iImagetype == IMAGETYPE_PNG)
+				elseif ($iDestImagetype == IMAGETYPE_PNG)
 				{
 					$return = imagepng($sourceResource, $target, intval(PNG_QUALITY));
 				}
-				elseif (defined('IMAGETYPE_WEBP') && $iImagetype == IMAGETYPE_WEBP && function_exists('imagecreatefromwebp'))
+				elseif (defined('IMAGETYPE_WEBP') && $iDestImagetype == IMAGETYPE_WEBP && function_exists('imagecreatefromwebp'))
 				{
 					$return = imagewebp($sourceResource, $target, defined('WEBP_QUALITY') ? WEBP_QUALITY : 50);
 				}
-				elseif (defined('IMAGETYPE_AVIF') && $iImagetype == IMAGETYPE_AVIF && function_exists('imagecreatefromavif'))
+				elseif (defined('IMAGETYPE_AVIF') && $iDestImagetype == IMAGETYPE_AVIF && function_exists('imagecreatefromavif'))
 				{
 					$return = imageavif($sourceResource, $target, defined('AVIF_QUALITY') ? 'AVIF_QUALITY' : 50);
 				}
-				elseif ($iImagetype == IMAGETYPE_GIF)
+				elseif ($iDestImagetype == IMAGETYPE_GIF)
 				{
 					$return = imagegif($sourceResource, $target);
 				}
 
 				@chmod($target, CHMOD_FILE);
 				imagedestroy($sourceResource);
+				$sourceResource = NULL;
 			}
 		}
 		else
@@ -687,6 +712,49 @@ class Core_Image_Gd extends Core_Image
 		}
 
 		return 0;
+	}
+
+	/**
+	 * Detect animated GIF
+	 * @param string $filePath
+	 * @return bool
+	 */
+	public function isAnimatedGif($filePath)
+	{
+		$fp = fopen($filePath, "rb");
+		
+		if (fread($fp, 3) !== "GIF")
+		{
+			fclose($fp);
+			return FALSE;
+		}
+
+		$iFrames = 0;
+
+		while (!feof($fp) && $iFrames < 2)
+		{
+			if (fread($fp, 1) === "\x00")
+			{
+				// Animated gif contains multiple "frames", with each frame having a
+				// header made up of:
+				// * a static 4-byte sequence (\x00\x21\xF9\x04)
+				// * 4 variable bytes
+				// * a static 2-byte sequence (\x00\x2C)
+	
+				// Some of the animated GIFs do not contain graphic control extension (starts with 21 f9)
+				$byte = fread($fp, 1);
+				if ($byte === "\x2c"
+					|| $byte === "\x21" && fread($fp, 1) === "\xf9"
+				)
+				{
+					$iFrames++;
+				}
+			}
+		}
+
+		fclose($fp);
+
+		return $iFrames > 1;
 	}
 
 	/**

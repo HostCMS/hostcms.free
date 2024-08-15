@@ -64,9 +64,7 @@ $oAdmin_Form_Controller
 $oAdmin_Form_Controller->addExternalReplace('{crm_project_id}', $oCrm_Project->id);
 
 // Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -78,9 +76,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 	$oAdmin_Form_Controller->addAction($oCrm_Project_Note_Controller_Edit);
 }
 
-$oAdminFormActionUploadFiles = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('uploadFiles');
+$oAdminFormActionUploadFiles = $oAdmin_Form->Admin_Form_Actions->getByName('uploadFiles');
 
 if ($oAdminFormActionUploadFiles && $oAdmin_Form_Controller->getAction() == 'uploadFiles')
 {

@@ -518,6 +518,25 @@ class Core_Page extends Core_Servant_Properties
 	}
 
 	/**
+	 * Get block of linked css
+	 */
+	public function showFavicons()
+	{
+		$oSite = Core_Entity::factory('Site', CURRENT_SITE);
+		$aSite_Favicons = $oSite->Site_Favicons->findAll(FALSE);
+		foreach ($aSite_Favicons as $oSite_Favicon)
+		{
+			if ($oSite_Favicon->filename !== '')
+			{
+				echo '<link rel="' . htmlspecialchars($oSite_Favicon->rel) .  '"'
+					. ($oSite_Favicon->sizes != '' ? ' sizes="' . htmlspecialchars($oSite_Favicon->sizes) .  '"' : '')
+					. ($oSite_Favicon->type != '' ? ' type="' . htmlspecialchars($oSite_Favicon->type) .  '"' : '')
+					. ' href="' . htmlspecialchars($oSite_Favicon->getFaviconHref()) . '"' . ($this->doctype === 'xhtml' ? ' />' : '>') . "\n";
+			}
+		}
+	}
+
+	/**
 	 * Show page title
 	 * @return self
 	 */
@@ -660,7 +679,7 @@ class Core_Page extends Core_Servant_Properties
 
 		return $this->_errorNotFound(404);
 	}
-	
+
 	/**
 	 * Show 410 error
 	 * @return self

@@ -1959,10 +1959,7 @@ class Field_Controller_Tab
 		$aFileData = $aLargeFile;
 		$aSmallFileData = $aSmallFile;
 
-		$large_image = '';
-		$small_image = '';
-
-		$aCore_Config = Core::$mainConfig;
+		$large_image = $small_image = '';
 
 		$create_small_image_from_large = $this->_getEachPost("create_small_image_from_large_small_{$sFieldName}");
 
@@ -1975,7 +1972,7 @@ class Field_Controller_Tab
 		if ($bLargeImageIsCorrect)
 		{
 			// Проверка на допустимый тип файла
-			if (Core_File::isValidExtension($aFileData['name'], $aCore_Config['availableExtension']))
+			if (Core_File::isValidExtension($aFileData['name'], Core::$mainConfig['availableExtension']))
 			{
 				// Удаление файла большого изображения
 				if ($oFileValue->file)
@@ -2023,7 +2020,7 @@ class Field_Controller_Tab
 
 			// Явно указано малое изображение
 			if ($bSmallImageIsCorrect
-				&& Core_File::isValidExtension($aSmallFileData['name'], $aCore_Config['availableExtension']))
+				&& Core_File::isValidExtension($aSmallFileData['name'], Core::$mainConfig['availableExtension']))
 			{
 				// задано изображение
 				if ($oFileValue->file != '')

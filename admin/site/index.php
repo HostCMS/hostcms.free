@@ -70,9 +70,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 );
 
 // Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -87,9 +85,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 }
 
 // Действие "Применить"
-$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdminFormActionApply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
@@ -102,9 +98,7 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 }
 
 // Действие "Копировать"
-$oAdminFormActionCopy = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('copy');
+$oAdminFormActionCopy = $oAdmin_Form->Admin_Form_Actions->getByName('copy');
 
 if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 {
@@ -117,28 +111,22 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 }
 
 // Действие "Удалить ico-файл"
-$oAdminFormActionDeleteIcoFile = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deleteFavicon');
+$oAdminFormActionDeleteIcoFile = $oAdmin_Form->Admin_Form_Actions->getByName('deleteFavicon');
 
 if ($oAdminFormActionDeleteIcoFile && $oAdmin_Form_Controller->getAction() == 'deleteFavicon')
 {
-	$oSiteControllerDeleteIcoFile = Admin_Form_Action_Controller::factory(
-		'Admin_Form_Action_Controller_Type_Delete_File', $oAdminFormActionDeleteIcoFile
+	$oSite_Favicon_Delete_File = Admin_Form_Action_Controller::factory(
+		'Site_Favicon_Delete_File', $oAdminFormActionDeleteIcoFile
 	);
 
-	$oSiteControllerDeleteIcoFile
-		->methodName('deleteFavicon')
-		->divId(array('preview_large_icofile', 'delete_large_icofile'));
+	$oSite_Favicon_Delete_File->site_favicon_id(Core_Array::getGet('site_favicon_id', 0, 'int'));
 
 	// Добавляем контроллер редактирования контроллеру формы
-	$oAdmin_Form_Controller->addAction($oSiteControllerDeleteIcoFile);
+	$oAdmin_Form_Controller->addAction($oSite_Favicon_Delete_File);
 }
 
 // Действие "Отметить удаленным"
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('markDeleted');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('markDeleted');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'markDeleted')
 {
@@ -151,9 +139,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'markDeleted'
 }
 
 // Действие "Регистрационные данные"
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('accountInfo');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('accountInfo');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'accountInfo')
 {
@@ -169,9 +155,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'accountInfo'
 }
 
 // Действие "Добавить с шаблоном дизайна"
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('addSiteWithTemplate');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('addSiteWithTemplate');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'addSiteWithTemplate')
 {
@@ -186,9 +170,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'addSiteWithT
 	$oAdmin_Form_Controller->addAction($oSite_Controller_Edit);
 }
 
-$oAdminFormActionRollback = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('rollback');
+$oAdminFormActionRollback = $oAdmin_Form->Admin_Form_Actions->getByName('rollback');
 
 if ($oAdminFormActionRollback && $oAdmin_Form_Controller->getAction() == 'rollback')
 {

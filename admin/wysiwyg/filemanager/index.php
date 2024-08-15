@@ -256,9 +256,7 @@ if (!$oUser->read_only)
 }
 
 // Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -274,9 +272,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 }
 
 // Действие "Применить"
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'apply')
 {
@@ -288,9 +284,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'apply')
 }
 
 // Действие создание директории
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('createDirectory');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('createDirectory');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'createDirectory')
 {
@@ -307,9 +301,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'createDirect
 }
 
 // Действие загрузка файла
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('uploadFile');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('uploadFile');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'uploadFile')
 {
@@ -323,6 +315,22 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'uploadFile')
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($oWysiwyg_Filemanager_Controller_Upload_File);
+}
+
+// Действие переименовать
+$oAdminFormActionRename = $oAdmin_Form->Admin_Form_Actions->getByName('rename');
+
+if ($oAdminFormActionRename && $oAdmin_Form_Controller->getAction() == 'rename')
+{
+	$oFilemanager_Controller_Rename = Admin_Form_Action_Controller::factory(
+		'Filemanager_Controller_Rename', $oAdminFormActionRename
+	);
+
+	$oFilemanager_Controller_Rename
+		->cdir($cdir);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oFilemanager_Controller_Rename);
 }
 
 $path = CMS_FOLDER . ltrim($cdir, DIRECTORY_SEPARATOR);

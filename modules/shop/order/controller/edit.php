@@ -322,6 +322,21 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				array('class' => 'form-group col-xs-12 col-sm-4 col-md-2 margin-top-21')
 			), $oMainRow3);
 
+		$shop_payment_system_id = $this->_object->shop_payment_system_id;
+
+		if (!$this->_object->id)
+		{
+			$oShop_Payment_Systems = Core_Entity::factory('Shop_Payment_System');
+			$oShop_Payment_Systems->queryBuilder()
+				->where('shop_id', '=', $shop_id)
+				->orderBy('sorting');
+
+			$oShop_Payment_System = $oShop_Payment_Systems->getFirst(FALSE);
+
+			!is_null($oShop_Payment_System)
+				&& $shop_payment_system_id = $oShop_Payment_System->id;
+		}
+
 		$oMainRow3->add(
 			Admin_Form_Entity::factory('Select')
 				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3'))
@@ -330,7 +345,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$this->_fillPaymentSystems(Core_Array::getGet('shop_id', 0))
 				)
 				->name('shop_payment_system_id')
-				->value($this->_object->shop_payment_system_id)
+				->value($shop_payment_system_id)
 		);
 
 		$oMainTab->move($this->getField('payment_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3')), $oMainRow3);
@@ -351,6 +366,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->id('status_datetime')
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3')), $oMainRow4);
 
+		$company_id = $this->_object->company_id;
 
 		$aTmpCompanies = array(" … ");
 		$aCompanies = $this->_object->Shop->Site->Companies->findAll();
@@ -359,23 +375,36 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$aTmpCompanies[$oCompany->id] = $oCompany->name;
 		}
 
+		if (!$this->_object->id && count($aTmpCompanies) > 1)
+		{
+			unset($aTmpCompanies[0]);
+			reset($aTmpCompanies);
+			$company_id = key($aTmpCompanies);
+
+			$oMainRow4->add(Admin_Form_Entity::factory('Code')->html('<script>$(function(){
+				setTimeout(function(){
+					$("select[name = company_id]").change();
+				}, 500);
+			});</script>'));
+		}
+
 		$oMainRow4->add(
 			Admin_Form_Entity::factory('Select')
 				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3'))
 				->caption(Core::_('Shop_Order.company_id'))
 				->options($aTmpCompanies)
 				->name('company_id')
-				->value($this->_object->company_id)
-				->onchange("$.ajaxRequest({path: '/admin/shop/order/index.php',context: 'company_account_id', callBack: $.loadSelectOptionsCallback, objectId: {$objectId}, action: 'loadCompanyAccountList',additionalParams: 'company_id=' + this.value,windowId: '{$windowId}'}); return false")
+				->value($company_id)
+				->data('shop-order-id', $this->_object->id)
+				->onchange("$.ajaxRequest({path: '/admin/shop/order/index.php',context: 'company_account_id', callBack: $.loadSelectOptionsCallback, objectId: {$objectId}, action: 'loadCompanyAccountList',additionalParams: 'company_id=' + this.value + '&shop_order_id=' + this.getAttribute('data-shop-order-id'),windowId: '{$windowId}'}); return false")
 		);
 
 		$oAdditionalTab->delete(
 			$this->getField('company_account_id')
 		);
 
-
 		$oMainRow4->add(
-			Admin_Form_Entity::factory('Select')
+			$oCompanyAccountSelect = Admin_Form_Entity::factory('Select')
 				->caption(Core::_('Shop_Order.company_account_id'))
 				->id('company_account_id')
 				->options($this->_fillCompanyAccounts($this->_object->company_id))
@@ -383,6 +412,19 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->value($this->_object->company_account_id)
 				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3'))
 		);
+
+		if (!$this->_object->id && $company_id)
+		{
+			$oCompany = Core_Entity::factory('Company')->getById($company_id, FALSE);
+			if (!is_null($oCompany))
+			{
+				$oCompany_Account = $oCompany->Company_Accounts->getFirst(FALSE);
+				if (!is_null($oCompany_Account))
+				{
+					$oCompanyAccountSelect->data('setOptionId', $oCompany_Account->id);
+				}
+			}
+		}
 
 		$Shop_Delivery_Controller_Edit = new Shop_Delivery_Controller_Edit($this->_Admin_Form_Action);
 
@@ -1226,6 +1268,10 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 * Processing of the form. Apply object fields.
 	 * @return self
 	 * @hostcms-event Shop_Order_Controller_Edit.onAfterRedeclaredApplyObjectProperty
+	 * @hostcms-event Shop_Order_Controller_Edit.onBeforeChangeShopOrderItem
+	 * @hostcms-event Shop_Order_Controller_Edit.onAfterChangeShopOrderItem
+	 * @hostcms-event Shop_Order_Controller_Edit.onBeforeAddShopOrderItem
+	 * @hostcms-event Shop_Order_Controller_Edit.onAfterAddShopOrderItem
 	 */
 	protected function _applyObjectProperty()
 	{
@@ -1307,21 +1353,26 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			if (isset($_POST['shop_order_item_name_' . $oShop_Order_Item->id]))
 			{
+				Core_Event::notify(get_class($this) . '.onBeforeChangeShopOrderItem', $this, array($this->_Admin_Form_Controller, $oShop_Order_Item));
+
+				$oShop_Order_Item->name = Core_Array::getPost('shop_order_item_name_' . $oShop_Order_Item->id, '', 'trim');
+
 				$quantity = Core_Array::getPost('shop_order_item_quantity_' . $oShop_Order_Item->id);
-				$shop_warehouse_id = intval(Core_Array::getPost('shop_order_item_warehouse_' . $oShop_Order_Item->id));
+				$shop_warehouse_id = Core_Array::getPost('shop_order_item_warehouse_' . $oShop_Order_Item->id, 0, 'int');
 
 				$oShop_Order_Item->quantity != $quantity || $oShop_Order_Item->shop_warehouse_id != $shop_warehouse_id
 					&& $bShopOrderItemChanged = TRUE;
 
-				$oShop_Order_Item->name = trim(Core_Array::getPost('shop_order_item_name_' . $oShop_Order_Item->id));
 				$oShop_Order_Item->quantity = $quantity;
-				$oShop_Order_Item->price = Core_Array::getPost('shop_order_item_price_' . $oShop_Order_Item->id);
-				$oShop_Order_Item->rate = Core_Array::getPost('shop_order_item_rate_' . $oShop_Order_Item->id);
-				$oShop_Order_Item->type = intval(Core_Array::getPost('shop_order_item_type_' . $oShop_Order_Item->id));
-				$oShop_Order_Item->marking = trim(Core_Array::getPost('shop_order_item_marking_' . $oShop_Order_Item->id));
+				$oShop_Order_Item->price = Core_Array::getPost('shop_order_item_price_' . $oShop_Order_Item->id, 0, 'int');
+				$oShop_Order_Item->rate = Core_Array::getPost('shop_order_item_rate_' . $oShop_Order_Item->id, 0, 'int');
+				$oShop_Order_Item->type = Core_Array::getPost('shop_order_item_type_' . $oShop_Order_Item->id, 0, 'int');
+				$oShop_Order_Item->marking = Core_Array::getPost('shop_order_item_marking_' . $oShop_Order_Item->id, '', 'trim');
 				$oShop_Order_Item->shop_warehouse_id = $shop_warehouse_id;
-				$oShop_Order_Item->shop_order_item_status_id = intval(Core_Array::getPost('shop_order_item_status_' . $oShop_Order_Item->id));
+				$oShop_Order_Item->shop_order_item_status_id = Core_Array::getPost('shop_order_item_status_' . $oShop_Order_Item->id, 0, 'int');
 				$oShop_Order_Item->save();
+
+				Core_Event::notify(get_class($this) . '.onAfterChangeShopOrderItem', $this, array($this->_Admin_Form_Controller, $oShop_Order_Item));
 			}
 			else
 			{
@@ -1331,6 +1382,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			}
 		}
 
+		// Новые товары
 		$aNew_Shop_Order_Items_Name = Core_Array::getPost('shop_order_item_name', array());
 		$aNew_Shop_Order_Items_Quantity = Core_Array::getPost('shop_order_item_quantity', array());
 		$aNew_Shop_Order_Items_Price = Core_Array::getPost('shop_order_item_price', array());
@@ -1341,7 +1393,6 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$aNew_Shop_Order_Items_Shop_Item_Id = Core_Array::getPost('shop_order_item_id', array());
 		$aNew_Shop_Order_Items_Shop_Item_Status_Id = Core_Array::getPost('shop_order_item_status', array());
 
-		// Новые товары
 		foreach ($aNew_Shop_Order_Items_Name as $key => $name)
 		{
 			$shop_item_id = Core_Array::get($aNew_Shop_Order_Items_Shop_Item_Id, $key);
@@ -1353,6 +1404,9 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				: 0;
 
 			$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
+
+			Core_Event::notify(get_class($this) . '.onBeforeAddShopOrderItem', $this, array($this->_Admin_Form_Controller, $oShop_Order_Item, $key));
+
 			$oShop_Order_Item->shop_order_id = $this->_object->id;
 			$oShop_Order_Item->shop_item_id = $shop_item_id;
 			$oShop_Order_Item->shop_measure_id = $shop_mesure_id;
@@ -1360,11 +1414,13 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$oShop_Order_Item->quantity = Core_Array::get($aNew_Shop_Order_Items_Quantity, $key);
 			$oShop_Order_Item->price = Core_Array::get($aNew_Shop_Order_Items_Price, $key);
 			$oShop_Order_Item->rate = Core_Array::get($aNew_Shop_Order_Items_Rate, $key);
-			$oShop_Order_Item->type = intval(Core_Array::get($aNew_Shop_Order_Items_Type, $key));
-			$oShop_Order_Item->marking = trim(Core_Array::get($aNew_Shop_Order_Items_Marking, $key));
-			$oShop_Order_Item->shop_order_item_status_id = intval(Core_Array::get($aNew_Shop_Order_Items_Shop_Item_Status_Id, $key));
-			$oShop_Order_Item->shop_warehouse_id = intval(Core_Array::get($aNew_Shop_Order_Items_Warehouse, $key));
+			$oShop_Order_Item->type = Core_Array::get($aNew_Shop_Order_Items_Type, $key, 0, 'int');
+			$oShop_Order_Item->marking = Core_Array::get($aNew_Shop_Order_Items_Marking, $key, '', 'trim');
+			$oShop_Order_Item->shop_order_item_status_id = Core_Array::get($aNew_Shop_Order_Items_Shop_Item_Status_Id, $key, 0, 'int');
+			$oShop_Order_Item->shop_warehouse_id = Core_Array::get($aNew_Shop_Order_Items_Warehouse, $key, 0, 'int');
 			$oShop_Order_Item->save();
+
+			Core_Event::notify(get_class($this) . '.onAfterAddShopOrderItem', $this, array($this->_Admin_Form_Controller, $oShop_Order_Item, $key));
 
 			$bShopOrderItemChanged = TRUE;
 		}

@@ -39,9 +39,7 @@ $oAdmin_Form_Controller
 	->view('timeline');
 
 // Добавление заметки
-$oAdmin_Form_Action_Add_Event_Note = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('addNote');
+$oAdmin_Form_Action_Add_Event_Note = $oAdmin_Form->Admin_Form_Actions->getByName('addNote');
 
 if ($oAdmin_Form_Action_Add_Event_Note && $oAdmin_Form_Controller->getAction() == 'addNote')
 {
@@ -54,9 +52,7 @@ if ($oAdmin_Form_Action_Add_Event_Note && $oAdmin_Form_Controller->getAction() =
 }
 
 // Действие редактирования
-/*$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deleteEntity');
+/*$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('deleteEntity');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'deleteEntity')
 {
@@ -69,9 +65,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'deleteEntity
 }*/
 
 // Действие "Отметить удаленным"
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('markDeleted');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('markDeleted');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'markDeleted')
 {
@@ -84,9 +78,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'markDeleted'
 }
 
 // Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {

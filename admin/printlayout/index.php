@@ -193,9 +193,7 @@ if ($printlayout_dir_id)
 }
 
 // Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('edit');
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
@@ -210,9 +208,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 }
 
 // Действие "Применить"
-$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
+$oAdminFormActionApply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
@@ -225,9 +221,7 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 }
 
 // Действие "Удаление файла"
-$oAction = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deleteFile');
+$oAction = $oAdmin_Form->Admin_Form_Actions->getByName('deleteFile');
 
 if ($oAction && $oAdmin_Form_Controller->getAction() == 'deleteFile')
 {
@@ -244,9 +238,7 @@ if ($oAction && $oAdmin_Form_Controller->getAction() == 'deleteFile')
 }
 
 // Действие "Настройка модулей"
-$oAction = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('setModules');
+$oAction = $oAdmin_Form->Admin_Form_Actions->getByName('setModules');
 
 if ($oAction && $oAdmin_Form_Controller->getAction() == 'setModules')
 {
@@ -260,9 +252,7 @@ if ($oAction && $oAdmin_Form_Controller->getAction() == 'setModules')
 	$oAdmin_Form_Controller->addAction($Printlayout_Module_Controller_Set);
 }
 
-$oAdminFormActionRollback = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('rollback');
+$oAdminFormActionRollback = $oAdmin_Form->Admin_Form_Actions->getByName('rollback');
 
 if ($oAdminFormActionRollback && $oAdmin_Form_Controller->getAction() == 'rollback')
 {

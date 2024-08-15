@@ -113,4 +113,8 @@ return array(
 	'days' => '%d days',
 	'hour' => 'hour',
 	'hours' => '%d hours',
+	'minute' => 'minute',
+	'minutes' => '%d minutes',
+	'second' => 'second',
+	'seconds' => '%d seconds',
 );

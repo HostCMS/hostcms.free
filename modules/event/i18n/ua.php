@@ -164,4 +164,11 @@ return array(
 	'tags' => "Мітки (теги)",
 	'type_tag' => 'Введіть тег ...',
 	'without_deadline' => 'Без терміну',
+
+	'add_checklist' => 'додати чек-лист',
+	'remove_checklist' => 'видалити чек-лист',
+	'checklist_name' => 'Назва чек-листа',
+	'checklist_item_name' => 'Назва пункту',
+	'add_checklist_item' => 'додати пункт',
+	'remove_checklist_item' => 'видалити пункт',
 );

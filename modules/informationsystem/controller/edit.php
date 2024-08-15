@@ -526,10 +526,18 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 	 */
 	protected function _applyObjectProperty()
 	{
-		// Backup revision
-		if (Core::moduleIsActive('revision') && $this->_object->id)
+		$modelName = $this->_object->getModelName();
+
+		switch ($modelName)
 		{
-			$this->_object->backupRevision();
+			case 'informationsystem':
+				// Backup revision
+				if (Core::moduleIsActive('revision') && $this->_object->id)
+				{
+					$this->_object->backupRevision();
+				}
+
+			break;
 		}
 
 		parent::_applyObjectProperty();
@@ -555,7 +563,11 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 			}
 		}
 
+		Core::moduleIsActive('wysiwyg') && Wysiwyg_Controller::uploadImages($this->_formValues, $this->_object, $this->_Admin_Form_Controller);
+
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
+
+		return $this;
 	}
 
 	/**

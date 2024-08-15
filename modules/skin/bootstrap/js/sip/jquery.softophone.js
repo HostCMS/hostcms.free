@@ -19,8 +19,6 @@ $(function (){
 			});
 
 			$('.backspace-button').on('click', function() {
-				// $('.phone-number').focus();
-
 				var phone = $('.phone-number').val();
 				$('.phone-number').val(phone.substring(0, phone.length - 1));
 
@@ -29,10 +27,6 @@ $(function (){
 					$('.backspace-button').addClass('hidden');
 				}
 			});
-
-			/*$('.microphone').on('click', function(){
-				$(this).find('i').toggleClass('fa-microphone gray fa-microphone-slash darkorange');
-			});*/
 
 			$('.keyboard').on('click', function() {
 				$('.pad').toggleClass('hidden');

@@ -4,8 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @author Hostmake LLC
- * @copyright © 2005-2024 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2024, https://www.hostcms.ru
  */
 define('CMS_FOLDER', dirname(__FILE__) . DIRECTORY_SEPARATOR);
 define('HOSTCMS', TRUE);
@@ -129,3 +128,94 @@ class Hostcms_YM_Observer
 }
 
 Core_Event::attach('Admin_Form_Action_Controller_Type_Edit.onAfterRedeclaredPrepareForm', array('Hostcms_Shop_Order_Edit_Observer', 'onAfterRedeclaredPrepareForm'));*/
+
+/*class Hostcms_Cart_Observer
+{
+	static public function onAfterAddShopOrderItem($controller, $args)
+	{
+		list($oShop_Order_Item, $oShop_Cart) = $args;
+
+		$oShop_Item_Parent = $oShop_Cart->Shop_Item;
+
+		if ($oShop_Item_Parent->id && $oShop_Item_Parent->type == 3)
+		{
+			$oShop_Item_Controller = new Shop_Item_Controller();
+
+			$setQuantity = $oShop_Order_Item->quantity;
+			$setPrice = $oShop_Order_Item->price; // 10 000
+
+			$aShop_Item_Sets = $oShop_Item_Parent->Shop_Item_Sets->findAll(FALSE);
+
+			$totalItemPrices = 0;
+			foreach ($aShop_Item_Sets as $oShop_Item_Set)
+			{
+				$oShop_Item = Core_Entity::factory('Shop_Item', $oShop_Item_Set->shop_item_set_id);
+
+				$oShop_Item = $oShop_Item->shortcut_id
+					? $oShop_Item->Shop_Item
+					: $oShop_Item;
+
+				if (!is_null($oShop_Item->id))
+				{
+					$aPrices = $oShop_Item_Controller->getPrices($oShop_Item);
+					$totalItemPrices += $aPrices['price_discount'] * $oShop_Item_Set->count;
+				}
+			}
+
+			// var_dump($setPrice); // 10131.00"
+			// var_dump($totalItemPrices); // float(16386)
+
+			$delta = $totalItemPrices > 0
+				? $setPrice / $totalItemPrices
+				: 0;
+
+			$createdAmount = 0;
+			foreach ($aShop_Item_Sets as $oShop_Item_Set)
+			{
+				$oShop_Item = Core_Entity::factory('Shop_Item', $oShop_Item_Set->shop_item_set_id);
+
+				$oShop_Item = $oShop_Item->shortcut_id
+					? $oShop_Item->Shop_Item
+					: $oShop_Item;
+
+				if (!is_null($oShop_Item->id))
+				{
+					$oShop_Cart_New = clone $oShop_Cart;
+					$oShop_Cart_New->shop_item_id = $oShop_Item->id;
+					$oShop_Cart_New->quantity = $setQuantity * $oShop_Item_Set->count;
+
+					// Заменяем цену на пропорциональную цене вхождения товара в комплекте
+					$oNewShop_Order_Item = $controller->createOrderItem($oShop_Cart_New, $oShop_Item);
+					$oNewShop_Order_Item->price = $oNewShop_Order_Item->price * $delta;
+					$oNewShop_Order_Item->save();
+
+					$createdAmount += $oNewShop_Order_Item->price * $oShop_Cart_New->quantity;
+				}
+			}
+
+			// Разницу в копейках добавляем последнему товару
+			if ($createdAmount < $setPrice)
+			{
+				$oNewShop_Order_Item->price += ($setPrice - $createdAmount) / $oShop_Cart_New->quantity;
+				$oNewShop_Order_Item->save();
+			}
+
+			// var_dump($createdAmount);
+			// die();
+
+			$oShop_Order_Item->delete();
+		}
+	}
+}
+
+Core_Event::attach('Shop_Payment_System_Handler.onAfterAddShopOrderItem', array('Hostcms_Cart_Observer', 'onAfterAddShopOrderItem'));*/
+
+/*class Shop_Order_Observer
+{
+	static public function onCalltextitemscount($object, $args)
+	{
+		return Core_Inflection::instance('ru')->numberInWords($object->Shop_Order_Items->getCount(FALSE));
+	}
+}
+Core_Event::attach('shop_order.onCalltextitemscount', array('Shop_Order_Observer', 'onCalltextitemscount'));*/
+

@@ -9,7 +9,7 @@ async function getMedia() {
 			// Сначала, если доступно, получим устаревшее getUserMedia
 			var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
-			//Некоторые браузеры не реализуют его, тогда вернём отменённый промис
+			// Некоторые браузеры не реализуют его, тогда вернём отменённый промис
 			// с ошибкой для поддержания последовательности интерфейса
 			if (!getUserMedia) {
 				return Promise.reject(
@@ -48,8 +48,8 @@ export default async function initSoftophone(line, data) {
 		return false;
 	}
 
-	// const bMicro = await getMedia();
-	const bMicro = true; // !!!! TMP
+	const bMicro = await getMedia();
+	// const bMicro = true; // !!!! TMP
 
 	data = $.extend({
 		server: '',
@@ -60,7 +60,7 @@ export default async function initSoftophone(line, data) {
 		register_expires: 180,
 		session_timers: false,
 		rington: 'ringback.aac',
-		userAgent: 'JsSip-' + JsSIP.version
+		userAgent: 'HostCMS-JsSip-' + JsSIP.version
 	}, data);
 
 	console.log('initSoftophone', line, data);
@@ -158,7 +158,7 @@ export default async function initSoftophone(line, data) {
 			// Исходящий
 			if(session.direction === 'outgoing')
 			{
-				console.log('stream outgoing  -------->');
+				// console.log('stream outgoing  -------->');
 
 				session.on('connecting', function() {
 					console.log('CONNECT');
@@ -179,7 +179,7 @@ export default async function initSoftophone(line, data) {
 
 			if (session.direction === "incoming")
 			{
-				console.log('stream incoming  <--------');
+				// console.log('stream incoming  <--------');
 
 				playSound(data.rington, true);
 
@@ -374,23 +374,10 @@ function showTimer()
 				minutes++;
 			}
 
-			if (minutes < 10)
-			{
-				$('.phone-action-buttons #minutes').text("0" + minutes);
-			}
-			else
-			{
-				$('.phone-action-buttons #minutes').text(minutes);
-			}
+			$('.phone-action-buttons #minutes').text(minutes < 10 ? "0" + minutes : minutes);
 		}
 
-		if (seconds < 10) {
-			$('.phone-action-buttons #seconds').text("0" + seconds);
-		}
-		else
-		{
-			$('.phone-action-buttons #seconds').text(seconds);
-		}
+		$('.phone-action-buttons #seconds').text(seconds < 10 ? "0" + seconds : seconds);
 
 		showTimer();
 	}, 1000);

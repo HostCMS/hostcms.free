@@ -12,7 +12,7 @@
  * @package HostCMS 7\cron
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2023, https://www.hostcms.ru
  */
 
 require_once(dirname(__FILE__) . '/../' . 'bootstrap.php');

@@ -36,7 +36,7 @@ class Shop_Module extends Core_Module_Abstract
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2024-06-06';
+	public $date = '2024-07-09';
 
 	/**
 	 * Module name
@@ -671,7 +671,11 @@ class Shop_Module extends Core_Module_Abstract
 
 					if (!is_null($oShop_Item->id))
 					{
-						$additionalParams = "shop_id={$oShop_Item->Shop->id}&shop_group_id={$oShop_Item->shop_group_id}";
+						$shopGroupId = $oShop_Item->modification_id
+							? $oShop_Item->Modification->shop_group_id
+							: $oShop_Item->shop_group_id;
+
+						$additionalParams = "shop_id={$oShop_Item->Shop->id}&shop_group_id={$shopGroupId}";
 						$href = $oAdmin_Form_Controller->getAdminActionLoadHref($sPath, 'edit', NULL, 1, $oShop_Item->id, $additionalParams);
 						$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($sPath, 'edit', NULL, 1, $oShop_Item->id, $additionalParams);
 					}
