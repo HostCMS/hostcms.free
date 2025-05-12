@@ -47,4 +47,9 @@ return array(
 	'bot_page_description' => '%s потрібно перевірити безпеку вашого з\'єднання, перш ніж продовжити.',
 	'bot_page_button' => 'Я людина &#187;',
 	'bot_page_button_wait' => 'Будь ласка, зачекайте ...',
+
+	'import' => 'Імпорт',
+	'import_file' => 'Виберіть файл із комп\'ютера',
+	'import_button' => 'Завантажити',
+	'importFilters_success' => 'Імпорт завершено!',
 );

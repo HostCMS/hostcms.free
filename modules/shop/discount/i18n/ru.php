@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Скидки',
@@ -66,4 +66,5 @@ return array(
 	'move_items_dirs' => "Родительский раздел",
 	'move_success' => 'Скидки перенесены',
 	'color' => 'Цвет',
+	'max_discount' => 'Максимальная скидка',
 );

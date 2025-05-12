@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -137,7 +137,7 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 							shop_id = $('#<?php echo $windowId?> input[name = "shop_id"]').val();
 
 						$.ajax({
-							url: '/admin/shop/filter/seo/index.php',
+							url: hostcmsBackend + '/shop/filter/seo/index.php',
 							data: { 'load_properties': 1, 'shop_group_id': shop_group_id, 'shop_id': shop_id },
 							dataType: 'json',
 							type: 'POST',
@@ -199,7 +199,7 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 								if (in_array($oProperty->type, $aAvailableProperties))
 								{
 									$csrf = Core_Security::getCsrfToken();
-									$onclick = $this->_Admin_Form_Controller->getAdminActionLoadAjax('/admin/shop/filter/seo/index.php', 'deleteCondition', NULL, 0, $this->_object->id, "shop_filter_seo_property_id={$oShop_Filter_Seo_Property->id}&secret_csrf={$csrf}");
+									$onclick = $this->_Admin_Form_Controller->getAdminActionLoadAjax('/{admin}/shop/filter/seo/index.php', 'deleteCondition', NULL, 0, $this->_object->id, "shop_filter_seo_property_id={$oShop_Filter_Seo_Property->id}&secret_csrf={$csrf}");
 
 									?>
 									<div class="dd">
@@ -579,7 +579,7 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 					$('[name = shop_group_name]').autocomplete({
 						source: function(request, response) {
 							$.ajax({
-								url: '/admin/shop/item/index.php?autocomplete=1&show_group=1&shop_id={$this->_object->shop_id}',
+								url: hostcmsBackend + '/shop/item/index.php?autocomplete=1&show_group=1&shop_id={$this->_object->shop_id}',
 								dataType: 'json',
 								data: {
 									queryString: request.term

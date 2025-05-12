@@ -1,4 +1,4 @@
-/*global i18n ace Notify bootbox themeprimary readCookie createCookie revertFunc tinyMCE tinymce */
+/*global i18n ace Notify bootbox themeprimary readCookie createCookie revertFunc tinyMCE tinymce hostcmsBackend */
 
 function isEmpty(str) {
 	return (!str || 0 === str.length);
@@ -186,7 +186,7 @@ function isEmpty(str) {
 			var data = jQuery.getData({});
 
 			jQuery.ajax({
-				url: '/admin/index.php?ajaxCreateNote',
+				url: hostcmsBackend + '/index.php?ajaxCreateNote',
 				data: data,
 				dataType: 'json',
 				type: 'POST',
@@ -229,8 +229,7 @@ function isEmpty(str) {
 
 						jQuery.ajax({
 							context: textarea,
-							url: '/admin/index.php?' + 'ajaxNote&action=save'
-								+ '&entity_id=' + noteId,
+							url: hostcmsBackend + '/index.php?ajaxNote&action=save' + '&entity_id=' + noteId,
 							type: 'POST',
 							data: data,
 							dataType: 'json',
@@ -245,8 +244,7 @@ function isEmpty(str) {
 		// Удаление заметки
 		destroyNote: function(jDiv) {
 			jQuery.ajax({
-				url: '/admin/index.php?' + 'ajaxNote&action=delete'
-					+ '&entity_id=' + jDiv.data('user-note-id'),
+				url: hostcmsBackend + '/index.php?ajaxNote&action=delete&entity_id=' + jDiv.data('user-note-id'),
 				type: 'get',
 				dataType: 'json',
 				success: function(){}
@@ -270,6 +268,51 @@ function isEmpty(str) {
 				}
 			});
 		},
+		showCrmIcons: function(object, selector) {
+			$.loadingScreen('show');
+
+			var color = $(object).css('background-color');
+
+			$.ajax({
+				url: hostcmsBackend + '/crm/project/index.php',
+				data: { 'showCrmIconsModal': 1, 'color': color, 'selector': selector },
+				dataType: 'json',
+				type: 'POST',
+				success: function(response){
+					$.loadingScreen('hide');
+
+					$('body').append(response.html);
+
+					var $modal = $('#crmProjectIconsModal');
+
+					$modal.modal('show');
+
+					$modal.on('hidden.bs.modal', function () {
+						$(this).remove();
+					});
+				}
+			});
+		},
+		selectCrmIcon: function(object, selector) {
+			var $object = $(object),
+				value = $object.data('value'),
+				id = $object.data('id') || 0,
+				$modal = $('#crmProjectIconsModal'),
+				inputSelector = $('input[name = crm_icon_id]');
+
+			inputSelector.val(id);
+
+			if ($('.input-' + selector).length)
+			{
+				inputSelector = $('.input-' + selector)
+				inputSelector.val(value);
+			}
+
+			selector = $('.' + selector) || $('.crm-project-icon');
+			selector.find('i').attr('class', value);
+
+			$modal.modal('hide');
+		},
 		addEventChecklist: function (windowId, container)
 		{
 			var indexLength = $('#' + windowId + ' .event-checklist-wrapper > .well').length,
@@ -282,7 +325,7 @@ function isEmpty(str) {
 			$.loadingScreen('show');
 
 			$.ajax({
-				url: '/admin/event/index.php',
+				url: hostcmsBackend + '/event/index.php',
 				type: "POST",
 				data: { 'add_checklist': 1, 'index': index },
 				dataType: 'json',
@@ -311,7 +354,7 @@ function isEmpty(str) {
 			$.loadingScreen('show');
 
 			$.ajax({
-				url: '/admin/event/index.php',
+				url: hostcmsBackend + '/event/index.php',
 				type: "POST",
 				data: { 'load_checklists': 1, 'event_id': event_id },
 				dataType: 'json',
@@ -435,7 +478,7 @@ function isEmpty(str) {
 		showAdminFormSettings: function(admin_form_id, site_id, modelsNames)
 		{
 			$.ajax({
-				url: '/admin/admin_form/index.php',
+				url: hostcmsBackend + '/admin_form/index.php',
 				data: { 'showAdminFormSettingsModal': 1, 'admin_form_id': admin_form_id, 'site_id': site_id, 'modelsNames': modelsNames },
 				dataType: 'json',
 				type: 'POST',
@@ -556,7 +599,7 @@ function isEmpty(str) {
 				dataAmount = parseFloat($object.data('amount'));
 
 			$.ajax({
-				url: '/admin/shop/document/relation/add/index.php',
+				url: hostcmsBackend + '/shop/document/relation/add/index.php',
 				type: "POST",
 				data: { 'add_shop_document': 1, 'id': id, 'type': type, 'document_id': document_id },
 				dataType: 'json',
@@ -567,7 +610,7 @@ function isEmpty(str) {
 
 					if (result.related_document_id)
 					{
-						$.adminLoad({ path: '/admin/shop/document/relation/index.php', additionalParams: 'document_id=' + document_id + '&shop_id=' + shop_id +'&parentWindowId=' + windowId + '&_module=0', windowId: windowId, loadingScreen: false });
+						$.adminLoad({ path: hostcmsBackend + '/shop/document/relation/index.php', additionalParams: 'document_id=' + document_id + '&shop_id=' + shop_id +'&parentWindowId=' + windowId + '&_module=0', windowId: windowId, loadingScreen: false });
 
 						$('input[name = amount]').val($.mathRound(amount + dataAmount, 2));
 					}
@@ -581,7 +624,7 @@ function isEmpty(str) {
 				entity_id = $object.data('entity-id');
 
 			$.ajax({
-				url: '/admin/media/index.php',
+				url: hostcmsBackend + '/media/index.php',
 				type: "POST",
 				data: { 'add_media_file': 1, 'id': id, 'type': type, 'entity_id': entity_id },
 				dataType: 'json',
@@ -591,13 +634,13 @@ function isEmpty(str) {
 					$('#' + modalWindowId).parents('.modal').modal('hide');
 
 					mainFormLocker.unlock();
-					$.adminLoad({ path: '/admin/media/index.php', additionalParams: 'entity_id=' + entity_id + '&type=' + type + '&parentWindowId=' + windowId + '&_module=0', windowId: windowId, loadingScreen: false });
+					$.adminLoad({ path: hostcmsBackend + '/media/index.php', additionalParams: 'entity_id=' + entity_id + '&type=' + type + '&parentWindowId=' + windowId + '&_module=0', windowId: windowId, loadingScreen: false });
 				}
 			});
 		},
 		removeMediaFile: function(id, entity_id, type, windowId) {
 			$.ajax({
-				url: '/admin/media/index.php',
+				url: hostcmsBackend + '/media/index.php',
 				type: "POST",
 				data: { 'remove_media_file': 1, 'id': id, 'type': type, 'entity_id': entity_id },
 				dataType: 'json',
@@ -607,7 +650,7 @@ function isEmpty(str) {
 					if (res)
 					{
 						mainFormLocker.unlock();
-						$.adminLoad({ path: '/admin/media/index.php', additionalParams: 'entity_id=' + entity_id + '&type=' + type + '&parentWindowId=' + windowId + '&_module=0', windowId: windowId, loadingScreen: false });
+						$.adminLoad({ path: hostcmsBackend + '/media/index.php', additionalParams: 'entity_id=' + entity_id + '&type=' + type + '&parentWindowId=' + windowId + '&_module=0', windowId: windowId, loadingScreen: false });
 					}
 				}
 			});
@@ -624,9 +667,20 @@ function isEmpty(str) {
 			});
 
 			$.ajax({
-				url: '/admin/media/index.php',
+				url: hostcmsBackend + '/media/index.php',
 				type: "POST",
 				data: { 'refresh_sorting_media_file': 1, 'modelName': modelName, 'inputs': aInputs },
+				dataType: 'json',
+				error: function(){},
+				success: function () {}
+			});
+		},
+		refreshSetsSorting(aIds)
+		{
+			$.ajax({
+				url: hostcmsBackend + '/shop/item/index.php',
+				type: "POST",
+				data: { 'refresh_sorting_sets': 1, 'ids': aIds },
 				dataType: 'json',
 				error: function(){},
 				success: function () {}
@@ -639,7 +693,7 @@ function isEmpty(str) {
 				list_id = $object.data('list-id');
 
 			$.ajax({
-				url: '/admin/list/item/index.php',
+				url: hostcmsBackend + '/list/item/index.php',
 				data: { 'showAddListItemModal': 1, 'list_id': list_id },
 				dataType: 'json',
 				type: 'POST',
@@ -658,7 +712,7 @@ function isEmpty(str) {
 		},
 		savePropertyListItem: function(windowId, list_id, value) {
 			$.ajax({
-				url: '/admin/list/item/index.php',
+				url: hostcmsBackend + '/list/item/index.php',
 				data: { 'addListItem': 1, 'list_id': list_id, 'value': value },
 				dataType: 'json',
 				type: 'POST',
@@ -682,7 +736,7 @@ function isEmpty(str) {
 				production_process_id = $object.data('production-process-id');
 
 			$.ajax({
-				url: '/admin/production/process/stage/index.php',
+				url: hostcmsBackend + '/production/process/stage/index.php',
 				type: "POST",
 				data: { 'add_production_stage': 1, 'production_stage_id': id, 'production_process_id': production_process_id },
 				dataType: 'json',
@@ -692,24 +746,58 @@ function isEmpty(str) {
 
 					if (result.production_process_stage_id)
 					{
-						$.adminLoad({ path: '/admin/production/process/stage/index.php', additionalParams: 'production_process_id=' + production_process_id + '&parentWindowId=' + windowId + '&_module=0', windowId: windowId, loadingScreen: false });
+						$.adminLoad({ path: hostcmsBackend + '/production/process/stage/index.php', additionalParams: 'production_process_id=' + production_process_id + '&parentWindowId=' + windowId + '&_module=0', windowId: windowId, loadingScreen: false });
 					}
 				}
 			});
 		},
+
+		// Получение количества и стоимости единицы товара, используемого в техзадании
+		getTaskPlanMaterialCountAndCostValue: function (iShopItemId, aMapProcessPlanMaterials, windowId)
+		{
+			var oResult = {count: 0, price: 0};
+
+			if (!aMapProcessPlanMaterials)
+			{
+				aMapProcessPlanMaterials = $('#' + windowId + ' .plan-manufactures-table > tbody').data('aMapProcessPlanMaterials');
+			}
+
+			aMapProcessPlanMaterials.forEach(function(oItem)
+			{
+				oItem.materials.forEach(function(oMaterialInfo)
+				{
+					if (oMaterialInfo.id == iShopItemId)
+					{
+						oResult.count += oMaterialInfo.count;
+						!oResult.price && (oResult.price = +oMaterialInfo.price);
+
+						return false;
+					}
+				});
+			});
+
+			return oResult;
+		},
+
 		selectProductionProcessPlan: function(object, windowId, modalWindowId) {
 
 			var $object = $(object),
 				id = $object.data('id'),
-				production_task_id = $object.data('production-task-id');
+				production_task_id = $object.data('production-task-id'),
+				material_warehouse_id = $object.data('material_warehouse_id');
+
+
+			//console.log('getTaskPlanMaterialCountAndCostValue', getTaskPlanMaterialCountAndCostValue);
 
 			$.ajax({
-				url: '/admin/production/process/plan/index.php',
+				url: hostcmsBackend + '/production/process/plan/index.php',
 				type: "POST",
-				data: { 'add_production_process_plan': 1, 'production_process_plan_id': id, 'production_task_id': production_task_id },
+				data: { 'add_production_process_plan': 1, 'production_process_plan_id': id, 'production_task_id': production_task_id, 'material_warehouse_id': material_warehouse_id },
 				dataType: 'json',
 				error: function() {},
 				success: function(result) {
+
+					//console.log('result', result);
 
 					$('#' + modalWindowId).parents('.modal').modal('hide');
 
@@ -721,10 +809,12 @@ function isEmpty(str) {
 							oPlanMaterialsTableBody = $('#id_content_materials .plan-materials-table > tbody'),
 							oPlanMaterialsTr = oPlanMaterialsTableBody.find('tr'),
 							oExistingPlanMaterialsTr, oSpanMaterialCountValue,
-							oSpanMaterialCostValue, materialCostValue,
+							oSpanMaterialCostValue, materialCostValue, oSpanMaterialShortageValue,
 							aPlanMaterialsIds = [],
 							countMaterials,
-							newTableRow;
+							newTableRow,
+							materialShortage,
+							materialMeasureName, bCreateTableRow = true;
 
 							//console.log('oPlanMaterialsTr = ', oPlanMaterialsTr);
 
@@ -732,22 +822,22 @@ function isEmpty(str) {
 
 						// Добавляемая техкарта отсутствует среди ранее добавленных и для техкарты задана продукция (товары)
 						if (!~$.inArray(aProcessPlanInfo['id'], oPlanManufacturesTableBody.data('aAddedProcessPlansId'))
-							&& (countManufactures = result['result']['data']['process_plan']['manufacture'].length))
+							&& result['result']['data']['process_plan']['manufacture'] && (countManufactures = result['result']['data']['process_plan']['manufacture'].length))
 						{
 							// Продукция
 							for (var i = 0; i < countManufactures; i++)
 							{
 								var manufactureData = result['result']['data']['process_plan']['manufacture'][i],
-									manufactureRate = parseFloat(manufactureData['rate']);
+									manufactureRate = $.mathRound(parseFloat(manufactureData['rate']), 2);
+									// manufactureRate = parseFloat(manufactureData['rate']);
 
-									!Number.isInteger(manufactureRate) && (manufactureRate = manufactureRate.toFixed(2));
+								//!Number.isInteger(manufactureRate) && (manufactureRate = manufactureRate.toFixed(2));
 
-									newTableRow = $('<tr data-process-plan-id="' + result['result']['data']['process_plan']['id'] + '" data-item-id="' + manufactureData['shop_item_id'] + '"><td>' + manufactureData['shop_item_id'] + '</td>' + (!i ? ('<td rowspan="' + countManufactures + '">' + $.escapeHtml(result['result']['data']['process_plan']['name']) + '</td>') : '') + '<td>' + $.escapeHtml(manufactureData['shop_item_name']) + '</td>' + (!i ? ('<td rowspan="' + countManufactures + '" width="110"><input type="text" class="price manufacture-volume form-control" name="manufacture_volume_' + result['result']['data']['process_plan']['id'] + '" value="1"/></td>') : '') + ' <!--<td width="110"><input type="text" class="price manufacture-volume form-control" name="manufacture_volume_' + result['result']['data']['process_plan']['id'] + '" value="1"/></td>--><td class="manufacture_rate"><span class="manufacture_rate_value">' + manufactureRate + '</span>&nbsp;<span class="manufacture_measure_name">' + $.escapeHtml(manufactureData['measure_name']) + '</span></td><td class="manufacture_count"><span class="manufacture_count_value">' + manufactureRate + '</span>&nbsp;<span class="manufacture_measure_name">' + $.escapeHtml(manufactureData['measure_name']) + '</span></td><td></td><td></td>' + (!i ? '<td rowspan="' + countManufactures + '"><a class="delete-associated-item" onclick="$.deleteProductionTaskProcessPlan(this) /*var oTr = $(this).parents(\'tr\'), processPlanId = oTr.data(\'process-plan-id\'), oTrSiblings = oTr.siblings(\'[data-process-plan-id=\' + processPlanId + \']\'); console.log(oTrSiblings); next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)*/"><i class="fa fa-times-circle darkorange"></i></a></td>' : '') + '</tr>');
+								newTableRow = $('<tr data-process-plan-id="' + result['result']['data']['process_plan']['id'] + '" data-item-id="' + manufactureData['shop_item_id'] + '"><td>' + manufactureData['shop_item_id'] + '</td>' + (!i ? ('<td rowspan="' + countManufactures + '">' + $.escapeHtml(result['result']['data']['process_plan']['name']) + '</td>') : '') + '<td>' + $.escapeHtml(manufactureData['shop_item_name']) + '</td>' + (!i ? ('<td rowspan="' + countManufactures + '" width="110"><input type="text" class="price manufacture-volume form-control" name="manufacture_volume_' + result['result']['data']['process_plan']['id'] + '" value="1"/></td>') : '') + ' <!--<td width="110"><input type="text" class="price manufacture-volume form-control" name="manufacture_volume_' + result['result']['data']['process_plan']['id'] + '" value="1"/></td>--><td class="manufacture_rate"><span class="manufacture_rate_value">' + manufactureRate + '</span><span class="manufacture_measure_name">' + $.escapeHtml(manufactureData['measure_name']) + '</span></td><td class="manufacture_count"><span class="manufacture_count_value">' + manufactureRate + '</span><span class="manufacture_measure_name">' + $.escapeHtml(manufactureData['measure_name']) + '</span></td><td></td><td></td>' + (!i ? '<td rowspan="' + countManufactures + '"><a class="delete-associated-item" onclick="$.deleteProductionTaskProcessPlan(this) /*var oTr = $(this).parents(\'tr\'), processPlanId = oTr.data(\'process-plan-id\'), oTrSiblings = oTr.siblings(\'[data-process-plan-id=\' + processPlanId + \']\'); console.log(oTrSiblings); next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)*/"><i class="fa fa-times-circle darkorange"></i></a></td>' : '') + '</tr>');
 
-									oPlanManufacturesTableBody.append(newTableRow);
+								oPlanManufacturesTableBody.append(newTableRow);
 
-									//var newRow = $('<tr data-item-id=\"' + ui.item.id + '\"><td class=\"index\">' + $('#{$windowId} .index_value').val() + '</td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td width=\"110\"><input type=\"text\" class=\"price set-item-price form-control\" name=\"shop_item_price[]\" value=\"' + ui.item.price_with_tax +'\"/></td><td>' + $.escapeHtml(ui.item.currency) + '</td><td width=\"80\"><input class=\"set-item-count form-control\" name=\"shop_item_quantity[]\" value=\"\"/></td>	<td><span class=\"calc-warehouse-sum\"></span></td><td><a class=\"delete-associated-item\" onclick=\"var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>')
-
+								//var newRow = $('<tr data-item-id=\"' + ui.item.id + '\"><td class=\"index\">' + $('#{$windowId} .index_value').val() + '</td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td width=\"110\"><input type=\"text\" class=\"price set-item-price form-control\" name=\"shop_item_price[]\" value=\"' + ui.item.price_with_tax +'\"/></td><td>' + $.escapeHtml(ui.item.currency) + '</td><td width=\"80\"><input class=\"set-item-count form-control\" name=\"shop_item_quantity[]\" value=\"\"/></td>	<td><span class=\"calc-warehouse-sum\"></span></td><td><a class=\"delete-associated-item\" onclick=\"var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>')
 							}
 
 							// Материалы
@@ -758,8 +848,7 @@ function isEmpty(str) {
 								aPlanMaterialsIds.push($(this).data('itemId'));
 							});
 
-
-							// console.log('aPlanMaterialsIds', aPlanMaterialsIds);
+							//console.log('aPlanMaterialsIds', aPlanMaterialsIds);
 
 							countMaterials = result['result']['data']['process_plan']['materials'].length;
 
@@ -767,60 +856,94 @@ function isEmpty(str) {
 
 							var aTmpMaterials = [];
 
-							for (var i = 0; i < countMaterials; i++)
+							for (var j = 0; j < countMaterials; j++)
 							{
-								var materialsData = result['result']['data']['process_plan']['materials'][i],
-									materialCostValue = materialsData['price'] * materialsData['rate'];
+								var materialsData = result['result']['data']['process_plan']['materials'][j];
+
+								materialsData['rate'] = +materialsData['rate'];
+
+								materialCostValue = materialsData['price'] * materialsData['rate'];
 
 								aTmpMaterials.push({'id': materialsData['shop_item_id'], 'count': materialsData['rate'], 'price': materialsData['price']});
+
+								materialMeasureName = materialsData['measure_name'] ? $.escapeHtml(materialsData['measure_name']) : '';
 
 								// Материал уже есть в списке (относится к ранее добавленной техкарте)
 								if (aPlanMaterialsIds.includes(materialsData['shop_item_id']))
 								{
+									bCreateTableRow = false;
+
 									// Строка с существующим материалом
 									oExistingPlanMaterialsTr = oPlanMaterialsTr.filter('[data-item-id = "' + materialsData['shop_item_id'] + '"]');
 
+									var oTaskMaterialInfo = $.getTaskPlanMaterialCountAndCostValue(materialsData['shop_item_id'], oPlanManufacturesTableBody.data('aMapProcessPlanMaterials'), windowId);
+
 									// Количество
 									oSpanMaterialCountValue = oExistingPlanMaterialsTr.find('.material_count_value');
-									oSpanMaterialCountValue.text(+materialsData['rate'] + +oSpanMaterialCountValue.text());
+
+									//materialsData['rate'] += +oSpanMaterialCountValue.text();
+									materialsData['rate'] += +oTaskMaterialInfo.count;
+
+									//oSpanMaterialCountValue.text(materialsData['rate'] + +oSpanMaterialCountValue.text());
+									oSpanMaterialCountValue.text($.mathRound(materialsData['rate'], 2));
 
 									// Общая стоимость
+									//oSpanMaterialCostValue = oExistingPlanMaterialsTr.find('.material_cost_value');
+
 									oSpanMaterialCostValue = oExistingPlanMaterialsTr.find('.material_cost_value');
-									oSpanMaterialCostValue.text(materialCostValue + +oSpanMaterialCostValue.text());
+									//oSpanMaterialCostValue.text(materialCostValue + +oSpanMaterialCostValue.text());
+									oSpanMaterialCostValue.text(materialCostValue + +oTaskMaterialInfo.price);
+
+									// continue;
+								}
+								else
+								{
+									bCreateTableRow = true;
+								}
+
+								materialsData['rest'] = +materialsData['rest'];
+
+								//console.log('materialsData', materialsData);
+
+								materialShortage = materialsData['rate'] > materialsData['rest'] ? $.mathRound(materialsData['rate'] - materialsData['rest'], 2) : '';
+
+								if (materialShortage)
+								{
+									// Количество для заказа округляем до сотых в случае делимого товара (тип - 2),
+									// для остальных типов товаров - округляем до большего целого
+									materialShortage = materialsData['shop_item_type'] == 2 ? $.mathRound(materialShortage, 2) : Math.ceil(materialShortage);
+								}
+
+								if (!bCreateTableRow)
+								{
+									oExistingPlanMaterialsTr
+										.find('.material_shortage_value')
+											.text(materialShortage)
+										.end()
+										.find('.material_shortage .material_measure_name')
+											.html(materialShortage ? materialMeasureName : '');
 
 									continue;
 								}
 
 								//<td class="manufacture_count"><span class="manufacture_count_value">35</span> <span class="manufacture_measure_name">шт</span></td>
+								//materialsData['rate'] = +materialsData['rate'];
 
-								newTableRow = $('<tr data-item-id="' + materialsData['shop_item_id'] + '"><td>' + materialsData['shop_item_id'] + '</td><td>' + $.escapeHtml(materialsData['name']) + '</td><td class="material_count"><span class="material_count_value">' + materialsData['rate'] + '</span>&nbsp;<span class="material_measure_name">' + $.escapeHtml(materialsData['measure_name']) + '</span></td><td class="material_price"><span class="material_price_value">' + $.escapeHtml(materialsData['price']) + '</span>&nbsp;<span class="material_currency_sign">' + $.escapeHtml(materialsData['currency_sign']) + '</span></td><td class="material_cost"><span class="material_cost_value">' + materialCostValue + '</span>&nbsp;<span class="material_currency_sign">' + $.escapeHtml(materialsData['currency_sign']) + '</span></td><td></td><td></td>');
+								// materialMeasureName = '<span class="material_measure_name">' + $.escapeHtml(materialsData['measure_name']) + '</span>';
+
+								newTableRow = $('<tr data-item-id="' + materialsData['shop_item_id'] + '"><td>' + materialsData['shop_item_id'] + '</td><td>' + $.escapeHtml(materialsData['name']) + '</td><td class="material_count"><span class="material_count_value">' + materialsData['rate'] + '</span><span class="material_measure_name">' + materialMeasureName + '</span></td><td class="material_price"><span class="material_price_value">' + $.escapeHtml(materialsData['price']) + '</span><span class="material_currency_sign">' + $.escapeHtml(materialsData['currency_sign']) + '</span></td><td class="material_cost"><span class="material_cost_value">' + materialCostValue + '</span><span class="material_currency_sign">' + $.escapeHtml(materialsData['currency_sign']) + '</span></td><td class="material_rest"><span class="material_rest_value">' + materialsData['rest'] + '</span><span class="material_measure_name">' + materialMeasureName + '</span></td><td class="material_shortage"><span class="material_shortage_value">' + materialShortage + '</span><span class="material_measure_name">' + (materialShortage ? materialMeasureName : '') + '</span></td>');
 
 								oPlanMaterialsTableBody.append(newTableRow);
-
-								/* var manufactureData = result['result']['data']['process_plan']['manufacture'][i],
-									manufactureRate = parseFloat(manufactureData['rate']);
-
-									!Number.isInteger(manufactureRate) && (manufactureRate = manufactureRate.toFixed(2)); */
-
-									//var newTableRow = $('<tr data-process-plan-id="' + result['result']['data']['process_plan']['id'] + '" data-item-id="' + manufactureData['shop_item_id'] + '"><td>' + manufactureData['shop_item_id'] + '</td>' + (!i ? ('<td rowspan="' + countManufactures + '">' + result['result']['data']['process_plan']['name'] + '</td>') : '') + '<td>' + manufactureData['shop_item_name'] + '</td>' + (!i ? ('<td rowspan="' + countManufactures + '" width="110"><input type="text" class="price manufacture-volume form-control" name="manufacture_volume_' + result['result']['data']['process_plan']['id'] + '" value="1"/></td>') : '') + ' <!--<td width="110"><input type="text" class="price manufacture-volume form-control" name="manufacture_volume_' + result['result']['data']['process_plan']['id'] + '" value="1"/></td>--><td class="manufacture_rate"><span class="manufacture_rate_value">' + manufactureRate + '</span> <span class="manufacture_measure_name">' + manufactureData['measure_name'] + '</span></td><td class="manufacture_count"><span class="manufacture_count_value">' + manufactureRate + '</span> <span class="manufacture_measure_name">' + manufactureData['measure_name'] + '</span></td><td></td><td></td>' + (!i ? '<td rowspan="' + countManufactures + '"><a class="delete-associated-item" onclick="$.deleteProductionTaskProcessPlan(this) /*var oTr = $(this).parents(\'tr\'), processPlanId = oTr.data(\'process-plan-id\'), oTrSiblings = oTr.siblings(\'[data-process-plan-id=\' + processPlanId + \']\'); console.log(oTrSiblings); next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)*/"><i class="fa fa-times-circle darkorange"></i></a></td>' : '') + '</tr>');
-
-									//oPlanManufacturesTableBody.append(newTableRow);
-
-									//var newRow = $('<tr data-item-id=\"' + ui.item.id + '\"><td class=\"index\">' + $('#{$windowId} .index_value').val() + '</td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td width=\"110\"><input type=\"text\" class=\"price set-item-price form-control\" name=\"shop_item_price[]\" value=\"' + ui.item.price_with_tax +'\"/></td><td>' + $.escapeHtml(ui.item.currency) + '</td><td width=\"80\"><input class=\"set-item-count form-control\" name=\"shop_item_quantity[]\" value=\"\"/></td>	<td><span class=\"calc-warehouse-sum\"></span></td><td><a class=\"delete-associated-item\" onclick=\"var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>')
-
 							}
 
 							var oMapProcessPlanMaterials = {'process_plan_id': aProcessPlanInfo['id'], 'materials': aTmpMaterials};
 
 							oPlanManufacturesTableBody.data('aAddedProcessPlansId').push(aProcessPlanInfo['id']);
 							oPlanManufacturesTableBody.data('aMapProcessPlanMaterials').push(oMapProcessPlanMaterials);
+
+							// console.log('oMapProcessPlanMaterials', oMapProcessPlanMaterials);
 						}
 					}
-
-					/* if (result.production_task_process_plan_id)
-					{
-						$.adminLoad({ path: '/admin/production/process/plan/index.php', additionalParams: 'production_task_id=' + production_task_id + '&parentWindowId=' + windowId + '&_module=0', windowId: windowId, loadingScreen: false });
-					} */
 				}
 			});
 		},
@@ -869,7 +992,9 @@ function isEmpty(str) {
 					// Цикл по материалам, используемым в удаляемой техкарте
 					aDeletedProcessPlanMaterials.forEach(function(oDeletedMaterial) {
 
-						var aIndexesOfMapProcessPlanMaterials = [], bMaterialUsedInOtherProcessPlan = false;
+						// var aIndexesOfMapProcessPlanMaterials = [];
+
+						var bMaterialUsedInOtherProcessPlan = false;
 
 						// Проверяем, используется ли в других техкартах данного техзадания удаляемый материал
 						for (var i = 0; i < iMapProcessPlanMaterialsLength; i++)
@@ -924,7 +1049,7 @@ function isEmpty(str) {
 
 		loadChartaccounts: function(windowId, chartaccount_id, prefix) {
 			$.ajax({
-				url: '/admin/chartaccount/operation/index.php',
+				url: hostcmsBackend + '/chartaccount/operation/index.php',
 				type: "POST",
 				data: { 'load_chartaccounts': 1, 'chartaccount_id': chartaccount_id, 'prefix': prefix },
 				dataType: 'json',
@@ -969,14 +1094,14 @@ function isEmpty(str) {
 		},
 		filterChartaccountTrialbalanceEntries: function(object, windowId, code) {
 			$.sendRequest({
-				path: '/admin/chartaccount/trialbalance/entry/index.php?code=' + code,
+				path: hostcmsBackend + '/chartaccount/trialbalance/entry/index.php?code=' + code,
 				context: $('#' + windowId + ' .mainForm')
 			});
 		},
 		/*addChartaccountOperationItem: function (company_id)
 		{
 			$.ajax({
-				url: '/admin/chartaccount/operation/index.php',
+				url: hostcmsBackend + '/chartaccount/operation/index.php',
 				data: { 'showAddItem': 1, 'company_id': company_id },
 				dataType: 'json',
 				type: 'POST',
@@ -1023,7 +1148,7 @@ function isEmpty(str) {
 				item.html($.escapeHtml(_t.val()) + '<i class="fa-solid fa-xmark" onclick="$.sqlDeleteTab(this);"></i>').css('display', '');
 				$editor.parent().remove();
 
-				var settings = { path: '/admin/sql/index.php', windowId: '#id_content' };
+				var settings = { path: hostcmsBackend + '/sql/index.php', windowId: '#id_content' };
 
 				var data = jQuery.getData(settings);
 
@@ -1065,11 +1190,14 @@ function isEmpty(str) {
 				: $(object),
 			_a = _t.parents('a');
 
+			// console.log(_t);
+			// console.log(_a);
+
 			var res = confirm(i18n['confirm_delete']);
 			if (res)
 			{
 				var id = _a.attr('href').split('_')[1];
-				$.adminLoad({ path: '/admin/sql/index.php', action: 'delete', additionalParams: 'tabid=' + id, windowId: 'id_content' });
+				$.adminLoad({ path: hostcmsBackend + '/sql/index.php', action: 'delete', additionalParams: 'tabid=' + id, windowId: 'id_content' });
 			}
 
 			return false;
@@ -1078,7 +1206,7 @@ function isEmpty(str) {
 			if ($("#id_content #calendar").length)
 			{
 				$.ajax({
-					url: '/admin/calendar/index.php',
+					url: hostcmsBackend + '/calendar/index.php',
 					type: 'POST',
 					dataType: 'json',
 					data: { 'updateCaldav': 1 },
@@ -1114,7 +1242,7 @@ function isEmpty(str) {
 				crm_note_attachment_id = $object.data('id');
 
 			$.ajax({
-				url: '/admin/crm/note/index.php',
+				url: hostcmsBackend + '/crm/note/index.php',
 				data: { 'showCrmNoteAttachment': 1, 'crm_note_attachment_id': crm_note_attachment_id, 'params': model + '_id=' + id },
 				dataType: 'json',
 				type: 'POST',
@@ -1161,6 +1289,13 @@ function isEmpty(str) {
 			// $prev.addClass('showed');
 			$object.remove();
 		},
+		showAllDescription: function(object) {
+			var $object = $(object),
+				$parent = $object.parents('.crm-description-wrapper');
+
+			$parent.find('.crm-description.expand').removeClass('expand');
+			$object.remove();
+		},
 		showAutosave: function($form) {
 			var admin_form_id = $form.data('adminformid');
 
@@ -1170,7 +1305,7 @@ function isEmpty(str) {
 					entity_id = $('input[name = id]', $form).val();
 
 				$.ajax({
-					url: '/admin/admin_form/index.php',
+					url: hostcmsBackend + '/admin_form/index.php',
 					data: { 'show_autosave': 1, 'admin_form_id': admin_form_id, 'dataset': dataset, 'entity_id': entity_id },
 					dataType: 'json',
 					type: 'POST',
@@ -1252,7 +1387,7 @@ function isEmpty(str) {
 			});
 
 			$.ajax({
-				url: '/admin/admin_form/index.php',
+				url: hostcmsBackend + '/admin_form/index.php',
 				data: { 'delete_autosave': 1, 'admin_form_autosave_id': id },
 				dataType: 'json',
 				type: 'POST',
@@ -1316,7 +1451,7 @@ function isEmpty(str) {
 		},
 		getSeoFilterPropertyValues: function(object) {
 			$.ajax({
-				url: '/admin/shop/filter/seo/index.php',
+				url: hostcmsBackend + '/shop/filter/seo/index.php',
 				data: { 'get_values': 1, 'property_id': $(object).val() },
 				dataType: 'json',
 				type: 'POST',
@@ -1356,7 +1491,7 @@ function isEmpty(str) {
 				}
 
 				$.ajax({
-					url: '/admin/shop/filter/seo/index.php',
+					url: hostcmsBackend + '/shop/filter/seo/index.php',
 					data: { 'add_property': 1, 'property_id': property_id, 'property_value': property_value, 'property_value_to': property_value_to },
 					dataType: 'json',
 					type: 'POST',
@@ -1478,7 +1613,7 @@ function isEmpty(str) {
 		addIpaddressFilterCondition: function()
 		{
 			$.ajax({
-				url: '/admin/ipaddress/filter/index.php',
+				url: hostcmsBackend + '/ipaddress/filter/index.php',
 				data: { 'add_filter': 1 },
 				dataType: 'json',
 				type: 'POST',
@@ -1510,7 +1645,7 @@ function isEmpty(str) {
 
 			$ban_hours.removeClass('hidden');
 
-			if ($object.val() == 1)
+			if (+$object.val())
 			{
 				$ban_hours.addClass('hidden');
 			}
@@ -1581,7 +1716,7 @@ function isEmpty(str) {
 		addIpaddressVisitorFilterCondition: function()
 		{
 			$.ajax({
-				url: '/admin/ipaddress/visitor/filter/index.php',
+				url: hostcmsBackend + '/ipaddress/visitor/filter/index.php',
 				data: { 'add_filter': 1 },
 				dataType: 'json',
 				type: 'POST',
@@ -1686,9 +1821,9 @@ function isEmpty(str) {
 				break;
 				case 1:
 					$('textarea#editor').tinymce({
-						script_url: "/admin/wysiwyg/tinymce.min.js",
+						script_url: hostcmsBackend + "/wysiwyg/tinymce.min.js",
 						language: lng,
-						language_url: '/admin/wysiwyg/langs/' + lng + '.js',
+						language_url: hostcmsBackend + '/wysiwyg/langs/' + lng + '.js',
 						menubar: false,
 						statusbar: false,
 						plugins: [
@@ -1706,7 +1841,7 @@ function isEmpty(str) {
 
 			settings = $.extend({
 				block_ip: 1,
-				path: '/admin/ipaddress/index.php',
+				path: hostcmsBackend + '/ipaddress/index.php',
 			}, settings);
 
 			$.ajax({
@@ -1805,7 +1940,7 @@ function isEmpty(str) {
 				post[id] = 1;
 				post['lead_status_id'] = lead_status_id;
 
-				$.adminLoad({path: '/admin/lead/index.php', action: 'morphLead', operation: operation, post: post, additionalParams: '', windowId: windowId});
+				$.adminLoad({path: hostcmsBackend + '/lead/index.php', action: 'morphLead', operation: operation, post: post, additionalParams: '', windowId: windowId});
 			});
 
 			var jActiveLi = $(".lead-stage-wrapper.lead-stage-wrapper-" + lead_id + " .lead-stage.active"),
@@ -2149,7 +2284,7 @@ function isEmpty(str) {
 			$.loadingScreen('show');
 
 			$.ajax({
-				url: '/admin/dms/document/version/attachment/index.php',
+				url: hostcmsBackend + '/dms/document/version/attachment/index.php',
 				data: { 'show_sign_modal': 1, 'dms_document_version_attachment_id': dms_document_version_attachment_id },
 				dataType: 'json',
 				type: 'POST',
@@ -2179,7 +2314,7 @@ function isEmpty(str) {
 			$.loadingScreen('show');
 
 			$.ajax({
-				url: '/admin/dms/document/version/attachment/index.php',
+				url: hostcmsBackend + '/dms/document/version/attachment/index.php',
 				data: { 'show_unsign_modal': 1, 'dms_document_version_attachment_id': dms_document_version_attachment_id },
 				dataType: 'json',
 				type: 'POST',
@@ -2203,7 +2338,7 @@ function isEmpty(str) {
 			var dms_workflow_template_step_id = $object.data('step-id');
 
 			$.ajax({
-				url: '/admin/dms/workflow/template/index.php',
+				url: hostcmsBackend + '/dms/workflow/template/index.php',
 				data: { 'show_modal': 1, 'dms_workflow_template_step_id': dms_workflow_template_step_id, 'dms_workflow_template_id': dms_workflow_template_id },
 				dataType: 'json',
 				type: 'POST',
@@ -2226,7 +2361,7 @@ function isEmpty(str) {
 		startDmsWorkflow: function(dms_document_id)
 		{
 			$.ajax({
-				url: '/admin/dms/document/index.php',
+				url: hostcmsBackend + '/dms/document/index.php',
 				data: { 'show_workflow_modal': 1, 'dms_document_id': dms_document_id },
 				dataType: 'json',
 				type: 'POST',
@@ -2248,7 +2383,7 @@ function isEmpty(str) {
 			$('#dmsWorkflowModal' + dms_document_id).modal('hide');
 
 			$.ajax({
-				url: '/admin/dms/document/index.php',
+				url: hostcmsBackend + '/dms/document/index.php',
 				data: { 'show_workflow_document_modal': 1, 'dms_document_id': dms_document_id, 'dms_workflow_template_id': dms_workflow_template_id },
 				dataType: 'json',
 				type: 'POST',
@@ -2272,7 +2407,7 @@ function isEmpty(str) {
 		applyDmsWorkflowTemplateDocument: function(dms_document_id, dms_workflow_template_id)
 		{
 			$.ajax({
-				url: '/admin/dms/document/index.php',
+				url: hostcmsBackend + '/dms/document/index.php',
 				data: { 'start_workflow': 1, 'dms_document_id': dms_document_id, 'dms_workflow_template_id': dms_workflow_template_id, 'data': $('#dmsWorkflowDocumentModal' + dms_document_id).find('input[type=hidden]').serialize() },
 				dataType: 'json',
 				type: 'POST',
@@ -2294,7 +2429,7 @@ function isEmpty(str) {
 				jParent = $object.parents('.dd-item');
 
 			$.ajax({
-				url: '/admin/dms/document/index.php',
+				url: hostcmsBackend + '/dms/document/index.php',
 				data: { 'edit_template_users_modal': 1, 'dms_workflow_template_step_id': dms_workflow_template_step_id, 'data': jParent.find('input[type=hidden]').serialize(), 'route_type': route_type },
 				dataType: 'json',
 				type: 'POST',
@@ -2387,7 +2522,7 @@ function isEmpty(str) {
 			$.loadingScreen('show');
 
 			$.ajax({
-				url: '/admin/dms/document/relation/index.php',
+				url: hostcmsBackend + '/dms/document/relation/index.php',
 				data: { 'show_modal': 1, 'dms_document_id': dms_document_id, 'window_id': windowId },
 				dataType: 'json',
 				type: 'POST',
@@ -2413,7 +2548,7 @@ function isEmpty(str) {
 				$.loadingScreen('show');
 
 				$.ajax({
-					url: '/admin/dms/document/relation/index.php',
+					url: hostcmsBackend + '/dms/document/relation/index.php',
 					data: { 'apply_relation': 1, 'dms_document_id': dms_document_id, 'dms_document_relation_id': dms_document_relation_id, 'dms_document_relation_type_id': dms_document_relation_type_id },
 					dataType: 'json',
 					type: 'POST',
@@ -2422,7 +2557,7 @@ function isEmpty(str) {
 						{
 							$.loadingScreen('hide');
 
-							$.adminLoad({ path: '/admin/dms/document/relation/index.php', additionalParams: 'dms_document_id=' + dms_document_id + '&hideMenu=1&_module=0', windowId: windowId, loadingScreen: false });
+							$.adminLoad({ path: hostcmsBackend + '/dms/document/relation/index.php', additionalParams: 'dms_document_id=' + dms_document_id + '&hideMenu=1&_module=0', windowId: windowId, loadingScreen: false });
 						}
 					}
 				});
@@ -2469,7 +2604,7 @@ function isEmpty(str) {
 			}
 
 			$.ajax({
-				url: '/admin/dms/workflow/template/index.php',
+				url: hostcmsBackend + '/dms/workflow/template/index.php',
 				data: { 'add_modal_row': 1, 'type': $type, 'windowId': windowId },
 				dataType: 'json',
 				type: 'POST',
@@ -2520,7 +2655,7 @@ function isEmpty(str) {
 			});
 
 			$.ajax({
-				url: '/admin/dms/workflow/template/index.php',
+				url: hostcmsBackend + '/dms/workflow/template/index.php',
 				data: { 'resort_list': 1, 'sorting': aSorting },
 				dataType: 'json',
 				type: 'POST',
@@ -2530,7 +2665,7 @@ function isEmpty(str) {
 		applyActions: function(dms_workflow_template_id, dms_workflow_template_step_id)
 		{
 			$.ajax({
-				url: '/admin/dms/workflow/template/index.php',
+				url: hostcmsBackend + '/dms/workflow/template/index.php',
 				data: { 'apply_action': 1, 'data': $('.actions-form').serialize(), 'dms_workflow_template_step_id': dms_workflow_template_step_id, 'dms_workflow_template_id': dms_workflow_template_id },
 				dataType: 'json',
 				type: 'POST',
@@ -2543,7 +2678,7 @@ function isEmpty(str) {
 		loadActionsList: function(dms_workflow_template_id)
 		{
 			$.ajax({
-				url: '/admin/dms/workflow/template/index.php',
+				url: hostcmsBackend + '/dms/workflow/template/index.php',
 				data: { 'show_actions_list': 1, 'dms_workflow_template_id': dms_workflow_template_id },
 				dataType: 'json',
 				type: 'POST',
@@ -2566,7 +2701,7 @@ function isEmpty(str) {
 			var dms_workflow_template_step_id = $object.data('step-id');
 
 			$.ajax({
-				url: '/admin/dms/workflow/template/index.php',
+				url: hostcmsBackend + '/dms/workflow/template/index.php',
 				data: { 'add_route': 1, 'dms_workflow_template_step_id': dms_workflow_template_step_id },
 				dataType: 'json',
 				type: 'POST',
@@ -2606,7 +2741,7 @@ function isEmpty(str) {
 		applyRoutes: function(dms_workflow_template_id, dms_workflow_template_step_id)
 		{
 			$.ajax({
-				url: '/admin/dms/workflow/template/index.php',
+				url: hostcmsBackend + '/dms/workflow/template/index.php',
 				data: { 'apply_route': 1, 'data': $('.routes-form').serialize(), 'dms_workflow_template_step_id': dms_workflow_template_step_id },
 				dataType: 'json',
 				type: 'POST',
@@ -2702,7 +2837,7 @@ function isEmpty(str) {
 					$.loadingScreen('show');
 
 					$.ajax({
-						url: '/admin/dms/document/index.php',
+						url: hostcmsBackend + '/dms/document/index.php',
 						data: { 'remove_user_access': 1, 'dms_document_access_user_id': dms_document_access_user_id },
 						dataType: 'json',
 						type: 'POST',
@@ -2721,7 +2856,7 @@ function isEmpty(str) {
 		dmsEditDocument: function(dms_document_version_attachment_id, cloud_id)
 		{
 			$.ajax({
-				url: '/admin/dms/document/version/attachment/index.php',
+				url: hostcmsBackend + '/dms/document/version/attachment/index.php',
 				data: { 'open_edit_file': 1, 'dms_document_version_attachment_id': dms_document_version_attachment_id, 'cloud_id': cloud_id },
 				dataType: 'json',
 				type: 'POST',
@@ -2736,7 +2871,7 @@ function isEmpty(str) {
 								clearInterval(timer);
 
 								$.ajax({
-									url: '/admin/dms/document/version/attachment/index.php',
+									url: hostcmsBackend + '/dms/document/version/attachment/index.php',
 									data: { 'close_edit_file': 1, 'file_id': answer.file_id, 'dms_document_version_attachment_id': dms_document_version_attachment_id, 'cloud_id': cloud_id },
 									dataType: 'json',
 									type: 'POST',
@@ -2747,9 +2882,9 @@ function isEmpty(str) {
 
 											if (answer.document_id)
 											{
-												$.adminLoad({ path: '/admin/dms/document/version/attachment/index.php', additionalParams: 'dms_document_id=' + answer.document_id + '&hideMenu=1&_module=0', windowId: 'document-attachments', loadingScreen: false });
+												$.adminLoad({ path: hostcmsBackend + '/dms/document/version/attachment/index.php', additionalParams: 'dms_document_id=' + answer.document_id + '&hideMenu=1&_module=0', windowId: 'document-attachments', loadingScreen: false });
 
-												$.adminLoad({ path: '/admin/dms/document/version/index.php', additionalParams: 'dms_document_id=' + answer.document_id + '&hideMenu=1&_module=0', windowId: 'document-versions', loadingScreen: false });
+												$.adminLoad({ path: hostcmsBackend + '/dms/document/version/index.php', additionalParams: 'dms_document_id=' + answer.document_id + '&hideMenu=1&_module=0', windowId: 'document-versions', loadingScreen: false });
 											}
 										}
 									}
@@ -2769,7 +2904,7 @@ function isEmpty(str) {
 			if (dms_document_type_id)
 			{
 				$.ajax({
-					url: '/admin/dms/document/type/index.php',
+					url: hostcmsBackend + '/dms/document/type/index.php',
 					data: { 'load_fields': 1, 'dms_document_id': dms_document_id, 'dms_document_type_id': dms_document_type_id, 'hostcms[window]': windowId },
 					dataType: 'json',
 					type: 'POST',
@@ -2784,7 +2919,7 @@ function isEmpty(str) {
 		showStateHistory: function(dms_document_id)
 		{
 			$.ajax({
-				url: '/admin/dms/document/index.php',
+				url: hostcmsBackend + '/dms/document/index.php',
 				data: { 'load_state_history': 1, 'dms_document_id': dms_document_id },
 				dataType: 'json',
 				type: 'POST',
@@ -2812,7 +2947,7 @@ function isEmpty(str) {
 		dmsWorkflowShowStateValues: function(object, windowId)
 		{
 			$.ajaxRequest({
-				path: '/admin/dms/workflow/index.php',
+				path: hostcmsBackend + '/dms/workflow/index.php',
 				callBack: function(data) {
 					$('#' + windowId + ' #progress_dms_state_value_id, #' + windowId + ' #success_dms_state_value_id, #' + windowId + ' #failed_dms_state_value_id').appendOptions(data);
 				},
@@ -2874,7 +3009,7 @@ function isEmpty(str) {
 							});
 
 							$.ajax({
-								url: '/admin/user/index.php',
+								url: hostcmsBackend + '/user/index.php',
 								type: 'POST',
 								data: { 'sortableBookmarks': 1, 'bookmarks': aIds },
 								dataType: 'json',
@@ -2959,7 +3094,7 @@ function isEmpty(str) {
 			if (bNeedsRequest)
 			{
 				$.ajax({
-					url: '/admin/index.php?ajaxWidgetLoad&moduleId=' + jBookmarksListBox.data('moduleId') + '&type=85',
+					url: hostcmsBackend + '/index.php?ajaxWidgetLoad&moduleId=' + jBookmarksListBox.data('moduleId') + '&type=85',
 					type: 'POST',
 					data: data,
 					dataType: 'json',
@@ -3063,7 +3198,7 @@ function isEmpty(str) {
 					if (name)
 					{
 						$.ajax({
-							url: '/admin/user/index.php',
+							url: hostcmsBackend + '/user/index.php',
 							type: "POST",
 							data: {'add_bookmark': 1, 'name': name, 'path': settings.path, 'module_id': settings.module_id},
 							dataType: 'json',
@@ -3112,7 +3247,7 @@ function isEmpty(str) {
 					if (result)
 					{
 						$.ajax({
-							url: '/admin/user/index.php',
+							url: hostcmsBackend + '/user/index.php',
 							type: "POST",
 							data: {'remove_bookmark': 1, 'bookmark_id': settings.bookmark_id},
 							dataType: 'json',
@@ -3177,7 +3312,7 @@ function isEmpty(str) {
 		},
 		generateCoupon: function(jInput) {
 			$.ajax({
-				url: '/admin/shop/discount/index.php',
+				url: hostcmsBackend + '/shop/discount/index.php',
 				type: 'POST',
 				data: {'generate-coupon': 1},
 				dataType: 'json',
@@ -3192,7 +3327,7 @@ function isEmpty(str) {
 		showEmails: function(data)
 		{
 			$.ajax({
-				url: '/admin/printlayout/index.php',
+				url: hostcmsBackend + '/printlayout/index.php',
 				type: 'POST',
 				data: {'showEmails': 1, 'representative': data.id},
 				dataType: 'json',
@@ -3373,7 +3508,7 @@ function isEmpty(str) {
 					post['mode'] = 'edit';
 					post['lead_status_id'] = lead_status_id;
 
-					$.adminLoad({path: '/admin/lead/index.php', action: 'morphLead', operation: 'finish', post: post, additionalParams: '', windowId: result.window_id});
+					$.adminLoad({path: hostcmsBackend + '/lead/index.php', action: 'morphLead', operation: 'finish', post: post, additionalParams: '', windowId: result.window_id});
 				}
 				else if (result.type == 2)
 				{
@@ -4089,7 +4224,7 @@ function isEmpty(str) {
 			if (aMessagesId && aMessagesId.length)
 			{
 				var jMessagesList = $('.chatbar-messages .messages-list'),
-					path = '/admin/index.php?ajaxWidgetLoad&moduleId=' + jMessagesList.data('moduleId') + '&type=83',
+					path = hostcmsBackend + '/index.php?ajaxWidgetLoad&moduleId=' + jMessagesList.data('moduleId') + '&type=83',
 					data = $.getData({});
 
 				for (var messageId of aMessagesId)
@@ -4527,7 +4662,7 @@ function isEmpty(str) {
 			var jMessagesList = $('.chatbar-messages .messages-list'),
 				firstMessageId = jMessagesList.data('firstMessageId'),
 				module_id = jMessagesList.data('moduleId'),
-				path = '/admin/index.php?ajaxWidgetLoad&moduleId=' + module_id + '&type=78&first_message_id=' + firstMessageId,
+				path = hostcmsBackend + '/index.php?ajaxWidgetLoad&moduleId=' + module_id + '&type=78&first_message_id=' + firstMessageId,
 				ajaxData = $.getData({});
 
 			ajaxData['user-id'] = jMessagesList.data('recipientUserId');
@@ -4673,7 +4808,7 @@ function isEmpty(str) {
 
 				var dateNow = Date.now(),
 					jMessagesList = $('.chatbar-messages .messages-list'),
-					path = '/admin/index.php?ajaxWidgetLoad&moduleId=' + jMessagesList.data('moduleId') + '&type=81',
+					path = hostcmsBackend + '/index.php?ajaxWidgetLoad&moduleId=' + jMessagesList.data('moduleId') + '&type=81',
 					data = $.getData({}),
 					bNeedsRequest = false;
 
@@ -4957,7 +5092,7 @@ function isEmpty(str) {
 		refreshUserStatuses: function() {
 			setInterval(function () {
 				var jMessagesList = $('.chatbar-messages .messages-list'),
-					path = '/admin/index.php?ajaxWidgetLoad&moduleId=' + jMessagesList.data('moduleId') + '&type=82',
+					path = hostcmsBackend + '/index.php?ajaxWidgetLoad&moduleId=' + jMessagesList.data('moduleId') + '&type=82',
 					data = $.getData({});
 
 				var bLocalStorage = typeof localStorage !== 'undefined',
@@ -5505,7 +5640,7 @@ function isEmpty(str) {
 			var data = $.getData({});
 
 			$.ajax({
-				url: '/admin/index.php?ajaxWidgetLoad&moduleId=0&type=10',
+				url: hostcmsBackend + '/index.php?ajaxWidgetLoad&moduleId=0&type=10',
 				type: "POST",
 				data: data,
 				dataType: 'json',
@@ -5532,7 +5667,7 @@ function isEmpty(str) {
 			data.loadNavSidebarMenu = 1;
 
 			$.ajax({
-				url: '/admin/user/index.php',
+				url: hostcmsBackend + '/user/index.php',
 				type: "POST",
 				data: data,
 				dataType: 'json',
@@ -5550,7 +5685,7 @@ function isEmpty(str) {
 		},
 		loadWallpaper: function(wallpaper_id) {
 			$.ajax({
-				url: '/admin/user/index.php',
+				url: hostcmsBackend + '/user/index.php',
 				type: "POST",
 				data: {'loadWallpaper': wallpaper_id},
 				dataType: 'json',
@@ -5580,7 +5715,7 @@ function isEmpty(str) {
 			createCookie("wallpaper-id", wallpaper_id, 365);
 
 			$.ajax({
-				url: '/admin/user/index.php',
+				url: hostcmsBackend + '/user/index.php',
 				type: 'POST',
 				data: {'wallpaper-id': wallpaper_id},
 				dataType: 'json',
@@ -5616,14 +5751,14 @@ function isEmpty(str) {
 			$(selector).toggleClass('hidden');
 			object.parents('.row').eq(0).remove();
 		},
-		generatePassword: function() {
+		generatePassword: function(length) {
 			var jFirstPassword = $("[name = 'password_first']"),
 				jSecondPassword = $("[name = 'password_second']");
 
 			$.ajax({
-				url: '/admin/user/index.php',
+				url: hostcmsBackend + '/user/index.php',
 				type: 'POST',
-				data: {'generate-password':1},
+				data: { 'generate-password': 1, 'length': length },
 				dataType: 'json',
 				error: function(){},
 				success: function (answer) {
@@ -5723,7 +5858,7 @@ function isEmpty(str) {
 			if (bNeedsRequest)
 			{
 				$.ajax({
-					url: '/admin/index.php?ajaxWidgetLoad&moduleId=' + jNotificationsClockListBox.data('moduleId') + '&type=4',
+					url: hostcmsBackend + '/index.php?ajaxWidgetLoad&moduleId=' + jNotificationsClockListBox.data('moduleId') + '&type=4',
 					type: 'POST',
 					data: data,
 					dataType: 'json',
@@ -6054,6 +6189,7 @@ function isEmpty(str) {
 		addNotification: function (oNotification, jBox){
 			if (!oNotification['show'])
 			{
+				// remove all .toast
 				$('.toast').remove();
 				return false;
 			}
@@ -6353,7 +6489,7 @@ function isEmpty(str) {
 
 				$.ajax({
 					//context: textarea,
-					url: '/admin/index.php?ajaxWidgetLoad&moduleId=' + jNotificationsListBox.data('moduleId') + '&type=0',
+					url: hostcmsBackend + '/index.php?ajaxWidgetLoad&moduleId=' + jNotificationsListBox.data('moduleId') + '&type=0',
 					type: 'POST',
 					data: data,
 					dataType: 'json',
@@ -6418,7 +6554,7 @@ function isEmpty(str) {
 				data['currentUserId'] = $('.navbar-account #notificationsListBox').data('currentUserId');
 
 				$.ajax({
-					url: '/admin/index.php?ajaxWidgetLoad&moduleId=' + $('.navbar-account #notificationsListBox').data('moduleId') + '&type=1',
+					url: hostcmsBackend + '/index.php?ajaxWidgetLoad&moduleId=' + $('.navbar-account #notificationsListBox').data('moduleId') + '&type=1',
 					type: 'POST',
 					data: data,
 					dataType: 'json'
@@ -6448,7 +6584,7 @@ function isEmpty(str) {
 		clearNotifications: function (){
 			// Mark all current user notifications as read
 			$.ajax({
-				url: '/admin/user/index.php',
+				url: hostcmsBackend + '/user/index.php',
 				type: 'POST',
 				data: { 'setNotificationsRead': 1 },
 				dataType: 'json'
@@ -6594,7 +6730,7 @@ function isEmpty(str) {
 
 											$.ajax({
 												//context: textarea,
-												url: '/admin/index.php?ajaxWidgetLoad&moduleId=' + $('#eventsAdminPage').data('moduleId') + '&type=1',
+												url: hostcmsBackend + '/index.php?ajaxWidgetLoad&moduleId=' + $('#eventsAdminPage').data('moduleId') + '&type=1',
 												type: 'POST',
 												data: ajaxData,
 												dataType: 'json',
@@ -6639,7 +6775,7 @@ function isEmpty(str) {
 						}
 
 						$(this).find('i').addClass('fa-spin');
-						$.widgetLoad({ path: '/admin/index.php?ajaxWidgetLoad&moduleId=' + $(this).data('moduleId') + '&type=0', context: jEventsAdminPage});
+						$.widgetLoad({ path: hostcmsBackend + '/index.php?ajaxWidgetLoad&moduleId=' + $(this).data('moduleId') + '&type=0', context: jEventsAdminPage});
 					}
 				}, '[data-toggle = "upload"]'
 			)
@@ -6683,12 +6819,12 @@ function isEmpty(str) {
 						});
 
 						$.ajax({
-							url: '/admin/index.php?ajaxWidgetLoad&moduleId=' + $('#eventsAdminPage').data('moduleId') + '&type=3',
+							url: hostcmsBackend + '/index.php?ajaxWidgetLoad&moduleId=' + $('#eventsAdminPage').data('moduleId') + '&type=3',
 							type: 'POST',
 							data: ajaxData,
 							dataType: 'json',
 							success: function (){
-								$.widgetLoad({ path: '/admin/index.php?ajaxWidgetLoad&moduleId=' + $('#eventsAdminPage').data('moduleId') + '&type=0', context: $('#eventsAdminPage') });
+								$.widgetLoad({ path: hostcmsBackend + '/index.php?ajaxWidgetLoad&moduleId=' + $('#eventsAdminPage').data('moduleId') + '&type=0', context: $('#eventsAdminPage') });
 							}
 						});
 					}
@@ -6707,7 +6843,7 @@ function isEmpty(str) {
 			ajaxData['eventStatusId'] = jEventStatus.prop('id');
 
 			$.ajax({
-				url: '/admin/index.php?ajaxWidgetLoad&moduleId=' + $('#eventsAdminPage').data('moduleId') + '&type=2',
+				url: hostcmsBackend + '/index.php?ajaxWidgetLoad&moduleId=' + $('#eventsAdminPage').data('moduleId') + '&type=2',
 				type: 'POST',
 				data: ajaxData,
 				dataType: 'json',
@@ -6761,7 +6897,7 @@ function isEmpty(str) {
 									var ajaxData = $.extend({}, $.getData({}), {'eventId': eventId, 'moduleId': moduleId});
 
 									$.ajax({
-										url: '/admin/calendar/index.php?eventDelete',
+										url: hostcmsBackend + '/calendar/index.php?eventDelete',
 										type: "POST",
 										dataType: 'json',
 										data: ajaxData,
@@ -6799,7 +6935,7 @@ function isEmpty(str) {
 						eventElement.popover && eventElement.popover('hide');
 
 					$.openWindow({
-						path: '/admin/calendar/index.php?addEntity&eventId=' + eventId + '&moduleId=' + moduleId,
+						path: hostcmsBackend + '/calendar/index.php?addEntity&eventId=' + eventId + '&moduleId=' + moduleId,
 						addContentPadding: false,
 						width: $('#id_content').outerWidth() * 0.9, //0.8
 						height: (dH < wH ? dH : wH) * 0.9, //0.8
@@ -6911,10 +7047,14 @@ function isEmpty(str) {
 
 			propertyBlock.remove();
 		},
-		cloneProperty: function(windowId, index)
+		cloneProperty: function(windowId, index, object)
 		{
-			var jProperies = jQuery('#' + windowId + ' #property_' + index),
-				jSourceProperty = jProperies.eq(0);
+			var
+				// jProperies = jQuery('#' + windowId + ' #property_' + index),
+				// jSourceProperty = jProperies.eq(0),
+				jSourceProperty = jQuery(object).parents('#' + windowId + ' #property_' + index);
+
+			// console.log(jSourceProperty);
 
 			// Объект окна настроек большого изображения у родителя
 			var oSpanFileSettings = jSourceProperty.find("span[id ^= 'file_large_settings_']");
@@ -6949,7 +7089,8 @@ function isEmpty(str) {
 
 			jNewObject.addClass('new-property');
 
-			jNewObject.insertAfter(jProperies.eq(-1));
+			// jNewObject.insertAfter(jProperies.eq(-1));
+			jNewObject.insertAfter(jSourceProperty);
 
 			jNewObject.find("textarea")
 				.removeAttr('wysiwyg')
@@ -7055,11 +7196,13 @@ function isEmpty(str) {
 				$('.section-' + index).sortable('refresh');
 			}
 		},
-		clonePropertyInfSys: function(windowId, index)
+		clonePropertyInfSys: function(windowId, index, object)
 		{
 			var jProperies = jQuery('#' + windowId + ' #property_' + index),
 				html = jProperies[0].outerHTML,
 				iRand = Math.floor(Math.random() * 999999); // clone with parent
+
+			var jSourceProperty = jQuery(object).parents('#' + windowId + ' #property_' + index);
 
 			html = html
 				.replace(/oSelectFilter(\d+)/g, 'oSelectFilter$1clone' + iRand)
@@ -7089,7 +7232,7 @@ function isEmpty(str) {
 				.attr('name', 'property_' + index + '[]')
 				.val();
 
-			jItemInput.val(null).trigger("change");
+			jItemInput.val(null)/*.trigger("change").trigger("keyup")*/;
 
 			jNewObject
 				.find('.add-remove-property > div')
@@ -7098,7 +7241,10 @@ function isEmpty(str) {
 				.removeClass('hide');
 
 			jNewObject.find("img#delete").attr('onclick', "jQuery.deleteNewProperty(this)");
-			jNewObject.insertAfter(jProperies.eq(-1));
+			// jNewObject.insertAfter(jProperies.eq(-1));
+			jNewObject.insertAfter(jSourceProperty);
+
+			jItemInput.trigger("change").trigger("keyup");
 		},
 		cloneFormRow: function(cloningElement){
 			if (cloningElement)
@@ -7588,7 +7734,7 @@ function isEmpty(str) {
 				.addClass('fa-spinner fa-spin');
 
 			$.ajax({
-				url: '/admin/deal/index.php',
+				url: hostcmsBackend + '/deal/index.php',
 				type: "POST",
 				dataType: 'json',
 				data: settings,
@@ -7650,7 +7796,7 @@ function isEmpty(str) {
 		loadDealStepUsers: function(deal_step_id, windowId)
 		{
 			$.ajax({
-				url: '/admin/deal/index.php',
+				url: hostcmsBackend + '/deal/index.php',
 				type: "POST",
 				dataType: 'json',
 				data: {'load_deal_step_users': 1, 'deal_step_id': deal_step_id},
@@ -7684,7 +7830,7 @@ function isEmpty(str) {
 										</div>\
 										<div class="databox-right">\
 											<div class="orange radius-bordered" style="right: 0; left: 7px">\
-												<div class="databox-text black semi-bold"><a data-popover="hover" data-user-id="' + oUser['id'] + '" class="black" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][' + oUser['id'] + ']=1" onclick="$.modalLoad({path: \'/admin/user/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' + oUser['id'] + ']=1\', windowId: \'id_content\'}); return false">' + $.escapeHtml(oUser['name']) + '</a></div>\
+												<div class="databox-text black semi-bold"><a data-popover="hover" data-user-id="' + oUser['id'] + '" class="black" href="' + hostcmsBackend + '/user/index.php?hostcms[action]=view&hostcms[checked][0][' + oUser['id'] + ']=1" onclick="$.modalLoad({path: \'' + hostcmsBackend + '/user/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' + oUser['id'] + ']=1\', windowId: \'id_content\'}); return false">' + $.escapeHtml(oUser['name']) + '</a></div>\
 												<div class="databox-text darkgray">' + $.escapeHtml(oUser['post']) + '</div>\
 											</div>\
 										</div>\
@@ -7718,7 +7864,7 @@ function isEmpty(str) {
 						<div class="databox-left no-padding">\
 							<div class="img-wrapper">\
 								<img class="databox-user-avatar" src="' + $.escapeHtml(object.avatar) + '"/>\
-								<a href="/admin/siteuser/representative/index.php?hostcms[action]=view&hostcms[checked][' + dataset + '][' + id + ']=1&show=' + object.type + '" onclick=\'$.modalLoad({path: "/admin/siteuser/representative/index.php", action: "view", operation: "modal", additionalParams: "hostcms[checked][' + dataset + '][' + id + ']=1&show=' + object.type + '", windowId: "id_content"}); return false\'>\
+								<a href="' + hostcmsBackend + '/siteuser/representative/index.php?hostcms[action]=view&hostcms[checked][' + dataset + '][' + id + ']=1&show=' + object.type + '" onclick=\'$.modalLoad({path: "' + hostcmsBackend + '/siteuser/representative/index.php", action: "view", operation: "modal", additionalParams: "hostcms[checked][' + dataset + '][' + id + ']=1&show=' + object.type + '", windowId: "id_content"}); return false\'>\
 								</a>\
 							</div>\
 						</div>\
@@ -7800,7 +7946,7 @@ function isEmpty(str) {
 			}
 
 			$.ajax({
-				url: '/admin/user/index.php',
+				url: hostcmsBackend + '/user/index.php',
 				type: "POST",
 				data: data,
 				dataType: 'json',
@@ -7853,7 +7999,7 @@ function isEmpty(str) {
 			});
 
 			$.ajax({
-				url: '/admin/shop/warehouse/inventory/index.php',
+				url: hostcmsBackend + '/shop/warehouse/inventory/index.php',
 				type: "POST",
 				data: {'update_warehouse_counts': 1, 'shop_warehouse_id': shop_warehouse_id, 'items': aItems, 'datetime': $('input[name=datetime]').val()},
 				dataType: 'json',
@@ -8135,7 +8281,7 @@ function isEmpty(str) {
 			});
 
 			$.ajax({
-				url: '/admin/shop/warehouse/index.php',
+				url: hostcmsBackend + '/shop/warehouse/index.php',
 				type: "POST",
 				data: {'load_prices': 1, 'shop_price_id': shop_price_id, 'items': aItems},
 				dataType: 'json',
@@ -8505,7 +8651,8 @@ function isEmpty(str) {
 
 			// Фильтр
 			var jFiltersItems = jQuery("#" + settings.windowId + " :input[name^='admin_form_filter_']"),
-				iFiltersItemsCount = jFiltersItems.length;
+				iFiltersItemsCount = jFiltersItems.length,
+				admin_filter_value;
 
 			for (let jFiltersItem, i = 0; i < iFiltersItemsCount; i++)
 			{
@@ -8514,8 +8661,17 @@ function isEmpty(str) {
 				// Если значение фильтра до 255 символов
 				if (typeof jFiltersItem.val() == 'string' && jFiltersItem.val().toString().length < 256)
 				{
+					admin_filter_value = jFiltersItem.val();
+
+					if (jFiltersItem.getInputType() == 'checkbox')
+					{
+						admin_filter_value = jFiltersItem.is(':checked')
+							? 1
+							: 0;
+					}
+
 					// Дописываем к передаваемым данным
-					data[jFiltersItem.attr('name')] = jFiltersItem.val();
+					data[jFiltersItem.attr('name')] = admin_filter_value;
 				}
 			}
 
@@ -8527,7 +8683,8 @@ function isEmpty(str) {
 			data['hostcms[filterId]'] = filterId;
 
 			var jTopFiltersItems = jQuery("#" + settings.windowId + " #filter-" + filterId + " :input[name^='topFilter_']"),
-				iTopFiltersItemsCount = jTopFiltersItems.length;
+				iTopFiltersItemsCount = jTopFiltersItems.length,
+				filter_value;
 
 			for (let jFiltersItem, i = 0; i < iTopFiltersItemsCount; i++)
 			{
@@ -8536,8 +8693,17 @@ function isEmpty(str) {
 				// Если значение фильтра до 255 символов
 				if ((jFiltersItem.val() || '').length < 256)
 				{
+					filter_value = jFiltersItem.val();
+
+					if (jFiltersItem.getInputType() == 'checkbox')
+					{
+						filter_value = jFiltersItem.is(':checked')
+							? 1
+							: 0;
+					}
+
 					// Дописываем к передаваемым данным
-					data[jFiltersItem.attr('name')] = jFiltersItem.val();
+					data[jFiltersItem.attr('name')] = filter_value;
 				}
 			}
 
@@ -8744,7 +8910,11 @@ function isEmpty(str) {
 				return;
 			}
 
-			if (jqXHR.getResponseHeader('content-type') == 'application/force-download')
+			const mime = ['application/force-download', 'application/json'];
+			const responseHeader = jqXHR.getResponseHeader('content-type');
+
+			// if (jqXHR.getResponseHeader('content-type') == 'application/force-download')
+			if (mime.includes(responseHeader))
 			{
 				const url = window.URL.createObjectURL(new Blob([jqXHR.responseText])),
 					a = document.createElement('a');
@@ -9071,7 +9241,21 @@ function isEmpty(str) {
 		},
 		cloneMultipleValue: function(windowId, cloneDelete) {
 			var jMultipleValue = jQuery(cloneDelete).closest('.multiple_value'),
-			jNewObject = jMultipleValue.clone();
+				html = jMultipleValue[0].outerHTML, // clone with parent
+				iRand = Math.floor(Math.random() * 999999);
+
+			html = html
+				.replace(/(field_id(?:_[\d]+)+)/g, 'field_id_clone' + iRand);
+
+			var jNewObject = jQuery(jQuery.parseHTML(html, document, true));
+
+			jNewObject.find('.tox.tox-tinymce').remove();
+
+			jNewObject.insertAfter(jMultipleValue);
+
+			jNewObject.find("textarea")
+				.removeAttr('wysiwyg')
+				.css('display', '');
 
 			// Change input name
 			jNewObject.find(':regex(name, ^\\S+_\\d+$)').each(function(index, object){
@@ -9079,9 +9263,8 @@ function isEmpty(str) {
 				var arr = reg.exec(object.name);
 				jQuery(object).prop('name', arr[1] + '_' + '[]');
 			});
-			jNewObject.find("input,select").val('');
 
-			jNewObject.insertAfter(jMultipleValue);
+			jNewObject.find("input,select,textarea").val('');
 		},
 		deleteNewMultipleValue: function(object) {
 			jQuery(object).closest('.multiple_value').remove();
@@ -9200,7 +9383,7 @@ function isEmpty(str) {
 			if (companyId && siteuserCompanyId)
 			{
 				$.ajax({
-					url: '/admin/siteuser/company/contract/index.php?getSiteuserCompanyContracts',
+					url: hostcmsBackend + '/siteuser/company/contract/index.php?getSiteuserCompanyContracts',
 					dataType: 'json',
 					data: {
 						companyId: companyId,
@@ -9251,7 +9434,7 @@ function isEmpty(str) {
 				}, data);
 
 				$.ajax({
-					url: '/admin/chartaccount/index.php',
+					url: hostcmsBackend + '/chartaccount/index.php',
 					data: data,
 					dataType: 'json',
 					type: 'POST',
@@ -9272,7 +9455,7 @@ function isEmpty(str) {
 			if (companyId)
 			{
 				$.ajax({
-					url: '/admin/company/cashbox/index.php?getCashboxes',
+					url: hostcmsBackend + '/company/cashbox/index.php?getCashboxes',
 					dataType: 'json',
 					data: {
 						companyId: companyId
@@ -9298,7 +9481,7 @@ function isEmpty(str) {
 			if (companyId)
 			{
 				$.ajax({
-					url: '/admin/company/account/index.php?getAccounts',
+					url: hostcmsBackend + '/company/account/index.php?getAccounts',
 					dataType: 'json',
 					data: {
 						companyId: companyId
@@ -9391,7 +9574,7 @@ function isEmpty(str) {
 		applyInformationsystemGroupAutocomplete: function(windowId, propertyId, informationsystemId) {
 			// propertyId e.g. 'input_property_123' or 'input_property_clone1234567'
 			var jInput = $('#' + windowId + ' input[id ^= ' + propertyId + ']'),
-				url = '/admin/informationsystem/item/index.php?autocomplete=1&show_group=1&informationsystem_id=' + informationsystemId,
+				url = hostcmsBackend + '/informationsystem/item/index.php?autocomplete=1&show_group=1&informationsystem_id=' + informationsystemId,
 				settings = {};
 
 			$.applyPropertyAutocomplete(jInput, url, settings);
@@ -9402,8 +9585,8 @@ function isEmpty(str) {
 				url = '',
 				settings = {
 					source: function(request, response) {
-						var selectedVal = jInput.parents('div[id ^= property]').find('[id ^= id_group_] :selected').val(),
-						url = '/admin/informationsystem/item/index.php?autocomplete=1&informationsystem_id=' + informationsystemId + '&informationsystem_group_id=' + selectedVal;
+						var selectedVal = jInput.parents('div[id ^= property]').first().find('[id ^= id_group_] :selected').val(),
+						url = hostcmsBackend + '/informationsystem/item/index.php?autocomplete=1&informationsystem_id=' + informationsystemId + '&informationsystem_group_id=' + selectedVal;
 
 						$.ajax({
 							url: url,
@@ -9423,7 +9606,7 @@ function isEmpty(str) {
 		applyShopGroupAutocomplete: function(windowId, propertyId, shopId) {
 			// propertyId e.g. 'input_property_123' or 'input_property_clone1234567'
 			var jInput = $('#' + windowId + ' input[id ^= ' + propertyId + ']'),
-				url = '/admin/shop/item/index.php?autocomplete=1&show_group=1&shop_id=' + shopId,
+				url = hostcmsBackend + '/shop/item/index.php?autocomplete=1&show_group=1&shop_id=' + shopId,
 				settings = {};
 
 			$.applyPropertyAutocomplete(jInput, url, settings);
@@ -9431,12 +9614,12 @@ function isEmpty(str) {
 		applyShopItemAutocomplete: function(windowId, propertyId, shopId) {
 			// propertyId e.g. 'input_property_123' or 'input_property_clone1234567'
 			var jInput = $('#' + windowId + ' input[id ^= ' + propertyId + ']'),
-				//selectedVal = jInput.parents('div[id ^= property]').find('[id ^= id_group_] :selected').val(),
+				//selectedVal = jInput.parents('div[id ^= property]').first().find('[id ^= id_group_] :selected').val(),
 				url = '',
 				settings = {
 					source: function(request, response) {
-						var selectedVal = jInput.parents('div[id ^= property]').find('[id ^= id_group_] :selected').val(),
-						url = '/admin/shop/item/index.php?autocomplete=1&shop_id=' + shopId + '&shop_group_id=' + selectedVal;
+						var selectedVal = jInput.parents('div[id ^= property]').first().find('[id ^= id_group_] :selected').val(),
+						url = hostcmsBackend + '/shop/item/index.php?autocomplete=1&shop_id=' + shopId + '&shop_group_id=' + selectedVal;
 
 						$.ajax({
 							url: url,
@@ -9456,7 +9639,7 @@ function isEmpty(str) {
 		applyListItemAutocomplete: function(windowId, propertyId, listId) {
 			// propertyId e.g. 'id_property_123' or 'id_property_clone1234567'
 			var jInput = $('#' + windowId + ' input[id ^= ' + propertyId + ']'),
-				url = '/admin/list/item/index.php?autocomplete=1&show_parents=1&list_id=' + listId /*+ '&mode=' + $('#' + windowId + ' #' + jInput.attr('id') + '_mode').val()*/,
+				url = hostcmsBackend + '/list/item/index.php?autocomplete=1&show_parents=1&list_id=' + listId /*+ '&mode=' + $('#' + windowId + ' #' + jInput.attr('id') + '_mode').val()*/,
 				settings = {};
 
 			$.applyPropertyAutocomplete(jInput, url, settings);
@@ -9494,15 +9677,19 @@ function isEmpty(str) {
 					$(this).prev('.ui-helper-hidden-accessible').remove();
 				},
 				select: function(event, ui) {
-					var jSelect = jInput.parents('[id ^= property]').find('select[name ^= property_]');
+					var jSelect = jInput.parents('[id ^= property]').first().find('select[name ^= property_]');
 						jSelect.empty().append($('<option>', {value: ui.item.id, text: ui.item.label}).attr('selected', 'selected'));
+
+					jSelect.trigger('appliedPropertyAutocomplete', [event, ui]);
 				},
 				change: function(event, ui) {
 					// Set to empty value
 					if (ui.item === null)
 					{
-						var jSelect = jInput.parents('[id ^= property]').find('select[name ^= property_]');
+						var jSelect = jInput.parents('[id ^= property]').first().find('select[name ^= property_]');
 						jSelect.empty().append($('<option>', { value: '', text: ''}).attr('selected', 'selected'));
+
+						jSelect.trigger('appliedPropertyAutocomplete', [event, ui]);
 					}
 				},
 				open: function() {
@@ -9525,7 +9712,7 @@ function isEmpty(str) {
 			if (shopId)
 			{
 				$.ajax({
-					url: '/admin/production/process/index.php?getProductionProcessDirs',
+					url: hostcmsBackend + '/production/process/index.php?getProductionProcessDirs',
 					dataType: 'json',
 					data: {
 						shopId: shopId,
@@ -9683,7 +9870,7 @@ function isEmpty(str) {
 		selectSiteuser: function(settings)
 		{
 			settings = $.extend({
-				url: "/admin/siteuser/index.php?loadSiteusers&types[]=siteuser&types[]=person&types[]=company",
+				url: hostcmsBackend + "/siteuser/index.php?loadSiteusers&types[]=siteuser&types[]=person&types[]=company",
 				minimumInputLength: 1,
 				allowClear: true,
 				templateResult: $.templateResultItemSiteusers,
@@ -9723,7 +9910,7 @@ function isEmpty(str) {
 		selectPersonCompany: function(settings)
 		{
 			settings = $.extend({
-				url: '/admin/siteuser/index.php?loadSiteusers&types[]=siteuser&types[]=person&types[]=company',
+				url: hostcmsBackend + '/siteuser/index.php?loadSiteusers&types[]=siteuser&types[]=person&types[]=company',
 				allowClear: true,
 				templateResult: $.templateResultItemSiteusers,
 				escapeMarkup: function(m) { return m; },
@@ -9761,7 +9948,7 @@ function isEmpty(str) {
 				jQuery(this).autocomplete({
 					source: function(request, response) {
 						$.ajax({
-								url: '/admin/shop/index.php?autocomplete&' + $.param(options),
+								url: hostcmsBackend + '/shop/index.php?autocomplete&' + $.param(options),
 								dataType: 'json',
 								data: {
 								queryString: request.term
@@ -9889,7 +10076,12 @@ function isEmpty(str) {
 						type: 'POST',
 						data: data,
 						dataType: 'json',
-						success: function(){this.remove();}
+						success: function(answer){
+							this.remove();
+							var div = $('<div class="hidden-message hidden">').html(answer.error);
+							$(item).append(div);
+							div.remove();
+						}
 					});
 				},
 				action: 'apply'
@@ -9913,9 +10105,11 @@ function isEmpty(str) {
 
 					var $item = jQuery(this),
 						$editor,
-						len = $item.text().length;
+						len = $item.text().length,
+						display = $item.css('display') || '',
+						bTextarea = $item.data('editable-type') == 'textarea';
 
-					if (len > 50 || $item.data('editable-type') == 'textarea')
+					if (len > 50 || bTextarea)
 					{
 						var $parent = $item.parent(),
 							height = $parent.outerHeight(),
@@ -9948,21 +10142,25 @@ function isEmpty(str) {
 							value = $editor.val();
 
 						item
-							.html(value.replace(/\n/g, "<br />"))
-							.css('display', '');
+							.html($.escapeHtml(value).replace(/\n/g, "\n<br />"))
+							//.text(value)
+							.css('display', display);
 						$editor.remove();
 						settings.save(item, value, settings);
 					})
 					.on('keydown', function(e) {
 						if (e.keyCode == 13) { // Enter
-							e.preventDefault();
-							this.blur();
+							if (!bTextarea)
+							{
+								e.preventDefault();
+								this.blur();
+							}
 						}
 						if (e.keyCode == 27) { // ESC
 							e.preventDefault();
 							var $editor = jQuery(this),
 								item = $editor.prev();
-							item.css('display', '');
+							item.css('display', display);
 							$editor.remove();
 						}
 					})
@@ -10032,7 +10230,7 @@ function isEmpty(str) {
 								var content = '';
 
 								$.ajax({
-									url: '/admin/user/index.php',
+									url: hostcmsBackend + '/user/index.php',
 									data: { showPopover: 1, user_id: $(this).data('user-id') },
 									dataType: 'json',
 									type: 'POST',
@@ -10090,7 +10288,7 @@ function isEmpty(str) {
 								var content = '';
 
 								$.ajax({
-									url: '/admin/siteuser/index.php',
+									url: hostcmsBackend + '/siteuser/index.php',
 									data: { showPopover: 1, person_id: $(this).data('person-id'), company_id: $(this).data('company-id') },
 									dataType: 'json',
 									type: 'POST',
@@ -10148,7 +10346,7 @@ function isEmpty(str) {
 								var content = '';
 
 								$.ajax({
-									url: '/admin/company/index.php',
+									url: hostcmsBackend + '/company/index.php',
 									data: { showPopover: 1, company_id: $(this).data('company-id') },
 									dataType: 'json',
 									type: 'POST',
@@ -10415,7 +10613,7 @@ $(function(){
 			}
 		})
 		.on('click', '[data-action="showListDealTemplateSteps"]', function() {
-			$.adminLoad({path: '/admin/deal/template/step/index.php', action: 'addConversion', operation: 'showListDealTemplateSteps', additionalParams: 'deal_template_id=' + $(this).parents('.deal-template-step-conversion').data('deal-template-id') + '&hostcms[checked][0][' + $(this).attr('id').split('adding_conversion_to_')[1] + ']=1', windowId: 'id_content'});
+			$.adminLoad({path: hostcmsBackend + '/deal/template/step/index.php', action: 'addConversion', operation: 'showListDealTemplateSteps', additionalParams: 'deal_template_id=' + $(this).parents('.deal-template-step-conversion').data('deal-template-id') + '&hostcms[checked][0][' + $(this).attr('id').split('adding_conversion_to_')[1] + ']=1', windowId: 'id_content'});
 
 			return false;
 		})
@@ -10426,7 +10624,7 @@ $(function(){
 				conversionStartStepId = startAndEndStepId[1],
 				conversionEndStepId = startAndEndStepId[2];
 
-			$.adminLoad({path: '/admin/deal/template/step/index.php', action: 'deleteConversion', operation: '', additionalParams: 'deal_template_id=' + $(this).parents('.deal-template-step-conversion').data('deal-template-id') + '&conversion_end_step_id=' + conversionEndStepId + '&hostcms[checked][0][' + conversionStartStepId + ']=1', windowId: 'id_content'});
+			$.adminLoad({path: hostcmsBackend + '/deal/template/step/index.php', action: 'deleteConversion', operation: '', additionalParams: 'deal_template_id=' + $(this).parents('.deal-template-step-conversion').data('deal-template-id') + '&conversion_end_step_id=' + conversionEndStepId + '&hostcms[checked][0][' + conversionStartStepId + ']=1', windowId: 'id_content'});
 		})
 		.on('click', '.dropdown-step-list .close', function() {
 			var dropdownStepList = $(this).parent('.dropdown-step-list');
@@ -10503,7 +10701,7 @@ $(function(){
 						dealTemplateId = aObjUrlParams['deal_template_id'];
 					}
 
-					$.adminLoad({path: '/admin/deal/template/step/index.php', action: 'changeAccess', operation: '', additionalParams: 'deal_template_id=' + dealTemplateId + '&objectType=' + objectTypePermission + '&objectId=' + objectIdPermission + '&actionType=' + actionType + '&hostcms[checked][0][' + dealTemplateStepId + ']=1', windowId: 'id_content'});
+					$.adminLoad({path: hostcmsBackend + '/deal/template/step/index.php', action: 'changeAccess', operation: '', additionalParams: 'deal_template_id=' + dealTemplateId + '&objectType=' + objectTypePermission + '&objectId=' + objectIdPermission + '&actionType=' + actionType + '&hostcms[checked][0][' + dealTemplateStepId + ']=1', windowId: 'id_content'});
 				},
 				'mousedown': function() {
 					$(this).removeClass('changed');
@@ -10592,7 +10790,7 @@ $(function(){
 						dmsClassId = $(this).data('dms-class-id'), // идентификатор типа документа
 						action = $(this).data('action-id'); // тип действия
 
-					$.adminLoad({path: '/admin/dms/document/type/index.php', action: 'changeAccess', operation: '', additionalParams: 'dms_class_id=' + dmsClassId + '&dms_document_type_id=' + dmsDocumentTypeId + '&type=' + type + '&objectId=' + objectId + '&action=' + action + '&hostcms[checked][0][' + dmsDocumentTypeId + ']=1', windowId: 'id_content'});
+					$.adminLoad({path: hostcmsBackend + '/dms/document/type/index.php', action: 'changeAccess', operation: '', additionalParams: 'dms_class_id=' + dmsClassId + '&dms_document_type_id=' + dmsDocumentTypeId + '&type=' + type + '&objectId=' + objectId + '&action=' + action + '&hostcms[checked][0][' + dmsDocumentTypeId + ']=1', windowId: 'id_content'});
 				},
 				'mousedown': function() {
 					$(this).removeClass('changed');
@@ -10633,7 +10831,7 @@ $(function(){
 			}
 			else if (object.hasClass('user-workday-stop-another-time'))
 			{
-				$.modalLoad({title: $(this).data('title'), path: '/admin/user/index.php', additionalParams: 'showAnotherTimeModalForm', width: '50%', windowId: 'id_content', onHide: function(){$(".wickedpicker").remove();}});
+				$.modalLoad({title: $(this).data('title'), path: hostcmsBackend + '/user/index.php', additionalParams: 'showAnotherTimeModalForm', width: '50%', windowId: 'id_content', onHide: function(){$(".wickedpicker").remove();}});
 
 				return true;
 			}
@@ -10658,7 +10856,7 @@ $(function(){
 				break;
 				// Показ формы запроса на завершение рабочего дня с другим временем
 				case 'user-workday-stop-another-time':
-					$.modalLoad({title: $(this).data('title'), path: '/admin/user/index.php', additionalParams: 'showAnotherTimeModalForm', width: '50%', windowId: 'id_content', onHide: function(){$(".wickedpicker").remove();}});
+					$.modalLoad({title: $(this).data('title'), path: hostcmsBackend + '/user/index.php', additionalParams: 'showAnotherTimeModalForm', width: '50%', windowId: 'id_content', onHide: function(){$(".wickedpicker").remove();}});
 
 					return true;
 				break;
@@ -11425,7 +11623,6 @@ function prepareKanbanBoard(oKanbanBoard)
 function prepareKanbanBoards()
 {
 	$('.kanban-board:visible').each(function() {
-
 		prepareKanbanBoard($(this));
 	});
 }
@@ -11583,7 +11780,7 @@ function setResizableAdminTableTh()
 			$.loadingScreen('show');
 
 			$.ajax({
-				url: '/admin/admin_form/index.php',
+				url: hostcmsBackend + '/admin_form/index.php',
 				data: { 'saveAdminFieldWidth': 1, 'admin_form_id': admin_form_id, 'admin_form_field_id': admin_form_field_id, 'site_id': site_id, 'modelsNames': modelsNames, 'width': width },
 				dataType: 'json',
 				type: 'POST',
@@ -11755,7 +11952,6 @@ document.addEventListener("DOMContentLoaded", function() {
 	lazyload();
 }, false);
 
-
 var methods = {
 	show: function() {
 		$('body').css('cursor', 'wait');
@@ -11797,7 +11993,7 @@ function calendarEvents(start, end, timezone, callback) // eslint-disable-line
 	ajaxData['end'] = end.unix();
 
 	$.ajax({
-		url: '/admin/calendar/index.php?loadEvents',
+		url: hostcmsBackend + '/calendar/index.php?loadEvents',
 		type: 'POST',
 		dataType: 'json',
 		data: ajaxData,
@@ -11891,7 +12087,7 @@ function calendarEventResize(event, delta, revertFunc) // eslint-disable-line
 
 		$.ajax({
 
-			url: '/admin/calendar/index.php?eventResize',
+			url: hostcmsBackend + '/calendar/index.php?eventResize',
 			type: "POST",
 			dataType: 'json',
 			data: ajaxData,
@@ -11927,7 +12123,7 @@ function calendarEventDrop(event, delta, revertFunc) // eslint-disable-line
 
 	$.ajax({
 
-		url: '/admin/calendar/index.php?eventDrop',
+		url: hostcmsBackend + '/calendar/index.php?eventDrop',
 		type: "POST",
 		dataType: 'json',
 		data: ajaxData,
@@ -12083,7 +12279,7 @@ function setEventStartButtons(start, windowId)
 
 	if (aDates.length)
 	{
-		// Дата начала события находится в диапозоне дат "сегодя и через 2 дня",
+		// Дата начала события находится в диапазоне дат "сегодня и через 2 дня",
 		if (+oCurrentStartDateWithoutTime >= +aDates[0] && +oCurrentStartDateWithoutTime <= +aDates[aDates.length - 1])
 		{
 			aDates.forEach(function (date, index){
@@ -12155,7 +12351,7 @@ function formAutosave()
 		);
 
 		$.ajax({
-			url: '/admin/admin_form/index.php',
+			url: hostcmsBackend + '/admin_form/index.php',
 			data: { 'autosave': 1, 'admin_form_id': admin_form_id, 'dataset': dataset, 'entity_id': entity_id, 'json': json },
 			dataType: 'json',
 			type: 'POST',
@@ -12384,8 +12580,7 @@ function cSelectFilter(windowId, sObjectId) // eslint-disable-line
 	this.ignoreCase = true;
 	this.timeout = null;
 	this.pattern = '';
-	this.aOriginalOptions = null;
-	this.sSelectedValue = '';
+	//this.sSelectedValue = '';
 
 	// Сейчас происходит фильтрация
 	this.is_filtering = false;
@@ -12406,21 +12601,15 @@ function cSelectFilter(windowId, sObjectId) // eslint-disable-line
 	}
 
 	this.Init = function() {
-
 		this.GetCurrentSelectObject();
 
-		if (this.oCurrentSelectObject.length == 1)
+		/*if (this.oCurrentSelectObject.length == 1)
 		{
-			var jOptions = this.oCurrentSelectObject.children("option");
-				// jOptionItem;
-
-			if (jOptions.length > 0)
+			if (this.oCurrentSelectObject.children("option").length > 0)
 			{
-				// Сохраняем установленное до фильтрации значение
 				this.sSelectedValue = this.oCurrentSelectObject.val();
-				this.aOriginalOptions = jOptions;
 			}
-		}
+		}*/
 	}
 
 	this.Filter = function() {
@@ -12432,70 +12621,78 @@ function cSelectFilter(windowId, sObjectId) // eslint-disable-line
 		setTimeout(function(){
 			// Если фильтрация - получаем объект
 			if (self.is_filtering) {
-				// Заново получаем объект, т.к. при AJAX-запросе на момент Init-а
-				// объект мог не существовать
+				// Заново получаем объект, т.к. при AJAX-запросе на момент Init-а объект мог не существовать
 				self.GetCurrentSelectObject();
 			}
 
-			if (self.aOriginalOptions == null || self.aOriginalOptions.length === 0) {
+			if (self.oCurrentSelectObject == undefined) {
 				self.Init();
 			}
 
 			if (self.oCurrentSelectObject.length == 1)
 			{
-				// Сбрасываем все значения списка
-				self.oCurrentSelectObject.empty();
-
 				if (self.is_filtering) {
 					var attributes = self.ignoreCase ? 'i' : '',
 						regexp = new RegExp(self.pattern, attributes),
-						currentOption, iOriginalOptionsLength = self.aOriginalOptions.length;
+						currentOption,
+						aOriginalOptions = self.oCurrentSelectObject.find("option"),
+						iOriginalOptionsLength = aOriginalOptions.length;
 
 					for (var i = 0; i < iOriginalOptionsLength; i++)
 					{
-						currentOption = $(self.aOriginalOptions[i]);
+						currentOption = aOriginalOptions.eq(i);
 
 						if (regexp.test(' ' + currentOption.text()))
-						//if (currentOption.text().indexOf(self.pattern) != -1)
 						{
-							self.oCurrentSelectObject.append(
-								currentOption
-							);
+							currentOption.removeClass('hidden');
 						}
+						else
+						{
+							currentOption.addClass('hidden');
+						}
+					}
+
+					var shownOptions = self.oCurrentSelectObject.find('option:not(.hidden)');
+					if (shownOptions.length)
+					{
+						self.oCurrentSelectObject.val(shownOptions.eq(0).val());
 					}
 
 					self.oCurrentSelectObject.trigger('change');
 				}
 				else {
 					// restore all values
-					self.oCurrentSelectObject.append(self.aOriginalOptions);
+					self.oCurrentSelectObject.find('option').removeClass('hidden');
+					// set first
+					self.oCurrentSelectObject.get(0).options.selectedIndex = 0;
 				}
+
+				icon.removeClass('fa-spinner fa-spin').addClass('fa-search');
+
+				self.oCurrentSelectObject.trigger('change');
+				//self.oCurrentSelectObject.val(self.sSelectedValue);
+				//jImg.remove();
 			}
-
-			icon.removeClass('fa-spinner fa-spin').addClass('fa-search');
-
-			self.oCurrentSelectObject.get(0).options.selectedIndex = 0;
-			self.oCurrentSelectObject.trigger('change');
-			//self.oCurrentSelectObject.val(self.sSelectedValue);
-			//jImg.remove();
 		}, 100);
 	}
 }
 
-function radiogroupOnChange(windowId, value, values) // eslint-disable-line
+function radiogroupOnChange(windowId, value, values, hiddenName, shownName) // eslint-disable-line
 {
 	values = values || [0, 1];
+	hiddenName = hiddenName || 'hidden';
+	shownName = shownName || 'shown';
 
 	for (var x in values) {
 		if (value != values[x])
 		{
-			$("#" + windowId + " .hidden-" + values[x]).show();
-			$("#" + windowId + " .shown-" + values[x]).hide();
+			$("#" + windowId + " ." + hiddenName + "-" + values[x]).show();
+			$("#" + windowId + " ." + shownName + "-" + values[x]).hide();
 		}
 	}
 
-	$("#" + windowId + " .hidden-" + value).hide();
-	$("#" + windowId + " .shown-" + value).show();
+	$("#" + windowId + " ." + hiddenName + "-" + value).hide();
+	$("#" + windowId + " ." + shownName + "-" + value).show();
 }
 
 function setIColor(object) // eslint-disable-line
@@ -12601,7 +12798,7 @@ function fieldChecker()
 				.css('border-bottom-style', 'solid')
 				.css('border-width', '1px')
 				.css('border-color', '#ff1861')
-				.css('background-image', "url('/admin/images/bullet_red.gif')")
+				.css('background-image', "url(" + hostcmsBackend +  "'/images/bullet_red.gif')")
 				.css('background-position', 'center right')
 				.css('background-repeat', 'no-repeat');
 		}
@@ -12611,7 +12808,7 @@ function fieldChecker()
 				.css('border-style', '')
 				.css('border-width', '')
 				.css('border-color', '')
-				.css('background-image', "url('/admin/images/bullet_green.gif')")
+				.css('background-image', "url(" + hostcmsBackend + "'/images/bullet_green.gif')")
 				.css('background-position', 'center right')
 				.css('background-repeat', 'no-repeat');
 		}
@@ -12807,7 +13004,7 @@ function HostCMSFileManager() // eslint-disable-line
 			}
 		}
 
-		var path = "/admin/wysiwyg/filemanager/index.php?field_name=" + this.field + "&cdir=" + cdir + "&dir=" + dir + "&type=" + type, width = screen.width / 1.2, height = screen.height / 1.2;
+		var path = hostcmsBackend + "/wysiwyg/filemanager/index.php?field_name=" + this.field + "&cdir=" + cdir + "&dir=" + dir + "&type=" + type, width = screen.width / 1.2, height = screen.height / 1.2;
 
 		var x = parseInt(screen.width / 2.0) - (width / 2.0), y = parseInt(screen.height / 2.0) - (height / 2.0);
 
@@ -13252,73 +13449,75 @@ jQuery.expr[':'].icontains = function(a, i, m) {
 };
 
 // Загрузка изображений в TinyMCE6
-const hostcms_image_upload_handler = (blobInfo, progress) => new Promise((resolve, reject) => { // eslint-disable-line
-	const xhr = new XMLHttpRequest();
-	xhr.withCredentials = false;
-	xhr.open('POST', '/admin/wysiwyg/upload.php');
+function hostcms_image_upload_handler (blobInfo, progress) { // eslint-disable-line
+	return new Promise((resolve, reject) => {
+		const xhr = new XMLHttpRequest();
+		xhr.withCredentials = false;
+		xhr.open('POST', hostcmsBackend + '/wysiwyg/upload.php');
 
-	xhr.upload.onprogress = (e) => {
-		progress(e.loaded / e.total * 100);
-	};
+		xhr.upload.onprogress = (e) => {
+			progress(e.loaded / e.total * 100);
+		};
 
-	xhr.onload = () => {
-		if (xhr.status === 403) {
-			reject({ message: 'HTTP Error: ' + xhr.status, remove: true });
-			return;
-		}
-
-		if (xhr.status < 200 || xhr.status >= 300) {
-			reject('HTTP Error: ' + xhr.status);
-			return;
-		}
-
-		// console.log(xhr);
-
-		const json = JSON.parse(xhr.responseText);
-
-		if (!json || typeof json.location != 'string') {
-			reject('Invalid JSON: ' + xhr.responseText);
-			return;
-		}
-
-		// console.log(json);
-
-		if (json.status == 'success' && json.location != '')
-		{
-			// console.log(entity_id);
-
-			if (entity_id == '')
-			{
-				// Добавляем скрытое поле
-				$form.append('<input type="hidden" name="wysiwyg_images[]" value="' + json.location + '"/>');
+		xhr.onload = () => {
+			if (xhr.status === 403) {
+				reject({ message: 'HTTP Error: ' + xhr.status, remove: true });
+				return;
 			}
 
-			resolve(json.location);
-		}
-		else
-		{
-			reject();
-			return;
-		}
-	};
+			if (xhr.status < 200 || xhr.status >= 300) {
+				reject('HTTP Error: ' + xhr.status);
+				return;
+			}
 
-	xhr.onerror = () => {
-		reject('Image upload failed due to a XHR Transport error. Code: ' + xhr.status);
-	};
+			// console.log(xhr);
 
-	let textarea = tinymce.activeEditor.getElement();
-	let $form = $(textarea).parents('form');
-	let entity_id = $form.data('entity_id');
-	let entity_type = $form.data('entity_type');
+			const json = JSON.parse(xhr.responseText);
 
-	const formData = new FormData();
-	formData.append('entity_type', entity_type);
-	formData.append('entity_id', entity_id);
-	formData.append('filename', blobInfo.filename());
-	formData.append('blob', blobInfo.blob());
+			if (!json || typeof json.location != 'string') {
+				reject('Invalid JSON: ' + xhr.responseText);
+				return;
+			}
 
-	xhr.send(formData);
-});
+			// console.log(json);
+
+			if (json.status == 'success' && json.location != '')
+			{
+				// console.log(entity_id);
+
+				if (entity_id == '')
+				{
+					// Добавляем скрытое поле
+					$form.append('<input type="hidden" name="wysiwyg_images[]" value="' + json.location + '"/>');
+				}
+
+				resolve(json.location);
+			}
+			else
+			{
+				reject();
+				return;
+			}
+		};
+
+		xhr.onerror = () => {
+			reject('Image upload failed due to a XHR Transport error. Code: ' + xhr.status);
+		};
+
+		let textarea = tinymce.activeEditor.getElement();
+		let $form = $(textarea).parents('form');
+		let entity_id = $form.data('entity_id');
+		let entity_type = $form.data('entity_type');
+
+		const formData = new FormData();
+		formData.append('entity_type', entity_type);
+		formData.append('entity_id', entity_id);
+		formData.append('filename', blobInfo.filename());
+		formData.append('blob', blobInfo.blob());
+
+		xhr.send(formData);
+	});
+}
 
 function replaceWysiwygImages(aConform) // eslint-disable-line
 {

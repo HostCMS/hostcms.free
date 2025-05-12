@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../bootstrap.php');
 
@@ -26,7 +26,7 @@ if (Core_Security::checkCsrf(Core_Array::getGet('secret_csrf', '', 'str'), Core:
 			throw new Core_Exception(Core::_('Core.csrf_token_timeout'), array(), 0, FALSE);
 		break;
 	}*/
-	
+
 	Core_Log::instance()->clear()
 		->status(Core_Log::$SUCCESS)
 		->write(Core::_('Core.error_log_exit'));
@@ -34,4 +34,4 @@ if (Core_Security::checkCsrf(Core_Array::getGet('secret_csrf', '', 'str'), Core:
 	Core_Auth::logout();
 }
 
-header('Location: /admin/index.php');
+header(Admin_Form_Controller::correctBackendPath('Location: /{admin}/index.php'));

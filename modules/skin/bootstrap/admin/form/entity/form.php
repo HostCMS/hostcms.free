@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Form extends Skin_Default_Admin_Form_Entity_Form {
 	/**
@@ -19,6 +19,8 @@ class Skin_Bootstrap_Admin_Form_Entity_Form extends Skin_Default_Admin_Form_Enti
 	public function execute()
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeExecute', $this);
+
+		$this->action = Admin_Form_Controller::correctBackendPath($this->action);
 
 		$aAttr = $this->getAttrsString();
 

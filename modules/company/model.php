@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Company
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Company_Model extends Core_Entity
 {
@@ -384,7 +384,7 @@ class Company_Model extends Core_Entity
 	 * Build visual representation of group tree
 	 * @param int $iInformationsystemId information system ID
 	 * @param int $iInformationsystemGroupParentId parent ID
-	 * @param int $aExclude exclude group ID
+	 * @param array $aExclude exclude group ID
 	 * @param int $iLevel current nesting level
 	 * @return array
 	 */
@@ -432,7 +432,7 @@ class Company_Model extends Core_Entity
 	/**
 	 * Build visual representation of group tree
 	 * @param int $iCompanyDepartmentParentId company department parent ID
-	 * @param int $aExclude exclude group ID
+	 * @param array $aExclude exclude group ID
 	 * @param int $iLevel current nesting level
 	 * @return array
 	 */
@@ -625,7 +625,7 @@ class Company_Model extends Core_Entity
 	{
 		return strlen((string) $this->image)
 			? $this->getImageHref()
-			: "/admin/company/index.php?loadCompanyAvatar={$this->id}";
+			: Admin_Form_Controller::correctBackendPath("/{admin}/company/index.php?loadCompanyAvatar={$this->id}");
 	}
 
 	public function imgBackend()
@@ -708,6 +708,7 @@ class Company_Model extends Core_Entity
 	/**
 	 * Delete image file
 	 * @return self
+	 * @hostcms-event company.onAfterDeleteImageFile
 	 */
 	public function deleteImageFile()
 	{
@@ -715,6 +716,8 @@ class Company_Model extends Core_Entity
 		{
 			Core_File::isFile($this->getImageFilePath()) && Core_File::delete($this->getImageFilePath());
 		} catch (Exception $e) {}
+
+		Core_Event::notify($this->_modelName . '.onAfterDeleteImageFile', $this);
 
 		$this->image = '';
 		$this->save();
@@ -925,22 +928,6 @@ class Company_Model extends Core_Entity
 	 */
 	public function getProfileBlock($class = '')
 	{
-		/*$oUser = Core_Auth::getCurrentUser();
-		$sFullName = $this->name;
-
-		$oAdmin_Form = Core_Entity::factory('Admin_Form', 64);
-
-		$nameLink = $oAdmin_Form->Admin_Form_Actions->checkAllowedActionForUser($oUser, 'view')
-			? '<a href="/admin/siteuser/representative/index.php?hostcms[action]=view&hostcms[checked][0][' . $this->id . ']=1&siteuser_id=' . $this->siteuser_id . '" onclick="$.modalLoad({path: \'/admin/siteuser/representative/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $this->id . ']=1&siteuser_id=' . $this->siteuser_id . '\', windowId: \'id_content\', width: \'70%\'}); return false">' . htmlspecialchars($sFullName) . '</a>'
-			: htmlspecialchars($this->name);*/
-
-		/*$imgLink = $oAdmin_Form->Admin_Form_Actions->checkAllowedActionForUser($oUser, 'edit')
-			? '<a href="/admin/siteuser/representative/index.php?hostcms[action]=edit&hostcms[checked][0][' . $this->id . ']=1&siteuser_id=' . $this->siteuser_id . '" onclick="$.modalLoad({path: \'/admin/siteuser/representative/index.php\', action: \'edit\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $this->id . ']=1&siteuser_id=' . $this->siteuser_id . '&parentWindowId=id_content\', view: \'list\', windowId: \'id_content\', width: \'70%\'}); return false">
-				<i class="fa fa-building"></i>
-				<i class="fa fa-pencil"></i>
-			</a>'
-			: '<i class="fa fa-building"></i>';*/
-
 		$tin = !empty($this->tin) ? '<div class="tin">' . Core::_('Company.tin_list', $this->tin) . '</div>' : '';
 
 		return '<li class="ticket-item ' . $class . '" data-popover="hover" data-company-id="' . $this->id . '">

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 abstract class Core_Module_Abstract
 {
@@ -295,17 +295,6 @@ abstract class Core_Module_Abstract
 	public function getNotificationDesignByNotification(Notification_Model $oNotification)
 	{
 		return $this->getNotificationDesign($oNotification->type, $oNotification->entity_id);
-	}
-
-	/**
-	 * Notify module on the action on schedule
-	 * @param int $action action number
-	 * @param int $entityId entity ID
-	 * @return array
-	 */
-	public function callSchedule($action, $entityId)
-	{
-		// do smth
 	}
 
 	/**

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Purchase_Discount_Coupon_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -75,7 +75,8 @@ class Shop_Purchase_Discount_Coupon_Controller_Edit extends Admin_Form_Action_Co
 
 				$oMainTab
 					->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'));
+					->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				// Удаляем группу
 				$oAdditionalTab->delete($this->getField('shop_purchase_discount_coupon_dir_id'));
@@ -110,6 +111,47 @@ class Shop_Purchase_Discount_Coupon_Controller_Edit extends Admin_Form_Action_Co
 					->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-md-3')), $oMainRow2)
 					->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-md-3 margin-top-21')), $oMainRow2)
 					;
+
+				$oAdditionalTab->delete($this->getField('siteuser_id'));
+
+				if (Core::moduleIsActive('siteuser'))
+				{
+					$oSiteuser = !is_null(Core_Array::getGet('siteuser_id'))
+						? Core_Entity::factory('Siteuser')->find(Core_Array::getGet('siteuser_id'))
+						: $this->_object->Siteuser;
+
+					$options = !is_null($oSiteuser->id)
+						? array($oSiteuser->id => $oSiteuser->login . ' [' . $oSiteuser->id . ']')
+						: array(0);
+
+					$oSiteuserSelect = Admin_Form_Entity::factory('Select')
+						->caption(Core::_('Shop_Order.siteuser_id'))
+						->options($options)
+						->name('siteuser_id')
+						->class('siteuser-tag')
+						->style('width: 100%')
+						// ->divAttr(array('class' => 'form-group col-xs-12'));
+						->divAttr(array('class' => 'col-xs-12'));
+
+					$oMainRow3
+						->add(
+							Admin_Form_Entity::factory('Div')
+								->class('form-group col-xs-12 col-sm-6 col-md-3 no-padding siteuser-select2')
+								->add($oSiteuserSelect)
+						);
+
+					// Show button
+					Siteuser_Controller_Edit::addSiteuserSelect2($oSiteuserSelect, $oSiteuser, $this->_Admin_Form_Controller);
+
+					$icons = Siteuser_Controller_Edit::addSiteuserRepresentativeAvatars($oSiteuser);
+
+					$oMainRow3
+						->add(
+							Admin_Form_Entity::factory('Div')
+								->class('form-group col-xs-12 col-sm-6 col-md-3 margin-top-21 siteuser-representative-list')
+								->add(Admin_Form_Entity::factory('Code')->html($icons))
+						);
+				}
 
 				$title = $this->_object->id
 					? Core::_('Shop_Purchase_Discount_Coupon.coupon_form_table_title_edit', $this->_object->name, FALSE)

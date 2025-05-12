@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 {
@@ -301,7 +301,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				->name('siteuser_group_id')
 				->id('siteuserGroupId')
 				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
-				->options(array(Core::_('Shop.allgroupsaccess')) + $aSiteuser_Groups)
+				->options(array(' … ') + $aSiteuser_Groups)
 				->caption(Core::_('Shop_Item.siteuser_group_id'))
 				->controller($window_Admin_Form_Controller);
 
@@ -537,7 +537,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 								allowClear: true,
 								multiple: true,
 								ajax: {
-									url: "/admin/tag/index.php?hostcms[action]=loadTagsList&hostcms[checked][0][0]=1",
+									url: hostcmsBackend + "/tag/index.php?hostcms[action]=loadTagsList&hostcms[checked][0][0]=1",
 									dataType: "json",
 									type: "GET",
 									processResults: function (data) {
@@ -590,6 +590,19 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 							->add($oAdmin_Form_Entity_Modification_Checkbox)
 					);
 			}
+
+			$oAdmin_Form_Entity_Shortcut_Checkbox = Admin_Form_Entity::factory('Checkbox')
+				->name("apply_shortcut_parent_item")
+				->class('form-control')
+				->caption(Core::_('Shop_Item.apply_shortcut_parent_item'))
+				->divAttr(array('class' => 'form-group col-xs-12'));
+
+			$oItemMainTab
+			->add(
+				Admin_Form_Entity::factory('Div')
+					->class('row')
+					->add($oAdmin_Form_Entity_Shortcut_Checkbox)
+			);
 
 			$oItemPriceTab->add($oPricesRow1 = Admin_Form_Entity::factory('Div')->class('row'));
 
@@ -716,7 +729,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				->name('group_siteuser_group_id')
 				->id('siteuserGroupId')
 				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
-				->options(array(Core::_('Shop.allgroupsaccess')) + $aSiteuser_Groups)
+				->options(array(' … ') + $aSiteuser_Groups)
 				->caption(Core::_('Shop_Item.siteuser_group_id'))
 				->controller($window_Admin_Form_Controller);
 
@@ -728,6 +741,19 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 						->add($oAdmin_Form_Entity_Select_Indexing_Group)
 						->add($oAdmin_Form_Entity_Select_Group_Siteuser_Groups)
 				);
+
+			$oAdmin_Form_Entity_Shortcut_Group_Checkbox = Admin_Form_Entity::factory('Checkbox')
+				->name("apply_shortcut_parent_group")
+				->class('form-control')
+				->caption(Core::_('Shop_Group.apply_shortcut_parent_group'))
+				->divAttr(array('class' => 'form-group col-xs-12'));
+
+			$oGroupTab
+			->add(
+				Admin_Form_Entity::factory('Div')
+					->class('row')
+					->add($oAdmin_Form_Entity_Shortcut_Group_Checkbox)
+			);
 
 			Core_Event::notify(get_class($this) . '.onBeforeAddButton', $this, array($oCore_Html_Entity_Form, $oCore_Html_Entity_Div));
 
@@ -760,7 +786,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 
 			Core_Html_Entity::factory('Script')
 				->value("$(function() {
-					$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . Core_Str::escapeJavascriptVariable($this->title) . "', AppendTo: '#{$windowId}', width: 800, height: 720, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
+					$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . Core_Str::escapeJavascriptVariable($this->title) . "', AppendTo: '#{$windowId}', width: 800, height: 780, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
 				->execute();
 
 			$this->addMessage(ob_get_clean());
@@ -856,10 +882,20 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 	protected function _applyGroupAttributes(Shop_Group_Model $oShop_Group)
 	{
 		Core_Array::getPost('group_active') !== '' && $oShop_Group->active = Core_Array::getPost('group_active', 0, 'int');
-		Core_Array::getPost('group_indexing') !== '' && $oShop_Group->indexing = Core_Array::getPost('group_indexing', 0, 'int');
-		Core_Array::getPost('group_siteuser_group_id') && $oShop_Group->siteuser_group_id = Core_Array::getPost('group_siteuser_group_id', 0, 'int');
-
 		$oShop_Group->save();
+
+		if (!$oShop_Group->shortcut_id)
+		{
+			Core_Array::getPost('group_indexing') !== '' && $oShop_Group->indexing = Core_Array::getPost('group_indexing', 0, 'int');
+			Core_Array::getPost('group_siteuser_group_id') && $oShop_Group->siteuser_group_id = Core_Array::getPost('group_siteuser_group_id', 0, 'int');
+
+			$oShop_Group->save();
+		}
+		// Ярлык и применять к основным группам ярлыков
+		elseif (!is_null(Core_Array::getPost('apply_shortcut_parent_group')))
+		{
+			$this->_applyGroupAttributes($oShop_Group->Shortcut);
+		}
 
 		$oShop_Group->clearCache();
 
@@ -884,134 +920,145 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeApplyItem', $this, array($oShop_Item));
 
-		Core_Array::getPost('shop_currency_id') && $oShop_Item->shop_currency_id = Core_Array::getPost('shop_currency_id', 0, 'int');
-		Core_Array::getPost('shop_producer_id') && $oShop_Item->shop_producer_id = Core_Array::getPost('shop_producer_id', 0, 'int');
-		Core_Array::getPost('shop_seller_id') && $oShop_Item->shop_seller_id = Core_Array::getPost('shop_seller_id', 0, 'int');
-		Core_Array::getPost('shop_tax_id') && $oShop_Item->shop_tax_id = Core_Array::getPost('shop_tax_id', 0, 'int');
-		Core_Array::getPost('shop_measure_id') && $oShop_Item->shop_measure_id = Core_Array::getPost('shop_measure_id', 0, 'int');
-		Core_Array::getPost('siteuser_group_id') && $oShop_Item->siteuser_group_id = Core_Array::getPost('siteuser_group_id', 0, 'int');
-
 		Core_Array::getPost('active') !== '' && $oShop_Item->active = Core_Array::getPost('active', 0, 'int');
-		Core_Array::getPost('indexing') !== '' && $oShop_Item->indexing = Core_Array::getPost('indexing', 0, 'int');
-		Core_Array::getPost('yandex_market') !== '' && $oShop_Item->yandex_market = Core_Array::getPost('yandex_market', 0, 'int');
-
-		Core_Array::getPost('apply_purchase_discount') !== '' && $oShop_Item->apply_purchase_discount = Core_Array::getPost('apply_purchase_discount', 0, 'int');
-		Core_Array::getPost('datetime') !== '' && $oShop_Item->datetime = strval(Core_Date::datetime2sql(Core_Array::getPost('datetime')));
-
-		Core_Array::getPost('length') !== '' && $oShop_Item->length = Core_Array::getPost('length', 0, 'float');
-		Core_Array::getPost('width') !== '' && $oShop_Item->width = Core_Array::getPost('width', 0, 'float');
-		Core_Array::getPost('height') !== '' && $oShop_Item->height = Core_Array::getPost('height', 0, 'float');
-		Core_Array::getPost('weight') !== '' && $oShop_Item->weight = Core_Array::getPost('weight', 0, 'float');
-
-		Core_Array::getPost('package_length') !== '' && $oShop_Item->package_length = Core_Array::getPost('package_length', 0, 'float');
-		Core_Array::getPost('package_width') !== '' && $oShop_Item->package_width = Core_Array::getPost('package_width', 0, 'float');
-		Core_Array::getPost('package_height') !== '' && $oShop_Item->package_height = Core_Array::getPost('package_height', 0, 'float');
-		Core_Array::getPost('package_weight') !== '' && $oShop_Item->package_weight = Core_Array::getPost('package_weight', 0, 'float');
-
-		Core_Array::getPost('min_quantity') !== '' && $oShop_Item->min_quantity = Core_Array::getPost('min_quantity', 0, 'float');
-		Core_Array::getPost('max_quantity') !== '' && $oShop_Item->max_quantity = Core_Array::getPost('max_quantity', 0, 'float');
-		Core_Array::getPost('quantity_step') !== '' && $oShop_Item->quantity_step = Core_Array::getPost('quantity_step', 0, 'float');
-
 		$oShop_Item->save();
 
-		$main_price = Core_Array::getPost('main_price');
-
-		if ($main_price !== '' && $oShop_Item->price != $main_price)
+		if (!$oShop_Item->shortcut_id)
 		{
-			$oShop_Price_Setting = $this->_getShopPriceSetting($oShop_Item->shop_id);
+			Core_Array::getPost('shop_currency_id') && $oShop_Item->shop_currency_id = Core_Array::getPost('shop_currency_id', 0, 'int');
+			Core_Array::getPost('shop_producer_id') && $oShop_Item->shop_producer_id = Core_Array::getPost('shop_producer_id', 0, 'int');
+			Core_Array::getPost('shop_seller_id') && $oShop_Item->shop_seller_id = Core_Array::getPost('shop_seller_id', 0, 'int');
+			Core_Array::getPost('shop_tax_id') && $oShop_Item->shop_tax_id = Core_Array::getPost('shop_tax_id', 0, 'int');
+			Core_Array::getPost('shop_measure_id') && $oShop_Item->shop_measure_id = Core_Array::getPost('shop_measure_id', 0, 'int');
+			Core_Array::getPost('siteuser_group_id') && $oShop_Item->siteuser_group_id = Core_Array::getPost('siteuser_group_id', 0, 'int');
 
-			$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
-			$oShop_Price_Setting_Item->shop_price_setting_id = $oShop_Price_Setting->id;
-			$oShop_Price_Setting_Item->shop_price_id = 0; // Розничная
-			$oShop_Price_Setting_Item->shop_item_id = $oShop_Item->id;
-			$oShop_Price_Setting_Item->old_price = $oShop_Item->price;
-			$oShop_Price_Setting_Item->new_price = floatval($main_price);
-			$oShop_Price_Setting_Item->save();
-		}
+			Core_Array::getPost('indexing') !== '' && $oShop_Item->indexing = Core_Array::getPost('indexing', 0, 'int');
 
-		if (Core::moduleIsActive('siteuser') || defined('BACKEND_SHOP_PRICES'))
-		{
-			$Shop_Price_Entry_Controller = new Shop_Price_Entry_Controller();
+			Core_Array::getPost('yandex_market') !== '' && $oShop_Item->yandex_market = Core_Array::getPost('yandex_market', 0, 'int');
 
-			$aShop_Prices = $oShop_Item->Shop->Shop_Prices->findAll();
-			foreach ($aShop_Prices as $oShop_Price)
+			Core_Array::getPost('apply_purchase_discount') !== '' && $oShop_Item->apply_purchase_discount = Core_Array::getPost('apply_purchase_discount', 0, 'int');
+			Core_Array::getPost('datetime') !== '' && $oShop_Item->datetime = strval(Core_Date::datetime2sql(Core_Array::getPost('datetime')));
+
+			Core_Array::getPost('length') !== '' && $oShop_Item->length = Core_Array::getPost('length', 0, 'float');
+			Core_Array::getPost('width') !== '' && $oShop_Item->width = Core_Array::getPost('width', 0, 'float');
+			Core_Array::getPost('height') !== '' && $oShop_Item->height = Core_Array::getPost('height', 0, 'float');
+			Core_Array::getPost('weight') !== '' && $oShop_Item->weight = Core_Array::getPost('weight', 0, 'float');
+
+			Core_Array::getPost('package_length') !== '' && $oShop_Item->package_length = Core_Array::getPost('package_length', 0, 'float');
+			Core_Array::getPost('package_width') !== '' && $oShop_Item->package_width = Core_Array::getPost('package_width', 0, 'float');
+			Core_Array::getPost('package_height') !== '' && $oShop_Item->package_height = Core_Array::getPost('package_height', 0, 'float');
+			Core_Array::getPost('package_weight') !== '' && $oShop_Item->package_weight = Core_Array::getPost('package_weight', 0, 'float');
+
+			Core_Array::getPost('min_quantity') !== '' && $oShop_Item->min_quantity = Core_Array::getPost('min_quantity', 0, 'float');
+			Core_Array::getPost('max_quantity') !== '' && $oShop_Item->max_quantity = Core_Array::getPost('max_quantity', 0, 'float');
+			Core_Array::getPost('quantity_step') !== '' && $oShop_Item->quantity_step = Core_Array::getPost('quantity_step', 0, 'float');
+
+			$oShop_Item->save();
+
+			$main_price = Core_Array::getPost('main_price');
+
+			if ($main_price !== '' && $oShop_Item->price != $main_price)
 			{
-				$item_price = Core_Array::getPost('item_price_value_' . $oShop_Price->id);
+				$oShop_Price_Setting = $this->_getShopPriceSetting($oShop_Item->shop_id);
 
-				$old_price = $Shop_Price_Entry_Controller->getPrice($oShop_Price->id, $oShop_Item->id, Core_Date::timestamp2sql(time()));
-
-				if ($item_price !== '' && $old_price != $item_price)
-				{
-					$oShop_Price_Setting = $this->_getShopPriceSetting($oShop_Item->shop_id);
-
-					is_null($old_price)
-						&& $old_price = $oShop_Item->price;
-
-					$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
-					$oShop_Price_Setting_Item
-						->shop_price_setting_id($oShop_Price_Setting->id)
-						->shop_price_id($oShop_Price->id)
-						->shop_item_id($oShop_Item->id)
-						->old_price($old_price)
-						->new_price(floatval($item_price))
-						->save();
-				}
-			}
-		}
-
-		$aShop_Warehouses = $oShop_Item->Shop->Shop_Warehouses->findAll();
-		foreach ($aShop_Warehouses as $oShop_Warehouse)
-		{
-			$warehouse_value = Core_Array::getPost('item_warehouse_value_' . $oShop_Warehouse->id);
-
-			if ($warehouse_value !== '')
-			{
-				$fRest = $oShop_Warehouse->getRest($oShop_Item->id);
-
-				if ($fRest != $warehouse_value)
-				{
-					$oShop_Warehouse_Inventory = $this->_getShopWarehouseInventory($oShop_Warehouse->id);
-
-					$oShop_Warehouse_Inventory_Item = Core_Entity::factory('Shop_Warehouse_Inventory_Item');
-					$oShop_Warehouse_Inventory_Item->shop_warehouse_inventory_id = $oShop_Warehouse_Inventory->id;
-					$oShop_Warehouse_Inventory_Item->shop_item_id = $oShop_Item->id;
-					$oShop_Warehouse_Inventory_Item->count = floatval($warehouse_value);
-					$oShop_Warehouse_Inventory_Item->save();
-				}
-			}
-		}
-
-		if (Core::moduleIsActive('tag'))
-		{
-			$aRecievedTags = Core_Array::getPost('tags', array());
-			!is_array($aRecievedTags) && $aRecievedTags = array();
-
-			$aTmp = array();
-
-			$aTags = $oShop_Item->Tags->findAll(FALSE);
-			foreach ($aTags as $oTag)
-			{
-				$aTmp[] = $oTag->name;
+				$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
+				$oShop_Price_Setting_Item->shop_price_setting_id = $oShop_Price_Setting->id;
+				$oShop_Price_Setting_Item->shop_price_id = 0; // Розничная
+				$oShop_Price_Setting_Item->shop_item_id = $oShop_Item->id;
+				$oShop_Price_Setting_Item->old_price = $oShop_Item->price;
+				$oShop_Price_Setting_Item->new_price = floatval($main_price);
+				$oShop_Price_Setting_Item->save();
 			}
 
-			foreach ($aRecievedTags as $tag_name)
+			if (Core::moduleIsActive('siteuser') || defined('BACKEND_SHOP_PRICES'))
 			{
-				$tag_name = trim($tag_name);
+				$Shop_Price_Entry_Controller = new Shop_Price_Entry_Controller();
 
-				if ($tag_name != '' && !in_array($tag_name, $aTmp))
+				$aShop_Prices = $oShop_Item->Shop->Shop_Prices->findAll();
+				foreach ($aShop_Prices as $oShop_Price)
 				{
-					$oTag = Core_Entity::factory('Tag')->getByName($tag_name, FALSE);
+					$item_price = Core_Array::getPost('item_price_value_' . $oShop_Price->id);
 
-					if (is_null($oTag))
+					$old_price = $Shop_Price_Entry_Controller->getPrice($oShop_Price->id, $oShop_Item->id, Core_Date::timestamp2sql(time()));
+
+					if ($item_price !== '' && $old_price != $item_price)
 					{
-						$oTag = Core_Entity::factory('Tag');
-						$oTag->name = $oTag->path = $tag_name;
-						$oTag->save();
-					}
+						$oShop_Price_Setting = $this->_getShopPriceSetting($oShop_Item->shop_id);
 
-					$oShop_Item->add($oTag);
+						is_null($old_price)
+							&& $old_price = $oShop_Item->price;
+
+						$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
+						$oShop_Price_Setting_Item
+							->shop_price_setting_id($oShop_Price_Setting->id)
+							->shop_price_id($oShop_Price->id)
+							->shop_item_id($oShop_Item->id)
+							->old_price($old_price)
+							->new_price(floatval($item_price))
+							->save();
+					}
 				}
 			}
+
+			$aShop_Warehouses = $oShop_Item->Shop->Shop_Warehouses->findAll();
+			foreach ($aShop_Warehouses as $oShop_Warehouse)
+			{
+				$warehouse_value = Core_Array::getPost('item_warehouse_value_' . $oShop_Warehouse->id);
+
+				if ($warehouse_value !== '')
+				{
+					$fRest = $oShop_Warehouse->getRest($oShop_Item->id);
+
+					if ($fRest != $warehouse_value)
+					{
+						$oShop_Warehouse_Inventory = $this->_getShopWarehouseInventory($oShop_Warehouse->id);
+
+						$oShop_Warehouse_Inventory_Item = Core_Entity::factory('Shop_Warehouse_Inventory_Item');
+						$oShop_Warehouse_Inventory_Item->shop_warehouse_inventory_id = $oShop_Warehouse_Inventory->id;
+						$oShop_Warehouse_Inventory_Item->shop_item_id = $oShop_Item->id;
+						$oShop_Warehouse_Inventory_Item->count = floatval($warehouse_value);
+						$oShop_Warehouse_Inventory_Item->save();
+					}
+				}
+			}
+
+			if (Core::moduleIsActive('tag'))
+			{
+				$aRecievedTags = Core_Array::getPost('tags', array());
+				!is_array($aRecievedTags) && $aRecievedTags = array();
+
+				$aTmp = array();
+
+				$aTags = $oShop_Item->Tags->findAll(FALSE);
+				foreach ($aTags as $oTag)
+				{
+					$aTmp[] = $oTag->name;
+				}
+
+				foreach ($aRecievedTags as $tag_name)
+				{
+					$tag_name = trim($tag_name);
+
+					if ($tag_name != '' && !in_array($tag_name, $aTmp))
+					{
+						$oTag = Core_Entity::factory('Tag')->getByName($tag_name, FALSE);
+
+						if (is_null($oTag))
+						{
+							$oTag = Core_Entity::factory('Tag');
+							$oTag->name = $oTag->path = $tag_name;
+							$oTag->save();
+						}
+
+						$oShop_Item->add($oTag);
+					}
+				}
+			}
+		}
+		// Ярлык и применять к основным товарам ярлыков
+		elseif (!is_null(Core_Array::getPost('apply_shortcut_parent_item')))
+		{
+			$this->_applyItem($oShop_Item->Shop_Item);
 		}
 
 		$oShop_Item->clearCache();

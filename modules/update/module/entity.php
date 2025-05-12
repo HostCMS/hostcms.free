@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Update
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Update_Module_Entity extends Core_Empty_Entity
 {
@@ -120,6 +120,7 @@ class Update_Module_Entity extends Core_Empty_Entity
 
 			// Распаковываем файлы
 			$Core_Tar = new Core_Tar($source_file, 'gz');
+			// $Core_Tar->addReplace('admin/', Core::$mainConfig['backend'] . '/');
 			if (!$Core_Tar->extractModify($oMarket_Controller->tmpDir, $oMarket_Controller->tmpDir))
 			{
 				// Возникла ошибка распаковки
@@ -132,6 +133,11 @@ class Update_Module_Entity extends Core_Empty_Entity
 			$sFilesDir = $oMarket_Controller->tmpDir . DIRECTORY_SEPARATOR . 'files';
 			if (Core_File::isDir($sFilesDir))
 			{
+				if (Core::$mainConfig['backend'] !== 'admin' && Core_File::isDir($sFilesDir . '/admin'))
+				{
+					Core_File::rename($sFilesDir . '/admin', $sFilesDir . '/' . Core::$mainConfig['backend']);
+				}
+
 				Core_File::copyDir($sFilesDir, CMS_FOLDER);
 			}
 
@@ -147,6 +153,12 @@ class Update_Module_Entity extends Core_Empty_Entity
 				//Sql_Controller::instance()->execute($sSqlCode);
 				Sql_Controller::instance()->executeByFile($sSqlFilename);
 			}
+
+			// Clear Core_ORM_ColumnCache, Core_ORM_RelationCache
+			Core_ORM::clearColumnCache();
+			Core_ORM::clearRelationModelCache();
+
+			method_exists('Core_Cache', 'opcacheReset') && Core_Cache::opcacheReset();
 
 			// Размещаем PHP из описания обновления
 			$sPhpFilename = $oMarket_Controller->tmpDir . '/update.php';

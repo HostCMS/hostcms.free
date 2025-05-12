@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Cache
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 abstract class Core_Cache
 {
@@ -42,6 +42,7 @@ abstract class Core_Cache
 		'expire' => 86400,
 		'size' => 262144,
 		'active' => TRUE,
+		'log' => FALSE,
 		'tags' => TRUE,
 		'compress' => FALSE
 	);
@@ -244,28 +245,52 @@ abstract class Core_Cache
 
 			$bClear = FALSE;
 
-			foreach ($tags as $tag)
+			$cache = Core::crc32($cacheName);
+			$hashcrc32 = Core::crc32($actualKey);
+			$sqlExpire = Core_Date::timestamp2sql($expire);
+
+			if (count($tags))
 			{
-				$oCache_Tag = Core_Entity::factory('Cache_Tag');
-				$oCache_Tag->tag = Core::crc32($tag);
-				$oCache_Tag->cache = Core::crc32($cacheName);
-				$oCache_Tag->hashcrc32 = Core::crc32($actualKey);
-				$oCache_Tag->hash = $actualKey;
-				$oCache_Tag->expire = Core_Date::timestamp2sql($expire);
-				$oCache_Tag->save();
+				$oQB = Core_QueryBuilder::insert('cache_tags')
+					->columns('tag', 'cache', 'hashcrc32', 'hash', 'expire');
 
-				!$bClear
-					&& $bClear = rand(0, $this->_cleaningFrequency * 0.8) == 0;
-			}
+				$count = 0;
+				foreach ($tags as $tag)
+				{
+					/*$oCache_Tag = Core_Entity::factory('Cache_Tag');
+					$oCache_Tag->tag = Core::crc32($tag);
+					$oCache_Tag->cache = $cache;
+					$oCache_Tag->hashcrc32 = $hashcrc32;
+					$oCache_Tag->hash = $actualKey;
+					$oCache_Tag->expire = $sqlExpire;
+					$oCache_Tag->save();*/
 
-			if ($bClear)
-			{
-				$iLimit = intval($this->_cleaningFrequency);
+					$oQB->values(Core::crc32($tag), $cache, $hashcrc32, $actualKey, $sqlExpire);
 
-				$cleaningDate = Core_Date::timestamp2sql(time());
+					$count++;
 
-				Core_DataBase::instance()->setQueryType(3)
-					->query("DELETE LOW_PRIORITY QUICK FROM `cache_tags` WHERE `expire` < '{$cleaningDate}' LIMIT {$iLimit}");
+					if ($count > 50)
+					{
+						$oQB->execute();
+						$oQB->clearValues();
+						$count = 0;
+					}
+
+					!$bClear
+						&& $bClear = rand(0, $this->_cleaningFrequency * 0.8) == 0;
+				}
+
+				$count > 0 && $oQB->execute();
+
+				if ($bClear)
+				{
+					$iLimit = intval($this->_cleaningFrequency);
+
+					$cleaningDate = Core_Date::timestamp2sql(time());
+
+					Core_DataBase::instance()->setQueryType(3)
+						->query("DELETE LOW_PRIORITY QUICK FROM `cache_tags` WHERE `expire` < '{$cleaningDate}' LIMIT {$iLimit}");
+				}
 			}
 		}
 
@@ -305,7 +330,7 @@ abstract class Core_Cache
 				->limit($limit);
 
 			$aCache_Tags = $oCache_Tags->findAll(FALSE);
-			
+
 			foreach ($aCache_Tags as $oCache_Tag)
 			{
 				$this->_deleteByTag($oCache_Tag);
@@ -342,5 +367,23 @@ abstract class Core_Cache
 			->execute();
 
 		return $this;
+	}
+	
+	/**
+	 * Reset Opcache
+	 */
+	static public function opcacheReset()
+	{
+		if (function_exists('opcache_reset'))
+		{
+			$aConfig = opcache_get_configuration();
+
+			if (!isset($aConfig['directives']['restrict_api'])
+				|| ($aConfig['directives']['restrict_api'] == '' || strpos(CMS_FOLDER, $aConfig['directives']['restrict_api']) === 0)
+			)
+			{
+				opcache_reset();
+			}
+		}
 	}
 }

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properties
 {
@@ -333,9 +333,16 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 	public function getItemData($oInformationsystem_Item)
 	{
 		$aGroupData = $this->_aGroupBaseProperties;
-		$aGroupData[1] = is_null($oInformationsystem_Item->Informationsystem_Group->id)
+
+		$oInformationsystem_Group = $oInformationsystem_Item->informationsystem_group_id
+			? Core_Entity::factory('Shop_Group', $oInformationsystem_Item->informationsystem_group_id)
+			: NULL;
+
+		//!is_null($oInformationsystem_Group) && $aGroupData[0] = $oInformationsystem_Group->name;
+
+		$aGroupData[1] = is_null($oInformationsystem_Group)
 			? 'ID00000000'
-			: $oInformationsystem_Item->Informationsystem_Group->guid;
+			: $oInformationsystem_Group->guid;
 
 		$result = array_merge(
 			$aGroupData,
@@ -793,8 +800,10 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 
 			$oInformationsystem_Items = $oInformationsystem_Group->Informationsystem_Items;
 			$oInformationsystem_Items->queryBuilder()
-				->where('informationsystem_id', '=', $this->informationsystemId)
-				->where('shortcut_id', '=', 0);
+				->where('informationsystem_items.informationsystem_id', '=', $this->informationsystemId)
+				->where('informationsystem_items.shortcut_id', '=', 0)
+				->clearOrderBy()
+				->orderBy('informationsystem_items.id', 'ASC');
 
 			if ($iInformationsystemGroupId != 0)
 			{

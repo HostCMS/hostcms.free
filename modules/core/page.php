@@ -80,7 +80,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Page extends Core_Servant_Properties
 {
@@ -95,6 +95,8 @@ class Core_Page extends Core_Servant_Properties
 		'keywords',
 		'template',
 		'structure',
+		'templateSection',
+		'templateSectionLib',
 		'response',
 		'libParams',
 		'widgetParams',

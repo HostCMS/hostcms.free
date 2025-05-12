@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Event
 {
@@ -36,7 +36,10 @@ class Core_Event
 	 */
 	static public function attach($eventName, $function, $options = NULL)
 	{
-		self::$_attached[$eventName][] = array($function, $options);
+		if (!isset(self::$_attached[$eventName]) || !in_array(array($function, $options), self::$_attached[$eventName], TRUE))
+		{
+			self::$_attached[$eventName][] = array($function, $options);
+		}
 	}
 
 	/**

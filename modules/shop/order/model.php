@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Order_Model extends Core_Entity
 {
@@ -187,6 +187,8 @@ class Shop_Order_Model extends Core_Entity
 					echo ' <span title="' . $title . '" class="badge badge-ico badge-blue white"><i class="fa fa-google"></i></span>';
 				break;
 				case 'direct.yandex.ru':
+				case 'yandex.ru':
+				case 'yandex':
 					echo ' <span title="' . $title . '" class="badge badge-ico badge-darkorange white">Я</span>';
 				break;
 				case 'twitterfeed':
@@ -276,6 +278,11 @@ class Shop_Order_Model extends Core_Entity
 				->where('shop_order_id', '=', $this->id)
 				->execute();
 		}
+
+		Core_QueryBuilder::update('shop_discountcard_bonuses')
+			->set('shop_order_id', 0)
+			->where('shop_order_id', '=', $this->id)
+			->execute();
 
 		if (Core_File::isDir($sDir))
 		{
@@ -1023,6 +1030,7 @@ class Shop_Order_Model extends Core_Entity
 	/**
 	 * Prepare entity and children entities
 	 * @return self
+	 * @hostcms-event shop_order.onBeforeAddPropertyValues
 	 */
 	protected function _prepareData()
 	{
@@ -1154,6 +1162,8 @@ class Shop_Order_Model extends Core_Entity
 			{
 				$this->_preparePropertyValue($oProperty_Value);
 			}
+
+			Core_Event::notify($this->_modelName . '.onBeforeAddPropertyValues', $this, array($aProperty_Values));
 
 			// Add all values
 			$this->addEntities($aProperty_Values);
@@ -1348,7 +1358,11 @@ class Shop_Order_Model extends Core_Entity
 						$oShop_Discountcard = Core_Entity::factory('Shop_Discountcard');
 						$oShop_Discountcard->shop_id = $this->shop_id;
 						$oShop_Discountcard->siteuser_id = $this->siteuser_id;
+
+						// Сумма по текущему платежу будет начислена дополнительно в _paidShopDiscountcard()
 						$oShop_Discountcard->setSiteuserAmount();
+						$oShop_Discountcard->amount -= $this->getAmount();
+
 						$oShop_Discountcard->number = '';
 						$oShop_Discountcard->save(); // create ID
 
@@ -1403,9 +1417,19 @@ class Shop_Order_Model extends Core_Entity
 		return $this->save();
 	}
 
+	/**
+	 * Add amount to discountcard
+	 * @return self
+	 * @hostcms-event shop_order.onBeforePaidShopDiscountcard
+	 * @hostcms-event shop_order.onAfterPaidShopDiscountcard
+	 */
 	protected function _paidShopDiscountcard()
 	{
-		if ($this->_oShop_Discountcard)
+		Core_Event::notify($this->_modelName . '.onBeforePaidShopDiscountcard', $this);
+
+		$eventResult = Core_Event::getLastReturn();
+
+		if (is_null($eventResult) && $this->_oShop_Discountcard)
 		{
 			$mode = $this->paid == 0 ? -1 : 1;
 
@@ -1418,6 +1442,8 @@ class Shop_Order_Model extends Core_Entity
 			// update level
 			$this->_oShop_Discountcard->checkLevel();
 		}
+
+		Core_Event::notify($this->_modelName . '.onAfterPaidShopDiscountcard', $this);
 
 		return $this;
 	}
@@ -1791,14 +1817,24 @@ class Shop_Order_Model extends Core_Entity
 				}
 			}
 
-			in_array($oShop_Order_Item->type, array(3, 4, 5))
-				? $fTotalDiscount += $fAmount
-				: $fTotalAmount += $fAmount;
+			// 3 - Скидка от суммы заказа
+			// 4 - Скидка по дисконтной карте
+			// 5 - Списание бонусов
+			if (in_array($oShop_Order_Item->type, array(3, 4, 5)))
+			{
+				$fTotalDiscount += $fAmount;
+			}
+			// 0 - Товар
+			// 7 - Услуга
+			elseif (in_array($oShop_Order_Item->type, array(0, 7)))
+			{
+				$fTotalAmount += $fAmount;
+			}
 
 			$oShop_Item->clearCache();
 		}
 
-		// Бонусы начисляем в отдельном цикле
+		// Бонусы на дисконтную карту начисляем в отдельном цикле
 		if ($this->paid == 1)
 		{
 			if ($fTotalAmount > 0 && $this->_oShop_Discountcard)
@@ -2786,129 +2822,128 @@ class Shop_Order_Model extends Core_Entity
 			: '';
 
 		?>
-		<div class="row">
-			<div class="col-xs-12 table-responsive">
-				<table class="table table-hover">
-					<thead class="bordered-palegreen">
-						<tr>
-							<th>
-								<?php echo "№"?>
-							</th>
-							<th width="40"></th>
-							<th>
-								<?php echo Core::_("Shop_Order.table_description")?>
-							</th>
-							<th>
-								<?php echo Core::_("Shop_Order.table_mark")?>
-							</th>
-							<th>
-								<?php echo Core::_("Shop_Order.table_price") . ", " . $sig?>
-							</th>
-							<th width="10%">
-								<?php echo Core::_("Shop_Order.table_amount")?>
-							</th>
-							<th width="10%">
-								<?php echo Core::_("Shop_Order.table_nds_tax")?>
-							</th>
-							<th width="10%">
-								<?php echo Core::_("Shop_Order.table_nds_value")?>
-							</th>
-							<th width="10%">
-								<?php echo Core::_("Shop_Order.table_amount_value") . ", " . $sig?>
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-					<?php
-					$i = 1;
 
-					$aShop_Order_Items = $this->Shop_Order_Items->findAll(FALSE);
+		<div class="table-responsive">
+			<table class="table table-hover">
+				<thead class="bordered-palegreen">
+					<tr>
+						<th>
+							<?php echo "№"?>
+						</th>
+						<th width="40"></th>
+						<th>
+							<?php echo Core::_("Shop_Order.table_description")?>
+						</th>
+						<th>
+							<?php echo Core::_("Shop_Order.table_mark")?>
+						</th>
+						<th>
+							<?php echo Core::_("Shop_Order.table_price") . ", " . $sig?>
+						</th>
+						<th width="10%">
+							<?php echo Core::_("Shop_Order.table_amount")?>
+						</th>
+						<th width="10%">
+							<?php echo Core::_("Shop_Order.table_nds_tax")?>
+						</th>
+						<th width="10%">
+							<?php echo Core::_("Shop_Order.table_nds_value")?>
+						</th>
+						<th width="10%">
+							<?php echo Core::_("Shop_Order.table_amount_value") . ", " . $sig?>
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+				<?php
+				$i = 1;
 
-					$fShopTaxValueSum = $fShopOrderItemSum = 0.0;
+				$aShop_Order_Items = $this->Shop_Order_Items->findAll(FALSE);
 
-					if (count($aShop_Order_Items))
+				$fShopTaxValueSum = $fShopOrderItemSum = 0.0;
+
+				if (count($aShop_Order_Items))
+				{
+					foreach ($aShop_Order_Items as $oShop_Order_Item)
 					{
-						foreach ($aShop_Order_Items as $oShop_Order_Item)
-						{
-							$sShopTaxRate = $oShop_Order_Item->rate;
+						$sShopTaxRate = $oShop_Order_Item->rate;
 
-							$fShopTaxValue = $sShopTaxRate
-								? $oShop_Order_Item->getTax()
-								: 0;
+						$fShopTaxValue = $sShopTaxRate
+							? $oShop_Order_Item->getTax()
+							: 0;
 
-							// Не установлен статус у товара или статус НЕ отмененный
-							$bNotCanceled = !$oShop_Order_Item->isCanceled();
+						// Не установлен статус у товара или статус НЕ отмененный
+						$bNotCanceled = !$oShop_Order_Item->isCanceled();
 
-							$fItemAmount = $bNotCanceled
-								? $oShop_Order_Item->getAmount()
-								: 0;
+						$fItemAmount = $bNotCanceled
+							? $oShop_Order_Item->getAmount()
+							: 0;
 
-							$fShopTaxValueSum += $fShopTaxValue;
-							$fShopOrderItemSum += $fItemAmount;
+						$fShopTaxValueSum += $fShopTaxValue;
+						$fShopOrderItemSum += $fItemAmount;
 
-							?>
-							<tr>
-								<td>
-									<?php echo $i++?>
-								</td>
-								<td width="40" align="center"><?php
-									if ($oShop_Order_Item->type == 0)
-									{
-										echo $oShop_Order_Item->Shop_Item->imgBackend();
-									}
-									?>
-								</td>
-								<td>
-									<?php
-									if ($oShop_Order_Item->shop_order_item_status_id)
-									{
-										?><i class="fa <?php echo $oShop_Order_Item->Shop_Order_Item_Status->canceled ? 'fa-times-circle' : 'fa-circle'?>" style="color: <?php echo htmlspecialchars($oShop_Order_Item->Shop_Order_Item_Status->color)?>" title="<?php echo htmlspecialchars($oShop_Order_Item->Shop_Order_Item_Status->name)?>"></i> <?php
-									}
-									echo htmlspecialchars($oShop_Order_Item->name);
-									?>
-								</td>
-								<td>
-									<?php echo htmlspecialchars((string) $oShop_Order_Item->marking)?>
-								</td>
-								<td>
-									<?php echo number_format(Shop_Controller::instance()->round($oShop_Order_Item->getPrice()), 2, '.', '')?>
-								</td>
-								<td>
-									<?php echo Core_Str::hideZeros($oShop_Order_Item->quantity)?>
-								</td>
-								<td>
-									<?php echo $sShopTaxRate != 0 ? "{$sShopTaxRate}%" : '-'?>
-								</td>
-								<td>
-									<?php echo $fShopTaxValue != 0 ? $fShopTaxValue : '-'?>
-								</td>
-								<td>
-									<?php echo $bNotCanceled ? number_format($fItemAmount, 2, '.', '') : '-'?>
-								</td>
-							</tr>
-							<?php
-						}
+						?>
+						<tr>
+							<td>
+								<?php echo $i++?>
+							</td>
+							<td width="40" align="center"><?php
+								if ($oShop_Order_Item->type == 0)
+								{
+									echo $oShop_Order_Item->Shop_Item->imgBackend();
+								}
+								?>
+							</td>
+							<td>
+								<?php
+								if ($oShop_Order_Item->shop_order_item_status_id)
+								{
+									?><i class="fa <?php echo $oShop_Order_Item->Shop_Order_Item_Status->canceled ? 'fa-times-circle' : 'fa-circle'?>" style="color: <?php echo htmlspecialchars($oShop_Order_Item->Shop_Order_Item_Status->color)?>" title="<?php echo htmlspecialchars($oShop_Order_Item->Shop_Order_Item_Status->name)?>"></i> <?php
+								}
+								echo htmlspecialchars($oShop_Order_Item->name);
+								?>
+							</td>
+							<td>
+								<?php echo htmlspecialchars((string) $oShop_Order_Item->marking)?>
+							</td>
+							<td>
+								<?php echo number_format(Shop_Controller::instance()->round($oShop_Order_Item->getPrice()), 2, '.', '')?>
+							</td>
+							<td>
+								<?php echo Core_Str::hideZeros($oShop_Order_Item->quantity)?>
+							</td>
+							<td>
+								<?php echo $sShopTaxRate != 0 ? "{$sShopTaxRate}%" : '-'?>
+							</td>
+							<td>
+								<?php echo $fShopTaxValue != 0 ? $fShopTaxValue : '-'?>
+							</td>
+							<td>
+								<?php echo $bNotCanceled ? number_format($fItemAmount, 2, '.', '') : '-'?>
+							</td>
+						</tr>
+						<?php
 					}
-					?>
-							<tr class="footer">
-							<td width="80%" align="right" style="border-bottom: 1px solid #e9e9e9" colspan="6">
-								<?php echo Core::_("Shop_Order.table_nds")?>
-							</td>
-							<td width="80%" align="right" style="border-bottom: 1px solid #e9e9e9" colspan="3">
-								<?php echo $this->Shop_Currency->formatWithCurrency($fShopTaxValueSum)?>
-							</td>
-						</tr>
-						<tr class="footer">
-							<td align="right" colspan="6">
-								<?php echo Core::_("Shop_Order.table_all_to_pay")?>
-							</td>
-							<td align="right" colspan="3">
-								<?php echo $this->Shop_Currency->formatWithCurrency($fShopOrderItemSum)?>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
+				}
+				?>
+					<tr class="footer">
+						<td align="right" style="border-bottom: 1px solid #e9e9e9" colspan="6">
+							<?php echo Core::_("Shop_Order.table_nds")?>
+						</td>
+						<td align="right" style="border-bottom: 1px solid #e9e9e9" colspan="3">
+							<?php echo $this->Shop_Currency->formatWithCurrency($fShopTaxValueSum)?>
+						</td>
+					</tr>
+					<tr class="footer">
+						<td align="right" colspan="6">
+							<?php echo Core::_("Shop_Order.table_all_to_pay")?>
+						</td>
+						<td align="right" colspan="3">
+							<?php echo $this->Shop_Currency->formatWithCurrency($fShopOrderItemSum)?>
+						</td>
+					</tr>
+				</tbody>
+			</table>
 		</div>
 
 		<?php
@@ -2923,7 +2958,7 @@ class Shop_Order_Model extends Core_Entity
 
 		if ($siteuser_id)
 		{
-			$onclick = "$.modalLoad({path: '/admin/shop/order/item/index.php',additionalParams: 'shop_id={shop_id}&shop_group_id={shop_group_id}&shop_dir_id={shop_dir_id}&shop_order_id={id}&{INTERNAL}', windowId: '{windowId}'}); return false";
+			$onclick = "$.modalLoad({path: hostcmsBackend + '/shop/order/item/index.php',additionalParams: 'shop_id={shop_id}&shop_group_id={shop_group_id}&shop_dir_id={shop_dir_id}&shop_order_id={id}&{INTERNAL}', windowId: '{windowId}'}); return false";
 		}
 		else
 		{
@@ -3049,6 +3084,8 @@ class Shop_Order_Model extends Core_Entity
 	 * Add discounts to the shop_order
 	 * @param array $aOptions array('amount' => $amount, 'quantity' => $quantity, 'prices' => $aDiscountPrices, 'applyDiscounts' => TRUE, 'applyDiscountCards' => TRUE)
 	 * @return self
+	 * @hostcms-event shop_order.onBeforeAddPurchaseDiscountShopOrderItem
+	 * @hostcms-event shop_order.onBeforeAddDiscountcardShopOrderItem
 	 */
 	public function addPurchaseDiscount($aOptions)
 	{
@@ -3070,157 +3107,95 @@ class Shop_Order_Model extends Core_Entity
 
 			$oShop = $this->Shop;
 
-			// Дисконтная карта
-			$bApplyMaxDiscount = FALSE;
-			$fDiscountcard = 0;
+			$oShop_Purchase_Discount_Controller = new Shop_Purchase_Discount_Controller($oShop);
+			$oShop_Purchase_Discount_Controller
+				->applyDiscountCards($aOptions['applyDiscountCards'])
+				->applyDiscounts($aOptions['applyDiscounts'])
+				->amount($amount)
+				->quantity($quantity)
+				->weight($weight)
+				->couponText($this->coupon)
+				->siteuserId($this->siteuser_id ? $this->siteuser_id : 0)
+				->prices($aDiscountPrices)
+				->dateTime($this->datetime);
 
-			if ($aOptions['applyDiscountCards'] && Core::moduleIsActive('siteuser') && $this->siteuser_id)
+			// Получаем данные о купоне
+			$shop_purchase_discount_coupon_id = $shop_purchase_discount_id = 0;
+			if (strlen((string) $this->coupon))
 			{
-				$oSiteuser = $this->Siteuser;
+				$aShop_Purchase_Discounts_For_Coupon = $oShop_Purchase_Discount_Controller->getAllByCouponText($this->coupon);
 
-				$oShop_Discountcard = $oSiteuser->Shop_Discountcards->getByShop_id($oShop->id);
-				if (!is_null($oShop_Discountcard)
-					&& $oShop_Discountcard->active
-					&& $oShop_Discountcard->shop_discountcard_level_id
-				)
+				if (isset($aShop_Purchase_Discounts_For_Coupon[0]))
 				{
-					$oShop_Discountcard_Level = $oShop_Discountcard->Shop_Discountcard_Level;
-
-					$bApplyMaxDiscount = $oShop_Discountcard_Level->apply_max_discount == 1;
-
-					// Сумма скидки по дисконтной карте
-					$fDiscountcard = $amount * ($oShop_Discountcard_Level->discount / 100);
-
-					// Округляем до целых
-					$oShop_Discountcard_Level->round
-						&& $fDiscountcard = round($fDiscountcard);
+					// ID скидки по купону
+					$shop_purchase_discount_id = $aShop_Purchase_Discounts_For_Coupon[0]->id;
+					// ID самого купона
+					$shop_purchase_discount_coupon_id = $aShop_Purchase_Discounts_For_Coupon[0]->shop_purchase_discount_coupon_id;
 				}
 			}
 
-			// Скидки от суммы заказа
-			$fAppliedDiscountsAmount = 0;
-			$bApplyShopPurchaseDiscounts = FALSE;
+			$aArray = $oShop_Purchase_Discount_Controller->calculateDiscounts();
 
-			if ($aOptions['applyDiscounts'])
+			foreach ($aArray['discounts'] as $oShop_Purchase_Discount)
 			{
-				$oShop_Purchase_Discount_Controller = new Shop_Purchase_Discount_Controller($oShop);
-				$oShop_Purchase_Discount_Controller
-					->amount($amount)
-					->quantity($quantity)
-					->weight($weight)
-					->couponText($this->coupon)
-					->siteuserId($this->siteuser_id ? $this->siteuser_id : 0)
-					->prices($aDiscountPrices)
-					->dateTime($this->datetime);
+				$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
+				$oShop_Order_Item->name = $oShop_Purchase_Discount->name;
+				$oShop_Order_Item->quantity = 1;
+				$oShop_Order_Item->type = 3; // 3 - Скидка от суммы заказа
 
-				// Получаем данные о купоне
-				$shop_purchase_discount_coupon_id = $shop_purchase_discount_id = 0;
-				if (strlen((string) $oShop_Purchase_Discount_Controller->couponText))
+				$discountAmount = $oShop_Purchase_Discount->getDiscountAmount();
+
+				// Скидка больше суммы заказа
+				$discountAmount > $amount && $discountAmount = $amount;
+
+				$oShop_Order_Item->price = -1 * $discountAmount;
+
+				if ($oShop_Purchase_Discount->id == $shop_purchase_discount_id)
 				{
-					$oShop_Purchase_Discounts_For_Coupon = $oShop->Shop_Purchase_Discounts->getByCouponText(
-						$oShop_Purchase_Discount_Controller->couponText
+					$oShop_Purchase_Discount_Coupon = Core_Entity::factory('Shop_Purchase_Discount_Coupon')->find(
+						$shop_purchase_discount_coupon_id
 					);
-					if (!is_null($oShop_Purchase_Discounts_For_Coupon))
+
+					if (!is_null($oShop_Purchase_Discount_Coupon->id))
 					{
-						// ID скидки по купону
-						$shop_purchase_discount_id = $oShop_Purchase_Discounts_For_Coupon->id;
-						// ID самого купона
-						$shop_purchase_discount_coupon_id = $oShop_Purchase_Discounts_For_Coupon->shop_purchase_discount_coupon_id;
-					}
-				}
-
-				$aShop_Purchase_Discounts = $oShop_Purchase_Discount_Controller->getDiscounts();
-
-				// Вычисляем сумму скидок по скидкам от суммы заказа и по уровню дисконтной карты, применяется наибольшее из рассчитанных скидок
-				if ($bApplyMaxDiscount)
-				{
-					$totalPurchaseDiscount = 0;
-					foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
-					{
-						$totalPurchaseDiscount += $oShop_Purchase_Discount->getDiscountAmount();
-					}
-
-					$bApplyShopPurchaseDiscounts = $totalPurchaseDiscount > $fDiscountcard;
-				}
-				else
-				{
-					$bApplyShopPurchaseDiscounts = TRUE;
-				}
-
-				// Если решили применять скидку от суммы заказа
-				if ($bApplyShopPurchaseDiscounts)
-				{
-					foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
-					{
-						$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
-						$oShop_Order_Item->name = $oShop_Purchase_Discount->name;
-						$oShop_Order_Item->quantity = 1;
-						$oShop_Order_Item->type = 3; // 3 - Скидка от суммы заказа
-
-						$discountAmount = $oShop_Purchase_Discount->getDiscountAmount();
-
-						// Скидка больше суммы заказа
-						$discountAmount > $amount && $discountAmount = $amount;
-
-						$oShop_Order_Item->price = -1 * $discountAmount;
-
-						// Inc total discount amount
-						$fAppliedDiscountsAmount += $discountAmount;
-
-						if ($oShop_Purchase_Discount->id == $shop_purchase_discount_id)
+						// Списываем купон
+						if ($oShop_Purchase_Discount_Coupon->count != -1 && $oShop_Purchase_Discount_Coupon->count != 0)
 						{
-							$oShop_Purchase_Discount_Coupon = Core_Entity::factory('Shop_Purchase_Discount_Coupon')->find(
-								$shop_purchase_discount_coupon_id
-							);
-
-							if (!is_null($oShop_Purchase_Discount_Coupon->id))
-							{
-								// Списываем купон
-								if ($oShop_Purchase_Discount_Coupon->count != -1 && $oShop_Purchase_Discount_Coupon->count != 0)
-								{
-									$oShop_Purchase_Discount_Coupon->count = $oShop_Purchase_Discount_Coupon->count - 1;
-									$oShop_Purchase_Discount_Coupon->save();
-								}
-
-								// Сохраняем купон для заказа, мог быть задан выше как купон скидки на товар
-								if (!is_null($this->coupon))
-								{
-									$this->coupon = $oShop_Purchase_Discount_Coupon->text;
-									$this->save();
-								}
-							}
+							$oShop_Purchase_Discount_Coupon->count = $oShop_Purchase_Discount_Coupon->count - 1;
+							$oShop_Purchase_Discount_Coupon->save();
 						}
 
-						$this->add($oShop_Order_Item);
+						// Сохраняем купон для заказа, мог быть задан выше как купон скидки на товар
+						if (!is_null($this->coupon))
+						{
+							$this->coupon = $oShop_Purchase_Discount_Coupon->text;
+							$this->save();
+						}
 					}
 				}
+
+				Core_Event::notify($this->_modelName . '.onBeforeAddPurchaseDiscountShopOrderItem', $this, array($oShop_Order_Item, $oShop_Purchase_Discount));
+
+				$this->add($oShop_Order_Item);
 			}
 
-			// Не применять максимальную скидку или сумму по карте больше, чем скидка от суммы заказа
-			if (!$bApplyMaxDiscount || !$bApplyShopPurchaseDiscounts)
+			$fDiscountcard = !is_null($aArray['discountcard'])
+				? $aArray['discountcard']->getDiscountAmount()
+				: 0;
+
+			if ($fDiscountcard > 0)
 			{
-				if ($fDiscountcard)
-				{
-					$fAmountForCard = $amount - $fAppliedDiscountsAmount;
+				$oShop_Discountcard = $aArray['discountcard'];
 
-					if ($fAmountForCard > 0)
-					{
-						// Рассчитываем от новой суммы, без учета примененных выше скидок от суммы заказа
-						$fDiscountcard = $fAmountForCard * ($oShop_Discountcard_Level->discount / 100);
+				$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
+				$oShop_Order_Item->name = Core::_('Shop_Discountcard.shop_order_item_name', $oShop_Discountcard->number);
+				$oShop_Order_Item->quantity = 1;
+				$oShop_Order_Item->type = 4; // 4 - Скидка по дисконтной карте
+				$oShop_Order_Item->price = -1 * $fDiscountcard;
 
-						// Округляем до целых
-						$oShop_Discountcard_Level->round
-							&& $fDiscountcard = round($fDiscountcard);
+				Core_Event::notify($this->_modelName . '.onBeforeAddDiscountcardShopOrderItem', $this, array($oShop_Order_Item, $oShop_Discountcard));
 
-						$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
-						$oShop_Order_Item->name = Core::_('Shop_Discountcard.shop_order_item_name', $oShop_Discountcard->number);
-						$oShop_Order_Item->quantity = 1;
-						$oShop_Order_Item->type = 4; // 4 - Скидка по дисконтной карте
-						$oShop_Order_Item->price = -1 * Shop_Controller::instance()->round($fDiscountcard);
-
-						$this->add($oShop_Order_Item);
-					}
-				}
+				$this->add($oShop_Order_Item);
 			}
 		}
 
@@ -3991,7 +3966,7 @@ class Shop_Order_Model extends Core_Entity
 				// Товар
 				if ($oShop_Order_Item->type == 0)
 				{
-					$oShop_Order_Item->quantity += 1;
+					$oShop_Order_Item->quantity += $oNew_Shop_Order_Item->quantity;
 					$oShop_Order_Item->save();
 				}
 

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Site
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Site_Favicon_Model extends Core_Entity
 {
@@ -103,6 +103,7 @@ class Site_Favicon_Model extends Core_Entity
 	/**
 	 * Delete favicon file
 	 * @return self
+	 * @hostcms-event site_favicon.onAfterDeleteFavicon
 	 */
 	public function deleteFavicon()
 	{
@@ -111,11 +112,13 @@ class Site_Favicon_Model extends Core_Entity
 			try
 			{
 				Core_File::delete($this->getFaviconPath());
-
-				$this->filename = '';
-				$this->type = '';
-				$this->save();
 			} catch (Exception $e) {}
+
+			Core_Event::notify($this->_modelName . '.onAfterDeleteFavicon', $this);
+
+			$this->filename = '';
+			$this->type = '';
+			$this->save();
 		}
 
 		return $this;

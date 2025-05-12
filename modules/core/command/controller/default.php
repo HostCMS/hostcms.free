@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Command
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Command_Controller_Default extends Core_Command_Controller
 {
@@ -411,7 +411,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 		0 - Страница из документооборота
 		1 - Динамическая страница
 		2 - Типовая динамическая страница
-		3 - Ссылка на вшений ресурс
+		3 - Ссылка на внешний ресурс
 		*/
 
 		// Если тип - страница
@@ -501,17 +501,91 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 
 				$oUser = Core_Auth::getCurrentUser();
 
+				// XML
 				if ($hostcmsAction == 'SHOW_XML'
 					&& Core::moduleIsActive('xsl')
 					&& $oUser && $oUser->checkModuleAccess(array('xsl'), $oSite)
 				)
 				{
-					$_SESSION['HOSTCMS_SHOW_XML'] = $hostcmsAction == 'SHOW_XML';
+					$_SESSION['HOSTCMS_SHOW_XML'] = TRUE;
 				}
-				elseif (isset($_SESSION['HOSTCMS_SHOW_XML']))
+				elseif (isset($_SESSION['HOSTCMS_SHOW_XML']) && $hostcmsAction == 'HIDE_XML')
 				{
 					unset($_SESSION['HOSTCMS_SHOW_XML']);
 				}
+
+				// Дизайн
+				/*if ($hostcmsAction == 'SHOW_DESIGN'
+					&& Core::moduleIsActive('template')
+					&& $oUser && $oUser->checkModuleAccess(array('template'), $oSite)
+				)
+				{
+					$_SESSION['HOSTCMS_SHOW_DESIGN'] = TRUE;
+				}
+				elseif (isset($_SESSION['HOSTCMS_SHOW_DESIGN']) && $hostcmsAction == 'HIDE_DESIGN')
+				{
+					unset($_SESSION['HOSTCMS_SHOW_DESIGN']);
+				}*/
+			}
+
+			// var_dump(Core::$url);
+
+			// Если показ дизайна
+			if ($hostcmsAction == 'SHOW_DESIGN' && !isset($_GET['hostcmsShowDesign']))
+			{
+				ob_start();
+
+				$iTimestamp = abs(Core::crc32(Core::getVersion()));
+
+				// die();
+				?><!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+		<meta http-equiv="Content-Type" content="text/html; charset=<?php echo SITE_CODING?>">
+		<meta charset="<?php echo SITE_CODING?>">
+		<title><?php Core_Page::instance()->showTitle()?></title>
+		<meta name="viewport" content="height=device-height,
+						  width=device-width, initial-scale=1.0,
+						  minimum-scale=1.0, maximum-scale=5.0,
+						  target-densitydpi=device-dpi">
+		<meta name="description" content="<?php Core_Page::instance()->showDescription()?>">
+		<meta name="keywords" content="<?php Core_Page::instance()->showKeywords()?>">
+
+		<link rel="stylesheet" type="text/css" href="/modules/skin/default/frontend/panel.css"/>
+		<link rel="stylesheet" type="text/css" href="/modules/skin/bootstrap/fonts/fontawesome/6/css/all.min.css?<?php echo $iTimestamp?>" />
+
+		<script src="/modules/skin/default/frontend/jquery.min.js"></script>
+		<script>var hQuery = $.noConflict(true);</script>
+		<script src="/modules/skin/default/frontend/frontend.js"></script>
+	</head>
+	<body>
+		<div class="top-panel">
+			<div class="icons">
+				<i title="<?php echo Core::_('Template.design_icon_desktop')?>" class="fa-solid fa-desktop fa-fw active" onclick="hQuery.changeDevice(this, 'desktop')"></i>
+				<i title="<?php echo Core::_('Template.design_icon_tablet')?>" class="fa-solid fa-tablet-screen-button fa-fw" onclick="hQuery.changeDevice(this, 'tablet')"></i>
+				<i title="<?php echo Core::_('Template.design_icon_tablet_wide')?>" class="fa-solid fa-tablet-screen-button fa-rotate-270 fa-fw" onclick="hQuery.changeDevice(this, 'tablet-wide')"></i>
+				<i title="<?php echo Core::_('Template.design_icon_mobile')?>" class="fa-solid fa-mobile-screen-button fa-fw" onclick="hQuery.changeDevice(this, 'mobile')"></i>
+				<i title="<?php echo Core::_('Template.design_icon_mobile_wide')?>" class="fa-solid fa-mobile-screen-button fa-rotate-270 fa-fw" onclick="hQuery.changeDevice(this, 'mobile-wide')"></i>
+				<a href="<?php echo htmlspecialchars(Core::$url['path'])?>" class="btn-open-site" title="Close"><i class="fa-regular fa-circle-xmark"></i></a>
+			</div>
+		</div>
+		<div class="iframe-wrapper">
+			<iframe id="siteFrame" frameBorder="0" allowfullscreen="" src="<?php echo htmlspecialchars(
+				Core::$url['path'] . '?'
+					. (Core::$url['query'] !== '' ? Core::$url['query'] : '')
+					. (Core::$url['query'] !== '' ? '&' : '')
+					. 'hostcmsShowDesign')?>">
+			</iframe>
+		</div>
+	</body>
+</html><?php
+
+				$sContent = ob_get_clean();
+
+				$oCore_Response->body($sContent);
+
+				return $oCore_Response;
 			}
 		}
 
@@ -685,7 +759,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 			if (!Core_Auth::logged() && !preg_match_all($pat, $sTmpContent, $matches))
 			{
 				$sContent = '<div style="box-sizing: border-box; border: 1px solid #E83531; z-index: 999999; border-radius: 5px; background: #FEEFDA; text-align: center; clear: both; height: 120px; position: relative;' . (Core::checkPanel() ? 'margin-top: 38px;' : '') . '">
-					<div style="position: absolute; right: 3px; top: 3px; font-family: courier new; font-weight: bold;"><a href="#" onclick="javascript:this.parentNode.parentNode.style.display=\'none\'; return false;"><img src="/admin/images/wclose.gif" style="border: none;" alt="Close this notice"/></a></div>
+					<div style="position: absolute; right: 3px; top: 3px; font-family: courier new; font-weight: bold;"><a href="#" onclick="javascript:this.parentNode.parentNode.style.display=\'none\'; return false;"><img src="' . Admin_Form_Controller::correctBackendPath('/{admin}/images/wclose.gif') . '" style="border: none;" alt="Close this notice"/></a></div>
 					<div style="box-sizing: border-box; width: 740px; margin: 0 auto; text-align: left; padding: 0; overflow: hidden; color: black;"><div style="width: 75px; float: left"><img src="https://www.hostcms.ru/images/free-notice/warning.jpg" alt="Warning!"/></div>
 					<div style="width: 600px; float: left; font-family: Arial, sans-serif"><div style="font-size: 14px; font-weight: bold; margin-top: 12px;">Нарушение п. 3.3 лицензионого договора присоединения</div>
 					<div style="font-size: 12px; margin-top: 6px; line-height: 12px">Пользователь бесплатной редакции HostCMS.Старт обязуется разместить на каждом сайте, работающем с использованием Программного продукта, активную, индексируемую и видимую при просмотре сайта ссылку
@@ -719,7 +793,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 		);
 
 		// Top panel
-		if (Core::checkPanel())
+		if ($bLogged && Core::checkPanel())
 		{
 			ob_start();
 

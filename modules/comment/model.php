@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Comment
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Comment_Model extends Core_Entity
 {
@@ -298,8 +298,8 @@ class Comment_Model extends Core_Entity
 				->execute();
 
 			Core_Html_Entity::factory('A')
-				->href($oAdmin_Form_Controller->getAdminActionLoadHref('/admin/siteuser/index.php', 'edit', NULL, 0, intval($this->Siteuser->id)))
-				->onclick("$.openWindowAddTaskbar({path: '/admin/siteuser/index.php', additionalParams: '&hostcms[checked][0][{$this->Siteuser->id}]=1&hostcms[action]=edit', shortcutImg: '" . '/modules/skin/' . Core_Skin::instance()->getSkinName() . '/images/module/siteuser.png' . "', shortcutTitle: 'undefined', Minimize: true}); return false")
+				->href($oAdmin_Form_Controller->getAdminActionLoadHref('/{admin}/siteuser/index.php', 'edit', NULL, 0, intval($this->Siteuser->id)))
+				->onclick("$.openWindowAddTaskbar({path: hostcmsBackend + '/siteuser/index.php', additionalParams: '&hostcms[checked][0][{$this->Siteuser->id}]=1&hostcms[action]=edit', shortcutImg: '" . '/modules/skin/' . Core_Skin::instance()->getSkinName() . '/images/module/siteuser.png' . "', shortcutTitle: 'undefined', Minimize: true}); return false")
 				->value(htmlspecialchars((string) $this->Siteuser->login))
 				->execute();
 
@@ -606,7 +606,6 @@ class Comment_Model extends Core_Entity
 			if (is_array($this->_showXmlProperties))
 			{
 				$aProperty_Values = Property_Controller_Value::getPropertiesValues($this->_showXmlProperties, $this->id, FALSE, $this->_xmlSortPropertiesValues);
-
 				foreach ($aProperty_Values as $oProperty_Value)
 				{
 					$this->_preparePropertyValue($oProperty_Value);
@@ -615,8 +614,6 @@ class Comment_Model extends Core_Entity
 			else
 			{
 				$aProperty_Values = $this->getPropertyValues(TRUE, array(), $this->_xmlSortPropertiesValues);
-				// Add all values
-				//$this->addEntities($aProperty_Values);
 			}
 
 			Core_Event::notify($this->_modelName . '.onBeforeAddPropertyValues', $this, array($aProperty_Values));
@@ -644,7 +641,7 @@ class Comment_Model extends Core_Entity
 						->where('id', 'IN', $aListIDs)
 						->clearOrderBy();
 
-					$oList_Items->findAll(TRUE);
+					$oList_Items->findAll();
 				}
 			}
 		}

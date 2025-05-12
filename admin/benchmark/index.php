@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'benchmark');
 
 // Код формы
 $iAdmin_Form_Id = 196;
-$sAdminFormAction = '/admin/benchmark/index.php';
+$sAdminFormAction = '/{admin}/benchmark/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -57,10 +57,10 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('Benchmark.menu_site_speed'))
 		->icon('fa fa-tachometer')
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/benchmark/url/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/benchmark/url/index.php', NULL, NULL, '')
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/benchmark/url/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/benchmark/url/index.php', NULL, NULL, '')
 		)
 );
 
@@ -455,7 +455,7 @@ function benchmarkShow($oAdmin_Form_Controller)
 			if (isset($aConfig['default']))
 			{
 				$aConfig['default']['storageEngine'] = $sEngine;
-				
+
 				Core::$config->set('core_database', $aConfig);
 			}
 
@@ -740,7 +740,7 @@ function benchmarkShow($oAdmin_Form_Controller)
 				}
 				?>
 				<div id="horizontal-form">
-					<form class="form-horizontal" role="form" action="/admin/benchmark/index.php" method="post">
+					<form class="form-horizontal" role="form" action="<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/benchmark/index.php")?>" method="post">
 						<div class="form-title">
 							<?php echo Core::_('Benchmark.changeStorageEnginesTitle')?>
 						</div>
@@ -891,7 +891,7 @@ function benchmarkShow($oAdmin_Form_Controller)
 				}
 				?>
 				<div id="horizontal-form">
-					<form class="form-horizontal" role="form" action="/admin/benchmark/index.php" method="post">
+					<form class="form-horizontal" role="form" action="<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/benchmark/index.php")?>" method="post">
 						<div class="form-title">
 							<?php echo Core::_('Benchmark.changeStorageCharsetTitle')?>
 						</div>

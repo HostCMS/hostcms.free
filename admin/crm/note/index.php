@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -97,7 +97,7 @@ if (Core_Array::getPost('showCrmNoteAttachment'))
 	if (!is_null($oCrm_Note_Attachment))
 	{
 		$params = Core_Array::getPost('params', 0, 'strval');
-		$src = '/admin/crm/note/index.php?&crm_note_attachment_id=' . $oCrm_Note_Attachment->id . '&' . $params;
+		$src = Admin_Form_Controller::correctBackendPath('/{admin}/crm/note/index.php?&crm_note_attachment_id=') . $oCrm_Note_Attachment->id . '&' . $params;
 
 		ob_start();
 		?>

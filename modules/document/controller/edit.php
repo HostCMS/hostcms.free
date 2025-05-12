@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Document
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -77,7 +77,7 @@ class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oTextarea_Document = Admin_Form_Entity::factory('Textarea')
 					->value($this->_object->text)
-					->rows(15)
+					->rows(18)
 					->caption(Core::_('Document.text'))
 					->name('text')
 					->wysiwyg(Core::moduleIsActive('wysiwyg'))

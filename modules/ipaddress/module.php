@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Ipaddress
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Ipaddress_Module extends Core_Module_Abstract
 {
@@ -16,13 +16,13 @@ class Ipaddress_Module extends Core_Module_Abstract
 	 * Module version
 	 * @var string
 	 */
-	public $version = '7.0';
+	public $version = '7.1';
 
 	/**
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2024-07-09';
+	public $date = '2025-04-04';
 
 	/**
 	 * Module name
@@ -42,8 +42,8 @@ class Ipaddress_Module extends Core_Module_Abstract
 				'block' => 3,
 				'ico' => 'fa fa-link',
 				'name' => Core::_('ipaddress.menu'),
-				'href' => "/admin/ipaddress/index.php",
-				'onclick' => "$.adminLoad({path: '/admin/ipaddress/index.php'}); return false"
+				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/ipaddress/index.php"),
+				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/ipaddress/index.php'}); return false")
 			)
 		);
 

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Purchase_Discount_Model extends Core_Entity
 {
@@ -111,29 +111,28 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 	 * Get All Discounts By Coupon Text
 	 * @param string $couponText coupon code
 	 * @return array
+	 * @see Shop_Purchase_Discount_Controller::getAllByCouponText
 	 */
 	public function getAllByCouponText($couponText)
 	{
-		$sDatetime = Core_Date::timestamp2sql(time());
+		$shop_id = 0;
 
-		$this->queryBuilder()
-			->select('shop_purchase_discounts.*',
-				array('shop_purchase_discount_coupons.id', 'shop_purchase_discount_coupon_id')
-			)
-			->join('shop_purchase_discount_coupons', 'shop_purchase_discounts.id', '=', 'shop_purchase_discount_coupons.shop_purchase_discount_id')
-			->where('shop_purchase_discount_coupons.active', '=', 1)
-			->where('shop_purchase_discount_coupons.deleted', '=', 0)
-			->where('shop_purchase_discount_coupons.text', '=', $couponText)
-			->where('shop_purchase_discount_coupons.start_datetime', '<=', $sDatetime)
-			->where('shop_purchase_discount_coupons.end_datetime', '>=', $sDatetime)
-			->open()
-			->where('shop_purchase_discount_coupons.count', '>', 0)
-			->setOr()
-			->where('shop_purchase_discount_coupons.count', '=', -1)
-			->close();
+		$aWhere = $this->queryBuilder()->getWhere();
+		foreach ($aWhere as $aCondition)
+		{
+			if (isset($aCondition['']) && $aCondition[''][0] == 'shop_purchase_discounts.shop_id')
+			{
+				$shop_id = $aCondition[''][2];
 
-		// Чтобы получить новый объект с заполненным shop_purchase_discount_coupon_id используем FALSE
-		return $this->findAll(FALSE);
+				$oShop_Purchase_Discount_Controller = new Shop_Purchase_Discount_Controller(
+					Core_Entity::factory('Shop', $shop_id)
+				);
+
+				return $oShop_Purchase_Discount_Controller->getAllByCouponText($couponText);
+			}
+		}
+
+		return array();
 	}
 
 	/**
@@ -288,9 +287,34 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 	 */
 	public function valueBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		return $this->type == 0
-			? Core_Str::hideZeros($this->value) . '%'
-			: htmlspecialchars($this->Shop->Shop_Currency->formatWithCurrency($this->value));
+		$max_discount = '';
+
+		if ($this->value > 80 && $this->type == 0)
+		{
+			$return = '<i class="fa fa-exclamation-triangle warning" title="More than 80%"></i> ';
+		}
+		elseif($this->value == 0)
+		{
+			$return = '<i class="fa fa-exclamation-triangle warning" title="Zero Discount"></i> ';
+		}
+		else
+		{
+			$return = '';
+		}
+
+		if ($this->type == 0 && $this->max_discount > 0)
+		{
+			$max_discount = Core_Html_Entity::factory('Span')
+				->class('badge badge-sky badge-ico white margin-left-5 pull-right')
+				->title('Max discount')
+				->value('≤' . htmlspecialchars($this->Shop->Shop_Currency->formatWithCurrency($this->max_discount)))
+				->execute();
+		}
+
+		return $return . ($this->type == 0
+			? Core_Str::hideZeros($this->value) . '%' . $max_discount
+			: htmlspecialchars($this->Shop->Shop_Currency->formatWithCurrency($this->value))
+		);
 	}
 
 	/**

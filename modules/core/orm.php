@@ -62,7 +62,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_ORM
 {
@@ -320,7 +320,7 @@ class Core_ORM
 	 * Default sorting for models
 	 * <code>
 	 * protected $_sorting = array(
-		'tablename.sorting' => 'ASC'
+	 * 	'tablename.sorting' => 'ASC'
 	 * );
 	 * </code>
 	 * @var array
@@ -1600,6 +1600,37 @@ class Core_ORM
 	}
 
 	/**
+	 * Invoked when unset() is used on inaccessible (protected or private) or non-existing properties
+	 * @param string $property property name
+	 * @ignore
+	 */
+	public function __unset($property)
+	{
+		// data-property, e.g. dataMyValue
+		if (strpos($property, 'data') === 0 && $property != 'data')
+		{
+			if (isset($this->_dataValues[$property]))
+			{
+				unset($this->_dataValues[$property]);
+			}
+		}
+		else
+		{
+			$lowerProperty = strtolower($property);
+			if (array_key_exists($lowerProperty, $this->_modelColumns))
+			{
+				$this->_load();
+				$this->_modelColumns[$lowerProperty] = NULL;
+			}
+			else
+			{
+				throw new Core_Exception("Unset error, the property '%property' does not exist in the model '%model'",
+					array('%property' => $property, '%model' => $this->getModelName()));
+			}
+		}
+	}
+
+	/**
 	 * Get dataValues
 	 * @return array
 	 */
@@ -2230,25 +2261,25 @@ class Core_ORM
 	 */
 	public function toArray()
 	{
-		$return = array();
+		$aReturn = array();
 
 		if (!empty($this->_modelColumns))
 		{
-			$return = $this->_modelColumns;
+			$aReturn = $this->_modelColumns;
 		}
 
 		// 'dataXXX' values
 		foreach ($this->_dataValues as $key => $value)
 		{
-			$return[$key] = $value;
+			$aReturn[$key] = $value;
 		}
 
-		Core_Event::notify($this->_modelName . '.onAfterToArray', $this, array($return));
+		Core_Event::notify($this->_modelName . '.onAfterToArray', $this, array($aReturn));
 		$eventResult = Core_Event::getLastReturn();
 
 		return is_array($eventResult)
 			? $eventResult
-			: $return;
+			: $aReturn;
 	}
 
 	/**

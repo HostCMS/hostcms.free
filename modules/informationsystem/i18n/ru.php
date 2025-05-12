@@ -6,7 +6,7 @@
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Информационные системы',
@@ -169,4 +169,10 @@ return array(
 	'searchIndexGroup' => 'Идентификатор группы',
 	'searchUnindexItem' => 'Идентификатор элемента',
 	'recountInformationsystem' => 'Идентификатор информационной системы',
+
+	'url_type_date' => 'Дата',
+	'path_date_format' => 'Формат пути типа "Дата"',
+
+	'watermark_item_header' => 'Элемент',
+	'watermark_group_header' => 'Группа',
 );

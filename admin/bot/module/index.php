@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -14,7 +14,7 @@ $iAdmin_Form_Id = 308;
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
 // Путь к контроллеру формы ЦА
-$sAdminFormAction = '/admin/bot/module/index.php';
+$sAdminFormAction = '/{admin}/bot/module/index.php';
 
 $module_id = intval(Core_Array::getGet('module_id'));
 $entity_id = intval(Core_Array::getGet('entity_id'));
@@ -261,6 +261,33 @@ if (Core_Array::getPost('show_settings'))
 																templateSelection: $.templateSelectionItemResponsibleEmployees,
 																language: "' . Core_i18n::instance()->getLng() . '",
 																width: "100%"
+															})
+															.on("select2:opening select2:closing", function(e){
+
+																var $searchfield = $(this).parent().find(".select2-search__field");
+
+																if (!$searchfield.data("setKeydownHeader"))
+																{
+																	$searchfield.data("setKeydownHeader", true);
+
+																	$searchfield.on("keydown", function(e) {
+
+																		var $this = $(this);
+
+																		if ($this.val() == "" && e.key == "Backspace")
+																		{
+																			$this
+																				.parents("ul.select2-selection__rendered")
+																				.find("li.select2-selection__choice")
+																				.filter(":last")
+																				.find(".select2-selection__choice__remove")
+																				.trigger("click");
+
+																			e.stopImmediatePropagation();
+																			e.preventDefault();
+																		}
+																	});
+																}
 															});
 														});
 													')

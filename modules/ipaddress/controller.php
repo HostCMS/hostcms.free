@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Ipaddress
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Ipaddress_Controller
 {
@@ -96,24 +96,43 @@ class Ipaddress_Controller
 	{
 		!is_array($aIp) && $aIp = array($aIp);
 
-		$aIpaddresses = $this->getDenyAccessIpaddresses();
+		$bCache = Core::moduleIsActive('cache');
 
-		$bBlocked = FALSE;
-		foreach ($aIp as $checkIp)
+		if ($bCache)
 		{
-			foreach ($aIpaddresses as $ipId => $aIpaddress)
-			{
-				foreach ($aIpaddress as $sIpaddress)
-				{
-					$bBlocked = $this->ipCheck($checkIp, $sIpaddress);
+			$oCore_Cache = Core_Cache::instance(Core::$mainConfig['defaultCache']);
+			$cacheKey = 'blocked_' . implode(',', $aIp);
+			$bBlocked = $oCore_Cache->get($cacheKey, $this->_cacheName);
+		}
+		else
+		{
+			$bBlocked = NULL;
+		}
 
-					if ($bBlocked)
+		if (is_null($bBlocked))
+		{
+			$aIpaddresses = $this->getDenyAccessIpaddresses();
+
+			$bBlocked = FALSE;
+			foreach ($aIp as $checkIp)
+			{
+				foreach ($aIpaddresses as $ipId => $aIpaddress)
+				{
+					foreach ($aIpaddress as $sIpaddress)
 					{
-						$incBanned && $this->incIpaddressBanned($ipId);
-						break 3;
+						$bBlocked = $this->ipCheck($checkIp, $sIpaddress);
+
+						if ($bBlocked)
+						{
+							$incBanned && $this->incIpaddressBanned($ipId);
+							break 3;
+						}
 					}
 				}
 			}
+			
+			$bCache
+				&& $oCore_Cache->set($cacheKey, $bBlocked, $this->_cacheName);
 		}
 
 		return $bBlocked;

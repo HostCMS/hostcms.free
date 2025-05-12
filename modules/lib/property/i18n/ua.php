@@ -24,6 +24,9 @@ return array(
 	'lib_property_type_5' => 'Велике текстове поле',
 	'lib_property_type_7' => 'TPL-шаблон',
 	'lib_property_type_8' => 'Файл',
+	'lib_property_type_9' => 'Візуальний редактор',
+	'lib_property_type_10' => 'Складений',
+	'lib_property_type_11' => 'Іконка',
 	'value' => 'Значення',
 	'multivalue' => 'Множинні значення',
 	'copy_from' => ' [Копія від %s]' ,
@@ -37,4 +40,5 @@ return array(
 	'delete_success' => 'Елемент видалений!',
 	'undelete_success' => 'Елемент відновлено!',
 	'change_filename' => '<acronym title="Перетворення назв всіх файлів, що завантажуються для всіх об\'єктів інтернет-магазину - товарів, груп, додаткових властивостей товарів і груп">Змінювати назви завантаження</acronym>',
+	'parent_id' => 'Батьківський параметр',
 );

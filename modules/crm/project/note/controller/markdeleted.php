@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm_Project
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Crm_Project_Note_Controller_Markdeleted extends Admin_Form_Action_Controller
 {
@@ -27,7 +27,7 @@ class Crm_Project_Note_Controller_Markdeleted extends Admin_Form_Action_Controll
 			$this->_object->markDeleted();
 
 			// $this->addMessage("<script>$(function() {
-			// 	$.adminLoad({ path: '/admin/crm/project/entity/index.php', additionalParams: 'crm_project_id=" . $oCrm_Project->id . "', windowId: 'id_content' });
+			// 	$.adminLoad({ path: hostcmsBackend + '/crm/project/entity/index.php', additionalParams: 'crm_project_id=" . $oCrm_Project->id . "', windowId: 'id_content' });
 			// });</script>");
 		}
 

@@ -112,4 +112,9 @@ return array(
 	'protect_frame' => 'Захист від кадрів',
 	'protect_frame_exclusions' => 'Не захищати сторінки',
 	'error_bot' => 'Сторінка для перевірки ботів',
+	'favicon_header' => 'Favicon',
+	'menu3_sub_caption' => 'Адрес панелі',
+	'backend_title' => 'Адрес панелі центру адміністрування',
+	'panelBackend_success' => 'Адрес панелі успішно змінено!',
+	'rename_backend_error' => 'Не вдалося змінити адресу центру панелі адміністрування!',
 );

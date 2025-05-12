@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Template
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Template_Section_Lib_Command_Controller extends Core_Command_Controller
 {
@@ -26,7 +26,7 @@ class Template_Section_Lib_Command_Controller extends Core_Command_Controller
 
 		if (Core::checkPanel())
 		{
-			$iTemplateSectionLibId = intval(Core_Array::getGet('template_section_lib_id'));
+			$iTemplateSectionLibId = Core_Array::getGet('template_section_lib_id', 0, 'int');
 			$oTemplate_Section_Lib = Core_Entity::factory('Template_Section_Lib', $iTemplateSectionLibId);
 
 			$bUserAccess = $oTemplate_Section_Lib->Template_Section->Template->checkUserAccess();

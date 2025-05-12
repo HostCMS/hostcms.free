@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'calendar');
 
 // Код формы
 $iAdmin_Form_Id = 233;
-$sAdminFormAction = '/admin/calendar/caldav/user/index.php';
+$sAdminFormAction = '/{admin}/calendar/caldav/user/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -52,19 +52,19 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Calendar.menu'))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/calendar/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/calendar/index.php', NULL, NULL, '')
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/calendar/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/calendar/index.php', NULL, NULL, '')
 		)
 )->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Calendar_Caldav.title'))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/calendar/caldav/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/calendar/caldav/index.php', NULL, NULL, '')
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/calendar/caldav/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/calendar/caldav/index.php', NULL, NULL, '')
 		)
 )->add(
 	Admin_Form_Entity::factory('Breadcrumb')

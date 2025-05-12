@@ -13,7 +13,7 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Item_Controller_Pricetag extends Core_Servant_Properties
 {
@@ -133,12 +133,20 @@ class Shop_Item_Controller_Pricetag extends Core_Servant_Properties
 
 			$sTempFilePath = tempnam(CMS_FOLDER . TMP_DIR, "XLS");
 
-			$zipReader = fopen($drawing->getPath(), 'r');
-			$imageContents = '';
+			$aExplode = explode('#', substr($drawing->getPath(), 6));
+			$zipPath = $aExplode[0];
+			$filePathInZip = $aExplode[1];
+
+			$ZipArchive = new ZipArchive();
+			$ZipArchive->open($zipPath);
+			$imageContents = $ZipArchive->getFromName($filePathInZip);
+
+			//$zipReader = fopen($drawing->getPath(), 'r');
+			/*$imageContents = '';
 			while (!feof($zipReader)) {
 				$imageContents .= fread($zipReader, 1024);
 			}
-			fclose($zipReader);
+			fclose($zipReader);*/
 
 			Core_File::write($sTempFilePath, $imageContents);
 

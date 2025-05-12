@@ -3,7 +3,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -11,7 +11,7 @@ Core_Auth::authorization($sModule = 'seo');
 
 // Код формы
 $iAdmin_Form_Id = 214;
-$sAdminFormAction = '/admin/seo/driver/index.php';
+$sAdminFormAction = '/{admin}/seo/driver/index.php';
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
 // Контроллер формы
@@ -50,10 +50,10 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Seo.title'))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/seo/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/seo/index.php', NULL, NULL, '')
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/seo/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/seo/index.php', NULL, NULL, '')
 	)
 )
 ->add(

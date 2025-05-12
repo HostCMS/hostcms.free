@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -120,7 +120,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				$this->addTabAfter($oPropertyTab, $oMainTab);
 
 				// Properties
-				Property_Controller_Tab::factory($this->_Admin_Form_Controller)
+				Core::moduleIsActive('property') && Property_Controller_Tab::factory($this->_Admin_Form_Controller)
 					->setObject($this->_object)
 					->setDatasetId($this->getDatasetId())
 					->linkedObject(Core_Entity::factory('Informationsystem_Item_Property_List', $oInformationsystem->id))
@@ -198,7 +198,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 							allowClear: true,
 							multiple: true,
 							ajax: {
-								url: "/admin/informationsystem/item/index.php?shortcuts&informationsystem_id=' . $this->_object->informationsystem_id .'",
+								url: hostcmsBackend + "/informationsystem/item/index.php?shortcuts&informationsystem_id=' . $this->_object->informationsystem_id .'",
 								dataType: "json",
 								type: "GET",
 								processResults: function (data) {
@@ -282,7 +282,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					$oMainRow6
 						->add(
 							Admin_Form_Entity::factory('Div')
-								->class('form-group col-xs-12 col-sm-3 no-padding')
+								->class('form-group col-xs-12 col-sm-3 no-padding siteuser-select2')
 								->add($oSiteuserSelect)
 						);
 
@@ -329,7 +329,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 							'place_watermark_checkbox_checked' => $oInformationsystem->watermark_default_use_large_image,
 
 							// onclick_delete_big_image - значение onclick для удаления большой картинки
-							'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteLargeImage', windowId: '{$windowId}'}); return FALSE",
+							'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteLargeImage', windowId: '{$windowId}'}); return false",
 
 							'caption' => Core::_('Informationsystem_Item.image_large'),
 
@@ -355,7 +355,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 							'place_watermark_checkbox_checked' => $oInformationsystem->watermark_default_use_small_image,
 
 							// onclick_delete_small_image - значение onclick для удаления малой картинки
-							'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteSmallImage', windowId: '{$windowId}'}); return FALSE",
+							'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteSmallImage', windowId: '{$windowId}'}); return false",
 
 							// load_small_image_caption - заголовок поля загрузки малого изображения
 							'caption' => Core::_('Informationsystem_Item.image_small'),
@@ -449,7 +449,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					->add($oDescriptionRow4 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$this->getField('description')
-					->rows(8)
+					->rows(10)
 					->wysiwyg(Core::moduleIsActive('wysiwyg'))
 					->template_id($template_id);
 
@@ -486,7 +486,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 				// Text
 				$this->getField('text')
-					->rows(15)
+					->rows(18)
 					->wysiwyg(Core::moduleIsActive('wysiwyg'))
 					->template_id($template_id);
 
@@ -574,7 +574,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 							allowClear: true,
 							multiple: true,
 							ajax: {
-								url: "/admin/tag/index.php?hostcms[action]=loadTagsList&hostcms[checked][0][0]=1",
+								url: hostcmsBackend + "/tag/index.php?hostcms[action]=loadTagsList&hostcms[checked][0][0]=1",
 								dataType: "json",
 								type: "GET",
 								processResults: function (data) {
@@ -616,7 +616,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				$this->addTabAfter($oPropertyTab, $oMainTab);
 
 				// Properties
-				Property_Controller_Tab::factory($this->_Admin_Form_Controller)
+				Core::moduleIsActive('property') && Property_Controller_Tab::factory($this->_Admin_Form_Controller)
 					->setObject($this->_object)
 					->setDatasetId($this->getDatasetId())
 					->linkedObject(Core_Entity::factory('Informationsystem_Group_Property_List', $oInformationsystem->id))
@@ -770,7 +770,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 						allowClear: true,
 						multiple: true,
 						ajax: {
-							url: "/admin/informationsystem/item/index.php?shortcuts&informationsystem_id=' . $this->_object->informationsystem_id .'",
+							url: hostcmsBackend + "/informationsystem/item/index.php?shortcuts&informationsystem_id=' . $this->_object->informationsystem_id .'",
 							dataType: "json",
 							type: "GET",
 							processResults: function (data) {
@@ -798,7 +798,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				//$oMainTab->move($this->getField('description'), $oMainRow3);
 
 				$this->getField('description')
-					->rows(15)
+					->rows(18)
 					->wysiwyg(Core::moduleIsActive('wysiwyg'))
 					->template_id($template_id);
 
@@ -872,7 +872,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 						'place_watermark_checkbox_checked' => $oInformationsystem->watermark_default_use_large_image,
 
 						// onclick_delete_big_image - значение onclick для удаления большой картинки
-						'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteLargeImage', windowId: '{$windowId}'}); return FALSE",
+						'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteLargeImage', windowId: '{$windowId}'}); return false",
 
 						'caption' => Core::_('Informationsystem_Group.image_large'),
 
@@ -897,7 +897,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 						'place_watermark_checkbox_checked' => $oInformationsystem->watermark_default_use_small_image,
 
 						// onclick_delete_small_image - значение onclick для удаления малой картинки
-						'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteSmallImage', windowId: '{$windowId}'}); return FALSE",
+						'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteSmallImage', windowId: '{$windowId}'}); return false",
 
 						// load_small_image_caption - заголовок поля загрузки малого изображения
 						'caption' => Core::_('Informationsystem_Group.image_small'),
@@ -1081,7 +1081,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					source: function(request, response) {
 
 						$.ajax({
-						url: '/admin/informationsystem/item/index.php?autocomplete=1&show_group=1&informationsystem_id={$this->_object->informationsystem_id}',
+						url: hostcmsBackend + '/informationsystem/item/index.php?autocomplete=1&show_group=1&informationsystem_id={$this->_object->informationsystem_id}',
 						dataType: 'json',
 						data: {
 							queryString: request.term
@@ -1186,7 +1186,8 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 	{
 		$bNewObject = is_null($this->_object->id) && is_null(Core_Array::getPost('id'));
 
-		$this->_formValues['siteuser_id'] = intval(Core_Array::get($this->_formValues, 'siteuser_id'));
+		$this->_formValues['siteuser_id'] = Core_Array::get($this->_formValues, 'siteuser_id', 0, 'int');
+		$this->_formValues['path'] = Core_Array::get($this->_formValues, 'path', '', 'trim');
 
 		// Backup revision
 		if (Core::moduleIsActive('revision') && $this->_object->id)
@@ -1338,7 +1339,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				}
 
 				// Properties
-				Property_Controller_Tab::factory($this->_Admin_Form_Controller)
+				Core::moduleIsActive('property') && Property_Controller_Tab::factory($this->_Admin_Form_Controller)
 					->setObject($this->_object)
 					->linkedObject(Core_Entity::factory('Informationsystem_Item_Property_List', $oInformationsystem->id))
 					->applyObjectProperty();
@@ -1391,7 +1392,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				}
 
 				// Properties
-				Property_Controller_Tab::factory($this->_Admin_Form_Controller)
+				Core::moduleIsActive('property') && Property_Controller_Tab::factory($this->_Admin_Form_Controller)
 					->setObject($this->_object)
 					->linkedObject(Core_Entity::factory('Informationsystem_Group_Property_List', $oInformationsystem->id))
 					->applyObjectProperty();
@@ -1676,6 +1677,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 			// Index item by schedule
 			if (Core::moduleIsActive('schedule')
 				&& $this->_object->start_datetime != '0000-00-00 00:00:00'
+				&& $this->_object->indexing
 				&& Core_Date::sql2timestamp($this->_object->start_datetime) > time())
 			{
 				$oModule = Core_Entity::factory('Module')->getByPath('informationsystem');
@@ -1695,6 +1697,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 			// Unindex item by schedule
 			if (Core::moduleIsActive('schedule')
 				&& $this->_object->end_datetime != '0000-00-00 00:00:00'
+				&& $this->_object->indexing
 				&& Core_Date::sql2timestamp($this->_object->end_datetime) > time())
 			{
 				$oModule = Core_Entity::factory('Module')->getByPath('informationsystem');
@@ -1786,7 +1789,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 		return Admin_Form_Entity::factory('Script')
 			->value("$(function (){
 				mainFormLocker.unlock();
-				$.adminLoad({ path: '/admin/media/index.php', additionalParams: 'entity_id=" . $this->_object->id . "&type=" . $modelName . "&dataset_id=" . $this->getDatasetId() . "&parentWindowId=" . $windowId . "&_module=0', windowId: '{$windowId}-media-items', loadingScreen: false });
+				$.adminLoad({ path: hostcmsBackend + '/media/index.php', additionalParams: 'entity_id=" . $this->_object->id . "&type=" . $modelName . "&dataset_id=" . $this->getDatasetId() . "&parentWindowId=" . $windowId . "&_module=0', windowId: '{$windowId}-media-items', loadingScreen: false });
 			});");
 	}
 

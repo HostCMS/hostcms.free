@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 define('CMS_FOLDER', dirname(__FILE__) . DIRECTORY_SEPARATOR);
 define('HOSTCMS', TRUE);
@@ -44,6 +44,7 @@ if (Core_Auth::logged())
 	Core_Event::attach('Core_Cache.onBeforeSet', array('Core_Cache_Observer', 'onBeforeSet'));
 	Core_Event::attach('Core_Cache.onAfterSet', array('Core_Cache_Observer', 'onAfterSet'));
 }
+
 
 // Robokassa SMS observers
 // Core_Event::attach('shop_order.onAfterChangeStatusPaid', array('Shop_Observer_Robokassa', 'onAfterChangeStatusPaid'));
@@ -219,3 +220,121 @@ Core_Event::attach('Shop_Payment_System_Handler.onAfterAddShopOrderItem', array(
 }
 Core_Event::attach('shop_order.onCalltextitemscount', array('Shop_Order_Observer', 'onCalltextitemscount'));*/
 
+/*class Hostcms_Shop_Order_Observer
+{
+	static public function onAfterProcessOrder($controller)
+	{
+		if (Core::moduleIsActive('field'))
+		{
+			$oShop_Order = $controller->getShopOrder();
+
+			$aCompanies = array();
+
+			$aShop_Order_Items = $oShop_Order->Shop_Order_Items->getAllByType(0, FALSE);
+			foreach ($aShop_Order_Items as $oShop_Order_Item)
+			{
+				$oShop_Item = $oShop_Order_Item->Shop_Item;
+
+				// Если модификация - берем родителя, так как у модификации shop_group_id всегда 0
+				$oShop_Item = $oShop_Item->modification_id
+					? $oShop_Item->Modification
+					: $oShop_Item;
+
+				$company_id = self::_getCompanyId($oShop_Item->shop_group_id);
+
+				$aCompanies[$company_id ? $company_id : $oShop_Order->Shop->shop_company_id][] = $oShop_Order_Item;
+			}
+
+			$oNew_Shop_Order = $oShop_Order;
+			foreach ($aCompanies as $company_id => $aShop_Order_Items)
+			{
+				// Second iterations
+				if (!$oNew_Shop_Order)
+				{
+					$oNew_Shop_Order = clone $oShop_Order;
+					$oNew_Shop_Order->company_id = $company_id;
+					$oNew_Shop_Order->save();
+
+					$oNew_Shop_Order->createInvoice();
+					$oNew_Shop_Order->save();
+
+					foreach ($aShop_Order_Items as $oShop_Order_Item)
+					{
+						$oShop_Order_Item->shop_order_id = $oNew_Shop_Order->id;
+						$oShop_Order_Item->save();
+					}
+				}
+
+				$oNew_Shop_Order->company_id = $company_id;
+				$oNew_Shop_Order->save();
+
+				$oNew_Shop_Order = NULL;
+			}
+		}
+	}
+
+	static protected function _getCompanyId($shop_group_id)
+	{
+		$oShop_Group = Core_Entity::factory('Shop_Group')->getById($shop_group_id, FALSE);
+
+		if (!is_null($oShop_Group))
+		{
+			$oField = Core_Entity::factory('Field')->getByTag_name('company_id');
+
+			$aTmpGroup = $oShop_Group;
+
+			do {
+				if (!is_null($oField))
+				{
+					$aField_Values = $oField->getValues($aTmpGroup->id, FALSE);
+
+					if (isset($aField_Values[0]) && $aField_Values[0]->value)
+					{
+						return $aField_Values[0]->value;
+					}
+				}
+			} while ($aTmpGroup = $aTmpGroup->getParent());
+		}
+
+		return 0;
+	}
+}
+
+Core_Event::attach('Shop_Payment_System_Handler.onAfterProcessOrder', array('Hostcms_Shop_Order_Observer', 'onAfterProcessOrder'));*/
+
+/*class Hostcms_ASMP_MegaImport_Observer
+{
+	static public function onBeforeImportPrices($controller, $args)
+	{
+		list($oShop_Item, $aProces) = $args;
+
+		if (Core::moduleIsActive('field'))
+		{
+			$oField = Core_Entity::factory('Field')->getByTag_name('fix_price');
+
+			if (!is_null($oField))
+			{
+				$aField_Values = $oField->getValues($oShop_Item->id, FALSE);
+
+				// Не импортировать цены, очищаем присланный массив
+				if (isset($aField_Values[0]) && $aField_Values[0]->value)
+				{
+					return array();
+				}
+			}
+		}
+	}
+}
+
+Core_Event::attach('ASMP_MegaImport_Controller.onBeforeImportPrices', array('Hostcms_ASMP_MegaImport_Observer', 'onBeforeImportPrices'));*/
+
+/*Core_Router::addGlobalMiddleware('test', function(Core_Command_Controller $oController, callable $next) {
+	// Выполнить действие
+
+	return $next();
+});*/
+
+
+/*Core_Event::attach('shop_item.onCallmultiLng', function($object, $args) {
+	var_dump($args);
+});*/

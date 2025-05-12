@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Admin_Form_Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -154,17 +154,18 @@ class Admin_Form_Field_Controller_Edit extends Admin_Form_Action_Controller_Type
 					5 => Core::_('Admin_Form_Field.field_type_date_time'),
 					6 => Core::_('Admin_Form_Field.field_type_date'),
 					7 => Core::_('Admin_Form_Field.field_type_image_link'),
-					8 => Core::_('Admin_Form_Field.field_type_image_list'),
+					8 => Core::_('Admin_Form_Field.field_type_list'),
 					9 => Core::_('Admin_Form_Field.field_type_text_as_is'),
 					10 => Core::_('Admin_Form_Field.field_type_image_callback_function'),
-					11 => Core::_('Admin_Form_Field.field_type_textarea')
+					11 => Core::_('Admin_Form_Field.field_type_textarea'),
+					12 => Core::_('Admin_Form_Field.field_type_list_item')
 				)
 			)
 			->name('type')
 			->value($this->_object->type)
 			->caption(Core::_('Admin_Form_Field.type'))
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
-			->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [1,2,3,4,5,6,7,8,9,10,11])");
+			->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [1,2,3,4,5,6,7,8,9,10,11,12])");
 
 		$oMainTab->delete($this->getField('type'));
 
@@ -198,19 +199,19 @@ class Admin_Form_Field_Controller_Edit extends Admin_Form_Action_Controller_Type
 		$oMainTab->move($this->getField('editable')->divAttr(array('class' => 'form-group col-xs-12 col-md-4')), $oMainRow7);
 
 		$this->getField('image')
-			->divAttr(array('class' => 'form-group col-xs-12 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-8 hidden-9 hidden-10 hidden-11'))
+			->divAttr(array('class' => 'form-group col-xs-12 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12'))
 			->rows(3);
 
 		$this->getField('link')
-			->divAttr(array('class' => 'form-group col-xs-12 hidden-1 hidden-2 hidden-3 hidden-5 hidden-6 hidden-8 hidden-9 hidden-11'))
+			->divAttr(array('class' => 'form-group col-xs-12 hidden-1 hidden-2 hidden-3 hidden-5 hidden-6 hidden-8 hidden-9 hidden-11 hidden-12'))
 			->rows(2);
 
 		$this->getField('onclick')
-			->divAttr(array('class' => 'form-group col-xs-12 hidden-1 hidden-2 hidden-3 hidden-5 hidden-6 hidden-8 hidden-9 hidden-11'))
+			->divAttr(array('class' => 'form-group col-xs-12 hidden-1 hidden-2 hidden-3 hidden-5 hidden-6 hidden-8 hidden-9 hidden-11 hidden-12'))
 			->rows(2);
 
 		$this->getField('list')
-			->divAttr(array('class' => 'form-group col-xs-12 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-9 hidden-10 hidden-11'))
+			->divAttr(array('class' => 'form-group col-xs-12 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-9 hidden-10 hidden-11 hidden-12'))
 			->rows(3);
 
 		$oMainTab
@@ -251,7 +252,7 @@ class Admin_Form_Field_Controller_Edit extends Admin_Form_Action_Controller_Type
 			->move($this->getField('ico'), $oViewRow2)
 			->add(
 				Admin_Form_Entity::factory('Code')
-					->html("<script>radiogroupOnChange('{$windowId}', " . intval($this->_object->type) . ", [1,2,3,4,5,6,7,8,9,10])</script>")
+					->html("<script>radiogroupOnChange('{$windowId}', " . intval($this->_object->type) . ", [1,2,3,4,5,6,7,8,9,10,11,12])</script>")
 			);
 
 		$oAdmin_Word_Value = $this->_object->Admin_Word->getWordByLanguage(CURRENT_LANGUAGE_ID);

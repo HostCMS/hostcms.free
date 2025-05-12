@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Статусы дел',
@@ -27,4 +27,8 @@ return array(
 	'undelete_success' => 'Элемент восстановлен!',
 	'apply_success' => "Информация успешно изменена",
 	'changeFinal_success' => 'Финальный параметр статуса изменен',
+
+	'final0' => 'Нет',
+	'final1' => 'Завершен успешно',
+	'final2' => 'Провален',
 );

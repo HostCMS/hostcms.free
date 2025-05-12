@@ -68,4 +68,6 @@ return array(
 	'seo_item_h1_template' => 'Шаблон H1',
 	'markDeleted' => 'Удалить группу',
 	'shortcut_success' => "Ярлык группы успешно добавлен",
+	'apply_shortcut_parent_group' => 'Применять к основным группам ярлыков',
+	'change_attributes_success' => 'Атрибуты изменены успешно!',
 );

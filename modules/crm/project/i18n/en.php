@@ -35,4 +35,5 @@ return array(
 	'add_attachment' => 'File',
 	'add_document' => 'Document',
 	'documents_count' => 'Documents: %s',
+	'crm_icon_id' => 'Icon',
 );

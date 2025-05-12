@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Warehouse_Movement_Model extends Core_Entity
 {
@@ -154,6 +154,13 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 		{
 			$oSource_Shop_Warehouse = $this->Source_Shop_Warehouse;
 			$oDestination_Shop_Warehouse = $this->Destination_Shop_Warehouse;
+			
+			$oShop = $oSource_Shop_Warehouse->Shop;
+			// Fast filter
+			if ($oShop->filter)
+			{
+				$oShop_Filter_Controller = new Shop_Filter_Controller($oShop);
+			}
 
 			$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, $this->getEntityType());
 
@@ -217,7 +224,6 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 					$oShop_Warehouse_Entry_Destination->save();
 
 					$restSource = $oSource_Shop_Warehouse->getRest($oShop_Warehouse_Movement_Item->shop_item_id);
-
 					if (!is_null($restSource))
 					{
 						// Recount
@@ -225,12 +231,15 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 					}
 
 					$restDestination = $oDestination_Shop_Warehouse->getRest($oShop_Warehouse_Movement_Item->shop_item_id);
-
 					if (!is_null($restDestination))
 					{
 						// Recount
 						$oDestination_Shop_Warehouse->setRest($oShop_Warehouse_Movement_Item->shop_item_id, $restDestination);
 					}
+					
+					// Fast filter
+					$oShop->filter
+						&& $oShop_Filter_Controller->fill($oShop_Warehouse_Entry_Source->Shop_Item);
 				}
 
 				$offset += $limit;

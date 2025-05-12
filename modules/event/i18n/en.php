@@ -170,4 +170,6 @@ return array(
 	'checklist_item_name' => 'Item name',
 	'add_checklist_item' => 'add item',
 	'remove_checklist_item' => 'remove item',
+
+	'select_project' => 'Select project',
 );

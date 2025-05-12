@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Property
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Property_Model extends Core_Entity
 {
@@ -41,6 +41,7 @@ class Property_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_hasMany = array(
+		'property_value_bigint' => array(),
 		'property_value_int' => array(),
 		'property_value_float' => array(),
 		'property_value_string' => array(),
@@ -427,6 +428,7 @@ class Property_Model extends Core_Entity
 	 * Copy property
 	 * @param boolean $bCopyRelation Copy related entities
 	 * @return Property_Model
+	 * @hostcms-event property.onAfterRedeclaredCopy
 	 */
 	public function copy($bCopyRelation = TRUE)
 	{
@@ -471,6 +473,8 @@ class Property_Model extends Core_Entity
 			}
 		}
 
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
+
 		return $newObject;
 	}
 
@@ -502,6 +506,14 @@ class Property_Model extends Core_Entity
 	{
 		if ($this->type == $oProperty->type)
 		{
+			if (Core::moduleIsActive('list')
+				&& $this->type == 3 && $oProperty->type == 3
+				&& $this->list_id != $oProperty->list_id
+			)
+			{
+				throw new Core_Exception(Core::_('Property.merge_error_lists'), array(), 0, FALSE);
+			}
+
 			$oProperty_Controller_Value_Type = Property_Controller_Value::factory($this->type);
 			$tableName = $oProperty_Controller_Value_Type->getTableName();
 
@@ -760,7 +772,7 @@ class Property_Model extends Core_Entity
 
 		if ($this->type == 3 && $this->list_id && Core::moduleIsActive('list'))
 		{
-			$return .= '<a href="/admin/list/item/index.php?list_id=' . $this->list_id . '" target="_blank"><i title="' . Core::_('Property.move_to_list') . '" class="fa fa-external-link margin-left-5"></i></a>';
+			$return .= '<a href="' . Admin_Form_Controller::correctBackendPath('/{admin}/list/item/index.php') . '?list_id=' . $this->list_id . '" target="_blank"><i title="' . Core::_('Property.move_to_list') . '" class="fa fa-external-link margin-left-5"></i></a>';
 		}
 
 		return $return;

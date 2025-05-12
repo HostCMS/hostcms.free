@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Property
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Дополнительные свойства',
@@ -38,6 +38,7 @@ return array(
 	'type12' => 'Товар интернет-магазина',
 	'type13' => 'Группа информационной системы',
 	'type14' => 'Группа интернет-магазина',
+	'type15' => 'Большое целое число',
 
 	'list_id' => '<acronym title="Выберите список значений для дополнительного свойства">Список</acronym>',
 	'informationsystem_id' => '<acronym title="Информационная система, задаваемая в качестве свойства">Информационная система</acronym>',
@@ -101,4 +102,6 @@ return array(
 
 	'prefix_large_file' => 'Префикс имени большого файла',
 	'prefix_small_file' => 'Префикс имени малого файла',
+
+	'merge_error_lists' => 'Запрещено объединение свойств с разными списками',
 );

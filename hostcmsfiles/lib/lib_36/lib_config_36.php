@@ -76,7 +76,7 @@ elseif (isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_AUTH_PW']))
 		Core_Log::instance()->clear()
 			->status(Core_Log::$ERROR)
 			//->notify(FALSE)
-			->write(Core::_('Core.error_log_authorization_error'));
+			->write(Core::_('Core.error_log_authorization_error', $_SERVER['PHP_AUTH_USER']));
 	}
 
 	$oUser = Core_Entity::factory('User')->getByLogin(
@@ -131,6 +131,8 @@ if (($sType == 'catalog' || $sType == 'sale') && $sMode == 'checkauth')
 		// Удаление XML файлов
 		if (is_dir($sCmsFolderTemporaryDirectory))
 		{
+			$sessionId = preg_replace('/[^A-Za-z0-9_-]/', '', session_id());
+
 			try
 			{
 				clearstatcache();
@@ -143,7 +145,7 @@ if (($sType == 'catalog' || $sType == 'sale') && $sMode == 'checkauth')
 						{
 							$pathName = $sCmsFolderTemporaryDirectory .  $file;
 
-							if (Core_File::getExtension($pathName) == 'xml' && is_file($pathName))
+							if (Core_File::getExtension($pathName) == 'xml' && strpos($file, $sessionId) === 0 && is_file($pathName))
 							{
 								$bDebug && Core_Log::instance()->clear()
 									->status(Core_Log::$MESSAGE)
@@ -184,7 +186,10 @@ elseif ($sType == 'catalog' && $sMode == 'file' && ($sFileName = Core_Array::get
 
 	$sessionId = preg_replace('/[^A-Za-z0-9_-]/', '', session_id());
 
-	$sFullFileName = $sCmsFolderTemporaryDirectory . $sessionId . '_' . $sFileName;
+	$sFullFileName = Core_File::getExtension($sFileName) == 'xml'
+		? $sCmsFolderTemporaryDirectory . $sessionId . '_' . $sFileName
+		: $sCmsFolderTemporaryDirectory . $sFileName;
+
 	Core_File::mkdir(dirname($sFullFileName), CHMOD, TRUE);
 
 	clearstatcache();
@@ -236,7 +241,7 @@ elseif ($sType == 'catalog' && $sMode == 'import' && !is_null($sFileName = Core_
 	try
 	{
 		$sessionId = preg_replace('/[^A-Za-z0-9_-]/', '', session_id());
-		
+
 		$sFullPath = $sCmsFolderTemporaryDirectory . $sessionId . '_' . Core_File::filenameCorrection($sFileName);
 
 		$oShop_Item_Import_Cml_Controller = new Shop_Item_Import_Cml_Controller($sFullPath);

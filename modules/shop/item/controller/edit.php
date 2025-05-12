@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -205,7 +205,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$this->addTabAfter($oPropertyTab, $oShopItemTabAssociated);
 
 				// Properties
-				Shop_Item_Property_Controller_Tab::factory($this->_Admin_Form_Controller)
+				Core::moduleIsActive('property') && Shop_Item_Property_Controller_Tab::factory($this->_Admin_Form_Controller)
 					->setObject($this->_object)
 					->setDatasetId($this->getDatasetId())
 					->linkedObject(Core_Entity::factory('Shop_Item_Property_List', $oShop->id))
@@ -281,7 +281,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				;
 
 				$oDescriptionField
-					->rows(8)
+					->rows(10)
 					->wysiwyg(Core::moduleIsActive('wysiwyg'))
 					->template_id($template_id);
 
@@ -318,7 +318,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainTab->moveAfter($oTextField = $this->getField('text'), isset($oOpticalAlignDescriptionCheckBox) ? $oOpticalAlignDescriptionCheckBox : $oDescriptionField, $oShopItemTabDescription);
 
 				$oTextField
-					->rows(15)
+					->rows(18)
 					->wysiwyg(Core::moduleIsActive('wysiwyg'))
 					->template_id($template_id);
 
@@ -377,7 +377,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						allowClear: true,
 						multiple: true,
 						ajax: {
-							url: "/admin/shop/item/index.php?shortcuts&shop_id=' . $this->_object->shop_id .'",
+							url: hostcmsBackend + "/shop/item/index.php?shortcuts&shop_id=' . $this->_object->shop_id .'",
 							dataType: "json",
 							type: "GET",
 							processResults: function (data) {
@@ -437,14 +437,14 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$sTmpHtml .= '<div class="btn-group">';
 
-					$sTmpHtml .= '<a href="' . $this->_Admin_Form_Controller->getAdminLoadHref('/admin/shop/item/associated/index.php', NULL, NULL, $additionalParams1) . '" onclick="' . $this->_Admin_Form_Controller->getAdminLoadAjax('/admin/shop/item/associated/index.php', NULL, NULL, $additionalParams1) . '" class="btn btn-default"><i class="fa fa-magnet fa-fw no-margin"></i></a>
-					<a href="' . $this->_Admin_Form_Controller->getAdminLoadHref('/admin/shop/item/modification/index.php', NULL, NULL, $additionalParams2) . '" onclick="' . $this->_Admin_Form_Controller->getAdminLoadAjax('/admin/shop/item/modification/index.php', NULL, NULL, $additionalParams2) . '" class="btn btn-default"><i class="fa fa-code-fork fa-fw no-margin"></i></a>';
+					$sTmpHtml .= '<a href="' . $this->_Admin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/associated/index.php', NULL, NULL, $additionalParams1) . '" onclick="' . $this->_Admin_Form_Controller->getAdminLoadAjax('/{admin}/shop/item/associated/index.php', NULL, NULL, $additionalParams1) . '" class="btn btn-default"><i class="fa fa-magnet fa-fw no-margin"></i></a>
+					<a href="' . $this->_Admin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/modification/index.php', NULL, NULL, $additionalParams2) . '" onclick="' . $this->_Admin_Form_Controller->getAdminLoadAjax('/{admin}/shop/item/modification/index.php', NULL, NULL, $additionalParams2) . '" class="btn btn-default"><i class="fa fa-code-fork fa-fw no-margin"></i></a>';
 
 					if ($this->_object->modification_id)
 					{
 						$additionalParams3 = "shop_item_id={$this->_object->modification_id}";
 
-						$sTmpHtml .= '<a href="' . $this->_Admin_Form_Controller->getAdminLoadHref('/admin/shop/item/modification/index.php', NULL, NULL, $additionalParams3) . '" onclick="' . $this->_Admin_Form_Controller->getAdminLoadAjax('/admin/shop/item/modification/index.php', NULL, NULL, $additionalParams3) . '" class="btn btn-default"><i class="fa fa-list fa-fw no-margin"></i></a>';
+						$sTmpHtml .= '<a href="' . $this->_Admin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/modification/index.php', NULL, NULL, $additionalParams3) . '" onclick="' . $this->_Admin_Form_Controller->getAdminLoadAjax('/{admin}/shop/item/modification/index.php', NULL, NULL, $additionalParams3) . '" class="btn btn-default"><i class="fa fa-list fa-fw no-margin"></i></a>';
 					}
 
 					$sTmpHtml .= "</div></div>";
@@ -502,7 +502,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						$('#{$windowId} [name = modification_name]').autocomplete({
 							source: function(request, response) {
 								$.ajax({
-									url: '/admin/shop/item/index.php?autocomplete=1&show_modification=1&shop_item_id={$this->_object->id}',
+									url: hostcmsBackend + '/shop/item/index.php?autocomplete=1&show_modification=1&shop_item_id={$this->_object->id}',
 									dataType: 'json',
 									data: {
 										queryString: request.term
@@ -607,7 +607,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oShop_Item_Certificate = $this->_object->Shop_Item_Certificate;
 
-				// Единицы измерения
 				$oCertificateRow1->add(
 					Admin_Form_Entity::factory('Select')
 						->caption(Core::_('Shop_Item.certificate_discount'))
@@ -727,7 +726,52 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						ui.item.value = '';
 					});");
 
-				$oSetRow2->add($oCore_Html_Entity_Script);
+				$oCore_Html_Entity_ScriptSort = Core_Html_Entity::factory('Script')->value("
+					$('#{$windowId} .set-item-table tbody').sortable({
+						connectWith: '.set-item-table tbody',
+						items: '> tr',
+						scroll: false,
+						placeholder: 'placeholder',
+						cancel: '.delete-associated-item, .set-item-count',
+						tolerance: 'pointer',
+						// appendTo: 'body',
+						// helper: 'clone',
+						helper: function(event, ui) {
+							var jUi = $(ui),
+								clone = jUi.clone(true);
+								// clone.css('border', '1px solid red');
+
+							return clone.css('position','absolute').get(0);
+						},
+						start: function(event, ui) {
+							// Ghost show
+							$('.set-item-table > tbody').find('tr')
+								.addClass('ghost-item')
+								.css('opacity', .5)
+								.show();
+						},
+						stop: function(event, ui) {
+							// Ghost hide
+							var ghostItem = $('.set-item-table > tbody').find('tr');
+
+							ghostItem
+								.removeClass('ghost-item')
+								.css('opacity', 1);
+
+							var aIds = [];
+
+							$('#" . $windowId . " .set-item-table > tbody > tr').each(function() {
+								aIds.push($(this).attr('id'));
+							});
+
+							$.refreshSetsSorting(aIds);
+						}
+					}).disableSelection();
+				");
+
+				$oSetRow2
+					->add($oCore_Html_Entity_Script)
+					->add($oCore_Html_Entity_ScriptSort);
 
 				$oMainTab
 					->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-lg-3 col-sm-6 col-xs-12')), $oMainRow5)
@@ -759,7 +803,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						'watermark_position_y' => $oShop->watermark_default_position_y,
 						'place_watermark_checkbox_checked' => $oShop->watermark_default_use_large_image,
 						'delete_onclick' =>
-							"$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteLargeImage', windowId: '{$windowId}'}); return FALSE",
+							"$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteLargeImage', windowId: '{$windowId}'}); return false",
 						'caption' => Core::_('Shop_Item.items_catalog_image'),
 						'preserve_aspect_ratio_checkbox_checked' => $oShop->preserve_aspect_ratio
 						)
@@ -771,7 +815,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						'create_small_image_from_large_checked' => $oShop->create_small_image && $this->_object->image_small == '',
 						'place_watermark_checkbox_checked' => $oShop->watermark_default_use_small_image,
 						'delete_onclick' =>
-							"$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteSmallImage', windowId: '{$windowId}'}); return FALSE",
+							"$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteSmallImage', windowId: '{$windowId}'}); return false",
 						'caption' => Core::_('Shop_Item.items_catalog_image_small'),
 						'show_params' => TRUE,
 						'preserve_aspect_ratio_checkbox_checked' => $oShop->preserve_aspect_ratio_small
@@ -1008,7 +1052,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						allowClear: true,
 						multiple: true,
 						ajax: {
-							url: "/admin/shop/tab/index.php?autocomplete&shop_id=' . $this->_object->shop_id .'",
+							url: hostcmsBackend + "/shop/tab/index.php?autocomplete&shop_id=' . $this->_object->shop_id .'",
 							dataType: "json",
 							type: "GET",
 							processResults: function (data) {
@@ -1423,7 +1467,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							allowClear: true,
 							multiple: true,
 							ajax: {
-								url: "/admin/tag/index.php?hostcms[action]=loadTagsList&hostcms[checked][0][0]=1",
+								url: hostcmsBackend + "/tag/index.php?hostcms[action]=loadTagsList&hostcms[checked][0][0]=1",
 								dataType: "json",
 								type: "GET",
 								processResults: function (data) {
@@ -1471,7 +1515,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						allowClear: true,
 						multiple: true,
 						ajax: {
-							url: "/admin/shop/item/index.php?loadBarcodesList&shop_item_id=' . $this->_object->id . '",
+							url: hostcmsBackend + "/shop/item/index.php?loadBarcodesList&shop_item_id=' . $this->_object->id . '",
 							dataType: "json",
 							type: "GET",
 							processResults: function (data) {
@@ -1532,7 +1576,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 						if ($oShop_Item->id)
 						{
-							$link = $this->_Admin_Form_Controller->getAdminActionLoadAjax(/*$this->_Admin_Form_Controller->getPath()*/'/admin/shop/item/index.php', 'deleteAssociated', NULL, $this->_object->modification_id == 0 ? 1 : 0, $oShop_Item->id, "associated_item_id={$oShop_Item_Associated->id}");
+							$link = $this->_Admin_Form_Controller->getAdminActionLoadAjax(/*$this->_Admin_Form_Controller->getPath()*/'/{admin}/shop/item/index.php', 'deleteAssociated', NULL, $this->_object->modification_id == 0 ? 1 : 0, $oShop_Item->id, "associated_item_id={$oShop_Item_Associated->id}");
 
 							$associatedTable .= '
 								<tr id="' . $oShop_Item_Associated->id . '">
@@ -1691,7 +1735,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$this->addTabAfter($oPropertyTab, $oShopTabSeoTemplates);
 
 				// Properties
-				Property_Controller_Tab::factory($this->_Admin_Form_Controller)
+				Core::moduleIsActive('property') && Property_Controller_Tab::factory($this->_Admin_Form_Controller)
 					->setObject($this->_object)
 					->setDatasetId($this->getDatasetId())
 					->linkedObject(Core_Entity::factory('Shop_Group_Property_List', $oShop->id))
@@ -1785,7 +1829,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						allowClear: true,
 						multiple: true,
 						ajax: {
-							url: "/admin/shop/item/index.php?shortcuts&shop_id=' . $this->_object->shop_id .'",
+							url: hostcmsBackend + "/shop/item/index.php?shortcuts&shop_id=' . $this->_object->shop_id .'",
 							dataType: "json",
 							type: "GET",
 							processResults: function (data) {
@@ -1829,7 +1873,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						'watermark_position_y' => $oShop->watermark_default_position_y,
 						'place_watermark_checkbox_checked' => $oShop->watermark_default_use_large_image,
 						'delete_onclick' =>
-							"$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteLargeImage', windowId: '{$windowId}'}); return FALSE",
+							"$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteLargeImage', windowId: '{$windowId}'}); return false",
 						'caption' => Core::_('Shop_Group.items_catalog_image'),
 						'preserve_aspect_ratio_checkbox_checked' => $oShop->preserve_aspect_ratio_group
 						)
@@ -1841,7 +1885,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						'create_small_image_from_large_checked' => $oShop->create_small_image && $this->_object->image_small == '',
 						'place_watermark_checkbox_checked' => $oShop->watermark_default_use_small_image,
 						'delete_onclick' =>
-							"$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteSmallImage', windowId: '{$windowId}'}); return FALSE",
+							"$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteSmallImage', windowId: '{$windowId}'}); return false",
 						'caption' => Core::_('Shop_Group.items_catalog_image_small'),
 						'show_params' => TRUE,
 						'preserve_aspect_ratio_checkbox_checked' => $oShop->preserve_aspect_ratio_group_small
@@ -1943,7 +1987,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						allowClear: true,
 						multiple: true,
 						ajax: {
-							url: "/admin/shop/tab/index.php?autocomplete&shop_id=' . $this->_object->shop_id .'",
+							url: hostcmsBackend + "/shop/tab/index.php?autocomplete&shop_id=' . $this->_object->shop_id .'",
 							dataType: "json",
 							type: "GET",
 							processResults: function (data) {
@@ -1985,7 +2029,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainTab->move($this->getField('path'), $oMainRow3);
 
 				$oDescriptionField = $this->getField('description')
-					->rows(15)
+					->rows(18)
 					->wysiwyg(Core::moduleIsActive('wysiwyg'))
 					->template_id($template_id);
 
@@ -2048,7 +2092,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	{
 		$bNewObject = is_null($this->_object->id) && is_null(Core_Array::getPost('id'));
 
-		$this->_formValues['siteuser_id'] = intval(Core_Array::get($this->_formValues, 'siteuser_id'));
+		$this->_formValues['siteuser_id'] = Core_Array::get($this->_formValues, 'siteuser_id', 0, 'int');
+		$this->_formValues['path'] = Core_Array::get($this->_formValues, 'path', '', 'trim');
 
 		// Backup revision
 		if (Core::moduleIsActive('revision') && $this->_object->id)
@@ -2460,7 +2505,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				}
 
 				// Properties
-				Shop_Item_Property_Controller_Tab::factory($this->_Admin_Form_Controller)
+				Core::moduleIsActive('property') && Shop_Item_Property_Controller_Tab::factory($this->_Admin_Form_Controller)
 					->setObject($this->_object)
 					->linkedObject(Core_Entity::factory('Shop_Item_Property_List', $oShop->id))
 					->applyObjectProperty();
@@ -2695,7 +2740,9 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$oShop_Price_Setting->post();
 				}
 
-				if (!is_null(Core_Array::getPost('certificate_shop_purchase_discount_id')))
+				$certificate_shop_purchase_discount_id = Core_Array::getPost('certificate_shop_purchase_discount_id', 0, 'int');
+
+				if ($certificate_shop_purchase_discount_id)
 				{
 					$oShop_Item_Certificate = $this->_object->Shop_Item_Certificate;
 
@@ -2705,7 +2752,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						$oShop_Item_Certificate->shop_item_id = $this->_object->id;
 					}
 
-					$oShop_Item_Certificate->shop_purchase_discount_id = intval(Core_Array::getPost('certificate_shop_purchase_discount_id'));
+					$oShop_Item_Certificate->shop_purchase_discount_id = $certificate_shop_purchase_discount_id;
 					$oShop_Item_Certificate->save();
 				}
 
@@ -2738,7 +2785,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				}
 
 				// Properties
-				Property_Controller_Tab::factory($this->_Admin_Form_Controller)
+				Core::moduleIsActive('property') && Property_Controller_Tab::factory($this->_Admin_Form_Controller)
 					->setObject($this->_object)
 					->linkedObject(Core_Entity::factory('Shop_Group_Property_List', $oShop->id))
 					->applyObjectProperty();
@@ -3067,6 +3114,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			// Index item by schedule
 			if (Core::moduleIsActive('schedule')
 				&& $this->_object->start_datetime != '0000-00-00 00:00:00'
+				&& $this->_object->indexing
 				&& Core_Date::sql2timestamp($this->_object->start_datetime) > time())
 			{
 				$oModule = Core_Entity::factory('Module')->getByPath('shop');
@@ -3086,6 +3134,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			// Unindex item by schedule
 			if (Core::moduleIsActive('schedule')
 				&& $this->_object->end_datetime != '0000-00-00 00:00:00'
+				&& $this->_object->indexing
 				&& Core_Date::sql2timestamp($this->_object->end_datetime) > time())
 			{
 				$oModule = Core_Entity::factory('Module')->getByPath('shop');
@@ -3147,7 +3196,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		return Admin_Form_Entity::factory('Script')
 			->value("$(function (){
 				mainFormLocker.unlock();
-				$.adminLoad({ path: '/admin/media/index.php', additionalParams: 'entity_id=" . $this->_object->id . "&type=" . $modelName . "&dataset_id=" . $this->getDatasetId() . "&parentWindowId=" . $windowId . "&_module=0', windowId: '{$windowId}-media-items', loadingScreen: false });
+				$.adminLoad({ path: hostcmsBackend + '/media/index.php', additionalParams: 'entity_id=" . $this->_object->id . "&type=" . $modelName . "&dataset_id=" . $this->getDatasetId() . "&parentWindowId=" . $windowId . "&_module=0', windowId: '{$windowId}-media-items', loadingScreen: false });
 			});");
 	}
 
@@ -3326,7 +3375,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->value("$('#{$windowId} [name = shop_group_name]').autocomplete({
 					source: function(request, response) {
 						$.ajax({
-							url: '/admin/shop/item/index.php?autocomplete=1&show_group=1&shop_id={$this->_object->shop_id}',
+							url: hostcmsBackend + '/shop/item/index.php?autocomplete=1&show_group=1&shop_id={$this->_object->shop_id}',
 							dataType: 'json',
 							data: {
 								queryString: request.term

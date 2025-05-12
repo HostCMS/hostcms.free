@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'shop');
 
 // Код формы
 $iAdmin_Form_Id = 54;
-$sAdminFormAction = '/admin/shop/index.php';
+$sAdminFormAction = '/{admin}/shop/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -183,7 +183,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 					'image_small' => $imageSmall,
 					'aPrices' => $aPrices,
 					'aWarehouses' => $aWarehouses,
-					'link' => "/admin/shop/item/index.php?hostcms[action]=edit&hostcms[current]=1&hostcms[window]=id_content&shop_id={$oShop->id}&shop_dir_id={$oShop->shop_dir_id}&shop_group_id={$oShop_Item->shop_group_id}&hostcms[checked][1][{$oShop_Item->id}]=1"
+					'link' => Admin_Form_Controller::correctBackendPath("/{admin}/shop/item/index.php") . "?hostcms[action]=edit&hostcms[current]=1&hostcms[window]=id_content&shop_id={$oShop->id}&shop_dir_id={$oShop->shop_dir_id}&shop_group_id={$oShop_Item->shop_group_id}&hostcms[checked][1][{$oShop_Item->id}]=1"
 				);
 			}
 		}
@@ -285,7 +285,7 @@ $oAdmin_Form_Entity_Menus->add(
 				->name(Core::_('Shop_Measure.mesures'))
 				->icon('fa fa-tachometer')
 				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref($sMeasuresFormPath = '/admin/shop/measure/index.php', NULL, NULL, $sAdditionalParam = "&shop_dir_id=" . intval(Core_Array::getGet('shop_dir_id', 0)))
+					$oAdmin_Form_Controller->getAdminLoadHref($sMeasuresFormPath = '/{admin}/shop/measure/index.php', NULL, NULL, $sAdditionalParam = "&shop_dir_id=" . intval(Core_Array::getGet('shop_dir_id', 0)))
 				)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($sMeasuresFormPath, NULL, NULL, $sAdditionalParam)
@@ -296,7 +296,7 @@ $oAdmin_Form_Entity_Menus->add(
 				->name(Core::_('Shop_Country.shop_form_menu_countries'))
 				->icon('fa fa-flag')
 				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref($sCountriesFormPath = '/admin/shop/country/index.php', NULL, NULL, $sAdditionalParam = "&shop_dir_id=" . intval(Core_Array::getGet('shop_dir_id', 0)))
+					$oAdmin_Form_Controller->getAdminLoadHref($sCountriesFormPath = '/{admin}/shop/country/index.php', NULL, NULL, $sAdditionalParam = "&shop_dir_id=" . intval(Core_Array::getGet('shop_dir_id', 0)))
 				)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($sCountriesFormPath, NULL, NULL, $sAdditionalParam)
@@ -307,7 +307,7 @@ $oAdmin_Form_Entity_Menus->add(
 				->name(Core::_('Shop_Codetype.title'))
 				->icon('fa fa-code')
 				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref($sCodesFormPath = '/admin/shop/codetype/index.php', NULL, NULL, $sAdditionalParam = "&shop_dir_id=" . intval(Core_Array::getGet('shop_dir_id', 0)))
+					$oAdmin_Form_Controller->getAdminLoadHref($sCodesFormPath = '/{admin}/shop/codetype/index.php', NULL, NULL, $sAdditionalParam = "&shop_dir_id=" . intval(Core_Array::getGet('shop_dir_id', 0)))
 				)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($sCodesFormPath, NULL, NULL, $sAdditionalParam)
@@ -318,7 +318,7 @@ $oAdmin_Form_Entity_Menus->add(
 				->name(Core::_('Shop_Item_Type.title'))
 				->icon('fa-solid fa-list-ol')
 				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref($sTypesFormPath = '/admin/shop/item/type/index.php', NULL, NULL, $sAdditionalParam = "shop_dir_id=" . intval(Core_Array::getGet('shop_dir_id', 0)))
+					$oAdmin_Form_Controller->getAdminLoadHref($sTypesFormPath = '/{admin}/shop/item/type/index.php', NULL, NULL, $sAdditionalParam = "shop_dir_id=" . intval(Core_Array::getGet('shop_dir_id', 0)))
 				)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($sTypesFormPath, NULL, NULL, $sAdditionalParam)
@@ -333,7 +333,7 @@ $oAdmin_Form_Entity_Menus->add(
 			->name(Core::_('Shop_Tax.show_tax_link'))
 			->icon('fa fa-money')
 			->href(
-				$oAdmin_Form_Controller->getAdminLoadHref($sTaxFormPath = '/admin/shop/tax/index.php', NULL, NULL, '')
+				$oAdmin_Form_Controller->getAdminLoadHref($sTaxFormPath = '/{admin}/shop/tax/index.php', NULL, NULL, '')
 			)
 			->onclick(
 				$oAdmin_Form_Controller->getAdminLoadAjax($sTaxFormPath, NULL, NULL, '')
@@ -343,7 +343,7 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('Shop_Currency.show_currency_link'))
 		->icon('fa fa-eur')
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref($sCurrenciesFormPath = '/admin/shop/currency/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadHref($sCurrenciesFormPath = '/{admin}/shop/currency/index.php', NULL, NULL, '')
 		)
 		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($sCurrenciesFormPath, NULL, NULL, '')
@@ -534,8 +534,8 @@ $oAdmin_Form_Dataset->addCondition(
 			'where' => array('site_id', '=', CURRENT_SITE)
 		)
 	)
-	->changeField('name', 'link', '/admin/shop/item/index.php?shop_id={id}&shop_dir_id={shop_dir_id}')
-	->changeField('name', 'onclick', "$.adminLoad({path: '/admin/shop/item/index.php', additionalParams: 'shop_id={id}&shop_dir_id={shop_dir_id}', windowId: '{windowId}'}); return false");
+	->changeField('name', 'link', '/{admin}/shop/item/index.php?shop_id={id}&shop_dir_id={shop_dir_id}')
+	->changeField('name', 'onclick', "$.adminLoad({path: '/{admin}/shop/item/index.php', additionalParams: 'shop_id={id}&shop_dir_id={shop_dir_id}', windowId: '{windowId}'}); return false");
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(

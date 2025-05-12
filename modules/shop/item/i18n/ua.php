@@ -393,4 +393,9 @@ return array(
 	'export_fields_allow_groups' => 'Експортувати групи користувачів поля',
 	'delete_field_values' => 'Удаляти існуючі значення користувацьких полів',
 	'shops_add_form_link_fields' => "Користувачські поля товару",
+
+	'export_stocks' => 'Експортувати склади',
+	'export_prices' => 'Експортувати ціни',
+
+	'apply_shortcut_parent_item' => 'Застосовувати до основних товарів ярликів',
 );

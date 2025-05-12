@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 {
@@ -164,7 +164,7 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 							break;
 						}
 
-						sleep(2);
+						sleep(3);
 
 						$current++;
 

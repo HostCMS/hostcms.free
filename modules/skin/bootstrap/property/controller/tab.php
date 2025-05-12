@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Property_Controller_Tab extends Property_Controller_Tab {
 
@@ -27,7 +27,7 @@ class Skin_Bootstrap_Property_Controller_Tab extends Property_Controller_Tab {
 							Admin_Form_Entity::factory('Div')
 								->class('btn btn-palegreen btn-clone inverted')
 								->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-plus-circle close"></i>'))
-								->onclick("{$addFunction}('{$windowId}', '{$oProperty->id}'); event.stopPropagation();")
+								->onclick("{$addFunction}('{$windowId}', '{$oProperty->id}', this); event.stopPropagation();")
 						)
 						->add(
 							Admin_Form_Entity::factory('Div')

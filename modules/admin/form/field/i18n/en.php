@@ -6,7 +6,7 @@
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Back-end form fields',
@@ -55,9 +55,10 @@ return array(
 	'field_type_date_time' => 'Date-time',
 	'field_type_date' => 'Date',
 	'field_type_image_link' => 'Picture-link',
-	'field_type_image_list' => 'List',
+	'field_type_list' => 'List',
 	'field_type_image_callback_function' => 'Calculated field (Function callback is used)',
 	'field_type_textarea' => 'Textarea',
+	'field_type_list_item' => 'List item',
 
 	// Отображение
 	'field_view0' => 'Column & Filter',

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Trash
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Корзина',
@@ -19,4 +19,5 @@ return array(
 	'deleted_elements' => 'Удалено элементов: %s',
 	'deleted_complete' => 'Удалены все элементы',
 	'option_maxExactCount' => 'Оценочное количество элементов в таблице, после которого модуль не будет определять точное количество удаленных элементов',
+	'schedule-deleteAll' => 'Очистить корзину',
 );

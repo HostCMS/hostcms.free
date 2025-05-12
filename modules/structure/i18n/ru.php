@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Structure
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Структура сайта',
@@ -92,4 +92,6 @@ return array(
 	'add_shortcut_title' => 'Создание ярлыка',
 	'add_item_shortcut_structure_id' => 'Родительский узел',
 	'shortcut_success' => "Ярлык успешно добавлен",
+	'changeShow_success' => 'Показ в меню раздела структуры успешно изменен.',
+	'changeShow_error' => 'Ошибка при изменении показа в меню структуры.',
 );

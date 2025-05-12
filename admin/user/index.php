@@ -4,13 +4,13 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
 // Код формы
 $iAdmin_Form_Id = 8;
-$sAdminFormAction = '/admin/user/index.php';
+$sAdminFormAction = '/{admin}/user/index.php';
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
 if (Core_Auth::logged())
@@ -237,7 +237,7 @@ if (Core_Auth::logged())
 				$oAuthorUser = $oUser_Absence->User;
 
 				ob_start();
-				?><div class="contracrot"><div class="user-image"><img class="contracrot-ico" src="<?php echo $oAuthorUser->getAvatar()?>" /></div><div class="user-name" style="margin-top: 8px;"><a class="darkgray" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][<?php echo $oAuthorUser->id?>]=1" onclick="$.modalLoad({path: '/admin/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oAuthorUser->id?>]=1', windowId: 'id_content'}); return false"><?php echo htmlspecialchars($oAuthorUser->getFullName())?></a></div></div><?php
+				?><div class="contracrot"><div class="user-image"><img class="contracrot-ico" src="<?php echo $oAuthorUser->getAvatar()?>" /></div><div class="user-name" style="margin-top: 8px;"><a class="darkgray" href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/user/index.php')?>?hostcms[action]=view&hostcms[checked][0][<?php echo $oAuthorUser->id?>]=1" onclick="$.modalLoad({path: '<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/user/index.php')?>', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oAuthorUser->id?>]=1', windowId: 'id_content'}); return false"><?php echo htmlspecialchars($oAuthorUser->getFullName())?></a></div></div><?php
 				$author = ob_get_clean();
 
 				$oEmployee = Core_Entity::factory('User')->find($employee_id);
@@ -253,7 +253,7 @@ if (Core_Auth::logged())
 		{
 			$sCurrentLng = Core_I18n::instance()->getLng();
 
-			?><form class="show-add-absence-form" method="POST" action="<?php echo $sAdminFormAction?>">
+			?><form class="show-add-absence-form" method="POST" action="<?php echo Admin_Form_Controller::correctBackendPath($sAdminFormAction)?>">
 				<div class="row">
 					<div class="col-xs-12 col-sm-6">
 						<select id="employee_id" class="form-control" name="employee_id" data-placeholder="<?php echo Core::_('User_Absence.select_user')?>">
@@ -353,6 +353,33 @@ if (Core_Auth::logged())
 					placeholder: function(){
 						$(this).data('placeholder');
 					}
+				})
+				.on("select2:opening select2:closing", function(e){
+
+					var $searchfield = $(this).parent().find(".select2-search__field");
+
+					if (!$searchfield.data("setKeydownHeader"))
+					{
+						$searchfield.data("setKeydownHeader", true);
+
+						$searchfield.on("keydown", function(e) {
+
+							var $this = $(this);
+
+							if ($this.val() == "" && e.key == "Backspace")
+							{
+								$this
+									.parents("ul.select2-selection__rendered")
+									.find("li.select2-selection__choice")
+									.filter(":last")
+									.find(".select2-selection__choice__remove")
+									.trigger("click");
+
+								e.stopImmediatePropagation();
+								e.preventDefault();
+							}
+						});
+					}
 				});
 
 				$(".show-add-absence-form #employee_id").val('<?php echo $employee_id?>').trigger('change.select2');
@@ -424,7 +451,7 @@ if (Core_Auth::logged())
 						var month = +$('[name="month"]').val(),
 							year = +$('[name="year"]').val();
 
-						$.adminLoad({path: '/admin/user/timesheet/index.php', additionalParams: 'month=' + month + '&year=' + year, windowId : 'id_content'});
+						$.adminLoad({path: '<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/user/timesheet/index.php')?>', additionalParams: 'month=' + month + '&year=' + year, windowId : 'id_content'});
 
 						// Переключение на активную вкладку
 						window.activeTabHref && $('ul#agregate-user-info a[href="' + window.activeTabHref + '"]').click();
@@ -451,7 +478,7 @@ if (Core_Auth::logged())
 			);
 
 		?>
-		<form class="show-another-time-form" method="POST" action="<?php echo $sAdminFormAction?>">
+		<form class="show-another-time-form" method="POST" action="<?php echo Admin_Form_Controller::correctBackendPath($sAdminFormAction)?>">
 			<div class="row">
 				<div class="col-xs-12 col-sm-6">
 					<label for="select-another-time"><?php echo Core::_('User_Workday.select_time')?></label>
@@ -630,7 +657,7 @@ if (Core_Auth::logged())
 		{
 			$iWorkdayEndTimeInSeconds = Core_Date::sql2timestamp($oUser_Workday->date . ' ' . $oUser_Workday->end);
 		?>
-		<form class="show-another-time-form form-horizontal form-bordered" method="POST" action="<?php echo $sAdminFormAction?>">
+		<form class="show-another-time-form form-horizontal form-bordered" method="POST" action="<?php echo Admin_Form_Controller::correctBackendPath($sAdminFormAction)?>">
 			<div class="form-group">
 				<div class="col-xs-12">
 					<div class="user">
@@ -789,7 +816,7 @@ if (Core_Auth::logged())
 				var month = +$('[name="month"]').val(),
 					year = +$('[name="year"]').val();
 
-				$.adminLoad({path: '/admin/user/timesheet/index.php', additionalParams: 'month=' + month + '&year=' + year, windowId : 'id_content'});
+				$.adminLoad({path: '<?php Admin_Form_Controller::correctBackendPath('/{admin}/user/timesheet/index.php')?>', additionalParams: 'month=' + month + '&year=' + year, windowId : 'id_content'});
 
 				// Переключение на активную вкладку
 				window.activeTabHref && $('ul#agregate-user-info a[href="' + window.activeTabHref + '"]').click();
@@ -856,10 +883,13 @@ if (Core_Auth::logged())
 
 		if (!is_null($oUser))
 		{
+			$path = Core_Array::getPost('path', 'trim');
+			$path = str_replace('/' . Core::$mainConfig['backend'] . '/', '/{admin}/', $path);
+
 			$oUser_Bookmark = Core_Entity::factory('User_Bookmark');
-			$oUser_Bookmark->module_id = intval(Core_Array::getPost('module_id', 0));
-			$oUser_Bookmark->name = strval(Core_Array::getPost('name'));
-			$oUser_Bookmark->path = strval(Core_Array::getPost('path'));
+			$oUser_Bookmark->module_id = Core_Array::getPost('module_id', 0, 'int');
+			$oUser_Bookmark->name = Core_Array::getPost('name', 'trim');
+			$oUser_Bookmark->path = $path;
 			$oUser_Bookmark->user_id = $oUser->id;
 			$oUser_Bookmark->save();
 		}
@@ -994,23 +1024,13 @@ if (Core_Auth::logged())
 	}
 }
 
-Core_Auth::authorization($sModule = 'user');
-
-// Контроллер формы
-$oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
-
-$oAdmin_Form_Controller
-	->module(Core_Module_Abstract::factory($sModule))
-	->setUp()
-	->path($sAdminFormAction)
-	->title(Core::_('User.ua_show_users_title'))
-	->pageTitle(Core::_('User.ua_show_users_title'));
-
 if (!is_null(Core_Array::getPost('generate-password')))
 {
+	$length = Core_Array::getPost('length', 8, 'int');
+
 	Core::showJson(
 		array(
-			'password' => Core_Password::get()
+			'password' => Core_Password::get($length)
 		)
 	);
 }
@@ -1039,10 +1059,22 @@ if (!is_null(Core_Array::getPost('sortableBookmarks')))
 	Core::showJson($aJSON);
 }
 
+Core_Auth::authorization($sModule = 'user');
+
+// Контроллер формы
+$oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
+
+$oAdmin_Form_Controller
+	->module(Core_Module_Abstract::factory($sModule))
+	->setUp()
+	->path($sAdminFormAction)
+	->title(Core::_('User.ua_show_users_title'))
+	->pageTitle(Core::_('User.ua_show_users_title'));
+
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
-$sUserSiteChoosePath = '/admin/user/site/index.php';
+$sUserSiteChoosePath = '/{admin}/user/site/index.php';
 
 $sActionAdditionalParam = '&mode=action';
 
@@ -1062,20 +1094,30 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('User.wallpaper'))
 		->icon('fa fa-image')
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/user/wallpaper/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/user/wallpaper/index.php', NULL, NULL, '')
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/user/wallpaper/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/user/wallpaper/index.php', NULL, NULL, '')
 		)
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('User.session'))
 		->icon('fa fa-history')
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/user/session/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/user/session/index.php', NULL, NULL, '')
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/user/session/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/user/session/index.php', NULL, NULL, '')
+		)
+)->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('User.accessdenied'))
+		->icon('fa fa-ban')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/user/accessdenied/index.php', NULL, NULL, '')
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/user/accessdenied/index.php', NULL, NULL, '')
 		)
 );
 

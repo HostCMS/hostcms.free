@@ -8,10 +8,16 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Sql
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Sql_Table_View_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
+	/**
+	 * Hide empty PK when adding
+	 * @var boolean
+	 */
+	protected $_hideEmptyPK = FALSE;
+
 	/**
 	 * Constructor.
 	 * @param Admin_Form_Action_Model $oAdmin_Form_Action action

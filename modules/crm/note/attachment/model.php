@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Crm_Note_Attachment_Model extends Core_Entity
 {
@@ -211,6 +211,7 @@ class Crm_Note_Attachment_Model extends Core_Entity
 	/**
 	 * Delete attachment file
 	 * @return self
+	 * @hostcms-event crm_note_attachment.onAfterDeleteFile
 	 */
 	public function deleteFile()
 	{
@@ -220,12 +221,15 @@ class Crm_Note_Attachment_Model extends Core_Entity
 			Core_File::isFile($path) && Core_File::delete($path);
 		} catch (Exception $e) {}
 
+		Core_Event::notify($this->_modelName . '.onAfterDeleteFile', $this);
+
 		return $this;
 	}
 
 	/**
 	 * Delete attachment small file
 	 * @return self
+	 * @hostcms-event crm_note_attachment.onAfterDeleteSmallFile
 	 */
 	public function deleteSmallFile()
 	{
@@ -234,6 +238,8 @@ class Crm_Note_Attachment_Model extends Core_Entity
 			$path = $this->getSmallFilePath();
 			Core_File::isFile($path) && Core_File::delete($path);
 		} catch (Exception $e) {}
+
+		Core_Event::notify($this->_modelName . '.onAfterDeleteSmallFile', $this);
 
 		return $this;
 	}

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Str
 {
@@ -170,7 +170,7 @@ class Core_Str
 
 			preg_match('/^((?:.*?[.!?。])*)/su', $text, $matches);
 
-			$text = isset($matches[1]) && mb_strlen($matches[1])
+			$text = isset($matches[1]) && mb_strlen($matches[1]) > 5
 				? $matches[1]
 				: mb_substr($text, 0, mb_strrpos($text, ' '));
 		}
@@ -388,21 +388,24 @@ class Core_Str
 	 */
 	static public function hex2ip($hex)
 	{
-		$aHex = explode('.', chunk_split($hex, 2, '.'));
-
-		$aReturn = array ();
-
-		if (count($aHex) > 0)
+		$aReturn = array();
+		
+		if (is_scalar($hex))
 		{
-			foreach ($aHex as $field)
+			$aHex = explode('.', chunk_split($hex, 2, '.'));
+			
+			if (count($aHex) > 0)
 			{
-				if (!empty($field))
+				foreach ($aHex as $field)
 				{
-					$aReturn[] = hexdec($field);
+					if (!empty($field))
+					{
+						$aReturn[] = hexdec($field);
+					}
 				}
 			}
 		}
-
+		
 		return implode('.', $aReturn);
 	}
 
@@ -465,8 +468,10 @@ class Core_Str
 
 			// ABC123 => ABC AB A 123 12 1
 			$text = preg_replace_callback($replace, function($matches) {
-				$return = '';
+				// Base word
+				$return = $matches[0];
 
+				// Splited parts
 				for ($m = 1; $m < 3; $m++)
 				{
 					$return .= ' ' . $matches[$m];
@@ -475,6 +480,7 @@ class Core_Str
 						$return .= ' '. mb_substr($matches[$m], 0, $len);
 					}
 				}
+
 				return trim($return);
 			}, $text);
 		}

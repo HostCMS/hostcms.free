@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Http
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Http_Socket extends Core_Http
 {
@@ -17,9 +17,11 @@ class Core_Http_Socket extends Core_Http
 	 * @param string $host host
 	 * @param string $path path
 	 * @param string $query query
+	 * @param mixed $user user
+	 * @param mixed $password password
 	 * @return self
 	 */
-	protected function _execute($host, $path, $query, $scheme = 'http')
+	protected function _execute($host, $path, $query, $scheme = 'http', $user = NULL, $password = NULL)
 	{
 		// для 443 порта в fsockopen перед хостом нужно добавлять ssl://
 		$socketHost = $scheme == 'https'
@@ -44,14 +46,20 @@ class Core_Http_Socket extends Core_Http
 		}
 
 		$out = "{$this->_method} {$path}{$query} HTTP/1.1\r\n";
-		$out .= "Content-Type: {$this->_contentType}\r\n";
-		$out .= "Referer: {$this->_referer}\r\n";
-		$out .= "User-Agent: {$this->_userAgent}\r\n";
+
+		!is_null($this->_contentType)
+			&& $out .= "Content-Type: " . self::sanitizeHeader($this->_contentType) . "\r\n";
+
+		$this->_referer !== FALSE
+			&& $out .= "Referer: " . self::sanitizeHeader($this->_referer) . "\r\n";
+
+		!is_null($this->_userAgent)
+			&& $out .= "User-Agent: " . self::sanitizeHeader($this->_userAgent) . "\r\n";
 
 		// Additional headers
 		foreach ($this->_additionalHeaders as $name => $value)
 		{
-			$out .= "{$name}: {$value}\r\n";
+			$out .= "{$name}: " . self::sanitizeHeader($value) . "\r\n";
 		}
 
 		$out .= "Host: {$host}\r\n";

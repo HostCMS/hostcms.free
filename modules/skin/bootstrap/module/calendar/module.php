@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 {
@@ -46,7 +46,7 @@ class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 	{
 		$type = intval($type);
 		$oModule = Core_Entity::factory('Module')->getByPath($this->_moduleName);
-		$path = "/admin/index.php?ajaxWidgetLoad&moduleId={$oModule->id}&type={$type}";
+		$path = Admin_Form_Controller::correctBackendPath("/{admin}/index.php?ajaxWidgetLoad&moduleId={$oModule->id}&type={$type}");
 
 		switch ($type)
 		{
@@ -66,8 +66,7 @@ class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 					$aJson['eventId'] = $iEventId;
 					Core::showJson($aJson);
 				}
-				break;
-
+			break;
 			case 2: // Изменение статуса дела
 				if ($ajax)
 				{
@@ -88,8 +87,7 @@ class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 					Core::showJson($aJson);
 				}
 
-				break;
-
+			break;
 			case 3: // Добавление дела
 				if ($ajax)
 				{
@@ -151,10 +149,8 @@ class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 
 					Core::showJson($aJson);
 				}
-				break;
-
+			break;
 			default:
-
 				Calendar_Controller::createContextMenu();
 
 				if ($ajax)
@@ -192,7 +188,7 @@ class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 					<a data-toggle="maximize">
 						<i class="fa fa-expand gray"></i>
 					</a>
-					<a data-toggle="upload" onclick="$(this).find('i').addClass('fa-spin'); $.widgetLoad({ path: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oModule->id?>&type=0', context: $('#calendarAdminPage')});">
+					<a data-toggle="upload" onclick="$(this).find('i').addClass('fa-spin'); $.widgetLoad({ path: hostcmsBackend + '/index.php?ajaxWidgetLoad&moduleId=<?php echo $oModule->id?>&type=0', context: $('#calendarAdminPage')});">
 						<i class="fa-solid fa-rotate gray"></i>
 					</a>
 				</div>

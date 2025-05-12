@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'user');
 
 // Код формы
 $iAdmin_Form_Id = 139;
-$sAdminFormAction = '/admin/user/site/form/action/index.php';
+$sAdminFormAction = '/{admin}/user/site/form/action/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -53,22 +53,22 @@ $oAdmin_Form_Controller
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
 // Путь к контроллеру формы групп пользователей
-// $sUserGroupsPath = '/admin/user/index.php';
+// $sUserGroupsPath = '/{admin}/user/index.php';
 
 // Путь к контроллеру формы пользователей определенной группы
-//$sUsersPath = '/admin/company/index.php';
+//$sUsersPath = '/{admin}/company/index.php';
 //$sAdditionalParamsUser = 'company_department_id=' . $company_department_id;
 
-$sCompaniesPath = '/admin/company/index.php';
+$sCompaniesPath = '/{admin}/company/index.php';
 
-$sCompanyPath = '/admin/company/department/index.php';
+$sCompanyPath = '/{admin}/company/department/index.php';
 $sAdditionalCompanyParams = 'company_id=' . $oCompany_Department->Company->id;
 
 
-$sChoosingSitePath = '/admin/user/site/index.php';
+$sChoosingSitePath = '/{admin}/user/site/index.php';
 $sAdditionalChoosingSite = 'company_department_id=' . $company_department_id . '&mode=action';
 
-$sFormActionsPath = '/admin/user/site/form/index.php';
+$sFormActionsPath = '/{admin}/user/site/form/index.php';
 $sAdditionalFormActions = 'company_department_id=' . $company_department_id . '&site_id=' . $site_id;
 
 // Элементы строки навигации

@@ -4,13 +4,13 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
 Core_Auth::authorization($sModule = 'wysiwyg');
 
-$sAdminFormAction = '/admin/wysiwyg/upload.php';
+$sAdminFormAction = '/{admin}/wysiwyg/upload.php';
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create();
@@ -27,7 +27,9 @@ $aJSON = array(
 $modelName = Core_Array::getPost('entity_type', '', 'trim');
 $id = Core_Array::getPost('entity_id', 0, 'int');
 
-if ($modelName != '')
+$oUser = Core_Auth::getCurrentUser();
+
+if ($modelName != '' && $oUser)
 {
 	if (class_exists($modelName . '_Model'))
 	{
@@ -40,8 +42,6 @@ if ($modelName != '')
 
 			if (!is_null($oEntity->id))
 			{
-				$oUser = Core_Auth::getCurrentUser();
-
 				// Get Module Name
 				list($moduleName) = explode('_', $modelName);
 
@@ -63,25 +63,22 @@ if ($modelName != '')
 			}
 		}
 
-		if (!is_null($href) && !is_null($path))
+		$filename = Core_Array::getPost('filename', '', 'trim');
+		$aFile = Core_Array::getFiles('blob', array());
+
+		if ($filename != '' && isset($aFile['tmp_name']))
 		{
-			$filename = Core_Array::getPost('filename', '', 'trim');
-			$aFile = Core_Array::getFiles('blob', '');
-
-			if ($filename != '' && isset($aFile['tmp_name']))
+			if (Core_File::isValidExtension($filename, Core::$mainConfig['availableExtension']))
 			{
-				if (Core_File::isValidExtension($filename, Core::$mainConfig['availableExtension']))
-				{
-					$ext = Core_File::getExtension($filename);
-					$name = uniqid() . '.' . $ext;
+				$ext = Core_File::getExtension($filename);
+				$name = uniqid() . '.' . $ext;
 
-					Core_File::upload($aFile['tmp_name'], $path . $name);
+				Core_File::upload($aFile['tmp_name'], $path . $name);
 
-					$aJSON = array(
-						'status' => 'success',
-						'location' => '/' . ltrim($href, '/') . $name
-					);
-				}
+				$aJSON = array(
+					'status' => 'success',
+					'location' => '/' . ltrim($href, '/') . $name
+				);
 			}
 		}
 	}

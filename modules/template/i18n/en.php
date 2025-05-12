@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Template
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Тemplates',
@@ -46,4 +46,10 @@ return array(
 	'error_access_forbidden' => 'You do not have permission to edit.',
 	'language' => '%s.php',
 	'type' => 'Type',
+
+	'design_icon_desktop' => 'Full screen',
+	'design_icon_tablet' => 'Tablet',
+	'design_icon_tablet_wide' => 'Tablet horizontal',
+	'design_icon_mobile' => 'Smartphone',
+	'design_icon_mobile_wide' => 'Smartphone horizontal',
 );

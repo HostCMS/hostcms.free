@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Item_Controller_Set_Modification extends Admin_Form_Action_Controller
 {
@@ -84,12 +84,32 @@ class Shop_Item_Controller_Set_Modification extends Admin_Form_Action_Controller
 				// ->value($this->_object->modification_id)
 				->type('hidden');
 
+			$aExclude = array();
+
+			$aChecked = $window_Admin_Form_Controller->getChecked();
+
+			foreach ($aChecked as $datasetKey => $checkedItems)
+			{
+				// Exclude items
+				if ($datasetKey == 1)
+				{
+					foreach ($checkedItems as $key => $value)
+					{
+						$aExclude[] = $key;
+					}
+				}
+			}
+
+			$exclude = count($aExclude)
+				? json_encode($aExclude)
+				: '';
+
 			$oCore_Html_Entity_Script_Modification = Core_Html_Entity::factory('Script')
 				->value("
 					$('#{$newWindowId} [name = modification_name]').autocomplete({
 						source: function(request, response) {
 							$.ajax({
-								url: '/admin/shop/item/index.php?items=1&shop_id={$oShop->id}',
+								url: hostcmsBackend + '/shop/item/index.php?items=1&shop_id={$oShop->id}&exclude={$exclude}',
 								dataType: 'json',
 								data: {
 									queryString: request.term

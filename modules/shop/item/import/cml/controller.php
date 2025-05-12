@@ -27,7 +27,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 {
@@ -248,6 +248,12 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 		{
 			Core_Event::notify('Shop_Item_Import_Cml_Controller.onBeforeImportSpecialPrice', $this, array($oPrice));
 
+			// If onBeforeImportSpecialPrice returned FALSE, skip item
+			if (Core_Event::getLastReturn() === FALSE)
+			{
+				continue;
+			}
+
 			$oShop_Price = Core_Entity::factory('Shop', $this->iShopId)
 				->Shop_Prices
 				->getByGuid(strval($oPrice->Ид), FALSE);
@@ -307,6 +313,12 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 		foreach ($this->xpath($oXMLNode, 'Группа') as $oXMLGroupNode)
 		{
 			Core_Event::notify('Shop_Item_Import_Cml_Controller.onBeforeImportShopGroup', $this, array($oXMLGroupNode));
+			
+			// If onBeforeImportShopGroup returned FALSE, skip item
+			if (Core_Event::getLastReturn() === FALSE)
+			{
+				continue;
+			}
 
 			$oShop_Group = Core_Entity::factory('Shop', $this->iShopId)
 				->Shop_Groups
@@ -1358,6 +1370,7 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 		{
 			$aJSON = json_decode(Core_File::read($sJsonFilePath), TRUE);
 
+			$this->iShopGroupId = Core_Array::get($aJSON, 'iShopGroupId', 0);
 			$this->_aPropertyValues = Core_Array::get($aJSON, '_aPropertyValues', array());
 			$this->_aBaseProperties = Core_Array::get($aJSON, '_aBaseProperties', array());
 			$this->sShopDefaultPriceGUID = Core_Array::get($aJSON, 'sShopDefaultPriceGUID', '');
@@ -1488,6 +1501,7 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 									$oShop->add($oTmpGroup);
 								}
 
+								// Корневой будет являться группа классификатора
 								$this->iShopGroupId = $oTmpGroup->id;
 							}
 						}
@@ -1535,6 +1549,7 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 
 					Core_File::write($sJsonFilePath, json_encode(
 						array(
+							'iShopGroupId' => $this->iShopGroupId,
 							'_aPropertyValues' => $this->_aPropertyValues,
 							'_aBaseProperties' => $this->_aBaseProperties,
 							'sShopDefaultPriceGUID' => $this->sShopDefaultPriceGUID
@@ -1573,8 +1588,8 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 
 					// Товар может быть идентифицирован произвольным (например GUID или внутрисистемным) идентификатором, Штрихкодом, Артикулом. Контрагент может использовать любой удобный с его точки зрения идентификатор - на выбор
 
-					// Search by GUID
-					$oShopItem = $bCmlIdItemSearchFields
+					// Search by GUID or not isset Штрихкод or not isset Артикул
+					$oShopItem = $bCmlIdItemSearchFields || !isset($oXmlItem->Штрихкод) && !isset($oXmlItem->Артикул)
 						? $oShop->Shop_Items->getByGuid($sGUID, FALSE)
 						: NULL;
 
@@ -2819,6 +2834,12 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 		{
 			Core_Event::notify('Shop_Item_Import_Cml_Controller.onBeforeImportWarehouse', $this, array($oWarehouse));
 
+			// If onBeforeImportWarehouse returned FALSE, skip item
+			if (Core_Event::getLastReturn() === FALSE)
+			{
+				continue;
+			}
+
 			$sWarehouseGuid = strval($oWarehouse->Ид);
 
 			$oShopWarehouse = $oShop
@@ -2869,6 +2890,12 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 		foreach ($this->xpath($packageOfProposals, 'ЕдиницыИзмерения/ЕдиницаИзмерения') as $oNode)
 		{
 			Core_Event::notify('Shop_Item_Import_Cml_Controller.onBeforeImportMeasure', $this, array($oNode));
+
+			// If onBeforeImportMeasure returned FALSE, skip item
+			if (Core_Event::getLastReturn() === FALSE)
+			{
+				continue;
+			}
 
 			$okei = intval($oNode->Код);
 
@@ -3173,6 +3200,12 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 		foreach ($this->xpath($this->_oSimpleXMLElement, 'Документ') as $oDocument)
 		{
 			Core_Event::notify('Shop_Item_Import_Cml_Controller.onBeforeImportShopOrder', $this, array($oDocument));
+
+			// If onBeforeImportShopOrder returned FALSE, skip item
+			if (Core_Event::getLastReturn() === FALSE)
+			{
+				continue;
+			}
 
 			$sInvoice = strval($oDocument->Номер);
 			$oShop_Order = $oShop->Shop_Orders->getByInvoice($sInvoice, FALSE);

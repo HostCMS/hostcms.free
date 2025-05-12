@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Password extends Admin_Form_Entity_Input
 {
@@ -17,7 +17,8 @@ class Skin_Default_Admin_Form_Entity_Password extends Admin_Form_Entity_Input
 	 * @var array
 	 */
 	protected $_allowedProperties = array(
-		'generatePassword'
+		'generatePassword',
+		'generatePasswordLength'
 	);
 
 	/**
@@ -29,6 +30,7 @@ class Skin_Default_Admin_Form_Entity_Password extends Admin_Form_Entity_Input
 
 		$this
 			->generatePassword(FALSE)
+			->generatePasswordLength(8)
 			->type('password')
 			->size(30);
 	}
@@ -67,11 +69,11 @@ class Skin_Default_Admin_Form_Entity_Password extends Admin_Form_Entity_Input
 			?><div class="input-group"><?php
 		}
 		?>
-		<input <?php echo implode(' ', $aAttr) ?>/>
+		<input autocomplete="new-password" <?php echo implode(' ', $aAttr) ?>/>
 		<?php
 		if ($this->generatePassword)
 		{
-			?><a class="generate-password" onclick="$.generatePassword();"><i class="fa fa-keyboard-o"></i></a><?php
+			?><a class="generate-password" onclick="$.generatePassword(<?php echo htmlspecialchars((int) $this->generatePasswordLength)?>);"><i class="fa fa-keyboard-o"></i></a><?php
 		}
 
 		$this->executeChildren();

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Printlayout
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Printlayout_Model extends Core_Entity
 {
@@ -136,6 +136,7 @@ class Printlayout_Model extends Core_Entity
 	/**
 	 * Delete file
 	 * @return self
+	 * @hostcms-event printlayout.onAfterDeleteFile
 	 */
 	public function deleteFile()
 	{
@@ -148,6 +149,8 @@ class Printlayout_Model extends Core_Entity
 				Core_File::delete($fileName);
 			} catch (Exception $e) {}
 		}
+
+		Core_Event::notify($this->_modelName . '.onAfterDeleteFile', $this);
 
 		return $this;
 	}

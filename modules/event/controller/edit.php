@@ -1,5 +1,7 @@
 <?php
 
+use PSpell\Config;
+
 defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 /**
@@ -8,7 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -28,7 +30,6 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		if (!$object->id)
 		{
 			$object->parent_id = Core_Array::getGet('parent_id', 0, 'int');
-			$object->crm_project_id = Core_Array::getGet('crm_project_id', 0, 'int');
 
 			if (!is_null(Core_Array::getGet('event_status_id')))
 			{
@@ -63,98 +64,6 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			$oAdditionalTab->move($this->getField('id')->divAttr(array('class' => 'form-group col-xs-12')), $oAdditionalRow1);
 		}
-
-		/*if (Core::moduleIsActive('crm_project'))
-		{
-			$oAdditionalTab->delete($this->getField('crm_project_id'));
-
-			$windowId = $this->_Admin_Form_Controller->getWindowId();
-
-			$aCrmProjectsOptions = array(' … ');
-
-			$aCrm_Projects = Core_Entity::factory('Crm_Project')->getAllBySite_id(CURRENT_SITE);
-			foreach ($aCrm_Projects as $oCrm_Project)
-			{
-				$aCrmProjectsOptions[$oCrm_Project->id] = $oCrm_Project->name;
-			}
-
-			if (count($aCrm_Projects) < Core::$mainConfig['switchSelectToAutocomplete'])
-			{
-				$oSelect_Projects = Admin_Form_Entity::factory('Select');
-				$oSelect_Projects
-					->options($aCrmProjectsOptions)
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
-					->name('crm_project_id')
-					->value($this->_object->crm_project_id)
-					->caption(Core::_('Event.crm_project_id'));
-
-				$oAdditionalRow2->add($oSelect_Projects);
-			}
-			else
-			{
-				$oCrmProjectInput = Admin_Form_Entity::factory('Input')
-					->caption(Core::_('Event.crm_project_id'))
-					->divAttr(array('class' => 'form-group col-xs-12'))
-					->name('crm_project_name')
-					->placeholder(Core::_('Admin.autocomplete_placeholder'));
-
-				if ($this->_object->crm_project_id)
-				{
-					$oCrm_Project = $this->_object->Crm_Project;
-					$oCrmProjectInput->value($oCrm_Project->name . ' [' . $oCrm_Project->id . ']');
-				}
-
-				$oCrmProjectInputHidden = Admin_Form_Entity::factory('Input')
-					->divAttr(array('class' => 'form-group col-xs-12 hidden'))
-					->name('crm_project_id')
-					->value($this->_object->crm_project_id)
-					->type('hidden');
-
-				$oCore_Html_Entity_Script_Crm_Project = Core_Html_Entity::factory('Script')
-				->value("
-					$('#" . $windowId . " [name = crm_project_name]').autocomplete({
-						source: function(request, response) {
-							$.ajax({
-								url: '/admin/crm/project/index.php?autocomplete=1',
-								dataType: 'json',
-								data: {
-									queryString: request.term
-								},
-								success: function(data) {
-									response(data);
-								}
-							});
-						},
-						minLength: 1,
-						create: function() {
-							$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
-								return $('<li class=\"autocomplete-suggestion\"></li>')
-									.data('item.autocomplete', item)
-									.append($('<div class=\"name\">').html($.escapeHtml(item.label)))
-									.append($('<div class=\"id\">').html('[' + $.escapeHtml(item.id) + ']'))
-									.appendTo(ul);
-							}
-
-							$(this).prev('.ui-helper-hidden-accessible').remove();
-						},
-						select: function(event, ui) {
-							$('#" . $windowId . " [name = crm_project_id]').val(ui.item.id);
-						},
-						open: function() {
-							$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
-						},
-						close: function() {
-							$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
-						}
-					});
-				");
-
-				$oAdditionalRow2
-					->add($oCrmProjectInput)
-					->add($oCrmProjectInputHidden)
-					->add($oCore_Html_Entity_Script_Crm_Project);
-			}
-		}*/
 
 		$oMainTab
 			->move($this->getField('guid')->divAttr(array('class' => 'form-group col-xs-12')), $oAdditionalRow3)
@@ -235,12 +144,13 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								timer = setInterval(function(){
 									if (bodyWidth >= 992)
 									{
-										if ($("#' . $windowId . ' .left-block").height())
+										var leftBlockHeight = parseInt($("#' . $windowId . ' .left-block").height());
+										if (leftBlockHeight)
 										{
 											clearInterval(timer);
 
-											$("#' . $windowId . ' .right-block").find("#' . $windowId . '-event-notes").slimscroll({
-												height: $("#' . $windowId . ' .left-block").height() + 150,
+											$("#' . $windowId . ' .right-block").find("#' . $windowId . '-event-notes, #' . $windowId . '-event-timeline").slimscroll({
+												height: leftBlockHeight + (leftBlockHeight < 600 ? 75 : 0),
 												color: "rgba(0, 0, 0, 0.3)",
 												size: "5px"
 											});
@@ -283,12 +193,12 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			<div class="tabbable">
 				<ul class="nav nav-tabs tabs-flat" id="eventTabs">
 					<li class="active" data-type="timeline">
-						<a data-toggle="tab" href="#<?php echo $windowId?>_timeline" data-path="/admin/event/timeline/index.php" data-window-id="<?php echo $windowId?>-event-timeline" data-additional="event_id=<?php echo $this->_object->id?>">
+						<a data-toggle="tab" href="#<?php echo $windowId?>_timeline" data-path="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/event/timeline/index.php')?>" data-window-id="<?php echo $windowId?>-event-timeline" data-additional="event_id=<?php echo $this->_object->id?>">
 							<i class="fa fa-bars"></i>
 						</a>
 					</li>
 					<li data-type="note">
-						<a data-toggle="tab" href="#<?php echo $windowId?>_notes" data-path="/admin/event/note/index.php" data-window-id="<?php echo $windowId?>-event-notes" data-additional="event_id=<?php echo $this->_object->id?>">
+						<a data-toggle="tab" href="#<?php echo $windowId?>_notes" data-path="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/event/note/index.php')?>" data-window-id="<?php echo $windowId?>-event-notes" data-additional="event_id=<?php echo $this->_object->id?>">
 							<?php echo Core::_("Event.tabNotes")?> <?php echo $countNotes?>
 						</a>
 					</li>
@@ -342,7 +252,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								->name("file_{$oEvent_Attachment->id}")
 								->largeImage(
 									array(
-										'path' => '/admin/event/index.php?downloadFile=' . $oEvent_Attachment->id . '&filename=' . $oEvent_Attachment->file_name,
+										'path' => Admin_Form_Controller::correctBackendPath('/{admin}/event/index.php?downloadFile=') . $oEvent_Attachment->id . '&filename=' . $oEvent_Attachment->file_name,
 										'show_params' => FALSE,
 										'show_actions' => FALSE,
 										'originalName' => $oEvent_Attachment->file_name,
@@ -500,33 +410,6 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					)
 			);
 
-			// Статус
-			/*if ($this->_object->event_status_id)
-			{
-				$oEvent_Status = Core_Entity::factory('Event_Status', $this->_object->event_status_id);
-
-				$sEventStatusName = $oEvent_Status->name;
-				$sEventStatusColor = $oEvent_Status->color;
-			}
-			else
-			{
-				$sEventStatusName = Core::_('Event.notStatus');
-				$sEventStatusColor = '#aebec4';
-			}
-
-			$oMainRow3->add(
-				Admin_Form_Entity::factory('Div')
-					->class('col-xs-12 col-md-4')
-					->add(
-						Admin_Form_Entity::factory('Code')
-							->html('
-								<div class="event-status">
-									<i class="fa fa-circle" style="margin-right: 5px; color: ' . htmlspecialchars($sEventStatusColor) . '"></i><span style="color: ' . htmlspecialchars($sEventStatusColor) . '">' . htmlspecialchars($sEventStatusName) . '</span>
-								</div>
-							')
-					)
-			);*/
-
 			$aMasEventStatuses = array(array('value' => Core::_('Event.notStatus'), 'color' => '#aebec4'));
 
 			// При добавлении дела отображаем статусы, которые не являются завершающими
@@ -679,7 +562,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							: 1;
 
 						$imgLink = $oAdmin_Form->Admin_Form_Actions->checkAllowedActionForUser($oAdminUser, 'view')
-							? '<a href="/admin/siteuser/representative/index.php?hostcms[action]=view&hostcms[checked][' . $dataset . '][' . $aObject['id'] . ']=1" onclick="$.modalLoad({path: \'/admin/siteuser/representative/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][' . $dataset . '][' . $aObject['id'] . ']=1\', windowId: \'id_content\'}); return false"></a>'
+							? '<a href="' . Admin_Form_Controller::correctBackendPath('/{admin}/siteuser/representative/index.php') . '?hostcms[action]=view&hostcms[checked][' . $dataset . '][' . $aObject['id'] . ']=1" onclick="$.modalLoad({path: hostcmsBackend + \'/siteuser/representative/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][' . $dataset . '][' . $aObject['id'] . ']=1\', windowId: \'id_content\'}); return false"></a>'
 							: '';
 
 						$eventUsers .= '
@@ -690,7 +573,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 											<img class="databox-user-avatar" src="' . $aObject['avatar'] . '"/>' . $imgLink . '
 										</div>
 									</div>
-									<div class="databox-right bg-whitesmoke">
+									<div class="databox-right">
 										<div class="databox-text">
 											<div class="semi-bold">' . $aObject['name'] . '</div>
 											<div class="darkgray">' . $phone . '</div>
@@ -756,21 +639,23 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							? $aCompany_Department_Post_Users[0]->Company_Post->name
 							: '';
 
-						$col = 4;
+						/*$col = 4;
 
 						if (count($aEvent_Users) < 4)
 						{
 							$col = 12 / count($aEvent_Users);
-						}
+						}*/
 
 						ob_start();
 						?>
-						<div class="col-xs-12 col-sm-6 col-lg-<?php echo $col?>">
-							<div class="databox databox-graded">
+						<div class="col-xs-12 col-sm-6 user-block">
+							<div class="databox">
 								<div class="databox-left no-padding">
-									<img class="databox-user-avatar" src="<?php echo $oUser->getAvatar()?>">
+									<div class="img-wrapper">
+										<img class="databox-user-avatar" src="<?php echo $oUser->getAvatar()?>">
+									</div>
 								</div>
-								<div class="databox-right padding-top-20 bg-whitesmoke">
+								<div class="databox-right padding-top-20">
 									<div class="databox-stat orange radius-bordered">
 										<div class="databox-text black semi-bold darkgray event-user-view"><?php $oUser->showLink($this->_Admin_Form_Controller->getWindowId(), $oUser->getFullName()); echo ($bCreator ? '<i title="' . Core::_('Event.creator') . '" class="fa fa-star gold"></i>' : '')?></div>
 										<div class="databox-text darkgray"><?php echo htmlspecialchars($sUserPost)?></div>
@@ -804,45 +689,6 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$failed = $oEvent_Type->failed != ''
 				? htmlspecialchars($oEvent_Type->failed)
 				: Core::_('Event_Type.failed');
-
-			// Файлы
-			/*$aEvent_Attachments = $this->_object->Event_Attachments->findAll(FALSE);
-			if (count($aEvent_Attachments))
-			{
-				$oMainRow10->add(
-					Admin_Form_Entity::factory('Div')
-						->class('col-xs-12')
-						->add(
-							Admin_Form_Entity::factory('Code')
-								->html('<h6 class="row-title before-warning">' . Core::_('Event.event_files') . '</h6>')
-						)
-				);
-
-				foreach ($aEvent_Attachments as $oEvent_Attachment)
-				{
-					$textSize = $oEvent_Attachment->getTextSize();
-
-					ob_start();
-					Core_Html_Entity::factory('I')
-						->class(Core_File::getIcon($oEvent_Attachment->file_name))
-						->execute();
-					$icon_file_img = ob_get_clean();
-
-					ob_start();
-					Core_Html_Entity::factory('Strong')
-						->value(" ({$textSize})")
-						->execute();
-
-					$oMainRow10->add(
-						Admin_Form_Entity::factory('Code')
-							->html('
-								<div class="form-group col-xs-12">
-									' . $icon_file_img . ' <a href="/admin/event/index.php?downloadFile=' . $oEvent_Attachment->id . '" target="_blank">' . $oEvent_Attachment->file_name . '</a> ' . ob_get_clean() . '
-								</div>
-							')
-					);
-				}
-			}*/
 
 			$oMainRow10->add(
 				Admin_Form_Entity::factory('Radiogroup')
@@ -923,8 +769,8 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row additional-row' . ($bHideAdditionalRow ? ' hidden' : '')))
 			->add($oMainRow7 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow8 = Admin_Form_Entity::factory('Div')->class('row additional-row multiple-users' . ($bHideAdditionalRow ? ' hidden' : '')))
-			->add($oMainRowProjects = Admin_Form_Entity::factory('Div')->class('row additional-row' . ($bHideAdditionalRow ? ' hidden' : '')))
 			->add($oMainRowCalendar = Admin_Form_Entity::factory('Div')->class('row additional-row' . ($bHideAdditionalRow ? ' hidden' : '')))
+			->add($oMainRowProjects = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRowTags = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRowResultShow = Admin_Form_Entity::factory('Div')->class('row' . ($this->_object->completed ? ' hidden' : '')))
 			->add($oMainRow9 = Admin_Form_Entity::factory('Div')->class('row result-row hidden'))
@@ -968,11 +814,25 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$htmlEventStartButtons = '';
 		$startDayNum = -1;
 
+		$bActive = NULL;
+
 		// Формирование кнопок быстрого переключения даты начала события
 		foreach ($masEventStartButtonTitle as $eventStartDate => $eventStartTitle)
 		{
-			$htmlEventStartButtons .= '<a href="#" data-start-day="' . $startDayNum . '" class="btn' . ((!$this->_object->id && !$startDayNum) || ($eventStartDate == ("'" . Core_Date::sql2date($this->_object->start) . "'")) ? ' active' : '') . '">' . $eventStartTitle . '</a>';
+			// При создании выбираем "Сегодня"
+			if (is_null($bActive) && (!$this->_object->id && !$startDayNum
+				// Без срока
+				|| $this->_object->id && $eventStartDate === '' && $this->_object->deadline == '0000-00-00 00:00:00'
+				// Дата запуска совпадает с ключем одной из фраз
+				|| $eventStartDate === "'" . Core_Date::sql2date($this->_object->start) . "'"))
+			{
+				$bActive = TRUE;
+			}
+
+			$htmlEventStartButtons .= '<a href="#" data-start-day="' . $startDayNum . '" class="btn' . ($bActive ? ' active' : '') . '">' . $eventStartTitle . '</a>';
 			$startDayNum++;
+
+			$bActive = FALSE;
 		}
 
 		$oAdmin_Form_Entity_Code = Admin_Form_Entity::factory('Code')->html(
@@ -1179,6 +1039,33 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						templateSelection: $.templateSelectionItemResponsibleEmployees,
 						language: "' . Core_I18n::instance()->getLng() . '",
 						width: "100%"
+					})
+					.on("select2:opening select2:closing", function(e){
+
+						var $searchfield = $(this).parent().find(".select2-search__field");
+
+						if (!$searchfield.data("setKeydownHeader"))
+						{
+							$searchfield.data("setKeydownHeader", true);
+
+							$searchfield.on("keydown", function(e) {
+
+								var $this = $(this);
+
+								if ($this.val() == "" && e.key == "Backspace")
+								{
+									$this
+										.parents("ul.select2-selection__rendered")
+										.find("li.select2-selection__choice")
+										.filter(":last")
+										.find(".select2-selection__choice__remove")
+										.trigger("click");
+
+									e.stopImmediatePropagation();
+									e.preventDefault();
+								}
+							});
+						}
 					});
 					'
 			);
@@ -1293,7 +1180,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						allowClear: true,
 						multiple: true,
 						ajax: {
-							url: "/admin/siteuser/index.php?loadSiteusers&types[]=person&types[]=company",
+							url: hostcmsBackend + "/siteuser/index.php?loadSiteusers&types[]=person&types[]=company",
 							dataType: "json",
 							type: "GET",
 							processResults: function (data) {
@@ -1311,6 +1198,33 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						templateSelection: $.templateSelectionItemSiteusers,
 						language: "' . Core_I18n::instance()->getLng() . '",
 						width: "100%"
+					})
+					.on("select2:opening select2:closing", function(e){
+
+						var $searchfield = $(this).parent().find(".select2-search__field");
+
+						if (!$searchfield.data("setKeydownHeader"))
+						{
+							$searchfield.data("setKeydownHeader", true);
+
+							$searchfield.on("keydown", function(e) {
+
+								var $this = $(this);
+
+								if ($this.val() == "" && e.key == "Backspace")
+								{
+									$this
+										.parents("ul.select2-selection__rendered")
+										.find("li.select2-selection__choice")
+										.filter(":last")
+										.find(".select2-selection__choice__remove")
+										.trigger("click");
+
+									e.stopImmediatePropagation();
+									e.preventDefault();
+								}
+							});
+						}
 					});'
 				);
 
@@ -1325,89 +1239,111 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 			$windowId = $this->_Admin_Form_Controller->getWindowId();
 
-			$aCrmProjectsOptions = array(' … ');
-
 			$aCrm_Projects = Core_Entity::factory('Crm_Project')->getAllBySite_id(CURRENT_SITE);
-			foreach ($aCrm_Projects as $oCrm_Project)
-			{
-				$aCrmProjectsOptions[$oCrm_Project->id] = $oCrm_Project->name;
-			}
 
-			if (count($aCrm_Projects) < Core::$mainConfig['switchSelectToAutocomplete'])
+			if (count($aCrm_Projects))
 			{
-				$oSelect_Projects = Admin_Form_Entity::factory('Select');
-				$oSelect_Projects
-					->options($aCrmProjectsOptions)
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
-					->name('crm_project_id')
-					->value($this->_object->crm_project_id)
-					->caption(Core::_('Event.crm_project_id'));
+				$aCrm_Project_Options = array();
 
-				$oMainRowProjects->add($oSelect_Projects);
-			}
-			else
-			{
-				$oCrmProjectInput = Admin_Form_Entity::factory('Input')
-					->caption(Core::_('Event.crm_project_id'))
-					->divAttr(array('class' => 'form-group col-xs-12'))
-					->name('crm_project_name')
-					->placeholder(Core::_('Admin.autocomplete_placeholder'));
+				$crm_project_id = Core_Array::getGet('crm_project_id', 0, 'int');
 
-				if ($this->_object->crm_project_id)
+				if ($this->_object->id)
 				{
-					$oCrm_Project = $this->_object->Crm_Project;
-					$oCrmProjectInput->value($oCrm_Project->name . ' [' . $oCrm_Project->id . ']');
+					$aEvent_Crm_Projects = $this->_object->Event_Crm_Projects->findAll(FALSE);
+
+					foreach ($aEvent_Crm_Projects as $oEvent_Crm_Project)
+					{
+						$oCrm_Project = $oEvent_Crm_Project->Crm_Project;
+
+						$aTmp = $this->_getCrmProject($oCrm_Project);
+
+						$aCrm_Project_Options[$oCrm_Project->id] = $aTmp;
+					}
+				}
+				elseif ($crm_project_id)
+				{
+					$oCrm_Project = Core_Entity::factory('Crm_Project')->getById($crm_project_id);
+
+					if ($oCrm_Project)
+					{
+						$aTmp = $this->_getCrmProject($oCrm_Project);
+
+						$aCrm_Project_Options[$oCrm_Project->id] = $aTmp;
+					}
 				}
 
-				$oCrmProjectInputHidden = Admin_Form_Entity::factory('Input')
-					->divAttr(array('class' => 'form-group col-xs-12 hidden'))
-					->name('crm_project_id')
-					->value($this->_object->crm_project_id)
-					->type('hidden');
+				$oSelect_Projects = Admin_Form_Entity::factory('Select')
+					->id($windowId . '-event_crm_project_id')
+					->multiple('multiple')
+					->options($aCrm_Project_Options)
+					->name('event_crm_project_id[]')
+					->caption(Core::_('Event.crm_project_id'))
+					->style("width: 100%");
 
-				$oCore_Html_Entity_Script_Crm_Project = Core_Html_Entity::factory('Script')
-				->value("
-					$('#" . $windowId . " [name = crm_project_name]').autocomplete({
-						source: function(request, response) {
-							$.ajax({
-								url: '/admin/crm/project/index.php?autocomplete=1',
-								dataType: 'json',
-								data: {
-									queryString: request.term
-								},
-								success: function(data) {
-									response(data);
+				$oScriptProjects = Admin_Form_Entity::factory('Script')
+					->value('
+						$("#' . $windowId . '-event_crm_project_id").select2({
+							dropdownParent: $("#' . $windowId . '"),
+							minimumInputLength: 1,
+							placeholder: "' . Core::_('Event.select_project') . '",
+							allowClear: true,
+							multiple: true,
+							ajax: {
+								url: hostcmsBackend + "/crm/project/index.php?loadProjects",
+								dataType: "json",
+								type: "GET",
+								processResults: function (data) {
+									var aResults = [];
+									$.each(data, function (index, item) {
+										aResults.push(item);
+									});
+									return {
+										results: aResults
+									};
 								}
-							});
-						},
-						minLength: 1,
-						create: function() {
-							$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
-								return $('<li class=\"autocomplete-suggestion\"></li>')
-									.data('item.autocomplete', item)
-									.append($('<div class=\"name\">').html($.escapeHtml(item.label)))
-									.append($('<div class=\"id\">').html('[' + $.escapeHtml(item.id) + ']'))
-									.appendTo(ul);
-							}
+							},
+							escapeMarkup: function(m) { return m; },
+							templateSelection: function (data, container) {
+								if (data.element && typeof $(data.element).data("color") != "undefined") {
+									container[0].setAttribute("style", "background-color:" +  $(data.element).data(\'color\') + "0f !important; color:" +  $(data.element).data(\'color\') + " !important;");
+									container[0].getElementsByTagName("span")[0].setAttribute("style", "color: " + $(data.element).data(\'color\') + " !important");
+								}
+								return data.text;
+							},
+							language: "' . Core_I18n::instance()->getLng() . '"
+						})
+						.on("select2:opening select2:closing", function(e){
 
-							$(this).prev('.ui-helper-hidden-accessible').remove();
-						},
-						select: function(event, ui) {
-							$('#" . $windowId . " [name = crm_project_id]').val(ui.item.id);
-						},
-						open: function() {
-							$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
-						},
-						close: function() {
-							$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
-						}
-					});
-				");
+							var $searchfield = $(this).parent().find(".select2-search__field");
+
+							if (!$searchfield.data("setKeydownHeader"))
+							{
+								$searchfield.data("setKeydownHeader", true);
+
+								$searchfield.on("keydown", function(e) {
+
+									var $this = $(this);
+
+									if ($this.val() == "" && e.key == "Backspace")
+									{
+										$this
+											.parents("ul.select2-selection__rendered")
+											.find("li.select2-selection__choice")
+											.filter(":last")
+											.find(".select2-selection__choice__remove")
+											.trigger("click");
+
+										e.stopImmediatePropagation();
+										e.preventDefault();
+									}
+								});
+							}
+						});'
+					);
 
 				$oMainRowProjects
-					->add($oCrmProjectInput)
-					->add($oCrmProjectInputHidden)
-					->add($oCore_Html_Entity_Script_Crm_Project);
+					->add($oSelect_Projects)
+					->add($oScriptProjects);
 			}
 		}
 
@@ -1436,7 +1372,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					allowClear: true,
 					multiple: true,
 					ajax: {
-						url: "/admin/tag/index.php?hostcms[action]=loadTagsList&hostcms[checked][0][0]=1",
+						url: hostcmsBackend + "/tag/index.php?hostcms[action]=loadTagsList&hostcms[checked][0][0]=1",
 						dataType: "json",
 						type: "GET",
 						processResults: function (data) {
@@ -1451,6 +1387,33 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								results: aResults
 							};
 						}
+					}
+				})
+				.on("select2:opening select2:closing", function(e){
+
+					var $searchfield = $(this).parent().find(".select2-search__field");
+
+					if (!$searchfield.data("setKeydownHeader"))
+					{
+						$searchfield.data("setKeydownHeader", true);
+
+						$searchfield.on("keydown", function(e) {
+
+							var $this = $(this);
+
+							if ($this.val() == "" && e.key == "Backspace")
+							{
+								$this
+									.parents("ul.select2-selection__rendered")
+									.find("li.select2-selection__choice")
+									.filter(":last")
+									.find(".select2-selection__choice__remove")
+									.trigger("click");
+
+								e.stopImmediatePropagation();
+								e.preventDefault();
+							}
+						});
 					}
 				});
 			});</script>';
@@ -1518,16 +1481,13 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							allowClear: true,
 							multiple: true,
 							ajax: {
-								url: "/admin/calendar/caldav/index.php?loadCalendars",
+								url: hostcmsBackend + "/calendar/caldav/index.php?loadCalendars",
 								dataType: "json",
 								type: "GET",
 								processResults: function (data) {
 									var aResults = [];
 									$.each(data, function (index, item) {
-										aResults.push({
-											"id": item.id,
-											"text": item.text
-										});
+										aResults.push(item);
 									});
 									return {
 										results: aResults
@@ -1537,12 +1497,39 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							escapeMarkup: function(m) { return m; },
 							templateSelection: function (data, container) {
 								if (data.element && typeof $(data.element).data("color") != "undefined") {
-									container[0].setAttribute("style", "background-color:" +  $(data.element).data(\'color\') + " !important; color: #FFF !important; border-color: " + $(data.element).data(\'color\') + " !important;");
-									container[0].getElementsByTagName("span")[0].setAttribute("style", "color: #FFF !important");
+									container[0].setAttribute("style", "background-color:" +  $(data.element).data(\'color\') + "0f !important; color:" +  $(data.element).data(\'color\') + " !important;");
+									container[0].getElementsByTagName("span")[0].setAttribute("style", "color: " + $(data.element).data(\'color\') + " !important");
 								}
 								return data.text;
 							},
 							language: "' . Core_I18n::instance()->getLng() . '"
+						})
+						.on("select2:opening select2:closing", function(e){
+
+							var $searchfield = $(this).parent().find(".select2-search__field");
+
+							if (!$searchfield.data("setKeydownHeader"))
+							{
+								$searchfield.data("setKeydownHeader", true);
+
+								$searchfield.on("keydown", function(e) {
+
+									var $this = $(this);
+
+									if ($this.val() == "" && e.key == "Backspace")
+									{
+										$this
+											.parents("ul.select2-selection__rendered")
+											.find("li.select2-selection__choice")
+											.filter(":last")
+											.find(".select2-selection__choice__remove")
+											.trigger("click");
+
+										e.stopImmediatePropagation();
+										e.preventDefault();
+									}
+								});
+							}
 						});'
 					);
 
@@ -1592,7 +1579,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$oEntityDiv->add(
 						Admin_Form_Entity::factory('Code')
-							->html('<span class="badge badge-square margin-right-5" style="color: ' . $oLead->Lead_Status->color . '; background-color: ' . Core_Str::hex2lighter($oLead->Lead_Status->color, 0.88) . '"><i class="fa fa-user-circle-o margin-right-5"></i><a style="color: inherit;" href="/admin/lead/index.php?hostcms[action]=edit&hostcms[checked][0][' . $oLead->id . ']=1" onclick="$.modalLoad({path: \'/admin/lead/index.php\', action: \'edit\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $oLead->id . ']=1\', windowId: \'' . $this->_Admin_Form_Controller->getWindowId() . '\'}); return false">' . htmlspecialchars($oLead->getFullName()) . '</a></span>')
+							->html('<span class="badge badge-square margin-right-5" style="color: ' . $oLead->Lead_Status->color . '; background-color: ' . Core_Str::hex2lighter($oLead->Lead_Status->color, 0.88) . '"><i class="fa fa-user-circle-o margin-right-5"></i><a style="color: inherit;" href="' . Admin_Form_Controller::correctBackendPath('/{admin}/lead/index.php') . '?hostcms[action]=edit&hostcms[checked][0][' . $oLead->id . ']=1" onclick="$.modalLoad({path: hostcmsBackend + \'/lead/index.php\', action: \'edit\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $oLead->id . ']=1\', windowId: \'' . $this->_Admin_Form_Controller->getWindowId() . '\'}); return false">' . htmlspecialchars($oLead->getFullName()) . '</a></span>')
 					);
 				}
 			}
@@ -1605,7 +1592,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$oEntityDiv->add(
 						Admin_Form_Entity::factory('Code')
-							->html('<span class="badge badge-square margin-right-5" style="color: ' . $oDeal->Deal_Template->color . '; background-color: ' . Core_Str::hex2lighter($oDeal->Deal_Template->color, 0.88) . '"><i class="fa fa-user-circle-o margin-right-5"></i><a style="color: inherit;" href="/admin/deal/index.php?hostcms[action]=edit&hostcms[checked][0][' . $oDeal->id . ']=1" onclick="$.modalLoad({path: \'/admin/deal/index.php\', action: \'edit\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $oDeal->id . ']=1\', windowId: \'' . $this->_Admin_Form_Controller->getWindowId() . '\'}); return false">' . htmlspecialchars($oDeal->name) . '</a></span>')
+							->html('<span class="badge badge-square margin-right-5" style="color: ' . $oDeal->Deal_Template->color . '; background-color: ' . Core_Str::hex2lighter($oDeal->Deal_Template->color, 0.88) . '"><i class="fa fa-user-circle-o margin-right-5"></i><a style="color: inherit;" href="' . Admin_Form_Controller::correctBackendPath('/{admin}/deal/index.php') . '?hostcms[action]=edit&hostcms[checked][0][' . $oDeal->id . ']=1" onclick="$.modalLoad({path: hostcmsBackend + \'/deal/index.php\', action: \'edit\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $oDeal->id . ']=1\', windowId: \'' . $this->_Admin_Form_Controller->getWindowId() . '\'}); return false">' . htmlspecialchars($oDeal->name) . '</a></span>')
 					);
 				}
 			}
@@ -1620,8 +1607,22 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			)
 		);
 
+		$iNewLines = substr_count((string) $this->_object->description, '<br') + substr_count((string) $this->_object->description, '<p');
+
 		$oMainTab
-			->move($this->getField('description'), $oMainRow2)
+			->move(
+				$this->getField('description')
+					->rows($iNewLines < 7 ? 7 : ($iNewLines < 15 ? $iNewLines : 15))
+					->wysiwyg(Core::moduleIsActive('wysiwyg'))
+					->wysiwygOptions(array(
+						'menubar' => 'false',
+						'statusbar' => 'true',
+						'plugins' => '"advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table code wordcount"',
+						'toolbar1' => '"insert | undo redo | formatselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | removeformat"',
+						// 'inline' => 'true'
+					))
+					->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2
+			)
 			->move($this->getField('place')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow6)
 			;
 
@@ -1757,12 +1758,12 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		<div class="tabbable">
 			<ul class="nav nav-tabs tabs-flat" id="eventTabs">
 				<li class="active" data-type="timeline">
-					<a data-toggle="tab" href="#<?php echo $windowId?>_timeline" data-path="/admin/event/timeline/index.php" data-window-id="<?php echo $windowId?>-event-timeline" data-additional="event_id=<?php echo $this->_object->id?>">
+					<a data-toggle="tab" href="#<?php echo $windowId?>_timeline" data-path="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/event/timeline/index.php')?>" data-window-id="<?php echo $windowId?>-event-timeline" data-additional="event_id=<?php echo $this->_object->id?>">
 						<i class="fa fa-bars"></i>
 					</a>
 				</li>
 				<li data-type="note">
-					<a data-toggle="tab" href="#<?php echo $windowId?>_notes" data-path="/admin/event/note/index.php" data-window-id="<?php echo $windowId?>-event-notes" data-additional="event_id=<?php echo $this->_object->id?>">
+					<a data-toggle="tab" href="#<?php echo $windowId?>_notes" data-path="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/event/note/index.php')?>" data-window-id="<?php echo $windowId?>-event-notes" data-additional="event_id=<?php echo $this->_object->id?>">
 						<?php echo Core::_("Event.tabNotes")?> <?php echo $countNotes?>
 					</a>
 				</li>
@@ -1776,7 +1777,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				{
 					?>
 					<li data-type="event">
-						<a data-toggle="tab" href="#<?php echo $windowId?>_events" data-path="/admin/event/index.php" data-window-id="<?php echo $windowId?>-related-events" data-additional="show_subs=1&hideMenu=1&parent_id=<?php echo $this->_object->id?>">
+						<a data-toggle="tab" href="#<?php echo $windowId?>_events" data-path="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/event/index.php')?>" data-window-id="<?php echo $windowId?>-related-events" data-additional="show_subs=1&hideMenu=1&parent_id=<?php echo $this->_object->id?>">
 							<?php echo Core::_("Event.tabEvents")?> <?php echo $countEvents?>
 						</a>
 					</li>
@@ -1787,7 +1788,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				{
 				?>
 					<li data-type="dms_document">
-						<a data-toggle="tab" href="#<?php echo $windowId?>_documents" data-path="/admin/event/dms/document/index.php" data-window-id="<?php echo $windowId?>-event-dms-documents" data-additional="event_id=<?php echo $this->_object->id?>">
+						<a data-toggle="tab" href="#<?php echo $windowId?>_documents" data-path="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/event/dms/document/index.php')?>" data-window-id="<?php echo $windowId?>-event-dms-documents" data-additional="event_id=<?php echo $this->_object->id?>">
 							<?php echo Core::_("Event.tabDmsDocuments")?> <?php echo ($count = $this->_object->Dms_Documents->getCount())
 								? '<span class="badge badge-purple">' . $count . '</span>'
 								: ''?>
@@ -1841,10 +1842,10 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							->name("file_{$oEvent_Attachment->id}")
 							->largeImage(
 								array(
-									'path' => '/admin/event/index.php?downloadFile=' . $oEvent_Attachment->id . '&filename=' . $oEvent_Attachment->file_name,
+									'path' => Admin_Form_Controller::correctBackendPath('/{admin}/event/index.php?downloadFile=') . $oEvent_Attachment->id . '&filename=' . $oEvent_Attachment->file_name,
 									'show_params' => FALSE,
 									'originalName' => $oEvent_Attachment->file_name,
-									'delete_onclick' => "$.adminLoad({path: '/admin/event/index.php', additionalParams: 'hostcms[checked][0][{$this->_object->id}]=1', operation: '{$oEvent_Attachment->id}', action: 'deleteFile', windowId: '{$windowId}'}); return false",
+									'delete_onclick' => "$.adminLoad({path: hostcmsBackend + '/event/index.php', additionalParams: 'hostcms[checked][0][{$this->_object->id}]=1', operation: '{$oEvent_Attachment->id}', action: 'deleteFile', windowId: '{$windowId}'}); return false",
 									'delete_href' => ''
 								)
 							)
@@ -1966,7 +1967,6 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					}
 
 					function showTimeslider() {
-
 						var
 							oEventStartDate = new Date(+$(\'#' . $windowId . ' input[name="start"]\').parent().data("DateTimePicker").date()),
 							timeZoneOffset = (oEventStartDate.getTimezoneOffset() * 60 * 1000 * -1),
@@ -2181,9 +2181,14 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 							// Не нажата кнопка быстрой установки начала события, не перемещается ползунок,
 							// не прокручивается линейка при смещении ползунка к одному из ее концов, не изменяется ширина ползунка
-							if (!($("#' . $windowId . ' #eventStartButtonsGroup").data("clickStartButton") || jTimeSlider.data("moveTimeCell")
-								|| jTimeSlider.data("rulerRepeating") || jTimeSlider.data("resizeTimeCell")
-								|| $("#' . $windowId . ' input[name=\'all_day\']").data("clickAllDay")))
+							if (!(
+									$("#' . $windowId . ' #eventStartButtonsGroup").data("clickStartButton")
+									|| jTimeSlider.data("moveTimeCell")
+									|| jTimeSlider.data("rulerRepeating")
+									|| jTimeSlider.data("resizeTimeCell")
+									|| $("#' . $windowId . ' input[name=\'all_day\']").data("clickAllDay")
+								)
+							)
 							{
 								var inputField = $("#' . $windowId . ' input.hasDatetimepicker", this),
 									inputFieldName = inputField.attr("name"),
@@ -2236,7 +2241,12 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								jTimeSlider.TimeSlider("edit", timeCellOptions);
 
 								// Продолжительность изменена не через поле "Продолжительность" или был нажат "Весь день"
-								if(!($("#' . $windowId . ' input[name=\'all_day\']").data("clickAllDay") || $(\'#' . $windowId . ' input[name="duration"]\').data("durationFieldChanged") || $(\'#' . $windowId . ' select[name="duration_type"]\').data("durationFieldChanged")))
+								if(!(
+										$("#' . $windowId . ' input[name=\'all_day\']").data("clickAllDay")
+										|| $(\'#' . $windowId . ' input[name="duration"]\').data("durationFieldChanged")
+										|| $(\'#' . $windowId . ' select[name="duration_type"]\').data("durationFieldChanged")
+									)
+								)
 								{
 									if (startTimeCell < stopTimeCell)
 									{
@@ -2244,7 +2254,8 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 										setDuration(startTimeCell, stopTimeCell, \'' . $windowId . '\');
 									}
 
-									setEventStartButtons(startTimeCell, \'' . $windowId . '\');
+									// Кнопки инициализируем только при наличии даты окончания
+									stopTimeCell && setEventStartButtons(startTimeCell, \'' . $windowId . '\');
 								}
 							}
 						});
@@ -2507,7 +2518,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		return Admin_Form_Entity::factory('Script')
 			->value("$(function() {
-				$.adminLoad({ path: '/admin/event/index.php', additionalParams: 'show_subs=1&hideMenu=1&parent_id={$this->_object->id}&parentWindowId={$targetWindowId}', windowId: '{$targetWindowId}-related-events' });
+				$.adminLoad({ path: hostcmsBackend + '/event/index.php', additionalParams: 'show_subs=1&hideMenu=1&parent_id={$this->_object->id}&parentWindowId={$targetWindowId}', windowId: '{$targetWindowId}-related-events' });
 			});");
 	}
 
@@ -2524,7 +2535,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		return Admin_Form_Entity::factory('Script')
 			->value("$(function() {
-				$.adminLoad({ path: '/admin/event/timeline/index.php', additionalParams: 'event_id={$this->_object->id}&parentWindowId={$targetWindowId}', windowId: '{$targetWindowId}-event-timeline' });
+				$.adminLoad({ path: hostcmsBackend + '/event/timeline/index.php', additionalParams: 'event_id={$this->_object->id}&parentWindowId={$targetWindowId}', windowId: '{$targetWindowId}-event-timeline' });
 			});");
 	}
 
@@ -2538,7 +2549,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		return Admin_Form_Entity::factory('Script')
 			->value("$(function (){
-				$.adminLoad({ path: '/admin/event/dms/document/index.php', additionalParams: 'event_id=" . $this->_object->id . "', windowId: '{$windowId}-event-dms-documents' });
+				$.adminLoad({ path: hostcmsBackend + '/event/dms/document/index.php', additionalParams: 'event_id=" . $this->_object->id . "', windowId: '{$windowId}-event-dms-documents' });
 			});");
 	}
 
@@ -2555,7 +2566,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		return Admin_Form_Entity::factory('Script')
 			->value("$(function() {
-				$.adminLoad({ path: '/admin/event/note/index.php', additionalParams: 'event_id=" . $this->_object->id . "', windowId: '{$targetWindowId}-event-notes' });
+				$.adminLoad({ path: hostcmsBackend + '/event/note/index.php', additionalParams: 'event_id=" . $this->_object->id . "', windowId: '{$targetWindowId}-event-notes' });
 			});");
 	}
 
@@ -2919,6 +2930,39 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			}
 		}
 
+		if (Core::moduleIsActive('crm_project'))
+		{
+			$aProjectIds = Core_Array::getPost('event_crm_project_id', array());
+			!is_array($aProjectIds) && $aProjectIds = array();
+
+			$aTmp = array();
+
+			$aEvent_Crm_Projects = $this->_object->Event_Crm_Projects->findAll(FALSE);
+			foreach ($aEvent_Crm_Projects as $oEvent_Crm_Project)
+			{
+				$oCrm_Project = $oEvent_Crm_Project->Crm_Project;
+
+				if (!in_array($oCrm_Project->id, $aProjectIds))
+				{
+					$oEvent_Crm_Project->delete();
+				}
+				else
+				{
+					$aTmp[] = $oCrm_Project->id;
+				}
+			}
+
+			// Новые
+			$aNewProjectIds = array_diff($aProjectIds, $aTmp);
+			foreach ($aNewProjectIds as $iNewProjectId)
+			{
+				$oEvent_Crm_Project = Core_Entity::factory('Event_Crm_Project');
+				$oEvent_Crm_Project->event_id = $this->_object->id;
+				$oEvent_Crm_Project->crm_project_id = $iNewProjectId;
+				$oEvent_Crm_Project->save();
+			}
+		}
+
 		if (Core::moduleIsActive('calendar'))
 		{
 			$aCalendarIds = Core_Array::getPost('event_calendar_caldav_id', array());
@@ -3217,7 +3261,8 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oUser = Core_Auth::getCurrentUser();
 
 		//$parent_id = Core_Array::getGet('parent_id', 0);
-		$siteuser_id = Core_Array::getGet('siteuser_id', 0);
+		$siteuser_id = Core_Array::getGet('siteuser_id', 0, 'int');
+		$crm_project_id = Core_Array::getGet('crm_project_id', 0, 'int');
 		$bShow_subs = !is_null(Core_Array::getGet('show_subs'));
 
 		// $windowId = $this->_Admin_Form_Controller->getWindowId();
@@ -3233,15 +3278,19 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		// CRM-Projects
 		if ($("#id_content .timeline-crm").length && typeof _windowSettings != \'undefined\') {
-			$.adminLoad({ path: \'/admin/crm/project/entity/index.php\', additionalParams: \'crm_project_id=' . $this->_object->crm_project_id . '\', windowId: \'id_content\' });
+			$.adminLoad({ path: hostcmsBackend + \'/crm/project/entity/index.php\', additionalParams: \'crm_project_id=' . $crm_project_id . '\', windowId: \'id_content\' });
 		}
 		// /CRM-Projects
+		';
 
-		var jA = $("li[data-type=timeline] a");
-		if (jA.length)
+		if ($this->_object->id)
 		{
-			$.adminLoad({ path: jA.eq(0).data("path"), additionalParams: jA.eq(0).data("additional"), windowId: jA.eq(0).data("window-id") });
-		}';
+			$sJsRefresh .= 'var jA = $("li[data-type=timeline] a");
+			if (jA.length)
+			{
+				$.adminLoad({ path: jA.eq(0).data("path"), additionalParams: jA.eq(0).data("additional"), windowId: jA.eq(0).data("window-id") });
+			}';
+		}
 
 		//if (!$parent_id && !$siteuser_id)
 		if (!$bShow_subs && !$siteuser_id)
@@ -3260,10 +3309,10 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			case 'save':
 			case 'saveModal':
 			case 'applyModal':
-				$aEventUserId = Core_Array::get($this->_formValues, 'event_user_id');
+				// $aEventUserId = Core_Array::get($this->_formValues, 'event_user_id');
 
-				// Редактирование дела
-				if (!is_null($this->_object->id))
+				// Редактирование дела, ответсвтенные не обязательные к заполнению
+				/*if (!is_null($this->_object->id))
 				{
 					$oEventCreator = $this->_object->getCreator();
 					if (!is_null($oEventCreator) && $oEventCreator->id == $oUser->id)
@@ -3304,7 +3353,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							return TRUE;
 						}
 					}
-				}
+				}*/
 
 				$operation == 'saveModal' && $this->addMessage($sJsRefresh);
 				$operation == 'applyModal' && $this->addContent($sJsRefresh);
@@ -3392,6 +3441,30 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				'value' => $oTag->name,
 				'attr' => array('selected' => 'selected')
 			);
+		}
+
+		return $aReturn;
+	}
+
+	/**
+	 * Get crm project info
+	 * @param Crm_Project_Model $oCrm_Project
+	 * @return array
+	 */
+	protected function _getCrmProject(Crm_Project_Model $oCrm_Project)
+	{
+		$icon = $oCrm_Project->crm_icon_id
+			? $oCrm_Project->Crm_Icon->value
+			: '';
+
+		$aReturn = array(
+			'value' => ($icon != '' ? '<i class="' . $icon . '"></i> ' : '') . htmlspecialchars($oCrm_Project->name),
+			'attr' => array('selected' => 'selected')
+		);
+
+		if ($oCrm_Project->color != '')
+		{
+			$aReturn['attr']['data-color'] = $oCrm_Project->color;
 		}
 
 		return $aReturn;

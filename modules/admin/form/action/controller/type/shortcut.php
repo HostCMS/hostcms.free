@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Type_Shortcut extends Admin_Form_Action_Controller
 {
@@ -129,18 +129,18 @@ class Admin_Form_Action_Controller_Type_Shortcut extends Admin_Form_Action_Contr
 					}
 
 					$entity_id = $oShop->id;
-					$path = '/admin/shop/item/index.php?autocomplete=1&show_shortcut_groups=1';
+					$path = Admin_Form_Controller::correctBackendPath('/{admin}/shop/item/index.php?autocomplete=1&show_shortcut_groups=1');
 				}
 				elseif (Core_Array::getGet('informationsystem_id'))
 				{
 					$oInformationsystem = Core_Entity::factory('Informationsystem', Core_Array::getGet('informationsystem_id', 0));
 					$entity_id = $oInformationsystem->id;
-					$path = '/admin/informationsystem/item/index.php?autocomplete=1&show_shortcut_groups=1';
+					$path = Admin_Form_Controller::correctBackendPath('/{admin}/informationsystem/item/index.php?autocomplete=1&show_shortcut_groups=1');
 				}
 				else
 				{
 					$entity_id = CURRENT_SITE;
-					$path = '/admin/structure/index.php?autocomplete=1&show_shortcuts=1';
+					$path = Admin_Form_Controller::correctBackendPath('/{admin}/structure/index.php?autocomplete=1&show_shortcuts=1');
 				}
 
 				if ($entity_id)

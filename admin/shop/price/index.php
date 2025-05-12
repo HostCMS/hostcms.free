@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'shop');
 
 // Код формы
 $iAdmin_Form_Id = 68;
-$sAdminFormAction = '/admin/shop/price/index.php';
+$sAdminFormAction = '/{admin}/shop/price/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -46,10 +46,10 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('Shop_Price.set_prices'))
 		->icon('fa fa-dollar')
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/price/setting/index.php', NULL, NULL)
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/price/setting/index.php', NULL, NULL)
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/price/setting/index.php', NULL, NULL)
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/price/setting/index.php', NULL, NULL)
 		)
 );
 
@@ -73,7 +73,7 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop.menu'))
-		->href($oAdmin_Form_Controller->getAdminLoadHref($sShopItemFormPath = '/admin/shop/index.php', NULL, NULL, ''))
+		->href($oAdmin_Form_Controller->getAdminLoadHref($sShopItemFormPath = '/{admin}/shop/index.php', NULL, NULL, ''))
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sShopItemFormPath, NULL, NULL, ''))
 );
 
@@ -110,8 +110,8 @@ if ($oShopDir->id)
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($oShop->name)
-		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/index.php', NULL, NULL, $sAdditionalParams = "shop_id={$oShop->id}&shop_group_id=0"))
-		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, $sAdditionalParams))
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/index.php', NULL, NULL, $sAdditionalParams = "shop_id={$oShop->id}&shop_group_id=0"))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/item/index.php', NULL, NULL, $sAdditionalParams))
 );
 
 // Крошки строим только если: мы не в корне или идет редактирование
@@ -122,7 +122,7 @@ if ($shop_group_id)
 	// Массив хлебных крошек
 	$aBreadcrumbs = array();
 
-	$sShopItemFormPath = '/admin/shop/item/index.php';
+	$sShopItemFormPath = '/{admin}/shop/item/index.php';
 
 	do
 	{

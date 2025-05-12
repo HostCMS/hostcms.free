@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Sql
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Sql_Table_Field_Entity extends Core_Empty_Entity
 {
@@ -107,10 +107,11 @@ class Sql_Table_Field_Entity extends Core_Empty_Entity
 	 * Get primary key value
 	 * @return mixed
 	 */
-	public function getPrimaryKeyName()
+	/*public function getPrimaryKeyName()
 	{
+		// Первичный ключ не используется, так как при добавлении он будет скрыт с вкладки "Дополнительно", а нам требуется его заполнять
 		return 'Field';
-	}
+	}*/
 
 	/**
 	 * Backend badge

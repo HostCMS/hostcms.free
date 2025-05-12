@@ -5,7 +5,7 @@
 * @package HostCMS
 * @version 7.x
 * @author Hostmake LLC
-* @copyright © 2005-2024, https://www.hostcms.ru
+* @copyright © 2005-2025, https://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -24,7 +24,9 @@ if (Core_Array::getPost('action') == 'export')
 	$oInformationsystem_Item_Export_Csv_Controller = new Informationsystem_Item_Export_Csv_Controller(
 		Core_Array::getPost('informationsystem_id', 0),
 		!is_null(Core_Array::getPost('export_external_properties_allow_items')),
-		!is_null(Core_Array::getPost('export_external_properties_allow_groups'))
+		!is_null(Core_Array::getPost('export_external_properties_allow_groups')),
+		!is_null(Core_Array::getPost('export_fields_allow_items')),
+		!is_null(Core_Array::getPost('export_fields_allow_groups'))
 	);
 
 	$oInformationsystem_Item_Export_Csv_Controller
@@ -41,7 +43,7 @@ $oAdmin_Form_Controller = Admin_Form_Controller::create();
 $oAdmin_Form_Controller
 	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
-	->path('/admin/informationsystem/item/export/index.php');
+	->path('/{admin}/informationsystem/item/export/index.php');
 
 ob_start();
 
@@ -58,10 +60,10 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 Admin_Form_Entity::factory('Breadcrumb')
 	->name(Core::_('Informationsystem.menu'))
 	->href($oAdmin_Form_Controller->getAdminLoadHref(
-		'/admin/informationsystem/index.php'
+		'/{admin}/informationsystem/index.php'
 	))
 	->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-		'/admin/informationsystem/index.php'
+		'/{admin}/informationsystem/index.php'
 	))
 );
 
@@ -77,10 +79,10 @@ if ($oInformationsystem_Dir->id)
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 		->name($oInformationsystemDirBreadcrumbs->name)
 		->href($oAdmin_Form_Controller->getAdminLoadHref(
-				'/admin/informationsystem/index.php', NULL, NULL, "informationsystem_dir_id={$oInformationsystemDirBreadcrumbs->id}"
+				'/{admin}/informationsystem/index.php', NULL, NULL, "informationsystem_dir_id={$oInformationsystemDirBreadcrumbs->id}"
 		))
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-				'/admin/informationsystem/index.php', NULL, NULL, "informationsystem_dir_id={$oInformationsystemDirBreadcrumbs->id}"
+				'/{admin}/informationsystem/index.php', NULL, NULL, "informationsystem_dir_id={$oInformationsystemDirBreadcrumbs->id}"
 		));
 	}
 	while ($oInformationsystemDirBreadcrumbs = $oInformationsystemDirBreadcrumbs->getParent());
@@ -98,10 +100,10 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($oInformationsystem->name)
 		->href($oAdmin_Form_Controller->getAdminLoadHref(
-			'/admin/informationsystem/item/index.php', NULL, NULL, "informationsystem_id={$oInformationsystem->id}"
+			'/{admin}/informationsystem/item/index.php', NULL, NULL, "informationsystem_id={$oInformationsystem->id}"
 		))
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-			'/admin/informationsystem/item/index.php', NULL, NULL, "informationsystem_id={$oInformationsystem->id}"
+			'/{admin}/informationsystem/item/index.php', NULL, NULL, "informationsystem_id={$oInformationsystem->id}"
 		))
 );
 
@@ -117,10 +119,10 @@ if ($oInformationsystem_Group->id)
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 			->name($oInformationsystemGroupBreadcrumbs->name)
 			->href($oAdmin_Form_Controller->getAdminLoadHref(
-				'/admin/informationsystem/item/index.php', NULL, NULL, "informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystemGroupBreadcrumbs->id}"
+				'/{admin}/informationsystem/item/index.php', NULL, NULL, "informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystemGroupBreadcrumbs->id}"
 			))
 			->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-				'/admin/informationsystem/item/index.php', NULL, NULL, "informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystemGroupBreadcrumbs->id}"
+				'/{admin}/informationsystem/item/index.php', NULL, NULL, "informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystemGroupBreadcrumbs->id}"
 			));
 	}
 	while ($oInformationsystemGroupBreadcrumbs = $oInformationsystemGroupBreadcrumbs->getParent());

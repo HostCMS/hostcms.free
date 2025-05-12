@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Field
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Field_Model extends Core_Entity
 {
@@ -35,6 +35,7 @@ class Field_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_hasMany = array(
+		'field_value_bigint' => array(),
 		'field_value_int' => array(),
 		'field_value_float' => array(),
 		'field_value_string' => array(),
@@ -226,7 +227,7 @@ class Field_Model extends Core_Entity
 
 		if ($this->type == 3 && $this->list_id && Core::moduleIsActive('list'))
 		{
-			$return .= '<a href="/admin/list/item/index.php?list_id=' . $this->list_id . '" target="_blank"><i title="' . Core::_('Property.move_to_list') . '" class="fa fa-external-link margin-left-5"></i></a>';
+			$return .= Admin_Form_Controller::correctBackendPath('<a href="/{admin}/list/item/index.php?list_id=') . $this->list_id . '" target="_blank"><i title="' . Core::_('Property.move_to_list') . '" class="fa fa-external-link margin-left-5"></i></a>';
 		}
 
 		return $return;

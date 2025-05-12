@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'sql');
 
 // Код формы
 $iAdmin_Form_Id = 382;
-$sAdminFormAction = '/admin/sql/variable/index.php';
+$sAdminFormAction = '/{admin}/sql/variable/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -33,10 +33,10 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Sql.title'))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/sql/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/sql/index.php', NULL, NULL, '')
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/sql/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/sql/index.php', NULL, NULL, '')
 	)
 )->add(
 	Admin_Form_Entity::factory('Breadcrumb')

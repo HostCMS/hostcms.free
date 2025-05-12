@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Crm_Project_Controller_Note extends Admin_Form_Controller_View
 {
@@ -137,7 +137,7 @@ class Crm_Project_Controller_Note extends Admin_Form_Controller_View
 				// {
 				?>
 				<div>
-					<form action="/admin/crm/project/note/index.php?hostcms[action]=addNote&_=<?php echo time()?>&hostcms[checked][0][0]=1&crm_project_id=<?php echo $crm_project_id?>&parentWindowId=<?php echo htmlspecialchars($windowId)?>" method="POST" enctype='multipart/form-data' class="padding-bottom-10 dropzone-form dropzone-form-note">
+					<form action="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/crm/project/note/index.php')?>?hostcms[action]=addNote&_=<?php echo time()?>&hostcms[checked][0][0]=1&crm_project_id=<?php echo $crm_project_id?>&parentWindowId=<?php echo htmlspecialchars($windowId)?>" method="POST" enctype='multipart/form-data' class="padding-bottom-10 dropzone-form dropzone-form-note">
 						<div class="timeline-comment-wrapper">
 							<!-- <textarea rows="3" name="text_note" type="text" class="form-control" placeholder="<?php echo Core::_('Crm_Project_Note.note_placeholder')?>"></textarea>-->
 							<?php
@@ -287,10 +287,14 @@ class Crm_Project_Controller_Note extends Admin_Form_Controller_View
 							$prevDate = $sDate;
 							$i++;
 						}
+
+						$badge = isset($oEntity->user_id) && $oEntity->user_id
+							? '<img class="img-circle" src="' . $oEntity->User->getAvatar() . '" width="30" height="30"/>'
+							: '<i class="fa fa-comment-o"></i>';
 						?>
 						<li class="timeline-inverted <?php echo $class?>">
 							<div class="timeline-badge yellow">
-								<img class="img-circle" src="<?php echo $oUser->getAvatar()?>" width="30" height="30"/>
+								<?php echo $badge?>
 							</div>
 							<div class="timeline-panel">
 								<div class="timeline-header bordered-bottom bordered-palegreen">

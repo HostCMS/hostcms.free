@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Lib
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Lib_Model extends Core_Entity
 {
@@ -68,6 +68,107 @@ class Lib_Model extends Core_Entity
 			$oUser = Core_Auth::getCurrentUser();
 			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 		}
+	}
+
+	/**
+	 * Get href for files
+	 * @return string
+	 */
+	public function getHref()
+	{
+		return 'upload/libs/lib_' . intval($this->id) . '/';
+	}
+
+	/**
+	 * Get path for files
+	 * @return string
+	 */
+	public function getPath()
+	{
+		return CMS_FOLDER . $this->getHref();
+	}
+
+	/**
+	 * Get file path
+	 * @return string
+	 */
+	public function getFilePath()
+	{
+		return $this->getPath() . $this->file;
+	}
+
+	/**
+	 * Get file href
+	 * @return string
+	 */
+	public function getFileHref()
+	{
+		return '/' . $this->getHref() . $this->file;
+	}
+
+	/**
+	 * Create files directory
+	 * @return self
+	 */
+	public function createDir()
+	{
+		clearstatcache();
+
+		if (!Core_File::isDir($this->getPath()))
+		{
+			try
+			{
+				Core_File::mkdir($this->getPath(), CHMOD, TRUE);
+			} catch (Exception $e) {}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Save file
+	 * @param string $fileSourcePath source file
+	 * @param string $fileName file name
+	 * @return self
+	 */
+	public function saveFile($fileSourcePath, $fileName)
+	{
+		$this->createDir();
+
+		$filePath = $this->getFilePath();
+
+		// Delete old file
+		if ($this->file != '' && Core_File::isFile($filePath))
+		{
+			$this->deleteFile();
+		}
+
+		$this->file = $this->id . '.' . Core_File::getExtension(basename($fileName));
+		$this->save();
+
+		Core_File::upload($fileSourcePath, $this->getFilePath());
+
+		return $this;
+	}
+
+	/**
+	 * Delete file
+	 * @return self
+	 * @hostcms-event lib.onAfterDeleteFile
+	 */
+	public function deleteFile()
+	{
+		try
+		{
+			Core_File::delete($this->getFilePath());
+		} catch (Exception $e) {}
+
+		Core_Event::notify($this->_modelName . '.onAfterDeleteFile', $this);
+
+		$this->file = '';
+		$this->save();
+
+		return $this;
 	}
 
 	/**
@@ -169,6 +270,8 @@ class Lib_Model extends Core_Entity
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return self
 	 * @hostcms-event lib.onBeforeRedeclaredDelete
+	 * @hostcms-event lib.onAfterDeleteLibFile
+	 * @hostcms-event lib.onAfterDeleteLibConfigFile
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -192,10 +295,14 @@ class Lib_Model extends Core_Entity
 			Core_File::delete($this->getLibFilePath());
 		} catch (Exception $e) {}
 
+		Core_Event::notify($this->_modelName . '.onAfterDeleteLibFile', $this);
+
 		try
 		{
 			Core_File::delete($this->getLibConfigFilePath());
 		} catch (Exception $e) {}
+
+		Core_Event::notify($this->_modelName . '.onAfterDeleteLibConfigFile', $this);
 
 		try
 		{
@@ -203,6 +310,8 @@ class Lib_Model extends Core_Entity
 		} catch (Exception $e) {}
 
 		$this->Lib_Properties->deleteAll(FALSE);
+
+		$this->deleteFile();
 
 		return parent::delete($primaryKey);
 	}
@@ -464,5 +573,118 @@ class Lib_Model extends Core_Entity
 	public function exportBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		return '<a target="_blank" href="' . $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'exportLibs', NULL, 1, intval($this->id), 'lib_dir_id=' . Core_Array::getGet('lib_dir_id')) . '"><i class="fa fa-upload"></i></a>';
+	}
+
+	/**
+	 * Show section fields attrs
+	 * @param string $fieldName
+	 * @return string
+	 */
+	public function showSectionFieldAttrs($fieldName, $position = 0, $prefix = '')
+	{
+		$userAccess = Core_Page::instance()->template->checkUserAccess();
+
+		$bShow = isset($_GET['hostcmsAction']) && $_GET['hostcmsAction'] == 'SHOW_DESIGN';
+
+		if ($userAccess && $bShow) // && preg_match(, $fieldName)
+		{
+			$oTemplate_Section_Lib = Core_Page::instance()->templateSectionLib;
+
+			$return = ' data-editable-' . $oTemplate_Section_Lib->id . '="' . htmlspecialchars($fieldName) . '"';
+
+			if ($position && $prefix != '')
+			{
+				$return .= ' data-prefix="' . htmlspecialchars($prefix) . '"';
+			}
+
+			return $return;
+		}
+
+		return '';
+	}
+
+	/**
+	 * Show section fields attrs
+	 * @param string $fieldName
+	 * @return string
+	 */
+	public function showSectionFieldDesign($fieldName, $position = 0, $prefix = '')
+	{
+		$return = '';
+
+		$userAccess = Core_Page::instance()->template->checkUserAccess();
+
+		if ($userAccess) // && preg_match(, $fieldName)
+		{
+			$bShow = isset($_GET['hostcmsAction']) && $_GET['hostcmsAction'] == 'SHOW_DESIGN';
+
+			$oTemplate_Section_Lib = Core_Page::instance()->templateSectionLib;
+
+			$return = ' id="' . $oTemplate_Section_Lib->id . '_' . htmlspecialchars($fieldName) . ($position ? '_' . $position : '') . '"';
+
+			if ($bShow)
+			{
+				$return .= ' data-design-' . $oTemplate_Section_Lib->id . '="' . htmlspecialchars($fieldName) . '"';
+			}
+
+			// Классы
+			$aFieldClasses = $oTemplate_Section_Lib->field_classes != ''
+				? json_decode($oTemplate_Section_Lib->field_classes, TRUE)
+				: array();
+
+			$field_classes = isset($aFieldClasses[$fieldName])
+				? $aFieldClasses[$fieldName]
+				: '';
+
+			if ($position)
+			{
+				$field_classes = isset($aFieldClasses[$fieldName . '_' . $position])
+					? $aFieldClasses[$fieldName . '_' . $position]
+					: '';
+			}
+
+			$return .= ' class="' . $prefix . htmlspecialchars($fieldName) . ' ' . $field_classes . '"';
+
+			// Стили
+			$aFieldStyles = $oTemplate_Section_Lib->field_styles != ''
+				? json_decode($oTemplate_Section_Lib->field_styles, TRUE)
+				: array();
+
+			$field_styles = isset($aFieldStyles[$fieldName])
+				? $aFieldStyles[$fieldName]
+				: '';
+
+			if ($position)
+			{
+				$field_styles = isset($aFieldStyles[$fieldName . '_' . $position])
+					? $aFieldStyles[$fieldName . '_' . $position]
+					: '';
+			}
+
+			$return .= ' style="' . $field_styles . '"';
+
+			if ($position)
+			{
+				$return .= ' data-position="' . $position . '"';
+			}
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function propertiesBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$count = $this->Lib_Properties->getCountByParent_id(0, FALSE);
+		$count && Core_Html_Entity::factory('Span')
+			->class('badge badge-ico badge-azure white')
+			->value($count < 100 ? $count : '∞')
+			->title($count)
+			->execute();
 	}
 }

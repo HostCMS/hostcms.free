@@ -31,6 +31,7 @@ return array(
 	'type12' => 'Shop',
 	'type13' => 'Information system group',
 	'type14' => 'Shop group',
+	'type15' => 'Big integer',
 
 	'list_id' => '<acronym title="Select list of values for property">Lists</acronym>',
 	'informationsystem_id' => '<acronym title="Information system sets as a property">Information system</acronym>',
@@ -99,4 +100,6 @@ return array(
 
 	'prefix_large_file' => 'Large file name prefix',
 	'prefix_small_file' => 'Small file name prefix',
+
+	'merge_error_lists' => 'Merging properties with different lists is prohibited',
 );

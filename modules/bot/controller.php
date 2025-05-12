@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Bot
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 abstract class Bot_Controller
 {
@@ -93,7 +93,7 @@ abstract class Bot_Controller
 	 * @param int $entity_id entity id
 	 * @return array
 	 */
-	public static function getBotModules($module_id, $type, $entity_id)
+	static public function getBotModules($module_id, $type, $entity_id)
 	{
 		$oBot_Modules = Core_Entity::factory('Bot_Module');
 		$oBot_Modules->queryBuilder()
@@ -105,6 +105,31 @@ abstract class Bot_Controller
 	}
 
 	/**
+	 * Get Site
+	 * @param object $oObject
+	 * @return Site_Model|NULL
+	 */
+	static public function getSite($oObject)
+	{
+		$oSite = NULL;
+
+		if (isset($oObject->site_id))
+		{
+			$oSite = $oObject->Site;
+		}
+		elseif (isset($oObject->shop_id))
+		{
+			$oSite = $oObject->Shop->Site;
+		}
+		elseif (isset($oObject->informationsystem_id))
+		{
+			$oSite = $oObject->Informationsystem->Site;
+		}
+
+		return $oSite;
+	}
+
+	/**
 	 * Notify bot
 	 * @param int $module_id module id
 	 * @param int $type entity type
@@ -112,7 +137,7 @@ abstract class Bot_Controller
 	 * @param object $object object
 	 * @return self
 	 */
-	public static function notify($module_id, $type, $entity_id, $object)
+	static public function notify($module_id, $type, $entity_id, $object)
 	{
 		$aBot_Modules = self::getBotModules($module_id, $type, $entity_id);
 
@@ -194,7 +219,7 @@ abstract class Bot_Controller
 			->add(
 				Admin_Form_Entity::factory('Script')
 					->value("$(function (){
-						$.adminLoad({ path: '/admin/bot/module/index.php', additionalParams: 'entity_id=" . $entity_id . "&module_id=" . $oModule->id . "&type=" . $type . "&hideMenu=1&_module=0', windowId: '{$sBotsContainerId}', loadingScreen: false });
+						$.adminLoad({ path: '" . Admin_Form_Controller::correctBackendPath('/{admin}/bot/module/index.php') ."', additionalParams: 'entity_id=" . $entity_id . "&module_id=" . $oModule->id . "&type=" . $type . "&hideMenu=1&_module=0', windowId: '{$sBotsContainerId}', loadingScreen: false });
 					});")
 			);
 

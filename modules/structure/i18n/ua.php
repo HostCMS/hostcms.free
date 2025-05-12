@@ -85,4 +85,6 @@ return array(
 	'add_shortcut_title' => 'Створення ярлика',
 	'add_item_shortcut_structure_id' => 'Батьківський вузол',
 	'shortcut_success' => "Ярлик успішно доданий",
+	'changeShow_success' => 'Показ у меню розділу структури успішно змінено.',
+	'changeShow_error' => 'Помилка при зміні показу в меню структури.',
 );

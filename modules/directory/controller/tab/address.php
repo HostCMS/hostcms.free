@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Directory
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 {
@@ -120,6 +120,13 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 					->value($oUser_Directory_Address ? $oUser_Directory_Address->Directory_Address->longitude : '')
 					->caption(Core::_('Directory_Address.longitude'))
 					->divAttr(array('class' => 'form-group col-xs-6 col-lg-2 no-padding-left-sm no-padding-left-xs'))
+			)
+			->add(
+				Admin_Form_Entity::factory('Input')
+					->name($this->prefix . 'address_description' . $sNameSuffix)
+					->value($oUser_Directory_Address ? $oUser_Directory_Address->Directory_Address->description : '')
+					->caption(Core::_('Directory_Address.description'))
+					->divAttr(array('class' => 'form-group col-xs-6 col-lg-5'))
 			);
 
 		if ($this->showPublicityControlElement)
@@ -195,6 +202,7 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 					->flat($sFlat)
 					->latitude(Core_Array::getPost("{$prefix}latitude#{$oDirectory_Address->id}", '', 'string'))
 					->longitude(Core_Array::getPost("{$prefix}longitude#{$oDirectory_Address->id}", '', 'string'))
+					->description(Core_Array::getPost("{$prefix}address_description#{$oDirectory_Address->id}", '', 'string'))
 					->save();
 			}
 			else
@@ -220,6 +228,7 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 		$aAddress_Flat = Core_Array::getPost($prefix . 'address_flat', array());
 		$aLatitudes = Core_Array::getPost($prefix . 'latitude', array());
 		$aLongitudes = Core_Array::getPost($prefix . 'longitude', array());
+		$aDescriptions = Core_Array::getPost($prefix . 'address_description', array());
 		$aAddress_Public = Core_Array::getPost($prefix . 'address_public', array());
 
 		if (is_array($aAddresses) && count($aAddresses))
@@ -247,6 +256,7 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 						->flat($sFlat)
 						->latitude(Core_Array::get($aLatitudes, $key, NULL, 'string'))
 						->longitude(Core_Array::get($aLongitudes, $key, NULL, 'string'))
+						->description(Core_Array::get($aDescriptions, $key, NULL, 'string'))
 						->save();
 
 					$object->add($oDirectory_Address);
@@ -263,6 +273,7 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 						$(\"#{$windowId} input[name='{$prefix}address_flat\\[\\]']\").eq({$i}).prop('name', '{$prefix}address_flat#{$oDirectory_Address->id}');
 						$(\"#{$windowId} input[name='{$prefix}latitude\\[\\]']\").eq({$i}).prop('name', '{$prefix}latitude#{$oDirectory_Address->id}');
 						$(\"#{$windowId} input[name='{$prefix}longitude\\[\\]']\").eq({$i}).prop('name', '{$prefix}longitude#{$oDirectory_Address->id}');
+						$(\"#{$windowId} input[name='{$prefix}address_description\\[\\]']\").eq({$i}).prop('name', '{$prefix}address_description#{$oDirectory_Address->id}');
 						$(\"#{$windowId} input[name='{$prefix}address_public\\[\\]']\").eq({$i}).prop('name', '{$prefix}address_public#{$oDirectory_Address->id}');
 						")
 						->execute();

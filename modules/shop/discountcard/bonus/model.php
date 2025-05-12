@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
  class Shop_Discountcard_Bonus_Model extends Core_Entity
 {
@@ -132,7 +132,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		{
 			$oShop_Order = $this->Shop_Order;
 
-			return '<a href="/admin/shop/order/index.php?hostcms[action]=edit&hostcms[checked][0][' . $oShop_Order->id . ']=1&shop_id=' . $oShop_Order->Shop->id . '" onclick="$.adminLoad({path: \'/admin/shop/order/index.php\', action: \'edit\', operation: \'\', additionalParams: \'hostcms[checked][0][' . $oShop_Order->id . ']=1&shop_id=' . $oShop_Order->Shop->id . '\', windowId: \'id_content\'}); return false">' . htmlspecialchars($oShop_Order->invoice) . '</a>';
+			$invoice = $oShop_Order->invoice != ''
+				? $oShop_Order->invoice
+				: $oShop_Order->id;
+
+			return '<a href="' . Admin_Form_Controller::correctBackendPath('/{admin}/shop/order/index.php') . '?hostcms[action]=edit&hostcms[checked][0][' . $oShop_Order->id . ']=1&shop_id=' . $oShop_Order->Shop->id . '" onclick="$.adminLoad({path: hostcmsBackend + \'/shop/order/index.php\', action: \'edit\', operation: \'\', additionalParams: \'hostcms[checked][0][' . $oShop_Order->id . ']=1&shop_id=' . $oShop_Order->Shop->id . '\', windowId: \'id_content\'}); return false">' . htmlspecialchars((string) $invoice) . '</a>';
 		}
 	}
 

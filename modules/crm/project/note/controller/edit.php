@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm_Project
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Crm_Project_Note_Controller_Edit extends Crm_Note_Controller_Edit
 {
@@ -68,10 +68,10 @@ class Crm_Project_Note_Controller_Edit extends Crm_Note_Controller_Edit
 
 		$sJsRefresh = '<script>
 			if ($("#id_content .timeline-crm").length && typeof _windowSettings != \'undefined\') {
-				$.adminLoad({ path: \'/admin/crm/project/entity/index.php\', additionalParams: \'crm_project_id=' . $crm_project_id . '\', windowId: \'id_content\' });
+				$.adminLoad({ path: hostcmsBackend + \'/crm/project/entity/index.php\', additionalParams: \'crm_project_id=' . $crm_project_id . '\', windowId: \'id_content\' });
 			}
 			if ($("#id_content #crm-project-notes").length) {
-				$.adminLoad({ path: \'/admin/crm/project/note/index.php\', additionalParams: \'crm_project_id=' . $crm_project_id . '\', windowId: \'crm-project-notes\' });
+				$.adminLoad({ path: hostcmsBackend + \'/crm/project/note/index.php\', additionalParams: \'crm_project_id=' . $crm_project_id . '\', windowId: \'crm-project-notes\' });
 			}
 		</script>';
 

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Warehouse_Writeoff_Model extends Core_Entity
 {
@@ -152,6 +152,13 @@ class Shop_Warehouse_Writeoff_Model extends Core_Entity
 		if (!$this->posted)
 		{
 			$oShop_Warehouse = $this->Shop_Warehouse;
+			
+			$oShop = $oShop_Warehouse->Shop;
+			// Fast filter
+			if ($oShop->filter)
+			{
+				$oShop_Filter_Controller = new Shop_Filter_Controller($oShop);
+			}
 
 			$aShop_Warehouse_Entries = $oShop_Warehouse->Shop_Warehouse_Entries->getByDocument($this->id, $this->getEntityType());
 
@@ -203,6 +210,10 @@ class Shop_Warehouse_Writeoff_Model extends Core_Entity
 					{
 						// Recount
 						$oShop_Warehouse->setRest($oShop_Warehouse_Writeoff_Item->shop_item_id, $rest);
+						
+						// Fast filter
+						$oShop->filter
+							&& $oShop_Filter_Controller->fill($oShop_Warehouse_Writeoff_Item->Shop_Item);
 					}
 				}
 

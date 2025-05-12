@@ -253,8 +253,10 @@
 								<xsl:otherwise><xsl:value-of select="forum_topic/last/forum_topic_post/subject"/></xsl:otherwise>
 						</xsl:choose></xsl:variable>
 
+						<xsl:variable name="last_topic_url"><xsl:value-of select="forum_topic/url"/><xsl:if test="forum_topic/count_posts &gt; /forum/posts_on_page and /forum/posts_on_page &gt; 0">page-<xsl:value-of select="ceiling(forum_topic/count_posts div /forum/posts_on_page)"/>/</xsl:if>#<xsl:value-of select="forum_topic/last/forum_topic_post/@id"/>
+                        </xsl:variable>
 
-					<strong><a href="{/forum/url}{@id}/{forum_topic/@id}/"><xsl:value-of select="$total_theme_name" /></a></strong>
+					<strong><a href="{$last_topic_url}"><xsl:value-of select="$total_theme_name" /></a></strong>
 						<br />
 					&labelFrom;<xsl:text> </xsl:text><img src="/hostcmsfiles/images/user.gif" style="margin: 0px 5px -4px 0px;"/>
 

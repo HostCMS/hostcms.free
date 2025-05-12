@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Item_Set_Controller_Delete extends Admin_Form_Action_Controller
 {
@@ -18,7 +18,7 @@ class Shop_Item_Set_Controller_Delete extends Admin_Form_Action_Controller
 	 */
 	public function execute($operation = NULL)
 	{
-		$set_item_id = intval(Core_Array::getGet('set_item_id'));
+		$set_item_id = Core_Array::getGet('set_item_id', 0, 'int');
 
 		if ($set_item_id)
 		{

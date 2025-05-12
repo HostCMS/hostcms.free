@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -14,10 +14,10 @@ $iAdmin_Form_Id = 201;
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
 // Путь к контроллеру формы ЦА
-$sAdminFormAction = '/admin/template/section/index.php';
+$sAdminFormAction = '/{admin}/template/section/index.php';
 
 // Путь к контроллеру предыдущей формы
-$sTemplatePath = '/admin/template/index.php';
+$sTemplatePath = '/{admin}/template/index.php';
 
 // Идентификатор макета
 $iTemplateId = intval(Core_Array::getRequest('template_id', 0));

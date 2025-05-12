@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Lib
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Parameters of sample dynamic pages',
@@ -31,6 +31,9 @@ return array(
 	'lib_property_type_5' => 'Large text field',
 	'lib_property_type_7' => 'TPL template',
 	'lib_property_type_8' => 'File',
+	'lib_property_type_9' => 'Visual Editor',
+	'lib_property_type_10' => 'Composite',
+	'lib_property_type_11' => 'Icon',
 	'value' => 'Value',
 	'multivalue' => 'Multiple values',
 	'copy_from' => ' [Copy of %s]',
@@ -44,4 +47,5 @@ return array(
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
 	'change_filename' => '<acronym title="Conversion of names of all uploaded files for all online store objects - products, groups, additional properties of products and groups">Change names of uploaded files</acronym>',
+	'parent_id' => 'Parent parameter',
 );

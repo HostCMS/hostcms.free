@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Warrant_Model extends Core_Entity
 {
@@ -399,9 +399,9 @@ class Shop_Warrant_Model extends Core_Entity
 	{
 		$color = Core_Str::createColor($this->getEntityType());
 
-		$href = $oAdmin_Form_Controller->getAdminActionLoadHref(array('path' => '/admin/shop/warrant/index.php', 'action' => 'edit', 'operation' => 'modal', 'additionalParams' => "type={$this->type}", 'datasetKey' => 0, 'datasetValue' => $this->id));
+		$href = $oAdmin_Form_Controller->getAdminActionLoadHref(array('path' => '/{admin}/shop/warrant/index.php', 'action' => 'edit', 'operation' => 'modal', 'additionalParams' => "type={$this->type}", 'datasetKey' => 0, 'datasetValue' => $this->id));
 
-		$onclick = $oAdmin_Form_Controller->getAdminActionModalLoad(array('path' => '/admin/shop/warrant/index.php', 'action' => 'edit', 'operation' => 'modal', 'additionalParams' => "type={$this->type}", 'datasetKey' => 0, 'datasetValue' => $this->id, 'window' => '', 'width' => '90%'));
+		$onclick = $oAdmin_Form_Controller->getAdminActionModalLoad(array('path' => '/{admin}/shop/warrant/index.php', 'action' => 'edit', 'operation' => 'modal', 'additionalParams' => "type={$this->type}", 'datasetKey' => 0, 'datasetValue' => $this->id, 'window' => '', 'width' => '90%'));
 
 		ob_start();
 

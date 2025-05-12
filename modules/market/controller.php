@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Market
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Market_Controller extends Core_Servant_Properties
 {
@@ -39,7 +39,8 @@ class Market_Controller extends Core_Servant_Properties
 		'options',
 		'tmpDir',
 		'order',
-		'protocol'
+		'protocol',
+		'backend'
 	);
 
 	/**
@@ -135,7 +136,8 @@ class Market_Controller extends Core_Servant_Properties
 			->domain($domain)
 			->update_server(HOSTCMS_UPDATE_SERVER)
 			->keys($aSite_Alias_Names)
-			->protocol($oSite->https ? 'https' : 'http');
+			->protocol($oSite->https ? 'https' : 'http')
+			->backend(Core::$mainConfig['backend']);
 
 		return $this;
 	}
@@ -193,7 +195,7 @@ class Market_Controller extends Core_Servant_Properties
 			&& $this->pin !== '' && !is_null($this->pin)
 		)
 		{*/
-		
+
 		$md5_contract = md5($this->contract);
 		$md5_pin = md5($this->pin);
 
@@ -207,7 +209,8 @@ class Market_Controller extends Core_Servant_Properties
 			"&mysql_version=" . rawurlencode((string) $this->mysql_version) .
 			"&update_id=" . $this->update_id .
 			"&current=" . intval($this->page) .
-			"&limit=" . intval($this->limit);
+			"&limit=" . intval($this->limit) .
+			"&backend=" . rawurlencode((string) $this->backend);
 
 		if ($this->search != '')
 		{
@@ -340,7 +343,8 @@ class Market_Controller extends Core_Servant_Properties
 			'&update_id=' . $this->update_id .
 			'&module_id=' . intval($module_id) .
 			'&current=' . intval($this->page) .
-			'&limit=' . intval($this->limit);
+			'&limit=' . intval($this->limit) .
+			"&backend=" . rawurlencode((string) $this->backend);
 
 		if (is_numeric($this->category_id))
 		{
@@ -455,6 +459,7 @@ class Market_Controller extends Core_Servant_Properties
 								{
 									// Распаковываем файлы
 									$Core_Tar = new Core_Tar($source_file, 'gz');
+									// $Core_Tar->addReplace('admin/', Core::$mainConfig['backend'] . '/');
 									if (!$Core_Tar->extractModify($this->tmpDir, $this->tmpDir))
 									{
 										// Возникла ошибка распаковки
@@ -821,6 +826,11 @@ class Market_Controller extends Core_Servant_Properties
 		$sFilesDir = $this->tmpDir . DIRECTORY_SEPARATOR . 'files';
 		if (Core_File::isDir($sFilesDir))
 		{
+			if (Core::$mainConfig['backend'] !== 'admin' && Core_File::isDir($sFilesDir . '/admin'))
+			{
+				Core_File::rename($sFilesDir . '/admin', $sFilesDir . '/' . Core::$mainConfig['backend']);
+			}
+
 			Core_Log::instance()->clear()
 				->status(Core_Log::$MESSAGE)
 				->write(sprintf('Market, copy `files` directory'));
@@ -993,7 +1003,8 @@ class Market_Controller extends Core_Servant_Properties
 			"&cms_folder=" . rawurlencode($this->cms_folder) .
 			"&php_version=" . rawurlencode($this->php_version) .
 			"&mysql_version=" . rawurlencode($this->mysql_version) .
-			"&update_id=" . $this->update_id;
+			"&update_id=" . $this->update_id .
+			"&backend=" . rawurlencode((string) $this->backend);
 
 		!is_null($this->installMode) && $this->installMode && $url .= '&installMode';
 
@@ -1127,7 +1138,7 @@ class Market_Controller extends Core_Servant_Properties
 					if (object && object.tagName == "SELECT")
 					{
 						category_id = parseInt(object.options[object.selectedIndex].value);
-						$.adminLoad({path: "/admin/market/index.php", windowId:"' . $sWindowId . '", additionalParams: "category_id=" + category_id, current: 1});
+						$.adminLoad({path: hostcmsBackend + "/market/index.php", windowId:"' . $sWindowId . '", additionalParams: "category_id=" + category_id, current: 1});
 					}
 					return false;
 				}</script>')
@@ -1217,7 +1228,7 @@ class Market_Controller extends Core_Servant_Properties
 				if ($object->paid && !$object->installed || $object->price == 0)
 				{
 					$sHtml .= '
-						<a class="btn btn-labeled btn-darkorange pull-right" onclick="res =confirm(\'' . Core::_('Market.install_warning') . '\'); if (res){ $.adminLoad({path:\'/admin/market/index.php\',action:\'\',operation:\'\',additionalParams:\'install=' . $object->id . '&category_id=' . $this->category_id . '&current=' . $this->page . '\',windowId:\'' . $sWindowId . '\'}); } return false" href="/admin/market/index.php?hostcms[window]=' . $sWindowId . '&install=' . $object->id . '&category_id=' . $this->category_id . '&current=' . $this->page . '">
+						<a class="btn btn-labeled btn-darkorange pull-right" onclick="res =confirm(\'' . Core::_('Market.install_warning') . '\'); if (res){ $.adminLoad({path: hostcmsBackend + \'/market/index.php\',action:\'\',operation:\'\',additionalParams:\'install=' . $object->id . '&category_id=' . $this->category_id . '&current=' . $this->page . '\',windowId:\'' . $sWindowId . '\'}); } return false" href="' . Admin_Form_Controller::correctBackendPath('/{admin}/market/index.php') . '?hostcms[window]=' . $sWindowId . '&install=' . $object->id . '&category_id=' . $this->category_id . '&current=' . $this->page . '">
 							<i class="btn-label fa fa-download"></i>
 							' . Core::_('Market.install') . '
 						</a>

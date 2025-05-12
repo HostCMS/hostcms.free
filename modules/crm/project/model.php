@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Crm_Project_Model extends Core_Entity
 {
@@ -24,6 +24,7 @@ class Crm_Project_Model extends Core_Entity
 		'crm_note' => array('through' => 'crm_project_crm_note'),
 		'crm_project_attachment' => array(),
 		'dms_document' => array(),
+		'event_crm_project' => array(),
 	);
 
 	/**
@@ -33,6 +34,7 @@ class Crm_Project_Model extends Core_Entity
 	protected $_belongsTo = array(
 		'user' => array(),
 		'site' => array(),
+		'crm_icon' => array()
 	);
 
 	/**
@@ -64,7 +66,11 @@ class Crm_Project_Model extends Core_Entity
 		$link = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $link);
 		$onclick = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $onclick);
 
-		return '<i class="fa fa-circle" style="margin-right: 5px; color: ' . ($this->color ? htmlspecialchars($this->color) : '#aebec4') . '"></i> '
+		$oCrm_Icon = $this->crm_icon_id
+			? $this->Crm_Icon
+			: Core_Entity::factory('Crm_Icon')->value('');
+
+		return '<span class="crm-project-list-icon" style="color:' . ($this->color ? htmlspecialchars($this->color) : '#aebec4') . '">' . $oCrm_Icon->getIcon() . '</span> '
 			. '<a href="' . $link . '" onclick="' . $onclick . '">' . htmlspecialchars($this->name) . '</a>';
 	}
 
@@ -76,49 +82,40 @@ class Crm_Project_Model extends Core_Entity
 	{
 		if (Core::moduleIsActive('event') && $countEvents = $this->Events->getCount())
 		{
-			Core_Html_Entity::factory('Span')
-				->class('label-crm-project')
-				->style('border-color: #53a93f; color: #53a93f; background-color: ' . Core_Str::hex2lighter('#53a93f', 0.88))
-				->value('<i class="fa fa-tasks fa-fw"></i> ' . $countEvents)
-				->title(Core::_('Crm_Project.events_count', $countEvents))
-				->execute();
+			$eventColor = '#53a93f';
+
+			?><span class="badge badge-round badge-max-width margin-left-5" title="<?php echo Core::_('Crm_Project.events_count', $countEvents)?>" style="color: <?php echo Core_Str::hex2darker($eventColor, 0.2)?>; background-color:<?php echo Core_Str::hex2lighter($eventColor, 0.88)?>"><i class="fa fa-tasks fa-fw"></i> <?php echo $countEvents?></span><?php
 		}
 
 		if (Core::moduleIsActive('deal') && $countDeals = $this->Deals->getCount())
 		{
-			Core_Html_Entity::factory('Span')
-				->class('label-crm-project')
-				->style('border-color: #57b5e3; color: #57b5e3; background-color: ' . Core_Str::hex2lighter('#57b5e3', 0.88))
-				->value('<i class="fa fa-handshake-o fa-fw"></i> ' . $countDeals)
-				->title(Core::_('Crm_Project.deals_count', $countDeals))
-				->execute();
+			$dealColor = '#57b5e3';
+
+			?><span class="badge badge-round badge-max-width margin-left-5" title="<?php echo Core::_('Crm_Project.deals_count', $countDeals)?>" style="color: <?php echo Core_Str::hex2darker($dealColor, 0.2)?>; background-color:<?php echo Core_Str::hex2lighter($dealColor, 0.88)?>"><i class="fa fa-handshake-o fa-fw"></i> <?php echo $countDeals?></span><?php
 		}
 
 		if (Core::moduleIsActive('dms') && $countDocuments = $this->Dms_Documents->getCount())
 		{
-			Core_Html_Entity::factory('Span')
-				->class('label-crm-project')
-				->style('border-color: #d73d32; color: #d73d32; background-color: ' . Core_Str::hex2lighter('#d73d32', 0.88))
-				->value('<i class="fa fa-columns fa-fw"></i> ' . $countDocuments)
-				->title(Core::_('Crm_Project.documents_count', $countDocuments))
-				->execute();
+			$dmsColor = '#d73d32';
+
+			?><span class="badge badge-round badge-max-width margin-left-5" title="<?php echo Core::_('Crm_Project.documents_count', $countDocuments)?>" style="color: <?php echo Core_Str::hex2darker($dmsColor, 0.2)?>; background-color:<?php echo Core_Str::hex2lighter($dmsColor, 0.88)?>"><i class="fa fa-columns fa-fw"></i> <?php echo $countDocuments?></span><?php
 		}
 
 		$countNotes = $this->Crm_Project_Crm_Notes->getCount();
-		$countNotes && Core_Html_Entity::factory('Span')
-			->class('label-crm-project')
-			->style('border-color: #f4b400; color: #f4b400; background-color: ' . Core_Str::hex2lighter('#f4b400', 0.88))
-			->value('<i class="fa fa-comment-o fa-fw"></i> ' . $countNotes)
-			->title(Core::_('Crm_Project.notes_count', $countNotes))
-			->execute();
+		if ($countNotes)
+		{
+			$notesColor = '#f4b400';
+
+			?><span class="badge badge-round badge-max-width margin-left-5" title="<?php echo Core::_('Crm_Project.notes_count', $countNotes)?>" style="color: <?php echo Core_Str::hex2darker($notesColor, 0.2)?>; background-color:<?php echo Core_Str::hex2lighter($notesColor, 0.88)?>"><i class="fa fa-comment-o fa-fw"></i> <?php echo $countNotes?></span><?php
+		}
 
 		$countFiles = $this->Crm_Project_Attachments->getCount();
-		$countFiles && Core_Html_Entity::factory('Span')
-			->class('label-crm-project')
-			->style('border-color: #981b48; color: #981b48; background-color: ' . Core_Str::hex2lighter('#981b48', 0.88))
-			->value('<i class="fa fa fa-file-text-o fa-fw"></i> ' . $countFiles)
-			->title(Core::_('Crm_Project.files_count', $countFiles))
-			->execute();
+		if ($countFiles)
+		{
+			$filesColor = '#981b48';
+
+			?><span class="badge badge-round badge-max-width margin-left-5" title="<?php echo Core::_('Crm_Project.files_count', $countFiles)?>" style="color: <?php echo Core_Str::hex2darker($filesColor, 0.2)?>; background-color:<?php echo Core_Str::hex2lighter($filesColor, 0.88)?>"><i class="fa fa-file-text-o fa-fw"></i> <?php echo $countFiles?></span><?php
+		}
 	}
 
 	/**
@@ -220,21 +217,15 @@ class Crm_Project_Model extends Core_Entity
 			? htmlspecialchars($this->color)
 			: '#aebec4';
 
-		?><div class="related-events-wrapper">
-			<div class="related-events" style="color: <?php echo $color?>; background-color:<?php echo Core_Str::hex2lighter($color, 0.88)?>"><i class="fas fa-tasks"></i></div>
-			<div>
-				<?php
-				if ($bModuleAccess)
-				{
-					?><a style="color: <?php echo $color?>" href="/admin/crm/project/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $this->id?>]=1" onclick="$.modalLoad({path: '/admin/crm/project/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $this->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>'}); return false"><?php echo htmlspecialchars($this->name)?></a><?php
-				}
-				else
-				{
-					?><span style="color: <?php echo $color?>"><?php echo htmlspecialchars($this->name)?></span><?php
-				}
-				?>
-			</div>
-		</div><?php
+		$name = $bModuleAccess
+			? '<a style="color: ' . $color . '" href="' . Admin_Form_Controller::correctBackendPath('/{admin}/crm/project/entity/index.php') . '?crm_project_id=' . $this->id . '" onclick="$.modalLoad({path: hostcmsBackend + \'/crm/project/entity/index.php\', action: \'\', operation: \'modal\', view: \'view\', additionalParams: \'show_entities=1&crm_project_id=' . $this->id . '\', windowId: \'' . $oAdmin_Form_Controller->getWindowId() . '\'}); return false">' . htmlspecialchars($this->name). '</a>'
+			: htmlspecialchars($this->name);
+
+		$icon = $this->crm_icon_id
+			? $this->Crm_Icon->value
+			: 'fas fa-tasks';
+
+		?><span class="badge badge-square margin-right-5" style="color: <?php echo $color?>; background-color:<?php echo Core_Str::hex2lighter($color, 0.88)?>"><i class="<?php echo $icon?>"></i> <?php echo $name?></span><?php
 	}
 
 	/**
@@ -333,6 +324,8 @@ class Crm_Project_Model extends Core_Entity
 				->set('crm_project_id', 0)
 				->where('crm_project_id', '=', $this->id)
 				->execute();
+
+			$this->Event_Crm_Projects->deleteAll(FALSE);
 		}
 
 		if (Core::moduleIsActive('deal'))
@@ -367,7 +360,7 @@ class Crm_Project_Model extends Core_Entity
 			? htmlspecialchars($this->color)
 			: '#aebec4';
 
-		?><span class="label label-related margin-right-5" style="color: <?php echo $color?>; background-color:<?php echo Core_Str::hex2lighter($color, 0.88)?>"><i class="fa-regular fa-folder-open margin-right-5"></i><a style="color: inherit;" href="/admin/crm/project/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $this->id?>]=1" onclick="$.modalLoad({path: '/admin/crm/project/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $this->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>'}); return false"><?php echo htmlspecialchars($this->name)?></a></span><?php
+		?><span class="label label-related margin-right-5" style="color: <?php echo $color?>; background-color:<?php echo Core_Str::hex2lighter($color, 0.88)?>"><i class="fa-regular fa-folder-open margin-right-5"></i><a style="color: inherit;" href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/crm/project/index.php')?>?hostcms[action]=edit&hostcms[checked][0][<?php echo $this->id?>]=1" onclick="$.modalLoad({path: hostcmsBackend + '/crm/project/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $this->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>'}); return false"><?php echo htmlspecialchars($this->name)?></a></span><?php
 
 		return $this;
 	}

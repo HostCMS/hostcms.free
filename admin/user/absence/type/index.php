@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'user');
 
 // Код формы
 $iAdmin_Form_Id = 248;
-$sAdminFormAction = '/admin/user/absence/type/index.php';
+$sAdminFormAction = '/{admin}/user/absence/type/index.php';
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
 // Контроллер формы
@@ -51,19 +51,19 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('User.ua_show_users_title'))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/user/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/user/index.php', NULL, NULL, '')
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/user/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/user/index.php', NULL, NULL, '')
 	)
 )->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('User.timesheet_title'))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/user/timesheet/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/user/timesheet/index.php', NULL, NULL, '')
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/user/timesheet/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/user/timesheet/index.php', NULL, NULL, '')
 	)
 )->add(
 	Admin_Form_Entity::factory('Breadcrumb')

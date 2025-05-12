@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Informationsystem_Item_Model extends Core_Entity
 {
@@ -164,6 +164,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	 * Apply array tags for item
 	 * @param array $aTags array of tags
 	 * @return self
+	 * @hostcms-event informationsystem_item.onAfterCreateTag
 	 */
 	public function applyTagsArray(array $aTags)
 	{
@@ -182,8 +183,27 @@ class Informationsystem_Item_Model extends Core_Entity
 				{
 					$oTag = Core_Entity::factory('Tag');
 					$oTag->name = $oTag->path = $tag_name;
+
+					if ($this->Informationsystem->url_type == 1)
+					{
+						try {
+							Core::$mainConfig['translate'] && $sTranslated = Core_Str::translate($tag_name);
+
+							$oTag->path = Core::$mainConfig['translate'] && strlen((string) $sTranslated)
+								? $sTranslated
+								: $tag_name;
+
+							$oTag->path = Core_Str::transliteration($oTag->path);
+						} catch (Exception $e) {
+							$oTag->path = Core_Str::transliteration($tag_name);
+						}
+					}
+
 					$oTag->save();
+
+					Core_Event::notify($this->_modelName . '.onAfterCreateTag', $this, array($oTag));
 				}
+
 				$this->add($oTag);
 			}
 		}
@@ -314,6 +334,21 @@ class Informationsystem_Item_Model extends Core_Entity
 		if (Core::moduleIsActive('media'))
 		{
 			$this->Media_Informationsystem_Items->deleteAll(FALSE);
+		}
+
+		// Свойства "Информационный элемент"
+		$oProperties = Core_Entity::factory('Property');
+		$oProperties->queryBuilder()
+			->where('informationsystem_id', '=', $this->informationsystem_id)
+			->where('type', '=', 5);
+
+		$aProperties = $oProperties->findAll(FALSE);
+		foreach ($aProperties as $oProperty)
+		{
+			Core_QueryBuilder::delete('property_value_ints')
+				->where('property_id', '=', $oProperty->id)
+				->where('value', '=', $this->id)
+				->execute();
 		}
 
 		// Удаляем директорию информационного элемента
@@ -641,30 +676,55 @@ class Informationsystem_Item_Model extends Core_Entity
 	/**
 	 * Make url path
 	 * @return self
+	 * @hostcms-event informationsystem_item.onAfterMakePath
 	 */
 	public function makePath()
 	{
-		if ($this->InformationSystem->url_type == 1)
+		switch ($this->Informationsystem->url_type)
 		{
-			try {
-				Core::$mainConfig['translate'] && $sTranslated = Core_Str::translate($this->name);
+			case 0:
+			default:
+				!is_null($this->id) && $this->path = $this->id;
+			break;
+			case 1:
+				try {
+					Core::$mainConfig['translate'] && $sTranslated = Core_Str::translate($this->name);
 
-				$this->path = Core::$mainConfig['translate'] && strlen((string) $sTranslated)
-					? $sTranslated
-					: $this->name;
+					$this->path = Core::$mainConfig['translate'] && strlen((string) $sTranslated)
+						? $sTranslated
+						: $this->name;
 
-				$this->path = Core_Str::transliteration($this->path);
+					$this->path = Core_Str::transliteration($this->path);
 
-			} catch (Exception $e) {
-				$this->path = Core_Str::transliteration($this->name);
-			}
+				} catch (Exception $e) {
+					$this->path = Core_Str::transliteration($this->name);
+				}
 
-			$this->checkDuplicatePath();
+				$this->checkDuplicatePath();
+			break;
+			case 2:
+				if ($this->Informationsystem->path_date_format != '' && strpos($this->Informationsystem->path_date_format, '/') === FALSE && $this->datetime != '')
+				{
+					$date_path = date($this->Informationsystem->path_date_format, Core_Date::sql2timestamp($this->datetime));
+
+					$oExist_Items = $this->Informationsystem->Informationsystem_Items;
+					$oExist_Items->queryBuilder()
+						->where('informationsystem_items.path', 'LIKE', $date_path . '%');
+
+					$exist_count = $oExist_Items->getCount(FALSE);
+
+					$this->path = !$exist_count
+						? $date_path
+						: $date_path . '-' . ($exist_count + 1);
+				}
+				else
+				{
+					!is_null($this->id) && $this->path = $this->id;
+				}
+			break;
 		}
-		elseif ($this->id)
-		{
-			$this->path = $this->id;
-		}
+
+		Core_Event::notify($this->_modelName . '.onAfterMakePath', $this);
 
 		return $this;
 	}
@@ -738,6 +798,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	/**
 	 * Delete item's large image
 	 * @return self
+	 * @hostcms-event informationsystem_item.onAfterDeleteLargeImage
 	 */
 	public function deleteLargeImage()
 	{
@@ -749,6 +810,8 @@ class Informationsystem_Item_Model extends Core_Entity
 				Core_File::delete($fileName);
 			} catch (Exception $e) {}
 
+			Core_Event::notify($this->_modelName . '.onAfterDeleteLargeImage', $this);
+
 			$this->image_large = '';
 			$this->save();
 		}
@@ -758,6 +821,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	/**
 	 * Delete item's small image
 	 * @return self
+	 * @hostcms-event informationsystem_item.onAfterDeleteSmallImage
 	 */
 	public function deleteSmallImage()
 	{
@@ -768,6 +832,8 @@ class Informationsystem_Item_Model extends Core_Entity
 			{
 				Core_File::delete($fileName);
 			} catch (Exception $e) {}
+
+			Core_Event::notify($this->_modelName . '.onAfterDeleteSmallImage', $this);
 
 			$this->image_small = '';
 			$this->save();
@@ -1054,53 +1120,56 @@ class Informationsystem_Item_Model extends Core_Entity
 			}
 		}
 
-		$aPropertyValues = $this->getPropertyValues(FALSE);
-		foreach ($aPropertyValues as $oPropertyValue)
+		if (Core::moduleIsActive('property'))
 		{
-			if ($oPropertyValue->Property->indexing)
+			$aPropertyValues = $this->getPropertyValues(FALSE);
+			foreach ($aPropertyValues as $oPropertyValue)
 			{
-				// List
-				if ($oPropertyValue->Property->type == 3 && Core::moduleIsActive('list'))
+				if ($oPropertyValue->Property->indexing)
 				{
-					if ($oPropertyValue->value != 0)
+					// List
+					if ($oPropertyValue->Property->type == 3 && Core::moduleIsActive('list'))
 					{
-						$oList_Item = $oPropertyValue->List_Item;
-						$oList_Item->id && $oSearch_Page->text .= htmlspecialchars((string) $oList_Item->value) . ' ' . htmlspecialchars((string) $oList_Item->description) . ' ';
-					}
-				}
-				// Informationsystem
-				elseif ($oPropertyValue->Property->type == 5 && Core::moduleIsActive('informationsystem'))
-				{
-					if ($oPropertyValue->value != 0)
-					{
-						$oInformationsystem_Item = $oPropertyValue->Informationsystem_Item;
-						if ($oInformationsystem_Item->id)
+						if ($oPropertyValue->value != 0)
 						{
-							$oSearch_Page->text .= htmlspecialchars((string) $oInformationsystem_Item->name) . ' ' . $oInformationsystem_Item->description . ' ' . $oInformationsystem_Item->text . ' ';
+							$oList_Item = $oPropertyValue->List_Item;
+							$oList_Item->id && $oSearch_Page->text .= htmlspecialchars((string) $oList_Item->value) . ' ' . htmlspecialchars((string) $oList_Item->description) . ' ';
 						}
 					}
-				}
-				// Shop
-				elseif ($oPropertyValue->Property->type == 12 && Core::moduleIsActive('shop'))
-				{
-					if ($oPropertyValue->value != 0)
+					// Informationsystem
+					elseif ($oPropertyValue->Property->type == 5 && Core::moduleIsActive('informationsystem'))
 					{
-						$oShop_Item = $oPropertyValue->Shop_Item;
-						if ($oShop_Item->id)
+						if ($oPropertyValue->value != 0)
 						{
-							$oSearch_Page->text .= htmlspecialchars((string) $oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
+							$oInformationsystem_Item = $oPropertyValue->Informationsystem_Item;
+							if ($oInformationsystem_Item->id)
+							{
+								$oSearch_Page->text .= htmlspecialchars((string) $oInformationsystem_Item->name) . ' ' . $oInformationsystem_Item->description . ' ' . $oInformationsystem_Item->text . ' ';
+							}
 						}
 					}
-				}
-				// Wysiwyg
-				elseif ($oPropertyValue->Property->type == 6)
-				{
-					$oSearch_Page->text .= htmlspecialchars(strip_tags((string) $oPropertyValue->value)) . ' ';
-				}
-				// Other type
-				elseif ($oPropertyValue->Property->type != 2)
-				{
-					$oSearch_Page->text .= htmlspecialchars((string) $oPropertyValue->value) . ' ';
+					// Shop
+					elseif ($oPropertyValue->Property->type == 12 && Core::moduleIsActive('shop'))
+					{
+						if ($oPropertyValue->value != 0)
+						{
+							$oShop_Item = $oPropertyValue->Shop_Item;
+							if ($oShop_Item->id)
+							{
+								$oSearch_Page->text .= htmlspecialchars((string) $oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
+							}
+						}
+					}
+					// Wysiwyg
+					elseif ($oPropertyValue->Property->type == 6)
+					{
+						$oSearch_Page->text .= htmlspecialchars(strip_tags((string) $oPropertyValue->value)) . ' ';
+					}
+					// Other type
+					elseif ($oPropertyValue->Property->type != 2)
+					{
+						$oSearch_Page->text .= htmlspecialchars((string) $oPropertyValue->value) . ' ';
+					}
 				}
 			}
 		}
@@ -1617,7 +1686,6 @@ class Informationsystem_Item_Model extends Core_Entity
 			if (is_array($this->_showXmlProperties))
 			{
 				$aProperty_Values = Property_Controller_Value::getPropertiesValues($this->_showXmlProperties, $this->id, FALSE, $this->_xmlSortPropertiesValues);
-
 				foreach ($aProperty_Values as $oProperty_Value)
 				{
 					$this->_preparePropertyValue($oProperty_Value);
@@ -1626,8 +1694,6 @@ class Informationsystem_Item_Model extends Core_Entity
 			else
 			{
 				$aProperty_Values = $this->getPropertyValues(TRUE, array(), $this->_xmlSortPropertiesValues);
-				// Add all values
-				//$this->addEntities($aProperty_Values);
 			}
 
 			Core_Event::notify($this->_modelName . '.onBeforeAddPropertyValues', $this, array($aProperty_Values));
@@ -1653,7 +1719,7 @@ class Informationsystem_Item_Model extends Core_Entity
 					->where('id', 'IN', $aListIDs)
 					->clearOrderBy();
 
-				$oList_Items->findAll(TRUE);
+				$oList_Items->findAll();
 			}
 		}
 
@@ -1886,14 +1952,14 @@ class Informationsystem_Item_Model extends Core_Entity
 		{
 			return '<i class="fa-solid fa-link"></i>';
 		}
-		elseif (strlen($this->image_small))
+		elseif ($this->image_small != '')
 		{
 			$srcImg = htmlspecialchars($this->getSmallFileHref());
 			$dataContent = '<img class="backend-preview" src="' . $srcImg . '"/>';
 
 			return '<img data-toggle="popover" data-trigger="hover" data-html="true" data-placement="top" data-content="' . htmlspecialchars($dataContent) . '" class="backend-thumbnail" src="' . $srcImg . '" />';
 		}
-		elseif (strlen($this->image_large))
+		elseif ($this->image_large != '')
 		{
 			$srcImg = htmlspecialchars($this->getLargeFileHref());
 			$dataContent = '<img class="backend-preview" src="' . $srcImg . '" />';

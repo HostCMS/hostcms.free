@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Xsl
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Xsl_Model extends Core_Entity
 {
@@ -123,6 +123,8 @@ class Xsl_Model extends Core_Entity
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
 	 * @hostcms-event xsl.onBeforeRedeclaredDelete
+	 * @hostcms-event xsl.onAfterDeleteXslFile
+	 * @hostcms-event xsl.onAfterDeleteDtdFiles
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -140,20 +142,24 @@ class Xsl_Model extends Core_Entity
 
 		try
 		{
-			Core_File::delete($filename);
-
-			// DTD
-			$aLngs = Xsl_Controller::getLngs();
-			foreach ($aLngs as $sLng)
-			{
-				$sDtdPath = $this->getLngDtdPath($sLng);
-
-				if (Core_File::isFile($sDtdPath))
-				{
-					Core_File::delete($sDtdPath);
-				}
-			}
+			Core_File::isFile($filename) && Core_File::delete($filename);
 		} catch (Exception $e) {}
+
+		Core_Event::notify($this->_modelName . '.onAfterDeleteXslFile', $this);
+
+		// DTD
+		$aLngs = Xsl_Controller::getLngs();
+		foreach ($aLngs as $sLng)
+		{
+			$sDtdPath = $this->getLngDtdPath($sLng);
+
+			try
+			{
+				Core_File::isFile($sDtdPath) && Core_File::delete($sDtdPath);
+			} catch (Exception $e) {}
+		}
+
+		Core_Event::notify($this->_modelName . '.onAfterDeleteDtdFiles', $this);
 
 		return parent::delete($primaryKey);
 	}

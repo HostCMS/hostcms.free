@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 
 require_once('../../../../bootstrap.php');
@@ -15,7 +15,7 @@ $iAdmin_Form_Id = 354;
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
 // Путь к контроллеру формы ЦА
-$sAdminFormAction = '/admin/shop/document/relation/index.php';
+$sAdminFormAction = '/{admin}/shop/document/relation/index.php';
 
 $document_id = Core_Array::getRequest('document_id', 0, 'int');
 $shop_id = Core_Array::getGet('shop_id', 0, 'int');
@@ -34,7 +34,7 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
 if ($document_id)
 {
-	$addPath = '/admin/shop/document/relation/add/index.php';
+	$addPath = '/{admin}/shop/document/relation/add/index.php';
 
 	$oAdmin_Form_Entity_Menus->add(
 		Admin_Form_Entity::factory('Menu')

@@ -1,8 +1,9 @@
 php_flag short_open_tag Off
 
 #php_value memory_limit "128M"
-#php_value max_execution_time "240"
+#php_value max_execution_time "60"
 
+#php_value max_input_vars 5000
 #php_value error_reporting "E_ALL"
 #php_value display_errors "1"
 

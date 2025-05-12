@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -12,11 +12,11 @@ Core_Auth::authorization($sModule = 'tag');
 
 // Код формы
 $iAdmin_Form_Id = 173;
-$sAdminFormAction = '/admin/tag/index.php';
+$sAdminFormAction = '/{admin}/tag/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
-$tag_dir_id = intval(Core_Array::getGet('tag_dir_id', 0));
+$tag_dir_id = intval(Core_Array::getGet('tag_dir_id', 0, 'int'));
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
@@ -169,7 +169,9 @@ if ($tag_dir_id)
 }
 
 // Действие редактирования
-$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
+$oAdmin_Form_Action = $oAdmin_Form
+	->Admin_Form_Actions
+	->getByName('edit');
 
 if ($oAdmin_Form_Action/* && $oAdmin_Form_Controller->getAction() == 'edit'*/)
 {
@@ -185,7 +187,9 @@ if ($oAdmin_Form_Action/* && $oAdmin_Form_Controller->getAction() == 'edit'*/)
 }
 
 // Действие "Применить"
-$oAdminFormActionApply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
+$oAdminFormActionApply = $oAdmin_Form
+	->Admin_Form_Actions
+	->getByName('apply');
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
@@ -199,7 +203,9 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 }
 
 // Действие "Копировать"
-$oAdminFormActionCopy = $oAdmin_Form->Admin_Form_Actions->getByName('copy');
+$oAdminFormActionCopy = $oAdmin_Form
+	->Admin_Form_Actions
+	->getByName('copy');
 
 if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 {
@@ -212,7 +218,9 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 }
 
 // Действие "Объединить"
-$oAdminFormActionMerge = $oAdmin_Form->Admin_Form_Actions->getByName('merge');
+$oAdminFormActionMerge = $oAdmin_Form
+	->Admin_Form_Actions
+	->getByName('merge');
 
 if ($oAdminFormActionMerge && $oAdmin_Form_Controller->getAction() == 'merge')
 {
@@ -226,7 +234,9 @@ if ($oAdminFormActionMerge && $oAdmin_Form_Controller->getAction() == 'merge')
 }
 
 // Действие "Перенести"
-$oAdminFormActionMove = $oAdmin_Form->Admin_Form_Actions->getByName('move');
+$oAdminFormActionMove = $oAdmin_Form
+	->Admin_Form_Actions
+	->getByName('move');
 
 if ($oAdminFormActionMove && $oAdmin_Form_Controller->getAction() == 'move')
 {

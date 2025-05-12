@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once ('../bootstrap.php');
 
@@ -132,7 +132,7 @@ if (!Core_Auth::logged())
 
 			$oAdmin_Answer->message(
 				Core_Message::get(
-					Core::_('Admin.authorization_error_valid_user', $login, Core_Array::get($_SERVER, 'REMOTE_ADDR', 'undefined'))
+					Core::_('Admin.authorization_error_valid_user', $login, Core::getClientIp())
 				, 'error')
 			);
 		}

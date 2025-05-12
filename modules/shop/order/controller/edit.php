@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -261,7 +261,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$shop_order_id = intval($this->_object->id);
 		$shop_id = Core_Array::getGet('shop_id', 0);
 
-		$sShopOrderItemsPath = '/admin/shop/order/item/index.php';
+		$sShopOrderItemsPath = '/{admin}/shop/order/item/index.php';
 
 		$siteuser_id = intval(Core_Array::getGet('siteuser_id'));
 		$siteuserPath = $siteuser_id
@@ -354,7 +354,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			Admin_Form_Entity::factory('Select')
 				->caption(Core::_('Shop_Order.show_order_status'))
 				->options(
-					$Shop_Controller_Edit->fillOrderStatuses($this->_object->Shop)
+					array(' … ') + $Shop_Controller_Edit->fillOrderStatuses($this->_object->Shop)
 				)
 				->name('shop_order_status_id')
 				->value($this->_object->shop_order_status_id)
@@ -396,7 +396,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->name('company_id')
 				->value($company_id)
 				->data('shop-order-id', $this->_object->id)
-				->onchange("$.ajaxRequest({path: '/admin/shop/order/index.php',context: 'company_account_id', callBack: $.loadSelectOptionsCallback, objectId: {$objectId}, action: 'loadCompanyAccountList',additionalParams: 'company_id=' + this.value + '&shop_order_id=' + this.getAttribute('data-shop-order-id'),windowId: '{$windowId}'}); return false")
+				->onchange("$.ajaxRequest({path: hostcmsBackend + '/shop/order/index.php',context: 'company_account_id', callBack: $.loadSelectOptionsCallback, objectId: {$objectId}, action: 'loadCompanyAccountList',additionalParams: 'company_id=' + this.value + '&shop_order_id=' + this.getAttribute('data-shop-order-id'),windowId: '{$windowId}'}); return false")
 		);
 
 		$oAdditionalTab->delete(
@@ -442,7 +442,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->name('shop_delivery_id')
 			->id('shop_delivery_id')
 			->value($this->_object->shop_delivery_id)
-			->onchange("$.ajaxRequest({path: '/admin/shop/order/index.php',context: 'shop_delivery_condition_id', callBack: $.loadSelectOptionsCallback, objectId: {$objectId}, action: 'loadDeliveryConditionsList',additionalParams: 'delivery_id=' + this.value,windowId: '{$windowId}'}); return false")
+			->onchange("$.ajaxRequest({path: hostcmsBackend + '/shop/order/index.php',context: 'shop_delivery_condition_id', callBack: $.loadSelectOptionsCallback, objectId: {$objectId}, action: 'loadDeliveryConditionsList',additionalParams: 'delivery_id=' + this.value,windowId: '{$windowId}'}); return false")
 			->divAttr(array('class' => 'form-group col-xs-6 col-sm-6 col-md-3'));
 
 		$oMainRow5->add($oShopDeliveryTypeSelect);
@@ -511,7 +511,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					allowClear: true,
 					multiple: true,
 					ajax: {
-						url: "/admin/tag/index.php?hostcms[action]=loadTagsList&hostcms[checked][0][0]=1",
+						url: hostcmsBackend + "/tag/index.php?hostcms[action]=loadTagsList&hostcms[checked][0][0]=1",
 						dataType: "json",
 						type: "GET",
 						processResults: function (data) {
@@ -649,7 +649,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 			if ($oShop_Order_Item->type == 0 && $oShop_Order_Item->shop_item_id)
 			{
-				$sShopItemPath = '/admin/shop/item/index.php';
+				$sShopItemPath = '/{admin}/shop/item/index.php';
 				$iShopItemId = intval($oShop_Order_Item->shop_item_id);
 
 				$link = sprintf(
@@ -753,7 +753,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					switch (ui.item.type)
 					{
 						case 'item':
-							price = ui.item.price_with_tax_formatWithCurrency;
+							price = ui.item.price_with_tax;
 						break;
 						case 'discount':
 							// Фиксированная скидка
@@ -948,53 +948,6 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->value($this->_object->shop_country_location_city_area_id)
 		);
 
-
-		// Печать
-		/*$printButton = '
-			<div class="btn-group">
-				<a class="btn btn-labeled btn-success" href="javascript:void(0);"><i class="btn-label fa fa-print"></i>' . Core::_('Printlayout.print') . '</a>
-				<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
-				<ul class="dropdown-menu dropdown-palegreen">
-		';
-
-		// Печать заказа
-		$printLink = $this->_Admin_Form_Controller->getAdminLoadHref("/admin/shop/order/print/index.php", NULL, NULL, "shop_order_id=" . intval($this->_object->id));
-		$printButton .= '<li>
-			<a target="_blank" href="' . $printLink . '">' . Core::_('Shop_Order.print') . '</a>
-		</li>';
-
-		// Карточка заказка
-		$orderCardLink = $this->_Admin_Form_Controller->getAdminLoadHref("/admin/shop/order/card/index.php", NULL, NULL, "shop_order_id=" . intval($this->_object->id));
-		$printButton .= '<li>
-			<a target="_blank" href="' . $orderCardLink . '">' . Core::_('Shop_Order.order_card') . '</a>
-		</li>';
-
-		$moduleName = $this->_Admin_Form_Controller->module->getModuleName();
-
-		$oModule = Core_Entity::factory('Module')->getByPath($moduleName);
-
-		if (!is_null($oModule) && Core::moduleIsActive('printlayout'))
-		{
-			$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0));
-			$oShop_Group = Core_Entity::factory('Shop_Group', Core_Array::getGet('shop_group_id', 0));
-
-			$printButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, $this->_object->getEntityType(), 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id, TRUE);
-		}
-
-		$printButton .= '
-				</ul>
-			</div>
-		';
-
-		$oDocumentsTabRow1
-			->add(Admin_Form_Entity::factory('Div')
-				// ->class('form-group col-xs-12 col-sm-3')
-				->class('padding-left-15 padding-bottom-15')
-				->add(
-					Admin_Form_Entity::factory('Code')->html($printButton)
-				)
-		);*/
-
 		$oDocumentsTabRow1->add($this->_getPrintButton());
 
 		$oMainTab->delete($this->getField('acceptance_report'));
@@ -1076,7 +1029,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->add(
 						Core_Html_Entity::factory('A')
 							->class('btn btn-labeled ' . $aColors[$index])
-							->href($this->_Admin_Form_Controller->getAdminLoadHref("/admin/shop/order/index.php", NULL, NULL, $additionalParams))
+							->href($this->_Admin_Form_Controller->getAdminLoadHref("/{admin}/shop/order/index.php", NULL, NULL, $additionalParams))
 							->target('_blank')
 							->add(
 								Core_Html_Entity::factory('I')
@@ -1364,7 +1317,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					&& $bShopOrderItemChanged = TRUE;
 
 				$oShop_Order_Item->quantity = $quantity;
-				$oShop_Order_Item->price = Core_Array::getPost('shop_order_item_price_' . $oShop_Order_Item->id, 0, 'int');
+				$oShop_Order_Item->price = Core_Array::getPost('shop_order_item_price_' . $oShop_Order_Item->id, 0, 'float');
 				$oShop_Order_Item->rate = Core_Array::getPost('shop_order_item_rate_' . $oShop_Order_Item->id, 0, 'int');
 				$oShop_Order_Item->type = Core_Array::getPost('shop_order_item_type_' . $oShop_Order_Item->id, 0, 'int');
 				$oShop_Order_Item->marking = Core_Array::getPost('shop_order_item_marking_' . $oShop_Order_Item->id, '', 'trim');
@@ -1651,13 +1604,13 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		';
 
 		// Печать заказа
-		$printLink = $this->_Admin_Form_Controller->getAdminLoadHref("/admin/shop/order/print/index.php", NULL, NULL, "shop_order_id=" . intval($this->_object->id));
+		$printLink = $this->_Admin_Form_Controller->getAdminLoadHref("/{admin}/shop/order/print/index.php", NULL, NULL, "shop_order_id=" . intval($this->_object->id));
 		$printButton .= '<li>
 			<a target="_blank" href="' . $printLink . '">' . Core::_('Shop_Order.print') . '</a>
 		</li>';
 
 		// Карточка заказка
-		$orderCardLink = $this->_Admin_Form_Controller->getAdminLoadHref("/admin/shop/order/card/index.php", NULL, NULL, "shop_order_id=" . intval($this->_object->id));
+		$orderCardLink = $this->_Admin_Form_Controller->getAdminLoadHref("/{admin}/shop/order/card/index.php", NULL, NULL, "shop_order_id=" . intval($this->_object->id));
 		$printButton .= '<li>
 			<a target="_blank" href="' . $orderCardLink . '">' . Core::_('Shop_Order.order_card') . '</a>
 		</li>';

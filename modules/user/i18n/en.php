@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage User
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Staff',
@@ -102,4 +102,6 @@ return array(
 
 	'option_max_height' => 'Max avatar height',
 	'option_max_width' => 'Max avatar width',
+
+	'accessdenied' => 'Blocks',
 );

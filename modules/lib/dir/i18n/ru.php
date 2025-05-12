@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Lib
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Разделы типовых динамических страниц',
@@ -22,4 +22,6 @@ return array(
 	'edit_error' => 'Ошибка обновления данных о разделе динамических страниц!',
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
+	'sorting' => "Порядок сортировки",
+	'apply_success' => "Информация успешно изменена",
 );

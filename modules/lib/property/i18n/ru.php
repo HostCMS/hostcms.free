@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Lib
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Свойства типовой динамической страницы',
@@ -31,6 +31,9 @@ return array(
 	'lib_property_type_5' => 'Большое текстовое поле',
 	'lib_property_type_7' => 'TPL-шаблон',
 	'lib_property_type_8' => 'Файл',
+	'lib_property_type_9' => 'Визуальный редактор',
+	'lib_property_type_10' => 'Составной',
+	'lib_property_type_11' => 'Иконка',
 	'value' => 'Значение',
 	'multivalue' => 'Множественные значения',
 	'copy_from' => ' [Копия от %s]' ,
@@ -44,4 +47,5 @@ return array(
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
 	'change_filename' => 'Изменять названия загружаемых файлов',
+	'parent_id' => 'Родительский параметр',
 );

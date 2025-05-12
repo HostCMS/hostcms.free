@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -56,6 +56,8 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
 
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
+
 		$modelName = $this->_object->getModelName();
 
 		switch ($modelName)
@@ -67,7 +69,8 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 					->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'));
+					->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oMainRow7 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$oAdditionalTab->delete($this->getField('shop_currency_id'));
 				$oMainTab
@@ -94,9 +97,12 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 							))
 							->value($this->_object->type)
 							->class('form-control input-group-addon')
+							->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [0,1], 'maxHidden', 'maxShown')")
 						)
 					)
 				);
+
+				$oMainTab->move($this->getField('max_discount')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-2 col-lg-2 maxHidden-1')), $oMainRow1);
 
 				$oPositionSelectField = Admin_Form_Entity::factory('Select')
 					->id('position')
@@ -159,9 +165,20 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 					->move($this->getField('min_count')->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 hidden-2')), $oMainRow4)
 					->move($this->getField('max_count')->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 hidden-2')), $oMainRow4)
 					->move($this->getField('min_weight')->caption(Core::_('Shop_Purchase_Discount.min_weight', $measureName))->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 hidden-2')), $oMainRow5)
-					->move($this->getField('max_weight')->caption(Core::_('Shop_Purchase_Discount.max_weight', $measureName))->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 hidden-2')), $oMainRow5)
-					->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 margin-top-21')), $oMainRow6)
-					->move($this->getField('coupon')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 margin-top-21')), $oMainRow6);
+					->move($this->getField('max_weight')->caption(Core::_('Shop_Purchase_Discount.max_weight', $measureName))->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 hidden-2')), $oMainRow5);
+
+				if (Core::moduleIsActive('siteuser'))
+				{
+					$oMainTab->move($this->getField('first_order')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3')), $oMainRow6);
+				}
+				else
+				{
+					$oMainTab->delete($this->getField('first_order'));
+				}
+
+				$oMainTab
+					->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3')), $oMainRow6)
+					->move($this->getField('coupon')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3')), $oMainRow6);
 
 				// Удаляем группу
 				$oAdditionalTab->delete($this->getField('shop_purchase_discount_dir_id'));
@@ -175,14 +192,15 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 					->value($this->_object->shop_purchase_discount_dir_id)
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3'));
 
-				$oMainRow6->add($oGroupSelect);
+				$oMainRow7->add($oGroupSelect);
 
 				$oMainTab
-					->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-6 col-sm-6 col-md-3')), $oMainRow6);
+					->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-6 col-sm-6 col-md-3')), $oMainRow7);
 
 				$oMainTab->add(
 					Admin_Form_Entity::factory('Code')
-						->html("<script>radiogroupOnChange('{$windowId}', '{$this->_object->mode}', [0,1,2])</script>")
+						->html("<script>radiogroupOnChange('{$windowId}', '{$this->_object->mode}', [0,1,2]);
+						radiogroupOnChange('{$windowId}', {$this->_object->type}, [0,1], 'maxHidden', 'maxShown')</script>")
 				);
 
 				$title = $this->_object->id

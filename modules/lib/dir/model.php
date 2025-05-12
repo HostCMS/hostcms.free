@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Lib
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Lib_Dir_Model extends Core_Entity
 {
@@ -87,7 +87,7 @@ class Lib_Dir_Model extends Core_Entity
 	}
 
 	/**
-	 * Get parent comment
+	 * Get parent lib dir
 	 * @return Lib_Dir_Model|NULL
 	 */
 	public function getParent()
@@ -96,9 +96,7 @@ class Lib_Dir_Model extends Core_Entity
 		{
 			return Core_Entity::factory('Lib_Dir', $this->parent_id);
 		}
-		else
-		{
-			return NULL;
-		}
+
+		return NULL;
 	}
 }

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Producer_Model extends Core_Entity
 {
@@ -97,7 +97,7 @@ class Shop_Producer_Model extends Core_Entity
 	 */
 	public function getPath()
 	{
-		return $this->Shop->Producer_Structure->getPath() . rawurlencode($this->path) . '/';
+		return $this->Shop->Producer_Structure->getPath() . rawurlencode((string) $this->path) . '/';
 	}
 
 	/**
@@ -256,14 +256,14 @@ class Shop_Producer_Model extends Core_Entity
 	{
 		$this->indexing = 1 - $this->indexing;
 		$this->save();
-		
+
 		if ($this->indexing && Core::moduleIsActive('search'))
 		{
 			Search_Controller::indexingSearchPages(array(
 				$this->indexing()
 			));
 		}
-		
+
 		return $this;
 	}
 
@@ -450,6 +450,8 @@ class Shop_Producer_Model extends Core_Entity
 
 	/**
 	 * Delete producer's large image
+	 * @return self
+	 * @hostcms-event shop_producer.onAfterDeleteLargeImage
 	 */
 	public function deleteLargeImage()
 	{
@@ -458,13 +460,18 @@ class Shop_Producer_Model extends Core_Entity
 			Core_File::delete($this->getLargeFilePath());
 		} catch (Exception $e) {}
 
+		Core_Event::notify($this->_modelName . '.onAfterDeleteLargeImage', $this);
+
 		$this->image_large = '';
 		$this->save();
+
+		return $this;
 	}
 
 	/**
 	 * Delete producer's small image
 	 * @return self
+	 * @hostcms-event shop_producer.onAfterDeleteSmallImage
 	 */
 	public function deleteSmallImage()
 	{
@@ -473,8 +480,12 @@ class Shop_Producer_Model extends Core_Entity
 			Core_File::delete($this->getSmallFilePath());
 		} catch (Exception $e) {}
 
+		Core_Event::notify($this->_modelName . '.onAfterDeleteSmallImage', $this);
+
 		$this->image_small = '';
 		$this->save();
+
+		return $this;
 	}
 
 	/**

@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -14,7 +14,7 @@ $iAdmin_Form_Id = 282;
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
 // Путь к контроллеру формы ЦА
-$sAdminFormAction = '/admin/company/activity/index.php';
+$sAdminFormAction = '/{admin}/company/activity/index.php';
 
 $pageTitle = Core::_('Company_Activity.title');
 
@@ -58,7 +58,7 @@ $oAdminFormEntityBreadcrumbs
 	->add(
 		Admin_Form_Entity::factory('Breadcrumb')
 			->name(Core::_('Company.company_show_title2'))
-			->href($oAdmin_Form_Controller->getAdminLoadHref($sPath = '/admin/company/index.php', NULL, NULL, ''))
+			->href($oAdmin_Form_Controller->getAdminLoadHref($sPath = '/{admin}/company/index.php', NULL, NULL, ''))
 			->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sPath, NULL, NULL, ''))
 	)
 	->add(

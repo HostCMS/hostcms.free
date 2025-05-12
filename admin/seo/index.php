@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'seo');
 
 // Код формы
 $iAdmin_Form_Id = 215;
-$sAdminFormAction = '/admin/seo/index.php';
+$sAdminFormAction = '/{admin}/seo/index.php';
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
 // Контроллер формы
@@ -43,10 +43,10 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('Seo.drivers'))
 		->icon('fa fa-gear')
 		->href(
-			$oAdmin_Form_Controller->getAdminActionLoadHref('/admin/seo/driver/index.php', NULL, NULL, 0, 0)
+			$oAdmin_Form_Controller->getAdminActionLoadHref('/{admin}/seo/driver/index.php', NULL, NULL, 0, 0)
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminActionLoadAjax('/admin/seo/driver/index.php', NULL, NULL, 0, 0)
+			$oAdmin_Form_Controller->getAdminActionLoadAjax('/{admin}/seo/driver/index.php', NULL, NULL, 0, 0)
 		)
 );
 

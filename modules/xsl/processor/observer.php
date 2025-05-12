@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Xsl
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Xsl_Processor_Observer
 {
@@ -52,7 +52,7 @@ class Xsl_Processor_Observer
 
 			$oXsl = $object->getXsl();
 
-			$sPath = '/admin/xsl/index.php';
+			$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/xsl/index.php');
 			$sAdditional = "hostcms[action]=edit&xsl_dir_id={$oXsl->xsl_dir_id}&hostcms[checked][1][{$oXsl->id}]=1";
 
 			$sTitle = Core::_('Xsl.panel_edit_xsl', $oXsl->name);

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Tpl
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Tpl_Processor_Observer
 {
@@ -50,7 +50,7 @@ class Tpl_Processor_Observer
 
 			$oTpl = $object->getTpl();
 
-			$sPath = '/admin/tpl/index.php';
+			$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/tpl/index.php');
 			$sAdditional = "hostcms[action]=edit&tpl_dir_id={$oTpl->tpl_dir_id}&hostcms[checked][1][{$oTpl->id}]=1";
 
 			$sTitle = Core::_('Tpl.panel_edit_tpl', $oTpl->name);

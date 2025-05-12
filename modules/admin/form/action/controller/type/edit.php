@@ -10,7 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controller
 {
@@ -82,6 +82,12 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 		$this->_formValues[$key] = $value;
 		return $this;
 	}
+	
+	/**
+	 * Hide empty PK when adding
+	 * @var boolean
+	 */
+	protected $_hideEmptyPK = TRUE;
 
 	/**
 	 * Constructor.
@@ -641,7 +647,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 
 				if (/*!is_null($this->_object->getPrimaryKey())
 					|| $sTabName == 'main'*/
-					!(is_null($this->_object->getPrimaryKey()) && $columnName == $primaryKeyName)
+					!$this->_hideEmptyPK || !(is_null($this->_object->getPrimaryKey()) && $columnName == $primaryKeyName)
 				)
 				{
 					$this->_tabs[$sTabName]->add(

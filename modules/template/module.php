@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Template
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Template_Module extends Core_Module_Abstract
 {
@@ -16,13 +16,13 @@ class Template_Module extends Core_Module_Abstract
 	 * Module version
 	 * @var string
 	 */
-	public $version = '7.0';
+	public $version = '7.1';
 
 	/**
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2024-07-09';
+	public $date = '2025-04-04';
 
 	/**
 	 * Module name
@@ -62,8 +62,8 @@ class Template_Module extends Core_Module_Abstract
 				'block' => 0,
 				'ico' => 'fa fa-th',
 				'name' => Core::_('template.menu'),
-				'href' => "/admin/template/index.php",
-				'onclick' => "$.adminLoad({path: '/admin/template/index.php'}); return false"
+				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/template/index.php"),
+				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/template/index.php'}); return false")
 			)
 		);
 

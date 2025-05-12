@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Model extends Core_Entity
 {
@@ -472,6 +472,8 @@ class Shop_Model extends Core_Entity
 
 	/**
 	 * Delete watermark file
+	 * @return self
+	 * @hostcms-event shop.onAfterDeleteWatermarkFile
 	 */
 	public function deleteWatermarkFile()
 	{
@@ -480,8 +482,12 @@ class Shop_Model extends Core_Entity
 			Core_File::delete($this->getWatermarkFilePath());
 		} catch (Exception $e) {}
 
+		Core_Event::notify($this->_modelName . '.onAfterDeleteWatermarkFile', $this);
+
 		$this->watermark_file = '';
 		$this->save();
+
+		return $this;
 	}
 
 	/**
@@ -1180,9 +1186,9 @@ class Shop_Model extends Core_Entity
 			->addXmlTag('producer_url', $this->Producer_Structure->getPath())
 			->addXmlTag('captcha_id', $this->use_captcha ? Core_Captcha::getCaptchaId() : 0);
 
-		$this->shop_currency_id && $this->addEntity($this->Shop_Currency->clearEntities());
-		$this->shop_measure_id && $this->addEntity($this->Shop_Measure->clearEntities());
-		$this->shop_company_id && $this->addEntity($this->Shop_Company->clearEntities());
+		$this->shop_currency_id && $this->_isTagAvailable('shop_currency') && $this->addEntity($this->Shop_Currency->clearEntities());
+		$this->shop_measure_id && $this->_isTagAvailable('shop_measure') && $this->addEntity($this->Shop_Measure->clearEntities());
+		$this->shop_company_id && $this->_isTagAvailable('shop_company') && $this->addEntity($this->Shop_Company->clearEntities());
 
 		$this->size_measure !== '' && $this->addEntity(
 			Core::factory('Core_Xml_Entity')

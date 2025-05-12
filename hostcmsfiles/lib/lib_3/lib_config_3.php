@@ -5,7 +5,7 @@ if (Core::moduleIsActive('search'))
 	// Autocomplete
 	if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet('query')))
 	{
-		$sQuery = Core_Str::stripTags(Core_Array::getGet('query', '', 'str'));
+		$sQuery = str_replace(' ', '%', Core_Str::stripTags(Core_Array::getGet('query', '', 'str')));
 
 		$aJSON = array();
 		$aJSON['query'] = $sQuery;

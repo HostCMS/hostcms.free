@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Purchase_Discount_Coupon_Model extends Core_Entity
 {
@@ -29,6 +29,7 @@ class Shop_Purchase_Discount_Coupon_Model extends Core_Entity
 		'shop_purchase_discount' => array(),
 		'shop_purchase_discount_coupon_dir' => array(),
 		'shop_order' => array(),
+		'siteuser' => array(),
 		'user' => array()
 	);
 

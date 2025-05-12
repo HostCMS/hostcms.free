@@ -35,4 +35,5 @@ return array(
 	'completed' => 'Завершен',
 	'changeCompleted_success' => 'Завершенность проекта изменена',
 	'documents_count' => 'Документы: %s',
+	'crm_icon_id' => 'Иконка',
 );

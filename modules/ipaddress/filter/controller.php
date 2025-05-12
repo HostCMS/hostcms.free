@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Ipaddress
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Ipaddress_Filter_Controller
 {
@@ -187,8 +187,8 @@ class Ipaddress_Filter_Controller
 								}
 
 								// NULL может проверяться в режимах содержит/не содержит
-								if (!is_null($compared) || $aCondition['condition'] == 'like' || $aCondition['condition'] == 'not-like')
-								{
+								//if (!is_null($compared) || $aCondition['condition'] == 'like' || $aCondition['condition'] == 'not-like')
+								//{
 									if (!is_null($compared) && $aCondition['condition'] !== 'reg' && !$bCaseSensitive)
 									{
 										$compared = mb_strtolower($compared);
@@ -198,25 +198,39 @@ class Ipaddress_Filter_Controller
 									switch ($aCondition['condition'])
 									{
 										case '=':
-											// Не IP или IP не содержит подсеть
-											if ($aCondition['type'] != 'ip' || strpos($aCondition['value'], '/') === FALSE)
+											if (!is_null($compared))
 											{
-												$bReturn = $compared == $aCondition['value'];
+												// Не IP или IP не содержит подсеть
+												if ($aCondition['type'] != 'ip' || strpos($aCondition['value'], '/') === FALSE)
+												{
+													$bReturn = $compared == $aCondition['value'];
+												}
+												else
+												{
+													$bReturn = Ipaddress_Controller::instance()->ipCheck($compared, $aCondition['value']);
+												}
 											}
 											else
 											{
-												$bReturn = Ipaddress_Controller::instance()->ipCheck($compared, $aCondition['value']);
+												$bReturn = FALSE;
 											}
 										break;
 										case '!=':
-											// Не IP или IP не содержит подсеть
-											if ($aCondition['type'] != 'ip' || strpos($aCondition['value'], '/') === FALSE)
+											if (!is_null($compared))
 											{
-												$bReturn = $compared != $aCondition['value'];
+												// Не IP или IP не содержит подсеть
+												if ($aCondition['type'] != 'ip' || strpos($aCondition['value'], '/') === FALSE)
+												{
+													$bReturn = $compared != $aCondition['value'];
+												}
+												else
+												{
+													$bReturn = !Ipaddress_Controller::instance()->ipCheck($compared, $aCondition['value']);
+												}
 											}
 											else
 											{
-												$bReturn = !Ipaddress_Controller::instance()->ipCheck($compared, $aCondition['value']);
+												$bReturn = TRUE;
 											}
 										break;
 										case 'like':
@@ -236,30 +250,31 @@ class Ipaddress_Filter_Controller
 												: TRUE; // не содержит для отсутствующего значения будет TRUE
 										break;
 										case '^':
-											$bReturn = $aCondition['value'] != ''
+											$bReturn = is_scalar($compared) && $aCondition['value'] != ''
 												? mb_strpos($compared, $aCondition['value']) === 0
 												: FALSE;
 										break;
 										case '!^':
-											$bReturn = $aCondition['value'] != ''
+											$bReturn = is_scalar($compared) && $aCondition['value'] != ''
 												? mb_strpos($compared, $aCondition['value']) !== 0
 												: FALSE;
 										break;
 										case '$':
-											$bReturn = $aCondition['value'] != ''
+											$bReturn = is_scalar($compared) && $aCondition['value'] != ''
 												? mb_strpos($compared, $aCondition['value']) === (mb_strlen($compared) - mb_strlen($aCondition['value']))
 												: FALSE;
 										break;
 										case '!$':
-											$bReturn = $aCondition['value'] != ''
+											$bReturn = is_scalar($compared) && $aCondition['value'] != ''
 												? mb_strpos($compared, $aCondition['value']) !== (mb_strlen($compared) - mb_strlen($aCondition['value']))
 												: FALSE;
 										break;
 										case 'reg':
 											//$pattern = '/' . preg_quote($aCondition['value'], '/') . '/' . ($bCaseSensitive ? '' : 'i');
 											$pattern = '/' . str_replace('/', '\/', $aCondition['value']) . '/' . ($bCaseSensitive ? '' : 'i');
-											$bReturn = preg_match($pattern, $compared, $matches) > 0;
-											//var_dump($pattern, $compared, $bReturn);
+											$bReturn = is_scalar($compared)
+												? preg_match($pattern, $compared, $matches) > 0
+												: FALSE;
 										break;
 										default:
 											$bReturn = FALSE;
@@ -277,7 +292,7 @@ class Ipaddress_Filter_Controller
 										$bBlocked = FALSE;
 										break;
 									}
-								}
+								//}
 							}
 						}
 
@@ -300,7 +315,7 @@ class Ipaddress_Filter_Controller
 									Ipaddress_Controller::instance()->clearCache();
 								}
 							}
-							// прерываем, один из фильтров полностью совпал
+							// Прерываем, один из фильтров полностью совпал
 							break;
 						}
 					}

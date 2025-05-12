@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -14,18 +14,19 @@ $iAdmin_Form_Id = 33;
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
 // Путь к контроллеру формы ЦА
-$sAdminFormAction = '/admin/lib/property/index.php';
+$sAdminFormAction = '/{admin}/lib/property/index.php';
 
 // Путь к контроллеру предыдущей формы
-$sLibPath = '/admin/lib/index.php';
+$sLibPath = '/{admin}/lib/index.php';
 
 // Идентификатор ТДС
-$iLibId = intval(Core_Array::getRequest('lib_id', 0));
+$iLibId = Core_Array::getRequest('lib_id', 0, 'int');
+$oLib = Core_Entity::factory('Lib')->find($iLibId);
 
 // Идентификатор группы ТДС
-$iLibDirId = intval(Core_Array::getRequest('lib_dir_id', 0));
+$iLibDirId = Core_Array::getRequest('lib_dir_id', 0, 'int');
 
-$oLib = Core_Entity::factory('Lib')->find($iLibId);
+$parent_id = Core_Array::getRequest('parent_id', 0, 'int');
 
 $pageTitle = Core::_('lib_property.lib_property_show_title', $oLib->name, FALSE);
 
@@ -176,16 +177,16 @@ $oUser = Core_Auth::getCurrentUser();
 !$oUser->superuser && $oUser->only_access_my_own
 	&& $oAdmin_Form_Dataset->addUserConditions();
 
-$oAdmin_Form_Dataset->addCondition(
-	array('where' =>
-		array('lib_id', '=', $iLibId)
-	)
-);
+$oAdmin_Form_Dataset
+	->addCondition(array('where' => array('parent_id', '=', $parent_id)))
+	->addCondition(array('where' => array('lib_id', '=', $iLibId)));
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(
 	$oAdmin_Form_Dataset
 );
+
+$oAdmin_Form_Controller->addExternalReplace('{lib_dir_id}', $iLibDirId);
 
 // Показ формы
 $oAdmin_Form_Controller->execute();

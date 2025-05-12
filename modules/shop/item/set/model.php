@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Item_Set_Model extends Core_Entity
 {
@@ -53,6 +53,22 @@ class Shop_Item_Set_Model extends Core_Entity
 			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 		}
 	}
+
+	/**
+	 * List of preloaded values
+	 * @var array
+	 */
+	protected $_preloadValues = array(
+		'sorting' => 0
+	);
+
+	/**
+	 * Default sorting for models
+	 * @var array
+	 */
+	protected $_sorting = array(
+		'shop_item_sets.sorting' => 'ASC'
+	);
 
 	/**
 	 * Get Related Site

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Schedule
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Schedule_Controller
 {
@@ -30,7 +30,7 @@ class Schedule_Controller
 			// Запускаем обработку
 			$oCore_Module = $oModule->loadModule()->Core_Module;
 
-			if (!is_null($oCore_Module))
+			if (!is_null($oCore_Module) && method_exists($oCore_Module, 'callSchedule'))
 			{
 				$aScheduleActions = $oCore_Module->getScheduleActions();
 
@@ -49,7 +49,12 @@ class Schedule_Controller
 					->write(Core::_('Schedule.log_message_begin', $oModule->name, $oSchedule->entity_id, $sAction));
 
 				try {
-					$oCore_Module->callSchedule($oSchedule->action, $oSchedule->entity_id);
+					$oReflectionMethod = new ReflectionMethod($oCore_Module, 'callSchedule');
+
+					// Since HostCMS 7.1.3 you can call the callSchedule($oSchedule)
+					count($oReflectionMethod->getParameters()) == 2
+						? $oCore_Module->callSchedule($oSchedule->action, $oSchedule->entity_id)
+						: $oCore_Module->callSchedule($oSchedule);
 				}
 				catch (Exception $e)
 				{

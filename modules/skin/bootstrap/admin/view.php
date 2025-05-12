@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_View extends Admin_View
 {
@@ -22,7 +22,7 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 		<ul class="breadcrumb">
 			<li>
 				<i class="fa fa-home"></i>
-				<a href="/admin/index.php" onclick="$.adminLoad({path: '/admin/index.php'}); return false"><?php echo Core::_('Admin.home')?></a>
+				<a href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/index.php')?>" onclick="$.adminLoad({path: hostcmsBackend + '/index.php'}); return false"><?php echo Core::_('Admin.home')?></a>
 			</li><?php
 
 		// Связанные с формой элементы (меню, строка навигации и т.д.)
@@ -110,8 +110,10 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 				$module_id = !is_null($oModule) ? $oModule->id : 0;
 
 				$sPagePath = strval(Core_Array::get($_SERVER,'REQUEST_URI'));
+				$sPagePath = str_replace('/' . Core::$mainConfig['backend'] . '/', '/{admin}/', $sPagePath);
 
 				$oUser = Core_Auth::getCurrentUser();
+
 				$oUser_Bookmark = $oUser->User_Bookmarks->getByPath($sPagePath);
 				$class = !is_null($oUser_Bookmark) ? 'active' : '';
 

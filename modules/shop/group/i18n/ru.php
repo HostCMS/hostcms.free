@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Группы товаров',
@@ -65,4 +65,6 @@ return array(
 	'items_total_count' => 'Количество активных товаров',
 	'changeIndexation_success' => 'Индексация группы магазина изменена.',
 	'fields' => "Пользовательские поля групп",
+	'apply_discount_success' => 'Информация добавлена успешно!',
+	'apply_shortcut_parent_group' => 'Применять к основным группам ярлыков',
 );

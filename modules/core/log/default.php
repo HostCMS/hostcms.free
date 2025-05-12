@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Log
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Log_Default extends Core_Log
 {
@@ -61,8 +61,9 @@ class Core_Log_Default extends Core_Log
 
 		$sHttpHost = Core_Array::get($_SERVER, 'HTTP_HOST');
 		$page = !is_null($sHttpHost)
-			? Core_Array::get($_SERVER, 'REQUEST_SCHEME', 'http') . '://' . $sHttpHost . Core_Array::get($_SERVER, 'REQUEST_URI')
+			? (Core::httpsUses() ? 'https' : 'http') . '://' . $sHttpHost . Core_Array::get($_SERVER, 'REQUEST_URI')
 			: Core_Array::get($_SERVER, 'PHP_SELF');
+
 		$user_ip = Core::getClientIp();
 
 		$fname = $this->getLogName(date('Y-m-d'));
@@ -94,7 +95,9 @@ class Core_Log_Default extends Core_Log
 
 			if ($bWasLocked || flock($f_log, LOCK_EX))
 			{
-				fputcsv($f_log, $aWrite);
+				PHP_VERSION_ID >= 55400
+					? fputcsv($f_log, $aWrite, ",", "\"", "\\")
+					: fputcsv($f_log, $aWrite, ",", "\"");
 
 				if (!$bWasLocked)
 				{

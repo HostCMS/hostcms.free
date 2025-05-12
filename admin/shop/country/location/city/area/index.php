@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'shop');
 
 // Код формы
 $iAdmin_Form_Id = 61;
-$sAdminFormAction = '/admin/shop/country/location/city/area/index.php';
+$sAdminFormAction = '/{admin}/shop/country/location/city/area/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -57,7 +57,7 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop.menu'))
-		->href($oAdmin_Form_Controller->getAdminLoadHref($sShopFormPath = '/admin/shop/index.php', NULL, NULL, ''))
+		->href($oAdmin_Form_Controller->getAdminLoadHref($sShopFormPath = '/{admin}/shop/index.php', NULL, NULL, ''))
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sShopFormPath, NULL, NULL, ''))
 );
 
@@ -65,7 +65,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop_Country.show_country_link'))
-		->href($oAdmin_Form_Controller->getAdminLoadHref($prevFormPath = '/admin/shop/country/index.php', NULL, NULL, ''))
+		->href($oAdmin_Form_Controller->getAdminLoadHref($prevFormPath = '/{admin}/shop/country/index.php', NULL, NULL, ''))
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($prevFormPath, NULL, NULL, ''))
 );
 
@@ -74,7 +74,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop_Country_Location.show_location_title', $oShopCountry->name, FALSE))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref($prevFormPath = '/admin/shop/country/location/index.php', NULL, NULL, $sAdditionalParam = '&shop_country_id=' . $oShopCountry->id)
+			$oAdmin_Form_Controller->getAdminLoadHref($prevFormPath = '/{admin}/shop/country/location/index.php', NULL, NULL, $sAdditionalParam = '&shop_country_id=' . $oShopCountry->id)
 		)
 		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($prevFormPath, NULL, NULL, $sAdditionalParam)
@@ -86,7 +86,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop_Country_Location_City.show_city_title', $oShopCountryLocation->name, FALSE))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref($prevFormPath = '/admin/shop/country/location/city/index.php', NULL, NULL, $sAdditionalParam = "&shop_location_id=" . $oShopCountryLocation->id)
+			$oAdmin_Form_Controller->getAdminLoadHref($prevFormPath = '/{admin}/shop/country/location/city/index.php', NULL, NULL, $sAdditionalParam = "&shop_location_id=" . $oShopCountryLocation->id)
 		)
 		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($prevFormPath, NULL, NULL, $sAdditionalParam)

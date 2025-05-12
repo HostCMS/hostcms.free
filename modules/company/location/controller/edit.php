@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Company
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Company_Location_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -75,7 +75,7 @@ class Company_Location_Controller_Edit extends Admin_Form_Action_Controller_Type
 				$('#{$windowId} #company_department_id').data({'current_value': " . (intval($this->_object->company_department_id)) . "});
 
 				$.ajaxRequest({
-					path: '/admin/company/department/index.php',
+					path: hostcmsBackend + '/company/department/index.php',
 					context: 'company_department_id',
 					callBack: [$.loadSelectOptionsCallback, function(data){
 						var iCompanyDepartmentId = $('#{$windowId} input[name = company_id]').val() == $('#{$windowId} input[name = company_id]').data('current_value') ? $('#{$windowId} #company_department_id').data('current_value') : 0;

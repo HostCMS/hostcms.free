@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Event_Controller_Note extends Admin_Form_Controller_View
 {
@@ -149,7 +149,7 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 					if ($bAddNoteAccess)
 					{
 					?>
-					<form action="/admin/event/note/index.php?hostcms[action]=addNote&_=<?php echo time()?>&hostcms[checked][0][0]=1&event_id=<?php echo $event_id?>&parentWindowId=<?php echo htmlspecialchars($windowId)?>" method="POST" enctype='multipart/form-data' class="padding-bottom-10 dropzone-form dropzone-form-note">
+					<form action="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/event/note/index.php')?>?hostcms[action]=addNote&_=<?php echo time()?>&hostcms[checked][0][0]=1&event_id=<?php echo $event_id?>&parentWindowId=<?php echo htmlspecialchars($windowId)?>" method="POST" enctype='multipart/form-data' class="padding-bottom-10 dropzone-form dropzone-form-note">
 						<div class="timeline-comment-wrapper">
 							<?php
 								Admin_Form_Entity::factory('Textarea')
@@ -259,7 +259,7 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 								if ($timeline.length)
 								{
 									window_id = $timeline.find('a').data('window-id');
-									$.adminLoad({ path: '/admin/event/timeline/index.php', additionalParams: 'event_id=<?php echo $event_id?>', windowId: window_id });
+									$.adminLoad({ path: hostcmsBackend + '/event/timeline/index.php', additionalParams: 'event_id=<?php echo $event_id?>', windowId: window_id });
 								}
 							}
 						});
@@ -307,10 +307,14 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 							$prevDate = $sDate;
 							$i++;
 						}
+
+						$badge = isset($oEntity->user_id) && $oEntity->user_id
+							? '<img class="img-circle" src="' . $oEntity->User->getAvatar() . '" width="30" height="30"/>'
+							: '<i class="fa fa-comment-o"></i>';
 						?>
 						<li class="timeline-inverted <?php echo $class?>">
 							<div class="timeline-badge yelllow">
-								<img class="img-circle" src="<?php echo $oEntity->User->getAvatar()?>" width="30" height="30"/>
+								<?php echo $badge?>
 							</div>
 							<div class="timeline-panel">
 								<div class="timeline-header bordered-bottom bordered-palegreen">

@@ -18,7 +18,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Order_Item_Model extends Core_Entity
 {
@@ -179,7 +179,7 @@ class Shop_Order_Item_Model extends Core_Entity
 		}
 		else
 		{
-			$sShopItemPath = '/admin/shop/item/index.php';
+			$sShopItemPath = '/{admin}/shop/item/index.php';
 			$iShopItemId = $this->Shop_Item->id;
 
 			echo sprintf(
@@ -406,7 +406,7 @@ class Shop_Order_Item_Model extends Core_Entity
 	}
 
 	/**
-	 * Get sum of order's item
+	 * Get amount of order's item
 	 * @return float
 	 */
 	public function getAmount()
@@ -701,7 +701,7 @@ class Shop_Order_Item_Model extends Core_Entity
 				$(function() {
 					$('.codes-<?php echo $this->id?>').on('click', function(){
 						$.ajax({
-							url: '/admin/shop/order/item/index.php',
+							url: hostcmsBackend + '/shop/order/item/index.php',
 							type: "POST",
 							data: {'load_modal': 1, 'shop_order_item_id': <?php echo $this->id?>, 'shop_order_id': <?php echo $this->shop_order_id?>},
 							dataType: 'json',

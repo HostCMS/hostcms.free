@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Structure
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Structure_Model extends Core_Entity
 {
@@ -337,6 +337,7 @@ class Structure_Model extends Core_Entity
 	/**
 	 * Delete Structure Config File
 	 * @return self
+	 * @hostcms-event structure.onAfterDeleteConfigFile
 	 */
 	public function deleteConfigFile()
 	{
@@ -347,12 +348,15 @@ class Structure_Model extends Core_Entity
 		}
 		catch (Exception $e) {}
 
+		Core_Event::notify($this->_modelName . '.onAfterDeleteConfigFile', $this);
+
 		return $this;
 	}
 
 	/**
 	 * Delete Structure File
 	 * @return self
+	 * @hostcms-event structure.onAfterDeleteFile
 	 */
 	public function deleteFile()
 	{
@@ -363,6 +367,8 @@ class Structure_Model extends Core_Entity
 		}
 		catch (Exception $e) {}
 
+		Core_Event::notify($this->_modelName . '.onAfterDeleteFile', $this);
+
 		return $this;
 	}
 
@@ -371,6 +377,7 @@ class Structure_Model extends Core_Entity
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
 	 * @hostcms-event structure.onBeforeRedeclaredDelete
+	 * @hostcms-event structure.onAfterDeleteLibDatFile
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -438,7 +445,16 @@ class Structure_Model extends Core_Entity
 				Core_File::isFile($sLibDatFile) && Core_File::delete($sLibDatFile);
 			}
 			catch (Exception $e) {}
+
+			Core_Event::notify($this->_modelName . '.onAfterDeleteLibDatFile', $this);
 		}
+
+		$libDir = $this->getLibFilePath();
+		try
+		{
+			Core_File::isDir($libDir) && Core_File::deleteDir($libDir);
+		}
+		catch (Exception $e) {}
 
 		return parent::delete($primaryKey);
 	}
@@ -494,6 +510,16 @@ class Structure_Model extends Core_Entity
 						->class('badge badge-hostcms badge-square')
 						->value($iCount)
 				);
+
+			if ($this->https)
+			{
+				$oCore_Html_Entity_Div->add(
+					Core_Html_Entity::factory('Span')
+						->style('font-size: 10px !important;')
+						->value('<i class="fa-solid fa-shield-halved azure"></i>')
+						->title('HTTPS')
+				);
+			}
 		}
 		else
 		{
@@ -748,6 +774,18 @@ class Structure_Model extends Core_Entity
 	}
 
 	/**
+	 * Switch show mode
+	 * @return self
+	 */
+	public function changeShow()
+	{
+		$this->show = 1 - $this->show;
+		$this->save();
+
+		return $this;
+	}
+
+	/**
 	 * Copy object
 	 * @return Core_Entity
 	 * @hostcms-event structure.onAfterRedeclaredCopy
@@ -921,6 +959,7 @@ class Structure_Model extends Core_Entity
 	/**
 	 * Prepare entity and children entities
 	 * @return self
+	 * @hostcms-event structure.onBeforeAddPropertyValues
 	 */
 	protected function _prepareData()
 	{
@@ -933,8 +972,6 @@ class Structure_Model extends Core_Entity
 
 		if ($this->_showXmlProperties)
 		{
-			// $this->addEntities($this->getPropertyValues(TRUE, array(), $this->_xmlSortPropertiesValues));
-
 			$aProperty_Values = is_array($this->_showXmlProperties)
 				? Property_Controller_Value::getPropertiesValues($this->_showXmlProperties, $this->id, FALSE, $this->_xmlSortPropertiesValues)
 				: $this->getPropertyValues(TRUE, array(), $this->_xmlSortPropertiesValues);
@@ -943,6 +980,8 @@ class Structure_Model extends Core_Entity
 			{
 				$this->_preparePropertyValue($oProperty_Value);
 			}
+
+			Core_Event::notify($this->_modelName . '.onBeforeAddPropertyValues', $this, array($aProperty_Values));
 
 			// Add all values
 			$this->addEntities($aProperty_Values);
@@ -1041,36 +1080,39 @@ class Structure_Model extends Core_Entity
 			}
 		}
 
-		$aPropertyValues = $this->getPropertyValues(FALSE);
-		foreach ($aPropertyValues as $oPropertyValue)
+		if (Core::moduleIsActive('property'))
 		{
-			if ($oPropertyValue->Property->indexing)
+			$aPropertyValues = $this->getPropertyValues(FALSE);
+			foreach ($aPropertyValues as $oPropertyValue)
 			{
-				// List
-				if ($oPropertyValue->Property->type == 3 && Core::moduleIsActive('list'))
+				if ($oPropertyValue->Property->indexing)
 				{
-					if ($oPropertyValue->value != 0)
+					// List
+					if ($oPropertyValue->Property->type == 3 && Core::moduleIsActive('list'))
 					{
-						$oList_Item = $oPropertyValue->List_Item;
-						$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ' . htmlspecialchars($oList_Item->description) . ' ';
-					}
-				}
-				// Informationsystem
-				elseif ($oPropertyValue->Property->type == 5 && Core::moduleIsActive('informationsystem'))
-				{
-					if ($oPropertyValue->value != 0)
-					{
-						$oInformationsystem_Item = $oPropertyValue->Informationsystem_Item;
-						if ($oInformationsystem_Item->id)
+						if ($oPropertyValue->value != 0)
 						{
-							$oSearch_Page->text .= htmlspecialchars($oInformationsystem_Item->name) . ' ';
+							$oList_Item = $oPropertyValue->List_Item;
+							$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ' . htmlspecialchars($oList_Item->description) . ' ';
 						}
 					}
-				}
-				// Other type
-				elseif ($oPropertyValue->Property->type != 2)
-				{
-					$oSearch_Page->text .= htmlspecialchars($oPropertyValue->value) . ' ';
+					// Informationsystem
+					elseif ($oPropertyValue->Property->type == 5 && Core::moduleIsActive('informationsystem'))
+					{
+						if ($oPropertyValue->value != 0)
+						{
+							$oInformationsystem_Item = $oPropertyValue->Informationsystem_Item;
+							if ($oInformationsystem_Item->id)
+							{
+								$oSearch_Page->text .= htmlspecialchars($oInformationsystem_Item->name) . ' ';
+							}
+						}
+					}
+					// Other type
+					elseif ($oPropertyValue->Property->type != 2)
+					{
+						$oSearch_Page->text .= htmlspecialchars($oPropertyValue->value) . ' ';
+					}
 				}
 			}
 		}
@@ -1160,15 +1202,15 @@ class Structure_Model extends Core_Entity
 	 */
 	public function setCorePageSeo(Core_Page $oCore_Page)
 	{
-		$sTitle = trim($this->seo_title) != ''
+		$sTitle = trim((string) $this->seo_title) != ''
 			? $this->seo_title
 			: $this->name;
 
-		$sDescription = trim($this->seo_description) != ''
+		$sDescription = trim((string) $this->seo_description) != ''
 			? $this->seo_description
 			: $this->name;
 
-		$sKeywords = trim($this->seo_keywords) != ''
+		$sKeywords = trim((string) $this->seo_keywords) != ''
 			? $this->seo_keywords
 			: $this->name;
 

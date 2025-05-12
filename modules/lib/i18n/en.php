@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Lib
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Lib',
@@ -35,4 +35,13 @@ return array(
 	'import_button' => 'Upload',
 	'importLibs_success' => 'Import completed successfully!',
 	'name_empty' => 'Lib name is empty!',
+	'file' => 'Preview',
+	'type' => 'Type',
+	'type0' => 'Page',
+	'type1' => 'Widget',
+	'class' => 'Attribute "class"',
+	'style' => 'Attribute "style"',
+	'deleteFile_success' => 'File deleted successfully!',
+	'sorting' => "Sorting order",
+	'apply_success' => "Information successfully changed",
 );

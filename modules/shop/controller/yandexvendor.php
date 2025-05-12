@@ -20,7 +20,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Controller_YandexVendor extends Core_Controller
 {
@@ -331,7 +331,7 @@ class Shop_Controller_YandexVendor extends Core_Controller
 					// Рекомендованная цена.
 					$aPrices = $oShop_Item_Controller->calculatePriceInItemCurrency($oShop_Item->price, $oShop_Item);
 
-					echo '<recomendedPrice currency="' . $oShop_Item->Shop_Currency->code . '">' . $aPrices['price_discount'] . '</recomendedPrice>' . "\n";
+					echo '<recomendedPrice currency="' . $oShop_Item->Shop_Currency->code . '">' . intval($aPrices['price_discount']) . '</recomendedPrice>' . "\n";
 
 					// Дата добавления описания модели в каталог.
 					echo '<addDate>' . date('Y-m-d', Core_Date::sql2timestamp($oShop_Item->datetime)) . '</addDate>' . "\n";

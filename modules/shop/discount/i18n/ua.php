@@ -59,4 +59,5 @@ return array(
 	'move_items_dirs' => "Батьківський розділ",
 	'move_success' => 'Знижки перенесені',
 	'color' => 'Колір',
+	'max_discount' => 'Максимальна знижка',
 );

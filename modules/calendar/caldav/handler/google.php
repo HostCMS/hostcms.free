@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Calendar
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Calendar_Caldav_Handler_Google extends Calendar_Caldav_Handler_Default
 {
@@ -146,7 +146,7 @@ class Calendar_Caldav_Handler_Google extends Calendar_Caldav_Handler_Default
 		// show
 		else
 		{
-			$oCalendar_Caldav_User_Controller_Edit->addContent('<script>$.modalLoad({path: \'/admin/calendar/caldav/user/index.php\', action: \'edit\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $object->id . ']=1&calendar_caldav_id=' . $object->calendar_caldav_id. '&additionalSettings=1\', windowId: \'id_content\'});</script>');
+			$oCalendar_Caldav_User_Controller_Edit->addContent('<script>$.modalLoad({path: hostcmsBackend + \'/calendar/caldav/user/index.php\', action: \'edit\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $object->id . ']=1&calendar_caldav_id=' . $object->calendar_caldav_id. '&additionalSettings=1\', windowId: \'id_content\'});</script>');
 		}
 	}
 

@@ -14,6 +14,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - modifications(TRUE|FALSE) показывать модификации для выбранных товаров, по умолчанию FALSE
  * - specialprices(TRUE|FALSE) показывать специальные цены для выбранных товаров, по умолчанию FALSE
  * - commentsRating(TRUE|FALSE) показывать оценки комментариев для выбранных товаров, по умолчанию FALSE
+ * - itemsMedia(TRUE|FALSE) выводить значения библиотеки файлов для товаров, по умолчанию FALSE
+ * - cart(TRUE|FALSE) выводить товары в корзине, по умолчанию FALSE
+ * - sets(TRUE|FALSE) показывать состав комплектов товаров, по умолчанию TRUE
  * - limit($limit) количество
  * - addAllowedTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, разрешенных к передаче в генерируемый XML
  * - addForbiddenTags('/node/path', array('description')) массив тегов для элементов, указанных в первом аргументе, запрещенных к передаче в генерируемый XML
@@ -46,7 +49,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Favorite_Controller_Show extends Core_Controller
 {
@@ -63,6 +66,9 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 		'modifications',
 		'specialprices',
 		'commentsRating',
+		'itemsMedia',
+		'cart',
+		'sets',
 		'offset',
 		'page',
 		'total',
@@ -110,8 +116,8 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 				->value($this->_oSiteuser ? $this->_oSiteuser->id : 0)
 		);
 
-		$this->itemsProperties = $this->modifications = $this->specialprices = $this->commentsRating = FALSE;
-		$this->itemsPropertiesList = $this->sortPropertiesValues = $this->favoriteList = TRUE;
+		$this->itemsProperties = $this->modifications = $this->specialprices = $this->commentsRating = $this->itemsMedia = $this->cart = FALSE;
+		$this->itemsPropertiesList = $this->sortPropertiesValues = $this->favoriteList = $this->sets = TRUE;
 		$this->limit = 10;
 
 		$this->offset = $this->page = 0;
@@ -120,7 +126,7 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 
 		// Named subpatterns {name} can consist of up to 32 alphanumeric characters and underscores, but must start with a non-digit.
 		$this->pattern = rawurldecode($this->getEntity()->Structure->getPath()) . '({path})(page-{page}/)';
-		
+
 		$this->url = Core::$url['path'];
 	}
 
@@ -230,6 +236,56 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 			}
 		}
 
+		// Товары в корзине
+		if ($this->cart)
+		{
+			// Проверяем наличие товара в корзины
+			$Shop_Cart_Controller = Shop_Cart_Controller::instance();
+			$aShop_Cart = $Shop_Cart_Controller->getAll($oShop);
+
+			if (count($aShop_Cart))
+			{
+				$this->addEntity(
+					$oCartEntity = Core::factory('Core_Xml_Entity')
+						->name('items_in_cart')
+				);
+
+				foreach ($aShop_Cart as $oShop_Cart)
+				{
+					$oShop_Item = Core_Entity::factory('Shop_Item')->find($oShop_Cart->shop_item_id);
+					if (!is_null($oShop_Item->id) && $oShop_Item->active)
+					{
+						$oShop_Item_Into_Cart = clone $oShop_Item;
+						$oShop_Item_Into_Cart->id($oShop_Item->id);
+
+						Core_Event::notify(get_class($this).'.onBeforeAddCartItem', $this, array($oShop_Item_Into_Cart, $oShop_Cart));
+
+						//$this->applyItemsForbiddenTags($oShop_Item_Into_Cart->clearEntities());
+						$this->applyForbiddenAllowedTags('/shop/items_in_cart/shop_item|/shop/shop_item', $oShop_Item_Into_Cart);
+
+						$this->itemsProperties
+							&& $oShop_Item_Into_Cart->showXmlProperties($this->itemsProperties, $this->sortPropertiesValues);
+
+						// Media
+						$this->itemsMedia
+							&& $oShop_Item_Into_Cart->showXmlMedia($this->itemsMedia);
+
+						!$this->sets && $oShop_Item_Into_Cart->showXmlSets($this->sets);
+
+						// $oShop_Item_Into_Cart->itemsActivity($this->itemsActivity);
+
+						$oShop_Item_Into_Cart->addEntity(
+							Core::factory('Core_Xml_Entity')
+								->name('quantity')
+								->value($oShop_Cart->quantity)
+						);
+
+						$oCartEntity->addEntity($oShop_Item_Into_Cart);
+					}
+				}
+			}
+		}
+
 		$this->total = 0;
 
 		if ($this->limit > 0)
@@ -260,7 +316,15 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 						->showXmlSpecialprices($this->specialprices)
 						->showXmlCommentsRating($this->commentsRating);
 
+					// Media
+					$this->itemsMedia
+						&& $oShop_Item->showXmlMedia($this->itemsMedia);
+
+					!$this->sets && $oShop_Item->showXmlSets($this->sets);
+
 					$this->applyForbiddenAllowedTags('/shop/shop_favorite', $oShop_Favorite);
+
+					Core_Event::notify(get_class($this) . '.onBeforeAddShopFavorite', $this, array($oShop_Favorite, $oShop_Item));
 
 					$this->addEntity($oShop_Favorite);
 				}

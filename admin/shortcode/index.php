@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'shortcode');
 
 // Код формы
 $iAdmin_Form_Id = 204;
-$sAdminFormAction = '/admin/shortcode/index.php';
+$sAdminFormAction = '/{admin}/shortcode/index.php';
 
 $oShortcode_Dir = Core_Entity::factory('Shortcode_Dir', Core_Array::getGet('shortcode_dir_id', 0));
 
@@ -79,8 +79,8 @@ if ($oShortcode_Dir->id)
 	{
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 			->name($oShortcode_Dir_Breadcrumbs->name)
-			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shortcode/index.php', NULL, NULL, "shortcode_dir_id={$oShortcode_Dir_Breadcrumbs->id}"))
-			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shortcode/index.php', NULL, NULL, "shortcode_dir_id={$oShortcode_Dir_Breadcrumbs->id}"));
+			->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shortcode/index.php', NULL, NULL, "shortcode_dir_id={$oShortcode_Dir_Breadcrumbs->id}"))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shortcode/index.php', NULL, NULL, "shortcode_dir_id={$oShortcode_Dir_Breadcrumbs->id}"));
 	}
 	while ($oShortcode_Dir_Breadcrumbs = $oShortcode_Dir_Breadcrumbs->getParent());
 

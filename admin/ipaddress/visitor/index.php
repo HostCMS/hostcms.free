@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'ipaddress');
 
 // Код формы
 $iAdmin_Form_Id = 384;
-$sAdminFormAction = '/admin/ipaddress/visitor/index.php';
+$sAdminFormAction = '/{admin}/ipaddress/visitor/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -34,10 +34,10 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('Ipaddress_Visitor.filter_menu'))
 		->icon('fa-solid fa-filter')
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/ipaddress/visitor/filter/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/ipaddress/visitor/filter/index.php', NULL, NULL, '')
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/ipaddress/visitor/filter/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/ipaddress/visitor/filter/index.php', NULL, NULL, '')
 		)
 );
 
@@ -52,10 +52,10 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Ipaddress.show_ip_title'))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/ipaddress/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/ipaddress/index.php', NULL, NULL, '')
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/ipaddress/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/ipaddress/index.php', NULL, NULL, '')
 	)
 )->add(
 	Admin_Form_Entity::factory('Breadcrumb')
@@ -102,6 +102,20 @@ $aOptions = array(
 $oAdmin_Form_Dataset
 	->changeField('result', 'type', 8)
 	->changeField('result', 'list', $aOptions);
+
+// Список значений типов доставки для фильтра
+$aIpaddress_Visitor_Filters = Core_Entity::factory('Ipaddress_Visitor_Filter')->findAll(FALSE);
+$aList = array();
+foreach ($aIpaddress_Visitor_Filters as $oIpaddress_Visitor_Filter)
+{
+	$aList[$oIpaddress_Visitor_Filter->id] = array('value' => $oIpaddress_Visitor_Filter->name);
+	!$oIpaddress_Visitor_Filter->active && $aList[$oIpaddress_Visitor_Filter->id]['attr'] = array(
+		'class' => 'darkgray line-through'
+	);
+}
+$oAdmin_Form_Dataset
+	->changeField('ipaddress_visitor_filter_id', 'type', 8)
+	->changeField('ipaddress_visitor_filter_id', 'list', $aList);
 
 // Показ формы
 $oAdmin_Form_Controller->execute();

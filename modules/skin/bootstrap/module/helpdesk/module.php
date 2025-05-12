@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Helpdesk_Module extends Helpdesk_Module
 {
@@ -31,7 +31,7 @@ class Skin_Bootstrap_Module_Helpdesk_Module extends Helpdesk_Module
 			<div class="databox radius-bordered databox-shadowed hostcms-widget-databox">
 				<div class="databox-left bg-azure">
 					<div class="databox-piechart">
-						<a href="/admin/helpdesk/index.php" onclick="$.adminLoad({path: '/admin/helpdesk/index.php'}); return false"><i class="fa fa-life-ring fa-3x"></i></a>
+						<a href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/helpdesk/index.php')?>" onclick="$.adminLoad({path: hostcmsBackend + '/helpdesk/index.php'}); return false"><i class="fa fa-life-ring fa-3x"></i></a>
 					</div>
 				</div>
 				<?php

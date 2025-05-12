@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Event_Dms_Document_Controller_View extends Admin_Form_Controller_View
 {
@@ -186,7 +186,7 @@ class Event_Dms_Document_Controller_View extends Admin_Form_Controller_View
 
 										$action = $oAdmin_Form_Action->name;
 
-										$path = '/admin/event/dms/document/index.php';
+										$path = '/{admin}/event/dms/document/index.php';
 
 										$icon = $oAdmin_Form_Action->icon;
 
@@ -199,7 +199,7 @@ class Event_Dms_Document_Controller_View extends Admin_Form_Controller_View
 											elseif ($oDms_Document->checkPermission2View($oUser))
 											{
 												$action = 'view';
-												$path = '/admin/dms/document/index.php';
+												$path = '/{admin}/dms/document/index.php';
 												$icon = 'fa fa-eye';
 											}
 										}
@@ -209,6 +209,8 @@ class Event_Dms_Document_Controller_View extends Admin_Form_Controller_View
 										$name = $Admin_Word_Value && strlen($Admin_Word_Value->name) > 0
 											? $Admin_Word_Value->name
 											: '';
+
+										$path = Admin_Form_Controller::correctBackendPath($path);
 
 										$href = $oAdmin_Form_Controller->getAdminActionLoadHref($path, $action, NULL, 0, $oDms_Document->id, $additionalParams, 10, 1, NULL, NULL, 'list');
 

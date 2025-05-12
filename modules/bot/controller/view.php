@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Bot
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Bot_Controller_View extends Admin_Form_Controller_View
 {
@@ -118,7 +118,7 @@ class Bot_Controller_View extends Admin_Form_Controller_View
 							if ($bChange)
 							{
 								$.ajax({
-									url: '/admin/bot/module/index.php',
+									url: hostcmsBackend + '/bot/module/index.php',
 									data: { 'save_sorting': 1, 'aIds': $aIds },
 									dataType: 'json',
 									type: 'POST',
@@ -133,7 +133,7 @@ class Bot_Controller_View extends Admin_Form_Controller_View
 				showBotModuleSettings: function(bot_module_id)
 				{
 					$.ajax({
-						url: '/admin/bot/module/index.php',
+						url: hostcmsBackend + '/bot/module/index.php',
 						data: { 'show_settings': 1, 'bot_module_id': bot_module_id },
 						dataType: 'json',
 						type: 'POST',
@@ -171,7 +171,7 @@ class Bot_Controller_View extends Admin_Form_Controller_View
 				saveBotModuleSettings: function(bot_module_id, module_id, entity_id, type)
 				{
 					$.ajax({
-						url: '/admin/bot/module/index.php',
+						url: hostcmsBackend + '/bot/module/index.php',
 						data: { 'save_settings': 1, 'data': $('#<?php echo $windowId?> .bot-modules-form').serialize(), 'bot_module_id': bot_module_id },
 						dataType: 'json',
 						type: 'POST',
@@ -179,7 +179,7 @@ class Bot_Controller_View extends Admin_Form_Controller_View
 							$('#<?php echo $windowId?> #settingsModal' + bot_module_id).modal('hide');
 
 							// Reload list
-							$.adminLoad({ path: '/admin/bot/module/index.php', additionalParams: 'entity_id=' + entity_id + '&module_id=' + module_id + '&type=' + type + '&hideMenu=1&_module=0', windowId: 'bots-container', loadingScreen: false });
+							$.adminLoad({ path: hostcmsBackend + '/bot/module/index.php', additionalParams: 'entity_id=' + entity_id + '&module_id=' + module_id + '&type=' + type + '&hideMenu=1&_module=0', windowId: 'bots-container', loadingScreen: false });
 						}
 					});
 				}
@@ -208,7 +208,7 @@ class Bot_Controller_View extends Admin_Form_Controller_View
 					{
 						$oBot = $oBot_Module->Bot;
 
-						$onclick = $this->_Admin_Form_Controller->getAdminActionLoadAjax('/admin/bot/module/index.php', 'deleteModule', NULL, 0, $oBot_Module->id);
+						$onclick = $this->_Admin_Form_Controller->getAdminActionLoadAjax('/{admin}/bot/module/index.php', 'deleteModule', NULL, 0, $oBot_Module->id, "secret_csrf=" . Core_Security::getCsrfToken());
 
 						$sParents = $oBot->bot_dir_id
 							? $oBot->Bot_Dir->dirPathWithSeparator() . ' → '
@@ -306,7 +306,7 @@ class Bot_Controller_View extends Admin_Form_Controller_View
 				{
 					$additionalParams = $this->_Admin_Form_Controller->additionalParams . '&bot_id=' . $oBot->id;
 
-					$return .= '<li><a href="#" onclick="' . $this->_Admin_Form_Controller->getAdminActionLoadAjax('/admin/bot/module/index.php', 'addBot', NULL, 0, 0, $additionalParams) . '"><i class="fa fa-android"></i>' . htmlspecialchars($oBot->name) . '</a></li>';
+					$return .= '<li><a href="#" onclick="' . $this->_Admin_Form_Controller->getAdminActionLoadAjax('/{admin}/bot/module/index.php', 'addBot', NULL, 0, 0, $additionalParams) . '"><i class="fa fa-android"></i>' . htmlspecialchars($oBot->name) . '</a></li>';
 				}
 			}
 

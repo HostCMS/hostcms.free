@@ -32,7 +32,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Informationsystem_Controller_Rss_Show extends Core_Controller
 {
@@ -252,7 +252,7 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 		$this->_Core_Rss
 			->add('title', !is_null($this->title) ? $this->title : $oInformationsystem->name)
 			->add('description', !is_null($this->description) ? $this->description : Core_Str::str2ncr(Core_Str::xml($this->stripTags
-				? strip_tags($oInformationsystem->description)
+				? strip_tags((string) $oInformationsystem->description)
 				: $oInformationsystem->description)));
 
 		$this->_Core_Rss->add('link', !is_null($this->link)

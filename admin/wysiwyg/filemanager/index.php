@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'wysiwyg');
 
 // Код формы
 $iAdmin_Form_Id = 130;
-$sAdminFormAction = '/admin/wysiwyg/filemanager/index.php';
+$sAdminFormAction = '/{admin}/wysiwyg/filemanager/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -147,7 +147,7 @@ $oUser = Core_Auth::getCurrentUser();
 if (!$oUser->read_only)
 {
 	$oCore_Html_Entity_Form_File = Core_Html_Entity::factory('Form')
-		->action($sAdminFormAction)
+		->action(Admin_Form_Controller::correctBackendPath($sAdminFormAction))
 		->method('post')
 		->enctype('multipart/form-data')
 		->class('margin-top-10 margin-bottom-20')
@@ -170,25 +170,34 @@ if (!$oUser->read_only)
 		->add(Admin_Form_Entity::factory('Code')->html('
 			<script type="text/javascript">
 				$(function() {
+					// var aFilenames = [];
+
 					$("#' . $windowId . ' #dropzone").dropzone({
-						url: "/admin/wysiwyg/filemanager/index.php?hostcms[action]=uploadFile&hostcms[checked][1][0]=1&cdir=' . rawurlencode($cdir) . '&secret_csrf=' . Core_Security::getCsrfToken() . '",
+						url: "' . Admin_Form_Controller::correctBackendPath("/{admin}/wysiwyg/filemanager/index.php") . '?hostcms[action]=uploadFile&hostcms[checked][1][0]=1&cdir=' . rawurlencode($cdir) . '&secret_csrf=' . Core_Security::getCsrfToken() . '",
 						parallelUploads: ' . $aConfig['parallelUploads'] . ',
 						maxFilesize: ' . $aConfig['maxFilesize'] . ',
 						paramName: "file",
 						uploadMultiple: true,
 						clickable: true,
+						// autoProcessQueue: false,
 						init: function() {
 							this.on("addedfile", function(file) {
+								// console.log(file);
+
+								// aFilenames.push(file.name);
+
+								// console.log(aFilenames);
+
 								var thumbnail = $(file.previewElement);
 
 								thumbnail.on("click", function(){
 									window.opener.HostCMSFileManager.insertFile("' . rawurlencode(DIRECTORY_SEPARATOR . ltrim($cdir, DIRECTORY_SEPARATOR)) . '" + file.name); return false;
 								});
 							});' .
-							(isset($aConfig['reloadAfterUpload']) && $aConfig['reloadAfterUpload'] ? '
+							/*(isset($aConfig['reloadAfterUpload']) && $aConfig['reloadAfterUpload'] ? '
 							this.on("queuecomplete", function() {
 								$("#' . $windowId . ' #admin_forms_apply_button").click();
-							});' : '') . '
+							});' : '') . */ '
 						}
 					});
 				});
@@ -322,15 +331,15 @@ $oAdminFormActionRename = $oAdmin_Form->Admin_Form_Actions->getByName('rename');
 
 if ($oAdminFormActionRename && $oAdmin_Form_Controller->getAction() == 'rename')
 {
-	$oFilemanager_Controller_Rename = Admin_Form_Action_Controller::factory(
-		'Filemanager_Controller_Rename', $oAdminFormActionRename
+	$oWysiwyg_Filemanager_Controller_Rename = Admin_Form_Action_Controller::factory(
+		'Wysiwyg_Filemanager_Controller_Rename', $oAdminFormActionRename
 	);
 
-	$oFilemanager_Controller_Rename
+	$oWysiwyg_Filemanager_Controller_Rename
 		->cdir($cdir);
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
-	$oAdmin_Form_Controller->addAction($oFilemanager_Controller_Rename);
+	$oAdmin_Form_Controller->addAction($oWysiwyg_Filemanager_Controller_Rename);
 }
 
 $path = CMS_FOLDER . ltrim($cdir, DIRECTORY_SEPARATOR);

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Crm_Project_Module extends Core_Module_Abstract
 {
@@ -16,13 +16,13 @@ class Crm_Project_Module extends Core_Module_Abstract
 	 * Module version
 	 * @var string
 	 */
-	public $version = '7.0';
+	public $version = '7.1';
 
 	/**
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2024-07-09';
+	public $date = '2025-04-04';
 
 	/**
 	 * Module name
@@ -42,8 +42,8 @@ class Crm_Project_Module extends Core_Module_Abstract
 				'block' => 0,
 				'ico' => 'fas fa-tasks',
 				'name' => Core::_('Crm_Project.menu'),
-				'href' => "/admin/crm/project/index.php",
-				'onclick' => "$.adminLoad({path: '/admin/crm/project/index.php'}); return false"
+				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/crm/project/index.php"),
+				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/crm/project/index.php'}); return false")
 			)
 		);
 
@@ -84,9 +84,9 @@ class Crm_Project_Module extends Core_Module_Abstract
 				'ico' => $sIconIco,
 				'background-color' => $sNotificationColor
 			),
-			'href' => "/admin/crm/project/index.php?hostcms[action]=edit&hostcms[operation]=&hostcms[current]=1&hostcms[checked][0][" . $entityId . "]=1",
+			'href' => Admin_Form_Controller::correctBackendPath("/{admin}/crm/project/index.php?hostcms[action]=edit&hostcms[operation]=&hostcms[current]=1&hostcms[checked][0][" . $entityId . "]=1"),
 			// $(this).parents('li.open').click();
-			'onclick' => "$.adminLoad({path: '/admin/crm/project/index.php?hostcms[action]=edit&hostcms[operation]=&hostcms[current]=1&hostcms[checked][0][" . $entityId . "]=1'}); return false",
+			'onclick' => "$.adminLoad({path: hostcmsBackend + '/crm/project/index.php?hostcms[action]=edit&hostcms[operation]=&hostcms[current]=1&hostcms[checked][0][" . $entityId . "]=1'}); return false",
 			'extra' => array(
 				'icons' => array(),
 				'description' => NULL

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Crm_Note_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -84,10 +84,10 @@ class Crm_Note_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->name("file_{$oCrm_Note_Attachment->id}")
 				->largeImage(
 					array(
-						'path' => '/admin/crm/note/index.php?' . $relatedId . '=' . $this->_relatedObject->id . '&crm_note_attachment_id=' . $oCrm_Note_Attachment->id,
+						'path' => Admin_Form_Controller::correctBackendPath('/{admin}/crm/note/index.php?') . $relatedId . '=' . $this->_relatedObject->id . '&crm_note_attachment_id=' . $oCrm_Note_Attachment->id,
 						'show_params' => FALSE,
 						'originalName' => $oCrm_Note_Attachment->file_name,
-						'delete_onclick' => "$.adminLoad({path: '/admin/event/note/index.php', additionalParams: 'hostcms[checked][0][{$this->_object->id}]=1&{$relatedId}={$this->_relatedObject->id}', operation: '{$oCrm_Note_Attachment->id}', action: 'deleteFile', windowId: '{$windowId}'}); return false",
+						'delete_onclick' => "$.adminLoad({path: hostcmsBackend + '/event/note/index.php', additionalParams: 'hostcms[checked][0][{$this->_object->id}]=1&{$relatedId}={$this->_relatedObject->id}', operation: '{$oCrm_Note_Attachment->id}', action: 'deleteFile', windowId: '{$windowId}'}); return false",
 						'delete_href' => ''
 					)
 				)

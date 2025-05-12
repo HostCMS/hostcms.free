@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controller
 {
@@ -154,7 +154,9 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 			'exportItemShortcuts',
 			'exportInStock',
 			'exportItemFields',
-			'exportGroupFields'
+			'exportGroupFields',
+			'exportStocks',
+			'exportPrices'
 		));
 
 		parent::__construct($iShopId);
@@ -328,7 +330,8 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 			: '';
 
 		// Заполняем склады
-		$this->_aShopWarehouses = $oShop->Shop_Warehouses->findAll(FALSE);
+		$this->exportStocks
+			&& $this->_aShopWarehouses = $oShop->Shop_Warehouses->findAll(FALSE);
 
 		// Заполняем дополнительные свойства товара
 		$this->exportItemExternalProperties
@@ -346,7 +349,9 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 		$this->exportGroupFields
 			&& $this->_aGroup_Fields = Field_Controller::getFields('shop_group', $oShop->site_id);
 
-		$this->_aShopPrices = $oShop->Shop_prices->findAll(FALSE);
+		// Заполняем цены
+		$this->exportPrices
+			&& $this->_aShopPrices = $oShop->Shop_prices->findAll(FALSE);
 
 		// Группы
 		$aGroupTitles = array_map(array($this, 'prepareCell'), $this->getGroupTitles());
@@ -464,6 +469,8 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 		$oShop_Group = $oShopItem->shop_group_id
 			? Core_Entity::factory('Shop_Group', $oShopItem->shop_group_id)
 			: NULL;
+
+		//!is_null($oShop_Group) && $aGroupData[0] = $oShop_Group->name;
 
 		$aGroupData[1] = is_null($oShop_Group)
 			? 'ID00000000'
@@ -745,26 +752,36 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 		return $aRow;
 	}
 
-	public function getWarehouseItems($oShopItem)
+	/**
+	 * Get waregouses
+	 * @param Shop_Item_Model $oShop_Item
+	 * @return array
+	 */
+	public function getWarehouseItems($oShop_Item)
 	{
 		$aWarehouses = array();
 
 		foreach ($this->_aShopWarehouses as $oWarehouse)
 		{
-			$oShop_Warehouse_Item = $oShopItem->Shop_Warehouse_Items->getByWarehouseId($oWarehouse->id, FALSE);
+			$oShop_Warehouse_Item = $oShop_Item->Shop_Warehouse_Items->getByWarehouseId($oWarehouse->id, FALSE);
 			$aWarehouses[] = !is_null($oShop_Warehouse_Item) ? $oShop_Warehouse_Item->count : 0;
 		}
 
 		return $aWarehouses;
 	}
 
-	public function getPrices($oShopItem)
+	/**
+	 * Get prices
+	 * @param Shop_Item_Model $oShop_Item
+	 * @return array
+	 */
+	public function getPrices($oShop_Item)
 	{
 		$aShopPrices = array();
 
 		foreach ($this->_aShopPrices as $oShopPrice)
 		{
-			$oShop_Price = $oShopItem->Shop_Item_Prices->getByPriceId($oShopPrice->id, FALSE);
+			$oShop_Price = $oShop_Item->Shop_Item_Prices->getByPriceId($oShopPrice->id, FALSE);
 			$aShopPrices[] = !is_null($oShop_Price) ? $oShop_Price->value : 0;
 		}
 

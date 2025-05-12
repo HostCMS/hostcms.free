@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'informationsystem');
 
 // Код формы
 $iAdmin_Form_Id = 52;
-$sAdminFormAction = '/admin/informationsystem/item/comment/index.php';
+$sAdminFormAction = '/{admin}/informationsystem/item/comment/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -89,10 +89,10 @@ if ($oInformationsystem->id)
 			->name(Core::_('Informationsystem_Item.show_information_groups_link3'))
 			->icon('fa fa-gears')
 			->href(
-				$oAdmin_Form_Controller->getAdminLoadHref('/admin/informationsystem/comment/property/index.php', NULL, NULL, $additionalParamsProperties)
+				$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/informationsystem/comment/property/index.php', NULL, NULL, $additionalParamsProperties)
 			)
 			->onclick(
-				$oAdmin_Form_Controller->getAdminLoadAjax('/admin/informationsystem/comment/property/index.php', NULL, NULL, $additionalParamsProperties)
+				$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/informationsystem/comment/property/index.php', NULL, NULL, $additionalParamsProperties)
 			)
 	);
 }
@@ -104,7 +104,7 @@ $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
 // Строка навигации
-$sInformationsystemDirPath = '/admin/informationsystem/index.php';
+$sInformationsystemDirPath = '/{admin}/informationsystem/index.php';
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs->add(
@@ -154,7 +154,7 @@ if ($oInformationsystem->informationsystem_dir_id)
 }
 
 $additionalParams = 'informationsystem_id=' . $oInformationsystem->id;
-$sInformationsystemPath = '/admin/informationsystem/item/index.php';
+$sInformationsystemPath = '/{admin}/informationsystem/item/index.php';
 
 if ($oInformationsystem->id)
 {

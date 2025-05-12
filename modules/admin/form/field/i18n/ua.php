@@ -46,9 +46,10 @@ return array(
 	'field_type_date_time' => 'Дата-час',
 	'field_type_date' => 'Дата',
 	'field_type_image_link' => 'Зображення-посилання',
-	'field_type_image_list' => 'Список',
+	'field_type_list' => 'Список',
 	'field_type_image_callback_function' => 'Обчислюване поле (Використовується зворотний виклик функції)',
 	'field_type_textarea' => 'Велике текстове поле',
+	'field_type_list_item' => 'Елемент списку',
 
 	// Відображення
 	'field_view0' => 'Стовпець і фільтр',

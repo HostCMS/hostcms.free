@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Favorite_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -78,7 +78,7 @@ class Shop_Favorite_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 							// allowClear: true,
 							// multiple: true,
 							ajax: {
-								url: "/admin/shop/item/index.php?items&add_modifications&shop_id=' . $this->_object->shop_id .'",
+								url: hostcmsBackend + "/shop/item/index.php?items&add_modifications&shop_id=' . $this->_object->shop_id .'",
 								dataType: "json",
 								type: "GET",
 								processResults: function (data) {
@@ -187,12 +187,14 @@ class Shop_Favorite_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 		switch ($modelName)
 		{
 			case 'shop_favorite':
-				$shop_item_id = intval(Core_Array::get($this->_formValues, 'shop_item_id', 0, 'intval'));
+				$shop_item_id = Core_Array::get($this->_formValues, 'shop_item_id', 0, 'int');
+				$shop_favorite_list_id = Core_Array::get($this->_formValues, 'shop_favorite_list_id', 0, 'int');
 
 				$oShop_Favorites = Core_Entity::factory('Shop_Favorite');
 				$oShop_Favorites->queryBuilder()
 					->where('shop_favorites.shop_item_id', '=', $shop_item_id)
-					->where('shop_favorites.shop_favorite_list_id', '=', $this->_object->shop_favorite_list_id)
+					// ->where('shop_favorites.shop_favorite_list_id', '=', $this->_object->shop_favorite_list_id)
+					->where('shop_favorites.shop_favorite_list_id', '=', $shop_favorite_list_id)
 					->where('shop_favorites.siteuser_id', '=', $this->_object->siteuser_id);
 
 				$count = $oShop_Favorites->getCount();

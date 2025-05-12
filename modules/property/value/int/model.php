@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Property
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Property_Value_Int_Model extends Core_Entity
 {
@@ -427,5 +427,30 @@ class Property_Value_Int_Model extends Core_Entity
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Convert Object to Array
+	 * @return array
+	 * @hostcms-event modelname.onAfterToArray
+	 */
+	public function toArray()
+	{
+		$return = parent::toArray();
+
+		// List
+		if ($this->Property->type == 3 && $this->value != 0 && Core::moduleIsActive('list'))
+		{
+			$oList_Item = $this->List_Item;
+
+			if ($oList_Item->id)
+			{
+				$return['list_item'] = $oList_Item->toArray();
+			}
+		}
+
+		$return['__model_name'] = $this->_modelName;
+
+		return $return;
 	}
 }

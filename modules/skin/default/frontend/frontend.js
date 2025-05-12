@@ -267,13 +267,13 @@
 										// theme: "silver",
 										// toolbar_items_size: "small",
 										language: backendLng,
-										language_url: '/admin/wysiwyg/langs/' + backendLng + '.js',
+										language_url: hostcmsBackend + '/wysiwyg/langs/' + backendLng + '.js',
 										init_instance_callback: function (editor) {
 											editor.on('blur', function (e) {
 												settings.blur(jEditInPlace);
 											});
 										},
-										script_url: "/admin/wysiwyg/tinymce.min.js",
+										script_url: hostcmsBackend + "/wysiwyg/tinymce.min.js",
 										menubar: false,
 										plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table  importcss',
 										toolbar: 'undo redo | styleselect formatselect | bold italic underline backcolor | alignleft aligncenter alignright alignjustify | bullist numlist | link unlink image media preview table | removeformat code',
@@ -409,6 +409,7 @@
 			{
 				cmsrequest += '?' + settings.additionalParams;
 			}
+
 			jDivWin
 				.append('<iframe src="' + cmsrequest + '&hostcmsMode=blank"></iframe>')
 				.dialog('open');
@@ -438,7 +439,7 @@
 
 			hQuery.ajax({
 				context: hQuery('#hostcmsSection' + id),
-				url: '/template-section.php?template_section_id=' + id,
+				url: '/template-section.php?hostcmsAction=SHOW_DESIGN&template_section_id=' + id,
 				type: 'POST',
 				data: data,
 				dataType: 'json',
@@ -455,7 +456,7 @@
 
 			hQuery.ajax({
 				context: settings.goal,
-				url: settings.path,
+				url: settings.path + '&hostcmsAction=SHOW_DESIGN',
 				type: 'POST',
 				data: data,
 				dataType: 'json',
@@ -474,6 +475,8 @@
 
 			hQuery(".hostcmsPanel,.hostcmsSectionPanel,.hostcmsSectionWidgetPanel", newDiv)
 				.draggable({containment: "document"});
+
+			frontendInit(newDiv);
 		},
 		sortWidget: function()
 		{
@@ -485,10 +488,10 @@
 					hQuery.ajax({
 						data: data,
 						type: "POST",
-						url: "/template-section.php",
+						url: "/template-section.php?hostcmsAction=SHOW_DESIGN",
 					});
 				}
-			});
+			})/*.disableSelection()*/;
 		},
 		toggleSlidePanel: function()
 		{
@@ -525,9 +528,663 @@
 					}
 				}
 			});
+		},
+		showDesignPanel: function (template_section_lib_id, field, aAttrs)
+		{
+			aAttrs = aAttrs || [];
+
+			hQuery.ajax({
+				data: { 'showDesignPanel': 1, 'template_section_lib_id': template_section_lib_id, 'field': field, 'attributes': aAttrs },
+				type: "POST",
+				dataType: 'json',
+				url: hostcmsBackend + '/template/index.php',
+				success: function(result){
+					if (result.status == 'success')
+					{
+						hQuery('body').append(result.html);
+						hQuery('.template-settings.template-section-lib-settings .slidepanel').animate({ left: 0 });
+					}
+				}
+			});
+		},
+		changePreset: function (object, template_section_lib_id)
+		{
+			if (template_section_lib_id)
+			{
+				var $object = hQuery(object),
+					background = $object.data('background') || 'white',
+					$widget = hQuery('#hostcmsSectionWidget-' + template_section_lib_id),
+					$panel = hQuery('#panel' + template_section_lib_id)
+					design_id = $panel.data('design-id') || '', //50_caption, 50_icon_2
+					aSplit = design_id.split('_', 3),
+					field = aSplit[1] + (typeof aSplit[2] != 'undefined' ? '_' + aSplit[2] : '') || '';
+
+				if (design_id != '')
+				{
+					$widget = hQuery('#' + design_id);
+				}
+
+				$panel.find('.background-active').removeClass('background-active');
+				$object.addClass('background-active');
+
+				$widget.removeAttr('data-bg');
+
+				$widget.removeClass(function(index, className) {
+					return (className.match (/(^|\s)preset-\S+/g) || []).join(' ');
+				});
+
+				$widget.attr('data-bg', background);
+				$widget.addClass(background);
+
+				if (typeof field == 'undefined' || field == 'undefined')
+				{
+					field = '';
+				}
+
+				hQuery.ajax({
+					data: { 'changePreset': 1, 'template_section_lib_id': template_section_lib_id, 'field': field, 'class': $widget.attr('class') },
+					type: "POST",
+					dataType: 'json',
+					url: hostcmsBackend + '/template/index.php',
+					success: function(result){
+						if (result.status == 'success')
+						{
+							var aProperties = ['background', 'color', 'opacity'];
+							$.each(aProperties, function(index, property){
+								hQuery.clearProperty(property);
+							});
+						}
+					}
+				});
+			}
+		},
+		clearProperty: function(property)
+		{
+			hQuery('input[data-property=' + property + ']').parents('.background-block').find('.fa-circle-xmark').click();
+		},
+		refreshStyle: function (object, value)
+		{
+			var $object = hQuery(object),
+				template_section_lib_id = +$object.data('id') || 0;
+
+			value = value || $object.val();
+
+			if (template_section_lib_id)
+			{
+				var type = $object.data('type') || '',
+					property = $object.data('property') || '',
+					$widget = hQuery('#hostcmsSectionWidget-' + template_section_lib_id),
+					$panel = hQuery('#panel' + template_section_lib_id)
+					design_id = $panel.data('design-id') || '', //50_caption, 50_icon_2
+					aSplit = design_id.split('_', 3),
+					field = aSplit[1] + (typeof aSplit[2] != 'undefined' ? '_' + aSplit[2] : '') || '';
+
+				if (design_id != '')
+				{
+					$widget = hQuery('#' + design_id);
+				}
+
+				switch (type)
+				{
+					case 'colorpicker-range':
+						var name = $object.data('name') || '';
+
+						if (name != '')
+						{
+							var aParts = [];
+							$.each(hQuery('[data-type=' + type + '][data-name^=' + name + ']'), function() {
+								var val = hQuery(this).val();
+
+								val != '' && aParts.push(val);
+							});
+
+							value = aParts.length == 3
+								? "linear-gradient(" + aParts[2] + "deg," + aParts[0] + "," + aParts[1] + ")"
+								: '';
+						}
+					break;
+				}
+
+				if (value == 'auto')
+				{
+					value = '';
+				}
+
+				if (typeof field == 'undefined' || field == 'undefined')
+				{
+					field = '';
+				}
+
+				$widget.css(property, value != '' ? value : '');
+
+				hQuery.ajax({
+					url: hostcmsBackend + '/template/index.php',
+					data: { 'refreshStyle': 1, 'template_section_lib_id': template_section_lib_id, 'type': type, 'field': field, 'property': property, 'value': value },
+					type: "POST",
+					dataType: 'json'
+				});
+			}
+		},
+		updateMinicolors: function()
+		{
+			hQuery.refreshStyle(this);
+		},
+		changeRange: function (object, measure)
+		{
+			var $object = hQuery(object),
+				measure = measure || '';
+				value = $object.val() + measure
+				unset = +$object.data('unset') || 0;
+
+			if (unset && $object.val() == 0)
+			{
+				value = 'auto';
+			}
+
+			$object.parents('.range-wrapper').find('.range-value').text(value);
+
+			clearTimeout(window.range_timeout);
+
+			window.range_timeout = setTimeout(function () {
+				hQuery.refreshStyle(object, value);
+			}, 1000);
+		},
+		clearBlock: function (object, type, default_value, measure)
+		{
+			var $object = hQuery(object),
+				$parent = $object.parents('.background-block');
+
+			$.each($parent.find(':input'), function() {
+				var $input = hQuery(this),
+					input_type = $input.data('type') || '';
+
+				if (input_type == 'colorpicker' || (input_type != 'colorpicker-range' && $input.hasClass('colorpicker')))
+				{
+					$input.minicolors('value', default_value);
+				}
+				else if (input_type == 'colorpicker-range')
+				{
+					if ($input.hasClass('colorpicker'))
+					{
+						$input.minicolors('value', '');
+					}
+					else
+					{
+						$input.val(default_value);
+						$input.parents('.range-wrapper').find('.range-value').text(default_value + measure);
+					}
+				}
+				else
+				{
+					$input.val(default_value);
+
+					if (input_type == 'range')
+					{
+						$input.parents('.range-wrapper').find('.range-value').text(default_value + measure);
+					}
+				}
+
+				hQuery.refreshStyle(this, default_value);
+			});
+		},
+		changeDevice: function (object, type)
+		{
+			console.log(type);
+
+			var $object = hQuery(object),
+				width = 0;
+
+			hQuery('.top-panel .icons > i').removeClass('active');
+
+			switch (type)
+			{
+				case 'tablet':
+					width = 810;
+				break;
+				case 'tablet-wide':
+					width = 1080;
+				break;
+				case 'mobile':
+					width = 390;
+				break;
+				case 'mobile-wide':
+					width = 844;
+				break;
+			}
+
+			// console.log(width);
+
+			if (width)
+			{
+				hQuery('#siteFrame').width(width);
+			}
+			else
+			{
+				hQuery('#siteFrame').css('width', '');
+			}
+
+			$object.addClass('active');
+		},
+		showWidgetPanel: function (template_section_id, template_section_lib_id)
+		{
+			template_section_lib_id = template_section_lib_id || 0;
+
+			hQuery.ajax({
+				url: hostcmsBackend + '/template/index.php',
+				data: { 'showWidgetPanel': 1, 'template_section_id': template_section_id, 'template_section_lib_id': template_section_lib_id },
+				type: "POST",
+				dataType: 'json',
+				success: function(result) {
+					if (result.status == 'success')
+					{
+						hQuery('body').append(result.html);
+						hQuery('.template-settings.template-section-settings .slidepanel').animate({ left: 0 });
+
+						setTimeout(function () {
+							hQuery('#panel' + template_section_id).find('.dirs-wrapper .dir-item:first-child').click();
+						}, 500);
+					}
+				}
+			});
+		},
+		showWidgets: function (object, template_section_id, template_section_lib_id, lib_dir_id)
+		{
+			var $object = hQuery(object),
+				lib_wrapper = hQuery('#panel' + template_section_id).find('.libs-wrapper');
+
+			hQuery('#panel' + template_section_id).find('.dir-item').removeClass('active');
+			hQuery('#panel' + template_section_id).find('.dir-item[data-dir-id=' + lib_dir_id + ']').addClass('active');
+
+			lib_wrapper.empty();
+
+			hQuery.ajax({
+				url: hostcmsBackend + '/template/index.php',
+				data: { 'showWidgets': 1, 'template_section_id': template_section_id, 'template_section_lib_id': template_section_lib_id, 'lib_dir_id': lib_dir_id },
+				type: "POST",
+				dataType: 'json',
+				success: function(result) {
+					if (result.status == 'success')
+					{
+						lib_wrapper.append(result.html);
+					}
+				}
+			});
+		},
+		addWidget: function (object, template_section_id, template_section_lib_id, lib_id)
+		{
+			var $object = hQuery(object),
+				$parent = $object.parents('.lib-item');
+
+			hQuery.ajax({
+				// ajax loader
+				context: hQuery('<img>').addClass('img_line').prop('src', '/modules/skin/default/frontend/images/ajax-loader.gif').appendTo($parent),
+				data: { 'addWidget': 1, 'template_section_id': template_section_id, 'template_section_lib_id': template_section_lib_id, 'lib_id': lib_id },
+				type: "POST",
+				dataType: 'json',
+				url: hostcmsBackend + '/template/index.php',
+				success: function(result) {
+					if (result.status == 'success')
+					{
+						hQuery.refreshSection(template_section_id);
+						$parent.find('.img_line').remove();
+					}
+				}
+			});
+		},
+		updateSettings: function(selector, parent, template_section_lib_id, template_section_id)
+		{
+			event.preventDefault();
+
+			var FormNode = hQuery('form.settings' + template_section_lib_id),
+				data = { 'saveSettings': 1, 'template_section_lib_id': template_section_lib_id },
+				path = FormNode.attr('action');
+
+			FormNode.ajaxSubmit({
+				context: hQuery('<img>').addClass('img_line').prop('src', '/modules/skin/default/frontend/images/ajax-loader.gif').appendTo(parent),
+				data: data,
+				url: path,
+				type: 'POST',
+				dataType: 'json',
+				cache: false,
+				success: function(result) {
+					if (result.status == 'success')
+					{
+						parent.find('.img_line').remove();
+
+						parent.append('<i class="fa-solid fa-check-circle process-status palegreen"></i>');
+
+						hQuery.refreshSection(template_section_id);
+						hQuery.refreshSettingsBlock(template_section_lib_id);
+
+						setTimeout(function() {
+							parent.find('.process-status').remove();
+						}, 2000);
+					}
+				}
+			});
+		},
+		refreshSettingsBlock: function(template_section_lib_id)
+		{
+			hQuery.ajax({
+				// ajax loader
+				data: { 'refreshSettingsBlock': 1, 'template_section_lib_id': template_section_lib_id },
+				type: "POST",
+				dataType: 'json',
+				url: hostcmsBackend + '/template/index.php',
+				success: function(result) {
+					if (result.status == 'success')
+					{
+						var $parent = hQuery('form.settings' + template_section_lib_id).parent();
+
+						$parent.empty();
+
+						$parent.append(result.html);
+					}
+				}
+			});
+		},
+		saveSettings: function(object, template_section_lib_id, template_section_id)
+		{
+			var $object = hQuery(object);
+
+			hQuery.updateSettings("#settings :input", $object.parents('.button-wrapper'), template_section_lib_id, template_section_id);
+		},
+		showSettingsCrmIcons: function(object, input_name)
+		{
+			hQuery.ajax({
+				// ajax loader
+				data: { 'showSettingsCrmIcons': 1, 'input_name': input_name },
+				type: "POST",
+				dataType: 'json',
+				url: hostcmsBackend + '/template/index.php',
+				success: function(result) {
+					if (result.status == 'success')
+					{
+						// append to slide panel
+						$('.template-settings.template-section-lib-settings').append(result.html);
+
+						var $modal = $('#settingsCrmIcons');
+
+						$modal.modal('show');
+
+						$modal.on('hidden.bs.modal', function () {
+							$(this).remove();
+						});
+					}
+				}
+			});
+		},
+		selectSettingsCrmIcon: function (object, input_name)
+		{
+			var $object = $(object),
+				value = $object.data('value'),
+				$modal = $('#settingsCrmIcons'),
+				$inputSelector = $('input[name = "' + input_name + '"]'),
+				$wrapper = $inputSelector.parents('.settings-row-icon-wrapper'),
+				input_val = $inputSelector.val();
+
+			var escaped_val = input_val.replace(/fa\-[a-zA-Z0-9\-_]*/g, '');
+			escaped_val = escaped_val.trim();
+
+			var new_value = value + (escaped_val.length != '' ? ' ' : '') + escaped_val;
+
+			$wrapper.find('i').attr('class', new_value);
+			$inputSelector.val(new_value);
+
+			$modal.modal('hide');
+		},
+		addPoint: function (object, template_section_lib_id, lib_property_id, varible_name)
+		{
+			var $wrapper = $(object).parents('.details-wrapper'),
+				$item_wrapper = $wrapper.find('.details-item-wrapper[data-block-name = ' + varible_name + ']');
+
+			var count = $item_wrapper.find('.details-item').get().reduce(function (result, item) {
+				return Math.max(result, $(item).data("key"));
+			}, 0);
+
+			// console.log('addPoint', count);
+
+			hQuery.ajax({
+				// ajax loader
+				data: { 'addPoint': 1, 'template_section_lib_id': template_section_lib_id, 'lib_property_id': lib_property_id, 'count': count },
+				type: "POST",
+				dataType: 'json',
+				url: hostcmsBackend + '/template/index.php',
+				success: function(result) {
+					if (result.status == 'success')
+					{
+						$item_wrapper.append(result.html);
+					}
+				}
+			});
+		},
+		copyPoint: function (object, template_section_lib_id, lib_property_id, varible_name, block_id)
+		{
+			var $wrapper = $(object).parents('.details-wrapper'),
+				$item_wrapper = $wrapper.find('.details-item-wrapper[data-block-name = ' + varible_name + ']');
+
+			var count = $item_wrapper.find('.details-item').get().reduce(function (result, item) {
+				return Math.max(result, $(item).data("key"));
+			}, 0);
+
+			// console.log('copyPoint', count);
+
+			hQuery.ajax({
+				// ajax loader
+				data: { 'copyPoint': 1, 'template_section_lib_id': template_section_lib_id, 'lib_property_id': lib_property_id, 'count': count, 'block_id': block_id },
+				type: "POST",
+				dataType: 'json',
+				url: hostcmsBackend + '/template/index.php',
+				success: function(result) {
+					if (result.status == 'success')
+					{
+						$item_wrapper.append(result.html);
+					}
+				}
+			});
+		},
+		deletePoint: function (object, varible_name)
+		{
+			var $wrapper = $(object).parents('.details-wrapper'),
+				$item_wrapper = $wrapper.find('.details-item-wrapper[data-block-name = ' + varible_name + ']')
+				count = $item_wrapper.find('.details-item').length || 0;
+
+			if (count > 1)
+			{
+				if (confirm(i18n['confirm_delete']))
+				{
+					$(object).parents('.details-item').remove();
+				}
+			}
 		}
 	});
 //})(hQuery);
+
+window.range_timeout = null;
+
+hQuery(document).on('click', function(e) {
+	var $target = hQuery(e.target),
+		$container = $target.closest('.template-settings.template-section-lib-settings');
+		$slidepanel = $target.closest('.template-settings.template-section-lib-settings .slidepanel');
+
+	if (!$target.is('.fa-trash-can') && ($target.is('.slidepanel-button-close > i') || !$container.length))
+	{
+		hQuery('body').find(".template-settings.template-section-lib-settings .slidepanel").animate({ left: -1000 }, {
+			complete: function() {
+				hQuery('body').find(".template-settings.template-section-lib-settings").remove();
+			}
+		});
+	}
+});
+
+hQuery(document).on('click', function(e) {
+	var $target = hQuery(e.target),
+		$container = $target.closest('.template-settings.template-section-settings');
+		$slidepanel = $target.closest('.template-settings.template-section-settings .slidepanel');
+
+	if ($target.is('.slidepanel-button-close > i') || !$container.length)
+	{
+		hQuery('body').find(".template-settings.template-section-settings .slidepanel").animate({ left: -1000 }, {
+			complete: function() {
+				hQuery('body').find(".template-settings.template-section-settings").remove();
+			}
+		});
+	}
+});
+
+// Find by part of data- attribute name
+hQuery.expr[':'].hasAttr = hQuery.expr.createPseudo(function(regex) {
+	var re = new RegExp(regex);
+	return function(obj) {
+		var attrs = obj.attributes
+		for (var i = 0; i < attrs.length; i++) {
+			if (re.test(attrs[i].nodeName)) return true;
+		};
+		return false;
+	};
+});
+
+// Get data-editable- attribute info { 'id', 'name', 'value' }
+hQuery.fn.getEditableInfo = function (str) {
+	var object = this.get(0),
+		data = {},
+		regex = new RegExp('^' + str);
+
+    [].forEach.call(object.attributes, function (attr) {
+		// console.log('reg', regex);
+
+		if (regex.test(attr.name)) {
+			var id = attr.name.substr(str.length).replace(/-(.)/g, function ($0, $1) {
+				return $1;
+			});
+
+			// console.log(object);
+
+			return data = {
+				'id': id,
+				'name': attr.value,
+				'value': object.innerHTML,
+				'position': object.dataset.position || 0,
+				'prefix': object.dataset.prefix || ''
+			}
+		}
+    });
+
+    return data;
+}
+
+document.addEventListener('focusin', (e) => {
+	if (e.target.closest(".tox-tinymce-aux, .moxman-window, .tam-assetmanager-root") !== null) {
+		e.stopImmediatePropagation();
+	}
+});
+
+function frontendInit(jParent)
+{
+	hQuery('*:hasAttr(^data-editable-.+$)', jParent)
+		.on('dblclick', function(e){
+			// console.log('dblclick', e);
+			if (e.hasOwnProperty('type') && e.type == 'dblclick')
+			{
+				var object = hQuery(this);
+
+				setTimeout(function(){
+					// console.log(hQuery(this));
+
+					object.addClass('editing');
+
+					object.tinymce({
+						language: backendLng,
+						language_url: hostcmsBackend + '/wysiwyg/langs/' + backendLng + '.js',
+						init_instance_callback: function (editor) {
+							editor.on('blur', function (e) {
+								e.stopImmediatePropagation();
+								editor.remove();
+								object.css('visibility', '');
+
+								object.removeClass('editing');
+							});
+						},
+						script_url: hostcmsBackend + "/wysiwyg/tinymce.min.js",
+						menubar: false,
+						inline: true,
+						plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table  importcss',
+						toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist | link unlink image media preview table | removeformat code',
+						font_size_formats: "8pt 9pt 10pt 11pt 12pt 14pt 16pt 18pt 20pt 24pt 30pt 36pt 48pt 60pt 72pt 96pt"
+					});
+				}, 300);
+			}
+		})
+		.on('blur', function(e){
+			var object = hQuery(this),
+				data = object.getEditableInfo('data-editable-');
+
+			if (data.hasOwnProperty('id'))
+			{
+				// console.log(data);
+
+				data['_'] = Math.round(new Date().getTime());
+
+				hQuery.ajax({
+					data: { 'saveContent': 1, data: data },
+					type: "POST",
+					url: hostcmsBackend + '/template/index.php',
+					success: function(result){
+						// console.log(result);
+						object.removeClass('editing');
+					}
+				});
+			}
+		});
+
+	var DELAY = 700, clicks = 0, timer = null;
+
+	hQuery('*:hasAttr(^data-design-.+$)', jParent)
+		.on('click', function(e){
+			if (hQuery(this).hasClass('mce-edit-focus'))
+			{
+				return false;
+			}
+
+			clicks++;
+
+			// console.log('click', e);
+			var selected = getSelection().toString();
+
+			if (!selected && clicks === 1)
+			{
+				var object = hQuery(this),
+					data = object.getEditableInfo('data-design-');
+
+				timer = setTimeout(function() {
+					clicks = 0;  //after action performed, reset counter
+
+					// console.log(data);
+
+					if (data.hasOwnProperty('id') && data.hasOwnProperty('name'))
+					{
+						var design_id = "data-design-id=" + data.id + "_" + data.name,
+							field = data.name;
+
+						if (data.hasOwnProperty('position') && data.position)
+						{
+							design_id += "_" + data.position;
+							field += "_" + data.position;
+						}
+
+						hQuery.showDesignPanel(data.id, field, [design_id]);
+					}
+				}, DELAY);
+			}
+			else
+			{
+				clearTimeout(timer); //prevent single-click action
+				clicks = 0;
+			}
+		});
+}
+
+frontendInit(hQuery('body'));
 
 function frontendNotify(message, position, timeout, theme, icon, closable, sound) {
 	toastr.options.positionClass = 'toast-' + position;

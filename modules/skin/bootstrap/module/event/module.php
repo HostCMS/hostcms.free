@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Event_Module extends Event_Module
 {
@@ -47,7 +47,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 		$type = intval($type);
 
 		$oModule = Core_Entity::factory('Module')->getByPath($this->_moduleName);
-		$path = "/admin/index.php?ajaxWidgetLoad&moduleId={$oModule->id}&type={$type}";
+		$path = Admin_Form_Controller::correctBackendPath("/{admin}/index.php?ajaxWidgetLoad&moduleId={$oModule->id}&type={$type}");
 
 		$oUser = Core_Auth::getCurrentUser();
 
@@ -148,8 +148,8 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 							'name' => $oEvent->name,
 							'start' => Event_Controller::getDateTime($oEvent->start),
 							'deadline' => Event_Controller::getDateTime($oEvent->deadline),
-							'href' => "/admin/event/index.php?hostcms[action]=edit&hostcms[operation]=&hostcms[current]=1&hostcms[checked][0][{$oEvent->id}]=1",
-							'onclick' => "$(this).parents('li.open').click(); $.adminLoad({path: '/admin/event/index.php?hostcms[action]=edit&amp;hostcms[operation]=&amp;hostcms[current]=1&amp;hostcms[checked][0][{$oEvent->id}]=1'}); return false",
+							'href' => Admin_Form_Controller::correctBackendPath("/{admin}/event/index.php?hostcms[action]=edit&hostcms[operation]=&hostcms[current]=1&hostcms[checked][0][{$oEvent->id}]=1"),
+							'onclick' => "$(this).parents('li.open').click(); $.adminLoad({path: hostcmsBackend + '/event/index.php?hostcms[action]=edit&amp;hostcms[operation]=&amp;hostcms[current]=1&amp;hostcms[checked][0][{$oEvent->id}]=1'}); return false",
 							'icon' => $oEvent->Event_Type->icon,
 							'background-color' => $oEvent->Event_Type->color
 						);
@@ -289,7 +289,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 									</div>
 									<div class="task-state">
 										<?php
-										$aColorEventTypes = array('success', 'primary', 'azure', 'magenta', 'sky');
+										// $aColorEventTypes = array('success', 'primary', 'azure', 'magenta', 'sky');
 
 										$oEvent->event_type_id && $oEvent->showType();
 
@@ -299,7 +299,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 										}
 
 										$iAdmin_Form_Id = 220;
-										$sAdminFormAction = '/admin/event/index.php';
+										$sAdminFormAction = Admin_Form_Controller::correctBackendPath('/{admin}/event/index.php');
 
 										$oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 										$oAdmin_Form_Action = $oAdmin_Form
@@ -336,29 +336,42 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 										?>
 										<span class="task-title editable" id="apply_check_0_<?php echo $oEvent->id ?>_fv_1226"><?php echo $deadlineIcon, htmlspecialchars($oEvent->name);?></span>
 										<?php
-											$isCreator = is_null($oEvent_User) ? 0 : $oEvent_User->creator;
-											// Текущий пользователь - не создатель дела
-											if (!$isCreator)
-											{
-												$oEvent_Creator = $oEvent->Event_Users->getByCreator(1);
+										$isCreator = is_null($oEvent_User) ? 0 : $oEvent_User->creator;
+										// Текущий пользователь - не создатель дела
+										if (!$isCreator)
+										{
+											$oEvent_Creator = $oEvent->Event_Users->getByCreator(1);
 
-												if (!is_null($oEvent_Creator))
-												{
-													// Создатель дела
-													$oUser_Creator = $oEvent_Creator->User;
-												?>
-												<div class="<?php echo $oUser_Creator->isOnline() ? 'online margin-left-5 margin-right-5' : 'offline margin-left-5 margin-right-5'; ?>"></div><span class="task-creator"><?php $oUser_Creator->showLink('id_content')?></span>
-												<?php
-												}
+											if (!is_null($oEvent_Creator))
+											{
+												// Создатель дела
+												$oUser_Creator = $oEvent_Creator->User;
+											?>
+											<div class="<?php echo $oUser_Creator->isOnline() ? 'online margin-left-5 margin-right-5' : 'offline margin-left-5 margin-right-5'; ?>"></div><span class="task-creator"><?php $oUser_Creator->showLink('id_content')?></span>
+											<?php
 											}
-										?>
-										<span class="task-description" style="display: block; color: #999; font-size: 11px; line-height: 17px"><?php echo nl2br(htmlspecialchars((string) $oEvent->description));?></span>
-										<?php
+										}
+
+										if ($oEvent->description != '')
+										{
+											$bExpand = mb_strlen((string) $oEvent->description) > 250;
+											?><div class="crm-description-wrapper">
+											<div class="crm-description<?php echo $bExpand ? ' expand' : ''?>">
+												<span><?php echo strip_tags($oEvent->description, '<br><p><b><i><u><strong><em>')?></span>
+											</div>
+											<?php if ($bExpand)
+											{
+												?><div class="more-wrapper"><div class="more" onclick="$.showAllDescription(this)"><?php echo Core::_('Event.more')?> <i class="fas fa-chevron-down"></i></div></div><?php
+											}
+											?>
+											</div><?php
+										}
+
 										if (strlen($oEvent->place))
 										{
-										?>
-											<span class="kanban-place"><i class="fa fa-map-marker black"></i> <?php echo htmlspecialchars($oEvent->place)?></span>
-										<?php
+											?>
+												<span class="kanban-place"><i class="fa fa-map-marker black"></i> <?php echo htmlspecialchars($oEvent->place)?></span>
+											<?php
 										}
 										?>
 									</div>
@@ -396,7 +409,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 				$('#eventsAdminPage').data({'moduleId': <?php echo $oModule->id?>});
 
 				(function($){
-					$('#eventsAdminPage .editable').hostcmsEditable({windowId: '#eventsAdminPage', path: '/admin/event/index.php'});
+					$('#eventsAdminPage .editable').hostcmsEditable({windowId: '#eventsAdminPage', path: hostcmsBackend + '/event/index.php'});
 				})(jQuery);
 			</script>
 		</div><!--Widget -->

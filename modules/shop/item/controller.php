@@ -14,7 +14,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Item_Controller extends Core_Servant_Properties
 {
@@ -366,9 +366,26 @@ class Shop_Item_Controller extends Core_Servant_Properties
 							{
 								$this->_aPrice['discounts'][] = $oShop_Discount;
 
-								$oShop_Discount->type == 0
+								/*$oShop_Discount->type == 0
 									? $discountPercent += $oShop_Discount->value
-									: $discountAmount += $oShop_Discount->value;
+									: $discountAmount += $oShop_Discount->value;*/
+
+								// Скидка в %
+								if ($oShop_Discount->type == 0)
+								{
+									$discount = $this->_aPrice['price'] * $oShop_Discount->value / 100;
+
+									// Максимальный размер скидки при указанном %
+									$oShop_Discount->max_discount > 0 && $discount > $oShop_Discount->max_discount
+										&& $discount = $oShop_Discount->max_discount;
+								}
+								else
+								{
+									$discount = $oShop_Discount->value;
+								}
+
+								($this->_aPrice['price'] - $this->_aPrice['discount']) > $discount
+									&& $this->_aPrice['discount'] += $discount;
 
 								if ($oShop_Discount->coupon == 1 && $bCoupon)
 								{
@@ -380,13 +397,13 @@ class Shop_Item_Controller extends Core_Servant_Properties
 				}
 
 				// Определяем суммарную величину скидки в %
-				$this->_aPrice['discount'] = $discountPercent > 0 && $discountPercent <= 100
+				/*$this->_aPrice['discount'] = $discountPercent > 0 && $discountPercent <= 100
 					? $this->_aPrice['price'] * $discountPercent / 100
 					: 0;
 
 				// Если оставшаяся цена > скидки в фиксированном размере, то применяем скидку в фиксированном размере
 				($this->_aPrice['price'] - $this->_aPrice['discount']) > $discountAmount
-					&& $this->_aPrice['discount'] += $discountAmount;
+					&& $this->_aPrice['discount'] += $discountAmount;*/
 
 				// Вычисляем цену со скидкой как ее разность с величиной скидки в %
 				$this->_aPrice['price_discount'] = $this->_aPrice['price'] - $this->_aPrice['discount'];

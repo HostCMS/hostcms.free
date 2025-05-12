@@ -56,4 +56,5 @@ return array(
 	'import_file' => 'Виберіть файл із комп\'ютера',
 	'import_button' => 'Завантажити',
 	'importFilters_success' => 'Імпорт завершено!',
+	'description' => 'Опис',
 );

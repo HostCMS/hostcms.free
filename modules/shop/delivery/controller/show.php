@@ -19,7 +19,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Delivery_Controller_Show extends Core_Controller
 {
@@ -158,7 +158,8 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 		$this->_Shop_Deliveries
 			->queryBuilder()
 			->join('shop_delivery_siteuser_groups', 'shop_delivery_siteuser_groups.shop_delivery_id', '=', 'shop_deliveries.id')
-			->where('shop_delivery_siteuser_groups.siteuser_group_id', 'IN', $aSiteuser_Group_IDs);
+			->where('shop_delivery_siteuser_groups.siteuser_group_id', 'IN', $aSiteuser_Group_IDs)
+			->groupBy('shop_deliveries.id');
 
 		// Выбираем все типы доставки для данного магазина
 		$aShop_Deliveries = $this->_Shop_Deliveries->findAll();
@@ -330,94 +331,22 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 		// Массив цен для расчета скидок каждый N-й со скидкой N%
 		$aDiscountPrices = $Shop_Cart_Controller->totalDiscountPrices;
 
-		// Дисконтная карта
-		$bApplyMaxDiscount = $bApplyShopPurchaseDiscounts = FALSE;
-		$fDiscountcard = $fAppliedDiscountsAmount = 0;
+		// Скидки от суммы заказа и дисконтные карты
+		$oShop_Purchase_Discount_Controller = new Shop_Purchase_Discount_Controller($oShop);
+		$oShop_Purchase_Discount_Controller
+			->applyDiscountCards($this->applyDiscountCards)
+			->applyDiscounts($this->applyDiscounts)
+			->amount($amountPurchaseDiscount)
+			->quantity($quantityPurchaseDiscount)
+			->weight($this->totalWeight)
+			->couponText($this->couponText)
+			->siteuserId($this->_oSiteuser ? $this->_oSiteuser->id : 0)
+			->prices($aDiscountPrices);
 
-		if ($this->applyDiscountCards && Core::moduleIsActive('siteuser') && $this->_oSiteuser)
-		{
-			$oShop_Discountcard = $this->_oSiteuser->Shop_Discountcards->getByShop_id($oShop->id);
-			if (!is_null($oShop_Discountcard)
-				&& $oShop_Discountcard->active
-				&& $oShop_Discountcard->shop_discountcard_level_id
-			)
-			{
-				$oShop_Discountcard_Level = $oShop_Discountcard->Shop_Discountcard_Level;
-
-				$bApplyMaxDiscount = $oShop_Discountcard_Level->apply_max_discount == 1;
-
-				// Сумма скидки по дисконтной карте
-				$fDiscountcard = $amountPurchaseDiscount * ($oShop_Discountcard_Level->discount / 100);
-			}
-		}
-
-		if ($this->applyDiscounts)
-		{
-			// Скидки от суммы заказа
-			$oShop_Purchase_Discount_Controller = new Shop_Purchase_Discount_Controller($oShop);
-			$oShop_Purchase_Discount_Controller
-				->amount($amountPurchaseDiscount)
-				->quantity($quantityPurchaseDiscount)
-				->weight($this->totalWeight)
-				->couponText($this->couponText)
-				->siteuserId($this->_oSiteuser ? $this->_oSiteuser->id : 0)
-				->prices($aDiscountPrices);
-
-			$aShop_Purchase_Discounts = $oShop_Purchase_Discount_Controller->getDiscounts();
-
-			// Если применять только максимальную скидку, то считаем сумму скидок по скидкам от суммы заказа
-			if ($bApplyMaxDiscount)
-			{
-				$totalPurchaseDiscount = 0;
-
-				foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
-				{
-					$totalPurchaseDiscount += $oShop_Purchase_Discount->getDiscountAmount();
-				}
-
-				$bApplyShopPurchaseDiscounts = $totalPurchaseDiscount > $fDiscountcard;
-			}
-			else
-			{
-				$bApplyShopPurchaseDiscounts = TRUE;
-			}
-
-			// Если решили применять скидку от суммы заказа
-			if ($bApplyShopPurchaseDiscounts)
-			{
-				foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
-				{
-					$fAppliedDiscountsAmount += $oShop_Purchase_Discount->getDiscountAmount();
-				}
-			}
-
-			// Скидка больше суммы заказа
-			$fAppliedDiscountsAmount > $amountPurchaseDiscount && $fAppliedDiscountsAmount = $amountPurchaseDiscount;
-		}
-
-		// Не применять максимальную скидку или сумму по карте больше, чем скидка от суммы заказа
-		if (!$bApplyMaxDiscount || !$bApplyShopPurchaseDiscounts)
-		{
-			if ($fDiscountcard)
-			{
-				$fAmountForCard = $amountPurchaseDiscount - $fAppliedDiscountsAmount;
-
-				if ($fAmountForCard > 0)
-				{
-					$oShop_Discountcard->discountAmount(
-						Shop_Controller::instance()->round($fAmountForCard * ($oShop_Discountcard_Level->discount / 100))
-					);
-
-					$fAppliedDiscountsAmount += $oShop_Discountcard->getDiscountAmount();
-				}
-			}
-		}
-
-		// Скидка больше суммы заказа
-		$fAppliedDiscountsAmount > $amountPurchaseDiscount && $fAppliedDiscountsAmount = $amountPurchaseDiscount;
+		$aArray = $oShop_Purchase_Discount_Controller->calculateDiscounts();
 
 		// Применяем скидку от суммы заказа
-		$this->totalAmount -= $fAppliedDiscountsAmount;
+		$this->totalAmount -= $aArray['discountAmount'];
 
 		if ($this->_oSiteuser)
 		{

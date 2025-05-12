@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -13,7 +13,7 @@ Core_Auth::authorization($sModule = 'sql');
 // Текущий пользователь
 $oUser = Core_Auth::getCurrentUser();
 
-$sAdminFormAction = '/admin/sql/index.php';
+$sAdminFormAction = '/{admin}/sql/index.php';
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create();
@@ -114,20 +114,20 @@ $oAdmin_Form_Entity_Menus->add(
 				->name(Core::_('Sql.optimize_table'))
 				->icon('fa fa-database')
 				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/sql/optimize/index.php', '', NULL)
+					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/sql/optimize/index.php', '', NULL)
 				)
 				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/sql/optimize/index.php', '', NULL)
+					$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/sql/optimize/index.php', '', NULL)
 				)
 		)->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Sql.repair_table'))
 				->icon('fa fa-wrench')
 				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/sql/repair/index.php', '', NULL)
+					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/sql/repair/index.php', '', NULL)
 				)
 				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/sql/repair/index.php', '', NULL)
+					$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/sql/repair/index.php', '', NULL)
 				)
 		)
 		->add(
@@ -135,10 +135,10 @@ $oAdmin_Form_Entity_Menus->add(
 				->name(Core::_('Sql.duplicate_indexes'))
 				->icon('fa fa-key')
 				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/sql/index.php', 'duplicate', NULL)
+					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/sql/index.php', 'duplicate', NULL)
 				)
 				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/sql/index.php', 'duplicate', NULL)
+					$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/sql/index.php', 'duplicate', NULL)
 				)
 		)
 )
@@ -147,10 +147,10 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('Sql.manage'))
 		->icon('fa fa-table')
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/sql/table/index.php', '', NULL)
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/sql/table/index.php', '', NULL)
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/sql/table/index.php', '', NULL)
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/sql/table/index.php', '', NULL)
 		)
 )
 ->add(
@@ -158,10 +158,10 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('Sql.variables'))
 		->icon('fa fa-list')
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/sql/variable/index.php', '', NULL)
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/sql/variable/index.php', '', NULL)
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/sql/variable/index.php', '', NULL)
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/sql/variable/index.php', '', NULL)
 		)
 )
 ->add(
@@ -169,10 +169,10 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('Sql.processlist'))
 		->icon('fa fa-list')
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/sql/processlist/index.php', '', NULL)
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/sql/processlist/index.php', '', NULL)
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/sql/processlist/index.php', '', NULL)
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/sql/processlist/index.php', '', NULL)
 		)
 );
 
@@ -270,16 +270,23 @@ if ($bExec)
 		}
 
 		$oSql_User_Tab = $iAffectedRows = $oDiv = NULL;
+		$iCountQueries = 0;
+		$bExecuted = FALSE;
+
+		// MySQL 5.7.8 or later and not MariaDB (max_statement_time 10.1.1+)
+		$fullVersion = Core_DataBase::instance()->getVersion();
+		if (strpos($fullVersion, 'MariaDB') === FALSE)
+		{
+			list($version) = explode('-', $fullVersion);
+			version_compare($version, '5.7.8') >= 0
+				&& Core_Database::instance()->query("SET SESSION `max_execution_time` = 0;");
+		}
 
 		$sText = Core_Array::getPost('text');
 
 		$aFile = Core_Array::getFiles('file');
 		/*!is_null($aFile) && $aFile['size'] > 0
 			&& $sText = Core_File::read($aFile['tmp_name']);*/
-
-		$iCountQueries = 0;
-
-		$bExecuted = FALSE;
 
 		if (!is_null($aFile) && $aFile['size'] > 0)
 		{
@@ -577,7 +584,7 @@ foreach ($aSql_User_Tabs as $key => $oSql_User_Tab)
 
 	$oTab->add($oForm
 		->controller($oAdmin_Form_Controller)
-		->action($sAdminFormAction)
+		->action(Admin_Form_Controller::correctBackendPath($sAdminFormAction))
 		->add(
 			Admin_Form_Entity::factory('Input')
 				->type('hidden')
@@ -614,7 +621,10 @@ $oTabs
 ?>
 <script>
 $(function(){
-	$('.nav-tabs.sql-user-tabs i.fa-xmark').on('click', {elm: $('.nav-tabs.sql-user-tabs i.fa-xmark')}, $.sqlDeleteTab);
+	// $('.nav-tabs.sql-user-tabs i.fa-xmark').on('click', { elm: $('.nav-tabs.sql-user-tabs i.fa-xmark') }, $.sqlDeleteTab);
+	$('.nav-tabs.sql-user-tabs i.fa-xmark').on('click', function(){
+		$.sqlDeleteTab($(this));
+	});
 
 	$('.nav-tabs.sql-user-tabs li a').on('dblclick', $.sqlRenameTab);
 
@@ -628,7 +638,7 @@ $(function(){
 		if (_a.attr('href') == '#user_tab_plus')
 		{
 			$.ajax({
-				url: '/admin/sql/index.php',
+				url: '<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/sql/index.php")?>',
 				type: 'POST',
 				dataType: 'json',
 				data: { 'add_tab': 1 },

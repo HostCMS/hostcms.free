@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Site
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Site_Favicon_Controller_Tab extends Core_Servant_Properties
 {
@@ -61,7 +61,7 @@ class Site_Favicon_Controller_Tab extends Core_Servant_Properties
 	{
 		return array(
 			'icon' => 'icon',
-			'shortcut-icon' => 'shortcut icon',
+			'shortcut icon' => 'shortcut icon',
 			'apple-touch-icon' => 'apple-touch-icon',
 			'apple-touch-icon-precomposed' => 'apple-touch-icon-precomposed'
 		);
@@ -76,6 +76,8 @@ class Site_Favicon_Controller_Tab extends Core_Servant_Properties
 		return array(
 			'16x16' => '16x16',
 			'32x32' => '32x32',
+			'48x48' => '48x48',
+			'120x120' => '120x120',
 			'180x180' => '180x180',
 			'192x192' => '192x192',
 			'256x256' => '256x256',

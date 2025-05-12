@@ -17,7 +17,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Router
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Router_Route
 {
@@ -174,6 +174,90 @@ class Core_Router_Route
 	}
 
 	/**
+	 * Middleware stack
+	 * @var array
+	 */
+	protected $_middlewares = array();
+
+	/**
+	 * Add middleware to the route
+	 * @param string $middleware
+	 * @param callable|NULL $callable
+	 * @return self
+	 */
+	public function middleware($middleware, $callable = NULL)
+	{
+		if (!isset($this->_middlewares[$middleware]))
+		{
+			is_null($callable) && $callable = $middleware;
+
+			$oMiddleware = is_callable($callable) ? $callable : new $callable();
+
+			$this->_middlewares[$middleware] = $oMiddleware;
+		}
+
+		return $this;
+	}
+	
+	/**
+	 * Add middleware to the route
+	 * @param string $middleware
+	 * @param callable|NULL $callable
+	 * @return self
+	 * @see middleware()
+	 */
+	public function addMiddleware($middleware, $callable = NULL)
+	{
+		return $this->middleware($middleware, $callable);
+	}
+	
+	/**
+	 * Prepend middleware to the route
+	 * @param string $middleware
+	 * @param callable|NULL $callable
+	 * @return self
+	 */
+	public function prependMiddleware($middleware, $callable = NULL)
+	{
+		if (!isset($this->_middlewares[$middleware]))
+		{
+			is_null($callable) && $callable = $middleware;
+
+			$oMiddleware = is_callable($callable) ? $callable : new $callable();
+
+			$this->_middlewares = array($middleware => $oMiddleware) + $this->_middlewares;
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Exclude middleware to the route
+	 * @param string $middleware
+	 * @return self
+	 */
+	public function withoutMiddleware($middleware)
+	{
+		if (isset($this->_middlewares[$middleware]))
+		{
+			unset($this->_middlewares[$middleware]);
+		}
+
+		return $this;
+	}
+	
+	/**
+	 * Exclude middleware to the route
+	 * @param string $middleware
+	 * @return self
+	 * @see withoutMiddleware()
+	 */
+	public function removeMiddleware($middleware)
+	{
+		return $this->withoutMiddleware($middleware);
+	}
+
+	/**
 	 * Set controller columns and execute command controller method '{action}Action()'.
 	 * Default action name is showAction()
 	 * @return mixed expect Core_Response
@@ -181,8 +265,8 @@ class Core_Router_Route
 	public function execute()
 	{
 		$sControllerName = $this->_controller;
-		$oController = new $sControllerName();
 
+		$oController = new $sControllerName();
 		$oController->setUri($this->_uri);
 
 		foreach ($this->_controllerColumns as $column => $value)
@@ -190,7 +274,50 @@ class Core_Router_Route
 			$oController->$column = $value;
 		}
 
-		$sActionName = $this->_action . 'Action';
-		return $oController->$sActionName();
+		// Создаем замыкание для вызова контроллера
+		$controllerHandler = function() use ($oController) {
+			$sActionName = $this->_action . 'Action';
+			return $oController->$sActionName();
+		};
+
+		/*$actionName = $this->_action . 'Action';
+		return $oController->$actionName();*/
+		
+		// Обертываем контроллер в middleware
+		$next = $this->_wrapMiddleware($oController, $controllerHandler);
+		
+		// Выполняем middleware и контроллер
+		return $next();
+	}
+	
+	/**
+	 * Wrap middleware around the controller handler
+	 * @param object $oController
+	 * @param callable $next
+	 * @return callable
+	 */
+	protected function _wrapMiddleware($oController, $next)
+	{
+		foreach (array_reverse($this->_middlewares) as $middleware)
+		{
+			$next = function() use ($middleware, $oController, $next) {
+				if ($middleware instanceof Core_Middleware)
+				{
+					// Если middleware — это объект класса Core_Middleware, вызываем его метод handle
+					return $middleware->handle($oController, $next);
+				}
+				elseif (is_callable($middleware))
+				{
+					// Если middleware — это callable-функция, вызываем её
+					return call_user_func($middleware, $oController, $next);
+				}
+				else
+				{
+					throw new Core_Exception("Core_Router_Route: Middleware must be callable or extend Core_Middleware.");
+				}
+			};
+		}
+		
+		return $next;
 	}
 }

@@ -8,16 +8,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Entity_File
 {
-	/**
-	 * Preview Extensions
-	 * @var array
-	 */
-	static protected $_previewExtensions = array('jpg', 'jpeg', 'gif', 'png', 'webp', 'svg', 'avif');
-	
 	/**
 	 * Execute business logic
 	 * @hostcms-event Skin_Bootstrap_Admin_Form_Entity_File.onAfterShowLargeImage
@@ -445,7 +439,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 		{
 			$pathForExt = $this->largeImage['originalName'] != '' ? $this->largeImage['originalName'] : $this->largeImage['path'];
 
-			if (Core_File::isValidExtension($pathForExt, self::$_previewExtensions))
+			if (Core_File::isValidExtension($pathForExt, $this->getPreviewExtensions()))
 			{
 				$prefixRand = strpos($this->largeImage['path'], '?') === FALSE ? '?' : '&';
 
@@ -751,7 +745,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 			{
 				$pathForExt = $this->smallImage['originalName'] != '' ? $this->smallImage['originalName'] : $this->smallImage['path'];
 
-				if (Core_File::isValidExtension($pathForExt, self::$_previewExtensions))
+				if (Core_File::isValidExtension($pathForExt, $this->getPreviewExtensions()))
 				{
 					$prefixRand = strpos($this->smallImage['path'], '?') === FALSE ? '?' : '&';
 

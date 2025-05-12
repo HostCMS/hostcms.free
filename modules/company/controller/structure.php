@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Company
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Company_Controller_Structure extends Admin_Form_Controller_View
 {
@@ -529,10 +529,10 @@ class Company_Controller_Structure extends Admin_Form_Controller_View
 								if (in_array('changeAccessModulesAndActions', $aAllowedActions))
 								{
 								?>
-									<a href="/admin/user/site/index.php?company_department_id=<?php echo $oCompany_Department->id?>" onclick="$.adminLoad({path: '/admin/user/site/index.php',action: '',operation: '',additionalParams: 'company_department_id=<?php echo $oCompany_Department->id?>',current: '1',windowId: 'id_content'}); return false" class="bordered-sky" data-action="module_access" title="<?php echo Core::_('Company_Department.moduleTitleAction')?>" alt="<?php echo Core::_('Company_Department.moduleTitleAction')?>">
+									<a href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/user/site/index.php')?>?company_department_id=<?php echo $oCompany_Department->id?>" onclick="$.adminLoad({path: hostcmsBackend + '/user/site/index.php',action: '',operation: '',additionalParams: 'company_department_id=<?php echo $oCompany_Department->id?>',current: '1',windowId: 'id_content'}); return false" class="bordered-sky" data-action="module_access" title="<?php echo Core::_('Company_Department.moduleTitleAction')?>" alt="<?php echo Core::_('Company_Department.moduleTitleAction')?>">
 										<i class="fa fa-cogs sky"></i>
 									</a>
-									<a href="/admin/user/site/index.php?company_department_id=<?php echo $oCompany_Department->id?>&mode=action" onclick="$.adminLoad({path: '/admin/user/site/index.php',action: '',operation: '',additionalParams: 'mode=action&company_department_id=<?php echo $oCompany_Department->id?>',current: '1',windowId: 'id_content'}); return false" class="bordered-yellow" data-action="action_access" title="<?php echo Core::_('Company_Department.actionTitleAction'); ?>" alt="<?php echo Core::_('Company_Department.actionTitleAction'); ?>">
+									<a href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/user/site/index.php')?>?company_department_id=<?php echo $oCompany_Department->id?>&mode=action" onclick="$.adminLoad({path: hostcmsBackend + '/user/site/index.php',action: '',operation: '',additionalParams: 'mode=action&company_department_id=<?php echo $oCompany_Department->id?>',current: '1',windowId: 'id_content'}); return false" class="bordered-yellow" data-action="action_access" title="<?php echo Core::_('Company_Department.actionTitleAction'); ?>" alt="<?php echo Core::_('Company_Department.actionTitleAction'); ?>">
 										<i class="fa fa-bolt yellow"></i>
 									</a>
 								<?php

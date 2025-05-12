@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 {
@@ -73,7 +73,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 		$type = intval($type);
 
 		$oModule = Core_Entity::factory('Module')->getByPath($this->_moduleName);
-		$this->_path = "/admin/index.php?ajaxWidgetLoad&moduleId={$oModule->id}&type={$type}";
+		$this->_path = Admin_Form_Controller::correctBackendPath("/{admin}/index.php?ajaxWidgetLoad&moduleId={$oModule->id}&type={$type}");
 
 		$colClass = $this->_bInformationsystems && $this->_bShops
 			? 'col-xs-12 col-sm-6'
@@ -167,7 +167,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 							$oComments_Admin_Form = Core_Entity::factory('Admin_Form', $iComments_Admin_Form_Id);
 							$oComments_Admin_Form_Controller = Admin_Form_Controller::create($oComments_Admin_Form)
 								->window('id_content');
-							$sInformationsystemCommentsHref = '/admin/informationsystem/item/comment/index.php';
+							$sInformationsystemCommentsHref = '/{admin}/informationsystem/item/comment/index.php';
 
 							foreach ($aComments as $oComment)
 							{
@@ -256,7 +256,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 							?>
 							</ul>
 							<div>
-								<a class="btn btn-info" onclick="$.adminLoad({path: '/admin/informationsystem/item/comment/index.php'}); return false" href="/admin/informationsystem/item/comment/index.php">
+								<a class="btn btn-info" onclick="$.adminLoad({path: hostcmsBackend + '/informationsystem/item/comment/index.php'}); return false" href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/informationsystem/item/comment/index.php')?>">
 									<i class="fa fa-comments"></i><?php echo Core::_('Informationsystem.widget_other_comments')?></a>
 							</div>
 						</div>
@@ -321,7 +321,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 							$oComments_Admin_Form = Core_Entity::factory('Admin_Form', $iComments_Admin_Form_Id);
 							$oComments_Admin_Form_Controller = Admin_Form_Controller::create($oComments_Admin_Form)
 								->window('id_content');
-							$sShopCommentsHref = '/admin/shop/item/comment/index.php';
+							$sShopCommentsHref = '/{admin}/shop/item/comment/index.php';
 
 							foreach ($aComments as $oComment)
 							{
@@ -411,7 +411,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 							?>
 							</ul>
 							<div>
-								<a class="btn btn-info" onclick="$.adminLoad({path: '/admin/shop/item/comment/index.php'}); return false" href="/admin/shop/item/comment/index.php">
+								<a class="btn btn-info" onclick="$.adminLoad({path: hostcmsBackend + '/shop/item/comment/index.php'}); return false" href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/shop/item/comment/index.php')?>">
 									<i class="fa fa-comments"></i><?php echo Core::_('Shop.widget_other_comments')?>
 								</a>
 							</div>

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Field
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Field_Controller_Tab
 {
@@ -212,14 +212,14 @@ class Field_Controller_Tab
 	{
 		$oField = $oField_Value->Field;
 
-		return "res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { mainFormLocker.unlock(); $.deleteField(this, {path: '/admin/field/modelfield/index.php', action: 'deleteFieldValue', fieldId: '{$oField->id}', fieldValueId: '{$oField_Value->id}', fieldDirId: '{$oField->field_dir_id}', model: '{$oField->model}'}) } else {return false}";
+		return "res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { mainFormLocker.unlock(); $.deleteField(this, {path: hostcmsBackend + '/field/modelfield/index.php', action: 'deleteFieldValue', fieldId: '{$oField->id}', fieldValueId: '{$oField_Value->id}', fieldDirId: '{$oField->field_dir_id}', model: '{$oField->model}'}) } else {return false}";
 	}
 
 	public function getImgDeleteFilePath($oField_Value, $prefix)
 	{
 		$oField = $oField_Value->Field;
 
-		return $this->_Admin_Form_Controller->getAdminActionLoadAjax('/admin/field/modelfield/index.php', 'deleteFieldValue', "{$prefix}_field_{$oField->id}_{$oField_Value->id}", 1, $oField->id, "fieldId={$oField->id}&fieldValueId={$oField_Value->id}&fieldDirId={$oField->field_dir_id}&model={$oField->model}");
+		return $this->_Admin_Form_Controller->getAdminActionLoadAjax('/{admin}/field/modelfield/index.php', 'deleteFieldValue', "{$prefix}_field_{$oField->id}_{$oField_Value->id}", 1, $oField->id, "fieldId={$oField->id}&fieldValueId={$oField_Value->id}&fieldDirId={$oField->field_dir_id}&model={$oField->model}");
 	}
 
 	/**
@@ -323,7 +323,7 @@ class Field_Controller_Tab
 			case 9: // Datetime
 			case 10: // Hidden field
 			case 11: // Float
-
+			case 15: // Bigint
 				Core_Event::notify('Field_Controller_Tab.onBeforeCreateFieldValue', $this, array($oField, $oAdmin_Form_Entity));
 
 				$aFormat = $oField->obligatory
@@ -333,6 +333,7 @@ class Field_Controller_Tab
 				switch ($oField->type)
 				{
 					case 0: // Int
+					case 15: // Bigint
 						$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input')
 							->format($aFormat + array('lib' => array(
 								'value' => 'integer'
@@ -491,7 +492,7 @@ class Field_Controller_Tab
 											Core_Array::union($oNewAdmin_Form_Entity->largeImage, array(
 												'path' => $sDirHref . rawurlencode($oField_Value->file),
 												'originalName' => $oField_Value->file_name,
-												// 'delete_onclick' => $this->_Admin_Form_Controller->getAdminActionLoadAjax('/admin/field/modelfield/index.php', 'deleteFieldValue', "large_field_{$oField->id}_{$oField_Value->id}", $this->_datasetId, $this->_object->id)
+												// 'delete_onclick' => $this->_Admin_Form_Controller->getAdminActionLoadAjax('/{admin}/field/modelfield/index.php', 'deleteFieldValue', "large_field_{$oField->id}_{$oField_Value->id}", $this->_datasetId, $this->_object->id)
 												'delete_onclick' => $this->getImgDeleteFilePath($oField_Value, 'large')
 											))
 										);
@@ -509,7 +510,7 @@ class Field_Controller_Tab
 											Core_Array::union($oNewAdmin_Form_Entity->smallImage, array(
 												'path' => $sDirHref . rawurlencode($oField_Value->file_small),
 												'originalName' => $oField_Value->file_small_name,
-												// 'delete_onclick' => $this->_Admin_Form_Controller->getAdminActionLoadAjax('/admin/field/modelfield/index.php', 'deleteFieldValue', "small_field_{$oField->id}_{$oField_Value->id}", $this->_datasetId, $this->_object->id),
+												// 'delete_onclick' => $this->_Admin_Form_Controller->getAdminActionLoadAjax('/{admin}/field/modelfield/index.php', 'deleteFieldValue', "small_field_{$oField->id}_{$oField_Value->id}", $this->_datasetId, $this->_object->id),
 												'delete_onclick' => $this->getImgDeleteFilePath($oField_Value, 'small'),
 												'create_small_image_from_large_checked' => FALSE,
 											))
@@ -594,7 +595,8 @@ class Field_Controller_Tab
 							2 => Core::_('Admin_Form.autocomplete_mode2'),
 							3 => Core::_('Admin_Form.autocomplete_mode3')
 						))
-						->caption(Core::_('Admin_Form.autocomplete_mode'));
+						->caption(Core::_('Admin_Form.autocomplete_mode'))
+						->name("input_field_{$oField->id}_mode");
 
 					// Значений св-в нет для объекта
 					if (count($aField_Values) == 0)
@@ -622,7 +624,8 @@ class Field_Controller_Tab
 
 							$oNewAdmin_Form_Entity_Autocomplete_Select = clone $oAdmin_Form_Entity_Autocomplete_Select;
 							$oNewAdmin_Form_Entity_Autocomplete_Select
-								->id($oNewAdmin_Form_Entity_ListItemsInput->id . '_mode'); // id_field_ !!!
+								->id($oNewAdmin_Form_Entity_ListItemsInput->id . '_mode') // id_field_ !!!
+								->name("input_field_{$oField->id}_{$oField_Value->id}_mode");
 
 							Core_Event::notify('Field_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity_ListItems, $oAdmin_Form_Entity_Section, $oField, $oField_Value));
 
@@ -930,7 +933,7 @@ class Field_Controller_Tab
 							jTopParentDiv = jInput.parents('div[id ^= field]');
 
 						$.ajax({
-							url: '/admin/list/item/index.php?autocomplete=1&show_parents=1&list_id={$oList->id}&mode=' + $('#{$windowId} #' + jInput.attr('id') + '_mode').val(),
+							url: hostcmsBackend + '/list/item/index.php?autocomplete=1&show_parents=1&list_id={$oList->id}&mode=' + $('#{$windowId} #' + jInput.attr('id') + '_mode').val(),
 							dataType: 'json',
 							data: {
 								queryString: request.term
@@ -1052,7 +1055,7 @@ class Field_Controller_Tab
 							jTopParentDiv = jInput.parents('div[id ^= field]');
 
 						$.ajax({
-							url: '/admin/informationsystem/item/index.php?autocomplete=1&show_group=1&informationsystem_id={$oInformationsystem->id}',
+							url: hostcmsBackend + '/informationsystem/item/index.php?autocomplete=1&show_group=1&informationsystem_id={$oInformationsystem->id}',
 							dataType: 'json',
 							data: {
 								queryString: request.term
@@ -1136,7 +1139,7 @@ class Field_Controller_Tab
 		$oAdmin_Form_Entity_InfGroups
 			->value($Informationsystem_Item->informationsystem_group_id)
 			->options(array(' … ') + $aOptions)
-			->onchange("$.ajaxRequest({path: '/admin/informationsystem/item/index.php', context: '{$oAdmin_Form_Entity_InfItemsSelect->id}', callBack: $.loadSelectOptionsCallback, action: 'loadInformationItemList',additionalParams: 'informationsystem_group_id=' + this.value + '&informationsystem_id={$oField->informationsystem_id}',windowId: '{$windowId}'}); return false");
+			->onchange("$.ajaxRequest({path: hostcmsBackend + '/informationsystem/item/index.php', context: '{$oAdmin_Form_Entity_InfItemsSelect->id}', callBack: $.loadSelectOptionsCallback, action: 'loadInformationItemList',additionalParams: 'informationsystem_group_id=' + this.value + '&informationsystem_id={$oField->informationsystem_id}',windowId: '{$windowId}'}); return false");
 
 		// Items
 		$oInformationsystem_Items = $oInformationsystem->Informationsystem_Items;
@@ -1244,7 +1247,7 @@ class Field_Controller_Tab
 							selectedVal = $(':selected', jInfGroupDiv).val();
 
 						$.ajax({
-							url: '/admin/informationsystem/item/index.php?autocomplete=1&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id=' + selectedVal + '',
+							url: hostcmsBackend + '/informationsystem/item/index.php?autocomplete=1&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id=' + selectedVal + '',
 							dataType: 'json',
 							data: {
 								queryString: request.term
@@ -1426,7 +1429,7 @@ class Field_Controller_Tab
 						selectedVal = $(':selected', jInfGroupDiv).val();
 
 					$.ajax({
-					url: '/admin/shop/item/index.php?autocomplete=1&show_group=1&shop_id={$oShop->id}',
+					url: hostcmsBackend + '/shop/item/index.php?autocomplete=1&show_group=1&shop_id={$oShop->id}',
 					dataType: 'json',
 					data: {
 						queryString: request.term
@@ -1512,7 +1515,7 @@ class Field_Controller_Tab
 		$oAdmin_Form_Entity_Shop_Groups
 			->value($group_id)
 			->options(array(' … ') + $aOptions)
-			->onchange("$.ajaxRequest({path: '/admin/shop/item/index.php', context: '{$oAdmin_Form_Entity_Shop_Items->id}', callBack: $.loadSelectOptionsCallback, action: 'loadShopItemList', additionalParams: 'shop_group_id=' + this.value + '&shop_id={$oField->shop_id}',windowId: '{$windowId}'}); return false");
+			->onchange("$.ajaxRequest({path: hostcmsBackend + '/shop/item/index.php', context: '{$oAdmin_Form_Entity_Shop_Items->id}', callBack: $.loadSelectOptionsCallback, action: 'loadShopItemList', additionalParams: 'shop_group_id=' + this.value + '&shop_id={$oField->shop_id}',windowId: '{$windowId}'}); return false");
 
 		// Items
 		$oShop_Items = $oShop->Shop_Items;
@@ -1611,7 +1614,7 @@ class Field_Controller_Tab
 						selectedVal = $(':selected', jInfGroupDiv).val();
 
 					$.ajax({
-					url: '/admin/shop/item/index.php?autocomplete=1&shop_id={$oShop->id}&shop_group_id=' + selectedVal + '',
+					url: hostcmsBackend + '/shop/item/index.php?autocomplete=1&shop_id={$oShop->id}&shop_group_id=' + selectedVal + '',
 					dataType: 'json',
 					data: {
 						queryString: request.term
@@ -1735,6 +1738,7 @@ class Field_Controller_Tab
 				case 12: // Shop
 				case 13: // IS group
 				case 14: // Shop group
+				case 15: // Bigint
 					$value = Core_Array::getPost("field_{$oField->id}_{$oField_Value->id}");
 
 					// 000227947
@@ -1792,7 +1796,7 @@ class Field_Controller_Tab
 				case 12: // Shop
 				case 13: // IS group
 				case 14: // Shop group
-
+				case 15: // Bigint
 					// New values of field
 					$aNewValue = Core_Array::getPost("field_{$oField->id}", array());
 
@@ -2179,6 +2183,7 @@ class Field_Controller_Tab
 		switch ($oField->type)
 		{
 			case 0: // Int
+			case 15: // Bigint
 			case 7: // Checkbox
 			case 3: // List
 				$value = intval($value);

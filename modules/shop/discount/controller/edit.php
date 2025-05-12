@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -59,6 +59,8 @@ class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 
 		$modelName = $this->_object->getModelName();
 
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
+
 		switch ($modelName)
 		{
 			case 'shop_discount':
@@ -93,8 +95,8 @@ class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 				$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2);
 
 				$sColorValue = ($this->_object->id && $this->getField('color')->value)
-				? $this->getField('color')->value
-				: '#aebec4';
+					? $this->getField('color')->value
+					: '#aebec4';
 
 				$this->getField('color')
 					->colorpicker(TRUE)
@@ -181,7 +183,7 @@ class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 					->options(array(' … ') + self::fillShopDiscountDir($this->_object->shop_id))
 					->name('shop_discount_dir_id')
 					->value($this->_object->shop_discount_dir_id)
-					->divAttr(array('class' => 'form-group col-xs-12 col-lg-4'));
+					->divAttr(array('class' => 'form-group col-xs-12 col-lg-3'));
 
 				$oMainRow1->add($oGroupSelect);
 
@@ -203,18 +205,29 @@ class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 							))
 							->value($this->_object->type)
 							->class('form-control input-group-addon')
+							->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [0,1])")
 						)
 					)
 				);
 
-				$oMainTab->move($this->getField('coupon')
-					->divAttr(array('class' => 'form-group margin-top-21 col-xs-12 col-sm-6 col-md-4 col-lg-3'))->onclick("$.toggleCoupon(this)"), $oMainRow1);
+				$oMainTab->move($this->getField('max_discount')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-2 col-lg-2 hidden-1')), $oMainRow1);
+
+				$oMainTab
+					->move($this->getField('coupon')
+					->divAttr(array('class' => 'form-group margin-top-21 col-xs-12 col-sm-6 col-md-4 col-lg-2'))->onclick("$.toggleCoupon(this)"), $oMainRow1);
 
 				$hidden = !$this->_object->coupon
 					? ' hidden'
 					: '';
 
 				$oMainTab->move($this->getField('coupon_text')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 col-lg-3' . $hidden)), $oMainRow1);
+
+				$oAdmin_Form_Entity_Code = Admin_Form_Entity::factory('Code');
+				$oAdmin_Form_Entity_Code->html(
+					"<script>radiogroupOnChange('{$windowId}', {$this->_object->type}, [0,1])</script>"
+				);
+
+				$oMainTab->add($oAdmin_Form_Entity_Code);
 
 				$title = $this->_object->id
 					? Core::_('Shop_Discount.item_discount_edit_form_title', $this->_object->name, FALSE)

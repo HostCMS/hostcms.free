@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Ipaddress
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Ipaddress_Visitor_Filter_Export_Controller extends Core_Servant_Properties
 {
@@ -48,10 +48,64 @@ class Ipaddress_Visitor_Filter_Export_Controller extends Core_Servant_Properties
 					!is_null($oIpaddress_Visitor_Filter)
 						&& $this->_setObjects($oIpaddress_Visitor_Filter);
 				}
+				else
+				{
+					$oIpaddress_Visitor_Filter_Dir = Core_Entity::factory('Ipaddress_Visitor_Filter_Dir')->getById($key);
+
+					!is_null($oIpaddress_Visitor_Filter_Dir)
+						&& $this->_addFilters($oIpaddress_Visitor_Filter_Dir);
+				}
 			}
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Add filters from dirs
+	 * @param Ipaddress_Visitor_Filter_Dir_Model $oIpaddress_Visitor_Filter_Dir
+	 * @return self
+	 */
+	protected function _addFilters(Ipaddress_Visitor_Filter_Dir_Model $oIpaddress_Visitor_Filter_Dir)
+	{
+		$aIpaddress_Visitor_Filters = $oIpaddress_Visitor_Filter_Dir->Ipaddress_Visitor_Filters->findAll(FALSE);
+		foreach ($aIpaddress_Visitor_Filters as $oIpaddress_Visitor_Filter)
+		{
+			$this->_setObjects($oIpaddress_Visitor_Filter);
+		}
+
+		// subgroups
+		$aIpaddress_Visitor_Filter_Dirs = $oIpaddress_Visitor_Filter_Dir->Ipaddress_Visitor_Filter_Dirs->findAll(FALSE);
+		foreach ($aIpaddress_Visitor_Filter_Dirs as $oIpaddress_Visitor_Filter_Dir)
+		{
+			$this->_addFilters($oIpaddress_Visitor_Filter_Dir);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Get dir name
+	 * @param Ipaddress_Visitor_Filter_Model $oIpaddress_Visitor_Filter
+	 * @return string
+	 */
+	protected function _getDirName(Ipaddress_Visitor_Filter_Model $oIpaddress_Visitor_Filter)
+	{
+		$aReturn = array();
+
+		if ($oIpaddress_Visitor_Filter->ipaddress_visitor_filter_dir_id)
+		{
+			$oIpaddress_Visitor_Filter_Dir = $oIpaddress_Visitor_Filter->Ipaddress_Visitor_Filter_Dir;
+
+			do {
+				$aReturn[] = $oIpaddress_Visitor_Filter_Dir->name;
+				$oIpaddress_Visitor_Filter_Dir = $oIpaddress_Visitor_Filter_Dir->getParent();
+			} while ($oIpaddress_Visitor_Filter_Dir);
+
+			$aReturn = array_reverse($aReturn);
+		}
+
+		return implode('/', $aReturn);
 	}
 
 	/**
@@ -63,7 +117,9 @@ class Ipaddress_Visitor_Filter_Export_Controller extends Core_Servant_Properties
 	{
 		$this->_aObjects[$oIpaddress_Visitor_Filter->name] = array(
 			'version' => CURRENT_VERSION,
+			'dirName' => strval($this->_getDirName($oIpaddress_Visitor_Filter)),
 			'name' => $oIpaddress_Visitor_Filter->name,
+			'description' => $oIpaddress_Visitor_Filter->description,
 			'json' => $oIpaddress_Visitor_Filter->json,
 			'active' => $oIpaddress_Visitor_Filter->active,
 			'mode' => $oIpaddress_Visitor_Filter->mode,
@@ -84,6 +140,8 @@ class Ipaddress_Visitor_Filter_Export_Controller extends Core_Servant_Properties
 	{
 		$this->_init();
 
+// var_dump(count($this->_aObjects));
+
 		if (count($this->_aObjects))
 		{
 			$prefix = count($this->_aObjects) == 1
@@ -102,6 +160,7 @@ class Ipaddress_Visitor_Filter_Export_Controller extends Core_Servant_Properties
 				count($this->_aObjects) == 1
 					? reset($this->_aObjects)
 					: $this->_aObjects
+				, defined('JSON_UNESCAPED_UNICODE') ? JSON_UNESCAPED_UNICODE : 0
 			);
 
 			exit();

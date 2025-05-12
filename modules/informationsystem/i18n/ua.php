@@ -160,4 +160,10 @@ return array(
 	'searchUnindexItem' => 'Ідентифікатор елемента',
 	'recountInformationsystem' => 'Ідентифікатор інформаційної системи',
 	'all_shortcuts_count' => 'Всього ярликів: %s',
+
+	'url_type_date' => 'Дата',
+	'path_date_format' => 'Формат шляху типу "Дата"',
+
+	'watermark_item_header' => 'Елемент',
+	'watermark_group_header' => 'Група',
 );

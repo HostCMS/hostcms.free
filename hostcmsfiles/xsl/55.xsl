@@ -347,7 +347,7 @@
 		<xsl:template match="shop_group" mode="breadCrumbs">
 			<xsl:param name="parent_id" select="parent_id"/>
 
-			<xsl:apply-templates select="//shop_group[@id=$parent_id]" mode="breadCrumbs"/>
+			<xsl:apply-templates select="ancestor::shop_group[@id=$parent_id]" mode="breadCrumbs"/>
 
 			<xsl:if test="parent_id=0">
 				<a href="{/shop/url}" hostcms:id="{/shop/@id}" hostcms:field="name" hostcms:entity="shop">

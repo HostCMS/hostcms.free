@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Sql
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Sql_Table_Entity extends Core_Empty_Entity
 {
@@ -32,6 +32,10 @@ class Sql_Table_Entity extends Core_Empty_Entity
 	public $fragmented = NULL;
 	public $collation = NULL;
 
+	/**
+	 * Fields
+	 * @var array
+	 */
 	protected $_tableColums = array(
 		'name' => array(
 			'datatype' => 'string',
@@ -75,10 +79,11 @@ class Sql_Table_Entity extends Core_Empty_Entity
 	 * Get primary key value
 	 * @return mixed
 	 */
-	public function getPrimaryKeyName()
+	/*public function getPrimaryKeyName()
 	{
+		// Первичный ключ не используется, так как при добавлении он будет скрыт с вкладки "Дополнительно", а нам требуется его заполнять
 		return 'name';
-	}
+	}*/
 
 	/**
 	 * Backend callback method
@@ -155,7 +160,8 @@ class Sql_Table_Entity extends Core_Empty_Entity
 	{
 		if (isset($this->_tableColums[$property]))
 		{
-			return '';
+			// return '';
+			return $this->_tableColums[$property];
 		}
 	}
 

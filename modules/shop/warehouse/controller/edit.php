@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -221,7 +221,7 @@ class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 					allowClear: true,
 					multiple: true,
 					ajax: {
-						url: "/admin/tag/index.php?hostcms[action]=loadTagsList&hostcms[checked][0][0]=1",
+						url: hostcmsBackend + "/tag/index.php?hostcms[action]=loadTagsList&hostcms[checked][0][0]=1",
 						dataType: "json",
 						type: "GET",
 						processResults: function (data) {

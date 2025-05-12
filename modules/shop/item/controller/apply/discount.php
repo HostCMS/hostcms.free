@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 {
@@ -146,7 +146,7 @@ class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 			{
 				$oAdmin_Form_Dataset_Entity = $this->_Admin_Form_Controller->getDataset($datasetKey);
 
-				if ($oAdmin_Form_Dataset_Entity && get_class($oAdmin_Form_Dataset_Entity->getEntity()) == 'Shop_Item_Model')
+				if ($oAdmin_Form_Dataset_Entity /*&& get_class($oAdmin_Form_Dataset_Entity->getEntity()) == 'Shop_Item_Model'*/)
 				{
 					foreach ($checkedItems as $key => $value)
 					{
@@ -198,91 +198,66 @@ class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 			$iDiscountID = Core_Array::getPost('discount_id', 0, 'int');
 			$iBonusID = Core_Array::getPost('bonus_id', 0, 'int');
 
-			$oShop_Item = $this->_object;
-
-			if ($iDiscountID)
+			switch (get_class($this->_object))
 			{
-				$this->_applyDiscounts($oShop_Item, $iDiscountID);
+				case 'Shop_Item_Model':
+					$this->_applyItem($this->_object, $iDiscountID, $iBonusID);
+				break;
+				case 'Shop_Group_Model':
+					$this->_applyGroup($this->_object, $iDiscountID, $iBonusID);
+				break;
 			}
-
-			if (Core::moduleIsActive('siteuser') && $iBonusID)
-			{
-				$this->_applyBonuses($oShop_Item, $iBonusID);
-			}
-
-			$this->_clear($oShop_Item);
 		}
 
 		return $this;
 	}
 
 	/**
-	 * Clear shop item
+	 * Apply attrubites for item
 	 * @param Shop_Item_Model $oShop_Item
+	 * @param int $iDiscountID
+	 * @param int $iBonusID
 	 * @return self
 	 */
-	protected function _clear(Shop_Item_Model $oShop_Item)
+	protected function _applyItem(Shop_Item_Model $oShop_Item, $iDiscountID, $iBonusID)
 	{
-		$oShop_Item->clearCache();
-
-		// Fast filter
-		if ($this->Shop->filter)
+		if ($iDiscountID)
 		{
-			$oShop_Filter_Controller = new Shop_Filter_Controller($this->Shop);
-			$oShop_Filter_Controller->fill($oShop_Item);
+			$this->_applyDiscounts($oShop_Item, $iDiscountID);
 		}
+
+		if (Core::moduleIsActive('siteuser') && $iBonusID)
+		{
+			$this->_applyBonuses($oShop_Item, $iBonusID);
+		}
+
+		$this->_clear($oShop_Item);
 
 		return $this;
 	}
 
 	/**
-	 * Get shop items
-	 * @param Shop_Item_Model $oShop_Item
-	 * @param int $flag_include_modifications
-	 * @return array
+	 * Apply attrubites for items in group
+	 * @param Shop_Group_Model $oShop_Group
+	 * @param int $iDiscountID
+	 * @param int $iBonusID
+	 * @return self
 	 */
-	protected function _getShopItems(Shop_Item_Model $oShop_Item, $flag_include_modifications = 0)
+	protected function _applyGroup(Shop_Group_Model $oShop_Group, $iDiscountID, $iBonusID)
 	{
-		$aReturn = array();
-
-		$oShop_Item->shortcut_id && $oShop_Item = $oShop_Item->Shop_Item;
-
-		$shop_producer_id = Core_Array::getPost('shop_producer_id', 0 , 'int');
-
-		if ($shop_producer_id)
+		$aShop_Items = $oShop_Group->Shop_Items->findAll(FALSE);
+		foreach ($aShop_Items as $oShop_Item)
 		{
-			if ($oShop_Item->shop_producer_id == $shop_producer_id)
-			{
-				$aReturn[] = $oShop_Item;
-			}
-
-			if ($flag_include_modifications)
-			{
-				$aModifications = $oShop_Item->Modifications->findAll(FALSE);
-				foreach ($aModifications as $oModification)
-				{
-					if ($oModification->shop_producer_id == $shop_producer_id)
-					{
-						$aReturn[] = $oModification;
-					}
-				}
-			}
-		}
-		else
-		{
-			$aReturn[] = $oShop_Item;
-
-			if ($flag_include_modifications)
-			{
-				$aModifications = $oShop_Item->Modifications->findAll(FALSE);
-				foreach ($aModifications as $oModification)
-				{
-					$aReturn[] = $oModification;
-				}
-			}
+			$this->_applyItem($oShop_Item, $iDiscountID, $iBonusID);
 		}
 
-		return $aReturn;
+		$aShop_Groups = $oShop_Group->Shop_Groups->findAll(FALSE);
+		foreach ($aShop_Groups as $oTmp_Shop_Group)
+		{
+			$this->_applyGroup($oTmp_Shop_Group, $iDiscountID, $iBonusID);
+		}
+
+		return $this;
 	}
 
 	/**
@@ -342,6 +317,75 @@ class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 			}
 
 			$this->_clear($oShop_Item);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Get shop items
+	 * @param Shop_Item_Model $oShop_Item
+	 * @param int $flag_include_modifications
+	 * @return array
+	 */
+	protected function _getShopItems(Shop_Item_Model $oShop_Item, $flag_include_modifications = 0)
+	{
+		$aReturn = array();
+
+		$oShop_Item->shortcut_id && $oShop_Item = $oShop_Item->Shop_Item;
+
+		$shop_producer_id = Core_Array::getPost('shop_producer_id', 0 , 'int');
+
+		if ($shop_producer_id)
+		{
+			if ($oShop_Item->shop_producer_id == $shop_producer_id)
+			{
+				$aReturn[] = $oShop_Item;
+			}
+
+			if ($flag_include_modifications)
+			{
+				$aModifications = $oShop_Item->Modifications->findAll(FALSE);
+				foreach ($aModifications as $oModification)
+				{
+					if ($oModification->shop_producer_id == $shop_producer_id)
+					{
+						$aReturn[] = $oModification;
+					}
+				}
+			}
+		}
+		else
+		{
+			$aReturn[] = $oShop_Item;
+
+			if ($flag_include_modifications)
+			{
+				$aModifications = $oShop_Item->Modifications->findAll(FALSE);
+				foreach ($aModifications as $oModification)
+				{
+					$aReturn[] = $oModification;
+				}
+			}
+		}
+
+		return $aReturn;
+	}
+
+	/**
+	 * Clear shop item
+	 * @param Shop_Item_Model $oShop_Item
+	 * @return self
+	 */
+	protected function _clear(Shop_Item_Model $oShop_Item)
+	{
+		$oShop_Item->clearCache();
+
+		// Fast filter
+		if ($this->Shop->filter)
+		{
+			$oShop_Filter_Controller = new Shop_Filter_Controller($this->Shop);
+			$oShop_Filter_Controller->fill($oShop_Item);
 		}
 
 		return $this;

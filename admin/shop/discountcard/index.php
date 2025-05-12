@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'shop');
 
 // Код формы
 $iAdmin_Form_Id = 249;
-$sFormAction = '/admin/shop/discountcard/index.php';
+$sFormAction = '/{admin}/shop/discountcard/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -51,10 +51,10 @@ $oAdmin_Form_Entity_Menus->add(
 			->name(Core::_('Shop_Discountcard.levels'))
 			->icon('fa fa-bars')
 			->href(
-				$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/discountcard/level/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}")
+				$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/discountcard/level/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}")
 			)
 			->onclick(
-				$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/discountcard/level/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}")
+				$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/discountcard/level/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}")
 			)
 	)
 	->add(
@@ -62,10 +62,10 @@ $oAdmin_Form_Entity_Menus->add(
 			->name(Core::_('Shop_Discountcard.types'))
 			->icon('fa fa-circle icon-separator')
 			->href(
-				$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/discountcard/bonus/type/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}")
+				$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/discountcard/bonus/type/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}")
 			)
 			->onclick(
-				$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/discountcard/bonus/type/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}")
+				$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/discountcard/bonus/type/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}")
 			)
 	)
 	->add(
@@ -100,8 +100,8 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop.menu'))
-		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/index.php'))
-		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/index.php'))
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/index.php'))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/index.php'))
 );
 
 // Крошки по директориям магазинов
@@ -115,8 +115,8 @@ if ($oShopDir->id)
 	{
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 			->name($oShopDirBreadcrumbs->name)
-			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"))
-			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"));
+			->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"));
 	} while ($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
@@ -131,8 +131,8 @@ if ($oShopDir->id)
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($oShop->name)
-		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"))
-		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"))
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"))
 );
 
 // Крошки по группам товаров
@@ -146,8 +146,8 @@ if ($oShopGroup->id)
 	{
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 			->name($oShopGroupBreadcrumbs->name)
-			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
-			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"));
+			->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"));
 	} while ($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);

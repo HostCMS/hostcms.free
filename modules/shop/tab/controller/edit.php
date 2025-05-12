@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Tab_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -85,7 +85,7 @@ class Shop_Tab_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oText = Admin_Form_Entity::factory('Textarea')
 					->value($this->_object->text)
-					->rows(15)
+					->rows(18)
 					->caption(Core::_('Shop_Tab.text'))
 					->name('text')
 					->wysiwyg(Core::moduleIsActive('wysiwyg'))
@@ -117,7 +117,7 @@ class Shop_Tab_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								allowClear: true,
 								multiple: true,
 								ajax: {
-									url: "/admin/shop/item/index.php?shortcuts&includeRoot=1&shop_id=' . $this->_object->shop_id .'",
+									url: hostcmsBackend + "/shop/item/index.php?shortcuts&includeRoot=1&shop_id=' . $this->_object->shop_id .'",
 									dataType: "json",
 									type: "GET",
 									processResults: function (data) {
@@ -162,7 +162,7 @@ class Shop_Tab_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								allowClear: true,
 								multiple: true,
 								ajax: {
-									url: "/admin/shop/item/index.php?items&shop_id=' . $this->_object->shop_id .'",
+									url: hostcmsBackend + "/shop/item/index.php?items&shop_id=' . $this->_object->shop_id .'",
 									dataType: "json",
 									type: "GET",
 									processResults: function (data) {
@@ -207,7 +207,7 @@ class Shop_Tab_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								allowClear: true,
 								multiple: true,
 								ajax: {
-									url: "/admin/shop/item/index.php?producers&shop_id=' . $this->_object->shop_id .'",
+									url: hostcmsBackend + "/shop/item/index.php?producers&shop_id=' . $this->_object->shop_id .'",
 									dataType: "json",
 									type: "GET",
 									processResults: function (data) {

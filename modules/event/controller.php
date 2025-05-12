@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Event_Controller
 {
@@ -126,5 +126,55 @@ class Event_Controller
 			}
 			?>
 		</span><?php
+	}
+
+	/**
+	 * Show crm projects filter
+	 * @return self
+	 */
+	static public function showCrmProjectFilter()
+	{
+		ob_start();
+
+		$oUser = Core_Auth::getCurrentUser();
+
+		$crm_project_id = Core_Array::getGet('crm_project_id', 0, 'int');
+
+		?><div class="crm-project-filter-wrapper"><?php
+			$oCrm_Projects = Core_Entity::factory('Crm_Project');
+			$oCrm_Projects->queryBuilder()
+				->join('event_crm_projects', 'event_crm_projects.crm_project_id', '=', 'crm_projects.id')
+				->join('events', 'events.id', '=', 'event_crm_projects.event_id')
+				->join('event_users', 'event_users.event_id', '=', 'events.id')
+				->where('crm_projects.site_id', '=', CURRENT_SITE)
+				->where('event_users.user_id', '=', $oUser->id)
+				->groupBy('crm_projects.id');
+
+			$aCrm_Projects = $oCrm_Projects->findAll(FALSE);
+			foreach ($aCrm_Projects as $oCrm_Project)
+			{
+				$icon = $oCrm_Project->crm_icon_id
+					? $oCrm_Project->Crm_Icon->value
+					: 'fa-solid fa-tasks';
+
+				$color = $oCrm_Project->color != ''
+					? $oCrm_Project->color
+					: '#aebec4';
+
+				$additionalParams = $crm_project_id == $oCrm_Project->id
+					? ''
+					: "crm_project_id={$oCrm_Project->id}";
+
+				$onclick = "mainFormLocker.unlock(); $.adminLoad({additionalParams: '{$additionalParams}',current: '1',sortingDirection: '1',windowId: 'id_content',path: hostcmsBackend + '/event/index.php'}); return false";
+
+				$active = $crm_project_id == $oCrm_Project->id
+					? 'active'
+					: '';
+
+				?><div onclick="<?php echo $onclick?>" class="crm-project-filter-item <?php echo $active?>" title="<?php echo htmlspecialchars($oCrm_Project->name)?>" style="background-color: <?php echo htmlspecialchars($color)?>"><i class="<?php echo htmlspecialchars($icon)?>"></i></div><?php
+			}
+		?></div><?php
+
+		return ob_get_clean();
 	}
 }

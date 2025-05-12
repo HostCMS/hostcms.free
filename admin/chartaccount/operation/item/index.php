@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'chartaccount');
 
 // Код формы
 $iAdmin_Form_Id = 363;
-$sAdminFormAction = '/admin/chartaccount/operation/item/index.php';
+$sAdminFormAction = '/{admin}/chartaccount/operation/item/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -39,10 +39,10 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('Admin_Form.add'))
 		->icon('fa fa-plus')
 		->href(
-			$oAdmin_Form_Controller->getAdminActionLoadHref(array('path' => '/admin/chartaccount/operation/item/index.php', 'action' => 'edit', 'datasetKey' => 0, 'datasetValue' => 0, 'additionalParams' => "chartaccount_operation_id={$chartaccount_operation_id}&company_id={$company_id}"))
+			$oAdmin_Form_Controller->getAdminActionLoadHref(array('path' => '/{admin}/chartaccount/operation/item/index.php', 'action' => 'edit', 'datasetKey' => 0, 'datasetValue' => 0, 'additionalParams' => "chartaccount_operation_id={$chartaccount_operation_id}&company_id={$company_id}"))
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminActionModalLoad(array('path' => '/admin/chartaccount/operation/item/index.php', 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => 0, 'additionalParams' => "chartaccount_operation_id={$chartaccount_operation_id}&company_id={$company_id}", 'width' => '90%'))
+			$oAdmin_Form_Controller->getAdminActionModalLoad(array('path' => '/{admin}/chartaccount/operation/item/index.php', 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => 0, 'additionalParams' => "chartaccount_operation_id={$chartaccount_operation_id}&company_id={$company_id}", 'width' => '90%'))
 		)
 );
 

@@ -47,4 +47,9 @@ return array(
 	'bot_page_description' => '%s needs to review the security of your connection before proceeding.',
 	'bot_page_button' => 'I\'m a Human Being &#187;',
 	'bot_page_button_wait' => 'Please wait ...',
+
+	'import' => 'Import',
+	'import_file' => 'Select file from computer',
+	'import_button' => 'Upload',
+	'importFilters_success' => 'Import complete!',
 );

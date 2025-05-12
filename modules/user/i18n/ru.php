@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage User
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Сотрудники',
@@ -101,4 +101,6 @@ return array(
 
 	'option_max_height' => 'Максимальная высота аватара',
 	'option_max_width' => 'Максимальная ширина аватара',
+
+	'accessdenied' => 'Блокировки',
 );

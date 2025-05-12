@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Delivery_Condition_Controller_Import extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -74,7 +74,7 @@ class Shop_Delivery_Condition_Controller_Import extends Admin_Form_Action_Contro
 		// Цикл по строкам CSV-файла
 		while (!feof($fp))
 		{
-			$current_csv_line_array = fgetcsv($fp, 10000, ';', '"');
+			$current_csv_line_array = fgetcsv($fp, 10000, ';', '"', "\\");
 
 			// Если пустая строка - пропускаем
 			if (!is_array($current_csv_line_array) || (count($current_csv_line_array) == 1 && empty ($current_csv_line_array[0])))

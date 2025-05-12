@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -13,7 +13,7 @@ Core_Auth::authorization($sModule = 'constant');
 // Код формы
 $iAdmin_Form_Id = 26;
 
-$sAdminFormAction = '/admin/constant/index.php';
+$sAdminFormAction = '/{admin}/constant/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -54,6 +54,8 @@ if ($oConstant_Dir->id)
 	$oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 }
 
+$additionalParams = "constant_dir_id={$oConstant_Dir->id}";
+
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
@@ -82,6 +84,26 @@ $oAdmin_Form_Entity_Menus->add(
 
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
+
+// Глобальный поиск
+$sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
+
+$oAdmin_Form_Controller->addEntity(
+	Admin_Form_Entity::factory('Code')
+		->html('
+			<div class="row search-field margin-bottom-20">
+				<div class="col-xs-12">
+					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
+						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
+						<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
+						<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '"><i class="fa fa-search fa-fw"></i></button>
+					</form>
+				</div>
+			</div>
+		')
+);
+
+$sGlobalSearch = Core_DataBase::instance()->escapeLike($sGlobalSearch);
 
 // Действие редактирования
 $oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
@@ -123,7 +145,20 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Constant_Dir')
 );
 
-$oAdmin_Form_Dataset->addCondition(array('where' =>array('parent_id', '=', $oConstant_Dir->id)));
+if (strlen($sGlobalSearch))
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('open' => array()))
+			->addCondition(array('where' => array('constant_dirs.id', '=', $sGlobalSearch)))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('constant_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
+}
+else
+{
+	$oAdmin_Form_Dataset->addCondition(array('where' => array('parent_id', '=', $oConstant_Dir->id)));
+}
+
 $oAdmin_Form_Dataset->changeField('active', 'type', 1);
 
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
@@ -138,7 +173,22 @@ $oUser = Core_Auth::getCurrentUser();
 !$oUser->superuser && $oUser->only_access_my_own
 	&& $oAdmin_Form_Dataset->addUserConditions();
 
-$oAdmin_Form_Dataset->addCondition(array('where' =>array('constant_dir_id', '=', $oConstant_Dir->id)));
+if (strlen($sGlobalSearch))
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('open' => array()))
+			->addCondition(array('where' => array('constants.id', '=', $sGlobalSearch)))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('constants.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('constants.value', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
+}
+else
+{
+	$oAdmin_Form_Dataset->addCondition(array('where' => array('constant_dir_id', '=', $oConstant_Dir->id)));
+}
+
 $oAdmin_Form_Dataset->changeField('name', 'type', 1);
 
 // Добавляем источник данных контроллеру формы

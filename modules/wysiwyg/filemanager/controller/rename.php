@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Wysiwyg
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Wysiwyg_Filemanager_Controller_Rename extends Admin_Form_Action_Controller
 {
@@ -137,9 +137,7 @@ class Wysiwyg_Filemanager_Controller_Rename extends Admin_Form_Action_Controller
 			$new_name = Core_Array::getPost('new_name', '', 'trim');
 			if ($new_name != '')
 			{
-				$target = CMS_FOLDER . $this->cdir . Core_File::filenameCorrection($new_name);
-
-				Core_File::rename($this->_getFilePath(), $target);
+				Core_File::rename($this->_getFilePath($this->_object->name), $this->_getFilePath($new_name), TRUE);
 			}
 		}
 	}
@@ -148,8 +146,8 @@ class Wysiwyg_Filemanager_Controller_Rename extends Admin_Form_Action_Controller
 	 * Get file path
 	 * @return string
 	 */
-	protected function _getFilePath()
+	protected function _getFilePath($name)
 	{
-		return CMS_FOLDER . Core_File::pathCorrection($this->cdir . $this->_object->name);
+		return CMS_FOLDER . Core_File::pathCorrection(ltrim($this->cdir, '/\\') . $name);
 	}
 }

@@ -4,13 +4,13 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
 Core_Auth::authorization($sModule = 'chartaccount');
 
-$sAdminFormAction = '/admin/chartaccount/trialbalance/entry/index.php';
+$sAdminFormAction = '/{admin}/chartaccount/trialbalance/entry/index.php';
 
 $code = Core_Array::getGet('code', '', 'strval');
 $sc = Core_Array::getGet('sc', array(), 'array');
@@ -77,19 +77,19 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Chartaccount.title'))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/chartaccount/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/chartaccount/index.php', NULL, NULL, '')
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/chartaccount/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/chartaccount/index.php', NULL, NULL, '')
 		)
 )->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Chartaccount_Trialbalance.title'))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref(array('path' => '/admin/chartaccount/trialbalance/index.php', 'additionalParams' => ''))
+			$oAdmin_Form_Controller->getAdminLoadHref(array('path' => '/{admin}/chartaccount/trialbalance/index.php', 'additionalParams' => ''))
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax(array('path' => '/admin/chartaccount/trialbalance/index.php', 'additionalParams' => ''))
+			$oAdmin_Form_Controller->getAdminLoadAjax(array('path' => '/{admin}/chartaccount/trialbalance/index.php', 'additionalParams' => ''))
 	)
 )->add(
 	Admin_Form_Entity::factory('Breadcrumb')

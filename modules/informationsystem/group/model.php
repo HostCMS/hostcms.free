@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Informationsystem_Group_Model extends Core_Entity
 {
@@ -365,6 +365,21 @@ class Informationsystem_Group_Model extends Core_Entity
 			$this->Media_Informationsystem_Groups->deleteAll(FALSE);
 		}
 
+		// Свойства "Информационная группа"
+		$oProperties = Core_Entity::factory('Property');
+		$oProperties->queryBuilder()
+			->where('informationsystem_id', '=', $this->informationsystem_id)
+			->where('type', '=', 13);
+
+		$aProperties = $oProperties->findAll(FALSE);
+		foreach ($aProperties as $oProperty)
+		{
+			Core_QueryBuilder::delete('property_value_ints')
+				->where('property_id', '=', $oProperty->id)
+				->where('value', '=', $this->id)
+				->execute();
+		}
+
 		// Удаляем директорию информационной группы
 		$this->deleteDir();
 
@@ -486,13 +501,27 @@ class Informationsystem_Group_Model extends Core_Entity
 	{
 		$this->queryBuilder()
 			//->clear()
-			->where('path', 'LIKE', Core_DataBase::instance()->escapeLike($path))
-			->where('parent_id', '=', $parent_id)
-			->where('shortcut_id', '=', 0)
-			->limit(1)
-			->clearOrderBy();
+			->where('informationsystem_groups.path', 'LIKE', Core_DataBase::instance()->escapeLike($path))
+			->where('informationsystem_groups.parent_id', '=', $parent_id)
+			->where('informationsystem_groups.shortcut_id', '=', 0)
+			//->limit(1)
+			->clearOrderBy()
+			->orderBy('informationsystem_groups.id', 'ASC');
 
 		$aInformationsystem_Groups = $this->findAll(FALSE);
+
+		// Fix the same paths
+		if (count($aInformationsystem_Groups) > 1)
+		{
+			foreach ($aInformationsystem_Groups as $key => $oInformationsystem_Group)
+			{
+				if ($key > 0)
+				{
+					$oInformationsystem_Group->path .= '-' . $key;
+					$oInformationsystem_Group->save();
+				}
+			}
+		}
 
 		return isset($aInformationsystem_Groups[0])
 			? $aInformationsystem_Groups[0]
@@ -628,14 +657,14 @@ class Informationsystem_Group_Model extends Core_Entity
 	 */
 	public function deleteDir()
 	{
-		// Удаляем файл большого изображения группы
-		$this->deleteLargeImage();
-
-		// Удаляем файл малого изображения группы
-		$this->deleteSmallImage();
-
 		if (Core_File::isDir($this->getGroupPath()))
 		{
+			// Удаляем файл большого изображения группы
+			$this->deleteLargeImage();
+
+			// Удаляем файл малого изображения группы
+			$this->deleteSmallImage();
+
 			try
 			{
 				Core_File::deleteDir($this->getGroupPath());
@@ -647,6 +676,7 @@ class Informationsystem_Group_Model extends Core_Entity
 	/**
 	 * Delete group's large image
 	 * @return self
+	 * @hostcms-event informationsystem_group.onAfterDeleteLargeImage
 	 */
 	public function deleteLargeImage()
 	{
@@ -658,6 +688,8 @@ class Informationsystem_Group_Model extends Core_Entity
 				Core_File::delete($fileName);
 			} catch (Exception $e) {}
 
+			Core_Event::notify($this->_modelName . '.onAfterDeleteLargeImage', $this);
+
 			$this->image_large = '';
 			$this->save();
 		}
@@ -667,6 +699,7 @@ class Informationsystem_Group_Model extends Core_Entity
 	/**
 	 * Delete group's small image
 	 * @return self
+	 * @hostcms-event informationsystem_group.onAfterDeleteSmallImage
 	 */
 	public function deleteSmallImage()
 	{
@@ -677,6 +710,8 @@ class Informationsystem_Group_Model extends Core_Entity
 			{
 				Core_File::delete($fileName);
 			} catch (Exception $e) {}
+
+			Core_Event::notify($this->_modelName . '.onAfterDeleteSmallImage', $this);
 
 			$this->image_small = '';
 			$this->save();
@@ -802,6 +837,7 @@ class Informationsystem_Group_Model extends Core_Entity
 
 	/**
 	 * Увеличение на 1 количества элементов в группе и во всех родительских группах
+	 * @retrun self
 	 */
 	public function incCountItems()
 	{
@@ -809,6 +845,7 @@ class Informationsystem_Group_Model extends Core_Entity
 	}
 	/**
 	 * Уменьшение на 1 количества элементов в группе и во всех родительских группах
+	 * @retrun self
 	 */
 	public function decCountItems()
 	{
@@ -836,6 +873,7 @@ class Informationsystem_Group_Model extends Core_Entity
 
 	/**
 	 * Увеличение на 1 количества подгрупп в группе и во всех родительских группах
+	 * @retrun self
 	 */
 	public function incCountGroups()
 	{
@@ -844,6 +882,7 @@ class Informationsystem_Group_Model extends Core_Entity
 
 	/**
 	 * Уменьшение на 1 количества подгрупп в группе и во всех родительских группах
+	 * @retrun self
 	 */
 	public function decCountGroups()
 	{
@@ -971,53 +1010,56 @@ class Informationsystem_Group_Model extends Core_Entity
 
 		$oSearch_Page->title = (string) $this->name;
 
-		$aPropertyValues = $this->getPropertyValues(FALSE);
-		foreach ($aPropertyValues as $oPropertyValue)
+		if (Core::moduleIsActive('property'))
 		{
-			if ($oPropertyValue->Property->indexing)
+			$aPropertyValues = $this->getPropertyValues(FALSE);
+			foreach ($aPropertyValues as $oPropertyValue)
 			{
-				// List
-				if ($oPropertyValue->Property->type == 3 && Core::moduleIsActive('list'))
+				if ($oPropertyValue->Property->indexing)
 				{
-					if ($oPropertyValue->value != 0)
+					// List
+					if ($oPropertyValue->Property->type == 3 && Core::moduleIsActive('list'))
 					{
-						$oList_Item = $oPropertyValue->List_Item;
-						$oList_Item->id && $oSearch_Page->text .= htmlspecialchars((string) $oList_Item->value) . ' ' . htmlspecialchars((string) $oList_Item->description) . ' ';
-					}
-				}
-				// Informationsystem
-				elseif ($oPropertyValue->Property->type == 5 && Core::moduleIsActive('informationsystem'))
-				{
-					if ($oPropertyValue->value != 0)
-					{
-						$oInformationsystem_Item = $oPropertyValue->Informationsystem_Item;
-						if ($oInformationsystem_Item->id)
+						if ($oPropertyValue->value != 0)
 						{
-							$oSearch_Page->text .= htmlspecialchars((string) $oInformationsystem_Item->name) . ' ' . $oInformationsystem_Item->description . ' ' . $oInformationsystem_Item->text . ' ';
+							$oList_Item = $oPropertyValue->List_Item;
+							$oList_Item->id && $oSearch_Page->text .= htmlspecialchars((string) $oList_Item->value) . ' ' . htmlspecialchars((string) $oList_Item->description) . ' ';
 						}
 					}
-				}
-				// Shop
-				elseif ($oPropertyValue->Property->type == 12 && Core::moduleIsActive('shop'))
-				{
-					if ($oPropertyValue->value != 0)
+					// Informationsystem
+					elseif ($oPropertyValue->Property->type == 5 && Core::moduleIsActive('informationsystem'))
 					{
-						$oShop_Item = $oPropertyValue->Shop_Item;
-						if ($oShop_Item->id)
+						if ($oPropertyValue->value != 0)
 						{
-							$oSearch_Page->text .= htmlspecialchars((string) $oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
+							$oInformationsystem_Item = $oPropertyValue->Informationsystem_Item;
+							if ($oInformationsystem_Item->id)
+							{
+								$oSearch_Page->text .= htmlspecialchars((string) $oInformationsystem_Item->name) . ' ' . $oInformationsystem_Item->description . ' ' . $oInformationsystem_Item->text . ' ';
+							}
 						}
 					}
-				}
-				// Wysiwyg
-				elseif ($oPropertyValue->Property->type == 6)
-				{
-					$oSearch_Page->text .= htmlspecialchars(strip_tags((string) $oPropertyValue->value)) . ' ';
-				}
-				// Other type
-				elseif ($oPropertyValue->Property->type != 2)
-				{
-					$oSearch_Page->text .= htmlspecialchars((string) $oPropertyValue->value) . ' ';
+					// Shop
+					elseif ($oPropertyValue->Property->type == 12 && Core::moduleIsActive('shop'))
+					{
+						if ($oPropertyValue->value != 0)
+						{
+							$oShop_Item = $oPropertyValue->Shop_Item;
+							if ($oShop_Item->id)
+							{
+								$oSearch_Page->text .= htmlspecialchars((string) $oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
+							}
+						}
+					}
+					// Wysiwyg
+					elseif ($oPropertyValue->Property->type == 6)
+					{
+						$oSearch_Page->text .= htmlspecialchars(strip_tags((string) $oPropertyValue->value)) . ' ';
+					}
+					// Other type
+					elseif ($oPropertyValue->Property->type != 2)
+					{
+						$oSearch_Page->text .= htmlspecialchars((string) $oPropertyValue->value) . ' ';
+					}
 				}
 			}
 		}
@@ -1181,6 +1223,7 @@ class Informationsystem_Group_Model extends Core_Entity
 	/**
 	 * Prepare entity and children entities
 	 * @return self
+	 * @hostcms-event informationsystem_group.onBeforeAddPropertyValues
 	 */
 	protected function _prepareData()
 	{
@@ -1197,19 +1240,43 @@ class Informationsystem_Group_Model extends Core_Entity
 			if (is_array($this->_showXmlProperties))
 			{
 				$aProperty_Values = Property_Controller_Value::getPropertiesValues($this->_showXmlProperties, $this->id, FALSE, $this->_xmlSortPropertiesValues);
-
 				foreach ($aProperty_Values as $oProperty_Value)
 				{
 					$this->_preparePropertyValue($oProperty_Value);
-
-					$this->addEntity($oProperty_Value);
 				}
 			}
 			else
 			{
 				$aProperty_Values = $this->getPropertyValues(TRUE, array(), $this->_xmlSortPropertiesValues);
-				// Add all values
-				$this->addEntities($aProperty_Values);
+			}
+
+			Core_Event::notify($this->_modelName . '.onBeforeAddPropertyValues', $this, array($aProperty_Values));
+
+			$aListIDs = array();
+
+			foreach ($aProperty_Values as $oProperty_Value)
+			{
+				// List_Items
+				if ($oProperty_Value->Property->type == 3)
+				{
+					$aListIDs[] = $oProperty_Value->value;
+				}
+
+				$this->addEntity($oProperty_Value);
+			}
+
+			if (Core::moduleIsActive('list'))
+			{
+				// Cache necessary List_Items
+				if (count($aListIDs))
+				{
+					$oList_Items = Core_Entity::factory('List_Item');
+					$oList_Items->queryBuilder()
+						->where('id', 'IN', $aListIDs)
+						->clearOrderBy();
+
+					$oList_Items->findAll();
+				}
 			}
 		}
 

@@ -235,7 +235,7 @@ class Core_Tar
 
         return $v_list_detail;
     }
-	
+
 	/**
 	* This method creates the archive file and add the files / directories
 	* that are listed in $p_filelist.
@@ -1528,6 +1528,14 @@ class Core_Tar
 					while (substr($p_path, -1) == '/')
 					$p_path = substr($p_path, 0, strlen($p_path)-1);
 
+					// add HostCMS
+					foreach ($this->_replaces as $key => $value)
+					{
+						if (strpos($v_header['filename'],$key) === 0) {
+							$v_header['filename'] = preg_replace('/^' . preg_quote($key, '/') . '/', $value, $v_header['filename']);
+						}
+					}
+
 					$v_header['filename'] = substr($v_header['filename'], 0, 1) == '/'
 						? $p_path . $v_header['filename']
 						: $p_path . '/' . $v_header['filename'];
@@ -1556,8 +1564,8 @@ class Core_Tar
 				}
 				// ----- Check the directory availability and create it if necessary
 				elseif (($v_result = $this->_dirCheck(($v_header['typeflag'] == "5"
-				? $v_header['filename']
-				: dirname($v_header['filename'])), Core_Array::get($v_header, 'mode', CHMOD))) != 1)
+					? $v_header['filename']
+					: dirname($v_header['filename'])), Core_Array::get($v_header, 'mode', CHMOD))) != 1)
 				{
 					$this->_error(Core::_('Core.unpack_error_creating_dir', $v_header['filename']));
 					return false;
@@ -1869,5 +1877,13 @@ class Core_Tar
 			: 'gzopen64';
 
 		return $sFunctionName($filename, $mode, $use_include_path);
+	}
+
+	protected $_replaces = array();
+
+	public function addReplace($key, $value)
+	{
+		$this->_replaces[$key] = $value;
+		return $this;
 	}
 }

@@ -56,4 +56,5 @@ return array(
 	'import_file' => 'Выберите файл с компьютера',
 	'import_button' => 'Загрузить',
 	'importFilters_success' => 'Импорт завершен!',
+	'description' => 'Описание',
 );

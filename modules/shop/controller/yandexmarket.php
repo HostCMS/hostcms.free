@@ -11,13 +11,17 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - itemsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств товаров, по умолчанию TRUE.
  * - itemsForbiddenProperties(array()) исключать значения дополнительных свойств товаров, по умолчанию array().
  * - additionalImages(array()) массив tag_name дополнительных свойств для изображений.
+ * - additionalGroupImages(array()) массив tag_name дополнительных свойств для изображений групп.
  * - additionalTagNames(array()) имена тегов, включаемых в основной offer товара, с указанием соответствующих дополнительных свойств, например, array('expiry' => 117)
  * - addForbiddenTag('tag-name') добавить тег, запрещенный к передаче в генерируемый YML.
  * - addForbiddenTags(array('description', 'vendor')) массив тегов, запрещенных к передаче в генерируемый YML.
  * - cdata(array('description')) массив тегов, передаваемых с форматированием в виде блока символьных данных — CDATA, по умолчанию array(). Если длина кода превышает установленные лимиты, будет произведено удаление тегов и сокращение текста до установленных лимитов.
+ * - offerDescription('description') имя поля товара, в которое загружать описание товаров, может принимать значения description, text. По умолчанию description
  * - removeForbiddenTag(name) удалить тег из списка запрещенных к передаче в генерируемый YML.
  * - modifications(TRUE|FALSE) экспортировать модификации, по умолчанию TRUE.
  * - media(TRUE|FALSE) выгружать изображения из библиотеки, по умолчанию FALSE.
+ * - collections(TRUE|FALSE) выгружать коллекции, по умолчанию FALSE.
+ * - collectionActiveFieldId(int) идентификатор пользовательского поля, отвечающего за выборку коллекций.
  * - closed(TRUE|FALSE) выгружать закрытые товаров, по умолчанию FALSE.
  * - surcharge(200|'20%') дополнительная наценка на все товары, может быть указана в абсолютном значении, либо процентом, по умолчанию 0.
  * - rootItems(TRUE|FALSE) экспортировать корневые товары, по умолчанию FALSE.
@@ -38,7 +42,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - paymentMethod(array('YANDEX' => 17, 'APPLE_PAY' => 18, 'GOOGLE_PAY' => 19, 'CARD_ON_DELIVERY' => 2, 'CASH_ON_DELIVERY' => 1)) [Покупка на Яндекс.Маркете] массив соответствия способов оплаты ('YANDEX', 'APPLE_PAY', 'GOOGLE_PAY', 'CARD_ON_DELIVERY', 'CASH_ON_DELIVERY') и ID платежных систем в системе управления.
  * - token(string) [Покупка на Яндекс.Маркете] токен
  * - request(string) [Покупка на Яндекс.Маркете] данные запроса, если заданы, то используются вместо присланного запроса
- * - marketMode(NULL|'catalog'|'terms') Вы можете использовать общий файл для добавления товаров и для управления условиями размещения в магазинах. Но можно сделать отдельные файлы: в файле с добавлением передавать только общие параметры товаров ->marketMode('catalog'), а в файлах с условиями размещения ->marketMode('terms') — только параметры для размещения в магазинах.
+ * - marketMode(NULL|'catalog'|'terms') Вы можете использовать общий файл для добавления товаров и для управления условиями размещения в магазинах. Но можно сделать отдельные файлы: в файле с добавлением передавать только общие параметры товаров ->marketMode('catalog'), а в файле с условиями размещения ->marketMode('terms') — только параметры для размещения в магазинах.
  * - utm_source() определяет рекламодателя, например, market
  * - utm_medium() определяет рекламный или маркетинговый канал (цена за клик, баннер, рассылка по электронной почте).
  * - debug(TRUE|FALSE) фиксировать в логах поступаемые запросы, по умолчанию FALSE.
@@ -68,7 +72,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Controller_YandexMarket extends Core_Controller
 {
@@ -78,14 +82,18 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	 */
 	protected $_allowedProperties = array(
 		'additionalImages',
+		'additionalGroupImages',
 		'additionalTagNames',
 		'cdata',
+		'offerDescription',
 		'itemsProperties',
 		'itemsForbiddenProperties',
 		'outlets',
 		'paymentMethod',
 		'modifications',
 		'media',
+		'collections',
+		'collectionActiveFieldId',
 		'closed',
 		'surcharge',
 		'rootItems',
@@ -366,10 +374,12 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 		$this->itemsProperties = $this->modifications = $this->deliveryOptions = $this->checkAvailable = TRUE;
 
-		$this->groupModifications = $this->rootItems = $this->recommended = $this->checkRest = $this->outlets = $this->debug = $this->media = $this->closed = FALSE;
+		$this->groupModifications = $this->rootItems = $this->recommended = $this->checkRest = $this->outlets = $this->debug
+			= $this->media = $this->collections = $this->closed = FALSE;
 
 		$this->paymentMethod = $this->cdata = $this->itemsForbiddenProperties = array();
 
+		$this->offerDescription = 'description';
 		$this->type = 'offer';
 		$this->onStep = 500;
 		$this->token = '';
@@ -378,7 +388,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		$this->mode = 'between';
 		$this->priceMode = 'item';
 
-		$this->model = $this->additionalImages = $this->additionalTagNames = NULL;
+		$this->model = $this->additionalImages = $this->additionalGroupImages = $this->additionalTagNames = NULL;
 
 		$this->stdOut = new Core_Out_Std();
 		$this->_Shop_Item_Controller = new Shop_Item_Controller();
@@ -571,6 +581,45 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	}
 
 	/**
+	 * Get user field for collection
+	 * @return Field_Model|NULL
+	 */
+	protected function _getCollectionField()
+	{
+		if ($this->collectionActiveFieldId)
+		{
+			$oFields = Core_Entity::factory('Field');
+			$oFields->queryBuilder()
+				->where('fields.model', '=', 'shop_group')
+				->where('fields.id', '=', $this->collectionActiveFieldId)
+				->where('fields.type', 'IN', array(0, 1, 7, 15)) // Целое число, Строка, Флажок, Большое целое число
+				->open()
+					->where('fields.site_id', '=', CURRENT_SITE)
+					->setOr()
+					->where('fields.site_id', '=', 0)
+				->close()
+				->clearOrderBy()
+				->orderBy('sorting', 'ASC');
+
+			return $oFields->getLast(FALSE);
+		}
+
+		return NULL;
+	}
+
+	/**
+	 * Shop group parents ids
+	 * @var array
+	 */
+	protected $_aGroupParentIDs = array();
+
+	/**
+	 * Shop group collection ids
+	 * @var array
+	 */
+	protected $_aGroupCollectionIDs = array();
+
+	/**
 	 * Show categories
 	 * @return self
 	 */
@@ -597,6 +646,30 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			$aShop_Groups = $this->_Shop_Groups->findAll(FALSE);
 			foreach ($aShop_Groups as $oShop_Group)
 			{
+				$this->_aGroupParentIDs[$oShop_Group->id] = $oShop_Group->parent_id;
+
+				if ($this->collections)
+				{
+					$bAddIntoCollection = TRUE;
+
+					if (Core::moduleIsActive('field') && $this->collectionActiveFieldId)
+					{
+						$oField = $this->_getCollectionField();
+
+						if (!is_null($oField))
+						{
+							$aField_Values = Field_Controller_Value::getFieldsValues(array($oField->id), $oShop_Group->id, FALSE);
+							if (!isset($aField_Values[0]) || (isset($aField_Values[0]) && !$aField_Values[0]->value))
+							{
+								$bAddIntoCollection = FALSE;
+							}
+						}
+					}
+
+					$bAddIntoCollection
+						&& $this->_aGroupCollectionIDs[$oShop_Group->id] = $oShop_Group->id;
+				}
+
 				if ($oShop_Group->active
 					// Группа в корневой или в списке отключенных нет ее родителя
 					&& ($oShop_Group->parent_id == 0 || !isset($aDisabledCategoriesId[$oShop_Group->parent_id]))
@@ -616,9 +689,11 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 			$iCount = count($aShop_Groups);
 
-			// Delete BETWEEN() and deleted = 1
 			$this->mode == 'between'
-				&& $this->_Shop_Groups->queryBuilder()->deleteLastWhere()->deleteLastWhere();
+				// Delete BETWEEN() and deleted = 0
+				? $this->_Shop_Groups->queryBuilder()->deleteLastWhere()->deleteLastWhere()
+				// Delete deleted = 0
+				: $this->_Shop_Groups->queryBuilder()->deleteLastWhere();
 
 			// Delay execution
 			$this->delay && $iCount && usleep($this->delay);
@@ -801,9 +876,11 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			// Delay execution
 			$this->delay && $iCount && usleep($this->delay);
 
-			// Delete BETWEEN() and deleted = 1
 			$this->mode == 'between'
-				&& $this->_Shop_Items->queryBuilder()->deleteLastWhere()->deleteLastWhere();
+				// Delete BETWEEN() and deleted = 0
+				? $this->_Shop_Items->queryBuilder()->deleteLastWhere()->deleteLastWhere()
+				// Delete deleted = 0
+				: $this->_Shop_Items->queryBuilder()->deleteLastWhere();
 		}
 		while ($this->mode == 'between' ? $iFrom < $maxId : $iCount);
 
@@ -834,7 +911,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 				!is_null($this->utm_medium)
 					? '&utm_medium=' . $this->utm_medium
 						. '&utm_campaign=' . (
-							($oItem = $oShop_Item->modification_id ? $oShop_Item->Modification : $oShop_Item)->shop_group_id
+							($oItem = $oShop_Item->modification_id ? $oShop_Item->Modification : $oShop_Item) && $oItem->shop_group_id
 								? $oItem->Shop_Group->path
 								: ''
 						)
@@ -1016,13 +1093,13 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			);
 		}
 
-		/* Цена */
-		$this->write('<price>' . ($aPrices['price_discount']) . '</price>'. "\n");
+		/* Цена. Цена указывается в рублях. Число должно быть целым */
+		$this->write('<price>' . intval($aPrices['price_discount']) . '</price>'. "\n");
 
 		if ($aPrices['discount'] > 0 && !$this->isForbiddenTag('/shop/offers/offer', 'discount'))
 		{
-			/* Старая цена */
-			$this->write('<oldprice>' . ($aPrices['price'] + $aPrices['tax']) . '</oldprice>'. "\n");
+			/* Старая цена. Цена указывается в рублях. Число должно быть целым. */
+			$this->write('<oldprice>' . intval($aPrices['price'] + $aPrices['tax']) . '</oldprice>'. "\n");
 		}
 
 		/* CURRENCY */
@@ -1057,6 +1134,35 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 		$this->marketMode != 'terms'
 			&& $this->write('<categoryId>' . $categoryId . '</categoryId>'. "\n");
+
+		if ($this->collections)
+		{
+			$group_id = $categoryId;
+
+			$aCollections = array();
+			do {
+				if (isset($this->_aGroupCollectionIDs[$group_id]))
+				{
+					$aCollections[$group_id] = $group_id;
+					$this->write('<collectionId>' . $group_id . '</collectionId>'. "\n");
+				}
+
+				$group_id = $this->_aGroupParentIDs[$group_id];
+			} while($group_id);
+
+			// Группы, в которых размещены ярлыки товара
+			$aShortcuts = $oShop_Item->Shop_Items->findAll(FALSE);
+			foreach ($aShortcuts as $oShortcut)
+			{
+				if (!isset($aCollections[$oShortcut->shop_group_id]) && isset($this->_aGroupCollectionIDs[$oShortcut->shop_group_id]))
+				{
+					$aCollections[$oShortcut->shop_group_id] = $oShortcut->shop_group_id;
+					$this->write('<collectionId>' . $oShortcut->shop_group_id . '</collectionId>'. "\n");
+				}
+			}
+
+			unset($aCollections);
+		}
 
 		if (!is_null($this->_MarketCategory))
 		{
@@ -1125,9 +1231,12 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		/* DESCRIPTION */
 		if ($this->marketMode != 'terms' && !$this->isForbiddenTag('/shop/offers/offer', 'description'))
 		{
-			$description = !empty($oEntity->description)
-				? $oEntity->description
-				: $oEntity->text;
+			$offerDescription = $this->offerDescription;
+
+			$description = $oEntity->$offerDescription;
+
+			$description == '' && $offerDescription == 'description'
+				&& $description = $oEntity->text;
 
 			$iDescriptionLen = mb_strlen((string) $description);
 			if ($iDescriptionLen)
@@ -2604,7 +2713,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			->orderBy('shop_discounts.id');
 
 		$aShop_Discounts = $oShop_Discounts->findAll(FALSE);
-		
+
 		if (count($aShop_Discounts))
 		{
 			$this->write("<promos>\n");
@@ -2636,7 +2745,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		$this->write('<end-date>' . Core_Str::xml($oShop_Discount->end_datetime) . '</end-date>'. "\n");
 
 		// Description
-		if (strlen($oShop_Discount->description))
+		if (strlen((string) $oShop_Discount->description))
 		{
 			$description = Core_Str::cutSentences(
 				html_entity_decode(strip_tags($oShop_Discount->description), ENT_COMPAT, 'UTF-8'), 500
@@ -2646,7 +2755,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		}
 
 		// Url
-		if (strlen($oShop_Discount->url))
+		if (strlen((string) $oShop_Discount->url))
 		{
 			$this->write('<url>' . Core_Str::xml($oShop_Discount->url) . '</url>'. "\n");
 		}
@@ -2691,11 +2800,134 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	}
 
 	/**
+	 * Get Pictures
+	 * @param Shop_Group_Model $oShop_Group
+	 * @return array
+	 * @hostcms-event Shop_Controller_YandexMarket.onAfterGetGroupPictures
+	 */
+	protected function _getGroupPictures(Shop_Group_Model $oShop_Group)
+	{
+		$oShop = $this->getEntity();
+
+		$aPictures = array();
+
+		if ($oShop_Group->image_large != '')
+		{
+			$aPictures[] = $this->protocol . '://' . Core_Str::xml($this->_siteAlias->name . $oShop_Group->getLargeFileHref());
+		}
+
+		if (is_array($this->additionalGroupImages))
+		{
+			$linkedObject = Core_Entity::factory('Shop_Group_Property_List', $oShop->id);
+
+			foreach ($this->additionalGroupImages as $tag_name)
+			{
+				$oProperty = $linkedObject->Properties->getByTag_name($tag_name);
+
+				if ($oProperty && $oProperty->type == 2)
+				{
+					$aProperty_Values = $oProperty->getValues($oShop_Group->id);
+
+					foreach ($aProperty_Values as $oProperty_Value)
+					{
+						if ($oProperty_Value->file != '')
+						{
+							$aPictures[] = $this->protocol . '://' . Core_Str::xml($this->_siteAlias->name . $oShop_Group->getGroupHref()) . Core_Str::xml($oProperty_Value->file);
+						}
+					}
+				}
+			}
+		}
+
+		if (Core::moduleIsActive('media') && $this->media)
+		{
+			$aEntities = Media_Item_Controller::getValues($oShop_Group);
+			foreach ($aEntities as $oEntity)
+			{
+				$oMedia_Item = $oEntity->Media_Item;
+
+				if ($oMedia_Item->file != '')
+				{
+					$aPictures[] = $this->protocol . '://' . Core_Str::xml($this->_siteAlias->name . $oMedia_Item->getHref()) . Core_Str::xml($oMedia_Item->file);
+				}
+			}
+		}
+
+		Core_Event::notify(get_class($this) . '.onAfterGetGroupPictures', $this, array($oShop_Group, $aPictures));
+		$eventResult = Core_Event::getLastReturn();
+
+		return is_array($eventResult) ? $eventResult : $aPictures;
+	}
+
+	/**
+	 * Show collections
+	 * @return self
+	 */
+	protected function _collections()
+	{
+		if (count($this->_aGroupCollectionIDs))
+		{
+			$this->write("<collections>\n");
+
+			foreach ($this->_aGroupCollectionIDs as $shop_group_id)
+			{
+				$oShop_Group = Core_Entity::factory('Shop_Group')->getById($shop_group_id);
+
+				$this->_showCollection($oShop_Group);
+			}
+
+			$this->write("</collections>\n");
+		}
+	}
+
+	/**
+	 * Show collection
+	 * @param Shop_Group_Model $oShop_Group
+	 * @return self
+	 * @hostcms-event Shop_Controller_YandexMarket.onBeforeCollection
+	 * @hostcms-event Shop_Controller_YandexMarket.onAfterCollection
+	 */
+	protected function _showCollection(Shop_Group_Model $oShop_Group)
+	{
+		$this->write('<collection id="' . Core_Str::xml($oShop_Group->id) . '">' . "\n");
+
+		Core_Event::notify(get_class($this) . '.onBeforeCollection', $this, array($oShop_Group));
+
+		// Url
+		$this->write('<url>' . Core_Str::xml($this->_shopPath . $oShop_Group->getPath()) . '</url>'. "\n");
+
+		$aPictures = array_slice($this->_getGroupPictures($oShop_Group), 0, 10);
+		foreach ($aPictures as $sPicture)
+		{
+			$this->write('<picture>' . $sPicture . '</picture>'. "\n");
+		}
+
+		$this->write('<name>' . Core_Str::xml($oShop_Group->name) . '</name>'. "\n");
+
+		// Description
+		if (strlen((string) $oShop_Group->description))
+		{
+			$description = trim(html_entity_decode(strip_tags($oShop_Group->description), ENT_COMPAT, 'UTF-8'));
+
+			$this->write('<description>' . Core_Str::xml($description) . '</description>'. "\n");
+		}
+
+		Core_Event::notify(get_class($this) . '.onAfterCollection', $this, array($oShop_Group));
+
+		$this->write("</collection>\n");
+
+		return $this;
+	}
+
+	/**
 	 * Show UML built data
 	 * @return self
 	 * @hostcms-event Shop_Controller_YandexMarket.onBeforeRedeclaredShowYml
+	 * @hostcms-event Shop_Controller_YandexMarket.onBeforeShop
 	 * @hostcms-event Shop_Controller_YandexMarket.onBeforeCategories
 	 * @hostcms-event Shop_Controller_YandexMarket.onBeforeOffers
+	 * @hostcms-event Shop_Controller_YandexMarket.onBeforeCollections
+	 * @hostcms-event Shop_Controller_YandexMarket.onAfterShop
 	 */
 	public function showYml()
 	{
@@ -2715,6 +2947,9 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		$this->write('<?xml version="1.0" encoding="' . $oSite->coding . '"?>' . "\n");
 		$this->write('<!DOCTYPE yml_catalog SYSTEM "shops.dtd">' . "\n");
 		$this->write('<yml_catalog date="' . date('c') . '">' . "\n");
+
+		Core_Event::notify(get_class($this) . '.onBeforeShop', $this);
+
 		$this->write("<shop>\n");
 
 		// Название магазина
@@ -2783,12 +3018,23 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		/* Товары */
 		$this->_offers();
 
+		/* Коллекции */
+		if ($this->collections)
+		{
+			Core_Event::notify(get_class($this) . '.onBeforeCollections', $this, array($oShop));
+
+			$this->_collections();
+		}
+
 		/* Промоакции */
 		// https://yandex.ru/support/partnermarket-dsbs/elements/promos.html?lang=ru
 		// При размещении по модели DBS (продажи с доставкой продавца) нельзя передавать информацию об акциях.
 		$this->model != 'DBS' && $this->_promos();
 
 		$this->write("</shop>\n");
+
+		Core_Event::notify(get_class($this) . '.onAfterShop', $this);
+
 		$this->write('</yml_catalog>');
 
 		$this->stdOut->close();

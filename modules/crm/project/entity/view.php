@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Crm_Project_Entity_View extends Admin_Form_Controller_View
 {
@@ -171,7 +171,7 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 								->value($oObject->event_status_id)
 								->options($aMasEventStatuses)
 								//->class('btn-group event-status')
-								->onchange("$.adminLoad({path: '/admin/event/index.php', additionalParams: 'hostcms[checked][0][{$oObject->id}]=0&eventStatusId=' + $(this).find('li[selected]').prop('id'), action: 'changeStatus', windowId: '{$oAdmin_Form_Controller->getWindowId()}'});")
+								->onchange("$.adminLoad({path: hostcmsBackend + '/event/index.php', additionalParams: 'hostcms[checked][0][{$oObject->id}]=0&eventStatusId=' + $(this).find('li[selected]').prop('id'), action: 'changeStatus', windowId: '{$oAdmin_Form_Controller->getWindowId()}'});")
 								->execute();
 						}
 						else
@@ -246,7 +246,7 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 						$text = ob_get_clean();
 
 						$iEntityAdminFormId = 220;
-						$entityPath = '/admin/event/index.php';
+						$entityPath = Admin_Form_Controller::correctBackendPath('/{admin}/event/index.php');
 					break;
 					// Deals
 					case 1:
@@ -261,7 +261,7 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 						$text = ob_get_clean();
 
 						$iEntityAdminFormId = 226;
-						$entityPath = '/admin/deal/index.php';
+						$entityPath = Admin_Form_Controller::correctBackendPath('/{admin}/deal/index.php');
 					break;
 					// Notes
 					case 2:
@@ -287,7 +287,7 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 						$text = ob_get_clean();
 
 						$iEntityAdminFormId = 312;
-						$entityPath = '/admin/crm/project/note/index.php';
+						$entityPath = Admin_Form_Controller::correctBackendPath('/{admin}/crm/project/note/index.php');
 					break;
 					case 3:
 						$badge = 'fa fa-file-text-o';
@@ -296,7 +296,7 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 
 						$oObject = Core_Entity::factory('Crm_Project_Attachment', $oEntity->id);
 
-						$src = '/admin/crm/project/attachment/index.php?crm_project_id=' . $oObject->crm_project_id . '&crm_project_attachment_id=' . $oObject->id . '&rand=' . time();
+						$src = Admin_Form_Controller::correctBackendPath('/{admin}/crm/project/attachment/index.php?crm_project_id=') . $oObject->crm_project_id . '&crm_project_attachment_id=' . $oObject->id . '&rand=' . time();
 
 						$ext = Core_File::getExtension($oObject->getFilePath());
 
@@ -312,7 +312,7 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 						$text = ob_get_clean();
 
 						$iEntityAdminFormId = 326;
-						$entityPath = '/admin/crm/project/attachment/index.php';
+						$entityPath = Admin_Form_Controller::correctBackendPath('/{admin}/crm/project/attachment/index.php');
 					break;
 					case 4:
 						$badge = 'fa fa-columns';
@@ -337,7 +337,7 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 						$text = ob_get_clean();
 
 						$iEntityAdminFormId = 278;
-						$entityPath = '/admin/dms/document/index.php';
+						$entityPath = Admin_Form_Controller::correctBackendPath('/{admin}/dms/document/index.php');
 					break;
 				}
 
@@ -412,7 +412,7 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 											? $Admin_Word_Value->name
 											: '';
 
-										$path = '/admin/crm/project/entity/index.php';
+										$path = '/{admin}/crm/project/entity/index.php';
 										$additionalParams = "type={$oEntity->type}&entity_id={$oEntity->id}&crm_project_id={$crm_project_id}&secret_csrf=" . Core_Security::getCsrfToken();
 
 										$href = $oAdmin_Form_Controller->getAdminActionLoadHref($path, $oAdmin_Form_Action->name, NULL, 0, intval($oEntity->id), $additionalParams, 10, 1, NULL, NULL, 'entity');

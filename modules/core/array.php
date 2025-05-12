@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Array
 {
@@ -45,67 +45,78 @@ class Core_Array
 	/**
 	 * Filter Value
 	 * @param mixed $value
-	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim', 'array', 'filterVarInt', 'filterVarFloat', 'filterVarBoolean'
+	 * @param string|array|NULL $filter filter or array of filters, e.g. 'str'|'string'|'strval', 'trim', 'stripTags'|'strip_tags', 'int'|'integer'|'intval', 'filterVarInt', 'float'|'floatval', 'filterVarFloat', 'bool'|'boolean'|'boolval', 'filterVarBoolean', 'array'
 	 * @return mixed
 	 */
-	static protected function _filter($value, $filter)
+	static protected function _filter($value, $aFilter)
 	{
-		if (!is_null($filter))
+		if (!is_null($aFilter))
 		{
-			switch ($filter)
-			{
-				case 'str':
-				case 'string':
-				case 'strval':
-					$value = is_scalar($value)
-						? strval($value)
-						: '';
-				break;
-				case 'trim':
-					$value = is_scalar($value)
-						? trim($value)
-						: '';
-				break;
-				case 'int':
-				case 'integer':
-				case 'intval':
-					$value = is_scalar($value)
-						? intval($value)
-						: 0;
-				break;
-				case 'filterVarInt':
-					$value = filter_var($value, FILTER_VALIDATE_INT);
-				break;
-				case 'float':
-				case 'floatval':
-					$value = is_scalar($value)
-						? floatval($value)
-						: 0.0;
-				break;
-				case 'filterVarFloat':
-					$value = filter_var($value, FILTER_VALIDATE_FLOAT);
-				break;
-				case 'bool':
-				case 'boolean':
-				case 'boolval':
-					$value = is_scalar($value)
-						? (function_exists('boolval')
-							? boolval($value)
-							: (bool)$value
-						)
-						: FALSE;
-				break;
-				case 'filterVarBoolean':
-					$value = filter_var($value, FILTER_VALIDATE_BOOLEAN);
-				break;
-				case 'array':
-					$value = is_array($value)
-						? $value
-						: array();
-				break;
-				default:
-					throw new Core_Exception('Core_Array wrong \'%name\' filter name', array('%name' => $filter));
+			!is_array($aFilter) && $aFilter = array($aFilter);
 
+			foreach ($aFilter as $filter)
+			{
+				switch ($filter)
+				{
+					case 'str':
+					case 'string':
+					case 'strval':
+						$value = is_scalar($value)
+							? strval($value)
+							: '';
+					break;
+					case 'trim':
+						$value = is_scalar($value)
+							? trim($value)
+							: '';
+					break;
+					case 'stripTags':
+					case 'strip_tags':
+						$value = is_scalar($value)
+							? strip_tags($value)
+							: '';
+					break;
+					case 'int':
+					case 'integer':
+					case 'intval':
+						$value = is_scalar($value)
+							? intval($value)
+							: 0;
+					break;
+					case 'filterVarInt':
+						$value = filter_var($value, FILTER_VALIDATE_INT);
+					break;
+					case 'float':
+					case 'floatval':
+						$value = is_scalar($value)
+							? floatval($value)
+							: 0.0;
+					break;
+					case 'filterVarFloat':
+						$value = filter_var($value, FILTER_VALIDATE_FLOAT);
+					break;
+					case 'bool':
+					case 'boolean':
+					case 'boolval':
+						$value = is_scalar($value)
+							? (function_exists('boolval')
+								? boolval($value)
+								: (bool)$value
+							)
+							: FALSE;
+					break;
+					case 'filterVarBoolean':
+						$value = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+					break;
+					case 'array':
+						$value = is_array($value)
+							? $value
+							: array();
+					break;
+					default:
+						throw new Core_Exception('Core_Array wrong \'%name\' filter name', array('%name' => $filter));
+
+				}
 			}
 		}
 
@@ -277,7 +288,7 @@ class Core_Array
 		{
 			foreach ($array as $key => $value)
 			{
-				$array[$key] = intval($value);
+				$array[$key] = intval(preg_replace('/[^0-9-]/', '', $value));
 			}
 		}
 

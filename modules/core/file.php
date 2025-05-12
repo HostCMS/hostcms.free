@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_File
 {
@@ -210,15 +210,40 @@ class Core_File
 	 * Renames a file or directory
 	 * @param string $oldname The old name.
 	 * @param string $newname The new name.
+	 * @param bool $recursive Recursive rename.
 	 */
-	static public function rename($oldname, $newname)
+	static public function rename($oldname, $newname, $recursive = FALSE)
 	{
 		if (self::isFile($oldname) || self::isDir($oldname))
 		{
-			if (!@rename($oldname, $newname))
+			if (!self::isDir($newname))
 			{
-				throw new Core_Exception("Rename file/dir '%oldname' error.",
-					array('%oldname' => Core::cutRootPath($oldname)));
+				if (!@rename($oldname, $newname))
+				{
+					throw new Core_Exception("Rename file/dir '%oldname' error.",
+						array('%oldname' => Core::cutRootPath($oldname)));
+				}
+			}
+			elseif ($recursive)
+			{
+				// выбираем все из oldname
+				// для каждого из них вызываем self::rename
+				if ($dh = @opendir($oldname))
+				{
+					while (($file = readdir($dh)) !== FALSE)
+					{
+						if ($file != '.' && $file != '..')
+						{
+							self::clearCache();
+
+							self::rename($oldname . DIRECTORY_SEPARATOR . Core_File::filenameCorrection($file), $newname . DIRECTORY_SEPARATOR . Core_File::filenameCorrection($file), $recursive);
+						}
+					}
+
+					closedir($dh);
+
+					rmdir($oldname);
+				}
 			}
 		}
 		else

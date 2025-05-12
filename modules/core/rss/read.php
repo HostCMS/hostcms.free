@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Rss
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Rss_Read
 {
@@ -24,6 +24,11 @@ class Core_Rss_Read
 	 * @var string
 	 */
 	protected $_encoding = '';
+
+	/**
+	 * @var string
+	 */
+	protected $_rssChannel = '';
 
 	/**
 	 * Пустой массив с полями записи
@@ -130,6 +135,7 @@ class Core_Rss_Read
 				foreach ($aTagUri as $sTagName)
 				{
 					$sTagName = mb_strtolower($sTagName);
+					!is_array($current) && $current = array();
 					if (!isset($current[$sTagName]))
 					{
 						$current[$sTagName] = array();
@@ -289,7 +295,7 @@ class Core_Rss_Read
 	/**
 	 * Чтение данных из RSS
 	 *
-	 * @param array $encoding кодировка документа
+	 * @param string $encoding кодировка документа
 	 * @return array ассоциативнй массив
 	 * <br />[chanel] => Array
 	 * - (

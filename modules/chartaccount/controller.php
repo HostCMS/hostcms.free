@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Chartaccount
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Chartaccount_Controller
 {
@@ -326,7 +326,7 @@ class Chartaccount_Controller
 										allowClear: true,
 										// multiple: true,
 										ajax: {
-											url: "/admin/siteuser/index.php?loadSiteusers&types[]=company",
+											url: hostcmsBackend + "/siteuser/index.php?loadSiteusers&types[]=company",
 											dataType: "json",
 											type: "GET",
 											processResults: function (data) {
@@ -344,6 +344,33 @@ class Chartaccount_Controller
 										templateSelection: $.templateSelectionItemSiteusers,
 										language: "' . Core_I18n::instance()->getLng() . '",
 										width: "100%"
+									})
+									.on("select2:opening select2:closing", function(e){
+
+										var $searchfield = $(this).parent().find(".select2-search__field");
+
+										if (!$searchfield.data("setKeydownHeader"))
+										{
+											$searchfield.data("setKeydownHeader", true);
+
+											$searchfield.on("keydown", function(e) {
+
+												var $this = $(this);
+
+												if ($this.val() == "" && e.key == "Backspace")
+												{
+													$this
+														.parents("ul.select2-selection__rendered")
+														.find("li.select2-selection__choice")
+														.filter(":last")
+														.find(".select2-selection__choice__remove")
+														.trigger("click");
+
+													e.stopImmediatePropagation();
+													e.preventDefault();
+												}
+											});
+										}
 									})
 									.val("company_' . $value . '")
 									.trigger("change.select2");
@@ -504,12 +531,12 @@ class Chartaccount_Controller
 					if (!is_null($oSiteuser_Company))
 					{
 						$onclick = $oUser->checkModuleAccess(array('siteuser'), $oSite)
-							? self::$_Admin_Form_Controller->getAdminActionModalLoad(array('path' => '/admin/siteuser/representative/index.php', 'action' => 'edit', 'operation' => 'modal', 'additionalParams' => 'show=company', 'datasetKey' => 0, 'datasetValue' => $oSiteuser_Company->id, 'window' => '', 'width' => '90%'))
+							? self::$_Admin_Form_Controller->getAdminActionModalLoad(array('path' => '/{admin}/siteuser/representative/index.php', 'action' => 'edit', 'operation' => 'modal', 'additionalParams' => 'show=company', 'datasetKey' => 0, 'datasetValue' => $oSiteuser_Company->id, 'window' => '', 'width' => '90%'))
 							: '';
 
 						return array(
 							'name' => $oSiteuser_Company->name,
-							'href' => self::$_Admin_Form_Controller->getAdminActionLoadHref(array('path' => '/admin/siteuser/representative/index.php', 'action' => 'edit', 'operation' => 'modal', 'additionalParams' => 'show=company', 'datasetKey' => 0, 'datasetValue' => $oSiteuser_Company->id)),
+							'href' => self::$_Admin_Form_Controller->getAdminActionLoadHref(array('path' => '/{admin}/siteuser/representative/index.php', 'action' => 'edit', 'operation' => 'modal', 'additionalParams' => 'show=company', 'datasetKey' => 0, 'datasetValue' => $oSiteuser_Company->id)),
 							'onclick' => $onclick
 						);
 					}
@@ -523,12 +550,12 @@ class Chartaccount_Controller
 					if (!is_null($oSiteuser_Company_Contract))
 					{
 						$onclick = $oUser->checkModuleAccess(array('siteuser'), $oSite)
-							? self::$_Admin_Form_Controller->getAdminActionModalLoad(array('path' => '/admin/siteuser/company/contract/index.php', 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => $oSiteuser_Company_Contract->id, 'window' => '', 'width' => '90%'))
+							? self::$_Admin_Form_Controller->getAdminActionModalLoad(array('path' => '/{admin}/siteuser/company/contract/index.php', 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => $oSiteuser_Company_Contract->id, 'window' => '', 'width' => '90%'))
 							: '';
 
 						return array(
 							'name' => $oSiteuser_Company_Contract->name,
-							'href' => self::$_Admin_Form_Controller->getAdminActionLoadHref(array('path' => '/admin/siteuser/company/contract/index.php', 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => $oSiteuser_Company_Contract->id)),
+							'href' => self::$_Admin_Form_Controller->getAdminActionLoadHref(array('path' => '/{admin}/siteuser/company/contract/index.php', 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => $oSiteuser_Company_Contract->id)),
 							'onclick' => $onclick
 						);
 					}
@@ -541,8 +568,8 @@ class Chartaccount_Controller
 				{
 					return array(
 						'name' => $oChartaccount_Cashflow->name,
-						'href' => self::$_Admin_Form_Controller->getAdminActionLoadHref(array('path' => '/admin/chartaccount/cashflow/index.php', 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => $oChartaccount_Cashflow->id)),
-						'onclick' => self::$_Admin_Form_Controller->getAdminActionModalLoad(array('path' => '/admin/chartaccount/cashflow/index.php', 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => $oChartaccount_Cashflow->id, 'window' => '', 'width' => '90%')),
+						'href' => self::$_Admin_Form_Controller->getAdminActionLoadHref(array('path' => '/{admin}/chartaccount/cashflow/index.php', 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => $oChartaccount_Cashflow->id)),
+						'onclick' => self::$_Admin_Form_Controller->getAdminActionModalLoad(array('path' => '/{admin}/chartaccount/cashflow/index.php', 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => $oChartaccount_Cashflow->id, 'window' => '', 'width' => '90%')),
 						'color' => $oChartaccount_Cashflow->color
 					);
 				}
@@ -553,12 +580,12 @@ class Chartaccount_Controller
 				if (!is_null($oCompany_Account))
 				{
 					$onclick = $oUser->checkModuleAccess(array('company'), $oSite)
-						? self::$_Admin_Form_Controller->getAdminActionModalLoad(array('path' => '/admin/company/account/index.php', 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => $oCompany_Account->id, 'window' => '', 'width' => '90%'))
+						? self::$_Admin_Form_Controller->getAdminActionModalLoad(array('path' => '/{admin}/company/account/index.php', 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => $oCompany_Account->id, 'window' => '', 'width' => '90%'))
 						: '';
 
 					return array(
 						'name' => $oCompany_Account->name,
-						'href' => self::$_Admin_Form_Controller->getAdminActionLoadHref(array('path' => '/admin/company/account/index.php', 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => $oCompany_Account->id)),
+						'href' => self::$_Admin_Form_Controller->getAdminActionLoadHref(array('path' => '/{admin}/company/account/index.php', 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => $oCompany_Account->id)),
 						'onclick' => $onclick
 					);
 				}
@@ -569,12 +596,12 @@ class Chartaccount_Controller
 				if (!is_null($oCompany_Cashbox))
 				{
 					$onclick = $oUser->checkModuleAccess(array('company'), $oSite)
-						? self::$_Admin_Form_Controller->getAdminActionModalLoad(array('path' => '/admin/company/cashbox/index.php', 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => $oCompany_Cashbox->id, 'window' => '', 'width' => '90%'))
+						? self::$_Admin_Form_Controller->getAdminActionModalLoad(array('path' => '/{admin}/company/cashbox/index.php', 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => $oCompany_Cashbox->id, 'window' => '', 'width' => '90%'))
 						: '';
 
 					return array(
 						'name' => $oCompany_Cashbox->name,
-						'href' => self::$_Admin_Form_Controller->getAdminActionLoadHref(array('path' => '/admin/company/cashbox/index.php', 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => $oCompany_Cashbox->id)),
+						'href' => self::$_Admin_Form_Controller->getAdminActionLoadHref(array('path' => '/{admin}/company/cashbox/index.php', 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => $oCompany_Cashbox->id)),
 						'onclick' => $onclick
 					);
 				}

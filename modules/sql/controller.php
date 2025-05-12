@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Sql
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Sql_Controller
 {
@@ -267,8 +267,8 @@ class Sql_Controller
 	 */
 	static public function getTableViewIcon($tableName, $class = 'fa fa-table h5-edit-icon warning')
 	{
-		$href = '/admin/sql/table/view/index.php?table=' . $tableName;
-		$onclick = "$.adminLoad({path: '/admin/sql/table/view/index.php',additionalParams: 'table={$tableName}', windowId: 'id_content'}); return false";
+		$href = Admin_Form_Controller::correctBackendPath('/{admin}/sql/table/view/index.php?table=') . $tableName;
+		$onclick = "$.adminLoad({path: hostcmsBackend + '/sql/table/view/index.php',additionalParams: 'table={$tableName}', windowId: 'id_content'}); return false";
 
 		return Admin_Form_Entity::factory('Code')
 			->html('
@@ -293,8 +293,8 @@ class Sql_Controller
 	 */
 	static public function getFieldsIcon($tableName, $class = 'fa fa-th-list h5-edit-icon azure')
 	{
-		$href = '/admin/sql/table/field/index.php?table=' . $tableName;
-		$onclick = "$.adminLoad({path: '/admin/sql/table/field/index.php',additionalParams: 'table={$tableName}', windowId: 'id_content'}); return false";
+		$href = Admin_Form_Controller::correctBackendPath('/{admin}/sql/table/field/index.php?table=') . $tableName;
+		$onclick = "$.adminLoad({path: hostcmsBackend + '/sql/table/field/index.php',additionalParams: 'table={$tableName}', windowId: 'id_content'}); return false";
 
 		return Admin_Form_Entity::factory('Code')
 			->html('
@@ -319,8 +319,8 @@ class Sql_Controller
 	 */
 	static public function getIndexesIcon($tableName, $class = 'fas fa-key h5-edit-icon success')
 	{
-		$href = '/admin/sql/table/index/index.php?table=' . $tableName;
-		$onclick = "$.adminLoad({path: '/admin/sql/table/index/index.php',additionalParams: 'table={$tableName}', windowId: 'id_content'}); return false";
+		$href = Admin_Form_Controller::correctBackendPath('/{admin}/sql/table/index/index.php?table=') . $tableName;
+		$onclick = "$.adminLoad({path: hostcmsBackend + '/sql/table/index/index.php',additionalParams: 'table={$tableName}', windowId: 'id_content'}); return false";
 
 		return Admin_Form_Entity::factory('Code')
 			->html('

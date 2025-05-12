@@ -44,4 +44,6 @@ return array(
 	'move_success' => 'Знижки перенесені',
 	'min_weight' => 'Вага ⩾, %s',
 	'max_weight' => 'Вага &lt;, %s',
+	'max_discount' => 'Максимальна знижка',
+	'first_order' => 'Застосовувати до першого замовлення',
 );

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Order_Controller_Recalc extends Admin_Form_Action_Controller
 {
@@ -169,7 +169,7 @@ class Shop_Order_Controller_Recalc extends Admin_Form_Action_Controller
 								var $input = $('input[name=shop_delivery_condition_price]:checked');
 
 								$.ajax({
-									url: '/admin/shop/order/index.php',
+									url: hostcmsBackend + '/shop/order/index.php',
 									data: { 'recalcFormula': 1, 'shop_order_id': <?php echo $this->_object->id?>, 'shop_delivery_condition_name': $input.data('name'), 'shop_delivery_condition_price': $input.val() },
 									dataType: 'json',
 									type: 'POST',

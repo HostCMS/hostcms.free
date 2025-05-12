@@ -13,4 +13,5 @@ return array(
 
 	'deleted_elements' => 'Вилучено елементів:% s',
 	'deleted_complete' => 'Вилучені всі елементи',
+	'schedule-deleteAll' => 'Очистити кошик',
 );

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Warehouse_Regrade_Item_Controller_Delete extends Admin_Form_Action_Controller
 {
@@ -18,7 +18,7 @@ class Shop_Warehouse_Regrade_Item_Controller_Delete extends Admin_Form_Action_Co
 	 */
 	public function execute($operation = NULL)
 	{
-		$shop_warehouse_regrade_item_id = intval(Core_Array::getGet('shop_warehouse_regrade_item_id'));
+		$shop_warehouse_regrade_item_id = Core_Array::getGet('shop_warehouse_regrade_item_id', 0, 'int');
 
 		if ($shop_warehouse_regrade_item_id)
 		{

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Event_Model extends Core_Entity
 {
@@ -45,6 +45,7 @@ class Event_Model extends Core_Entity
 		'dms_document' => array('through' => 'event_dms_document'),
 		'event_dms_document' => array(),
 		'event_calendar_caldav' => array(),
+		'event_crm_project' => array(),
 		'tag' => array('through' => 'tag_event'),
 		'tag_event' => array(),
 		'event_checklist' => array()
@@ -168,22 +169,32 @@ class Event_Model extends Core_Entity
 			: '';
 
 		?><div class="d-flex align-items-center justify-content-between <?php echo $opacity?>"><?php
-		
+
 		// Название вместе с attachments в одном div
 		?><div><?php
 		if ($this->Event_Attachments->getCount(FALSE))
 		{
 			?><i class="fa fa-paperclip name-attachments"></i><?php
 		}
-		?><div class="semi-bold editable" style="display: inline-block;" id="apply_check_0_<?php echo $this->id?>_fv_1226"><?php echo htmlspecialchars((string) $this->name)?></div><?php
+		?><div class="semi-bold editable" data-editable-type="textarea" style="display: inline-block;" id="apply_check_0_<?php echo $this->id?>_fv_1226"><?php echo nl2br(htmlspecialchars((string) $this->name))?></div><?php
 		?></div><?php
-		
+
 		echo $this->showChecklists();
 		?></div><?php
-		
+
 		if ($this->description != '')
 		{
-			?><div class="event-description"><?php echo nl2br(htmlspecialchars((string) $this->description))?></div><?php
+			$bExpand = mb_strlen((string) $this->description) > 250;
+			?><div class="crm-description-wrapper">
+			<div class="crm-description<?php echo $bExpand ? ' expand' : ''?>">
+				<span><?php echo strip_tags($this->description, '<br><p><b><i><u><strong><em>')?></span>
+			</div>
+			<?php if ($bExpand)
+			{
+				?><div class="more-wrapper"><div class="more" onclick="$.showAllDescription(this)"><?php echo Core::_('Event.more')?> <i class="fas fa-chevron-down"></i></div></div><?php
+			}
+			?>
+			</div><?php
 		}
 
 		$this->relatedBackend($oAdmin_Form_Field, $oAdmin_Form_Controller);
@@ -420,7 +431,7 @@ class Event_Model extends Core_Entity
 		}
 
 		Core::moduleIsActive('crm_project')
-			&& $this->crm_project_id
+			// && $this->crm_project_id
 			// && $this->Crm_Project->showKanbanLine($oAdmin_Form_Controller);
 			&& $this->showCrmProjects($oAdmin_Form_Controller);
 	}
@@ -441,7 +452,7 @@ class Event_Model extends Core_Entity
 			{
 				?><div class="related-events-wrapper">
 					<div class="related-events" style="color: <?php echo $oDeal->Deal_Template->color?>; background-color:<?php echo Core_Str::hex2lighter($oDeal->Deal_Template->color, 0.88)?>"><i class="fa fa-handshake-o"></i></div>
-					<div><a style="color: <?php echo $oDeal->Deal_Template->color?>" href="/admin/deal/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $oDeal->id?>]=1" onclick="$.modalLoad({path: '/admin/deal/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oDeal->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>', width: '90%'}); return false"><?php echo htmlspecialchars($oDeal->name)?></a></div>
+					<div><a style="color: <?php echo $oDeal->Deal_Template->color?>" href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/deal/index.php')?>?hostcms[action]=edit&hostcms[checked][0][<?php echo $oDeal->id?>]=1" onclick="$.modalLoad({path: hostcmsBackend + '/deal/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oDeal->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>', width: '90%'}); return false"><?php echo htmlspecialchars($oDeal->name)?></a></div>
 				</div><?php
 			}
 		}
@@ -463,7 +474,7 @@ class Event_Model extends Core_Entity
 			{
 				?><div class="related-events-wrapper">
 					<div class="related-events" style="color: <?php echo $oLead->Lead_Status->color?>; background-color:<?php echo Core_Str::hex2lighter($oLead->Lead_Status->color, 0.88)?>"><i class="fa fa-user-circle-o"></i></div>
-					<div><a style="color: <?php echo $oLead->Lead_Status->color?>;" href="/admin/lead/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $oLead->id?>]=1" onclick="$.modalLoad({path: '/admin/lead/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oLead->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>', width: '90%'}); return false"><?php echo htmlspecialchars($oLead->getFullName())?></a></div>
+					<div><a style="color: <?php echo $oLead->Lead_Status->color?>;" href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/lead/index.php')?>?hostcms[action]=edit&hostcms[checked][0][<?php echo $oLead->id?>]=1" onclick="$.modalLoad({path: hostcmsBackend + '/lead/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oLead->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>', width: '90%'}); return false"><?php echo htmlspecialchars($oLead->getFullName())?></a></div>
 				</div><?php
 			}
 		}
@@ -504,7 +515,7 @@ class Event_Model extends Core_Entity
 				{
 					?><div class="related-events-wrapper">
 						<div class="related-events" style="color: <?php echo $oDms_Document->Dms_Document_Type->color?>; background-color:<?php echo Core_Str::hex2lighter($oDms_Document->Dms_Document_Type->color, 0.88)?>"><i class="fa fa-columns"></i></div>
-						<div><a style="color: <?php echo $oDms_Document->Dms_Document_Type->color?>;" href="/admin/dms/document/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $oDms_Document->id?>]=1" onclick="$.modalLoad({path: '/admin/dms/document/index.php', action: '<?php echo $action?>', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oDms_Document->id?>]=1', windowId: 'modal<?php echo $oDms_Document->id?>', width: '90%'}); return false"><?php echo htmlspecialchars($name)?></a></div>
+						<div><a style="color: <?php echo $oDms_Document->Dms_Document_Type->color?>;" href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/dms/document/index.php')?>?hostcms[action]=edit&hostcms[checked][0][<?php echo $oDms_Document->id?>]=1" onclick="$.modalLoad({path: hostcmsBackend + '/dms/document/index.php', action: '<?php echo $action?>', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oDms_Document->id?>]=1', windowId: 'modal<?php echo $oDms_Document->id?>', width: '90%'}); return false"><?php echo htmlspecialchars($name)?></a></div>
 					</div><?php
 				}
 			}
@@ -520,8 +531,20 @@ class Event_Model extends Core_Entity
 	 */
 	public function showCrmProjects($oAdmin_Form_Controller)
 	{
-		Core::moduleIsActive('crm_project')
-			&& $this->Crm_Project->showBadge($oAdmin_Form_Controller);
+		if (Core::moduleIsActive('crm_project'))
+		{
+			$aEvent_Crm_Projects = $this->Event_Crm_Projects->findAll(FALSE);
+			if (count($aEvent_Crm_Projects))
+			{
+				?><div style="margin: 3px 0;"><?php
+					foreach ($aEvent_Crm_Projects as $oEvent_Crm_Project)
+					{
+						$oCrm_Project = $oEvent_Crm_Project->Crm_Project;
+						$oCrm_Project->showBadge($oAdmin_Form_Controller);
+					}
+				?></div><?php
+			}
+		}
 	}
 
 	/**
@@ -724,8 +747,8 @@ class Event_Model extends Core_Entity
 			ob_start();
 
 			Admin_Form_Entity::factory('a')
-				->href("/admin/event/index.php?hostcms[action]=changeImportant&hostcms[checked][0][{$this->id}]=0")
-				->onclick("$.adminLoad({path: '/admin/event/index.php',additionalParams: 'hostcms[checked][0][{$this->id}]=0', action: 'changeImportant', windowId: '{$oAdmin_Form_Controller->getWindowId()}'}); return false;")
+				->href(Admin_Form_Controller::correctBackendPath("/{admin}/event/index.php?hostcms[action]=changeImportant&hostcms[checked][0][{$this->id}]=0"))
+				->onclick("$.adminLoad({path: hostcmsBackend + '/event/index.php',additionalParams: 'hostcms[checked][0][{$this->id}]=0', action: 'changeImportant', windowId: '{$oAdmin_Form_Controller->getWindowId()}'}); return false;")
 				->add(
 					Admin_Form_Entity::factory('Code')
 						->html($sExclamation)
@@ -1052,6 +1075,7 @@ class Event_Model extends Core_Entity
 		$this->Event_Dms_Documents->deleteAll(FALSE);
 		$this->Event_Siteusers->deleteAll(FALSE);
 		$this->Event_Calendar_Caldavs->deleteAll(FALSE);
+		$this->Event_Crm_Projects->deleteAll(FALSE);
 
 		if (Core::moduleIsActive('deal'))
 		{
@@ -1312,7 +1336,7 @@ class Event_Model extends Core_Entity
 				->value($this->event_status_id)
 				->options($aMasEventStatuses)
 				//->class('btn-group event-status')
-				->onchange("$.adminLoad({path: '/admin/event/index.php', additionalParams: 'hostcms[checked][0][{$this->id}]=0&eventStatusId=' + $(this).find('li[selected]').prop('id'), action: 'changeStatus', windowId: '{$oAdmin_Form_Controller->getWindowId()}'});")
+				->onchange("$.adminLoad({path: hostcmsBackend + '/event/index.php', additionalParams: 'hostcms[checked][0][{$this->id}]=0&eventStatusId=' + $(this).find('li[selected]').prop('id'), action: 'changeStatus', windowId: '{$oAdmin_Form_Controller->getWindowId()}'});")
 				->execute();
 		}
 		else

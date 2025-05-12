@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'shop');
 
 // Код формы
 $iAdmin_Form_Id = 274;
-$sAdminFormAction = '/admin/shop/filter/seo/index.php';
+$sAdminFormAction = '/{admin}/shop/filter/seo/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -295,7 +295,7 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop.menu'))
-		->href($oAdmin_Form_Controller->getAdminLoadHref($sShopFormPath = '/admin/shop/index.php', NULL, NULL, ''))
+		->href($oAdmin_Form_Controller->getAdminLoadHref($sShopFormPath = '/{admin}/shop/index.php', NULL, NULL, ''))
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sShopFormPath, NULL, NULL, ''))
 );
 
@@ -327,7 +327,7 @@ if ($iShopDirId)
 }
 
 $additionalParams = 'shop_id=' . $shop_id;
-$sShopPath = '/admin/shop/item/index.php';
+$sShopPath = '/{admin}/shop/item/index.php';
 
 // Ссылка на название магазина
 $oAdmin_Form_Entity_Breadcrumbs->add(
@@ -460,7 +460,7 @@ $oUser = Core_Auth::getCurrentUser();
 	&& $oAdmin_Form_Dataset->addUserConditions();
 
 // Фильтр по группе
-if (isset($oAdmin_Form_Controller->request['admin_form_filter_1556']) && $oAdmin_Form_Controller->request['admin_form_filter_1556'] != ''
+if (isset($oAdmin_Form_Controller->request['admin_form_filter_1556']) && $oAdmin_Form_Controller->request['admin_form_filter_1556'] != '')
 {
 	$mFilterValue = $oAdmin_Form_Controller->convertLike(strval($oAdmin_Form_Controller->request['admin_form_filter_1556']));
 

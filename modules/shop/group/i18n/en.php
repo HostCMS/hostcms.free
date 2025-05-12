@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Products groups',
@@ -65,4 +65,6 @@ return array(
 	'seo_item_h1_template' => 'H1 Template',
 	'changeIndexation_success' => 'The indexing of the shop group has been changed.',
 	'fields' => "User fields of groups",
+	'apply_discount_success' => 'Information has been successfully changed!',
+	'apply_shortcut_parent_group' => 'Apply to parent shortcut groups',
 );

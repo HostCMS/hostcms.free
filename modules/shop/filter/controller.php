@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Filter_Controller
 {
@@ -469,16 +469,20 @@ class Shop_Filter_Controller
 				)
 				: 0;*/
 
-			// warehouse rest
-			$available = $oShop_Item->getRest() > 0 ? 1 : 0;
+			$oOriginal_Shop_Item = $oShop_Item->shortcut_id
+				? $oShop_Item->Shop_Item
+				: $oShop_Item;
 
 			$shop_group_id = $oShop_Item->modification_id
 				? $oShop_Item->Modification->shop_group_id
 				: $oShop_Item->shop_group_id;
 
+			// warehouse rest
+			$available = $oOriginal_Shop_Item->getRest(FALSE) > 0 ? 1 : 0;
+
 			// prices
 			//$aPrices = $this->_oShop_Item_Controller->calculatePriceInItemCurrency($oShop_Item->price, $oShop_Item);
-			$aPrices = $this->_oShop_Item_Controller->calculatePrice($oShop_Item->price, $oShop_Item);
+			$aPrices = $this->_oShop_Item_Controller->calculatePrice($oOriginal_Shop_Item->price, $oOriginal_Shop_Item);
 
 			// Используется также ниже в блоке цен для групп клиентов
 			$price_absolute = $aPrices['price_discount'] /* * $fCurrencyCoefficient*/;
@@ -488,7 +492,7 @@ class Shop_Filter_Controller
 				1, // primary
 				$oShop_Item->modification_id,
 				$shop_group_id,
-				$oShop_Item->shop_producer_id,
+				$oOriginal_Shop_Item->shop_producer_id,
 				//$oShop_Item->shop_currency_id,
 				//$aPrices['price_discount'], // price
 				$price_absolute, // price_absolute
@@ -498,31 +502,34 @@ class Shop_Filter_Controller
 			$aPropertyIds = $this->_getPropertyIDs();
 
 			// Collect values by property_id
-			$aProperty_Values = $oShop_Item->getPropertyValues(FALSE);
-			$aTmp = array();
-			foreach ($aProperty_Values as $oProperty_Value)
+			$aPV = array();
+			if (Core::moduleIsActive('property'))
 			{
-				$oProperty = $oProperty_Value->Property;
-
-				if (in_array($oProperty->type, $this->_aAvailablePropertyTypes))
+				$aTmp = array();
+				$aProperty_Values = $oShop_Item->getPropertyValues(FALSE);
+				foreach ($aProperty_Values as $oProperty_Value)
 				{
-					if (isset($aPropertyIds[$oProperty->id]))
+					$oProperty = $oProperty_Value->Property;
+
+					if (in_array($oProperty->type, $this->_aAvailablePropertyTypes))
 					{
-						// Свойство множественное или ранее для этого единичного значения не было значения
-						if ($oProperty->multiple || !isset($aTmp[$oProperty->id]))
+						if (isset($aPropertyIds[$oProperty->id]))
 						{
-							$aTmp[$oProperty->id][] = $oProperty_Value->value;
+							// Свойство множественное или ранее для этого единичного значения не было значения
+							if ($oProperty->multiple || !isset($aTmp[$oProperty->id]))
+							{
+								$aTmp[$oProperty->id][] = $oProperty_Value->value;
+							}
 						}
 					}
 				}
-			}
 
-			$aPV = array();
-			foreach ($aPropertyIds as $property_id)
-			{
-				$aPV[] = isset($aTmp[$property_id]) ? $aTmp[$property_id] : array($this->_getDefaultValue($property_id));
+				foreach ($aPropertyIds as $property_id)
+				{
+					$aPV[] = isset($aTmp[$property_id]) ? $aTmp[$property_id] : array($this->_getDefaultValue($property_id));
+				}
+				unset($aTmp);
 			}
-			unset($aTmp);
 
 			if (count($aPV))
 			{

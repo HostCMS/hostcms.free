@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Event_Controller_Timeline extends Admin_Form_Controller_View
 {
@@ -155,7 +155,7 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 					if ($bAddNoteAccess)
 					{
 				?>
-				<form action="/admin/event/timeline/index.php?hostcms[action]=addNote&_=<?php echo time()?>&hostcms[checked][0][1-0]=1&event_id=<?php echo $event_id?>&parentWindowId=<?php echo htmlspecialchars($windowId)?>" method="POST" enctype='multipart/form-data' class="padding-bottom-10 dropzone-form dropzone-form-timeline">
+				<form action="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/event/timeline/index.php')?>?hostcms[action]=addNote&_=<?php echo time()?>&hostcms[checked][0][1-0]=1&event_id=<?php echo $event_id?>&parentWindowId=<?php echo htmlspecialchars($windowId)?>" method="POST" enctype='multipart/form-data' class="padding-bottom-10 dropzone-form dropzone-form-timeline">
 					<div class="timeline-comment-wrapper">
 						<?php
 							Admin_Form_Entity::factory('Textarea')
@@ -258,7 +258,7 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 
 								$.beforeContentLoad($window);
 								$.insertContent($window, response.form_html);
-								$.adminLoad({ path: '/admin/event/note/index.php', additionalParams: 'event_id=<?php echo $event_id?>', windowId: window_id });
+								$.adminLoad({ path: hostcmsBackend + '/event/note/index.php', additionalParams: 'event_id=<?php echo $event_id?>', windowId: window_id });
 							}
 						});
 					});
@@ -337,7 +337,7 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 
 									$iEntityAdminFormId = 324;
 
-									$path = '/admin/event/timeline/index.php';
+									$path = '/{admin}/event/timeline/index.php';
 									$additionalParams = '';
 									// $datasetId = 0;
 								break;
@@ -352,7 +352,7 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 
 									$iEntityAdminFormId = 220;
 
-									$path = '/admin/event/timeline/index.php';
+									$path = '/{admin}/event/timeline/index.php';
 									$additionalParams = "";
 									// $datasetId = 0;
 								break;
@@ -403,7 +403,7 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 
 									$iEntityAdminFormId = 278;
 
-									$path = '/admin/event/timeline/index.php';
+									$path = '/{admin}/event/timeline/index.php';
 								break;
 							}
 
@@ -449,6 +449,8 @@ class Event_Controller_Timeline extends Admin_Form_Controller_View
 
 													// $additionalParams = "type={$oTmpEntity->type}&entity_id={$key}&event_id={$oEventParent->id}";
 													$additionalParams = "event_id={$oEventParent->id}&parentWindowId={$windowId}&secret_csrf=" . Core_Security::getCsrfToken();
+
+													$path = Admin_Form_Controller::correctBackendPath($path);
 
 													$href = $oAdmin_Form_Controller->getAdminActionLoadHref($path, $oAdmin_Form_Action->name, NULL, $datasetId, $key, $additionalParams, 10, 1, NULL, NULL, 'list');
 

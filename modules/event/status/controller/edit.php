@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Event_Status_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -47,8 +47,35 @@ class Event_Status_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 		$oMainTab
 			->move($this->getField('name')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1)
 			->move($this->getField('color')->set('data-control', 'hue')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow2)
-			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow2)
-			->move($this->getField('final')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 margin-top-21')), $oMainRow2)
+			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow2);
+
+		// $oMainTab->move($this->getField('final')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow2);
+
+		$aFinals = array(
+			0 => array(
+				'value' => Core::_('Event_Status.final0'),
+				'color' => '#999'
+			),
+			1 => array(
+				'value' => Core::_('Event_Status.final1'),
+				'color' => '#53a93f'
+			),
+			-1 => array(
+				'value' => Core::_('Event_Status.final2'),
+				'color' => '#d73d32'
+			)
+		);
+
+		$oFinalSelect = Admin_Form_Entity::factory('Dropdownlist')
+			->options($aFinals)
+			->name('final')
+			->value($this->_object->final)
+			->caption(Core::_('Event_Status.final'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
+
+		$oMainRow2->add($oFinalSelect);
+
+		$oMainTab
 			->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow3);
 
 		if ($this->_object->id && Core::moduleIsActive('bot'))

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Warehouse_Entry_Model extends Core_Entity
 {
@@ -222,34 +222,34 @@ class Shop_Warehouse_Entry_Model extends Core_Entity
 		switch ($type)
 		{
 			case 0:
-				$path = '/admin/shop/warehouse/inventory/index.php';
+				$path = '/{admin}/shop/warehouse/inventory/index.php';
 			break;
 			case 1:
-				$path = '/admin/shop/warehouse/incoming/index.php';
+				$path = '/{admin}/shop/warehouse/incoming/index.php';
 			break;
 			case 2:
-				$path = '/admin/shop/warehouse/writeoff/index.php';
+				$path = '/{admin}/shop/warehouse/writeoff/index.php';
 			break;
 			case 3:
-				$path = '/admin/shop/warehouse/regrade/index.php';
+				$path = '/{admin}/shop/warehouse/regrade/index.php';
 			break;
 			case 4:
-				$path = '/admin/shop/warehouse/movement/index.php';
+				$path = '/{admin}/shop/warehouse/movement/index.php';
 			break;
 			case 5:
-				$path = '/admin/shop/order/index.php';
+				$path = '/{admin}/shop/order/index.php';
 			break;
 			case 6:
-				$path = '/admin/shop/warehouse/purchaseorder/index.php';
+				$path = '/{admin}/shop/warehouse/purchaseorder/index.php';
 			break;
 			case 7:
-				$path = '/admin/shop/warehouse/invoice/index.php';
+				$path = '/{admin}/shop/warehouse/invoice/index.php';
 			break;
 			case 8:
-				$path = '/admin/shop/warehouse/supply/index.php';
+				$path = '/{admin}/shop/warehouse/supply/index.php';
 			break;
 			case 9:
-				$path = '/admin/shop/warehouse/purchasereturn/index.php';
+				$path = '/{admin}/shop/warehouse/purchasereturn/index.php';
 			break;
 			default:
 				$path = '';
@@ -261,6 +261,8 @@ class Shop_Warehouse_Entry_Model extends Core_Entity
 		{
 			$shop_id = Core_Array::getGet('shop_id', 0, 'int');
 			$shop_group_id = Core_Array::getGet('shop_group_id', 0, 'int');
+
+			$path = Admin_Form_Controller::correctBackendPath($path);
 
 			return '<span class="badge badge-round badge-max-width" style="border-color: ' . $color . '; color: ' . Core_Str::hex2darker($color, 0.2) . '; background-color: ' . Core_Str::hex2lighter($color, 0.88) . '"><a style="color: ' . $color . '" href="' . $path . '?hostcms[action]=edit&hostcms[checked][0][' . $id . ']=1" onclick="$.modalLoad({path: \'' . $path . '\', action: \'edit\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $id . ']=1&shop_id=' . $shop_id . '&shop_group_id=' . $shop_group_id . '\', windowId: \'modal' . $this->document_id . '\', width: \'90%\'}); return false">' . Core::_('Shop_Document_Relation.type' . $type) . ' ' . $id . '</a></span>';
 		}

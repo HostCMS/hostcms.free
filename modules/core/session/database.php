@@ -8,9 +8,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
-class Core_Session_Database extends Core_Session
+//class Core_Session_Database extends Core_Session
+//class Core_Session_Database //extends SessionHandler
+class Core_Session_Database implements SessionHandlerInterface
 {
 	/**
 	 * DataBase instance
@@ -65,11 +67,12 @@ class Core_Session_Database extends Core_Session
 
 	/**
 	 * The open callback works like a constructor in classes and is executed when the session is being opened.
-	 * @param string $save_path save path
-	 * @param string $session_name session name
+	 * @param string $path save path
+	 * @param string $name session name
 	 * @return boolean
 	 */
-	public function sessionOpen($save_path, $session_name)
+	#[\ReturnTypeWillChange]
+	public function open($path, $name)
 	{
 		return TRUE;
 	}
@@ -78,7 +81,8 @@ class Core_Session_Database extends Core_Session
 	 * The close callback works like a destructor in classes and is executed after the session write callback has been called.
 	 * @return boolean
 	 */
-	public function sessionClose()
+	#[\ReturnTypeWillChange]
+	public function close()
 	{
 		return TRUE;
 	}
@@ -88,7 +92,8 @@ class Core_Session_Database extends Core_Session
 	 * @param string $id session ID
 	 * @return string
 	 */
-	public function sessionRead($id)
+	#[\ReturnTypeWillChange]
+	public function read($id)
 	{
 		if ($this->_lock($id))
 		{
@@ -103,7 +108,8 @@ class Core_Session_Database extends Core_Session
 			$oDataBase->free();
 
 			$this->_read = TRUE;
-			self::$_started = TRUE;
+			//self::$_started = TRUE;
+			Core_Session::setStarted();
 
 			if ($row)
 			{
@@ -141,7 +147,8 @@ class Core_Session_Database extends Core_Session
 	 * @param string $value data
 	 * @return boolean
 	 */
-	public function sessionWrite($id, $value)
+	#[\ReturnTypeWillChange]
+	public function write($id, $value)
 	{
 		if ($this->_read/* && $this->_lock($id)*/)
 		{
@@ -158,7 +165,7 @@ class Core_Session_Database extends Core_Session
 			// If nothing's really was changed affected rowCount will return 0.
 			if ($oDataBase->getAffectedRows() == 0 && $value != '')
 			{
-				$maxlifetime = self::getMaxLifeTime();
+				$maxlifetime = Core_Session::getMaxLifeTime();
 
 				$oDataBase->free();
 
@@ -184,7 +191,8 @@ class Core_Session_Database extends Core_Session
 	 * @param string $id session ID
 	 * @return boolean
 	 */
-	public function sessionDestroyer($id)
+	#[\ReturnTypeWillChange]
+	public function destroy($id)
 	{
 		if ($this->_lock($id))
 		{
@@ -225,9 +233,6 @@ class Core_Session_Database extends Core_Session
 
 		$oDataBase->free();
 
-		// Set cookie with expiration date
-		//self::_setCookie();
-
 		return TRUE;
 	}
 
@@ -236,7 +241,8 @@ class Core_Session_Database extends Core_Session
 	 * @param string $maxlifetime max life time
 	 * @return boolean
 	 */
-	public function sessionGc($maxlifetime)
+	#[\ReturnTypeWillChange]
+	public function gc($maxlifetime)
 	{
 		$oDataBase = Core_QueryBuilder::delete('sessions')
 			->where('time + maxlifetime', '<', time())
@@ -251,7 +257,7 @@ class Core_Session_Database extends Core_Session
 	 * This callback is executed when a new session ID is required.
 	 * @return string
 	 */
-	public function sessionCreateSid()
+	public function create_sid()
 	{
 		return session_create_id();
 	}
@@ -261,7 +267,7 @@ class Core_Session_Database extends Core_Session
 	 * @param string $id Session ID
 	 * @return bool
 	 */
-	public function sessionValidateSid($id)
+	public function validateId($id)
 	{
 		$queryBuilder = Core_QueryBuilder::select('id')
 			->from('sessions')
@@ -273,7 +279,7 @@ class Core_Session_Database extends Core_Session
 
 		$oDataBase->free();
 
-		return $row === FALSE;
+		return $row !== FALSE;
 	}
 
 	/**
@@ -308,7 +314,7 @@ class Core_Session_Database extends Core_Session
 
 			if (!is_array($row))
 			{
-				self::_error('HostCMS session lock error: Get row failure.');
+				Core_Session::error('HostCMS session lock error: Get row failure.');
 			}
 
 			if (isset($row['lock']) && $row['lock'] == 1)
@@ -320,7 +326,7 @@ class Core_Session_Database extends Core_Session
 
 			if ($iTime > $this->_lockTimeout)
 			{
-				self::_error('HostCMS session lock error: Timeout.');
+				Core_Session::error('HostCMS session lock error: Timeout.');
 				return FALSE;
 			}
 
@@ -345,7 +351,7 @@ class Core_Session_Database extends Core_Session
 
 		if (!is_array($row))
 		{
-			self::_error('HostCMS session unlock error: Get row failure');
+			Core_Session::error('HostCMS session unlock error: Get row failure');
 		}
 
 		return TRUE;

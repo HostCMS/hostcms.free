@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Cart_Model extends Core_Entity
 {
@@ -110,7 +110,7 @@ class Shop_Cart_Model extends Core_Entity
 			$oCore_Html_Entity_Div->add(
 				Core_Html_Entity::factory('A')
 					->href(
-						$oAdmin_Form_Controller->getAdminActionLoadHref('/admin/shop/item/index.php', 'edit', NULL, 1, $object->id)
+						$oAdmin_Form_Controller->getAdminActionLoadHref('/{admin}/shop/item/index.php', 'edit', NULL, 1, $object->id)
 					)
 					->target('_blank')
 					->value(htmlspecialchars($this->name))

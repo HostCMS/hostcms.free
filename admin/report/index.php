@@ -4,13 +4,13 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
 Core_Auth::authorization($sModule = 'report');
 
-$sAdminFormAction = '/admin/report/index.php';
+$sAdminFormAction = '/{admin}/report/index.php';
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create();
@@ -253,7 +253,7 @@ Admin_Form_Entity::factory('Form')
 		var context = settings.tab.find('a').attr('href');
 
 		$.ajax({
-			url: '/admin/report/index.php',
+			url: '<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/report/index.php")?>',
 			data: dataRequest,
 			dataType: 'json',
 			context: $(context),

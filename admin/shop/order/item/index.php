@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -13,14 +13,14 @@ Core_Auth::authorization($sModule = 'shop');
 // Код формы
 $iAdmin_Form_Id = 76;
 
-$sAdminFormAction = '/admin/shop/order/item/index.php';
+$sAdminFormAction = '/{admin}/shop/order/item/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
 $shop_id = Core_Array::getGet('shop_id', 0, 'int');
 $shop_group_id = Core_Array::getGet('shop_group_id', 0, 'int');
 $shop_dir_id = Core_Array::getGet('shop_dir_id', 0, 'int');
-$shop_order_id = Core_Array::getGet('shop_order_id', 0, 'int');
+$shop_order_id = Core_Array::getRequest('shop_order_id', 0, 'int');
 
 $oShop = Core_Entity::factory('Shop')->find($shop_id);
 $oShop_Order = Core_Entity::factory('Shop_Order')->getById($shop_order_id);
@@ -75,7 +75,7 @@ if (Core_Array::getPost('load_modal') && Core_Array::getPost('shop_order_item_id
 		<div class="modal fade" id="codes-<?php echo $oShop_Order_Item->id?>" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content">
-					<form action="/admin/shop/order/item/index.php" method="POST">
+					<form action="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/shop/order/item/index.php')?>" method="POST">
 						<div class="modal-header">
 							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 							<h4 class="modal-title" id="myModalLabel"><?php echo Core::_('Shop_Order_Item.item_codes', $oShop_Order_Item->name)?></h4>
@@ -141,7 +141,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 	$iShopId = intval(Core_Array::getGet('shop_id'));
 	$oShop = Core_Entity::factory('Shop', $iShopId);
 
-	$aJSON = array(
+	$aJSON[0] = array(
 		'id' => 0,
 		'label' => '[0] ...'
 	);
@@ -152,7 +152,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 		foreach ($aTmp as $key => $value)
 		{
-			$key && $aJSON[] = array(
+			$key && $aJSON[$key] = array(
 				'id' => $key,
 				'label' => $value
 			);
@@ -196,7 +196,7 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop.menu'))
-		->href($oAdmin_Form_Controller->getAdminLoadHref($sShopItemFormPath = '/admin/shop/index.php', NULL, NULL, ''))
+		->href($oAdmin_Form_Controller->getAdminLoadHref($sShopItemFormPath = '/{admin}/shop/index.php', NULL, NULL, ''))
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sShopItemFormPath, NULL, NULL, ''))
 );
 
@@ -231,8 +231,8 @@ if ($oShopDir->id)
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($oShop->name)
-		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/index.php', NULL, NULL,$sAdditionalParams = "shop_id={$oShop->id}&shop_group_id=0&shop_dir_id={$oShopDir->id}"))
-		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, $sAdditionalParams))
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/index.php', NULL, NULL,$sAdditionalParams = "shop_id={$oShop->id}&shop_group_id=0&shop_dir_id={$oShopDir->id}"))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/item/index.php', NULL, NULL, $sAdditionalParams))
 );
 
 // Крошки строим только если: мы не в корне или идет редактирование
@@ -243,7 +243,7 @@ if ($shop_group_id)
 	// Массив хлебных крошек
 	$aBreadcrumbs = array();
 
-	$sShopItemFormPath = '/admin/shop/item/index.php';
+	$sShopItemFormPath = '/{admin}/shop/item/index.php';
 
 	do
 	{
@@ -269,13 +269,13 @@ if ($shop_group_id)
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop_Order.orders'))
-		->href($oAdmin_Form_Controller->getAdminLoadHref($sShopOrderFormPath = '/admin/shop/order/index.php', NULL, NULL, $sAdditionalParams = "shop_id={$oShop->id}&shop_group_id={$shop_group_id}&shop_dir_id={$oShopDir->id}"))
+		->href($oAdmin_Form_Controller->getAdminLoadHref($sShopOrderFormPath = '/{admin}/shop/order/index.php', NULL, NULL, $sAdditionalParams = "shop_id={$oShop->id}&shop_group_id={$shop_group_id}&shop_dir_id={$oShopDir->id}"))
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sShopOrderFormPath, NULL, NULL, $sAdditionalParams))
 )->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop_Order.order_edit', $oShop_Order->invoice, FALSE))
-		->href($oAdmin_Form_Controller->getAdminActionLoadHref('/admin/shop/order/index.php', 'edit', NULL, 0, $oShop_Order->id))
-		->onclick($oAdmin_Form_Controller->getAdminActionLoadAjax('/admin/shop/order/index.php', 'edit', NULL, 0, $oShop_Order->id))
+		->href($oAdmin_Form_Controller->getAdminActionLoadHref('/{admin}/shop/order/index.php', 'edit', NULL, 0, $oShop_Order->id))
+		->onclick($oAdmin_Form_Controller->getAdminActionLoadAjax('/{admin}/shop/order/index.php', 'edit', NULL, 0, $oShop_Order->id))
 );
 
 // Добавляем крошку на текущую форму

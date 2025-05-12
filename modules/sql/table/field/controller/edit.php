@@ -8,10 +8,16 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Sql
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Sql_Table_Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
+	/**
+	 * Hide empty PK when adding
+	 * @var boolean
+	 */
+	protected $_hideEmptyPK = FALSE;
+
 	/**
 	 * Prepare backend item's edit form
 	 *
@@ -51,8 +57,8 @@ class Sql_Table_Field_Controller_Edit extends Admin_Form_Action_Controller_Type_
 		// double unsigned => double
 		list($aType['datatype']) = explode(' ', $aType['datatype']);
 
-		$oAdditionalTab
-			->move($this->getField('Field')->class('form-control input-lg'), $oMainRow1);
+		// $oAdditionalTab
+			// ->move($this->getField('Field')->class('form-control input-lg'), $oMainRow1);
 
 		$oMainTab->delete($this->getField('Type'));
 
@@ -235,7 +241,7 @@ class Sql_Table_Field_Controller_Edit extends Admin_Form_Action_Controller_Type_
 			Admin_Form_Entity::factory('Checkbox')
 				->name('Autoincrement')
 				->value(1)
-				->checked(strtolower($this->_object->Extra) == 'auto_increment')
+				->checked(strtolower((string) $this->_object->Extra) == 'auto_increment')
 				->caption(Core::_('sql_table_field.Autoincrement'))
 				->divAttr(array('class' => 'form-group col-xs-12'))
 		);

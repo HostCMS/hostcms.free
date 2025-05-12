@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Update
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Update_Controller extends Core_Servant_Properties
 {
@@ -29,7 +29,8 @@ class Update_Controller extends Core_Servant_Properties
 		'install_beta',
 		'keys',
 		'modules',
-		'protocol'
+		'protocol',
+		'backend'
 	);
 
 	/**
@@ -198,7 +199,8 @@ class Update_Controller extends Core_Servant_Properties
 			->install_beta(defined('INSTALL_BETA_UPDATE') && INSTALL_BETA_UPDATE ? 1 : 0)
 			->keys($aSite_Alias_Names)
 			->modules($aTmpModules)
-			->protocol($oSite->https ? 'https' : 'http');
+			->protocol($oSite->https ? 'https' : 'http')
+			->backend(Core::$mainConfig['backend']);
 
 		return $this;
 	}
@@ -220,9 +222,11 @@ class Update_Controller extends Core_Servant_Properties
 			'&php_version=' . rawurlencode($this->php_version) .
 			'&mysql_version=' . rawurlencode($this->mysql_version) .
 			'&update_id=' . $this->update_id .
-			'&install_beta_update=' . rawurlencode($this->install_beta);
+			'&install_beta_update=' . rawurlencode($this->install_beta) .
+			"&backend=" . rawurlencode((string) $this->backend);
 
 		$Core_Http = Core_Http::instance()
+			->clear()
 			->timeout(15)
 			->method('POST');
 
@@ -287,9 +291,13 @@ class Update_Controller extends Core_Servant_Properties
 			"&cms_folder=" . rawurlencode($this->cms_folder) .
 			"&php_version=" . rawurlencode($this->php_version) .
 			"&mysql_version=" . rawurlencode($this->mysql_version) .
-			"&update_id=" . $this->update_id . "&update_key_id=" . rawurlencode($update_key_id) . "&install_beta_update=" . rawurlencode($this->install_beta);
+			"&update_id=" . $this->update_id .
+			"&update_key_id=" . rawurlencode($update_key_id) .
+			"&install_beta_update=" . rawurlencode($this->install_beta) .
+			"&backend=" . rawurlencode((string) $this->backend);
 
 		$Core_Http = Core_Http::instance()
+			->clear()
 			->url($url)
 			->timeout(15)
 			->referer(Core_Array::get($_SERVER, 'REQUEST_SCHEME', 'http') . '://' . Core_Array::get($_SERVER, 'HTTP_HOST'))
@@ -401,9 +409,12 @@ class Update_Controller extends Core_Servant_Properties
 			"&cms_folder=" . rawurlencode($this->cms_folder) .
 			"&php_version=" . rawurlencode($this->php_version) .
 			"&mysql_version=" . rawurlencode($this->mysql_version) .
-			"&update_id=" . $this->update_id . "&install_beta_update=" . rawurlencode($this->install_beta);
+			"&update_id=" . $this->update_id .
+			"&install_beta_update=" . rawurlencode($this->install_beta) .
+			"&backend=" . rawurlencode((string) $this->backend);
 
 		$Core_Http = Core_Http::instance()
+			->clear()
 			->url($url)
 			->timeout(20)
 			->referer(Core_Array::get($_SERVER, 'REQUEST_SCHEME', 'http') . '://' . Core_Array::get($_SERVER, 'HTTP_HOST'))

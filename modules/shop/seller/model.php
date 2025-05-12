@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Seller_Model extends Core_Entity
 {
@@ -338,6 +338,8 @@ class Shop_Seller_Model extends Core_Entity
 
 	/**
 	 * Delete seller's large image
+	 * @return self
+	 * @hostcms-event shop_seller.onAfterDeleteLargeImage
 	 */
 	public function deleteLargeImage()
 	{
@@ -346,13 +348,18 @@ class Shop_Seller_Model extends Core_Entity
 			Core_File::delete($this->getLargeFilePath());
 		} catch (Exception $e) {}
 
+		Core_Event::notify($this->_modelName . '.onAfterDeleteLargeImage', $this);
+
 		$this->image_large = '';
 		$this->save();
+
+		return $this;
 	}
 
 	/**
 	 * Delete seller's small image
 	 * @return self
+	 * @hostcms-event shop_seller.onAfterDeleteSmallImage
 	 */
 	public function deleteSmallImage()
 	{
@@ -361,8 +368,12 @@ class Shop_Seller_Model extends Core_Entity
 			Core_File::delete($this->getSmallFilePath());
 		} catch (Exception $e) {}
 
+		Core_Event::notify($this->_modelName . '.onAfterDeleteSmallImage', $this);
+
 		$this->image_small = '';
 		$this->save();
+
+		return $this;
 	}
 
 	/**
