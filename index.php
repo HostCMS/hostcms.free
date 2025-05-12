@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 
 if (is_dir('install/') && is_file('install/index.php'))
@@ -239,111 +239,132 @@ if (Core::moduleIsActive('ipaddress'))
 		: $eventResult;
 }
 
-$userAgent = Core_Array::get($_SERVER, 'HTTP_USER_AGENT', '', 'str');
-$requestURI = Core_Array::get($_SERVER, 'REQUEST_URI', '', 'str');
-
-// Static files that should be ignored
-Core_Event::notify('Ipaddress.isStaticFile', NULL, array($requestURI));
-$eventResult = Core_Event::getLastReturn();
-
-$bStaticFiles = is_bool($eventResult)
-	? $eventResult
-	: in_array($requestURI, array('/favicon.ico', '/favicon.gif', '/favicon.png', '/favicon.svg', '/robots.txt', '/hostcms-benchmark.php'))
-		|| strpos($requestURI, '/apple-touch-icon') === 0
-		|| strpos($requestURI, '/.well-known') === 0;
-
-if (!$bBlockedIp && !$bBlockedFilter && !$bStaticFiles && Core::moduleIsActive('counter'))
+if (!$bBlockedIp)
 {
-	if (Core::moduleIsActive('ipaddress') && !Core::checkBot($userAgent))
-	{
-		$oIpaddress_Visitor_Filter_Controller = Ipaddress_Visitor_Filter_Controller::instance();
-		$bUseIpaddressVisitors = count($oIpaddress_Visitor_Filter_Controller->getFilters());
+	$userAgent = Core_Array::get($_SERVER, 'HTTP_USER_AGENT', '', 'str');
+	$requestURI = Core_Array::get($_SERVER, 'REQUEST_URI', '', 'str');
 
+	// Static files that should be ignored
+	Core_Event::notify('Ipaddress.isStaticFile', NULL, array($requestURI));
+	$eventResult = Core_Event::getLastReturn();
+
+	$bStaticFiles = is_bool($eventResult)
+		? $eventResult
+		: in_array($requestURI, array('/favicon.ico', '/favicon.gif', '/favicon.png', '/favicon.svg', '/robots.txt', '/hostcms-benchmark.php'))
+			|| strpos($requestURI, '/apple-touch-icon') === 0
+			|| strpos($requestURI, '/.well-known') === 0;
+
+	if (/*!$bBlockedIp && */!$bBlockedFilter && !$bStaticFiles && Core::moduleIsActive('counter'))
+	{
+		if (Core::moduleIsActive('ipaddress') && !Core::checkBot($userAgent))
+		{
+			$oIpaddress_Visitor_Filter_Controller = Ipaddress_Visitor_Filter_Controller::instance();
+			$bUseIpaddressVisitors = count($oIpaddress_Visitor_Filter_Controller->getFilters());
+
+			if ($bUseIpaddressVisitors)
+			{
+				// Save and reset timezone to GMT
+				$timezone = date_default_timezone_get();
+				date_default_timezone_set('GMT');
+
+				$timeGmt = time();
+
+				$oIpaddress_Visitor = Ipaddress_Visitor_Controller::getCurrentIpaddressVisitor();
+
+				// _h_tag устанавливаем до учета статистики
+				$bSecure = Core::httpsUses();
+				Core_Cookie::set('_h_tag', $oIpaddress_Visitor->id, array('expires' => $timeGmt + 2592000, 'path' => '/', 'samesite' => $bSecure ? 'None' : 'Lax', 'secure' => $bSecure));
+				$_COOKIE['_h_tag'] = $oIpaddress_Visitor->id;
+
+				// Restore timezone
+				date_default_timezone_set($timezone);
+			}
+		}
+		else
+		{
+			$bUseIpaddressVisitors = FALSE;
+		}
+
+		// Статистика учитывается для незаблокированных
+		$oCounter_Controller = Counter_Controller::instance()
+			->site($oSite)
+			->referrer(Core_Array::get($_SERVER, 'HTTP_REFERER'))
+			->page((Core::httpsUses() ? 'https' : 'http') . '://' . strtolower(Core_Array::get($_SERVER, 'HTTP_HOST')) . $requestURI)
+			->ip(Core::getClientIp())
+			->userAgent($userAgent)
+			->counterId(0)
+			->applyData();
+
+		// Проверку на посетителей делаем после учета данных статистики текущего посещения, а также если заданы фильтры.
 		if ($bUseIpaddressVisitors)
 		{
-			// Save and reset timezone to GMT
-			$timezone = date_default_timezone_get();
-			date_default_timezone_set('GMT');
+			// Нет расчитанного результата для посетителя
+			if ($oIpaddress_Visitor->result_expired == 0 || $oIpaddress_Visitor->result_expired < $timeGmt)
+			{
+				Core_Event::notify('Ipaddress.onGetVisitorBlockMode', NULL, array($oIpaddress_Visitor));
+				$eventResult = Core_Event::getLastReturn();
 
-			$timeGmt = time();
+				if (!is_integer($eventResult))
+				{
+					if ($oIpaddress_Visitor_Filter_Controller->isBlocked())
+					{
+						// 0 - забанен, 1 - разрешен
+						switch ($oIpaddress_Visitor_Filter_Controller->getBlockMode())
+						{
+							case 0:
+								$checkResult = 0; // Block
+							break;
+							case 1:
+								$checkResult = 2; // Captcha
+							break;
+							default:
+								$checkResult = 1; // Не заблокирован
+							break;
+						}
+					}
+					else
+					{
+						// Не заблокирован
+						$checkResult = 1;
+					}
+				}
+				else
+				{
+					$checkResult = $eventResult;
+				}
 
-			$oIpaddress_Visitor = Ipaddress_Visitor_Controller::getCurrentIpaddressVisitor();
+				$oIpaddress_Visitor->result = $checkResult;
+				$oIpaddress_Visitor->ipaddress_visitor_filter_id = $oIpaddress_Visitor_Filter_Controller->getFilterId();
 
-			// _h_tag устанавливаем до учета статистики
-			$bSecure = Core::httpsUses();
-			Core_Cookie::set('_h_tag', $oIpaddress_Visitor->id, array('expires' => $timeGmt + 2592000, 'path' => '/', 'samesite' => $bSecure ? 'None' : 'Lax', 'secure' => $bSecure));
-			$_COOKIE['_h_tag'] = $oIpaddress_Visitor->id;
+				if ($oIpaddress_Visitor->result)
+				{
+					// Результат проверки на 5 минут
+					$oIpaddress_Visitor->result_expired = $timeGmt + 60 * 5;
+				}
+				else
+				{
+					// Результат проверки на $hours дней
+					$hours = $oIpaddress_Visitor_Filter_Controller->getHoursToBlock();
+					$oIpaddress_Visitor->result_expired = $timeGmt + 3600 * ($hours > 0 ? $hours : 24);
+				}
 
-			// Restore timezone
-			date_default_timezone_set($timezone);
+				$oIpaddress_Visitor->save();
+			}
+
+			$bBlockedVisitorFilter = $oIpaddress_Visitor->result == 0;
+			$bCaptchaVisitorFilter = $oIpaddress_Visitor->result == 2;
 		}
-	}
-	else
-	{
-		$bUseIpaddressVisitors = FALSE;
-	}
-
-	// Статистика учитывается для незаблокированных
-	Counter_Controller::instance()
-		->site($oSite)
-		->referrer(Core_Array::get($_SERVER, 'HTTP_REFERER'))
-		->page((Core::httpsUses() ? 'https' : 'http') . '://' . strtolower(Core_Array::get($_SERVER, 'HTTP_HOST')) . $requestURI)
-		->ip(Core::getClientIp())
-		->userAgent($userAgent)
-		->counterId(0)
-		->applyData();
-
-	// Проверку на посетителей делаем после учета данных статистики текущего посещения, а также если заданы фильтры.
-	if ($bUseIpaddressVisitors)
-	{
-		// Нет расчитанного результата для посетителя
-		if ($oIpaddress_Visitor->result_expired == 0 || $oIpaddress_Visitor->result_expired < $timeGmt)
+		
+		// Накопительная статистика за день
+		if (!$bBlockedVisitorFilter && !$bCaptchaVisitorFilter)
 		{
-			// 0 - забанен, 1 - разрешен
-			if ($oIpaddress_Visitor_Filter_Controller->isBlocked())
-			{
-				$checkResult = $oIpaddress_Visitor_Filter_Controller->getBlockMode() == 0
-					? 0 // Block
-					: 2; // Captcha
-			}
-			else
-			{
-				// Не заблокирован
-				$checkResult = 1;
-			}
-
-			$oIpaddress_Visitor->result = $checkResult;
-			$oIpaddress_Visitor->ipaddress_visitor_filter_id = $oIpaddress_Visitor_Filter_Controller->getFilterId();
-
-			if ($oIpaddress_Visitor->result)
-			{
-				// Результат проверки на 5 минут
-				$oIpaddress_Visitor->result_expired = $timeGmt + 60 * 5;
-			}
-			else
-			{
-				// Результат проверки на $hours дней
-				$hours = $oIpaddress_Visitor_Filter_Controller->getHoursToBlock();
-				$oIpaddress_Visitor->result_expired = $timeGmt + 3600 * ($hours > 0 ? $hours : 24);
-			}
-
-			$oIpaddress_Visitor->save();
+			$oCounter_Controller->applySummary();
 		}
-
-		$bBlockedVisitorFilter = $oIpaddress_Visitor->result == 0;
-		$bCaptchaVisitorFilter = $oIpaddress_Visitor->result == 2;
 	}
 }
 
 if (Core::moduleIsActive('ipaddress'))
 {
-	/*Core_Log::instance()->clear()
-		->status(Core_Log::$MESSAGE)
-		->write($bBlockedIp
-			? Core::_('Ipaddress.error_log_blocked_ip', implode(',', $aIp))
-			: Core::_('Ipaddress.error_log_blocked_useragent', implode(',', $aIp), $userAgent)
-		);*/
-
 	if ($bBlockedIp || $bBlockedFilter || $bBlockedVisitorFilter)
 	{
 		// IP blocked

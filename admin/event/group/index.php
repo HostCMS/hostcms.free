@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'event');
 
 // Код формы
 $iAdmin_Form_Id = 219;
-$sAdminFormAction = '/admin/event/group/index.php';
+$sAdminFormAction = '/{admin}/event/group/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -51,7 +51,7 @@ $oAdmin_Form_Entity_Breadcrumbs
 		Admin_Form_Entity::factory('Breadcrumb')
 			->name(Core::_('Event.events_title'))
 			->href(
-				$oAdmin_Form_Controller->getAdminLoadHref($sEventPath = '/admin/event/index.php')
+				$oAdmin_Form_Controller->getAdminLoadHref($sEventPath = '/{admin}/event/index.php')
 			)
 			->onclick(
 				$oAdmin_Form_Controller->getAdminLoadAjax($sEventPath)

@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -22,7 +22,7 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 $oAdmin_Form_Controller
 	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
-	->path('/admin/shop/item/import/index.php');
+	->path('/{admin}/shop/item/import/index.php');
 
 ob_start();
 
@@ -36,8 +36,8 @@ $oAdmin_View
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop.menu'))
-		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/index.php'))
-		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/index.php'))
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/index.php'))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/index.php'))
 );
 
 // Крошки по директориям магазинов
@@ -51,8 +51,8 @@ if ($oShopDir->id)
 	{
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 			->name($oShopDirBreadcrumbs->name)
-			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"))
-			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"));
+			->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"));
 	} while ($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
@@ -67,8 +67,8 @@ if ($oShopDir->id)
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($oShop->name)
-		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"))
-		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"))
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"))
 );
 
 // Крошки по группам товаров
@@ -82,8 +82,8 @@ if ($oShopGroup->id)
 	{
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 			->name($oShopGroupBreadcrumbs->name)
-			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"))
-			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"));
+			->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"));
 	} while ($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
@@ -217,8 +217,8 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 						}
 
 						$sLocale = Core_Array::getPost('import_price_encoding');
-						$oShop_Item_Import_Csv_Controller = new Shop_Item_Import_Csv_Controller($oShop->id, $shop_groups_parent_id);
 
+						$oShop_Item_Import_Csv_Controller = new Shop_Item_Import_Csv_Controller($oShop->id, $shop_groups_parent_id);
 						$oShop_Item_Import_Csv_Controller
 							->encoding($sLocale)
 							->separator($sSeparator)
@@ -293,10 +293,15 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 									//$sCaption = $oShop_Item_Import_Csv_Controller->aCaptions[$j];
 									$sCaption = trim(mb_strtolower(str_replace('  ', '', $aTmpOptions['caption'])));
 
-									// cut "... [47]"
+									// matche "47" from square brackets
+									preg_match('/\[(\d+)\]/', $sCaption, $matches);
+									$sId = isset($matches[1]) ? $matches[1] : NULL;
+
+									// cut square brackets "... [47]"
 									$sCaption = preg_replace('/\s*\[\d+\]/', '', $sCaption);
 
 									if (!$aAlreadySelected && ($aCsvLine[$i] == $sCaption
+										|| !is_null($sId) && $aCsvLine[$i] == $sId
 										|| (strlen($sCaption) > 0 && strlen($aCsvLine[$i]) > 0
 											&& (strpos($aCsvLine[$i], $sCaption) !== FALSE || strpos($sCaption, $aCsvLine[$i]) !== FALSE)
 											&& !in_array($aCsvLine[$i], $aForbiddenFields)
@@ -437,8 +442,8 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 	{
 		Core_Session::start();
 
-		$import_price_delay = intval(Core_Array::getRequest('import_price_delay'));
-		$import_entries_limit = intval(Core_Array::getRequest('import_entries_limit', 5000));
+		$import_price_delay = Core_Array::getRequest('import_price_delay', 0, 'int');
+		$import_entries_limit = Core_Array::getRequest('import_entries_limit', 5000, 'int');
 
 		if (isset($_SESSION['Shop_Item_Import_Csv_Controller']))
 		{
@@ -455,9 +460,9 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 
 			foreach ($_POST as $iKey => $sValue)
 			{
-				if (mb_strpos($iKey, "field") === 0)
+				if (strpos($iKey, "field") === 0)
 				{
-					$aConformity[] = $sValue;
+					$aConformity[intval(substr($iKey, 5))] = $sValue;
 				}
 			}
 
@@ -520,7 +525,7 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 
 			$_SESSION['Shop_Item_Import_Csv_Controller'] = $Shop_Item_Import_Csv_Controller;
 
-			$sRedirectAction = $oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/import/index.php', 'start_import', NULL, $sAdditionalParams . '&mode=' . $mode);
+			$sRedirectAction = $oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/item/import/index.php', 'start_import', NULL, $sAdditionalParams . '&mode=' . $mode);
 
 			showStat($Shop_Item_Import_Csv_Controller);
 		}
@@ -531,7 +536,7 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 			{
 				$_SESSION['Shop_Item_Import_Csv_Controller'] = $Shop_Item_Import_Csv_Controller;
 
-				$sRedirectAction = $oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/import/index.php', 'start_import', NULL, $sAdditionalParams . '&mode=' . $mode);
+				$sRedirectAction = $oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/item/import/index.php', 'start_import', NULL, $sAdditionalParams . '&mode=' . $mode);
 
 				showStat($Shop_Item_Import_Csv_Controller);
 			}
@@ -593,7 +598,35 @@ else
 		'maxTime' => 20,
 		'maxCount' => 100,
 		'entriesLimit' => 5000,
+		'separator' => ';',
+		'limiter' => '"'
 	);
+
+	$aSeparator = array(
+		0 => ',',
+		1 => ';',
+		2 => "\t"
+	);
+
+	$separator_text = '';
+	$separatorOptionKey = array_search($aConfig['separator'], $aSeparator, TRUE);
+	if ($separatorOptionKey === FALSE)
+	{
+		$separatorOptionKey = 3;
+		$separator_text = $aConfig['separator'];
+	}
+
+	$aLimiter = array(
+		0 => '"'
+	);
+
+	$limiter_text = '';
+	$limiterOptionKey = array_search($aConfig['limiter'], $aLimiter, TRUE);
+	if ($limiterOptionKey === FALSE)
+	{
+		$limiterOptionKey = 1;
+		$limiter_text = $aConfig['limiter'];
+	}
 
 	$oMainTab->add(
 		Admin_Form_Entity::factory('Div')->class('row')->add(
@@ -662,11 +695,11 @@ else
 			->caption(Core::_('Shop_Item.import_price_list_separator'))
 			->divAttr(array('class' => 'no-padding-right form-group col-xs-10 col-sm-9 rounded-radio-group hidden-1'))
 			->name('import_price_separator')
-			// Разделитель ';'
-			->value(1)
+			->value($separatorOptionKey)
 			->add(
 				Admin_Form_Entity::factory('Input')
 					->name("import_separator_text")
+					->value($separator_text)
 					//->caption('&nbsp;')
 					->size(3)
 					->divAttr(array('class' => 'form-group d-inline-block margin-left-10 hidden-1'))
@@ -685,10 +718,12 @@ else
 			))
 			->caption(Core::_('Shop_Item.limiter'))
 			->name('limiter')
+			->value($limiterOptionKey)
 			->divAttr(array('class' => 'no-padding-right form-group col-xs-10 col-sm-9 rounded-radio-group hidden-1'))
 			->add(
 				Admin_Form_Entity::factory('Input')
 					->name("limiter_text")
+					->value($limiter_text)
 					//->caption('&nbsp;')
 					->size(3)
 					->divAttr(array('class' => 'form-group d-inline-block margin-left-10 hidden-1'))

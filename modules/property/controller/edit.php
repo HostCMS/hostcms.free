@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Property
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -31,6 +31,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$this->_types = array(
 			0 => Core::_('Property.type0'),
+			15 => Core::_('Property.type15'),
 			11 => Core::_('Property.type11'),
 			1 => Core::_('Property.type1'),
 			2 => Core::_('Property.type2'),
@@ -224,14 +225,14 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->name("typograph")
 						->caption(Core::_('Property.use_typograph'))
 						->value(1)
-						->divAttr(array('class' => 'form-group col-sm-12 col-md-6 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'))
+						->divAttr(array('class' => 'form-group col-sm-12 col-md-6 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14 hidden-15'))
 						->checked($this->_object->typograph);
 
 					$oUseTrailingPunctuation = Admin_Form_Entity::factory('Checkbox')
 						->name("trailing_punctuation")
 						->caption(Core::_('Property.use_trailing_punctuation'))
 						->value(1)
-						->divAttr(array('class' => 'form-group col-sm-12 col-md-6 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'))
+						->divAttr(array('class' => 'form-group col-sm-12 col-md-6 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14 hidden-15'))
 						->checked($this->_object->trailing_punctuation);
 
 					$oMainRow3
@@ -258,7 +259,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					{
 						$pathLink
 							->target('_blank')
-							->href('/admin/list/item/index.php?list_id=' . $this->_object->list_id);
+							->href(Admin_Form_Controller::correctBackendPath('/{admin}/list/item/index.php?list_id=') . $this->_object->list_id);
 					}
 
 					if ($iCountLists < Core::$mainConfig['switchSelectToAutocomplete'])
@@ -271,9 +272,9 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							->name('list_id')
 							->value($this->_object->list_id)
 							->caption(Core::_('Property.list_id'))
-							->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'))
+							->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14 hidden-15'))
 							->add($pathLink)
-							->onchange("$('#{$windowId} #pathLink').attr('href', '/admin/list/item/index.php?list_id=' + this.value); return false");
+							->onchange("$('#{$windowId} #pathLink').attr('href', hostcmsBackend + '/list/item/index.php?list_id=' + this.value); return false");
 
 						$oMainRow3->add($oSelect_Lists);
 					}
@@ -283,7 +284,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 						$oListInput = Admin_Form_Entity::factory('Input')
 							->caption(Core::_('Property.list_id'))
-							->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'))
+							->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14 hidden-15'))
 							->name('list_name')
 							->add($pathLink)
 							->placeholder(Core::_('Admin.autocomplete_placeholder'));
@@ -302,7 +303,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								$('#{$windowId} [name = list_name]').autocomplete({
 									source: function(request, response) {
 										$.ajax({
-											url: '/admin/list/index.php?autocomplete=1&show_list=1&site_id={$oSite->id}',
+											url: hostcmsBackend + '/list/index.php?autocomplete=1&show_list=1&site_id={$oSite->id}',
 											dataType: 'json',
 											data: {
 												queryString: request.term
@@ -326,7 +327,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 									select: function(event, ui) {
 										$('#{$windowId} [name = list_id]').val(ui.item.id);
 
-										$('#{$windowId} #pathLink').attr('href', '/admin/list/item/index.php?list_id=' + ui.item.id);
+										$('#{$windowId} #pathLink').attr('href', hostcmsBackend + '/list/item/index.php?list_id=' + ui.item.id);
 									},
 									open: function() {
 										$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
@@ -358,7 +359,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->name('informationsystem_id')
 						->value($this->_object->informationsystem_id)
 						->caption(Core::_('Property.informationsystem_id'))
-						->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-14'));
+						->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-14 hidden-15'));
 
 					$oMainRow4->add($oSelect_Informationsystems);
 				}
@@ -376,7 +377,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->name('shop_id')
 						->value($this->_object->shop_id)
 						->caption(Core::_('Property.shop_id'))
-						->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-13'));
+						->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-13 hidden-15'));
 
 					$oMainRow5->add($oSelect_Shops);
 				}
@@ -397,7 +398,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->value($this->_object->default_value == '0000-00-00 00:00:00' ? '' : $this->_object->default_value)
 					->name('default_value_date')
 					->caption(Core::_('Property.default_value'))
-					->divAttr(array('class' => 'form-group col-sm-6 col-md-4 col-lg-3 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'));
+					->divAttr(array('class' => 'form-group col-sm-6 col-md-4 col-lg-3 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14 hidden-15'));
 
 				$oMainRow8->add($oDefault_Value_Date);
 
@@ -405,7 +406,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->value($this->_object->default_value == '0000-00-00 00:00:00' ? '' : $this->_object->default_value)
 					->name('default_value_datetime')
 					->caption(Core::_('Property.default_value'))
-					->divAttr(array('class' => 'form-group col-sm-6 col-md-4 col-lg-3 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'));
+					->divAttr(array('class' => 'form-group col-sm-6 col-md-4 col-lg-3 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14 hidden-15'));
 
 				$oMainRow9->add($oDefault_Value_DateTime);
 
@@ -414,7 +415,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->checked($this->_object->default_value == 1)
 					->caption(Core::_('Property.default_value'))
 					->name('default_value_checked')
-					->divAttr(array('class' => 'form-group col-sm-6 col-md-4 col-lg-4 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'));
+					->divAttr(array('class' => 'form-group col-sm-6 col-md-4 col-lg-4 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14 hidden-15'));
 
 				$oMainRow10->add($oDefault_Value_Checkbox);
 
@@ -435,8 +436,8 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainTab
 					->move($this->getField('tag_name'), $oMainRow11)
 					->move($this->getField('sorting'), $oMainRow11)
-					->move($this->getField('prefix_large_file')->divAttr(array('class' => 'form-group col-xs-12 col-md-6 hidden-0 hidden-1 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14')), $oMainRow11)
-					->move($this->getField('prefix_small_file')->divAttr(array('class' => 'form-group col-xs-12 col-md-6 hidden-0 hidden-1 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14')), $oMainRow11)
+					->move($this->getField('prefix_large_file')->divAttr(array('class' => 'form-group col-xs-12 col-md-6 hidden-0 hidden-1 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14 hidden-15')), $oMainRow11)
+					->move($this->getField('prefix_small_file')->divAttr(array('class' => 'form-group col-xs-12 col-md-6 hidden-0 hidden-1 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14 hidden-15')), $oMainRow11)
 					->move($this->getField('multiple'), $oMainRow12)
 					->move($this->getField('obligatory'), $oMainRow13)
 					->move($this->getField('indexing'), $oMainRow14);
@@ -592,7 +593,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$('#{$windowId} [name = property_dir_name]').autocomplete({
 						source: function(request, response) {
 							$.ajax({
-								url: '/admin/property/index.php?autocomplete=1&show_dir=1&linkedObjectName=" . $linkedObject->getModelName() . "&linkedObjectId=" . $linkedObject->getPrimaryKey() . "',
+								url: hostcmsBackend + '/property/index.php?autocomplete=1&show_dir=1&linkedObjectName=" . $linkedObject->getModelName() . "&linkedObjectId=" . $linkedObject->getPrimaryKey() . "',
 								dataType: 'json',
 								data: {
 									queryString: request.term

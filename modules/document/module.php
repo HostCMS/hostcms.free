@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Document
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Document_Module extends Core_Module_Abstract
 {
@@ -16,13 +16,13 @@ class Document_Module extends Core_Module_Abstract
 	 * Module version
 	 * @var string
 	 */
-	public $version = '7.0';
+	public $version = '7.1';
 
 	/**
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2024-07-09';
+	public $date = '2025-04-04';
 
 	/**
 	 * Module name
@@ -42,8 +42,8 @@ class Document_Module extends Core_Module_Abstract
 				'block' => 0,
 				'ico' => 'fa-regular fa-file-lines',
 				'name' => Core::_('Document.menu'),
-				'href' => "/admin/document/index.php",
-				'onclick' => "$.adminLoad({path: '/admin/document/index.php'}); return false"
+				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/document/index.php"),
+				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/document/index.php'}); return false")
 			)
 		);
 
@@ -103,7 +103,7 @@ class Document_Module extends Core_Module_Abstract
 		$oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 		$oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form)->formSettings();
 
-		$sPath = '/admin/document/index.php';
+		$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/document/index.php');
 
 		if ($oSearch_Page->module_value_id)
 		{

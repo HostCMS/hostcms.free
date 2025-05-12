@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -28,7 +28,7 @@ if (Core_Array::getGet('downloadFile'))
 
 // Код формы
 $iAdmin_Form_Id = 251;
-$sAdminFormAction = '/admin/printlayout/index.php';
+$sAdminFormAction = '/{admin}/printlayout/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -127,10 +127,10 @@ $oAdmin_Form_Entity_Menus->add(
 	->name(Core::_('Printlayout_Driver.model_name'))
 	->icon('fa fa-gear')
 	->href(
-		$oAdmin_Form_Controller->getAdminActionLoadHref('/admin/printlayout/driver/index.php', NULL, NULL, 0, 0)
+		$oAdmin_Form_Controller->getAdminActionLoadHref('/{admin}/printlayout/driver/index.php', NULL, NULL, 0, 0)
 	)
 	->onclick(
-		$oAdmin_Form_Controller->getAdminActionLoadAjax('/admin/printlayout/driver/index.php', NULL, NULL, 0, 0)
+		$oAdmin_Form_Controller->getAdminActionLoadAjax('/{admin}/printlayout/driver/index.php', NULL, NULL, 0, 0)
 	)
 );
 

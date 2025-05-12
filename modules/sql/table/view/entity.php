@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Sql
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Sql_Table_View_Entity extends Core_Empty_Entity
 {
@@ -101,7 +101,8 @@ class Sql_Table_View_Entity extends Core_Empty_Entity
 			$name = substr($methodName, 0, -7);
 
 			return is_null($this->$name)
-				? 'NULL'
+				? '<span id="apply_check_0_' . $this->id . '_fv_' . $arguments[0]->id . '" class="editable editable-null">' . '</span>'
+				//? 'NULL'
 				: htmlspecialchars($this->$name);
 		}
 	}

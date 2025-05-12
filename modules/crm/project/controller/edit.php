@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Crm_Project_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -74,10 +74,45 @@ class Crm_Project_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->value($sColorValue);
 
 		$oMainTab
-			->move($this->getField('name')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1)
+			->move($this->getField('name')->divAttr(array('class' => 'form-group col-xs-10')), $oMainRow1);
+
+		$oAdditionalTab->delete($this->getField('crm_icon_id'));
+
+		$oCrm_Icon = $this->_object->crm_icon_id
+			? $this->_object->Crm_Icon
+			: ($this->_object->id
+				? Core_Entity::factory('Crm_Icon')->getByValue('fa-solid fa-list-check')
+				: Core_Entity::factory('Crm_Icon')->getRandom()
+			);
+
+		$oMainRow1->add(
+			Admin_Form_Entity::factory('Div')
+				->class('form-group col-xs-2')
+				->add(
+					Core_Html_Entity::factory('Span')
+						->class('crm-project-icon crm-project-id margin-top-21')
+						->style('background-color: ' . $sColorValue)
+						->add(
+							Core_Html_Entity::factory('I')
+								->class($oCrm_Icon->value)
+						)
+						->onclick("$.showCrmIcons(this)")
+				)
+		);
+
+		$oMainTab
 			->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12'))->rows(10), $oMainRow2)
 			->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-4 col-lg-6')), $oMainRow3)
-			->move($this->getField('deadline')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-4 col-lg-6')), $oMainRow3)
+			->move($this->getField('deadline')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-4 col-lg-6')), $oMainRow3);
+
+		$oMainTab->add(
+			Admin_Form_Entity::factory('Input')
+				->type('hidden')
+				->name('crm_icon_id')
+				->value($oCrm_Icon->id)
+		);
+
+		$oMainTab
 			->move($this->getField('color')->set('data-control', 'hue')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow4)
 			->move($this->getField('completed')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-4 col-lg-6 margin-top-21')), $oMainRow4);
 
@@ -89,10 +124,19 @@ class Crm_Project_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		ob_start();
 		?>
+		<script>
+			$(function() {
+				$('.minicolors-input').on('change', function(){
+					var hex = $(this).val()
+
+					$('.crm-project-icon').css('background-color', hex);
+				});
+			});
+		</script>
 		<div class="tabbable">
 			<ul class="nav nav-tabs tabs-flat" id="crmProjectTabs">
 				<li class="active">
-					<a data-toggle="tab" href="#<?php echo $windowId?>_notes" data-path="/admin/crm/project/note/index.php" data-window-id="<?php echo $windowId?>_notes" data-additional="crm_project_id=<?php echo $this->_object->id?>">
+					<a data-toggle="tab" href="#<?php echo $windowId?>_notes" data-path="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/crm/project/note/index.php')?>" data-window-id="<?php echo $windowId?>_notes" data-additional="crm_project_id=<?php echo $this->_object->id?>">
 						<?php echo Core::_("Crm_Project.tabNotes")?> <?php echo $countNotes?>
 					</a>
 				</li>
@@ -142,7 +186,7 @@ class Crm_Project_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		return Admin_Form_Entity::factory('Script')
 			->value("$(function (){
-				$.adminLoad({ path: '/admin/crm/project/note/index.php', additionalParams: 'crm_project_id=" . $this->_object->id . "', windowId: '{$windowId}_notes' });
+				$.adminLoad({ path: hostcmsBackend + '/crm/project/note/index.php', additionalParams: 'crm_project_id=" . $this->_object->id . "', windowId: '{$windowId}_notes' });
 			});");
 	}
 

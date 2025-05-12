@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Ipaddress
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Ipaddress_Filter_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -74,7 +74,8 @@ class Ipaddress_Filter_Controller_Edit extends Admin_Form_Action_Controller_Type
 					;
 
 				$oMainTab
-					->move($this->getField('name')->class('form-control input-lg')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1);
+					->move($this->getField('name')->class('form-control input-lg')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1)
+					->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1);
 
 				ob_start();
 				?>

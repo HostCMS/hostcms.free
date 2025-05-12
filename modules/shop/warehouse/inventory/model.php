@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Warehouse_Inventory_Model extends Core_Entity
 {
@@ -153,6 +153,13 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 		{
 			$oShop_Warehouse = $this->Shop_Warehouse;
 
+			$oShop = $oShop_Warehouse->Shop;
+			// Fast filter
+			if ($oShop->filter)
+			{
+				$oShop_Filter_Controller = new Shop_Filter_Controller($oShop);
+			}
+
 			$aShop_Warehouse_Entries = $oShop_Warehouse->Shop_Warehouse_Entries->getByDocument($this->id, $this->getEntityType());
 
 			$aTmp = array();
@@ -203,6 +210,10 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 					{
 						// Recount
 						$oShop_Warehouse->setRest($oShop_Warehouse_Inventory_Item->shop_item_id, $rest);
+
+						// Fast filter
+						$oShop->filter
+							&& $oShop_Filter_Controller->fill($oShop_Warehouse_Entry->Shop_Item);
 					}
 				}
 

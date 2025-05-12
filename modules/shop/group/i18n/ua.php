@@ -58,4 +58,6 @@ return array(
 	'seo_item_h1_template' => 'Шаблон H1',
 	'changeIndexation_success' => 'Індексація групи магазину змінена.',
 	'fields' => "Пользовательские поля группы",
+	'apply_discount_success' => 'Інформація додана успішно!',
+	'apply_shortcut_parent_group' => 'Застосовувати до основних груп ярликів',
 );

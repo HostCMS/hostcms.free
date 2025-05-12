@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Auth
 {
@@ -395,8 +395,14 @@ class Core_Auth
 				{
 					$ip = Core::getClientIp();
 
-					// Привязки к IP не было или IP совпадают
-					if (!isset($_SESSION['current_user_ip']) || $_SESSION['current_user_ip'] == $ip)
+					// Привязки к IP не было или сети для IP совпадают
+					if (!isset($_SESSION['current_user_ip'])
+						// IPv4 network comparison
+						|| Core_Valid::ipv4($_SESSION['current_user_ip']) && Core_Valid::ipv4($ip)
+							&& Core_Ip::ipv4Network($_SESSION['current_user_ip'], Core::$mainConfig['backendAssignSessionIpMask']) == Core_Ip::ipv4Network($ip, Core::$mainConfig['backendAssignSessionIpMask'])
+						// or IPv6 comparison
+						|| $_SESSION['current_user_ip'] === $ip
+					)
 					{
 						// Пользователь существует
 						$oUser = Core_Entity::factory('User')->getCurrent();
@@ -533,7 +539,7 @@ class Core_Auth
 				self::logout();
 
 				header("HTTP/1.1 302 Found");
-				header("Location: /admin/");
+				header(Admin_Form_Controller::correctBackendPath("Location: /{admin}/"));
 
 				exit();
 			}
@@ -565,63 +571,66 @@ class Core_Auth
 
 		$ip = Core::getClientIp();
 
-		// Получаем количество неудачных попыток
-		$iCountAccessdenied = Core_Entity::factory('User_Accessdenied')->getCountByIp($ip);
-
-		// Были ли у данного пользователя неудачные попытки входа в систему администрирования за последние 24 часа?
-		if ($iCountAccessdenied)
+		if (Core::$mainConfig['timeoutAfterFailedAccessAttempts'])
 		{
-			// Last User_Accessdenied by IP
-			$oUser_Accessdenied = Core_Entity::factory('User_Accessdenied')->getLastByIp($ip);
+			// Получаем количество неудачных попыток
+			$iCountAccessdenied = Core_Entity::factory('User_Accessdenied')->getCountByIp($ip);
 
-			if (!is_null($oUser_Accessdenied))
+			// Были ли у данного пользователя неудачные попытки входа в систему администрирования за последние 24 часа?
+			if ($iCountAccessdenied)
 			{
-				// Определяем интервал времени между последней неудачной попыткой входа в систему
-				// и текущим временем входа в систему
-				$delta = time() - Core_Date::sql2timestamp($oUser_Accessdenied->datetime);
+				// Last User_Accessdenied by IP
+				$oUser_Accessdenied = Core_Entity::factory('User_Accessdenied')->getLastByIp($ip);
 
-				// Определяем период времени, в течении которого пользователю, имевшему неудачные
-				// попытки доступа в систему запрещен вход в систему
-				$delta_access_denied = $iCountAccessdenied > 2
-					? 5 * exp(2.2 * log($iCountAccessdenied - 1))
-					: 5 * $iCountAccessdenied;
-
-				// Если период запрета доступа в систему не истек
-				if ($delta_access_denied > $delta)
+				if (!is_null($oUser_Accessdenied))
 				{
-					$iCountAccessdenied++;
+					// Определяем интервал времени между последней неудачной попыткой входа в систему
+					// и текущим временем входа в систему
+					$delta = time() - Core_Date::sql2timestamp($oUser_Accessdenied->datetime);
 
-					// Проверяем количество доступных ошибочных попыток
-					if (Core::$mainConfig['banAfterFailedAccessAttempts']
-						&& $iCountAccessdenied > Core::$mainConfig['banAfterFailedAccessAttempts']
-						&& Core::moduleIsActive('ipaddress')
-					)
+					// Определяем период времени, в течении которого пользователю, имевшему неудачные
+					// попытки доступа в систему запрещен вход в систему
+					$delta_access_denied = $iCountAccessdenied > 2
+						? 5 * exp(2.2 * log($iCountAccessdenied - 1))
+						: 5 * $iCountAccessdenied;
+
+					// Если период запрета доступа в систему не истек
+					if ($delta_access_denied > $delta)
 					{
-						$banIp = strpos($ip, ':') === FALSE
-							// IPv4
-							? substr($ip, 0, strrpos($ip, '.')) . '.0/24'
-							// IPv6
-							: $ip;
+						$iCountAccessdenied++;
 
-						$oIpaddress = Core_Entity::factory('Ipaddress')->getByIp($banIp, FALSE);
-
-						if (!$oIpaddress)
+						// Проверяем количество доступных ошибочных попыток
+						if (Core::$mainConfig['banAfterFailedAccessAttempts']
+							&& $iCountAccessdenied > Core::$mainConfig['banAfterFailedAccessAttempts']
+							&& Core::moduleIsActive('ipaddress')
+						)
 						{
-							$oIpaddress = Core_Entity::factory('Ipaddress');
-							$oIpaddress->ip = $banIp;
-							$oIpaddress->deny_access = 0;
-							$oIpaddress->deny_backend = 1;
-							$oIpaddress->comment = sprintf('IP %s blocked after %d failed attempts', $ip, $iCountAccessdenied);
-							$oIpaddress->save();
+							$banIp = strpos($ip, ':') === FALSE
+								// IPv4
+								? substr($ip, 0, strrpos($ip, '.')) . '.0/24'
+								// IPv6
+								: $ip;
+
+							$oIpaddress = Core_Entity::factory('Ipaddress')->getByIp($banIp, FALSE);
+
+							if (!$oIpaddress)
+							{
+								$oIpaddress = Core_Entity::factory('Ipaddress');
+								$oIpaddress->ip = $banIp;
+								$oIpaddress->deny_access = 0;
+								$oIpaddress->deny_backend = 1;
+								$oIpaddress->comment = sprintf('IP %s blocked after %d failed attempts', $ip, $iCountAccessdenied);
+								$oIpaddress->save();
+							}
 						}
+
+						self::$_lastError = 'access temporarily unavailable';
+
+						throw new Core_Exception(
+							Core::_('Admin.authorization_error_access_temporarily_unavailable', $login, round($delta_access_denied - $delta)),
+							array(), 0, $bShowDebugTrace = FALSE
+						);
 					}
-
-					self::$_lastError = 'access temporarily unavailable';
-
-					throw new Core_Exception(
-						Core::_('Admin.authorization_error_access_temporarily_unavailable', $login, round($delta_access_denied - $delta)),
-						array(), 0, $bShowDebugTrace = FALSE
-					);
 				}
 			}
 		}
@@ -670,19 +679,23 @@ class Core_Auth
 				->write(Core::_('Core.error_log_logged'));
 
 			// Удаление всех неудачных попыток входа систему за период ранее 24 часов с момента успешного входа
-			$oUser_Accessdenieds = Core_Entity::factory('User_Accessdenied');
-			$oUser_Accessdenieds->queryBuilder()
-				->clear()
-				->where('datetime', '<', Core_Date::timestamp2sql(time() - 86400))
-				// Удаляем все попытки доступа с текущего IP
-				->setOr()
-				->where('ip', '=', $ip);
+			$limit = 500;
+			do {
+				$oUser_Accessdenieds = Core_Entity::factory('User_Accessdenied');
+				$oUser_Accessdenieds->queryBuilder()
+					->clear()
+					->where('datetime', '<', Core_Date::timestamp2sql(time() - 86400))
+					// Удаляем все попытки доступа с текущего IP
+					->setOr()
+					->where('ip', '=', $ip)
+					->limit($limit);
 
-			$aUser_Accessdenieds = $oUser_Accessdenieds->findAll(FALSE);
-			foreach ($aUser_Accessdenieds as $oUser_Accessdenied)
-			{
-				$oUser_Accessdenied->delete();
-			}
+				$aUser_Accessdenieds = $oUser_Accessdenieds->findAll(FALSE);
+				foreach ($aUser_Accessdenieds as $oUser_Accessdenied)
+				{
+					$oUser_Accessdenied->delete();
+				}
+			} while (count($aUser_Accessdenieds) == $limit);
 		}
 		else
 		{
@@ -738,7 +751,7 @@ class Core_Auth
 		self::$_logged = FALSE;
 		self::$_currentUser = NULL;
 
-		// regenerateId осуществляется при новой авторизации, а не при выходе из сеанса
+		// regenerateId осуществляется при новой авторизации
 		/*$sessionId = session_id();
 		Core_Session::destroy($sessionId);
 		self::$_regenerateId && Core_Session::regenerateId(TRUE);*/

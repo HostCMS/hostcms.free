@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Item_Digital_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -57,7 +57,7 @@ class Shop_Item_Digital_Controller_Edit extends Admin_Form_Action_Controller_Typ
 
 		if ($sFilePath)
 		{
-			$sFilePath = "/admin/shop/item/digital/index.php?download_digital_file={$this->_object->id}";
+			$sFilePath = Admin_Form_Controller::correctBackendPath("/{admin}/shop/item/digital/index.php?download_digital_file={$this->_object->id}");
 		}
 
 		$sFormPath = $this->_Admin_Form_Controller->getPath();
@@ -67,7 +67,7 @@ class Shop_Item_Digital_Controller_Edit extends Admin_Form_Action_Controller_Typ
 		$oImageField
 			->name("image")
 			->id("image")
-			->divAttr(array('class' => 'input-group col-xs-12 col-sm-6'))
+			->divAttr(array('class' => 'input-group1 col-xs-12 col-sm-6'))
 			->largeImage(array(
 				'path' => $sFilePath,
 				'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteFile', windowId: '{$windowId}'}); return false", 'caption' => Core::_('Shop_Item_Digital.filename')

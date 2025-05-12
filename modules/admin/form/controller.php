@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 abstract class Admin_Form_Controller extends Core_Servant_Properties
 {
@@ -38,10 +38,10 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 	/**
 	 * Create new form controller
-	 * @param Admin_Form_Model $oAdmin_Form
+	 * @param Admin_Form_Model|NULL $oAdmin_Form
 	 * @return object
 	 */
-	static public function create(Admin_Form_Model $oAdmin_Form = NULL)
+	static public function create($oAdmin_Form = NULL)
 	{
 		$className = 'Skin_' . ucfirst(Core_Skin::instance()->getSkinName()) . '_' . __CLASS__;
 
@@ -621,7 +621,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	 */
 	public function path($path)
 	{
-		$this->_path = $path;
+		$this->_path = self::correctBackendPath($path);
 
 		// Добавляем замену для path
 		$this->_externalReplace['{path}'] = $this->_path;
@@ -796,9 +796,9 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 	/**
 	 * Constructor.
-	 * @param Admin_Form_Model $oAdmin_Form admin form
+	 * @param Admin_Form_Model|NULL $oAdmin_Form admin form
 	 */
-	public function __construct(Admin_Form_Model $oAdmin_Form = NULL)
+	public function __construct($oAdmin_Form = NULL)
 	{
 		parent::__construct();
 
@@ -1326,7 +1326,47 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 				$oNew->caption = $oField->name;
 				$oNew->allow_filter = TRUE;
 				$oNew->view = 0;
-				$oNew->type = 1;
+
+				switch ($oField->type)
+				{
+					case 0: // Целое число
+					case 1: // Строка
+					case 2: // Файл
+					case 5: // Элемент информационной системы
+					case 6: // Визуальный редактор
+					case 10: // Скрытое поле
+					case 11: // Число с плавающей запятой
+					case 12: // Товар интернет-магазина
+					case 13: // Группа информационной системы
+					case 14: // Группа интернет-магазина
+					case 15: // Большое целое число
+					default:
+						$oNew->type = 1;
+					break;
+					case 3: // Список
+						$oNew->type = 12; // Элемент списка
+						// $oNew->allow_filter = FALSE;
+						$oNew->list = array();
+
+						if (Core::moduleIsActive('list') && $oField->list_id)
+						{
+							$oNew->list = $oField->List->getListItemsTree();
+						}
+					break;
+					case 4: // Большое текстовое поле
+						$oNew->type = 11;
+					break;
+					case 7: // Флажок
+						$oNew->type = 3;
+					break;
+					case 8: // Дата
+						$oNew->type = 6;
+					break;
+					case 9: // Дата-время
+						$oNew->type = 5;
+					break;
+				}
+
 				$oNew->editable = 0;
 				$oNew->filter_type = 1; // HAVING
 				$oNew->filter_condition = 0;
@@ -1695,6 +1735,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 											}
 										break;
 										case 8: // Выпадающий список
+										case 12: // Элемент списка
 											if (is_array($oAdmin_Form_Field_Changed->list))
 											{
 												$aValue = $oAdmin_Form_Field_Changed->list;
@@ -1724,7 +1765,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 										break;
 									}
 
-									$aData[] = $this->prepareCell($value);
+									$aData[] = is_scalar($value) ? $this->prepareCell(trim(strip_tags($value))) : gettype($value);
 								//}
 							}
 
@@ -1836,6 +1877,19 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	}
 
 	/**
+	 * Change {admin} to Core::$config['backend']
+	 * @param string $str
+	 * @return string
+	 */
+	static public function correctBackendPath($str)
+	{
+		// Backend path
+		return !is_null($str)
+			? str_replace('{admin}', Core::$mainConfig['backend'], $str)
+			: '';
+	}
+
+	/**
 	 * Apply external replaces in $subject
 	 * @param array $aAdmin_Form_Fields Admin_Form_Fields
 	 * @param Core_Entity $oEntity entity
@@ -1845,25 +1899,35 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	 */
 	public function doReplaces($aAdmin_Form_Fields, $oEntity, $subject, $mode = 'link')
 	{
-		foreach ($this->_externalReplace as $replace_key => $replace_value)
+		if (is_string($subject))
 		{
-			$subject = str_replace($replace_key, strval($replace_value), $subject);
-		}
+			// Backend path
+			$subject = self::correctBackendPath($subject);
 
-		// Columns + Data-attributes
-		$aColumns = array_merge(array_keys($oEntity->getTableColumns()), array_keys($oEntity->getDataValues()));
-		foreach ($aColumns as $columnName)
-		{
-			if (isset($oEntity->$columnName))
+			foreach ($this->_externalReplace as $replace_key => $replace_value)
 			{
-				$subject = str_replace(
-					'{' . $columnName . '}',
-					$mode == 'link'
-						? htmlspecialchars((string) $oEntity->$columnName)
-						: Core_Str::escapeJavascriptVariable(/*$this->jQueryEscape(*/$oEntity->$columnName/*)*/), // jQueryEscape() wrong with filemanager and dir with '+' char
-					$subject
-				);
+				$subject = str_replace($replace_key, strval($replace_value), $subject);
 			}
+
+			// Columns + Data-attributes
+			$aColumns = array_merge(array_keys($oEntity->getTableColumns()), array_keys($oEntity->getDataValues()));
+			foreach ($aColumns as $columnName)
+			{
+				if (isset($oEntity->$columnName))
+				{
+					$subject = str_replace(
+						'{' . $columnName . '}',
+						$mode == 'link'
+							? htmlspecialchars((string) $oEntity->$columnName)
+							: Core_Str::escapeJavascriptVariable(/*$this->jQueryEscape(*/$oEntity->$columnName/*)*/), // jQueryEscape() wrong with filemanager and dir with '+' char
+						$subject
+					);
+				}
+			}
+		}
+		else
+		{
+			$subject = '';
 		}
 
 		return $subject;
@@ -2128,7 +2192,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 		$aData = $this->_prepareAjaxRequest($options);
 
-		$path = Core_Str::escapeJavascriptVariable($options['path']);
+		$path = Core_Str::escapeJavascriptVariable(self::correctBackendPath($options['path']));
 		$aData[] = "path: '{$path}'";
 
 		return "$.adminLoad({" . implode(',', $aData) . "}); return false";
@@ -2170,7 +2234,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 		$aData = $this->_prepareAjaxRequest($options);
 
-		$path = Core_Str::escapeJavascriptVariable($options['path']);
+		$path = Core_Str::escapeJavascriptVariable(self::correctBackendPath($options['path']));
 		$aData[] = "path: '{$path}'";
 
 		isset($options['onHide'])
@@ -2354,7 +2418,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			$aData[] = $options['additionalParams'];
 		}
 
-		return $options['path'] . '?' . implode('&', $aData);
+		return self::correctBackendPath($options['path']) . '?' . implode('&', $aData);
 	}
 
 	/**
@@ -2436,6 +2500,23 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 	}
 
 	/**
+	 * Filter checkbox as select callback
+	 * @param string $value
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
+	 * @param string $filterPrefix
+	 * @param string $tabName
+	 */
+	protected function _filterCallbackCheckboxAsSelect($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
+	{
+		$value = intval($value);
+		?><select name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" class="form-control">
+			<option value="0" <?php echo $value == 0 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected_all'))?></option>
+			<option value="1" <?php echo $value == 1 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected'))?></option>
+			<option value="2" <?php echo $value == 2 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_not_selected'))?></option>
+		</select><?php
+	}
+
+	/**
 	 * Filter checkbox callback
 	 * @param string $value
 	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
@@ -2445,11 +2526,12 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 	protected function _filterCallbackCheckbox($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
 	{
 		$value = intval($value);
-		?><select name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" class="form-control">
-			<option value="0" <?php echo $value == 0 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected_all'))?></option>
-			<option value="1" <?php echo $value == 1 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected'))?></option>
-			<option value="2" <?php echo $value == 2 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_not_selected'))?></option>
-		</select><?php
+
+		$checked = $value
+			? 'checked="checked"'
+			: '';
+
+		?><label style="padding-top:7px"><input type="checkbox" <?php echo $checked?> name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" value="1" style="width: 100%" class="form-control input-sm" /><span class="text"></span></label><?php
 	}
 
 	/**
@@ -2661,7 +2743,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			</select>
 			<script>
 				$('#<?php echo $windowId?> #<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectSiteuser({
-					url: '/admin/siteuser/index.php?loadSiteusers&types[]=siteuser',
+					url: hostcmsBackend + '/siteuser/index.php?loadSiteusers&types[]=siteuser',
 					language: '<?php echo $language?>',
 					placeholder: '<?php echo $placeholder?>',
 					dropdownParent: $('#<?php echo $windowId?>')
@@ -2742,7 +2824,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			</select>
 			<script>
 				$('#<?php echo $windowId?> #<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectPersonCompany({
-					url: '/admin/siteuser/index.php?loadSiteusers&types[]=person&types[]=company',
+					url: hostcmsBackend + '/siteuser/index.php?loadSiteusers&types[]=person&types[]=company',
 					language: '<?php echo $language?>',
 					placeholder: '<?php echo $placeholder?>',
 					dropdownParent: $('#<?php echo $windowId?>')
@@ -2806,7 +2888,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			</select>
 			<script>
 				$('#<?php echo $windowId?> #<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectPersonCompany({
-					url: '/admin/siteuser/index.php?loadSiteusers&types[]=company',
+					url: hostcmsBackend + '/siteuser/index.php?loadSiteusers&types[]=company',
 					language: '<?php echo $language?>',
 					placeholder: '<?php echo $placeholder?>',
 					dropdownParent: $('#<?php echo $windowId?>')
@@ -2822,6 +2904,10 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 	/**
 	 * Отображает поле фильтра (верхнего или основного)
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
+	 * @param string $filterPrefix
+	 * @param string|NULL $tabName
+	 * @return void
 	 */
 	public function showFilterField($oAdmin_Form_Field, $filterPrefix, $tabName = NULL)
 	{
@@ -2861,7 +2947,6 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			case 10: // Функция обратного вызова
 				$this->_filters += array($oAdmin_Form_Field->name => array($this, '_filterCallbackInput'));
 			break;
-
 			case 3: // Checkbox
 				$this->_filters += array($oAdmin_Form_Field->name => array($this, '_filterCallbackCheckbox'));
 			break;
@@ -2879,6 +2964,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 					break;
 				}
 			case 8: // Выпадающий список
+			case 12: // Элемент списка
 				$this->_filters += array($oAdmin_Form_Field->name => array($this, '_filterCallbackSelect'));
 			break;
 			default:
@@ -2897,6 +2983,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 				case 3: // Checkbox.
 				case 7: // Картинка-ссылка
 				case 8: // Выпадающий список
+				case 12: // Элемент списка
 					echo call_user_func($this->_filters[$oAdmin_Form_Field->name], $mValue, $oAdmin_Form_Field, $filterPrefix, $tabName);
 				break;
 
@@ -3169,6 +3256,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 											break;
 										}
 									case 8: // Список
+									case 12: // Элемент списка
 										if (is_null($mFilterValue))
 										{
 											break;
@@ -3225,6 +3313,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 					}
 
 					$bMultiple = FALSE;
+
 					// Поля, связанные с датасетом
 					foreach ($aFieldIDs as $field_id)
 					{

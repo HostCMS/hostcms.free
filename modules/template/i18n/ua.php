@@ -39,4 +39,10 @@ return array(
 	'error_access_forbidden' => 'Доступ до редагування макета заборонений.',
 	'language' => '%s.php',
 	'type' => 'Тип',
+
+	'design_icon_desktop' => 'Повний екран',
+	'design_icon_tablet' => 'Планшет',
+	'design_icon_tablet_wide' => 'Планшет горизонтально',
+	'design_icon_mobile' => 'Смартфон',
+	'design_icon_mobile_wide' => 'Смартфон горизонтально',
 );

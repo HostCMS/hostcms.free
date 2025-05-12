@@ -138,4 +138,7 @@ return array(
 	'closed' => 'Закритий',
 	'export_fields_allow_items' => 'Експортувати поля користувача елементів',
 	'export_fields_allow_groups' => 'Експортувати поля користувача груп',
+
+	'delete_property_values' => 'Видаляти існуючі значення додаткових властивостей',
+	'delete_field_values' => 'Удаляти існуючі значення користувацьких полів',
 );

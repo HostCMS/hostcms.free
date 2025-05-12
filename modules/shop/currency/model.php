@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Currency_Model extends Core_Entity
 {
@@ -104,9 +104,11 @@ class Shop_Currency_Model extends Core_Entity
 	{
 		$this->queryBuilder()
 			->clear()
-			->where('name', 'LIKE', "%{$string}%")
-			->setOr()
-			->where('code', 'LIKE', "%{$string}%")
+			->open()
+				->where('name', 'LIKE', "%{$string}%")
+				->setOr()
+				->where('code', 'LIKE', "%{$string}%")
+			->close()
 			->limit(1);
 
 		$aObjects = $this->findAll($bCache);

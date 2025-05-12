@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Интернет-магазины',
@@ -225,4 +225,11 @@ return array(
 	'seo_template_filter_prices' => 'Фильтр по цене',
 	'seo_template_filter_prices_from' => 'Цена от',
 	'seo_template_filter_prices_to' => 'до',
+
+	'shop_shops_url_type_element_2' => 'Дата',
+	'path_date_format' => 'Формат пути типа "Дата"',
+
+	'watermark_item_header' => 'Товар',
+	'watermark_group_header' => 'Группа',
+	'watermark_producer_header' => 'Производитель',
 );

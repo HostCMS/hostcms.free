@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage User
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class User_Module extends Core_Module_Abstract
 {
@@ -16,13 +16,13 @@ class User_Module extends Core_Module_Abstract
 	 * Module version
 	 * @var string
 	 */
-	public $version = '7.0';
+	public $version = '7.1';
 
 	/**
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2024-07-09';
+	public $date = '2025-04-04';
 
 	/**
 	 * Module name
@@ -53,22 +53,22 @@ class User_Module extends Core_Module_Abstract
 				'block' => 2,
 				'ico' => 'fa fa-user',
 				'name' => Core::_('User.menu'),
-				'href' => "/admin/user/index.php",
-				'onclick' => "$.adminLoad({path: '/admin/user/index.php'}); return false",
+				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/user/index.php"),
+				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/user/index.php'}); return false"),
 				'submenu' => array(
 					array(
 						'sorting' => 10,
 						'ico' => 'fa fa-clock-o',
 						'name' => Core::_('User.timesheet_title'),
-						'href' => "/admin/user/timesheet/index.php",
-						'onclick' => "$.adminLoad({path: '/admin/user/timesheet/index.php'}); return false"
+						'href' => Admin_Form_Controller::correctBackendPath("/{admin}/user/timesheet/index.php"),
+						'onclick' => "$.adminLoad({path: hostcmsBackend + '/user/timesheet/index.php'}); return false"
 					),
 					array(
 						'sorting' => 20,
 						'ico' => 'fa fa-history',
 						'name' => Core::_('User.session'),
-						'href' => "/admin/user/session/index.php",
-						'onclick' => "$.adminLoad({path: '/admin/user/session/index.php'}); return false"
+						'href' => Admin_Form_Controller::correctBackendPath("/{admin}/user/session/index.php"),
+						'onclick' => "$.adminLoad({path: hostcmsBackend + '/user/session/index.php'}); return false"
 					)
 				)
 			)
@@ -162,7 +162,7 @@ class User_Module extends Core_Module_Abstract
 		// Контроллер формы
 		$oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 		$oAdmin_Form_Controller
-			->path('/admin/user/timesheet/index.php')
+			->path('/{admin}/user/timesheet/index.php')
 			->window('id_content');
 
 		switch ($type)

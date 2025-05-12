@@ -58,7 +58,7 @@
 			var data = jQuery.getData(settings),
 				jDivWin = jQuery('<div>')
 				.addClass("hostcmsWindow")
-				.append('<img src="/admin/images/ajax_loader.gif" style="position: absolute; left: 50%; top: 50%" />')
+				.append('<img src="' + hostcmsBackend + '/images/ajax_loader.gif" style="position: absolute; left: 50%; top: 50%" />')
 				.attr("id", "Window" + windowCounter)
 				.appendTo(jQuery(document));
 
@@ -276,7 +276,7 @@
 			var data = jQuery.getData({});
 			jQuery.ajax({
 				context: jQuery('body'),
-				url: '/admin/index.php?ajaxDesktopLoad&changeSiteId='+siteId,
+				url: hostcmsBackend + '/index.php?ajaxDesktopLoad&changeSiteId='+siteId,
 				type: 'POST',
 				data: data,
 				dataType: 'json',
@@ -319,7 +319,7 @@
 						.css('left', "3px")
 						.css('bottom', "-27px")
 						.css('width', "13px")
-						.append(jQuery('<img>').attr("src", '/admin/images/shadow_tail.gif'))
+						.append(jQuery('<img>').attr("src", hostcmsBackend + '/images/shadow_tail.gif'))
 						.appendTo(obj);
 					}
 				}
@@ -328,7 +328,7 @@
 		/*sendWindowStatus: function(event, ui)
 		{
 			jQuery.ajax({
-				url: '/admin/index.php?' + 'userSettings&moduleId=' + ui.options.moduleId
+				url: hostcmsBackend + '/index.php?' + 'userSettings&moduleId=' + ui.options.moduleId
 					+ '&type=' + ui.options.type
 					+ '&position_x=' + (ui.position.left + (ui.helper.outerWidth(true) - ui.helper.innerWidth()) / 2)
 					+ '&position_y=' + (ui.position.top + (ui.helper.outerHeight(true) - ui.helper.innerHeight()) / 2)
@@ -475,7 +475,7 @@
 					var reg = /note(\d+)/, arr = reg.exec(jQuery(this).prop('id'));
 
 					jQuery.ajax({
-						url: '/admin/index.php?' + 'userSettings&moduleId=0'
+						url: hostcmsBackend + '/index.php?' + 'userSettings&moduleId=0'
 							+ '&type=98'
 							+ '&position_x=' + ui.position.left
 							+ '&position_y=' + ui.position.top
@@ -502,7 +502,7 @@
 
 							jQuery.ajax({
 								context: textarea,
-								url: '/admin/index.php?' + 'ajaxNote&action=save'
+								url: hostcmsBackend + '/index.php?' + 'ajaxNote&action=save'
 									+ '&entity_id=' + arr[1],
 								type: 'POST',
 								data: data,
@@ -529,7 +529,7 @@
 
 					jQuery.ajax({
 						context: jObj,
-						url: '/admin/index.php?ajaxCreateNote&position_x='+jObj.position().left+'&position_y='+jObj.position().top,
+						url: hostcmsBackend + '/index.php?ajaxCreateNote&position_x='+jObj.position().left+'&position_y='+jObj.position().top,
 						data: data,
 						dataType: 'json',
 						type: 'POST',
@@ -550,7 +550,7 @@
 				var reg = /note(\d+)/, arr = reg.exec(jQuery(object).prop('id'));
 
 				jQuery.ajax({
-					url: '/admin/index.php?' + 'ajaxNote&action=delete'
+					url: hostcmsBackend + '/index.php?' + 'ajaxNote&action=delete'
 						+ '&entity_id=' + arr[1],
 					type: 'get',
 					dataType: 'json',
@@ -581,15 +581,15 @@
 
 	// Предварительная загрузка изображений
 	var cache = [];
-	$.preLoadImages("/admin/images/shadow-b.png",
-	"/admin/images/shadow-l.png",
-	"/admin/images/shadow-lb.png",
-	"/admin/images/shadow-lt.png",
-	"/admin/images/shadow-r.png",
-	"/admin/images/shadow-rb.png",
-	"/admin/images/shadow-rt.png",
-	"/admin/images/shadow-t.png",
-	"/admin/images/ajax_loader.gif");
+	$.preLoadImages(hostcmsBackend + "/images/shadow-b.png",
+	hostcmsBackend + "/images/shadow-l.png",
+	hostcmsBackend +"/images/shadow-lb.png",
+	hostcmsBackend + "/images/shadow-lt.png",
+	hostcmsBackend + "/images/shadow-r.png",
+	hostcmsBackend + "/images/shadow-rb.png",
+	hostcmsBackend + "/images/shadow-rt.png",
+	hostcmsBackend + "/images/shadow-t.png",
+	hostcmsBackend + "/images/ajax_loader.gif");
 
 	$(document).keydown(function(event) {
 		if (event.ctrlKey)
@@ -626,7 +626,7 @@ var methods = {
 				.prop('id', 'ajaxLoader')
 				.css('z-index', '1500')
 				.css('position', 'absolute')
-				.append($('<img>').prop('src', '/admin/images/ajax_loader.gif'));
+				.append($('<img>').prop('src', hostcmsBackend + '/images/ajax_loader.gif'));
 		}
 
 		fade_div.show()
@@ -839,7 +839,7 @@ function decor(CurrenElement, LevelMenu)
 	if (LevelMenu == 1) // для первого уровня вложенности
 	{
 		CurrenElement
-			.css('background-image', "url('/admin/images/line3.gif')")
+			.css('background-image', "url('" + hostcmsBackend + "/images/line3.gif')")
 			.css('background-repeat', 'repeat-x')
 			.css('background-position', '0 100%');
 
@@ -864,7 +864,7 @@ function unDecor(CurrenElement, LevelMenu)
 		clearTimeout(changeFontSizeTimer[CurrenElementId]);
 
 		CurrenElement
-			.css('background-image', "url('/admin/images/line1.gif')")
+			.css('background-image', "url('" + hostcmsBackend + "/images/line1.gif')")
 			.css('background-repeat', 'repeat-x')
 			.css('background-position', '0 100%');
 
@@ -938,7 +938,7 @@ function CreateWindow(windowId, windowTitle, windowWidth, windowHeight, typeClos
 
 	// Закрыть
 	var wclose_img = document.createElement("img");
-	wclose_img.src = '/admin/images/wclose.gif';
+	wclose_img.src = hostcmsBackend + '/images/wclose.gif';
 
 	windowId = windowId.replace('[','\\[').replace(']','\\]');
 
@@ -1078,7 +1078,7 @@ function SubMenu(divId)
 		}
 
 		$.ajax({
-			url: '/admin/index.php',
+			url: hostcmsBackend + '/index.php',
 			data: data,
 			type: 'POST',
 			dataType: 'json',

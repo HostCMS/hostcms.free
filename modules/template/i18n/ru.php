@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Template
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Макеты сайта',
@@ -46,4 +46,10 @@ return array(
 	'error_access_forbidden' => 'Доступ к редактированию макета запрещен.',
 	'language' => '%s.php',
 	'type' => 'Тип',
+
+	'design_icon_desktop' => 'Полный экран',
+	'design_icon_tablet' => 'Планшет',
+	'design_icon_tablet_wide' => 'Планшет горизонтально',
+	'design_icon_mobile' => 'Смартфон',
+	'design_icon_mobile_wide' => 'Смартфон горизонтально',
 );

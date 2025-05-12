@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Wysiwyg
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Wysiwyg_Filemanager_File extends Core_Empty_Entity
 {
@@ -153,7 +153,7 @@ class Wysiwyg_Filemanager_File extends Core_Empty_Entity
 	}
 
 	/**
-	 * Delete object from database
+	 * Extract files
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
 	 */
@@ -163,6 +163,7 @@ class Wysiwyg_Filemanager_File extends Core_Empty_Entity
 		$dirname = dirname($filePath);
 
 		$Core_Tar = new Core_Tar($filePath);
+		$Core_Tar->addReplace('admin/', Core::$mainConfig['backend'] . '/');
 		$Core_Tar->extractModify($dirname, $dirname);
 
 		return $this;
@@ -177,12 +178,12 @@ class Wysiwyg_Filemanager_File extends Core_Empty_Entity
 		if ($this->type == 'file')
 		{
 			ob_start();
-			$oCore_Html_Entity_Img = Core_Html_Entity::factory('A')
+			Core_Html_Entity::factory('A')
 				->add(
 					Core_Html_Entity::factory('I')
 						->class('fa fa-download palegreen')
 				)
-				->href("/admin/filemanager/index.php?hostcms[action]=download&cdir=" . rawurlencode(Core_File::pathCorrection(Core_Array::getRequest('cdir'))) . "&dir=" . rawurlencode(Core_File::pathCorrection(Core_Array::getRequest('dir'))) ."&hostcms[checked][1][{$this->hash}]=1")
+				->href(Admin_Form_Controller::correctBackendPath("/{admin}/filemanager/index.php") . "?hostcms[action]=download&cdir=" . rawurlencode(Core_File::pathCorrection(Core_Array::getRequest('cdir'))) . "&dir=" . rawurlencode(Core_File::pathCorrection(Core_Array::getRequest('dir'))) ."&hostcms[checked][1][{$this->hash}]=1")
 				->target('_blank')
 				->execute();
 			return ob_get_clean();

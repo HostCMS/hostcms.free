@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Товары магазина',
@@ -396,4 +396,9 @@ return array(
 	'export_fields_allow_groups' => 'Экспортировать пользовательские поля групп',
 	'delete_field_values' => 'Удалять существующие значения пользовательских полей',
 	'shops_add_form_link_fields' => "Пользовательские поля товара",
+
+	'export_stocks' => 'Экспортировать склады',
+	'export_prices' => 'Экспортировать цены',
+
+	'apply_shortcut_parent_item' => 'Применять к основным товарам ярлыков',
 );

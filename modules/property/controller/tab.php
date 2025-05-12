@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Property
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Property_Controller_Tab extends Core_Servant_Properties
 {
@@ -203,11 +203,6 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	* Add external properties container to $parentObject
 	* @param int $property_dir_id ID of parent directory of properties
 	* @param object $parentObject
-	* @hostcms-event Property_Controller_Tab.onBeforeAddFormEntity
-	* @hostcms-event Property_Controller_Tab.onBeforeCreatePropertyValue
-	* @hostcms-event Property_Controller_Tab.onAfterCreatePropertyValue
-	* @hostcms-event Property_Controller_Tab.onAfterCreatePropertyListValues
-	* @hostcms-event Property_Controller_Tab.onSetPropertyType
 	* @hostcms-event Property_Controller_Tab.onBeforeAddSection
 	*/
 	protected function _setPropertyDirs($property_dir_id, $parentObject)
@@ -259,6 +254,18 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		$oAdmin_Form_Entity_Panel->getCountChildren() && $parentObject->add($oAdmin_Form_Entity_Panel);
 	}
 
+	/**
+	 * Undocumented function
+	 * @param Admin_Form_Entity $oAdmin_Form_Entity_Panel
+	 * @param Property_Model $oProperty
+	 * @param boolean $active
+	 * @return self
+	 * @hostcms-event Property_Controller_Tab.onBeforeAddFormEntity
+	 * @hostcms-event Property_Controller_Tab.onBeforeCreatePropertyValue
+	 * @hostcms-event Property_Controller_Tab.onAfterCreatePropertyValue
+	 * @hostcms-event Property_Controller_Tab.onAfterCreatePropertyListValues
+	 * @hostcms-event Property_Controller_Tab.onSetPropertyType
+	 */
 	protected function _addIntoSection($oAdmin_Form_Entity_Panel, $oProperty, $active = TRUE)
 	{
 		/*$aProperty_Values = $this->_object->id
@@ -304,7 +311,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 			case 9: // Datetime
 			case 10: // Hidden field
 			case 11: // Float
-
+			case 15: // BigInt
 				$width = 410;
 
 				Core_Event::notify('Property_Controller_Tab.onBeforeCreatePropertyValue', $this, array($oProperty, $oAdmin_Form_Entity));
@@ -316,6 +323,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 				switch ($oProperty->type)
 				{
 					case 0: // Int
+					case 15: // BigInt
 						$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input')
 							->format($aFormat + array('lib' => array(
 								'value' => 'integer'
@@ -591,7 +599,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 						$sCaption .= '<a href="#" onclick="$.addPropertyListItem(event, this, \'' . $windowId . '\')" data-list-id=' . $oProperty->list_id . '><i title="' . Core::_('Property.add_to_list') . '" class="fa fa-circle-plus fa-small property-info"></i></a>';
 
-						$sCaption .= '<a href="/admin/list/item/index.php?list_id=' . $oProperty->list_id . '" target="_blank"><i title="' . Core::_('Property.move_to_list') . '" class="fa fa-external-link fa-small property-info"></i></a>';
+						$sCaption .= '<a href="' . Admin_Form_Controller::correctBackendPath('/{admin}/list/item/index.php') . '?list_id=' . $oProperty->list_id . '" target="_blank"><i title="' . Core::_('Property.move_to_list') . '" class="fa fa-external-link fa-small property-info"></i></a>';
 					}
 
 					$oAdmin_Form_Entity_ListItems = Admin_Form_Entity::factory('Select')
@@ -624,7 +632,8 @@ class Property_Controller_Tab extends Core_Servant_Properties
 							2 => Core::_('Admin_Form.autocomplete_mode2'),
 							3 => Core::_('Admin_Form.autocomplete_mode3')
 						))
-						->caption(Core::_('Admin_Form.autocomplete_mode'));
+						->caption(Core::_('Admin_Form.autocomplete_mode'))
+						->name("input_property_{$oProperty->id}_mode");
 
 					// Значений св-в нет для объекта
 					if (count($aProperty_Values) == 0)
@@ -653,7 +662,8 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 							$oNewAdmin_Form_Entity_Autocomplete_Select = clone $oAdmin_Form_Entity_Autocomplete_Select;
 							$oNewAdmin_Form_Entity_Autocomplete_Select
-								->id($oNewAdmin_Form_Entity_ListItemsInput->id . '_mode'); // id_property_ !!!
+								->id($oNewAdmin_Form_Entity_ListItemsInput->id . '_mode') // id_property_ !!!
+								->name("input_property_{$oProperty->id}_{$oProperty_Value->id}_mode");
 
 							Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity_ListItems, $oAdmin_Form_Entity_Section, $oProperty, $oProperty_Value));
 
@@ -1088,7 +1098,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		$oAdmin_Form_Entity_InfGroups
 			->value($Informationsystem_Item->informationsystem_group_id)
 			->options(array(' … ') + $aOptions)
-			->onchange("$.ajaxRequest({path: '/admin/informationsystem/item/index.php', context: '{$oAdmin_Form_Entity_InfItemsSelect->id}', callBack: $.loadSelectOptionsCallback, action: 'loadInformationItemList',additionalParams: 'informationsystem_group_id=' + this.value + '&informationsystem_id={$oProperty->informationsystem_id}',windowId: '{$windowId}'}); return false");
+			->onchange("$.ajaxRequest({path: hostcmsBackend + '/informationsystem/item/index.php', context: '{$oAdmin_Form_Entity_InfItemsSelect->id}', callBack: $.loadSelectOptionsCallback, action: 'loadInformationItemList',additionalParams: 'informationsystem_group_id=' + this.value + '&informationsystem_id={$oProperty->informationsystem_id}',windowId: '{$windowId}'}); return false");
 
 		// Items
 		$oInformationsystem_Items = $oInformationsystem->Informationsystem_Items;
@@ -1373,7 +1383,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		$oAdmin_Form_Entity_Shop_Groups
 			->value($group_id)
 			->options(array(' … ') + $aOptions)
-			->onchange("$.ajaxRequest({path: '/admin/shop/item/index.php', context: '{$oAdmin_Form_Entity_Shop_Items->id}', callBack: $.loadSelectOptionsCallback, action: 'loadShopItemList', additionalParams: 'shop_group_id=' + this.value + '&shop_id={$oProperty->shop_id}',windowId: '{$windowId}'}); return false");
+			->onchange("$.ajaxRequest({path: hostcmsBackend + '/shop/item/index.php', context: '{$oAdmin_Form_Entity_Shop_Items->id}', callBack: $.loadSelectOptionsCallback, action: 'loadShopItemList', additionalParams: 'shop_group_id=' + this.value + '&shop_id={$oProperty->shop_id}',windowId: '{$windowId}'}); return false");
 
 		// Items
 		$oShop_Items = $oShop->Shop_Items;
@@ -1558,6 +1568,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 				case 12: // Shop
 				case 13: // IS group
 				case 14: // Shop group
+				case 15: // Bigint
 					$value = Core_Array::getPost("property_{$oProperty->id}_{$oProperty_Value->id}");
 
 					// 000227947
@@ -1625,7 +1636,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 				case 12: // Shop
 				case 13: // IS group
 				case 14: // Shop group
-
+				case 15: // Bigint
 					// New values of property
 					$aNewValue = Core_Array::getPost("property_{$oProperty->id}", array());
 
@@ -2058,6 +2069,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 			case 0: // Int
 			case 7: // Checkbox
 			case 3: // List
+			case 15: // Bigint
 				$value = intval($value);
 			break;
 			case 1: // String

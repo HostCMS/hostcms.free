@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Chartaccount
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Chartaccount_Trialbalance_Controller
 {
@@ -34,7 +34,7 @@ class Chartaccount_Trialbalance_Controller
 
 	static public $oCompanyDefault = NULL;
 
-	static protected $_path = '/admin/chartaccount/trialbalance/index.php';
+	static protected $_path = '/{admin}/chartaccount/trialbalance/index.php';
 
 	/**
 	 * Set path
@@ -44,6 +44,16 @@ class Chartaccount_Trialbalance_Controller
 	static public function setPath($path)
 	{
 		self::$_path = $path;
+	}
+
+	/**
+	 * Set path
+	 * @param string $path
+	 * @return self
+	 */
+	static public function getPath()
+	{
+		return Admin_Form_Controller::correctBackendPath(self::$_path);
 	}
 
 	static protected $_Admin_Form_Controller = NULL;
@@ -236,7 +246,7 @@ class Chartaccount_Trialbalance_Controller
 			<div class="all-year">
 				<?php echo Core::_('Chartaccount_Trialbalance.all_year')?>
 				<label>
-					<input class="checkbox-slider toggle colored-success" name="all_year" onchange="$(this).val(+this.checked); $.sendRequest({path: '<?php echo self::$_path?>', context: $('.mainForm')});" value="<?php echo self::$bAllYear?>" <?php echo self::$bAllYear ? 'checked="checked"' : ''?> type="checkbox" />
+					<input class="checkbox-slider toggle colored-success" name="all_year" onchange="$(this).val(+this.checked); $.sendRequest({path: '<?php echo self::getPath()?>', context: $('.mainForm')});" value="<?php echo self::$bAllYear?>" <?php echo self::$bAllYear ? 'checked="checked"' : ''?> type="checkbox" />
 					<span class="text"></span>
 				</label>
 			</div>
@@ -268,7 +278,7 @@ class Chartaccount_Trialbalance_Controller
 						$.loadingScreen('show');
 
 						$.ajax({
-							// url: '<?php echo self::$_path?>',
+							// url: '<?php echo self::getPath()?>',
 							url: settings.path,
 							data: dataRequest,
 							dataType: 'json',
@@ -486,7 +496,7 @@ class Chartaccount_Trialbalance_Controller
 
 										?><tr>
 											<td>
-												<span data-folder="<?php echo intval($oChartaccount->folder)?>"><a href="/admin/chartaccount/trialbalance/entry/?code=<?php echo htmlspecialchars($aTmp['code'] . $additionalParams)?>" onclick="<?php echo self::$_Admin_Form_Controller->getAdminLoadAjax(array('path' => '/admin/chartaccount/trialbalance/entry/index.php', 'additionalParams' => 'code=' . htmlspecialchars($aTmp['code'] . $additionalParams)))?>"><?php echo htmlspecialchars($aTmp['code'])?></a></span>
+												<span data-folder="<?php echo intval($oChartaccount->folder)?>"><a href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/chartaccount/trialbalance/entry/')?>?code=<?php echo htmlspecialchars($aTmp['code'] . $additionalParams)?>" onclick="<?php echo self::$_Admin_Form_Controller->getAdminLoadAjax(array('path' => '/{admin}/chartaccount/trialbalance/entry/index.php', 'additionalParams' => 'code=' . htmlspecialchars($aTmp['code'] . $additionalParams)))?>"><?php echo htmlspecialchars($aTmp['code'])?></a></span>
 											</td>
 											<td>
 												<span data-folder="<?php echo intval($oChartaccount->folder)?>"><?php echo $bSpace, htmlspecialchars($aTmp['name'])?></span>

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Search_Module extends Search_Module
 {
@@ -128,7 +128,7 @@ class Skin_Bootstrap_Module_Search_Module extends Search_Module
 			<div class="databox radius-bordered databox-shadowed hostcms-widget-databox">
 				<div class="databox-left bg-palegreen">
 					<div class="databox-piechart">
-						<a href="/admin/search/index.php" onclick="$.adminLoad({path: '/admin/search/index.php'}); return false"><i class="fa-solid fa-magnifying-glass fa-3x"></i></a>
+						<a href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/search/index.php')?>" onclick="$.adminLoad({path: hostcmsBackend + '/search/index.php'}); return false"><i class="fa-solid fa-magnifying-glass fa-3x"></i></a>
 					</div>
 				</div>
 				<div class="databox-right">

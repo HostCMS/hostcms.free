@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'informationsystem');
 
 // Код формы
 $iAdmin_Form_Id = 11;
-$sAdminFormAction = '/admin/informationsystem/index.php';
+$sAdminFormAction = '/{admin}/informationsystem/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -188,8 +188,8 @@ $oAdmin_Form_Dataset->addCondition(
 			array('site_id', '=', CURRENT_SITE)
 		)
 	)
-	->changeField('name', 'link', '/admin/informationsystem/item/index.php?informationsystem_id={id}')
-	->changeField('name', 'onclick', "$.adminLoad({path: '/admin/informationsystem/item/index.php', additionalParams: 'informationsystem_id={id}', windowId: '{windowId}'}); return false");
+	->changeField('name', 'link', '/{admin}/informationsystem/item/index.php?informationsystem_id={id}')
+	->changeField('name', 'onclick', "$.adminLoad({path: '/{admin}/informationsystem/item/index.php', additionalParams: 'informationsystem_id={id}', windowId: '{windowId}'}); return false");
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(

@@ -21,7 +21,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Querybuilder
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_QueryBuilder_Lock extends Core_QueryBuilder_Statement
 {
@@ -107,7 +107,7 @@ class Core_QueryBuilder_Lock extends Core_QueryBuilder_Statement
 	 */
 	public function build()
 	{
-		return 'LOCK TABLES ' . $this->_buildLock($this->_table);
+		return $this->_buildComment($this->_comment) . 'LOCK TABLES ' . $this->_buildLock($this->_table);
 	}
 
 	/**

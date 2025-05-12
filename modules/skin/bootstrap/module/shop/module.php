@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 {
@@ -41,7 +41,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 		$type = intval($type);
 
 		$oModule = Core_Entity::factory('Module')->getByPath($this->_moduleName);
-		$this->_path = "/admin/index.php?ajaxWidgetLoad&moduleId={$oModule->id}&type={$type}";
+		$this->_path = Admin_Form_Controller::correctBackendPath("/{admin}/index.php?ajaxWidgetLoad&moduleId={$oModule->id}&type={$type}");
 
 		switch ($type)
 		{
@@ -652,7 +652,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 							$oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 							$oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form)
 								->window('id_content');
-							$sShopOrderHref = '/admin/shop/order/index.php';
+							$sShopOrderHref = '/{admin}/shop/order/index.php';
 
 							foreach ($aLast_Shop_Orders as $oShop_Order)
 							{

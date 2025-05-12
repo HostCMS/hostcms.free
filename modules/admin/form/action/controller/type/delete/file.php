@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Type_Delete_File extends Admin_Form_Action_Controller
 {
@@ -36,6 +36,7 @@ class Admin_Form_Action_Controller_Type_Delete_File extends Admin_Form_Action_Co
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name
 	 * @return boolean
+	 * @hostcms-event Admin_Form_Action_Controller_Type_Delete_File.onBeforeCallMethod
 	 */
 	public function execute($operation = NULL)
 	{
@@ -54,6 +55,8 @@ class Admin_Form_Action_Controller_Type_Delete_File extends Admin_Form_Action_Co
 			$this->_object->setDir($this->dir);
 		}
 
+		Core_Event::notify('Admin_Form_Action_Controller_Type_Delete_File.onBeforeCallMethod', $this, array($this->methodName, $operation));
+
 		$methodName = $this->methodName;
 		$this->_object->$methodName($operation);
 
@@ -64,11 +67,17 @@ class Admin_Form_Action_Controller_Type_Delete_File extends Admin_Form_Action_Co
 		ob_start();
 		foreach ($this->divId as $sDivId)
 		{
+			$setCreateSmallFromLarge = strpos($sDivId, 'small') !== FALSE
+				? 'fileDiv.closest(\'.input-group\').find(\'input[id^=create_small_image_from_large]\').prop(\'checked\', true);'
+				: '';
+			
 			// Удаляем дочерние узлы
 			// $('#{$windowId} div#file_{$sDivId}').toggleClass('hidden');
 			Core_Html_Entity::factory('Script')
-				->value("$('#{$windowId} div#file_{$sDivId}').prev('input').toggleClass('hidden');
-				$('#{$windowId} #{$sDivId}').remove();")
+				->value("var fileDiv = $('#{$windowId} div#file_{$sDivId}');
+				fileDiv.prev('input').toggleClass('hidden');
+				$('#{$windowId} #{$sDivId}').remove();
+				{$setCreateSmallFromLarge}")
 				->execute();
 		}
 		$this->addMessage(ob_get_clean());

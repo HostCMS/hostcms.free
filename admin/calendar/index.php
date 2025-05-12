@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Calendar
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -13,7 +13,7 @@ Core_Auth::authorization($sModule = 'calendar');
 
 $oAdmin_Form_Controller = Admin_Form_Controller::create();
 
-$sAdminFormAction = '/admin/calendar/index.php';
+$sAdminFormAction = '/{admin}/calendar/index.php';
 
 $oUser = Core_Auth::getCurrentUser();
 
@@ -316,12 +316,12 @@ $(function () {
 					: 0;
 
 				?>
-				<li><a class="caldav-<?php echo htmlspecialchars($oCalendar_Caldav->driver)?>" onclick="$.modalLoad({path: '/admin/calendar/caldav/user/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $id?>]=1&calendar_caldav_id=<?php echo $oCalendar_Caldav->id?>', windowId: 'id_content'}); return false"><i class="<?php echo htmlspecialchars($oCalendar_Caldav->icon)?>"></i><?php echo htmlspecialchars($oCalendar_Caldav->name)?></a></li>
+				<li><a class="caldav-<?php echo htmlspecialchars($oCalendar_Caldav->driver)?>" onclick="$.modalLoad({path: '<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/calendar/caldav/user/index.php')?>', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $id?>]=1&calendar_caldav_id=<?php echo $oCalendar_Caldav->id?>', windowId: 'id_content'}); return false"><i class="<?php echo htmlspecialchars($oCalendar_Caldav->icon)?>"></i><?php echo htmlspecialchars($oCalendar_Caldav->name)?></a></li>
 				<?php
 			}
 		?>
 		<li role="separator" class="divider"></li>
-		<li><a class="caldav-settings" href="/admin/calendar/caldav/index.php" onclick="$.adminLoad({path: '/admin/calendar/caldav/index.php',action: '',operation: '',additionalParams: '',current: '1',sortingFieldId: '1290',sortingDirection: '1',windowId: 'id_content'}); return false"><i class="fa fa-cog"></i><?php echo Core::_('Calendar.settings')?></a></li>
+		<li><a class="caldav-settings" href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/calendar/caldav/index.php')?>" onclick="$.adminLoad({path: '<?php Admin_Form_Controller::correctBackendPath('/{admin}/calendar/caldav/index.php')?>',action: '',operation: '',additionalParams: '',current: '1',sortingFieldId: '1290',sortingDirection: '1',windowId: 'id_content'}); return false"><i class="fa fa-cog"></i><?php echo Core::_('Calendar.settings')?></a></li>
 	</ul>
 </div>
 

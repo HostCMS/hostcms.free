@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Item_Import_Controller extends Core_Servant_Properties
 {
@@ -51,10 +51,14 @@ class Shop_Item_Import_Controller extends Core_Servant_Properties
 		$sStatus = Core_Array::get($aHeaders, 'status');
 		$iStatusCode = $Core_Http->parseHttpStatusCode($sStatus);
 
-		if ($iStatusCode != 200 || isset($aHeaders['Content-Type']) && strtolower(substr($aHeaders['Content-Type'], 0, 9)) == 'text/html')
+		$contentType = isset($aHeaders['Content-Type'])
+			? strtolower(substr(is_array($aHeaders['Content-Type']) ? $aHeaders['Content-Type'][0] : $aHeaders['Content-Type'], 0, 9))
+			: 'unknown';
+
+		if ($iStatusCode != 200 || $contentType == 'text/html')
 		{
 			throw new Core_Exception("Shop_Item_Import_Csv_Controller::_downloadHttpFile error, code: %code, Content-Type: %contentType.\nSource URL: %url",
-				array('%code' => $iStatusCode, '%contentType' => Core_Array::get($aHeaders, 'Content-Type', 'unknown'), '%url' => $sSourceFile));
+				array('%code' => $iStatusCode, '%contentType' => $contentType, '%url' => $sSourceFile));
 		}
 
 		$content = $Core_Http->getDecompressedBody();

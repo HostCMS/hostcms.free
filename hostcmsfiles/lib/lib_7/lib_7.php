@@ -78,6 +78,7 @@ if (Core_Array::getPost('oneStepCheckout'))
 	$_SESSION['hostcmsOrder']['phone'] = Core_Str::stripTags(Core_Array::getPost('phone', '', 'str'));
 	$_SESSION['hostcmsOrder']['email'] = Core_Str::stripTags(Core_Array::getPost('email', '', 'str'));
 	$_SESSION['hostcmsOrder']['description'] = Core_Str::stripTags(Core_Array::getPost('description', '', 'str'));
+	$_SESSION['hostcmsOrder']['tin'] = Core_Str::stripTags(Core_Array::getPost('tin', '', 'str'));
 
 	// Additional order properties
 	$_SESSION['hostcmsOrder']['properties'] = array();

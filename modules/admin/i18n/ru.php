@@ -77,7 +77,7 @@ return array(
 	'viewSite' => 'Посмотреть сайт в новом окне',
 	'selectSite' => 'Выберите сайт',
 
-	'company' => 'ООО «Хостмэйк»',
+	'company' => 'HostCMS',
 	'company-website' => 'www.hostcms.ru',
 	'company-support' => 'support@hostcms.ru',
 	'copy' => '%s [Копия от %s]',

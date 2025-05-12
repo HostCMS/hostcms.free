@@ -8,66 +8,64 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Password
 {
 	/**
 	 * Генерация пароля
 	 *
-	 * @param int $len длина пароля (1-49), по умолчанию 8
+	 * @param int $length длина пароля (1-49), по умолчанию 8
 	 * @param string $prefix префикс пароля, только латинские символы (до 10 символов, входит в длину пароля $len)
-	 * @param int $fuzzy cмазанность (0-10), по умолчанию 3
+	 * @param boolean $addDashes разбитие пароля на части через дефис
+	 * @param string $availableSets сложность - l - нижний регистр, u - верхний регистр, d - цифры, s - спец.символы. По умолчанию - luds
 	 * @return string
 	 */
-	static public function get($len = 10, $prefix = '', $fuzzy = 3)
+	static public function get($length = 9, $prefix = '', $addDashes = FALSE, $availableSets = 'luds')
 	{
-		$len %= 50;
-		$fuzzy %= 11;
+		$aSets = array();
 
-		$aRangeAlphabet = array(
-			'a' => 'ntrsldicmzp', 'b' => 'euloayribsj',
-			'c' => 'oheaktirulc', 'd' => 'eiorasydlun',
-			'e' => 'nrdsaltevcm', 'f' => 'ioreafltuyc',
-			'g' => 'aeohrilunsg', 'h' => 'eiaotruykms',
-			'i' => 'ntscmledorg', 'j' => 'ueoairhjklm',
-			'k' => 'eiyonashlus', 'l' => 'eoiyaldsfut',
-			'm' => 'eaoipsuybmn', 'n' => 'goeditscayl',
-			'o' => 'fnrzmwtovls', 'p' => 'earolipuths',
-			'q' => 'uuuuaecdfok', 'r' => 'eoiastydgnm',
-			's' => 'eothisakpuc', 't' => 'hoeiarzsuly',
-			'u' => 'trsnlpgecim', 'v' => 'eiaosnykrlu',
-			'w' => 'aiheonrsldw', 'x' => 'ptciaeuohnq',
-			'y' => 'oesitabpmwc', 'z' => 'eaiozlryhmt',
-			'0' => 'qazwsxedcrf', '1' => 'edcrfvtgbyh',
-			'2' => 'tgbyhnujmik', '3' => 'mnbgrikdfgr',
-			'4' => 'fvbcertgfdv', '5' => 'poilkmnghty',
-			'6' => 'qwerfdbcvgd', '7' => 'vbntrfdcvgd',
-			'8' => 'ghnbjytfgrt', '9' => 'jhtnbertyqw'
-		);
+		strpos($availableSets, 'l') !== FALSE && $aSets[] = 'abcdefghjkmnpqrstuvwxyz';
+		strpos($availableSets, 'u') !== FALSE && $aSets[] = 'ABCDEFGHJKMNPQRSTUVWXYZ';
+		strpos($availableSets, 'd') !== FALSE && $aSets[] = '23456789';
+		strpos($availableSets, 's') !== FALSE && $aSets[] = '!@#$%&*?';
 
-		$aRange = range('a', 'z');
+		$all = $password = '';
 
-		$return = strlen($prefix)
-			? strtolower(preg_replace('/[^a-zA-Z0-9]/', '', substr($prefix, 0, $len - 1)))
-			: $aRange[rand(0, count($aRange) - 1)];
-		
-		while (strlen($return) < $len)
+		$bAddPrefix = $prefix !== '' && strlen($prefix) < $length;
+		$bAddPrefix && $length -= strlen($prefix);
+
+		foreach ($aSets as $set)
 		{
-			$tmpFuzzy = $fuzzy;
-			while (
-				substr_count($return, substr($return, strlen($return) - 1, 1) .
-				($k = substr($aRangeAlphabet[substr($return, strlen($return) - 1, 1)], rand(0, $tmpFuzzy % 11), 1)))
-			)
-
-			if (++$tmpFuzzy > 10)
-			{
-				break;
-			}
-
-			$return .= $k;
+			$password .= $set[array_rand(str_split($set))];
+			$all .= $set;
 		}
 
-		return $return;
+		$all = str_split($all);
+		for ($i = 0; $i < $length - count($aSets); $i++)
+		{
+			$password .= $all[array_rand($all)];
+		}
+
+		$password = str_shuffle($password);
+
+		if ($addDashes)
+		{
+			$sTmp = $password;
+			$password = '';
+
+			$iDashLen = floor(sqrt($length));
+			while (strlen($sTmp) > $iDashLen)
+			{
+				$password .= substr($sTmp, 0, $iDashLen) . '-';
+				$sTmp = substr($sTmp, $iDashLen);
+			}
+
+			$password .= $sTmp;
+		}
+
+		$bAddPrefix && $password = $prefix . $password;
+
+		return $password;
 	}
 }

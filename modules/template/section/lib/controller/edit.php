@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Template
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -20,7 +20,9 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 	public function setObject($object)
 	{
 		$this
-			->addSkipColumn('options');
+			->addSkipColumn('options')
+			->addSkipColumn('field_styles')
+			->addSkipColumn('field_classes');
 
 		// При добавлении объекта
 		if (!$object->id)
@@ -64,8 +66,8 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 		$oAdditionalTab->delete($this->getField('lib_id'));
 
 		$oMainTab
-			->move($this->getField('class')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow1)
-			->move($this->getField('style')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow1);
+			->move($this->getField('class')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1)
+			->move($this->getField('style')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1);
 
 		$Lib_Controller_Edit = new Lib_Controller_Edit($this->_Admin_Form_Action);
 
@@ -79,7 +81,7 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 				array(' … ') + $Lib_Controller_Edit->fillLibDir(0)
 			)
 			->value($oLib->lib_dir_id)
-			->onchange("$.ajaxRequest({path: '/admin/structure/index.php',context: 'lib_id', callBack: $.loadSelectOptionsCallback, action: 'loadLibList',additionalParams: 'lib_dir_id=' + this.value,windowId: '{$windowId}'}); return false");
+			->onchange("$.ajaxRequest({path: hostcmsBackend + '/structure/index.php',context: 'lib_id', callBack: $.loadSelectOptionsCallback, action: 'loadLibList',additionalParams: 'lib_dir_id=' + this.value,windowId: '{$windowId}'}); return false");
 
 		$aLibForDir = array(' … ');
 		 // lib_dir_id может быть NULL
@@ -89,6 +91,7 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 		{
 			$aLibForDir[$oTmpLib->id] = '[' . $oTmpLib->id . '] ' . $oTmpLib->name;
 		}
+
 		$objectId = intval($this->_object->id);
 		$Select_Lib = Admin_Form_Entity::factory('Select')
 			->name('lib_id')
@@ -97,7 +100,7 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 			->divAttr(array('id' => 'lib', 'class' => 'form-group col-xs-12 col-sm-8 col-md-6'))
 			->options($aLibForDir)
 			->value($this->_object->lib_id)
-			->onchange("$.ajaxRequest({path: '/admin/template/section/lib/index.php', context: '{$this->_formId}', callBack: $.loadDivContentAjaxCallback, objectId: {$objectId}, action: 'loadLibProperties',additionalParams: 'lib_id=' + this.value,windowId: '{$windowId}'}); return false");
+			->onchange("$.ajaxRequest({path: hostcmsBackend + '/template/section/lib/index.php', context: '{$this->_formId}', callBack: $.loadDivContentAjaxCallback, objectId: {$objectId}, action: 'loadLibProperties',additionalParams: 'lib_id=' + this.value,windowId: '{$windowId}'}); return false");
 
 		$Select_Lib
 			->add(
@@ -105,7 +108,7 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 					->target('_blank')
 					->href(
 						$this->_object->lib_id
-							? $this->_object->lib_id . $this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/lib/index.php', 'edit', NULL, 1, $this->_object->lib_id, 'lib_dir_id=' . intval($oLib->lib_dir_id))
+							? $this->_object->lib_id . $this->_Admin_Form_Controller->getAdminActionLoadHref('/{admin}/lib/index.php', 'edit', NULL, 1, $this->_object->lib_id, 'lib_dir_id=' . intval($oLib->lib_dir_id))
 							: ''
 					)
 					->class('lib-edit input-group-addon blue' . ($this->_object->lib_id ? '' : ' hidden'))
@@ -143,6 +146,12 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 	 */
 	protected function _applyObjectProperty()
 	{
+		// Backup revision
+		if (Core::moduleIsActive('revision') && $this->_object->id)
+		{
+			$this->_object->backupRevision();
+		}
+
 		parent::_applyObjectProperty();
 
 		// Lib properties

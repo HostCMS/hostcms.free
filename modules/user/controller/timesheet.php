@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage User
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class User_Controller_Timesheet extends Admin_Form_Controller_View
 {
@@ -168,10 +168,10 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 														<a class="add-absence-button" data-action="add_absence" href="javascript:void(0);"><i class="fa fa-fw fa-plus"></i><?php echo Core::_('Admin_Form.add')?></a>
 													</li>
 													<li>
-														<a href="/admin/user/absence/index.php" onclick="<?php echo $oAdmin_Form_Controller->getAdminLoadAjax('/admin/user/absence/index.php', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'list')?>"><i class="fa fa-fw fa-list"></i><?php echo Core::_('User_Absence.absence_list')?></a>
+														<a href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/user/absence/index.php')?>" onclick="<?php echo $oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/user/absence/index.php', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'list')?>"><i class="fa fa-fw fa-list"></i><?php echo Core::_('User_Absence.absence_list')?></a>
 													</li>
 													<li>
-														<a href="/admin/user/absence/type/index.php" onclick="<?php echo $oAdmin_Form_Controller->getAdminLoadAjax('/admin/user/absence/type/index.php', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'list')?>"><i class="fa fa-fw fa-circle"></i><?php echo Core::_('User_Absence_Type.title')?></a>
+														<a href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/user/absence/type/index.php')?>" onclick="<?php echo $oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/user/absence/type/index.php', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'list')?>"><i class="fa fa-fw fa-circle"></i><?php echo Core::_('User_Absence_Type.title')?></a>
 													</li>
 												</ul>
 											</div>
@@ -221,7 +221,7 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 					absence_id = typeof $(this).attr('id') === "undefined" ? 0 : $(this).attr('id'),
 					title = absence_id ? '<?php echo Core::_('User_Absence.edit_absence_title')?>': '<?php echo Core::_('User_Absence.add_absence_title')?>';
 
-				$.modalLoad({title: title, path: '/admin/user/index.php', additionalParams: 'addEditUserAbsence&company_id=' + companyId + '&absence_id=' + absence_id, width: '50%', windowId: 'id_content'});
+				$.modalLoad({title: title, path: hostcmsBackend + '/user/index.php', additionalParams: 'addEditUserAbsence&company_id=' + companyId + '&absence_id=' + absence_id, width: '50%', windowId: 'id_content'});
 			});
 		});
 		</script>
@@ -369,7 +369,7 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 
 				window.activeTabHref = $('ul#agregate-user-info').find('li.active a').attr('href');
 
-				$.adminLoad({path: '/admin/user/timesheet/index.php', additionalParams: 'month=' + month + '&year=' + year, windowId : 'id_content'});
+				$.adminLoad({path: hostcmsBackend + '/user/timesheet/index.php', additionalParams: 'month=' + month + '&year=' + year, windowId : 'id_content'});
 			});
 
 			// Переключение на активную вкладку после выбора месяца/года
@@ -378,13 +378,13 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 			$('[data-action="showAnotherTimeDetailsApprovalForm"]').on('click', function() {
 				var iWorkdayId = +$(this).data('workday-id');
 
-				$.modalLoad({title: '<?php echo Core::_('User_Workday.approval_another_time_modal_title')?>', path: '/admin/user/index.php', additionalParams: 'showAnotherTimeDetailsApprovalForm&workdayId=' + iWorkdayId, width: '50%', windowId: 'id_content', onHide: function(){$(".wickedpicker").remove();}});
+				$.modalLoad({title: '<?php echo Core::_('User_Workday.approval_another_time_modal_title')?>', path: hostcmsBackend + '/user/index.php', additionalParams: 'showAnotherTimeDetailsApprovalForm&workdayId=' + iWorkdayId, width: '50%', windowId: 'id_content', onHide: function(){$(".wickedpicker").remove();}});
 			});
 
 			$('[data-action="editAnotherTimeDetailsApprovalForm"]').on('click', function() {
 				var iWorkdayId = +$(this).data('workday-id');
 
-				$.modalLoad({title: '<?php echo Core::_('User_Workday.approval_another_time_modal_title')?>', path: '/admin/user/workday/index.php', 'action': 'edit', 'operation': 'modal', 'datasetKey': 0, 'datasetValue': iWorkdayId, additionalParams: 'hostcms[checked][0][' + iWorkdayId + ']', width: '90%', windowId: 'id_content', onHide: function(){$(".wickedpicker").remove();}});
+				$.modalLoad({title: '<?php echo Core::_('User_Workday.approval_another_time_modal_title')?>', path: hostcmsBackend + '/user/workday/index.php', 'action': 'edit', 'operation': 'modal', 'datasetKey': 0, 'datasetValue': iWorkdayId, additionalParams: 'hostcms[checked][0][' + iWorkdayId + ']', width: '90%', windowId: 'id_content', onHide: function(){$(".wickedpicker").remove();}});
 			});
 		})
 		</script>

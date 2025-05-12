@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'document');
 
 // Код формы
 $iAdmin_Form_Id = 9;
-$sAdminFormAction = '/admin/document/index.php';
+$sAdminFormAction = '/{admin}/document/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -56,7 +56,7 @@ $oAdmin_Form_Controller->addEntity(
 
 $sGlobalSearch = str_replace(' ', '%', Core_DataBase::instance()->escapeLike($sGlobalSearch));
 
-$sStatusPath = '/admin/document/status/index.php';
+$sStatusPath = '/{admin}/document/status/index.php';
 
 // Элементы меню
 $oAdmin_Form_Entity_Menus->add(
@@ -234,8 +234,8 @@ else
 
 $oAdmin_Form_Dataset
 	->changeField('name', 'type', 4)
-	->changeField('name', 'link', '/admin/document/index.php?document_dir_id={id}')
-	->changeField('name', 'onclick', "$.adminLoad({path: '/admin/document/index.php', additionalParams: 'document_dir_id={id}', windowId: '{windowId}'}); return false");
+	->changeField('name', 'link', '/{admin}/document/index.php?document_dir_id={id}')
+	->changeField('name', 'onclick', "$.adminLoad({path: '/{admin}/document/index.php', additionalParams: 'document_dir_id={id}', windowId: '{windowId}'}); return false");
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Skin_Bootstrap extends Core_Skin
 {
@@ -118,15 +118,15 @@ class Skin_Bootstrap extends Core_Skin
 	{
 		$timestamp = $this->_getTimestamp();
 
-		$lng = $this->getLng();
-
 		foreach ($this->_css as $sPath)
 		{
 			?><link type="text/css" href="<?php echo $sPath . '?' . $timestamp?>" rel="stylesheet" /><?php
 			echo PHP_EOL;
-		}?>
+		}
 
-		<?php
+		?><script>const hostcmsBackend = '/<?php echo Core_Str::escapeJavascriptVariable(Core::$mainConfig['backend'])?>';</script><?php
+
+		$lng = $this->getLng();
 		$this->addJs('/modules/skin/' . $this->_skinName . "/js/lng/{$lng}/{$lng}.js");
 		foreach ($this->_js as $aJs)
 		{
@@ -152,7 +152,7 @@ class Skin_Bootstrap extends Core_Skin
 		}
 		?>
 		</script>
-		<script src="/admin/wysiwyg/jquery.tinymce.min.js?<?php echo $timestamp?>"></script>
+		<script src="<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/wysiwyg/jquery.tinymce.min.js?{$timestamp}")?>"></script>
 		<?php
 		if ($this->_mode != 'install')
 		{
@@ -225,8 +225,8 @@ class Skin_Bootstrap extends Core_Skin
 				<div class="navbar-container">
 					<!-- Navbar Barnd -->
 					<div class="navbar-header pull-left">
-						<a href="/admin/" <?php echo isset($_SESSION['valid_user'])
-							? 'onclick="' . "$.adminLoad({path: '/admin/index.php'}); return false" . '"'
+						<a href="<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/")?>" <?php echo isset($_SESSION['valid_user'])
+							? Admin_Form_Controller::correctBackendPath('onclick="' . "$.adminLoad({path: '/{admin}/index.php'}); return false" . '"')
 							: ''?> class="navbar-brand"><?php
 							$sLogoTitle = Core_Auth::logged() ? ' v. ' . htmlspecialchars(Core::getVersion()) : '';
 							?><img src="/modules/skin/bootstrap/img/logo-white.png" alt="(^) HostCMS" title="HostCMS <?php echo $sLogoTitle?>" /></a>
@@ -410,7 +410,7 @@ class Skin_Bootstrap extends Core_Skin
 										$(function(){
 											$("#sound-switch")
 												.data('soundEnabled', <?php echo $oUser->sound ? 'true' : 'false'?>)
-												.on('click', {path: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oModule->id?>&type=84'}, $.soundSwitch );
+												.on('click', {path: '<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/index.php?ajaxWidgetLoad&moduleId={$oModule->id}&type=84")?>'}, $.soundSwitch );
 										});
 									</script>
 								</li>
@@ -440,7 +440,7 @@ class Skin_Bootstrap extends Core_Skin
 														foreach ($aEvents as $oEvent)
 														{
 															?><li id="event-<?php echo $oEvent->id?>">
-																<a href="/admin/event/index.php?hostcms[action]=edit&hostcms[operation]=&hostcms[current]=1&hostcms[checked][0][<?php echo $oEvent->id?>]=1" onclick="$(this).parents('li.open').click(); $.adminLoad({path: '/admin/event/index.php?hostcms[action]=edit&hostcms[operation]=&hostcms[current]=1&hostcms[checked][0][<?php echo $oEvent->id?>]=1'}); return false">
+																<a href="<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/event/index.php?hostcms[action]=edit&hostcms[operation]=&hostcms[current]=1&hostcms[checked][0][{$oEvent->id}]=1")?>" onclick="$(this).parents('li.open').click(); $.adminLoad({path: '<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/event/index.php?hostcms[action]=edit&hostcms[operation]=&hostcms[current]=1&hostcms[checked][0][{$oEvent->id}]=1")?>'}); return false">
 																	<div class="clearfix notification-clock">
 																		<div class="notification-icon">
 																			<i class="<?php echo htmlspecialchars($oEvent->Event_Type->icon)?> white" style="background-color: <?php echo htmlspecialchars($oEvent->Event_Type->color)?>"></i>
@@ -471,7 +471,7 @@ class Skin_Bootstrap extends Core_Skin
 													}
 													?>
 													<li class="all-tasks">
-														<a href="/admin/event/index.php" onclick="$(this).parents('li.open').click(); $.adminLoad({path: '/admin/event/index.php'}); return false"> <?php echo Core::_('Event.all-tasks')?></a>
+														<a href="<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/event/index.php")?>" onclick="$(this).parents('li.open').click(); $.adminLoad({path: '<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/event/index.php')?>'}); return false"> <?php echo Core::_('Event.all-tasks')?></a>
 													</li>
 												</ul>
 											</div>
@@ -615,7 +615,9 @@ class Skin_Bootstrap extends Core_Skin
 											foreach ($aAdmin_Languages as $oAdmin_Language)
 											{
 												?><li>
-												<a <?php echo Core_Array::getSession('current_lng') != $oAdmin_Language->shortname ? 'href="/admin/index.php?lng_value=' . htmlspecialchars($oAdmin_Language->shortname) . '"' : ''?> onmousedown="$(window).off('beforeunload')">
+												<a <?php echo Core_Array::getSession('current_lng') != $oAdmin_Language->shortname
+													? 'href="' . Admin_Form_Controller::correctBackendPath('/{admin}/index.php?lng_value=' . htmlspecialchars($oAdmin_Language->shortname)) . '"'
+													: ''?> onmousedown="$(window).off('beforeunload')">
 
 													<div class="clearfix">
 														<div class="notification-icon">
@@ -771,15 +773,15 @@ class Skin_Bootstrap extends Core_Skin
 										$(function(){
 											// Chat
 											$('.page-container').append($('#chatbar'));
-											$("#chat-link, #chatbar div.back").on('click', {path: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oModule->id?>&type=77', context: $('#chatbar .contacts-list') }, function(event) { $(this).hasClass('open') && $.chatGetUsersList(event) });
+											$("#chat-link, #chatbar div.back").on('click', {path: '<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/index.php?ajaxWidgetLoad&moduleId={$oModule->id}&type=77")?>', context: $('#chatbar .contacts-list') }, function(event) { $(this).hasClass('open') && $.chatGetUsersList(event) });
 
 											$('.contacts-list')
 												.on('click', 'li.contact', $.chatClearMessagesList)
-												.on('click', 'li.contact', { path: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oModule->id?>&type=78' }, $.chatGetUserMessages);
+												.on('click', 'li.contact', { path: '<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/index.php?ajaxWidgetLoad&moduleId={$oModule->id}&type=78")?>' }, $.chatGetUserMessages);
 
-											$('.send-message textarea').on('keyup', { path: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oModule->id?>&type=79' }, $.chatSendMessage);
+											$('.send-message textarea').on('keyup', { path: '<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/index.php?ajaxWidgetLoad&moduleId={$oModule->id}&type=79")?>' }, $.chatSendMessage);
 
-											$.refreshChat({path: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oModule->id?>&type=80'});
+											$.refreshChat({path: '<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/index.php?ajaxWidgetLoad&moduleId={$oModule->id}&type=80")?>'});
 										});
 									</script>
 								</li>
@@ -883,7 +885,7 @@ class Skin_Bootstrap extends Core_Skin
 											</ul>
 										</li>
 										<li class="dropdown-footer">
-											<a href="/admin/logout.php?secret_csrf=<?php echo $csrf_token?>" onmousedown="$(window).off('beforeunload')"><?php echo Core::_('Admin.exit')?></a>
+											<a href="<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/logout.php?secret_csrf=$csrf_token")?>" onmousedown="$(window).off('beforeunload')"><?php echo Core::_('Admin.exit')?></a>
 										</li>
 									</ul>
 
@@ -981,7 +983,7 @@ class Skin_Bootstrap extends Core_Skin
 								.addClass('fa-spin');
 
 							$.ajax({
-								url: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oSearchModule->id?>&type=1&autocomplete=1',
+								url: '<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/index.php?ajaxWidgetLoad&moduleId={$oSearchModule->id}&type=1&autocomplete=1")?>',
 								dataType: 'json',
 								data: {
 								queryString: request.term
@@ -1042,10 +1044,14 @@ class Skin_Bootstrap extends Core_Skin
 		<?php
 	}
 
+	/**
+	 * Show Side Bar Menu
+	 * @hostcms-event Skin_Bootstrap.onLoadSkinConfig
+	 */
 	public function navSidebarMenu()
 	{
 		?><li id="menu-dashboard">
-			<a href="/admin/index.php" onclick="$.adminLoad({path: '/admin/index.php'}); return false">
+			<a href="<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/index.php")?>" onclick="$.adminLoad({path: '<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/index.php")?>'}); return false">
 				<i class="menu-icon glyphicon glyphicon-home"></i>
 				<span class="menu-text"><?php echo Core::_('Admin.home')?></span>
 			</a>
@@ -1301,13 +1307,15 @@ class Skin_Bootstrap extends Core_Skin
 			Core_Skin::instance()->answer()->message('');
 		}
 
-		$bDeviceTracking = !isset($_SERVER['HTTP_CF_IPCOUNTRY']) && Core_Array::getCookie('hostcms_device_tracking', 'on') == 'on';
+		$bDeviceTracking = Core::$mainConfig['backendAssignSessionToIp']
+			&& !isset($_SERVER['HTTP_CF_IPCOUNTRY']) && Core_Array::getCookie('hostcms_device_tracking', 'on') == 'on'
+			&& strtolower(Core_Array::get($_SERVER, 'HTTP_SAVE_DATA', 'off')) !== 'on';
 
 		$time = time();
 		?>
 
 		<div class="loginbox">
-			<form class="form-horizontal" action="/admin/index.php" method="post">
+			<form class="form-horizontal" action="<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/index.php")?>" method="post">
 				<div class="loginbox-textbox">
 					<span class="input-icon">
 						<input type="text" name="login" class="form-control" placeholder="<?php echo Core::_('Admin.authorization_form_login')?>" required="required" />
@@ -1385,7 +1393,7 @@ class Skin_Bootstrap extends Core_Skin
 <div class="container">
 	<div class="row">
 		<div class="col-xs-12">
-			<p class="copy pull-left copyright">Copyright © 2005–2024 <?php echo Core::_('Admin.company')?></p>
+			<p class="copy pull-left copyright">Copyright © 2005–2025 <?php echo Core::_('Admin.company')?></p>
 			<p class="copy text-right contacts">
 				<?php echo Core::_('Admin.website')?> <a href="http://<?php echo Core::_('Admin.company-website')?>" target="_blank"><?php echo Core::_('Admin.company-website')?></a>
 				<br/>
@@ -1741,6 +1749,7 @@ class Skin_Bootstrap extends Core_Skin
 
 	/**
 	 * Show Front End panels
+	 * @hostcms-event Skin_Bootstrap.onAfterTopPanel
 	 */
 	public function frontend()
 	{
@@ -1752,19 +1761,24 @@ class Skin_Bootstrap extends Core_Skin
 		$oTemplate = Core_Page::instance()->template;
 		$aTemplates = array();
 		$bLess = FALSE;
+		$countSections = 0;
+
+		$lng = $this->getLng();
 
 		do {
 			$aTemplates[] = $oTemplate;
 
 			$oTemplate->type == 1
-				&& $oTemplate->loadManifestFile() != ''
+				&& ($oTemplate->loadManifestFile() != '')
 				&& $bLess = TRUE;
+
+			$countSections += $oTemplate->Template_Sections->getCount();
 
 		} while ($oTemplate = $oTemplate->getParent());
 
 		$aTemplates = array_reverse($aTemplates);
 
-		if ($bLess)
+		if ($bLess || $countSections)
 		{
 			?><link rel="stylesheet" type="text/css" href="/modules/skin/default/frontend/bootstrap-iso.css?<?php echo $iTimestamp?>" /><?php
 			?><link rel="stylesheet" type="text/css" href="/modules/skin/bootstrap/js/toastr/toastr.css?<?php echo $iTimestamp?>" /><?php
@@ -1774,15 +1788,19 @@ class Skin_Bootstrap extends Core_Skin
 		?><link rel="stylesheet" type="text/css" href="/modules/skin/bootstrap/fonts/fontawesome/6/css/all.min.css?<?php echo $iTimestamp?>" /><?php
 		?><script src="/modules/skin/default/frontend/jquery.min.js"></script><?php
 		?><script src="/modules/skin/default/frontend/jquery-ui.min.js"></script><?php
-		?><script src="/admin/wysiwyg/jquery.tinymce.min.js"></script><?php
+		?><script src="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/wysiwyg/jquery.tinymce.min.js')?>"></script><?php
 
-		if ($bLess)
+		if ($bLess || $countSections)
 		{
 			?><script src="/modules/skin/bootstrap/js/colorpicker/jquery.minicolors.min.js"></script><?php
 			?><script src="/modules/skin/bootstrap/js/jquery.slimscroll.js"></script><?php
 			?><script src="/modules/skin/bootstrap/js/toastr/toastr.js"></script><?php
+			?><script src="/modules/skin/bootstrap/js/jquery.form.js"></script><?php
+			/*?><script src="/modules/skin/bootstrap/js/select2/select2.min.js"></script><?php
+			?><script src="/modules/skin/bootstrap/js/select2/i18n/<?php echo $this->getLng()?>.js"></script><?php*/
 		}
 		?><script>var hQuery = $.noConflict(true);</script><?php
+		?><script src="/modules/skin/<?php echo $this->_skinName?>/js/lng/<?php echo $lng?>/<?php echo $lng?>.js"></script><?php
 		?><script src="/modules/skin/default/frontend/frontend.js"></script><?php
 
 		if ($bLess)
@@ -1806,13 +1824,13 @@ class Skin_Bootstrap extends Core_Skin
 			<script>
 			hQuery('.bootstrap-iso .colorpicker').each(function () {
 				hQuery(this).minicolors({
-					control: $(this).attr('data-control') || 'hue',
-					defaultValue: $(this).attr('data-defaultValue') || '',
-					inline: $(this).attr('data-inline') === 'true',
-					letterCase: $(this).attr('data-letterCase') || 'lowercase',
-					opacity: $(this).attr('data-rgba'),
-					position: $(this).attr('data-position') || 'bottom right',
-					format: $(this).attr('data-format') || 'hex',
+					control: hQuery(this).attr('data-control') || 'hue',
+					defaultValue: hQuery(this).attr('data-defaultValue') || '',
+					inline: hQuery(this).attr('data-inline') === 'true',
+					letterCase: hQuery(this).attr('data-letterCase') || 'lowercase',
+					opacity: hQuery(this).attr('data-rgba'),
+					position: hQuery(this).attr('data-position') || 'bottom right',
+					format: hQuery(this).attr('data-format') || 'hex',
 					change: function (hex, opacity) {
 						if (!hex) return;
 						if (opacity) hex += ', ' + opacity;
@@ -1875,8 +1893,8 @@ class Skin_Bootstrap extends Core_Skin
 					)
 					->add(
 						Core_Html_Entity::factory('A')
-							->href('/admin/logout.php?secret_csrf=' . $csrf_token)
-							->onclick("hQuery.ajax({url: '/admin/logout.php?secret_csrf={$csrf_token}', dataType: 'html', success: function() {location.reload()}}); return false;")
+							->href(Admin_Form_Controller::correctBackendPath('/{admin}/logout.php?secret_csrf=' . $csrf_token))
+							->onclick(Admin_Form_Controller::correctBackendPath("hQuery.ajax({url: '/{admin}/logout.php?secret_csrf={$csrf_token}', dataType: 'html', success: function() {location.reload()}}); return false;"))
 							->add(
 								Core_Html_Entity::factory('I')
 									->id('hostcmsLogout')
@@ -1893,7 +1911,7 @@ class Skin_Bootstrap extends Core_Skin
 			// Structure
 			if ($oUser->checkModuleAccess(array('structure'), $oSite))
 			{
-				$sPath = '/admin/structure/index.php';
+				$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/structure/index.php');
 				$sAdditional = "hostcms[action]=edit&parent_id={$oStructure->parent_id}&hostcms[checked][0][{$oStructure->id}]=1";
 
 				$oHostcmsSubPanel->add(
@@ -1923,7 +1941,7 @@ class Skin_Bootstrap extends Core_Skin
 
 				if ($oTemplate && $oTemplate->id)
 				{
-					$sPath = '/admin/template/index.php';
+					$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/template/index.php');
 					$sAdditional = "hostcms[action]=edit&hostcms[checked][1][{$oTemplate->id}]=1";
 
 					$oHostcmsSubPanel->add(
@@ -1943,7 +1961,7 @@ class Skin_Bootstrap extends Core_Skin
 			// Document
 			if ($oUser->checkModuleAccess(array('document'), $oSite) && $oStructure->type == 0 && $oStructure->document_id)
 			{
-				$sPath = '/admin/document/index.php';
+				$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/document/index.php');
 				$sAdditional = "hostcms[action]=edit&document_dir_id={$oStructure->Document->document_dir_id}&hostcms[checked][1][{$oStructure->Document->id}]=1";
 
 				$oHostcmsSubPanel->add(
@@ -1967,7 +1985,7 @@ class Skin_Bootstrap extends Core_Skin
 
 				if ($oInformationsystem)
 				{
-					$sPath = '/admin/informationsystem/index.php';
+					$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/informationsystem/index.php');
 					$sAdditional = "hostcms[action]=edit&informationsystem_dir_id={$oInformationsystem->informationsystem_dir_id}&hostcms[checked][1][{$oInformationsystem->id}]=1";
 
 					$oHostcmsSubPanel->add(
@@ -1992,7 +2010,7 @@ class Skin_Bootstrap extends Core_Skin
 
 				if ($oShop)
 				{
-					$sPath = '/admin/shop/index.php';
+					$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/shop/index.php');
 					$sAdditional = "hostcms[action]=edit&shop_dir_id={$oShop->shop_dir_id}&hostcms[checked][1][{$oShop->id}]=1";
 
 					$oHostcmsSubPanel->add(
@@ -2014,10 +2032,34 @@ class Skin_Bootstrap extends Core_Skin
 		$oHostcmsSubPanel->add(
 			Core_Html_Entity::factory('Span')
 				->style('margin-left: 15px')
-		)
-		->add(
+		);
+
+		if ($oUser->checkModuleAccess(array('template'), $oSite))
+		{
+			// $activeDesign = Core_Type_Conversion::toBool($_SESSION['HOSTCMS_SHOW_DESIGN'])
+			// 	? ' active-design'
+			// 	: '';
+			$activeDesign = isset($_GET['hostcmsAction']) && $_GET['hostcmsAction'] == 'SHOW_DESIGN'
+				? ' active-design'
+				: '';
+
+			$oHostcmsSubPanel->add(
+				Core_Html_Entity::factory('A')
+					->href(
+						'?hostcmsAction=SHOW_DESIGN'
+					)
+					->add(
+						Core_Html_Entity::factory('I')
+							->id('hostcmsDesign')
+							->class('fa-solid fa-fill-drip fa-fw' . $activeDesign)
+							->title(Core::_('Core.show_design'))
+					)
+			);
+		}
+
+		$oHostcmsSubPanel->add(
 			Core_Html_Entity::factory('A')
-				->href('/admin/')
+				->href(Admin_Form_Controller::correctBackendPath('/{admin}/'))
 				->target('_blank')
 				->add(
 					Core_Html_Entity::factory('I')
@@ -2331,7 +2373,8 @@ class Skin_Bootstrap extends Core_Skin
 			->add(
 				Core_Html_Entity::factory('Script')
 					->value(
-						'var backendLng = "' . htmlspecialchars(Core_I18n::instance()->getLng()) . '";' . PHP_EOL .
+						'var backendLng = "' . htmlspecialchars(Core_I18n::instance()->getLng()) . '",' . PHP_EOL .
+						'hostcmsBackend = "/' . htmlspecialchars(Core::$mainConfig['backend']) . '";' . PHP_EOL .
 						'(function($){' . PHP_EOL .
 						'$("body").addClass("backendBody");' . PHP_EOL .
 						'$(".hostcmsPanel,.hostcmsSectionPanel,.hostcmsSectionWidgetPanel").draggable({containment: "window"});' . PHP_EOL .
@@ -2340,6 +2383,8 @@ class Skin_Bootstrap extends Core_Skin
 						'})(hQuery);'
 					)
 			);
+
+		Core_Event::notify(get_class($this) . '.onAfterTopPanel', $this, array($oHostcmsTopPanel));
 
 		$oHostcmsTopPanel->execute();
 	}

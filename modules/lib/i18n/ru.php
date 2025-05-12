@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Lib
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Типовые динамические страницы',
@@ -36,4 +36,13 @@ return array(
 	'import_button' => 'Загрузить',
 	'importLibs_success' => 'Импорт завершен!',
 	'name_empty' => 'Название типовой динамической страницы не указано!',
+	'file' => 'Превью',
+	'type' => 'Тип',
+	'type0' => 'Страница',
+	'type1' => 'Виджет',
+	'class' => 'Атрибут "class"',
+	'style' => 'Атрибут "style"',
+	'deleteFile_success' => 'Файл удален успешно!',
+	'sorting' => "Порядок сортировки",
+	'apply_success' => "Информация успешно изменена",
 );

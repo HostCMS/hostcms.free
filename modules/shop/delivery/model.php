@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Delivery_Model extends Core_Entity
 {
@@ -112,6 +112,8 @@ class Shop_Delivery_Model extends Core_Entity
 
 	/**
 	 * Delete delivery image
+	 * @return self
+	 * @hostcms-event shop_delivery.onAfterDeleteImage
 	 */
 	public function deleteImage()
 	{
@@ -120,8 +122,12 @@ class Shop_Delivery_Model extends Core_Entity
 			Core_File::delete($this->getDeliveryFilePath());
 		} catch (Exception $e) {}
 
+		Core_Event::notify($this->_modelName . '.onAfterDeleteImage', $this);
+
 		$this->image = '';
 		$this->save();
+
+		return $this;
 	}
 
 	/**
@@ -271,6 +277,7 @@ class Shop_Delivery_Model extends Core_Entity
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return self
 	 * @hostcms-event shop_delivery.onBeforeRedeclaredDelete
+	 * @hostcms-event shop_delivery.onAfterDeleteHandlerFile
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -292,6 +299,8 @@ class Shop_Delivery_Model extends Core_Entity
 			{
 				Core_File::delete($this->getHandlerFilePath());
 			} catch (Exception $e) {}
+
+			Core_Event::notify($this->_modelName . '.onAfterDeleteHandlerFile', $this);
 		}
 
 		$this->Shop_Delivery_Conditions->deleteAll(FALSE);

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Valid
 {
@@ -58,6 +58,18 @@ class Core_Valid
 		return is_string($ip)
 			? filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== FALSE
 			: FALSE;
+	}
+
+	/**
+	 * Checks if $ip is local IPv4
+	 * @param string $ip IP
+	 * @return boolean
+	 */
+	static public function localIpv4($ip)
+	{
+		return version_compare($ip, "192.168.0.0", ">") && version_compare($ip, "192.168.255.255", "<")
+		|| version_compare($ip, "172.16.0.0", ">") && version_compare($ip, "172.31.255.255", "<")
+		|| version_compare($ip, "10.0.0.0", ">") && version_compare($ip, "10.255.255.255", "<");
 	}
 
 	/**

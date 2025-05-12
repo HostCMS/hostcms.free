@@ -4,13 +4,13 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
 Core_Auth::authorization('shop');
 
-$sAdminFormAction = '/admin/shop/order/card/index.php';
+$sAdminFormAction = '/{admin}/shop/order/card/index.php';
 
 $shop_order_id = intval(Core_Array::getGet('shop_order_id'));
 

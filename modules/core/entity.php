@@ -20,7 +20,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Entity extends Core_ORM
 {
@@ -828,11 +828,12 @@ class Core_Entity extends Core_ORM
 			}
 		}
 
+		// User fields
 		$aField_Values = $this->getFields();
 		foreach ($aField_Values as $oField_Value)
 		{
 			$oField_Value->Field->type == 2 && $oField_Value->setDir(CMS_FOLDER . ($sPath = Field_Controller::getPath($this)))->setHref('/' . $sPath);
-
+			
 			$xml .= $oField_Value->getXml();
 		}
 
@@ -971,6 +972,40 @@ class Core_Entity extends Core_ORM
 		Core_Event::notify($this->_modelName . '.onAfterGetArray', $this);
 
 		return $oRetrun;
+	}
+
+	/**
+	 * Convert Object to Array
+	 * @return array
+	 */
+	public function toArray()
+	{
+		$aReturn = parent::toArray();
+
+		// Children entities
+		foreach ($this->_childrenEntities as $oChildEntity)
+		{
+			$childName = $oChildEntity instanceof Core_ORM
+				? $oChildEntity->getXmlTagName()
+				: $oChildEntity->name;
+
+			$childArray = $oChildEntity->toArray();
+
+			if (!isset($aReturn[$childName]))
+			{
+				$aReturn[$childName] = $childArray;
+			}
+			else
+			{
+				// Convert to array
+				!is_array($aReturn[$childName])
+					&& $aReturn[$childName] = array($aReturn[$childName]);
+
+				$aReturn[$childName][] = $childArray;
+			}
+		}
+
+		return $aReturn;
 	}
 
 	/**
@@ -1130,6 +1165,52 @@ class Core_Entity extends Core_ORM
 		$nameColumn = $this->_nameColumn;
 		$nameColumn != 'id' && $newObject->$nameColumn = $this->_getCopiedName();
 		$newObject->save();
+
+		if (Core::moduleIsActive('field'))
+		{
+			$aFields = Field_Controller::getFields($this->getModelName());
+
+			if (count($aFields))
+			{
+				$aFieldsIds = array();
+				foreach ($aFields as $oField)
+				{
+					$aFieldsIds[] = $oField->id;
+				}
+
+				$aField_Values = Field_Controller_Value::getFieldsValues($aFieldsIds, $this->getPrimaryKey(), FALSE);
+				foreach ($aField_Values as $oField_Value)
+				{
+					$newFieldValue = clone $oField_Value;
+
+					$newFieldValue->entity_id = $newObject->id;
+					$newFieldValue->save();
+
+					if ($oField_Value->Field->type == 2)
+					{
+						$fieldDir = CMS_FOLDER . Field_Controller::getPath($this);
+						$oField_Value->setDir($fieldDir);
+
+						$newFieldDir = CMS_FOLDER . Field_Controller::getPath($newObject);
+						$newFieldValue->setDir($newFieldDir);
+
+						try {
+							if ($oField_Value->file != '')
+							{
+								Core_File::copy($oField_Value->getLargeFilePath(), $newFieldValue->getLargeFilePath());
+							}
+						} catch (Exception $e) {}
+
+						try {
+							if ($oField_Value->file_small != '')
+							{
+								Core_File::copy($oField_Value->getSmallFilePath(), $newFieldValue->getSmallFilePath());
+							}
+						} catch (Exception $e) {}
+					}
+				}
+			}
+		}
 
 		Core_Event::notify($this->_modelName . '.onAfterCopy', $newObject, array($this));
 

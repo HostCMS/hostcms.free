@@ -9,9 +9,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
-class Core_Session_Phpredis extends Core_Session
+class Core_Session_Phpredis implements SessionHandlerInterface
 {
 	/**
 	 * Redis instance
@@ -61,6 +61,11 @@ class Core_Session_Phpredis extends Core_Session
 	protected $_lockKey = NULL;
 
 	/**
+	 * Lock Expire
+	 */
+	protected $_lockexpire = NULL;
+
+	/**
 	 * Pack format
 	 * @var string
 	 */
@@ -84,6 +89,9 @@ class Core_Session_Phpredis extends Core_Session
 
 		// Should be INT
 		$this->_ttl = intval(ini_get('session.gc_maxlifetime'));
+
+		$this->_lockexpire = ini_get('max_execution_time');
+		$this->_lockexpire < 0 && $this->_lockexpire = 30;
 	}
 
 	/**
@@ -104,7 +112,7 @@ class Core_Session_Phpredis extends Core_Session
 
 			if (!self::$_redis->connect(self::$_config['server'], self::$_config['port']))
 			{
-				self::_error('Redis connection error. Check \'session\' section, see modules/core/config/config.php');
+				Core_Session::error('Redis connection error. Check \'session\' section, see modules/core/config/config.php');
 				self::$_redis = NULL;
 
 				return FALSE;
@@ -112,7 +120,7 @@ class Core_Session_Phpredis extends Core_Session
 
 			if (!is_null(self::$_config['auth']) && !self::$_redis->auth(self::$_config['auth']))
 			{
-				self::_error('Redis connection authenticate error. Check \'session\' section, see modules/core/config/config.php');
+				Core_Session::error('Redis connection authenticate error. Check \'session\' section, see modules/core/config/config.php');
 				self::$_redis = NULL;
 
 				return FALSE;
@@ -120,7 +128,7 @@ class Core_Session_Phpredis extends Core_Session
 
 			if (!is_null(self::$_config['database']) && !self::$_redis->select(self::$_config['database']))
 			{
-				self::_error('Redis changing the selected database error. Check \'session\' section, see modules/core/config/config.php');
+				Core_Session::error('Redis changing the selected database error. Check \'session\' section, see modules/core/config/config.php');
 				self::$_redis = NULL;
 
 				return FALSE;
@@ -136,7 +144,8 @@ class Core_Session_Phpredis extends Core_Session
 	 * @param string $session_name session name
 	 * @return boolean
 	 */
-	public function sessionOpen($save_path, $session_name)
+	#[\ReturnTypeWillChange]
+	public function open($save_path, $session_name)
 	{
 		return TRUE;
 	}
@@ -145,7 +154,8 @@ class Core_Session_Phpredis extends Core_Session
 	 * The close callback works like a destructor in classes and is executed after the session write callback has been called.
 	 * @return boolean
 	 */
-	public function sessionClose()
+	#[\ReturnTypeWillChange]
+	public function close()
 	{
 		return TRUE;
 	}
@@ -160,7 +170,8 @@ class Core_Session_Phpredis extends Core_Session
 	 * @param string $id session ID
 	 * @return string
 	 */
-	public function sessionRead($id)
+	#[\ReturnTypeWillChange]
+	public function read($id)
 	{
 		$key = $this->_getKey($id);
 
@@ -170,7 +181,8 @@ class Core_Session_Phpredis extends Core_Session
 
 			$this->_read = TRUE;
 
-			self::$_started = TRUE;
+			//self::$_started = TRUE;
+			Core_Session::setStarted();
 
 			if ($value !== FALSE)
 			{
@@ -197,7 +209,8 @@ class Core_Session_Phpredis extends Core_Session
 	 * @param string $value data
 	 * @return boolean
 	 */
-	public function sessionWrite($id, $value)
+	#[\ReturnTypeWillChange]
+	public function write($id, $value)
 	{
 		if ($this->_read/* && $this->_lock($id)*/)
 		{
@@ -218,7 +231,8 @@ class Core_Session_Phpredis extends Core_Session
 	 * @param string $id session ID
 	 * @return boolean
 	 */
-	public function sessionDestroyer($id)
+	#[\ReturnTypeWillChange]
+	public function destroy($id)
 	{
 		if ($this->_read || $this->_lock($id))
 		{
@@ -264,7 +278,8 @@ class Core_Session_Phpredis extends Core_Session
 	 * @param string $maxlifetime max life time
 	 * @return boolean
 	 */
-	public function sessionGc($maxlifetime)
+	#[\ReturnTypeWillChange]
+	public function gc($maxlifetime)
 	{
 		// Nothing to do
 		return TRUE;
@@ -274,7 +289,7 @@ class Core_Session_Phpredis extends Core_Session
 	 * This callback is executed when a new session ID is required.
 	 * @return string
 	 */
-	public function sessionCreateSid()
+	public function create_sid()
 	{
 		return session_create_id();
 	}
@@ -284,7 +299,7 @@ class Core_Session_Phpredis extends Core_Session
 	 * @param string $id Session ID
 	 * @return bool
 	 */
-	public function sessionValidateSid($id)
+	public function validateId($id)
 	{
 		$key = $this->_getKey($id);
 		$value = self::$_redis->get($key);
@@ -306,9 +321,9 @@ class Core_Session_Phpredis extends Core_Session
 
 		while (!is_null(self::$_redis) && !connection_aborted())
 		{
-			// Redis 2.6.12+
-			if (self::$_redis->set($this->_lockKey, $this->_lockToken, array('NX')))
-			//if (self::$_redis->setNx($this->_lockKey, $this->_lockToken))
+			// Redis 2.6.12+, set the key, if it doesn't exist, with a ttl of _lockToken seconds
+			// The order of the arguments in the set method matters. In Redis, when you want to set both an expiration (EX) and a condition (NX - only set if the key doesn't exist), the EX option must come before the NX.
+			if (self::$_redis->set($this->_lockKey, $this->_lockToken, array('ex' => $this->_lockexpire > $this->_ttl ? $this->_ttl : $this->_lockexpire, 'nx')))
 			{
 				return TRUE;
 			}
@@ -317,7 +332,8 @@ class Core_Session_Phpredis extends Core_Session
 
 			if ($iTime > $this->_lockTimeout)
 			{
-				self::_error('HostCMS session lock error: Timeout. Please wait! Refreshing page ... <script>setTimeout(function() {window.location.reload(true);}, 1000);</script>');
+				Core_Session::error('HostCMS session lock error: Timeout.');
+				return FALSE;
 			}
 
 			usleep($this->_nextStepDelay);
@@ -355,7 +371,7 @@ class Core_Session_Phpredis extends Core_Session
 		self::_connect();
 
 		!is_null(self::$_config['database'])
-			? $redis->flushDb()
-			: $redis->flushAll();
+			? self::$_redis->flushDb()
+			: self::$_redis->flushAll(); // Redis 4.0.0+
 	}
 }

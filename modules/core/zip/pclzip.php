@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Zip_Pclzip
 {
@@ -105,6 +105,8 @@ class Core_Zip_Pclzip
      */
     public $filename;
 
+	public $context;
+
 	public function __construct()
 	{
 		$this->_tmpDir = CMS_FOLDER . rtrim(TMP_DIR, '/\\');
@@ -119,7 +121,7 @@ class Core_Zip_Pclzip
 	public function open($filename, $flags = NULL)
 	{
 		$this->filename = $filename;
-		
+
 		$this->_oPclZip = new PclZip($filename);
 
 		$this->numFiles = count($this->_oPclZip->listContent());
@@ -141,20 +143,24 @@ class Core_Zip_Pclzip
 	 */
 	public function __call($function, $args)
 	{
-		$zipFunction = "pclzip{$function}";
+		// if fopen('zip://...) $this->_oPclZip may be NULL
+		if ($this->_oPclZip)
+		{
+			$zipFunction = "pclzip{$function}";
 
-		// Run function
-		if (method_exists($this->_oPclZip, $zipFunction))
-		{
-			@call_user_func_array(array($this->_oPclZip, $zipFunction), $args);
-		}
-		elseif (strtolower($zipFunction) === 'pclziplocatename')
-		{
-			@call_user_func_array(array($this, 'pclzipLocateName'), $args);
-		}
-		else
-		{
-			throw new Core_Exception("%class: method %function does not exist", array('%class' => __CLASS__, '%function' => $function));
+			// Run function
+			if (method_exists($this->_oPclZip, $zipFunction))
+			{
+				return @call_user_func_array(array($this->_oPclZip, $zipFunction), $args);
+			}
+			elseif (strtolower($zipFunction) === 'pclziplocatename')
+			{
+				return @call_user_func_array(array($this, 'pclzipLocateName'), $args);
+			}
+			else
+			{
+				throw new Core_Exception("%class: method %function does not exist", array('%class' => __CLASS__, '%function' => $function));
+			}
 		}
 	}
 
@@ -260,7 +266,7 @@ class Core_Zip_Pclzip
 		for ($i = 0; $i < $listCount; ++$i) {
 			if (strtolower($list[$i]['filename']) == strtolower($filename) ||
 				strtolower($list[$i]['stored_filename']) == strtolower($filename)) {
-				$listIndex = $i;
+					$listIndex = $i;
 				break;
 			}
 		}
@@ -293,3 +299,9 @@ class Core_Zip_Pclzip
 		return TRUE;
 	}
 }
+
+/*if (function_exists('stream_get_wrappers') && !in_array('zip', stream_get_wrappers()))
+{
+	// stream_* методы не реализованы
+	stream_wrapper_register('zip', 'Core_Zip_Pclzip');
+}*/

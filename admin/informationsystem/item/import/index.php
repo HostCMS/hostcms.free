@@ -1,12 +1,11 @@
 <?php
 /**
  * Information systems.
-*
-* @package HostCMS
-* @version 7.x
-* @author Hostmake LLC
-* @copyright © 2005-2024, https://www.hostcms.ru
-*/
+ *
+ * @package HostCMS
+ * @version 7.x
+ * @copyright © 2005-2025, https://www.hostcms.ru
+ */
 require_once('../../../../bootstrap.php');
 
 Core_Auth::authorization($sModule = 'informationsystem');
@@ -22,8 +21,7 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 $oAdmin_Form_Controller
 	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
-	->path('/admin/informationsystem/item/import/index.php')
-;
+	->path('/{admin}/informationsystem/item/import/index.php');
 
 ob_start();
 
@@ -37,10 +35,10 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Informationsystem.menu'))
 		->href($oAdmin_Form_Controller->getAdminLoadHref(
-			'/admin/informationsystem/index.php'
+			'/{admin}/informationsystem/index.php'
 		))
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-			'/admin/informationsystem/index.php'
+			'/{admin}/informationsystem/index.php'
 		))
 );
 
@@ -56,10 +54,10 @@ if ($oInformationsystem_Dir->id)
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 		->name($oInformationsystemDirBreadcrumbs->name)
 		->href($oAdmin_Form_Controller->getAdminLoadHref(
-				'/admin/informationsystem/index.php', NULL, NULL, "informationsystem_dir_id={$oInformationsystemDirBreadcrumbs->id}"
+				'/{admin}/informationsystem/index.php', NULL, NULL, "informationsystem_dir_id={$oInformationsystemDirBreadcrumbs->id}"
 		))
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-				'/admin/informationsystem/index.php', NULL, NULL, "informationsystem_dir_id={$oInformationsystemDirBreadcrumbs->id}"
+				'/{admin}/informationsystem/index.php', NULL, NULL, "informationsystem_dir_id={$oInformationsystemDirBreadcrumbs->id}"
 		));
 	}
 	while ($oInformationsystemDirBreadcrumbs = $oInformationsystemDirBreadcrumbs->getParent());
@@ -77,10 +75,10 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 Admin_Form_Entity::factory('Breadcrumb')
 	->name($oInformationsystem->name)
 	->href($oAdmin_Form_Controller->getAdminLoadHref(
-			'/admin/informationsystem/item/index.php', NULL, NULL, "informationsystem_id={$oInformationsystem->id}"
+			'/{admin}/informationsystem/item/index.php', NULL, NULL, "informationsystem_id={$oInformationsystem->id}"
 	))
 	->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-			'/admin/informationsystem/item/index.php', NULL, NULL, "informationsystem_id={$oInformationsystem->id}"
+			'/{admin}/informationsystem/item/index.php', NULL, NULL, "informationsystem_id={$oInformationsystem->id}"
 	))
 );
 
@@ -96,10 +94,10 @@ if ($oInformationsystem_Group->id)
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 			->name($oInformationsystemGroupBreadcrumbs->name)
 			->href($oAdmin_Form_Controller->getAdminLoadHref(
-				'/admin/informationsystem/item/index.php', NULL, NULL, "informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystemGroupBreadcrumbs->id}"
+				'/{admin}/informationsystem/item/index.php', NULL, NULL, "informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystemGroupBreadcrumbs->id}"
 			))
 			->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-				'/admin/informationsystem/item/index.php', NULL, NULL, "informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystemGroupBreadcrumbs->id}"
+				'/{admin}/informationsystem/item/index.php', NULL, NULL, "informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystemGroupBreadcrumbs->id}"
 			));
 	}
 	while ($oInformationsystemGroupBreadcrumbs = $oInformationsystemGroupBreadcrumbs->getParent());
@@ -555,6 +553,8 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('informationsystem_groups_parent_id')->value(Core_Array::getPost('informationsystem_groups_parent_id')))
 							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('search_event_indexation')->value(isset($_POST['search_event_indexation']) ? 1 : 0))
 							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('import_action_delete_image')->value(isset($_POST['import_action_delete_image']) ? 1 : 0))
+							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('delete_property_values')->value(isset($_POST['delete_property_values']) ? 1 : 0))
+							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('delete_field_values')->value(isset($_POST['delete_field_values']) ? 1 : 0))
 						);
 
 						$oAdmin_Form_Entity_Form->add($oMainTab);
@@ -607,7 +607,7 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 
 			foreach ($_POST as $iKey => $sValue)
 			{
-				if (mb_strpos($iKey, "field") === 0)
+				if (strpos($iKey, "field") === 0)
 				{
 					$aConformity[] = $sValue;
 				}
@@ -629,6 +629,8 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 				->importAction(Core_Array::getPost('import_action_items'))
 				->searchIndexation(Core_Array::getPost('search_event_indexation'))
 				->deleteImage(Core_Array::getPost('import_action_delete_image'))
+				->deletePropertyValues(Core_Array::getPost('delete_property_values') == 1)
+				->deleteFieldValues(Core_Array::getPost('delete_field_values') == 1)
 			;
 
 			if (Core_Array::getPost('firstlineheader', 0))
@@ -655,7 +657,7 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 
 			$_SESSION['Informationsystem_Item_Import_Csv_Controller'] = $Informationsystem_Item_Import_Csv_Controller;
 
-			$sRedirectAction = $oAdmin_Form_Controller->getAdminLoadAjax('/admin/informationsystem/item/import/index.php', 'start_import', NULL, "informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$informationsystem_group_id}");
+			$sRedirectAction = $oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/informationsystem/item/import/index.php', 'start_import', NULL, "informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$informationsystem_group_id}");
 
 			showStat($Informationsystem_Item_Import_Csv_Controller);
 		}
@@ -696,8 +698,36 @@ else
 
 	$aConfig = Core_Config::instance()->get('informationsystem_csv', array()) + array(
 		'maxTime' => 20,
-		'maxCount' => 100
+		'maxCount' => 100,
+		'separator' => ';',
+		'limiter' => '"'
 	);
+
+	$aSeparator = array(
+		0 => ',',
+		1 => ';',
+		2 => "\t"
+	);
+
+	$separator_text = '';
+	$separatorOptionKey = array_search($aConfig['separator'], $aSeparator, TRUE);
+	if ($separatorOptionKey === FALSE)
+	{
+		$separatorOptionKey = 3;
+		$separator_text = $aConfig['separator'];
+	}
+
+	$aLimiter = array(
+		0 => '"'
+	);
+
+	$limiter_text = '';
+	$limiterOptionKey = array_search($aConfig['limiter'], $aLimiter, TRUE);
+	if ($limiterOptionKey === FALSE)
+	{
+		$limiterOptionKey = 1;
+		$limiter_text = $aConfig['limiter'];
+	}
 
 	$oAdmin_Form_Entity_Form->add(
 		$oMainTab->add(
@@ -748,11 +778,11 @@ else
 				->caption(Core::_('Informationsystem_Item.import_separator'))
 				->divAttr(array('class' => 'no-padding-right form-group col-xs-10 col-sm-9 rounded-radio-group', 'id' => 'import_separator'))
 				->name('import_separator')
-				// Разделитель ';'
-				->value(1)
+				->value($separatorOptionKey)
 				->add(
 					Admin_Form_Entity::factory('Input')
 						->name("import_separator_text")
+						->value($separator_text)
 						//->caption('&nbsp;')
 						->size(3)
 						->divAttr(array('class' => 'form-group d-inline-block margin-left-10'))
@@ -771,10 +801,12 @@ else
 					))
 					->caption(Core::_('Informationsystem_Item.limiter'))
 					->name('limiter')
+					->value($limiterOptionKey)
 					->divAttr(array('class' => 'no-padding-right form-group col-xs-10 col-sm-9 rounded-radio-group'))
 					->add(
 						Admin_Form_Entity::factory('Input')
 							->name("limiter")
+							->value($limiter_text)
 							//->caption('&nbsp;')
 							->size(3)
 							->divAttr(array('class' => 'form-group d-inline-block margin-left-10'))
@@ -820,6 +852,20 @@ else
 			->name("import_action_delete_image")
 			->caption(Core::_('Informationsystem_Item.import_action_delete_image'))
 			->divAttr(array('id' => 'import_action_delete_image','class' => 'form-group col-xs-12'))))
+		->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
+			->name("delete_property_values")
+			->class('form-control colored-danger times')
+			->caption(Core::_('Informationsystem_Item.delete_property_values'))
+			->divAttr(array('class' => 'form-group col-xs-12'))
+			->value(1))
+		)
+		->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
+			->name("delete_field_values")
+			->class('form-control colored-danger times')
+			->caption(Core::_('Informationsystem_Item.delete_field_values'))
+			->divAttr(array('class' => 'form-group col-xs-12'))
+			->value(1))
+		)
 		->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
 			->name("search_event_indexation")
 			->caption(Core::_('Informationsystem_Item.search_event_indexation_import'))

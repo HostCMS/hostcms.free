@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'lib');
 
 // Код формы
 $iAdmin_Form_Id = 3;
-$sAdminFormAction = '/admin/lib/property/list/value/index.php';
+$sAdminFormAction = '/{admin}/lib/property/list/value/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -66,7 +66,7 @@ $oAdminFormEntityBreadcrumbs->add(
 		)
 );
 
-$prevFormPath = '/admin/lib/index.php';
+$prevFormPath = '/{admin}/lib/index.php';
 
 $iLibDirId = $oLib->Lib_Dir->id;
 if ($iLibDirId)
@@ -108,7 +108,7 @@ if ($iLibDirId)
 
 $additionalParams = "lib_dir_id={$iLibDirId}&lib_id={$oLib->id}";
 
-$prevFormPath = '/admin/lib/property/index.php';
+$prevFormPath = '/{admin}/lib/property/index.php';
 
 $oAdminFormEntityBreadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')

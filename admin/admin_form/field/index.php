@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'admin_form');
 
 // Код формы
 $iAdmin_Form_Id = 2;
-$sAdminFormAction = '/admin/admin_form/field/index.php';
+$sAdminFormAction = '/{admin}/admin_form/field/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -53,7 +53,7 @@ $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
-$sAdminFormPath = '/admin/admin_form/index.php';
+$sAdminFormPath = '/{admin}/admin_form/index.php';
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs->add(

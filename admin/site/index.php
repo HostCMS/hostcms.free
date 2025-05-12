@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'site');
 
 // Код формы
 $iAdmin_Form_Id = 42;
-$sAdminFormAction = '/admin/site/index.php';
+$sAdminFormAction = '/{admin}/site/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -42,16 +42,27 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Site.menu2_caption'))
-		->icon('fa fa-gears')
+		->icon('fa-solid fa-gears')
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Site.menu2_sub_caption'))
-				->icon('fa fa-user')
+				->icon('fa-solid fa-user')
 				->href(
 					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'accountInfo', NULL, 0, 0)
 				)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'accountInfo', NULL, 0, 0)
+				)
+		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Site.menu3_sub_caption'))
+				->icon('fa-solid fa-arrow-right-to-bracket')
+				->href(
+					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'panelBackend', NULL, 0, 0)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'panelBackend', NULL, 0, 0)
 				)
 		)
 );
@@ -145,6 +156,22 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'accountInfo'
 {
 	$oSite_Controller_Edit = Admin_Form_Action_Controller::factory(
 		'Site_Controller_AccountInfo', $oAdmin_Form_Action
+	);
+
+	// Хлебные крошки
+	$oSite_Controller_Edit->addEntity($oAdmin_Form_Entity_Breadcrumbs);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oSite_Controller_Edit);
+}
+
+// Действие "Регистрационные данные"
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('panelBackend');
+
+if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'panelBackend')
+{
+	$oSite_Controller_Edit = Admin_Form_Action_Controller::factory(
+		'Site_Controller_Backend', $oAdmin_Form_Action
 	);
 
 	// Хлебные крошки

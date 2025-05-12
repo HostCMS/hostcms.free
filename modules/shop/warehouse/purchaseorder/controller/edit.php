@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Warehouse_Purchaseorder_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -122,7 +122,7 @@ class Shop_Warehouse_Purchaseorder_Controller_Edit extends Admin_Form_Action_Con
 						allowClear: true,
 						// multiple: true,
 						ajax: {
-							url: "/admin/siteuser/index.php?loadSiteusers&types[]=company",
+							url: hostcmsBackend + "/siteuser/index.php?loadSiteusers&types[]=company",
 							dataType: "json",
 							type: "GET",
 							processResults: function (data) {
@@ -140,6 +140,33 @@ class Shop_Warehouse_Purchaseorder_Controller_Edit extends Admin_Form_Action_Con
 						templateSelection: $.templateSelectionItemSiteusers,
 						language: "' . Core_I18n::instance()->getLng() . '",
 						width: "100%"
+					})
+					.on("select2:opening select2:closing", function(e){
+
+						var $searchfield = $(this).parent().find(".select2-search__field");
+
+						if (!$searchfield.data("setKeydownHeader"))
+						{
+							$searchfield.data("setKeydownHeader", true);
+
+							$searchfield.on("keydown", function(e) {
+
+								var $this = $(this);
+
+								if ($this.val() == "" && e.key == "Backspace")
+								{
+									$this
+										.parents("ul.select2-selection__rendered")
+										.find("li.select2-selection__choice")
+										.filter(":last")
+										.find(".select2-selection__choice__remove")
+										.trigger("click");
+
+									e.stopImmediatePropagation();
+									e.preventDefault();
+								}
+							});
+						}
 					})
 					.val("company_' . $this->_object->siteuser_company_id . '")
 					.trigger("change.select2");

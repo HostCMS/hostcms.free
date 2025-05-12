@@ -6,7 +6,7 @@
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Counter_Module extends Counter_Module
 {
@@ -39,7 +39,7 @@ class Skin_Bootstrap_Module_Counter_Module extends Counter_Module
 		$oModule = Core_Entity::factory('Module')->getByPath($this->getModuleName());
 
 		$type = intval($type);
-		$this->_path = "/admin/index.php?ajaxWidgetLoad&moduleId={$oModule->id}&type={$type}";
+		$this->_path = Admin_Form_Controller::correctBackendPath("/{admin}/index.php?ajaxWidgetLoad&moduleId={$oModule->id}&type={$type}");
 
 		if ($ajax)
 		{

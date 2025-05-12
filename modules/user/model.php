@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage User
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class User_Model extends Core_Entity
 {
@@ -111,6 +111,7 @@ class User_Model extends Core_Entity
 		'shop_warehouse_purchasereturn' => array(),
 		'telephony' => array(),
 		'telephony_line' => array(),
+		'production_process_stage' => array(),
 	);
 
 	/**
@@ -450,6 +451,7 @@ class User_Model extends Core_Entity
 	/**
 	 * Delete image file
 	 * @return self
+	 * @hostcms-event user.onAfterDeleteImageFile
 	 */
 	public function deleteImageFile()
 	{
@@ -457,6 +459,8 @@ class User_Model extends Core_Entity
 		{
 			Core_File::isFile($this->getImageFilePath()) && Core_File::delete($this->getImageFilePath());
 		} catch (Exception $e) {}
+
+		Core_Event::notify($this->_modelName . '.onAfterDeleteImageFile', $this);
 
 		$this->image = '';
 		$this->save();
@@ -768,7 +772,7 @@ class User_Model extends Core_Entity
 	{
 		return $this->image != '' && strlen($this->image)
 			? $this->getImageHref()
-			: "/admin/user/index.php?loadUserAvatar={$this->id}";
+			: Admin_Form_Controller::correctBackendPath("/{admin}/user/index.php?loadUserAvatar={$this->id}");
 	}
 
 	/**
@@ -806,7 +810,7 @@ class User_Model extends Core_Entity
 			$oCurrentUser = Core_Auth::getCurrentUser();
 
 			$link = $oCurrentUser && !$oCurrentUser->only_access_my_own
-				? '<a data-popover="hover" data-user-id="' . $this->id . '" style="color: inherit" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][' . $this->id . ']=1" onclick="$.modalLoad({path: \'/admin/user/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $this->id . ']=1\', windowId: \'id_content\', width: \'90%\'}); return false">' . htmlspecialchars($this->getFullName()) . '</a>'
+				? '<a data-popover="hover" data-user-id="' . $this->id . '" style="color: inherit" href="' . Admin_Form_Controller::correctBackendPath('/{admin}/user/index.php') . '?hostcms[action]=view&hostcms[checked][0][' . $this->id . ']=1" onclick="$.modalLoad({path: hostcmsBackend + \'/user/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $this->id . ']=1\', windowId: \'id_content\', width: \'90%\'}); return false">' . htmlspecialchars($this->getFullName()) . '</a>'
 				: '<span>' . htmlspecialchars($this->getFullName()) . '</span>';
 
 			return '<div class="contracrot">
@@ -1364,8 +1368,8 @@ class User_Model extends Core_Entity
 		$oCore_Html_Entity_Div
 			->add(
 				Core_Html_Entity::factory('A')
-					->href("/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][" . $this->id . "]=1")
-					->onclick("$.modalLoad({path: '/admin/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][" . $this->id . "]=1', windowId: 'id_content'}); return false")
+					->href(Admin_Form_Controller::correctBackendPath("/{admin}/user/index.php?hostcms[action]=view&hostcms[checked][0][" . $this->id . "]=1"))
+					->onclick("$.modalLoad({path: hostcmsBackend + '/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][" . $this->id . "]=1', windowId: 'id_content'}); return false")
 					->add(
 						Core_Html_Entity::factory('Img')
 							->src($this->getAvatar())
@@ -1375,8 +1379,8 @@ class User_Model extends Core_Entity
 			)
 			->add(
 				Core_Html_Entity::factory('A')
-					->href("/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][" . $this->id . "]=1")
-					->onclick("$.modalLoad({path: '/admin/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][" . $this->id . "]=1', windowId: 'id_content'}); return false")
+					->href(Admin_Form_Controller::correctBackendPath("/{admin}/user/index.php?hostcms[action]=view&hostcms[checked][0][" . $this->id . "]=1"))
+					->onclick("$.modalLoad({path: hostcmsBackend + '/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][" . $this->id . "]=1', windowId: 'id_content'}); return false")
 					->add(
 						Core_Html_Entity::factory('Span')
 						->value(htmlspecialchars($this->getFullName()))
@@ -1403,7 +1407,7 @@ class User_Model extends Core_Entity
 		?><a data-popover="hover" data-container="body" data-user-id="<?php echo $this->id?>" style="color: inherit" <?php
 		if ($oUser->checkModuleAccess(array('user'), Core_Entity::factory('Site', CURRENT_SITE)))
 		{
-			?>href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][<?php echo $this->id?>]=1" onclick="$.modalLoad({path: '/admin/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $this->id?>]=1', windowId: '<?php echo $windowId?>', width: '<?php echo $width?>'}); return false"<?php
+			?>href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/user/index.php')?>?hostcms[action]=view&hostcms[checked][0][<?php echo $this->id?>]=1" onclick="$.modalLoad({path: hostcmsBackend + '/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $this->id?>]=1', windowId: '<?php echo $windowId?>', width: '<?php echo $width?>'}); return false"<?php
 		}
 		?>><?php echo htmlspecialchars($content)?></a><?php
 	}

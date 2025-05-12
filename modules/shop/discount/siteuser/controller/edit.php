@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Discount_Siteuser_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -101,7 +101,7 @@ class Shop_Discount_Siteuser_Controller_Edit extends Admin_Form_Action_Controlle
 				allowClear: true,
 				multiple: true,
 				ajax: {
-					url: "/admin/shop/item/index.php?items&shop_id=' . $shop_id .'",
+					url: hostcmsBackend + "/shop/item/index.php?items&shop_id=' . $shop_id .'",
 					dataType: "json",
 					type: "GET",
 					processResults: function (data) {
@@ -144,7 +144,7 @@ class Shop_Discount_Siteuser_Controller_Edit extends Admin_Form_Action_Controlle
 				allowClear: true,
 				multiple: true,
 				ajax: {
-					url: "/admin/shop/item/index.php?shortcuts&shop_id=' . $shop_id .'",
+					url: hostcmsBackend + "/shop/item/index.php?shortcuts&shop_id=' . $shop_id .'",
 					dataType: "json",
 					type: "GET",
 					processResults: function (data) {
@@ -187,7 +187,7 @@ class Shop_Discount_Siteuser_Controller_Edit extends Admin_Form_Action_Controlle
 				allowClear: true,
 				multiple: true,
 				ajax: {
-					url: "/admin/shop/item/index.php?producers&shop_id=' . $shop_id .'",
+					url: hostcmsBackend + "/shop/item/index.php?producers&shop_id=' . $shop_id .'",
 					dataType: "json",
 					type: "GET",
 					processResults: function (data) {

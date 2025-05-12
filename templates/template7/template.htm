@@ -2,6 +2,20 @@
 	<div class="data">
 		<?php
 			Core_Page::instance()->execute();
+
+			/*$xsl = Core_Array::get(Core_Page::instance()->widgetParams, 'xsl');
+			$Core_Controller = new Core_Controller(Core_Entity::factory('Site'));
+
+			$Core_Controller
+			   ->addEntity(
+				   Core::factory('Core_Xml_Entity')->name('tat')->value(123)
+			   );
+
+			$Core_Controller
+			   ->xsl(
+				Core_Entity::factory('Xsl')->getByName($xsl)
+			   )
+			->show();*/
 		?>
 
 		<?php

@@ -8,10 +8,30 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Lib
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
+	/**
+	 * Set object
+	 * @param object $object object
+	 * @return self
+	 */
+	public function setObject($object)
+	{
+		$modelName = $object->getModelName();
+
+		switch ($modelName)
+		{
+			case 'lib':
+				$this
+					->addSkipColumn('file');
+			break;
+		}
+
+		return parent::setObject($object);
+	}
+
 	/**
 	 * Prepare backend item's edit form
 	 *
@@ -28,7 +48,10 @@ class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'));
+			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		switch ($modelName)
 		{
@@ -42,32 +65,82 @@ class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$this->_object->lib_dir_id = Core_Array::getGet('lib_dir_id');
 				}
 
-				// Код типовой дин. страницы
-				$oAdmin_Form_Tab_Entity_Lib = Admin_Form_Entity::factory('Tab')
-					->caption(Core::_('Lib.lib_php_code'))
-					->name('tab_lib_php_code');
+				$oMainTab->delete($this->getField('type'));
 
-				$this->addTabAfter($oAdmin_Form_Tab_Entity_Lib, $oMainTab);
+				$windowId = $this->_Admin_Form_Controller->getWindowId();
 
-				$oAdmin_Form_Entity_Textarea_Lib = Admin_Form_Entity::factory('Textarea');
-
-				$oTmpOptions = $oAdmin_Form_Entity_Textarea_Lib->syntaxHighlighterOptions;
-				$oTmpOptions['mode'] = '"ace/mode/php"';
-
-				$oAdmin_Form_Entity_Textarea_Lib
-					->value(
-						$this->_object->loadLibFile()
+				$oRadio_Type = Admin_Form_Entity::factory('Radiogroup')
+					->name('type')
+					->id('libType' . time())
+					->caption(Core::_('Lib.type'))
+					->value($this->_object->type)
+					->divAttr(array('id' => 'lib_types', 'class' => 'form-group col-xs-12 rounded-radio-group'))
+					->radio(
+						array(
+							0 => Core::_('Lib.type0'),
+							1 => Core::_('Lib.type1')
+						)
 					)
-					->cols(140)
-					->rows(30)
-					->caption(Core::_('Lib.lib_form_module'))
-					->name('lib_php_code')
-					->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
-					->syntaxHighlighterOptions($oTmpOptions);
+					->buttonset(TRUE)
+					->ico(
+						array(
+							0 => 'fa-regular fa-file-lines fa-fw',
+							1 => 'fa-regular fa-file-lines fa-fw'
+						)
+					)
+					->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [0,1]); window.dispatchEvent(new Event('resize'));");
 
-				$oAdmin_Form_Tab_Entity_Lib->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'));
+				$oMainRow1->add($oRadio_Type);
 
-				$oMainRow4->add($oAdmin_Form_Entity_Textarea_Lib);
+				$oAdditionalTab->delete(
+					$this->getField('lib_dir_id') // Удаляем стандартный <input> lib_dir_id
+			   );
+
+				// Селектор с группой
+				$oAdmin_Form_Entity_Select = Admin_Form_Entity::factory('Select');
+
+				$oAdmin_Form_Entity_Select
+					->options(
+						array(' … ') + $this->fillLibDir(0)
+					)
+					->name('lib_dir_id')
+					->value($this->_object->lib_dir_id)
+					->caption(Core::_('Lib.lib_dir_id'))
+					->divAttr(array('class' => 'col-xs-12 col-md-6'));
+
+				$oMainRow2->add($oAdmin_Form_Entity_Select);
+
+				// $oMainTab->delete($this->getField('file'));
+
+				$sFilePath = Core_File::isFile($this->_object->getFilePath())
+					? $this->_object->getFileHref()
+					: '';
+
+				$sFormPath = $this->_Admin_Form_Controller->getPath();
+
+				$oAdmin_Form_Entity_File = Admin_Form_Entity::factory('File')
+					->type('file')
+					->name('file')
+					->caption(Core::_('Lib.file'))
+					->largeImage(
+						array(
+							'path' => $sFilePath,
+							'show_params' => FALSE,
+							'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1&lib_dir_id={$this->_object->lib_dir_id}', action: 'deleteFile', windowId: '{$windowId}'}); return false",
+							'delete_href' => ''
+						)
+					)->smallImage(
+						array('show' => FALSE)
+					)
+					->divAttr(array('class' => 'col-xs-12 col-md-6 hidden-0'));
+
+				$oMainRow2->add($oAdmin_Form_Entity_File);
+
+				$oMainTab
+					->move($this->getField('class')->divAttr(array('class' => 'col-xs-12 col-md-6 hidden-0')), $oMainRow2)
+					->move($this->getField('style')->divAttr(array('class' => 'col-xs-12 col-md-6 hidden-0')), $oMainRow2)
+					->move($this->getField('description'), $oMainRow2)
+					->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow3);
 
 				// Настройки типовой дин. страницы
 				$oAdmin_Form_Tab_Entity_Lib_Config = Admin_Form_Entity::factory('Tab')
@@ -96,24 +169,37 @@ class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oMainRow3->add($oAdmin_Form_Entity_Textarea_Lib_Config);
 
-				// Селектор с группой
-				$oAdmin_Form_Entity_Select = Admin_Form_Entity::factory('Select');
+				// Код типовой дин. страницы
+				$oAdmin_Form_Tab_Entity_Lib = Admin_Form_Entity::factory('Tab')
+					->caption(Core::_('Lib.lib_php_code'))
+					->name('tab_lib_php_code');
 
-				$oAdmin_Form_Entity_Select
-					->options(
-						array(' … ') + $this->fillLibDir(0)
+				$this->addTabAfter($oAdmin_Form_Tab_Entity_Lib, $oAdmin_Form_Tab_Entity_Lib_Config);
+
+				$oAdmin_Form_Entity_Textarea_Lib = Admin_Form_Entity::factory('Textarea');
+
+				$oTmpOptions = $oAdmin_Form_Entity_Textarea_Lib->syntaxHighlighterOptions;
+				$oTmpOptions['mode'] = '"ace/mode/php"';
+
+				$oAdmin_Form_Entity_Textarea_Lib
+					->value(
+						$this->_object->loadLibFile()
 					)
-					->name('lib_dir_id')
-					->value($this->_object->lib_dir_id)
-					->caption(Core::_('Lib.lib_dir_id'));
+					->cols(140)
+					->rows(30)
+					->caption(Core::_('Lib.lib_form_module'))
+					->name('lib_php_code')
+					->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
+					->syntaxHighlighterOptions($oTmpOptions);
 
-				$oAdditionalTab->delete(
-					 $this->getField('lib_dir_id') // Удаляем стандартный <input> lib_dir_id
+				$oAdmin_Form_Tab_Entity_Lib->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'));
+
+				$oMainRow4->add($oAdmin_Form_Entity_Textarea_Lib);
+
+				$oMainTab->add(
+					Admin_Form_Entity::factory('Code')
+						->html("<script>radiogroupOnChange('{$windowId}', '{$this->_object->type}', [0,1])</script>")
 				);
-
-				$oMainRow1->add($oAdmin_Form_Entity_Select);
-				$oMainTab->move($this->getField('description'), $oMainRow2);
-
 			break;
 			case 'lib_dir':
 			default:
@@ -138,6 +224,9 @@ class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oAdditionalTab->delete($this->getField('parent_id'));
 
 				$oMainRow1->add($oAdmin_Form_Entity_Select);
+
+				$oMainTab
+					->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow2);
 			break;
 		}
 
@@ -166,6 +255,27 @@ class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		switch ($modelName)
 		{
 			case 'lib':
+				if (
+					// Поле файла существует
+					!is_null($aFileData = Core_Array::getFiles('file', NULL))
+					// и передан файл
+					&& intval($aFileData['size']) > 0)
+				{
+					if (Core_File::isValidExtension($aFileData['name'], array('jpg', 'jpeg', 'gif', 'png', 'webp', 'swf')))
+					{
+						$this->_object->saveFile($aFileData['tmp_name'], $aFileData['name']);
+					}
+					else
+					{
+						$this->addMessage(
+							Core_Message::get(
+								Core::_('Core.extension_does_not_allow', Core_File::getExtension($aFileData['name'])),
+								'error'
+							)
+						);
+					}
+				}
+
 				$this->_object->saveLibFile(Core_Array::getRequest('lib_php_code'));
 				$this->_object->saveLibConfigFile(Core_Array::getRequest('lib_php_code_config'));
 			break;

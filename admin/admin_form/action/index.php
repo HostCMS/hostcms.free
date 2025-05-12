@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'admin_form');
 
 // Код формы
 $iAdmin_Form_Id = 4;
-$sAdminFormAction = '/admin/admin_form/action/index.php';
+$sAdminFormAction = '/{admin}/admin_form/action/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -75,7 +75,7 @@ $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
-$sAdminFormPath = '/admin/admin_form/index.php';
+$sAdminFormPath = '/{admin}/admin_form/index.php';
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs->add(
@@ -103,8 +103,8 @@ if ($oAdmin_Form_Action_Dir->id)
 {
 	$oBreadcrumb = Admin_Form_Entity::factory('Breadcrumb')
 		->name($oAdmin_Form_Action_Dir->getName())
-		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/admin_form/action/index.php', NULL, NULL, "admin_form_id={$admin_form_id}&admin_form_action_dir_id={$oAdmin_Form_Action_Dir->id}"))
-		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/admin_form/action/index.php', NULL, NULL, "admin_form_id={$admin_form_id}&admin_form_action_dir_id={$oAdmin_Form_Action_Dir->id}"));
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/admin_form/action/index.php', NULL, NULL, "admin_form_id={$admin_form_id}&admin_form_action_dir_id={$oAdmin_Form_Action_Dir->id}"))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/admin_form/action/index.php', NULL, NULL, "admin_form_id={$admin_form_id}&admin_form_action_dir_id={$oAdmin_Form_Action_Dir->id}"));
 
 	$oAdmin_Form_Entity_Breadcrumbs->add($oBreadcrumb);
 }

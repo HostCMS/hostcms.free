@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Ipaddress
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Ipaddress_Visitor_Filter_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -74,6 +74,7 @@ class Ipaddress_Visitor_Filter_Controller_Edit extends Admin_Form_Action_Control
 
 				$oMainTab
 					->move($this->getField('name')->class('form-control input-lg')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1)
+					->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1)
 					->move($this->getField('banned'), $oAdditionalRow1);
 
 				ob_start();
@@ -229,7 +230,8 @@ class Ipaddress_Visitor_Filter_Controller_Edit extends Admin_Form_Action_Control
 					->name('block_mode')
 					->options(array(
 						0 => Core::_('Ipaddress_Visitor_Filter.block_mode0'),
-						1 => Core::_('Ipaddress_Visitor_Filter.block_mode1')
+						1 => Core::_('Ipaddress_Visitor_Filter.block_mode1'),
+						2 => Core::_('Ipaddress_Visitor_Filter.block_mode2')
 					))
 					->value($this->_object->block_mode)
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-2'))
@@ -238,7 +240,7 @@ class Ipaddress_Visitor_Filter_Controller_Edit extends Admin_Form_Action_Control
 				$oMainRow2->add($oBlockMode);
 
 				$oMainTab
-					->move($this->getField('ban_hours')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 col-lg-2' . ($this->_object->block_mode == 1 ? ' hidden' : ''))), $oMainRow2)
+					->move($this->getField('ban_hours')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 col-lg-2' . ($this->_object->block_mode ? ' hidden' : ''))), $oMainRow2)
 					->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-2')), $oMainRow2)
 					->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-2 margin-top-21')), $oMainRow2)
 					;

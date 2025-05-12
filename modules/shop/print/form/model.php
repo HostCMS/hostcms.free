@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Print_Form_Model extends Core_Entity
 {
@@ -93,6 +93,7 @@ class Shop_Print_Form_Model extends Core_Entity
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
 	 * @hostcms-event shop_print_form.onBeforeRedeclaredDelete
+	 * @hostcms-event shop_print_form.onAfterDeleteFile
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -109,6 +110,8 @@ class Shop_Print_Form_Model extends Core_Entity
 		{
 			Core_File::delete($this->getPrintFormFilePath());
 		} catch (Exception $e) {}
+
+		Core_Event::notify($this->_modelName . '.onAfterDeleteFile', $this);
 
 		return parent::delete($primaryKey);
 	}

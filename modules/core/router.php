@@ -27,7 +27,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Router
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Router
 {
@@ -50,6 +50,52 @@ class Core_Router
 	}
 
 	/**
+	 * Global middleware stack
+	 * @var array
+	 */
+	static protected $_globalMiddlewares = array();
+	
+	/**
+	 * Add global middleware
+	 * @param string $middleware
+	 * @param callable|NULL $callable
+	 */
+	static public function addGlobalMiddleware($middleware, $callable = NULL)
+	{
+		self::$_globalMiddlewares[$middleware] = is_null($callable) ? $middleware : $callable;
+	}
+	
+	/**
+	 * Prepend global middleware
+	 * @param string $middleware
+	 * @param callable|NULL $callable
+	 */
+	static public function prependGlobalMiddleware($middleware, $callable = NULL)
+	{
+		self::$_globalMiddlewares = array($middleware => is_null($callable) ? $middleware : $callable) + self::$_globalMiddlewares;
+	}
+	
+	/**
+	 * Remove global middleware
+	 * @param string $middleware
+	 */
+	static public function removeGlobalMiddleware($middleware)
+	{
+		if (isset(self::$_globalMiddlewares[$middleware]))
+		{
+			unset(self::$_globalMiddlewares[$middleware]);
+		}
+	}
+	
+	/**
+	 * Clear global middleware
+	 */
+	static public function clearGlobalMiddleware()
+	{
+		self::$_globalMiddlewares = array();
+	}
+
+	/**
 	 * Resolve route for URI $uri
 	 * @param string $uri URI
 	 * @return Core_Router_Route
@@ -60,6 +106,12 @@ class Core_Router
 		{
 			if ($oCore_Router_Route->check($uri))
 			{
+				// Добавляем глобальные middleware к маршруту
+				foreach (self::$_globalMiddlewares as $middleware => $callable)
+				{
+					$oCore_Router_Route->middleware($middleware, $callable);
+				}
+				
 				return $oCore_Router_Route->setUri($uri);
 			}
 		}

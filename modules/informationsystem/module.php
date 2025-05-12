@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Informationsystem_Module extends Core_Module_Abstract
 {
@@ -16,13 +16,13 @@ class Informationsystem_Module extends Core_Module_Abstract
 	 * Module version
 	 * @var string
 	 */
-	public $version = '7.0';
+	public $version = '7.1';
 
 	/**
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2024-07-09';
+	public $date = '2025-04-04';
 
 	/**
 	 * Module name
@@ -91,8 +91,8 @@ class Informationsystem_Module extends Core_Module_Abstract
 				'block' => 0,
 				'ico' => 'fa fa-newspaper-o',
 				'name' => Core::_('Informationsystem.menu'),
-				'href' => "/admin/informationsystem/index.php",
-				'onclick' => "$.adminLoad({path: '/admin/informationsystem/index.php'}); return false"
+				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/informationsystem/index.php"),
+				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/informationsystem/index.php'}); return false")
 			)
 		);
 
@@ -348,7 +348,7 @@ class Informationsystem_Module extends Core_Module_Abstract
 		$oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 		$oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form)->formSettings();
 
-		$sPath = '/admin/informationsystem/item/index.php';
+		$sPath = '/{admin}/informationsystem/item/index.php';
 
 		if ($oSearch_Page->module_value_id)
 		{
@@ -389,12 +389,13 @@ class Informationsystem_Module extends Core_Module_Abstract
 
 	/**
 	 * Notify module on the action on schedule
-	 * @param int $action action number
-	 * @param int $entityId entity ID
-	 * @return array
+	 * @param Schedule_Model $oSchedule
 	 */
-	public function callSchedule($action, $entityId)
+	public function callSchedule($oSchedule)
 	{
+		$action = $oSchedule->action;
+		$entityId = $oSchedule->entity_id;
+
 		if ($entityId)
 		{
 			switch ($action)

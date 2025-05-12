@@ -390,4 +390,9 @@ return array(
 	'export_fields_allow_groups' => 'Export user field groups',
 	'delete_field_values' => 'Delete existing values of custom fields',
 	'shops_add_form_link_fields' => "Custom product fields",
+
+	'export_stocks' => 'Export stocks',
+	'export_prices' => 'Export prices',
+
+	'apply_shortcut_parent_item' => 'Apply to parent shortcut items',
 );

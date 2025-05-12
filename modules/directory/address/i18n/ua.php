@@ -14,4 +14,5 @@ return array(
 	'longitude' => 'Довгота',
 	'house' => 'Дім',
 	'flat' => 'Квартира',
+	'description' => 'Опис',
 );

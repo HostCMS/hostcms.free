@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -63,6 +63,8 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
 
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
+
 		switch ($modelName)
 		{
 			case 'informationsystem':
@@ -70,6 +72,16 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 				$title = $object->id
 					? Core::_('Informationsystem.edit_title', $object->name, FALSE)
 					: Core::_('Informationsystem.add_title');
+
+				$oMainTab
+					// ->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oMainRow7 = Admin_Form_Entity::factory('Div')->class('row'))
+				;
 
 				$oInformationsystemTabSorting = Admin_Form_Entity::factory('Tab')
 					->caption(Core::_('Informationsystem.information_systems_form_tab_2'))
@@ -95,25 +107,43 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					->add($oFormatsRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oFormatsRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oFormatsRow3 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oFormatsRow4 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oFormatsRow5 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oFormatsRow6 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oFormatsRow7 = Admin_Form_Entity::factory('Div')->class('row'))
-					// ->add($oFormatsRow8 = Admin_Form_Entity::factory('Div')->class('row'))
 					;
 
 				$oInformationsystemTabImage
-					->add($oImageRowSize1 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oImageRowSize2 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oImageRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oImageRowSize3 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oImageRowSize4 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oImageRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oImageItemsBlock = Admin_Form_Entity::factory('Div')->class('well with-header well-sm'))
+					->add($oImageGroupsBlock = Admin_Form_Entity::factory('Div')->class('well with-header well-sm'))
+					// ->add($oImageRowSize1 = Admin_Form_Entity::factory('Div')->class('row'))
+					// ->add($oImageRowSize2 = Admin_Form_Entity::factory('Div')->class('row'))
+					// ->add($oImageRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+					// ->add($oImageRowSize3 = Admin_Form_Entity::factory('Div')->class('row'))
+					// ->add($oImageRowSize4 = Admin_Form_Entity::factory('Div')->class('row'))
+					// ->add($oImageRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oImageRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oImageRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oImageRow5 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oImageRow6 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oImageRow7 = Admin_Form_Entity::factory('Div')->class('row'));
+
+
+				$oImageItemsBlock
+					->add(Admin_Form_Entity::factory('Div')
+						->class('header bordered-palegreen')
+						->value(Core::_("Informationsystem.watermark_item_header"))
+					)
+					->add($oImageItemsRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oImageItemsRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oImageItemsRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+				;
+
+				$oImageGroupsBlock
+					->add(Admin_Form_Entity::factory('Div')
+						->class('header bordered-darkorange')
+						->value(Core::_("Informationsystem.watermark_group_header"))
+					)
+					->add($oImageGroupsRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oImageGroupsRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oImageGroupsRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+				;
 
 				$oInformationsystemTabSeoTemplates
 					->add($oInformationsystemGroupBlock = Admin_Form_Entity::factory('Div')->class('well with-header'))
@@ -182,9 +212,7 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					->value($this->_object->informationsystem_dir_id)
 					->caption(Core::_('Informationsystem.information_systems_dirs_add_form_group'));
 
-				$oMainTab->addAfter(
-					$oSelect_Dirs, $this->getField('name')
-				);
+				$oMainRow2->add($oSelect_Dirs);
 
 				$this->getField('description')
 					->rows(10)
@@ -192,6 +220,8 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					->template_id($this->_object->Structure->template_id
 						? $this->_object->Structure->template_id
 						: 0);
+
+				$oMainTab->move($this->getField('description'), $oMainRow3);
 
 				// Удаляем стандартный <input>
 				$oAdditionalTab->delete(
@@ -214,9 +244,7 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					->divAttr(array('class' => 'form-group col-sm-12 col-md-4 col-lg-4'))
 					->value($this->_object->structure_id);
 
-				$oMainTab->addAfter(
-					$oSelect_Structure, $this->getField('description')
-				);
+				$oMainRow4->add($oSelect_Structure);
 
 				// Список групп пользователей сайта
 				$oAdditionalTab->delete($this->getField('siteuser_group_id'));
@@ -240,9 +268,7 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					->divAttr(array('class' => 'form-group col-sm-12 col-md-4 col-lg-4'))
 					->value($this->_object->siteuser_group_id);
 
-				$oMainTab->addAfter(
-					$oSelect_SiteUserGroup, $oSelect_Structure
-				);
+				$oMainRow4->add($oSelect_SiteUserGroup);
 
 				// Список сайтов
 				$oSelect_Sites = Admin_Form_Entity::factory('Select');
@@ -253,12 +279,9 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					->value($this->_object->site_id)
 					->caption(Core::_('Informationsystem.site_name'));
 
-				$oMainTab->addAfter(
-					$oSelect_Sites, $oSelect_SiteUserGroup
-				);
+				$oMainRow4->add($oSelect_Sites);
 
-				$this->getField('items_on_page')
-					->divAttr(array('class' => 'form-group col-sm-12 col-md-4 col-lg-4'));
+				$oMainTab->move($this->getField('items_on_page')->divAttr(array('class' => 'form-group col-sm-12 col-md-4 col-lg-4')), $oMainRow5);
 
 				// Тип формирования URL информационных элементов
 				$oMainTab->delete($this->getField('url_type'));
@@ -267,15 +290,23 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					->name('url_type')
 					->caption(Core::_('Informationsystem.url_type'))
 					->options(
-						array(Core::_('Informationsystem.url_type_identificater'),
-							Core::_('Informationsystem.url_type_transliteration'))
+						array(
+							Core::_('Informationsystem.url_type_identificater'),
+							Core::_('Informationsystem.url_type_transliteration'),
+							Core::_('Informationsystem.url_type_date')
+						)
 					)
 					->divAttr(array('class' => 'form-group col-sm-12 col-md-4 col-lg-4'))
-					->value($this->_object->url_type);
+					->value($this->_object->url_type)
+					->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [0,1,2]); window.dispatchEvent(new Event('resize'));");
 
-				$oMainTab->addAfter(
-					$oSelect_UrlType, $this->getField('items_on_page')
-				);
+				$oMainRow5->add($oSelect_UrlType);
+
+				$oMainTab
+					->move($this->getField('path_date_format')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 hidden-0 hidden-1')), $oMainRow5)
+					->move($this->getField('apply_tags_automatically')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow6)
+					->move($this->getField('apply_keywords_automatically')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow7)
+					;
 
 				// Удаляем с основной вкладки поля сортировки
 				$oMainTab
@@ -352,8 +383,8 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 				$oMainTab
-					->move($this->getField('image_large_max_width'), $oImageRowSize1)
-					->move($this->getField('image_large_max_height'), $oImageRowSize1);
+					->move($this->getField('image_large_max_width'), $oImageItemsRow1)
+					->move($this->getField('image_large_max_height'), $oImageItemsRow1);
 
 				$this->getField('image_small_max_width')
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
@@ -361,8 +392,8 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 				$oMainTab
-					->move($this->getField('image_small_max_width'), $oImageRowSize2)
-					->move($this->getField('image_small_max_height'), $oImageRowSize2);
+					->move($this->getField('image_small_max_width'), $oImageItemsRow2)
+					->move($this->getField('image_small_max_height'), $oImageItemsRow2);
 
 				$this->getField('group_image_large_max_width')
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
@@ -371,21 +402,21 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 				$oMainTab
-					->move($this->getField('group_image_large_max_width'), $oImageRowSize3)
-					->move($this->getField('group_image_large_max_height'), $oImageRowSize3);
+					->move($this->getField('group_image_large_max_width'), $oImageGroupsRow1)
+					->move($this->getField('group_image_large_max_height'), $oImageGroupsRow1);
 
 				$this->getField('group_image_small_max_width')
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 				$this->getField('group_image_small_max_height')
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 				$oMainTab
-					->move($this->getField('group_image_small_max_width'), $oImageRowSize4)
-					->move($this->getField('group_image_small_max_height'), $oImageRowSize4);
+					->move($this->getField('group_image_small_max_width'), $oImageGroupsRow2)
+					->move($this->getField('group_image_small_max_height'), $oImageGroupsRow2);
 
 				$oMainTab
-					->move($this->getField('typograph_default_items')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oFormatsRow6)
-					->move($this->getField('typograph_default_groups')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oFormatsRow6)
-					->move($this->getField('use_captcha'), $oFormatsRow7);
+					->move($this->getField('typograph_default_items')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oFormatsRow2)
+					->move($this->getField('typograph_default_groups')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oFormatsRow2)
+					->move($this->getField('use_captcha'), $oFormatsRow3);
 
 				// Seo templates
 				$oMainTab
@@ -434,16 +465,21 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 				$oImageRow1->add($oWatermarkFileField);
 
 				$oMainTab
-					->move($this->getField('preserve_aspect_ratio')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow2)
-					->move($this->getField('preserve_aspect_ratio_small')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow2)
-					->move($this->getField('preserve_aspect_ratio_group')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow3)
-					->move($this->getField('preserve_aspect_ratio_group_small')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow3)
+					->move($this->getField('preserve_aspect_ratio')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageItemsRow3)
+					->move($this->getField('preserve_aspect_ratio_small')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageItemsRow3)
+					->move($this->getField('preserve_aspect_ratio_group')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageGroupsRow3)
+					->move($this->getField('preserve_aspect_ratio_group_small')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageGroupsRow3)
 					->move($this->getField('watermark_default_use_large_image')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow4)
 					->move($this->getField('watermark_default_use_small_image')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow4)
 					->move($this->getField('watermark_default_position_x')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow5)
 					->move($this->getField('watermark_default_position_y')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow5)
 					->move($this->getField('create_small_image')->divAttr(array('class' => 'form-group col-xs-12')), $oImageRow6)
 					->move($this->getField('change_filename')->divAttr(array('class' => 'form-group col-xs-12')), $oImageRow7);
+
+				$oMainTab->add(
+					Admin_Form_Entity::factory('Code')
+						->html("<script>radiogroupOnChange('{$windowId}', '{$this->_object->url_type}', [0,1,2])</script>")
+				);
 			break;
 			case 'informationsystem_dir':
 			default:

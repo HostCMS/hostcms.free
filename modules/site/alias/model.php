@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Site
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Site_Alias_Model extends Core_Entity
 {
@@ -133,6 +133,7 @@ class Site_Alias_Model extends Core_Entity
 			$php_version = phpversion();
 			$mysql_version = Core_DataBase::instance()->getVersion();
 			$update_id = HOSTCMS_UPDATE_NUMBER;
+			$backend = Core::$mainConfig['backend'];
 
 			// Формируем строку запроса
 			$url = 'https://' . HOSTCMS_UPDATE_SERVER . "/hostcmsupdate/key/?domain=".rawurlencode($this->alias_name_without_mask) .
@@ -143,7 +144,8 @@ class Site_Alias_Model extends Core_Entity
 				"&cms_folder=" . rawurlencode($cms_folder) .
 				"&php_version=" . rawurlencode($php_version) .
 				"&mysql_version=" . rawurlencode($mysql_version) .
-				"&update_id=" . rawurlencode($update_id);
+				"&update_id=" . rawurlencode($update_id) .
+				"&backend=" . rawurlencode($backend);
 
 			$Core_Http = Core_Http::instance()
 				->url($url)

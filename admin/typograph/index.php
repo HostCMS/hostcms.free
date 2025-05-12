@@ -4,13 +4,13 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
 Core_Auth::authorization($sModule = 'typograph');
 
-$sAdminFormAction = '/admin/typograph/index.php';
+$sAdminFormAction = '/{admin}/typograph/index.php';
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create();
@@ -21,6 +21,8 @@ $oAdmin_Form_Controller
 	->title(Core::_('typograph.title'))
 	//->pageTitle(Core::_('typograph.title'))
 	;
+
+$secret_csrf = Core_Security::getCsrfToken();
 
 ob_start();
 
@@ -34,7 +36,32 @@ $oAdmin_View
 
 $trailing_punctuation = Core_Array::getPost('trailing_punctuation', FALSE);
 
-$sText = Typograph_Controller::instance()->process(Core_Array::getPost('text'), $trailing_punctuation);
+$bTypographed = FALSE;
+try {
+	// Оттипографированный текст
+	if ($oAdmin_Form_Controller->getAction() == 'process')
+	{
+		$secret_csrf = Core_Array::getGet('secret_csrf', '', 'trim');
+
+		$sText = Core_Array::getPost('text');
+
+		if (!Core_Security::checkCsrf($secret_csrf, Core::$mainConfig['csrf_lifetime']))
+		{
+			Core_Security::throwCsrfError();
+		}
+
+		$sText = Typograph_Controller::instance()->process($sText, $trailing_punctuation);
+		$bTypographed = TRUE;
+	}
+	else
+	{
+		$sText = '';
+	}
+}
+catch (Exception $e)
+{
+	Core_Message::show($e->getMessage(), 'error');
+}
 
 $oAdmin_Form_Entity_Form = Admin_Form_Entity::factory('Form')
 	->controller($oAdmin_Form_Controller)
@@ -57,7 +84,7 @@ $oAdmin_Form_Entity_Form = Admin_Form_Entity::factory('Form')
 	);
 
 // Оттипографированный текст
-if ($oAdmin_Form_Controller->getAction() == 'process')
+if ($sText !== '' && $bTypographed && !Core_Security::checkXSS($sText))
 {
 	ob_start();
 
@@ -88,10 +115,11 @@ $oAdmin_Form_Entity_Form
 			->value(Core::_('typograph.process'))
 			->class('applyButton btn btn-blue')
 			->onclick(
-				$oAdmin_Form_Controller->getAdminSendForm('process')
+				$oAdmin_Form_Controller->getAdminSendForm(array('action' => 'process', 'additionalParams' => "secret_csrf={$secret_csrf}"))
 			)
 	)
 	->execute();
+
 
 $content = ob_get_clean();
 

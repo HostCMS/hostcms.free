@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Payment_System_Model extends Core_Entity
 {
@@ -135,7 +135,7 @@ class Shop_Payment_System_Model extends Core_Entity
 			Core_Html_Entity::factory('Span')
 				->class('badge badge-darkorange badge-ico white')
 				->add(Core_Html_Entity::factory('I')->class('fa fa-exclamation-triangle'))
-				->title('Empty group list!')
+				->title('Empty siteuser group list!')
 				->execute();
 		}
 	}
@@ -236,6 +236,7 @@ class Shop_Payment_System_Model extends Core_Entity
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
 	 * @hostcms-event shop_payment_system.onBeforeRedeclaredDelete
+	 * @hostcms-event shop_payment_system.onAfterDeleteFile
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -252,6 +253,8 @@ class Shop_Payment_System_Model extends Core_Entity
 		{
 			Core_File::delete($this->getPaymentSystemFilePath());
 		} catch (Exception $e) {}
+
+		Core_Event::notify($this->_modelName . '.onAfterDeleteFile', $this);
 
 		$this->Shop_Delivery_Payment_Systems->deleteAll(FALSE);
 		$this->Shop_Payment_System_Siteuser_Groups->deleteAll(FALSE);
@@ -310,6 +313,8 @@ class Shop_Payment_System_Model extends Core_Entity
 
 	/**
 	 * Delete delivery image
+	 * @return self
+	 * @hostcms-event shop_payment_system.onAfterDeleteImage
 	 */
 	public function deleteImage()
 	{
@@ -318,8 +323,12 @@ class Shop_Payment_System_Model extends Core_Entity
 			Core_File::delete($this->getPaymentSystemImageFilePath());
 		} catch (Exception $e) {}
 
+		Core_Event::notify($this->_modelName . '.onAfterDeleteImage', $this);
+
 		$this->image = '';
 		$this->save();
+
+		return $this;
 	}
 
 	/**

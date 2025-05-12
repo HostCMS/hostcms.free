@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Field
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -35,6 +35,7 @@ class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$this->_types = array(
 			0 => Core::_('Field.type0'),
+			15 => Core::_('Field.type15'),
 			11 => Core::_('Field.type11'),
 			1 => Core::_('Field.type1'),
 			2 => Core::_('Field.type2'),
@@ -263,7 +264,7 @@ class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							->name('list_id')
 							->value($this->_object->list_id)
 							->caption(Core::_('Field.list_id'))
-							->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'));
+							->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14 hidden-15'));
 
 						$oMainRow3->add($oSelect_Lists);
 					}
@@ -273,7 +274,7 @@ class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 						$oListInput = Admin_Form_Entity::factory('Input')
 							->caption(Core::_('Field.list_id'))
-							->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'))
+							->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14 hidden-15'))
 							->name('list_name')
 							->placeholder(Core::_('Admin.autocomplete_placeholder'));
 
@@ -291,7 +292,7 @@ class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								$('#{$windowId} [name = list_name]').autocomplete({
 									source: function(request, response) {
 										$.ajax({
-											url: '/admin/list/index.php?autocomplete=1&show_list=1&site_id={$oSite->id}',
+											url: hostcmsBackend + '/list/index.php?autocomplete=1&show_list=1&site_id={$oSite->id}',
 											dataType: 'json',
 											data: {
 												queryString: request.term
@@ -349,7 +350,7 @@ class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->name('informationsystem_id')
 						->value($this->_object->informationsystem_id)
 						->caption(Core::_('Field.informationsystem_id'))
-						->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-14'));
+						->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-14 hidden-15'));
 
 					$oMainRow4->add($oSelect_Informationsystems);
 				}
@@ -367,7 +368,7 @@ class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->name('shop_id')
 						->value($this->_object->shop_id)
 						->caption(Core::_('Field.shop_id'))
-						->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-13'));
+						->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-13 hidden-15'));
 
 					$oMainRow5->add($oSelect_Shops);
 				}
@@ -398,7 +399,7 @@ class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->value($this->_object->default_value == '0000-00-00 00:00:00' ? '' : $this->_object->default_value)
 					->name('default_value_date')
 					->caption(Core::_('Field.default_value'))
-					->divAttr(array('class' => 'form-group col-sm-6 col-md-4 col-lg-3 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'));
+					->divAttr(array('class' => 'form-group col-sm-6 col-md-4 col-lg-3 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14 hidden-15'));
 
 				$oMainRow7->add($oDefault_Value_Date);
 
@@ -406,7 +407,7 @@ class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->value($this->_object->default_value == '0000-00-00 00:00:00' ? '' : $this->_object->default_value)
 					->name('default_value_datetime')
 					->caption(Core::_('Field.default_value'))
-					->divAttr(array('class' => 'form-group col-sm-6 col-md-4 col-lg-3 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'));
+					->divAttr(array('class' => 'form-group col-sm-6 col-md-4 col-lg-3 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14 hidden-15'));
 
 				$oMainRow7->add($oDefault_Value_DateTime);
 
@@ -415,7 +416,7 @@ class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->checked($this->_object->default_value == 1)
 					->caption(Core::_('Field.default_value'))
 					->name('default_value_checked')
-					->divAttr(array('class' => 'form-group col-sm-6 col-md-4 col-lg-4 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'));
+					->divAttr(array('class' => 'form-group col-sm-6 col-md-4 col-lg-4 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14 hidden-15'));
 
 				$oMainRow7->add($oDefault_Value_Checkbox);
 

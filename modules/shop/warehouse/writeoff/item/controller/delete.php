@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Warehouse_Writeoff_Item_Controller_Delete extends Admin_Form_Action_Controller
 {
@@ -18,14 +18,14 @@ class Shop_Warehouse_Writeoff_Item_Controller_Delete extends Admin_Form_Action_C
 	 */
 	public function execute($operation = NULL)
 	{
-		$shop_warehouse_writeoff_item_id = intval(Core_Array::getGet('shop_warehouse_writeoff_item_id'));
+		$shop_warehouse_writeoff_item_id = Core_Array::getGet('shop_warehouse_writeoff_item_id', 0, 'int');
 
 		if ($shop_warehouse_writeoff_item_id)
 		{
 			$oShop_Warehouse_Writeoff_Item = Core_Entity::factory('Shop_Warehouse_Writeoff_Item')->getById($shop_warehouse_writeoff_item_id);
 
 			if (!is_null($oShop_Warehouse_Writeoff_Item))
-			{	
+			{
 				$oShop_Warehouse_Writeoff = $oShop_Warehouse_Writeoff_Item->Shop_Warehouse_Writeoff;
 				$oShop_Warehouse = $oShop_Warehouse_Writeoff->Shop_Warehouse;
 

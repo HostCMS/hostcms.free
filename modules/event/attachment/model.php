@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Events
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Event_Attachment_Model extends Core_Entity
 {
@@ -92,6 +92,7 @@ class Event_Attachment_Model extends Core_Entity
 	/**
 	 * Delete attachment file
 	 * @return self
+	 * @hostcms-event event_attachment.onAfterDeleteFile
 	 */
 	public function deleteFile()
 	{
@@ -100,6 +101,8 @@ class Event_Attachment_Model extends Core_Entity
 			$path = $this->getFilePath();
 			Core_File::isFile($path) && Core_File::delete($path);
 		} catch (Exception $e) {}
+
+		Core_Event::notify($this->_modelName . '.onAfterDeleteFile', $this);
 
 		return $this;
 	}

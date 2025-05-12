@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core
 {
@@ -190,7 +190,7 @@ class Core
 			'availableExtension' => array('JPG', 'JPEG', 'JFIF', 'GIF', 'PNG', 'WEBP', 'AVIF', 'SVG', 'PDF', 'ZIP', 'GZ', 'DOC', 'DOCX', 'XLS', 'XLSX', 'TXT'),
 			'availableGetVariables' => array('_openstat', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid', 'yclid', 'ymclid', 'ysclid', 'yadclid', 'fbclid', 'yadordid', 'from', 'etext'),
 			'defaultCache' => 'file',
-			'timezone' => 'America/Los_Angeles',
+			'timezone' => 'America/New_York',
 			'translate' => TRUE,
 			'chat' => TRUE,
 			'switchSelectToAutocomplete' => 100,
@@ -204,8 +204,12 @@ class Core
 			'compressionJsDirectory' => 'hostcmsfiles/js/',
 			'compressionCssDirectory' => 'hostcmsfiles/css/',
 			'sitemapDirectory' => 'hostcmsfiles/sitemap/',
-			'banAfterFailedAccessAttempts' => 5,
+			'timeoutAfterFailedAccessAttempts' => TRUE,
+			'banAfterFailedAccessAttempts' => 5,			
 			'csrf_lifetime' => 86400,
+			'backendSessionLifetime' => 14400,
+			'backendAssignSessionToIp' => TRUE,
+			'backendAssignSessionIpMask' => '255.255.0.0',
 			'session' => array(
 				'driver' => 'database',
 				'class' => 'Core_Session_Database',
@@ -215,8 +219,8 @@ class Core
 				'X-Content-Type-Options' => 'nosniff',
 				'X-XSS-Protection' => '1;mode=block'
 			),
-			'backendSessionLifetime' => 14400,
-			'backendContentSecurityPolicy' => "default-src 'self' www.hostcms.ru www.youtube.com youtube.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: *.cloudflare.com *.kaspersky-labs.com; img-src 'self' chart.googleapis.com data: blob: www.hostcms.ru; font-src 'self'; connect-src 'self' blob:; style-src 'self' 'unsafe-inline'"
+			'backendContentSecurityPolicy' => "default-src 'self' www.hostcms.ru www.youtube.com youtube.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: *.cloudflare.com *.kaspersky-labs.com; img-src 'self' chart.googleapis.com data: blob: www.hostcms.ru; font-src 'self'; connect-src 'self' blob:; style-src 'self' 'unsafe-inline'",
+			'backend' => 'admin'
 		);
 	}
 
@@ -459,7 +463,8 @@ class Core
 	 */
 	static public function cutRootPath($path)
 	{
-		if (strpos((string) $path, dirname(CMS_FOLDER)) === 0)
+		// debug_backtrace() return first line in lower case!
+		if (stripos((string) $path, dirname(CMS_FOLDER)) === 0)
 		{
 			$path = substr($path, strlen(CMS_FOLDER));
 		}
@@ -1045,6 +1050,14 @@ class Core
 		{
 			return $_SERVER['HTTP_X_QRATOR_IP_SOURCE'];
 		}
+		elseif (isset($_SERVER['X-REAL-IP']))
+		{
+			return $_SERVER['X-REAL-IP'];
+		}
+		elseif (isset($_SERVER['HTTP_X_REAL_IP']))
+		{
+			return $_SERVER['HTTP_X_REAL_IP'];
+		}
 
 		return Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1');
 	}
@@ -1070,7 +1083,7 @@ class Core
 	{
 		// gptbot|LetsearchBot|LightspeedSystemsCrawler|
 		return is_string($agent)
-			? (bool) preg_match('/http|bot|spide|craw|finder|curl|mail|yandex|rambler|seach|seek|site|sogou|yahoo|msnbot|snoopy|google|bing|feedreader|links|megaindex|simplepie|siteimprove/iu', $agent)
+			? (bool) preg_match('/http|bot|spide|craw|finder|curl|mail|yandex|applebot|seach|seek|site|sogou|yahoo|msnbot|snoopy|google|bing|feedreader|links|megaindex|simplepie|siteimprove/iu', $agent)
 			: FALSE;
 	}
 

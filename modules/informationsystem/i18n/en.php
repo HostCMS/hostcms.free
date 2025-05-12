@@ -6,7 +6,7 @@
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Information systems',
@@ -167,4 +167,10 @@ return array(
 	'recountInformationsystem' => 'Informationsystem ID',
 
 	'all_shortcuts_count' => 'Total shortcuts: %s',
+
+	'url_type_date' => 'Date',
+	'path_date_format' => 'Path format of type "Date"',
+
+	'watermark_item_header' => 'Item',
+	'watermark_group_header' => 'Group',
 );

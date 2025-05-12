@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Trash
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Trash_Controller_Delete extends Admin_Form_Action_Controller
 {
@@ -31,16 +31,12 @@ class Trash_Controller_Delete extends Admin_Form_Action_Controller
 		$timeout = Core::getmicrotime();
 
 		$iCount = 0;
-
-		$offset = Core_Array::getGet('offset', 0, 'int');
 		$limit = 100;
 
 		do {
-			$iDeleted = $this->_object->chunkDelete($offset, $limit);
+			$iDeleted = $this->_object->chunkDelete(0, $limit);
 
 			$iCount += $iDeleted;
-
-			$offset += ($limit - $iDeleted);
 
 			if (Core::getmicrotime() - $timeout + 3 > $iMaxTime)
 			{
@@ -67,7 +63,7 @@ class Trash_Controller_Delete extends Admin_Form_Action_Controller
 							'action' => 'delete',
 							'datasetKey' => 0,
 							'datasetValue' => $this->_object->id,
-							'additionalParams' => "offset={$offset}&secret_csrf=" . Core_Security::getCsrfToken()
+							'additionalParams' => "secret_csrf=" . Core_Security::getCsrfToken()
 						)
 					)?>
 			}

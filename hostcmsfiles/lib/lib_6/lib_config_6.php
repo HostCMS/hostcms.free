@@ -4,6 +4,12 @@ $oShop = Core_Entity::factory('Shop', Core_Array::get(Core_Page::instance()->lib
 
 $Shop_Controller_Show = new Shop_Controller_Show($oShop);
 
+/*if (!is_null(Core_Array::getRequest('coupon')))
+{
+	Core_Session::start();
+	$_SESSION['hostcmsOrder']['coupon_text'] = Core_Array::getRequest('coupon', '', 'trim');
+}*/
+
 /* Количество */
 $on_page = Core_Array::getGet('on_page', 0, 'int');
 if ($on_page > 0 && $on_page < 150)

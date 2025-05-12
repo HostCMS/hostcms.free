@@ -5,7 +5,7 @@
 * @package HostCMS
 * @version 7.x
 * @author Hostmake LLC
-* @copyright © 2005-2024, https://www.hostcms.ru
+* @copyright © 2005-2025, https://www.hostcms.ru
 */
 require_once('../../../bootstrap.php');
 
@@ -19,7 +19,7 @@ $oAdmin_Form_Controller = Admin_Form_Controller::create();
 $oAdmin_Form_Controller
 	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
-	->path('/admin/xsl/index.php');
+	->path('/{admin}/xsl/index.php');
 
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
@@ -35,10 +35,10 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Xsl.menu'))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/xsl/index.php')
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/xsl/index.php')
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/xsl/index.php')
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/xsl/index.php')
 		)
 );
 
@@ -58,7 +58,7 @@ $oSite = Core_Entity::factory('Site', CURRENT_SITE);
 
 $oAdmin_Form_Entity_Form = Admin_Form_Entity::factory('Form')
 	->controller($oAdmin_Form_Controller)
-	->action('/admin/xsl/index.php')
+	->action(Admin_Form_Controller::correctBackendPath('/{admin}/xsl/index.php'))
 	->enctype('multipart/form-data');
 
 $oAdmin_View->addChild($oAdmin_Form_Entity_Breadcrumbs);

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_User_Module extends User_Module
 {
@@ -468,13 +468,15 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 									? strval(Core_Array::get($aMenu[0], 'ico'))
 									: 'fa fa-bookmark';
 
+								$path = Admin_Form_Controller::correctBackendPath($oUser_Bookmark->path);
+
 								$aBookmark = array(
 									'id' => $oUser_Bookmark->id,
 									'name' => $oUser_Bookmark->name,
-									'href' => $oUser_Bookmark->path,
+									'href' => $path,
 									'ico' => $ico,
 									'onclick' => "$(this).parents('li.open').click(); $.adminLoad({path: '"
-										. Core_Str::escapeJavascriptVariable($oUser_Bookmark->path)
+										. Core_Str::escapeJavascriptVariable($path)
 										. "'}); return false",
 									'remove-title' => Core::_("User_Bookmark.remove_message"),
 									'remove-submit' => Core::_("User_Bookmark.remove_submit"),

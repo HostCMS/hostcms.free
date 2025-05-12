@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Item_Digital_Model extends Core_Entity
 {
@@ -165,6 +165,8 @@ class Shop_Item_Digital_Model extends Core_Entity
 
 	/**
 	 * Delete digital item's file
+	 * @return self
+	 * @hostcms-event shop_item_digital.onAfterDeleteFile
 	 */
 	public function deleteFile()
 	{
@@ -177,8 +179,12 @@ class Shop_Item_Digital_Model extends Core_Entity
 			}
 		} catch (Exception $e) {}
 
+		Core_Event::notify($this->_modelName . '.onAfterDeleteFile', $this);
+
 		$this->filename = '';
 		$this->save();
+
+		return $this;
 	}
 
 	/**
@@ -186,6 +192,7 @@ class Shop_Item_Digital_Model extends Core_Entity
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
 	 * @hostcms-event shop_item_digital.onBeforeRedeclaredDelete
+	 * @hostcms-event shop_item_digital.onAfterDeleteFullFile
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -209,6 +216,8 @@ class Shop_Item_Digital_Model extends Core_Entity
 				Core_File::delete($path);
 			}
 		} catch (Exception $e){}
+
+		Core_Event::notify($this->_modelName . '.onAfterDeleteFullFile', $this);
 
 		return parent::delete($primaryKey);
 	}

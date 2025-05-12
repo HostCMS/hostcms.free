@@ -171,4 +171,6 @@ return array(
 	'checklist_item_name' => 'Назва пункту',
 	'add_checklist_item' => 'додати пункт',
 	'remove_checklist_item' => 'видалити пункт',
+
+	'select_project' => 'Выберите проект',
 );

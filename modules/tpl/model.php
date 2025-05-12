@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Tpl
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Tpl_Model extends Core_Entity
 {
@@ -123,6 +123,7 @@ class Tpl_Model extends Core_Entity
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
 	 * @hostcms-event tpl.onBeforeRedeclaredDelete
+	 * @hostcms-event tpl.onAfterDeleteTplFile
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -142,6 +143,8 @@ class Tpl_Model extends Core_Entity
 		{
 			Core_File::delete($filename);
 		} catch (Exception $e) {}
+
+		Core_Event::notify($this->_modelName . '.onAfterDeleteTplFile', $this);
 
 		return parent::delete($primaryKey);
 	}

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -133,7 +133,7 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 				$('#{$windowId} [name = warehouse_name]').autocomplete({
 					source: function(request, response) {
 						$.ajax({
-							url: '/admin/shop/order/item/index.php?autocomplete=1&show_warehouse=1&shop_id={$this->_object->Shop_Item->shop_id}',
+							url: hostcmsBackend + '/shop/order/item/index.php?autocomplete=1&shop_order_id={$this->_object->shop_order_id}&show_warehouse=1&shop_id={$this->_object->Shop_Item->shop_id}',
 							dataType: 'json',
 							data: {
 								queryString: request.term

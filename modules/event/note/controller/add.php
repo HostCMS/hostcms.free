@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Event_Note_Controller_Add extends Crm_Note_Controller_Add
 {
@@ -74,12 +74,12 @@ class Event_Note_Controller_Add extends Crm_Note_Controller_Add
 		{
 			$aUserIDs[] = $oEvent_User->user_id;
 		}
-		
+
 		$aUserIDs = array_unique($aUserIDs);
 		if (count($aUserIDs))
 		{
 			$oModule = Core_Entity::factory('Module')->getByPath('event');
-			
+
 			// Добавляем уведомление
 			$oNotification = Core_Entity::factory('Notification')
 				->title(Core::_('Event_Note.add_notification', $oEvent->name, FALSE))
@@ -106,13 +106,13 @@ class Event_Note_Controller_Add extends Crm_Note_Controller_Add
 		if (strpos($windowId, '-event-notes') !== FALSE)
 		{
 			$this->addMessage("<script>$(function() {
-				$.adminLoad({ path: '/admin/event/timeline/index.php', additionalParams: 'event_id={$oEvent->id}', windowId: '{$aExplodeWindowId[0]}-event-timeline' });
+				$.adminLoad({ path: hostcmsBackend + '/event/timeline/index.php', additionalParams: 'event_id={$oEvent->id}', windowId: '{$aExplodeWindowId[0]}-event-timeline' });
 			});</script>");
 		}
 		elseif (strpos($windowId, '-event-timeline') !== FALSE)
 		{
 			$this->addMessage("<script>$(function() {
-				$.adminLoad({ path: '/admin/event/note/index.php', additionalParams: 'event_id={$oEvent->id}', windowId: '{$aExplodeWindowId[0]}-event-notes' });
+				$.adminLoad({ path: hostcmsBackend + '/event/note/index.php', additionalParams: 'event_id={$oEvent->id}', windowId: '{$aExplodeWindowId[0]}-event-notes' });
 			});</script>");
 		}
 	}

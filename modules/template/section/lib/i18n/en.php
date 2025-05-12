@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Template
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Widgets of Template Sections',
@@ -32,4 +32,18 @@ return array(
 	'widget_settings' => "Widget '%s' options",
 	'widget_delete' => "Delete Widget '%s'",
 	'widget_active' => "Change '%s' active",
+	'type_solid' => 'Preset',
+	'type_gradient' => 'Preset with gradient',
+	'background' => 'Background',
+	'color' => 'Color',
+	'font_family' => 'Font',
+	'font_size' => 'Font size',
+	'font_weight' => 'Font weight',
+	'padding_top' => 'Padding top',
+	'padding_bottom' => 'Padding bottom',
+	'padding_left' => 'Padding left',
+	'padding_right' => 'Padding right',
+	'margin_top' => 'Padding top',
+	'opacity' => 'Transparency',
+	'gradient_background' => 'Gradient',
 );

@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Online stores',
@@ -229,4 +229,11 @@ return array(
 	'seo_template_filter_prices_from' => 'Price from',
 	'seo_template_filter_prices_to' => 'to',
 	'producer_structure_id' => "Producer structure node",
+
+	'shop_shops_url_type_element_2' => 'Date',
+	'path_date_format' => 'Path format of type "Date"',
+
+	'watermark_item_header' => 'Product',
+	'watermark_group_header' => 'Group',
+	'watermark_producer_header' => 'Producer',
 );

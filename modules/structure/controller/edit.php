@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Structure
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -255,7 +255,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				array(' … ') + $Document_Controller_Edit->fillDocumentDir($this->_object->site_id)
 			)
 			->value($oDocument->document_dir_id)
-			->onchange("$.ajaxRequest({path: '/admin/structure/index.php', context: 'document_id', callBack: $.loadSelectOptionsCallback, action: 'loadDocumentList', additionalParams: 'document_dir_id=' + this.value,windowId: '{$windowId}'}); return false");
+			->onchange("$.ajaxRequest({path: hostcmsBackend + '/structure/index.php', context: 'document_id', callBack: $.loadSelectOptionsCallback, action: 'loadDocumentList', additionalParams: 'document_dir_id=' + this.value,windowId: '{$windowId}'}); return false");
 
 		$oMainRow6->add($Select_DocumentDir);
 
@@ -282,7 +282,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->divAttr(array('class' => 'form-group col-lg-6 hidden-1 hidden-2 hidden-3'))
 			->options($aDocumentForDir)
 			->value($this->_object->document_id)
-			->onchange("$('#{$windowId} .document-edit').removeClass('hidden'); $.ajaxRequest({path: '/admin/structure/index.php', context: '{$this->_formId}', callBack: $.loadDocumentText, additionalParams: 'loadDocumentText&document_id=' + this.value, windowId: '{$windowId}'}); return false");
+			->onchange("$('#{$windowId} .document-edit').removeClass('hidden'); $.ajaxRequest({path: hostcmsBackend + '/structure/index.php', context: '{$this->_formId}', callBack: $.loadDocumentText, additionalParams: 'loadDocumentText&document_id=' + this.value, windowId: '{$windowId}'}); return false");
 			;
 
 		$Select_Document
@@ -291,7 +291,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->target('_blank')
 					->href(
 						$oDocument->id
-							? $this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/document/index.php', 'edit', NULL, 1, intval($oDocument->id), 'document_dir_id=' . intval($oDocument->document_dir_id))
+							? $this->_Admin_Form_Controller->getAdminActionLoadHref('/{admin}/document/index.php', 'edit', NULL, 1, intval($oDocument->id), 'document_dir_id=' . intval($oDocument->document_dir_id))
 							: ''
 					)
 					->class('document-edit input-group-addon blue' . ($oDocument->id ? '' : ' hidden'))
@@ -326,7 +326,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->value($template_id)
 			->caption(Core::_('Structure.template_id'))
 			->divAttr(array('class' => 'form-group col-xs-12 col-lg-6 hidden-3'))
-			->onchange("$('#{$windowId} .template-edit').attr('href', '/admin/template/index.php?hostcms[action]=edit&hostcms[checked][1][' + this.value + ']=1'); return false");
+			->onchange("$('#{$windowId} .template-edit').attr('href', hostcmsBackend + '/template/index.php?hostcms[action]=edit&hostcms[checked][1][' + this.value + ']=1'); return false");
 
 		$oSelect_Template
 			->add(
@@ -383,7 +383,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				array(' … ') + $Lib_Controller_Edit->fillLibDir(0)
 			)
 			->value($oLib->lib_dir_id)
-			->onchange("$('#{$windowId} .lib-edit').addClass('hidden'); $.ajaxRequest({path: '/admin/structure/index.php',context: 'lib_id', callBack: $.loadSelectOptionsCallback, action: 'loadLibList',additionalParams: 'lib_dir_id=' + this.value,windowId: '{$windowId}'}); return false");
+			->onchange("$('#{$windowId} .lib-edit').addClass('hidden'); $.ajaxRequest({path: hostcmsBackend + '/structure/index.php',context: 'lib_id', callBack: $.loadSelectOptionsCallback, action: 'loadLibList',additionalParams: 'lib_dir_id=' + this.value,windowId: '{$windowId}'}); return false");
 
 		$aLibForDir = array(' … ');
 		$aLibs = Core_Entity::factory('Lib_Dir', intval($oLib->lib_dir_id)) // Может быть NULL
@@ -402,7 +402,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->divAttr(array('class' => 'form-group col-xs-12 col-lg-6 hidden-0 hidden-1 hidden-3'))
 			->options($aLibForDir)
 			->value($this->_object->lib_id)
-			->onchange("$.ajaxRequest({path: '/admin/structure/index.php', context: '{$this->_formId}', callBack: $.loadDivContentAjaxCallback, objectId: {$objectId}, action: 'loadLibProperties', additionalParams: 'lib_id=' + this.value, windowId: '{$windowId}'}); return false")
+			->onchange("$.ajaxRequest({path: hostcmsBackend + '/structure/index.php', context: '{$this->_formId}', callBack: $.loadDivContentAjaxCallback, objectId: {$objectId}, action: 'loadLibProperties', additionalParams: 'lib_id=' + this.value, windowId: '{$windowId}'}); return false")
 			;
 
 		$Select_Lib
@@ -411,7 +411,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->target('_blank')
 					->href(
 						$oLib->id
-							? $this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/lib/index.php', 'edit', NULL, 1, intval($oLib->id), 'lib_dir_id=' . intval($oLib->lib_dir_id))
+							? $this->_Admin_Form_Controller->getAdminActionLoadHref('/{admin}/lib/index.php', 'edit', NULL, 1, intval($oLib->id), 'lib_dir_id=' . intval($oLib->lib_dir_id))
 							: ''
 					)
 					->class('lib-edit input-group-addon blue ' . ($oLib->id ? '' : ' hidden'))
@@ -533,7 +533,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oSitemapRow2->add($oSelect_priority);
 
 		// ---- Дополнительные свойства
-		Property_Controller_Tab::factory($this->_Admin_Form_Controller)
+		Core::moduleIsActive('property') && Property_Controller_Tab::factory($this->_Admin_Form_Controller)
 			->setObject($this->_object)
 			->setDatasetId($this->getDatasetId())
 			->linkedObject(Core_Entity::factory('Structure_Property_List', CURRENT_SITE))
@@ -582,6 +582,8 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			$this->_object->backupRevision();
 		}
+
+		$this->_formValues['path'] = Core_Array::get($this->_formValues, 'path', '', 'trim');
 
 		parent::_applyObjectProperty();
 
@@ -669,7 +671,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		}
 
 		// ---- Дополнительные свойства
-		Property_Controller_Tab::factory($this->_Admin_Form_Controller)
+		Core::moduleIsActive('property') && Property_Controller_Tab::factory($this->_Admin_Form_Controller)
 			->setObject($this->_object)
 			->linkedObject(Core_Entity::factory('Structure_Property_List', CURRENT_SITE))
 			->applyObjectProperty();
@@ -735,7 +737,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		return Admin_Form_Entity::factory('Script')
 			->value("$(function (){
 				mainFormLocker.unlock();
-				$.adminLoad({ path: '/admin/media/index.php', additionalParams: 'entity_id=" . $this->_object->id . "&type=" . $modelName . "&dataset_id=" . $this->getDatasetId() . "&parentWindowId=" . $windowId . "&_module=0', windowId: '{$windowId}-media-items', loadingScreen: false });
+				$.adminLoad({ path: hostcmsBackend + '/media/index.php', additionalParams: 'entity_id=" . $this->_object->id . "&type=" . $modelName . "&dataset_id=" . $this->getDatasetId() . "&parentWindowId=" . $windowId . "&_module=0', windowId: '{$windowId}-media-items', loadingScreen: false });
 			});");
 	}
 

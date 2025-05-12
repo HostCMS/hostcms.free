@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Report_Controller
 {
@@ -1731,11 +1731,7 @@ class Shop_Report_Controller
 							show: true,
 							fill: false,
 							fillColor: {
-								colors: [{
-									opacity: 0.3
-								}, {
-									opacity: 0
-								}]
+								colors: [{opacity: 0.3 }, { opacity: 0 }]
 							}
 						},
 						points: { show: true },

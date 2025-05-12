@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Warehouse_Model extends Core_Entity
 {
@@ -394,10 +394,8 @@ class Shop_Warehouse_Model extends Core_Entity
 		ob_start();
 		Core_Html_Entity::factory('A')
 			->value(htmlspecialchars($this->name))
-			// ->href("/admin/shop/warehouse/cell/index.php?shop_warehouse_id={$this->id}&shop_id={$aExternalReplace['{shop_id}']}&shop_group_id={$aExternalReplace['{shop_group_id}']}")
-			// ->onclick("$.adminLoad({path: '/admin/shop/warehouse/cell/index.php',additionalParams: 'shop_warehouse_id=" . $this->id . "&shop_id=" . $aExternalReplace['{shop_id}'] . "&shop_group_id=" . $aExternalReplace['{shop_group_id}'] . "', windowId: '{$windowId}'}); return false;")
-			->href("/admin/shop/warehouse/item/index.php?shop_warehouse_id={$this->id}&shop_id={$aExternalReplace['{shop_id}']}&shop_group_id={$aExternalReplace['{shop_group_id}']}")
-			->onclick("$.adminLoad({path: '/admin/shop/warehouse/item/index.php',additionalParams: 'shop_warehouse_id=" . $this->id . "&shop_id=" . $aExternalReplace['{shop_id}'] . "&shop_group_id=" . $aExternalReplace['{shop_group_id}'] . "', windowId: '{$windowId}'}); return false;")
+			->href(Admin_Form_Controller::correctBackendPath("/{admin}/shop/warehouse/item/index.php") . "?shop_warehouse_id={$this->id}&shop_id={$aExternalReplace['{shop_id}']}&shop_group_id={$aExternalReplace['{shop_group_id}']}")
+			->onclick("$.adminLoad({path: hostcmsBackend + '/shop/warehouse/item/index.php',additionalParams: 'shop_warehouse_id=" . $this->id . "&shop_id=" . $aExternalReplace['{shop_id}'] . "&shop_group_id=" . $aExternalReplace['{shop_group_id}'] . "', windowId: '{$windowId}'}); return false;")
 			->execute();
 
 		return ob_get_clean();

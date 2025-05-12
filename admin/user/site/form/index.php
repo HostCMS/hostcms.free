@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'user');
 
 // Код формы
 $iAdmin_Form_Id = 138;
-$sAdminFormAction = '/admin/user/site/form/index.php';
+$sAdminFormAction = '/{admin}/user/site/form/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -44,13 +44,13 @@ $oAdmin_Form_Controller
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
 // Путь к контроллеру формы компаний
-//$sUsersPath = '/admin/company/index.php';
+//$sUsersPath = '/{admin}/company/index.php';
 //$sAdditionalUsersParams = 'company_id=' . $oCompany_Department->Company->id;
 
-$sCompaniesPath = '/admin/company/index.php';
+$sCompaniesPath = '/{admin}/company/index.php';
 $sAdditionalCompaniesParams = 'company_id=' . $oCompany_Department->Company->id;
 
-$sChoosingSitePath = '/admin/user/site/index.php';
+$sChoosingSitePath = '/{admin}/user/site/index.php';
 $sAdditionalChoosingSiteParams = 'company_department_id=' . $company_department_id;
 
 $form_mode = Core_Array::getGet('mode');
@@ -75,10 +75,10 @@ $oAdmin_Form_Entity_Breadcrumbs
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Company_Department.title', $oCompany_Department->Company->name, FALSE))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/company/department/index.php', NULL, NULL, $sAdditionalCompaniesParams)
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/company/department/index.php', NULL, NULL, $sAdditionalCompaniesParams)
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/company/department/index.php', NULL, NULL, $sAdditionalCompaniesParams)
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/company/department/index.php', NULL, NULL, $sAdditionalCompaniesParams)
 	)
 )
 ->add(

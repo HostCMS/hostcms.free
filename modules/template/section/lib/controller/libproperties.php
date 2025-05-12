@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Template
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Template_Section_Lib_Controller_Libproperties extends Lib_Controller_Libproperties
 {
@@ -50,7 +50,7 @@ class Template_Section_Lib_Controller_Libproperties extends Lib_Controller_Libpr
 		$aJson = array(
 			'id' => $oLib->id,
 			'editHref' => $this->_libId
-				? $this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/lib/index.php', 'edit', NULL, 1, $this->_libId, 'lib_dir_id=' . intval($oLib->lib_dir_id))
+				? $this->_Admin_Form_Controller->getAdminActionLoadHref('/{admin}/lib/index.php', 'edit', NULL, 1, $this->_libId, 'lib_dir_id=' . intval($oLib->lib_dir_id))
 				: '',
 			'optionsHtml' => ob_get_clean()
 		);

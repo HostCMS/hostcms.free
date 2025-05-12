@@ -17,7 +17,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Querybuilder
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_QueryBuilder_Drop extends Core_QueryBuilder_Statement
 {
@@ -168,7 +168,7 @@ class Core_QueryBuilder_Drop extends Core_QueryBuilder_Statement
 	 */
 	public function build()
 	{
-		$query = array('DROP');
+		$query = array($this->_buildComment($this->_comment) . 'DROP');
 
 		if ($this->_temporary)
 		{

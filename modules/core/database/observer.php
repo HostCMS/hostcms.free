@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Database
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Database_Observer
 {
@@ -87,9 +87,9 @@ class Core_Database_Observer
 			$oCore_Registry->get('Core_DataBase.queryTime', 0) + $time
 		);
 
-		/*if (FALSE)
+		/*if (FALSE || isset($_GET['logQueries']))
 		{
-			if ($f_log = @fopen(CMS_FOLDER . 'sql.log', 'a'))
+			if ($f_log = @fopen(CMS_FOLDER . 'hostcmsfiles/tmp/sql.log', 'a'))
 			{
 				if (flock($f_log, LOCK_EX))
 				{

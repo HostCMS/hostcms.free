@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Event_Module extends Core_Module_Abstract
 {
@@ -16,13 +16,13 @@ class Event_Module extends Core_Module_Abstract
 	 * Module version
 	 * @var string
 	 */
-	public $version = '7.0';
+	public $version = '7.1';
 
 	/**
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2024-07-09';
+	public $date = '2025-04-04';
 
 	/**
 	 * Module name
@@ -42,8 +42,8 @@ class Event_Module extends Core_Module_Abstract
 				'block' => 3,
 				'ico' => 'fa fa-tasks',
 				'name' => Core::_('Event.model_name'),
-				'href' => "/admin/event/index.php",
-				'onclick' => "$.adminLoad({path: '/admin/event/index.php'}); return false"
+				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/event/index.php"),
+				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/event/index.php'}); return false")
 			)
 		);
 
@@ -89,9 +89,9 @@ class Event_Module extends Core_Module_Abstract
 				'ico' => $sIconIco,
 				'background-color' => $sNotificationColor
 			),
-			'href' => "/admin/event/index.php?hostcms[action]=edit&hostcms[operation]=&hostcms[current]=1&hostcms[checked][0][" . $entityId . "]=1",
+			'href' => Admin_Form_Controller::correctBackendPath("/{admin}/event/index.php?hostcms[action]=edit&hostcms[operation]=&hostcms[current]=1&hostcms[checked][0][" . $entityId . "]=1"),
 			// $(this).parents('li.open').click();
-			'onclick' => "$.adminLoad({path: '/admin/event/index.php?hostcms[action]=edit&hostcms[operation]=&hostcms[current]=1&hostcms[checked][0][" . $entityId . "]=1'}); return false",
+			'onclick' => "$.adminLoad({path: hostcmsBackend + '/event/index.php?hostcms[action]=edit&hostcms[operation]=&hostcms[current]=1&hostcms[checked][0][" . $entityId . "]=1'}); return false",
 			'extra' => array(
 				'icons' => array(),
 				'description' => NULL
@@ -173,7 +173,7 @@ class Event_Module extends Core_Module_Abstract
 	 */
 	public function getCalendarContextMenuActions()
 	{
-		return array('<a href="javascript:void(0);" onclick="$.modalLoad({path: \'/admin/event/index.php\', action: \'edit\', operation: \'modal\', additionalParams: \'hostcms[checked][0][0]=1&date=\' + $(this).parents(\'ul\').data(\'timestamp\') + \'&parentWindowId=id_content&from_calendar=1\', windowId: \'id_content\'}); return false">' . Core::_('Event.add_event') . '</a>');
+		return array('<a href="javascript:void(0);" onclick="$.modalLoad({path: hostcmsBackend + \'/event/index.php\', action: \'edit\', operation: \'modal\', additionalParams: \'hostcms[checked][0][0]=1&date=\' + $(this).parents(\'ul\').data(\'timestamp\') + \'&parentWindowId=id_content&from_calendar=1\', windowId: \'id_content\'}); return false">' . Core::_('Event.add_event') . '</a>');
 	}
 
 	/**
@@ -213,9 +213,13 @@ class Event_Module extends Core_Module_Abstract
 			$oTmpEvent->guid = $oEvent->guid;
 			$oTmpEvent->last_modified = $oEvent->last_modified;
 			$oTmpEvent->title = $oEvent->name;
-			$oTmpEvent->path = '/admin/event/index.php';
+			$oTmpEvent->path = Admin_Form_Controller::correctBackendPath('/{admin}/event/index.php');
 
-			$oTmpEvent->description = $oEvent->description;
+			$oTmpEvent->description = strip_tags(
+				Core_Str::br2nl(
+					html_entity_decode($oEvent->description, ENT_COMPAT, 'UTF-8')
+				)
+			);
 			$oTmpEvent->place = $oEvent->place;
 
 			if (!$oEvent_User->creator)
@@ -436,7 +440,7 @@ class Event_Module extends Core_Module_Abstract
 		Core_Session::close();
 
 		$iAdmin_Form_Id = 220;
-		$sAdminFormEntityAction = '/admin/event/index.php';
+		$sAdminFormEntityAction = Admin_Form_Controller::correctBackendPath('/{admin}/event/index.php');
 		$sModule = 'event';
 
 		$oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);

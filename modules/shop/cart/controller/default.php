@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Cart_Controller_Default extends Shop_Cart_Controller
 {
@@ -480,7 +480,7 @@ class Shop_Cart_Controller_Default extends Shop_Cart_Controller
 						// Вставляем данные в таблицу корзины
 						$oShop_Cart->quantity = $this->quantity;
 						$oShop_Cart->postpone = $this->postpone;
-						strlen($this->marking) && $oShop_Cart->marking = $this->marking;
+						!is_null($this->marking) && strlen($this->marking) && $oShop_Cart->marking = $this->marking;
 						$oShop_Cart->shop_id = $oShop_Item->shop_id;
 						$oShop_Cart->shop_warehouse_id = $this->shop_warehouse_id;
 						$oShop_Cart->save();

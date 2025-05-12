@@ -11,7 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Chartaccount
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Chartaccount_Module extends Core_Module_Abstract
 {
@@ -19,13 +19,13 @@ class Chartaccount_Module extends Core_Module_Abstract
 	 * Module version
 	 * @var string
 	 */
-	public $version = '7.0';
+	public $version = '7.1';
 
 	/**
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2024-07-09';
+	public $date = '2025-04-04';
 
 	/**
 	 * Module name
@@ -45,8 +45,8 @@ class Chartaccount_Module extends Core_Module_Abstract
 				'block' => 1,
 				'ico' => 'fa-solid fa-file-invoice',
 				'name' => Core::_('Chartaccount.menu'),
-				'href' => "/admin/chartaccount/index.php",
-				'onclick' => "$.adminLoad({path: '/admin/chartaccount/index.php'}); return false"
+				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/chartaccount/index.php"),
+				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/chartaccount/index.php'}); return false")
 			)
 		);
 

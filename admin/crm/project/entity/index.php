@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -12,16 +12,18 @@ Core_Auth::authorization($sModule = 'crm_project');
 
 // Код формы
 $iAdmin_Form_Id = 311;
-$sAdminFormAction = '/admin/crm/project/entity/index.php';
+$sAdminFormAction = '/{admin}/crm/project/entity/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
-$iCrmProjectId = intval(Core_Array::getGet('crm_project_id', 0));
+$iCrmProjectId = Core_Array::getGet('crm_project_id', 0, 'int');
 $oCrm_Project = Core_Entity::factory('Crm_Project', $iCrmProjectId);
 
-$sCrmProjectPath = '/admin/crm/project/index.php';
+$sCrmProjectPath = '/{admin}/crm/project/index.php';
 
 $pageTitle =  $oCrm_Project->name;
+
+$show_entities = Core_Array::getGet('show_entities', 0, 'int');
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
@@ -33,6 +35,13 @@ $oAdmin_Form_Controller
 	->pageTitle($pageTitle)
 	->addView('entity', 'Crm_Project_Entity_View')
 	->view('entity');
+
+if ($show_entities)
+{
+	$oAdmin_Form_Controller->Admin_View(
+		Admin_View::getClassName('Admin_Internal_View')
+	);
+}
 
 if (!$oCrm_Project->id || $oCrm_Project->site_id != CURRENT_SITE)
 {
@@ -62,7 +71,7 @@ if (Core::moduleIsActive('event'))
 				->name(Core::_('Crm_Project.add_event'))
 				->icon('fa fa-plus')
 				->onclick(
-					"$.modalLoad({path: '/admin/event/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&{$additionalParams}', windowId: '{$windowId}'}); return false"
+					"$.modalLoad({path: hostcmsBackend + '/event/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&{$additionalParams}', windowId: '{$windowId}'}); return false"
 				)
 		);
 }
@@ -74,7 +83,7 @@ if (Core::moduleIsActive('deal'))
 			->name(Core::_('Crm_Project.add_deal'))
 			->icon('fa fa-plus')
 			->onclick(
-				"$.modalLoad({path: '/admin/deal/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&{$additionalParams}', windowId: '{$windowId}'}); return false"
+				"$.modalLoad({path: hostcmsBackend + '/deal/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&{$additionalParams}', windowId: '{$windowId}'}); return false"
 			)
 	);
 }
@@ -86,7 +95,7 @@ if (Core::moduleIsActive('dms'))
 			->name(Core::_('Crm_Project.add_document'))
 			->icon('fa fa-plus')
 			->onclick(
-				"$.modalLoad({path: '/admin/dms/document/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&{$additionalParams}', windowId: '{$windowId}'}); return false"
+				"$.modalLoad({path: hostcmsBackend + '/dms/document/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&{$additionalParams}', windowId: '{$windowId}'}); return false"
 			)
 	);
 }
@@ -96,14 +105,14 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('Crm_Project.add_note'))
 		->icon('fa fa-plus')
 		->onclick(
-			"$.modalLoad({path: '/admin/crm/project/note/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&{$additionalParams}', windowId: '{$windowId}'}); return false"
+			"$.modalLoad({path: hostcmsBackend + '/crm/project/note/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&{$additionalParams}', windowId: '{$windowId}'}); return false"
 		)
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Crm_Project.add_attachment'))
 		->icon('fa fa-plus')
 		->onclick(
-			"$.modalLoad({path: '/admin/crm/project/attachment/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&{$additionalParams}', windowId: '{$windowId}'}); return false"
+			"$.modalLoad({path: hostcmsBackend + '/crm/project/attachment/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&{$additionalParams}', windowId: '{$windowId}'}); return false"
 		)
 );
 

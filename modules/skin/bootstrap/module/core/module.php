@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Core_Module extends Core_Module
 {
@@ -54,7 +54,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 	{
 		$type = intval($type);
 
-		$this->_path = "/admin/index.php?ajaxWidgetLoad&moduleId=0&type={$type}";
+		$this->_path = Admin_Form_Controller::correctBackendPath("/{admin}/index.php?ajaxWidgetLoad&moduleId=0&type={$type}");
 
 		switch ($type)
 		{
@@ -176,7 +176,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 							// [0]-дата/время, [1]-имя пользователя, [2]-события, [3]-статус события, [4]-сайт, [5]-страница
 							while (!feof($fp))
 							{
-								$event = fgetcsv($fp, $iSlice);
+								$event = fgetcsv($fp, $iSlice, ",", "\"", "\\");
 								if (empty($event[0]) || count($event) < 3)
 								{
 									continue;
@@ -242,7 +242,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 							<?php
 							if ($access)
 							{
-								$sEventlogHref = '/admin/eventlog/index.php';
+								$sEventlogHref = Admin_Form_Controller::correctBackendPath('/{admin}/eventlog/index.php');
 								?>
 								<br />
 								<div class="footer">
@@ -697,7 +697,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 				if ($oSite->id != CURRENT_SITE)
 				{
 					$sListSitesContent .= '<li class="' . $classInactive . '">
-						<a href="/admin/index.php?changeSiteId=' . $oSite->id . '" onmousedown="$(window).off(\'beforeunload\')">
+						<a href="' . Admin_Form_Controller::correctBackendPath('/{admin}/index.php') . '?changeSiteId=' . $oSite->id . '" onmousedown="$(window).off(\'beforeunload\')">
 							<div class="clearfix">' . $sSite . '</div>
 						</a></li>';
 				}
@@ -743,7 +743,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 		)
 		{
 			$iAdmin_Form_Id = 42;
-			$sAdminFormAction = '/admin/site/index.php';
+			$sAdminFormAction = '/{admin}/site/index.php';
 
 			$oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 			$oAdmin_Form_Action = $oAdmin_Form

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Site
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Sites',
@@ -119,4 +119,10 @@ return array(
 	'protect_frame' => 'Protection from frames',
 	'protect_frame_exclusions' => 'Do not protect pages',
 	'error_bot' => 'Page for checking bots',
+	'favicon_header' => 'Favicon',
+
+	'menu3_sub_caption' => 'Backend panel',
+	'backend_title' => 'Backend panel address',
+	'panelBackend_success' => 'Information changed successfully!',
+	'rename_backend_error' => 'Failed to change the admin center address!',
 );

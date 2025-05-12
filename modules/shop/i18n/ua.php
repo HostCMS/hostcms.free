@@ -227,4 +227,11 @@ return array(
 	'seo_template_filter_prices_from' => 'Ціна від',
 	'seo_template_filter_prices_to' => 'до',
 	'producer_structure_id' => "Вузол структури виробників",
+
+	'shop_shops_url_type_element_2' => 'Дата',
+	'path_date_format' => 'Формат шляху типу "Дата"',
+
+	'watermark_item_header' => 'Товар',
+	'watermark_group_header' => 'Група',
+	'watermark_producer_header' => 'Виробник',
 );

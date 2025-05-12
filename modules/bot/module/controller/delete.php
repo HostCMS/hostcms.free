@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Bot
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Bot_Module_Controller_Delete extends Admin_Form_Action_Controller
 {
@@ -41,7 +41,7 @@ class Bot_Module_Controller_Delete extends Admin_Form_Action_Controller
 
 				$windowId = $this->_Admin_Form_Controller->getWindowId();
 
-				$sJSUpdateBotCounts = "var oTabBots = $('#" . $windowId . "').closest('.tab-pane'), tabBotsId = oTabBots.attr('id'), tabBotsBadge = oTabBots.parent('.tab-content').prev().find('a[href=#' + tabBotsId + '] span.badge'); tabBotsBadge.length && tabBotsBadge.text('" . ($countBotModules ? $countBotModules : '') . "');";
+				$sJSUpdateBotCounts = "var oTabBots = $('#" . $windowId . "').closest('.tab-pane'), tabBotsId = oTabBots.attr('id'), tabBotsBadge = oTabBots.parent('.tab-content').prev().find('a[href=\"#' + tabBotsId + '\"] span.badge'); tabBotsBadge.length && tabBotsBadge.text('" . ($countBotModules ? $countBotModules : '') . "');";
 			}
 
 			$this->_Admin_Form_Controller->addMessage(

@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'informationsystem');
 
 // Код формы
 $iAdmin_Form_Id = 67;
-$sAdminFormAction = '/admin/informationsystem/item/property/index.php';
+$sAdminFormAction = '/{admin}/informationsystem/item/property/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -66,7 +66,7 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 // Строка навигации
 $property_dir_id = intval(Core_Array::getGet('property_dir_id', 0));
 
-$sInformationsystemDirPath = '/admin/informationsystem/index.php';
+$sInformationsystemDirPath = '/{admin}/informationsystem/index.php';
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs->add(
@@ -116,7 +116,7 @@ if ($oInformationsystem->informationsystem_dir_id)
 }
 
 $additionalParams = 'informationsystem_id=' . $informationsystem_id;
-$sInformationsystemPath = '/admin/informationsystem/item/index.php';
+$sInformationsystemPath = '/{admin}/informationsystem/item/index.php';
 
 // Ссылка на название ИС
 $oAdmin_Form_Entity_Breadcrumbs->add(
@@ -345,18 +345,18 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 
 // Ограничение источника 0
 $oAdmin_Form_Dataset->addCondition(
-	array('select' => array('property_dirs.*'))
-)->addCondition(
-	array('join' => array('informationsystem_item_property_dirs', 'informationsystem_item_property_dirs.property_dir_id', '=', 'property_dirs.id'))
-)/*->addCondition(
-	array('where' => array('parent_id', '=', $property_dir_id))
-)*/->addCondition(
-	array('where' => array('informationsystem_item_property_dirs.informationsystem_id', '=', $informationsystem_id))
-)
-->changeField('name', 'type', 4)
-->changeField('name', 'link', "/admin/informationsystem/item/property/index.php?informationsystem_id=" . $informationsystem_id . "&informationsystem_group_id=" . $informationsystem_group_id . "&property_dir_id={id}")
-->changeField('name', 'onclick', "$.adminLoad({path: '/admin/informationsystem/item/property/index.php', additionalParams: 'informationsystem_id=" . $informationsystem_id . "&informationsystem_group_id=" . $informationsystem_group_id ."&property_dir_id={id}', windowId: '{windowId}'}); return false")
-;
+		array('select' => array('property_dirs.*'))
+	)->addCondition(
+		array('join' => array('informationsystem_item_property_dirs', 'informationsystem_item_property_dirs.property_dir_id', '=', 'property_dirs.id'))
+	)/*->addCondition(
+		array('where' => array('parent_id', '=', $property_dir_id))
+	)*/->addCondition(
+		array('where' => array('informationsystem_item_property_dirs.informationsystem_id', '=', $informationsystem_id))
+	)
+	->changeField('name', 'type', 4)
+	->changeField('name', 'link', "/{admin}/informationsystem/item/property/index.php?informationsystem_id=" . $informationsystem_id . "&informationsystem_group_id=" . $informationsystem_group_id . "&property_dir_id={id}")
+	->changeField('name', 'onclick', "$.adminLoad({path: '/{admin}/informationsystem/item/property/index.php', additionalParams: 'informationsystem_id=" . $informationsystem_id . "&informationsystem_group_id=" . $informationsystem_group_id ."&property_dir_id={id}', windowId: '{windowId}'}); return false")
+	;
 
 if (strlen($sGlobalSearch))
 {
@@ -416,11 +416,11 @@ else
 }
 
 $oAdmin_Form_Dataset
-->changeField('multiple', 'link', "/admin/informationsystem/item/property/index.php?hostcms[action]=changeMultiple&hostcms[checked][{dataset_key}][{id}]=1&informationsystem_id=" . $informationsystem_id . "&informationsystem_group_id=" . $informationsystem_group_id . "&property_dir_id={property_dir_id}")
-->changeField('multiple', 'onclick', "$.adminLoad({path: '/admin/informationsystem/item/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&informationsystem_id=" . $informationsystem_id . "&informationsystem_group_id=" . $informationsystem_group_id ."&property_dir_id={property_dir_id}', action: 'changeMultiple', windowId: '{windowId}'}); return false")
-->changeField('indexing', 'link', "/admin/informationsystem/item/property/index.php?hostcms[action]=changeIndexing&hostcms[checked][{dataset_key}][{id}]=1&informationsystem_id=" . $informationsystem_id . "&informationsystem_group_id=" . $informationsystem_group_id . "&property_dir_id={property_dir_id}")
-->changeField('indexing', 'onclick', "$.adminLoad({path: '/admin/informationsystem/item/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&informationsystem_id=" . $informationsystem_id . "&informationsystem_group_id=" . $informationsystem_group_id ."&property_dir_id={property_dir_id}', action: 'changeIndexing', windowId: '{windowId}'}); return false")
-;
+	->changeField('multiple', 'link', "/{admin}/informationsystem/item/property/index.php?hostcms[action]=changeMultiple&hostcms[checked][{dataset_key}][{id}]=1&informationsystem_id=" . $informationsystem_id . "&informationsystem_group_id=" . $informationsystem_group_id . "&property_dir_id={property_dir_id}")
+	->changeField('multiple', 'onclick', "$.adminLoad({path: '/{admin}/informationsystem/item/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&informationsystem_id=" . $informationsystem_id . "&informationsystem_group_id=" . $informationsystem_group_id ."&property_dir_id={property_dir_id}', action: 'changeMultiple', windowId: '{windowId}'}); return false")
+	->changeField('indexing', 'link', "/{admin}/informationsystem/item/property/index.php?hostcms[action]=changeIndexing&hostcms[checked][{dataset_key}][{id}]=1&informationsystem_id=" . $informationsystem_id . "&informationsystem_group_id=" . $informationsystem_group_id . "&property_dir_id={property_dir_id}")
+	->changeField('indexing', 'onclick', "$.adminLoad({path: '/{admin}/informationsystem/item/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&informationsystem_id=" . $informationsystem_id . "&informationsystem_group_id=" . $informationsystem_group_id ."&property_dir_id={property_dir_id}', action: 'changeIndexing', windowId: '{windowId}'}); return false")
+	;
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(

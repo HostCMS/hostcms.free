@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Schedule
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Schedule_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -88,7 +88,7 @@ class Schedule_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					array(' … ') + $this->fillModules()
 				)
 				->value($this->_object->module_id)
-				->onchange("$.ajaxRequest({path: '/admin/schedule/index.php', context: 'scheduleAction', callBack: $.loadSelectOptionsCallback, action: 'loadModuleActions', additionalParams: 'module_id=' + this.value,windowId: '{$windowId}'}); return false")
+				->onchange("$.ajaxRequest({path: hostcmsBackend + '/schedule/index.php', context: 'scheduleAction', callBack: $.loadSelectOptionsCallback, action: 'loadModuleActions', additionalParams: 'module_id=' + this.value,windowId: '{$windowId}'}); return false")
 			);
 
 		$oMainTab->delete($this->getField('action'));

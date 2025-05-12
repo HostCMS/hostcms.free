@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Sql
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Sql_Table_Index_Entity extends Core_Empty_Entity
 {
@@ -153,7 +153,7 @@ class Sql_Table_Index_Entity extends Core_Empty_Entity
 			<td class="semi-bold">' . htmlspecialchars($row['Column_name'])
 				. ($row['Sub_part'] != '' ? ' (' . htmlspecialchars($row['Sub_part']) . ')' : '')
 			. '</td>
-			<td width="10%">' . htmlspecialchars($row['Cardinality']) . '</td>
+			<td width="10%">' . htmlspecialchars((string) $row['Cardinality']) . '</td>
 			<td width="30">' . ($row['Null'] == 'YES' ? '<i class="fa fa-circle-o azure" title="NULL"></i>' : '') . '</td>
 			</tr>';
 		}

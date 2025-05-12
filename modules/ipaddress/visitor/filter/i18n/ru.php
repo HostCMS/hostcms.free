@@ -2,7 +2,7 @@
 
 return array(
 	'model_name' => 'Фильтры посетителей',
-	'title' => 'Фильтры',
+	'title' => 'Фильтры посетителей',
 	'edit_success' => "Фильтр успешно изменен!",
 	'delete_success' => 'Фильтр успешно удален!',
 	'markDeleted_success' => 'Фильтр успешно удален!',
@@ -51,6 +51,7 @@ return array(
 	'block_mode' => "Режим блокировки",
 	'block_mode0' => "Заблокировать",
 	'block_mode1' => "Капча",
+	'block_mode2' => "Разрешить",
 	'sorting' => "Порядок сортировки",
 	'apply_success' => "Информация успешно изменена",
 	'add_group' => "Группа",
@@ -62,4 +63,5 @@ return array(
 	'import_file' => 'Выберите файл с компьютера',
 	'import_button' => 'Загрузить',
 	'importFilters_success' => 'Импорт завершен!',
+	'description' => 'Описание',
 );

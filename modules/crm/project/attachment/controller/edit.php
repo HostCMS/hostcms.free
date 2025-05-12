@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Crm_Project_Attachment_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -65,7 +65,7 @@ class Crm_Project_Attachment_Controller_Edit extends Admin_Form_Action_Controlle
 		<script>
 			$(function() {
 				$("#<?php echo $windowId?> #dropzone").dropzone({
-					url: '/admin/crm/project/attachment/index.php?hostcms[action]=uploadFiles&hostcms[checked][0][0]=1&crm_project_id=<?php echo $object->crm_project_id?>',
+					url: hostcmsBackend + '/crm/project/attachment/index.php?hostcms[action]=uploadFiles&hostcms[checked][0][0]=1&crm_project_id=<?php echo $object->crm_project_id?>',
 					parallelUploads: 10,
 					maxFilesize: <?php echo Core::$mainConfig['dropzoneMaxFilesize']?>,
 					paramName: 'file',
@@ -86,7 +86,7 @@ class Crm_Project_Attachment_Controller_Edit extends Admin_Form_Action_Controlle
 						});
 					},
 					success : function(file, response){
-						$.adminLoad({ path: '/admin/crm/project/entity/index.php', additionalParams: 'crm_project_id=<?php echo $object->crm_project_id?>', windowId: 'id_content' });
+						$.adminLoad({ path: hostcmsBackend + '/crm/project/entity/index.php', additionalParams: 'crm_project_id=<?php echo $object->crm_project_id?>', windowId: 'id_content' });
 						bootbox.hideAll();
 					}
 				});

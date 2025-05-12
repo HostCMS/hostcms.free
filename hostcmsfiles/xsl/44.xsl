@@ -8,7 +8,7 @@
 	
 	<!-- ПисьмоОДобавленииТемы -->
 	<xsl:template match="/forum">
-<xsl:variable name="topic_link">http://<xsl:value-of select="site/site_alias/alias_name_without_mask"/><xsl:value-of select="url"/><xsl:value-of select="forum_category/@id"/>/<xsl:value-of select="forum_category/forum_topic/@id"/>/</xsl:variable>
+<xsl:variable name="topic_link"><xsl:value-of select="http"/><xsl:value-of select="url"/><xsl:value-of select="forum_category/@id"/>/<xsl:value-of select="forum_category/forum_topic/@id"/>/</xsl:variable>
 <xsl:variable name="post_author_id" select="forum_category/forum_topic/forum_topic_post/siteuser_id" />
 <xsl:variable name="moderator"><xsl:choose><xsl:when test = "/forum/forum_category/moderators/siteuser/node()">
 <xsl:choose><xsl:when test="/forum/forum_category/moderators//siteuser[@id = $post_author_id]/node()">1</xsl:when><xsl:otherwise>0</xsl:otherwise></xsl:choose></xsl:when><xsl:otherwise>0</xsl:otherwise></xsl:choose></xsl:variable>&labelLine1; "<xsl:value-of select="forum_category/name"/>"!

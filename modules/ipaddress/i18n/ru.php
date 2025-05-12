@@ -47,4 +47,9 @@ return array(
 	'bot_page_description' => '%s необходимо проверить безопасность вашего соединения, прежде чем продолжить.',
 	'bot_page_button' => 'Я не робот &#187;',
 	'bot_page_button_wait' => 'Подождите...',
+
+	'import' => 'Импорт',
+	'import_file' => 'Выберите файл с компьютера',
+	'import_button' => 'Загрузить',
+	'importFilters_success' => 'Импорт завершен!',
 );

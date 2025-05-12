@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Event_Note_Controller_Edit extends Crm_Note_Controller_Edit
 {
@@ -73,11 +73,11 @@ class Event_Note_Controller_Edit extends Crm_Note_Controller_Edit
 			// Refresh event notes list
 			if ($("#id_content-event-timeline").length)
 			{
-				$.adminLoad({ path: \'/admin/event/timeline/index.php\', additionalParams: \'event_id=' . $iEventId . '\', windowId: \'id_content-event-timeline\' });
+				$.adminLoad({ path: hostcmsBackend + \'/event/timeline/index.php\', additionalParams: \'event_id=' . $iEventId . '\', windowId: \'id_content-event-timeline\' });
 			}
 			if ($("#id_content-event-notes").length)
 			{
-				$.adminLoad({ path: \'/admin/event/note/index.php\', additionalParams: \'event_id=' . $iEventId . '\', windowId: \'id_content-event-notes\' });
+				$.adminLoad({ path: hostcmsBackend + \'/event/note/index.php\', additionalParams: \'event_id=' . $iEventId . '\', windowId: \'id_content-event-notes\' });
 			}
 		</script>';*/
 

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 abstract class Shop_Payment_System_Handler
 {
@@ -268,9 +268,9 @@ abstract class Shop_Payment_System_Handler
 
 			// Пользователь сменил платежную систему
 			if (!$this->_shopOrder->paid
-				&& $this->_shopOrder->shop_payment_system_id != intval(Core_Array::get($this->_orderParams, 'shop_payment_system_id', 0)))
+				&& $this->_shopOrder->shop_payment_system_id != Core_Array::get($this->_orderParams, 'shop_payment_system_id', 0, 'int'))
 			{
-				$this->_shopOrder->shop_payment_system_id = intval(Core_Array::get($this->_orderParams, 'shop_payment_system_id', 0));
+				$this->_shopOrder->shop_payment_system_id = Core_Array::get($this->_orderParams, 'shop_payment_system_id', 0, 'int');
 				$this->_shopOrder->save();
 			}
 		}
@@ -1046,8 +1046,8 @@ abstract class Shop_Payment_System_Handler
 	{
 		Core_Event::notify('Shop_Payment_System_Handler.onBeforeAddDelivery', $this);
 
-		$shop_delivery_condition_id = intval(Core_Array::get($this->_orderParams, 'shop_delivery_condition_id', 0));
-		$shop_delivery_id = intval(Core_Array::get($this->_orderParams, 'shop_delivery_id', 0));
+		$shop_delivery_condition_id = Core_Array::get($this->_orderParams, 'shop_delivery_condition_id', 0, 'int');
+		$shop_delivery_id = Core_Array::get($this->_orderParams, 'shop_delivery_id', 0, 'int');
 
 		// Добавляем стоимость доставки как отдельный товар
 		// Доставка может прийти как сущесвтующий shop_delivery_condition_id, так и shop_delivery_id + название рассчитанного условия доставки
@@ -1074,11 +1074,11 @@ abstract class Shop_Payment_System_Handler
 			{
 				$oShop_Delivery = Core_Entity::factory('Shop_Delivery', $shop_delivery_id);
 
-				$price = floatval(Core_Array::get($this->_orderParams, 'shop_delivery_price', 0));
-				$rate = intval(Core_Array::get($this->_orderParams, 'shop_delivery_rate', 0));
+				$price = Core_Array::get($this->_orderParams, 'shop_delivery_price', 0, 'float');
+				$rate = Core_Array::get($this->_orderParams, 'shop_delivery_rate', 0, 'int');
 				$marking = '';
 
-				$shop_delivery_condition_name = strval(Core_Array::get($this->_orderParams, 'shop_delivery_name'));
+				$shop_delivery_condition_name = Core_Array::get($this->_orderParams, 'shop_delivery_name', '', 'trim');
 
 				$this->_shopOrder->delivery_information = trim(
 					$this->_shopOrder->delivery_information . "\n" . $shop_delivery_condition_name

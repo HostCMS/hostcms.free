@@ -65,7 +65,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Structure
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Structure_Controller_Show extends Core_Controller
 {
@@ -338,7 +338,7 @@ class Structure_Controller_Show extends Core_Controller
 		}
 
 		// Показывать дополнительные свойства
-		if ($this->structurePropertiesList)
+		if (Core::moduleIsActive('property') && $this->structurePropertiesList)
 		{
 			$oStructure_Property_List = Core_Entity::factory('Structure_Property_List', $oSite->id);
 
@@ -493,7 +493,7 @@ class Structure_Controller_Show extends Core_Controller
 
 				// Properties for structure entity
 				$oStructure->showXmlProperties($this->showProperties, $this->sortPropertiesValues);
-				
+
 				$this->showMedia
 					&& $oStructure->showXmlMedia($this->showMedia);
 
@@ -508,13 +508,13 @@ class Structure_Controller_Show extends Core_Controller
 
 		if (is_null($this->level) || $level < $this->level)
 		{
-			// Informationsystem
+			// Informationsystem, элементы вложены в группы, поэтому при показе элемента требуются группы
 			if (($this->showInformationsystemGroups || $this->showInformationsystemItems) && isset($this->_Informationsystems[$parent_id]))
 			{
 				$this->_addInformationsystemGroups($parentObject, $this->_Informationsystems[$parent_id], $level + 1);
 			}
 
-			// Shop
+			// Shop, элементы вложены в группы, поэтому при показе элемента требуются группы
 			if (($this->showShopGroups || $this->showShopItems) && isset($this->_Shops[$parent_id]))
 			{
 				$this->_addShopGroups($parentObject, $this->_Shops[$parent_id], $level + 1);
@@ -763,7 +763,7 @@ class Structure_Controller_Show extends Core_Controller
 
 				$this->showInformationsystemGroupProperties
 					&& $oInformationsystem_Group->showXmlProperties($this->showInformationsystemGroupProperties);
-					
+
 				$this->showInformationsystemGroupMedia
 					&& $oInformationsystem_Group->showXmlMedia($this->showInformationsystemGroupMedia);
 
@@ -825,7 +825,7 @@ class Structure_Controller_Show extends Core_Controller
 
 				$this->showInformationsystemItemProperties
 					&& $oInformationsystem_Item->showXmlProperties($this->showInformationsystemItemProperties);
-					
+
 				$this->showInformationsystemItemMedia
 					&& $oInformationsystem_Item->showXmlMedia($this->showInformationsystemItemMedia);
 
@@ -1073,7 +1073,7 @@ class Structure_Controller_Show extends Core_Controller
 
 				$this->showShopGroupProperties
 					&& $oShop_Group->showXmlProperties($this->showShopGroupProperties);
-					
+
 				$this->showShopGroupMedia
 					&& $oShop_Group->showXmlMedia($this->showShopGroupMedia);
 
@@ -1136,7 +1136,7 @@ class Structure_Controller_Show extends Core_Controller
 
 				$this->showShopItemProperties
 					&& $oShop_Item->showXmlProperties($this->showShopItemProperties);
-					
+
 				$this->showShopItemMedia
 					&& $oShop_Item->showXmlMedia($this->showShopItemMedia);
 
@@ -1182,7 +1182,7 @@ class Structure_Controller_Show extends Core_Controller
 		$oXslSubPanel = Core_Html_Entity::factory('Div')
 			->class('hostcmsSubPanel hostcmsXsl');
 
-		$sPath = '/admin/structure/index.php';
+		$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/structure/index.php');
 		$sAdditional = "hostcms[action]=edit&hostcms[checked][0][0]=1";
 		$sTitle = Core::_('Structure.add_title');
 

@@ -6,7 +6,7 @@
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Поля формы центра администрирования',
@@ -54,9 +54,10 @@ return array(
 	'field_type_date_time' => 'Дата-время',
 	'field_type_date' => 'Дата',
 	'field_type_image_link' => 'Картинка-ссылка',
-	'field_type_image_list' => 'Список',
+	'field_type_list' => 'Список',
 	'field_type_image_callback_function' => 'Вычисляемое поле (Используется обратный вызов функции)',
 	'field_type_textarea' => 'Большое текстовое поле',
+	'field_type_list_item' => 'Элемент списка',
 
 	// Отображение
 	'field_view0' => 'Столбец и фильтр',

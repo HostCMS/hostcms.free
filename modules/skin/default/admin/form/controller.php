@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 {
@@ -42,7 +42,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 		?><input type="text" name="admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $value?>" style="width: 97%" class="form-control input-sm" /><?php
 	}
 
-	protected function _filterCallbackCheckbox($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
+	protected function _filterCallbackCheckboxAsSelect($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
 	{
 		?><select name="admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" class="form-control">
 			<option value="0" <?php echo $value == 0 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected_all'))?></option>
@@ -282,7 +282,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 					break;
 
 					case 3: // Checkbox
-						$this->_filters += array($oAdmin_Form_Field->name => array($this, '_filterCallbackCheckbox'));
+						$this->_filters += array($oAdmin_Form_Field->name => array($this, '_filterCallbackCheckboxAsSelect'));
 					break;
 
 					case 5: // Дата-время

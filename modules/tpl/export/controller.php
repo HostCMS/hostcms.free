@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Tpl
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Tpl_Export_Controller extends Core_Servant_Properties
 {
@@ -102,6 +102,7 @@ class Tpl_Export_Controller extends Core_Servant_Properties
 			count($this->_aObjects) == 1
 				? reset($this->_aObjects)
 				: $this->_aObjects
+			, defined('JSON_UNESCAPED_UNICODE') ? JSON_UNESCAPED_UNICODE : 0
 		);
 
 		exit();

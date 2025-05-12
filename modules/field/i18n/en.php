@@ -49,6 +49,7 @@ return array(
 	'type12' => 'Online store product',
 	'type13' => 'Information system group',
 	'type14' => 'Online store group',
+	'type15' => 'Bigint',
 
 	'obligatory' => 'Required',
 	'visible' => 'Field visibility',

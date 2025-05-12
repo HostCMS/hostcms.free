@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Chartaccount
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Chartaccount_Trialbalance_Entry_Controller extends Chartaccount_Trialbalance_Controller
 {
@@ -48,7 +48,7 @@ class Chartaccount_Trialbalance_Entry_Controller extends Chartaccount_Trialbalan
 			$additionalParams .= "&sc[{$scId}]={$scValue}";
 		}
 
-		self::setPath('/admin/chartaccount/trialbalance/entry/index.php?code=' . $code . $additionalParams);
+		self::setPath('/{admin}/chartaccount/trialbalance/entry/index.php?code=' . $code . $additionalParams);
 		self::_init($aOptions);
 
 		$oTab
@@ -112,7 +112,7 @@ class Chartaccount_Trialbalance_Entry_Controller extends Chartaccount_Trialbalan
 										Admin_Form_Entity::factory('Span')
 											->class('btn btn-sm btn-default margin-right-10')
 											->add(Core_Html_Entity::factory('I')->class('fa fa-filter no-margin'))
-											->onclick("$.filterChartaccountTrialbalanceEntries(this, '" . $windowId . "', " . $code . ")")
+											->onclick("$.filterChartaccountTrialbalanceEntries(this, '" . $windowId . "', '" . $code . "')")
 									);
 
 									$oSubcounts->execute();

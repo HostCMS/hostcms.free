@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Field
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Field_Value_File_Model extends Core_Entity
 {
@@ -143,6 +143,7 @@ class Field_Value_File_Model extends Core_Entity
 	/**
 	 * Delete large file
 	 * @return self
+	 * @hostcms-event field_value_file.onAfterDeleteLargeFile
 	 */
 	public function deleteLargeFile()
 	{
@@ -157,6 +158,8 @@ class Field_Value_File_Model extends Core_Entity
 					Core_File::delete($path);
 				} catch (Exception $e) {}
 			}
+
+			Core_Event::notify($this->_modelName . '.onAfterDeleteLargeFile', $this);
 
 			$this->file = '';
 			$this->file_name = '';
@@ -187,6 +190,7 @@ class Field_Value_File_Model extends Core_Entity
 	/**
 	 * Delete small file
 	 * @return self
+	 * @hostcms-event field_value_file.onAfterDeleteSmallFile
 	 */
 	public function deleteSmallFile()
 	{
@@ -201,6 +205,8 @@ class Field_Value_File_Model extends Core_Entity
 					Core_File::delete($path);
 				} catch (Exception $e) {}
 			}
+
+			Core_Event::notify($this->_modelName . '.onAfterDeleteSmallFile', $this);
 
 			$this->file_small = '';
 			$this->file_small_name = '';

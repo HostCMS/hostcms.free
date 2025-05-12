@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Filter_Group_Controller
 {
@@ -175,11 +175,6 @@ class Shop_Filter_Group_Controller
 			// var_dump($this->_tree);
 			// echo "</pre>";
 
-			// remove
-			Core_QueryBuilder::delete($tableName)
-				->where('shop_group_id', '=', $shop_group_id)
-				->execute();
-
 			$aValues[] = $shop_group_id;
 
 			if (isset($this->_tree[$shop_group_id]))
@@ -192,12 +187,15 @@ class Shop_Filter_Group_Controller
 
 				$aValues = array_unique($aValues);
 			}
+			
+			// Remove before insert
+			Core_QueryBuilder::delete($tableName)
+				->where('shop_group_id', '=', $shop_group_id)
+				->execute();
 
-			$oCore_DataBase = Core_DataBase::instance();
-
-			$query = "INSERT INTO `{$tableName}` (`shop_group_id`, `child_id`) VALUES ({$shop_group_id}, " . implode("), ({$shop_group_id}, ", $aValues) . ')';
-
-			$oCore_DataBase->query($query);
+			// Insert
+			$query = "INSERT IGNORE INTO `{$tableName}` (`shop_group_id`, `child_id`) VALUES ({$shop_group_id}, " . implode("), ({$shop_group_id}, ", $aValues) . ')';
+			Core_DataBase::instance()->query($query);
 		}
 
 		return $aValues;

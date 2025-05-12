@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Template
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Виджеты секции макета сайта',
@@ -32,4 +32,19 @@ return array(
 	'widget_settings' => "Настройки виджета '%s'",
 	'widget_delete' => "Удалить виджет '%s'",
 	'widget_active' => "Изменение активности виджета '%s'",
+
+	'type_solid' => 'Пресет',
+	'type_gradient' => 'Пресет с градиентом',
+	'background' => 'Фон',
+	'color' => 'Цвет',
+	'font_family' => 'Шрифт',
+	'font_size' => 'Размер шрифта',
+	'font_weight' => 'Насыщенность шрифта',
+	'padding_top' => 'Внутренний отступ сверху',
+	'padding_bottom' => 'Внутренний отступ снизу',
+	'padding_left' => 'Внутренний отступ слева',
+	'padding_right' => 'Внутренний отступ справа',
+	'margin_top' => 'Внешний отступ сверху',
+	'opacity' => 'Прозрачность',
+	'gradient_background' => 'Градиент',
 );

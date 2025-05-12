@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Group_Model extends Core_Entity
 {
@@ -303,13 +303,27 @@ class Shop_Group_Model extends Core_Entity
 	{
 		$this->queryBuilder()
 			//->clear()
-			->where('path', 'LIKE', Core_DataBase::instance()->escapeLike($path))
-			->where('parent_id', '=', $parent_id)
-			->where('shortcut_id', '=', 0)
+			->where('shop_groups.path', 'LIKE', Core_DataBase::instance()->escapeLike($path))
+			->where('shop_groups.parent_id', '=', $parent_id)
+			->where('shop_groups.shortcut_id', '=', 0)
+			//->limit(1)
 			->clearOrderBy()
-			->limit(1);
+			->orderBy('shop_groups.id', 'ASC');
 
 		$aShop_Groups = $this->findAll(FALSE);
+
+		// Fix the same paths
+		if (count($aShop_Groups) > 1)
+		{
+			foreach ($aShop_Groups as $key => $oShop_Group)
+			{
+				if ($key > 0)
+				{
+					$oShop_Group->path .= '-' . $key;
+					$oShop_Group->save();
+				}
+			}
+		}
 
 		return isset($aShop_Groups[0])
 			? $aShop_Groups[0]
@@ -345,6 +359,28 @@ class Shop_Group_Model extends Core_Entity
 			try
 			{
 				Core_File::mkdir($this->getGroupPath(), CHMOD, TRUE);
+			} catch (Exception $e) {}
+		}
+		return $this;
+	}
+
+	/**
+	 * Delete group directory
+	 * @return self
+	 */
+	public function deleteDir()
+	{
+		if (Core_File::isDir($this->getGroupPath()))
+		{
+			// Удаляем файл большого изображения группы
+			$this->deleteLargeImage();
+
+			// Удаляем файл малого изображения группы
+			$this->deleteSmallImage();
+
+			try
+			{
+				Core_File::deleteDir($this->getGroupPath());
 			} catch (Exception $e) {}
 		}
 		return $this;
@@ -422,6 +458,8 @@ class Shop_Group_Model extends Core_Entity
 
 	/**
 	 * Delete group's large image
+	 * @return self
+	 * @hostcms-event shop_group.onAfterDeleteLargeImage
 	 */
 	public function deleteLargeImage()
 	{
@@ -433,6 +471,8 @@ class Shop_Group_Model extends Core_Entity
 				Core_File::delete($fileName);
 			} catch (Exception $e) {}
 
+			Core_Event::notify($this->_modelName . '.onAfterDeleteLargeImage', $this);
+
 			$this->image_large = '';
 			$this->save();
 		}
@@ -442,6 +482,7 @@ class Shop_Group_Model extends Core_Entity
 	/**
 	 * Delete group's small image
 	 * @return self
+	 * @hostcms-event shop_group.onAfterDeleteSmallImage
 	 */
 	public function deleteSmallImage()
 	{
@@ -452,6 +493,8 @@ class Shop_Group_Model extends Core_Entity
 			{
 				Core_File::delete($fileName);
 			} catch (Exception $e) {}
+
+			Core_Event::notify($this->_modelName . '.onAfterDeleteSmallImage', $this);
 
 			$this->image_small = '';
 			$this->save();
@@ -746,53 +789,56 @@ class Shop_Group_Model extends Core_Entity
 
 		$oSearch_Page->title = (string) $this->name;
 
-		$aPropertyValues = $this->getPropertyValues();
-		foreach ($aPropertyValues as $oPropertyValue)
+		if (Core::moduleIsActive('property'))
 		{
-			if ($oPropertyValue->Property->indexing)
+			$aPropertyValues = $this->getPropertyValues();
+			foreach ($aPropertyValues as $oPropertyValue)
 			{
-				// List
-				if ($oPropertyValue->Property->type == 3 && Core::moduleIsActive('list'))
+				if ($oPropertyValue->Property->indexing)
 				{
-					if ($oPropertyValue->value != 0)
+					// List
+					if ($oPropertyValue->Property->type == 3 && Core::moduleIsActive('list'))
 					{
-						$oList_Item = $oPropertyValue->List_Item;
-						$oList_Item->id && $oSearch_Page->text .= htmlspecialchars((string) $oList_Item->value) . ' ' . htmlspecialchars((string) $oList_Item->description) . ' ';
-					}
-				}
-				// Informationsystem
-				elseif ($oPropertyValue->Property->type == 5 && Core::moduleIsActive('informationsystem'))
-				{
-					if ($oPropertyValue->value != 0)
-					{
-						$oInformationsystem_Item = $oPropertyValue->Informationsystem_Item;
-						if ($oInformationsystem_Item->id)
+						if ($oPropertyValue->value != 0)
 						{
-							$oSearch_Page->text .= htmlspecialchars((string) $oInformationsystem_Item->name) . ' ' . $oInformationsystem_Item->description . ' ' . $oInformationsystem_Item->text . ' ';
+							$oList_Item = $oPropertyValue->List_Item;
+							$oList_Item->id && $oSearch_Page->text .= htmlspecialchars((string) $oList_Item->value) . ' ' . htmlspecialchars((string) $oList_Item->description) . ' ';
 						}
 					}
-				}
-				// Shop
-				elseif ($oPropertyValue->Property->type == 12 && Core::moduleIsActive('shop'))
-				{
-					if ($oPropertyValue->value != 0)
+					// Informationsystem
+					elseif ($oPropertyValue->Property->type == 5 && Core::moduleIsActive('informationsystem'))
 					{
-						$oShop_Item = $oPropertyValue->Shop_Item;
-						if ($oShop_Item->id)
+						if ($oPropertyValue->value != 0)
 						{
-							$oSearch_Page->text .= htmlspecialchars((string) $oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
+							$oInformationsystem_Item = $oPropertyValue->Informationsystem_Item;
+							if ($oInformationsystem_Item->id)
+							{
+								$oSearch_Page->text .= htmlspecialchars((string) $oInformationsystem_Item->name) . ' ' . $oInformationsystem_Item->description . ' ' . $oInformationsystem_Item->text . ' ';
+							}
 						}
 					}
-				}
-				// Wysiwyg
-				elseif ($oPropertyValue->Property->type == 6)
-				{
-					$oSearch_Page->text .= htmlspecialchars(strip_tags((string) $oPropertyValue->value)) . ' ';
-				}
-				// Other type
-				elseif ($oPropertyValue->Property->type != 2)
-				{
-					$oSearch_Page->text .= htmlspecialchars((string) $oPropertyValue->value) . ' ';
+					// Shop
+					elseif ($oPropertyValue->Property->type == 12 && Core::moduleIsActive('shop'))
+					{
+						if ($oPropertyValue->value != 0)
+						{
+							$oShop_Item = $oPropertyValue->Shop_Item;
+							if ($oShop_Item->id)
+							{
+								$oSearch_Page->text .= htmlspecialchars((string) $oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
+							}
+						}
+					}
+					// Wysiwyg
+					elseif ($oPropertyValue->Property->type == 6)
+					{
+						$oSearch_Page->text .= htmlspecialchars(strip_tags((string) $oPropertyValue->value)) . ' ';
+					}
+					// Other type
+					elseif ($oPropertyValue->Property->type != 2)
+					{
+						$oSearch_Page->text .= htmlspecialchars((string) $oPropertyValue->value) . ' ';
+					}
 				}
 			}
 		}
@@ -1081,6 +1127,24 @@ class Shop_Group_Model extends Core_Entity
 			$this->Media_Shop_Groups->deleteAll(FALSE);
 		}
 
+		// Свойства "Группа магазина"
+		$oProperties = Core_Entity::factory('Property');
+		$oProperties->queryBuilder()
+			->where('shop_id', '=', $this->shop_id)
+			->where('type', '=', 14);
+
+		$aProperties = $oProperties->findAll(FALSE);
+		foreach ($aProperties as $oProperty)
+		{
+			Core_QueryBuilder::delete('property_value_ints')
+				->where('property_id', '=', $oProperty->id)
+				->where('value', '=', $this->id)
+				->execute();
+		}
+
+		// Удаляем директорию группы товаров
+		$this->deleteDir();
+
 		// Remove from search index
 		$this->unindex();
 
@@ -1294,6 +1358,7 @@ class Shop_Group_Model extends Core_Entity
 	/**
 	 * Prepare entity and children entities
 	 * @return self
+	 * @hostcms-event shop_group.onBeforeAddPropertyValues
 	 */
 	protected function _prepareData()
 	{
@@ -1313,15 +1378,40 @@ class Shop_Group_Model extends Core_Entity
 				foreach ($aProperty_Values as $oProperty_Value)
 				{
 					$this->_preparePropertyValue($oProperty_Value);
-
-					$this->addEntity($oProperty_Value);
 				}
 			}
 			else
 			{
 				$aProperty_Values = $this->getPropertyValues(TRUE, array(), $this->_xmlSortPropertiesValues);
-				// Add all values
-				$this->addEntities($aProperty_Values);
+			}
+
+			Core_Event::notify($this->_modelName . '.onBeforeAddPropertyValues', $this, array($aProperty_Values));
+
+			$aListIDs = array();
+
+			foreach ($aProperty_Values as $oProperty_Value)
+			{
+				// List_Items
+				if ($oProperty_Value->Property->type == 3)
+				{
+					$aListIDs[] = $oProperty_Value->value;
+				}
+
+				$this->addEntity($oProperty_Value);
+			}
+
+			if (Core::moduleIsActive('list'))
+			{
+				// Cache necessary List_Items
+				if (count($aListIDs))
+				{
+					$oList_Items = Core_Entity::factory('List_Item');
+					$oList_Items->queryBuilder()
+						->where('id', 'IN', $aListIDs)
+						->clearOrderBy();
+
+					$oList_Items->findAll();
+				}
 			}
 		}
 
@@ -1594,8 +1684,8 @@ class Shop_Group_Model extends Core_Entity
 	{
 		if (!$this->shortcut_id)
 		{
-			$link = '/admin/shop/group/discount/index.php?shop_group_id={id}';
-			$onclick = "$.adminLoad({path: '/admin/shop/group/discount/index.php',additionalParams: 'shop_group_id={id}', windowId: '{windowId}'}); return false";
+			$link = Admin_Form_Controller::correctBackendPath('/{admin}/shop/group/discount/index.php?shop_group_id={id}');
+			$onclick = "$.adminLoad({path: hostcmsBackend + '/shop/group/discount/index.php',additionalParams: 'shop_group_id={id}', windowId: '{windowId}'}); return false";
 
 			$link = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $link);
 			$onclick = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $onclick);

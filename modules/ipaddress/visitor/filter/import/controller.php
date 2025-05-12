@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Ipaddress
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Ipaddress_Visitor_Filter_Import_Controller extends Admin_Form_Action_Controller
 {
@@ -61,16 +61,52 @@ class Ipaddress_Visitor_Filter_Import_Controller extends Admin_Form_Action_Contr
 	 */
 	protected function _import(array $aContent = array())
 	{
-		$oIpaddress_Visitor_Filter = Core_Entity::factory('Ipaddress_Visitor_Filter');
+		$aExplodeDir = explode('/', $aContent['dirName']);
+
+		$iParent_Id = $this->ipaddress_visitor_filter_dir_id;
+
+		foreach ($aExplodeDir as $sDirName)
+		{
+			if ($sDirName != '')
+			{
+				$oIpaddress_Visitor_Filter_Dirs = Core_Entity::factory('Ipaddress_Visitor_Filter_Dir');
+				$oIpaddress_Visitor_Filter_Dirs
+					->queryBuilder()
+					->where('ipaddress_visitor_filter_dirs.parent_id', '=', $iParent_Id);
+
+				$oIpaddress_Visitor_Filter_Dir = $oIpaddress_Visitor_Filter_Dirs->getByName($sDirName, FALSE);
+
+				if (is_null($oIpaddress_Visitor_Filter_Dir))
+				{
+					$oIpaddress_Visitor_Filter_Dir = Core_Entity::factory('Ipaddress_Visitor_Filter_Dir');
+					$oIpaddress_Visitor_Filter_Dir
+						->parent_id($iParent_Id)
+						->name($sDirName)
+						->save();
+				}
+
+				$iParent_Id = $oIpaddress_Visitor_Filter_Dir->id;
+			}
+		}
+
+
+		$oIpaddress_Visitor_Filter = Core_Entity::factory('Ipaddress_Visitor_Filter')->getByName($aContent['name'], FALSE);
+
+		if (is_null($oIpaddress_Visitor_Filter))
+		{
+			$oIpaddress_Visitor_Filter = Core_Entity::factory('Ipaddress_Visitor_Filter');
+			$oIpaddress_Visitor_Filter->ipaddress_visitor_filter_dir_id = $iParent_Id;
+			$oIpaddress_Visitor_Filter->banned = 0; //$aContent['banned'];
+			$oIpaddress_Visitor_Filter->sorting = $aContent['sorting'];
+		}
+
 		$oIpaddress_Visitor_Filter->name = $aContent['name'];
-		$oIpaddress_Visitor_Filter->ipaddress_visitor_filter_dir_id = $this->ipaddress_visitor_filter_dir_id;
+		$oIpaddress_Visitor_Filter->description = isset($aContent['description']) ? $aContent['description'] : '';
 		$oIpaddress_Visitor_Filter->json = $aContent['json'];
 		$oIpaddress_Visitor_Filter->active = $aContent['active'];
 		$oIpaddress_Visitor_Filter->mode = $aContent['mode'];
-		$oIpaddress_Visitor_Filter->banned = $aContent['banned'];
 		$oIpaddress_Visitor_Filter->ban_hours = $aContent['ban_hours'];
 		$oIpaddress_Visitor_Filter->block_mode = $aContent['block_mode'];
-		$oIpaddress_Visitor_Filter->sorting = $aContent['sorting'];
 		$oIpaddress_Visitor_Filter->save();
 
 		return $this;

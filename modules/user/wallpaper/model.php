@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage User
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class User_Wallpaper_Model extends Core_Entity
 {
@@ -122,6 +122,8 @@ class User_Wallpaper_Model extends Core_Entity
 	/**
 	 * Delete image file
 	 * @return self
+	 * @hostcms-event user_wallpaper.onAfterDeleteLargeImage
+	 * @hostcms-event user_wallpaper.onAfterDeleteSmallImage
 	 */
 	public function deleteImageFile()
 	{
@@ -130,12 +132,17 @@ class User_Wallpaper_Model extends Core_Entity
 			Core_File::isFile($this->getLargeImageFilePath()) && Core_File::delete($this->getLargeImageFilePath());
 		} catch (Exception $e) {}
 
+		Core_Event::notify($this->_modelName . '.onAfterDeleteLargeImage', $this);
+
+		$this->image_large = '';
+
 		try
 		{
 			Core_File::isFile($this->getSmallImageFilePath()) && Core_File::delete($this->getSmallImageFilePath());
 		} catch (Exception $e) {}
 
-		$this->image_large = '';
+		Core_Event::notify($this->_modelName . '.onAfterDeleteSmallImage', $this);
+
 		$this->image_small = '';
 
 		$this->save();

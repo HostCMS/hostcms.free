@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'benchmark');
 
 // Код формы
 $iAdmin_Form_Id = 197;
-$sAdminFormAction = '/admin/benchmark/url/index.php';
+$sAdminFormAction = '/{admin}/benchmark/url/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -51,10 +51,10 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Benchmark.title'))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/benchmark/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/benchmark/index.php', NULL, NULL, '')
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/benchmark/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/benchmark/index.php', NULL, NULL, '')
 		)
 	)->add(
 	Admin_Form_Entity::factory('Breadcrumb')
@@ -138,7 +138,7 @@ else
 	{
 		$.ajax({
 			type: "POST",
-			url: "/admin/benchmark/url/index.php",
+			url: "<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/benchmark/url/index.php')?>",
 			data: {constantName: name, constantValue: +value}
 		});
 	}

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Siteuser_Transaction_Model extends Core_Entity
 {
@@ -167,10 +167,10 @@ class Shop_Siteuser_Transaction_Model extends Core_Entity
  	public function shop_order_idBackend()
 	{
 		return $this->shop_order_id
-			? '<a href="/admin/shop/order/index.php?hostcms[action]=edit&hostcms[checked][0][' . $this->shop_order_id . ']=1&shop_id=' . $this->Shop_Order->shop_id . '" onclick="$.adminLoad({path: \'/admin/shop/order/index.php\', action: \'edit\', operation: \'\', additionalParams: \'hostcms[checked][0][' . $this->shop_order_id . ']=1&shop_id=' . $this->Shop_Order->shop_id . '\', view: \'list\', windowId: \'id_content\'}); return false">' . $this->Shop_Order->invoice . '</a>'
+			? '<a href="' . Admin_Form_Controller::correctBackendPath('/{admin}/shop/order/index.php') . '?hostcms[action]=edit&hostcms[checked][0][' . $this->shop_order_id . ']=1&shop_id=' . $this->Shop_Order->shop_id . '" onclick="$.adminLoad({path: hostcmsBackend + \'/shop/order/index.php\', action: \'edit\', operation: \'\', additionalParams: \'hostcms[checked][0][' . $this->shop_order_id . ']=1&shop_id=' . $this->Shop_Order->shop_id . '\', view: \'list\', windowId: \'id_content\'}); return false">' . $this->Shop_Order->invoice . '</a>'
 			: '—';
 	}
-	
+
 	/**
 	 * Backend callback method
 	 * @return string
@@ -181,7 +181,7 @@ class Shop_Siteuser_Transaction_Model extends Core_Entity
 			? $this->Shop_Currency->formatWithCurrency($this->amount)
 			: $this->amount) . '</span>';
 	}
-	
+
 	/**
 	 * Backend callback method
 	 * @return string

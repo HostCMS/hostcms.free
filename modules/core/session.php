@@ -18,7 +18,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 abstract class Core_Session
 {
@@ -35,6 +35,15 @@ abstract class Core_Session
 	static public function isStarted()
 	{
 		return self::$_started;
+	}
+	
+	/**
+	 * Set started
+	 * @return boolean
+	 */
+	static public function setStarted()
+	{
+		self::$_started = TRUE;
 	}
 
 	/**
@@ -429,27 +438,36 @@ abstract class Core_Session
 
 			$oCore_Session = self::$_handler = new $sessionClass();
 
+			if (PHP_VERSION_ID >= 80400)
+			{
+				session_set_save_handler($oCore_Session, TRUE);
+			}
 			// Callables $validate_sid and $update_timestamp are supported since PHP 7.0
 			// session_create_id() PHP 7 >= 7.1.0
-			PHP_VERSION_ID >= 70100
-				? session_set_save_handler(
-					array($oCore_Session, 'sessionOpen'),
-					array($oCore_Session, 'sessionClose'),
-					array($oCore_Session, 'sessionRead'),
-					array($oCore_Session, 'sessionWrite'),
-					array($oCore_Session, 'sessionDestroyer'),
-					array($oCore_Session, 'sessionGc'),
-					array($oCore_Session, 'sessionCreateSid'),
-					array($oCore_Session, 'sessionValidateSid')
-				)
-				: session_set_save_handler(
-					array($oCore_Session, 'sessionOpen'),
-					array($oCore_Session, 'sessionClose'),
-					array($oCore_Session, 'sessionRead'),
-					array($oCore_Session, 'sessionWrite'),
-					array($oCore_Session, 'sessionDestroyer'),
-					array($oCore_Session, 'sessionGc')
+			elseif (PHP_VERSION_ID >= 70100)
+			{
+				session_set_save_handler(
+					array($oCore_Session, 'open'),
+					array($oCore_Session, 'close'),
+					array($oCore_Session, 'read'),
+					array($oCore_Session, 'write'),
+					array($oCore_Session, 'destroy'),
+					array($oCore_Session, 'gc'),
+					array($oCore_Session, 'create_sid'),
+					array($oCore_Session, 'validateId')
 				);
+			}
+			else
+			{
+				session_set_save_handler(
+					array($oCore_Session, 'open'),
+					array($oCore_Session, 'close'),
+					array($oCore_Session, 'read'),
+					array($oCore_Session, 'write'),
+					array($oCore_Session, 'destroy'),
+					array($oCore_Session, 'gc')
+				);
+			}
 		}
 	}
 
@@ -518,7 +536,7 @@ abstract class Core_Session
 			);
 		}
 
-		return self::$_handler->sessionDestroyer($id);
+		return self::$_handler->destroy($id);
 	}
 
 	/**
@@ -531,7 +549,7 @@ abstract class Core_Session
 	 * Show error
 	 * @param string $content
 	 */
-	static protected function _error($content)
+	static public function error($content)
 	{
 		self::$_error = $content;
 	}
@@ -583,20 +601,20 @@ abstract class Core_Session
 	 * @param string $session_name session name
 	 * @return boolean
 	 */
-	abstract public function sessionOpen($save_path, $session_name);
+	//abstract public function sessionOpen($save_path, $session_name);
 
 	/**
 	 * The close callback works like a destructor in classes and is executed after the session write callback has been called.
 	 * @return boolean
 	 */
-	abstract public function sessionClose();
+	//abstract public function sessionClose();
 
 	/**
 	 * The read callback must always return a session encoded (serialized) string, or an empty string if there is no data to read.
 	 * @param string $id session ID
 	 * @return string
 	 */
-	abstract public function sessionRead($id);
+	//abstract public function sessionRead($id);
 
 	/**
 	 * The write callback is called when the session needs to be saved and closed.
@@ -604,21 +622,21 @@ abstract class Core_Session
 	 * @param string $value data
 	 * @return boolean
 	 */
-	abstract public function sessionWrite($id, $value);
+	//abstract public function sessionWrite($id, $value);
 
 	/**
 	 * This callback is executed when a session is destroyed with session_destroy()
 	 * @param string $id session ID
 	 * @return boolean
 	 */
-	abstract public function sessionDestroyer($id);
+	//abstract public function sessionDestroyer($id);
 
 	/**
 	 * The garbage collector callback is invoked internally by PHP periodically in order to purge old session data.
 	 * @param string $maxlifetime max life time
 	 * @return boolean
 	 */
-	abstract public function sessionGc($maxlifetime);
+	//abstract public function sessionGc($maxlifetime);
 
 	/**
 	 * This callback is executed when a session sets maxlifetime
@@ -626,7 +644,10 @@ abstract class Core_Session
 	 * @param bool $overwrite overwrite previous maxlifetime
 	 * @return boolean
 	 */
-	abstract public function sessionMaxlifetime($maxlifetime, $overwrite = FALSE);
+	public function sessionMaxlifetime($maxlifetime, $overwrite = FALSE)
+	{
+		self::$_handler->sessionMaxlifetime($maxlifetime, $overwrite);
+	}
 
 	/**
 	 * Delete all sessions

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Querybuilder
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 abstract class Core_QueryBuilder_Statement
 {
@@ -141,22 +141,63 @@ abstract class Core_QueryBuilder_Statement
 	}
 
 	/**
-	 * Clear LIMIT
+	 * Comment --
+	 * @var array
+	 */
+	protected $_comment = array();
+
+	/**
+	 * Add comment
+	 *
+	 * http://dev.mysql.com/doc/refman/5.7/en/comments.html
+	 *
+	 * @param string $comment
 	 * @return self
 	 */
-	public function clearLimit()
+	public function comment($comment)
 	{
-		$this->_limit = NULL;
+		$this->_comment[] = $comment;
+		
 		return $this;
 	}
 
 	/**
-	 * Clear OFFSET
+	 * Build Comment
+	 *
+	 * @param array $aComment
+	 * @return string|NULL The SQL query
+	 */
+	protected function _buildComment(array $aComment)
+	{
+		if (!empty($aComment))
+		{
+			$commentSql = '';
+			
+			foreach ($aComment as $sComment)
+			{
+				$commentSql .= "-- " . str_replace(array("\r", "\n", "\0", ''), '', $sComment) . "\n";
+			}
+
+			return $commentSql;
+		}
+	}
+
+	/**
+	 * Get Comment
+	 * @return array
+	 */
+	public function getComment()
+	{
+		return $this->_comment;
+	}
+
+	/**
+	 * Clear Comment
 	 * @return self
 	 */
-	public function clearOffset()
+	public function clearComment()
 	{
-		$this->_offset = NULL;
+		$this->_comment = NULL;
 		return $this;
 	}
 

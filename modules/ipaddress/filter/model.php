@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Ipaddress
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Ipaddress_Filter_Model extends Core_Entity
 {
@@ -92,7 +92,25 @@ class Ipaddress_Filter_Model extends Core_Entity
 	 */
 	public function nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		return htmlspecialchars($this->name);
+		ob_start();
+
+		?><div>
+			<span class="<?php echo !$this->active ? 'line-through' : ''?>"><?php echo htmlspecialchars($this->name);?></span>
+			<?php
+				$this->_showBadge($oAdmin_Form_Field, $oAdmin_Form_Controller);
+			?>
+		</div><?php
+
+		if ($this->description != '')
+		{
+			?><div class="crm-description-wrapper">
+				<div class="crm-description">
+					<span><?php echo nl2br(htmlspecialchars($this->description))?></span>
+				</div>
+			</div><?php
+		}
+
+		return ob_get_clean();
 	}
 
 	/**
@@ -101,7 +119,7 @@ class Ipaddress_Filter_Model extends Core_Entity
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	protected function _showBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$this->block_ip && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square darkorange')
@@ -134,11 +152,14 @@ class Ipaddress_Filter_Model extends Core_Entity
 		{
 			$type = Core_Array::get($aCondition, 'type', '', 'trim');
 
-			?>
-			<div class="d-flex align-items-center margin-bottom-5">
-				<span class="badge badge-round badge-max-width margin-right-5 green"><?php echo htmlspecialchars(Core::_('Ipaddress_Filter.' . $type) . ($type == 'get' ? ' ' . Core_Array::get($aCondition, 'get', '', 'trim'): '') . ($type == 'header' ? ' ' . Core_Array::get($aCondition, 'header', '', 'trim') : ''))?></span>
-				<span class="badge badge-round badge-max-width margin-right-5 gray"><?php echo htmlspecialchars(Core::_('Ipaddress_Filter.condition_' . Core_Array::get($aCondition, 'condition', '', 'trim')))?></span>
-				<span class="badge badge-round badge-max-width margin-right-5 blue"><?php echo htmlspecialchars(Core_Array::get($aCondition, 'value', '', 'trim'))?></span>
+			$filter_type = htmlspecialchars(Core::_('Ipaddress_Filter.' . $type) . ($type == 'get' ? ' ' . Core_Array::get($aCondition, 'get', '', 'trim'): '') . ($type == 'header' ? ' ' . Core_Array::get($aCondition, 'header', '', 'trim') : ''));
+			$filter_condition = htmlspecialchars(Core::_('Ipaddress_Filter.condition_' . Core_Array::get($aCondition, 'condition', '', 'trim')));
+			$filter_value = htmlspecialchars(Core_Array::get($aCondition, 'value', '', 'trim'));
+
+			?><div class="d-flex align-items-center margin-bottom-5">
+				<span class="badge badge-round badge-max-width margin-right-5 green" title="<?php echo $filter_type?>"><?php echo $filter_type?></span>
+				<span class="badge badge-round badge-max-width margin-right-5 gray" title="<?php echo $filter_condition?>"><?php echo $filter_condition?></span>
+				<span class="badge badge-round badge-max-width margin-right-5 blue" title="<?php echo $filter_value?>"><?php echo $filter_value?></span>
 
 				<?php
 				if ($aCondition['case_sensitive'])
@@ -146,8 +167,7 @@ class Ipaddress_Filter_Model extends Core_Entity
 					?><i title="<?php echo Core::_('Ipaddress_Filter.case_sensitive')?>" class="fa-solid fa-font"></i><?php
 				}
 				?>
-			</div>
-			<?php
+			</div><?php
 		}
 	}
 

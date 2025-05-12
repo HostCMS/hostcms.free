@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Item_Comment_Controller_Edit extends Comment_Controller_Edit
 {
@@ -41,7 +41,7 @@ class Shop_Item_Comment_Controller_Edit extends Comment_Controller_Edit
 		$this->addTabAfter($oPropertyTab, $oMainTab);
 
 		// Properties
-		Property_Controller_Tab::factory($this->_Admin_Form_Controller)
+		Core::moduleIsActive('property') && Property_Controller_Tab::factory($this->_Admin_Form_Controller)
 			->setObject($this->_object)
 			->setDatasetId($this->getDatasetId())
 			->linkedObject(Core_Entity::factory('Shop_Comment_Property_List', $oShop->id))
@@ -72,7 +72,7 @@ class Shop_Item_Comment_Controller_Edit extends Comment_Controller_Edit
 					->class('input-group-addon blue')
 					->value('<i class="fa fa-external-link"></i>')
 					->target('_blank')
-					->href("/admin/shop/item/index.php?hostcms[action]=edit&hostcms[window]=id_content&shop_id={$oShop->id}&shop_group_id={$oShop_Item->shop_group_id}&hostcms[checked][1][{$shop_item_id}]=1")
+					->href(Admin_Form_Controller::correctBackendPath("/{admin}/shop/item/index.php?hostcms[action]=edit&hostcms[window]=id_content&shop_id={$oShop->id}&shop_group_id={$oShop_Item->shop_group_id}&hostcms[checked][1][{$shop_item_id}]=1"))
 			);
 
 		$oAdditionalRow1->add($oAdmin_Form_Entity_Input_Name);
@@ -94,7 +94,7 @@ class Shop_Item_Comment_Controller_Edit extends Comment_Controller_Edit
 		$Comment_Shop_Item->Shop_Item->clearCache();
 
 		// Properties
-		Property_Controller_Tab::factory($this->_Admin_Form_Controller)
+		Core::moduleIsActive('property') && Property_Controller_Tab::factory($this->_Admin_Form_Controller)
 			->setObject($this->_object)
 			->linkedObject(Core_Entity::factory('Shop_Comment_Property_List', $Comment_Shop_Item->Shop_Item->shop_id))
 			->applyObjectProperty();

@@ -13,5 +13,6 @@ return array(
 	'latitude' => 'Latitude',
 	'longitude' => 'Longitude',
 	'house' => 'House',
-	'flat' => 'Flat'
+	'flat' => 'Flat',
+	'description' => 'Description',
 );

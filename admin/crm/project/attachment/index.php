@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -39,7 +39,7 @@ if (Core_Array::getGet('crm_project_attachment_id'))
 
 // Код формы
 $iAdmin_Form_Id = 326;
-$sAdminFormAction = '/admin/crm/project/attachment/index.php';
+$sAdminFormAction = '/{admin}/crm/project/attachment/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 

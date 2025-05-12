@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Chartaccount
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Chartaccount_Closure_Period_Model extends Core_Entity
 {
@@ -196,7 +196,7 @@ class Chartaccount_Closure_Period_Model extends Core_Entity
 
 			99 счет ведется только в бухгалтерском учете (БУ).
 
-			Смысл закрытия года (реформации баланса), чтобы закрылись все субсчета 90, 91 и 99 счета. 
+			Смысл закрытия года (реформации баланса), чтобы закрылись все субсчета 90, 91 и 99 счета.
 
 			Для закрытия 90 счета нужно сделать проводки с субсчетов всех затратных счетов и счета выручки в субсчет 90.09. Если у нас остаток по кредиту 90.01 (выручка), то мы делаем проводку с дебета 90.01 в кредит 90.09 на сумму остатка. С счетами учета затрат наоборот - с кредита счета учета затрат в дебет 90.09.
 
@@ -321,9 +321,9 @@ class Chartaccount_Closure_Period_Model extends Core_Entity
 	{
 		$color = Core_Str::createColor($this->getEntityType());
 
-		$href = $oAdmin_Form_Controller->getAdminActionLoadHref(array('path' => '/admin/chartaccount/closure/period/index.php', 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => $this->id));
+		$href = $oAdmin_Form_Controller->getAdminActionLoadHref(array('path' => '/{admin}/chartaccount/closure/period/index.php', 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => $this->id));
 
-		$onclick = $oAdmin_Form_Controller->getAdminActionModalLoad(array('path' => '/admin/chartaccount/closure/period/index.php', 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => $this->id, 'window' => '', 'width' => '90%'));
+		$onclick = $oAdmin_Form_Controller->getAdminActionModalLoad(array('path' => '/{admin}/chartaccount/closure/period/index.php', 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => $this->id, 'window' => '', 'width' => '90%'));
 
 		ob_start();
 

@@ -8,10 +8,22 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Querybuilder
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 {
+	/**
+	 * WITH
+	 * @var array
+	 */
+	protected $_with = array();
+	
+	/**
+	 * WITH RECURCIVE option
+	 * @var array
+	 */
+	protected $_withRecursive = FALSE;
+
 	/**
 	 * WHERE
 	 * @var array
@@ -97,6 +109,87 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	{
 		$this->_dataBase->asAssoc();
 		return $this;
+	}
+
+	/**
+	 * Add WITH (Common Table Expressions) and WITH RECURSIVE (Recursive Common Table Expressions)
+	 *
+	 * <code>
+	 * $cte = Core_QueryBuilder::select(array(1, 'col1'), array(2, 'col2'))
+	 * 	->union(
+	 * 		Core_QueryBuilder::select(3, 4)
+	 * 	);
+	 *
+	 * Core_QueryBuilder::select('col1', 'col2')
+	 * 	//->with('cte', $cte)
+	 * 	//->with('RECURSIVE', 'cte', $cte)
+	 * 	->with('cte', 'col1', 'col2', $cte)
+	 * 	->from('cte')
+	 * 	->execute();
+	 * </code>
+	 * @return self
+	 */
+	public function with()
+	{
+		$args = func_get_args();
+
+		if (count($args) >= 2)
+		{
+			$oQB = array_pop($args);
+
+			if (!is_object($oQB))
+			{
+				throw new Core_Exception("with(cte_name, [col_name [, col_name] ...], subquery) expected subquery as an object, %type given",
+						array('%type' => gettype($oQB))
+					);
+			}
+
+			if (is_string($args[0]) && strtoupper($args[0]) == 'RECURSIVE')
+			{
+				array_shift($args);
+				$this->_withRecursive = TRUE;
+			}
+
+			$this->_with[] = array(
+				'cte_name' => array_shift($args),
+				'subquery' => $oQB,
+				'cols' => $args
+			);
+		}
+		else
+		{
+			throw new Core_Exception("with(cte_name, [col_name [, col_name] ...], subquery) must has an options with 2 or more args, %count given",
+					array('%count' => count($args))
+				);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Build WITH expression
+	 *
+	 * @param array $aWiths
+	 * @return string The SQL query
+	 */
+	protected function _buildWith(array $aWiths)
+	{
+		$aTmp = array();
+		foreach ($aWiths as $aWith)
+		{
+			$sql = $this->quoteTable($aWith['cte_name']);
+
+			if (count($aWith['cols']))
+			{
+				$sql .= ' (' . implode(', ', $this->_quoteColumns($aWith['cols'])) . ')';
+			}
+
+			$sql .= ' AS (' . $aWith['subquery']->build() . ')';
+			
+			$aTmp[] = $sql;
+		}
+
+		return "WITH" . ($this->_withRecursive ? ' RECURSIVE' : '') . "\n" . implode(",\n", $aTmp);
 	}
 
 	/**
@@ -976,7 +1069,10 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 				? '(' . $column->build() . ')'
 				: $column->build()
 			)
-			: $this->_dataBase->quoteColumnName($column);
+			: (is_null($column) // EXISTS, NOT EXISTS
+				? ''
+				: $this->_dataBase->quoteColumnName($column)
+			);
 
 		$expression = strtoupper($expression);
 		if (is_null($value))
@@ -999,7 +1095,8 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 			case 'NOT LIKE': // Negation of simple pattern matching
 			case '!=': // Not equal operator
 			case '<>': // Not equal operator
-
+			case 'EXISTS':
+			case 'NOT EXISTS':
 				// Subquery Syntax
 				// http://dev.mysql.com/doc/refman/5.7/en/subqueries.html
 				if ($this->_isObjectSelect($value))
@@ -1014,10 +1111,10 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 						: $this->_dataBase->quote($value);
 				}
 			break;
-			case 'REGEXP':
-			case 'NOT REGEXP':
-			case 'RLIKE':
-			case 'NOT RLIKE':
+			case 'REGEXP': // Whether string matches regular expression
+			case 'NOT REGEXP': // Negation of REGEXP
+			case 'RLIKE': // Whether string matches regular expression
+			case 'NOT RLIKE': // Negation of RLIKE
 				$value = $this->_dataBase->quote($value);
 			break;
 			case 'IN': // Check whether a value is within a set of values
@@ -1076,7 +1173,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	}
 
 	/**
-	 * Set order column and direction
+	 * Add order column and direction
 	 *
 	 * http://dev.mysql.com/doc/refman/5.7/en/sorting-rows.html
 	 *
@@ -1149,7 +1246,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * Build ORDER BY expression
 	 *
 	 * @param array $aOrderBy
-	 * @return string The SQL query
+	 * @return string|NULL The SQL query
 	 */
 	protected function _buildOrderBy(array $aOrderBy)
 	{
@@ -1224,6 +1321,16 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	}
 
 	/**
+	 * Clear LIMIT
+	 * @return self
+	 */
+	public function clearLimit()
+	{
+		$this->_limit = NULL;
+		return $this;
+	}
+
+	/**
 	 * Set offset
 	 *
 	 * <code>
@@ -1253,6 +1360,16 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	public function getOffset()
 	{
 		return $this->_offset;
+	}
+
+	/**
+	 * Clear OFFSET
+	 * @return self
+	 */
+	public function clearOffset()
+	{
+		$this->_offset = NULL;
+		return $this;
 	}
 
 	/**

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Wysiwyg
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Wysiwyg_Filemanager_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -128,10 +128,7 @@ class Wysiwyg_Filemanager_Controller_Edit extends Admin_Form_Action_Controller_T
 		{
 			Core_File::write($filePath, $content);
 
-			if (function_exists('opcache_reset'))
-			{
-				opcache_reset();
-			}
+			Core_Cache::opcacheReset();
 		}
 
 		//parent::_applyObjectProperty();

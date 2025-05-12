@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -40,12 +40,25 @@ if (Core_Array::getGet('downloadFile'))
 
 // Код формы
 $iAdmin_Form_Id = 220;
-$sAdminFormAction = '/admin/event/index.php';
+$sAdminFormAction = '/{admin}/event/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
-$parent_id = intval(Core_Array::getGet('parent_id', 0));
+$parent_id = Core_Array::getGet('parent_id', 0, 'int');
 $bShow_subs = !is_null(Core_Array::getGet('show_subs'));
+
+$crm_project_id = Core_Array::getGet('crm_project_id', 0, 'int');
+
+$title = Core::_('Event.events_title');
+
+if ($crm_project_id)
+{
+	$oCrm_Project = Core_Entity::factory('Crm_Project')->getById($crm_project_id, FALSE);
+	if (!is_null($oCrm_Project))
+	{
+		$title .= ': ' . $oCrm_Project->name;
+	}
+}
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
@@ -53,9 +66,10 @@ $oAdmin_Form_Controller
 	->module(Core_Module_Abstract::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
-	->title(Core::_('Event.events_title'))
-	->pageTitle(Core::_('Event.events_title'))
-	->addView('kanban', 'Event_Controller_Kanban');
+	->title($title)
+	->pageTitle($title)
+	->addView('kanban', 'Event_Controller_Kanban')
+	->addView('list', 'Event_View');
 
 if ($bShow_subs && $parent_id)
 {
@@ -82,9 +96,9 @@ if (Core_Array::getPost('id') && (Core_Array::getPost('target_id') || Core_Array
 		'status' => 'error'
 	);
 
-	$iEventId = intval(Core_Array::getPost('id'));
-	$iTargetStatusId = intval(Core_Array::getPost('target_id'));
-	$iSenderStatusId = intval(Core_Array::getPost('sender_id'));
+	$iEventId = Core_Array::getPost('id', 0, 'int');
+	$iTargetStatusId = Core_Array::getPost('target_id', 0, 'int');
+	$iSenderStatusId = Core_Array::getPost('sender_id', 0, 'int');
 
 	$oEvents = Core_Entity::factory('Event');
 
@@ -106,6 +120,16 @@ if (Core_Array::getPost('id') && (Core_Array::getPost('target_id') || Core_Array
 				$oEvent->deleted = 0;
 				$oEvent->event_status_id = $iTargetStatusId;
 				$oEvent->last_modified = Core_Date::timestamp2sql(time());
+
+				if ($oEvent_Status->final)
+				{
+					$oEvent->completed = $oEvent_Status->final == 1 ? 1 : -1;
+				}
+				else
+				{
+					$oEvent->completed = 0;
+				}
+
 				$oEvent->save();
 
 				if ($previousStatusId != $oEvent->event_status_id)
@@ -115,7 +139,7 @@ if (Core_Array::getPost('id') && (Core_Array::getPost('target_id') || Core_Array
 
 				$aJSON['status'] = 'success';
 
-				if (intval(Core_Array::getPost('update_data')))
+				if (Core_Array::getPost('update_data', 0, 'int'))
 				{
 					$aTargetData = $oEvent->updateKanban($iTargetStatusId);
 
@@ -220,7 +244,7 @@ if (!$siteuser_id && is_null(Core_Array::getGet('hideMenu')))
 					->name(Core::_('Event.events_menu_types'))
 					->icon('fa fa-bars')
 					->href(
-						$oAdmin_Form_Controller->getAdminLoadHref(array('path' => $sPath = '/admin/event/type/index.php'))
+						$oAdmin_Form_Controller->getAdminLoadHref(array('path' => $sPath = '/{admin}/event/type/index.php'))
 					)
 					->onclick(
 						$oAdmin_Form_Controller->getAdminLoadAjax(array('path' => $sPath))
@@ -231,7 +255,7 @@ if (!$siteuser_id && is_null(Core_Array::getGet('hideMenu')))
 					->name(Core::_('Event.events_menu_groups'))
 					->icon('fa fa-folder-o')
 					->href(
-						$oAdmin_Form_Controller->getAdminLoadHref(array('path' => $sPath = '/admin/event/group/index.php'))
+						$oAdmin_Form_Controller->getAdminLoadHref(array('path' => $sPath = '/{admin}/event/group/index.php'))
 					)
 					->onclick(
 						$oAdmin_Form_Controller->getAdminLoadAjax(array('path' => $sPath))
@@ -242,7 +266,7 @@ if (!$siteuser_id && is_null(Core_Array::getGet('hideMenu')))
 					->name(Core::_('Event.events_menu_statuses'))
 					->icon('fa fa-circle')
 					->href(
-						$oAdmin_Form_Controller->getAdminLoadHref(array('path' => $sPath = '/admin/event/status/index.php'))
+						$oAdmin_Form_Controller->getAdminLoadHref(array('path' => $sPath = '/{admin}/event/status/index.php'))
 					)
 					->onclick(
 						$oAdmin_Form_Controller->getAdminLoadAjax(array('path' => $sPath))
@@ -259,7 +283,7 @@ if (!$siteuser_id && !$oCurrentUser->read_only && is_null(Core_Array::getGet('hi
 	$oAdmin_Form_Controller->addEntity(
 		Admin_Form_Entity::factory('Code')
 			->html('<div class="add-event margin-bottom-20">
-				<form action="/admin/event/index.php" method="POST">
+				<form action="' . Admin_Form_Controller::correctBackendPath("/{admin}/event/index.php") . '" method="POST">
 					<div class="input-group">
 						<input type="text" name="event_name" class="form-control" placeholder="' . Core::_('Event.placeholderEventName') . '">
 						<span class="input-group-btn">
@@ -498,6 +522,19 @@ $oAdmin_Form_Dataset
 	)->addCondition(
 		array('groupBy' => array('events.id'))
 	);
+
+if ($crm_project_id)
+{
+	$oAdmin_Form_Dataset->addCondition(
+		array('join' => array('event_crm_projects', 'event_crm_projects.event_id', '=', 'events.id'))
+	)
+	->addCondition(
+		array('where' => array('event_crm_projects.crm_project_id', '=', $crm_project_id))
+	)
+	->addCondition(
+		array('groupBy' => array('events.id'))
+	);
+}
 
 if ($siteuser_id)
 {

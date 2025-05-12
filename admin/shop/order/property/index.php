@@ -4,13 +4,13 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
 Core_Auth::authorization($sModule = 'shop');
 
-$sAdminFormAction = '/admin/shop/order/property/index.php';
+$sAdminFormAction = '/{admin}/shop/order/property/index.php';
 $iAdmin_Form_Id = 67;
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -76,8 +76,8 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop.menu'))
-		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/index.php', NULL, NULL, ''))
-		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/index.php', NULL, NULL, ''))
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/index.php', NULL, NULL, ''))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/index.php', NULL, NULL, ''))
 );
 
 if ($oShop->shop_dir_id)
@@ -88,8 +88,8 @@ if ($oShop->shop_dir_id)
 	{
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 			->name($oShopDir->name)
-			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDir->id}"))
-			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDir->id}"));
+			->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDir->id}"))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDir->id}"));
 	} while ($oShopDir = $oShopDir->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
@@ -102,8 +102,8 @@ if ($oShop->shop_dir_id)
 
 $oAdmin_Form_Entity_Breadcrumbs->add(Admin_Form_Entity::factory('Breadcrumb')
 	->name($oShop->name)
-	->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id=0"))
-	->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id=0")));
+	->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id=0"))
+	->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id=0")));
 
 if ($oShopGroup->id)
 {
@@ -113,8 +113,8 @@ if ($oShopGroup->id)
 	{
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 			->name($oShopGroupTmp->name)
-			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupTmp->id}"))
-			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupTmp->id}"));
+			->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupTmp->id}"))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupTmp->id}"));
 	} while ($oShopGroupTmp = $oShopGroupTmp->getParent());
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 	foreach ($aBreadcrumbs as $oAdmin_Form_Entity_Breadcrumb)
@@ -126,14 +126,14 @@ if ($oShopGroup->id)
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop_Order.show_order_title', $oShop->name, FALSE))
-		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
-		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/order/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/order/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
 );
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop_Order.property_menu'))
-		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
-		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
 );
 
 if ($property_dir_id)
@@ -148,8 +148,8 @@ if ($property_dir_id)
 		{
 			$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 				->name($oProperty_Dir->name)
-				->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={$oProperty_Dir->id}"))
-				->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={$oProperty_Dir->id}"));
+				->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={$oProperty_Dir->id}"))
+				->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={$oProperty_Dir->id}"));
 		} while ($oProperty_Dir = $oProperty_Dir->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
@@ -254,18 +254,18 @@ if ($oAdminFormActionMerge && $oAdmin_Form_Controller->getAction() == 'merge')
 // Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(Core_Entity::factory('Property_Dir'));
 $oAdmin_Form_Dataset
-->addCondition(
-	array('select' => array('property_dirs.*'))
-)->addCondition(
-	array('join' => array('shop_order_property_dirs', 'shop_order_property_dirs.property_dir_id', '=', 'property_dirs.id'))
-)/*->addCondition(
-	array('where' =>array('parent_id', '=', $property_dir_id))
-)*/->addCondition(
-	array('where' =>array('shop_order_property_dirs.shop_id', '=', $oShop->id))
-)
-->changeField('name', 'type', 4)
-->changeField('name', 'link', "/admin/shop/order/property/index.php?shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={id}")
-->changeField('name', 'onclick', "$.adminLoad({path: '/admin/shop/order/property/index.php', additionalParams: 'shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={id}', windowId: '{windowId}'}); return false");
+	->addCondition(
+		array('select' => array('property_dirs.*'))
+	)->addCondition(
+		array('join' => array('shop_order_property_dirs', 'shop_order_property_dirs.property_dir_id', '=', 'property_dirs.id'))
+	)/*->addCondition(
+		array('where' =>array('parent_id', '=', $property_dir_id))
+	)*/->addCondition(
+		array('where' =>array('shop_order_property_dirs.shop_id', '=', $oShop->id))
+	)
+	->changeField('name', 'type', 4)
+	->changeField('name', 'link', "/{admin}/shop/order/property/index.php?shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={id}")
+	->changeField('name', 'onclick', "$.adminLoad({path: '/{admin}/shop/order/property/index.php', additionalParams: 'shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={id}', windowId: '{windowId}'}); return false");
 
 if (strlen($sGlobalSearch))
 {
@@ -322,10 +322,10 @@ else
 }
 
 $oAdmin_Form_Dataset
-	->changeField('multiple', 'link', "/admin/shop/order/property/index.php?hostcms[action]=changeMultiple&hostcms[checked][{dataset_key}][{id}]=1&shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={property_dir_id}")
-	->changeField('multiple', 'onclick', "$.adminLoad({path: '/admin/shop/order/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={property_dir_id}', action: 'changeMultiple', windowId: '{windowId}'}); return false")
-	->changeField('indexing', 'link', "/admin/shop/order/property/index.php?hostcms[action]=changeIndexing&hostcms[checked][{dataset_key}][{id}]=1&shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={property_dir_id}")
-	->changeField('indexing', 'onclick', "$.adminLoad({path: '/admin/shop/order/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={property_dir_id}', action: 'changeIndexing', windowId: '{windowId}'}); return false");
+	->changeField('multiple', 'link', "/{admin}/shop/order/property/index.php?hostcms[action]=changeMultiple&hostcms[checked][{dataset_key}][{id}]=1&shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={property_dir_id}")
+	->changeField('multiple', 'onclick', "$.adminLoad({path: '/{admin}/shop/order/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={property_dir_id}', action: 'changeMultiple', windowId: '{windowId}'}); return false")
+	->changeField('indexing', 'link', "/{admin}/shop/order/property/index.php?hostcms[action]=changeIndexing&hostcms[checked][{dataset_key}][{id}]=1&shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={property_dir_id}")
+	->changeField('indexing', 'onclick', "$.adminLoad({path: '/{admin}/shop/order/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={property_dir_id}', action: 'changeIndexing', windowId: '{windowId}'}); return false");
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);

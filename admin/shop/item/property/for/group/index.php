@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'shop');
 
 // Код формы
 $iAdmin_Form_Id = 71;
-$sAdminFormAction = '/admin/shop/item/property/for/group/index.php';
+$sAdminFormAction = '/{admin}/shop/item/property/for/group/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -61,7 +61,7 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 // Строка навигации
 $property_dir_id = Core_Array::getGet('property_dir_id', 0, 'int');
 
-$sShopDirPath = '/admin/shop/index.php';
+$sShopDirPath = '/{admin}/shop/index.php';
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs->add(
@@ -103,7 +103,7 @@ if ($oShop->shop_dir_id)
 }
 
 $additionalParams = 'shop_id=' . $shop_id;
-$sShopPath = '/admin/shop/item/index.php';
+$sShopPath = '/{admin}/shop/item/index.php';
 
 // Ссылка на название ИС
 $oAdmin_Form_Entity_Breadcrumbs->add(
@@ -220,23 +220,21 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 
 // Ограничение источника 0
 $oAdmin_Form_Dataset->addCondition(
-	array('select' => array('property_dirs.*'))
-)->addCondition(
-	array('join' => array('shop_item_property_dirs', 'shop_item_property_dirs.property_dir_id', '=', 'property_dirs.id'))
-)/*->addCondition(
-	array('where' =>
-		array('parent_id', '=', $property_dir_id)
+		array('select' => array('property_dirs.*'))
+	)->addCondition(
+		array('join' => array('shop_item_property_dirs', 'shop_item_property_dirs.property_dir_id', '=', 'property_dirs.id'))
+	)/*->addCondition(
+		array('where' =>
+			array('parent_id', '=', $property_dir_id)
+		)
+	)*/->addCondition(
+		array('where' =>
+			array('shop_item_property_dirs.shop_id', '=', $shop_id)
+		)
 	)
-)*/->addCondition(
-	array('where' =>
-		array('shop_item_property_dirs.shop_id', '=', $shop_id)
-	)
-)
-
-->changeField('name', 'type', 4)
-->changeField('name', 'link', "/admin/shop/item/property/for/group/index.php?shop_id=" . $shop_id . "&shop_group_id=" . $shop_group_id . "&property_dir_id={id}")
-->changeField('name', 'onclick', "$.adminLoad({path: '/admin/shop/item/property/for/group/index.php', additionalParams: 'shop_id=" . $shop_id . "&shop_group_id=" . $shop_group_id ."&property_dir_id={id}', windowId: '{windowId}'}); return false")
-;
+	->changeField('name', 'type', 4)
+	->changeField('name', 'link', "/{admin}/shop/item/property/for/group/index.php?shop_id=" . $shop_id . "&shop_group_id=" . $shop_group_id . "&property_dir_id={id}")
+	->changeField('name', 'onclick', "$.adminLoad({path: '/{admin}/shop/item/property/for/group/index.php', additionalParams: 'shop_id=" . $shop_id . "&shop_group_id=" . $shop_group_id ."&property_dir_id={id}', windowId: '{windowId}'}); return false");
 
 if (strlen($sGlobalSearch))
 {

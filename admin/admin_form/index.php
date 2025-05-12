@@ -4,13 +4,13 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
 // Код формы
 $iAdmin_Form_Id = 1;
-$sAdminFormAction = '/admin/admin_form/index.php';
+$sAdminFormAction = '/{admin}/admin_form/index.php';
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
 if (Core_Auth::logged())
@@ -146,7 +146,7 @@ if (Core_Auth::logged())
 			<div class="modal fade" id="adminFormSettingsModal<?php echo $oAdmin_Form->id?>" tabindex="-1" role="dialog" aria-labelledby="adminFormSettingsModalLabel">
 				<div class="modal-dialog modal-lg" role="document">
 					<div class="modal-content no-padding-bottom">
-						<form action="/admin/admin_form/index.php" method="POST">
+						<form action="<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/admin_form/index.php")?>" method="POST">
 							<div class="modal-header">
 								<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 								<h4 class="modal-title"><?php echo Core::_('Admin_Form.setting_modal_title', $formName)?></h4>
@@ -238,39 +238,18 @@ if (Core_Auth::logged())
 
 		if ($width && !is_null($oAdmin_Form) && !is_null($oUser))
 		{
-			// Если не было полей для формы сохранено
+			// Если не было полей для формы сохранено, то при создании не затрагиваем пользовательские поля
 			$aAdmin_Form_Field_Settings = $oAdmin_Form->Admin_Form_Field_Settings->getAllByUser_id($oUser->id, FALSE);
 			if (!count($aAdmin_Form_Field_Settings))
 			{
 				$aAdmin_Form_Fields = $oAdmin_Form->Admin_Form_Fields->getAllByshow_by_default(1, FALSE);
-
-				if (Core::moduleIsActive('field'))
-				{
-					$site_id = Core_Array::getPost('site_id', 0, 'int');
-					$modelsNames = Core_Array::getPost('modelsNames', '', 'trim');
-
-					$aFields = Admin_Form_Controller::getFields($site_id, explode(',', $modelsNames));
-					$aAdmin_Form_Fields = array_merge($aAdmin_Form_Fields, $aFields);
-				}
-
 				foreach ($aAdmin_Form_Fields as $oTmpAdmin_Form_Field)
 				{
 					$oAdmin_Form_Field_Setting = Core_Entity::factory('Admin_Form_Field_Setting');
 					$oAdmin_Form_Field_Setting->admin_form_id = $oAdmin_Form->id;
 					$oAdmin_Form_Field_Setting->user_id = $oUser->id;
-
-					if (strpos($oTmpAdmin_Form_Field->id, 'uf_') !== FALSE)
-					{
-						$field_id = intval(filter_var($oTmpAdmin_Form_Field->id, FILTER_SANITIZE_NUMBER_INT));
-						$oAdmin_Form_Field_Setting->field_id = $field_id;
-						$oAdmin_Form_Field_Setting->admin_form_field_id = 0;
-					}
-					else
-					{
-						$oAdmin_Form_Field_Setting->admin_form_field_id = $oTmpAdmin_Form_Field->id;
-						$oAdmin_Form_Field_Setting->field_id = 0;
-					}
-
+					$oAdmin_Form_Field_Setting->admin_form_field_id = $oTmpAdmin_Form_Field->id;
+					$oAdmin_Form_Field_Setting->field_id = 0;
 					$oAdmin_Form_Field_Setting->save();
 				}
 			}
@@ -436,7 +415,7 @@ $oAdmin_Form_Controller
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
-$sLanguagePath = '/admin/admin_form/language/index.php';
+$sLanguagePath = '/{admin}/admin_form/language/index.php';
 
 // Элементы меню
 $oAdmin_Form_Entity_Menus->add(

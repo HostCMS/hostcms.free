@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'chartaccount');
 
 // Код формы
 $iAdmin_Form_Id = 358;
-$sAdminFormAction = '/admin/chartaccount/index.php';
+$sAdminFormAction = '/{admin}/chartaccount/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -89,10 +89,10 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('Chartaccount_Trialbalance.title'))
 		->icon('fa-solid fa-scale-balanced')
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref(array('path' => '/admin/chartaccount/trialbalance/index.php'))
+			$oAdmin_Form_Controller->getAdminLoadHref(array('path' => '/{admin}/chartaccount/trialbalance/index.php'))
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax(array('path' => '/admin/chartaccount/trialbalance/index.php'))
+			$oAdmin_Form_Controller->getAdminLoadAjax(array('path' => '/{admin}/chartaccount/trialbalance/index.php'))
 		)
 )->add(
 	Admin_Form_Entity::factory('Menu')
@@ -103,30 +103,30 @@ $oAdmin_Form_Entity_Menus->add(
 				->name(Core::_('Chartaccount_Operation.title'))
 				->icon('fa-solid fa-book')
 				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref(array('path' => '/admin/chartaccount/operation/index.php'))
+					$oAdmin_Form_Controller->getAdminLoadHref(array('path' => '/{admin}/chartaccount/operation/index.php'))
 				)
 				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax(array('path' => '/admin/chartaccount/operation/index.php'))
+					$oAdmin_Form_Controller->getAdminLoadAjax(array('path' => '/{admin}/chartaccount/operation/index.php'))
 				)
 		)->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Chartaccount_Entry.menu'))
 				->icon('fa-solid fa-book-open')
 				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref(array('path' => '/admin/chartaccount/entry/index.php'))
+					$oAdmin_Form_Controller->getAdminLoadHref(array('path' => '/{admin}/chartaccount/entry/index.php'))
 				)
 				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax(array('path' => '/admin/chartaccount/entry/index.php'))
+					$oAdmin_Form_Controller->getAdminLoadAjax(array('path' => '/{admin}/chartaccount/entry/index.php'))
 				)
 		)->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Chartaccount_Closure_Period.menu'))
 				->icon('fa-solid fa-book-bookmark')
 				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref(array('path' => '/admin/chartaccount/closure/period/index.php'))
+					$oAdmin_Form_Controller->getAdminLoadHref(array('path' => '/{admin}/chartaccount/closure/period/index.php'))
 				)
 				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax(array('path' => '/admin/chartaccount/closure/period/index.php'))
+					$oAdmin_Form_Controller->getAdminLoadAjax(array('path' => '/{admin}/chartaccount/closure/period/index.php'))
 				)
 		)
 )->add(
@@ -134,7 +134,7 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('Chartaccount_Cashflow.title'))
 		->icon('fa-solid fa-arrow-right-arrow-left')
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref($sCashflowsFormPath = '/admin/chartaccount/cashflow/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadHref($sCashflowsFormPath = '/{admin}/chartaccount/cashflow/index.php', NULL, NULL, '')
 		)
 		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($sCashflowsFormPath, NULL, NULL, '')
@@ -151,10 +151,10 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Chartaccount.title'))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/chartaccount/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/chartaccount/index.php', NULL, NULL, '')
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/chartaccount/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/chartaccount/index.php', NULL, NULL, '')
 		)
 );
 

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Wysiwyg
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Wysiwyg_Controller
 {
@@ -41,8 +41,8 @@ class Wysiwyg_Controller
 		{
 			if (method_exists($oEntity, $pathMethod) && strpos($oEntity->$hrefMethod(), '/private/') === FALSE)
 			{
-				$aReturn['href'] = $oEntity->$hrefMethod();
-				$aReturn['path'] = $oEntity->$pathMethod();
+				$aReturn['href'] = rtrim($oEntity->$hrefMethod(), '/') . '/';
+				$aReturn['path'] = rtrim($oEntity->$pathMethod(), '\/') . DIRECTORY_SEPARATOR;
 
 				break;
 			}
@@ -72,35 +72,33 @@ class Wysiwyg_Controller
 				// Перемещаем файл из директории Wysiwyg_Controller::getTmpDirHref()
 				if (strpos($realFilepath, Core_File::pathCorrection('/' . Wysiwyg_Controller::getTmpDirHref())) === 0)
 				{
-					$newHref = Wysiwyg_Controller::getTmpDirHref();
-					$newPath = CMS_FOLDER . ltrim($newHref, DIRECTORY_SEPARATOR);
-
 					$aTmp = Wysiwyg_Controller::getPathAndHref($oEntity);
-
 					if (is_array($aTmp))
 					{
 						$newHref = $aTmp['href'];
 						$newPath = $aTmp['path'];
 					}
-
-					if (!is_null($newHref) && !is_null($newPath))
+					else
 					{
-						try {
-							if (method_exists($oEntity, 'createDir'))
-							{
-								$oEntity->createDir();
-							}
-							else
-							{
-								Core_File::mkdir($newPath, TRUE);
-							}
+						$newHref = Wysiwyg_Controller::getTmpDirHref();
+						$newPath = CMS_FOLDER . ltrim($newHref, DIRECTORY_SEPARATOR);
+					}
 
-							Core_File::rename(CMS_FOLDER . ltrim($realFilepath, DIRECTORY_SEPARATOR), $newPath . basename($realFilepath));
-
-							$aConform[$filepath] = '/' . ltrim($newHref, '/') . basename($filepath);
-						} catch (Exception $e) {
-							Core_Message::show($e->getMessage(), 'error');
+					try {
+						if (method_exists($oEntity, 'createDir'))
+						{
+							$oEntity->createDir();
 						}
+						else
+						{
+							Core_File::mkdir($newPath, TRUE);
+						}
+
+						Core_File::rename(CMS_FOLDER . ltrim($realFilepath, DIRECTORY_SEPARATOR), $newPath . basename($realFilepath));
+
+						$aConform[$filepath] = '/' . ltrim($newHref, '/') . basename($filepath);
+					} catch (Exception $e) {
+						Core_Message::show($e->getMessage(), 'error');
 					}
 				}
 			}
@@ -119,10 +117,9 @@ class Wysiwyg_Controller
 				$oEntity->save();
 
 				// Дополнительные свойства
-				if (method_exists($oEntity, 'getPropertyValues'))
+				if (Core::moduleIsActive('property') && method_exists($oEntity, 'getPropertyValues'))
 				{
 					$aProperty_Values = $oEntity->getPropertyValues(FALSE);
-
 					foreach($aProperty_Values as $oProperty_Value)
 					{
 						// Визуальный редактор
@@ -135,7 +132,7 @@ class Wysiwyg_Controller
 				}
 
 				// Пользовательские поля
-				if (method_exists($oEntity, 'getFields'))
+				if (Core::moduleIsActive('field') && method_exists($oEntity, 'getFields'))
 				{
 					$aField_Values = $oEntity->getFields(FALSE);
 					foreach($aField_Values as $oField_Value)
@@ -154,22 +151,22 @@ class Wysiwyg_Controller
 				ob_start();
 				?>
 				<script type="text/javascript">
-					$(function(){
-						// Удаляем скрытые инпуты
-						var $form = $('#<?php echo $windowId?> form.adminForm').find('input[name ^= wysiwyg_images]').remove();
+				$(function(){
+					// Удаляем скрытые инпуты
+					var $form = $('#<?php echo $windowId?> form.adminForm').find('input[name ^= wysiwyg_images]').remove();
 
-						var aConformities = [];
-						<?php
-						foreach ($aConform as $source => $destination)
-						{
-							?>aConformities.push({
-								source: '<?php echo Core_Str::escapeJavascriptVariable($source)?>',
-								destination: '<?php echo Core_Str::escapeJavascriptVariable($destination)?>'
-							});<?php
-						}
-						?>
-						replaceWysiwygImages(aConformities);
-					});
+					var aConformities = [];
+					<?php
+					foreach ($aConform as $source => $destination)
+					{
+						?>aConformities.push({
+							source: '<?php echo Core_Str::escapeJavascriptVariable($source)?>',
+							destination: '<?php echo Core_Str::escapeJavascriptVariable($destination)?>'
+						});<?php
+					}
+					?>
+					replaceWysiwygImages(aConformities);
+				});
 				</script>
 				<?php
 

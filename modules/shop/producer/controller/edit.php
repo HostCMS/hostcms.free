@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -44,7 +44,7 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 				parent::setObject($object);
 
 				$this->getField('description')
-					->rows(15)
+					->rows(18)
 					->wysiwyg(Core::moduleIsActive('wysiwyg'));
 
 				$oMainTab = $this->getTab('main');
@@ -224,7 +224,7 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 						allowClear: true,
 						multiple: true,
 						ajax: {
-							url: "/admin/shop/tab/index.php?autocomplete&shop_id=' . $this->_object->shop_id .'",
+							url: hostcmsBackend + "/shop/tab/index.php?autocomplete&shop_id=' . $this->_object->shop_id .'",
 							dataType: "json",
 							type: "GET",
 							processResults: function (data) {
@@ -353,9 +353,14 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 	 */
 	protected function _applyObjectProperty()
 	{
-		parent::_applyObjectProperty();
-
 		$modelName = $this->_object->getModelName();
+		
+		if ($modelName == 'shop_producer')
+		{
+			$this->_formValues['path'] = Core_Array::get($this->_formValues, 'path', '', 'trim');
+		}
+		
+		parent::_applyObjectProperty();
 
 		switch ($modelName)
 		{

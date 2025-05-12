@@ -5,13 +5,43 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 /**
  * Information systems import CSV controller
  *
+ * Доступные методы:
+ *
+ * - encoding('UTF-8') кодировка импорта
+ * - file('my.csv') имя импортируемого CSV-файла, который ранее был загружен во временную директорию
+ * - seek($int) позиция в файле импорта
+ * - time(20) ограничение времени импорта за шаг, из конфигурационного файла, по умолчанию 20
+ * - step(100) ограничение количества импортируемых за шаг, из конфигурационного файла, по умолчанию 100
+ * - separator($str) разделитель столбцов в CSV-файле, по умолчанию ';'
+ * - limiter() ограничитель строки в CSV-файле, по умолчанию '"'
+ * - firstlineheader(TRUE|FALSE) первая строка - название полей
+ * - csv_fields(array) массив соответствий полей CSV элементам системы
+ * - imagesPath($str) путь к импортируемым картинкам, конкатенируется с переденными в файле
+ * - importAction($int) действие с существующими товарами: 1 - обновить существующие товары, 2 - не обновлять существующие товары, 3 - удалить содержимое магазина до импорта. По умолчанию 1
+ * - searchIndexation(TRUE|FALSE) индексировать импортируемые данные, по умолчанию FALSE
+ * - deletePropertyValues(TRUE|FALSE|array()) удалять существующие значения дополнительных свойств перед импортом новых, по умолчанию TRUE
+ * - deleteFieldValues(TRUE|FALSE|array()) удалять существующие значения пользовательских полей перед импортом новых, по умолчанию TRUE
+ * - deleteImage(TRUE|FALSE) удалять основные изображения
+ *
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properties
 {
+	/**
+	 * Array of ID's and GUIDs of cleared item's properties
+	 * @var array
+	 */
+	protected $_aClearedItemsPropertyValues = array();
+
+	/**
+	 * Array of ID's and GUIDs of cleared item's properties
+	 * @var array
+	 */
+	protected $_aClearedItemsFieldValues = array();
+
 	/**
 	 * Array of inserted groups
 	 * @var array
@@ -85,6 +115,12 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 	protected $_sCurrentTags;
 
 	/**
+	 * List of external properties
+	 * @var array
+	 */
+	protected $_aExternalProperties = array();
+
+	/**
 	 * List of small parts of external properties
 	 * @var array
 	 */
@@ -97,10 +133,10 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 	protected $_aExternalPropertiesDesc = array();
 
 	/**
-	 * List of external properties
+	 * List of external fields
 	 * @var array
 	 */
-	protected $_aExternalProperties = array();
+	protected $_aExternalFields = array();
 
 	/**
 	 * List of small parts of external fields
@@ -113,12 +149,6 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 	 * @var array
 	 */
 	protected $_aExternalFieldsDesc = array();
-
-	/**
-	 * List of external fields
-	 * @var array
-	 */
-	protected $_aExternalFields = array();
 
 	/**
 	 * List of additional group
@@ -158,6 +188,8 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 		'importAction',
 		// Флаг, указывающий, включена ли индексация
 		'searchIndexation',
+		'deletePropertyValues',
+		'deleteFieldValues',
 		'deleteImage'
 	);
 
@@ -340,7 +372,9 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 
 		$this->_aConfig = Core_Config::instance()->get('informationsystem_csv', array()) + array(
 			'maxTime' => 20,
-			'maxCount' => 100
+			'maxCount' => 100,
+			'separator' => ';',
+			'limiter' => '"'
 		);
 
 		$this->_iCurrentInformationsystemId = $iCurrentInformationsystemId;
@@ -348,14 +382,14 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 
 		$this->time = $this->_aConfig['maxTime'];
 		$this->step = $this->_aConfig['maxCount'];
+		$this->separator = $this->_aConfig['separator'];
+		$this->limiter = $this->_aConfig['limiter'];
 
 		$this->init();
 
-		// Единожды в конструкторе, чтобы после __wakeup() не обнулялось
-		$this->_InsertedItemsCount = 0;
-		$this->_UpdatedItemsCount = 0;
-		$this->_InsertedGroupsCount = 0;
-		$this->_UpdatedGroupsCount = 0;
+		$this->deletePropertyValues = $this->deleteFieldValues = TRUE;
+
+		$this->_InsertedItemsCount = $this->_UpdatedItemsCount = $this->_InsertedGroupsCount = $this->_UpdatedGroupsCount = 0;
 	}
 
 	/**
@@ -1004,7 +1038,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 						break;
 						// Передана активность инфоэлемента
 						case 'informationsystem_items_is_active':
-							$this->_oCurrentItem->active = $sData;
+							$this->_oCurrentItem->active = $this->_correctCheckbox($sData);
 						break;
 						// Передан порядок сортировки инфоэлемента
 						case 'informationsystem_items_order':
@@ -1041,7 +1075,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 						break;
 						// Передан флаг индексации инфоэлемента
 						case 'informationsystem_items_indexation':
-							$this->_oCurrentItem->indexing = $sData;
+							$this->_oCurrentItem->indexing = $this->_correctCheckbox($sData);
 						break;
 						// Передан идентификатор пользователя сайта
 						case 'site_users_id':
@@ -1083,14 +1117,14 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 								// Дополнительный файл дополнительного свойства/Малое изображение картинки дополнительного свойства
 								$aPropertySmallInfo = explode("-", $sFieldName);
 
-								$this->_aExternalPropertiesSmall[$aPropertySmallInfo[1]] = $sData;
+								$this->_aExternalPropertiesSmall[$aPropertySmallInfo[1]][] = $sData;
 							}
 
 							if (strpos($sFieldName, "propdesc-") === 0)
 							{
 								// Описание дополнительного свойства
 								$aTmpExplode = explode('-', $sFieldName);
-								$this->_aExternalPropertiesDesc[$aTmpExplode[1]] = $sData;
+								$this->_aExternalPropertiesDesc[$aTmpExplode[1]][] = $sData;
 							}
 
 							if (strpos($sFieldName, "prop-") === 0)
@@ -1098,7 +1132,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 								// Основной файл дополнительного свойства/Большое изображение картинки дополнительного свойства
 								$aPropertyInfo = explode("-", $sFieldName);
 
-								$this->_aExternalProperties[$aPropertyInfo[1]] = $sData;
+								$this->_aExternalProperties[$aPropertyInfo[1]][] = $sData;
 							}
 
 							if (strpos($sFieldName, "fieldsmall-") === 0)
@@ -1106,14 +1140,14 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 								// Дополнительный файл пользовательских полей/Малое изображение картинки пользовательских полей
 								$aFieldSmallInfo = explode("-", $sFieldName);
 
-								$this->_aExternalFieldsSmall[$aFieldSmallInfo[1]] = $sData;
+								$this->_aExternalFieldsSmall[$aFieldSmallInfo[1]][] = $sData;
 							}
 
 							if (strpos($sFieldName, "fielddesc-") === 0)
 							{
 								// Описание пользовательских полей
 								$aTmpExplode = explode('-', $sFieldName);
-								$this->_aExternalFieldsDesc[$aTmpExplode[1]] = $sData;
+								$this->_aExternalFieldsDesc[$aTmpExplode[1]][] = $sData;
 							}
 
 							if (strpos($sFieldName, "field-") === 0)
@@ -1121,7 +1155,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 								// Основной файл пользовательских полей/Большое изображение картинки пользовательских полей
 								$aFieldInfo = explode("-", $sFieldName);
 
-								$this->_aExternalFields[$aFieldInfo[1]] = $sData;
+								$this->_aExternalFields[$aFieldInfo[1]][] = $sData;
 							}
 
 							if (strpos($sFieldName, "prop_group-") === 0)
@@ -1314,6 +1348,9 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 
 											$oInformationsystem_Item && $oProperty_Value->setValue($oInformationsystem_Item->id);
 										}
+									break;
+									case 7: // Checkbox
+										$oProperty_Value->setValue($this->_correctCheckbox($sData));
 									break;
 									case 8:
 										if (!preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/", $sData))
@@ -1548,6 +1585,9 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 
 												$oInformationsystem_Item && $oField_Value->setValue($oInformationsystem_Item->id);
 											}
+										break;
+										case 7: // Checkbox
+											$oField_Value->setValue($this->_correctCheckbox($sData));
 										break;
 										case 8:
 											if (!preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/", $sData))
@@ -2006,675 +2046,168 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 				}
 				$this->_sBigImageFile = '';
 
-				// WARNING
-				foreach ($this->_aExternalProperties as $iPropertyID => $sPropertyValue)
+				// Импорт доп. свойств с передачей вызова в метод _addItemPropertyValue
+				foreach ($this->_aExternalProperties as $iPropertyID => $aPropertyValue)
 				{
 					$oProperty = Core_Entity::factory('Property')->find($iPropertyID);
 
-					Core_Event::notify('Informationsystem_Item_Import_Csv_Controller.onBeforeImportItemProperty', $this, array($this->_oCurrentInformationsystem, $this->_oCurrentItem, $oProperty, $sPropertyValue));
-
-					$aPropertyValues = $oProperty->getValues($this->_oCurrentItem->id, FALSE);
-
-					if (!isset($this->_aClearedPropertyValues[$this->_oCurrentItem->id]) || !in_array($oProperty->guid, $this->_aClearedPropertyValues[$this->_oCurrentItem->id]))
+					foreach ($aPropertyValue as $key => $sPropertyValue)
 					{
-						foreach ($aPropertyValues as $oPropertyValue)
-						{
-							$oProperty->type == 2 && $oPropertyValue->setDir($this->_oCurrentItem->getItemPath());
-							$oPropertyValue->delete();
-						}
+						Core_Event::notify('Informationsystem_Item_Import_Csv_Controller.onBeforeImportItemProperty', $this, array($this->_oCurrentInformationsystem, $this->_oCurrentItem, $oProperty, $sPropertyValue));
 
-						$aPropertyValues = array();
+						/*$oProperty_Value = */
+						$this->_addItemPropertyValue($this->_oCurrentItem, $oProperty, $sPropertyValue, $key);
 
-						$this->_aClearedPropertyValues[$this->_oCurrentItem->id][] = $oProperty->guid;
+						/*$oProperty->type == 2
+							&& $aImportedFileProperties[$iPropertyID][] = $oProperty_Value;*/
 					}
+				}
 
-					if ($oProperty->multiple)
+				// Импорт пользовательских полей с передачей вызова в метод _addItemFieldValue
+				foreach ($this->_aExternalFields as $iFieldID => $aFieldValue)
+				{
+					$oField = Core_Entity::factory('Field')->find($iFieldID);
+
+					foreach ($aFieldValue as $key => $sFieldValue)
 					{
+						Core_Event::notify('Informationsystem_Item_Import_Csv_Controller.onBeforeImportItemField', $this, array($this->_oCurrentInformationsystem, $this->_oCurrentItem, $oField, $sFieldValue));
+
+						$this->_addItemFieldValue($this->_oCurrentItem, $oField, $sFieldValue, $key);
+					}
+				}
+
+				// Отдельный импорт малых изображений, когда большие не были проимпортированы
+				foreach ($this->_aExternalPropertiesSmall as $iPropertyID => $aPropertyValue)
+				{
+					$oProperty = Core_Entity::factory('Property')->find($iPropertyID);
+
+					foreach ($aPropertyValue as $sPropertyValue)
+					{
+						// При отдельном импорте малых изображений, всегда создаются новые значения,
+						// при совместном импорте с большими, малые изображения обрабатываются в _addItemPropertyValue()
 						$oProperty_Value = $oProperty->createNewValue($this->_oCurrentItem->id);
-					}
-					else
-					{
-						$oProperty_Value = isset($aPropertyValues[0])
-							? $aPropertyValues[0]
-							: $oProperty->createNewValue($this->_oCurrentItem->id);
-					}
 
-					switch ($oProperty->type)
-					{
-						case 0: // Int
-							$sPropertyValue = Shop_Controller::convertDecimal($sPropertyValue);
-							$oProperty_Value->setValue($sPropertyValue);
-						break;
-						// Файл
-						case 2:
-							// Папка назначения
-							$sDestinationFolder = $this->_oCurrentItem->getItemPath();
+						// Папка назначения
+						$sDestinationFolder = $this->_oCurrentItem->getItemPath();
 
-							// Файл-источник
-							$sTmpFilePath = $this->imagesPath . (
-								strtoupper($this->encoding) == 'UTF-8'
-									? $sPropertyValue
-									: Core_File::convertfileNameToLocalEncoding($sPropertyValue)
-							);
+						// Файл-источник
+						$sTmpFilePath = $this->imagesPath . $sPropertyValue;
 
-							$sSourceFileBaseName = basename($sTmpFilePath, '');
+						$sSourceFileBaseName = basename($sTmpFilePath, '');
 
-							$bHttp = strpos(strtolower($sTmpFilePath), "http://") === 0 || strpos(strtolower($sTmpFilePath), "https://") === 0;
+						$bHttp = strpos(strtolower($sTmpFilePath), "http://") === 0 || strpos(strtolower($sTmpFilePath), "https://") === 0;
 
-							if (Core_File::isValidExtension($sTmpFilePath, Core::$mainConfig['availableExtension']) || $bHttp)
+						if (Core_File::isValidExtension($sTmpFilePath, Core::$mainConfig['availableExtension']) || $bHttp)
+						{
+							// Создаем папку назначения
+							$this->_oCurrentItem->createDir();
+
+							if ($bHttp)
 							{
-								// Создаем папку назначения
-								$this->_oCurrentItem->createDir();
-
-								if ($bHttp)
-								{
-									try {
-										$sSourceFile = $this->_downloadHttpFile($sTmpFilePath);
-									}
-									catch (Exception $e)
-									{
-										Core_Message::show($e->getMessage(), 'error');
-										$sSourceFile = NULL;
-									}
-								}
-								else
-								{
-									$sSourceFile = CMS_FOLDER . $sTmpFilePath;
-								}
-
-								if (!$this->_oCurrentInformationsystem->change_filename)
-								{
-									$sTargetFileName = $sSourceFileBaseName;
-								}
-								else
-								{
-									$sTargetFileExtension = Core_File::getExtension($sSourceFileBaseName);
-									$sTargetFileExtension = $sTargetFileExtension == '' || strlen($sTargetFileExtension) > 5
-										? '.jpg'
-										: ".{$sTargetFileExtension}";
-
-									$oProperty_Value->save();
-									$sTargetFileName = "informationsystem_property_file_{$this->_oCurrentItem->id}_{$oProperty_Value->id}{$sTargetFileExtension}";
-									//$sTargetFileName = "shop_property_file_{$this->_oCurrentItem->id}_{$oProperty->id}{$sTargetFileExtension}";
-								}
-
-								// Создаем массив параметров для загрузки картинок элементу
-								$aPicturesParam = array();
-								$aPicturesParam['large_image_source'] = $sSourceFile;
-								$aPicturesParam['large_image_name'] = $sSourceFileBaseName;
-								$aPicturesParam['large_image_target'] = $sDestinationFolder . $sTargetFileName;
-								$aPicturesParam['watermark_file_path'] = $this->_oCurrentInformationsystem->getWatermarkFilePath();
-								$aPicturesParam['watermark_position_x'] = $this->_oCurrentInformationsystem->watermark_default_position_x;
-								$aPicturesParam['watermark_position_y'] = $this->_oCurrentInformationsystem->watermark_default_position_y;
-								$aPicturesParam['large_image_preserve_aspect_ratio'] = $this->_oCurrentInformationsystem->preserve_aspect_ratio;
-								//$aPicturesParam['large_image_max_width'] = $this->_oCurrentInformationsystem->image_large_max_width;
-								$aPicturesParam['large_image_max_width'] = $oProperty->image_large_max_width;
-								//$aPicturesParam['large_image_max_height'] = $this->_oCurrentInformationsystem->image_large_max_height;
-								$aPicturesParam['large_image_max_height'] = $oProperty->image_large_max_height;
-								$aPicturesParam['large_image_watermark'] = $this->_oCurrentInformationsystem->watermark_default_use_large_image;
-
-								if (isset($this->_aExternalPropertiesSmall[$iPropertyID]))
-								{
-									// Малое изображение передано
-									$aPicturesParam['create_small_image_from_large'] = FALSE;
-								}
-								else
-								{
-									// Малое изображение не передано
-									$aPicturesParam['create_small_image_from_large'] = TRUE;
-									$aPicturesParam['small_image_source'] = $aPicturesParam['large_image_source'];
-									$aPicturesParam['small_image_name'] = $aPicturesParam['large_image_name'];
-									$aPicturesParam['small_image_target'] = $sDestinationFolder . "small_{$sTargetFileName}";
-									$aPicturesParam['small_image_max_width'] = $oProperty->image_small_max_width;
-									$aPicturesParam['small_image_max_height'] = $oProperty->image_small_max_height;
-									$aPicturesParam['small_image_watermark'] = $this->_oCurrentInformationsystem->watermark_default_use_small_image;
-									$aPicturesParam['small_image_preserve_aspect_ratio'] = $aPicturesParam['large_image_preserve_aspect_ratio'];
-								}
-
-								// Удаляем старое большое изображение
-								if ($oProperty_Value->file != '')
-								{
-									try
-									{
-										Core_File::delete($sDestinationFolder . $oProperty_Value->file);
-									} catch (Exception $e) {}
-								}
-
-								// Удаляем старое малое изображение
-								if ($oProperty_Value->file_small != '')
-								{
-									try
-									{
-										Core_File::delete($sDestinationFolder . $oProperty_Value->file_small);
-									} catch (Exception $e) {}
-								}
-
 								try {
-									Core_Event::notify('Informationsystem_Item_Import_Csv_Controller.oBeforeAdminUpload', $this, array($aPicturesParam));
-									$aTmpReturn = Core_Event::getLastReturn();
-									is_array($aTmpReturn) && $aPicturesParam = $aTmpReturn;
-
-									$aResult = Core_File::adminUpload($aPicturesParam);
+									$sSourceFile = $this->_downloadHttpFile($sTmpFilePath);
 								}
 								catch (Exception $e)
 								{
-									Core_Message::show(strtoupper($this->encoding) == 'UTF-8'
-										? $e->getMessage()
-										: @iconv($this->encoding, "UTF-8//IGNORE//TRANSLIT", $e->getMessage())
-									, 'error');
-
-									$aResult = array('large_image' => FALSE, 'small_image' => FALSE);
+									Core_Message::show($e->getMessage(), 'error');
+									$sSourceFile = NULL;
 								}
+							}
+							else
+							{
+								$sSourceFile = CMS_FOLDER . $sTmpFilePath;
+							}
 
-								if ($aResult['large_image'])
+							if (!$this->_oCurrentInformationsystem->change_filename)
+							{
+								$sTargetFileName = "small_{$sSourceFileBaseName}";
+							}
+							else
+							{
+								$sTargetFileExtension = Core_File::getExtension($sSourceFileBaseName);
+								$sTargetFileExtension = $sTargetFileExtension == '' || strlen($sTargetFileExtension) > 5
+									? '.jpg'
+									: ".{$sTargetFileExtension}";
+
+								$oProperty_Value->save();
+								$sTargetFileName = "small_informationsystem_property_file_{$this->_oCurrentItem->id}_{$oProperty_Value->id}{$sTargetFileExtension}";
+							}
+
+							$aPicturesParam = array();
+							$aPicturesParam['small_image_source'] = $sSourceFile;
+							$aPicturesParam['small_image_name'] = $sSourceFileBaseName;
+							$aPicturesParam['small_image_target'] = $sDestinationFolder . $sTargetFileName;
+							$aPicturesParam['create_small_image_from_large'] = FALSE;
+							$aPicturesParam['small_image_max_width'] = $this->_oCurrentInformationsystem->image_small_max_width;
+							$aPicturesParam['small_image_max_height'] = $this->_oCurrentInformationsystem->image_small_max_height;
+							$aPicturesParam['small_image_watermark'] = $this->_oCurrentInformationsystem->watermark_default_use_small_image;
+							$aPicturesParam['watermark_file_path'] = $this->_oCurrentInformationsystem->getWatermarkFilePath();
+							$aPicturesParam['watermark_position_x'] = $this->_oCurrentInformationsystem->watermark_default_position_x;
+							$aPicturesParam['watermark_position_y'] = $this->_oCurrentInformationsystem->watermark_default_position_y;
+							$aPicturesParam['small_image_preserve_aspect_ratio'] = $this->_oCurrentInformationsystem->preserve_aspect_ratio;
+
+							// Удаляем старое малое изображение
+							if ($oProperty_Value->file_small != '')
+							{
+								try
 								{
-									$oProperty_Value->file = $sTargetFileName;
-									$oProperty_Value->file_name = '';
-								}
-
-								if ($aResult['small_image'])
-								{
-									$oProperty_Value->file_small = "small_{$sTargetFileName}";
-									$oProperty_Value->file_small_name = '';
-								}
-
-								if (isset($this->_aExternalPropertiesDesc[$iPropertyID]))
-								{
-									$oProperty_Value->file_description = $this->_aExternalPropertiesDesc[$iPropertyID];
-								}
-
-								clearstatcache();
-
-								if (!is_null($sSourceFile) && strpos(basename($sSourceFile), "CMS") === 0 && Core_File::isFile($sSourceFile))
-								{
-									// Файл временный, подлежит удалению
-									Core_File::delete($sSourceFile);
-								}
-							}
-						break;
-						// Список
-						case 3:
-							if (Core::moduleIsActive('list'))
-							{
-								$oListItem = Core_Entity::factory('List_Item');
-								$oListItem
-									->queryBuilder()
-									->where('list_id', '=', $oProperty->list_id)
-									->where('value', '=', $sPropertyValue)
-								;
-								$oListItem = $oListItem->findAll(FALSE);
-
-								if (count($oListItem))
-								{
-									$oProperty_Value->setValue($oListItem[0]->id);
-								}
-								else
-								{
-									$oProperty_Value->setValue(Core_Entity::factory('List_Item')
-										->list_id($oProperty->list_id)
-										->value($sPropertyValue)
-										->save()
-										->id
-									);
-								}
-							}
-						break;
-						case 5: // Informationsystem
-							$oInformationsystem_Item = $oProperty->Informationsystem->Informationsystem_Items->getByName($sPropertyValue);
-							if ($oInformationsystem_Item)
-							{
-								$oProperty_Value->setValue($oInformationsystem_Item->id);
-							}
-							elseif (is_numeric($sPropertyValue))
-							{
-								$oInformationsystem_Item = $oProperty->Informationsystem->Informationsystem_Items->getById($sPropertyValue);
-
-								$oInformationsystem_Item && $oProperty_Value->setValue($oInformationsystem_Item->id);
-							}
-						break;
-						case 8:
-							if (!preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/", $sPropertyValue))
-							{
-								$sPropertyValue = Core_Date::datetime2sql($sPropertyValue);
+									Core_File::delete($sDestinationFolder . $oProperty_Value->file_small);
+								} catch (Exception $e) {}
 							}
 
-							$oProperty_Value->setValue($sPropertyValue);
-						break;
-						case 9:
-							if (!preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})/", $sPropertyValue))
-							{
-							 $sPropertyValue = Core_Date::datetime2sql($sPropertyValue);
-							}
-
-							$oProperty_Value->setValue($sPropertyValue);
-						break;
-						case 11: // Float
-							$sPropertyValue = Shop_Controller::convertDecimal($sPropertyValue);
-							$oProperty_Value->setValue($sPropertyValue);
-						break;
-						case 12: // Shop
-							$oShop_Item = $oProperty->Shop->Shop_Items->getByName($sPropertyValue);
-							if ($oShop_Item)
-							{
-								$oProperty_Value->setValue($oShop_Item->id);
-							}
-							elseif (is_numeric($sPropertyValue))
-							{
-								$oShop_Item = $oProperty->Shop->Shop_Items->getById($sPropertyValue);
-
-								$oShop_Item && $oProperty_Value->setValue($oShop_Item->id);
-							}
-						break;
-						default:
-							Core_Event::notify(get_class($this) . '.onPreparePropertyValueDefault', $this, array($this->_oCurrentItem, $oProperty, $sPropertyValue));
-
-							if (!is_null(Core_Event::getLastReturn()))
-							{
-								$sPropertyValue = Core_Event::getLastReturn();
-							}
-
-							$oProperty_Value->setValue($sPropertyValue);
-						break;
-					}
-
-					$oProperty_Value->save();
-				}
-
-				foreach ($this->_aExternalPropertiesSmall as $iPropertyID => $sPropertyValue)
-				{
-					$oProperty = Core_Entity::factory('Property')->find($iPropertyID);
-
-					$aPropertyValues = $oProperty->getValues($this->_oCurrentItem->id, FALSE);
-
-					$oProperty_Value = isset($aPropertyValues[0])
-						? $aPropertyValues[0]
-						: $oProperty->createNewValue($this->_oCurrentItem->id);
-
-					// Папка назначения
-					$sDestinationFolder = $this->_oCurrentItem->getItemPath();
-
-					// Файл-источник
-					$sTmpFilePath = $this->imagesPath . $sPropertyValue;
-
-					$sSourceFileBaseName = basename($sTmpFilePath, '');
-
-					$bHttp = strpos(strtolower($sTmpFilePath), "http://") === 0 || strpos(strtolower($sTmpFilePath), "https://") === 0;
-
-					if (Core_File::isValidExtension($sTmpFilePath, Core::$mainConfig['availableExtension']) || $bHttp)
-					{
-						// Создаем папку назначения
-						$this->_oCurrentItem->createDir();
-
-						if ($bHttp)
-						{
 							try {
-								$sSourceFile = $this->_downloadHttpFile($sTmpFilePath);
+								Core_Event::notify('Informationsystem_Item_Import_Csv_Controller.onBeforeAdminUpload', $this, array($aPicturesParam));
+								$aTmpReturn = Core_Event::getLastReturn();
+								is_array($aTmpReturn) && $aPicturesParam = $aTmpReturn;
+
+								$aResult = Core_File::adminUpload($aPicturesParam);
 							}
 							catch (Exception $e)
 							{
-								Core_Message::show($e->getMessage(), 'error');
-								$sSourceFile = NULL;
+								Core_Message::show(strtoupper($this->encoding) == 'UTF-8'
+									? $e->getMessage()
+									: @iconv($this->encoding, "UTF-8//IGNORE//TRANSLIT", $e->getMessage())
+								, 'error');
+
+								$aResult = array('large_image' => FALSE, 'small_image' => FALSE);
+							}
+
+							if ($aResult['small_image'])
+							{
+								$oProperty_Value->file_small = $sTargetFileName;
+								$oProperty_Value->file_small_name = '';
+							}
+
+							if (!is_null($sSourceFile) && strpos(basename($sSourceFile), "CMS") === 0)
+							{
+								// Файл временный, подлежит удалению
+								Core_File::delete($sSourceFile);
 							}
 						}
-						else
-						{
-							$sSourceFile = CMS_FOLDER . $sTmpFilePath;
-						}
 
-						if (!$this->_oCurrentInformationsystem->change_filename)
-						{
-							$sTargetFileName = "small_{$sSourceFileBaseName}";
-						}
-						else
-						{
-							$sTargetFileExtension = Core_File::getExtension($sSourceFileBaseName);
-							$sTargetFileExtension = $sTargetFileExtension == '' || strlen($sTargetFileExtension) > 5
-								? '.jpg'
-								: ".{$sTargetFileExtension}";
-
-							$oProperty_Value->save();
-							$sTargetFileName = "small_informationsystem_property_file_{$this->_oCurrentItem->id}_{$oProperty_Value->id}{$sTargetFileExtension}";
-						}
-
-						$aPicturesParam = array();
-						$aPicturesParam['small_image_source'] = $sSourceFile;
-						$aPicturesParam['small_image_name'] = $sSourceFileBaseName;
-						$aPicturesParam['small_image_target'] = $sDestinationFolder . $sTargetFileName;
-						$aPicturesParam['create_small_image_from_large'] = FALSE;
-						$aPicturesParam['small_image_max_width'] = $this->_oCurrentInformationsystem->image_small_max_width;
-						$aPicturesParam['small_image_max_height'] = $this->_oCurrentInformationsystem->image_small_max_height;
-						$aPicturesParam['small_image_watermark'] = $this->_oCurrentInformationsystem->watermark_default_use_small_image;
-						$aPicturesParam['watermark_file_path'] = $this->_oCurrentInformationsystem->getWatermarkFilePath();
-						$aPicturesParam['watermark_position_x'] = $this->_oCurrentInformationsystem->watermark_default_position_x;
-						$aPicturesParam['watermark_position_y'] = $this->_oCurrentInformationsystem->watermark_default_position_y;
-						$aPicturesParam['small_image_preserve_aspect_ratio'] = $this->_oCurrentInformationsystem->preserve_aspect_ratio;
-
-						// Удаляем старое малое изображение
-						if ($oProperty_Value->file_small != '')
-						{
-							try
-							{
-								Core_File::delete($sDestinationFolder . $oProperty_Value->file_small);
-							} catch (Exception $e) {}
-						}
-
-						try {
-							Core_Event::notify('Informationsystem_Item_Import_Csv_Controller.oBeforeAdminUpload', $this, array($aPicturesParam));
-							$aTmpReturn = Core_Event::getLastReturn();
-							is_array($aTmpReturn) && $aPicturesParam = $aTmpReturn;
-
-							$aResult = Core_File::adminUpload($aPicturesParam);
-						}
-						catch (Exception $e)
-						{
-							Core_Message::show(strtoupper($this->encoding) == 'UTF-8'
-								? $e->getMessage()
-								: @iconv($this->encoding, "UTF-8//IGNORE//TRANSLIT", $e->getMessage())
-							, 'error');
-
-							$aResult = array('large_image' => FALSE, 'small_image' => FALSE);
-						}
-
-						if ($aResult['small_image'])
-						{
-							$oProperty_Value->file_small = $sTargetFileName;
-							$oProperty_Value->file_small_name = '';
-						}
-
-						if (!is_null($sSourceFile) && strpos(basename($sSourceFile), "CMS") === 0)
-						{
-							// Файл временный, подлежит удалению
-							Core_File::delete($sSourceFile);
-						}
+						$oProperty_Value->save();
 					}
-
-					$oProperty_Value->save();
 				}
 
-				if (Core::moduleIsActive('field'))
+				// Отдельный импорт малых изображений, когда большие не были проимпортированы
+				foreach ($this->_aExternalFieldsSmall as $iFieldID => $aFieldValue)
 				{
-					foreach ($this->_aExternalFields as $iFieldID => $sFieldValue)
+					$oField = Core_Entity::factory('Field')->find($iFieldID);
+
+					// Разрешаем свойство для группы
+					// $this->_allowFieldForGroup($oField, $this->_oCurrentGroup->id);
+
+					foreach ($aFieldValue as $sFieldValue)
 					{
-						$oField = Core_Entity::factory('Field')->find($iFieldID);
-
-						Core_Event::notify('Informationsystem_Item_Import_Csv_Controller.onBeforeImportItemField', $this, array($this->_oCurrentInformationsystem, $this->_oCurrentItem, $oField, $sFieldValue));
-
-						$aFieldValues = $oField->getValues($this->_oCurrentItem->id, FALSE);
-
-						if (!isset($this->_aClearedFieldValues[$this->_oCurrentItem->id]) || !in_array($oField->id, $this->_aClearedFieldValues[$this->_oCurrentItem->id]))
-						{
-							foreach ($aFieldValues as $oFieldValue)
-							{
-								$oField->type == 2 && $oFieldValue->setDir($this->_oCurrentItem->getItemPath());
-								$oFieldValue->delete();
-							}
-
-							$aFieldValues = array();
-
-							$this->_aClearedFieldValues[$this->_oCurrentItem->id][] = $oField->id;
-						}
-
-						if ($oField->multiple)
-						{
-							$oField_Value = $oField->createNewValue($this->_oCurrentItem->id);
-						}
-						else
-						{
-							$oField_Value = isset($aFieldValues[0])
-								? $aFieldValues[0]
-								: $oField->createNewValue($this->_oCurrentItem->id);
-						}
-
-						switch ($oField->type)
-						{
-							case 0: // Int
-								$sFieldValue = Shop_Controller::convertDecimal($sFieldValue);
-								$oField_Value->setValue($sFieldValue);
-							break;
-							// Файл
-							case 2:
-								// Папка назначения
-								$sDestinationFolder = $this->_oCurrentItem->getItemPath();
-
-								// Файл-источник
-								$sTmpFilePath = $this->imagesPath . (
-									strtoupper($this->encoding) == 'UTF-8'
-										? $sFieldValue
-										: Core_File::convertfileNameToLocalEncoding($sFieldValue)
-								);
-
-								$sSourceFileBaseName = basename($sTmpFilePath, '');
-
-								$bHttp = strpos(strtolower($sTmpFilePath), "http://") === 0 || strpos(strtolower($sTmpFilePath), "https://") === 0;
-
-								if (Core_File::isValidExtension($sTmpFilePath, Core::$mainConfig['availableExtension']) || $bHttp)
-								{
-									// Создаем папку назначения
-									$this->_oCurrentItem->createDir();
-
-									if ($bHttp)
-									{
-										try {
-											$sSourceFile = $this->_downloadHttpFile($sTmpFilePath);
-										}
-										catch (Exception $e)
-										{
-											Core_Message::show($e->getMessage(), 'error');
-											$sSourceFile = NULL;
-										}
-									}
-									else
-									{
-										$sSourceFile = CMS_FOLDER . $sTmpFilePath;
-									}
-
-									if (!$this->_oCurrentInformationsystem->change_filename)
-									{
-										$sTargetFileName = $sSourceFileBaseName;
-									}
-									else
-									{
-										$sTargetFileExtension = Core_File::getExtension($sSourceFileBaseName);
-										$sTargetFileExtension = $sTargetFileExtension == '' || strlen($sTargetFileExtension) > 5
-											? '.jpg'
-											: ".{$sTargetFileExtension}";
-
-										$oField_Value->save();
-										$sTargetFileName = "informationsystem_field_file_{$this->_oCurrentItem->id}_{$oField_Value->id}{$sTargetFileExtension}";
-										//$sTargetFileName = "shop_field_file_{$this->_oCurrentItem->id}_{$oField->id}{$sTargetFileExtension}";
-									}
-
-									// Создаем массив параметров для загрузки картинок элементу
-									$aPicturesParam = array();
-									$aPicturesParam['large_image_source'] = $sSourceFile;
-									$aPicturesParam['large_image_name'] = $sSourceFileBaseName;
-									$aPicturesParam['large_image_target'] = $sDestinationFolder . $sTargetFileName;
-									$aPicturesParam['watermark_file_path'] = $this->_oCurrentInformationsystem->getWatermarkFilePath();
-									$aPicturesParam['watermark_position_x'] = $this->_oCurrentInformationsystem->watermark_default_position_x;
-									$aPicturesParam['watermark_position_y'] = $this->_oCurrentInformationsystem->watermark_default_position_y;
-									$aPicturesParam['large_image_preserve_aspect_ratio'] = $this->_oCurrentInformationsystem->preserve_aspect_ratio;
-									//$aPicturesParam['large_image_max_width'] = $this->_oCurrentInformationsystem->image_large_max_width;
-									$aPicturesParam['large_image_max_width'] = $oField->image_large_max_width;
-									//$aPicturesParam['large_image_max_height'] = $this->_oCurrentInformationsystem->image_large_max_height;
-									$aPicturesParam['large_image_max_height'] = $oField->image_large_max_height;
-									$aPicturesParam['large_image_watermark'] = $this->_oCurrentInformationsystem->watermark_default_use_large_image;
-
-									if (isset($this->_aExternalFieldsSmall[$iFieldID]))
-									{
-										// Малое изображение передано
-										$aPicturesParam['create_small_image_from_large'] = FALSE;
-									}
-									else
-									{
-										// Малое изображение не передано
-										$aPicturesParam['create_small_image_from_large'] = TRUE;
-										$aPicturesParam['small_image_source'] = $aPicturesParam['large_image_source'];
-										$aPicturesParam['small_image_name'] = $aPicturesParam['large_image_name'];
-										$aPicturesParam['small_image_target'] = $sDestinationFolder . "small_{$sTargetFileName}";
-										$aPicturesParam['small_image_max_width'] = $oField->image_small_max_width;
-										$aPicturesParam['small_image_max_height'] = $oField->image_small_max_height;
-										$aPicturesParam['small_image_watermark'] = $this->_oCurrentInformationsystem->watermark_default_use_small_image;
-										$aPicturesParam['small_image_preserve_aspect_ratio'] = $aPicturesParam['large_image_preserve_aspect_ratio'];
-									}
-
-									// Удаляем старое большое изображение
-									if ($oField_Value->file != '')
-									{
-										try
-										{
-											Core_File::delete($sDestinationFolder . $oField_Value->file);
-										} catch (Exception $e) {}
-									}
-
-									// Удаляем старое малое изображение
-									if ($oField_Value->file_small != '')
-									{
-										try
-										{
-											Core_File::delete($sDestinationFolder . $oField_Value->file_small);
-										} catch (Exception $e) {}
-									}
-
-									try {
-										Core_Event::notify('Informationsystem_Item_Import_Csv_Controller.oBeforeAdminUpload', $this, array($aPicturesParam));
-										$aTmpReturn = Core_Event::getLastReturn();
-										is_array($aTmpReturn) && $aPicturesParam = $aTmpReturn;
-
-										$aResult = Core_File::adminUpload($aPicturesParam);
-									}
-									catch (Exception $e)
-									{
-										Core_Message::show(strtoupper($this->encoding) == 'UTF-8'
-											? $e->getMessage()
-											: @iconv($this->encoding, "UTF-8//IGNORE//TRANSLIT", $e->getMessage())
-										, 'error');
-
-										$aResult = array('large_image' => FALSE, 'small_image' => FALSE);
-									}
-
-									if ($aResult['large_image'])
-									{
-										$oField_Value->file = $sTargetFileName;
-										$oField_Value->file_name = '';
-									}
-
-									if ($aResult['small_image'])
-									{
-										$oField_Value->file_small = "small_{$sTargetFileName}";
-										$oField_Value->file_small_name = '';
-									}
-
-									if (isset($this->_aExternalFieldsDesc[$iFieldID]))
-									{
-										$oField_Value->file_description = $this->_aExternalFieldsDesc[$iFieldID];
-									}
-
-									clearstatcache();
-
-									if (!is_null($sSourceFile) && strpos(basename($sSourceFile), "CMS") === 0 && Core_File::isFile($sSourceFile))
-									{
-										// Файл временный, подлежит удалению
-										Core_File::delete($sSourceFile);
-									}
-								}
-							break;
-							// Список
-							case 3:
-								if (Core::moduleIsActive('list'))
-								{
-									$oListItem = Core_Entity::factory('List_Item');
-									$oListItem
-										->queryBuilder()
-										->where('list_id', '=', $oField->list_id)
-										->where('value', '=', $sFieldValue)
-									;
-									$oListItem = $oListItem->findAll(FALSE);
-
-									if (count($oListItem))
-									{
-										$oField_Value->setValue($oListItem[0]->id);
-									}
-									else
-									{
-										$oField_Value->setValue(Core_Entity::factory('List_Item')
-											->list_id($oField->list_id)
-											->value($sFieldValue)
-											->save()
-											->id
-										);
-									}
-								}
-							break;
-							case 5: // Informationsystem
-								$oInformationsystem_Item = $oField->Informationsystem->Informationsystem_Items->getByName($sFieldValue);
-								if ($oInformationsystem_Item)
-								{
-									$oField_Value->setValue($oInformationsystem_Item->id);
-								}
-								elseif (is_numeric($sFieldValue))
-								{
-									$oInformationsystem_Item = $oField->Informationsystem->Informationsystem_Items->getById($sFieldValue);
-
-									$oInformationsystem_Item && $oField_Value->setValue($oInformationsystem_Item->id);
-								}
-							break;
-							case 8:
-								if (!preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/", $sFieldValue))
-								{
-									$sFieldValue = Core_Date::datetime2sql($sFieldValue);
-								}
-
-								$oField_Value->setValue($sFieldValue);
-							break;
-							case 9:
-								if (!preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})/", $sFieldValue))
-								{
-									$sFieldValue = Core_Date::datetime2sql($sFieldValue);
-								}
-
-								$oField_Value->setValue($sFieldValue);
-							break;
-							case 11: // Float
-								$sFieldValue = Shop_Controller::convertDecimal($sFieldValue);
-								$oField_Value->setValue($sFieldValue);
-							break;
-							case 12: // Shop
-								$oShop_Item = $oField->Shop->Shop_Items->getByName($sFieldValue);
-								if ($oShop_Item)
-								{
-									$oField_Value->setValue($oShop_Item->id);
-								}
-								elseif (is_numeric($sFieldValue))
-								{
-									$oShop_Item = $oField->Shop->Shop_Items->getById($sFieldValue);
-
-									$oShop_Item && $oField_Value->setValue($oShop_Item->id);
-								}
-							break;
-							default:
-								Core_Event::notify(get_class($this) . '.onPrepareFieldValueDefault', $this, array($this->_oCurrentItem, $oField, $sFieldValue));
-
-								if (!is_null(Core_Event::getLastReturn()))
-								{
-									$sFieldValue = Core_Event::getLastReturn();
-								}
-
-								$oField_Value->setValue($sFieldValue);
-							break;
-						}
-
-						$oField_Value->save();
-					}
-
-					foreach ($this->_aExternalFieldsSmall as $iFieldID => $sFieldValue)
-					{
-						$oField = Core_Entity::factory('Field')->find($iFieldID);
-
-						$aFieldValues = $oField->getValues($this->_oCurrentItem->id, FALSE);
+						/*$aFieldValues = $oField->getValues($this->_oCurrentItem->id, FALSE);
 
 						$oField_Value = isset($aFieldValues[0])
 							? $aFieldValues[0]
-							: $oField->createNewValue($this->_oCurrentItem->id);
+							: $oField->createNewValue($this->_oCurrentItem->id);*/
+
+						// При отдельном импорте малых изображений, всегда создаются новые значения,
+						// при совместном импорте с большими, малые изображения обрабатываются в _addItemFieldValue()
+						$oField_Value = $oField->createNewValue($this->_oCurrentItem->id);
 
 						// Папка назначения
 						$sDestinationFolder = $this->_oCurrentItem->getItemPath();
@@ -2745,7 +2278,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 							}
 
 							try {
-								Core_Event::notify('Informationsystem_Item_Import_Csv_Controller.oBeforeAdminUpload', $this, array($aPicturesParam));
+								Core_Event::notify('Informationsystem_Item_Import_Csv_Controller.onBeforeAdminUpload', $this, array($aPicturesParam));
 								$aTmpReturn = Core_Event::getLastReturn();
 								is_array($aTmpReturn) && $aPicturesParam = $aTmpReturn;
 
@@ -2777,7 +2310,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 						$oField_Value->save();
 					}
 				}
-			} // end fields
+			}
 
 			$iCounter++;
 
@@ -2810,6 +2343,826 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 		Core_Event::notify('Informationsystem_Item_Import_Csv_Controller.onAfterImport', $this, array($this->_oCurrentInformationsystem, $iCurrentSeekPosition));
 
 		return $iCurrentSeekPosition;
+	}
+
+	/**
+	 * Add property to item
+	 * @param Informationsystem_Item_Model $oInformationsystemItem
+	 * @param Property_Model $oProperty
+	 * @param string $sPropertyValue property value
+	 * @hostcms-event Informationsystem_Item_Import_Csv_Controller.onAddItemPropertyValueDefault
+	 */
+	protected function _addItemPropertyValue(Informationsystem_Item_Model $oInformationsystemItem, Property_Model $oProperty, $sPropertyValue, $position = 0)
+	{
+		$aPropertyValues = $oProperty->getValues($oInformationsystemItem->id, FALSE);
+
+		// Удалять ранее загруженные свойства или свойство в массиве у удалению перед загрузкой
+		if ($this->deletePropertyValues === TRUE
+			|| is_array($this->deletePropertyValues) && in_array($oProperty->id, $this->deletePropertyValues))
+		{
+			// Свойство для данного товара не было очищено
+			if (!isset($this->_aClearedItemsPropertyValues[$oInformationsystemItem->id])
+				|| !in_array($oProperty->id, $this->_aClearedItemsPropertyValues[$oInformationsystemItem->id]))
+			{
+				foreach ($aPropertyValues as $oPropertyValue)
+				{
+					$oProperty->type == 2
+						&& $oPropertyValue->setDir($oInformationsystemItem->getItemPath());
+					$oPropertyValue->delete();
+				}
+
+				$aPropertyValues = array();
+
+				$this->_aClearedItemsPropertyValues[$oInformationsystemItem->id][] = $oProperty->id;
+			}
+		}
+
+		switch ($oProperty->type)
+		{
+			case 0: // Int
+				$changedValue = Shop_Controller::convertDecimal($sPropertyValue);
+			break;
+			case 2: // Файл
+				$changedValue = $sPropertyValue;
+			break;
+			case 3: // Список
+				if (Core::moduleIsActive('list'))
+				{
+					$oList_Item = $oProperty->List->List_Items->getByValue($sPropertyValue, FALSE);
+
+					if ($oList_Item)
+					{
+						$changedValue = $oList_Item->id;
+					}
+					else
+					{
+						$oList_Item = Core_Entity::factory('List_Item')
+							->list_id($oProperty->list_id)
+							->value($sPropertyValue);
+
+						// Apache %2F (/) is forbidden
+						strpos($sPropertyValue, '/') !== FALSE
+							&& $oList_Item->path = trim(str_replace('/', ' ', $sPropertyValue));
+
+						$changedValue = $oList_Item->save()
+							->id;
+					}
+				}
+				else
+				{
+					$changedValue = NULL;
+				}
+			break;
+			case 5: // Informationsystem
+				$oInformationsystem_Item = $oProperty->Informationsystem->Informationsystem_Items->getByName($sPropertyValue);
+				if ($oInformationsystem_Item)
+				{
+					$changedValue = $oInformationsystem_Item->id;
+				}
+				elseif (is_numeric($sPropertyValue))
+				{
+					$oInformationsystem_Item = $oProperty->Informationsystem->Informationsystem_Items->getById($sPropertyValue);
+
+					$changedValue = $oInformationsystem_Item
+						? $oInformationsystem_Item->id
+						: NULL;
+				}
+				else
+				{
+					$changedValue = NULL;
+				}
+			break;
+			case 7: // Checkbox
+				$changedValue = $this->_correctCheckbox($sPropertyValue);
+			break;
+			case 8:
+				$changedValue = preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/", $sPropertyValue)
+					? $sPropertyValue
+					: Core_Date::datetime2sql($sPropertyValue);
+			break;
+			case 9:
+				$changedValue = preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})/", $sPropertyValue)
+					? $sPropertyValue
+					: Core_Date::datetime2sql($sPropertyValue);
+			break;
+			case 11: // Float
+				$changedValue = Shop_Controller::convertDecimal($sPropertyValue);
+			break;
+			case 12: // Shop
+				// by Name
+				$oShop_Item = $oProperty->Shop->Shop_Items->getByName($sPropertyValue);
+				if ($oShop_Item)
+				{
+					$changedValue = $oShop_Item->id;
+				}
+				else
+				{
+					// by Marking
+					$oShop_Item = $oProperty->Shop->Shop_Items->getByMarking($sPropertyValue);
+					if ($oShop_Item)
+					{
+						$changedValue = $oShop_Item->id;
+					}
+					// by ID
+					elseif (is_numeric($sPropertyValue))
+					{
+						$oShop_Item = $oProperty->Shop->Shop_Items->getById($sPropertyValue);
+
+						$changedValue = $oShop_Item
+							? $oShop_Item->id
+							: NULL;
+					}
+					else
+					{
+						$changedValue = NULL;
+					}
+				}
+			break;
+			default:
+				Core_Event::notify(get_class($this) . '.onAddItemPropertyValueDefault', $this, array($oInformationsystemItem, $oProperty, $sPropertyValue));
+
+				$changedValue = is_null(Core_Event::getLastReturn())
+					? $sPropertyValue
+					: Core_Event::getLastReturn();
+		}
+
+		if (!is_null($changedValue))
+		{
+			if ($oProperty->multiple)
+			{
+				$bHttp = strpos(strtolower($changedValue), "http://") === 0 || strpos(strtolower($changedValue), "https://") === 0;
+
+				foreach ($aPropertyValues as $oProperty_Value)
+				{
+					if ($oProperty->type == 2 && basename($oProperty_Value->file_name) == basename($changedValue)
+						|| $oProperty->type != 2 && $oProperty_Value->value == $changedValue)
+					{
+						return $oProperty_Value;
+					}
+				}
+
+				$oProperty_Value = $oProperty->createNewValue($oInformationsystemItem->id);
+			}
+			else
+			{
+				$oProperty_Value = isset($aPropertyValues[0])
+					? $aPropertyValues[0]
+					: $oProperty->createNewValue($oInformationsystemItem->id);
+			}
+
+			// File
+			if ($oProperty->type == 2)
+			{
+				// Папка назначения
+				$sDestinationFolder = $oInformationsystemItem->getItemPath();
+
+				// Файл-источник
+				$sTmpFilePath = $this->imagesPath . (
+					/*strtoupper($this->encoding) == 'UTF-8'
+						? $sPropertyValue
+						: Core_File::convertfileNameFromLocalEncoding($sPropertyValue)*/
+					$sPropertyValue
+				);
+
+				$sSourceFileBaseName = basename($sTmpFilePath, '');
+
+				$bHttp = strpos(strtolower($sTmpFilePath), "http://") === 0 || strpos(strtolower($sTmpFilePath), "https://") === 0;
+
+				$sSourceFileName = $bHttp
+					? basename($sPropertyValue)
+					: $sSourceFileBaseName;
+
+				if (Core_File::isValidExtension($sTmpFilePath, Core::$mainConfig['availableExtension']) || $bHttp)
+				{
+					// Создаем папку назначения
+					$oInformationsystemItem->createDir();
+
+					if ($bHttp)
+					{
+						try {
+							$sSourceFile = $this->_downloadHttpFile($sTmpFilePath);
+						}
+						catch (Exception $e)
+						{
+							Core_Message::show($e->getMessage(), 'error');
+							$sSourceFile = NULL;
+						}
+					}
+					else
+					{
+						$sSourceFile = CMS_FOLDER . ltrim($sTmpFilePath, '/\\');
+					}
+
+					if (!$this->_oCurrentInformationsystem->change_filename)
+					{
+						$sTargetFileName = $sSourceFileBaseName;
+					}
+					else
+					{
+						$sTargetFileExtension = Core_File::getExtension($sSourceFileBaseName);
+						$sTargetFileExtension = $sTargetFileExtension == '' || strlen($sTargetFileExtension) > 5
+							? '.jpg'
+							: ".{$sTargetFileExtension}";
+
+						$oProperty_Value->save();
+						$sTargetFileName = "informationsystem_property_file_{$oInformationsystemItem->id}_{$oProperty_Value->id}{$sTargetFileExtension}";
+						//$sTargetFileName = "informationsystem_property_file_{$oInformationsystemItem->id}_{$oProperty->id}{$sTargetFileExtension}";
+					}
+
+					// Создаем массив параметров для загрузки картинок элементу
+					$aPicturesParam = array();
+					$aPicturesParam['large_image_source'] = $sSourceFile;
+					$aPicturesParam['large_image_name'] = $sSourceFileBaseName;
+					$aPicturesParam['large_image_target'] = $sDestinationFolder . $sTargetFileName;
+					$aPicturesParam['watermark_file_path'] = $this->_oCurrentInformationsystem->getWatermarkFilePath();
+					$aPicturesParam['watermark_position_x'] = $this->_oCurrentInformationsystem->watermark_default_position_x;
+					$aPicturesParam['watermark_position_y'] = $this->_oCurrentInformationsystem->watermark_default_position_y;
+					$aPicturesParam['large_image_preserve_aspect_ratio'] = $this->_oCurrentInformationsystem->preserve_aspect_ratio;
+					//$aPicturesParam['large_image_max_width'] = $this->_oCurrentInformationsystem->image_large_max_width;
+					$aPicturesParam['large_image_max_width'] = $oProperty->image_large_max_width;
+					//$aPicturesParam['large_image_max_height'] = $this->_oCurrentInformationsystem->image_large_max_height;
+					$aPicturesParam['large_image_max_height'] = $oProperty->image_large_max_height;
+					$aPicturesParam['large_image_watermark'] = $this->_oCurrentInformationsystem->watermark_default_use_large_image;
+
+					if (isset($this->_aExternalPropertiesSmall[$oProperty->id][$position]))
+					{
+						// Малое изображение передано
+						$aPicturesParam['create_small_image_from_large'] = FALSE;
+
+						// Файл-источник
+						$sTmpFilePath = $this->imagesPath . $this->_aExternalPropertiesSmall[$oProperty->id][$position];
+
+						$sSourceFileBaseNameSmall = basename($sTmpFilePath, '');
+
+						$bHttp = strpos(strtolower($sTmpFilePath), "http://") === 0 || strpos(strtolower($sTmpFilePath), "https://") === 0;
+
+						if (Core_File::isValidExtension($sTmpFilePath, Core::$mainConfig['availableExtension']) || $bHttp)
+						{
+							// Создаем папку назначения
+							$oInformationsystemItem->createDir();
+
+							if ($bHttp)
+							{
+								try {
+									$sSourceFileSmall = $this->_downloadHttpFile($sTmpFilePath);
+								}
+								catch (Exception $e)
+								{
+									Core_Message::show($e->getMessage(), 'error');
+									$sSourceFileSmall = NULL;
+								}
+							}
+							else
+							{
+								$sSourceFileSmall = CMS_FOLDER . $sTmpFilePath;
+							}
+
+							if (!$this->_oCurrentInformationsystem->change_filename)
+							{
+								$sTargetFileNameSmall = "small_{$sSourceFileBaseNameSmall}";
+							}
+							else
+							{
+								$sTargetFileExtension = Core_File::getExtension($sSourceFileBaseNameSmall);
+								$sTargetFileExtension = $sTargetFileExtension == '' || strlen($sTargetFileExtension) > 5
+									? '.jpg'
+									: ".{$sTargetFileExtension}";
+
+								$oProperty_Value->save();
+								$sTargetFileNameSmall = "small_informationsystem_property_file_{$oInformationsystemItem->id}_{$oProperty_Value->id}{$sTargetFileExtension}";
+							}
+
+							$aPicturesParam['small_image_source'] = $sSourceFileSmall;
+							$aPicturesParam['small_image_name'] = $sSourceFileBaseNameSmall;
+							$aPicturesParam['small_image_target'] = $sDestinationFolder . $sTargetFileNameSmall;
+
+							// Удаляем старое малое изображение
+							/*if ($oProperty_Value->file_small != '')
+							{
+								try
+								{
+									Core_File::delete($sDestinationFolder . $oProperty_Value->file_small);
+								} catch (Exception $e) {}
+							}*/
+						}
+
+						// ------------------------------------------
+						// Исключаем из отдельного импорта малых изображений
+						unset($this->_aExternalPropertiesSmall[$oProperty->id][$position]);
+					}
+					else
+					{
+						// Малое изображение не передано
+						$aPicturesParam['create_small_image_from_large'] = TRUE;
+						$aPicturesParam['small_image_source'] = $aPicturesParam['large_image_source'];
+						$aPicturesParam['small_image_name'] = $aPicturesParam['large_image_name'];
+						$aPicturesParam['small_image_target'] = $sDestinationFolder . "small_{$sTargetFileName}";
+
+						$sSourceFileSmall = NULL;
+						$sTargetFileNameSmall = "small_{$sTargetFileName}";
+					}
+
+					$aPicturesParam['small_image_max_width'] = $oProperty->image_small_max_width;
+					$aPicturesParam['small_image_max_height'] = $oProperty->image_small_max_height;
+					$aPicturesParam['small_image_watermark'] = $this->_oCurrentInformationsystem->watermark_default_use_small_image;
+					$aPicturesParam['small_image_preserve_aspect_ratio'] = $aPicturesParam['large_image_preserve_aspect_ratio'];
+
+					// Удаляем старое большое изображение
+					if ($oProperty_Value->file != '')
+					{
+						if ($sDestinationFolder . $oProperty_Value->file != $sSourceFile)
+						{
+							try
+							{
+								Core_File::delete($sDestinationFolder . $oProperty_Value->file);
+							} catch (Exception $e) {}
+						}
+					}
+
+					// Удаляем старое малое изображение
+					if ($oProperty_Value->file_small != '')
+					{
+						if ($sDestinationFolder . $oProperty_Value->file_small != $sSourceFileSmall)
+						{
+							try
+							{
+								Core_File::delete($sDestinationFolder . $oProperty_Value->file_small);
+							} catch (Exception $e) {}
+						}
+					}
+
+					try {
+						Core_Event::notify('Informationsystem_Item_Import_Csv_Controller.onBeforeAdminUpload', $this, array($aPicturesParam));
+						$aTmpReturn = Core_Event::getLastReturn();
+						is_array($aTmpReturn) && $aPicturesParam = $aTmpReturn;
+
+						$aResult = Core_File::adminUpload($aPicturesParam);
+					}
+					catch (Exception $e)
+					{
+						Core_Message::show(strtoupper($this->encoding) == 'UTF-8'
+							? $e->getMessage()
+							: @iconv($this->encoding, "UTF-8//IGNORE//TRANSLIT", $e->getMessage())
+						, 'error');
+
+						$aResult = array('large_image' => FALSE, 'small_image' => FALSE);
+					}
+
+					if ($aResult['large_image'])
+					{
+						$oProperty_Value->file = $sTargetFileName;
+						$oProperty_Value->file_name = $sSourceFileName;
+					}
+
+					if ($aResult['small_image'])
+					{
+						$oProperty_Value->file_small = $sTargetFileNameSmall;
+						$oProperty_Value->file_small_name = '';
+					}
+
+					if (isset($this->_aExternalPropertiesDesc[$oProperty->id][$position]))
+					{
+						$oProperty_Value->file_description = $this->_aExternalPropertiesDesc[$oProperty->id][$position];
+						unset($this->_aExternalPropertiesDesc[$oProperty->id][$position]);
+					}
+
+					$oProperty_Value->save();
+
+					clearstatcache();
+
+					if (!is_null($sSourceFile) && strpos(basename($sSourceFile), "CMS") === 0 && Core_File::isFile($sSourceFile))
+					{
+						// Файл временный, подлежит удалению
+						Core_File::delete($sSourceFile);
+					}
+
+					if (!is_null($sSourceFileSmall) && strpos(basename($sSourceFileSmall), "CMS") === 0 && Core_File::isFile($sSourceFileSmall))
+					{
+						// Файл временный, подлежит удалению
+						Core_File::delete($sSourceFileSmall);
+					}
+				}
+			}
+			else
+			{
+				$oProperty_Value->setValue($changedValue);
+				$oProperty_Value->save();
+			}
+
+			return $oProperty_Value;
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * Add field to item
+	 * @param Informationsystem_Item_Model $oInformationsystemItem
+	 * @param Field_Model $oField
+	 * @param string $sFieldValue field value
+	 * @hostcms-event Informationsystem_Item_Import_Csv_Controller.onAddItemFieldValueDefault
+	 */
+	protected function _addItemFieldValue(Informationsystem_Item_Model $oInformationsystemItem, Field_Model $oField, $sFieldValue, $position = 0)
+	{
+		$aFieldValues = $oField->getValues($oInformationsystemItem->id, FALSE);
+
+		// Удалять ранее загруженные свойства или свойство в массиве у удалению перед загрузкой
+		if ($this->deleteFieldValues === TRUE
+			|| is_array($this->deleteFieldValues) && in_array($oField->id, $this->deleteFieldValues))
+		{
+			// Свойство для данного товара не было очищено
+			if (!isset($this->_aClearedItemsFieldValues[$oInformationsystemItem->id])
+				|| !in_array($oField->id, $this->_aClearedItemsFieldValues[$oInformationsystemItem->id]))
+			{
+				foreach ($aFieldValues as $oFieldValue)
+				{
+					$oField->type == 2
+						&& $oFieldValue->setDir($oInformationsystemItem->getItemPath());
+					$oFieldValue->delete();
+				}
+
+				$aFieldValues = array();
+
+				$this->_aClearedItemsFieldValues[$oInformationsystemItem->id][] = $oField->id;
+			}
+		}
+
+		switch ($oField->type)
+		{
+			case 0: // Int
+				$changedValue = Shop_Controller::convertDecimal($sFieldValue);
+			break;
+			case 2: // Файл
+				$changedValue = $sFieldValue;
+			break;
+			case 3: // Список
+				if (Core::moduleIsActive('list'))
+				{
+					$oList_Item = $oField->List->List_Items->getByValue($sFieldValue, FALSE);
+
+					if ($oList_Item)
+					{
+						$changedValue = $oList_Item->id;
+					}
+					else
+					{
+						$oList_Item = Core_Entity::factory('List_Item')
+							->list_id($oField->list_id)
+							->value($sFieldValue);
+
+						// Apache %2F (/) is forbidden
+						strpos($sFieldValue, '/') !== FALSE
+							&& $oList_Item->path = trim(str_replace('/', ' ', $sFieldValue));
+
+						$changedValue = $oList_Item->save()
+							->id;
+					}
+				}
+				else
+				{
+					$changedValue = NULL;
+				}
+			break;
+			case 5: // Informationsystem
+				$oInformationsystem_Item = $oField->Informationsystem->Informationsystem_Items->getByName($sFieldValue);
+				if ($oInformationsystem_Item)
+				{
+					$changedValue = $oInformationsystem_Item->id;
+				}
+				elseif (is_numeric($sFieldValue))
+				{
+					$oInformationsystem_Item = $oField->Informationsystem->Informationsystem_Items->getById($sFieldValue);
+
+					$changedValue = $oInformationsystem_Item
+						? $oInformationsystem_Item->id
+						: NULL;
+				}
+				else
+				{
+					$changedValue = NULL;
+				}
+			break;
+			case 7: // Checkbox
+				$changedValue = $this->_correctCheckbox($sFieldValue);
+			break;
+			case 8:
+				$changedValue = preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/", $sFieldValue)
+					? $sFieldValue
+					: Core_Date::datetime2sql($sFieldValue);
+			break;
+			case 9:
+				$changedValue = preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})/", $sFieldValue)
+					? $sFieldValue
+					: Core_Date::datetime2sql($sFieldValue);
+			break;
+			case 11: // Float
+				$changedValue = Shop_Controller::convertDecimal($sFieldValue);
+			break;
+			case 12: // Shop
+				// by Name
+				$oShop_Item = $oField->Shop->Shop_Items->getByName($sFieldValue);
+				if ($oShop_Item)
+				{
+					$changedValue = $oShop_Item->id;
+				}
+				else
+				{
+					// by Marking
+					$oShop_Item = $oField->Shop->Shop_Items->getByMarking($sFieldValue);
+					if ($oShop_Item)
+					{
+						$changedValue = $oShop_Item->id;
+					}
+					// by ID
+					elseif (is_numeric($sFieldValue))
+					{
+						$oShop_Item = $oField->Shop->Shop_Items->getById($sFieldValue);
+
+						$changedValue = $oShop_Item
+							? $oShop_Item->id
+							: NULL;
+					}
+					else
+					{
+						$changedValue = NULL;
+					}
+				}
+			break;
+			default:
+				Core_Event::notify(get_class($this) . '.onAddItemFieldValueDefault', $this, array($oInformationsystemItem, $oField, $sFieldValue));
+
+				$changedValue = is_null(Core_Event::getLastReturn())
+					? $sFieldValue
+					: Core_Event::getLastReturn();
+		}
+
+		if (!is_null($changedValue))
+		{
+			if ($oField->multiple)
+			{
+				$bHttp = strpos(strtolower($changedValue), "http://") === 0 || strpos(strtolower($changedValue), "https://") === 0;
+
+				foreach ($aFieldValues as $oField_Value)
+				{
+					if ($oField->type == 2 && basename($oField_Value->file_name) == basename($changedValue)
+						|| $oField->type != 2 && $oField_Value->value == $changedValue)
+					{
+						return $oField_Value;
+					}
+				}
+
+				$oField_Value = $oField->createNewValue($oInformationsystemItem->id);
+			}
+			else
+			{
+				$oField_Value = isset($aFieldValues[0])
+					? $aFieldValues[0]
+					: $oField->createNewValue($oInformationsystemItem->id);
+			}
+
+			// File
+			if ($oField->type == 2)
+			{
+				// Папка назначения
+				$sDestinationFolder = $oInformationsystemItem->getItemPath();
+
+				// Файл-источник
+				$sTmpFilePath = $this->imagesPath . (
+					/*strtoupper($this->encoding) == 'UTF-8'
+						? $sFieldValue
+						: Core_File::convertfileNameFromLocalEncoding($sFieldValue)*/
+					$sFieldValue
+				);
+
+				$sSourceFileBaseName = basename($sTmpFilePath, '');
+
+				$bHttp = strpos(strtolower($sTmpFilePath), "http://") === 0 || strpos(strtolower($sTmpFilePath), "https://") === 0;
+
+				$sSourceFileName = $bHttp
+					? basename($sFieldValue)
+					: $sSourceFileBaseName;
+
+				if (Core_File::isValidExtension($sTmpFilePath, Core::$mainConfig['availableExtension']) || $bHttp)
+				{
+					// Создаем папку назначения
+					$oInformationsystemItem->createDir();
+
+					if ($bHttp)
+					{
+						try {
+							$sSourceFile = $this->_downloadHttpFile($sTmpFilePath);
+						}
+						catch (Exception $e)
+						{
+							Core_Message::show($e->getMessage(), 'error');
+							$sSourceFile = NULL;
+						}
+					}
+					else
+					{
+						$sSourceFile = CMS_FOLDER . ltrim($sTmpFilePath, '/\\');
+					}
+
+					if (!$this->_oCurrentInformationsystem->change_filename)
+					{
+						$sTargetFileName = $sSourceFileBaseName;
+					}
+					else
+					{
+						$sTargetFileExtension = Core_File::getExtension($sSourceFileBaseName);
+						$sTargetFileExtension = $sTargetFileExtension == '' || strlen($sTargetFileExtension) > 5
+							? '.jpg'
+							: ".{$sTargetFileExtension}";
+
+						$oField_Value->save();
+						$sTargetFileName = "informationsystem_field_file_{$oInformationsystemItem->id}_{$oField_Value->id}{$sTargetFileExtension}";
+						//$sTargetFileName = "shop_field_file_{$oInformationsystemItem->id}_{$oField->id}{$sTargetFileExtension}";
+					}
+
+					// Создаем массив параметров для загрузки картинок элементу
+					$aPicturesParam = array();
+					$aPicturesParam['large_image_source'] = $sSourceFile;
+					$aPicturesParam['large_image_name'] = $sSourceFileBaseName;
+					$aPicturesParam['large_image_target'] = $sDestinationFolder . $sTargetFileName;
+					$aPicturesParam['watermark_file_path'] = $this->_oCurrentInformationsystem->getWatermarkFilePath();
+					$aPicturesParam['watermark_position_x'] = $this->_oCurrentInformationsystem->watermark_default_position_x;
+					$aPicturesParam['watermark_position_y'] = $this->_oCurrentInformationsystem->watermark_default_position_y;
+					$aPicturesParam['large_image_preserve_aspect_ratio'] = $this->_oCurrentInformationsystem->preserve_aspect_ratio;
+					//$aPicturesParam['large_image_max_width'] = $this->_oCurrentInformationsystem->image_large_max_width;
+					$aPicturesParam['large_image_max_width'] = $oField->image_large_max_width;
+					//$aPicturesParam['large_image_max_height'] = $this->_oCurrentInformationsystem->image_large_max_height;
+					$aPicturesParam['large_image_max_height'] = $oField->image_large_max_height;
+					$aPicturesParam['large_image_watermark'] = $this->_oCurrentInformationsystem->watermark_default_use_large_image;
+
+					if (isset($this->_aExternalFieldsSmall[$oField->id][$position]))
+					{
+						// Малое изображение передано
+						$aPicturesParam['create_small_image_from_large'] = FALSE;
+
+						// Файл-источник
+						$sTmpFilePath = $this->imagesPath . $this->_aExternalFieldsSmall[$oField->id][$position];
+
+						$sSourceFileBaseNameSmall = basename($sTmpFilePath, '');
+
+						$bHttp = strpos(strtolower($sTmpFilePath), "http://") === 0 || strpos(strtolower($sTmpFilePath), "https://") === 0;
+
+						if (Core_File::isValidExtension($sTmpFilePath, Core::$mainConfig['availableExtension']) || $bHttp)
+						{
+							// Создаем папку назначения
+							$oInformationsystemItem->createDir();
+
+							if ($bHttp)
+							{
+								try {
+									$sSourceFileSmall = $this->_downloadHttpFile($sTmpFilePath);
+								}
+								catch (Exception $e)
+								{
+									Core_Message::show($e->getMessage(), 'error');
+									$sSourceFileSmall = NULL;
+								}
+							}
+							else
+							{
+								$sSourceFileSmall = CMS_FOLDER . $sTmpFilePath;
+							}
+
+							if (!$this->_oCurrentInformationsystem->change_filename)
+							{
+								$sTargetFileNameSmall = "small_{$sSourceFileBaseNameSmall}";
+							}
+							else
+							{
+								$sTargetFileExtension = Core_File::getExtension($sSourceFileBaseNameSmall);
+								$sTargetFileExtension = $sTargetFileExtension == '' || strlen($sTargetFileExtension) > 5
+									? '.jpg'
+									: ".{$sTargetFileExtension}";
+
+								$oField_Value->save();
+								$sTargetFileNameSmall = "small_informationsystem_field_file_{$oInformationsystemItem->id}_{$oField_Value->id}{$sTargetFileExtension}";
+							}
+
+							$aPicturesParam['small_image_source'] = $sSourceFileSmall;
+							$aPicturesParam['small_image_name'] = $sSourceFileBaseNameSmall;
+							$aPicturesParam['small_image_target'] = $sDestinationFolder . $sTargetFileNameSmall;
+
+							// Удаляем старое малое изображение
+							/*if ($oField_Value->file_small != '')
+							{
+								try
+								{
+									Core_File::delete($sDestinationFolder . $oField_Value->file_small);
+								} catch (Exception $e) {}
+							}*/
+						}
+
+						// ------------------------------------------
+						// Исключаем из отдельного импорта малых изображений
+						unset($this->_aExternalFieldsSmall[$oField->id][$position]);
+					}
+					else
+					{
+						// Малое изображение не передано
+						$aPicturesParam['create_small_image_from_large'] = TRUE;
+						$aPicturesParam['small_image_source'] = $aPicturesParam['large_image_source'];
+						$aPicturesParam['small_image_name'] = $aPicturesParam['large_image_name'];
+						$aPicturesParam['small_image_target'] = $sDestinationFolder . "small_{$sTargetFileName}";
+
+						$sSourceFileSmall = NULL;
+						$sTargetFileNameSmall = "small_{$sTargetFileName}";
+					}
+
+					$aPicturesParam['small_image_max_width'] = $oField->image_small_max_width;
+					$aPicturesParam['small_image_max_height'] = $oField->image_small_max_height;
+					$aPicturesParam['small_image_watermark'] = $this->_oCurrentInformationsystem->watermark_default_use_small_image;
+					$aPicturesParam['small_image_preserve_aspect_ratio'] = $aPicturesParam['large_image_preserve_aspect_ratio'];
+
+					// Удаляем старое большое изображение
+					if ($oField_Value->file != '')
+					{
+						if ($sDestinationFolder . $oField_Value->file != $sSourceFile)
+						{
+							try
+							{
+								Core_File::delete($sDestinationFolder . $oField_Value->file);
+							} catch (Exception $e) {}
+						}
+					}
+
+					// Удаляем старое малое изображение
+					if ($oField_Value->file_small != '')
+					{
+						if ($sDestinationFolder . $oField_Value->file_small != $sSourceFileSmall)
+						{
+							try
+							{
+								Core_File::delete($sDestinationFolder . $oField_Value->file_small);
+							} catch (Exception $e) {}
+						}
+					}
+
+					try {
+						Core_Event::notify('Informationsystem_Item_Import_Csv_Controller.onBeforeAdminUpload', $this, array($aPicturesParam));
+						$aTmpReturn = Core_Event::getLastReturn();
+						is_array($aTmpReturn) && $aPicturesParam = $aTmpReturn;
+
+						$aResult = Core_File::adminUpload($aPicturesParam);
+					}
+					catch (Exception $e)
+					{
+						Core_Message::show(strtoupper($this->encoding) == 'UTF-8'
+							? $e->getMessage()
+							: @iconv($this->encoding, "UTF-8//IGNORE//TRANSLIT", $e->getMessage())
+						, 'error');
+
+						$aResult = array('large_image' => FALSE, 'small_image' => FALSE);
+					}
+
+					if ($aResult['large_image'])
+					{
+						$oField_Value->file = $sTargetFileName;
+						$oField_Value->file_name = $sSourceFileName;
+					}
+
+					if ($aResult['small_image'])
+					{
+						$oField_Value->file_small = $sTargetFileNameSmall;
+						$oField_Value->file_small_name = '';
+					}
+
+					if (isset($this->_aExternalFieldsDesc[$oField->id][$position]))
+					{
+						$oField_Value->file_description = $this->_aExternalFieldsDesc[$oField->id][$position];
+						unset($this->_aExternalFieldsDesc[$oField->id][$position]);
+					}
+
+					$oField_Value->save();
+
+					clearstatcache();
+
+					if (!is_null($sSourceFile) && strpos(basename($sSourceFile), "CMS") === 0 && Core_File::isFile($sSourceFile))
+					{
+						// Файл временный, подлежит удалению
+						Core_File::delete($sSourceFile);
+					}
+
+					if (!is_null($sSourceFile) && strpos(basename($sSourceFileSmall), "CMS") === 0 && Core_File::isFile($sSourceFileSmall))
+					{
+						// Файл временный, подлежит удалению
+						Core_File::delete($sSourceFileSmall);
+					}
+				}
+			}
+			else
+			{
+				$oField_Value->setValue($changedValue);
+				$oField_Value->save();
+			}
+
+			return $oField_Value;
+		}
+
+		return FALSE;
 	}
 
 	/**
@@ -2865,9 +3218,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 			setlocale(LC_ALL, ALT_SITE_LOCALE);
 		}
 
-		$aCsvLine = PHP_VERSION_ID >= 50300
-			? @fgetcsv($fileDescriptor, 0, $this->separator, $this->limiter, '"')
-			: @fgetcsv($fileDescriptor, 0, $this->separator, $this->limiter);
+		$aCsvLine = @fgetcsv($fileDescriptor, 0, $this->separator, $this->limiter, '"');
 
 		if ($aCsvLine === FALSE)
 		{
@@ -2980,10 +3331,14 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 		$sStatus = Core_Array::get($aHeaders, 'status');
 		$iStatusCode = $Core_Http->parseHttpStatusCode($sStatus);
 
-		if ($iStatusCode != 200 || isset($aHeaders['Content-Type']) && strtolower(substr($aHeaders['Content-Type'], 0, 9)) == 'text/html')
+		$contentType = isset($aHeaders['Content-Type'])
+			? strtolower(substr(is_array($aHeaders['Content-Type']) ? $aHeaders['Content-Type'][0] : $aHeaders['Content-Type'], 0, 9))
+			: 'unknown';
+
+		if ($iStatusCode != 200 || $contentType == 'text/html')
 		{
-			throw new Core_Exception("Shop_Item_Import_Csv_Controller::_downloadHttpFile error, code: %code, Content-Type: %contentType.\nSource URL: %url",
-				array('%code' => $iStatusCode, '%contentType' => Core_Array::get($aHeaders, 'Content-Type', 'unknown'), '%url' => $sSourceFile));
+			throw new Core_Exception("Informationsystem_Item_Import_Csv_Controller::_downloadHttpFile error, code: %code, Content-Type: %contentType.\nSource URL: %url",
+				array('%code' => $iStatusCode, '%contentType' => $contentType, '%url' => $sSourceFile));
 		}
 
 		$content = $Core_Http->getDecompressedBody();
@@ -2994,5 +3349,17 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 		Core_File::write($sTempFileName, $content);
 
 		return $sTempFileName;
+	}
+
+	/**
+	 * Correct checkbox value
+	 * @param string $value
+	 * @return bool
+	 */
+	protected function _correctCheckbox($value)
+	{
+		return $value == 1 || strtolower($value) === 'true' || strtolower($value) === 'да'
+			? 1
+			: 0;
 	}
 }

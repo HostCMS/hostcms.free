@@ -24,6 +24,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - commentsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств комментариев, по умолчанию TRUE.
  * - groupsMedia(TRUE|FALSE) выводить значения библиотеки файлов для групп информационной системы, по умолчанию FALSE
  * - itemsMedia(TRUE|FALSE) выводить значения библиотеки файлов для информационных элементов, по умолчанию FALSE
+ * - closed(TRUE|FALSE) ограничивать вывод закрытых информационных элементов, по умолчанию TRUE
  * - addFilter() добавить условие отобра информационных элементов, может задавать условие отобра по значению свойства ->addFilter('property', 17, '=', 1)
  * - comments(TRUE|FALSE) показывать комментарии для выбранных информационных элементов, по умолчанию FALSE
  * - commentsRating(TRUE|FALSE) показывать оценки комментариев для выбранных информационных элементов, по умолчанию FALSE
@@ -88,7 +89,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Informationsystem_Controller_Show extends Core_Controller
 {
@@ -112,6 +113,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 		'commentsPropertiesList',
 		'groupsMedia',
 		'itemsMedia',
+		'closed',
 		'itemsForbiddenTags',
 		'comments',
 		'commentsRating',
@@ -316,7 +318,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			= $this->tags = $this->calculateCounts = $this->siteuserProperties = $this->groupsMedia = $this->itemsMedia = FALSE;
 
 		$this->siteuser = $this->cache = $this->itemsPropertiesList = $this->commentsPropertiesList = $this->groupsPropertiesList
-			= $this->votes = $this->showPanel = $this->calculateTotal = $this->parts = $this->sortPropertiesValues
+			= $this->votes = $this->showPanel = $this->calculateTotal = $this->parts = $this->sortPropertiesValues = $this->closed
 			= $this->patternPart = $this->patternTag = TRUE;
 
 		$this->groupsMode = 'tree';
@@ -718,7 +720,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 				if ($this->calculateTotal)
 				{
-					$this->total = Core_QueryBuilder::select()->getFoundRows();
+					$this->total = intval(Core_QueryBuilder::select()->getFoundRows());
 				}
 			}
 		}
@@ -750,7 +752,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 				'id' => $id
 			),
 			'pagination' => array(
-				'total' => intval($this->total),
+				'total' => $this->total,
 				'pages' => $this->limit > 0 ? ceil($this->total / $this->limit) : 0,
 				'current' => intval($this->page) + 1,
 				'limit' => $this->limit
@@ -957,7 +959,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 			$this->_setLimits();
 
-			$this->_Informationsystem_Items
+			$this->closed && $this->_Informationsystem_Items
 				->queryBuilder()
 				->where('informationsystem_items.closed', '=', 0);
 		}
@@ -1030,6 +1032,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 			if (is_array($inCache))
 			{
 				$this->_shownIDs = $inCache['shown'];
+				$this->calculateTotal && isset($inCache['total']) && $this->total = $inCache['total']; // remove isset() after 7.1.4
+				
 				echo $inCache['content'];
 				return $this;
 			}
@@ -1102,12 +1106,12 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 				if ($this->calculateTotal)
 				{
-					$this->total = Core_QueryBuilder::select()->getFoundRows();
+					$this->total = intval(Core_QueryBuilder::select()->getFoundRows());
 
 					$this->addEntity(
 						Core::factory('Core_Xml_Entity')
 							->name('total')
-							->value(intval($this->total))
+							->value($this->total)
 					);
 				}
 			}
@@ -1369,7 +1373,11 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 		$bCache && $oCore_Cache->set(
 			$cacheKey,
-			array('content' => $content, 'shown' => $this->_shownIDs),
+			array(
+				'content' => $content,
+				'total' => $this->total,
+				'shown' => $this->_shownIDs,
+			),
 			$this->_cacheName,
 			$this->_cacheTags
 		);
@@ -2132,6 +2140,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 							->name('parent_id')
 							->value($oShortcut_Group->parent_id)
 					);
+					
+					$oInformationsystem_Group->dataOriginalId = $oShortcut_Group->id;
 			}
 			else
 			{
@@ -2215,7 +2225,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 				$parentObject->addEntity($oInformationsystem_Group);
 
-				$this->_addGroupsByParentId($oInformationsystem_Group->id, $oInformationsystem_Group);
+				$this->_addGroupsByParentId(!is_null($oInformationsystem_Group->dataOriginalId) ? $oInformationsystem_Group->dataOriginalId : $oInformationsystem_Group->id, $oInformationsystem_Group);
 			}
 
 			Core_Event::notify(get_class($this) . '.onAfterAddInformationsystemGroups', $this, array($this->_aInformationsystem_Groups[$parent_id]));
@@ -2318,7 +2328,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 		if ($this->item == 0 && !is_array($this->group))
 		{
-			$sPath = '/admin/informationsystem/item/index.php';
+			$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/informationsystem/item/index.php');
 			$sAdditional = "hostcms[action]=edit&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$this->group}&hostcms[checked][1][0]=1";
 			$sTitle = Core::_('Informationsystem_Item.information_items_add_form_title');
 
@@ -2333,7 +2343,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 					)
 			);
 
-			$sPath = '/admin/informationsystem/item/index.php';
+			$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/informationsystem/item/index.php');
 			$sAdditional = "hostcms[action]=edit&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$this->group}&hostcms[checked][0][0]=1";
 			$sTitle = Core::_('Informationsystem_Group.information_groups_add_form_title');
 
@@ -2352,7 +2362,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			{
 				$oInformationsystem_Group = Core_Entity::factory('Informationsystem_Group', $this->group);
 
-				$sPath = '/admin/informationsystem/item/index.php';
+				$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/informationsystem/item/index.php');
 				$sAdditional = "hostcms[action]=edit&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystem_Group->parent_id}&hostcms[checked][0][{$this->group}]=1";
 				$sTitle = Core::_('Informationsystem_Group.information_groups_edit_form_title', $oInformationsystem_Group->name, FALSE);
 
@@ -2369,7 +2379,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			}
 
 			// Folder
-			$sPath = '/admin/informationsystem/item/index.php';
+			$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/informationsystem/item/index.php');
 			$sAdditional = "&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$this->group}";
 			$sTitle = Core::_('Informationsystem_Group.information_system_top_menu_groups');
 
@@ -2387,7 +2397,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			if ($this->group)
 			{
 				// Delete
-				$sPath = '/admin/informationsystem/item/index.php';
+				$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/informationsystem/item/index.php');
 				$sAdditional = "hostcms[action]=markDeleted&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystem_Group->parent_id}&hostcms[checked][0][{$this->group}]=1&secret_csrf=" . Core_Security::getCsrfToken();
 				$sTitle = Core::_('Informationsystem_Group.markDeleted');
 
@@ -2403,7 +2413,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 				);
 			}
 
-			/*$sPath = '/admin/informationsystem/index.php';
+			/*$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/informationsystem/index.php');
 			$sAdditional = "hostcms[action]=edit&informationsystem_dir_id={$oInformationsystem->informationsystem_dir_id}&hostcms[checked][1][{$oInformationsystem->id}]=1";
 			$sTitle = Core::_('Informationsystem.edit_title', $oInformationsystem->name);
 
@@ -2423,7 +2433,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			$oInformationsystem_Item = Core_Entity::factory('Informationsystem_Item', $this->item);
 
 			// Edit
-			$sPath = '/admin/informationsystem/item/index.php';
+			$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/informationsystem/item/index.php');
 			$sAdditional = "hostcms[action]=edit&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$this->group}&hostcms[checked][1][{$this->item}]=1";
 			$sTitle = Core::_('Informationsystem_Item.information_items_edit_form_title', $oInformationsystem_Item->name, FALSE);
 
@@ -2439,7 +2449,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			);
 
 			// Copy
-			$sPath = '/admin/informationsystem/item/index.php';
+			$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/informationsystem/item/index.php');
 			$sAdditional = "hostcms[action]=copy&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$this->group}&hostcms[checked][1][{$this->item}]=1&secret_csrf=" . Core_Security::getCsrfToken();
 			$sTitle = Core::_('Informationsystem_Item.information_items_copy_form_title');
 
@@ -2455,7 +2465,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			);
 
 			// Folder
-			$sPath = '/admin/informationsystem/item/index.php';
+			$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/informationsystem/item/index.php');
 			$sAdditional = "&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$this->group}";
 			$sTitle = Core::_('Informationsystem_Group.information_system_top_menu_groups');
 
@@ -2471,7 +2481,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			);
 
 			// Comments
-			$sPath = '/admin/informationsystem/item/comment/index.php';
+			$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/informationsystem/item/comment/index.php');
 			$sAdditional = "informationsystem_item_id={$this->item}";
 			$sTitle = Core::_('Informationsystem_Item.show_all_comments_top_menu');
 
@@ -2487,7 +2497,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			);
 
 			// Delete
-			$sPath = '/admin/informationsystem/item/index.php';
+			$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/informationsystem/item/index.php');
 			$sAdditional = "hostcms[action]=markDeleted&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$this->group}&hostcms[checked][1][{$this->item}]=1&secret_csrf=" . Core_Security::getCsrfToken();
 			$sTitle = Core::_('Informationsystem_Item.markDeleted');
 

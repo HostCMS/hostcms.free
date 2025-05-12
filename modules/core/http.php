@@ -16,11 +16,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - method('GET') метод HTTP запроса, по умолчанию GET
  * - timeout(10) таймаут соединения, по умолчанию 10
  * - port(80) порт соединения, по умолчанию 80
- * - contentType('application/x-www-form-urlencoded') Content-type запроса, по умолчанию 'application/x-www-form-urlencoded'
+ * - contentType('application/x-www-form-urlencoded') Content-type запроса, по умолчанию не задан
  * - rawData($data) все данные, передаваемые в HTTP POST-запросе (передача массива закодирует данные в виде multipart/form-data)
  * - userAgent($userAgent) установить пользовательский агент, по умолчанию 'Mozilla/5.0 (compatible; HostCMS/7.x; +https://www.hostcms.ru)'
  * - url($url) адрес загружаемого ресурса
- * - referer($referer) содержимое заголовка Referer, если NULL, то будет установлен в "{схема}://{запрошенный домен}"
+ * - referer($referer) содержимое заголовка Referer, если NULL, то будет установлен в "{схема}://{запрошенный домен}", если FALSE, то не будет передан
  * - data($key, $value) добавить POST-данные
  * - execute() отправить запрос
  *
@@ -49,7 +49,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Http
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 abstract class Core_Http
 {
@@ -188,9 +188,11 @@ abstract class Core_Http
 	 * @param string $host host
 	 * @param string $path path
 	 * @param string $query query
+	 * @param mixed $user user
+	 * @param mixed $password password
 	 * @return mixed
 	 */
-	abstract protected function _execute($host, $path, $query, $scheme = 'http');
+	abstract protected function _execute($host, $path, $query, $scheme = 'http', $user = NULL, $password = NULL);
 
 	/**
 	 * Clear object
@@ -200,7 +202,9 @@ abstract class Core_Http
 	public function clear()
 	{
 		$this->_additionalHeaders = $this->_data = array();
-		$this->_url = $this->_referer = $this->_headers = $this->_body = NULL;
+		$this->_rawData = $this->_userAgent = $this->_url = $this->_referer = $this->_headers = $this->_body = NULL;
+
+		$this->_method = 'GET';
 
 		return $this->config($this->_originalConfig)->_init();
 	}
@@ -215,8 +219,7 @@ abstract class Core_Http
 			->userAgent('Mozilla/5.0 (compatible; HostCMS/7.x; +https://www.hostcms.ru)')
 			->method('GET')
 			->timeout(10)
-			->port(80)
-			->contentType('application/x-www-form-urlencoded');
+			->port(80);
 
 		$this
 			->additionalHeader('Accept-Charset', 'utf-8,*;q=0.9')
@@ -445,8 +448,15 @@ abstract class Core_Http
 			switch ($encoding)
 			{
 				case 'gzip':
-					$content = substr($this->_body, 10);
-					return $content != '' ? gzinflate($content) : '';
+					// First 2 bytes: 1F 8B
+					if (substr($this->_body, 0, 2) === chr(0x1F) . chr(0x8b))
+					{
+						$content = substr($this->_body, 10);
+						return $content != '' ? gzinflate($content) : '';
+					}
+				break;
+				case 'none':
+					// nothing to do
 				break;
 				default:
 					throw new Core_Exception('Core_Http unsupported compression method "%name"', array('%name' => $encoding));
@@ -512,10 +522,10 @@ abstract class Core_Http
 			: '';
 
 		$this->_referer = is_null($this->_referer)
-			? "{$scheme}://{$host}"
+			? "{$scheme}://{$host}/"
 			: $this->_referer;
 
-		return $this->_execute($host, $path, $query, $scheme);
+		return $this->_execute($host, $path, $query, $scheme, Core_Array::get($aUrl, 'user'), Core_Array::get($aUrl, 'pass'));
 	}
 
 	/**
@@ -541,7 +551,7 @@ abstract class Core_Http
 			preg_match('|HTTP/\d(?:\.\d)?\s+(\d+)|', $status, $match);
 			return Core_Array::get($match, 1);
 		}
-		
+
 		return NULL;
 	}
 
@@ -727,9 +737,9 @@ abstract class Core_Http
 		}
 
 		$return = array(self::$_requestParseBodyPost, self::$_requestParseBodyFile);
-		
+
 		self::$_requestParseBodyPost = self::$_requestParseBodyFile = array();
-		
+
 		return $return;
 	}
 

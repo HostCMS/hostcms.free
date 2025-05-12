@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 {
@@ -168,14 +168,17 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 				$lng = Core_I18n::instance()->getLng();
 
 				// add
-				$this->_init['script_url'] = "'/admin/wysiwyg/tinymce.min.js?v=" . HOSTCMS_UPDATE_NUMBER . "'";
-				$this->_init['language'] = '"' . $lng . '"';
-				$this->_init['language_url'] = "'/admin/wysiwyg/langs/{$lng}.js'";
-				$this->_init['cache_suffix'] = "'?v=" . HOSTCMS_UPDATE_NUMBER  . "'";
-				$this->_init['promotion'] = "false";
-				//$this->_init['elements'] = '"' . $this->id . '"';
-
-				$this->_init['init_instance_callback'] = 'function(editor) { $(\'body\').trigger(\'afterTinyMceInit\', [editor]); }';
+				$this->_init += array(
+					'script_url' => Admin_Form_Controller::correctBackendPath("'/{admin}/wysiwyg/tinymce.min.js?v=" . HOSTCMS_UPDATE_NUMBER . "'"),
+					'language' => '"' . $lng . '"',
+					'language_url' => Admin_Form_Controller::correctBackendPath("'/{admin}/wysiwyg/langs/{$lng}.js'"),
+					'cache_suffix' => "'?v=" . HOSTCMS_UPDATE_NUMBER  . "'",
+					'promotion' => "false",
+					//'elements' => '"' . $this->id . '"',
+					'init_instance_callback' => 'function(editor) { $(\'body\').trigger(\'afterTinyMceInit\', [editor]); }',
+					'images_reuse_filename' => 'true',
+					'images_upload_handler' => 'function (blobInfo, progress) { return hostcms_image_upload_handler(blobInfo, progress) }'
+				);
 
 				if (Core::moduleIsActive('shortcode'))
 				{

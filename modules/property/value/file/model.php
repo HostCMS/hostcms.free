@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Property
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Property_Value_File_Model extends Core_Entity
 {
@@ -143,6 +143,7 @@ class Property_Value_File_Model extends Core_Entity
 	/**
 	 * Delete large file
 	 * @return self
+	 * @hostcms-event property_value_file.onAfterDeleteLargeFile
 	 */
 	public function deleteLargeFile()
 	{
@@ -157,6 +158,8 @@ class Property_Value_File_Model extends Core_Entity
 					Core_File::delete($path);
 				} catch (Exception $e) {}
 			}
+
+			Core_Event::notify($this->_modelName . '.onAfterDeleteLargeFile', $this);
 
 			$this->file = '';
 			$this->file_name = '';
@@ -187,6 +190,7 @@ class Property_Value_File_Model extends Core_Entity
 	/**
 	 * Delete small file
 	 * @return self
+	 * @hostcms-event property_value_file.onAfterDeleteSmallFile
 	 */
 	public function deleteSmallFile()
 	{
@@ -201,6 +205,8 @@ class Property_Value_File_Model extends Core_Entity
 					Core_File::delete($path);
 				} catch (Exception $e) {}
 			}
+
+			Core_Event::notify($this->_modelName . '.onAfterDeleteSmallFile', $this);
 
 			$this->file_small = '';
 			$this->file_small_name = '';
@@ -325,5 +331,19 @@ class Property_Value_File_Model extends Core_Entity
 			->addXmlTag('tag_name', $this->Property->tag_name);
 
 		return $this;
+	}
+
+	/**
+	 * Convert Object to Array
+	 * @return array
+	 * @hostcms-event modelname.onAfterToArray
+	 */
+	public function toArray()
+	{
+		$return = parent::toArray();
+
+		$return['__model_name'] = $this->_modelName;
+
+		return $return;
 	}
 }

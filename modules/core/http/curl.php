@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Http
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Http_Curl extends Core_Http
 {
@@ -17,9 +17,11 @@ class Core_Http_Curl extends Core_Http
 	 * @param string $host host
 	 * @param string $path path
 	 * @param string $query query
+	 * @param mixed $user user
+	 * @param mixed $password password
 	 * @return self
 	 */
-	protected function _execute($host, $path, $query, $scheme = 'http')
+	protected function _execute($host, $path, $query, $scheme = 'http', $user = NULL, $password = NULL)
 	{
 		if (!function_exists('curl_init'))
 		{
@@ -28,12 +30,20 @@ class Core_Http_Curl extends Core_Http
 
 		$curl = @curl_init();
 
+		// Both're posibile - CURLOPT_USERPWD or "{$user}:{$password}@"
+		/*$userPassword = !is_null($user) && !is_null($password)
+			? "{$user}:{$password}@"
+			: '';*/
+
 		// Предотвращаем chunked-ответ
 		//curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
 		// Force to use HTTP 1.1 instead of 2.0
 		//curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-
+		//curl_setopt($curl, CURLOPT_URL, "{$scheme}://{$userPassword}{$host}:{$this->_port}{$path}{$query}");
 		curl_setopt($curl, CURLOPT_URL, "{$scheme}://{$host}:{$this->_port}{$path}{$query}");
+
+		!is_null($user) && !is_null($password)
+			&& curl_setopt($curl, CURLOPT_USERPWD, "{$user}:{$password}");
 
 		switch ($this->_method)
 		{
@@ -52,6 +62,9 @@ class Core_Http_Curl extends Core_Http
 			break;
 			case 'HEAD':
 				curl_setopt($curl, CURLOPT_NOBODY, TRUE);
+			break;
+			case 'FTP':
+				// nothing to do
 			break;
 			default:
 				curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $this->_method);
@@ -92,7 +105,9 @@ class Core_Http_Curl extends Core_Http
 		curl_setopt($curl, CURLOPT_TIMEOUT, $this->_timeout);
 		curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, $this->_timeout);
 		curl_setopt($curl, CURLOPT_USERAGENT, $this->_userAgent);
-		curl_setopt($curl, CURLOPT_REFERER, $this->_referer);
+
+		$this->_referer !== FALSE
+			&& curl_setopt($curl, CURLOPT_REFERER, $this->_referer);
 
 		curl_setopt($curl, CURLOPT_VERBOSE, FALSE); // Minimize logs
 		//curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, FALSE);
@@ -161,6 +176,8 @@ class Core_Http_Curl extends Core_Http
 					{
 						$rch = curl_copy_handle($curl);
 						@curl_close($curl);
+						unset($curl); // PHP-8: curl_close no longer closes the resource
+
 						$curl = $rch;
 						//curl_setopt($rch, CURLOPT_FORBID_REUSE, TRUE);
 						curl_setopt($curl, CURLOPT_URL, trim($newurl));
@@ -185,10 +202,17 @@ class Core_Http_Curl extends Core_Http
 
 		$this->_error = curl_error($curl);
 
-		$iHeaderSize = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
-		$this->_headers = substr($datastr, 0, $iHeaderSize);
+		if ($this->_method !== 'FTP')
+		{
+			$iHeaderSize = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+			$this->_headers = substr($datastr, 0, $iHeaderSize);
 
-		$this->_body = substr($datastr, $iHeaderSize);
+			$this->_body = substr($datastr, $iHeaderSize);
+		}
+		else
+		{
+			$this->_body = $datastr;
+		}
 
 		// Close PHP cURL handle
 		@curl_close($curl);

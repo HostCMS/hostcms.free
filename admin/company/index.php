@@ -4,13 +4,13 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
 // Код формы
 $iAdmin_Form_Id = 64;
-$sAdminFormAction = '/admin/company/index.php';
+$sAdminFormAction = '/{admin}/company/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -96,7 +96,7 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('Company.show_posts'))
 		->icon('fa fa-user')
 		->href(
-			$oAdmin_Form_Controller->getAdminActionLoadHref($sCompanyPostsFormPath = '/admin/company/post/index.php', NULL, NULL, '', 0)
+			$oAdmin_Form_Controller->getAdminActionLoadHref($sCompanyPostsFormPath = '/{admin}/company/post/index.php', NULL, NULL, '', 0)
 		)
 		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($sCompanyPostsFormPath, NULL, NULL, '', 0)
@@ -107,7 +107,7 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('Company.show_email_types'))
 		->icon('fa fa-envelope')
 		->href(
-			$oAdmin_Form_Controller->getAdminActionLoadHref($sCompanyEmailTypesFormPath = '/admin/directory/email/type/index.php', NULL, NULL, '', 0)
+			$oAdmin_Form_Controller->getAdminActionLoadHref($sCompanyEmailTypesFormPath = '/{admin}/directory/email/type/index.php', NULL, NULL, '', 0)
 		)
 		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($sCompanyEmailTypesFormPath, NULL, NULL, '', 0)
@@ -118,7 +118,7 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('Company.show_phone_types'))
 		->icon('fa fa-phone')
 		->href(
-			$oAdmin_Form_Controller->getAdminActionLoadHref($sCompanyAddressTypesFormPath = '/admin/directory/phone/type/index.php', NULL, NULL, '', 0)
+			$oAdmin_Form_Controller->getAdminActionLoadHref($sCompanyAddressTypesFormPath = '/{admin}/directory/phone/type/index.php', NULL, NULL, '', 0)
 		)
 		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($sCompanyAddressTypesFormPath, NULL, NULL, '', 0)
@@ -129,7 +129,7 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('Company.show_address_types'))
 		->icon('fa fa-map-marker')
 		->href(
-			$oAdmin_Form_Controller->getAdminActionLoadHref($sCompanyPhoneTypesFormPath = '/admin/directory/address/type/index.php', NULL, NULL, '', 0)
+			$oAdmin_Form_Controller->getAdminActionLoadHref($sCompanyPhoneTypesFormPath = '/{admin}/directory/address/type/index.php', NULL, NULL, '', 0)
 		)
 		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($sCompanyPhoneTypesFormPath, NULL, NULL, '', 0)
@@ -140,7 +140,7 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('Company.show_socials'))
 		->icon('fa fa-share-alt')
 		->href(
-			$oAdmin_Form_Controller->getAdminActionLoadHref($sCompanySocialsFormPath = '/admin/directory/social/type/index.php', NULL, NULL, '', 0)
+			$oAdmin_Form_Controller->getAdminActionLoadHref($sCompanySocialsFormPath = '/{admin}/directory/social/type/index.php', NULL, NULL, '', 0)
 		)
 		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($sCompanySocialsFormPath, NULL, NULL, '', 0)
@@ -151,7 +151,7 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('Company.show_messengers'))
 		->icon('fa fa-comments')
 		->href(
-			$oAdmin_Form_Controller->getAdminActionLoadHref($sCompanyMessengersFormPath = '/admin/directory/messenger/type/index.php', NULL, NULL, '', 0)
+			$oAdmin_Form_Controller->getAdminActionLoadHref($sCompanyMessengersFormPath = '/{admin}/directory/messenger/type/index.php', NULL, NULL, '', 0)
 		)
 		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($sCompanyMessengersFormPath, NULL, NULL, '', 0)

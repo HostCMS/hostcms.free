@@ -33,7 +33,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Querybuilder
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 {
@@ -637,31 +637,45 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	 */
 	public function build()
 	{
-		$query = array('SELECT');
+		$query = array();
+		
+		if (!empty($this->_comment))
+		{
+			$query[] = $this->_buildComment($this->_comment);
+		}
+		
+		if (!empty($this->_with))
+		{
+			$query[] = $this->_buildWith($this->_with);
+		}
+		
+		$sql = 'SELECT ';
 
 		if ($this->_distinct)
 		{
-			$query[] = 'DISTINCT';
+			$sql .= 'DISTINCT ';
 		}
 
 		if ($this->_highPriority)
 		{
-			$query[] = 'HIGH_PRIORITY';
+			$sql .= 'HIGH_PRIORITY ';
 		}
 
 		if ($this->_straightJoin)
 		{
-			$query[] = 'STRAIGHT_JOIN';
+			$sql .= 'STRAIGHT_JOIN ';
 		}
 
 		if ($this->_sqlCalcFoundRows)
 		{
-			$query[] = 'SQL_CALC_FOUND_ROWS';
+			$sql .= 'SQL_CALC_FOUND_ROWS ';
 		}
 
-		$query[] = !empty($this->_select)
+		$sql .= !empty($this->_select)
 			? implode(', ', $this->_quoteColumns($this->_select))
 			: '*';
+		
+		$query[] = $sql;
 
 		if (!empty($this->_from))
 		{

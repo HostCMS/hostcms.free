@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Crm_Project_Note_Controller_Add extends Crm_Note_Controller_Add
 {
@@ -60,7 +60,7 @@ class Crm_Project_Note_Controller_Add extends Crm_Note_Controller_Add
 		}
 
 		$this->addMessage("<script>$(function() {
-			$.adminLoad({ path: '/admin/crm/project/note/index.php', additionalParams: 'crm_project_id=" . $oCrm_Project->id . "', windowId: 'crm-project-notes' });
+			$.adminLoad({ path: hostcmsBackend + '/crm/project/note/index.php', additionalParams: 'crm_project_id=" . $oCrm_Project->id . "', windowId: 'crm-project-notes' });
 		});</script>");
 	}
 }

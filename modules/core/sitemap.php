@@ -26,7 +26,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Sitemap extends Core_Servant_Properties
 {
@@ -1035,9 +1035,9 @@ class Core_Sitemap extends Core_Servant_Properties
 		Core_Event::notify('Core_Sitemap.onBeforeAddNode', $this, array($entity));
 		$content .= Core_Event::getLastReturn();
 
-		$content .= "<loc>{$loc}</loc>\n" .
-		"<changefreq>" . $sChangefreq . "</changefreq>\n" .
-		"<priority>" . $priority . "</priority>\n";
+		$content .= "<loc>" . htmlspecialchars($loc) . "</loc>\n" .
+			"<changefreq>" . $sChangefreq . "</changefreq>\n" .
+			"<priority>" . $priority . "</priority>\n";
 
 		Core_Event::notify('Core_Sitemap.onAfterAddNode', $this, array($entity));
 		$content .= Core_Event::getLastReturn();

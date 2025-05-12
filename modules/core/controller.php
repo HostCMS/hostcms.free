@@ -27,7 +27,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Controller extends Core_Servant_Properties
 {
@@ -405,12 +405,45 @@ class Core_Controller extends Core_Servant_Properties
 
 	/**
 	 * Add additional signature for cache name
-	 * @param string $name name
+	 * @param string $signature
 	 * @return self
 	 */
-	public function addCacheSignature($name)
+	public function addCacheSignature($signature)
 	{
-		$this->_cacheSignatures[] = $name;
+		$this->_cacheSignatures[] = $signature;
+		return $this;
+	}
+	
+	/**
+	 * Add additional signatures for cache name
+	 * @param array $aSignature
+	 * @return self
+	 */
+	public function addCacheSignatures(array $aSignature)
+	{
+		foreach ($aSignature as $signature)
+		{
+			$this->_cacheSignatures[] = $signature;
+		}
+		return $this;
+	}
+	
+	/**
+	 * Get additional signatures for cache name
+	 * @return array
+	 */
+	public function getCacheSignatures()
+	{
+		return $this->_cacheSignatures;
+	}
+	
+	/**
+	 * Clear additional signatures for cache name
+	 * @return self
+	 */
+	public function clearCacheSignatures()
+	{
+		$this->_cacheSignatures = array();
 		return $this;
 	}
 

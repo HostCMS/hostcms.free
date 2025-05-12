@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage User
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -53,7 +53,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainTab->delete($this->getField('password'));
 
 		$aPasswordFormat = array(
-			'minlen' => array('value' => 9),
+			'minlen' => array('value' => 8),
 			'maxlen' => array('value' => 255)
 		);
 
@@ -62,7 +62,8 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->id('password_first')
 			->name('password_first')
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
-			->generatePassword(TRUE);
+			->generatePassword(TRUE)
+			->generatePasswordLength(8);
 
 		!$this->_object->id && $oPasswordFirst->format($aPasswordFormat);
 

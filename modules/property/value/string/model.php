@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Property
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Property_Value_String_Model extends Core_Entity
 {
@@ -106,5 +106,19 @@ class Property_Value_String_Model extends Core_Entity
 			->addXmlTag('tag_name', $oProperty->tag_name);
 
 		return $this;
+	}
+	
+	/**
+	 * Convert Object to Array
+	 * @return array
+	 * @hostcms-event modelname.onAfterToArray
+	 */
+	public function toArray()
+	{
+		$return = parent::toArray();
+
+		$return['__model_name'] = $this->_modelName;
+
+		return $return;
 	}
 }

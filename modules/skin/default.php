@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Skin_Default extends Core_Skin
 {
@@ -163,7 +163,7 @@ class Skin_Default extends Core_Skin
 				.mouseup(function(){$('#hostCmsLogo').animate({top: 0})});
 		});
 		</script>
-		<script src="/admin/wysiwyg/jquery.tinymce.js"></script>
+		<script src="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/wysiwyg/jquery.tinymce.js')?>"></script>
 		<?php
 
 		return $this;
@@ -180,7 +180,7 @@ class Skin_Default extends Core_Skin
 	<title><?php echo htmlspecialchars($this->_title)?></title>
 	<meta content="text/html; charset=UTF-8" http-equiv="Content-Type"></meta>
 	<link rel="icon" type="image/svg+xml" href="/modules/skin/bootstrap/ico/favicon.svg" />
-	
+
 	<?php $this->showHead()?>
 </head>
 <body class="body-<?php echo htmlspecialchars($this->_mode)?> hostcms6 backendBody">
@@ -190,7 +190,7 @@ if ($this->_mode != 'blank')
 ?>
 <div id="top">
 	<div id="hostCmsLogo">
-		<a href="/admin/"><img id="hostCmsLogoImg" src="<?php echo $this->getImageHref()?>logo.png" alt="(^) HostCMS" title="HostCMS<?php echo Core_Auth::logged() ? ' v. ' . htmlspecialchars(Core::getVersion()) : ''?>"></img></a>
+		<a href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/')?>"><img id="hostCmsLogoImg" src="<?php echo $this->getImageHref()?>logo.png" alt="(^) HostCMS" title="HostCMS<?php echo Core_Auth::logged() ? ' v. ' . htmlspecialchars(Core::getVersion()) : ''?>"></img></a>
 	</div>
 	<?php if (Core_Auth::logged() && defined('CURRENT_SITE'))
 	{ ?>
@@ -247,8 +247,8 @@ if ($this->_mode != 'blank')
 	<?php if (Core_Auth::logged())
 	{
 	?><div id="logout">
-		<div><a href="/admin/logout.php"><img src="<?php echo $this->getImageHref()?>logout.png"></img></a></div>
-		<div id="login"><a href="/admin/logout.php"><?php echo Core_Auth::getCurrentUser()->login?></a></div>
+		<div><a href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/logout.php')?>"><img src="<?php echo $this->getImageHref()?>logout.png"></img></a></div>
+		<div id="login"><a href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/logout.php')?>"><?php echo Core_Auth::getCurrentUser()->login?></a></div>
 	</div><?php
 	}
 	?></div><?php
@@ -333,7 +333,7 @@ if ($this->_mode != 'blank')
 
 		?><div id="authorization">
 			<div id="form">
-				<form name="authorization" action="/admin/index.php" method="post">
+				<form name="authorization" action="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/index.php')?>" method="post">
 					<div>
 						<p><?php echo Core::_('Admin.authorization_form_login')?>:</p>
 						<p><input name="login" type="text"></input></p>
@@ -770,8 +770,8 @@ if ($this->_mode != 'blank')
 			</div>
 
 			<div id="submenuWidgets" class="mbmenu">
-				<a class="{action: '$.widgetLoad({ path: \'/admin/index.php?ajaxWidgetLoad&widgetAjax&moduleId=0&type=1\' })', img: '<?php echo $this->getImageHref()?>module/eventlog.png'}"><?php echo Core::_('Admin.index_systems_events')?></a>
-				<a class="{action: '$.widgetLoad({ path: \'/admin/index.php?ajaxWidgetLoad&widgetAjax&moduleId=0&type=2\' })', img: '<?php echo $this->getImageHref()?>module/info.png'}"><?php echo Core::_('Admin.index_systems_characteristics')?></a>
+				<a class="{action: '$.widgetLoad({ path: hostcmsBackend + \'/index.php?ajaxWidgetLoad&widgetAjax&moduleId=0&type=1\' })', img: '<?php echo $this->getImageHref()?>module/eventlog.png'}"><?php echo Core::_('Admin.index_systems_events')?></a>
+				<a class="{action: '$.widgetLoad({ path: hostcmsBackend + \'/index.php?ajaxWidgetLoad&widgetAjax&moduleId=0&type=2\' })', img: '<?php echo $this->getImageHref()?>module/info.png'}"><?php echo Core::_('Admin.index_systems_characteristics')?></a>
 				<?php
 
 				// Other modules
@@ -797,7 +797,7 @@ if ($this->_mode != 'blank')
 							// $oUser_Setting = $oUser->User_Settings->getByModuleIdAndTypeAndEntityId($oModule->id, $type, 0);
 
 							Core_Html_Entity::factory('A')
-								->class("{action: '$.widgetLoad({ path: \'/admin/index.php?ajaxWidgetLoad&widgetAjax&moduleId={$oModule->id}&type={$type}\' })', img: '{$this->getImageHref()}module/{$oModule->path}.png'}")
+								->class("{action: '$.widgetLoad({ path: hostcmsBackend + \'/index.php?ajaxWidgetLoad&widgetAjax&moduleId={$oModule->id}&type={$type}\' })', img: '{$this->getImageHref()}module/{$oModule->path}.png'}")
 								->value($aAdminPage['title'])
 								->execute();
 						}
@@ -848,7 +848,7 @@ if ($this->_mode != 'blank')
 				update: function(event, ui) {
 					var object = $(this), reg = /sortable(\d+)/, arr = reg.exec(object.prop('id'));
 					$.ajax({
-						url: '/admin/index.php?' + 'userSettings&blockId=' + arr[1] + '&' + object.sortable('serialize'),
+						url: hostcmsBackend + '/index.php?' + 'userSettings&blockId=' + arr[1] + '&' + object.sortable('serialize'),
 						type: 'get',
 						dataType: 'json',
 						success: function(){}
@@ -909,7 +909,7 @@ if ($this->_mode != 'blank')
 		if ($this->_mode != 'blank')
 		{
 		?><div id="footer">
-			<div id="copyright">&copy; 2005–2024 ООО «Хостмэйк»</div>
+			<div id="copyright">&copy; 2005–2025 ООО «Хостмэйк»</div>
 			<div id="links">
 				<p><?php echo Core::_('Admin.website')?> <a href="http://www.hostcms.ru" target="_blank">www.hostcms.ru</a></p>
 				<p><?php echo Core::_('Admin.support_email')?> <a href="mailto:support@hostcms.ru">support@hostcms.ru</a></p>

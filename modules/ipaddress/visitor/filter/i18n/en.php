@@ -2,7 +2,7 @@
 
 return array(
 	'model_name' => 'Visitor filters',
-	'title' => 'Filters',
+	'title' => 'Visitor filters',
 	'edit_success' => "Filter edited successfully!",
 	'delete_success' => 'Filter deleted successfully!',
 	'markDeleted_success' => 'Filter deleted successfully!',
@@ -62,4 +62,6 @@ return array(
 	'block_mode' => "Block mode",
 	'block_mode0' => "Block",
 	'block_mode1' => "Capcha",
+	'block_mode2' => "Allow",
+	'description' => 'Description',
 );

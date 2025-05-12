@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'trash');
 
 // Код формы
 $iAdmin_Form_Id = 183;
-$sAdminFormAction = '/admin/trash/index.php';
+$sAdminFormAction = '/{admin}/trash/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -71,7 +71,8 @@ if ($oAdmin_Form_Controller->getAction() == 'deleteAll')
 
 		$iCount = 0;
 
-		$offset = Core_Array::getGet('offset', 0, 'int');
+		// Offset используется только внутри цикла между таблицами!
+		$offset = 0;
 		$limit = 100;
 
 		foreach ($aTables as $oTrash_Entity)
@@ -108,7 +109,7 @@ if ($oAdmin_Form_Controller->getAction() == 'deleteAll')
 					'action' => 'deleteAll',
 					'datasetKey' => 0,
 					'datasetValue' => 0,
-					'additionalParams' => "offset={$offset}&tableOffset={$tableOffset}&secret_csrf=" . Core_Security::getCsrfToken())
+					'additionalParams' => "tableOffset={$tableOffset}&secret_csrf=" . Core_Security::getCsrfToken())
 				)?>
 			}
 			setTimeout('set_location()', <?php echo $iDelay * 1000?>);

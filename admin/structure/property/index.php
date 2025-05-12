@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'structure');
 
 // Код формы
 $iAdmin_Form_Id = 67;
-$sAdminFormAction = '/admin/structure/property/index.php';
+$sAdminFormAction = '/{admin}/structure/property/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -25,7 +25,7 @@ $oAdmin_Form_Controller
 	->title(Core::_('Property.title'))
 	->pageTitle(Core::_('Property.title'));
 
-$sStructurePath = '/admin/structure/index.php';
+$sStructurePath = '/{admin}/structure/index.php';
 
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
@@ -291,22 +291,21 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 
 // Ограничение источника 0
 $oAdmin_Form_Dataset->addCondition(
-	array('select' => array('property_dirs.*'))
-)->addCondition(
-	array('join' => array('structure_property_dirs', 'structure_property_dirs.property_dir_id', '=', 'property_dirs.id'))
-)->addCondition(
-	array('where' =>
-		array('parent_id', '=', $property_dir_id)
+		array('select' => array('property_dirs.*'))
+	)->addCondition(
+		array('join' => array('structure_property_dirs', 'structure_property_dirs.property_dir_id', '=', 'property_dirs.id'))
+	)->addCondition(
+		array('where' =>
+			array('parent_id', '=', $property_dir_id)
+		)
+	)->addCondition(
+		array('where' =>
+			array('structure_property_dirs.site_id', '=', CURRENT_SITE)
+		)
 	)
-)->addCondition(
-	array('where' =>
-		array('structure_property_dirs.site_id', '=', CURRENT_SITE)
-	)
-)
-->changeField('name', 'type', 4)
-->changeField('name', 'link', "/admin/structure/property/index.php?property_dir_id={id}")
-->changeField('name', 'onclick', "$.adminLoad({path: '/admin/structure/property/index.php', additionalParams: 'property_dir_id={id}', windowId: '{windowId}'}); return false")
-;
+	->changeField('name', 'type', 4)
+	->changeField('name', 'link', "/{admin}/structure/property/index.php?property_dir_id={id}")
+	->changeField('name', 'onclick', "$.adminLoad({path: '/{admin}/structure/property/index.php', additionalParams: 'property_dir_id={id}', windowId: '{windowId}'}); return false");
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(
@@ -353,10 +352,10 @@ else
 }
 
 $oAdmin_Form_Dataset
-	->changeField('multiple', 'link', "/admin/structure/property/index.php?hostcms[action]=changeMultiple&hostcms[checked][{dataset_key}][{id}]=1&property_dir_id={property_dir_id}")
-	->changeField('multiple', 'onclick', "$.adminLoad({path: '/admin/structure/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&property_dir_id={property_dir_id}', action: 'changeMultiple', windowId: '{windowId}'}); return false")
-	->changeField('indexing', 'link', "/admin/structure/property/index.php?hostcms[action]=changeIndexing&hostcms[checked][{dataset_key}][{id}]=1&property_dir_id={property_dir_id}")
-	->changeField('indexing', 'onclick', "$.adminLoad({path: '/admin/structure/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&property_dir_id={property_dir_id}', action: 'changeIndexing', windowId: '{windowId}'}); return false");
+	->changeField('multiple', 'link', "/{admin}/structure/property/index.php?hostcms[action]=changeMultiple&hostcms[checked][{dataset_key}][{id}]=1&property_dir_id={property_dir_id}")
+	->changeField('multiple', 'onclick', "$.adminLoad({path: '/{admin}/structure/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&property_dir_id={property_dir_id}', action: 'changeMultiple', windowId: '{windowId}'}); return false")
+	->changeField('indexing', 'link', "/{admin}/structure/property/index.php?hostcms[action]=changeIndexing&hostcms[checked][{dataset_key}][{id}]=1&property_dir_id={property_dir_id}")
+	->changeField('indexing', 'onclick', "$.adminLoad({path: '/{admin}/structure/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&property_dir_id={property_dir_id}', action: 'changeIndexing', windowId: '{windowId}'}); return false");
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(

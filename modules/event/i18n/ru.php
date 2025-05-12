@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Дела',
@@ -177,4 +177,6 @@ return array(
 	'checklist_item_name' => 'Название пункта',
 	'add_checklist_item' => 'добавить пункт',
 	'remove_checklist_item' => 'удалить пункт',
+
+	'select_project' => 'Выберите проект',
 );

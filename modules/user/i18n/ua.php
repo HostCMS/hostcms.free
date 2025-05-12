@@ -95,4 +95,6 @@ return array(
 
 	'option_max_height' => 'Максимальна висота аватара',
 	'option_max_width' => 'Максимальна ширина аватара',
+
+	'accessdenied' => 'Блокування',
 );

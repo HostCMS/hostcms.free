@@ -77,7 +77,7 @@ return array(
 	'viewSite' => 'View site in a new window',
 	'selectSite' => 'Select Site',
 
-	'company' => 'Hostmake LLC',
+	'company' => 'HostCMS',
 	'company-website' => 'www.hostcms.org',
 	'company-support' => 'support@hostcms.org',
 	'copy' => '%s [Copy %s]',

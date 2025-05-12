@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Template
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Template_Model extends Core_Entity
 {
@@ -264,10 +264,13 @@ class Template_Model extends Core_Entity
 
 		Core_File::write($this->getTemplateLessFilePath(), trim((string) $content));
 
-		if ($this->type == 1 && strlen($content))
+		if ($this->type == 1)
 		{
 			// Rebuild CSS
-			$css = Template_Preprocessor::factory('less')->compile($content);
+			$css = strlen($content)
+				? Template_Preprocessor::factory('less')->compile($content)
+				: '';
+
 			$this->saveTemplateCssFile($css);
 		}
 
@@ -510,6 +513,8 @@ class Template_Model extends Core_Entity
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return self
 	 * @hostcms-event template.onBeforeRedeclaredDelete
+	 * @hostcms-event template.onAfterDeleteTemplateFile
+	 * @hostcms-event template.onAfterDeleteTemplateCssFile
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -530,12 +535,16 @@ class Template_Model extends Core_Entity
 		}
 		catch (Exception $e) {}
 
+		Core_Event::notify($this->_modelName . '.onAfterDeleteTemplateFile', $this);
+
 		try
 		{
 			$path = $this->getTemplateCssFilePath();
 			Core_File::isFile($path) && Core_File::delete($path);
 		}
 		catch (Exception $e) {}
+
+		Core_Event::notify($this->_modelName . '.onAfterDeleteTemplateCssFile', $this);
 
 		try
 		{
@@ -761,16 +770,17 @@ class Template_Model extends Core_Entity
 			$bUserAccess = $this->checkUserAccess();
 			// $bUserAccess = Core::checkPanel() && Core_Auth::logged();
 
-			if ($bUserAccess)
+			if ($bUserAccess && isset($_GET['hostcmsAction']) && $_GET['hostcmsAction'] == 'SHOW_DESIGN')
 			{
 				?><div class="hostcmsSection" id="hostcmsSection<?php echo $oTemplate_Section->id?>" style="border-color: <?php echo Core_Str::hex2rgba($oTemplate_Section->color, 0.8)?>">
+					<div class="hostcmsSectionIcon" data-template-section-id="<?php echo $oTemplate_Section->id?>" onclick="hQuery.showWidgetPanel(<?php echo $oTemplate_Section->id?>)"><i class="fa-solid fa-plus"></i></div>
 					<div class="hostcmsSectionPanel" style="display: none">
 						<div class="draggable-indicator">
 							<svg width="16px" height="16px" viewBox="0 0 32 32"><rect height="4" width="4" y="4" x="4" /><rect height="4" width="4" y="12" x="4" /><rect height="4" width="4" y="4" x="12"/><rect height="4" width="4" y="12" x="12"/><rect height="4" width="4" y="4" x="20"/><rect height="4" width="4" y="12" x="20"/><rect height="4" width="4" y="4" x="28"/><rect height="4" width="4" y="12" x="28"/></svg>
 						</div>
 						<?php
 						// Добавление виджета в секцию
-						$sPathAddWidget = '/admin/template/section/lib/index.php';
+						$sPathAddWidget = Admin_Form_Controller::correctBackendPath('/{admin}/template/section/lib/index.php');
 						$sTitleAddWidget = Core::_('Template_Section.add_widget');
 						$sAdditionalAddWidget = "hostcms[action]=edit&template_section_id={$oTemplate_Section->id}&hostcms[checked][0][0]=1";
 						$sOnclickAddWidget = "hQuery.openWindow({path: '{$sPathAddWidget}', additionalParams: '{$sAdditionalAddWidget}', title: '" . Core_Str::escapeJavascriptVariable($sTitleAddWidget) . "', dialogClass: 'hostcms6'}); return false";
@@ -778,7 +788,7 @@ class Template_Model extends Core_Entity
 						<div><a href="<?php echo "{$sPathAddWidget}?{$sAdditionalAddWidget}"?>" onclick="<?php echo $sOnclickAddWidget ?>" alt="<?php echo $sTitleAddWidget?>" title="<?php echo $sTitleAddWidget?>"><i class="fa-solid fa-fw fa-plus"></i></a></div>
 						<?php
 						// Настройки секции
-						$sPath = '/admin/template/section/index.php';
+						$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/template/section/index.php');
 						$sTitleSectionSettings = Core::_('Template_Section.section_settings', $oTemplate_Section->name);
 						$sAdditionalSectionSettings = "hostcms[action]=edit&template_id={$this->id}&template_dir_id={$this->Template_Dir->id}&hostcms[checked][0][{$oTemplate_Section->id}]=1";
 						$sOnclickSectionSettings = "hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditionalSectionSettings}', title: '" . Core_Str::escapeJavascriptVariable($sTitleSectionSettings) . "', dialogClass: 'hostcms6'}); return false";

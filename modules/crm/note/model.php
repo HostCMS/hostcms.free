@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Crm_Note_Model extends Core_Entity
 {
@@ -144,9 +144,13 @@ class Crm_Note_Model extends Core_Entity
 
 				$file = $oCrm_Note_Attachment->setDir($path)->setHref($href)->getSmallFileHref();
 
+				$ext = Core_File::getExtension($oCrm_Note_Attachment->file_name);
+
+				$bAudio = in_array($ext, array('mp3', 'ogg', 'acc'));
+
 				if ($bModuleAccess)
 				{
-					$src = '/admin/crm/note/index.php?&' . $oObject->getModelName() . '_id=' . $oObject->id . '&crm_note_attachment_id=' . $oCrm_Note_Attachment->id . '&rand=' . time();
+					$src = Admin_Form_Controller::correctBackendPath('/{admin}/crm/note/index.php?&') . $oObject->getModelName() . '_id=' . $oObject->id . '&crm_note_attachment_id=' . $oCrm_Note_Attachment->id . '&rand=' . time();
 
 					if (!is_null($file))
 					{
@@ -164,21 +168,44 @@ class Crm_Note_Model extends Core_Entity
 					}
 
 					?><div class="crm-note-attachment-item" data-id="<?php echo $oCrm_Note_Attachment->id?>" data-<?php echo $oObject->getModelName()?>-id="<?php echo $oObject->id?>" title="<?php echo htmlspecialchars($oCrm_Note_Attachment->file_name)?>"<?php echo $onclick?>>
-						<div class="image">
-							<?php echo $image?>
-							<span class="size"><?php echo $oCrm_Note_Attachment->getTextSize()?></span>
-						</div>
+						<?php
+						if ($bAudio)
+						{
+							?><div class="audio">
+								<audio controls src="<?php echo $src?>"></audio>
+								<span class="size"><?php echo $oCrm_Note_Attachment->getTextSize()?></span>
+							</div><?php
+						}
+						else
+						{
+							?><div class="image">
+								<?php echo $image?>
+								<span class="size"><?php echo $oCrm_Note_Attachment->getTextSize()?></span>
+							</div><?php
+						}
+						?>
 						<div class="name"><?php echo $name?></div>
 					</div><?php
 				}
 				else
 				{
 					?><div class="crm-note-attachment-item" title="<?php echo htmlspecialchars($oCrm_Note_Attachment->file_name)?>">
-					<div class="image">
-						<!-- <i class="fa-solid fa-image gray"></i> -->
-						<i class="<?php echo Core_File::getIcon($oCrm_Note_Attachment->file_name)?>"></i>
-						<span class="size"><?php echo $oCrm_Note_Attachment->getTextSize()?></span>
-					</div>
+						<?php
+						if ($bAudio)
+						{
+							?><div class="audio">
+								<audio controls src="<?php echo $file?>"></audio>
+								<span class="size"><?php echo $oCrm_Note_Attachment->getTextSize()?></span>
+							</div><?php
+						}
+						else
+						{
+							?><div class="image">
+								<i class="<?php echo Core_File::getIcon($oCrm_Note_Attachment->file_name)?>"></i>
+								<span class="size"><?php echo $oCrm_Note_Attachment->getTextSize()?></span>
+							</div><?php
+						}
+						?>
 					<div class="name"><?php echo htmlspecialchars($oCrm_Note_Attachment->file_name)?></div>
 				</div><?php
 				}

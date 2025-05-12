@@ -137,4 +137,7 @@ return array(
 	'closed' => 'Closed',
 	'export_fields_allow_items' => 'Export custom fields of items',
 	'export_fields_allow_groups' => 'Export user field groups',
+
+	'delete_property_values' => 'Delete exist property values',
+	'delete_field_values' => 'Delete existing values of custom fields',
 );

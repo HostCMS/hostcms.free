@@ -26,7 +26,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Mail
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 abstract class Core_Mail
 {
@@ -515,7 +515,7 @@ abstract class Core_Mail
 
 		$this
 			->header('From', $sFrom)
-			->header('X-Mailer', 'HostCMS/7.0');
+			->header('X-Mailer', 'HostCMS/7.1');
 
 		$sTo = !is_null($this->_recipientName)
 			// NO SPACES BETWEEN name and <email> // rolled back
@@ -793,16 +793,19 @@ abstract class Core_Mail
 		}
 
 		$aLines = explode("\r\n", $body);
+
+		unset($body);
+
 		foreach ($aLines as $key => $value)
 		{
 			// Ignore all whitespace at the end of lines
-			$value = rtrim($value);
-
 			// Reduce all sequences of WSP within a line to a single SP character.
-			$aLines[$key] = preg_replace('/\s+/', ' ', $value);
+			$aLines[$key] = preg_replace('/\s+/', ' ', rtrim($value));
 		}
 
 		$body = implode("\r\n", $aLines);
+
+		unset($aLines);
 
 		return $this->_dkimSimpleCanonicalizeBody($body);
 	}
@@ -854,6 +857,7 @@ abstract class Core_Mail
 		if (!Core_File::isFile($this->_config['dkim']['private_key']))
 		{
 			Core_Log::instance()->clear()
+				->notify(FALSE) // avoid recursion
 				->status(Core_Log::$ERROR)
 				->write('Core_Mail::_getDkimSignature. The private_key ' . $this->_config['dkim']['private_key'] . ' does not exist');
 
@@ -920,6 +924,7 @@ abstract class Core_Mail
 		else
 		{
 			Core_Log::instance()->clear()
+				->notify(FALSE) // avoid recursion
 				->status(Core_Log::$ERROR)
 				->write('Core_Mail::_getDkimSignature. openssl_sign error!');
 

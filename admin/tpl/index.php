@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'tpl');
 
 // Код формы
 $iAdmin_Form_Id = 236;
-$sAdminFormAction = '/admin/tpl/index.php';
+$sAdminFormAction = '/{admin}/tpl/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -57,10 +57,10 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('Tpl.import'))
 		->icon('fa fa-download')
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/tpl/import/index.php', NULL, NULL, 'tpl_dir_id=' . $tpl_dir_id)
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/tpl/import/index.php', NULL, NULL, 'tpl_dir_id=' . $tpl_dir_id)
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/tpl/import/index.php', NULL, NULL, 'tpl_dir_id=' . $tpl_dir_id)
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/tpl/import/index.php', NULL, NULL, 'tpl_dir_id=' . $tpl_dir_id)
 		)
 );
 

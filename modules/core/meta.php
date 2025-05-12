@@ -3,12 +3,12 @@
 defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 /**
- * Apply Meta-tags templates, e.g. {uppercaseFirst group.name}, {this.seoFilter ": " ", "}, {date(d.m.Y)}
+ * Apply Meta-tags templates, e.g. {uppercaseFirst group.name} or {uppercaseFirst group.nameField}, {this.seoFilter ": " ", "}, {date(d.m.Y)}
  *
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Meta
 {
@@ -138,7 +138,14 @@ class Core_Meta
 
 				foreach ($aTmpExplode as $fieldName)
 				{
-					if (is_callable(array($object, $fieldName)))
+					// xyzField
+					if (substr($fieldName, -5) === 'Field' && ($sTmp = substr($fieldName, 0, -5)) && isset($object->$sTmp))
+					{
+						$return = $object->$sTmp;
+					}
+					// ->xyz()
+					//is_callable(array($object, $fieldName)) вернёт true для произвольного метода объекта, который реализует метод __call(), даже если метод не определили в классе
+					elseif (method_exists($object, $fieldName) || method_exists($object, '__isset') && $object->__isset($fieldName))
 					{
 						$attr = isset($matches[3]) && $matches[3] != ''
 							? $this->_parseArgs($matches[3])
@@ -146,6 +153,7 @@ class Core_Meta
 
 						$return = call_user_func_array(array($object, $fieldName), $attr);
 					}
+					// ->xyz
 					elseif (isset($object->$fieldName))
 					{
 						$return = $object->$fieldName;

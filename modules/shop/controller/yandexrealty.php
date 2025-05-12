@@ -16,7 +16,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Controller_YandexRealty extends Core_Controller
 {
@@ -426,7 +426,7 @@ class Shop_Controller_YandexRealty extends Core_Controller
 				$aPrices = $oShop_Item_Controller->calculatePriceInItemCurrency($oShop_Item->price, $oShop_Item);
 
 				echo '<price>'."\n";
-					echo '<value>' . $aPrices['price_discount'] . '</value>'."\n";
+					echo '<value>' . intval($aPrices['price_discount']) . '</value>'."\n";
 					echo '<currency>' . $oShop_Item->Shop_Currency->code . '</currency>'."\n";
 				echo '</price>'."\n";
 

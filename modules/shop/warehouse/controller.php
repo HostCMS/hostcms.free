@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Warehouse_Controller
 {
@@ -40,7 +40,7 @@ class Shop_Warehouse_Controller
 			$from != ''
 				&& $additionalParams .= "&createFrom={$from}&createFromId={$oEntity->id}";
 
-			$path = '/admin/shop/warehouse/' . $entity . '/index.php';
+			$path = '/{admin}/shop/warehouse/' . $entity . '/index.php';
 
 			switch ($entity)
 			{
@@ -59,18 +59,18 @@ class Shop_Warehouse_Controller
 				case 'warrant_order':
 					$caption = Core::_('Shop_Warehouse_Purchaseorder.create_warrant_order');
 					$icon = 'fa-solid fa-fw fa-cash-register';
-					$path = '/admin/shop/warrant/index.php';
+					$path = '/{admin}/shop/warrant/index.php';
 					$additionalParams .= '&type=0';
 				break;
 				case 'warrant_pay':
 					$caption = Core::_('Shop_Warehouse_Purchaseorder.create_warrant_pay');
 					$icon = 'fa-solid fa-fw fa-building-columns';
-					$path = '/admin/shop/warrant/index.php';
+					$path = '/{admin}/shop/warrant/index.php';
 					$additionalParams .= '&type=3';
 				break;
 			}
 
-			$options = array('path' => $path, 'action' => 'edit', 'datasetKey' => 0, 'datasetValue' => 0, 'additionalParams' => $additionalParams);
+			$options = array('path' => Admin_Form_Controller::correctBackendPath($path), 'action' => 'edit', 'datasetKey' => 0, 'datasetValue' => 0, 'additionalParams' => $additionalParams);
 
 			$href = $oAdmin_Form_Controller->getAdminActionLoadHref($options);
 
@@ -127,7 +127,7 @@ class Shop_Warehouse_Controller
 		{
 			$additionalParams = "shop_id={$oShop->id}&shop_group_id=$oShop_Group->id&createFrom={$entity}&createFromId={$oEntity->id}";
 
-			$path = '/admin/shop/warehouse/' . $entity . '/index.php';
+			$path = '/{admin}/shop/warehouse/' . $entity . '/index.php';
 
 			$options = array('path' => $path, 'action' => 'edit', 'datasetKey' => 0, 'datasetValue' => 0, 'additionalParams' => $additionalParams);
 

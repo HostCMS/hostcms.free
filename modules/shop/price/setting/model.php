@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Price_Setting_Model extends Core_Entity
 {
@@ -157,6 +157,13 @@ class Shop_Price_Setting_Model extends Core_Entity
 		{
 			$aShop_Price_Entries = Core_Entity::factory('Shop_Price_Entry')->getByDocument($this->id, 0);
 
+			$oShop = $this->Shop;
+			// Fast filter
+			if ($oShop->filter)
+			{
+				$oShop_Filter_Controller = new Shop_Filter_Controller($oShop);
+			}
+
 			$Shop_Price_Entry_Controller = new Shop_Price_Entry_Controller();
 
 			$aTmp = array();
@@ -180,7 +187,6 @@ class Shop_Price_Setting_Model extends Core_Entity
 					->orderBy('id', 'ASC');
 
 				$aShop_Price_Setting_Items = $oShop_Price_Setting_Items->findAll(FALSE);
-
 				foreach ($aShop_Price_Setting_Items as $oShop_Price_Setting_Item)
 				{
 					if (isset($aTmp[$oShop_Price_Setting_Item->shop_item_id]))
@@ -205,6 +211,10 @@ class Shop_Price_Setting_Model extends Core_Entity
 						$oShop_Price_Setting_Item->shop_item_id,
 						$Shop_Price_Entry_Controller->getPrice($oShop_Price_Setting_Item->shop_price_id, $oShop_Price_Setting_Item->shop_item_id)
 					);
+					
+					// Fast filter
+					$oShop->filter
+						&& $oShop_Filter_Controller->fill($oShop_Price_Setting_Item->Shop_Item);
 				}
 
 				$offset += $limit;

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Sql
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Sql_Table_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -31,8 +31,8 @@ class Sql_Table_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'));
 
-		$oAdditionalTab
-			->move($this->getField('name')->class('form-control input-lg'), $oMainRow1);
+		// $oAdditionalTab
+			// ->move($this->getField('name')->class('form-control input-lg'), $oMainRow1);
 
 		$oDataBase = Core_DataBase::instance();
 
@@ -148,7 +148,7 @@ class Sql_Table_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			$oldTableName = $this->_object->name;
 
-			$bAdd = $oldTableName === '';
+			$bAdd = is_null($oldTableName);
 
 			$oDataBase = Core_DataBase::instance();
 

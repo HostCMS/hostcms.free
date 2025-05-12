@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'shop');
 
 // Код формы
 $iAdmin_Form_Id = 75;
-$sAdminFormAction = '/admin/shop/order/index.php';
+$sAdminFormAction = '/{admin}/shop/order/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -228,17 +228,17 @@ if (!$siteuser_id)
 			->name(Core::_('Shop_Item.items_catalog_add_form_comment_link'))
 			->icon('fa fa-comments')
 			->href(
-				$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/comment/index.php', NULL, NULL, "shop_id={$oShop->id}")
+				$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/order/comment/index.php', NULL, NULL, "shop_id={$oShop->id}")
 			)
 			->onclick(
-				$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/comment/index.php', NULL, NULL, "shop_id={$oShop->id}")
+				$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/order/comment/index.php', NULL, NULL, "shop_id={$oShop->id}")
 			)
 	)->add(
 		Admin_Form_Entity::factory('Menu')
 			->name(Core::_('Shop_Order.property_menu'))
 			->icon('fa fa-gears')
-			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$shop_group_id}"))
-			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$shop_group_id}"))
+			->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$shop_group_id}"))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$shop_group_id}"))
 	);
 }
 
@@ -275,7 +275,7 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 	->name(Core::_('Shop.menu'))
-	->href($oAdmin_Form_Controller->getAdminLoadHref($sShopItemFormPath = '/admin/shop/index.php', NULL, NULL, ''))
+	->href($oAdmin_Form_Controller->getAdminLoadHref($sShopItemFormPath = '/{admin}/shop/index.php', NULL, NULL, ''))
 	->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sShopItemFormPath, NULL, NULL, ''))
 );
 
@@ -313,8 +313,8 @@ if ($oShopDir->id)
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($oShop->name)
-		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/index.php', NULL, NULL, $sAdditionalParams = "shop_id={$oShop->id}&shop_group_id=0&shop_dir_id={$oShopDir->id}"))
-		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, $sAdditionalParams))
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/index.php', NULL, NULL, $sAdditionalParams = "shop_id={$oShop->id}&shop_group_id=0&shop_dir_id={$oShopDir->id}"))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/item/index.php', NULL, NULL, $sAdditionalParams))
 );
 
 // Крошки строим только если: мы не в корне или идет редактирование
@@ -325,7 +325,7 @@ if ($shop_group_id)
 	// Массив хлебных крошек
 	$aBreadcrumbs = array();
 
-	$sShopItemFormPath = '/admin/shop/item/index.php';
+	$sShopItemFormPath = '/{admin}/shop/item/index.php';
 
 	do
 	{
@@ -632,14 +632,46 @@ else
 
 	if (strlen($sGlobalSearch))
 	{
-		$oAdmin_Form_Dataset
-			->addCondition(
-				array(
-					'select' => array(
-						'shop_orders.*'
-					)
-				)
-			)
+		// Заказы
+		$oUnionSelect = Core_QueryBuilder::select(array('id', 'shop_order_id'))
+			->from('shop_orders')
+			->where('shop_orders.shop_id', '=', $oShop->id)
+			->open()
+				->where('shop_orders.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)
+				->setOr()
+				->where('shop_orders.invoice', 'LIKE', '%' . $sGlobalSearch . '%')
+				->setOr()
+				->where('shop_orders.coupon', 'LIKE', '%' . $sGlobalSearch . '%')
+				->setOr()
+				->where('shop_orders.postcode', 'LIKE', '%' . $sGlobalSearch . '%')
+				->setOr()
+				->where('shop_orders.address', 'LIKE', '%' . $sGlobalSearch . '%')
+				->setOr()
+				->where('shop_orders.surname', 'LIKE', '%' . $sGlobalSearch . '%')
+				->setOr()
+				->where('shop_orders.name', 'LIKE', '%' . $sGlobalSearch . '%')
+				->setOr()
+				->where('shop_orders.patronymic', 'LIKE', '%' . $sGlobalSearch . '%')
+				->setOr()
+				->where('shop_orders.company', 'LIKE', '%' . $sGlobalSearch . '%')
+				->setOr()
+				->where('shop_orders.phone', 'LIKE', '%' . $sGlobalSearch . '%')
+				->setOr()
+				->where('shop_orders.email', 'LIKE', '%' . $sGlobalSearch . '%')
+			->close()
+			// Товары заказов
+			->union(
+				Core_QueryBuilder::select('shop_order_id')
+					->from('shop_order_items')
+					->open()
+						->where('shop_order_items.name', 'LIKE', '%' . $sGlobalSearch . '%')
+						->setOr()
+						->where('shop_order_items.marking', 'LIKE', '%' . $sGlobalSearch . '%')
+					->close()
+			);
+		
+		/*$oAdmin_Form_Dataset
+			// ->addCondition(array('select' => array('shop_orders.*')))
 			->addCondition(
 				array('leftJoin' => array('shop_order_items', 'shop_order_items.shop_order_id', '=', 'shop_orders.id'))
 			)
@@ -672,6 +704,20 @@ else
 			->addCondition(array('close' => array()))
 			->addCondition(
 				array('groupBy' => array('shop_orders.id'))
+			);*/
+			
+		$oAdmin_Form_Dataset
+			->addCondition(
+				array('select' => array(
+					'shop_orders.*'
+				))
+			)
+			->addCondition(
+				array(
+					'join' => array(
+						array($oUnionSelect, 'UNI'), 'shop_orders.id', '=', 'UNI.shop_order_id'
+					)
+				)
 			);
 	}
 }
@@ -692,6 +738,22 @@ if (isset($oAdmin_Form_Controller->request['topFilter_filter_tags'])
 			array('where' => array('tags.name', 'IN', $aValues))
 		);
 	}
+}
+
+$aAvailableFields = $oAdmin_Form->getAvailableFieldsForUser($oUser->id);
+
+if (isset($oAdmin_Form_Controller->request['admin_form_filter_2360'])
+		&& $oAdmin_Form_Controller->request['admin_form_filter_2360'] != ''
+	|| isset($oAdmin_Form_Controller->request['topFilter_2360'])
+		&& $oAdmin_Form_Controller->request['topFilter_2360'] != ''
+	|| count($aAvailableFields) && isset($aAvailableFields[2360]) // dataSource
+)
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('select' => array(array('sources.service', 'dataSource'))))
+		->addCondition(
+			array('leftJoin' => array('sources', 'sources.id', '=', 'shop_orders.source_id'))
+	);
 }
 
 // Список значений для фильтра и поля
@@ -775,21 +837,22 @@ Core_Event::attach('Admin_Form_Controller.onAfterShowContent', function($oAdmin_
 
 			if (!$this.data("bs.popover"))
 			{
+				
 				$this.popover({
-					placement:'left',
-					trigger:'manual',
-					html:true,
+					placement: 'left',
+					trigger: 'manual',
+					html: true,
 					content: function() {
 						var content = '';
-
+						
 						$.ajax({
-							url: '/admin/shop/order/index.php',
+							url: '<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/shop/order/index.php")?>',
 							data: { showPopover: 1, shop_order_id: $(this).data('id') },
 							dataType: 'json',
 							type: 'POST',
 							async: false,
 							success: function(response) {
-								content = response.html;
+								content = '<div style="max-width: ' + ($this.offset().left - 30) + 'px">' + response.html + '</div>';
 							}
 						});
 

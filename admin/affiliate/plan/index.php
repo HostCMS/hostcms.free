@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'siteuser');
 
 // Код формы
 $iAdmin_Form_Id = 162;
-$sAdminFormAction = '/admin/affiliate/plan/index.php';
+$sAdminFormAction = '/{admin}/affiliate/plan/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -41,7 +41,7 @@ $oAdmin_Form_Entity_Menus->add(
 		)
 );
 
-$sSiteuserGroupPath = '/admin/siteuser/siteuser/index.php';
+$sSiteuserGroupPath = '/{admin}/siteuser/siteuser/index.php';
 
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
@@ -52,7 +52,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 	->name(Core::_('Siteuser.menu'))
 	->href(
-		$oAdmin_Form_Controller->getAdminLoadHref($sSiteuserFormPath = '/admin/siteuser/index.php', NULL, NULL, '')
+		$oAdmin_Form_Controller->getAdminLoadHref($sSiteuserFormPath = '/{admin}/siteuser/index.php', NULL, NULL, '')
 	)
 	->onclick(
 		$oAdmin_Form_Controller->getAdminLoadAjax($sSiteuserFormPath, NULL, NULL, '')

@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'shop');
 
 // Код формы
 $iAdmin_Form_Id = 52;
-$sAdminFormAction = '/admin/shop/order/comment/index.php';
+$sAdminFormAction = '/{admin}/shop/order/comment/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -73,10 +73,10 @@ if ($oShop->id)
 			->name(Core::_('Shop_Item.property_header'))
 			->icon('fa fa-gears')
 			->href(
-				$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/comment/property/index.php', NULL, NULL, $additionalParamsProperties)
+				$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/order/comment/property/index.php', NULL, NULL, $additionalParamsProperties)
 			)
 			->onclick(
-				$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/comment/property/index.php', NULL, NULL, $additionalParamsProperties)
+				$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/order/comment/property/index.php', NULL, NULL, $additionalParamsProperties)
 			)
 	);
 }
@@ -88,7 +88,7 @@ $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
 // Строка навигации
-$sShopDirPath = '/admin/shop/index.php';
+$sShopDirPath = '/{admin}/shop/index.php';
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs->add(
@@ -127,7 +127,7 @@ if ($oShop->shop_dir_id)
 }
 
 $additionalParams = 'shop_id=' . $oShop->id;
-$sShopPath = '/admin/shop/item/index.php';
+$sShopPath = '/{admin}/shop/item/index.php';
 
 if ($oShop->id)
 {
@@ -142,8 +142,8 @@ if ($oShop->id)
 	$oAdmin_Form_Entity_Breadcrumbs->add(
 		Admin_Form_Entity::factory('Breadcrumb')
 			->name(Core::_('Shop_Order.show_order_title', $oShop->name))
-			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/index.php', NULL, NULL, $additionalParams))
-			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/index.php', NULL, NULL, $additionalParams))
+			->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/order/index.php', NULL, NULL, $additionalParams))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/order/index.php', NULL, NULL, $additionalParams))
 	);
 }
 

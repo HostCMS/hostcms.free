@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Ipaddress
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Ipaddress_Visitor_Model extends Core_Entity
 {
@@ -77,8 +77,8 @@ class Ipaddress_Visitor_Model extends Core_Entity
 		{
 			$additionalParam = 'admin_form_filter_2319=' . $this->id;
 
-			$href = $oAdmin_Form_Controller->getAdminLoadHref('/admin/counter/session/index.php', NULL, NULL, $additionalParam);
-			$onclick = $oAdmin_Form_Controller->getAdminLoadAjax('/admin/counter/session/index.php', NULL, NULL, $additionalParam);
+			$href = $oAdmin_Form_Controller->getAdminLoadHref('/{admin}/counter/session/index.php', NULL, NULL, $additionalParam);
+			$onclick = $oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/counter/session/index.php', NULL, NULL, $additionalParam);
 
 			return '<a href="' . $href . '" onclick="' . $onclick . '">' . htmlspecialchars($this->id) . '</a>';
 		}
@@ -100,12 +100,29 @@ class Ipaddress_Visitor_Model extends Core_Entity
 
 		if ($this->ipaddress_visitor_filter_id)
 		{
-			Core_Html_Entity::factory('Span')
-				->class('badge badge-round gray')
-				->value(htmlspecialchars((string) $this->Ipaddress_Visitor_Filter->name))
-				->title((string) $this->Ipaddress_Visitor_Filter->name)
-				->execute();
+			$this->_filterBadge();
 		}
+	}
+
+	/**
+	 * Show filter name badge
+	 */
+	protected function _filterBadge()
+	{
+		Core_Html_Entity::factory('Span')
+			->class('badge badge-round gray')
+			->value(htmlspecialchars((string) $this->Ipaddress_Visitor_Filter->name))
+			->title((string) $this->Ipaddress_Visitor_Filter->name)
+			->execute();
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function ipaddress_visitor_filter_idBackend()
+	{
+		$this->_filterBadge();
 	}
 
 	/**
@@ -138,9 +155,12 @@ class Ipaddress_Visitor_Model extends Core_Entity
 		if ($this->headers != '')
 		{
 			$aHeaders = json_decode($this->headers, TRUE);
-			foreach ($aHeaders as $hKey => $hValue)
+			if (is_array($aHeaders))
 			{
-				echo '<br><b>' . htmlspecialchars($hKey) . '</b>: ' . htmlspecialchars($hValue);
+				foreach ($aHeaders as $hKey => $hValue)
+				{
+					echo '<br><b>' . htmlspecialchars($hKey) . '</b>: ' . htmlspecialchars($hValue);
+				}
 			}
 		}
 

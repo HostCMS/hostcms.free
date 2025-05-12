@@ -10,7 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Image_Imagick extends Core_Image
 {
@@ -58,6 +58,17 @@ class Core_Image_Imagick extends Core_Image
 
 		if ($sourceX > $maxWidth || $sourceY > $maxHeight)
 		{
+			$aConfig = self::$_config['imagick'] + array(
+				'sharpenImage' => array(
+					'radius' => 0,
+					'sigma' => 1
+				),
+				'adaptiveSharpenImage' => array(
+					'radius' => 0,
+					'sigma' => 1
+				)
+			);
+			
 			if ($preserveAspectRatio)
 			{
 				$destX = $sourceX;
@@ -185,21 +196,30 @@ class Core_Image_Imagick extends Core_Image
 
 			$oImagick->resizeimage($destX, $destY, 0, 1, FALSE);
 
-			if (is_array(self::$_config['imagick']['sharpenImage']))
+			if (is_array($aConfig['sharpenImage']))
 			{
-				self::$_config['imagick']['sharpenImage'] += array('radius' => 0, 'sigma' => 1);
+				$aConfig['sharpenImage'] += array('radius' => 0, 'sigma' => 1);
 
-				$oImagick->sharpenImage(floatval(self::$_config['imagick']['sharpenImage']['radius']), floatval(self::$_config['imagick']['sharpenImage']['sigma']));
+				$oImagick->sharpenImage(floatval($aConfig['sharpenImage']['radius']), floatval($aConfig['sharpenImage']['sigma']));
 			}
-			elseif (is_array(self::$_config['imagick']['adaptiveSharpenImage']))
+			elseif (is_array($aConfig['adaptiveSharpenImage']))
 			{
-				self::$_config['imagick']['adaptiveSharpenImage'] += array('radius' => 0, 'sigma' => 1);
+				$aConfig['adaptiveSharpenImage'] += array('radius' => 0, 'sigma' => 1);
 
-				$oImagick->adaptiveSharpenImage(floatval(self::$_config['imagick']['adaptiveSharpenImage']['radius']), floatval(self::$_config['imagick']['adaptiveSharpenImage']['sigma']));
+				$oImagick->adaptiveSharpenImage(floatval($aConfig['adaptiveSharpenImage']['radius']), floatval($aConfig['adaptiveSharpenImage']['sigma']));
 			}
+
+			// Save ICC-profile
+			$aProfiles = $oImagick->getImageProfiles("icc", true);
 
 			// Удаляем метаданные
 			$oImagick->stripImage();
+			
+			if(!empty($aProfiles))
+			{
+				// Restore ICC-profile
+				$oImagick->profileImage("icc", $aProfiles['icc']);
+			}
 
 			if (!$preserveAspectRatio)
 			{

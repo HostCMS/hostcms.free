@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Event_Controller_Kanban extends Skin_Bootstrap_Admin_Form_Controller_List
 {
@@ -45,6 +45,7 @@ class Event_Controller_Kanban extends Skin_Bootstrap_Admin_Form_Controller_List
 		?>
 		<div class="table-toolbar">
 			<?php $this->_Admin_Form_Controller->showFormMenus()?>
+			<div class="btn-group"><?php echo Event_Controller::showCrmProjectFilter()?></div>
 			<div class="table-toolbar-right pull-right">
 				<?php $this->_pageSelector()?>
 				<?php $this->_Admin_Form_Controller->showChangeViews()?>
@@ -152,8 +153,8 @@ class Event_Controller_Kanban extends Skin_Bootstrap_Admin_Form_Controller_List
 		?>
 		<div class="kanban-board">
 			<div class="chevron-wrapper">
-				<div class="horizon-prev"><img src="/admin/images/scroll/l-arrow.png"></div>
-				<div class="horizon-next"><img src="/admin/images/scroll/r-arrow.png"></div>
+				<div class="horizon-prev"><img src="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/images/scroll/l-arrow.png')?>"></div>
+				<div class="horizon-next"><img src="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/images/scroll/r-arrow.png')?>"></div>
 			</div>
 			<div class="kanban-wrapper">
 			<?php
@@ -175,7 +176,7 @@ class Event_Controller_Kanban extends Skin_Bootstrap_Admin_Form_Controller_List
 								?>
 							</h5>
 							<span class="triangle" style="border-left-color: <?php echo $aEventStatus['color']?>"></span>
-							<span class="add" style="background-color: <?php echo htmlspecialchars($aEventStatus['color'])?>" onclick="$.modalLoad({path: '/admin/event/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&event_status_id=<?php echo $iEventStatusId?>', windowId: '<?php echo $windowId?>'}); return false"><i class="fa fa-plus-circle"></i></span>
+							<span class="add" style="background-color: <?php echo htmlspecialchars($aEventStatus['color'])?>" onclick="$.modalLoad({path: hostcmsBackend + '/event/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&event_status_id=<?php echo $iEventStatusId?>', windowId: '<?php echo $windowId?>'}); return false"><i class="fa fa-plus-circle"></i></span>
 						</div>
 
 						<ul id="entity-list-<?php echo $iEventStatusId?>" data-step-id="<?php echo $iEventStatusId?>" class="kanban-list connectedSortable event-status-<?php echo $iEventStatusId?>">
@@ -187,7 +188,7 @@ class Event_Controller_Kanban extends Skin_Bootstrap_Admin_Form_Controller_List
 								// $oEventCreator = $oEntity->getCreator();
 								// $userIsEventCreator = !is_null($oEventCreator) && $oEventCreator->id == $oUser->id;
 								?>
-								<li ondblclick="$.modalLoad({path: '/admin/event/index.php', action: 'edit',operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oEntity->id?>]=1&parentWindowId=id_content', windowId: 'id_content', width: '90%'});" id="event-<?php echo $oEntity->id?>" data-id="<?php echo $oEntity->id?>">
+								<li ondblclick="$.modalLoad({path: hostcmsBackend + '/event/index.php', action: 'edit',operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oEntity->id?>]=1&parentWindowId=id_content', windowId: 'id_content', width: '90%'});" id="event-<?php echo $oEntity->id?>" data-id="<?php echo $oEntity->id?>">
 									<div class="well">
 										<!-- <div class="drag-handle"></div> -->
 										<div class="row">
@@ -219,7 +220,7 @@ class Event_Controller_Kanban extends Skin_Bootstrap_Admin_Form_Controller_List
 											</div>
 										</div>
 										<div class="d-flex align-items-center justify-content-between">
-											<a class="evetn-title name" onclick="$.modalLoad({path: '/admin/event/index.php', action: 'edit',operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oEntity->id?>]=1&parentWindowId=id_content', windowId: 'id_content', width: '90%'});"><?php echo htmlspecialchars($oEntity->name)?></a>
+											<a class="evetn-title name" onclick="$.modalLoad({path: hostcmsBackend + '/event/index.php', action: 'edit',operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oEntity->id?>]=1&parentWindowId=id_content', windowId: 'id_content', width: '90%'});"><?php echo htmlspecialchars($oEntity->name)?></a>
 											<?php
 											echo $oEntity->showChecklists(TRUE);
 											?>
@@ -227,8 +228,16 @@ class Event_Controller_Kanban extends Skin_Bootstrap_Admin_Form_Controller_List
 										<?php
 										if ($oEntity->description != '')
 										{
-											?><div class="crm-description">
-												<span><?php echo nl2br(htmlspecialchars($oEntity->description))?></span>
+											$bExpand = mb_strlen((string) $oEntity->description) > 250;
+											?><div class="crm-description-wrapper">
+											<div class="crm-description<?php echo $bExpand ? ' expand' : ''?>">
+												<span><?php echo strip_tags($oEntity->description, '<br><p><b><i><u><strong><em>')?></span>
+											</div>
+											<?php if ($bExpand)
+											{
+												?><div class="more-wrapper"><div class="more" onclick="$.showAllDescription(this)"><?php echo Core::_('Event.more')?> <i class="fas fa-chevron-down"></i></div></div><?php
+											}
+											?>
 											</div><?php
 										}
 
@@ -327,14 +336,12 @@ class Event_Controller_Kanban extends Skin_Bootstrap_Admin_Form_Controller_List
 				?>
 			</div>
 
-			<!--<div class="kanban-action-wrapper hidden" > -->
-			<!--  style="visibility: hidden" -->
 			<div class="kanban-action-wrapper hidden">
 				<div class="kanban-actions text-align-center">
 					<?php
 					$oEvent_Statuses = Core_Entity::factory('Event_Status');
 					$oEvent_Statuses->queryBuilder()
-						->where('event_statuses.final', '=', 1)
+						->where('event_statuses.final', '!=', 0)
 						->clearOrderBy()
 						->orderBy('event_statuses.sorting', 'ASC');
 
@@ -364,7 +371,7 @@ class Event_Controller_Kanban extends Skin_Bootstrap_Admin_Form_Controller_List
 		</div>
 		<script>
 		$(function() {
-			$.sortableKanban({path: '/admin/event/index.php', container: '.kanban-board', updateData: true, windowId: '<?php echo $windowId?>', handle: '.well'});
+			$.sortableKanban({path: hostcmsBackend + '/event/index.php', container: '.kanban-board', updateData: true, windowId: '<?php echo $windowId?>', handle: '.well'});
 			$.showKanban('.kanban-board');
 		});
 		</script>

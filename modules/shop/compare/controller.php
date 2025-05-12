@@ -13,7 +13,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Compare_Controller extends Core_Servant_Properties
 {
@@ -47,7 +47,7 @@ class Shop_Compare_Controller extends Core_Servant_Properties
 
 	/**
 	 * Clear compare operation's options
-	 * @return Shop_Compare_Controller
+	 * @return self
 	 * @hostcms-event Shop_Compare_Controller.onBeforeClear
 	 * @hostcms-event Shop_Compare_Controller.onAfterClear
 	 */
@@ -70,7 +70,7 @@ class Shop_Compare_Controller extends Core_Servant_Properties
 
 	/**
 	 * Register an existing instance as a singleton.
-	 * @return object
+	 * @return Shop_Compare_Controller
 	 */
 	static public function instance()
 	{
@@ -135,7 +135,7 @@ class Shop_Compare_Controller extends Core_Servant_Properties
 
 	/**
 	 * Clear session compare
-	 * @return Shop_Compare_Controller
+	 * @return self
 	 */
 	public function clearSessionCompare()
 	{
@@ -176,7 +176,7 @@ class Shop_Compare_Controller extends Core_Servant_Properties
 
 	/**
 	 * Get all compares from session
-	 * @param Shop_Model $oShop shop
+	 * @param Shop_Model $oShop
 	 * @return array
 	 */
 	protected function _getAllFromSession(Shop_Model $oShop)
@@ -257,7 +257,7 @@ class Shop_Compare_Controller extends Core_Servant_Properties
 
 	/**
 	 * Delete item from compare
-	 * @return Shop_Compare_Controller
+	 * @return self
 	 * @hostcms-event Shop_Compare_Controller.onBeforeDelete
 	 * @hostcms-event Shop_Compare_Controller.onAfterDelete
 	 */
@@ -297,7 +297,7 @@ class Shop_Compare_Controller extends Core_Servant_Properties
 
 	/**
 	 * Add item into compare
-	 * @return Shop_Compare_Controller
+	 * @return self
 	 * @hostcms-event Shop_Compare_Controller.onBeforeAdd
 	 * @hostcms-event Shop_Compare_Controller.onAfterAdd
 	 */
@@ -316,8 +316,8 @@ class Shop_Compare_Controller extends Core_Servant_Properties
 	}
 
 	/**
-	 * Update item in compare
-	 * @return Shop_Compare_Controller
+	 * Toggle item in compare
+	 * @return self
 	 * @hostcms-event Shop_Compare_Controller.onBeforeUpdate
 	 * @hostcms-event Shop_Compare_Controller.onAfterUpdate
 	 */
@@ -337,20 +337,18 @@ class Shop_Compare_Controller extends Core_Servant_Properties
 				$oShop_Compare = Core_Entity::factory('Shop_Compare')
 					->getByShopItemIdAndSiteuserId($this->shop_item_id, $this->siteuser_id, FALSE);
 
-				if (is_null($oShop_Compare))
+				if (!is_null($oShop_Compare))
+				{
+					$oShop_Compare->delete();
+				}
+				else
 				{
 					$oShop_Compare = Core_Entity::factory('Shop_Compare');
 					$oShop_Compare->shop_item_id = $this->shop_item_id;
 					$oShop_Compare->siteuser_id = $this->siteuser_id;
+					$oShop_Compare->shop_id = $oShop_Item->shop_id;
+					$oShop_Compare->save();
 				}
-				else
-				{
-					$oShop_Compare->delete();
-				}
-
-				// Вставляем данные в таблицу избранного
-				$oShop_Compare->shop_id = $oShop_Item->shop_id;
-				$oShop_Compare->save();
 			}
 			else
 			{

@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'ipaddress');
 
 // Код формы
 $iAdmin_Form_Id = 25;
-$sAdminFormAction = '/admin/ipaddress/index.php';
+$sAdminFormAction = '/{admin}/ipaddress/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -138,10 +138,20 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('Ipaddress.filter_menu'))
 		->icon('fa-solid fa-filter')
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/ipaddress/filter/index.php', NULL, NULL, '', $additionalParams)
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/ipaddress/filter/index.php', NULL, NULL, '', $additionalParams)
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/ipaddress/filter/index.php', NULL, NULL, '', $additionalParams)
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/ipaddress/filter/index.php', NULL, NULL, '', $additionalParams)
+		)
+)->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Ipaddress_Filter.import'))
+		->icon('fa fa-download')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/ipaddress/import/index.php', NULL, NULL, 'ipaddress_dir_id=' . $oIpaddress_Dir->id)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/ipaddress/import/index.php', NULL, NULL, 'ipaddress_dir_id=' . $oIpaddress_Dir->id)
 		)
 );
 
@@ -152,10 +162,10 @@ if (Core::moduleIsActive('counter'))
 			->name(Core::_('Ipaddress.visitor_menu'))
 			->icon('fa-solid fa-users')
 			->href(
-				$oAdmin_Form_Controller->getAdminLoadHref('/admin/ipaddress/visitor/index.php', NULL, NULL, '', $additionalParams)
+				$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/ipaddress/visitor/index.php', NULL, NULL, '', $additionalParams)
 			)
 			->onclick(
-				$oAdmin_Form_Controller->getAdminLoadAjax('/admin/ipaddress/visitor/index.php', NULL, NULL, '', $additionalParams)
+				$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/ipaddress/visitor/index.php', NULL, NULL, '', $additionalParams)
 			)
 		);
 }
@@ -203,8 +213,8 @@ if ($oIpaddress_Dir->id)
 	{
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 			->name($oIpaddress_Dir_Breadcrumbs->name)
-			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/ipaddress/index.php', NULL, NULL, "ipaddress_dir_id={$oIpaddress_Dir_Breadcrumbs->id}"))
-			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/ipaddress/index.php', NULL, NULL, "ipaddress_dir_id={$oIpaddress_Dir_Breadcrumbs->id}"));
+			->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/ipaddress/index.php', NULL, NULL, "ipaddress_dir_id={$oIpaddress_Dir_Breadcrumbs->id}"))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/ipaddress/index.php', NULL, NULL, "ipaddress_dir_id={$oIpaddress_Dir_Breadcrumbs->id}"));
 	}
 	while ($oIpaddress_Dir_Breadcrumbs = $oIpaddress_Dir_Breadcrumbs->getParent());
 
@@ -217,6 +227,51 @@ if ($oIpaddress_Dir->id)
 }
 
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
+
+$oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('importFilters');
+
+if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'importFilters')
+{
+	$oUserCurrent = Core_Auth::getCurrentUser();
+	if (!$oUserCurrent->read_only)
+	{
+		if (isset($_FILES['json_file']) && intval($_FILES['json_file']['size']) > 0)
+		{
+			try {
+				$content = Core_File::read($_FILES['json_file']['tmp_name']);
+
+				$oIpaddress_Import_Controller = Admin_Form_Action_Controller::factory(
+					'Ipaddress_Import_Controller', $oAdmin_Form_Action
+				);
+
+				$oIpaddress_Import_Controller
+					->content($content)
+					->ipaddress_dir_id($oIpaddress_Dir->id)
+					// ->execute()
+					;
+
+				$oAdmin_Form_Controller->addAction($oIpaddress_Import_Controller);
+			}
+			catch (Exception $exc) {
+				Core_Message::show($exc->getMessage(), "error");
+			}
+		}
+	}
+}
+
+// Действие "Экспорт"
+$oAdminFormActionExport = $oAdmin_Form->Admin_Form_Actions->getByName('exportFilters');
+
+if ($oAdminFormActionExport && $oAdmin_Form_Controller->getAction() == 'exportFilters')
+{
+	$oIpaddress_Export_Controller = Admin_Form_Action_Controller::factory(
+		'Ipaddress_Export_Controller', $oAdminFormActionExport
+	);
+
+	$oIpaddress_Export_Controller
+		->controller($oAdmin_Form_Controller)
+		->export();
+}
 
 // Действие редактирования
 $oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
@@ -285,7 +340,7 @@ if ($oAdminFormActionMove && $oAdmin_Form_Controller->getAction() == 'move')
 		->title(Core::_('Ipaddress.move_items_groups_title'))
 		->selectCaption(Core::_('Ipaddress.move_items_groups_ipaddress_dir_id'))
 		->value($oIpaddress_Dir->id)
-		->autocompletePath('/admin/ipaddress/index.php?autocomplete=1&show_dir=1')
+		->autocompletePath(Admin_Form_Controller::correctBackendPath('/{admin}/ipaddress/index.php?autocomplete=1&show_dir=1'))
 		->autocompleteEntityId($oSite->id)
 		;
 

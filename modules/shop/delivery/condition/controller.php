@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Delivery_Condition_Controller extends Core_Servant_Properties
 {
@@ -91,29 +91,36 @@ class Shop_Delivery_Condition_Controller extends Core_Servant_Properties
 					->where('max_price', '>=', $this->totalAmount)
 					->setOr()
 					->where('max_price', '=', 0)
-				->close()
-				// Time
-				->open()
+				->close();
+
+			// Time
+			if ($this->timeFrom != '' && $this->timeTo != '')
+			{
+				$oShop_Delivery_Conditions->queryBuilder()
 					->open()
-						// Заданное время начала больше времени начала и меньше времени окончания
-						->where('time_from', '<=', $this->timeFrom)
 						->open()
-							->where('time_to', '>=', $this->timeFrom)
-							->setOr()
-							->where('time_to', '=', '00:00:00')
+							// Заданное время начала больше времени начала и меньше времени окончания
+							->where('time_from', '<=', $this->timeFrom)
+							->open()
+								->where('time_to', '>=', $this->timeFrom)
+								->setOr()
+								->where('time_to', '=', '00:00:00')
+							->close()
 						->close()
-					->close()
-					->setOr()
-					->open()
-						// Заданное время окончания больше времени начали и меньше времени окончания
-						->where('time_from', '<=', $this->timeTo)
+						->setOr()
 						->open()
-							->where('time_to', '>=', $this->timeTo)
-							->setOr()
-							->where('time_to', '=', '00:00:00')
+							// Заданное время окончания больше времени начали и меньше времени окончания
+							->where('time_from', '<=', $this->timeTo)
+							->open()
+								->where('time_to', '>=', $this->timeTo)
+								->setOr()
+								->where('time_to', '=', '00:00:00')
+							->close()
 						->close()
-					->close()
-				->close()
+					->close();
+			}
+
+			$oShop_Delivery_Conditions->queryBuilder()
 				// Сортируем вывод
 				->orderBy(Core_QueryBuilder::expression('IF ( `min_weight` > 0 AND `max_weight` > 0 AND `min_price` > 0 AND `max_price` > 0, 1, 0)'), 'DESC')
 				->orderBy('min_weight', 'DESC')

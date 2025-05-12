@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'template');
 
 // Код формы
 $iAdmin_Form_Id = 202;
-$sAdminFormAction = '/admin/template/section/lib/index.php';
+$sAdminFormAction = '/{admin}/template/section/lib/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -66,7 +66,7 @@ $oAdminFormEntityBreadcrumbs->add(
 		)
 );
 
-$prevFormPath = '/admin/template/index.php';
+$prevFormPath = '/{admin}/template/index.php';
 
 $iTemplateDirId = $oTemplate->Template_Dir->id;
 if ($iTemplateDirId)
@@ -105,7 +105,7 @@ if ($iTemplateDirId)
 
 $additionalParams = "template_dir_id={$iTemplateDirId}&template_id={$oTemplate->id}";
 
-$prevFormPath = '/admin/template/section/index.php';
+$prevFormPath = '/{admin}/template/section/index.php';
 
 $oAdminFormEntityBreadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
@@ -174,7 +174,7 @@ if ($oAdminFormActionLoadLibList && $oAdmin_Form_Controller->getAction() == 'loa
 		'Template_Section_Lib_Controller_Libproperties', $oAdminFormActionLoadLibList
 	);
 
-	$lib_id = intval(Core_Array::getGet('lib_id'));
+	$lib_id = Core_Array::getGet('lib_id', 0, 'int');
 
 	$oTemplate_Section_Lib_Controller_Libproperties->libId($lib_id);
 
@@ -192,6 +192,18 @@ if ($oAdminFormActionDeleteLibFile && $oAdmin_Form_Controller->getAction() == 'd
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($oLib_Controller_Delete_File);
+}
+
+$oAdminFormActionRollback = $oAdmin_Form->Admin_Form_Actions->getByName('rollback');
+
+if ($oAdminFormActionRollback && $oAdmin_Form_Controller->getAction() == 'rollback')
+{
+	$oControllerRollback = Admin_Form_Action_Controller::factory(
+		'Admin_Form_Action_Controller_Type_Rollback', $oAdminFormActionRollback
+	);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oControllerRollback);
 }
 
 // Источник данных 1

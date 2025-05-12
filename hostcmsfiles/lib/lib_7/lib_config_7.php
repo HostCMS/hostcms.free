@@ -20,7 +20,7 @@ $oShop_Cart_Controller = Shop_Cart_Controller::instance();
 $oShop_Cart_Controller->checkStock($bCheckStock);
 
 // Добавление товара в корзину
-if (!is_null(Core_Array::getRequest('add')))
+if (!is_null(Core_Array::getRequest('add')) || !is_null(Core_Array::getRequest('getCartInfo')))
 {
 	// Core_Session::start();
 	// Core_Session::setMaxLifeTime(86400, TRUE);
@@ -42,6 +42,20 @@ if (!is_null(Core_Array::getRequest('add')))
 			->shop_item_id(intval($shop_item_id))
 			->quantity(Core_Array::get($count, $key, 1, 'float'))
 			->add();
+	}
+
+	//
+	if (!is_null(Core_Array::getRequest('getCartInfo')))
+	{
+		$Shop_Cart_Controller = Shop_Cart_Controller::instance();
+		$Shop_Cart_Controller->getAll($oShop);
+
+		$aReturn = array(
+			'count' => $Shop_Cart_Controller->totalQuantity,
+			'amount' => $oShop->Shop_Currency->formatWithCurrency($Shop_Cart_Controller->totalAmount)
+		);
+
+		Core::showJson($aReturn);
 	}
 }
 

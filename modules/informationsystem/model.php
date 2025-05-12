@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Informationsystem_Model extends Core_Entity
 {
@@ -338,6 +338,7 @@ class Informationsystem_Model extends Core_Entity
 	/**
 	 * Delete watermark file
 	 * @return self
+	 * @hostcms-event informationsystem.onAfterDeleteWatermarkFile
 	 */
 	public function deleteWatermarkFile()
 	{
@@ -345,6 +346,8 @@ class Informationsystem_Model extends Core_Entity
 		{
 			$this->getWatermarkFilePath() != '' && Core_File::isFile($this->getWatermarkFilePath()) && Core_File::delete($this->getWatermarkFilePath());
 		} catch (Exception $e) {}
+
+		Core_Event::notify($this->_modelName . '.onAfterDeleteWatermarkFile', $this);
 
 		$this->watermark_file = '';
 		$this->save();

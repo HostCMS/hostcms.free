@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Sql
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Sql_Table_View_Apply extends Admin_Form_Action_Controller
 {
@@ -38,6 +38,29 @@ class Sql_Table_View_Apply extends Admin_Form_Action_Controller
 
 			if (!is_null($value))
 			{
+				// Если старое значение NULL, а пришла пустая строка, то не изменяем NULL => ''
+				if (isset($aRow['null']) && $aRow['null'])
+				{
+					$windowId = $this->_Admin_Form_Controller->getWindowId();
+
+					if (/*is_null($this->_object->$key) &&*/ $value === '')
+					{
+						$value = NULL;
+
+						// add
+						$this->_Admin_Form_Controller->addMessage(
+							"<script>$('#{$windowId} span#{$sInputName}').addClass('editable-null');</script>"
+						);
+					}
+					else
+					{
+						// remove
+						$this->_Admin_Form_Controller->addMessage(
+							"<script>$('#{$windowId} span#{$sInputName}').removeClass('editable-null');</script>"
+						);
+					}
+				}
+
 				Core_QueryBuilder::update($tableName)
 					->set($key, $value)
 					->where($primaryKeyName, '=', $this->_object->$primaryKeyName)

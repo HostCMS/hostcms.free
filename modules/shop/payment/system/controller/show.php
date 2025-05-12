@@ -20,7 +20,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Payment_System_Controller_Show extends Core_Controller
 {
@@ -127,7 +127,8 @@ class Shop_Payment_System_Controller_Show extends Core_Controller
 		$this->_Shop_Payment_Systems
 			->queryBuilder()
 			->join('shop_payment_system_siteuser_groups', 'shop_payment_system_siteuser_groups.shop_payment_system_id', '=', 'shop_payment_systems.id')
-			->where('shop_payment_system_siteuser_groups.siteuser_group_id', 'IN', $aSiteuser_Group_IDs);
+			->where('shop_payment_system_siteuser_groups.siteuser_group_id', 'IN', $aSiteuser_Group_IDs)
+			->groupBy('shop_payment_systems.id');
 
 		$aShop_Payment_Systems = $this->_Shop_Payment_Systems->findAll();
 		foreach ($aShop_Payment_Systems as $oShop_Payment_System)

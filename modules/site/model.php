@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Site
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Site_Model extends Core_Entity
 {
@@ -54,6 +54,7 @@ class Site_Model extends Core_Entity
 		'html_cache_with',
 		'html_cache_without',
 		'html_cache_clear_probability',
+		'~favicon',
 	);
 
 	/**
@@ -122,9 +123,8 @@ class Site_Model extends Core_Entity
 		'media_group' => array(),
 		'media_item' => array(),
 		'poll_group' => array(),
-		'search_log' => array(),
-		'search_page' => array(),
 		'search_link' => array(),
+		'search_log' => array(),
 		'seo_site' => array(),
 		'shop' => array(),
 		'shop_dir' => array(),
@@ -323,13 +323,6 @@ class Site_Model extends Core_Entity
 			$this->Forums->deleteAll(FALSE);
 		}
 
-		if (Core::moduleIsActive('search'))
-		{
-			$this->Search_Logs->deleteAll(FALSE);
-			$this->Search_Pages->deleteAll(FALSE);
-			$this->Search_Links->deleteAll(FALSE);
-		}
-
 		if (Core::moduleIsActive('seo'))
 		{
 			$this->Seo_Sites->deleteAll(FALSE);
@@ -454,6 +447,16 @@ class Site_Model extends Core_Entity
 		{
 			Core_File::deleteDir(CMS_FOLDER . $this->uploaddir . 'structure_' . intval($this->id));
 		} catch (Exception $e) {}
+		
+		// Таблицы поиска удаляются после удаления связанных с сайтом элементов
+		if (Core::moduleIsActive('search'))
+		{
+			$this->Search_Logs->deleteAll(FALSE);
+			$this->Search_Links->deleteAll(FALSE);
+
+			$Search_Controller = Search_Controller::instance();
+			$Search_Controller->truncate($this->id);
+		}
 
 		return parent::delete($primaryKey);
 	}

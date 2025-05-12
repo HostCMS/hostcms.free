@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Site
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Сайты',
@@ -67,12 +67,16 @@ return array(
 
 	'menu2_caption' => 'Настройки',
 	'menu2_sub_caption' => 'Регистрационные данные',
+	'menu3_sub_caption' => 'Адрес панели',
 
 	'accountinfo_title' => 'Редактирование регистрационных данных',
 	'accountinfo_login' => 'Логин пользователя в личном кабинете на сайте www.hostcms.ru',
 	'accountinfo_contract_number' => 'Номер лицензии',
 	'accountinfo_pin_code' => 'PIN-код',
 	'accountInfo_success' => 'Регистрационные данные успешно изменены.',
+
+	'backend_title' => 'Адрес панели центра администрирования',
+	'panelBackend_success' => 'Адрес панели успешно изменен!',
 
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
@@ -121,4 +125,5 @@ return array(
 
 	'error_bot' => 'Страница для проверки ботов',
 	'favicon_header' => 'Favicon',
+	'rename_backend_error' => 'Не удалось изменить адрес панели центра администрирования!',
 );

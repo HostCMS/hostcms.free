@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Mail
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Mail_Sendmail extends Core_Mail
 {
@@ -37,8 +37,6 @@ class Core_Mail_Sendmail extends Core_Mail
 		if (isset($this->_config['dkim']) && is_array($this->_config['dkim']))
 		{
 			$headersToSign = $headers;
-
-			$aDkimConfig = $this->_config['dkim'];
 
 			if (!empty($to) || !empty($subject))
 			{

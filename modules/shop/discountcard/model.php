@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
  class Shop_Discountcard_Model extends Core_Entity
 {
@@ -105,6 +105,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 			->execute();
 	}
 
+	/**
+	 * Set siteuser amount
+	 * @return self
+	 */
 	public function setSiteuserAmount()
 	{
 		$fSum = 0;
@@ -118,7 +122,6 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 			->where('shop_orders.paid', '=', 1);
 
 		$aShop_Orders = $oShop_Orders->findAll(FALSE);
-
 		foreach ($aShop_Orders as $oShop_Order)
 		{
 			// Определяем коэффициент пересчета
@@ -212,6 +215,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 */
 	public function checkLevel()
 	{
+		$oBefore = clone $this;
+
 		$oShop = $this->Shop;
 
 		$aShop_Discountcard_Levels = $oShop->Shop_Discountcard_Levels->findAll();
@@ -232,7 +237,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 		$this->shop_discountcard_level_id = $shop_discountcard_level_id;
 
-		Core_Event::notify($this->_modelName . '.onAfterCheckLevel', $this);
+		Core_Event::notify($this->_modelName . '.onAfterCheckLevel', $this, array($oBefore));
 
 		$this->save();
 

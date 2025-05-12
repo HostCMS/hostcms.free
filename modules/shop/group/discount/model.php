@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Group_Discount_Model extends Core_Entity
 {
@@ -214,8 +214,8 @@ class Shop_Group_Discount_Model extends Core_Entity
 
 		$additionalParam = "shop_group_discount_id={$this->id}&siteuser_id={$this->siteuser_id}&shop_id={$shop_id}&shop_group_id={$shop_group_id}";
 
-		$link = $oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/discount/siteuser/group/index.php', NULL, NULL, $additionalParam);
-		$onclick = $oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/discount/siteuser/group/index.php', NULL, NULL, $additionalParam);
+		$link = $oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/discount/siteuser/group/index.php', NULL, NULL, $additionalParam);
+		$onclick = $oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/discount/siteuser/group/index.php', NULL, NULL, $additionalParam);
 
 		ob_start();
 

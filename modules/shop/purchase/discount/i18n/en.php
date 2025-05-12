@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Purchase discounts',
@@ -51,4 +51,6 @@ return array(
 	'move_success' => 'Discounts moved',
 	'min_weight' => 'Weight ⩾, %s',
 	'max_weight' => 'Weight &lt;, %s',
+	'max_discount' => 'Maximum discount',
+	'first_order' => 'Apply to first order',
 );

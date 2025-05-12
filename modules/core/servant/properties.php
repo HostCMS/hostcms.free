@@ -24,7 +24,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Servant_Properties
 {
@@ -241,5 +241,38 @@ class Core_Servant_Properties
 		}
 
 		return '';
+	}
+	
+	/**
+	 * Convert Object to Array
+	 * @return array
+	 */
+	public function toArray()
+	{
+		$aReturn = array();
+
+		if (!empty($this->_allowedProperties))
+		{
+			foreach ($this->_allowedProperties as $propertyName)
+			{
+				// before is_array() cause array() may be static class method call array('MyClass', 'myCallbackMethod')
+				if (is_callable($this->$propertyName, FALSE, $callableName))
+				{
+					$value = $callableName;
+				}
+				elseif (is_resource($this->$propertyName))
+				{
+					$value = get_resource_type($this->$propertyName);
+				}
+				else
+				{
+					$value = $this->$propertyName;
+				}
+
+				$aReturn[$propertyName] = $value;
+			}
+		}
+
+		return $aReturn;
 	}
 }

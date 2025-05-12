@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Event_Status_Model extends Core_Entity
 {
@@ -82,21 +82,24 @@ class Event_Status_Model extends Core_Entity
 	}
 
 	/**
-	 * Change event status final
-	 * @hostcms-event event_status.onBeforeChangeActive
-	 * @hostcms-event event_status.onAfterChangeActive
-	 * @return self
+	 * Backend callback method
+	 * @return string
 	 */
-	public function changeFinal()
+	public function finalBackend()
 	{
-		Core_Event::notify($this->_modelName . '.onBeforeChangeFinal', $this);
+		switch ($this->final)
+		{
+			case 1:
+				$class = 'fa-check fa-active palegreen';
+			break;
+			case -1:
+				$class = 'fa-times darkorange';
+			break;
+			default:
+				$class = 'fa-check fa-inactive';
+		}
 
-		$this->final = 1 - $this->final;
-		$this->save();
-
-		Core_Event::notify($this->_modelName . '.onAfterChangeFinal', $this);
-
-		return $this;
+		return '<i class="fa-solid ' . $class . '"></i>';
 	}
 
 	/**

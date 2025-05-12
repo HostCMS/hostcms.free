@@ -56,4 +56,5 @@ return array(
 	'import_file' => 'Select a file from your computer',
 	'import_button' => 'Download',
 	'importFilters_success' => 'Import completed!',
+	'description' => 'Description',
 );

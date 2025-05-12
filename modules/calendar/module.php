@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Calendar
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Calendar_Module extends Core_Module_Abstract
 {
@@ -16,13 +16,13 @@ class Calendar_Module extends Core_Module_Abstract
 	 * Module version
 	 * @var string
 	 */
-	public $version = '7.0';
+	public $version = '7.1';
 
 	/**
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2024-07-09';
+	public $date = '2025-04-04';
 
 
 	/**
@@ -64,8 +64,8 @@ class Calendar_Module extends Core_Module_Abstract
 				'block' => 3,
 				'ico' => 'fa fa-calendar',
 				'name' => Core::_('Calendar.model_name'),
-				'href' => "/admin/calendar/index.php",
-				'onclick' => "$.adminLoad({path: '/admin/calendar/index.php'}); return false"
+				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/calendar/index.php"),
+				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/calendar/index.php'}); return false")
 			)
 		);
 

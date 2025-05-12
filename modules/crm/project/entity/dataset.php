@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Crm_Project_Entity_Dataset extends Admin_Form_Dataset
 {
@@ -69,9 +69,15 @@ class Crm_Project_Entity_Dataset extends Admin_Form_Dataset
 
 		if (Core::moduleIsActive('event'))
 		{
-			$events = Core_QueryBuilder::select(array(0, 'type'), 'id', 'datetime')
+			/*$events = Core_QueryBuilder::select(array(0, 'type'), 'id', 'datetime')
 				->from('events')
 				->where('events.crm_project_id', '=', $this->_crm_project->id)
+				->where('events.deleted', '=', 0);*/
+
+			$events = Core_QueryBuilder::select(array(0, 'type'), 'events.id', 'datetime')
+				->from('events')
+				->leftJoin('event_crm_projects', 'event_crm_projects.event_id', '=', 'events.id')
+				->where('event_crm_projects.crm_project_id', '=', $this->_crm_project->id)
 				->where('events.deleted', '=', 0);
 
 			$oQB->union($events);

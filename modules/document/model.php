@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Document
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Document_Model extends Core_Entity
 {
@@ -245,7 +245,7 @@ class Document_Model extends Core_Entity
 			foreach ($aStructures as $oStructure)
 			{
 				$sListStructures .= '<i class="fa-regular fa-folder-open" style="margin-right: 5px"></i><a onclick="'
-				. ("$.adminCheckObject({objectId: 'check_0_" . $oStructure->id . "', windowId: 'id_content'}); $.adminLoad({path: '/admin/structure/index.php', action: 'edit', additionalParams: '', windowId: 'id_content'}); return false")
+				. ("$.adminCheckObject({objectId: 'check_0_" . $oStructure->id . "', windowId: 'id_content'}); $.adminLoad({path: hostcmsBackend + '/structure/index.php', action: 'edit', additionalParams: '', windowId: 'id_content'}); return false")
 				. '">' . htmlspecialchars($oStructure->name) . "</a><br />";
 			}
 
@@ -319,6 +319,8 @@ class Document_Model extends Core_Entity
 		if ($checkPanel)
 		{
 			?><div hostcms:id="<?php echo intval($this->id)?>" hostcms:field="editInPlace" hostcms:entity="document" hostcms:type="wysiwyg"><?php
+
+			$this->_showPanel();
 		}
 
 		$bShortcodeTags = Core::moduleIsActive('shortcode');
@@ -343,6 +345,47 @@ class Document_Model extends Core_Entity
 		}
 
 		Core_Event::notify($this->_modelName . '.onAfterExecute', $this);
+
+		return $this;
+	}
+
+	/**
+	 * Show frontend panel
+	 * @return $this
+	 * @hostcms-event document.onBeforeShowPanel
+	 */
+	protected function _showPanel()
+	{
+		// Panel
+		$oXslPanel = Core_Html_Entity::factory('Div')
+			->class('hostcmsPanel')
+			->style('display: none');
+
+		$oXslSubPanel = Core_Html_Entity::factory('Div')
+			->class('hostcmsSubPanel hostcmsXsl');
+
+		// Edit
+		$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/document/index.php');
+		$sAdditional = "hostcms[action]=edit&hostcms[checked][1][{$this->id}]=1";
+		$sTitle = Core::_('Document.edit', $this->name, FALSE);
+
+		$oXslSubPanel->add(
+			Core_Html_Entity::factory('A')
+				->href("{$sPath}?{$sAdditional}")
+				->class('m0')
+				->onclick("hQuery.openWindow({path: '{$sPath}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
+				->add(
+					Core_Html_Entity::factory('I')
+						->class('fa-regular fa-file-lines fa-fw')
+						->title($sTitle)
+				)
+		);
+
+		Core_Event::notify($this->_modelName . '.onBeforeShowPanel', $this, array($oXslSubPanel));
+
+		$oXslPanel
+			->add($oXslSubPanel)
+			->execute();
 
 		return $this;
 	}

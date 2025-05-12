@@ -139,4 +139,17 @@ return array(
 	'closed' => 'Закрыт',
 	'export_fields_allow_items' => 'Экспортировать пользовательские поля элементов',
 	'export_fields_allow_groups' => 'Экспортировать пользовательские поля групп',
+
+	'delete_property_values' => 'Удалять существующие значения дополнительных свойств',
+	'delete_field_values' => 'Удалять существующие значения пользовательских полей',
+
+	'change_attributes_items_title' => 'Изменить атрибуты',
+	'change_attributes_success' => 'Атрибуты изменены успешно!',
+	'remove' => '× Убрать',
+	'set' => '✓ Установить',
+	'attribute_item_tab' => 'Элементы',
+	'attribute_group_tab' => 'Группы',
+	'include_subgroups' => 'Учитывать подгруппы',
+	'attribute_item_main_tab' => 'Основные',
+	'apply_shortcut_parent_item' => 'Применять к основным элементам ярлыков',
 );

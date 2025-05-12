@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'ipaddress');
 
 // Код формы
 $iAdmin_Form_Id = 350;
-$sAdminFormAction = '/admin/ipaddress/filter/index.php';
+$sAdminFormAction = '/{admin}/ipaddress/filter/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -167,10 +167,10 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('Ipaddress_Filter.import'))
 		->icon('fa fa-download')
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/ipaddress/filter/import/index.php', NULL, NULL, 'ipaddress_filter_dir_id=' . $oIpaddress_Filter_Dir->id)
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/ipaddress/filter/import/index.php', NULL, NULL, 'ipaddress_filter_dir_id=' . $oIpaddress_Filter_Dir->id)
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/ipaddress/filter/import/index.php', NULL, NULL, 'ipaddress_filter_dir_id=' . $oIpaddress_Filter_Dir->id)
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/ipaddress/filter/import/index.php', NULL, NULL, 'ipaddress_filter_dir_id=' . $oIpaddress_Filter_Dir->id)
 		)
 );
 
@@ -204,10 +204,10 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Ipaddress.show_ip_title'))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/ipaddress/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/ipaddress/index.php', NULL, NULL, '')
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/ipaddress/index.php', NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/ipaddress/index.php', NULL, NULL, '')
 	)
 )->add(
 	Admin_Form_Entity::factory('Breadcrumb')
@@ -231,8 +231,8 @@ if ($oIpaddress_Filter_Dir->id)
 	{
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 			->name($oIpaddress_Filter_Dir_Breadcrumbs->name)
-			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/ipaddress/filter/index.php', NULL, NULL, "ipaddress_filter_dir_id={$oIpaddress_Filter_Dir_Breadcrumbs->id}"))
-			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/ipaddress/filter/index.php', NULL, NULL, "ipaddress_filter_dir_id={$oIpaddress_Filter_Dir_Breadcrumbs->id}"));
+			->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/ipaddress/filter/index.php', NULL, NULL, "ipaddress_filter_dir_id={$oIpaddress_Filter_Dir_Breadcrumbs->id}"))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/ipaddress/filter/index.php', NULL, NULL, "ipaddress_filter_dir_id={$oIpaddress_Filter_Dir_Breadcrumbs->id}"));
 	}
 	while ($oIpaddress_Filter_Dir_Breadcrumbs = $oIpaddress_Filter_Dir_Breadcrumbs->getParent());
 
@@ -351,7 +351,7 @@ if ($oAdminFormActionMove && $oAdmin_Form_Controller->getAction() == 'move')
 		->title(Core::_('Ipaddress_Filter.move_items_groups_title'))
 		->selectCaption(Core::_('Ipaddress_Filter.move_items_groups_ipaddress_filter_dir_id'))
 		->value($oIpaddress_Filter_Dir->id)
-		->autocompletePath('/admin/ipaddress/filter/index.php?autocomplete=1&show_dir=1')
+		->autocompletePath(Admin_Form_Controller::correctBackendPath('/{admin}/ipaddress/filter/index.php?autocomplete=1&show_dir=1'))
 		->autocompleteEntityId($oSite->id)
 		;
 

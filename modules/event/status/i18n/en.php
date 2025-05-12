@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Event groups',
@@ -27,4 +27,8 @@ return array(
 	'final' => 'Final',
 	'changeFinal_success' => 'Final changed successfully!',
 	'apply_success' => "Information has been successfully changed",
+
+	'final0' => 'No',
+	'final1' => 'Completed successfully',
+	'final2' => 'Failed',
 );

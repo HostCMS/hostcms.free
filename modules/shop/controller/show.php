@@ -34,10 +34,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - modifications(TRUE|FALSE) показывать модификации для выбранных товаров, по умолчанию FALSE
  * - modificationsList(TRUE|FALSE) показывать модификации товаров текущей группы на уровне товаров группы, по умолчанию FALSE
  * - modificationsGroup(TRUE|FALSE) группировать и показывать родительский товар вместо модификаций, необходимо использовать совместно с modificationsList(TRUE), по умолчанию FALSE
+ * - closed(TRUE|FALSE) ограничивать вывод закрытых товаров, по умолчанию TRUE
  * - filterShortcuts(TRUE|FALSE) выбирать ярлыки товаров текущей группы на уровне товаров группы, по умолчанию FALSE. Используется для фильтрации по дополнительным свойствам
  * - parseFilterInUrl(TRUE|FALSE) разбирать условия фильтра из строки запроса, по умолчанию TRUE
  * - addFilter() добавить условие отобра товаров, может задавать условие отобра по цене ->addFilter('price', '>', 100), по значению свойства ->addFilter('property', 17, '=', 1) или по основному свойству, например, ->addFilter('weight', '>=', 50)
- * - filterCounts(TRUE|FALSE) производить подсчет количества соответсвующих свойству значений в текущей группе при использовании быстрого фильтра, по умолчанию FALSE
+ * - filterCounts(TRUE|FALSE) производить подсчет количества соответствующих свойству значений в текущей группе при использовании быстрого фильтра, по умолчанию FALSE
  * - filterStrictMode(TRUE|FALSE|array()) фильтровать только по существующим значениям (кроме списков и checkbox), отсутствие значения считать неверным значением. Если указан массив с идентификаторами свойств, то только для них будет использоваться строгий режим, по умолчанию FALSE
  * - specialprices(TRUE|FALSE) показывать специальные цены для выбранных товаров, по умолчанию FALSE
  * - seoFilters(TRUE|FALSE) показывать подходящие для текущей группы SEO-фильтры, по умолчанию FALSE
@@ -107,6 +108,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - '/shop/shop_filter_seos/shop_filter_seo' Доступные SEO-фильтры
  * - '/shop/tag' Примененный Tag для фильтрации
  * - '/shop/shop_producer' Примененный производитель для фильтрации
+ * - '/shop/producers/shop_producer' Список производителей
  * - '/shop/shop_filter_seo' Примененный SEO-фильтр
  * - '/shop/shop_group_properties/property' Свойство в списке свойств группы
  * - '/shop/shop_group_properties/property_dir' Раздел свойств в списке свойств группы
@@ -129,7 +131,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Controller_Show extends Core_Controller
 {
@@ -160,6 +162,7 @@ class Shop_Controller_Show extends Core_Controller
 		'modifications',
 		'modificationsList',
 		'modificationsGroup',
+		'closed',
 		'filterShortcuts',
 		'parseFilterInUrl',
 		'filterCounts',
@@ -402,7 +405,7 @@ class Shop_Controller_Show extends Core_Controller
 			= $this->seoFilters = $this->tabs = $this->filterStrictMode = $this->groupsMedia = $this->itemsMedia = FALSE;
 
 		$this->siteuser = $this->cache = $this->itemsPropertiesList = $this->commentsPropertiesList = $this->groupsPropertiesList
-			= $this->bonuses = $this->sets = $this->comparing = $this->favorite = $this->viewed
+			= $this->bonuses = $this->sets = $this->comparing = $this->favorite = $this->viewed = $this->closed
 			= $this->votes = $this->showPanel = $this->calculateTotal = $this->sortPropertiesValues
 			= $this->patternAffiliate = $this->patternTag = $this->patternProducer = $this->parseFilterInUrl = TRUE;
 
@@ -1132,6 +1135,11 @@ class Shop_Controller_Show extends Core_Controller
 	 */
 	public function getData()
 	{
+		$this->group === 0 && $this->subgroups
+			&& $this->group = FALSE;
+
+		$this->item && $this->_incShowed();
+
 		$this->total = 0;
 
 		if ($this->_errorCode)
@@ -1203,7 +1211,7 @@ class Shop_Controller_Show extends Core_Controller
 
 				if ($this->calculateTotal)
 				{
-					$this->total = Core_QueryBuilder::select()->getFoundRows();
+					$this->total = intval(Core_QueryBuilder::select()->getFoundRows());
 				}
 			}
 		}
@@ -1236,7 +1244,7 @@ class Shop_Controller_Show extends Core_Controller
 				'id' => $id
 			),
 			'pagination' => array(
-				'total' => intval($this->total),
+				'total' => $this->total,
 				'pages' => $this->limit > 0 ? ceil($this->total / $this->limit) : 0,
 				'current' => intval($this->page) + 1,
 				'limit' => $this->limit
@@ -1339,9 +1347,34 @@ class Shop_Controller_Show extends Core_Controller
 	protected function _getItemData(array $aShop_Items)
 	{
 		$aReturn = array();
+
+		$iCurrentTimestamp = time();
+
 		foreach ($aShop_Items as $oShop_Item)
 		{
-			$aReturn[] = $oShop_Item->toArray();
+			// Shortcut
+			$iShortcut = $oShop_Item->shortcut_id;
+
+			!$this->item && $this->modificationsList && $this->modificationsGroup && $oShop_Item->dataTmpId != $oShop_Item->id
+				&& $oShop_Item = $oShop_Item->Modification;
+
+			// Ярлык может ссылаться на отключенный товар
+			$desiredActivity = strtolower($this->itemsActivity) == 'active'
+				? 1
+				: (strtolower($this->itemsActivity) == 'all' ? $oShop_Item->active : 0);
+
+			if ($oShop_Item->id // Can be shortcut on markDeleted item
+				&& $oShop_Item->active == $desiredActivity
+				&& (!$iShortcut
+					|| (Core_Date::sql2timestamp($oShop_Item->end_datetime) >= $iCurrentTimestamp
+						|| $oShop_Item->end_datetime == '0000-00-00 00:00:00')
+					&& (Core_Date::sql2timestamp($oShop_Item->start_datetime) <= $iCurrentTimestamp
+						|| $oShop_Item->start_datetime == '0000-00-00 00:00:00')
+				)
+			)
+			{
+				$aReturn[] = $oShop_Item->toArray();
+			}
 		}
 
 		return $aReturn;
@@ -1466,7 +1499,15 @@ class Shop_Controller_Show extends Core_Controller
 
 				$this->_Shop_Items
 					->queryBuilder()
-					->leftJoin(array('shop_groups', 'sg'), 'sg.id', '=', 'shop_items.shop_group_id')
+					->where(NULL, 'NOT EXISTS', Core_QueryBuilder::select(1)
+						->from(array('shop_groups', 'sg'))
+						->where('sg.id', '=', 'shop_items.shop_group_id')
+						// Inverted conditions
+						->where('sg.active', '=', 0)
+						->where('sg.deleted', '=', 1)
+						->where('sg.siteuser_group_id', 'NOT IN', $this->_aSiteuserGroups)
+					)
+					/*->leftJoin(array('shop_groups', 'sg'), 'sg.id', '=', 'shop_items.shop_group_id')
 					// Активность группы или группа корневая
 					->open()
 						->where('sg.active', '=', 1)
@@ -1474,7 +1515,7 @@ class Shop_Controller_Show extends Core_Controller
 						->where('sg.siteuser_group_id', 'IN', $this->_aSiteuserGroups)
 						->setOr()
 						->where('sg.id', 'IS', NULL)
-					->close();
+					->close()*/;
 			}
 
 			if ($this->modificationsGroup)
@@ -1488,7 +1529,7 @@ class Shop_Controller_Show extends Core_Controller
 
 			$this->_setLimits();
 
-			$this->_Shop_Items
+			$this->closed && $this->_Shop_Items
 				->queryBuilder()
 				->where('shop_items.closed', '=', 0);
 		}
@@ -1509,6 +1550,7 @@ class Shop_Controller_Show extends Core_Controller
 	 * @hostcms-event Shop_Controller_Show.onBeforeAddGroupsPropertiesList
 	 * @hostcms-event Shop_Controller_Show.onBeforeAddShopItems
 	 * @hostcms-event Shop_Controller_Show.onBeforeAddShopItem
+	 * @hostcms-event Shop_Controller_Show.onBeforeAddParentItem
 	 * @hostcms-event Shop_Controller_Show.onAfterAddShopItems
 	 * @hostcms-event Shop_Controller_Show.onBeforeAddCartItem
 	 * @hostcms-event Shop_Controller_Show.onBeforeAddShortcut
@@ -1606,6 +1648,8 @@ class Shop_Controller_Show extends Core_Controller
 			if (is_array($inCache))
 			{
 				$this->_shownIDs = $inCache['shown'];
+				$this->calculateTotal && isset($inCache['total']) && $this->total = $inCache['total']; // remove isset() after 7.1.4
+
 				echo $inCache['content'];
 				return $this;
 			}
@@ -1727,7 +1771,7 @@ class Shop_Controller_Show extends Core_Controller
 							$oShop_Item_Into_Cart = clone $oShop_Item;
 							$oShop_Item_Into_Cart->id($oShop_Item->id);
 
-							Core_Event::notify(get_class($this).'.onBeforeAddCartItem', $this, array($oShop_Item_Into_Cart));
+							Core_Event::notify(get_class($this).'.onBeforeAddCartItem', $this, array($oShop_Item_Into_Cart, $oShop_Cart));
 
 							//$this->applyItemsForbiddenTags($oShop_Item_Into_Cart->clearEntities());
 							$this->applyForbiddenAllowedTags('/shop/items_in_cart/shop_item|/shop/shop_item', $oShop_Item_Into_Cart);
@@ -1742,6 +1786,12 @@ class Shop_Controller_Show extends Core_Controller
 							!$this->sets && $oShop_Item_Into_Cart->showXmlSets($this->sets);
 
 							$oShop_Item_Into_Cart->itemsActivity($this->itemsActivity);
+
+							$oShop_Item_Into_Cart->addEntity(
+								Core::factory('Core_Xml_Entity')
+									->name('quantity')
+									->value($oShop_Cart->quantity)
+							);
 
 							$oCartEntity->addEntity($oShop_Item_Into_Cart);
 						}
@@ -1806,12 +1856,12 @@ class Shop_Controller_Show extends Core_Controller
 
 				if ($this->calculateTotal)
 				{
-					$this->total = Core_QueryBuilder::select()->getFoundRows();
+					$this->total = intval(Core_QueryBuilder::select()->getFoundRows());
 
 					$this->addEntity(
 						Core::factory('Core_Xml_Entity')
 							->name('total')
-							->value(intval($this->total))
+							->value($this->total)
 					);
 				}
 			}
@@ -1882,13 +1932,13 @@ class Shop_Controller_Show extends Core_Controller
 		}
 
 		// Показывать дополнительные свойства товара
-		if ($this->itemsProperties || $this->itemsPropertiesList)
+		if (Core::moduleIsActive('property') && ($this->itemsProperties || $this->itemsPropertiesList))
 		{
 			$aShowPropertyIDs = $this->_itemsProperties();
 		}
 
 		// Показывать дополнительные свойства комментариев
-		if ($this->commentsProperties || $this->commentsPropertiesList)
+		if (Core::moduleIsActive('property') && ($this->commentsProperties || $this->commentsPropertiesList))
 		{
 			$aShowCommentPropertyIDs = $this->_commentsProperties();
 		}
@@ -2087,6 +2137,8 @@ class Shop_Controller_Show extends Core_Controller
 
 							$this->applyForbiddenAllowedTags('/shop/shop_item/shop_item|/shop/shop_item', $oParentItem);
 
+							Core_Event::notify(get_class($this) . '.onBeforeAddParentItem', $this, array($oShop_Item, $oParentItem));
+
 							$oShop_Item->addEntity($oParentItem);
 						}
 					}
@@ -2110,7 +2162,11 @@ class Shop_Controller_Show extends Core_Controller
 
 		$bCache && $oCore_Cache->set(
 			$cacheKey,
-			array('content' => $content, 'shown' => $this->_shownIDs),
+			array(
+				'content' => $content,
+				'total' => $this->total,
+				'shown' => $this->_shownIDs
+			),
 			$this->_cacheName,
 			$this->_cacheTags
 		);
@@ -2519,6 +2575,8 @@ class Shop_Controller_Show extends Core_Controller
 
 	protected function _subquerySelectShortcuts($fieldName, $columns)
 	{
+		$oShop = $this->getEntity();
+
 		$tableName = $this->getFilterTableName();
 
 		$oCore_QueryBuilder_Select_Shortcuts = Core_QueryBuilder::select()
@@ -2526,7 +2584,11 @@ class Shop_Controller_Show extends Core_Controller
 			->from($tableName)
 			->join('shop_items', $tableName . '.' . $fieldName, '=', 'shop_items.shortcut_id') // $fieldName is `shop_item_id` OR `modification_id`
 			->where('shop_items.deleted', '=', 0)
+			->where('shop_items.shop_id', '=', $oShop->id)
 			->where('shop_items.shortcut_id', '>', 0);
+
+		!$this->modificationsList
+			&& $oCore_QueryBuilder_Select_Shortcuts->where('shop_items.modification_id', '=', 0);
 
 		in_array($fieldName, array('shop_item_id', 'modification_id'))
 			&& $oCore_QueryBuilder_Select_Shortcuts->indexHint($tableName, array('FORCE INDEX', $fieldName));
@@ -2986,6 +3048,7 @@ class Shop_Controller_Show extends Core_Controller
 				{
 					$oCore_QueryBuilder_Select_Shortcuts = Core_QueryBuilder::select('shop_items.shortcut_id')
 						->from('shop_items')
+						->where('shop_items.shop_id', '=', $oShop->id)
 						->where('shop_items.deleted', '=', 0)
 						//->where('shop_items.shop_group_id', is_array($shop_group_id) ? 'IN' : '=', $shop_group_id)
 						->where('shop_items.shortcut_id', '>', 0);
@@ -4229,6 +4292,8 @@ class Shop_Controller_Show extends Core_Controller
 							->name('parent_id')
 							->value($oShortcut_Group->parent_id)
 					);
+
+					$oShop_Group->dataOriginalId = $oShortcut_Group->id;
 			}
 			else
 			{
@@ -4248,7 +4313,7 @@ class Shop_Controller_Show extends Core_Controller
 			// After check shortcut
 			$this->applyGroupsForbiddenTags($oShop_Group);
 
-			$this->_aShop_Groups[$parent_id][] = $oShop_Group;
+			$this->_aShop_Groups[$parent_id][$oShop_Group->id] = $oShop_Group;
 		}
 
 		return $this;
@@ -4305,7 +4370,7 @@ class Shop_Controller_Show extends Core_Controller
 
 				$parentObject->addEntity($oShop_Group);
 
-				$this->_addGroupsByParentId($oShop_Group->id, $oShop_Group);
+				$this->_addGroupsByParentId(!is_null($oShop_Group->dataOriginalId) ? $oShop_Group->dataOriginalId : $oShop_Group->id, $oShop_Group);
 			}
 
 			Core_Event::notify(get_class($this) . '.onAfterAddShopGroups', $this, array($this->_aShop_Groups[$parent_id]));
@@ -4634,7 +4699,7 @@ class Shop_Controller_Show extends Core_Controller
 
 		if ($this->item == 0 && !is_array($this->group))
 		{
-			$sPath = '/admin/shop/item/index.php';
+			$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/shop/item/index.php');
 			$sAdditional = "hostcms[action]=edit&shop_id={$oShop->id}&shop_group_id={$this->group}&hostcms[checked][1][0]=1";
 			$sTitle = Core::_('Shop_Item.items_catalog_add_form_title');
 
@@ -4649,7 +4714,7 @@ class Shop_Controller_Show extends Core_Controller
 					)
 			);
 
-			$sPath = '/admin/shop/item/index.php';
+			$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/shop/item/index.php');
 			$sAdditional = "hostcms[action]=edit&shop_id={$oShop->id}&shop_group_id={$this->group}&hostcms[checked][0][0]=1";
 			$sTitle = Core::_('Shop_Group.groups_add_form_title');
 
@@ -4669,7 +4734,7 @@ class Shop_Controller_Show extends Core_Controller
 				$oShop_Group = Core_Entity::factory('Shop_Group', $this->group);
 
 				// Edit
-				$sPath = '/admin/shop/item/index.php';
+				$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/shop/item/index.php');
 				$sAdditional = "hostcms[action]=edit&shop_id={$oShop->id}&shop_group_id={$oShop_Group->parent_id}&hostcms[checked][0][{$this->group}]=1";
 				$sTitle = Core::_('Shop_Group.groups_edit_form_title', $oShop_Group->name, FALSE);
 
@@ -4686,7 +4751,7 @@ class Shop_Controller_Show extends Core_Controller
 			}
 
 			// Folder
-			$sPath = '/admin/shop/item/index.php';
+			$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/shop/item/index.php');
 			$sAdditional = "shop_id={$oShop->id}&shop_group_id={$this->group}";
 			$sTitle = Core::_('Shop_Group.links_groups');
 
@@ -4704,7 +4769,7 @@ class Shop_Controller_Show extends Core_Controller
 			if ($this->group)
 			{
 				// Delete
-				$sPath = '/admin/shop/item/index.php';
+				$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/shop/item/index.php');
 				$sAdditional = "hostcms[action]=markDeleted&shop_id={$oShop->id}&shop_group_id={$oShop_Group->parent_id}&hostcms[checked][0][{$this->group}]=1&secret_csrf=" . Core_Security::getCsrfToken();
 				$sTitle = Core::_('Shop_Group.markDeleted');
 
@@ -4725,7 +4790,7 @@ class Shop_Controller_Show extends Core_Controller
 			$oShop_Item = Core_Entity::factory('Shop_Item', $this->item);
 
 			// Edit
-			$sPath = '/admin/shop/item/index.php';
+			$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/shop/item/index.php');
 			$sAdditional = "hostcms[action]=edit&shop_id={$oShop->id}&shop_group_id={$oShop_Item->shop_group_id}&hostcms[checked][1][{$this->item}]=1";
 			$sTitle = Core::_('Shop_Item.items_catalog_edit_form_title', $oShop_Item->name, FALSE);
 
@@ -4741,7 +4806,7 @@ class Shop_Controller_Show extends Core_Controller
 			);
 
 			// Copy
-			$sPath = '/admin/shop/item/index.php';
+			$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/shop/item/index.php');
 			$sAdditional = "hostcms[action]=copy&shop_id={$oShop->id}&shop_group_id={$oShop_Item->shop_group_id}&hostcms[checked][1][{$this->item}]=1&secret_csrf=" . Core_Security::getCsrfToken();
 			$sTitle = Core::_('Shop_Item.items_catalog_copy_form_title');
 
@@ -4757,7 +4822,7 @@ class Shop_Controller_Show extends Core_Controller
 			);
 
 			// Folder
-			$sPath = '/admin/shop/item/index.php';
+			$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/shop/item/index.php');
 			$sAdditional = "shop_id={$oShop->id}&shop_group_id={$oShop_Item->shop_group_id}";
 			$sTitle = Core::_('Shop_Group.links_groups');
 
@@ -4773,7 +4838,7 @@ class Shop_Controller_Show extends Core_Controller
 			);
 
 			// Comments
-			$sPath = '/admin/shop/item/comment/index.php';
+			$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/shop/item/comment/index.php');
 			$sAdditional = "shop_item_id={$this->item}";
 			$sTitle = Core::_('Shop_Item.items_catalog_add_form_comment_link');
 
@@ -4789,7 +4854,7 @@ class Shop_Controller_Show extends Core_Controller
 			);
 
 			// Delete
-			$sPath = '/admin/shop/item/index.php';
+			$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/shop/item/index.php');
 			$sAdditional = "hostcms[action]=markDeleted&shop_id={$oShop->id}&shop_group_id={$oShop_Item->shop_group_id}&hostcms[checked][1][{$this->item}]=1&secret_csrf=" . Core_Security::getCsrfToken();
 			$sTitle = Core::_('Shop_Item.markDeleted');
 
@@ -4885,13 +4950,19 @@ class Shop_Controller_Show extends Core_Controller
 
 	protected function _getSubMinMaxQueryBuilder()
 	{
+		$oShop = $this->getEntity();
+
 		$oSubMinMaxQueryBuilder = Core_QueryBuilder::select()
 			->from('shop_items')
 			->join(array('shop_items', 's'), 'shop_items.id', '=', 's.shortcut_id')
 			->where('s.deleted', '=', 0)
+			->where('s.shop_id', '=', $oShop->id)
 			->where('s.shortcut_id', '>', 0);
 
 		$this->applyFilterGroupCondition($oSubMinMaxQueryBuilder, 's.shop_group_id');
+
+		!$this->modificationsList
+			&& $oSubMinMaxQueryBuilder->where('s.modification_id', '=', 0);
 
 		// Стандартные ограничения для товаров
 		$this->_applyItemConditionsQueryBuilder($oSubMinMaxQueryBuilder, 's');
@@ -5027,7 +5098,9 @@ class Shop_Controller_Show extends Core_Controller
 					->join(array('shop_items', 'm'), 'shop_items.id', '=', 'm.modification_id')
 					->where('m.shop_group_id', '=', 0)
 					->where('m.modification_id', '>', 0)
+					->where('m.shop_id', '=', $oShop->id)
 					->where('m.deleted', '=', 0)
+					->where('shop_items.shop_id', '=', $oShop->id)
 					->where('shop_items.deleted', '=', 0);
 
 				$this->applyFilterGroupCondition($oSubMinMaxQueryBuilder, 'shop_items.shop_group_id');
@@ -5097,7 +5170,7 @@ class Shop_Controller_Show extends Core_Controller
 			{
 				$oSubMinMaxQueryBuilder = $this->_getSubMinMaxQueryBuilder();
 
-				$this->applyAbsolutePrice($oSubMinMaxQueryBuilder, 's');
+				$this->applyAbsolutePrice($oSubMinMaxQueryBuilder);
 
 				$oMinMaxQueryBuilder = Core_QueryBuilder::select(
 						array(Core_QueryBuilder::expression('MIN(t.price_absolute)'), 'min'),
@@ -5161,6 +5234,7 @@ class Shop_Controller_Show extends Core_Controller
 				->where('m.shop_group_id', '=', 0)
 				->where('m.modification_id', '>', 0)
 				->where('m.deleted', '=', 0)
+				->where('shop_items.shop_id', '=', $oShop->id)
 				->where('shop_items.deleted', '=', 0);
 
 			$this->applyFilterGroupCondition($oSubMinMaxQueryBuilder, 'shop_items.shop_group_id');
@@ -5190,6 +5264,7 @@ class Shop_Controller_Show extends Core_Controller
 				->from('shop_items')
 				->join(array('shop_items', 't'), 'shop_items.id', '=', 't.shortcut_id')
 				->where('t.deleted', '=', 0)
+				->where('t.shop_id', '=', $oShop->id)
 				->where('t.shortcut_id', '>', 0);
 
 			$this->applyFilterGroupCondition($oSubMinMaxQueryBuilder, 't.shop_group_id');
@@ -5261,7 +5336,9 @@ class Shop_Controller_Show extends Core_Controller
 				->where('m.shop_group_id', '=', 0)
 				->where('m.modification_id', '>', 0)
 				->where('m.deleted', '=', 0)
-				->where('shop_items.deleted', '=', 0);
+				->where('m.shop_id', '=', $oShop->id)
+				->where('shop_items.deleted', '=', 0)
+				->where('shop_items.shop_id', '=', $oShop->id);
 
 			$this->applyFilterGroupCondition($oSubMinMaxQueryBuilder, 'shop_items.shop_group_id');
 
@@ -5290,6 +5367,7 @@ class Shop_Controller_Show extends Core_Controller
 				->from('shop_items')
 				->join(array('shop_items', 't'), 'shop_items.id', '=', 't.shortcut_id')
 				->where('t.deleted', '=', 0)
+				->where('t.shop_id', '=', $oShop->id)
 				->where('t.shortcut_id', '>', 0);
 
 			$this->applyFilterGroupCondition($oSubMinMaxQueryBuilder, 't.shop_group_id');
@@ -5361,7 +5439,9 @@ class Shop_Controller_Show extends Core_Controller
 				->where('m.shop_group_id', '=', 0)
 				->where('m.modification_id', '>', 0)
 				->where('m.deleted', '=', 0)
-				->where('shop_items.deleted', '=', 0);
+				->where('m.shop_id', '=', $oShop->id)
+				->where('shop_items.deleted', '=', 0)
+				->where('shop_items.shop_id', '=', $oShop->id);
 
 			$this->applyFilterGroupCondition($oSubMinMaxQueryBuilder, 'shop_items.shop_group_id');
 
@@ -5390,6 +5470,7 @@ class Shop_Controller_Show extends Core_Controller
 				->from('shop_items')
 				->join(array('shop_items', 's'), 'shop_items.id', '=', 's.shortcut_id')
 				->where('s.deleted', '=', 0)
+				->where('s.shop_id', '=', $oShop->id)
 				->where('s.shortcut_id', '>', 0);
 
 			$this->applyFilterGroupCondition($oSubMinMaxQueryBuilder, 's.shop_group_id');
@@ -5461,7 +5542,9 @@ class Shop_Controller_Show extends Core_Controller
 				->where('m.shop_group_id', '=', 0)
 				->where('m.modification_id', '>', 0)
 				->where('m.deleted', '=', 0)
-				->where('shop_items.deleted', '=', 0);
+				->where('m.shop_id', '=', $oShop->id)
+				->where('shop_items.deleted', '=', 0)
+				->where('shop_items.shop_id', '=', $oShop->id);
 
 			$this->applyFilterGroupCondition($oSubMinMaxQueryBuilder, 'shop_items.shop_group_id');
 
@@ -5490,6 +5573,7 @@ class Shop_Controller_Show extends Core_Controller
 				->from('shop_items')
 				->join(array('shop_items', 't'), 'shop_items.id', '=', 't.shortcut_id')
 				->where('t.deleted', '=', 0)
+				->where('t.shop_id', '=', $oShop->id)
 				->where('t.active', '=', 1)
 				->where('t.shortcut_id', '>', 0);
 
@@ -5763,7 +5847,7 @@ class Shop_Controller_Show extends Core_Controller
 			{
 				list($condition, $value) = $aMainPropertyValue;
 
-				$this->shopItems()->queryBuilder()->where($mainPropertyName, $condition, $value);
+				$this->shopItems()->queryBuilder()->where('shop_items.' . $mainPropertyName, $condition, $value);
 
 				$this->_addFilterMainPropertyToXml($mainPropertyName, $condition, $value);
 			}
@@ -6575,6 +6659,7 @@ class Shop_Controller_Show extends Core_Controller
 				$oCore_QueryBuilder_Select_Shortcuts = Core_QueryBuilder::select('shop_items.shortcut_id')
 					->from('shop_items')
 					->where('shop_items.deleted', '=', 0)
+					->where('shop_items.shop_id', '=', $oShop->id)
 					->where('shop_items.active', '=', 1)
 					->where('shop_items.shortcut_id', '>', 0);
 
@@ -6623,6 +6708,7 @@ class Shop_Controller_Show extends Core_Controller
 				->distinct()
 				->select('shop_producers.*')
 				->join('shop_items', 'shop_items.shop_producer_id', '=', 'shop_producers.id')
+				->where('shop_items.shop_id', '=', $oShop->id)
 				->where('shop_items.deleted', '=', 0);
 
 			$this->applyFilterGroupCondition($oShop_Producers->queryBuilder(), 'shop_items.shop_group_id');
@@ -6657,6 +6743,7 @@ class Shop_Controller_Show extends Core_Controller
 			{
 				$oCore_QueryBuilder_Select_Shortcuts = Core_QueryBuilder::select('shop_items.shortcut_id')
 					->from('shop_items')
+					->where('shop_items.shop_id', '=', $oShop->id)
 					->where('shop_items.deleted', '=', 0)
 					->where('shop_items.active', '=', 1)
 					->where('shop_items.shortcut_id', '>', 0);
@@ -6704,6 +6791,8 @@ class Shop_Controller_Show extends Core_Controller
 						->value($oShop_Producer->dataCount)
 				);
 			}
+
+			$this->applyForbiddenAllowedTags('/shop/producers/shop_producer', $oShop_Producer);
 
 			// Добавляем производителя потомком XML-сущности
 			$oProducersXmlEntity->addEntity($oShop_Producer);

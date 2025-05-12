@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'crm_project');
 
 // Код формы
 $iAdmin_Form_Id = 310;
-$sAdminFormAction = '/admin/crm/project/index.php';
+$sAdminFormAction = '/{admin}/crm/project/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -24,6 +24,40 @@ $oAdmin_Form_Controller
 	->path($sAdminFormAction)
 	->title(Core::_('Crm_Project.menu'))
 	->pageTitle(Core::_('Crm_Project.menu'));
+
+if (!is_null(Core_Array::getGet('loadProjects')) && !is_null(Core_Array::getGet('term')))
+{
+	$aJSON = array();
+
+	$sQuery = trim(Core_DataBase::instance()->escapeLike(Core_Str::stripTags(strval(Core_Array::getGet('term')))));
+
+	$sQueryLike = '%' . str_replace(' ', '%', $sQuery) . '%';
+
+	if (strlen($sQuery))
+	{
+		$oCrm_Projects = Core_Entity::factory('Crm_Project');
+		$oCrm_Projects->queryBuilder()
+			->where('crm_projects.site_id', '=', CURRENT_SITE)
+			->where('crm_projects.name', 'LIKE', $sQueryLike)
+			->limit(Core::$mainConfig['autocompleteItems']);
+
+		$aCrm_Projects = $oCrm_Projects->findAll(FALSE);
+
+		foreach ($aCrm_Projects as $oCrm_Project)
+		{
+			$icon = $oCrm_Project->crm_icon_id
+				? $oCrm_Project->Crm_Icon->value
+				: '';
+
+			$aJSON[] = array(
+				'id' => $oCrm_Project->id,
+				'text' => ($icon != '' ? '<i class="' . $icon . '"></i> ' : '') . htmlspecialchars($oCrm_Project->name)
+			);
+		}
+	}
+
+	Core::showJson($aJSON);
+}
 
 if (!is_null(Core_Array::getGet('autocomplete'))
 	&& !is_null(Core_Array::getGet('queryString'))
@@ -54,10 +88,78 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 		{
 			$aJSON[] = array(
 				'id' => $oCrm_Project->id,
-				'label' => $oCrm_Project->name
+				'label' => htmlspecialchars($oCrm_Project->name)
 			);
 		}
 	}
+
+	Core::showJson($aJSON);
+}
+
+if (!is_null(Core_Array::getPost('showCrmIconsModal')))
+{
+	$aJSON = array(
+		'html' => ''
+	);
+
+	$color = Core_Array::getPost('color', '#aebec4', 'trim');
+	$selector = Core_Array::getPost('selector', 'crm-project-icon', 'trim');
+
+	ob_start();
+	?>
+		<div class="modal fade" id="crmProjectIconsModal" tabindex="-1" role="dialog" aria-labelledby="crmProjectIconsModalLabel">
+			<div class="modal-dialog modal-lg" role="document">
+				<div class="modal-content no-padding-bottom">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h4 class="modal-title"><?php echo Core::_('Crm_Project.crm_icon_id')?></h4>
+					</div>
+					<div class="modal-body">
+						<input type="text" class="icon-filter margin-bottom-20 w-100 input-lg" class="form-control" placeholder="Введите название иконки, например, 'arrow'"/>
+						<div class="crm-icon-wrapper">
+							<div class="crm-icon-modal">
+								<?php
+									$aCrm_Icons = Core_Entity::factory('Crm_Icon')->findAll(FALSE);
+									foreach ($aCrm_Icons as $oCrm_Icon)
+									{
+										$value = htmlspecialchars($oCrm_Icon->value);
+
+										?><span onclick="$.selectCrmIcon(this, '<?php echo htmlspecialchars($selector)?>');" class="crm-project-id" data-id="<?php echo $oCrm_Icon->id?>" data-value="<?php echo $value?>" style="background-color: <?php echo $color?>"><i class="<?php echo $value?>"></i></span><?php
+									}
+								?>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script>
+			$(function() {
+				$(".icon-filter").on('keyup', function(){
+					var selectIcon = $(this).val();
+
+					if (selectIcon.length)
+					{
+						filter(selectIcon);
+					}
+					else
+					{
+						$('.crm-icon-modal .crm-project-id').show();
+					}
+				});
+
+				function filter(e) {
+					$('.crm-icon-modal .crm-project-id').hide()
+						.filter(function() {
+							// console.log($(this).data('value'));
+							return $(this).data('value').toLowerCase().indexOf(e.toLowerCase()) > -1;
+						})
+						.show();
+				}
+			});
+		</script>
+	<?php
+	$aJSON['html'] = ob_get_clean();
 
 	Core::showJson($aJSON);
 }

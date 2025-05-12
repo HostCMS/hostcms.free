@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'user');
 
 // Код формы
 $iAdmin_Form_Id = 182;
-$sAdminFormAction = '/admin/user/site/index.php';
+$sAdminFormAction = '/{admin}/user/site/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -33,7 +33,7 @@ $company_department_id = Core_Array::getGet('company_department_id');
 $oCompany_Department = Core_Entity::factory('Company_Department', $company_department_id);
 
 // Путь к контроллеру формы пользователей определенной группы
-$sUsersPath = '/admin/company/index.php';
+$sUsersPath = '/{admin}/company/index.php';
 $sAdditionalCompanyParams = 'company_id=' . $oCompany_Department->Company->id;
 
 // Элементы строки навигации
@@ -51,10 +51,10 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Company_Department.title', $oCompany_Department->Company->name, FALSE))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/company/department/index.php', NULL, NULL, $sAdditionalCompanyParams)
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/company/department/index.php', NULL, NULL, $sAdditionalCompanyParams)
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/company/department/index.php', NULL, NULL, $sAdditionalCompanyParams)
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/company/department/index.php', NULL, NULL, $sAdditionalCompanyParams)
 	)
 )
 ->add(
@@ -129,8 +129,8 @@ $oAdmin_Form_Controller->addExternalReplace('{company_department_id}', $company_
 // Change links to other form
 if (Core_Array::getGet('mode') == 'action')
 {
-	$oAdmin_Form_Dataset->changeField('name', 'link', '/admin/user/site/form/index.php?company_department_id={company_department_id}&site_id={id}&mode=action');
-	$oAdmin_Form_Dataset->changeField('name', 'onclick', "$.adminLoad({path: '/admin/user/site/form/index.php', additionalParams: 'company_department_id={company_department_id}&site_id={id}&mode=action', windowId: '{windowId}'}); return false");
+	$oAdmin_Form_Dataset->changeField('name', 'link', '/{admin}/user/site/form/index.php?company_department_id={company_department_id}&site_id={id}&mode=action');
+	$oAdmin_Form_Dataset->changeField('name', 'onclick', "$.adminLoad({path: '/{admin}/user/site/form/index.php', additionalParams: 'company_department_id={company_department_id}&site_id={id}&mode=action', windowId: '{windowId}'}); return false");
 
 	$oAdmin_Form_Controller->addExternalReplace('{mode}', 'action');
 }

@@ -2,7 +2,7 @@
 
 return array(
 	'model_name' => 'Фільтри відвідувачів',
-	'title' => 'Фільтри',
+	'title' => 'Фільтри відвідувачів',
 	'edit_success' => "Фільтр успішно змінено!",
 	'delete_success' => 'Фільтр успішно видалено!',
 	'markDeleted_success' => 'Фільтр успішно видалено!',
@@ -62,4 +62,6 @@ return array(
 	'block_mode' => "Режим блокування",
 	'block_mode0' => "Заблокувати",
 	'block_mode1' => "Капча",
+	'block_mode2' => "Дозволити",
+	'description' => 'Опис',
 );

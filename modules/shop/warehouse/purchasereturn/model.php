@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Warehouse_Purchasereturn_Model extends Core_Entity
 {
@@ -240,6 +240,13 @@ class Shop_Warehouse_Purchasereturn_Model extends Core_Entity
 		// {
 			$oShop_Warehouse = $this->Shop_Warehouse;
 
+			$oShop = $oShop_Warehouse->Shop;
+			// Fast filter
+			if ($oShop->filter)
+			{
+				$oShop_Filter_Controller = new Shop_Filter_Controller($oShop);
+			}
+
 			$aShop_Warehouse_Entries = $oShop_Warehouse->Shop_Warehouse_Entries->getByDocument($this->id, $this->getEntityType());
 
 			$oBaseCurrency = Core_Entity::factory('Shop_Currency')->getDefault();
@@ -293,6 +300,10 @@ class Shop_Warehouse_Purchasereturn_Model extends Core_Entity
 					{
 						// Recount
 						$oShop_Warehouse->setRest($oShop_Warehouse_Purchasereturn_Item->shop_item_id, $rest);
+
+						// Fast filter
+						$oShop->filter
+							&& $oShop_Filter_Controller->fill($oShop_Warehouse_Purchasereturn_Item->Shop_Item);
 					}
 
 					if (Core::moduleIsActive('chartaccount') && $oShop_Warehouse_Purchasereturn_Item->shop_item_id)
@@ -639,9 +650,9 @@ class Shop_Warehouse_Purchasereturn_Model extends Core_Entity
 	{
 		$color = Core_Str::createColor($this->getEntityType());
 
-		$href = $oAdmin_Form_Controller->getAdminActionLoadHref(array('path' => '/admin/shop/warehouse/purchasereturn/index.php', 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => $this->id));
+		$href = $oAdmin_Form_Controller->getAdminActionLoadHref(array('path' => '/{admin}/shop/warehouse/purchasereturn/index.php', 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => $this->id));
 
-		$onclick = $oAdmin_Form_Controller->getAdminActionModalLoad(array('path' => '/admin/shop/warehouse/purchasereturn/index.php', 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => $this->id, 'window' => '', 'width' => '90%'));
+		$onclick = $oAdmin_Form_Controller->getAdminActionModalLoad(array('path' => '/{admin}/shop/warehouse/purchasereturn/index.php', 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => $this->id, 'window' => '', 'width' => '90%'));
 
 		ob_start();
 

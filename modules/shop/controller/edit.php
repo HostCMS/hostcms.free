@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -117,7 +117,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->name('Seo_Templates');
 
 				$oMainTab
-					->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					// ->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -132,14 +132,14 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->add($oCertificateBlock = Admin_Form_Entity::factory('Div')->class('well with-header well-sm'))
 					->add($oMailBlock = Admin_Form_Entity::factory('Div')->class('well with-header well-sm'))
 					// ->add($oMainRow8 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oMainRow9 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oMainRow10 = Admin_Form_Entity::factory('Div')->class('row'))
+					// ->add($oMainRow9 = Admin_Form_Entity::factory('Div')->class('row'))
+					// ->add($oMainRow10 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow11 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow12 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow13 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oMainRow14 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oMainRow15 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oMainRow16 = Admin_Form_Entity::factory('Div')->class('row'))
+					// ->add($oMainRow14 = Admin_Form_Entity::factory('Div')->class('row'))
+					// ->add($oMainRow15 = Admin_Form_Entity::factory('Div')->class('row'))
+					// ->add($oMainRow16 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow17 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$oShopTabFormats
@@ -160,19 +160,43 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				;
 
 				$oShopTabWatermark
-					->add($oShopTabWatermarkRowSize1 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabWatermarkRowSize2 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabWatermarkRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabWatermarkRowSize3 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabWatermarkRowSize4 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabWatermarkRow3 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabWatermarkRowSize5 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabWatermarkRowSize6 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oWatermarkItemsBlock = Admin_Form_Entity::factory('Div')->class('well with-header well-sm'))
+					->add($oWatermarkGroupsBlock = Admin_Form_Entity::factory('Div')->class('well with-header well-sm'))
+					->add($oWatermarkProducersBlock = Admin_Form_Entity::factory('Div')->class('well with-header well-sm'))
 					->add($oShopTabWatermarkRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopTabWatermarkRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopTabWatermarkRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oShopTabWatermarkRow4 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabWatermarkRow5 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabWatermarkRow6 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabWatermarkRow7 = Admin_Form_Entity::factory('Div')->class('row'));
+					->add($oShopTabWatermarkRow5 = Admin_Form_Entity::factory('Div')->class('row'));
+
+				$oWatermarkItemsBlock
+					->add(Admin_Form_Entity::factory('Div')
+						->class('header bordered-palegreen')
+						->value(Core::_("Shop.watermark_item_header"))
+					)
+					->add($oWatermarkItemsRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oWatermarkItemsRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oWatermarkItemsRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+				;
+
+				$oWatermarkGroupsBlock
+					->add(Admin_Form_Entity::factory('Div')
+						->class('header bordered-darkorange')
+						->value(Core::_("Shop.watermark_group_header"))
+					)
+					->add($oWatermarkGroupsRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oWatermarkGroupsRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oWatermarkGroupsRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+				;
+
+				$oWatermarkProducersBlock
+					->add(Admin_Form_Entity::factory('Div')
+						->class('header bordered-yellow')
+						->value(Core::_("Shop.watermark_producer_header"))
+					)
+					->add($oWatermarkProducersRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oWatermarkProducersRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+				;
 
 				$oShopTabOrders
 					->add($oShopTabOrdersRow1 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -514,11 +538,16 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->options(
 						array(
 							Core::_('Shop.shop_shops_url_type_element_0'),
-							Core::_('Shop.shop_shops_url_type_element_1'))
+							Core::_('Shop.shop_shops_url_type_element_1'),
+							Core::_('Shop.shop_shops_url_type_element_2')
+						)
 					)
-					->value($this->_object->url_type);
+					->value($this->_object->url_type)
+					->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [0,1,2]); window.dispatchEvent(new Event('resize'));");
 
 				$oMainRow6->add($oUrlTypeField);
+
+				$oMainTab->move($this->getField('path_date_format')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 hidden-0 hidden-1')), $oMainRow6);
 
 				$oMainTab->move($this->getField('reserve')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRowReserveOptions);
 				$oMainTab->move($this->getField('write_off_paid_items')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRowReserveOptions);
@@ -616,6 +645,33 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 									escapeMarkup: function(m) { return m; },
 									templateSelection: $.templateSelectionItemResponsibleEmployees,
 									width: "100%"
+								})
+								.on("select2:opening select2:closing", function(e){
+
+									var $searchfield = $(this).parent().find(".select2-search__field");
+
+									if (!$searchfield.data("setKeydownHeader"))
+									{
+										$searchfield.data("setKeydownHeader", true);
+
+										$searchfield.on("keydown", function(e) {
+
+											var $this = $(this);
+
+											if ($this.val() == "" && e.key == "Backspace")
+											{
+												$this
+													.parents("ul.select2-selection__rendered")
+													.find("li.select2-selection__choice")
+													.filter(":last")
+													.find(".select2-selection__choice__remove")
+													.trigger("click");
+
+												e.stopImmediatePropagation();
+												e.preventDefault();
+											}
+										});
+									}
 								});
 							})</script>
 						';
@@ -717,23 +773,23 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainTab->move($this->getField('apply_keywords_automatically'), $oMainRow13);
 				$oMainTab->move($this->getField('use_captcha'), $oMainRow17);
 
-				$oShopTabWatermark->move($this->getField('image_large_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize1);
-				$oShopTabWatermark->move($this->getField('image_large_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize1);
+				$oShopTabWatermark->move($this->getField('image_large_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oWatermarkItemsRow1);
+				$oShopTabWatermark->move($this->getField('image_large_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oWatermarkItemsRow1);
 
-				$oShopTabWatermark->move($this->getField('image_small_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize2);
-				$oShopTabWatermark->move($this->getField('image_small_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize2);
+				$oShopTabWatermark->move($this->getField('image_small_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oWatermarkItemsRow2);
+				$oShopTabWatermark->move($this->getField('image_small_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oWatermarkItemsRow2);
 
-				$oShopTabWatermark->move($this->getField('group_image_large_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize3);
-				$oShopTabWatermark->move($this->getField('group_image_large_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize3);
+				$oShopTabWatermark->move($this->getField('group_image_large_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oWatermarkGroupsRow1);
+				$oShopTabWatermark->move($this->getField('group_image_large_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oWatermarkGroupsRow1);
 
-				$oShopTabWatermark->move($this->getField('group_image_small_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize4);
-				$oShopTabWatermark->move($this->getField('group_image_small_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize4);
+				$oShopTabWatermark->move($this->getField('group_image_small_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oWatermarkGroupsRow2);
+				$oShopTabWatermark->move($this->getField('group_image_small_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oWatermarkGroupsRow2);
 
-				$oShopTabWatermark->move($this->getField('producer_image_large_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize5);
-				$oShopTabWatermark->move($this->getField('producer_image_large_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize5);
+				$oShopTabWatermark->move($this->getField('producer_image_large_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oWatermarkProducersRow1);
+				$oShopTabWatermark->move($this->getField('producer_image_large_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oWatermarkProducersRow1);
 
-				$oShopTabWatermark->move($this->getField('producer_image_small_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize6);
-				$oShopTabWatermark->move($this->getField('producer_image_small_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize6);
+				$oShopTabWatermark->move($this->getField('producer_image_small_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oWatermarkProducersRow2);
+				$oShopTabWatermark->move($this->getField('producer_image_small_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oWatermarkProducersRow2);
 
 				$oShopTabFormats->move($this->getField('format_date')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow1);
 				$oShopTabFormats->move($this->getField('format_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow1);
@@ -780,20 +836,20 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						)
 					));
 
-				$oShopTabWatermark->move($this->getField('preserve_aspect_ratio')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRow2);
-				$oShopTabWatermark->move($this->getField('preserve_aspect_ratio_small')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRow2);
+				$oShopTabWatermark->move($this->getField('preserve_aspect_ratio')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oWatermarkItemsRow3);
+				$oShopTabWatermark->move($this->getField('preserve_aspect_ratio_small')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oWatermarkItemsRow3);
 
-				$oShopTabWatermark->move($this->getField('preserve_aspect_ratio_group')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRow3);
-				$oShopTabWatermark->move($this->getField('preserve_aspect_ratio_group_small')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRow3);
+				$oShopTabWatermark->move($this->getField('preserve_aspect_ratio_group')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oWatermarkGroupsRow3);
+				$oShopTabWatermark->move($this->getField('preserve_aspect_ratio_group_small')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oWatermarkGroupsRow3);
 
-				$oShopTabWatermark->move($this->getField('watermark_default_use_large_image')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRow4);
-				$oShopTabWatermark->move($this->getField('watermark_default_use_small_image')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRow4);
+				$oShopTabWatermark->move($this->getField('watermark_default_use_large_image')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRow2);
+				$oShopTabWatermark->move($this->getField('watermark_default_use_small_image')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRow2);
 
-				$oShopTabWatermark->move($this->getField('watermark_default_position_x')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRow5);
-				$oShopTabWatermark->move($this->getField('watermark_default_position_y')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRow5);
+				$oShopTabWatermark->move($this->getField('watermark_default_position_x')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRow3);
+				$oShopTabWatermark->move($this->getField('watermark_default_position_y')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRow3);
 
-				$oShopTabWatermark->move($this->getField('create_small_image')->divAttr(array('class' => 'form-group col-xs-12')),$oShopTabWatermarkRow6);
-				$oMainTab->move($this->getField('change_filename')->divAttr(array('class' => 'form-group col-xs-12')),$oShopTabWatermarkRow7);
+				$oShopTabWatermark->move($this->getField('create_small_image')->divAttr(array('class' => 'form-group col-xs-12')),$oShopTabWatermarkRow4);
+				$oMainTab->move($this->getField('change_filename')->divAttr(array('class' => 'form-group col-xs-12')),$oShopTabWatermarkRow5);
 
 				// Добавляем поле сортировки товара
 				$oShopTabOrdersRow1->add(Admin_Form_Entity::factory('Select')
@@ -851,6 +907,10 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					)
 					->value($this->_object->groups_sorting_direction));
 
+				$oMainTab->add(
+					Admin_Form_Entity::factory('Code')
+						->html("<script>radiogroupOnChange('{$windowId}', '{$this->_object->url_type}', [0,1,2])</script>")
+				);
 			break;
 		}
 

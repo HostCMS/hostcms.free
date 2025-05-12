@@ -439,7 +439,8 @@ textarea.form-control { resize: vertical; }
 
 th.filter-action-0, th.filter-action-1, th.filter-action-2,
 th.filter-action-3, th.filter-action-4, th.filter-action-5,
-th.filter-action-6, th.filter-action-7 {
+th.filter-action-6, th.filter-action-7, th.filter-action-8,
+th.filter-action-9, th.filter-action-10 {
 	width: 70px
 }
 
@@ -449,6 +450,9 @@ th.filter-action-6, th.filter-action-7 {
 	th.filter-action-5{width: 160px}
 	th.filter-action-6{width: 190px}
 	th.filter-action-7{width: 220px}
+	th.filter-action-8{width: 250px}
+	th.filter-action-9{width: 280px}
+	th.filter-action-10{width: 310px}
 }
 
 @media (max-width:767px){
@@ -655,10 +659,8 @@ th.filter-action-6, th.filter-action-7 {
 
 .navbar .navbar-inner .navbar-header .navbar-account.setting-open #leftNavbarArrow,
 .navbar .navbar-inner .navbar-header .navbar-account.setting-open #rightNavbarArrow {
-
 	display: none;
 }
-
 
 .navbar .navbar-inner .navbar-header .navbar-account .collapse-navbar-item {
 
@@ -873,8 +875,34 @@ form.adminForm .popover .form-horizontal .checkbox-inline{
 }
 */
 
-.navbar .navbar-inner .navbar-header .navbar-account .account-area > li .dropdown-menu.dropdown-login-area{
+.navbar .navbar-inner .navbar-header .navbar-account .setting-container, .navbar .navbar-inner .navbar-header .navbar-account.setting-open .setting-container {
+	transform: initial;
+	-webkit-transform: initial;
+	-moz-transform: initial;
+	-o-transform: initial;
+	-ms-transform: initial;
 
+	-webkit-transform-style: initial;
+	-moz-transform-style: initial;
+	-o-transform-style: initial;
+	-ms-transform-style: initial;
+	transform-style: initial;
+
+	-moz-transform-origin: initial;
+	-o-transform-origin: initial;
+	-ms-transform-origin: initial;
+	transform-origin: initial;
+}
+.navbar .navbar-inner .navbar-header .navbar-account .setting-container {
+	right: -1000px;
+	display: none;
+}
+.navbar .navbar-inner .navbar-header .navbar-account.setting-open .setting-container {
+	right: 0;
+	display: block;
+}
+
+.navbar .navbar-inner .navbar-header .navbar-account .account-area > li .dropdown-menu.dropdown-login-area{
 	max-width: 100vw;
 }
 
@@ -905,7 +933,6 @@ form.adminForm .popover .form-horizontal .checkbox-inline{
 }
 
 .navbar .navbar-inner .navbar-header .navbar-account .setting-container label:last-child .text {
-
 	margin-right: 0;
 }
 
@@ -1987,8 +2014,15 @@ input[type=checkbox].lock:checked~.text:before,input[type=radio].lock:checked~.t
 .editable {
 	cursor: url("/modules/skin/default/images/cursor/edit.png"), text;
 }
-.editable:empty {
+.editable:empty:not(.editable-null){
 	padding: 0 5px; border-bottom: 1px dotted #aaa
+}
+.editable-null::before {
+	content: 'NULL';
+	color: #789EFD;
+}
+.editable-unsaved {
+	font-weight: initial !important;
 }
 
 /*.btn-group > .btn:last-child {*/
@@ -2171,7 +2205,7 @@ select{
 .nowrap { white-space: nowrap }
 .pre-wrap { white-space: pre-wrap }
 
-.admin-table .btn > .fa{
+.admin-table .btn > .fa, .admin-table .btn > .fas, .admin-table .btn > .fa-solid, .admin-table .btn > .fa-brands, .admin-table .btn > .fa-regular {
 	margin: 0;
 }
 
@@ -3952,8 +3986,12 @@ td.siteuser-avatar img {
 	width: 30px;
 } */
 img.databox-user-avatar {
-	width: 65px;
-	height: 65px;
+	width: 55px;
+	height: 55px;
+	border-radius: 50% !important;
+}
+.user-block img.databox-user-avatar {
+	margin: 5px;
 }
 
 .select2-container--default .select2-selection--multiple .select2-selection__rendered {
@@ -4882,7 +4920,21 @@ table.deals-aggregate-info tr th:not(:first-child) { text-align: right }
 .kanban-board .well .well-avatar span:hover { z-index: 100 !important; }
 .kanban-board .well .well-avatar span.last-img { margin-left: -15px }
 
-.crm-description { font-weight: 300; font-size: 85%; color: #999; white-space: normal; margin: 2px 0; z-index: 0 }
+.crm-description { font-weight: 300; font-size: 85%; color: #999; white-space: normal; margin: 2px 0; z-index: 0; }
+.crm-description.expand { overflow: hidden; max-height: 110px; }
+.crm-description-wrapper .more {
+	/* background-color: #f5f5f5; */
+	margin: 5px 0;
+	color: gray;
+	font-size: 10px;
+}
+.crm-description-wrapper .more-wrapper {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.crm-description-wrapper .more:hover { cursor: pointer; }
+.crm-description-wrapper .more i { font-size: 7px; margin-left: 2px; }
 .crm-company { font-weight: 300; font-size: 85%; color: #555; white-space: normal; margin: 2px 0; z-index: 0 }
 .kanban-place { white-space: normal; color: #555; font-size: 85% }
 .kanban-board .kanban-list {
@@ -5610,7 +5662,9 @@ table.deals-aggregate-info tr th:not(:first-child) { text-align: right }
 	padding-top: 0;
 }
 
-.timeline > li > .timeline-panel .timeline-body { padding-bottom: 10px }
+/* В таймлайне, вкладка заказы имеет время */
+/*.timeline > li > .timeline-panel .timeline-body { padding-bottom: 10px }*/
+
 .timeline > li > .timeline-panel .timeline-body > p { display: inline-block }
 .timeline > li > .timeline-panel .timeline-header { position: relative }
 .timeline > li > .timeline-panel .timeline-header .timeline-entity-actions {
@@ -5834,7 +5888,7 @@ ul#agregate-user-info li a[data-toggle="tab"] { border-radius: 0 }
 .avatar-user img { border-radius: 50% }
 .avatar.avatar-user { border-left: 0 !important }
 
-.databox .databox-left.databox-deal { background-color: #fff !important }
+/* .databox .databox-left.databox-deal { background-color: #fff !important } */
 
 .siteuser-link a.show-user-info:hover { text-decoration: none !important }
 
@@ -6216,7 +6270,7 @@ ul.nav.nav-tabs > li .badge {
 .user-block .databox {
 	margin-bottom: 15px;
 	background: none;
-	border: 1px solid #ddd;
+	border: 1px solid #f1f1f1;
 	border-radius: 10px;
 }
 
@@ -6361,7 +6415,7 @@ html:not([dir="rtl"]) .perspective-block .noUi-horizontal .noUi-handle { right: 
 .responsible-user-block .databox .databox-right .databox-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; /*font-size: 10px;*/ }
 .responsible-user-block .databox .databox-right .databox-text:first-child { margin-top: 3px !important }
 
-.delete-responsible-user { position: absolute; top: 0; font-size: 12px; right: 6px; color: #ea8585; cursor: pointer; display: none }
+.delete-responsible-user { position: absolute; top: 0; font-size: 12px; right: 6px; color: #ff4242; cursor: pointer; display: none }
 .databox .databox-right:hover .delete-responsible-user { display: block }
 
 .responsible-user-block .user-block { margin-top: 5px }
@@ -7618,7 +7672,7 @@ input[type="text"] + .input-group-btn > select {
 	overflow: hidden;
 	position: relative;
 }
-.crm-note-attachment-wrapper .crm-note-attachment-item .image .size {
+.crm-note-attachment-wrapper .crm-note-attachment-item .image .size, .crm-note-attachment-wrapper .crm-note-attachment-item .audio .size {
 	position: absolute;
 	top: 3px;
 	right: 3px;
@@ -7628,6 +7682,9 @@ input[type="text"] + .input-group-btn > select {
 	padding: 0 3px;
 	line-height: 13px;
 	border-radius: 2px;
+}
+.crm-note-attachment-wrapper .crm-note-attachment-item .audio .size {
+	top: 25px;
 }
 .crm-note-attachment-wrapper .crm-note-attachment-item:hover {
 	cursor: pointer;
@@ -8070,6 +8127,14 @@ ul.sql-user-tabs .fa-xmark:hover {
 	z-index: 9999;
 	background-color: rgba(255,255,255,.8);
 }*/
+.sticky-column {
+	min-width: 70px;
+}
+@media (max-width: 991.99px) {
+	.sticky-column {
+		width: 70px;
+	}
+}
 
 .representative-type {
 	width: 25px;
@@ -8128,9 +8193,6 @@ ul.sql-user-tabs .fa-xmark:hover {
 	display: flex;
 	flex-wrap: wrap;
 }
-.editable-unsaved {
-	font-weight: initial !important;
-}
 
 i.property-info {
 	color: #ccc;
@@ -8187,7 +8249,7 @@ i.property-info {
 	position: relative;
 }
 .media-wrapper .media-item .media-item-file.media-item-file-type1 {
-	background-image: url('/admin/images/tgrid.png');
+	background-image: url('/modules/skin/bootstrap/images/tgrid.png');
 	background-repeat: no-repeat;
 }
 .media-wrapper .media-item .media-item-file i {
@@ -8640,6 +8702,115 @@ i.property-info {
 	color: #999;
 }
 
+.crm-project-id {
+	height: 40px;
+	width: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 5px;
+}
+.crm-project-icon {
+	float: right;
+}
+.crm-project-id:hover {
+	cursor: pointer;
+}
+.crm-project-id i {
+	font-size: 25px;
+	color: #fff;
+}
+.crm-icon-wrapper {
+	max-height: 75vh;
+	overflow-y: scroll;
+}
+.crm-icon-modal {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	justify-content: center;
+}
+.crm-icon-modal .crm-project-id {
+	border-radius: 5px;
+	height: 65px;
+	width: 65px;
+}
+.crm-icon-modal .crm-project-id i {
+	font-size: 48px;
+}
+.crm-project-list-icon i {
+	font-size: 13px;
+}
+
+.user-block .databox.databox-graded {
+	border: none;
+}
+
+.crm-project-filter-wrapper {
+	display: inline-flex;
+	align-items: center;
+	flex-wrap: wrap;
+}
+.crm-project-filter-wrapper .crm-project-filter-item {
+	border-radius: 5px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #fff;
+	padding: 10px;
+}
+.crm-project-filter-wrapper .crm-project-filter-item:not(:last-child) {
+	margin-right: 5px;
+}
+.crm-project-filter-wrapper .crm-project-filter-item:hover {
+	cursor: pointer;
+}
+.crm-project-filter-wrapper .crm-project-filter-item.active {
+	border: 2px solid #ffffff99;
+}
+
+.backend-wrapper {
+	display: flex;
+	align-items: center;
+}
+.backend-wrapper .text {
+	background-color: #f5f5f5;
+	padding: 5px;
+	color: #777;
+}
+.backend-wrapper .text:first-child {
+	margin-right: 10px;
+}
+.backend-wrapper .text:last-child {
+	margin-left: 10px;
+}
+
+.set-item-table .ui-sortable > tr {
+	cursor: grab;
+}
+
+audio {
+	width: 100%;
+}
+.crm-note-attachment-item audio {
+	border-radius: 5px;
+	margin: 10px 0;
+}
+/* audio::-webkit-media-controls-play-button,
+audio::-webkit-media-controls-panel {
+	background-color: #fff;
+	color: #000;
+} */
+
+.complex-lib-property {
+	background-color: #f3f3f3;
+	padding: 10px 10px 10px 50px;
+	margin-bottom: 10px;
+}
+/* .complex-lib-property .item_div {
+
+} */
+
 @media (max-width: 767px) {
 	.delivery_options .add-remove-property {
 		padding-left: 15px !important;
@@ -8673,4 +8844,12 @@ i.property-info {
 	a:after {
 		content: "" !important;
 	}
+}
+
+table.table.plan-materials-table tr td:last-child {
+    text-align: left;
+}
+
+.material_measure_name, .material_currency_sign {
+	padding-left: 3px;
 }

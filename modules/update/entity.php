@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Update
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Update_Entity extends Core_Empty_Entity
 {
@@ -285,6 +285,7 @@ class Update_Entity extends Core_Empty_Entity
 							if (isset($aTmpUpdateItem['tar']))
 							{
 								$Core_Tar = new Core_Tar($aTmpUpdateItem['tar'], 'gz');
+								$Core_Tar->addReplace('admin/', Core::$mainConfig['backend'] . '/');
 
 								Core_Log::instance()->clear()
 									->status(Core_Log::$MESSAGE)
@@ -323,6 +324,8 @@ class Update_Entity extends Core_Empty_Entity
 							Core_ORM::clearColumnCache();
 							Core_ORM::clearRelationModelCache();
 
+							method_exists('Core_Cache', 'opcacheReset') && Core_Cache::opcacheReset();
+							
 							if (function_exists('opcache_reset'))
 							{
 								opcache_reset();

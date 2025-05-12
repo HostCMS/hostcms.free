@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -12,7 +12,7 @@ Core_Auth::authorization($sModule = 'informationsystem');
 
 // Код формы
 $iAdmin_Form_Id = 12;
-$sAdminFormAction = '/admin/informationsystem/item/index.php';
+$sAdminFormAction = '/{admin}/informationsystem/item/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -42,13 +42,13 @@ if (!is_null(Core_Array::getGet('shortcuts')) && !is_null(Core_Array::getGet('te
 
 	$sQuery = Core_Str::stripTags(Core_Array::getGet('term', '', 'trim'));
 	$iInformationsystemId = Core_Array::getGet('informationsystem_id', 0, 'int');
-	
+
 	if ($iInformationsystemId && strlen($sQuery))
 	{
 		$sQueryLike = '%' . str_replace(' ', '%', $sQuery) . '%';
-		
+
 		$oInformationsystem = Core_Entity::factory('Informationsystem', $iInformationsystemId);
-		
+
 		$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
 		$oInformationsystem_Groups->queryBuilder()
 			->where('informationsystem_groups.name', 'LIKE', $sQueryLike)
@@ -89,11 +89,13 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 		);
 
 		$oInformationsystem = Core_Entity::factory('Informationsystem', $entity_id);
-		
+
 		$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
 		$oInformationsystem_Groups->queryBuilder()
 			->where('informationsystem_groups.shortcut_id', '=', 0)
 			->limit(Core::$mainConfig['autocompleteItems']);
+
+		$oInformationsystem_Groups->queryBuilder()->open();
 
 		$mode = Core_Array::getGet('mode', 0, 'int');
 		switch ($mode)
@@ -117,10 +119,16 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 			break;
 		}
 
+		is_numeric($sQuery) && $oInformationsystem_Groups->queryBuilder()
+			->setOr()
+			->where('informationsystem_groups.id', '=', $sQuery);
+
+		$oInformationsystem_Groups->queryBuilder()->close();
+
 		$aExclude = strlen(Core_Array::getGet('exclude'))
 			? json_decode(Core_Array::getGet('exclude'), TRUE)
 			: array();
-			
+
 		count($aExclude) && $oInformationsystem_Groups->queryBuilder()
 			->where('informationsystem_groups.id', 'NOT IN', $aExclude);
 
@@ -147,7 +155,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 {
 	$sQuery = Core_Str::stripTags(Core_Array::getGet('queryString', '', 'trim'));
 	$entity_id = Core_Array::getGet('entity_id', 0, 'int');
-	
+
 	$aJSON = array();
 
 	if ($entity_id && strlen($sQuery))
@@ -158,11 +166,13 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 		);
 
 		$oInformationsystem = Core_Entity::factory('Informationsystem', $entity_id);
-		
+
 		$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
 		$oInformationsystem_Groups->queryBuilder()
 			->where('informationsystem_groups.shortcut_id', '=', 0)
 			->limit(Core::$mainConfig['autocompleteItems']);
+
+		$oInformationsystem_Groups->queryBuilder()->open();
 
 		$mode = Core_Array::getGet('mode', 0, 'int');
 		switch ($mode)
@@ -185,6 +195,12 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 				$oInformationsystem_Groups->queryBuilder()->where('informationsystem_groups.name', '=', $sQuery);
 			break;
 		}
+
+		is_numeric($sQuery) && $oInformationsystem_Groups->queryBuilder()
+			->setOr()
+			->where('informationsystem_groups.id', '=', $sQuery);
+
+		$oInformationsystem_Groups->queryBuilder()->close();
 
 		$aInformationsystem_Groups = $oInformationsystem_Groups->findAll(FALSE);
 		foreach ($aInformationsystem_Groups as $oInformationsystem_Group)
@@ -280,12 +296,12 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
-$sInformationsystemItemProperties = '/admin/informationsystem/item/property/index.php';
+$sInformationsystemItemProperties = Admin_Form_Controller::correctBackendPath('/{admin}/informationsystem/item/property/index.php');
 $additionalParamsItemProperties = 'informationsystem_id=' . $iInformationsystemId . '&informationsystem_group_id=' . $iInformationsystemGroupId;
 
-$sInformationsystemGroupProperties = '/admin/informationsystem/group/property/index.php';
+$sInformationsystemGroupProperties = Admin_Form_Controller::correctBackendPath('/{admin}/informationsystem/group/property/index.php');
 
-$sInformationsystemComments = '/admin/informationsystem/item/comment/index.php';
+$sInformationsystemComments = Admin_Form_Controller::correctBackendPath('/{admin}/informationsystem/item/comment/index.php');
 $additionalParamsComments = 'informationsystem_id=' . $iInformationsystemId . '&informationsystem_group_id=' . $iInformationsystemGroupId;
 
 // Элементы меню
@@ -320,10 +336,10 @@ $oAdmin_Form_Entity_Menus->add(
 				->name(Core::_('Informationsystem_Item.export'))
 				->icon('fa fa-upload')
 				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/informationsystem/item/export/index.php', NULL, NULL, $additionalParamsItemProperties)
+					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/informationsystem/item/export/index.php', NULL, NULL, $additionalParamsItemProperties)
 				)
 				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/informationsystem/item/export/index.php', NULL, NULL, $additionalParamsItemProperties)
+					$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/informationsystem/item/export/index.php', NULL, NULL, $additionalParamsItemProperties)
 				)
 		)
 		->add(
@@ -331,10 +347,10 @@ $oAdmin_Form_Entity_Menus->add(
 				->name(Core::_('Informationsystem_Item.import'))
 				->icon('fa fa-download')
 				->href(
-          $oAdmin_Form_Controller->getAdminLoadHref('/admin/informationsystem/item/import/index.php', NULL, NULL, $additionalParamsItemProperties)
+          $oAdmin_Form_Controller->getAdminLoadHref('/{admin}/informationsystem/item/import/index.php', NULL, NULL, $additionalParamsItemProperties)
 				)
 				->onclick(
-          $oAdmin_Form_Controller->getAdminLoadAjax('/admin/informationsystem/item/import/index.php', NULL, NULL, $additionalParamsItemProperties)
+          $oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/informationsystem/item/import/index.php', NULL, NULL, $additionalParamsItemProperties)
 				)
 		)
 )
@@ -452,7 +468,7 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 $iInformationsystemDirId = $oInformationsystem->informationsystem_dir_id;
 
 // Путь к контроллеру формы разделов информационных систем
-$sInformationsystemDirPath = '/admin/informationsystem/index.php';
+$sInformationsystemDirPath = '/{admin}/informationsystem/index.php';
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs->add(
@@ -607,7 +623,7 @@ if ($oAdminFormActionMove && $oAdmin_Form_Controller->getAction() == 'move')
 		->title(Core::_('Informationsystem_Item.move_items_groups_title'))
 		->selectCaption(Core::_('Informationsystem_Item.move_items_groups_information_groups_id'))
 		->value($iInformationsystemGroupId)
-		->autocompletePath('/admin/informationsystem/item/index.php?autocomplete=1&show_move_groups=1')
+		->autocompletePath(Admin_Form_Controller::correctBackendPath('/{admin}/informationsystem/item/index.php?autocomplete=1&show_move_groups=1'))
 		->autocompleteEntityId($oInformationsystem->id);
 
 	$iCount = $oInformationsystem->Informationsystem_Groups->getCount();
@@ -728,6 +744,23 @@ if ($oAdminFormActionRollback && $oAdmin_Form_Controller->getAction() == 'rollba
 	$oAdmin_Form_Controller->addAction($oControllerRollback);
 }
 
+// Действие "Изменить атрибуты"
+$oAdminFormActionChangeAttribute = $oAdmin_Form->Admin_Form_Actions->getByName('change_attributes');
+
+if ($oAdminFormActionChangeAttribute && $oAdmin_Form_Controller->getAction() == 'change_attributes')
+{
+	$oInformationsystem_Item_Controller_Change_Attribute = Admin_Form_Action_Controller::factory(
+		'Informationsystem_Item_Controller_Change_Attribute', $oAdminFormActionChangeAttribute
+	);
+
+	$oInformationsystem_Item_Controller_Change_Attribute
+		->title(Core::_('Informationsystem_Item.change_attributes_items_title'))
+		->Informationsystem($oInformationsystem);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oInformationsystem_Item_Controller_Change_Attribute);
+}
+
 // Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Informationsystem_Group')
@@ -745,9 +778,13 @@ if (strlen($sGlobalSearch))
 	if (!$iGlobalSearchMode || $iGlobalSearchMode == 1)
 	{
 		$oAdmin_Form_Dataset
-			->addCondition(array('open' => array()))
-				->addCondition(array('where' => array('informationsystem_groups.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
-				->addCondition(array('setOr' => array()))
+			->addCondition(array('open' => array()));
+
+		is_numeric($sGlobalSearch) && $oAdmin_Form_Dataset
+				->addCondition(array('where' => array('informationsystem_groups.id', '=', intval($sGlobalSearch))))
+				->addCondition(array('setOr' => array()));
+
+		$oAdmin_Form_Dataset
 				->addCondition(array('where' => array('informationsystem_groups.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 				->addCondition(array('setOr' => array()))
 				->addCondition(array('where' => array('informationsystem_groups.guid', '=', $sGlobalSearch)))
@@ -804,9 +841,15 @@ if (strlen($sGlobalSearch))
 	if (!$iGlobalSearchMode || $iGlobalSearchMode != 1)
 	{
 		$oAdmin_Form_Dataset
-			->addCondition(array('open' => array()))
-				->addCondition(array('where' => array('informationsystem_items.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
+			->addCondition(array('open' => array()));
+
+		is_numeric($sGlobalSearch) && $oAdmin_Form_Dataset
+				->addCondition(array('where' => array('informationsystem_items.id', '=', intval($sGlobalSearch))))
 				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('informationsystem_items.shortcut_id', '=', intval($sGlobalSearch))))
+				->addCondition(array('setOr' => array()));
+
+		$oAdmin_Form_Dataset
 				->addCondition(array('where' => array('informationsystem_items.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 				->addCondition(array('setOr' => array()))
 				->addCondition(array('where' => array('informationsystem_items.guid', '=', $sGlobalSearch)))

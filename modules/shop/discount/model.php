@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
  class Shop_Discount_Model extends Core_Entity
 {
@@ -381,11 +381,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		}
 
 		$oShop_Discount_Siteuser_Groups = $this->Shop_Discount_Siteuser_Groups;
-		
+
 		$oShop_Discount_Siteuser_Groups->queryBuilder()
 			->clearOrderBy()
 			->orderBy('siteuser_group_id', 'ASC');
-		
+
 		$aShop_Discount_Siteuser_Groups = $oShop_Discount_Siteuser_Groups->findAll(FALSE);
 		if (count($aShop_Discount_Siteuser_Groups))
 		{
@@ -400,7 +400,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 						->class('badge badge-square badge-hostcms')
 						->value('<i class="fa fa-users darkgray"></i> ' . $siteuserGroupName)
 					);
-				
+
 				// Если "Все", то прерываем формирование списка
 				if (!$oShop_Discount_Siteuser_Group->siteuser_group_id)
 				{
@@ -462,6 +462,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 */
 	public function valueBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
+		$max_discount = '';
+
 		if ($this->value > 80 && $this->type == 0)
 		{
 			$return = '<i class="fa fa-exclamation-triangle warning" title="More than 80%"></i> ';
@@ -475,8 +477,17 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 			$return = '';
 		}
 
+		if ($this->type == 0 && $this->max_discount > 0)
+		{
+			$max_discount = Core_Html_Entity::factory('Span')
+				->class('badge badge-sky badge-ico white margin-left-5 pull-right')
+				->title('Max discount')
+				->value('≤' . htmlspecialchars($this->Shop->Shop_Currency->formatWithCurrency($this->max_discount)))
+				->execute();
+		}
+
 		return $return . ($this->type == 0
-			? Core_Str::hideZeros($this->value) . '%'
+			? Core_Str::hideZeros($this->value) . '%' . $max_discount
 			: htmlspecialchars($this->Shop->Shop_Currency->formatWithCurrency($this->value))
 		);
 	}

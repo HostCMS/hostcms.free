@@ -37,7 +37,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Querybuilder
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_QueryBuilder_Insert extends Core_QueryBuilder_Replace
 {
@@ -127,7 +127,7 @@ class Core_QueryBuilder_Insert extends Core_QueryBuilder_Replace
 	 */
 	public function build()
 	{
-		$query = array('INSERT');
+		$query = array($this->_buildComment($this->_comment) . 'INSERT');
 
 		!is_null($this->_priority) && $query[] = $this->_priority;
 

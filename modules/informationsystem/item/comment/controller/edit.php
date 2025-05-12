@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Informationsystem_Item_Comment_Controller_Edit extends Comment_Controller_Edit
 {
@@ -40,7 +40,7 @@ class Informationsystem_Item_Comment_Controller_Edit extends Comment_Controller_
 		$this->addTabAfter($oPropertyTab, $oMainTab);
 
 		// Properties
-		Property_Controller_Tab::factory($this->_Admin_Form_Controller)
+		Core::moduleIsActive('property') && Property_Controller_Tab::factory($this->_Admin_Form_Controller)
 			->setObject($this->_object)
 			->setDatasetId($this->getDatasetId())
 			->linkedObject(Core_Entity::factory('Informationsystem_Comment_Property_List', $oInformationsystem->id))
@@ -71,7 +71,7 @@ class Informationsystem_Item_Comment_Controller_Edit extends Comment_Controller_
 					->class('input-group-addon blue')
 					->value('<i class="fa fa-external-link"></i>')
 					->target('_blank')
-					->href("/admin/informationsystem/item/index.php?hostcms[action]=edit&hostcms[window]=id_content&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystem_Item->informationsystem_group_id}&hostcms[checked][1][{$informationsystem_item_id}]=1")
+					->href(Admin_Form_Controller::correctBackendPath("/{admin}/informationsystem/item/index.php") . "?hostcms[action]=edit&hostcms[window]=id_content&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystem_Item->informationsystem_group_id}&hostcms[checked][1][{$informationsystem_item_id}]=1")
 			);
 
 		$oAdditionalRow1->add($oAdmin_Form_Entity_Input_Name);
@@ -101,7 +101,7 @@ class Informationsystem_Item_Comment_Controller_Edit extends Comment_Controller_
 		$Comment_Informationsystem_Item->Informationsystem_Item->clearCache();
 
 		// Properties
-		Property_Controller_Tab::factory($this->_Admin_Form_Controller)
+		Core::moduleIsActive('property') && Property_Controller_Tab::factory($this->_Admin_Form_Controller)
 			->setObject($this->_object)
 			->linkedObject(Core_Entity::factory('Informationsystem_Comment_Property_List', $Comment_Informationsystem_Item->Informationsystem_Item->informationsystem_id))
 			->applyObjectProperty();

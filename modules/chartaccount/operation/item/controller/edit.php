@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Chartaccount
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Chartaccount_Operation_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -251,7 +251,7 @@ class Chartaccount_Operation_Item_Controller_Edit extends Admin_Form_Action_Cont
 			if ($("#' . $windowId . '").length)
 			{
 				// console.log(1111);
-				$.adminLoad({ path: \'/admin/chartaccount/operation/item/index.php\', additionalParams: \'company_id=' . $company_id . '&chartaccount_operation_id=' . $chartaccount_operation_id . '\', windowId: \'' . $windowId . '\' });
+				$.adminLoad({ path: hostcmsBackend + \'/chartaccount/operation/item/index.php\', additionalParams: \'company_id=' . $company_id . '&chartaccount_operation_id=' . $chartaccount_operation_id . '\', windowId: \'' . $windowId . '\' });
 			}
 		</script>';
 

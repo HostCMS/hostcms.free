@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Seller_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -159,7 +159,8 @@ class Shop_Seller_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	protected function _applyObjectProperty()
 	{
-		$this->_formValues['siteuser_id'] = intval(Core_Array::get($this->_formValues, 'siteuser_id'));
+		$this->_formValues['siteuser_id'] = Core_Array::get($this->_formValues, 'siteuser_id', 0, 'int');
+		$this->_formValues['path'] = Core_Array::get($this->_formValues, 'path', '', 'trim');
 
 		parent::_applyObjectProperty();
 

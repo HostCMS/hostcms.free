@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Printlayout
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Printlayout_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -77,7 +77,7 @@ class Printlayout_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 				$oFilePath = $this->_object->file_name != '' && Core_File::isFile($this->_object->getFilePath())
-					? '/admin/printlayout/index.php?downloadFile=' . $this->_object->id
+					? Admin_Form_Controller::correctBackendPath('/{admin}/printlayout/index.php?downloadFile=') . $this->_object->id
 					: '';
 
 				$oImageField = Admin_Form_Entity::factory('File')
