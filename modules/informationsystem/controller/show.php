@@ -1033,7 +1033,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			{
 				$this->_shownIDs = $inCache['shown'];
 				$this->calculateTotal && isset($inCache['total']) && $this->total = $inCache['total']; // remove isset() after 7.1.4
-				
+
 				echo $inCache['content'];
 				return $this;
 			}
@@ -1479,10 +1479,13 @@ class Informationsystem_Controller_Show extends Core_Controller
 	 */
 	protected function _incShowed()
 	{
-		Core_QueryBuilder::update('informationsystem_items')
-			->set('showed', Core_QueryBuilder::expression('`showed` + 1'))
-			->where('id', '=', $this->item)
-			->execute();
+		if (!Core::checkBot(Core_Array::get($_SERVER, 'HTTP_USER_AGENT', '')))
+		{
+			Core_QueryBuilder::update('informationsystem_items')
+				->set('showed', Core_QueryBuilder::expression('`showed` + 1'))
+				->where('id', '=', $this->item)
+				->execute();
+		}
 
 		return $this;
 	}
@@ -1640,7 +1643,17 @@ class Informationsystem_Controller_Show extends Core_Controller
 			$this->tag($matches['tag']);
 
 			$this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
-			if (is_null($this->_oTag))
+			if (!is_null($this->_oTag))
+			{
+				if (!Core::checkBot(Core_Array::get($_SERVER, 'HTTP_USER_AGENT', '')))
+				{
+					Core_QueryBuilder::update('tags')
+						->set('tags.showed', Core_QueryBuilder::expression('`showed` + 1'))
+						->where('tags.id', '=', $this->_oTag->id)
+						->execute();
+				}
+			}
+			else
 			{
 				return $this->error404();
 			}
@@ -2140,7 +2153,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 							->name('parent_id')
 							->value($oShortcut_Group->parent_id)
 					);
-					
+
 					$oInformationsystem_Group->dataOriginalId = $oShortcut_Group->id;
 			}
 			else

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Site
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Site_Controller_Template extends Core_Servant_Properties
 {
@@ -123,7 +123,7 @@ class Site_Controller_Template extends Core_Servant_Properties
 
 		$Core_Http = Core_Http::instance($driverName)
 			->url($this->server . '/hostcms/templates/xml/')
-			->port(80)
+			// ->port(80)
 			->timeout(5)
 			->execute();
 

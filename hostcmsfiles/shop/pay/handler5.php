@@ -1326,7 +1326,9 @@ class YooMoneyLogger extends Core_Log
         $optionsConst = array(
             CURLOPT_HTTPHEADER => array('Content-Type:application/json;charset=utf-8'),
             CURLOPT_POST => 1,
-            CURLOPT_RETURNTRANSFER => 1
+            CURLOPT_RETURNTRANSFER => 1,
+			CURLOPT_TIMEOUT => 5,
+			CURLOPT_CONNECTTIMEOUT => 5,
         );
         $options = $optionsConst + $options;
         $ch = curl_init();

@@ -2497,6 +2497,7 @@ class Shop_Controller_Show extends Core_Controller
 			//->columns($args)
 			//->clearSelect()
 			->from($tableName)
+			->distinct()
 			->whereRaw(1);
 
 		call_user_func_array(array($oQueryBuilder, 'columns'), $args);
@@ -2506,6 +2507,10 @@ class Shop_Controller_Show extends Core_Controller
 
 		!$this->modificationsList
 			&& $oQueryBuilder->where($tableName . '.modification_id', '=', 0);
+
+		// Свойство не множественое и если нет ограничений по доп. условиям свойств, то ограничиваем primary
+		!$oProperty->multiple && !count($this->_aFilterProperties)
+			&& $oQueryBuilder->where($tableName . '.primary', '=', 1);
 
 		// Filter by properties
 		$this->applyFastFilterProperties($oQueryBuilder, array($oProperty->id));
@@ -2791,10 +2796,13 @@ class Shop_Controller_Show extends Core_Controller
 	 */
 	protected function _incShowed()
 	{
-		Core_QueryBuilder::update('shop_items')
-			->set('showed', Core_QueryBuilder::expression('`showed` + 1'))
-			->where('id', '=', $this->item)
-			->execute();
+		if (!Core::checkBot(Core_Array::get($_SERVER, 'HTTP_USER_AGENT', '')))
+		{
+			Core_QueryBuilder::update('shop_items')
+				->set('showed', Core_QueryBuilder::expression('`showed` + 1'))
+				->where('id', '=', $this->item)
+				->execute();
+		}
 
 		return $this;
 	}
@@ -2985,7 +2993,7 @@ class Shop_Controller_Show extends Core_Controller
 
 				// Если нет ограничений по доп. условиям свойств, то ограничиваем primary
 				!count($this->_aFilterProperties)
-					&& $this->_Shop_Items->queryBuilder()->where("{$tableName}.primary", '=', 1);
+					&& $this->_Shop_Items->queryBuilder()->where($tableName . '.primary', '=', 1);
 			}
 			else
 			{
@@ -3174,7 +3182,17 @@ class Shop_Controller_Show extends Core_Controller
 			$this->tag($matches['tag']);
 
 			$this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
-			if (is_null($this->_oTag))
+			if (!is_null($this->_oTag))
+			{
+				if (!Core::checkBot(Core_Array::get($_SERVER, 'HTTP_USER_AGENT', '')))
+				{
+					Core_QueryBuilder::update('tags')
+						->set('tags.showed', Core_QueryBuilder::expression('`showed` + 1'))
+						->where('tags.id', '=', $this->_oTag->id)
+						->execute();
+				}
+			}
+			else
 			{
 				return $this->error404();
 			}
@@ -4475,7 +4493,7 @@ class Shop_Controller_Show extends Core_Controller
 
 					// Если нет ограничений по доп. условиям свойств, то ограничиваем primary
 					!count($this->_aFilterProperties)
-						&& $oCore_QueryBuilder_Select->where("{$tableName}.primary", '=', 1);
+						&& $oCore_QueryBuilder_Select->where($tableName . '.primary', '=', 1);
 				}
 				else
 				{*/
@@ -5920,6 +5938,8 @@ class Shop_Controller_Show extends Core_Controller
 
 		$aBasicFilterProperties = array();
 
+//var_dump(count($this->_aFilterProperties)); die();
+
 		foreach ($this->_aFilterProperties as $iPropertyId => $aTmpProperties)
 		{
 			if (!in_array($iPropertyId, $excludeIDs))
@@ -6300,7 +6320,7 @@ class Shop_Controller_Show extends Core_Controller
 
 				// Если нет ограничений по доп. условиям свойств, то ограничиваем primary
 				!count($this->_aFilterProperties)
-					? $this->_Shop_Items->queryBuilder()->where("{$tableName}.primary", '=', 1)
+					? $this->_Shop_Items->queryBuilder()->where($tableName . '.primary', '=', 1)
 					: $this->_Shop_Items->queryBuilder()->groupBy('shop_items.id');
 			}
 		}

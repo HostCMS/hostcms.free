@@ -377,4 +377,6 @@ $oAdmin_Form_Controller->addExternalReplace('{shop_id}', $oShop->id);
 $oAdmin_Form_Controller->addExternalReplace('{shop_group_id}', $oShopGroup->id);
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 
+$oAdmin_Form_Controller->addFilter('siteuser_id', array($oAdmin_Form_Controller, '_filterCallbackSiteuser'));
+
 $oAdmin_Form_Controller->execute();

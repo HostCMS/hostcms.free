@@ -36,7 +36,7 @@ class Shop_Module extends Core_Module_Abstract
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2025-04-04';
+	public $date = '2025-08-19';
 
 	/**
 	 * Module name
@@ -624,7 +624,14 @@ class Shop_Module extends Core_Module_Abstract
 
 					!is_null($oShop_Seller->id) && $oSearch_Page->addEntity($oShop_Seller);
 				break;
-				case 4: // SEO-фильтры
+				case 4: // Производители
+					$oShop_Producer = Core_Entity::factory('Shop_Producer')->find($oSearch_Page->module_value_id);
+
+					Core_Event::notify(get_class($this) . '.searchCallback', $this, array($oSearch_Page, $oShop_Producer));
+
+					!is_null($oShop_Producer->id) && $oSearch_Page->addEntity($oShop_Producer);
+				break;
+				case 5: // SEO-фильтры
 					$oShop_Filter_Seo = Core_Entity::factory('Shop_Filter_Seo')->find($oSearch_Page->module_value_id);
 
 					Core_Event::notify(get_class($this) . '.searchCallback', $this, array($oSearch_Page, $oShop_Filter_Seo));

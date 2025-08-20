@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Inflection
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Inflection_En extends Core_Inflection
 {
@@ -215,11 +215,11 @@ class Core_Inflection_En extends Core_Inflection
 
 		foreach (self::$pluralRules as $pattern => $replacement)
 		{
-			$word = preg_replace($pattern, $replacement, $word, 1, $replaceCount);
+			$plural = preg_replace($pattern, $replacement, $word, 1, $replaceCount);
 
 			if ($replaceCount)
 			{
-				return $word;
+				return $plural;
 			}
 		}
 
@@ -259,11 +259,11 @@ class Core_Inflection_En extends Core_Inflection
 
 		foreach (self::$singularRules as $pattern => $replacement)
 		{
-			$word = preg_replace($pattern, $replacement, $word, 1, $replaceCount);
+			$singular = preg_replace($pattern, $replacement, $word, 1, $replaceCount);
 
 			if ($replaceCount)
 			{
-				return $word;
+				return $singular;
 			}
 		}
 

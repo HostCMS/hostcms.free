@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Sql
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Sql_Table_View_Dataset extends Admin_Form_Dataset
 {
@@ -299,7 +299,7 @@ class Sql_Table_View_Dataset extends Admin_Form_Dataset
 	{
 		if (is_null($this->_primaryKeyName))
 		{
-			$this->_primaryKeyName = 'id';
+			$this->_primaryKeyName = NULL;
 			$aFileds = Core_DataBase::instance()->getColumns($this->_tableName);
 			foreach ($aFileds as $key => $aRow)
 			{
@@ -322,19 +322,27 @@ class Sql_Table_View_Dataset extends Admin_Form_Dataset
 	 */
 	public function getObject($primaryKey)
 	{
-		// Определяем имя первичного ключа
-		$queryBuilder = $this->_entity
-			->queryBuilder()
-			->clearFrom()
-			->clearWhere()
-			->from($this->_tableName)
-			->where($this->_getPrimaryKeyName(), '=', $primaryKey);
+		$pk = $this->_getPrimaryKeyName();
 
-		$object = $this->_entity
-			->queryBuilder()
-			->asObject('Sql_Table_View_Entity')
-			->execute()
-			->current();
+		if (!is_null($pk))
+		{
+			$queryBuilder = $this->_entity
+				->queryBuilder()
+				->clearFrom()
+				->clearWhere()
+				->from($this->_tableName)
+				->where($pk, '=', $primaryKey);
+
+			$object = $this->_entity
+				->queryBuilder()
+				->asObject('Sql_Table_View_Entity')
+				->execute()
+				->current();
+		}
+		else
+		{
+			$object	= NULL;
+		}
 
 		if (!is_object($object))
 		{
@@ -345,4 +353,5 @@ class Sql_Table_View_Dataset extends Admin_Form_Dataset
 
 		return $object;
 	}
+	
 }

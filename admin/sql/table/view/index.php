@@ -35,6 +35,7 @@ if (strlen($tableName))
 
 			$bSetPK = TRUE;
 		}
+
 		$oAdmin_Form_Field = new Sql_Table_View_Field();
 		$oAdmin_Form_Field->id = $key;
 		$oAdmin_Form_Field->admin_form_id = $iAdmin_Form_Id;
@@ -97,6 +98,16 @@ if (strlen($tableName))
 		//$oAdmin_Form_Field->class = $aRow['max_length'] > 1000 ? 'truncated' : '';
 		$oAdmin_Form_Field->class = 'truncated' . ($aRow['key'] == 'PRI' ? ' semi-bold' : '');
 		$aAdmin_Form_Fields[$oAdmin_Form_Field->id] = $oAdmin_Form_Field;
+	}
+
+	// If PK doesn't exist
+	if (!$bSetPK)
+	{
+		$aRow = reset($aFileds);
+
+		$oAdmin_Form->key_field
+			= $oAdmin_Form->default_order_field
+			= $aRow['name'];
 	}
 }
 

@@ -1347,6 +1347,9 @@ class Structure_Model extends Core_Entity
 				$aBackup['structureConfigFile'] = $this->getStructureConfigFile();
 			}
 
+			$aBackup['property_values'] = Revision_Controller::getPropertyValues($this);
+			$aBackup['field_values'] = Revision_Controller::getFieldValues($this);
+
 			Revision_Controller::backup($this, $aBackup);
 		}
 
@@ -1397,6 +1400,9 @@ class Structure_Model extends Core_Entity
 					$this->saveStructureFile($aBackup['structureFile']);
 					$this->saveStructureConfigFile($aBackup['structureConfigFile']);
 				}
+
+				Revision_Controller::setPropertyValues($this, $aBackup['property_values']);
+				Revision_Controller::setFieldValues($this, $aBackup['field_values']);
 			}
 		}
 

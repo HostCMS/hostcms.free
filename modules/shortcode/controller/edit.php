@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shortcode
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shortcode_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -59,9 +59,6 @@ class Shortcode_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oPhp_Textarea = Admin_Form_Entity::factory('Textarea');
 
-				$oTmpOptions = $oPhp_Textarea->syntaxHighlighterOptions;
-				$oTmpOptions['mode'] = '"ace/mode/php"';
-
 				$oPhp_Textarea
 					->value($this->_object->php)
 					->cols(140)
@@ -69,7 +66,7 @@ class Shortcode_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->caption(Core::_('Shortcode.php'))
 					->name('php')
 					->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
-					->syntaxHighlighterOptions($oTmpOptions)
+					->syntaxHighlighterMode('php')
 					->divAttr(array('class' => 'form-group col-xs-12'));
 
 				$oMainRow3->add($oPhp_Textarea);

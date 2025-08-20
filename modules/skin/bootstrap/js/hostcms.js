@@ -369,11 +369,13 @@ function scrollTo(el, offset) {
 
 /*Show Notification*/
 function Notify(message, description, position, timeout, theme, icon, closable, sound) {
-	if (typeof sound == 'undefined')
+	soundAvailable = $('#sound-switch').data('soundEnabled') === undefined
+		? false
+		: !!$('#sound-switch').data('soundEnabled');
+	
+	if (typeof sound != 'undefined')
 	{
-		sound = $('#sound-switch').data('soundEnabled') === undefined
-			? false
-			: !!$('#sound-switch').data('soundEnabled');
+		soundAvailable = soundAvailable && sound;
 	}
 
 	toastr.options.positionClass = 'toast-' + position;
@@ -381,7 +383,7 @@ function Notify(message, description, position, timeout, theme, icon, closable, 
 	toastr.options.timeOut = timeout;
 	toastr.options.closeButton = closable;
 	toastr.options.iconClass = icon + ' toast-' + theme;
-	toastr.options.playSound = sound;
+	toastr.options.playSound = soundAvailable;
 
 	if (timeout == 0)
 	{

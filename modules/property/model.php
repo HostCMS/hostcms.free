@@ -854,6 +854,19 @@ class Property_Model extends Core_Entity
 				->execute();
 		}
 
+		/*if (is_numeric($this->type))
+		{
+			$countValues = Property_Controller_Value::factory($this->type)
+				->setProperty($this)
+				->getPropertyValueObject()->getCount(FALSE);
+
+			$countValues && Core_Html_Entity::factory('Span')
+				->class('badge badge-hostcms badge-square')
+				->value(number_format($countValues, 0, ',', ' '))
+				// ->title(Core::_('Property.count_values', number_format($countValues, 0, ',', ' ')))
+				->execute();
+		}*/
+
 		if ($this->type == 2)
 		{
 			if ($this->prefix_large_file != '')

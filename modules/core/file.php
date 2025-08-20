@@ -236,7 +236,7 @@ class Core_File
 						{
 							self::clearCache();
 
-							self::rename($oldname . DIRECTORY_SEPARATOR . Core_File::filenameCorrection($file), $newname . DIRECTORY_SEPARATOR . Core_File::filenameCorrection($file), $recursive);
+							self::rename($oldname . DIRECTORY_SEPARATOR . self::filenameCorrection($file), $newname . DIRECTORY_SEPARATOR . self::filenameCorrection($file), $recursive);
 						}
 					}
 
@@ -275,6 +275,9 @@ class Core_File
 			throw new Core_Exception("The file '%filePath' does not exist.",
 				array('%filePath' => Core::cutRootPath($filePath)));
 		}*/
+
+		Core::moduleIsActive('cdn')
+			&& Cdn_Controller::delete($filePath);
 	}
 
 	/**
@@ -1250,6 +1253,15 @@ class Core_File
 
 		$result['large_image'] = $large_image_created;
 		$result['small_image'] = $small_image_created;
+
+		if ($large_image_created || $small_image_created)
+		{
+			if (Core::moduleIsActive('cdn'))
+			{
+				$large_image_created && Cdn_Controller::upload($large_image_target);
+				$small_image_created && Cdn_Controller::upload($small_image_target);
+			}
+		}
 
 		return $result;
 	}

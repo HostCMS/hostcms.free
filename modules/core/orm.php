@@ -1320,7 +1320,7 @@ class Core_ORM
 					? self::$columnCache->get($this->_modelName, $cacheName)
 					: NULL;
 
-				self::$_columnCache[$this->_modelName] = $this->_tableColumns = is_array($inCache)
+				$this->_tableColumns = self::$_columnCache[$this->_modelName] = is_array($inCache)
 					? $inCache
 					: $this->getDatabase()->getColumns($this->_tableName);
 
@@ -1865,11 +1865,14 @@ class Core_ORM
 					}
 				break;
 				case 'decimal':
-					// Convert "," to "."
-					$value = str_replace(',', '.', $value);
+					if (!is_null($value))
+					{
+						// Convert "," to "."
+						$value = str_replace(',', '.', $value);
 
-					// Remove everything except numbers and dot
-					$value = preg_replace('/[^0-9\.\-]/', '', $value);
+						// Remove everything except numbers and dot
+						$value = preg_replace('/[^0-9\.\-]/', '', $value);
+					}
 
 					if ($value == '')
 					{
@@ -1923,11 +1926,14 @@ class Core_ORM
 					}
 				break;
 				case 'float':
-					// Convert "," to "."
-					$value = str_replace(',', '.', $value);
+					if (!is_null($value))
+					{
+						// Convert "," to "."
+						$value = str_replace(',', '.', $value);
 
-					// Remove everything except numbers and dot
-					$value = preg_replace('/[^0-9\.\-]/', '', $value);
+						// Remove everything except numbers and dot
+						$value = preg_replace('/[^0-9\.\-]/', '', $value);
+					}
 
 					if ($value == '')
 					{

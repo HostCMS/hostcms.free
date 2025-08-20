@@ -498,34 +498,40 @@ abstract class Core_Http
 
 	/**
 	 * Executes the business logic.
+	 * @return self
 	 */
 	public function execute()
 	{
-		$aUrl = @parse_url(trim($this->_url));
+		if (!is_null($this->_url))
+		{
+			$aUrl = @parse_url(trim($this->_url));
 
-		$scheme = strtolower(Core_Array::get($aUrl, 'scheme', 'http'));
+			$scheme = strtolower(Core_Array::get($aUrl, 'scheme', 'http'));
 
-		// Change https port
-		$scheme == 'https' && $this->_port == 80
-			&& $this->_port = 443;
+			// Change https port
+			$scheme == 'https' && $this->_port == 80
+				&& $this->_port = 443;
 
-		$path = isset($aUrl['host']) && isset($aUrl['path'])
-			? $aUrl['path']
-			: '/';
+			$path = isset($aUrl['host']) && isset($aUrl['path'])
+				? $aUrl['path']
+				: '/';
 
-		isset($aUrl['port']) && $this->_port = $aUrl['port'];
+			isset($aUrl['port']) && $this->_port = $aUrl['port'];
 
-		$host = Core_Array::get($aUrl, 'host', '');
+			$host = Core_Array::get($aUrl, 'host', '');
 
-		$query = isset($aUrl['query']) ?
-			'?' . $aUrl['query']
-			: '';
+			$query = isset($aUrl['query']) ?
+				'?' . $aUrl['query']
+				: '';
 
-		$this->_referer = is_null($this->_referer)
-			? "{$scheme}://{$host}/"
-			: $this->_referer;
+			$this->_referer = is_null($this->_referer)
+				? "{$scheme}://{$host}/"
+				: $this->_referer;
 
-		return $this->_execute($host, $path, $query, $scheme, Core_Array::get($aUrl, 'user'), Core_Array::get($aUrl, 'pass'));
+			$this->_execute($host, $path, $query, $scheme, Core_Array::get($aUrl, 'user'), Core_Array::get($aUrl, 'pass'));
+		}
+		
+		return $this;
 	}
 
 	/**

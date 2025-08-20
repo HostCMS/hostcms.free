@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Template
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -178,11 +178,6 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->move($this->getField('sorting'), $oMainRow4);
 
 				$oTemplate_Textarea = Admin_Form_Entity::factory('Textarea');
-
-				$oTmpOptions = $oTemplate_Textarea->syntaxHighlighterOptions;
-				// $oTmpOptions['mode'] = 'application/x-httpd-php';
-				$oTmpOptions['mode'] = '"ace/mode/php"';
-
 				$oTemplate_Textarea
 					->value(
 						$this->_object->loadTemplateFile()
@@ -192,7 +187,7 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->caption(Core::_('Template.template'))
 					->name('template')
 					->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
-					->syntaxHighlighterOptions($oTmpOptions)
+					->syntaxHighlighterMode('php')
 					->divAttr(array('class' => 'form-group col-xs-12'));
 
 				$oTemplateTab
@@ -210,7 +205,7 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							? $this->_object->loadTemplateLessFile()
 							: $this->_object->loadTemplateCssFile();
 
-						$mode = '"ace/mode/less"';
+						$mode = 'less';
 					break;
 					// SCSS
 					case 2:
@@ -218,18 +213,14 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							? $this->_object->loadTemplateScssFile()
 							: $this->_object->loadTemplateCssFile();
 
-						$mode = '"ace/mode/scss"';
+						$mode = 'scss';
 					break;
 					// CSS
 					default:
 						$styleValue = $this->_object->loadTemplateCssFile();
 
-						$mode = '"ace/mode/css"';
+						$mode = 'css';
 				}
-
-				$oTmpOptions = $oLessCss_Textarea->syntaxHighlighterOptions;
-				// $oTmpOptions['mode'] = 'css';
-				$oTmpOptions['mode'] = $mode;
 
 				$oLessCss_Textarea
 					->value($styleValue)
@@ -237,7 +228,7 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->caption(Core::_('Template.css'))
 					->name('css')
 					->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
-					->syntaxHighlighterOptions($oTmpOptions)
+					->syntaxHighlighterMode($mode)
 					->divAttr(array('class' => 'form-group col-xs-12'));
 
 				$oStyleTab
@@ -261,11 +252,6 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oCssRow2->add($oSelectStyleTypes);
 
 				$oJs_Textarea = Admin_Form_Entity::factory('Textarea');
-
-				$oTmpOptions = $oJs_Textarea->syntaxHighlighterOptions;
-				// $oTmpOptions['mode'] = 'text/javascript';
-				$oTmpOptions['mode'] = '"ace/mode/javascript"';
-
 				$oJs_Textarea
 					->value(
 						$this->_object->loadTemplateJsFile()
@@ -274,7 +260,7 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->caption(Core::_('Template.js'))
 					->name('js')
 					->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
-					->syntaxHighlighterOptions($oTmpOptions)
+					->syntaxHighlighterMode('javascript')
 					->divAttr(array('class' => 'form-group col-xs-12'));
 
 				$oJsTab
@@ -289,24 +275,19 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$oManifestTab
 						->add($oManifestRow1 = Admin_Form_Entity::factory('Div')->class('row'));
 
-					$oTextarea_Manifest = Admin_Form_Entity::factory('Textarea');
-
-					$oTmpOptions = $oTextarea_Manifest->syntaxHighlighterOptions;
-					// $oTmpOptions['mode'] = 'xml';
-					$oTmpOptions['mode'] = '"ace/mode/xml"';
-
 					$manifest = $this->_object->loadManifestFile();
 
 					$manifest == ''
 						&& $manifest = '<?xml version="1.0" encoding="UTF-8"?>' . "\n<manifest>\n</manifest>";
 
+					$oTextarea_Manifest = Admin_Form_Entity::factory('Textarea');
 					$oTextarea_Manifest
 						->value($manifest)
 						->rows(30)
 						->caption(Core::_('Template.manifest'))
 						->name('manifest')
 						->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
-						->syntaxHighlighterOptions($oTmpOptions)
+						->syntaxHighlighterMode('xml')
 						->divAttr(array('class' => 'form-group col-xs-12'));
 
 					$oManifestRow1->add($oTextarea_Manifest);
@@ -319,9 +300,6 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				foreach ($aLngs as $sLng)
 				{
 					$oTextarea_Lng = Admin_Form_Entity::factory('Textarea');
-
-					$oTmpOptions = $oTextarea_Lng->syntaxHighlighterOptions;
-					$oTmpOptions['mode'] = '"ace/mode/php"';
 
 					$lng = $this->_object->loadLngFile($sLng);
 
@@ -341,7 +319,7 @@ EOD;
 						->caption(Core::_('Template.language', $sLng))
 						->name('lng_' . $sLng)
 						->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
-						->syntaxHighlighterOptions($oTmpOptions)
+						->syntaxHighlighterMode('php')
 						->divAttr(array('class' => 'form-group col-xs-12'));
 
 					$oLanguageRow1->add($oTextarea_Lng);

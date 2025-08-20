@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Database
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_DataBase_Mysql extends Core_DataBase
 {
@@ -622,7 +622,7 @@ class Core_DataBase_Mysql extends Core_DataBase
 	 * Get tables schema in the database
 	 *
 	 * @param mixed $selectionCondition Selection condition
-	 * @return array
+	 * @return array Array of rows or objects
 	 */
 	public function getTablesSchema($selectionCondition = NULL)
 	{

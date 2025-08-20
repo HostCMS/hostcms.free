@@ -447,7 +447,7 @@ class Site_Model extends Core_Entity
 		{
 			Core_File::deleteDir(CMS_FOLDER . $this->uploaddir . 'structure_' . intval($this->id));
 		} catch (Exception $e) {}
-		
+
 		// Таблицы поиска удаляются после удаления связанных с сайтом элементов
 		if (Core::moduleIsActive('search'))
 		{

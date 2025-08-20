@@ -151,9 +151,6 @@ class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oAdmin_Form_Entity_Textarea_Lib_Config = Admin_Form_Entity::factory('Textarea');
 
-				$oTmpOptions = $oAdmin_Form_Entity_Textarea_Lib_Config->syntaxHighlighterOptions;
-				$oTmpOptions['mode'] = '"ace/mode/php"';
-
 				$oAdmin_Form_Entity_Textarea_Lib_Config
 					->value(
 						$this->_object->loadLibConfigFile()
@@ -163,7 +160,7 @@ class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->caption(Core::_('Lib.lib_form_module_config'))
 					->name('lib_php_code_config')
 					->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
-					->syntaxHighlighterOptions($oTmpOptions);
+					->syntaxHighlighterMode('php');
 
 				$oAdmin_Form_Tab_Entity_Lib_Config->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'));
 
@@ -178,9 +175,6 @@ class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oAdmin_Form_Entity_Textarea_Lib = Admin_Form_Entity::factory('Textarea');
 
-				$oTmpOptions = $oAdmin_Form_Entity_Textarea_Lib->syntaxHighlighterOptions;
-				$oTmpOptions['mode'] = '"ace/mode/php"';
-
 				$oAdmin_Form_Entity_Textarea_Lib
 					->value(
 						$this->_object->loadLibFile()
@@ -190,7 +184,7 @@ class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->caption(Core::_('Lib.lib_form_module'))
 					->name('lib_php_code')
 					->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
-					->syntaxHighlighterOptions($oTmpOptions);
+					->syntaxHighlighterMode('php');
 
 				$oAdmin_Form_Tab_Entity_Lib->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'));
 
@@ -276,8 +270,8 @@ class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					}
 				}
 
-				$this->_object->saveLibFile(Core_Array::getRequest('lib_php_code'));
 				$this->_object->saveLibConfigFile(Core_Array::getRequest('lib_php_code_config'));
+				$this->_object->saveLibFile(Core_Array::getRequest('lib_php_code'));
 			break;
 		}
 

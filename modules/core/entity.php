@@ -933,7 +933,9 @@ class Core_Entity extends Core_ORM
 		// Children entities
 		foreach ($this->_childrenEntities as $oChildEntity)
 		{
-			$childName = $oChildEntity instanceof Core_ORM
+			$bModel = $oChildEntity instanceof Core_ORM;
+			
+			$childName = $bModel
 				? $oChildEntity->getXmlTagName()
 				: $oChildEntity->name;
 
@@ -941,7 +943,9 @@ class Core_Entity extends Core_ORM
 
 			if (!isset($oRetrun->$childName))
 			{
-				$oRetrun->$childName = $childArray;
+				$oRetrun->$childName = $bModel && $this->_checkEntityIsHasManyRelation($oChildEntity)
+					? array($childArray)
+					: $childArray;
 			}
 			else
 			{
@@ -972,6 +976,18 @@ class Core_Entity extends Core_ORM
 		Core_Event::notify($this->_modelName . '.onAfterGetArray', $this);
 
 		return $oRetrun;
+	}
+
+	/**
+	 * Check model of $oEntity is hasMany relation
+	 * @param Core_Entity $oEntity
+	 * @return boolean
+	 */
+	protected function _checkEntityIsHasManyRelation($oEntity)
+	{
+		$modelName = $oEntity->getModelName();
+		
+		return isset($this->_hasMany[$modelName]) || isset($this->_hasMany[Core_Inflection::getPlural($modelName)]);
 	}
 
 	/**

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Print_Form_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -70,9 +70,6 @@ class Shop_Print_Form_Controller_Edit extends Admin_Form_Action_Controller_Type_
 
 		$Admin_Form_Entity_Textarea = Admin_Form_Entity::factory('Textarea');
 
-		$oTmpOptions = $Admin_Form_Entity_Textarea->syntaxHighlighterOptions;
-		$oTmpOptions['mode'] = '"ace/mode/php"';
-
 		$Admin_Form_Entity_Textarea
 			->value(
 				$this->_object->loadPrintFormFile()
@@ -82,7 +79,7 @@ class Shop_Print_Form_Controller_Edit extends Admin_Form_Action_Controller_Type_
 			->caption(Core::_('Shop_Print_Form.print_form_handler'))
 			->name('print_form_handler')
 			->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
-			->syntaxHighlighterOptions($oTmpOptions);
+			->syntaxHighlighterMode('php');
 
 		$oMainRow5->add($Admin_Form_Entity_Textarea);
 

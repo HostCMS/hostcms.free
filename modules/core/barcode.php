@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Barcode
 {
@@ -67,7 +67,7 @@ class Core_Barcode
 	 */
 	static public function isEAN8($value)
 	{
-		return strlen($value) == 8 && self::_validEAN($value);
+		return is_scalar($value) && strlen($value) == 8 && self::_validEAN($value);
 	}
 
 	/*
@@ -77,7 +77,7 @@ class Core_Barcode
 	 */
 	static public function isEAN13($value)
 	{
-		return strlen($value) == 13 && self::_validEAN($value);
+		return is_scalar($value) && strlen($value) == 13 && self::_validEAN($value);
 	}
 
 	/*
@@ -87,7 +87,7 @@ class Core_Barcode
 	 */
 	static public function isITF14($value)
 	{
-		return strlen($value) == 14 && self::_validEAN($value);
+		return is_scalar($value) && strlen($value) == 14 && self::_validEAN($value);
 	}
 
 	/*
@@ -97,7 +97,7 @@ class Core_Barcode
 	 */
 	static public function isCODE39($value)
 	{
-		return strlen($value)
+		return is_scalar($value) && strlen($value)
 			&& strlen($value) <= 43;
 	}
 
@@ -109,7 +109,8 @@ class Core_Barcode
 	static public function isEAN128($value)
 	{
 		// Find '(' in barcode
-		return strpos($value, '(') !== FALSE;
+		return is_scalar($value)
+			&& strpos($value, '(') !== FALSE;
 	}
 
 	/*

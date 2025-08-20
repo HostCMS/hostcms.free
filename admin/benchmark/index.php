@@ -124,7 +124,7 @@ function benchmarkShow($oAdmin_Form_Controller)
 		// Total
 		$iBenchmark = $oBenchmark->getBenchmark();
 
-		$aColors = array('gray', 'danger', 'orange', 'warning', 'success');
+		$aColors = Benchmark_Controller::getColors();
 		$sColor = $aColors[ceil($iBenchmark / 25)];
 		?>
 		<div class="row">
@@ -160,11 +160,11 @@ function benchmarkShow($oAdmin_Form_Controller)
 					<div class="databox-bottom no-padding bg-white">
 						<div class="databox-row">
 							<div class="databox-cell cell-6 text-align-center bordered-right bordered-platinum">
-								<span class="databox-number lightcarbon benchmark-databox"><?php echo $oBenchmark->mysql_write?></span>
+								<span class="databox-number lightcarbon benchmark-databox"><?php echo Benchmark_Controller::format($oBenchmark->mysql_write)?></span>
 								<span class="databox-text sonic-silver no-margin"><?php echo Core::_('Benchmark.server')?></span>
 							</div>
 							<div class="databox-cell cell-6 text-align-center">
-								<span class="databox-number lightcarbon benchmark-databox"><?php echo $oBenchmark->etalon_mysql_write?></span>
+								<span class="databox-number lightcarbon benchmark-databox"><?php echo Benchmark_Controller::format($oBenchmark->etalon_mysql_write)?></span>
 								<span class="databox-text sonic-silver no-margin"><?php echo Core::_('Benchmark.etalon')?></span>
 							</div>
 						</div>
@@ -184,11 +184,11 @@ function benchmarkShow($oAdmin_Form_Controller)
 					<div class="databox-bottom no-padding bg-white">
 						<div class="databox-row">
 							<div class="databox-cell cell-6 text-align-center bordered-right bordered-platinum">
-								<span class="databox-number lightcarbon benchmark-databox"><?php echo $oBenchmark->mysql_read?></span>
+								<span class="databox-number lightcarbon benchmark-databox"><?php echo Benchmark_Controller::format($oBenchmark->mysql_read)?></span>
 								<span class="databox-text sonic-silver no-margin"><?php echo Core::_('Benchmark.server')?></span>
 							</div>
 							<div class="databox-cell cell-6 text-align-center">
-								<span class="databox-number lightcarbon benchmark-databox"><?php echo $oBenchmark->etalon_mysql_read?></span>
+								<span class="databox-number lightcarbon benchmark-databox"><?php echo Benchmark_Controller::format($oBenchmark->etalon_mysql_read)?></span>
 								<span class="databox-text sonic-silver no-margin"><?php echo Core::_('Benchmark.etalon')?></span>
 							</div>
 						</div>
@@ -208,11 +208,11 @@ function benchmarkShow($oAdmin_Form_Controller)
 					<div class="databox-bottom no-padding bg-white">
 						<div class="databox-row">
 							<div class="databox-cell cell-6 text-align-center bordered-right bordered-platinum">
-								<span class="databox-number lightcarbon benchmark-databox"><?php echo $oBenchmark->mysql_update?></span>
+								<span class="databox-number lightcarbon benchmark-databox"><?php echo Benchmark_Controller::format($oBenchmark->mysql_update)?></span>
 								<span class="databox-text sonic-silver no-margin"><?php echo Core::_('Benchmark.server')?></span>
 							</div>
 							<div class="databox-cell cell-6 text-align-center">
-								<span class="databox-number lightcarbon benchmark-databox"><?php echo $oBenchmark->etalon_mysql_update?></span>
+								<span class="databox-number lightcarbon benchmark-databox"><?php echo Benchmark_Controller::format($oBenchmark->etalon_mysql_update)?></span>
 								<span class="databox-text sonic-silver no-margin"><?php echo Core::_('Benchmark.etalon')?></span>
 							</div>
 						</div>
@@ -232,11 +232,11 @@ function benchmarkShow($oAdmin_Form_Controller)
 					<div class="databox-bottom no-padding bg-white">
 						<div class="databox-row">
 							<div class="databox-cell cell-6 text-align-center bordered-right bordered-platinum">
-								<span class="databox-number lightcarbon benchmark-databox"><?php echo $oBenchmark->filesystem?></span>
+								<span class="databox-number lightcarbon benchmark-databox"><?php echo Benchmark_Controller::format($oBenchmark->filesystem)?></span>
 								<span class="databox-text sonic-silver no-margin"><?php echo Core::_('Benchmark.server')?></span>
 							</div>
 							<div class="databox-cell cell-6 text-align-center">
-								<span class="databox-number lightcarbon benchmark-databox"><?php echo $oBenchmark->etalon_filesystem?></span>
+								<span class="databox-number lightcarbon benchmark-databox"><?php echo Benchmark_Controller::format($oBenchmark->etalon_filesystem)?></span>
 								<span class="databox-text sonic-silver no-margin"><?php echo Core::_('Benchmark.etalon')?></span>
 							</div>
 						</div>
@@ -256,11 +256,11 @@ function benchmarkShow($oAdmin_Form_Controller)
 					<div class="databox-bottom no-padding bg-white">
 						<div class="databox-row">
 							<div class="databox-cell cell-6 text-align-center bordered-right bordered-platinum">
-								<span class="databox-number lightcarbon benchmark-databox"><?php echo $oBenchmark->cpu_math?></span>
+								<span class="databox-number lightcarbon benchmark-databox"><?php echo Benchmark_Controller::format($oBenchmark->cpu_math)?></span>
 								<span class="databox-text sonic-silver no-margin"><?php echo Core::_('Benchmark.server')?></span>
 							</div>
 							<div class="databox-cell cell-6 text-align-center">
-								<span class="databox-number lightcarbon benchmark-databox"><?php echo $oBenchmark->etalon_cpu_math?></span>
+								<span class="databox-number lightcarbon benchmark-databox"><?php echo Benchmark_Controller::format($oBenchmark->etalon_cpu_math)?></span>
 								<span class="databox-text sonic-silver no-margin"><?php echo Core::_('Benchmark.etalon')?></span>
 							</div>
 						</div>
@@ -280,11 +280,11 @@ function benchmarkShow($oAdmin_Form_Controller)
 					<div class="databox-bottom no-padding bg-white">
 						<div class="databox-row">
 							<div class="databox-cell cell-6 text-align-center bordered-right bordered-platinum">
-								<span class="databox-number lightcarbon benchmark-databox"><?php echo $oBenchmark->cpu_string?></span>
+								<span class="databox-number lightcarbon benchmark-databox"><?php echo Benchmark_Controller::format($oBenchmark->cpu_string)?></span>
 								<span class="databox-text sonic-silver no-margin"><?php echo Core::_('Benchmark.server')?></span>
 							</div>
 							<div class="databox-cell cell-6 text-align-center">
-								<span class="databox-number lightcarbon benchmark-databox"><?php echo $oBenchmark->etalon_cpu_string?></span>
+								<span class="databox-number lightcarbon benchmark-databox"><?php echo Benchmark_Controller::format($oBenchmark->etalon_cpu_string)?></span>
 								<span class="databox-text sonic-silver no-margin"><?php echo Core::_('Benchmark.etalon')?></span>
 							</div>
 						</div>
@@ -525,6 +525,8 @@ function benchmarkShow($oAdmin_Form_Controller)
 					$aCollation = explode('_', $aTable['Collation'], 2);
 					$sNewCollation = $sNewCharset . '_' . $aCollation[1];
 
+					$sNewCollation == 'utf8mb4_0900_ai_ci' && $sNewCollation = 'utf8mb4_general_ci';
+
 					try {
 						$oCore_DataBase
 							->setQueryType(5)
@@ -553,6 +555,8 @@ function benchmarkShow($oAdmin_Form_Controller)
 						{
 							$aColumnCollation = explode('_', $aColumn['Collation'], 2);
 							$sNewColumCollation = $sNewCharset . '_' . $aColumnCollation[1];
+
+							$sNewCollation == 'utf8mb4_0900_ai_ci' && $sNewCollation = 'utf8mb4_general_ci';
 
 							$sDefault = strtoupper($aColumn['Null']) == 'YES'
 								? 'NULL'

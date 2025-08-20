@@ -1935,9 +1935,9 @@ input[type="file"].form-control + .input-group-addon{
 
 .loading-container {background: none repeat scroll 0 0 rgba(50, 50, 50, 0.5)}
 
-/*.CodeMirror{
+.CodeMirror{
 	border: 1px solid #d5d5d5;
-}*/
+}
 
 .ace_editor {
 	border: 1px solid #d5d5d5;
@@ -2013,6 +2013,9 @@ input[type=checkbox].lock:checked~.text:before,input[type=radio].lock:checked~.t
 
 .editable {
 	cursor: url("/modules/skin/default/images/cursor/edit.png"), text;
+	max-height: 300px;
+	/* display: inline-block; */
+	overflow-y: auto;
 }
 .editable:empty:not(.editable-null){
 	padding: 0 5px; border-bottom: 1px dotted #aaa
@@ -2027,7 +2030,6 @@ input[type=checkbox].lock:checked~.text:before,input[type=radio].lock:checked~.t
 
 /*.btn-group > .btn:last-child {*/
 .btn-group > .btn:first-child:nth-last-child(1){
-
 	/*background-clip: padding-box;*/
 	border-radius: 2px;
 }
@@ -4013,6 +4015,8 @@ img.databox-user-avatar {
 
 .select2-selection--single .user-info, .select2-selection__choice .user-info {
 	float: left;
+	overflow: hidden;
+	width: calc(100% - 50px);
 }
 
 /* Выбранный */
@@ -8850,6 +8854,6 @@ table.table.plan-materials-table tr td:last-child {
     text-align: left;
 }
 
-.material_measure_name, .material_currency_sign {
+.manufacture_measure_name, .material_measure_name, .material_currency_sign {
 	padding-left: 3px;
 }

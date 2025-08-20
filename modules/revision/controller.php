@@ -8,10 +8,184 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Revision
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Revision_Controller
 {
+	/**
+	 * Get properties values
+	 * @param Core_Entity $oObject
+	 * @return array
+	 */
+	static public function getPropertyValues(Core_Entity $oObject)
+	{
+		$aReturn = array();
+
+		$aProperty_Values = $oObject->getPropertyValues(FALSE);
+
+		foreach ($aProperty_Values as $oProperty_Value)
+		{
+			$oProperty = $oProperty_Value->Property;
+
+			if (!in_array($oProperty->type, array(2)))
+			{
+				$aReturn[$oProperty->id][] = $oProperty_Value->value;
+			}
+		}
+
+		return $aReturn;
+	}
+
+	/**
+	 * Set property values
+	 * @param Core_Entity $oObject
+	 * @param array $aData
+	 */
+	static public function setPropertyValues(Core_Entity $oObject, $aData)
+	{
+		$aExists = array();
+
+		$aProperty_Values = $oObject->getPropertyValues(FALSE);
+
+		foreach ($aProperty_Values as $oProperty_Value)
+		{
+			$oProperty = $oProperty_Value->Property;
+
+			if (!in_array($oProperty->type, array(2)))
+			{
+				$aExists[$oProperty->id][] = $oProperty_Value;
+			}
+		}
+
+		foreach ($aData as $property_id => $aValues)
+		{
+			$oProperty = Core_Entity::factory('Property')->getById($property_id);
+
+			if (!is_null($oProperty) && !in_array($oProperty->type, array(2)))
+			{
+				foreach ($aValues as $value)
+				{
+					$oPV = isset($aExists[$property_id]) && count($aExists[$property_id])
+						? array_shift($aExists[$property_id])
+						: $oProperty->createNewValue($oObject->id);
+
+					$oPV->value = $value;
+					$oPV->save();
+				}
+			}
+		}
+
+		// Удаляем невостребованные значения
+		foreach ($aExists as $aProperty_Value_Exists)
+		{
+			foreach ($aProperty_Value_Exists as $oProperty_Value)
+			{
+				$oProperty_Value->delete();
+			}
+		}
+	}
+
+	/**
+	 * Get properties values
+	 * @param Core_Entity $oObject
+	 * @return array
+	 */
+	static public function getFieldValues(Core_Entity $oObject)
+	{
+		$aReturn = array();
+
+		if (Core::moduleIsActive('field'))
+		{
+			$aFields = Field_Controller::getFields($oObject->getModelName());
+
+			if (count($aFields))
+			{
+				$aFieldsIds = array();
+				foreach ($aFields as $oField)
+				{
+					$aFieldsIds[] = $oField->id;
+				}
+
+				$aField_Values = Field_Controller_Value::getFieldsValues($aFieldsIds, $oObject->id, FALSE);
+
+				foreach ($aField_Values as $oField_Value)
+				{
+					$oField = $oField_Value->Field;
+
+					if (!in_array($oField->type, array(2)))
+					{
+						$aReturn[$oField->id][] = $oField_Value->value;
+					}
+				}
+			}
+		}
+
+		return $aReturn;
+	}
+
+	/**
+	 * Set field values
+	 * @param Core_Entity $oObject
+	 * @param array $aData
+	 */
+	static public function setFieldValues(Core_Entity $oObject, $aData)
+	{
+		if (Core::moduleIsActive('field'))
+		{
+			$aFields = Field_Controller::getFields($oObject->getModelName());
+
+			if (count($aFields))
+			{
+				$aFieldsIds = array();
+				foreach ($aFields as $oField)
+				{
+					$aFieldsIds[] = $oField->id;
+				}
+
+				$aExists = array();
+
+				$aField_Values = Field_Controller_Value::getFieldsValues($aFieldsIds, $oObject->id, FALSE);
+
+				foreach ($aField_Values as $oField_Value)
+				{
+					$oField = $oField_Value->Field;
+
+					if (!in_array($oField->type, array(2)))
+					{
+						$aExists[$oField->id][] = $oField_Value;
+					}
+				}
+
+				foreach ($aData as $field_id => $aValues)
+				{
+					$oField = Core_Entity::factory('Field')->getById($field_id);
+
+					if (!is_null($oField) && !in_array($oField->type, array(2)))
+					{
+						foreach ($aValues as $value)
+						{
+							$oFV = isset($aExists[$field_id]) && count($aExists[$field_id])
+								? array_shift($aExists[$field_id])
+								: $oField->createNewValue($oObject->id);
+
+							$oFV->value = $value;
+							$oFV->save();
+						}
+					}
+				}
+
+				// Удаляем невостребованные значения
+				foreach ($aExists as $aField_Value_Exists)
+				{
+					foreach ($aField_Value_Exists as $oField_Value)
+					{
+						$oField_Value->delete();
+					}
+				}
+			}
+		}
+	}
+
 	/**
 	 * Delete old revisions
 	 */

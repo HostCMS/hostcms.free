@@ -512,7 +512,7 @@ class Template_Section_Lib_Controller
 						<input id="tab-btn-2" name="tab-btn" type="radio" value="">
 						<label for="tab-btn-2">Настройки</label>
 
-						<div class="tab-content" id="main">
+						<div id="main" class="tab-content">
 							<?php
 							foreach ($aEntities as $aEntity)
 							{
@@ -596,12 +596,12 @@ class Template_Section_Lib_Controller
 		ob_start();
 
 		?><form class="settings<?php echo $this->_oTemplate_Section_Lib->id?>" action="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/template/index.php')?>" method="POST" enctype="multipart/form-data">
-			<div class="button-wrapper">
-				<button class="button-1" onclick="hQuery.saveSettings(this, <?php echo intval($this->_oTemplate_Section_Lib->id)?>, <?php echo intval($this->_oTemplate_Section_Lib->Template_Section->id)?>)"><?php echo Core::_('Admin_Form.save')?></button>
-			</div>
 			<?php
 				$this->_showSettings();
 			?>
+			<div class="button-wrapper">
+				<button class="button-1" onclick="hQuery.saveSettings(this, <?php echo intval($this->_oTemplate_Section_Lib->id)?>, <?php echo intval($this->_oTemplate_Section_Lib->Template_Section->id)?>)"><?php echo Core::_('Admin_Form.save')?></button>
+			</div>
 		</form><?php
 
 		return ob_get_clean();
@@ -757,6 +757,10 @@ class Template_Section_Lib_Controller
 
 			switch ($oLib_Property->type)
 			{
+				// Большое текстовое поле
+				case 5:
+					?><textarea class="form-control mb-2" name="<?php echo $name?>" data-old-position="<?php echo htmlspecialchars($old_position)?>"><?php echo htmlspecialchars($value)?></textarea><?php
+				break;
 				// Визуальный редактор
 				case 9:
 					?><textarea class="form-control mb-2" data-wysiwyg="1" name="<?php echo $name?>" data-old-position="<?php echo htmlspecialchars($old_position)?>"><?php echo $value?></textarea>

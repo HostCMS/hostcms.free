@@ -263,7 +263,9 @@
 										}
 									});
 
-									jEditInPlace.tinymce(hQuery.extend({
+									wysiwyg.frontendDbl(jEditInPlace, settings, aCss);
+
+									/*jEditInPlace.tinymce(hQuery.extend({
 										// theme: "silver",
 										// toolbar_items_size: "small",
 										language: backendLng,
@@ -273,12 +275,12 @@
 												settings.blur(jEditInPlace);
 											});
 										},
-										script_url: hostcmsBackend + "/wysiwyg/tinymce.min.js",
+										//script_url: hostcmsBackend + "/wysiwyg/tinymce.min.js",
 										menubar: false,
 										plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table  importcss',
 										toolbar: 'undo redo | styleselect formatselect | bold italic underline backcolor | alignleft aligncenter alignright alignjustify | bullist numlist | link unlink image media preview table | removeformat code',
 										content_css: aCss
-									}, settings.wysiwygConfig));
+									}, settings.wysiwygConfig));*/
 								}, 300);
 							}
 
@@ -481,7 +483,7 @@
 		sortWidget: function()
 		{
 			hQuery(".hostcmsSection").sortable({
-				items: "> .hostcmsSectionWidget",
+				items: ".hostcmsSectionWidget",
 				handle: ".drag-handle",
 				stop: function (event, ui) {
 					var data = hQuery(this).sortable("serialize");
@@ -1073,11 +1075,11 @@ hQuery.fn.getEditableInfo = function (str) {
     return data;
 }
 
-document.addEventListener('focusin', (e) => {
+/*document.addEventListener('focusin', (e) => {
 	if (e.target.closest(".tox-tinymce-aux, .moxman-window, .tam-assetmanager-root") !== null) {
 		e.stopImmediatePropagation();
 	}
-});
+});*/
 
 function frontendInit(jParent)
 {
@@ -1093,7 +1095,9 @@ function frontendInit(jParent)
 
 					object.addClass('editing');
 
-					object.tinymce({
+					wysiwyg.frontendInit(object);
+
+					/*object.tinymce({
 						language: backendLng,
 						language_url: hostcmsBackend + '/wysiwyg/langs/' + backendLng + '.js',
 						init_instance_callback: function (editor) {
@@ -1105,13 +1109,13 @@ function frontendInit(jParent)
 								object.removeClass('editing');
 							});
 						},
-						script_url: hostcmsBackend + "/wysiwyg/tinymce.min.js",
+						//script_url: hostcmsBackend + "/wysiwyg/tinymce.min.js",
 						menubar: false,
 						inline: true,
 						plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table  importcss',
 						toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist | link unlink image media preview table | removeformat code',
 						font_size_formats: "8pt 9pt 10pt 11pt 12pt 14pt 16pt 18pt 20pt 24pt 30pt 36pt 48pt 60pt 72pt 96pt"
-					});
+					});*/
 				}, 300);
 			}
 		})

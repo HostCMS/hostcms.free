@@ -50,7 +50,7 @@ return array (
 		'system' => array(
 			'ico' => 'fa fa-gear',
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_system'),
-			'modules' => array('site', 'eventlog', 'certificate', 'notification', 'field', 'benchmark', 'admin_form', 'module', 'mail', 'constant', 'restapi', 'webhook', 'ipaddress'),
+			'modules' => array('site', 'eventlog', 'certificate', 'notification', 'field', 'benchmark', 'admin_form', 'module', 'mail', 'wysiwyg', 'syntaxhighlighter', 'constant', 'restapi', 'webhook', 'ipaddress'),
 		),
 		'cache' => array(
 			'ico' => 'fa fa-archive',

@@ -539,7 +539,13 @@ class Informationsystem_Item_Model extends Core_Entity
 	 */
 	public function getSmallFileHref()
 	{
-		return $this->getItemHref() . rawurlencode($this->image_small);
+		$link = Core::moduleIsActive('cdn')
+			? Cdn_Controller::link($this->getItemHref() . $this->image_small)
+			: NULL;
+
+		return !is_null($link)
+			? $link
+			: $this->getItemHref() . rawurlencode($this->image_small);
 	}
 
 	/**
@@ -557,7 +563,13 @@ class Informationsystem_Item_Model extends Core_Entity
 	 */
 	public function getLargeFileHref()
 	{
-		return $this->getItemHref() . rawurlencode($this->image_large);
+		$link = Core::moduleIsActive('cdn')
+			? Cdn_Controller::link($this->getItemHref() . $this->image_large)
+			: NULL;
+
+		return !is_null($link)
+			? $link
+			: $this->getItemHref() . rawurlencode($this->image_large);
 	}
 
 	/**
@@ -1889,6 +1901,9 @@ class Informationsystem_Item_Model extends Core_Entity
 				'user_id' => $this->user_id
 			);
 
+			$aBackup['property_values'] = Revision_Controller::getPropertyValues($this);
+			$aBackup['field_values'] = Revision_Controller::getFieldValues($this);
+
 			Revision_Controller::backup($this, $aBackup);
 		}
 
@@ -1930,7 +1945,11 @@ class Informationsystem_Item_Model extends Core_Entity
 				$this->seo_keywords = Core_Array::get($aBackup, 'seo_keywords');
 				$this->siteuser_group_id = Core_Array::get($aBackup, 'siteuser_group_id');
 				$this->user_id = Core_Array::get($aBackup, 'user_id');
+
 				$this->save();
+
+				Revision_Controller::setPropertyValues($this, $aBackup['property_values']);
+				Revision_Controller::setFieldValues($this, $aBackup['field_values']);
 			}
 		}
 

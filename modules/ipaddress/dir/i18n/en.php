@@ -1,8 +1,8 @@
 <?php
 return array(
 	'model_name' => 'IP Address Groups',
-	'add_form_title' => 'Adding a group of IP addresses',
-	'edit_form_title' => 'Editing IP address group "%s"',
+	'add_title' => 'Adding a group of IP addresses',
+	'edit_title' => 'Editing IP address group "%s"',
 	'name' => 'Name',
 	'sorting' => 'Sort order',
 	'parent_id' => 'Group',

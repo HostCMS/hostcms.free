@@ -37,7 +37,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Informationsystem_Controller_Tag_Show extends Core_Controller
 {
@@ -103,6 +103,7 @@ class Informationsystem_Controller_Tag_Show extends Core_Controller
 
 		$siteuser_id = 0;
 		$aSiteuserGroups = array(0, -1);
+
 		if (Core::moduleIsActive('siteuser'))
 		{
 			$oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
@@ -145,6 +146,7 @@ class Informationsystem_Controller_Tag_Show extends Core_Controller
 			//->where('tags.deleted', '=', 0)
 			->groupBy('tag_informationsystem_items.tag_id')
 			->having('count', '>', 0)
+			->orderBy('tags.sorting', 'ASC')
 			->orderBy('tags.name', 'ASC');
 
 		return $this;

@@ -235,7 +235,8 @@ class Ipaddress_Visitor_Filter_Controller
 
 		if (count($aFilters))
 		{
-			$aHeaders = array_change_key_case(Core::getallheaders());
+			$aHeaders = Core::getallheaders() + $_SERVER;
+			$aHeadersLowercased = array_change_key_case($aHeaders);
 
 			foreach ($aFilters as $aFilter)
 			{
@@ -317,7 +318,12 @@ class Ipaddress_Visitor_Filter_Controller
 											break;
 											case 'header':
 												$compared = isset($aCondition['header'])
-													? Core_Array::get($aHeaders, strtolower($aCondition['header'])/*, '', 'str'*/) // Нужен NULL
+													? (
+														// 'header_case_sensitive' since 7.1.5
+														!isset($aCondition['header_case_sensitive']) || !$aCondition['header_case_sensitive']
+															? Core_Array::get($aHeadersLowercased, strtolower($aCondition['header'])/*, '', 'str'*/) // Нужен NULL
+															: Core_Array::get($aHeaders, $aCondition['header']/*, '', 'str'*/) // Нужен NULL
+													)
 													: NULL;
 											break;
 											case 'lang':

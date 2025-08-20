@@ -100,9 +100,13 @@ class Sql_Table_View_Entity extends Core_Empty_Entity
 		{
 			$name = substr($methodName, 0, -7);
 
+			$args = '';
+			strpos($this->_columns[$name]['datatype'], 'text') !== FALSE
+				&& $args .= ' data-editable-type="textarea"';
+
 			return is_null($this->$name)
-				? '<span id="apply_check_0_' . $this->id . '_fv_' . $arguments[0]->id . '" class="editable editable-null">' . '</span>'
-				//? 'NULL'
+				? '<span id="apply_check_0_' . $this->id . '_fv_' . $arguments[0]->id . '" class="editable editable-null"' . $args . '>' . '</span>'
+				// ? 'NULL'
 				: htmlspecialchars($this->$name);
 		}
 	}
@@ -131,7 +135,7 @@ class Sql_Table_View_Entity extends Core_Empty_Entity
 	{
 		if (is_null($this->_primaryKeyName))
 		{
-			$this->_primaryKeyName = 'id';
+			$this->_primaryKeyName = NULL;
 
 			$aFileds = $this->getTableColumns();
 
@@ -203,10 +207,27 @@ class Sql_Table_View_Entity extends Core_Empty_Entity
 	{
 		$primaryKeyName = $this->getPrimaryKeyName();
 
-		Core_QueryBuilder::delete($this->_tableName)
-			->where($primaryKeyName, '=', $this->$primaryKeyName)
-			->execute();
+		if (!is_null($primaryKeyName))
+		{
+			Core_QueryBuilder::delete($this->_tableName)
+				->where($primaryKeyName, '=', $this->$primaryKeyName)
+				->execute();
+		}
 
 		return $this;
+	}
+
+
+	/**
+	 * Check user access to admin form action
+	 * @param string $actionName admin form action name
+	 * @param User_Model $oUser user object
+	 * @return bool
+	 */
+	public function checkBackendAccess($actionName, $oUser)
+	{
+		$primaryKeyName = $this->getPrimaryKeyName();
+
+		return !is_null($primaryKeyName);
 	}
 }

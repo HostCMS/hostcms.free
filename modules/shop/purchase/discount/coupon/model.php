@@ -119,6 +119,68 @@ class Shop_Purchase_Discount_Coupon_Model extends Core_Entity
 	}
 
 	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function siteuser_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$sResult = '';
+
+		if (Core::moduleIsActive('siteuser') && $this->siteuser_id)
+		{
+			$oSiteuser = $this->Siteuser;
+
+			if ($oSiteuser->login != '' || $oSiteuser->email != '')
+			{
+				$sResult .= '<div class="margin-bottom-5">';
+
+				if ($oSiteuser->login != '')
+				{
+					$colorLogin = Core_Str::createColor($oSiteuser->id);
+
+					$sResult .= '<span class="badge badge-square badge-max-width margin-right-5" style="background-color: ' . Core_Str::hex2lighter($colorLogin, 0.88) . '; color: ' . $colorLogin . '">' . htmlspecialchars($oSiteuser->login) . '</span>';
+				}
+
+				if ($oSiteuser->email != '')
+				{
+					$colorEmail = Core_Str::createColor($oSiteuser->email);
+
+					$sResult .= '<span class="badge badge-square badge-max-width margin-right-5" style="background-color: ' . Core_Str::hex2lighter($colorEmail, 0.88) . '; color: ' . $colorEmail . '">' . htmlspecialchars($oSiteuser->email) . '</span>';
+				}
+
+				$sResult .= '</div>';
+			}
+
+			$aSiteuserCompanies = $oSiteuser->Siteuser_Companies->findAll();
+			$aSiteuserPersons = $oSiteuser->Siteuser_People->findAll();
+
+			if (count($aSiteuserCompanies) || count($aSiteuserPersons))
+			{
+				$sResult .= '<div class="profile-container tickets-container"><ul class="tickets-list">';
+
+				foreach ($aSiteuserCompanies as $oSiteuserCompany)
+				{
+					$oSiteuserCompany->id
+						&& $sResult .= $oSiteuserCompany->getProfileBlock();
+				}
+
+				foreach ($aSiteuserPersons as $oSiteuserPerson)
+				{
+					$oSiteuserPerson->id
+						&& $sResult .= $oSiteuserPerson->getProfileBlock();
+				}
+
+				$sResult .= '</ul></div>';
+			}
+		}
+
+		return $sResult;
+	}
+
+
+	/**
 	 * Get Related Site
 	 * @return Site_Model|NULL
 	 * @hostcms-event shop_purchase_discount_coupon.onBeforeGetRelatedSite

@@ -29,6 +29,8 @@ if (Core_Auth::logged())
 	// Действие "Удаление значения поля"
 	if ($oAdmin_Form_Controller->getAction() == 'deleteFieldValue')
 	{
+		Core_Auth::setCurrentSite();
+
 		ob_start();
 
 		$oAdmin_Form_Action = $oAdmin_Form

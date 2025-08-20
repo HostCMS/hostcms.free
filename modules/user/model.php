@@ -93,6 +93,7 @@ class User_Model extends Core_Entity
 		'user_setting' => array(),
 		'user_session' => array(),
 		'user_message' => array(),
+		'user_webauthn' => array(),
 		'siteuser_user' => array(),
 		'calendar_caldav_user' => array(),
 		'dealdeal_step_user' => array(),
@@ -623,6 +624,7 @@ class User_Model extends Core_Entity
 		$this->User_Workdays->deleteAll(FALSE);
 		$this->User_Absences->deleteAll(FALSE);
 		$this->User_Sessions->deleteAll(FALSE);
+		$this->User_Webauthns->deleteAll(FALSE);
 
 		// Удаляем директорию
 		$this->deleteDir();
@@ -770,9 +772,18 @@ class User_Model extends Core_Entity
 	 */
 	public function getAvatar()
 	{
-		return $this->image != '' && strlen($this->image)
-			? $this->getImageHref()
-			: Admin_Form_Controller::correctBackendPath("/{admin}/user/index.php?loadUserAvatar={$this->id}");
+		$link = Core::moduleIsActive('cdn')
+			? Cdn_Controller::link($this->getImageHref())
+			: NULL;
+
+		if (is_null($link))
+		{
+			$link = $this->image != '' && strlen($this->image)
+				? $this->getImageHref()
+				: Admin_Form_Controller::correctBackendPath("/{admin}/user/index.php?loadUserAvatar={$this->id}");
+		}
+
+		return $link;
 	}
 
 	/**

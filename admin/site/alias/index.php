@@ -17,7 +17,7 @@ $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 $sAdminFormAction = '/{admin}/site/alias/index.php';
 $sSitePath = '/{admin}/site/index.php';
 
-$iSiteId = intval(Core_Array::getRequest('site_id', 0));
+$iSiteId = Core_Array::getRequest('site_id', 0, 'int');
 
 $oSite = Core_Entity::factory('Site')->find($iSiteId);
 
@@ -132,9 +132,7 @@ $oUser = Core_Auth::getCurrentUser();
 	&& $oAdmin_Form_Dataset->addUserConditions();
 
 $oAdmin_Form_Dataset->addCondition(
-	array('where' =>
-		array('site_id', '=', $iSiteId)
-	)
+	array('where' => array('site_id', '=', $iSiteId))
 );
 
 // Добавляем источник данных контроллеру формы
@@ -143,12 +141,15 @@ $oAdmin_Form_Controller->addDataset(
 );
 
 // Предупреждение
-if (is_null(Core_Entity::factory('Site', $iSiteId)->getCurrentAlias()))
-{
-	$oAdmin_Form_Controller->addMessage(
-		Core_Message::get(Core::_('Site_Alias.error_current_alias'), 'error')
-	);
-}
+Core_Event::attach('Admin_Form_Controller.onBeforeShowContent', function($oAdmin_Form_Controller) {
+	$iSiteId = Core_Array::getRequest('site_id', 0, 'int');
+	if (is_null(Core_Entity::factory('Site', $iSiteId)->getCurrentAlias()))
+	{
+		$oAdmin_Form_Controller->addMessage(
+			Core_Message::get(Core::_('Site_Alias.error_current_alias'), 'error')
+		);
+	}
+});
 
 // Показ формы
 $oAdmin_Form_Controller->execute();

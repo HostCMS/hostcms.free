@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Antispam
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Antispam_Stopword_Model extends Core_Entity
 {
@@ -65,17 +65,21 @@ class Antispam_Stopword_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
+	 * Change active
+	 * @return self
+	 * @hostcms-event antispam_stopword.onBeforeChangeCaseSesitive
+	 * @hostcms-event antispam_stopword.onAfterChangeCaseSesitive
 	 */
-	public function case_sensitiveBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function changeCaseSesitive()
 	{
-		$this->case_sensitive && Core_Html_Entity::factory('I')
-			->title(Core::_('Antispam_Stopword.case_sensitive'))
-			->class('fa-solid fa-font')
-			->execute();
+		Core_Event::notify($this->_modelName . '.onBeforeChangeCaseSesitive', $this);
+
+		$this->case_sensitive = 1 - $this->case_sensitive;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterChangeCaseSesitive', $this);
+
+		return $this;
 	}
 
 	/**

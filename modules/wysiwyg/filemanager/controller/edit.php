@@ -55,42 +55,38 @@ class Wysiwyg_Filemanager_Controller_Edit extends Admin_Form_Action_Controller_T
 			case 'php':
 			case 'html':
 			case 'htm':
-				$mode = 'ace/mode/php';
+				$mode = 'php';
 			break;
 			case 'css':
-				$mode = 'ace/mode/css';
+				$mode = 'css';
 			break;
 			case 'less':
-				$mode = 'ace/mode/less';
+				$mode = 'less';
 			break;
 			case 'scss':
-				$mode = 'ace/mode/scss';
+				$mode = 'scss';
 			break;
 			case 'xml':
 			case 'xsl':
-				$mode = 'ace/mode/scss';
+				$mode = 'scss';
 			break;
 			case 'sql':
-				$mode = 'ace/mode/sql';
+				$mode = 'sql';
 			break;
 			case 'tpl':
-				$mode = 'ace/mode/smarty';
+				$mode = 'smarty';
 			break;
 			case 'js':
-				$mode = 'ace/mode/javascript';
+				$mode = 'javascript';
 			break;
 			case 'json':
-				$mode = 'ace/mode/json';
+				$mode = 'json';
 			break;
 			default:
-				$mode = 'ace/mode/text';
+				$mode = 'text';
 		}
 
 		$oFile_Content = Admin_Form_Entity::factory('Textarea');
-
-		$oTmpOptions = $oFile_Content->syntaxHighlighterOptions;
-		$oTmpOptions['mode'] = $mode;
-
 		$oFile_Content
 			->value(
 				Core_File::read($filePath)
@@ -99,7 +95,7 @@ class Wysiwyg_Filemanager_Controller_Edit extends Admin_Form_Action_Controller_T
 			->name('text')
 			->rows(40)
 			->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
-			->syntaxHighlighterOptions($oTmpOptions);
+			->syntaxHighlighterMode($mode);
 
 		$oMainRow1->add($oFile_Content);
 

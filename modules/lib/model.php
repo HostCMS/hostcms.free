@@ -328,6 +328,10 @@ class Lib_Model extends Core_Entity
 
 		$content = trim($content);
 		Core_File::write($sLibFilePath, $content);
+		
+		clearstatcache();
+
+		Core_Cache::opcacheReset();
 	}
 
 	/**

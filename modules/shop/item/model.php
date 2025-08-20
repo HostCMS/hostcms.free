@@ -134,7 +134,10 @@ class Shop_Item_Model extends Core_Entity
 		'shop_warehouse_invoice_item' => array(),
 		'shop_warehouse_supply_item' => array(),
 		'production_process_stage_material' => array(),
-		'production_process_stage_manufacture' => array()
+		'production_process_stage_manufacture' => array(),
+		'production_process_plan' => array('through' => 'production_process_plan_manufacture'),
+		'production_task_process_plan_manufacture' => array(),
+
 	);
 
 	/**
@@ -758,7 +761,13 @@ class Shop_Item_Model extends Core_Entity
 	 */
 	public function getSmallFileHref()
 	{
-		return $this->getItemHref() . rawurlencode($this->image_small);
+		$link = Core::moduleIsActive('cdn')
+			? Cdn_Controller::link($this->getItemHref() . $this->image_small)
+			: NULL;
+
+		return !is_null($link)
+			? $link
+			: $this->getItemHref() . rawurlencode($this->image_small);
 	}
 
 	/**
@@ -776,7 +785,13 @@ class Shop_Item_Model extends Core_Entity
 	 */
 	public function getLargeFileHref()
 	{
-		return $this->getItemHref() . rawurlencode($this->image_large);
+		$link = Core::moduleIsActive('cdn')
+			? Cdn_Controller::link($this->getItemHref() . $this->image_large)
+			: NULL;
+
+		return !is_null($link)
+			? $link
+			: $this->getItemHref() . rawurlencode($this->image_large);
 	}
 
 	/**
@@ -986,9 +1001,25 @@ class Shop_Item_Model extends Core_Entity
 
 		parent::save();
 
+		// generate path
 		if (!$this->shortcut_id && $this->path == '' && !$this->deleted && $this->makePath())
 		{
 			$this->path != '' && $this->save();
+		}
+
+		// generate marking by marking_template
+		if ($this->marking == '' && !$this->shortcut_id && !$this->deleted && strlen($this->Shop->marking_template))
+		{
+			$oCore_Templater = new Core_Templater();
+			$oCore_Templater
+				->addObject('shop', $this->Shop)
+				->addObject('this', $this);
+
+			$this->marking = $oCore_Templater
+				->setTemplate($this->Shop->marking_template)
+				->execute();
+
+			$this->marking != '' && $this->save();
 		}
 
 		return $this;
@@ -1354,7 +1385,7 @@ class Shop_Item_Model extends Core_Entity
 	public function deleteLargeImage()
 	{
 		$fileName = $this->getLargeFilePath();
-		if ($this->image_large != '' && Core_File::isFile($fileName))
+		if ($this->image_large != '')
 		{
 			try
 			{
@@ -1377,7 +1408,7 @@ class Shop_Item_Model extends Core_Entity
 	public function deleteSmallImage()
 	{
 		$fileName = $this->getSmallFilePath();
-		if ($this->image_small != '' && Core_File::isFile($fileName))
+		if ($this->image_small != '')
 		{
 			try
 			{
@@ -2532,6 +2563,15 @@ class Shop_Item_Model extends Core_Entity
 		$this->_isTagAvailable('dir')
 			&& $this->addXmlTag('dir', Core_Page::instance()->shopCDN . $this->getItemHref());
 
+		if (Core::moduleIsActive('cdn'))
+		{
+			$this->_isTagAvailable('cdn_image_large')
+				&& $this->addXmlTag('cdn_image_large', $this->getLargeFileHref());
+
+			$this->_isTagAvailable('cdn_image_small')
+				&& $this->addXmlTag('cdn_image_small', $this->getSmallFileHref());
+		}
+
 		if ($this->_showXmlVotes && Core::moduleIsActive('siteuser'))
 		{
 			$aRate = Vote_Controller::instance()->getRateByObject($this);
@@ -3395,6 +3435,9 @@ class Shop_Item_Model extends Core_Entity
 				}
 			}
 
+			$aBackup['property_values'] = Revision_Controller::getPropertyValues($this);
+			$aBackup['field_values'] = Revision_Controller::getFieldValues($this);
+
 			Revision_Controller::backup($this, $aBackup);
 		}
 
@@ -3498,6 +3541,9 @@ class Shop_Item_Model extends Core_Entity
 				}
 
 				$this->save();
+
+				Revision_Controller::setPropertyValues($this, $aBackup['property_values']);
+				Revision_Controller::setFieldValues($this, $aBackup['field_values']);
 			}
 		}
 

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Tag
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Tag_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -105,6 +105,8 @@ class Tag_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$oMainTab->addBefore($oTextarea_TagName, $oSelect_Dirs);
 				}
 
+				$oMainTab->moveBefore($this->getField('showed')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $this->getField('sorting'));
+
 				// Tags SEO
 				$this->addTabAfter($seoTab = Admin_Form_Entity::factory('Tab')
 					->caption('SEO')
@@ -119,6 +121,8 @@ class Tag_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->move($this->getField('seo_title')->rows(3), $oMainRow1)
 					->move($this->getField('seo_description')->rows(3), $oMainRow2)
 					->move($this->getField('seo_keywords')->rows(3), $oMainRow3);
+
+				$this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'));
 			break;
 			case 'tag_dir':
 			default:
@@ -140,6 +144,8 @@ class Tag_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->caption(Core::_('Tag_Dir.parent_name'));
 
 				$oMainTab->addAfter($oSelect_Dirs, $this->getField('name'));
+
+				$this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'));
 			break;
 		}
 

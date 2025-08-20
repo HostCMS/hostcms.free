@@ -22,7 +22,7 @@ class Admin_Form_Module extends Core_Module_Abstract
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2025-04-04';
+	public $date = '2025-08-19';
 
 	/**
 	 * Module name

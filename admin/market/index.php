@@ -16,14 +16,12 @@ $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
 $sAdminFormAction = '/{admin}/market/index.php';
 
-$category_id = intval(Core_Array::getRequest('category_id'));
+$category_id = Core_Array::getRequest('category_id', 0, 'int');
 
-$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getRequest('search_query'))));
+$sQuery = Core_Str::stripTags(Core_Array::getRequest('search_query', '', 'trim'));
 
-$additionalParam = '';
-
-$additionalParam .= $category_id ? 'category_id=' . $category_id : '';
-$additionalParam .= $sQuery ? '&search_query=' . $sQuery . '&hostcms[action]=sendSearchQuery' : '';
+$additionalParam = $category_id ? 'category_id=' . $category_id : '';
+$additionalParam .= $sQuery != '' ? '&search_query=' . $sQuery . '&hostcms[action]=sendSearchQuery' : '';
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
@@ -43,8 +41,7 @@ $oMarket_Controller
 	->category_id($category_id)
 	->page($oAdmin_Form_Controller->getCurrent());
 
-if ($oAdmin_Form_Controller->getAction() == 'sendSearchQuery'
-	&& !is_null(Core_Array::getRequest('search_query')))
+if ($oAdmin_Form_Controller->getAction() == 'sendSearchQuery' && !is_null(Core_Array::getRequest('search_query')))
 {
 	$oMarket_Controller->search($sQuery);
 }

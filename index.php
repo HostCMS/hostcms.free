@@ -256,7 +256,7 @@ if (!$bBlockedIp)
 
 	if (/*!$bBlockedIp && */!$bBlockedFilter && !$bStaticFiles && Core::moduleIsActive('counter'))
 	{
-		if (Core::moduleIsActive('ipaddress') && !Core::checkBot($userAgent))
+		if (Core::moduleIsActive('ipaddress') && !Core::checkSearchEngineBot($userAgent))
 		{
 			$oIpaddress_Visitor_Filter_Controller = Ipaddress_Visitor_Filter_Controller::instance();
 			$bUseIpaddressVisitors = count($oIpaddress_Visitor_Filter_Controller->getFilters());

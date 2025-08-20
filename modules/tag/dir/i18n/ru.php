@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Tag
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Группы меток',
@@ -23,4 +23,5 @@ return array(
 	'move_success' => 'Группы меток перенесены',
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
+	'apply_success' => "Информация успешно изменена",
 );

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Benchmark
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Benchmark_Controller
 {
@@ -20,7 +20,7 @@ class Benchmark_Controller
 
 	/**
 	 * DataBase instance
-	 * @var string
+	 * @var mixed
 	 */
 	protected $_database = NULL;
 
@@ -381,5 +381,24 @@ window.addEventListener('load', function() {
 });
 </script><?php
 		}
+	}
+
+	/**
+	 * Format output
+	 * @param int $number
+	 * @return string
+	 */
+	static public function format($number)
+	{
+		return number_format($number, 0, ',', ' ');
+	}
+
+	/**
+	 * Get colors
+	 * @return array
+	 */
+	static public function getColors()
+	{
+		return array('gray', 'danger', 'orange', 'warning', 'success');
 	}
 }

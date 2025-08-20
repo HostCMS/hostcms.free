@@ -137,8 +137,8 @@ $oAdmin_Form_Controller->addDataset(
 );
 
 $oAdmin_Form_Dataset
-	->changeField('case_sensitive', 'type', 8)
-	->changeField('case_sensitive', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'))
+	// ->changeField('case_sensitive', 'type', 8)
+	// ->changeField('case_sensitive', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'))
 	->changeField('type', 'type', 8)
 	->changeField('type', 'list', "1=" . Core::_('Antispam_Stopword.type1') . "\n" . "0=" . Core::_('Antispam_Stopword.type0'));
 

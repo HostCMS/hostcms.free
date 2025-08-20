@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Menu extends Admin_Form_Entity
 {
@@ -17,6 +17,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Menu extends Admin_Form_Entity
 	 * @var array
 	 */
 	protected $_allowedProperties = array(
+		'divAttr',
 		'name',
 		'img',
 		'href',
@@ -25,6 +26,13 @@ class Skin_Bootstrap_Admin_Form_Entity_Menu extends Admin_Form_Entity
 		'icon',
 		'position',
 	);
+
+	public function __construct() {
+
+		parent::__construct();
+
+		$this->divAttr = array('class' => 'btn-group');
+	}
 
 	/**
 	 * Show menu item
@@ -71,10 +79,9 @@ class Skin_Bootstrap_Admin_Form_Entity_Menu extends Admin_Form_Entity
 			Core_Html_Entity::factory('I')->class($this->icon . ($bHasName ? ' icon-separator' : ' fa-fw no-margin'))
 		);
 
-		$bTop && $oCore_Html_Entity_A
-			->class(
-				!is_null($this->class) ? $this->class : "btn {$aFirstColors[$index]}"
-			);
+		$bTop && $oCore_Html_Entity_A->class(
+			!is_null($this->class) ? $this->class : "btn {$aFirstColors[$index]}"
+		);
 
 		$bHasSubmenu && $oCore_Html_Entity_A
 			->set('data-toggle', 'dropdown');
@@ -83,15 +90,20 @@ class Skin_Bootstrap_Admin_Form_Entity_Menu extends Admin_Form_Entity
 			Core_Html_Entity::factory('Code')->value(htmlspecialchars((string) $this->name))
 		);
 
-		$oCore_Html_Entity_A->execute();
-
-		if (!$this->href && !$this->onclick)
+		foreach ($this->_data as $name => $value)
 		{
-			?><a class="btn <?php echo htmlspecialchars($aSecondColors[$index])?> dropdown-toggle" data-toggle="dropdown"><i class="fa fa-angle-down"></i></a><?php
+			$oCore_Html_Entity_A->data($name, $value);
 		}
+
+		$oCore_Html_Entity_A->execute();
 
 		if ($bHasSubmenu)
 		{
+			if (!$this->href && !$this->onclick)
+			{
+				?><a class="btn <?php echo htmlspecialchars($aSecondColors[$index])?> dropdown-toggle" data-toggle="dropdown"><i class="fa fa-angle-down"></i></a><?php
+			}
+
 			?><ul class="dropdown-menu <?php echo $aDropdownColors[$index]?>"><?php
 
 			// Вывод подменю
@@ -112,7 +124,16 @@ class Skin_Bootstrap_Admin_Form_Entity_Menu extends Admin_Form_Entity
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeExecute', $this);
 
-		?><div class="btn-group"><?php $this->_showMenuItem(TRUE)?></div><?php
+		$aDivAttr = array();
+		if (is_array($this->divAttr))
+		{
+			foreach ($this->divAttr as $attrName => $attrValue)
+			{
+				$aDivAttr[] = "{$attrName}=\"" . htmlspecialchars((string) $attrValue) . "\"";
+			}
+		}
+
+		?><div <?php echo implode(' ', $aDivAttr)?>><?php $this->_showMenuItem(TRUE)?></div><?php
 
 		Core_Event::notify(get_class($this) . '.onAfterExecute', $this);
 	}

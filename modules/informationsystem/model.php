@@ -781,8 +781,8 @@ class Informationsystem_Model extends Core_Entity
 		$countInformationsystemGroups = $this->Informationsystem_Groups->getCount();
 		$countInformationsystemGroups && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
-			->value('<i class="fa-regular fa-folder-open"></i> ' . $countInformationsystemGroups)
-			->title(Core::_('Informationsystem.all_groups_count', $countInformationsystemGroups))
+			->value('<i class="fa-regular fa-folder-open"></i> ' . number_format($countInformationsystemGroups, 0, ',', ' '))
+			->title(Core::_('Informationsystem.all_groups_count', number_format($countInformationsystemGroups, 0, ',', ' ')))
 			->execute();
 
 
@@ -794,8 +794,8 @@ class Informationsystem_Model extends Core_Entity
 
 		$countInformationsystemItems && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
-			->value('<i class="fa fa-list-alt"></i> ' . $countInformationsystemItems)
-			->title(Core::_('Informationsystem.all_items_count', $countInformationsystemItems))
+			->value('<i class="fa fa-list-alt"></i> ' . number_format($countInformationsystemItems, 0, ',', ' '))
+			->title(Core::_('Informationsystem.all_items_count', number_format($countInformationsystemItems, 0, ',', ' ')))
 			->execute();
 
 		$oInformationsystemItems = $this->Informationsystem_Items;
@@ -806,8 +806,8 @@ class Informationsystem_Model extends Core_Entity
 
 		$countShortcuts && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
-			->value('<i class="fa-solid fa-link"></i> ' . $countShortcuts)
-			->title(Core::_('Informationsystem.all_shortcuts_count', $countShortcuts))
+			->value('<i class="fa-solid fa-link"></i> ' . number_format($countShortcuts, 0, ',', ' '))
+			->title(Core::_('Informationsystem.all_shortcuts_count', number_format($countShortcuts, 0, ',', ' ')))
 			->execute();
 	}
 

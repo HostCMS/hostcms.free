@@ -179,7 +179,7 @@ class Shop_Order_Model extends Core_Entity
 	{
 		if ($this->source_id)
 		{
-			$title = htmlspecialchars($this->Source->service);
+			$title = htmlspecialchars((string) $this->Source->service);
 
 			switch ($this->Source->service)
 			{
@@ -3725,6 +3725,9 @@ class Shop_Order_Model extends Core_Entity
 				);
 			}
 
+			$aBackup['property_values'] = Revision_Controller::getPropertyValues($this);
+			$aBackup['field_values'] = Revision_Controller::getFieldValues($this);
+
 			Revision_Controller::backup($this, $aBackup);
 		}
 
@@ -3820,6 +3823,9 @@ class Shop_Order_Model extends Core_Entity
 						$oShop_Order_Item->save();
 					}
 				}
+
+				Revision_Controller::setPropertyValues($this, $aBackup['property_values']);
+				Revision_Controller::setFieldValues($this, $aBackup['field_values']);
 			}
 		}
 

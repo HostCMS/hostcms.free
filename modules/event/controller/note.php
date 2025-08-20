@@ -156,12 +156,13 @@ class Event_Controller_Note extends Admin_Form_Controller_View
 									->name('text_note')
 									->rows(5)
 									->wysiwyg(Core::moduleIsActive('wysiwyg'))
-									->wysiwygOptions(array(
+									->wysiwygMode('short')
+									/*->wysiwygOptions(array(
 										'menubar' => 'false',
 										'statusbar' => 'false',
 										'plugins' => '"advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table code wordcount"',
 										'toolbar1' => '"bold italic underline alignleft aligncenter alignright alignjustify bullist numlist removeformat"'
-									))
+									))*/
 									->divAttr(array('class' => ''))
 									->controller($oAdmin_Form_Controller)
 									->execute();

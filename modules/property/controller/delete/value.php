@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Property
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Property_Controller_Delete_Value extends Admin_Form_Action_Controller
 {
@@ -86,6 +86,12 @@ class Property_Controller_Delete_Value extends Admin_Form_Action_Controller
 						}
 						else
 						{
+							// Backup revision
+							if (Core::moduleIsActive('revision') && $this->_object->id && method_exists($this->_object, 'backupRevision'))
+							{
+								$this->_object->backupRevision();
+							}
+
 							Core_Event::notify('Property_Controller_Delete_Value.onBeforeDelete', $this, array($oProperty, $oValue));
 
 							$oValue->delete();

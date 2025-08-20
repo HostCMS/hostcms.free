@@ -131,19 +131,19 @@ if (Core_Auth::logged())
 		$site_id = Core_Array::getPost('site_id', 0, 'int');
 		$modelsNames = Core_Array::getPost('modelsNames', '', 'trim');
 
-		$oAdmin_Form = Core_Entity::factory('Admin_Form')->getById($admin_form_id);
+		$oAdmin_FormTmp = Core_Entity::factory('Admin_Form')->getById($admin_form_id);
 		$oUser = Core_Auth::getCurrentUser();
 
-		if (!is_null($oAdmin_Form) && !is_null($oUser))
+		if (!is_null($oAdmin_FormTmp) && !is_null($oUser))
 		{
 			$oAdmin_Language = $oAdmin_Form_Controller->getAdminLanguage();
 
-			$oAdmin_Word_Value = $oAdmin_Form->Admin_Word->getWordByLanguage($oAdmin_Language->id);
+			$oAdmin_Word_Value = $oAdmin_FormTmp->Admin_Word->getWordByLanguage($oAdmin_Language->id);
 
 			$formName = $oAdmin_Word_Value ? $oAdmin_Word_Value->name : '';
 			ob_start();
 			?>
-			<div class="modal fade" id="adminFormSettingsModal<?php echo $oAdmin_Form->id?>" tabindex="-1" role="dialog" aria-labelledby="adminFormSettingsModalLabel">
+			<div class="modal fade" id="adminFormSettingsModal<?php echo $oAdmin_FormTmp->id?>" tabindex="-1" role="dialog" aria-labelledby="adminFormSettingsModalLabel">
 				<div class="modal-dialog modal-lg" role="document">
 					<div class="modal-content no-padding-bottom">
 						<form action="<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/admin_form/index.php")?>" method="POST">
@@ -154,9 +154,9 @@ if (Core_Auth::logged())
 							<div class="modal-body">
 								<div class="row margin-bottom-10 admin-form-settings-modal">
 									<?php
-										$aAvailableFields = $oAdmin_Form->getAvailableFieldsForUser($oUser->id);
+										$aAvailableFields = $oAdmin_FormTmp->getAvailableFieldsForUser($oUser->id);
 
-										$aAdmin_Form_Fields = $oAdmin_Form->Admin_Form_Fields->getAllByView(1, FALSE, '!=');
+										$aAdmin_Form_Fields = $oAdmin_FormTmp->Admin_Form_Fields->getAllByView(1, FALSE, '!=');
 
 										if (Core::moduleIsActive('field'))
 										{
@@ -205,11 +205,11 @@ if (Core_Auth::logged())
 							</div>
 							<div class="modal-footer">
 								<div class="pull-left">
-									<span class="admin-form-field-check admin-form-field-check-all sky margin-right-5" onclick="$.selectAdminFormSettings(<?php echo $oAdmin_Form->id?>, 1)"><?php echo Core::_('Admin_form.select_all')?></span>
-									<span class="admin-form-field-check" onclick="$.selectAdminFormSettings(<?php echo $oAdmin_Form->id?>, 0)"><?php echo Core::_('Admin_form.disable_all')?></span>
+									<span class="admin-form-field-check admin-form-field-check-all sky margin-right-5" onclick="$.selectAdminFormSettings(<?php echo $oAdmin_FormTmp->id?>, 1)"><?php echo Core::_('Admin_form.select_all')?></span>
+									<span class="admin-form-field-check" onclick="$.selectAdminFormSettings(<?php echo $oAdmin_FormTmp->id?>, 0)"><?php echo Core::_('Admin_form.disable_all')?></span>
 								</div>
 
-								<button type="button" class="btn btn-success" onclick="mainFormLocker.unlock(); <?php echo $oAdmin_Form_Controller->clearChecked()->getAdminSendForm(array('action' => 'applyFormFieldSettings', 'additionalParams' => 'hostcms[checked][0][' . $oAdmin_Form->id . ']=1&site_id=' . $site_id .'&modelsNames=' . $modelsNames))?>"><?php echo Core::_('Admin_Form.apply')?></button>
+								<button type="button" class="btn btn-success" onclick="mainFormLocker.unlock(); <?php echo $oAdmin_Form_Controller->clearChecked()->getAdminSendForm(array('action' => 'applyFormFieldSettings', 'additionalParams' => 'hostcms[checked][0][' . $oAdmin_FormTmp->id . ']=1&site_id=' . $site_id .'&modelsNames=' . $modelsNames))?>"><?php echo Core::_('Admin_Form.apply')?></button>
 							</div>
 						</form>
 					</div>
@@ -232,21 +232,21 @@ if (Core_Auth::logged())
 		$admin_form_field_id = Core_Array::getPost('admin_form_field_id', 0, 'trim');
 		$width = Core_Array::getPost('width', 0, 'int');
 
-		$oAdmin_Form = Core_Entity::factory('Admin_Form')->getById($admin_form_id);
+		$oAdmin_FormTmp = Core_Entity::factory('Admin_Form')->getById($admin_form_id);
 
 		$oUser = Core_Auth::getCurrentUser();
 
-		if ($width && !is_null($oAdmin_Form) && !is_null($oUser))
+		if ($width && !is_null($oAdmin_FormTmp) && !is_null($oUser))
 		{
 			// Если не было полей для формы сохранено, то при создании не затрагиваем пользовательские поля
-			$aAdmin_Form_Field_Settings = $oAdmin_Form->Admin_Form_Field_Settings->getAllByUser_id($oUser->id, FALSE);
+			$aAdmin_Form_Field_Settings = $oAdmin_FormTmp->Admin_Form_Field_Settings->getAllByUser_id($oUser->id, FALSE);
 			if (!count($aAdmin_Form_Field_Settings))
 			{
-				$aAdmin_Form_Fields = $oAdmin_Form->Admin_Form_Fields->getAllByshow_by_default(1, FALSE);
+				$aAdmin_Form_Fields = $oAdmin_FormTmp->Admin_Form_Fields->getAllByshow_by_default(1, FALSE);
 				foreach ($aAdmin_Form_Fields as $oTmpAdmin_Form_Field)
 				{
 					$oAdmin_Form_Field_Setting = Core_Entity::factory('Admin_Form_Field_Setting');
-					$oAdmin_Form_Field_Setting->admin_form_id = $oAdmin_Form->id;
+					$oAdmin_Form_Field_Setting->admin_form_id = $oAdmin_FormTmp->id;
 					$oAdmin_Form_Field_Setting->user_id = $oUser->id;
 					$oAdmin_Form_Field_Setting->admin_form_field_id = $oTmpAdmin_Form_Field->id;
 					$oAdmin_Form_Field_Setting->field_id = 0;
@@ -254,7 +254,7 @@ if (Core_Auth::logged())
 				}
 			}
 
-			$oAdmin_Form_Field_Settings = $oAdmin_Form->Admin_Form_Field_Settings;
+			$oAdmin_Form_Field_Settings = $oAdmin_FormTmp->Admin_Form_Field_Settings;
 			$oAdmin_Form_Field_Settings->queryBuilder()
 					->where('user_id', '=', $oUser->id)
 					->clearOrderBy()
@@ -276,7 +276,7 @@ if (Core_Auth::logged())
 			else
 			{
 				$oAdmin_Form_Field_Setting = Core_Entity::factory('Admin_Form_Field_Setting');
-				$oAdmin_Form_Field_Setting->admin_form_id = $oAdmin_Form->id;
+				$oAdmin_Form_Field_Setting->admin_form_id = $oAdmin_FormTmp->id;
 				$oAdmin_Form_Field_Setting->user_id = $oUser->id;
 
 				if ($bUserField)
@@ -304,20 +304,20 @@ if (Core_Auth::logged())
 	{
 		$oUser = Core_Auth::getCurrentUser();
 
-		$oAdmin_Form = NULL;
+		$oAdmin_FormTmp = NULL;
 
 		$aChecked = $oAdmin_Form_Controller->getChecked();
 
 		if (!is_null($oUser) && isset($aChecked[0]))
 		{
 			$key = key($aChecked[0]);
-			$oAdmin_Form = Core_Entity::factory('Admin_Form')->getById($key);
+			$oAdmin_FormTmp = Core_Entity::factory('Admin_Form')->getById($key);
 
-			if (!is_null($oAdmin_Form))
+			if (!is_null($oAdmin_FormTmp))
 			{
 				$aExistFormFieldSettings = array();
 
-				$oAdmin_Form_Field_Settings = $oAdmin_Form->Admin_Form_Field_Settings;
+				$oAdmin_Form_Field_Settings = $oAdmin_FormTmp->Admin_Form_Field_Settings;
 				$oAdmin_Form_Field_Settings->queryBuilder()
 					->where('user_id', '=', $oUser->id);
 
@@ -331,7 +331,7 @@ if (Core_Auth::logged())
 						&& $aExistFormFieldSettings['uf_' . $oAdmin_Form_Field_Setting->field_id] = $oAdmin_Form_Field_Setting;
 				}
 
-				$aAdmin_Form_Fields = $oAdmin_Form->Admin_Form_Fields->findAll(FALSE);
+				$aAdmin_Form_Fields = $oAdmin_FormTmp->Admin_Form_Fields->findAll(FALSE);
 
 				if (Core::moduleIsActive('field'))
 				{
@@ -354,7 +354,7 @@ if (Core_Auth::logged())
 						{
 							// Создаем новый
 							$oAdmin_Form_Field_Setting = Core_Entity::factory('Admin_Form_Field_Setting');
-							$oAdmin_Form_Field_Setting->admin_form_id = $oAdmin_Form->id;
+							$oAdmin_Form_Field_Setting->admin_form_id = $oAdmin_FormTmp->id;
 							$oAdmin_Form_Field_Setting->user_id = $oUser->id;
 
 							if (strpos($oAdmin_Form_Field->id, 'uf_') !== FALSE)
@@ -381,7 +381,7 @@ if (Core_Auth::logged())
 				}
 
 				$content = "<script>$(function() {
-					$('#adminFormSettingsModal{$oAdmin_Form->id}').modal('hide');
+					$('#adminFormSettingsModal{$oAdmin_FormTmp->id}').modal('hide');
 					mainFormLocker.unlock();
 					$.loadingScreen('show');
 					$('#id_content #refresh-toggler').click();

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Tpl
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Tpl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -60,10 +60,6 @@ class Tpl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oTextarea_Tpl = Admin_Form_Entity::factory('Textarea');
 
-				$oTmpOptions = $oTextarea_Tpl->syntaxHighlighterOptions;
-				// $oTmpOptions['mode'] = 'smarty';
-				$oTmpOptions['mode'] = '"ace/mode/smarty"';
-
 				$tplContent = $this->_object->id
 					? $this->_object->loadTplFile()
 					: '';
@@ -74,7 +70,7 @@ class Tpl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->caption(Core::_('Tpl.value'))
 					->name('tpl_value')
 					->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
-					->syntaxHighlighterOptions($oTmpOptions)
+					->syntaxHighlighterMode('smarty')
 					->divAttr(array('class' => 'form-group col-xs-12'));
 
 				$oMainRow2->add($oTextarea_Tpl);
@@ -115,10 +111,6 @@ class Tpl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$oTab_Lng->add($oLng_Tab_Row1 = Admin_Form_Entity::factory('Div')->class('row'));
 
 					$oTextarea_Lng = Admin_Form_Entity::factory('Textarea');
-
-					// $oTmpOptions = $oTextarea_Lng->syntaxHighlighterOptions;
-					// $oTmpOptions['mode'] = 'xml';
-
 					$oTextarea_Lng
 						->value(
 							$this->_object->loadLngConfigFile($sLng)
@@ -126,8 +118,6 @@ class Tpl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->rows(30)
 						->caption(Core::_('Tpl.config', $sLng))
 						->name('lng_' . $sLng)
-						// ->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
-						// ->syntaxHighlighterOptions($oTmpOptions)
 						->divAttr(array('class' => 'form-group col-xs-12'));
 
 					$oLng_Tab_Row1->add($oTextarea_Lng);

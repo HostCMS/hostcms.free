@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Site
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Site_Alias_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -99,8 +99,14 @@ class Site_Alias_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		if (!is_null(Core_Array::getPost('get_key')))
 		{
-			$this->_object->getKey();
-			Core_Message::show(Core::_('Site_Alias.getKey_success'), 'info');
+			try {
+				$this->_object->getKey();
+				Core_Message::show(Core::_('Site_Alias.getKey_success'), 'info');
+			} 
+			catch (Exception $e)
+			{
+				Core_Message::show($e->getMessage(), 'error');
+			}
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));

@@ -27,7 +27,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Mail
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Mail_Imap extends Core_Servant_Properties
 {
@@ -532,7 +532,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 						);
 
 						!is_null($partCharset) && strtolower($partCharset) != 'utf-8'
-							&& $sPartBody = mb_convert_encoding($sPartBody, 'UTF-8', $partCharset);
+							&& $sPartBody = $this->_convertEncoding($sPartBody, $partCharset);
 
 						$subtypeId = isset($aPart['id'])
 							? trim($aPart['id'], '<>')
@@ -581,7 +581,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 						: NULL;
 
 				!is_null($charset) && strtolower($charset) != 'utf-8'
-					&& $body = mb_convert_encoding($body, 'UTF-8', $charset);
+					&& $body = $this->_convertEncoding($body, $charset);
 
 				switch ($partType)
 				{
@@ -627,6 +627,26 @@ class Core_Mail_Imap extends Core_Servant_Properties
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Convert $str to UTF-8
+	 * @param string $str
+	 * @param string $fromEncoding
+	 * @return string
+	 */
+	protected function _convertEncoding($str, $fromEncoding)
+	{
+		try
+		{
+			$str = mb_convert_encoding($str, 'UTF-8', $fromEncoding);
+		}
+		catch (Error $e)
+		{
+			$str = Core_Str::deleteIllegalCharacters($str);
+		}
+		
+		return $str;
 	}
 
 	/**

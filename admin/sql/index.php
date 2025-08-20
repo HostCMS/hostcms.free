@@ -489,12 +489,9 @@ foreach ($aSql_User_Tabs as $key => $oSql_User_Tab)
 				: NULL
 		);
 
-	$aTmpOptions = $oTextarea_Sql->syntaxHighlighterOptions;
-	$aTmpOptions['mode'] = 'ace/mode/sql';
-
 	$oTextarea_Sql
 		->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
-		->syntaxHighlighterOptions($aTmpOptions);
+		->syntaxHighlighterMode('sql');
 
 	if ($bExec && $oSql_User_Tab && $oSql_User_Tab->id == $tab_id)
 	{
@@ -563,23 +560,10 @@ foreach ($aSql_User_Tabs as $key => $oSql_User_Tab)
 	$oTab
 		->add(
 			Admin_Form_Entity::factory('Script')
-				->value("var langTools = ace.require('ace/ext/language_tools');
-				var sqlTables = [" . implode(',', array_map(function($string) { return "'" . addslashes($string) . "'"; }, $aTables)) . "];
-
-				// create a completer object with a required callback function:
-				var sqlTablesCompleter = {
-					getCompletions: function(editor, session, pos, prefix, callback) {
-						callback(null, sqlTables.map(function(table) {
-							return {
-								value: table,
-								meta: 'Table'
-							};
-						}));
-					}
-				};
-				// bind to langTools
-				langTools.addCompleter(sqlTablesCompleter);"
-			)
+				->value("
+					var sqlTables = [" . implode(',', array_map(function($string) { return "'" . addslashes($string) . "'"; }, $aTables)) . "];
+					syntaxhighlighter.addCompleter(sqlTables);
+				")
 		);
 
 	$oTab->add($oForm
@@ -655,7 +639,10 @@ $(function(){
 						$cloneDiv.attr('id', 'userTab_' + result.id);
 						$cloneDiv.find('input[name = "file"]').val();
 
-						$cloneDiv.find('.ace_editor').remove();
+						// $cloneDiv.find('.ace_editor').remove();
+
+						syntaxhighlighter.remove($cloneDiv);
+
 						$cloneDiv.find('.alert').remove();
 						$cloneDiv.find('table').parent('div').remove();
 						$cloneDiv.find('p').remove();

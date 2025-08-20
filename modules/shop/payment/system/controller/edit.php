@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -197,9 +197,6 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 
 		$Admin_Form_Entity_Textarea = Admin_Form_Entity::factory('Textarea');
 
-		$oTmpOptions = $Admin_Form_Entity_Textarea->syntaxHighlighterOptions;
-		$oTmpOptions['mode'] = '"ace/mode/php"';
-
 		$Admin_Form_Entity_Textarea
 			->value($fileContent)
 			->rows(30)
@@ -207,7 +204,7 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 			->caption(Core::_('Shop_Payment_System.system_of_pay_add_form_handler'))
 			->name('system_of_pay_add_form_handler')
 			->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
-			->syntaxHighlighterOptions($oTmpOptions);
+			->syntaxHighlighterMode('php');
 
 		$oMainRow6->add($Admin_Form_Entity_Textarea);
 

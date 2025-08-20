@@ -30,4 +30,7 @@ return array(
 	'seo_description' => "Описание (description)",
 	'seo_keywords' => "Ключевые слова (keywords)",
 	'h1' => "Заголовок H1",
+	'sorting' => 'Порядок сортировки',
+	'apply_success' => "Информация успешно изменена",
+	'showed' => "Показов",
 );

@@ -311,7 +311,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 			'current' => NULL,
 			'sortingfield' => NULL,
 			'sortingdirection' => NULL,
-			'filterId' => 'main',
+			'filterId' => '', // 'main'
 			'action' => NULL,
 			'operation' => NULL,
 			'window' => 'id_content',
@@ -393,6 +393,92 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		$this->_externalReplace['{windowId}'] = $this->getWindowId();
 		$this->_externalReplace['{secret_csrf}'] =  Core_Security::getCsrfToken();
 
+		// Filter: Main Option
+		if (!is_null(Core_Array::getPost('changeFilterStatus')))
+		{
+			if ($this->_oAdmin_Form_Setting)
+			{
+				$this->_oAdmin_Form_Setting->filter = json_encode(
+					array('show' => intval(Core_Array::getPost('show')))
+						+ (is_array($this->filterSettings)
+							? $this->filterSettings
+							: array())
+				);
+				$this->_oAdmin_Form_Setting->save();
+
+				$aJSON = array('message' => 'OK');
+			}
+			else
+			{
+				$aJSON = array('message' => 'Error');
+			}
+
+			Core::showJson($aJSON);
+		}
+
+		// Filter: Fields
+		if (!is_null(Core_Array::getPost('changeFilterField')))
+		{
+			if ($this->_oAdmin_Form_Setting)
+			{
+				$tabs = Core_Array::get($this->filterSettings, 'tabs', array());
+
+				// Main Tab should be first
+				if (!isset($tabs['main']))
+				{
+					$tabs['main'] = array();
+				}
+
+				$tab = strval(Core_Array::getPost('tab'));
+				$field = strval(Core_Array::getPost('field'));
+				$show = intval(Core_Array::getPost('show'));
+
+				$tabs[$tab]['fields'][$field]['show'] = $show;
+
+				$this->filterSettings['tabs'] = $tabs;
+
+				$this->_oAdmin_Form_Setting->filter = json_encode($this->filterSettings);
+				$this->_oAdmin_Form_Setting->save();
+
+				$aJSON = array('message' => 'OK');
+			}
+			else
+			{
+				$aJSON = array('message' => 'Error');
+			}
+
+			Core::showJson($aJSON);
+		}
+
+		// Filter: Delete
+		if (!is_null(Core_Array::getPost('deleteFilter')))
+		{
+			if ($this->_oAdmin_Form_Setting)
+			{
+				$tabs = Core_Array::get($this->filterSettings, 'tabs', array());
+
+				$tabName = Core_Array::getPost('filterId');
+
+				if (isset($tabs[$tabName]))
+				{
+					unset($tabs[$tabName]);
+
+					$this->filterSettings['tabs'] = $tabs;
+
+					$this->_oAdmin_Form_Setting->filter = json_encode($this->filterSettings);
+					$this->_oAdmin_Form_Setting->save();
+				}
+
+				$aJSON = array('message' => 'OK');
+			}
+			else
+			{
+				$aJSON = array('message' => 'Error');
+			}
+
+			Core::showJson($aJSON);
+		}
+
 		return $this;
 	}
 
@@ -417,6 +503,8 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 			{
 				$this->_Admin_Form_Fields[$oAdmin_Form_Field->id] = $oAdmin_Form_Field;
 			}
+
+			// Пользовательские поля добавляются при добавлении dataset
 		}
 
 		return $this;
@@ -1049,6 +1137,23 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		Core_Event::notify('Admin_Form_Controller.onBeforeAddDataset', $this, array($oAdmin_Form_Dataset));
 
 		$this->_datasets[] = $oAdmin_Form_Dataset;
+
+		// Пользовательские поля для каждого dataset
+		if (Core::moduleIsActive('field'))
+		{
+			$this->loadAdminFormFields();
+
+			$oEntity = $oAdmin_Form_Dataset->getEntity();
+			if ($oEntity instanceof Core_Entity)
+			{
+				$aFields = self::getFields(CURRENT_SITE, $oEntity->getModelName());
+				foreach ($aFields as $oField)
+				{
+					$this->_Admin_Form_Fields[$oField->id] = $oField;
+				}
+			}
+		}
+
 		return $this;
 	}
 
@@ -1266,32 +1371,15 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		}
 
 		ob_start();
-		Core_Event::notify('Admin_Form_Controller.onBeforeShowContent', $this);
 
-		// Пользовательские поля для каждого dataset
-		if (Core::moduleIsActive('field'))
-		{
-			foreach ($this->_datasets as $datasetKey => $oAdmin_Form_Dataset)
-			{
-				$oEntity = $oAdmin_Form_Dataset->getEntity();
-				if ($oEntity instanceof Core_Entity)
-				{
-					$aFields = self::getFields(CURRENT_SITE, $oEntity->getModelName());
-					foreach ($aFields as $oField)
-					{
-						$this->_Admin_Form_Fields[$oField->id] = $oField;
-					}
-				}
-			}
-		}
+		Core_Event::notify('Admin_Form_Controller.onBeforeShowContent', $this);
 
 		$viewAdmin_Form_Controller = new $className($this);
 		$viewAdmin_Form_Controller->execute();
 
 		Core_Event::notify('Admin_Form_Controller.onAfterShowContent', $this);
 
-		$this
-			->addContent(ob_get_clean());
+		$this->addContent(ob_get_clean());
 
 		return $this;
 	}
@@ -1395,6 +1483,126 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		ob_start();
 
 		Core_Event::notify('Admin_Form_Controller.onBeforeExecute', $this);
+
+		// Filter: Save As
+		if (!is_null(Core_Array::getPost('saveFilterAs')))
+		{
+			if ($this->_oAdmin_Form_Setting)
+			{
+				$tabs = Core_Array::get($this->filterSettings, 'tabs', array());
+
+				// Main Tab should be first
+				if (!isset($tabs['main']))
+				{
+					$tabs['main'] = array();
+				}
+
+				$aNewTab = array(
+					'caption' => Core_Array::getPost('filterCaption')
+				);
+
+				$bCreated = FALSE;
+
+				//$aAdmin_Form_Fields = $this->_Admin_Form->Admin_Form_Fields->findAll();
+				$aAdmin_Form_Fields = $this->getAdminFormFields();
+
+				foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
+				{
+					if ($oAdmin_Form_Field->allow_filter && $oAdmin_Form_Field->view != 2 || $oAdmin_Form_Field->view == 1)
+					{
+						$field = $oAdmin_Form_Field->name;
+
+						$value = Core_Array::getPost('topFilter_' . $oAdmin_Form_Field->id, '', 'trim');
+
+						if (strlen($value))
+						{
+							$bCreated = TRUE;
+							$aNewTab['fields'][$field]['show'] = 1;
+							$aNewTab['fields'][$field]['value'] = $value;
+						}
+						else
+						{
+							$aNewTab['fields'][$field]['show'] = 0;
+						}
+					}
+				}
+
+				if ($bCreated)
+				{
+					$tabs[] = $aNewTab;
+
+					$this->filterSettings['tabs'] = $tabs;
+
+					$this->_oAdmin_Form_Setting->filter = json_encode($this->filterSettings);
+					$this->_oAdmin_Form_Setting->save();
+
+					end($tabs);
+
+					// Change current filter
+					$this->filterId(key($tabs));
+					/*$aJSON = array('message' => 'OK', 'id' => key($tabs));*/
+				}
+				else
+				{
+					//$aJSON = array('message' => 'Error, empty conditions');
+				}
+			}
+			else
+			{
+				//$aJSON = array('message' => 'Error');
+			}
+
+			//Core::showJson($aJSON);
+		}
+
+		// Filter: Save
+		if (!is_null(Core_Array::getPost('saveFilter')))
+		{
+			if ($this->_oAdmin_Form_Setting)
+			{
+				$tabs = Core_Array::get($this->filterSettings, 'tabs', array());
+
+				// _filterId
+				$tabName = Core_Array::getPost('filterId');
+
+				//$aAdmin_Form_Fields = $this->_Admin_Form->Admin_Form_Fields->findAll();
+				$aAdmin_Form_Fields = $this->getAdminFormFields();
+
+				foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
+				{
+					if ($oAdmin_Form_Field->allow_filter && $oAdmin_Form_Field->view != 2 || $oAdmin_Form_Field->view == 1)
+					{
+						$field = $oAdmin_Form_Field->name;
+
+						$value = Core_Array::getPost('topFilter_' . $oAdmin_Form_Field->id, '', 'trim');
+
+						if (strlen($value))
+						{
+							$tabs[$tabName]['fields'][$field]['show'] = 1;
+							$tabs[$tabName]['fields'][$field]['value'] = $value;
+						}
+						else
+						{
+							$tabs[$tabName]['fields'][$field]['show'] = 0;
+						}
+					}
+				}
+
+				$this->filterSettings['tabs'] = $tabs;
+
+				$this->_oAdmin_Form_Setting->filter = json_encode($this->filterSettings);
+				$this->_oAdmin_Form_Setting->save();
+
+				end($tabs);
+				$aJSON = array('message' => 'OK');
+			}
+			else
+			{
+				$aJSON = array('message' => 'Error');
+			}
+
+			Core::showJson($aJSON);
+		}
 
 		if ($this->action != '')
 		{
@@ -1941,9 +2149,11 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	* @param string $format форма отображения. Строка формата состоит из директив: обычных символов (за исключением %),
 	* которые копируются в результирующую строку, и описатели преобразований,
 	* каждый из которых заменяется на один из параметров.
+	* @return string
 	*/
 	public function applyFormat($str, $format)
 	{
+		$str = strval($str);
 		return !empty($format) ? sprintf($format, $str) : $str;
 	}
 
@@ -2961,6 +3171,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			case 7: // Картинка-ссылка
 				if (is_null($tabName) || !strlen($oAdmin_Form_Field->list))
 				{
+					$this->_filters += array($oAdmin_Form_Field->name => array($this, '_filterCallbackCheckbox'));
 					break;
 				}
 			case 8: // Выпадающий список
@@ -3110,7 +3321,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 						if (isset($this->_filterCallbacks[$oAdmin_Form_Field_Changed->name]))
 						{
 							$mFilterValue = call_user_func(
-								$this->_filterCallbacks[$oAdmin_Form_Field_Changed->name], $mFilterValue, $oAdmin_Form_Field_Changed, $filterPrefix
+								$this->_filterCallbacks[$oAdmin_Form_Field_Changed->name], $mFilterValue, $oAdmin_Form_Field_Changed, $filterPrefix, $oAdmin_Form_Dataset
 							);
 						}
 

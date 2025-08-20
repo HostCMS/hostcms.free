@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Cookie
 {
@@ -53,7 +53,7 @@ class Core_Cookie
 		// SameSite attribute of Lax or Strict is OK
 		return strcasecmp($samesite, 'lax') === 0 || strcasecmp($samesite, 'strict') === 0
 			? TRUE
-			: !Core_Cookie::isSameSiteIncompatible(!is_null($userAgent) ? $userAgent : Core_Array::get($_SERVER, 'HTTP_USER_AGENT'));
+			: !Core_Cookie::isSameSiteIncompatible(!is_null($userAgent) ? $userAgent : Core_Array::get($_SERVER, 'HTTP_USER_AGENT', '', 'str'));
 	}
 
 	/**
@@ -90,9 +90,10 @@ class Core_Cookie
 
 		// Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3205.0 Safari/537.36
 		// Versions of Chrome from Chrome 51 to Chrome 66 (inclusive on both ends)
+		// OPR/32 to 64
 		if (self::chromiumBased($userAgent))
 		{
-			if (self::incompatibleChromiumBasedVersion($userAgent, 51, 66))
+			if (self::incompatibleChromiumBasedVersion($userAgent, 1, 66))
 			{
 				return TRUE;
 			}

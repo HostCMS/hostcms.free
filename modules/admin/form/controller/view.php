@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Admin_Form_Controller_View extends Core_Servant_Properties
 {
@@ -30,6 +30,15 @@ class Admin_Form_Controller_View extends Core_Servant_Properties
 		$this->_Admin_Form_Controller = $oAdmin_Form_Controller;
 
 		$this->showFilter = $this->showChangeViews = $this->showPageSelector = $this->showPageNavigation = TRUE;
+	}
+
+	/**
+	 * Get admin form controller
+	 * @return Admin_Form_Controller
+	 */
+	public function getAdminFormController()
+	{
+		return $this->_Admin_Form_Controller;
 	}
 
 	/**

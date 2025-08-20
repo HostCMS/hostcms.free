@@ -188,7 +188,7 @@ class Core
 			'dateTimePickerFormat' => 'DD.MM.YYYY HH:mm:ss',
 			'timePickerFormat' => 'HH:mm:ss',
 			'availableExtension' => array('JPG', 'JPEG', 'JFIF', 'GIF', 'PNG', 'WEBP', 'AVIF', 'SVG', 'PDF', 'ZIP', 'GZ', 'DOC', 'DOCX', 'XLS', 'XLSX', 'TXT'),
-			'availableGetVariables' => array('_openstat', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid', 'yclid', 'ymclid', 'ysclid', 'yadclid', 'fbclid', 'yadordid', 'from', 'etext'),
+			'availableGetVariables' => array('_openstat', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'srsltid', 'gclid', 'yclid', 'ymclid', 'ysclid', 'yadclid', 'fbclid', 'yadordid', 'from', 'etext'),
 			'defaultCache' => 'file',
 			'timezone' => 'America/New_York',
 			'translate' => TRUE,
@@ -205,7 +205,7 @@ class Core
 			'compressionCssDirectory' => 'hostcmsfiles/css/',
 			'sitemapDirectory' => 'hostcmsfiles/sitemap/',
 			'timeoutAfterFailedAccessAttempts' => TRUE,
-			'banAfterFailedAccessAttempts' => 5,			
+			'banAfterFailedAccessAttempts' => 5,
 			'csrf_lifetime' => 86400,
 			'backendSessionLifetime' => 14400,
 			'backendAssignSessionToIp' => TRUE,
@@ -219,7 +219,7 @@ class Core
 				'X-Content-Type-Options' => 'nosniff',
 				'X-XSS-Protection' => '1;mode=block'
 			),
-			'backendContentSecurityPolicy' => "default-src 'self' www.hostcms.ru www.youtube.com youtube.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: *.cloudflare.com *.kaspersky-labs.com; img-src 'self' chart.googleapis.com data: blob: www.hostcms.ru; font-src 'self'; connect-src 'self' blob:; style-src 'self' 'unsafe-inline'",
+			'backendContentSecurityPolicy' => "default-src 'self' www.hostcms.ru www.youtube.com youtube.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: *.cloudflare.com *.kaspersky-labs.com  www.hostcms.ru; img-src 'self' chart.googleapis.com data: blob: www.hostcms.ru; font-src 'self'; connect-src 'self' blob:; style-src 'self' 'unsafe-inline'",
 			'backend' => 'admin'
 		);
 	}
@@ -1070,7 +1070,7 @@ class Core
 	*
 	* <code>
 	* <?php
-	* $agent = 'YANDEX';
+	* $agent = 'Foo Bar curl/7.81.0';
 	*
 	* $is_bot = Core::checkBot($agent);
 	*
@@ -1084,6 +1084,30 @@ class Core
 		// gptbot|LetsearchBot|LightspeedSystemsCrawler|
 		return is_string($agent)
 			? (bool) preg_match('/http|bot|spide|craw|finder|curl|mail|yandex|applebot|seach|seek|site|sogou|yahoo|msnbot|snoopy|google|bing|feedreader|links|megaindex|simplepie|siteimprove/iu', $agent)
+			: FALSE;
+	}
+
+	/**
+	* Проверка user-agent на принадлежность к ботам поисковых систем
+	*
+	* @param string $agent user-agent
+	* @return bool
+	*
+	* <code>
+	* <?php
+	* $agent = 'Mozilla/5.0 (compatible; YandexBot/3.0; MirrorDetector)';
+	*
+	* $is_bot = Core::checkSearchEngineBot($agent);
+	*
+	* // Распечатаем результат
+	* var_dump($is_bot);
+	* ?>
+	* </code>
+	*/
+	static public function checkSearchEngineBot($agent)
+	{
+		return is_string($agent)
+			? (bool) preg_match('/360Spider|Applebot|Baiduspider|baidu|bingbot|BingPreview|Bytespider|coccocbot|Daumoa|DuckDuckBot|duckduckgo|Googlebot|GoogleOther|google|Mail\.RU_Bot|MojeekBot|Rambler|SeznamBot|Sogou|Swisscows|Yahoo|YandexBot|yandex|YisouSpider/iu', $agent)
 			: FALSE;
 	}
 

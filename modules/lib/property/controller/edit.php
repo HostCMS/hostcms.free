@@ -45,23 +45,36 @@ class Lib_Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
+		$aOptions = array(
+			0 => Core::_('Lib_Property.lib_property_type_0'),
+			1 => Core::_('Lib_Property.lib_property_type_1'),
+			2 => Core::_('Lib_Property.lib_property_type_2'),
+			3 => Core::_('Lib_Property.lib_property_type_3'),
+			4 => Core::_('Lib_Property.lib_property_type_4'),
+			5 => Core::_('Lib_Property.lib_property_type_5'),
+			7 => Core::_('Lib_Property.lib_property_type_7'),
+			8 => Core::_('Lib_Property.lib_property_type_8'),
+			9 => Core::_('Lib_Property.lib_property_type_9'),
+			10 => Core::_('Lib_Property.lib_property_type_10'),
+			11 => Core::_('Lib_Property.lib_property_type_11')
+		);
+
+		if ($this->_object->parent_id)
+		{
+			$oLibPropertyParent = $this->_object->Lib_Property;
+
+			if ($oLibPropertyParent && $oLibPropertyParent->type == 10)
+			{
+				unset($aOptions[10]); // не может быть составной -> составной
+			}
+		}
+
 		$oHtmlFormSelect = Admin_Form_Entity::factory('Select')
-			->options(array(
-				0 => Core::_('Lib_Property.lib_property_type_0'),
-				1 => Core::_('Lib_Property.lib_property_type_1'),
-				2 => Core::_('Lib_Property.lib_property_type_2'),
-				3 => Core::_('Lib_Property.lib_property_type_3'),
-				4 => Core::_('Lib_Property.lib_property_type_4'),
-				5 => Core::_('Lib_Property.lib_property_type_5'),
-				7 => Core::_('Lib_Property.lib_property_type_7'),
-				8 => Core::_('Lib_Property.lib_property_type_8'),
-				9 => Core::_('Lib_Property.lib_property_type_9'),
-				10 => Core::_('Lib_Property.lib_property_type_10'),
-				11 => Core::_('Lib_Property.lib_property_type_11')
-			))
+			->options($aOptions)
 			->name('type')
 			->value($this->_object->type)
 			->caption(Core::_('Lib_Property.type'))
+			->class('form-control w-100')
 			->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [0,1,2,3,4,5,7,8,9,10,11])");
 
 		// Получаем основную вкладку
