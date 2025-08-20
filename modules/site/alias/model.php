@@ -149,13 +149,13 @@ class Site_Alias_Model extends Core_Entity
 
 			$Core_Http = Core_Http::instance()
 				->url($url)
-				->port(80)
+				// ->port(80)
 				->timeout(10)
 				->execute();
 
 			$xml = $Core_Http->getDecompressedBody();
 			//echo htmlspecialchars($xml);
-			$oXml = simplexml_load_string($xml);
+			$oXml = @simplexml_load_string($xml);
 
 			if (is_object($oXml))
 			{

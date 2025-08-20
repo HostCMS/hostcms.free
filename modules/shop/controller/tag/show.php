@@ -38,7 +38,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Controller_Tag_Show extends Core_Controller
 {
@@ -105,6 +105,7 @@ class Shop_Controller_Tag_Show extends Core_Controller
 
 		$siteuser_id = 0;
 		$aSiteuserGroups = array(0, -1);
+
 		if (Core::moduleIsActive('siteuser'))
 		{
 			$oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
@@ -147,6 +148,7 @@ class Shop_Controller_Tag_Show extends Core_Controller
 			//->where('tags.deleted', '=', 0)
 			->groupBy('tag_shop_items.tag_id')
 			->having('count', '>', 0)
+			->orderBy('tags.sorting', 'ASC')
 			->orderBy('tags.name', 'ASC');
 
 		return $this;
@@ -214,7 +216,7 @@ class Shop_Controller_Tag_Show extends Core_Controller
 				->name('limit')
 				->value(intval($this->limit))
 		);
-		
+
 		$oQueryBuilder = $this->_tags->queryBuilder();
 
 		if ($this->group !== FALSE)
@@ -250,7 +252,7 @@ class Shop_Controller_Tag_Show extends Core_Controller
 					->where('shop_items.shop_group_id', is_array($this->group) ? 'IN' : '=', $this->group);
 			}
 		}
-		
+
 		if ($this->tag_dir !== FALSE)
 		{
 			$oQueryBuilder
@@ -299,7 +301,7 @@ class Shop_Controller_Tag_Show extends Core_Controller
 		}
 		return $this;
 	}
-	
+
 	/**
 	 * Get Filter Group Table Name
 	 * @return string
@@ -308,16 +310,16 @@ class Shop_Controller_Tag_Show extends Core_Controller
 	{
 		return 'shop_filter_group' . $this->getEntity()->id;
 	}
-	
+
 	/**
 	 * Groups Tree For fillShopGroups()
 	 * @var NULL|array
 	 */
 	protected $_aGroupTree = NULL;
 
-	/** 
+	/**
 	 * Fill $this->_aGroupTree array
-	 * @param int $parent_id 
+	 * @param int $parent_id
 	 * @return array
 	 */
 	public function fillShopGroups($parent_id = 0)

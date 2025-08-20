@@ -69,9 +69,16 @@
 
 		<div>
 			<!-- Изображение для товара, если есть -->
-			<xsl:if test="image_small != ''">
+			<xsl:if test="image_small != '' or cdn_image_small/node()">
 				<div id="gallery" class="shop_img">
-					<a href="{dir}{image_large}" target="_blank"><img src="{dir}{image_small}" /></a>
+					<xsl:choose>
+						<xsl:when test="cdn_image_small/node()">
+							<a href="{cdn_image_large}" target="_blank"><img src="{cdn_image_small}" /></a>
+						</xsl:when>
+						<xsl:otherwise>
+							<a href="{dir}{image_large}" target="_blank"><img src="{dir}{image_small}" /></a>
+						</xsl:otherwise>
+					</xsl:choose>
 				</div>
 			</xsl:if>
 

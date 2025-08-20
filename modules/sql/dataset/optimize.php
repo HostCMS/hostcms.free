@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Sql
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Sql_Dataset_Optimize extends Admin_Form_Dataset
 {
@@ -76,9 +76,7 @@ class Sql_Dataset_Optimize extends Admin_Form_Dataset
 			foreach ($aTables as $sTable)
 			{
 				// Сбрасывать для этих таблиц AUTO_INCREMENT нельзя
-				if (strpos($sTable, 'admin_form') === FALSE
-					&& strpos($sTable, 'admin_language') === FALSE
-					&& strpos($sTable, 'admin_word') === FALSE)
+				if (strpos($sTable, 'admin_') !== 0)
 				{
 					try
 					{

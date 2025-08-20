@@ -132,9 +132,7 @@ if (Core_Array::getPost('add_ticket'))
 
 	if (Core::moduleIsActive('search'))
 	{
-		Search_Controller::indexingSearchPages(
-			array($oHelpdesk_Message->indexing())
-		);
+		$oHelpdesk_Message->index();
 	}
 
 	$path = "./";

@@ -218,7 +218,13 @@ class Shop_Seller_Model extends Core_Entity
 	 */
 	public function getSmallFileHref()
 	{
-		return $this->getSellerHref() . rawurlencode($this->image_small);
+		$link = Core::moduleIsActive('cdn')
+			? Cdn_Controller::link($this->getSellerHref() . $this->image_small)
+			: NULL;
+
+		return !is_null($link)
+			? $link
+			: $this->getSellerHref() . rawurlencode($this->image_small);
 	}
 
 	/**
@@ -236,7 +242,13 @@ class Shop_Seller_Model extends Core_Entity
 	 */
 	public function getLargeFileHref()
 	{
-		return $this->getSellerHref() . rawurlencode($this->image_large);
+		$link = Core::moduleIsActive('cdn')
+			? Cdn_Controller::link($this->getSellerHref() . $this->image_large)
+			: NULL;
+
+		return !is_null($link)
+			? $link
+			: $this->getSellerHref() . rawurlencode($this->image_large);
 	}
 
 	/**

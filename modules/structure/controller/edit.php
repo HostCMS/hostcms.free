@@ -438,33 +438,23 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		// Динамическая страница
 		$oTextarea_Structure_Source = Admin_Form_Entity::factory('Textarea');
-
-		$oTmpOptions = $oTextarea_Structure_Source->syntaxHighlighterOptions;
-		// $oTmpOptions['mode'] = 'application/x-httpd-php';
-		$oTmpOptions['mode'] = '"ace/mode/php"';
-
 		$oTextarea_Structure_Source
 			->name('structure_source')
 			->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-2 hidden-3'))
 			->caption(Core::_('Structure.structure_source'))
 			->value($this->_object->getStructureFile())
 			->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
-			->syntaxHighlighterOptions($oTmpOptions)
+			->syntaxHighlighterMode('php')
 			->rows(30);
 
 		$oTextarea_StructureConfig_Source = Admin_Form_Entity::factory('Textarea');
-
-		$oTmpOptions = $oTextarea_StructureConfig_Source->syntaxHighlighterOptions;
-		// $oTmpOptions['mode'] = 'application/x-httpd-php';
-		$oTmpOptions['mode'] = '"ace/mode/php"';
-
 		$oTextarea_StructureConfig_Source
 			->name('structure_config_source')
 			->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-2 hidden-3'))
 			->caption(Core::_('Structure.structure_config_source'))
 			->value($this->_object->getStructureConfigFile())
 			->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
-			->syntaxHighlighterOptions($oTmpOptions)
+			->syntaxHighlighterMode('php')
 			->rows(30);
 
 		$oMainRow12

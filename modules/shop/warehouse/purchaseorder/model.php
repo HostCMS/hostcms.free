@@ -599,7 +599,7 @@ class Shop_Warehouse_Purchaseorder_Model extends Core_Entity
 		}
 
 		$aReplace['quantity'] = $total_quantity;
-		$aReplace['amount'] = $oShop_Item->shop_currency_id ? $oShop_Item->Shop_Currency->format(Shop_Controller::instance()->round($total_amount)) : 0;
+		$aReplace['amount'] = $oShop->shop_currency_id ? $oShop->Shop_Currency->format(Shop_Controller::instance()->round($total_amount)) : 0;
 
 		$aReplace['amount_in_words'] = '';
 

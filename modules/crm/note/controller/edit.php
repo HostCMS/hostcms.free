@@ -57,13 +57,14 @@ class Crm_Note_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$this->getField('text')
 			->rows(10)
 			->wysiwyg(Core::moduleIsActive('wysiwyg'))
-			->wysiwygOptions(array(
+			->wysiwygMode('short')
+			/*->wysiwygOptions(array(
 				'menubar' => 'false',
 				'statusbar' => 'false',
 				'plugins' => '"advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table code wordcount"',
 				'toolbar1' => '"bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat"',
 				'statusbar' => true
-			));
+			))*/;
 
 		$oMainTab
 			->move($this->getField('text'), $oMainRow1)

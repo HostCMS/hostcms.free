@@ -45,15 +45,26 @@ if (Core_Array::getPost('add_filter'))
 
 	Admin_Form_Entity::factory('Input')
 		->name('get_name[]')
-		->divAttr(array('class' => 'col-xs-12 col-sm-1 property-data ipaddress-filter-get-name hidden'))
+		->divAttr(array('class' => 'col-xs-12 col-sm-4 property-data ipaddress-filter-get-name hidden'))
 		->placeholder(Core::_('Ipaddress_Filter.placeholder_name'))
 		->controller($oAdmin_Form_Controller)
 		->execute();
 
 	Admin_Form_Entity::factory('Input')
 		->name('header_name[]')
-		->divAttr(array('class' => 'col-xs-12 col-sm-1 property-data ipaddress-filter-header-name hidden'))
+		->divAttr(array('class' => 'col-xs-8 col-sm-6 col-lg-2 property-data ipaddress-filter-header-name hidden'))
 		->placeholder(Core::_('Ipaddress_Filter.placeholder_name'))
+		->controller($oAdmin_Form_Controller)
+		->execute();
+
+	Admin_Form_Entity::factory('Select')
+		->name('header_case_sensitive[]')
+		->options(array(
+			Core::_('Ipaddress_Filter.case_unsensitive'),
+			Core::_('Ipaddress_Filter.case_sensitive')
+		))
+		->divAttr(array('class' => 'col-xs-4 col-sm-2 col-lg-1 property-data ipaddress-filter-header-case-sensitive hidden'))
+		->value(0)
 		->controller($oAdmin_Form_Controller)
 		->execute();
 
@@ -66,7 +77,7 @@ if (Core_Array::getPost('add_filter'))
 
 	Admin_Form_Entity::factory('Input')
 		->name('value[]')
-		->divAttr(array('class' => 'col-xs-12 col-sm-4 col-lg-3 property-data ipaddress-filter-value'))
+		->divAttr(array('class' => 'col-xs-8 col-sm-4 col-lg-3 property-data ipaddress-filter-value'))
 		->placeholder(Core::_('Ipaddress_Filter.placeholder_value'))
 		->controller($oAdmin_Form_Controller)
 		->execute();
@@ -77,13 +88,13 @@ if (Core_Array::getPost('add_filter'))
 			Core::_('Ipaddress_Filter.case_unsensitive'),
 			Core::_('Ipaddress_Filter.case_sensitive')
 		))
-		->divAttr(array('class' => 'col-xs-12 col-sm-2 col-lg-1 property-data ipaddress-filter-case-sensitive'))
+		->divAttr(array('class' => 'col-xs-3 col-sm-2 col-lg-1 property-data ipaddress-filter-case-sensitive'))
 		->value(1)
 		->controller($oAdmin_Form_Controller)
 		->execute();
 
 	Admin_Form_Entity::factory('Div')
-		->class('col-xs-12 col-lg-3 property-data filter-days-wrapper')
+		->class('col-xs-12 col-sm-4 col-lg-3 property-data filter-days-wrapper')
 		->add(
 			Admin_Form_Entity::factory('Code')->html('
 				<input type="text" class="form-control" name="times[]" value="1"/><span> ' . Core::_('Ipaddress_Visitor_Filter.times') . ' </span><input type="text" class="form-control" name="hours[]" value="3"/><span> ' . Core::_('Ipaddress_Visitor_Filter.hours') . '</span>

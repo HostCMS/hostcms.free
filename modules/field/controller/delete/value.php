@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Field
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Field_Controller_Delete_Value extends Admin_Form_Action_Controller
 {
@@ -100,6 +100,17 @@ class Field_Controller_Delete_Value extends Admin_Form_Action_Controller
 						}
 						else
 						{
+							// Backup revision
+							if (!is_null($this->_model))
+							{
+								$oObject = Core_Entity::factory($this->_model, $oValue->entity_id);
+
+								if (Core::moduleIsActive('revision') && $oObject->id && method_exists($oObject, 'backupRevision'))
+								{
+									$oObject->backupRevision();
+								}
+							}
+
 							Core_Event::notify('Field_Controller_Delete_Value.onBeforeDelete', $this, array($oField, $oValue));
 
 							$oValue->delete();

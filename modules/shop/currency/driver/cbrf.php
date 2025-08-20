@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Shop_Currency_Driver_Cbrf extends Shop_Currency_Driver
 {
@@ -18,11 +18,11 @@ class Shop_Currency_Driver_Cbrf extends Shop_Currency_Driver
 	 */
 	public function execute()
 	{
-		$url = 'http://www.cbr.ru/scripts/XML_daily.asp';
+		$url = 'https://www.cbr.ru/scripts/XML_daily.asp';
 
 		$Core_Http = Core_Http::instance()
 			->url($url)
-			->port(80)
+			// ->port(80)
 			->timeout(10)
 			->additionalHeader('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:80.0) Gecko/20100101 Firefox/80.0')
 			->execute();

@@ -125,6 +125,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRowReserveOptions = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow7 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oMainRowMarking = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRowInvoice = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRowDiscountcard = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRowNotification = Admin_Form_Entity::factory('Div')->class('row'))
@@ -593,12 +594,15 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->move($this->getField('reserve_hours')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow7)
 					->move($this->getField('max_bonus')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow7);
 
+				Core_Templater::decorateInput($this->getField('marking_template'));
+				$oMainTab->move($this->getField('marking_template')->divAttr(array('class' => 'form-group col-xs-12 col-lg-7')), $oMainRowMarking);
+
 				Core_Templater::decorateInput($this->getField('invoice_template'));
-				$oMainTab->move($this->getField('invoice_template')->divAttr(array('class' => 'form-group col-xs-12 col-lg-6')), $oMainRowInvoice);
+				$oMainTab->move($this->getField('invoice_template')->divAttr(array('class' => 'form-group col-xs-12 col-lg-7')), $oMainRowInvoice);
 
 				Core_Templater::decorateInput($this->getField('discountcard_template'));
-				$oMainTab->move($this->getField('discountcard_template')->divAttr(array('class' => 'form-group col-xs-12 col-lg-6')), $oMainRowDiscountcard);
-				$oMainTab->move($this->getField('issue_discountcard')->divAttr(array('class' => 'form-group col-xs-12 col-md-6 col-lg-6 margin-top-25')), $oMainRowDiscountcard);
+				$oMainTab->move($this->getField('discountcard_template')->divAttr(array('class' => 'form-group col-xs-12 col-lg-7')), $oMainRowDiscountcard);
+				$oMainTab->move($this->getField('issue_discountcard')->divAttr(array('class' => 'form-group col-xs-12 col-lg-5 margin-top-25')), $oMainRowDiscountcard);
 
 				// Notification subscribers
 				if (Core::moduleIsActive('notification'))
@@ -742,7 +746,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				);
 
 				Core_Templater::decorateInput($this->getField('certificate_template'), $aTemplateOptions);
-				$oMainTab->move($this->getField('certificate_template')->divAttr(array('class' => 'form-group col-xs-12 col-lg-6')), $oCertificateBlockRow1);
+				$oMainTab->move($this->getField('certificate_template')->divAttr(array('class' => 'form-group col-xs-12 col-lg-7')), $oCertificateBlockRow1);
 
 				$oMainTab->move($this->getField('certificate_subject'), $oCertificateBlockRow2);
 

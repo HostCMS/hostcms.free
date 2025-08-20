@@ -236,8 +236,6 @@ class Site_Favicon_Controller_Tab extends Core_Servant_Properties
 
 					if (isset($_FILES['siteFaviconFile_']['name'][$key]))
 					{
-						var_dump($_FILES['siteFaviconFile_']['name'][$key]);
-						var_dump($_FILES['siteFaviconFile_']['tmp_name'][$key]);
 						$oSite_Favicon->saveFavicon($_FILES['siteFaviconFile_']['name'][$key], $_FILES['siteFaviconFile_']['tmp_name'][$key]);
 					}
 

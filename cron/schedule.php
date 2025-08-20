@@ -12,9 +12,8 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2023, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
-
 require_once(dirname(__FILE__) . '/../' . 'bootstrap.php');
 
 if (Core::moduleIsActive('schedule'))

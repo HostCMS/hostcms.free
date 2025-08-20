@@ -1462,6 +1462,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 	 * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeSwitch
 	 * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeFindByMarking
 	 * @hostcms-event Shop_Item_Import_Csv_Controller.onAfterFindByMarking
+	 * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeFindSpecialprice
 	 * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeAdminUpload
 	 * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeImportItemProperty
 	 * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeCaseDefault
@@ -3183,14 +3184,36 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 						->where('shop_item_id', '=', $this->_oCurrentItem->id)
 						->where('min_quantity', '=', $this->_oCurrentShopSpecialPrice->min_quantity)
 						->where('max_quantity', '=', $this->_oCurrentShopSpecialPrice->max_quantity)
-						->where('price', '=', $this->_oCurrentShopSpecialPrice->price)
-						->where('percent', '=', $this->_oCurrentShopSpecialPrice->percent);
+						//->where('price', '=', $this->_oCurrentShopSpecialPrice->price)
+						//->where('percent', '=', $this->_oCurrentShopSpecialPrice->percent)
+						->limit(1);
+
+					Core_Event::notify('Shop_Item_Import_Csv_Controller.onBeforeFindSpecialprice', $this, array($oTmpObject, $this->_oCurrentShopSpecialPrice));
+
+					$aTmpObjecs = $oTmpObject->findAll(FALSE);
 
 					// Добавляем специальную цену, если её ещё не существовало
-					if ($oTmpObject->getCount(FALSE) == 0)
+					if (!count($aTmpObjecs))
 					{
 						$this->_oCurrentShopSpecialPrice->shop_item_id = $this->_oCurrentItem->id;
 						$this->_oCurrentShopSpecialPrice->save();
+					}
+					// Обновляем цену и процент
+					else
+					{
+						$oSpecialPrice = $aTmpObjecs[0];
+						
+						// В соответствии с формой редактирования товара спеццены без цены или процента удаляются
+						if ($this->_oCurrentShopSpecialPrice->price || $this->_oCurrentShopSpecialPrice->percent)
+						{
+							$oSpecialPrice->price = $this->_oCurrentShopSpecialPrice->price;
+							$oSpecialPrice->percent = $this->_oCurrentShopSpecialPrice->percent;
+							$oSpecialPrice->save();
+						}
+						else
+						{
+							$oSpecialPrice->delete();
+						}
 					}
 				}
 

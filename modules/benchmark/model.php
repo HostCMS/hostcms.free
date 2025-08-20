@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Benchmark
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Benchmark_Model extends Core_Entity
 {
@@ -143,6 +143,91 @@ class Benchmark_Model extends Core_Entity
 			$this->getCoefficient($this->network, $this->etalon_network) * 0.05 +
 			$this->getMailCoefficient() * 0.05
 		);
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function getBenchmarkBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$iBenchmark = $this->getBenchmark();
+
+		$aColors = Benchmark_Controller::getColors();
+		$sColor = $aColors[ceil($iBenchmark / 25)];
+
+		Core_Html_Entity::factory('Span')
+			->class($sColor)
+			->value($iBenchmark)
+			->execute();
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function mysql_writeBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return Benchmark_Controller::format($this->mysql_write);
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function mysql_readBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return Benchmark_Controller::format($this->mysql_read);
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function mysql_updateBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return Benchmark_Controller::format($this->mysql_update);
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function filesystemBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return Benchmark_Controller::format($this->filesystem);
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function cpu_mathBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return Benchmark_Controller::format($this->cpu_math);
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function cpu_stringBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return Benchmark_Controller::format($this->cpu_string);
 	}
 
 	/**

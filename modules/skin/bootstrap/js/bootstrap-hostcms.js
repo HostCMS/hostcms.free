@@ -1,4 +1,4 @@
-/*global i18n ace Notify bootbox themeprimary readCookie createCookie revertFunc tinyMCE tinymce hostcmsBackend */
+/*global i18n syntaxhighlighter Notify bootbox themeprimary readCookie createCookie revertFunc wysiwyg hostcmsBackend */
 
 function isEmpty(str) {
 	return (!str || 0 === str.length);
@@ -809,7 +809,8 @@ function isEmpty(str) {
 							oPlanMaterialsTableBody = $('#id_content_materials .plan-materials-table > tbody'),
 							oPlanMaterialsTr = oPlanMaterialsTableBody.find('tr'),
 							oExistingPlanMaterialsTr, oSpanMaterialCountValue,
-							oSpanMaterialCostValue, materialCostValue, oSpanMaterialShortageValue,
+							oSpanMaterialCostValue, materialCostValue,
+							// oSpanMaterialShortageValue,
 							aPlanMaterialsIds = [],
 							countMaterials,
 							newTableRow,
@@ -818,131 +819,311 @@ function isEmpty(str) {
 
 							//console.log('oPlanMaterialsTr = ', oPlanMaterialsTr);
 
+						console.log('aProcessPlanInfo', aProcessPlanInfo);
+
 						!oPlanManufacturesTableBody.data('aAddedProcessPlansId') && oPlanManufacturesTableBody.data({'aAddedProcessPlansId': [], 'aMapProcessPlanMaterials': []});
 
 						// Добавляемая техкарта отсутствует среди ранее добавленных и для техкарты задана продукция (товары)
 						if (!~$.inArray(aProcessPlanInfo['id'], oPlanManufacturesTableBody.data('aAddedProcessPlansId'))
 							&& result['result']['data']['process_plan']['manufacture'] && (countManufactures = result['result']['data']['process_plan']['manufacture'].length))
 						{
+							//console.log("result['result']['data']", result['result']['data']);
+							// console.log("result['result']['data']['process_plan']['manufacture']", result['result']['data']['process_plan']['manufacture']);
+							console.log("result['result']['data']['process_plan']", result['result']['data']['process_plan']);
+
 							// Продукция
-							for (var i = 0; i < countManufactures; i++)
-							{
-								var manufactureData = result['result']['data']['process_plan']['manufacture'][i],
-									manufactureRate = $.mathRound(parseFloat(manufactureData['rate']), 2);
-									// manufactureRate = parseFloat(manufactureData['rate']);
+							var oProcessPlanData = {id: result['result']['data']['process_plan']['id'], name: result['result']['data']['process_plan']['name']};
 
-								//!Number.isInteger(manufactureRate) && (manufactureRate = manufactureRate.toFixed(2));
+							$.addTrProcessPlanManufacturesToProductionTask(oProcessPlanData, result['result']['data']['process_plan']['manufacture'], oPlanManufacturesTableBody);
 
-								newTableRow = $('<tr data-process-plan-id="' + result['result']['data']['process_plan']['id'] + '" data-item-id="' + manufactureData['shop_item_id'] + '"><td>' + manufactureData['shop_item_id'] + '</td>' + (!i ? ('<td rowspan="' + countManufactures + '">' + $.escapeHtml(result['result']['data']['process_plan']['name']) + '</td>') : '') + '<td>' + $.escapeHtml(manufactureData['shop_item_name']) + '</td>' + (!i ? ('<td rowspan="' + countManufactures + '" width="110"><input type="text" class="price manufacture-volume form-control" name="manufacture_volume_' + result['result']['data']['process_plan']['id'] + '" value="1"/></td>') : '') + ' <!--<td width="110"><input type="text" class="price manufacture-volume form-control" name="manufacture_volume_' + result['result']['data']['process_plan']['id'] + '" value="1"/></td>--><td class="manufacture_rate"><span class="manufacture_rate_value">' + manufactureRate + '</span><span class="manufacture_measure_name">' + $.escapeHtml(manufactureData['measure_name']) + '</span></td><td class="manufacture_count"><span class="manufacture_count_value">' + manufactureRate + '</span><span class="manufacture_measure_name">' + $.escapeHtml(manufactureData['measure_name']) + '</span></td><td></td><td></td>' + (!i ? '<td rowspan="' + countManufactures + '"><a class="delete-associated-item" onclick="$.deleteProductionTaskProcessPlan(this) /*var oTr = $(this).parents(\'tr\'), processPlanId = oTr.data(\'process-plan-id\'), oTrSiblings = oTr.siblings(\'[data-process-plan-id=\' + processPlanId + \']\'); console.log(oTrSiblings); next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)*/"><i class="fa fa-times-circle darkorange"></i></a></td>' : '') + '</tr>');
+							// for (var i = 0; i < countManufactures; i++)
+							// {
+								// var manufactureData = result['result']['data']['process_plan']['manufacture'][i],
+									// manufactureRate = $.mathRound(parseFloat(manufactureData['rate']), 2);
+									//manufactureRate = parseFloat(manufactureData['rate']);
 
-								oPlanManufacturesTableBody.append(newTableRow);
+								// newTableRow = $('<tr data-process-plan-id="' + result['result']['data']['process_plan']['id'] + '" data-item-id="' + manufactureData['shop_item_id'] + '"><td>' + manufactureData['shop_item_id'] + '</td>' + (!i ? ('<td' + (countManufactures > 1 ? (' rowspan="' + countManufactures + '"') : '') + '><a onclick="$.showProductionTaskProcessPlanDetails(this)">' + $.escapeHtml(result['result']['data']['process_plan']['name']) + '</a></td>') : '') + '<td>' + $.escapeHtml(manufactureData['shop_item_name']) + '</td>' + (!i ? ('<td' + (countManufactures > 1 ? (' rowspan="' + countManufactures + '"') : '') + ' width="110"><input type="text" class="price manufacture-volume form-control" name="manufacture_volume_' + result['result']['data']['process_plan']['id'] + '" value="1"/></td>') : '') + ' <!--<td width="110"><input type="text" class="price manufacture-volume form-control" name="manufacture_volume_' + result['result']['data']['process_plan']['id'] + '" value="1"/></td>--><td class="manufacture_rate"><span class="manufacture_rate_value">' + manufactureRate + '</span><span class="manufacture_measure_name">' + $.escapeHtml(manufactureData['measure_name']) + '</span></td><td class="manufacture_count"><span class="manufacture_count_value">' + manufactureRate + '</span><span class="manufacture_measure_name">' + $.escapeHtml(manufactureData['measure_name']) + '</span></td><td></td><td></td><td></td><td></td>' + (!i ? '<td ' + (countManufactures > 1 ? (' rowspan="' + countManufactures + '"') : '') + '><a class="delete-associated-item" onclick="$.deleteProductionTaskProcessPlan(this) /*var oTr = $(this).parents(\'tr\'), processPlanId = oTr.data(\'process-plan-id\'), oTrSiblings = oTr.siblings(\'[data-process-plan-id=\' + processPlanId + \']\'); console.log(oTrSiblings); next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)*/"><i class="fa fa-times-circle darkorange"></i></a></td>' : '') + '</tr>');
 
-								//var newRow = $('<tr data-item-id=\"' + ui.item.id + '\"><td class=\"index\">' + $('#{$windowId} .index_value').val() + '</td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td width=\"110\"><input type=\"text\" class=\"price set-item-price form-control\" name=\"shop_item_price[]\" value=\"' + ui.item.price_with_tax +'\"/></td><td>' + $.escapeHtml(ui.item.currency) + '</td><td width=\"80\"><input class=\"set-item-count form-control\" name=\"shop_item_quantity[]\" value=\"\"/></td>	<td><span class=\"calc-warehouse-sum\"></span></td><td><a class=\"delete-associated-item\" onclick=\"var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>')
-							}
+								// oPlanManufacturesTableBody.append(newTableRow);
+							// }
 
 							// Материалы
 
-							// Идентификаторы ранее добавленных материалов
-							oPlanMaterialsTr.each(function() {
 
-								aPlanMaterialsIds.push($(this).data('itemId'));
-							});
+							$.addTrProcessPlanMaterialsToProductionTask(oProcessPlanData, result['result']['data']['process_plan']['materials'], oPlanMaterialsTableBody, oPlanManufacturesTableBody, windowId);
 
-							//console.log('aPlanMaterialsIds', aPlanMaterialsIds);
+							/////////////////////////////////////
 
-							countMaterials = result['result']['data']['process_plan']['materials'].length;
-
-							//var oMapProcessPlanMaterials = {'process_plan_id': aProcessPlanInfo['id'], 'materials': []};
-
-							var aTmpMaterials = [];
-
-							for (var j = 0; j < countMaterials; j++)
+							if (0)
 							{
-								var materialsData = result['result']['data']['process_plan']['materials'][j];
+								// Идентификаторы ранее добавленных материалов
+								oPlanMaterialsTr.each(function() {
 
-								materialsData['rate'] = +materialsData['rate'];
+									aPlanMaterialsIds.push($(this).data('itemId'));
+								});
 
-								materialCostValue = materialsData['price'] * materialsData['rate'];
+								//console.log('aPlanMaterialsIds', aPlanMaterialsIds);
 
-								aTmpMaterials.push({'id': materialsData['shop_item_id'], 'count': materialsData['rate'], 'price': materialsData['price']});
+								countMaterials = result['result']['data']['process_plan']['materials'].length;
 
-								materialMeasureName = materialsData['measure_name'] ? $.escapeHtml(materialsData['measure_name']) : '';
+								//var oMapProcessPlanMaterials = {'process_plan_id': aProcessPlanInfo['id'], 'materials': []};
 
-								// Материал уже есть в списке (относится к ранее добавленной техкарте)
-								if (aPlanMaterialsIds.includes(materialsData['shop_item_id']))
+								var aTmpMaterials = [];
+
+								for (var j = 0; j < countMaterials; j++)
 								{
-									bCreateTableRow = false;
+									var materialsData = result['result']['data']['process_plan']['materials'][j];
 
-									// Строка с существующим материалом
-									oExistingPlanMaterialsTr = oPlanMaterialsTr.filter('[data-item-id = "' + materialsData['shop_item_id'] + '"]');
+									materialsData['rate'] = +materialsData['rate'];
 
-									var oTaskMaterialInfo = $.getTaskPlanMaterialCountAndCostValue(materialsData['shop_item_id'], oPlanManufacturesTableBody.data('aMapProcessPlanMaterials'), windowId);
+									materialCostValue = materialsData['price'] * materialsData['rate'];
 
-									// Количество
-									oSpanMaterialCountValue = oExistingPlanMaterialsTr.find('.material_count_value');
+									aTmpMaterials.push({'id': materialsData['shop_item_id'], 'count': materialsData['rate'], 'price': materialsData['price']});
 
-									//materialsData['rate'] += +oSpanMaterialCountValue.text();
-									materialsData['rate'] += +oTaskMaterialInfo.count;
+									materialMeasureName = materialsData['measure_name'] ? $.escapeHtml(materialsData['measure_name']) : '';
 
-									//oSpanMaterialCountValue.text(materialsData['rate'] + +oSpanMaterialCountValue.text());
-									oSpanMaterialCountValue.text($.mathRound(materialsData['rate'], 2));
+									// Материал уже есть в списке (относится к ранее добавленной техкарте)
+									if (aPlanMaterialsIds.includes(materialsData['shop_item_id']))
+									{
+										bCreateTableRow = false;
 
-									// Общая стоимость
-									//oSpanMaterialCostValue = oExistingPlanMaterialsTr.find('.material_cost_value');
+										// Строка с существующим материалом
+										oExistingPlanMaterialsTr = oPlanMaterialsTr.filter('[data-item-id = "' + materialsData['shop_item_id'] + '"]');
 
-									oSpanMaterialCostValue = oExistingPlanMaterialsTr.find('.material_cost_value');
-									//oSpanMaterialCostValue.text(materialCostValue + +oSpanMaterialCostValue.text());
-									oSpanMaterialCostValue.text(materialCostValue + +oTaskMaterialInfo.price);
+										var oTaskMaterialInfo = $.getTaskPlanMaterialCountAndCostValue(materialsData['shop_item_id'], oPlanManufacturesTableBody.data('aMapProcessPlanMaterials'), windowId);
 
-									// continue;
+										// Количество
+										oSpanMaterialCountValue = oExistingPlanMaterialsTr.find('.material_fact_value');
+
+										//materialsData['rate'] += +oSpanMaterialCountValue.text();
+										materialsData['rate'] += +oTaskMaterialInfo.count;
+
+										//oSpanMaterialCountValue.text(materialsData['rate'] + +oSpanMaterialCountValue.text());
+										oSpanMaterialCountValue.text($.mathRound(materialsData['rate'], 2));
+
+										// Общая стоимость
+
+										// Используется при выполнении производственного задания
+										/* oSpanMaterialCostValue = oExistingPlanMaterialsTr.find('.material_cost_value');
+										oSpanMaterialCostValue.text(materialCostValue + +oTaskMaterialInfo.price); */
+
+										// continue;
+									}
+									else
+									{
+										bCreateTableRow = true;
+									}
+
+									materialsData['rest'] = +materialsData['rest'];
+
+									//console.log('materialsData', materialsData);
+
+									materialShortage = materialsData['rate'] > materialsData['rest'] ? $.mathRound(materialsData['rate'] - materialsData['rest'], 2) : '';
+
+									if (materialShortage)
+									{
+										// Количество для заказа округляем до сотых в случае делимого товара (тип - 2),
+										// для остальных типов товаров - округляем до большего целого
+										materialShortage = materialsData['shop_item_type'] == 2 ? $.mathRound(materialShortage, 2) : Math.ceil(materialShortage);
+									}
+
+									if (!bCreateTableRow)
+									{
+										oExistingPlanMaterialsTr
+											.find('.material_shortage_value')
+												.text(materialShortage)
+											.end()
+											.find('.material_shortage .material_measure_name')
+												.html(materialShortage ? materialMeasureName : '');
+
+										continue;
+									}
+
+									//<td class="manufacture_count"><span class="manufacture_count_value">35</span> <span class="manufacture_measure_name">шт</span></td>
+									//materialsData['rate'] = +materialsData['rate'];
+
+									// materialMeasureName = '<span class="material_measure_name">' + $.escapeHtml(materialsData['measure_name']) + '</span>';
+
+									newTableRow = $('<tr data-item-id="' + materialsData['shop_item_id'] + '"><td>' + materialsData['shop_item_id'] + '</td><td>' + $.escapeHtml(materialsData['name']) + '</td><td class="material_fact"><span class="material_fact_value">' + materialsData['rate'] + '</span><span class="material_measure_name">' + materialMeasureName + '</span></td><td class="material_fact"></td><td class="material_difference"></td><td class="material_price"><span class="material_price_value">'/* + $.escapeHtml(materialsData['price'])*/ + '</span><span class="material_currency_sign">'/* + $.escapeHtml(materialsData['currency_sign'])*/ + '</span></td><td class="material_cost"><span class="material_cost_value">'/* + materialCostValue*/ + '</span><span class="material_currency_sign">'/* + $.escapeHtml(materialsData['currency_sign'])*/ + '</span></td><td class="material_rest"><span class="material_rest_value">' + materialsData['rest'] + '</span><span class="material_measure_name">' + materialMeasureName + '</span></td><td class="material_shortage"><span class="material_shortage_value">' + materialShortage + '</span><span class="material_measure_name">' + (materialShortage ? materialMeasureName : '') + '</span></td>');
+
+									oPlanMaterialsTableBody.append(newTableRow);
 								}
-								else
-								{
-									bCreateTableRow = true;
-								}
 
-								materialsData['rest'] = +materialsData['rest'];
 
-								//console.log('materialsData', materialsData);
 
-								materialShortage = materialsData['rate'] > materialsData['rest'] ? $.mathRound(materialsData['rate'] - materialsData['rest'], 2) : '';
+								var oMapProcessPlanMaterials = {'process_plan_id': aProcessPlanInfo['id'], 'materials': aTmpMaterials};
 
-								if (materialShortage)
-								{
-									// Количество для заказа округляем до сотых в случае делимого товара (тип - 2),
-									// для остальных типов товаров - округляем до большего целого
-									materialShortage = materialsData['shop_item_type'] == 2 ? $.mathRound(materialShortage, 2) : Math.ceil(materialShortage);
-								}
-
-								if (!bCreateTableRow)
-								{
-									oExistingPlanMaterialsTr
-										.find('.material_shortage_value')
-											.text(materialShortage)
-										.end()
-										.find('.material_shortage .material_measure_name')
-											.html(materialShortage ? materialMeasureName : '');
-
-									continue;
-								}
-
-								//<td class="manufacture_count"><span class="manufacture_count_value">35</span> <span class="manufacture_measure_name">шт</span></td>
-								//materialsData['rate'] = +materialsData['rate'];
-
-								// materialMeasureName = '<span class="material_measure_name">' + $.escapeHtml(materialsData['measure_name']) + '</span>';
-
-								newTableRow = $('<tr data-item-id="' + materialsData['shop_item_id'] + '"><td>' + materialsData['shop_item_id'] + '</td><td>' + $.escapeHtml(materialsData['name']) + '</td><td class="material_count"><span class="material_count_value">' + materialsData['rate'] + '</span><span class="material_measure_name">' + materialMeasureName + '</span></td><td class="material_price"><span class="material_price_value">' + $.escapeHtml(materialsData['price']) + '</span><span class="material_currency_sign">' + $.escapeHtml(materialsData['currency_sign']) + '</span></td><td class="material_cost"><span class="material_cost_value">' + materialCostValue + '</span><span class="material_currency_sign">' + $.escapeHtml(materialsData['currency_sign']) + '</span></td><td class="material_rest"><span class="material_rest_value">' + materialsData['rest'] + '</span><span class="material_measure_name">' + materialMeasureName + '</span></td><td class="material_shortage"><span class="material_shortage_value">' + materialShortage + '</span><span class="material_measure_name">' + (materialShortage ? materialMeasureName : '') + '</span></td>');
-
-								oPlanMaterialsTableBody.append(newTableRow);
+								oPlanManufacturesTableBody.data('aAddedProcessPlansId').push(aProcessPlanInfo['id']);
+								oPlanManufacturesTableBody.data('aMapProcessPlanMaterials').push(oMapProcessPlanMaterials);
 							}
 
-							var oMapProcessPlanMaterials = {'process_plan_id': aProcessPlanInfo['id'], 'materials': aTmpMaterials};
-
-							oPlanManufacturesTableBody.data('aAddedProcessPlansId').push(aProcessPlanInfo['id']);
-							oPlanManufacturesTableBody.data('aMapProcessPlanMaterials').push(oMapProcessPlanMaterials);
+							//////////////////////
 
 							// console.log('oMapProcessPlanMaterials', oMapProcessPlanMaterials);
 						}
+					}
+				}
+			});
+		},
+
+		// Добавление в таблицу изделий, создаваемых по одной техкарте производственного задания
+		addTrProcessPlanManufacturesToProductionTask: function(oProcessPlanData, oProcessPlanManufactures, oProcessPlanManufacturesTableBody) {
+
+			var countManufactures = oProcessPlanManufactures.length;
+
+			// Продукция
+			for (var i = 0; i < countManufactures; i++)
+			{
+				var manufactureData = oProcessPlanManufactures[i],
+					manufactureRate = $.mathRound(parseFloat(manufactureData['rate']), 2),
+
+					newTableRow = $('<tr data-process-plan-id="' + oProcessPlanData['id'] + '" data-item-id="' + manufactureData['shop_item_id'] + '"><td>' + manufactureData['shop_item_id'] + '</td>' + (!i ? ('<td' + (countManufactures > 1 ? (' rowspan="' + countManufactures + '"') : '') + '><a onclick="$.showProductionTaskProcessPlanDetails(this)">' + $.escapeHtml(oProcessPlanData['name']) + '</a></td>') : '') + '<td>' + $.escapeHtml(manufactureData['shop_item_name']) + '</td>' + (!i ? ('<td' + (countManufactures > 1 ? (' rowspan="' + countManufactures + '"') : '') + ' width="110"><input type="text" class="price manufacture-volume form-control" name="manufacture_volume_' + oProcessPlanData['id'] + '" value="1"/></td>') : '') + ' <td class="manufacture_rate"><span class="manufacture_rate_value">' + manufactureRate + '</span><span class="manufacture_measure_name">' + $.escapeHtml(manufactureData['measure_name']) + '</span></td><td class="manufacture_count"><span class="manufacture_count_value">' + manufactureRate + '</span><span class="manufacture_measure_name">' + $.escapeHtml(manufactureData['measure_name']) + '</span></td><td></td><td></td><td></td><td></td>' + (!i ? '<td ' + (countManufactures > 1 ? (' rowspan="' + countManufactures + '"') : '') + '><a class="delete-associated-item" onclick="$.deleteProductionTaskProcessPlan(this) /*var oTr = $(this).parents(\'tr\'), processPlanId = oTr.data(\'process-plan-id\'), oTrSiblings = oTr.siblings(\'[data-process-plan-id=\' + processPlanId + \']\'); console.log(oTrSiblings); next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)*/"><i class="fa fa-times-circle darkorange"></i></a></td>' : '') + '</tr>');
+
+				oProcessPlanManufacturesTableBody.append(newTableRow);
+			}
+		},
+
+		// Добавление в таблицу материалов, используемых для производства по одной техкарте производственного задания
+		addTrProcessPlanMaterialsToProductionTask: function(oProcessPlanData, oProcessPlanMaterials, oProcessPlanMaterialsTableBody, oProcessPlanManufacturesTableBody, windowId) {
+
+			var oPlanMaterialsTr = oProcessPlanMaterialsTableBody.find('tr'),
+				aPlanMaterialsIds = [];
+
+			// Идентификаторы ранее добавленных материалов
+			oPlanMaterialsTr.each(function() {
+
+				aPlanMaterialsIds.push($(this).data('itemId'));
+			});
+
+			//console.log('aPlanMaterialsIds', aPlanMaterialsIds);
+
+			var countMaterials = oProcessPlanMaterials.length;
+
+			//var oMapProcessPlanMaterials = {'process_plan_id': aProcessPlanInfo['id'], 'materials': []};
+
+			var aTmpMaterials = [];
+
+			for (var j = 0; j < countMaterials; j++)
+			{
+				var materialsData = oProcessPlanMaterials[j];
+
+				materialsData['rate'] = +materialsData['rate'];
+
+				materialCostValue = materialsData['price'] * materialsData['rate'];
+
+				aTmpMaterials.push({'id': materialsData['shop_item_id'], 'count': materialsData['rate'], 'price': materialsData['price']});
+
+				materialMeasureName = materialsData['measure_name'] ? $.escapeHtml(materialsData['measure_name']) : '';
+
+				// Материал уже есть в списке (относится к ранее добавленной техкарте)
+				if (aPlanMaterialsIds.includes(materialsData['shop_item_id']))
+				{
+					bCreateTableRow = false;
+
+					// Строка с существующим материалом
+					oExistingPlanMaterialsTr = oPlanMaterialsTr.filter('[data-item-id = "' + materialsData['shop_item_id'] + '"]');
+
+					var oTaskMaterialInfo = $.getTaskPlanMaterialCountAndCostValue(materialsData['shop_item_id'], oProcessPlanManufacturesTableBody.data('aMapProcessPlanMaterials'), windowId);
+
+					// Количество
+					oSpanMaterialCountValue = oExistingPlanMaterialsTr.find('.material_fact_value');
+
+					//materialsData['rate'] += +oSpanMaterialCountValue.text();
+					materialsData['rate'] += +oTaskMaterialInfo.count;
+
+					//oSpanMaterialCountValue.text(materialsData['rate'] + +oSpanMaterialCountValue.text());
+					oSpanMaterialCountValue.text($.mathRound(materialsData['rate'], 2));
+
+					// Общая стоимость
+
+					// Используется при выполнении производственного задания
+					// oSpanMaterialCostValue = oExistingPlanMaterialsTr.find('.material_cost_value');
+					//oSpanMaterialCostValue.text(materialCostValue + +oTaskMaterialInfo.price);
+
+					// continue;
+				}
+				else
+				{
+					bCreateTableRow = true;
+				}
+
+				materialsData['rest'] = +materialsData['rest'];
+
+				//console.log('materialsData', materialsData);
+
+				materialShortage = materialsData['rate'] > materialsData['rest'] ? $.mathRound(materialsData['rate'] - materialsData['rest'], 2) : '';
+
+				if (materialShortage)
+				{
+					// Количество для заказа округляем до сотых в случае делимого товара (тип - 2),
+					// для остальных типов товаров - округляем до большего целого
+					materialShortage = materialsData['shop_item_type'] == 2 ? $.mathRound(materialShortage, 2) : Math.ceil(materialShortage);
+				}
+
+				if (!bCreateTableRow)
+				{
+					oExistingPlanMaterialsTr
+						.find('.material_shortage_value')
+							.text(materialShortage)
+						.end()
+						.find('.material_shortage .material_measure_name')
+							.html(materialShortage ? materialMeasureName : '');
+
+					continue;
+				}
+
+				var newTableRow = $('<tr data-item-id="' + materialsData['shop_item_id'] + '"><td>' + materialsData['shop_item_id'] + '</td><td>' + $.escapeHtml(materialsData['name']) + '</td><td class="material_fact"><span class="material_fact_value">' + materialsData['rate'] + '</span><span class="material_measure_name">' + materialMeasureName + '</span></td><td class="material_fact"></td><td class="material_difference"></td><td class="material_price"><span class="material_price_value">' + '</span><span class="material_currency_sign">' + '</span></td><td class="material_cost"><span class="material_cost_value">' + '</span><span class="material_currency_sign">' + '</span></td><td class="material_rest"><span class="material_rest_value">' + materialsData['rest'] + '</span><span class="material_measure_name">' + materialMeasureName + '</span></td><td class="material_shortage"><span class="material_shortage_value">' + materialShortage + '</span><span class="material_measure_name">' + (materialShortage ? materialMeasureName : '') + '</span></td>');
+
+				oProcessPlanMaterialsTableBody.append(newTableRow);
+			}
+
+			var oMapProcessPlanMaterials = {'process_plan_id': oProcessPlanData['id'], 'materials': aTmpMaterials};
+
+			oProcessPlanManufacturesTableBody.data('aAddedProcessPlansId').push(oProcessPlanData['id']);
+			oProcessPlanManufacturesTableBody.data('aMapProcessPlanMaterials').push(oMapProcessPlanMaterials);
+
+		},
+
+		showProductionTaskProcessPlanDetails: function(oProductionTaskProcessPlanLink /* iProductionProcessPlanId */) {
+
+			var oProductionTaskProcessPlanLink = $(oProductionTaskProcessPlanLink),
+				oTr = oProductionTaskProcessPlanLink.parents('tr'),
+				iProductionProcessPlanId = +oTr.data().processPlanId,
+				manufactureVolume = oTr.find('input.manufacture-volume').val();
+
+			console.log('manufactureVolume =', manufactureVolume);
+
+			// console.log('tr.data().processPlanId =', typeof tr.data().processPlanId);
+
+			if (!iProductionProcessPlanId)
+			{
+				return false;
+			}
+
+			$.loadingScreen('show');
+
+			//var color = $(object).css('background-color');
+
+			$.ajax({
+				url: hostcmsBackend + '/production/task/index.php',
+				// data: { 'showCrmIconsModal': 1 },
+				data: { 'showProductionProcessPlanDetails': 1, 'productionProcessPlanId': iProductionProcessPlanId, 'manufactureVolume': manufactureVolume },
+				dataType: 'json',
+				type: 'POST',
+				success: function(response){
+					$.loadingScreen('hide');
+
+					if ( !response.error )
+					{
+						$('body').append(response.html);
+
+						var $modal = $('#productionProcessPlanDetailsModal');
+
+						$modal.modal('show');
+
+						$modal.on('hidden.bs.modal', function () {
+							$(this).remove();
+						});
 					}
 				}
 			});
@@ -1018,11 +1199,13 @@ function isEmpty(str) {
 							{
 								if (bMaterialUsedInOtherProcessPlan)
 								{
-									oTaskPlanMaterialCount = oTr.find('.material_count_value');
+									oTaskPlanMaterialCount = oTr.find('.material_fact_value');
 									oTaskPlanMaterialCostValue = oTr.find('.material_cost_value');
 
 									oTaskPlanMaterialCount.text(+(oTaskPlanMaterialCount.text() - oDeletedMaterial['count']).toFixed(2));
-									oTaskPlanMaterialCostValue.text(oTaskPlanMaterialCostValue.text() - oDeletedMaterial['count'] * oDeletedMaterial['price']);
+
+									// Используется при выполнении производственного задания
+									//oTaskPlanMaterialCostValue.text(oTaskPlanMaterialCostValue.text() - oDeletedMaterial['count'] * oDeletedMaterial['price']);
 								}
 								else
 								{
@@ -1353,15 +1536,17 @@ function isEmpty(str) {
 						case 'textarea':
 							$field.text(aValue['value']);
 
+							syntaxhighlighter.loadAutosave($field);
+
 							// Ace editor
-							var editor_textarea = document.getElementById($field.attr('id')),
+							/*var editor_textarea = document.getElementById($field.attr('id')),
 								editor_div = editor_textarea !== null ? editor_textarea.nextSibling : '';
 
 							if (editor_div != '' && $(editor_div).hasClass('ace_editor'))
 							{
 								var editor = ace.edit(editor_div);
 								editor.getSession().setValue($field.text());
-							}
+							}*/
 						break;
 						case 'checkbox':
 							$field.prop('checked', !!aValue['value']);
@@ -1659,6 +1844,7 @@ function isEmpty(str) {
 				$condition = $parent.find('.ipaddress-filter-condition'),
 				$value = $parent.find('.ipaddress-filter-value'),
 				$case_sensitive = $parent.find('.ipaddress-filter-case-sensitive'),
+				$header_case_sensitive = $parent.find('.ipaddress-filter-header-case-sensitive'),
 				$days = $parent.find('.filter-days-wrapper');
 
 			$days.removeClass('hidden');
@@ -1678,6 +1864,7 @@ function isEmpty(str) {
 			if ($object.val() == 'header')
 			{
 				$header_name.removeClass('hidden');
+				$header_case_sensitive.removeClass('hidden');
 
 				$days.addClass('hidden');
 			}
@@ -1686,6 +1873,11 @@ function isEmpty(str) {
 				if (!$header_name.hasClass('hidden'))
 				{
 					$header_name.addClass('hidden');
+				}
+
+				if (!$header_case_sensitive.hasClass('hidden'))
+				{
+					$header_case_sensitive.addClass('hidden');
 				}
 			}
 
@@ -1812,7 +2004,7 @@ function isEmpty(str) {
 				$.cookie(name, value, { expires: 365 }); // days
 			}
 		},
-		changeSiteuserEmailType: function(object, lng) {
+		/*changeSiteuserEmailType: function(object, lng) {
 			var type = parseInt($(object).val());
 
 			switch (type) {
@@ -1835,7 +2027,7 @@ function isEmpty(str) {
 					});
 				break;
 			}
-		},
+		},*/
 		blockIp: function(settings) {
 			$.loadingScreen('show');
 
@@ -6202,7 +6394,7 @@ function isEmpty(str) {
 			var	notificationExtra = '',
 				bUnread = oNotification['read'] == 0,
 				storageNotifications = $.localStorageGetItem('notifications'),
-				lastWindowNotificationId = window.lastWindowNotificationId??0,
+				lastWindowNotificationId = window.lastWindowNotificationId ? window.lastWindowNotificationId : 0,
 				lastStoredNotificationId = storageNotifications['lastAddedNotificationId'] ? storageNotifications['lastAddedNotificationId'] : 0;
 
 			if (oNotification['extra'].length)
@@ -7052,9 +7244,11 @@ function isEmpty(str) {
 			var
 				// jProperies = jQuery('#' + windowId + ' #property_' + index),
 				// jSourceProperty = jProperies.eq(0),
-				jSourceProperty = jQuery(object).parents('#' + windowId + ' #property_' + index);
+				jCopiedProperty = jQuery(object).parents('#' + windowId + ' #property_' + index),
+				// визуальный редактор клонируется от первого оригинального
+				jSourceProperty = jQuery('#' + windowId + ' #property_' + index).eq(0);
 
-			// console.log(jSourceProperty);
+			console.log(jSourceProperty);
 
 			// Объект окна настроек большого изображения у родителя
 			var oSpanFileSettings = jSourceProperty.find("span[id ^= 'file_large_settings_']");
@@ -7079,7 +7273,6 @@ function isEmpty(str) {
 			html = html
 				.replace(/(id_property(?:_[\d]+)+)/g, 'id_property_clone' + iRand);
 
-			// var jNewObject = jSourceProperty.clone();
 			var jNewObject = jQuery(jQuery.parseHTML(html, document, true));
 
 			// Clear autocomplete value
@@ -7089,8 +7282,7 @@ function isEmpty(str) {
 
 			jNewObject.addClass('new-property');
 
-			// jNewObject.insertAfter(jProperies.eq(-1));
-			jNewObject.insertAfter(jSourceProperty);
+			jNewObject.insertAfter(jCopiedProperty);
 
 			jNewObject.find("textarea")
 				.removeAttr('wysiwyg')
@@ -8786,22 +8978,24 @@ function isEmpty(str) {
 			}, settings);
 
 			// Сохраним из визуальных редакторов данные
-			if (typeof tinyMCE != 'undefined')
+			/*if (typeof tinyMCE != 'undefined')
 			{
 				tinyMCE.triggerSave();
-			}
+			}*/
+			wysiwyg.saveAll(jQuery("#" + settings.windowId));
 
 			// CodeMirror
-			/*jQuery("#"+settings.windowId+" .CodeMirror").each(function(){
+			/*jQuery("#" + settings.windowId + " .CodeMirror").each(function(){
 				this.CodeMirror.save();
 			});*/
 
-			jQuery("#" + settings.windowId + " .ace_editor").each(function(){
+			/*jQuery("#" + settings.windowId + " .ace_editor").each(function(){
 				var editor = ace.edit(this),
 					code = editor.getSession().getValue();
 
 				$(this).prev('textarea').val(code);
-			});
+			});*/
+			syntaxhighlighter.saveAll(settings);
 
 			var FormNode = jQuery(settings.buttonObject).closest('form'),
 				data = jQuery.getData(settings),
@@ -8884,9 +9078,10 @@ function isEmpty(str) {
 
 			return data;
 		},
-		beforeContentLoad: function(object)
+		beforeContentLoad: function($object)
 		{
-			object.removeTinyMCE();
+			wysiwyg.removeAll($object);
+			//$object.removeTinyMCE();
 		},
 		insertContent: function(jObject, content)
 		{
@@ -9037,7 +9232,8 @@ function isEmpty(str) {
 
 				$("select#template_id", $form).val(data['template_id']);
 
-				if (typeof tinyMCE != 'undefined')
+				wysiwyg.reloadTextarea(tinyTextarea, data['css']);
+				/*if (typeof tinyMCE != 'undefined')
 				{
 					var elementId = tinyTextarea.attr('id'),
 						editor = tinyMCE.get(elementId);
@@ -9048,7 +9244,7 @@ function isEmpty(str) {
 							editor.dom.loadCSS(value);
 						});
 					}
-				}
+				}*/
 			}
 		},
 		loadSelectOptionsCallback: function(data)
@@ -9249,13 +9445,14 @@ function isEmpty(str) {
 
 			var jNewObject = jQuery(jQuery.parseHTML(html, document, true));
 
-			jNewObject.find('.tox.tox-tinymce').remove();
+			//jNewObject.find('.tox.tox-tinymce').remove();
+			wysiwyg.clear(jNewObject);
 
 			jNewObject.insertAfter(jMultipleValue);
 
-			jNewObject.find("textarea")
+			/*jNewObject.find("textarea")
 				.removeAttr('wysiwyg')
-				.css('display', '');
+				.css('display', '');*/
 
 			// Change input name
 			jNewObject.find(':regex(name, ^\\S+_\\d+$)').each(function(index, object){
@@ -9534,7 +9731,10 @@ function isEmpty(str) {
 						.css('opacity', .5)
 						.show();
 
-					if (typeof tinyMCE != 'undefined')
+					var tinyTextarea = $(ui.item).find('textarea');
+					wysiwyg.remove(tinyTextarea);
+
+					/*if (typeof tinyMCE != 'undefined')
 					{
 						var tinyTextarea = $(ui.item).find('textarea'),
 							elementId = tinyTextarea.attr('id'),
@@ -9546,7 +9746,7 @@ function isEmpty(str) {
 							tinyMCE.remove('#' + elementId);
 							tinyTextarea.attr('name', elementName);
 						}
-					}
+					}*/
 				},
 				stop: function() {
 					// Ghost hide
@@ -9556,12 +9756,12 @@ function isEmpty(str) {
 						.removeClass('ghost-item')
 						.css('opacity', 1);
 
-					if (typeof tinyMCE != 'undefined')
-					{
+					//if (typeof tinyMCE != 'undefined')
+					//{
 						var tinyTextarea = ghostItem.find('textarea'),
 							script = tinyTextarea.next('script').text();
 						eval(script);
-					}
+					//}
 				}
 			}).disableSelection();
 
@@ -9748,7 +9948,7 @@ function isEmpty(str) {
 	});
 
 	$.fn.extend({
-		removeTinyMCE: function() {
+		/*removeTinyMCE: function() {
 			if (typeof tinyMCE != 'undefined')
 			{
 				this.each(function() {
@@ -9767,7 +9967,7 @@ function isEmpty(str) {
 			}
 
 			return this;
-		},
+		},*/
 		appendOptions: function(array) {
 			return this.each(function() {
 				var $option, $select = $(this);
@@ -11066,10 +11266,10 @@ $(function(){
 			}
 		})
 		// For TinyMCE init
-		.on('afterTinyMceInit', function(event, editor) {
-			editor.on('change', function() { mainFormLocker.lock() });
-			editor.on('input', function(e) { mainFormAutosave.changed($('form[id ^= "formEdit"]'), e) });
-		})
+		// .on('afterTinyMceInit', function(event, editor) {
+		// 	editor.on('change', function() { mainFormLocker.lock() });
+		// 	editor.on('input', function(e) { mainFormAutosave.changed($('form[id ^= "formEdit"]'), e) });
+		// })
 		.on('shown.bs.dropdown', '.table-scrollable', function(event) {
 			var divWrap = $(this),
 				//heightDivWrap = divWrap.height(),
@@ -12122,7 +12322,6 @@ function calendarEventDrop(event, delta, revertFunc) // eslint-disable-line
 		ajaxData = $.extend({}, $.getData({}), {'eventId': eventId, 'moduleId': moduleId, startTimestamp: event.start.format('X'), 'allDay': +event.allDay}) ;
 
 	$.ajax({
-
 		url: hostcmsBackend + '/calendar/index.php?eventDrop',
 		type: "POST",
 		dataType: 'json',
@@ -12334,13 +12533,19 @@ function formAutosave()
 			dataset = $form.data('datasetid'),
 			entity_id = $('input[name = id]', $form).val();
 
+		//syntaxhighlighter.save($(".ace_editor", $form));
+
+		$("textarea", $form).each(function(){
+			syntaxhighlighter.save($(this));
+		});
+
 		// Ace editor
-		$(".ace_editor", $form).each(function(){
+		/*$(".ace_editor", $form).each(function(){
 			var editor = ace.edit(this),
 				code = editor.getSession().getValue();
 
 			$(this).prev('textarea').val(code);
-		});
+		});*/
 
 		var ignoreFields = ["secret_csrf"];
 
@@ -12974,7 +13179,7 @@ function declension(number, nominative, genitive_singular, genitive_plural)
 // /-- Проверка ячеек
 
 // http://www.tinymce.com/wiki.php/How-to_implement_a_custom_file_browser
-function HostCMSFileManager() // eslint-disable-line
+/*function HostCMSFileManager() // eslint-disable-line
 {
 	//this.fileBrowserCallBack = function(field_name, url, type, win)
 	this.fileBrowserCallBack = function(callback, value, meta)
@@ -13022,7 +13227,7 @@ function HostCMSFileManager() // eslint-disable-line
 
 		this.win.close();
 	}
-}
+}*/
 
 /**
  * jQuery Cookie plugin
@@ -13225,7 +13430,8 @@ function setTableWithFixedHeaderAndLeftColumn() // eslint-disable-line
 					$("tbody", leftTable).append(fixedTr);
 
 					$('td', this).each(function (index) {
-						cols += parseInt($(this).attr('colspan')??1);
+						var colspan = $(this).attr('colspan');
+						cols += parseInt(colspan ? colspan : 1);
 
 						if (index > 0 && cols >= 3)
 						{
@@ -13449,7 +13655,7 @@ jQuery.expr[':'].icontains = function(a, i, m) {
 };
 
 // Загрузка изображений в TinyMCE6
-function hostcms_image_upload_handler (blobInfo, progress) { // eslint-disable-line
+/*function hostcms_image_upload_handler (blobInfo, progress) { // eslint-disable-line
 	return new Promise((resolve, reject) => {
 		const xhr = new XMLHttpRequest();
 		xhr.withCredentials = false;
@@ -13517,9 +13723,9 @@ function hostcms_image_upload_handler (blobInfo, progress) { // eslint-disable-l
 
 		xhr.send(formData);
 	});
-}
+}*/
 
-function replaceWysiwygImages(aConform) // eslint-disable-line
+/*function replaceWysiwygImages(aConform) // eslint-disable-line
 {
 	if (typeof tinyMCE != 'undefined')
 	{
@@ -13538,4 +13744,4 @@ function replaceWysiwygImages(aConform) // eslint-disable-line
 			}
 		});
 	}
-}
+}*/

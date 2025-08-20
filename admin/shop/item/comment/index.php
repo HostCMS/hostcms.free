@@ -393,6 +393,9 @@ else
 $oAdmin_Form_Controller->addExternalReplace('{shop_item_id}', intval($oShop_Item->id));
 $oAdmin_Form_Controller->addExternalReplace('{informationsystem_item_id}', 0);
 
+$oAdmin_Form_Dataset
+	->changeField('active', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'));
+
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(
 	$oAdmin_Form_Dataset

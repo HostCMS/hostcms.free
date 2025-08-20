@@ -50,11 +50,12 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				if ($shop_item_id)
 				{
-					$ShopItemModification = Core_Entity::factory('Shop_Item', $shop_item_id);
+					$oShop_Item_Modification = Core_Entity::factory('Shop_Item', $shop_item_id);
 
 					$object->modification_id = $shop_item_id;
-					$object->shop_id = $ShopItemModification->Shop->id;
-					$object->shop_currency_id = $ShopItemModification->Shop->shop_currency_id;
+					$object->shop_id = $oShop_Item_Modification->Shop->id;
+					$object->shop_currency_id = $oShop_Item_Modification->Shop->shop_currency_id;
+					$object->shop_tax_id = $oShop_Item_Modification->Shop->shop_tax_id;
 
 					$this->addSkipColumn('shop_group_id');
 				}
@@ -780,11 +781,11 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->move($this->getField('showed')->divAttr(array('class' => 'form-group col-lg-3 col-sm-6 col-xs-12')), $oMainRow5)
 				;
 
-				$oLargeFilePath = $this->_object->image_large != '' && Core_File::isFile($this->_object->getLargeFilePath())
+				$oLargeFilePath = $this->_object->image_large != '' /*&& Core_File::isFile($this->_object->getLargeFilePath())*/
 					? $this->_object->getLargeFileHref()
 					: '';
 
-				$oSmallFilePath = $this->_object->image_small != '' && Core_File::isFile($this->_object->getSmallFilePath())
+				$oSmallFilePath = $this->_object->image_small != '' /*&& Core_File::isFile($this->_object->getSmallFilePath())*/
 					? $this->_object->getSmallFileHref()
 					: '';
 
@@ -2437,8 +2438,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					if (!is_null(Core_Array::getPost("specPrice_{$oShop_Specialprice->id}")))
 					{
 						$oShop_Specialprice
-							->min_quantity(intval(Core_Array::getPost("specMinQuantity_{$oShop_Specialprice->id}", 0)))
-							->max_quantity(intval(Core_Array::getPost("specMaxQuantity_{$oShop_Specialprice->id}", 0)))
+							->min_quantity(Core_Array::getPost("specMinQuantity_{$oShop_Specialprice->id}", 0, 'int'))
+							->max_quantity(Core_Array::getPost("specMaxQuantity_{$oShop_Specialprice->id}", 0, 'int'))
 							->price(Shop_Controller::instance()->convertPrice(Core_Array::getPost("specPrice_{$oShop_Specialprice->id}", 0)))
 							->percent(Shop_Controller::instance()->convertPrice(Core_Array::getPost("specPercent_{$oShop_Specialprice->id}", 0)));
 
@@ -3501,7 +3502,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oTax
 			->queryBuilder()
-			->orderBy('id');
+			->orderBy('shop_taxes.id');
 
 		$aTaxes = $oTax->findAll();
 

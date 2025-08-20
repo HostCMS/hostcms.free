@@ -21,7 +21,8 @@ $oAdmin_Form_Controller
 
 $aJSON = array(
 	'status' => 'error',
-	'location' => ''
+	'uploaded' => 0,
+	'url' => ''
 );
 
 $modelName = Core_Array::getPost('entity_type', '', 'trim');
@@ -77,7 +78,9 @@ if ($modelName != '' && $oUser)
 
 				$aJSON = array(
 					'status' => 'success',
-					'location' => '/' . ltrim($href, '/') . $name
+					'uploaded' => 1,
+					'fileName' => $name,
+					'url' => '/' . ltrim($href, '/') . $name
 				);
 			}
 		}

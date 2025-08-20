@@ -2,8 +2,8 @@
 
 return array(
 	'model_name' => 'Групи IP-адрес',
-	'add_form_title' => 'Додавання групи IP-адрес',
-	'edit_form_title' => 'Редагування групи IP-адрес "%s"',
+	'add_title' => 'Додавання групи IP-адрес',
+	'edit_title' => 'Редагування групи IP-адрес "%s"',
 	'name' => 'Назва',
 	'sorting' => 'Порядок сортування',
 	'parent_id' => 'Група',

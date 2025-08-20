@@ -209,6 +209,12 @@ class Ipaddress_Visitor_Filter_Model extends Core_Entity
 				<span class="badge badge-round badge-max-width margin-right-5 green" title="<?php echo $filter_type?>"><?php echo $filter_type?></span>
 
 				<?php
+				// header_case_sensitive since 7.1.5
+				if ($type === 'header' && isset($aCondition['header_case_sensitive']) && $aCondition['header_case_sensitive'])
+				{
+					?><i title="<?php echo Core::_('Ipaddress_Filter.case_sensitive')?>" class="fa-solid fa-font margin-right-5 success"></i><?php
+				}
+
 				if ($type != 'delta_mobile_resolution')
 				{
 					$filter_condition = htmlspecialchars(Core::_('Ipaddress_Filter.condition_' . Core_Array::get($aCondition, 'condition', '', 'trim')));
@@ -221,19 +227,19 @@ class Ipaddress_Visitor_Filter_Model extends Core_Entity
 				<?php
 				}
 
+				if ($aCondition['case_sensitive'])
+				{
+					?><i title="<?php echo Core::_('Ipaddress_Filter.case_sensitive')?>" class="fa-solid fa-font margin-right-5 blue"></i><?php
+				}
+
 				if ($type != 'header')
 				{
 					$times = Core_Array::get($aCondition, 'times', 1, 'int');
 					$hours = Core_Array::get($aCondition, 'hours', 1, 'int');
 					?>
-					<span class="badge badge-round badge-max-width margin-right-5 orange"><?php echo $this->_getTimesByText($times)?> <?php echo Core::_('Ipaddress_Visitor_Filter.in')?> <?php echo $this->_getHoursByText($hours)?></span>
+					<span class="badge badge-round badge-max-width orange"><?php echo $this->_getTimesByText($times)?> <?php echo Core::_('Ipaddress_Visitor_Filter.in')?> <?php echo $this->_getHoursByText($hours)?></span>
 
 				<?php
-				}
-
-				if ($aCondition['case_sensitive'])
-				{
-					?><i title="<?php echo Core::_('Ipaddress_Filter.case_sensitive')?>" class="fa-solid fa-font"></i><?php
 				}
 				?>
 			</div><?php

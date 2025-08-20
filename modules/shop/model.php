@@ -128,7 +128,8 @@ class Shop_Model extends Core_Entity
 		'producer_image_small_max_height' => 100,
 		'producer_image_large_max_height' => 800,
 		'discountcard_template' => '{this.id}',
-		'invoice_template' => '{this.id}'
+		'invoice_template' => '{this.id}',
+		'marking_template' => ''
 	);
 
 	/**
@@ -1264,8 +1265,8 @@ class Shop_Model extends Core_Entity
 		$countShopGroups = $this->Shop_Groups->getCount();
 		$countShopGroups && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
-			->value('<i class="fa-regular fa-folder-open"></i> ' . $countShopGroups)
-			->title(Core::_('Shop.all_groups_count', $countShopGroups))
+			->value('<i class="fa-regular fa-folder-open"></i> ' . number_format($countShopGroups, 0, ',', ' '))
+			->title(Core::_('Shop.all_groups_count', number_format($countShopGroups, 0, ',', ' ')))
 			->execute();
 
 		$oShopItems = $this->Shop_Items;
@@ -1277,8 +1278,8 @@ class Shop_Model extends Core_Entity
 
 		$countShopItems && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
-			->value('<i class="fa-solid fa-box"></i> ' . $countShopItems)
-			->title(Core::_('Shop.all_items_count', $countShopItems))
+			->value('<i class="fa-solid fa-box"></i> ' . number_format($countShopItems, 0, ',', ' '))
+			->title(Core::_('Shop.all_items_count', number_format($countShopItems, 0, ',', ' ')))
 			->execute();
 
 		$oShopItems = $this->Shop_Items;
@@ -1290,8 +1291,8 @@ class Shop_Model extends Core_Entity
 
 		$countModifications && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
-			->value('<i class="fa-solid fa-code-fork"></i> ' . $countModifications)
-			->title(Core::_('Shop.all_modifications_count', $countModifications))
+			->value('<i class="fa-solid fa-code-fork"></i> ' . number_format($countModifications, 0, ',', ' '))
+			->title(Core::_('Shop.all_modifications_count', number_format($countModifications, 0, ',', ' ')))
 			->execute();
 
 		$oShopItems = $this->Shop_Items;
@@ -1303,8 +1304,8 @@ class Shop_Model extends Core_Entity
 
 		$countShortcuts && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
-			->value('<i class="fa-solid fa-link"></i> ' . $countShortcuts)
-			->title(Core::_('Shop.all_shortcuts_count', $countShortcuts))
+			->value('<i class="fa-solid fa-link"></i> ' . number_format($countShortcuts, 0, ',', ' '))
+			->title(Core::_('Shop.all_shortcuts_count', number_format($countShortcuts, 0, ',', ' ')))
 			->execute();
 	}
 
@@ -1477,6 +1478,7 @@ class Shop_Model extends Core_Entity
 				'issue_discountcard' => $this->issue_discountcard,
 				'filter' => $this->filter,
 				'discountcard_template' => $this->discountcard_template,
+				'marking_template' => $this->marking_template,
 				'invoice_template' => $this->invoice_template,
 				'order_admin_subject' => $this->order_admin_subject,
 				'order_user_subject' => $this->order_user_subject,
@@ -1593,6 +1595,7 @@ class Shop_Model extends Core_Entity
 				$this->issue_discountcard = Core_Array::get($aBackup, 'issue_discountcard');
 				$this->filter = Core_Array::get($aBackup, 'filter');
 				$this->discountcard_template = Core_Array::get($aBackup, 'discountcard_template');
+				$this->marking_template = Core_Array::get($aBackup, 'marking_template');
 				$this->invoice_template = Core_Array::get($aBackup, 'invoice_template');
 				$this->order_admin_subject = Core_Array::get($aBackup, 'order_admin_subject');
 				$this->order_user_subject = Core_Array::get($aBackup, 'order_user_subject');

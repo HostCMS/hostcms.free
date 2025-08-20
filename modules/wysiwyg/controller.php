@@ -165,7 +165,7 @@ class Wysiwyg_Controller
 						});<?php
 					}
 					?>
-					replaceWysiwygImages(aConformities);
+					wysiwyg.replaceWysiwygImages(aConformities);
 				});
 				</script>
 				<?php

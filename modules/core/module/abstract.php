@@ -628,6 +628,15 @@ abstract class Core_Module_Abstract
 					case 'color':
 						$value = strval($value);
 					break;
+					case 'xsl':
+						$value = intval($value);
+
+						$oXsl = Core_Entity::factory('Xsl')->getById($value);
+
+						$value = !is_null($oXsl)
+							? strval($oXsl->name)
+							: $value;
+					break;
 				}
 			}
 

@@ -22,7 +22,7 @@ class Wysiwyg_Module extends Core_Module_Abstract
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2025-04-04';
+	public $date = '2025-08-19';
 
 	/**
 	 * Module name
@@ -38,9 +38,12 @@ class Wysiwyg_Module extends Core_Module_Abstract
 	{
 		$this->menu = array(
 			array(
-				'sorting' => 0,
-				'block' => -1,
-				'ico' => 'fa fa-file-code-o',
+				'sorting' => 150,
+				'block' => 3,
+				'ico' => 'fa-solid fa-file-code-o',
+				'name' => Core::_('Wysiwyg.menu'),
+				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/wysiwyg/index.php"),
+				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/wysiwyg/index.php'}); return false")
 			)
 		);
 

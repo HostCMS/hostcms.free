@@ -290,7 +290,13 @@ class Shop_Payment_System_Model extends Core_Entity
 	 */
 	public function getPaymentSystemImageFileHref()
 	{
-		return $this->getHref() . rawurlencode($this->image);
+		$link = Core::moduleIsActive('cdn')
+			? Cdn_Controller::link($this->getHref() . $this->image)
+			: NULL;
+
+		return !is_null($link)
+			? $link
+			: $this->getHref() . rawurlencode($this->image);
 	}
 
 	/**

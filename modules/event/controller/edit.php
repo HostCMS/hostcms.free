@@ -282,7 +282,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 			$oMainRow1->add(
 				Admin_Form_Entity::factory('Code')
-					->html('<div class="form-group col-xs-12 semi-bold">' . nl2br(htmlspecialchars($this->_object->description)) . '</div>')
+					->html('<div class="form-group col-xs-12 semi-bold">' . strip_tags($this->_object->description, '<br><p><b><i><u><strong><em>') . '</div>')
 			);
 
 			if (Core::moduleIsActive('dms'))
@@ -1614,13 +1614,13 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$this->getField('description')
 					->rows($iNewLines < 7 ? 7 : ($iNewLines < 15 ? $iNewLines : 15))
 					->wysiwyg(Core::moduleIsActive('wysiwyg'))
-					->wysiwygOptions(array(
+					->wysiwygMode('short')
+					/*->wysiwygOptions(array(
 						'menubar' => 'false',
 						'statusbar' => 'true',
 						'plugins' => '"advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table code wordcount"',
 						'toolbar1' => '"insert | undo redo | formatselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | removeformat"',
-						// 'inline' => 'true'
-					))
+					))*/
 					->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2
 			)
 			->move($this->getField('place')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow6)

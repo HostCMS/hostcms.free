@@ -136,7 +136,7 @@ class Ipaddress_Visitor_Filter_Controller_Edit extends Admin_Form_Action_Control
 														Admin_Form_Entity::factory('Input')
 															->name('get_name[]')
 															->value(Core_Array::get($aCondition, 'get', '', 'trim'))
-															->divAttr(array('class' => 'col-xs-12 col-sm-1 property-data ipaddress-filter-get-name' . $hidden))
+															->divAttr(array('class' => 'col-xs-12 col-sm-4 property-data ipaddress-filter-get-name' . $hidden))
 															->placeholder(Core::_('Ipaddress_Filter.placeholder_name'))
 															->controller($this->_Admin_Form_Controller)
 															->execute();
@@ -148,8 +148,19 @@ class Ipaddress_Visitor_Filter_Controller_Edit extends Admin_Form_Action_Control
 														Admin_Form_Entity::factory('Input')
 															->name('header_name[]')
 															->value(Core_Array::get($aCondition, 'header', '', 'trim'))
-															->divAttr(array('class' => 'col-xs-12 col-sm-1 property-data ipaddress-filter-header-name' . $hiddenHeader))
+															->divAttr(array('class' => 'col-xs-8 col-sm-6 col-lg-2 property-data ipaddress-filter-header-name' . $hiddenHeader))
 															->placeholder(Core::_('Ipaddress_Filter.placeholder_name'))
+															->controller($this->_Admin_Form_Controller)
+															->execute();
+
+														Admin_Form_Entity::factory('Select')
+															->name('header_case_sensitive[]')
+															->options(array(
+																Core::_('Ipaddress_Filter.case_unsensitive'),
+																Core::_('Ipaddress_Filter.case_sensitive')
+															))
+															->value(Core_Array::get($aCondition, 'header_case_sensitive', 0, 'int'))
+															->divAttr(array('class' => 'col-xs-4 col-sm-2 col-lg-1 property-data ipaddress-filter-header-case-sensitive' . $hiddenHeader))
 															->controller($this->_Admin_Form_Controller)
 															->execute();
 
@@ -164,7 +175,7 @@ class Ipaddress_Visitor_Filter_Controller_Edit extends Admin_Form_Action_Control
 														Admin_Form_Entity::factory('Input')
 															->name('value[]')
 															->value(Core_Array::get($aCondition, 'value', '', 'str')) // trim нельзя, может быть 2 пробела
-															->divAttr(array('class' => 'col-xs-12 col-sm-4 col-lg-3 property-data ipaddress-filter-value' . $hiddenMobileResolution))
+															->divAttr(array('class' => 'col-xs-8 col-sm-4 col-lg-3 property-data ipaddress-filter-value' . $hiddenMobileResolution))
 															->placeholder(Core::_('Ipaddress_Filter.placeholder_value'))
 															->controller($this->_Admin_Form_Controller)
 															->execute();
@@ -176,12 +187,12 @@ class Ipaddress_Visitor_Filter_Controller_Edit extends Admin_Form_Action_Control
 																Core::_('Ipaddress_Filter.case_sensitive')
 															))
 															->value(Core_Array::get($aCondition, 'case_sensitive', 1, 'int'))
-															->divAttr(array('class' => 'col-xs-12 col-sm-2 col-lg-1 property-data ipaddress-filter-case-sensitive' . $hiddenMobileResolution))
+															->divAttr(array('class' => 'col-xs-3 col-sm-2 col-lg-1 property-data ipaddress-filter-case-sensitive' . $hiddenMobileResolution))
 															->controller($this->_Admin_Form_Controller)
 															->execute();
 
 														Admin_Form_Entity::factory('Div')
-															->class('col-xs-12 col-lg-3 property-data filter-days-wrapper' . ($type == 'header' ? ' hidden' : ''))
+															->class('col-xs-12 col-sm-4 col-lg-3 property-data filter-days-wrapper' . ($type == 'header' ? ' hidden' : ''))
 															->add(
 																Admin_Form_Entity::factory('Code')->html('
 																	<input type="text" class="form-control" name="times[]" value="' . Core_Array::get($aCondition, 'times', 1, 'int') . '"/><span> ' . Core::_('Ipaddress_Visitor_Filter.times') . ' </span><input type="text" class="form-control" name="hours[]" value="' . Core_Array::get($aCondition, 'hours', 3, 'int') . '"/><span> ' . Core::_('Ipaddress_Visitor_Filter.hours') . '</span>
@@ -216,12 +227,12 @@ class Ipaddress_Visitor_Filter_Controller_Edit extends Admin_Form_Action_Control
 						1 => Core::_('Ipaddress_Visitor_Filter.mode1')
 					))
 					->value($this->_object->mode)
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-2'));
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-lg-2'));
 
 				$oMainRow2->add($oMode);
 
 				$oMainTab
-					->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-2')), $oMainRow2);
+					->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-lg-2')), $oMainRow2);
 
 				$oMainTab->delete($this->getField('block_mode'));
 
@@ -234,15 +245,15 @@ class Ipaddress_Visitor_Filter_Controller_Edit extends Admin_Form_Action_Control
 						2 => Core::_('Ipaddress_Visitor_Filter.block_mode2')
 					))
 					->value($this->_object->block_mode)
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-2'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-lg-2'))
 					->onchange('$.changeIpaddressFilterBlockMode(this)');
 
 				$oMainRow2->add($oBlockMode);
 
 				$oMainTab
-					->move($this->getField('ban_hours')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 col-lg-2' . ($this->_object->block_mode ? ' hidden' : ''))), $oMainRow2)
-					->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-2')), $oMainRow2)
-					->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-2 margin-top-21')), $oMainRow2)
+					->move($this->getField('ban_hours')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-lg-2' . ($this->_object->block_mode ? ' hidden' : ''))), $oMainRow2)
+					->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-lg-2')), $oMainRow2)
+					->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-lg-2 margin-top-21')), $oMainRow2)
 					;
 
 				// Удаляем группу
@@ -312,6 +323,7 @@ class Ipaddress_Visitor_Filter_Controller_Edit extends Admin_Form_Action_Control
 		$aTimes = Core_Array::getPost('times', array(), 'array');
 		$aHours = Core_Array::getPost('hours', array(), 'array');
 		$aHeader_Names = Core_Array::getPost('header_name', array(), 'array');
+		$aHeader_Case_Sensitives = Core_Array::getPost('header_case_sensitive', array(), 'array');
 
 		$aJson = array();
 		foreach ($aTypes as $key => $type)
@@ -320,16 +332,19 @@ class Ipaddress_Visitor_Filter_Controller_Edit extends Admin_Form_Action_Control
 				'type' => $type,
 				'condition' => Core_Array::get($aConditions, $key),
 				'value' => Core_Array::get($aValues, $key),
-				'case_sensitive' => intval(Core_Array::get($aCase_Sensitives, $key)),
-				'times' => intval(Core_Array::get($aTimes, $key)),
-				'hours' => intval(Core_Array::get($aHours, $key))
+				'case_sensitive' => Core_Array::get($aCase_Sensitives, $key, 0, 'int'),
+				'times' => Core_Array::get($aTimes, $key, 0, 'int'),
+				'hours' => Core_Array::get($aHours, $key, 0, 'int')
 			);
 
 			$type === 'get'
 				&& $aLine['get'] = Core_Array::get($aGet_Names, $key);
 
-			$type === 'header'
-				&& $aLine['header'] = Core_Array::get($aHeader_Names, $key);
+			if ($type === 'header')
+			{
+				$aLine['header'] = Core_Array::get($aHeader_Names, $key);
+				$aLine['header_case_sensitive'] = Core_Array::get($aHeader_Case_Sensitives, $key, 0, 'int');
+			}
 
 			$aJson[] = $aLine;
 		}

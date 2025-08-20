@@ -223,9 +223,6 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 
 		$oTextarea = Admin_Form_Entity::factory('Textarea');
 
-		$oTmpOptions = $oTextarea->syntaxHighlighterOptions;
-		$oTmpOptions['mode'] = '"ace/mode/php"';
-
 		$oTextarea->caption(Core::_('Shop_Delivery.handler'))
 			->name('code')
 			->id('code_handler')
@@ -233,7 +230,7 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 			->divAttr(array('id' => 'code', 'class' => 'form-group col-xs-12 hidden-0'))
 			->rows(18)
 			->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
-			->syntaxHighlighterOptions($oTmpOptions);
+			->syntaxHighlighterMode('php');
 
 		$oMainRow2
 			->add($oTextarea)

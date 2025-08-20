@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Antispam
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 return array(
 	'title' => 'Стоп-слова',
@@ -27,4 +27,5 @@ return array(
 	'case_sensitive' => 'С учетом регистра',
 	'active' => 'Активность',
 	'changeActive_success' => 'Активность успешно изменена!',
+	'changeCaseSesitive_success' => 'Регистр успешно изменен!',
 );

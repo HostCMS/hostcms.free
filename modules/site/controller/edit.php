@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Site
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -469,10 +469,10 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainTab->move($this->getField('html_cache_use'), $oSiteTabCacheRow1);
 
 		$this->getField('html_cache_with')->divAttr(array('class' => 'form-group col-xs-12'));
-		$oMainTab->move($this->getField('html_cache_with'), $oSiteTabCacheRow2);
+		$oMainTab->move($this->getField('html_cache_with')->rows(10), $oSiteTabCacheRow2);
 
 		$this->getField('html_cache_without')->divAttr(array('class' => 'form-group col-xs-12'));
-		$oMainTab->move($this->getField('html_cache_without'), $oSiteTabCacheRow3);
+		$oMainTab->move($this->getField('html_cache_without')->rows(10), $oSiteTabCacheRow3);
 
 		$this->getField('html_cache_clear_probability')->divAttr(array('class' => 'form-group col-sm-6 col-md-6 col-sm-6 col-md-6 col-lg-6'));
 		$oMainTab->move($this->getField('html_cache_clear_probability'), $oSiteTabCacheRow4);
@@ -587,6 +587,12 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oSite_Favicon_Controller_Tab
 			->site_id($this->_object->id)
 			->applyObjectProperty();
+
+		// Clear static cache
+		if (Core::moduleIsActive('cache') && !$this->_object->html_cache_use)
+		{
+			Core_Cache::instance('static')->deleteAll($this->_object->id);
+		}
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 	}

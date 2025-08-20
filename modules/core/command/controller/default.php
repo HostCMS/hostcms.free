@@ -14,14 +14,24 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 {
 	/**
 	 * Check possibility of using static cache
+	 * @hostcms-event Core_Command_Controller_Default.onCheckCache
 	 */
 	protected function _checkCache()
 	{
-		return (
+		$return = (
 			!isset($_SESSION)
 			|| !isset($_SESSION['siteuser_id']) && !Core_Auth::logged() && empty($_SESSION['SCART'])
 			)
-			&& empty($_COOKIE['CART']) && count($_POST) == 0;
+			&& empty($_COOKIE['CART']) && count($_POST) == 0
+			// HostCMS cookie agree
+			&& !isset($_COOKIE['_hccagree']);
+
+		Core_Event::notify(get_class($this) . '.onCheckCache', $this);
+
+		$eventResult = Core_Event::getLastReturn();
+		!is_null($eventResult) && $return = $eventResult;
+
+		return $return;
 	}
 
 	/**
@@ -29,6 +39,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 	 * @return Core_Response
 	 * @hostcms-event Core_Command_Controller_Default.onBeforeShowAction
 	 * @hostcms-event Core_Command_Controller_Default.onAfterShowAction
+	 * @hostcms-event Core_Command_Controller_Default.onBeforeUseStaticCache
 	 * @hostcms-event Core_Command_Controller_Default.onBeforeContentCreation
 	 * @hostcms-event Core_Command_Controller_Default.onBeforeSetTemplate
 	 */
@@ -213,6 +224,8 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 					$oCore_Response
 						->header('Content-Type', 'text/html; charset=' . $oSite->coding)
 						->body($result);
+
+					Core_Event::notify(get_class($this) . '.onBeforeUseStaticCache', $this, array($oCore_Response));
 
 					return $oCore_Response;
 				}
@@ -475,6 +488,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 				{
 					$oCdn_Controller = Cdn_Controller::instance($oCdn->driver);
 					$oCdn_Controller->setCdnSite($oCdn_Site);
+					$oCdn_Controller->setCdn($oCdn);
 
 					$oCdn_Site->css
 						&& $oCore_Page->cssCDN = '//' . htmlspecialchars($oCdn_Controller->getCssDomain());

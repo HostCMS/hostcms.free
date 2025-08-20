@@ -39,9 +39,10 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/jquery.slimscroll.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/toastr/toastr.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/bootbox/bootbox.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/jquery.form.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/jquery.form.js');
 
-			->addJs('/modules/skin/' . $this->_skinName . '/js/ace/ace.js')
+			//https://github.com/ajaxorg/ace-builds
+			/*->addJs('/modules/skin/' . $this->_skinName . '/js/ace/ace.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/ace/theme-github.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/ace/mode-html.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/ace/mode-php.js')
@@ -54,8 +55,31 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/ace/ext-language_tools.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/ace/ext-searchbox-hostcms.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/ace/ext-prompt.js')
-			// ->addJs('/modules/skin/' . $this->_skinName . '/js/ace/ext-beautify.js')
+			// ->addJs('/modules/skin/' . $this->_skinName . '/js/ace/ext-beautify.js')*/
 
+		if (Core::moduleIsActive('syntaxhighlighter'))
+		{
+			$oSyntaxhighlighter = Core_Entity::factory('Syntaxhighlighter')->getDefault();
+
+			if ($oSyntaxhighlighter)
+			{
+				$oSyntaxhighlighter_Handler = Syntaxhighlighter_Handler::instance($oSyntaxhighlighter);
+
+				$aJsList = $oSyntaxhighlighter_Handler->getJsList();
+				foreach ($aJsList as $js)
+				{
+					$this->addJs($js);
+				}
+
+				$aCssList = $oSyntaxhighlighter_Handler->getCssList();
+				foreach ($aCssList as $css)
+				{
+					$this->addCss($css);
+				}
+			}
+		}
+
+		$this
 			->addJs('/modules/skin/' . $this->_skinName . '/js/star-rating.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/typeahead-bs2.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/ui/jquery-ui.min.js')
@@ -143,7 +167,7 @@ class Skin_Bootstrap extends Core_Skin
 		$bLogged = Core_Auth::logged();
 		if ($bLogged)
 		{
-			?>var HostCMSFileManager = new HostCMSFileManager();
+			?>//var HostCMSFileManager = new HostCMSFileManager();
 
 			<?php if (!defined('CONFIRM_CLOSE_BROWSER') || CONFIRM_CLOSE_BROWSER)
 			{
@@ -152,8 +176,47 @@ class Skin_Bootstrap extends Core_Skin
 		}
 		?>
 		</script>
-		<script src="<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/wysiwyg/jquery.tinymce.min.js?{$timestamp}")?>"></script>
+
 		<?php
+		if (Core::moduleIsActive('wysiwyg'))
+		{
+			$oWysiwyg = Core_Entity::factory('Wysiwyg')->getDefault();
+
+			if ($oWysiwyg)
+			{
+				$oWysiwyg_Handler = Wysiwyg_Handler::instance($oWysiwyg);
+
+				$aJsList = $oWysiwyg_Handler->getJsList();
+				foreach ($aJsList as $js)
+				{
+					?><script src="<?php echo Admin_Form_Controller::correctBackendPath("{$js}?{$timestamp}")?>"></script><?php
+				}
+
+				$aCssList = $oWysiwyg_Handler->getCssList();
+				foreach ($aCssList as $css)
+				{
+					?><link href="<?php echo Admin_Form_Controller::correctBackendPath("{$css}?{$timestamp}")?>" rel="stylesheet" type="text/css"><?php
+				}
+			}
+		}
+
+		if (Core::moduleIsActive('syntaxhighlighter'))
+		{
+			$oSyntaxhighlighter = Core_Entity::factory('Syntaxhighlighter')->getDefault();
+
+			if ($oSyntaxhighlighter)
+			{
+				$oSyntaxhighlighter_Handler = Syntaxhighlighter_Handler::instance($oSyntaxhighlighter);
+
+				$js = $oSyntaxhighlighter_Handler->getJs();
+
+				if (!is_null($js))
+				{
+					echo $js;
+				}
+			}
+		}
+
 		if ($this->_mode != 'install')
 		{
 			$wallpaperId = isset($_COOKIE['wallpaper-id'])
@@ -1788,7 +1851,30 @@ class Skin_Bootstrap extends Core_Skin
 		?><link rel="stylesheet" type="text/css" href="/modules/skin/bootstrap/fonts/fontawesome/6/css/all.min.css?<?php echo $iTimestamp?>" /><?php
 		?><script src="/modules/skin/default/frontend/jquery.min.js"></script><?php
 		?><script src="/modules/skin/default/frontend/jquery-ui.min.js"></script><?php
-		?><script src="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/wysiwyg/jquery.tinymce.min.js')?>"></script><?php
+
+		/*?><script src="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/wysiwyg/jquery.tinymce.min.js')?>"></script><?php*/
+
+		if (Core::moduleIsActive('wysiwyg'))
+		{
+			$oWysiwyg = Core_Entity::factory('Wysiwyg')->getDefault();
+
+			if ($oWysiwyg)
+			{
+				$oWysiwyg_Handler = Wysiwyg_Handler::instance($oWysiwyg);
+
+				$aJsList = $oWysiwyg_Handler->getJsList();
+				foreach ($aJsList as $js)
+				{
+					?><script src="<?php echo Admin_Form_Controller::correctBackendPath("{$js}?{$iTimestamp}")?>"></script><?php
+				}
+
+				$aCssList = $oWysiwyg_Handler->getCssList();
+				foreach ($aCssList as $css)
+				{
+					?><link href="<?php echo Admin_Form_Controller::correctBackendPath("{$css}?{$iTimestamp}")?>" rel="stylesheet" type="text/css"><?php
+				}
+			}
+		}
 
 		if ($bLess || $countSections)
 		{
@@ -2348,7 +2434,7 @@ class Skin_Bootstrap extends Core_Skin
 			);
 		}
 
-		$aCoreConfig = Core_Config::instance()->get('core_wysiwyg');
+		/*$aCoreConfig = Core_Config::instance()->get('core_wysiwyg');
 
 		$aConfig = array();
 
@@ -2358,14 +2444,29 @@ class Skin_Bootstrap extends Core_Skin
 			'menubar',
 			'file_picker_callback',
 			'content_css',
-		);
+		);*/
 
-		foreach ($aCoreConfig as $key => $value)
+		$aConfig = array();
+
+		if (Core::moduleIsActive('wysiwyg'))
 		{
-			if (!in_array($key, $aExcludeKeys))
+			$oWysiwyg = Core_Entity::factory('Wysiwyg')->getDefault();
+
+			if ($oWysiwyg)
 			{
-				is_bool($value) && $value = $value ? 'true' : 'false';
-				$aConfig[] = "{$key}: {$value}";
+				$oWysiwyg_Handler = Wysiwyg_Handler::instance($oWysiwyg);
+
+				$aCoreConfig = $oWysiwyg_Handler->getConfig();
+				$aExcludeKeys = $oWysiwyg_Handler->getExcludeOptions();
+
+				foreach ($aCoreConfig as $key => $value)
+				{
+					if (!in_array($key, $aExcludeKeys))
+					{
+						is_bool($value) && $value = $value ? 'true' : 'false';
+						$aConfig[] = "{$key}: {$value}";
+					}
+				}
 			}
 		}
 

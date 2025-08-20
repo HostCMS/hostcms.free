@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Printlayout
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 abstract class Printlayout_Controller_Print extends Admin_Form_Action_Controller
 {
@@ -404,7 +404,7 @@ abstract class Printlayout_Controller_Print extends Admin_Form_Action_Controller
 			?>
 			<div class="form-group col-xs-12 message-subject hidden">
 				<span class="caption"><?php echo Core::_('Printlayout.from')?></span>
-				<input class="form-control" name="from" type="text" value="<?php echo htmlspecialchars($oUser->getEmail())?>"/>
+				<input class="form-control" name="from" type="text" value="<?php echo htmlspecialchars((string) $oUser->getEmail())?>"/>
 			</div>
 			<div class="form-group col-xs-12">
 				<div class="control-group">
@@ -413,7 +413,6 @@ abstract class Printlayout_Controller_Print extends Admin_Form_Action_Controller
 					foreach ($aPrintlayout_Drivers as $key => $oPrintlayout_Driver)
 					{
 						$oPrintlayout_Driver_Controller = Printlayout_Driver_Controller::factory($oPrintlayout_Driver->driver);
-
 						if ($oPrintlayout_Driver_Controller->available())
 						{
 							$this->_rowsCount++;
@@ -428,7 +427,7 @@ abstract class Printlayout_Controller_Print extends Admin_Form_Action_Controller
 
 							?><div class="radio">
 								<label>
-									<input name="driver_id" value="<?php echo htmlspecialchars($oPrintlayout_Driver->id)?>" type="radio" class="colored-<?php echo $color?>" <?php echo $checked?>>
+									<input name="driver_id" value="<?php echo intval($oPrintlayout_Driver->id)?>" type="radio" class="colored-<?php echo $color?>" <?php echo $checked?>>
 									<span class="text"> <?php echo htmlspecialchars($oPrintlayout_Driver->name)?></span>
 								</label>
 							</div><?php
@@ -479,7 +478,7 @@ abstract class Printlayout_Controller_Print extends Admin_Form_Action_Controller
 			</div>
 			<div class="form-group col-xs-12 message-subject hidden">
 				<span class="caption"><?php echo Core::_('Printlayout.subject')?></span>
-				<input class="form-control" name="subject" type="text" value="<?php echo htmlspecialchars($subject)?>"/>
+				<input class="form-control" name="subject" type="text" value="<?php echo htmlspecialchars((string) $subject)?>"/>
 			</div>
 			<div class="form-group col-xs-12 message-text hidden">
 				<span class="caption"><?php echo Core::_('Printlayout.message_text')?></span>

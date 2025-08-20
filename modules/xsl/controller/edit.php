@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Xsl
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Xsl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -62,10 +62,6 @@ class Xsl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oTextarea_Xsl = Admin_Form_Entity::factory('Textarea');
 
-				$oTmpOptions = $oTextarea_Xsl->syntaxHighlighterOptions;
-				// $oTmpOptions['mode'] = 'xml';
-				$oTmpOptions['mode'] = '"ace/mode/xml"';
-
 				$xslContent = $this->_object->id
 					? $this->_object->loadXslFile()
 					: '<?xml version="1.0" encoding="utf-8"?>
@@ -91,7 +87,7 @@ class Xsl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->caption(Core::_('Xsl.value'))
 					->name('xsl_value')
 					->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
-					->syntaxHighlighterOptions($oTmpOptions)
+					->syntaxHighlighterMode('xml')
 					->divAttr(array('class' => 'form-group col-xs-12'));
 
 				$oMainRow2->add($oTextarea_Xsl);
@@ -136,11 +132,6 @@ class Xsl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$oTab_Lng->add($oLng_Tab_Row1 = Admin_Form_Entity::factory('Div')->class('row'));
 
 					$oTextarea_Lng = Admin_Form_Entity::factory('Textarea');
-
-					$oTmpOptions = $oTextarea_Lng->syntaxHighlighterOptions;
-					// $oTmpOptions['mode'] = 'xml';
-					$oTmpOptions['mode'] = '"ace/mode/xml"';
-
 					$oTextarea_Lng
 						->value(
 							$this->_object->loadLngDtdFile($sLng)
@@ -149,7 +140,7 @@ class Xsl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->caption(Core::_('Xsl.dtd', $sLng))
 						->name('lng_' . $sLng)
 						->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
-						->syntaxHighlighterOptions($oTmpOptions)
+						->syntaxHighlighterMode('xml')
 						->divAttr(array('class' => 'form-group col-xs-12'));
 
 					$oLng_Tab_Row1->add($oTextarea_Lng);

@@ -25,6 +25,46 @@ $oAdmin_Form_Controller
 	->title(Core::_('Wysiwyg_Filemanager.title'))
 	->pageTitle(Core::_('Wysiwyg_Filemanager.title'));
 
+$additionalFields = Core_Array::getGet('additionalFields', ''); // e.g. CKEditor,CKEditorFuncNum
+$globalAdditionalParams = '';
+if ($additionalFields != '')
+{
+	foreach (explode(',', $additionalFields) as $sTmp)
+	{
+		$sTmp = trim($sTmp);
+		if (isset($_GET[$sTmp]))
+		{
+			$globalAdditionalParams .= ($globalAdditionalParams == '' ? '' : '&') . rawurlencode($sTmp) . '=' . rawurlencode($_GET[$sTmp]);
+		}
+	}
+	
+	$oAdmin_Form_Controller->additionalParams($globalAdditionalParams);
+}
+
+if (!is_null(Core_Array::getPost('checkFileExist')))
+{
+	$aJSON = array();
+
+	$aFilenames = Core_Array::getPost('files', array(), 'array');
+	$cdir = Core_Array::getPost('cdir', '', 'trim');
+
+	$aExistFiles = array();
+
+	foreach ($aFilenames as $filename)
+	{
+		if ($filename != '' && Core_File::isFile(CMS_FOLDER . $cdir . $filename))
+		{
+			$aExistFiles[] = $filename;
+		}
+	}
+
+	$aJSON['exist_files'] = count($aExistFiles)
+		? Core::_('Wysiwyg_Filemanager.exist_files', implode('", "', $aExistFiles), FALSE)
+		: '';
+
+	Core::showJson($aJSON);
+}
+
 // Корневая директория для пользователя
 $oUser = Core_Auth::getCurrentUser();
 $root_dir = ltrim(Core_File::pathCorrection($oUser->root_dir), DIRECTORY_SEPARATOR);
@@ -98,10 +138,10 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Wysiwyg_Filemanager.root'))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, 'cdir=' . DIRECTORY_SEPARATOR)
+			$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $globalAdditionalParams . '&cdir=' . DIRECTORY_SEPARATOR)
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, 'cdir=' . DIRECTORY_SEPARATOR)
+			$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $globalAdditionalParams . '&cdir=' . DIRECTORY_SEPARATOR)
 	));
 
 if ($cdir != '')
@@ -111,7 +151,7 @@ if ($cdir != '')
 	$tmpCdir = DIRECTORY_SEPARATOR;
 	foreach ($aCdir as $sCdir)
 	{
-		$additional_param = 'cdir=' . rawurlencode($tmpCdir) . '&dir=' . rawurlencode($sCdir);
+		$additional_param = $globalAdditionalParams . '&cdir=' . rawurlencode($tmpCdir) . '&dir=' . rawurlencode($sCdir);
 		$oAdmin_Form_Entity_Breadcrumbs->add(
 		Admin_Form_Entity::factory('Breadcrumb')
 			->name($sCdir)
@@ -170,7 +210,7 @@ if (!$oUser->read_only)
 		->add(Admin_Form_Entity::factory('Code')->html('
 			<script type="text/javascript">
 				$(function() {
-					// var aFilenames = [];
+					var aFilenames = [];
 
 					$("#' . $windowId . ' #dropzone").dropzone({
 						url: "' . Admin_Form_Controller::correctBackendPath("/{admin}/wysiwyg/filemanager/index.php") . '?hostcms[action]=uploadFile&hostcms[checked][1][0]=1&cdir=' . rawurlencode($cdir) . '&secret_csrf=' . Core_Security::getCsrfToken() . '",
@@ -179,25 +219,46 @@ if (!$oUser->read_only)
 						paramName: "file",
 						uploadMultiple: true,
 						clickable: true,
-						// autoProcessQueue: false,
+						autoProcessQueue: false,
 						init: function() {
-							this.on("addedfile", function(file) {
-								// console.log(file);
+							dropzone = this;
 
-								// aFilenames.push(file.name);
+							dropzone.on("addedfile", function(file) {
+								aFilenames.push(file.name);
 
-								// console.log(aFilenames);
-
-								var thumbnail = $(file.previewElement);
-
-								thumbnail.on("click", function(){
+								$(file.previewElement).on("click", function(){
 									window.opener.HostCMSFileManager.insertFile("' . rawurlencode(DIRECTORY_SEPARATOR . ltrim($cdir, DIRECTORY_SEPARATOR)) . '" + file.name); return false;
 								});
+							});
+
+							dropzone.on("addedfiles", function() {
+								$.ajax({
+									url: "' . Admin_Form_Controller::correctBackendPath("/{admin}/wysiwyg/filemanager/index.php") . '",
+									data: { "checkFileExist": 1, "cdir": "' . Core_Str::escapeJavascriptVariable($cdir) . '", "files": aFilenames },
+									dataType: "json",
+									type: "POST",
+									success: function(result){
+										var bProcess = true;
+
+										if (result.exist_files != "")
+										{
+											bProcess = confirm(result.exist_files);
+
+											if (!bProcess)
+											{
+												dropzone.removeAllFiles();
+												aFilenames = [];
+											}
+										}
+
+										bProcess && dropzone.processQueue();
+									}
+								});
 							});' .
-							/*(isset($aConfig['reloadAfterUpload']) && $aConfig['reloadAfterUpload'] ? '
-							this.on("queuecomplete", function() {
+							(isset($aConfig['reloadAfterUpload']) && $aConfig['reloadAfterUpload'] ? '
+							dropzone.on("queuecomplete", function() {
 								$("#' . $windowId . ' #admin_forms_apply_button").click();
-							});' : '') . */ '
+							});' : '') .  '
 						}
 					});
 				});

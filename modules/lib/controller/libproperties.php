@@ -427,17 +427,13 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 
 				foreach ($value as $valueItem)
 				{
-					$oXsl = Core_Entity::factory('Xsl')->getByName($valueItem);
+					$xsl_id = $xsl_dir_id = 0;
 
+					$oXsl = Core_Entity::factory('Xsl')->getByName($valueItem);
 					if ($oXsl)
 					{
 						$xsl_id = $oXsl->id;
 						$xsl_dir_id = $oXsl->xsl_dir_id;
-					}
-					else
-					{
-						$xsl_id = 0;
-						$xsl_dir_id = 0;
 					}
 
 					$oDivInputs->add(
@@ -472,7 +468,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 													->name($sFieldName)
 													->id("lib_property_id_{$oLib_Property->id}")
 													->class('form-control')
-													->value($xsl_dir_id)
+													->value($xsl_id)
 											)
 											->add(
 												Core_Html_Entity::factory('A')

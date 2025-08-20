@@ -1583,7 +1583,7 @@ button.backendBody .ui-button::-moz-focus-inner {
 
 /* CSS */
 .button-1 {
-	background-color: #EA4C89;
+	background-color: #4CCCEA;
 	border-radius: 8px;
 	border-style: none;
 	box-sizing: border-box;
@@ -1612,7 +1612,7 @@ button.backendBody .ui-button::-moz-focus-inner {
 
 .button-1:hover,
 .button-1:focus {
-	background-color: #F082AC;
+	background-color: #61D8F4;
 }
 
 /*details {

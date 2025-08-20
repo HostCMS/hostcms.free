@@ -145,6 +145,11 @@ class Template_Model extends Core_Entity
 		$this->save();
 		$this->_createDir();
 		Core_File::write($this->getTemplateFilePath(), trim((string) $content));
+
+		clearstatcache();
+
+		Core_Cache::opcacheReset();
+
 		return $this;
 	}
 

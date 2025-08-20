@@ -273,16 +273,17 @@ class Core_Page extends Core_Servant_Properties
 	/**
 	 * Get block of linked css and clear added CSS list
 	 * @param boolean $bExternal add as link
+	 * @param string $rel default 'stylesheet'
 	 * @return string
 	 * @hostcms-event Core_Page.onBeforeGetCss
 	 */
-	public function getCss($bExternal = TRUE)
+	public function getCss($bExternal = TRUE, $rel = 'stylesheet')
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeGetCss', $this);
 
 		$return = $this->compress && Core::moduleIsActive('compression')
-			? $this->_getCssCompressed($bExternal)
-			: $this->_getCss($bExternal);
+			? $this->_getCssCompressed($bExternal, $rel)
+			: $this->_getCss($bExternal, $rel);
 
 		$this->css = array();
 
@@ -291,10 +292,11 @@ class Core_Page extends Core_Servant_Properties
 
 	/**
 	 * Get block of linked css
-	 * @param boolean $bExternal add as link, default TRUE
+	 * @param boolean $bExternal add as link
+	 * @param string $rel
 	 * @return string
 	 */
-	protected function _getCss($bExternal = TRUE)
+	protected function _getCss($bExternal, $rel)
 	{
 		$sReturn = $bExternal
 			? ''
@@ -308,7 +310,11 @@ class Core_Page extends Core_Servant_Properties
 					? filemtime($sPath)
 					: Core_Date::sql2timestamp($this->template->timestamp);
 
-				$sReturn .= '<link rel="stylesheet" type="text/css" href="' . $this->cssCDN . $css . '?' . $timestamp . '"' . ($this->doctype === 'xhtml' ? ' />' : '>') . "\n";
+				$type = $rel == 'preload' || $rel == 'prefetch'
+					? ' as="style"'
+					: ' type="text/css"';
+
+				$sReturn .= '<link rel="' . htmlspecialchars($rel) . '"' . $type . ' href="' . $this->cssCDN . $css . '?' . $timestamp . '"' . ($this->doctype === 'xhtml' ? ' />' : '>') . "\n";
 			}
 			else
 			{
@@ -326,10 +332,11 @@ class Core_Page extends Core_Servant_Properties
 
 	/**
 	 * Get block of linked compressed css
-	 * @param boolean $bExternal add as link, default TRUE
+	 * @param boolean $bExternal add as link
+	 * @param string $rel
 	 * @return string
 	 */
-	protected function _getCssCompressed($bExternal = TRUE)
+	protected function _getCssCompressed($bExternal, $rel)
 	{
 		try
 		{
@@ -341,13 +348,17 @@ class Core_Page extends Core_Servant_Properties
 				$oCompression_Controller->addCss($css);
 			}
 
+			$type = $rel == 'preload' || $rel == 'prefetch'
+				? ' as="style"'
+				: ' type="text/css"';
+
 			$sReturn = $bExternal
-				? '<link rel="stylesheet" type="text/css" href="' . $this->cssCDN . $oCompression_Controller->getPath() . '?' . Core_Date::sql2timestamp($this->template->timestamp) . '"' . ($this->doctype === 'xhtml' ? ' />' : '>') . "\n"
+				? '<link rel="' . htmlspecialchars($rel) . '"' . $type . ' href="' . $this->cssCDN . $oCompression_Controller->getPath() . '?' . Core_Date::sql2timestamp($this->template->timestamp) . '"' . ($this->doctype === 'xhtml' ? ' />' : '>') . "\n"
 				: "<style type=\"text/css\">\n" . $oCompression_Controller->getContent() . "\n</style>\n";
 		}
 		catch (Exception $e)
 		{
-			$sReturn = $this->_getCss();
+			$sReturn = $this->_getCss($bExternal, $rel);
 		}
 
 		return $sReturn;
@@ -356,14 +367,15 @@ class Core_Page extends Core_Servant_Properties
 	/**
 	 * Show block of linked css and clear added CSS list
 	 * @param boolean $bExternal add as link
+	 * @param string $rel default 'stylesheet'
 	 * @return self
 	 * @hostcms-event Core_Page.onBeforeShowCss
 	 */
-	public function showCss($bExternal = TRUE)
+	public function showCss($bExternal = TRUE, $rel = 'stylesheet')
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeShowCss', $this);
 
-		echo $this->getCss($bExternal);
+		echo $this->getCss($bExternal, $rel);
 		return $this;
 	}
 
@@ -428,7 +440,7 @@ class Core_Page extends Core_Servant_Properties
 
 	/**
 	 * Show block of linked JS and clear added JS list
-	 * @param boolean $mode async|defer|TRUE|FALSE, default FALSE
+	 * @param boolean $mode async|defer|prefetch|TRUE|FALSE, default FALSE
 	 * @return self
 	 * @hostcms-event Core_Page.onBeforeShowJs
 	 */
@@ -442,7 +454,7 @@ class Core_Page extends Core_Servant_Properties
 
 	/**
 	 * Get block of linked js
-	 * @param boolean $mode async|defer|TRUE|FALSE, default FALSE
+	 * @param boolean $mode async|defer|prefetch|TRUE|FALSE, default FALSE
 	 * @return string
 	 */
 	protected function _getJs($mode = FALSE)
@@ -455,33 +467,19 @@ class Core_Page extends Core_Servant_Properties
 				? filemtime($sPath)
 				: NULL;
 
-			$sReturn .= '<script' . $this->_getMode($aJs[1] === FALSE ? $mode : $aJs[1]) . ' src="' . $this->jsCDN . $aJs[0] . (!is_null($timestamp) ? '?' . $timestamp : '') . '"></script>' . "\n";
+			$currentMode = $aJs[1] === FALSE ? $mode : $aJs[1];
+
+			$isHint  = $currentMode === 'preload' || $currentMode === 'prefetch';
+			
+			$tagName = $isHint ? 'link' : 'script';
+			$attr = $isHint ? 'href' : 'src';
+
+			$sReturn .= '<' . $tagName . $this->_getMode($currentMode) . ' ' . $attr . '="' . $this->jsCDN . $aJs[0] . (!is_null($timestamp) ? '?' . $timestamp : '') . '"'
+				. ($tagName == 'link' && $this->doctype === 'xhtml' ? ' />' : '>')
+				. ($tagName != 'link' ? '</' . $tagName . '>' : '') . "\n";
 		}
 
 		return $sReturn;
-	}
-
-	/**
-	 * Get JS mode
-	 * @param $mode
-	 * @return string
-	 */
-	protected function _getMode($mode)
-	{
-		switch ($mode)
-		{
-			case 'defer':
-				$return = ' defer="defer"';
-			break;
-			case TRUE:
-			case 'async':
-				$return = ' async="async"';
-			break;
-			default:
-				$return = '';
-		}
-
-		return $return;
 	}
 
 	/**
@@ -509,15 +507,52 @@ class Core_Page extends Core_Servant_Properties
 				? filemtime(CMS_FOLDER . $sPath)
 				: NULL;
 
-			$sReturn .= '<script' . $this->_getMode($mode) . ' src="' . $this->jsCDN . $sPath . (!is_null($timestamp) ? '?' . $timestamp : '') . '"></script>' . "\n";
+			$isHint  = $mode === 'preload' || $mode === 'prefetch';
+
+			$tagName = $isHint ? 'link' : 'script';
+			$attr = $isHint ? 'href' : 'src';
+
+			$sReturn .= '<' . $tagName . $this->_getMode($mode) . ' ' . $attr . '="' . $this->jsCDN . $sPath . (!is_null($timestamp) ? '?' . $timestamp : '') . '"'
+				. ($tagName == 'link' && $this->doctype === 'xhtml' ? ' />' : '>')
+				. ($tagName != 'link' ? '</' . $tagName . '>' : '') . "\n";
 		}
 		catch (Exception $e)
 		{
-			$sReturn = $this->_getJs();
+			$sReturn = $this->_getJs($mode);
 		}
 
 		return $sReturn;
 	}
+	
+	/**
+	 * Get JS mode
+	 * @param $mode
+	 * @return string
+	 */
+	protected function _getMode($mode)
+	{
+		switch ($mode)
+		{
+			case 'defer':
+				$return = ' defer="defer"';
+			break;
+			case 'preload':
+				$return = ' rel="preload" as="script"';
+			break;
+			case 'prefetch':
+				$return = ' rel="prefetch" as="script"';
+			break;
+			case TRUE:
+			case 'async':
+				$return = ' async="async"';
+			break;
+			default:
+				$return = '';
+		}
+
+		return $return;
+	}
+
 
 	/**
 	 * Get block of linked css

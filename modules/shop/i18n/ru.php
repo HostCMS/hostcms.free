@@ -232,4 +232,6 @@ return array(
 	'watermark_item_header' => 'Товар',
 	'watermark_group_header' => 'Группа',
 	'watermark_producer_header' => 'Производитель',
+
+	'marking_template' => 'Шаблон артикула товара',
 );

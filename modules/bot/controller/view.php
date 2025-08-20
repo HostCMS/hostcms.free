@@ -158,11 +158,11 @@ class Bot_Controller_View extends Admin_Form_Controller_View
 										}
 										else
 										{
-											$('#<?php echo $windowId?> #settingsModal' + bot_module_id)
-												.removeTinyMCE()
-												.remove();
+											$object = $('#<?php echo $windowId?> #settingsModal' + bot_module_id);
+											wysiwyg.removeAll($object);
+											//$object.removeTinyMCE()
+											$object.remove();
 										}
-
 									});
 							}
 						}

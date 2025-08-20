@@ -44,6 +44,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 	/**
 	 * Top menu bar
+	 * @hostcms-event Admin_Form_Controller.onBeforeShowMenu
 	 */
 	protected function _topMenuBar()
 	{
@@ -194,7 +195,6 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 			->execute();
 
 		// $oUser = Core_Auth::getCurrentUser();
-
 
 		$aModelNames = array();
 		$aDatasets = $oAdmin_Form_Controller->getDatasets();
@@ -390,8 +390,8 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 										{
 											$sFormGroupId = $tabName . '-field-' . $oAdmin_Form_Field_Changed->id;
 
-											$bHide = isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field_Changed->name]['show'])
-												&& $aTabs[$tabName]['fields'][$oAdmin_Form_Field_Changed->name]['show'] == 0;
+											$bHide = $tabName != 'main' && (!isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field_Changed->name]['show'])
+												|| $aTabs[$tabName]['fields'][$oAdmin_Form_Field_Changed->name]['show'] == 0);
 
 											$bHide && $aHide[] = '#' . $sFormGroupId;
 
@@ -423,9 +423,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 																	foreach ($aOptions as $key => $value)
 																	{
-
 																		$selected = $filterCondition == $key ? 'selected="selected"' : '';
-
 																		?><option <?php echo $selected?> value="<?php echo $key?>"><?php echo $value?></option><?php
 																	}
 																	?>
@@ -653,6 +651,13 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 					&& $aAvailableFields[$oAdmin_Form_Field->id] = $oAdmin_Form_Field->id;
 			}
 		}
+
+		// Устанавливаем ограничения на источники
+		$oAdmin_Form_Controller->setDatasetConditions();
+		$oAdmin_Form_Controller->setDatasetLimits();
+
+		Core_Event::notify('Admin_Form_Controller.onAfterSetConditionsAndLimits', $this);
+
 		?>
 		<div class="admin-table-wrap table-scrollable no-border">
 			<table class="admin-table table table-hover table-striped" data-admin-form-id="<?php echo $oAdmin_Form->id?>" data-site-id="<?php echo CURRENT_SITE?>" data-models-names="<?php echo implode(',', $aModelNames)?>" id="admin-table-<?php echo $oAdmin_Form->id?>">
@@ -837,8 +842,8 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 			$oAdmin_Form_Controller->addAdditionalParam('secret_csrf', Core_Security::getCsrfToken());
 
 			// Устанавливаем ограничения на источники
-			$oAdmin_Form_Controller->setDatasetConditions();
-			$oAdmin_Form_Controller->setDatasetLimits();
+			//$oAdmin_Form_Controller->setDatasetConditions();
+			//$oAdmin_Form_Controller->setDatasetLimits();
 
 			$aDatasets = $oAdmin_Form_Controller->getDatasets();
 			foreach ($aDatasets as $datasetKey => $oAdmin_Form_Dataset)
@@ -1318,8 +1323,6 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 						if ($oAdmin_Form->show_operations && $oAdmin_Form_Controller->showOperations
 							/*|| $allow_filter && $this->showFilter*/)
 						{
-
-
 							$iActionsCount = 0;
 
 							// Подмена массива действий через событие

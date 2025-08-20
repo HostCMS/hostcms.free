@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Core_Date
 {
@@ -415,7 +415,7 @@ class Core_Date
 				throw new InvalidArgumentException('$timestamp argument is neither a valid UNIX timestamp, a valid date-time string or a DateTime object.');
 			}
 
-			$locale = setlocale(LC_ALL, 0);
+			$locale = setlocale(LC_TIME, 0);
 			// en_EN.utf => en_EN
 			$locale = substr((string) $locale, 0, 5);
 

@@ -338,3 +338,6 @@ Core_Event::attach('ASMP_MegaImport_Controller.onBeforeImportPrices', array('Hos
 /*Core_Event::attach('shop_item.onCallmultiLng', function($object, $args) {
 	var_dump($args);
 });*/
+
+//Core::moduleIsActive('cache') && Cache_Static::ignoreQuery('parameter');
+//Core::moduleIsActive('cache') && Cache_Static::ignoreQueries(array('parameter', 'foo', 'bar'));

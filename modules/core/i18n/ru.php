@@ -211,7 +211,7 @@ return array(
 	'minute_nominative' => 'минуту',
 	'minute_genitive_singular' => 'минуты',
 	'minute_genitive_plural' => 'минут',
-	
+
 	'day' => 'День',
 	'month' => 'Месяц',
 	'year' => 'Год',
@@ -252,4 +252,6 @@ return array(
 
 	'csrf_wrong_token' => 'Неправильный CSRF-токен, обновите форму!',
 	'csrf_token_timeout' => 'CSRF-токен истек, обновите форму!',
+
+	'show_design' => 'Конструктор',
 );

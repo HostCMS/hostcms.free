@@ -1674,6 +1674,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	 * Print Property_Value
 	 * @param mixed $oProperty_Value
 	 * @return self
+	 * @hostcms-event Shop_Controller_YandexMarket.onBeforeAddPropertyValue
 	 */
 	protected function _addPropertyValue($oProperty_Value)
 	{
@@ -1729,7 +1730,11 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			break;
 		}
 
-		if (!is_null($value))
+		Core_Event::notify(get_class($this) . '.onBeforeAddPropertyValue', $this, array($oProperty_Value, $value));
+		$eventResult = Core_Event::getLastReturn();
+		!is_null($eventResult) && $value = $eventResult;
+
+		if (!is_null($value) && $value !== '')
 		{
 			$sTagName = 'param';
 
@@ -1776,28 +1781,25 @@ class Shop_Controller_YandexMarket extends Core_Controller
 					$sAttr = '';
 				}
 			}
-
-			if ($value !== '')
+		
+			if (!in_array($sTagName, $this->_aForbid))
 			{
-				if (!in_array($sTagName, $this->_aForbid))
-				{
-					$this->write('<' . $sTagName . $sAttr . '>'
-						. Core_Str::xml(
-							Core_Str::cut(
-								html_entity_decode(strip_tags($value), ENT_COMPAT, 'UTF-8')
-							, 250)
-						)
-					. '</' . $sTagName . '>'. "\n");
-				}
-				elseif ($sTagName == 'age-year' && $value !== '' && in_array($value, $this->_aAgeYears))
-				{
-					$this->write('<age unit="year">' . intval($value) . '</age>'. "\n");
-					$this->_bAge = TRUE;
-				}
-				elseif (!$this->_bAge && $sTagName == 'age-month' && $value !== '' && in_array($value, $this->_aAgeMonthes))
-				{
-					$this->write('<age unit="month">' . intval($value) . '</age>'. "\n");
-				}
+				$this->write('<' . $sTagName . $sAttr . '>'
+					. Core_Str::xml(
+						Core_Str::cut(
+							html_entity_decode(strip_tags($value), ENT_COMPAT, 'UTF-8')
+						, 250)
+					)
+				. '</' . $sTagName . '>'. "\n");
+			}
+			elseif ($sTagName == 'age-year' && $value !== '' && in_array($value, $this->_aAgeYears))
+			{
+				$this->write('<age unit="year">' . intval($value) . '</age>'. "\n");
+				$this->_bAge = TRUE;
+			}
+			elseif (!$this->_bAge && $sTagName == 'age-month' && $value !== '' && in_array($value, $this->_aAgeMonthes))
+			{
+				$this->write('<age unit="month">' . intval($value) . '</age>'. "\n");
 			}
 		}
 

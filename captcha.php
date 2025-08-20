@@ -14,7 +14,7 @@ require_once ('bootstrap.php');
 $captchaId = Core_Array::getGet('id', Core_Array::getGet('get_captcha', 0, 'str'), 'str');
 
 if ($captchaId != ''
-	&& !preg_match('/http|bot|spide|craw|yandex|seach|seek|site|sogou|yahoo|msnbot|google|bing/iu', Core_Array::get($_SERVER, 'HTTP_USER_AGENT', ''))
+	&& !Core::checkBot(Core_Array::get($_SERVER, 'HTTP_USER_AGENT', ''))
 )
 {
 	$Core_Captcha = new Core_Captcha();

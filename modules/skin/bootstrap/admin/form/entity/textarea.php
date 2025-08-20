@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Textarea extends Skin_Default_Admin_Form_Entity_Textarea
 {
@@ -53,11 +53,11 @@ class Skin_Bootstrap_Admin_Form_Entity_Textarea extends Skin_Default_Admin_Form_
 			?><div class="input-group"><?php
 		}
 
-		$this->_init = is_null($this->wysiwygOptions)
+		/*$this->_init = is_null($this->wysiwygOptions)
 			? Core_Config::instance()->get('core_wysiwyg')
-			: $this->wysiwygOptions;
+			: $this->wysiwygOptions;*/
 
-		$tagName = isset($this->_init['inline'])
+		$tagName = $this->wysiwygInline
 			? 'div'
 			: 'textarea';
 

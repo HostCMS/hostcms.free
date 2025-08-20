@@ -63,7 +63,9 @@ class Skin_Bootstrap_Module_Counter_Module extends Counter_Module
 	 */
 	protected function _content()
 	{
-		echo Counter_Controller_Chart::show(12, TRUE, $this->_path);
+		$month = Core_Array::get(Core::$config->get('counter_config'), 'chartMonths', 12) ;
+		
+		echo Counter_Controller_Chart::show($month, TRUE, $this->_path);
 		return $this;
 	}
 }

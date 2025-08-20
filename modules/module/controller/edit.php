@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Module
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2025, https://www.hostcms.ru
  */
 class Module_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -145,6 +145,8 @@ class Module_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	protected function _getConfigItem($configName, $isset, $name, $value, $aDefaultValues, $aModule_Options = array())
 	{
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
+
 		$oAdmin_Form_Entity = NULL;
 		$aFormat = array();
 
@@ -171,6 +173,8 @@ class Module_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			$type = 'textarea';
 		}
+
+		$oPrev_Admin_Form_Entity = $oLast_Admin_Form_Entity = NULL;
 
 		switch ($type)
 		{
@@ -262,9 +266,40 @@ class Module_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->set('data-control', 'hue')
 					->value($value);
 			break;
-		}
+			case 'xsl':
+				$oXsl_Controller_Edit = new Xsl_Controller_Edit($this->_Admin_Form_Action);
+				$aXslDirs = $oXsl_Controller_Edit->fillXslDir(0);
 
-		$windowId = $this->_Admin_Form_Controller->getWindowId();
+				$xsl_id = $xsl_dir_id = 0;
+
+				$oXsl = Core_Entity::factory('Xsl')->getByName($value);
+				if ($oXsl)
+				{
+					$xsl_id = $oXsl->id;
+					$xsl_dir_id = $oXsl->xsl_dir_id;
+				}
+
+				$id = $configName . '[' . $name . ']';
+
+				$oPrev_Admin_Form_Entity = 	Admin_Form_Entity::factory('Select')
+					->name("xsl_dir_id_{$configName}_{$name}")
+					->id("xsl_dir_id_{$configName}_{$name}")
+					->class('form-control')
+					->divAttr(array('class' => 'col-xs-12 col-sm-6'))
+					->options(
+						array(' … ') + $aXslDirs
+					)
+					->value($xsl_dir_id)
+					->onchange("$.ajaxRequest({path: hostcmsBackend + '/structure/index.php', context: $.escapeSelector('{$id}'), callBack: [$.loadSelectOptionsCallback, function(){var xsl_id = \$('#{$windowId} #' + $.escapeSelector('{$id}') + ' [value=\'{$xsl_id}\']').get(0) ? {$xsl_id} : 0; \$('#{$windowId} #' + \$.escapeSelector('{$id}')).val(xsl_id)}], action: 'loadXslList',additionalParams: 'xsl_dir_id=' + this.value, windowId: '{$windowId}'}); return false");
+
+				$oAdmin_Form_Entity = Admin_Form_Entity::factory('Select')
+					->value($xsl_id)
+					->class('form-control')
+					->divAttr(array('class' => 'col-xs-12 col-sm-6'));
+
+				$oLast_Admin_Form_Entity = Admin_Form_Entity::factory('Script')->value("$('#{$windowId} #xsl_dir_id_{$configName}_{$name}').change();");
+			break;
+		}
 
 		$oAdmin_Form_Entity_Div = Admin_Form_Entity::factory('Div')
 			->class('col-xs-12 option-row');
@@ -312,12 +347,18 @@ class Module_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 			$oAdmin_Form_Entity
 				->id("{$configName}[{$name}]")
-				->divAttr(array('class' => ''))
-				->caption($caption)
+				->divAttr($type != 'xsl' ? array('class' => '') : $oAdmin_Form_Entity->divAttr)
+				// ->caption($caption)
 				->name("{$configName}[{$name}]");
+
+			if ($type != 'xsl')
+			{
+				$oAdmin_Form_Entity->caption($caption);
+			}
 
 			if ($bCheckbox)
 			{
+				$oAdmin_Form_Entity->id = '';
 				$oAdmin_Form_Entity->name = '';
 				$oAdmin_Form_Entity->onclick = '$.changeModuleOptionValue(this, "' . $windowId . '", "' . $configName . '[' . $name . ']")';
 
@@ -347,7 +388,37 @@ class Module_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				);
 		}
 
-		$oAdmin_Form_Entity_Div->add($oAdmin_Form_Entity);
+		$parentDiv = $oAdmin_Form_Entity_Div;
+
+		if (!is_null($oPrev_Admin_Form_Entity) || !is_null($oLast_Admin_Form_Entity))
+		{
+			$parentDiv = Admin_Form_Entity::factory('Div')
+				->class('row');
+
+			if ($type == 'xsl')
+			{
+				$parentDiv->add(
+					Admin_Form_Entity::factory('Span')
+						->divAttr(array('class' => ''))
+						->class('caption col-xs-12')
+						->value($caption)
+				);
+			}
+
+			$oAdmin_Form_Entity_Div->add($parentDiv);
+		}
+
+		if (!is_null($oPrev_Admin_Form_Entity))
+		{
+			$parentDiv->add($oPrev_Admin_Form_Entity);
+		}
+
+		$parentDiv->add($oAdmin_Form_Entity);
+
+		if (!is_null($oLast_Admin_Form_Entity))
+		{
+			$parentDiv->add($oLast_Admin_Form_Entity);
+		}
 
 		return $oAdmin_Form_Entity_Div;
 	}
