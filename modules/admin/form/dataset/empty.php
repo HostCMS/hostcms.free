@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Admin_Form_Dataset_Empty extends Admin_Form_Dataset
 {
@@ -42,8 +42,8 @@ class Admin_Form_Dataset_Empty extends Admin_Form_Dataset
 	/**
 	 * Get object
 	 * @param int $primaryKey ID
-	 * @return object
-	 */
+	 * @return object|null
+     */
 	public function getObject($primaryKey)
 	{
 		return NULL;

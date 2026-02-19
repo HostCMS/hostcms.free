@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../../../bootstrap.php');
 
@@ -16,9 +16,9 @@ $sFormAction = '/{admin}/shop/discount/siteuser/item/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
-$oShop = Core_Entity::factory('Shop', intval(Core_Array::getGet('shop_id', 0)));
-$oShopGroup = Core_Entity::factory('Shop_Group', intval(Core_Array::getGet('shop_group_id', 0)));
-$oSiteuser = Core_Entity::factory('Siteuser', intval(Core_Array::getGet('siteuser_id', 0)));
+$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0, 'int'));
+$oShopGroup = Core_Entity::factory('Shop_Group', Core_Array::getGet('shop_group_id', 0, 'int'));
+$oSiteuser = Core_Entity::factory('Siteuser', Core_Array::getGet('siteuser_id', 0, 'int'));
 $oShop_Item_Discount = Core_Entity::factory('Shop_Item_Discount', intval(Core_Array::getGet('shop_item_discount_id', 0)));
 $oShopDir = $oShop->Shop_Dir;
 

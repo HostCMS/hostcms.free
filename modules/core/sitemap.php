@@ -17,6 +17,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - rebuildTime время в секундах, которое должно пройти с момента создания sitemap.xml для его перегенерации. По умолчанию 14400
  * - limit ограничение на единичную выборку элементов, по умолчанию 1000. При наличии достаточного объема памяти рекомендуется увеличить параметр
  * - createIndex(TRUE|FALSE) разбивать карту на несколько файлов, по умолчанию FALSE
+ * - compress(TRUE|FALSE) сжимать файлы карты при разбиении на несколько файлов, по умолчанию FALSE
  * - perFile Count of nodes per one file
  * - defaultProtocol('http://') протокол по умолчанию, устанавливается в зависимоти от опции https у сайта
  * - urlset(array('xmlns' => 'http://www.sitemaps.org/schemas/sitemap/0.9')) массив опций для urlset
@@ -26,7 +27,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Sitemap extends Core_Servant_Properties
 {
@@ -48,6 +49,7 @@ class Core_Sitemap extends Core_Servant_Properties
 		'urlset',
 		'limit',
 		'createIndex',
+		'compress',
 		'perFile',
 		'fileName',
 		'multipleFileName',
@@ -67,10 +69,13 @@ class Core_Sitemap extends Core_Servant_Properties
 	{
 		parent::__construct();
 
-		if ((!defined('DENY_INI_SET') || !DENY_INI_SET) && strpos(@ini_get('disable_functions'), 'set_time_limit') === FALSE)
+		if (!defined('DENY_INI_SET') || !DENY_INI_SET)
 		{
-			@set_time_limit(21600);
-			ini_set('max_execution_time', '21600');
+			if (Core::isFunctionEnable('set_time_limit') && ini_get('safe_mode') != 1 && ini_get('max_execution_time') < 21600)
+			{
+				@set_time_limit(21600);
+				ini_set('max_execution_time', '21600');
+			}
 		}
 
 		$this->_oSite = $oSite;
@@ -95,7 +100,7 @@ class Core_Sitemap extends Core_Servant_Properties
 		$this->limit = 1000;
 
 		$this->showInformationsystemTags = $this->showModifications = $this->showShopTags
-			= $this->createIndex = FALSE;
+			= $this->createIndex = $this->compress = FALSE;
 
 		$this->showInformationsystemGroups = $this->showInformationsystemItems
 			= $this->showShopGroups = $this->showShopItems
@@ -315,7 +320,7 @@ class Core_Sitemap extends Core_Servant_Properties
 
 		$oDataBase = $oCore_QueryBuilder_Select->execute();
 
-		$aRow = $oDataBase->asAssoc()->current();
+		$aRow = $oDataBase->asAssoc()->current(FALSE);
 
 		$oDataBase->free();
 
@@ -383,7 +388,7 @@ class Core_Sitemap extends Core_Servant_Properties
 
 			$oDataBase = $oCore_QueryBuilder_Select->execute();
 
-			$aRow = $oDataBase->asAssoc()->current();
+			$aRow = $oDataBase->asAssoc()->current(FALSE);
 
 			$oDataBase->free();
 
@@ -469,7 +474,7 @@ class Core_Sitemap extends Core_Servant_Properties
 
 			$oDataBase = $oCore_QueryBuilder_Select->execute();
 
-			$aRow = $oDataBase->asAssoc()->current();
+			$aRow = $oDataBase->asAssoc()->current(FALSE);
 
 			$oDataBase->free();
 
@@ -529,20 +534,20 @@ class Core_Sitemap extends Core_Servant_Properties
 		return $this;
 	}
 
-	/**
-	 * Add Shop Nodes
-	 *
-	 * @param Structure_Model $oStructure
-	 * @param Shop_Model $oInformationsystem
-	 * @return self
-	 * @hostcms-event Core_Sitemap.onBeforeSelectShopGroups
-	 * @hostcms-event Core_Sitemap.onBeforeAddShopGroup
-	 * @hostcms-event Core_Sitemap.onBeforeSelectShopItems
-	 * @hostcms-event Core_Sitemap.onBeforeAddShopItem
-	 * @hostcms-event Core_Sitemap.onBeforeSelectShopTags
-	 * @hostcms-event Core_Sitemap.onBeforeAddShopTag
-	 * @hostcms-event Core_Sitemap.onBeforeAddShopFilter
-	 */
+    /**
+     * Add Shop Nodes
+     *
+     * @param Structure_Model $oStructure
+     * @param Shop_Model $oShop
+     * @return self
+     * @hostcms-event Core_Sitemap.onBeforeSelectShopGroups
+     * @hostcms-event Core_Sitemap.onBeforeAddShopGroup
+     * @hostcms-event Core_Sitemap.onBeforeSelectShopItems
+     * @hostcms-event Core_Sitemap.onBeforeAddShopItem
+     * @hostcms-event Core_Sitemap.onBeforeSelectShopTags
+     * @hostcms-event Core_Sitemap.onBeforeAddShopTag
+     * @hostcms-event Core_Sitemap.onBeforeAddShopFilter
+     */
 	protected function _fillShop(Structure_Model $oStructure, Shop_Model $oShop)
 	{
 		$oCore_QueryBuilder_Select = Core_QueryBuilder::select(array('MAX(id)', 'max_id'));
@@ -554,7 +559,7 @@ class Core_Sitemap extends Core_Servant_Properties
 
 		$oDataBase = $oCore_QueryBuilder_Select->execute();
 
-		$aRow = $oDataBase->asAssoc()->current();
+		$aRow = $oDataBase->asAssoc()->current(FALSE);
 
 		$oDataBase->free();
 
@@ -623,7 +628,7 @@ class Core_Sitemap extends Core_Servant_Properties
 
 			$oDataBase = $oCore_QueryBuilder_Select->execute();
 
-			$aRow = $oDataBase->asAssoc()->current();
+			$aRow = $oDataBase->asAssoc()->current(FALSE);
 
 			$oDataBase->free();
 
@@ -713,7 +718,7 @@ class Core_Sitemap extends Core_Servant_Properties
 
 			$oDataBase = $oCore_QueryBuilder_Select->execute();
 
-			$aRow = $oDataBase->asAssoc()->current();
+			$aRow = $oDataBase->asAssoc()->current(FALSE);
 
 			$oDataBase->free();
 
@@ -780,7 +785,7 @@ class Core_Sitemap extends Core_Servant_Properties
 
 			$oDataBase = $oCore_QueryBuilder_Select->execute();
 
-			$aRow = $oDataBase->asAssoc()->current();
+			$aRow = $oDataBase->asAssoc()->current(FALSE);
 
 			$oDataBase->free();
 
@@ -829,22 +834,24 @@ class Core_Sitemap extends Core_Servant_Properties
 	 */
 	protected $_bRebuild = TRUE;
 
-	/**
-	 * Add Informationsystem
-	 * @param int $structure_id
-	 * @param Informationsystem_Model $oInformationsystem
-	 */
+    /**
+     * Add Informationsystem
+     * @param int $structure_id
+     * @param Informationsystem_Model $oInformationsystem
+     * @return Core_Sitemap
+     */
 	public function addInformationsystem($structure_id, Informationsystem_Model $oInformationsystem)
 	{
 		$this->_Informationsystems[$structure_id] = $oInformationsystem;
 		return $this;
 	}
 
-	/**
-	 * Add Shop
-	 * @param int $structure_id
-	 * @param Shop_Model $oShop
-	 */
+    /**
+     * Add Shop
+     * @param int $structure_id
+     * @param Shop_Model $oShop
+     * @return Core_Sitemap
+     */
 	public function addShop($structure_id, Shop_Model $oShop)
 	{
 		$this->_Shops[$structure_id] = $oShop;
@@ -981,7 +988,26 @@ class Core_Sitemap extends Core_Servant_Properties
 		{
 			$this->_currentOut->write("</urlset>\n");
 			$this->_currentOut->close();
+
+			if ($this->createIndex && $this->compress)
+			{
+				if (Core_Gz::compress($this->_currentOut->filePath, $this->_currentOut->filePath . '.gz'))
+				{
+					// Delete .xml
+					Core_File::delete($this->_currentOut->filePath);
+
+					$this->_currentOut->filePath .= '.gz';
+				}
+			}
+
+			// sitemap-1-1.xml => sitemap-1-1.xml.gz при compression
+			$this->createIndex
+				&& $this->_aIndexedFiles[] = basename($this->_currentOut->filePath);
+
+			$this->_countFile++;
+			$this->_inFile = 0;
 		}
+
 		return $this;
 	}
 
@@ -993,15 +1019,11 @@ class Core_Sitemap extends Core_Servant_Properties
 		if (!is_null($this->_currentOut))
 		{
 			$this->_close();
-
-			$this->_countFile++;
-			$this->_inFile = 0;
 		}
 
-		$this->_aIndexedFiles[] = $filename = sprintf($this->multipleFileName, $this->_oSite->id, $this->_countFile);
+		$filename = sprintf($this->multipleFileName, $this->_oSite->id, $this->_countFile);
 
 		$this->_currentOut = new Core_Out_File();
-		//$this->_currentOut->filePath(CMS_FOLDER . $filename);
 		$this->_currentOut->filePath($this->getSitemapDir() . $filename);
 		$this->_open();
 	}

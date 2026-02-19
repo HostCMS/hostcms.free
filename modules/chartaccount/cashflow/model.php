@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Chartaccount
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Chartaccount_Cashflow_Model extends Core_Entity
 {
@@ -49,10 +49,10 @@ class Chartaccount_Cashflow_Model extends Core_Entity
 	 * Backend callback method
 	 * @return string
 	 */
-	public function nameBackend()
+	public function nameBackend($oAdmin_Form_Field)
 	{
 		return '<i class="fa fa-circle" style="margin-right: 5px; color: ' . ($this->color ? htmlspecialchars($this->color) : '#aebec4') . '"></i> '
-			. '<span class="editable" id="apply_check_0_' . $this->id . '_fv_1524">' . htmlspecialchars($this->name) . '</span>';
+			. '<span class="editable" id="apply_check_0_' . $this->id . '_fv_' . $oAdmin_Form_Field->id . '">' . htmlspecialchars($this->name) . '</span>';
 	}
 
 	/**

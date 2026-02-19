@@ -17,7 +17,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Xsl
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Xsl_Stream_Lang
 {
@@ -133,7 +133,7 @@ class Xsl_Stream_Lang
 
 	/**
 	 * Tests for end-of-file on a file pointer
-	 * @return Should return TRUE if the read/write position is at the end of the stream and if no more data is available to be read, or FALSE otherwise.
+	 * @return bool return TRUE if the read/write position is at the end of the stream and if no more data is available to be read, or FALSE otherwise.
 	 */
 	public function stream_eof()
 	{

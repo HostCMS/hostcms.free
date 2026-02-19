@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Revision
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Revision_Controller
 {
@@ -27,7 +27,7 @@ class Revision_Controller
 		{
 			$oProperty = $oProperty_Value->Property;
 
-			if (!in_array($oProperty->type, array(2)))
+            if (!in_array($oProperty->type, array(2)))
 			{
 				$aReturn[$oProperty->id][] = $oProperty_Value->value;
 			}

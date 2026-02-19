@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Currency_Model extends Core_Entity
 {
@@ -143,20 +143,33 @@ class Shop_Currency_Model extends Core_Entity
 	 * Backend callback method
 	 * @return string
 	 */
-	public function formatNumberBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function formatNumberBackend()
 	{
 		return '<span class="darkgray">' . htmlspecialchars($this->formatWithCurrency(345)) . '</span>';
 	}
 
-	/**
-	 * Backend callback method
-	 * @return string
-	 */
-	public function nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+    /**
+     * Backend callback method
+     * @param Admin_Form_Field_Model $oAdmin_Form_Field
+     * @throws Core_Exception
+     */
+	public function nameBackend($oAdmin_Form_Field)
 	{
-		return $this->default
-			? '<span class="semi-bold">' . htmlspecialchars($this->name) . '</span>'
-			: htmlspecialchars($this->name);
+		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')->value(
+			htmlspecialchars($this->name)
+		);
+
+		if ($oAdmin_Form_Field->editable)
+		{
+			$oCore_Html_Entity_Div
+				->class($oCore_Html_Entity_Div->class . ' editable')
+				->id('apply_check_0_' . $this->id . '_fv_' . $oAdmin_Form_Field->id);
+		}
+
+		$this->default
+			&& $oCore_Html_Entity_Div->class('semi-bold');
+
+		$oCore_Html_Entity_Div->execute();
 	}
 
 	/**

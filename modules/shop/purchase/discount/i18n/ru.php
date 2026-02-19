@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Скидки от суммы заказа',
@@ -53,4 +53,7 @@ return array(
 	'max_weight' => 'Вес &lt;, %s',
 	'max_discount' => 'Максимальная скидка',
 	'first_order' => 'Применять к первому заказу',
+	'siteuser_groups' => "Группа доступа",
+	'all' => 'Все',
+	'conditions' => 'Условия',
 );

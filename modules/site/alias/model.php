@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Site
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Site_Alias_Model extends Core_Entity
 {
@@ -260,7 +260,7 @@ class Site_Alias_Model extends Core_Entity
 
 	/**
 	 * Find alias by name with mask
-	 * @param string $name Alias, e.g. '*.site.ru'
+	 * @param string $aliasName Alias, e.g. '*.site.ru'
 	 * @return self|NULL
 	 */
 	public function findAlias($aliasName)
@@ -341,14 +341,13 @@ class Site_Alias_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function nameBadge()
 	{
 		$this->name != '' && Core_Html_Entity::factory('A')
-			->href('http://' . $this->alias_name_without_mask)
+			->href(
+                ($this->Site->https ? 'https://' : 'http://') . $this->alias_name_without_mask
+            )
 			->target('_blank')
 			->add(
 				Core_Html_Entity::factory('I')

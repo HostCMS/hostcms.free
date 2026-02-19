@@ -19,7 +19,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Delivery_Controller_Show extends Core_Controller
 {
@@ -106,12 +106,42 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 	}
 
 	/**
-	 * Get Shop_Deliveries
+	 * Get Shop_Deliveries relation
 	 * @return Shop_Delivery_Model
 	 */
 	public function shopDeliveries()
 	{
 		return $this->_Shop_Deliveries;
+	}
+
+	/**
+	 * Selected Shop_Deliveries
+	 * @var array
+	 */
+	protected $_aShop_Deliveries = array();
+
+	/**
+	 * Get array of secelted Shop_Deliveries
+	 * @return array
+	 */
+	public function getSelectedShopDeliveries()
+	{
+		return $this->_aShop_Deliveries;
+	}
+
+	/**
+	 * Selected Shop_Delivery_Conditions
+	 * @var array
+	 */
+	protected $_aShop_Delivery_Conditions = array();
+
+	/**
+	 * Get array of secelted Shop_Delivery_Conditions
+	 * @return array
+	 */
+	public function getSelectedShopDeliveryConditions()
+	{
+		return $this->_aShop_Delivery_Conditions;
 	}
 
 	/**
@@ -162,11 +192,13 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 			->groupBy('shop_deliveries.id');
 
 		// Выбираем все типы доставки для данного магазина
-		$aShop_Deliveries = $this->_Shop_Deliveries->findAll();
+		$this->_aShop_Deliveries = $this->_Shop_Deliveries->findAll();
 
-		foreach ($aShop_Deliveries as $oShop_Delivery)
+		foreach ($this->_aShop_Deliveries as $oShop_Delivery)
 		{
 			$aShop_Delivery_Conditions = $this->getShopDeliveryConditions($oShop_Delivery);
+
+			$this->_aShop_Delivery_Conditions[$oShop_Delivery->id] = $aShop_Delivery_Conditions;
 
 			if ($oShop_Delivery->type == 1)
 			{
@@ -205,38 +237,38 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 				}
 			}
 
-			if (count($aShop_Delivery_Conditions))
+			foreach ($aShop_Delivery_Conditions as $oShop_Delivery_Condition)
 			{
-				foreach ($aShop_Delivery_Conditions as $oShop_Delivery_Condition)
+				if (!is_null($oShop_Delivery_Condition))
 				{
-					if (!is_null($oShop_Delivery_Condition))
-					{
-						$oShop_Delivery_Clone = clone $oShop_Delivery;
+					$oShop_Delivery_Clone = clone $oShop_Delivery;
 
-						$this->paymentSystems
-							&& $oShop_Delivery_Clone->showXmlShopPaymentSystems($this->paymentSystems);
+					$this->paymentSystems
+						&& $oShop_Delivery_Clone->showXmlShopPaymentSystems($this->paymentSystems);
 
-						$oShop_Delivery_Clone
-							->id($oShop_Delivery->id)
-							->clearEntities()
-							->addEntity($oShop_Delivery_Condition);
+					$oShop_Delivery_Clone
+						->id($oShop_Delivery->id)
+						->clearEntities()
+						->addEntity($oShop_Delivery_Condition);
 
-						$this->applyForbiddenAllowedTags('/shop/shop_delivery', $oShop_Delivery_Clone);
-						$this->applyForbiddenAllowedTags('/shop/shop_delivery_condition', $oShop_Delivery_Condition);
+					$this->applyForbiddenAllowedTags('/shop/shop_delivery', $oShop_Delivery_Clone);
+					$this->applyForbiddenAllowedTags('/shop/shop_delivery_condition', $oShop_Delivery_Condition);
 
-						$this->addEntity($oShop_Delivery_Clone);
+					$this->addEntity($oShop_Delivery_Clone);
 
-						Core_Event::notify(get_class($this) . '.onAfterAddShopDeliveryCondition', $this, array($oShop_Delivery_Condition));
-					}
+					Core_Event::notify(get_class($this) . '.onAfterAddShopDeliveryCondition', $this, array($oShop_Delivery_Condition));
 				}
-
-				$aShop_Delivery_Conditions = array();
 			}
 		}
 
 		return parent::show();
 	}
 
+	/**
+	 * Get ShopDeliveryConditions for $oShop_Delivery
+	 * @param Shop_Delivery_Model $oShop_Delivery
+	 * @return array
+	 */
 	public function getShopDeliveryConditions(Shop_Delivery_Model $oShop_Delivery)
 	{
 		$aShop_Delivery_Conditions = array();
@@ -321,7 +353,7 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 		$oShop = $this->getEntity();
 
 		$Shop_Cart_Controller = Shop_Cart_Controller::instance();
-		$aShop_Cart = $Shop_Cart_Controller->getAll($oShop);
+		$Shop_Cart_Controller->getAll($oShop);
 
 		$this->totalAmount = $Shop_Cart_Controller->totalAmount;
 		$quantityPurchaseDiscount = $Shop_Cart_Controller->totalQuantityForPurchaseDiscount;

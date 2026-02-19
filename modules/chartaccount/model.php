@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Chartaccount
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Chartaccount_Model extends Core_Entity
 {
@@ -96,11 +96,8 @@ class Chartaccount_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function currencyBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function currencyBackend()
 	{
 		$this->currency && Core_Html_Entity::factory('Span')
 			->value('<i class="fa fa-check-circle-o palegreen"></i>')
@@ -109,11 +106,8 @@ class Chartaccount_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function quantitativeBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function quantitativeBackend()
 	{
 		$this->quantitative && Core_Html_Entity::factory('Span')
 			->value('<i class="fa fa-check-circle-o palegreen"></i>')
@@ -122,11 +116,8 @@ class Chartaccount_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function off_balanceBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function off_balanceBackend()
 	{
 		$this->off_balance && Core_Html_Entity::factory('Span')
 			->value('<i class="fa fa-check-circle-o palegreen"></i>')
@@ -135,11 +126,9 @@ class Chartaccount_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function sc0Backend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function sc0Backend()
 	{
 		return $this->sc0
 			? Core::_('Chartaccount.subcount' . $this->sc0)
@@ -148,11 +137,9 @@ class Chartaccount_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function sc1Backend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function sc1Backend()
 	{
 		return $this->sc1
 			? Core::_('Chartaccount.subcount' . $this->sc1)
@@ -161,11 +148,9 @@ class Chartaccount_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function sc2Backend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function sc2Backend()
 	{
 		return $this->sc2
 			? Core::_('Chartaccount.subcount' . $this->sc2)
@@ -183,18 +168,15 @@ class Chartaccount_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function nameBadge()
 	{
 		echo $this->getTypeBadge();
 	}
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -202,7 +184,7 @@ class Chartaccount_Model extends Core_Entity
 	{
 		$class = $this->folder ? 'gray' : '';
 
-		return '<span class="editable ' . $class . '" id="apply_check_0_' . $this->id . '_fv_2111">' . htmlspecialchars($this->code) . '</span>';
+		return '<span class="editable ' . $class . '" id="apply_check_0_' . $this->id . '_fv_' . $oAdmin_Form_Field->id . '">' . htmlspecialchars($this->code) . '</span>';
 	}
 
 	/**
@@ -224,11 +206,8 @@ class Chartaccount_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function correct_entriesBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function correct_entriesBadge()
 	{
 		$count = $this->_getCorrectEntries()->getCount(FALSE);
 		$count && Core_Html_Entity::factory('Span')

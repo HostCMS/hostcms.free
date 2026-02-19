@@ -101,9 +101,9 @@ Thumbs.db
 !modules/company/**
 !modules/constant/**
 !modules/core/**
-!modules/crm/**
 # Disable config folder
 modules/core/config/*
+!modules/crm/**
 !modules/directory/**
 !modules/document/**
 !modules/event/**
@@ -126,6 +126,9 @@ modules/core/config/*
 !modules/shortcode/**
 !modules/site/**
 !modules/skin/**
+modules/skin/bootstrap/js/package.json
+modules/skin/bootstrap/js/package-lock.json
+modules/skin/bootstrap/js/node_modules/**
 !modules/source/**
 !modules/sql/**
 !modules/structure/**

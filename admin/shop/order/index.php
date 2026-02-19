@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -669,43 +669,7 @@ else
 						->where('shop_order_items.marking', 'LIKE', '%' . $sGlobalSearch . '%')
 					->close()
 			);
-		
-		/*$oAdmin_Form_Dataset
-			// ->addCondition(array('select' => array('shop_orders.*')))
-			->addCondition(
-				array('leftJoin' => array('shop_order_items', 'shop_order_items.shop_order_id', '=', 'shop_orders.id'))
-			)
-			->addCondition(array('open' => array()))
-				->addCondition(array('where' => array('shop_orders.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
-				->addCondition(array('setOr' => array()))
-				->addCondition(array('where' => array('shop_orders.invoice', 'LIKE', '%' . $sGlobalSearch . '%')))
-				->addCondition(array('setOr' => array()))
-				->addCondition(array('where' => array('shop_orders.coupon', 'LIKE', '%' . $sGlobalSearch . '%')))
-				->addCondition(array('setOr' => array()))
-				->addCondition(array('where' => array('shop_orders.postcode', 'LIKE', '%' . $sGlobalSearch . '%')))
-				->addCondition(array('setOr' => array()))
-				->addCondition(array('where' => array('shop_orders.address', 'LIKE', '%' . $sGlobalSearch . '%')))
-				->addCondition(array('setOr' => array()))
-				->addCondition(array('where' => array('shop_orders.surname', 'LIKE', '%' . $sGlobalSearch . '%')))
-				->addCondition(array('setOr' => array()))
-				->addCondition(array('where' => array('shop_orders.name', 'LIKE', '%' . $sGlobalSearch . '%')))
-				->addCondition(array('setOr' => array()))
-				->addCondition(array('where' => array('shop_orders.patronymic', 'LIKE', '%' . $sGlobalSearch . '%')))
-				->addCondition(array('setOr' => array()))
-				->addCondition(array('where' => array('shop_orders.company', 'LIKE', '%' . $sGlobalSearch . '%')))
-				->addCondition(array('setOr' => array()))
-				->addCondition(array('where' => array('shop_orders.phone', 'LIKE', '%' . $sGlobalSearch . '%')))
-				->addCondition(array('setOr' => array()))
-				->addCondition(array('where' => array('shop_orders.email', 'LIKE', '%' . $sGlobalSearch . '%')))
-				->addCondition(array('setOr' => array()))
-				->addCondition(array('where' => array('shop_order_items.name', 'LIKE', '%' . $sGlobalSearch . '%')))
-				->addCondition(array('setOr' => array()))
-				->addCondition(array('where' => array('shop_order_items.marking', 'LIKE', '%' . $sGlobalSearch . '%')))
-			->addCondition(array('close' => array()))
-			->addCondition(
-				array('groupBy' => array('shop_orders.id'))
-			);*/
-			
+
 		$oAdmin_Form_Dataset
 			->addCondition(
 				array('select' => array(
@@ -763,7 +727,10 @@ if ($shop_id)
 	$aShop_Order_Statuses = Core_Entity::factory('Shop_Order_Status')->getAllByShop_id($shop_id);
 	foreach ($aShop_Order_Statuses as $oShop_Order_Status)
 	{
-		$aList[$oShop_Order_Status->id] = $oShop_Order_Status->name;
+			$aList[$oShop_Order_Status->id] = array(
+				'value' => $oShop_Order_Status->name,
+				'attr' => array('style' => 'color: ' . $oShop_Order_Status->color)
+			);
 	}
 }
 elseif (!$shop_id && $siteuser_id)
@@ -777,7 +744,10 @@ elseif (!$shop_id && $siteuser_id)
 		$aShop_Order_Statuses = Core_Entity::factory('Shop_Order_Status')->getAllByShop_id($oShop->id);
 		foreach ($aShop_Order_Statuses as $oShop_Order_Status)
 		{
-			$aList[$oShop_Order_Status->id] = $oShop_Order_Status->name;
+			$aList[$oShop_Order_Status->id] = array(
+				'value' => $oShop_Order_Status->name,
+				'attr' => array('style' => 'color: ' . $oShop_Order_Status->color)
+			);
 		}
 	}
 }
@@ -837,14 +807,14 @@ Core_Event::attach('Admin_Form_Controller.onAfterShowContent', function($oAdmin_
 
 			if (!$this.data("bs.popover"))
 			{
-				
+
 				$this.popover({
 					placement: 'left',
 					trigger: 'manual',
 					html: true,
 					content: function() {
 						var content = '';
-						
+
 						$.ajax({
 							url: '<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/shop/order/index.php")?>',
 							data: { showPopover: 1, shop_order_id: $(this).data('id') },

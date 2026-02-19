@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -18,8 +18,6 @@ $pageTitle = Core::_('Company_Account.title');
 
 if (Core_Auth::logged())
 {
-	Core_Auth::checkBackendBlockedIp();
-
 	if (!is_null(Core_Array::getGet('getAccounts')))
 	{
 		$aJSON = array();

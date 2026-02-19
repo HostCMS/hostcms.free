@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -451,12 +451,11 @@ function benchmarkShow($oAdmin_Form_Controller)
 		if (in_array($sEngine, $aAllowedEngines))
 		{
 			// Set default storageEngine
-			$aConfig = Core::$config->get('core_database', array());
-			if (isset($aConfig['default']))
+			$aConfigDataBase = Core::$config->get('core_database', array());
+			if (isset($aConfigDataBase['default']))
 			{
-				$aConfig['default']['storageEngine'] = $sEngine;
-
-				Core::$config->set('core_database', $aConfig);
+				$aConfigDataBase['default']['storageEngine'] = $sEngine;
+				Core::$config->set('core_database', $aConfigDataBase);
 			}
 
 			$oCore_DataBase = Core_DataBase::instance();
@@ -505,9 +504,12 @@ function benchmarkShow($oAdmin_Form_Controller)
 	// Изменение кодировки
 	if ($oAdmin_Form_Controller->getAction() == 'convertCharsets')
 	{
-		$sCharset = Core_Array::getPost('charset');
-
+		$sCharset = Core_Array::getPost('charset', '', 'trim');
 		$sNewCharset = strtolower($sCharset);
+		
+		$aConfigDataBase = Core_Config::instance()->get('core_database');
+		$aConfigDataBase['default']['charset'] = $sNewCharset;
+		Core_Config::instance()->set('core_database', $aConfigDataBase);
 
 		$oCore_DataBase = Core_DataBase::instance();
 
@@ -556,7 +558,7 @@ function benchmarkShow($oAdmin_Form_Controller)
 							$aColumnCollation = explode('_', $aColumn['Collation'], 2);
 							$sNewColumCollation = $sNewCharset . '_' . $aColumnCollation[1];
 
-							$sNewCollation == 'utf8mb4_0900_ai_ci' && $sNewCollation = 'utf8mb4_general_ci';
+							$sNewColumCollation == 'utf8mb4_0900_ai_ci' && $sNewColumCollation = 'utf8mb4_general_ci';
 
 							$sDefault = strtoupper($aColumn['Null']) == 'YES'
 								? 'NULL'
@@ -587,10 +589,6 @@ function benchmarkShow($oAdmin_Form_Controller)
 						Core_Message::show($e->getMessage(), 'error');
 					}
 				}
-
-				$aConfig = Core_Config::instance()->get('core_database');
-				$aConfig['default']['charset'] = $sNewCharset;
-				Core_Config::instance()->set('core_database', $aConfig);
 			}
 		}
 
@@ -893,6 +891,8 @@ function benchmarkShow($oAdmin_Form_Controller)
 				{
 					Core_Message::show(Core::_('Benchmark.severalCharsetsMsg'), 'error');
 				}
+				
+				$aConfigDataBase = Core_Config::instance()->get('core_database');
 				?>
 				<div id="horizontal-form">
 					<form class="form-horizontal" role="form" action="<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/benchmark/index.php")?>" method="post">
@@ -910,7 +910,7 @@ function benchmarkShow($oAdmin_Form_Controller)
 										array_combine($aAvailabledCharsets, $aAvailabledCharsets)
 									)
 									->class('form-control')
-									->value('utf8')
+									->value(isset($aConfigDataBase['default']['charset']) ? $aConfigDataBase['default']['charset'] : 'utf8')
 									->name('charset')
 									->execute();
 								?>

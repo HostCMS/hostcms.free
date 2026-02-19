@@ -23,8 +23,8 @@ return array(
 	'seo_keywords' => 'Keywords',
 	'indexing' => "Index product",
 	'yandex_market' => 'Export to Yandex.Market',
-	'yandex_market_bid' => '<acronym title="Base charge for Yandex.Market system (in cents)">Yandex.Market - base charge</acronym>',
-	'yandex_market_cid' => '<acronym title="Charge for model cards of Yandex.Market system (in cents)">Yandex.Market - charge for model cards</acronym>',
+	'yandex_market_bid' => 'Yandex.Market - base charge',
+	'yandex_market_cid' => 'Yandex.Market - charge for model cards',
 	'yandex_market_sales_notes' => 'Difference between product and other products (value of tag &lt;sales_notes&gt;)',
 	'datetime' => 'Date',
 	'guid' => '<acronym title="Product identifier for CommerceML format, e.g. ID00029527">CommerceML product identifier</acronym>',
@@ -35,7 +35,7 @@ return array(
 	'tab_description' => 'Description',
 	'tab_export' => 'Export/Import',
 	'tab_seo' => 'SEO',
-	'tab_associated' => 'Associated',
+	'tab_associated' => 'Related',
 	'shop_group_id' => 'Group',
 	'item_type_selection_group_buttons_name_simple' => "Conventional",
 	'item_type_selection_group_buttons_name_electronic' => "Digital",
@@ -123,7 +123,7 @@ return array(
 	'shortcut_creation_window_caption' => "Create shortcut",
 	'show_item_comment_title' => "List of comments to product \"%s\"",
 	'show_comments_title' => 'Comments to item "%s"',
-	'show_tying_products_title' => "Associated products of product \"%s\"",
+	'show_tying_products_title' => "Related products of product \"%s\"",
 	'item_modification_title' => 'Modification of product "%s"',
 	'item_modification_add_item' => 'Add',
 	'show_groups_modification' => 'Modification',
@@ -245,7 +245,7 @@ return array(
 	'create_modification_copy_export_import' => "<acronym title=\"Copy export/import parameters\">Copy export/import parameters of product</acronym>",
 	'create_modification_copy_prices_to_item' => "<acronym title=\"Copy additional prices of product\">Copy additional prices of product</acronym>",
 	'create_modification_copy_specials_prices_to_item' => "<acronym title=\"Copy special prices of product\">Copy special prices of product</acronym>",
-	'create_modification_copy_tying_products' => "<acronym title=\"Copy associated products\">Copy associated products</acronym>",
+	'create_modification_copy_tying_products' => "Copy related products",
 	'create_modification_copy_external_property' => "<acronym title=\"Copy values of other additional product properties\">Copy additional product properties</acronym>",
 	'create_modification_copy_tags' => "<acronym title=\"Copy product labels (tags)\">Copy product labels (tags)</acronym>",
 	'create_modification_copy_main_images' => "Copy main product images",
@@ -352,6 +352,7 @@ return array(
 	'create_modification_use_property_name' => 'Use property name',
 
 	'delete_unsent_modifications_by_properties' => 'Delete unsent modifications created by property',
+	'delete_associated_items' => 'Remove existing related products',
 	'shortcut' => 'Shortcut',
 	'include_modifications' => 'Include modifications',
 	'attribute_item_tab' => 'Items',
@@ -395,4 +396,15 @@ return array(
 	'export_prices' => 'Export prices',
 
 	'apply_shortcut_parent_item' => 'Apply to parent shortcut items',
+
+	'shop_gift_show_title' => 'Gifts',
+
+	'flag_include_shortcut_parent_item' => 'Apply to main product labels',
+	'change_price_main_header' => 'Main',
+	'change_price_discount_header' => 'Discount',
+	'change_price_bonus_header' => 'Bonus',
+
+	'aiApply_success' => 'AI integration successfully applied!',
+	'ai_prompt_description' => 'Write an engaging short description of product "%1$s" from manufacturer "%2$s" for sale in your online store. Do not use emojis. Please provide a descriptive text only, no more than 500 characters in your response.',
+	'ai_prompt_text' => 'Write a compelling description of product "%1$s" from manufacturer "%2$s" for sale in your online store. Do not use emojis. Use HTML markup, lists, and tables. If you have technical specifications, include them as well. Please provide a descriptive text only, no more than 5000 characters in your response.'
 );

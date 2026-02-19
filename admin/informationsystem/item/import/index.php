@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -636,7 +636,7 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 			if (Core_Array::getPost('firstlineheader', 0))
 			{
 				$fInputFile = fopen($Informationsystem_Item_Import_Csv_Controller->getFilePath(), 'rb');
-				@fgetcsv($fInputFile, 0, $Informationsystem_Item_Import_Csv_Controller->separator, $Informationsystem_Item_Import_Csv_Controller->limiter);
+				@fgetcsv($fInputFile, 0, $Informationsystem_Item_Import_Csv_Controller->separator, $Informationsystem_Item_Import_Csv_Controller->limiter, "\\");
 				$iNextSeekPosition = ftell($fInputFile);
 				fclose($fInputFile);
 			}
@@ -852,19 +852,23 @@ else
 			->name("import_action_delete_image")
 			->caption(Core::_('Informationsystem_Item.import_action_delete_image'))
 			->divAttr(array('id' => 'import_action_delete_image','class' => 'form-group col-xs-12'))))
-		->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
-			->name("delete_property_values")
-			->class('form-control colored-danger times')
-			->caption(Core::_('Informationsystem_Item.delete_property_values'))
-			->divAttr(array('class' => 'form-group col-xs-12'))
-			->value(1))
-		)
-		->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
-			->name("delete_field_values")
-			->class('form-control colored-danger times')
-			->caption(Core::_('Informationsystem_Item.delete_field_values'))
-			->divAttr(array('class' => 'form-group col-xs-12'))
-			->value(1))
+		->add(
+			Admin_Form_Entity::factory('Div')->class('row')->add(
+				Admin_Form_Entity::factory('Checkbox')
+					->name("delete_property_values")
+					->class('form-control colored-danger times')
+					->caption(Core::_('Informationsystem_Item.delete_property_values'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-md-6'))
+					->value(1)
+			)
+			->add(
+				Admin_Form_Entity::factory('Checkbox')
+					->name("delete_field_values")
+					->class('form-control colored-danger times')
+					->caption(Core::_('Informationsystem_Item.delete_field_values'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-md-6'))
+					->value(1)
+			)
 		)
 		->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
 			->name("search_event_indexation")

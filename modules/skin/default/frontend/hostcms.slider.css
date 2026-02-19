@@ -1,0 +1,78 @@
+.hostcms-slider-bar {
+	position: relative;
+	width: 100%;
+	height: 50px;
+	overflow: hidden;
+	background-color: initial;
+	border-bottom: 1px solid #dee2e6;
+}
+.hostcms-slider-bar-content {
+	display: flex;
+	height: 100%;
+	transition: transform 0.5s ease;
+}
+.hostcms-slider-bar-text {
+	flex: 0 0 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	padding: 0 20px;
+}
+.hostcms-slider-bar-text p {
+	margin: 0;
+	font-size: 16px;
+	color: inherit;
+	text-align: center;
+}
+/* Стили для точек-индикаторов */
+.hostcms-slider-dots {
+	position: absolute;
+	bottom: 5px;
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	gap: 8px;
+}
+.hostcms-slider-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background-color: #ccc;
+	cursor: pointer;
+	transition: background-color 0.3s;
+}
+.hostcms-slider-dot.active {
+	background-color: #333;
+}
+/* Кнопки навигации */
+.hostcms-slider-nav {
+	position: absolute;
+	top: 0;
+	height: 100%;
+	width: 40px;
+	background: initial;
+	border: none;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 20px;
+	color: inherit;
+	transition: background-color 0.3s;
+}
+.hostcms-slider-nav:hover {
+	background-color: rgba(0,0,0,0.2);
+}
+.hostcms-slider-prev {
+	left: 0;
+}
+.hostcms-slider-next {
+	right: 0;
+}
+.hostcms-slider-nav.hidden {
+	display: none;
+}
+.hostcms-slider-dots.hidden {
+	display: none;
+}

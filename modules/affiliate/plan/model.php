@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Affiliate
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Affiliate_Plan_Model extends Core_Entity
 {
@@ -71,8 +71,8 @@ class Affiliate_Plan_Model extends Core_Entity
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return self
-	 * @hostcms-event affiliate_plan.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event affiliate_plan.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -191,11 +191,8 @@ class Affiliate_Plan_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function levelsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function levelsBadge()
 	{
 		$count = $this->Affiliate_Plan_Levels->getCount();
 		$count && Core_Html_Entity::factory('Span')

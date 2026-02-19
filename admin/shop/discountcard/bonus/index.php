@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -16,8 +16,8 @@ $sFormAction = '/{admin}/shop/discountcard/bonus/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
-$oShop = Core_Entity::factory('Shop', intval(Core_Array::getGet('shop_id', 0)));
-$oShopGroup = Core_Entity::factory('Shop_Group', intval(Core_Array::getGet('shop_group_id', 0)));
+$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0, 'int'));
+$oShopGroup = Core_Entity::factory('Shop_Group', Core_Array::getGet('shop_group_id', 0, 'int'));
 $oShop_Discountcard = Core_Entity::factory('Shop_Discountcard', intval(Core_Array::getGet('shop_discountcard_id', 0)));
 $oShopDir = $oShop->Shop_Dir;
 

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Template
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Template_Section_Lib_Model extends Core_Entity
 {
@@ -90,6 +90,11 @@ class Template_Section_Lib_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeExecute', $this);
 
+		if (Core_Event::getLastReturn() === FALSE)
+		{
+			return $this;
+		}
+
 		try {
 			$bUserAccess = $this->Template_Section->Template->checkUserAccess();
 			// $bUserAccess = Core::checkPanel() && Core_Auth::logged();
@@ -107,6 +112,11 @@ class Template_Section_Lib_Model extends Core_Entity
 				}
 
 				?><div<?php echo $class != '' ? ' class="' . htmlspecialchars($class) . '"' : ''?><?php echo $this->style != '' ? ' style="' . htmlspecialchars($this->style) . '"' : ''?><?php echo $bUserAccess ? ' id="hostcmsSectionWidget-' . $this->id . '"' : ''?>><?php
+
+				if ($this->user_css != '')
+				{
+					?><style data-type="user_css"><?php echo htmlspecialchars((string) $this->user_css)?></style><?php
+				}
 			}
 
 			if ($bUserAccess)
@@ -133,12 +143,19 @@ class Template_Section_Lib_Model extends Core_Entity
 
 				if (isset($_GET['hostcmsAction']) && $_GET['hostcmsAction'] == 'SHOW_DESIGN')
 				{
-					?><div class="hostcmsWidgetIcon" data-template-section-id="<?php echo $this->Template_Section->id?>" onclick="hQuery.showWidgetPanel(<?php echo $this->Template_Section->id?>, <?php echo $this->id?>)"><i class="fa-solid fa-plus"></i></div>
-					<div class="hostcmsSectionWidgetPanel" style="display: none">
+					$upWidget = Core::_('Template_Section_Lib.up_widget');
+					$downWidget = Core::_('Template_Section_Lib.down_widget');
+
+					?>
+					<div class="hostcmsWidgetIcon" data-template-section-id="<?php echo $this->Template_Section->id?>" onclick="hQuery.showWidgetPanel(<?php echo $this->Template_Section->id?>, <?php echo $this->id?>)"><i class="fa-solid fa-plus"></i></div>
+					<!-- <div class="hostcmsSectionWidgetPanel" style="display: none"> -->
+					<div class="hostcmsSectionWidgetPanel">
 						<div class="draggable-indicator">
-							<svg width="16px" height="16px" viewBox="0 0 32 32"><rect height="4" width="4" y="4" x="4" /><rect height="4" width="4" y="12" x="4" /><rect height="4" width="4" y="4" x="12"/><rect height="4" width="4" y="12" x="12"/><rect height="4" width="4" y="4" x="20"/><rect height="4" width="4" y="12" x="20"/><rect height="4" width="4" y="4" x="28"/><rect height="4" width="4" y="12" x="28"/></svg>
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="mi-outline mi-drag-indicator" viewBox="0 0 24 24">
+								<path d="M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2m-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2m0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2m6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2m0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2m0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2"/>
+							</svg>
 						</div>
-						<div><a href="#" onclick="hQuery.showDesignPanel(<?php echo $this->id?>); return false"><i class="fa-solid fa-fill-drip"></i></a></div>
+						<div><a href="#" data-template-section-lib-id="<?php echo $this->id?>" onclick="hQuery.showDesignPanel(<?php echo $this->id?>); return false"><i class="fa-solid fa-palette"></i></a></div>
 						<?php
 						// Настройки виджета
 						$sPath = Admin_Form_Controller::correctBackendPath('/{admin}/template/section/lib/index.php');
@@ -147,6 +164,10 @@ class Template_Section_Lib_Model extends Core_Entity
 						$sOnclick = "hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', title: '" . Core_Str::escapeJavascriptVariable($sTitleWidgetSettings) . "', dialogClass: 'hostcms6'}); return false";
 						?>
 						<div><a href="<?php echo "{$sPath}?{$sAdditional}"?>" onclick="<?php echo $sOnclick ?>" alt="<?php echo $sTitleWidgetSettings ?>" title="<?php echo $sTitleWidgetSettings ?>"><i class="fa-solid fa-fw fa-gear"></i></a></div>
+
+						<div><span onclick="hQuery.changePosition(this, -1, <?php echo $this->id?>, <?php echo $this->Template_Section->id?>)" alt="<?php echo $upWidget?>" title="<?php echo $upWidget?>"><i class="fa-solid fa-fw fa-arrow-up"></i></span></div>
+						<div><span onclick="hQuery.changePosition(this, 1, <?php echo $this->id?>, <?php echo $this->Template_Section->id?>)" alt="<?php echo $downWidget?>" title="<?php echo $downWidget?>"><i class="fa-solid fa-fw fa-arrow-down"></i></span></div>
+
 						<?php
 						// Изменение активности
 						$sActiveUrl = "hQuery.changeActive({path: '/template-section-lib.php?template_section_lib_id={$this->id}{$sSettings}&active=' + (1 - hQuery(this).children('i').hasClass('active')), goal: hQuery('#hostcmsSectionWidget-{$this->id}')}); return false";
@@ -176,7 +197,7 @@ class Template_Section_Lib_Model extends Core_Entity
 
 			if ($bUserAccess)
 			{
-				?><div class="drag-handle" style="display: none"><i class="fa-regular fa-hand-back-fist fa-fw"></i></div><?php
+			 	?><div class="drag-handle" style="display: none"><i class="fa-regular fa-hand-back-fist fa-fw"></i></div><?php
 			}
 
 			if ($bCreateDiv)

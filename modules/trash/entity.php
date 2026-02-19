@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Trash
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Trash_Entity extends Core_Empty_Entity
 {
@@ -45,8 +45,8 @@ class Trash_Entity extends Core_Empty_Entity
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return Core_Entity
-	 */
+	 * @return self
+     */
 	public function delete($primaryKey = NULL)
 	{
 		if ($this->table_name != '')

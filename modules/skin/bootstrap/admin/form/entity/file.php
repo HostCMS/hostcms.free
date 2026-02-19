@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Entity_File
 {
@@ -243,7 +243,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 
 		if ($this->crop)
 		{
-			$originalName = $this->largeImage['originalName'] != '' ? $this->largeImage['originalName'] : basename($this->largeImage['path']);
+			$originalName = $this->largeImage['originalName'] != '' ? $this->largeImage['originalName'] : basename((string) $this->largeImage['path']);
 			$oLarge_Input_Group_Div->add(
 				Core_Html_Entity::factory('Script')
 					->value('$(function(){
@@ -567,7 +567,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 
 			if ($this->crop)
 			{
-				$originalName = $this->smallImage['originalName'] != '' ? $this->smallImage['originalName'] : basename($this->smallImage['path']);
+				$originalName = $this->smallImage['originalName'] != '' ? $this->smallImage['originalName'] : basename((string) $this->smallImage['path']);
 				$oSmall_Input_Group_Div->add(
 					Core_Html_Entity::factory('Script')
 						->value('$(function(){

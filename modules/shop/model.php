@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Model extends Core_Entity
 {
@@ -58,6 +58,8 @@ class Shop_Model extends Core_Entity
 		'shop_item' => array(),
 		'shop_item_property' => array(),
 		'shop_item_property_dir' => array(),
+		'shop_gift' => array(),
+		'shop_gift_dir' => array(),
 		'shop_order' => array(),
 		'shop_order_property' => array(),
 		'shop_order_property_dir' => array(),
@@ -272,7 +274,7 @@ class Shop_Model extends Core_Entity
 
 	/**
 	 * Add comments XML to item
-	 * @param boolean $showXmlComments mode
+	 * @param boolean $showXmlCounts mode
 	 * @return self
 	 */
 	public function showXmlCounts($showXmlCounts = TRUE)
@@ -301,8 +303,8 @@ class Shop_Model extends Core_Entity
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return self
-	 * @hostcms-event shop.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event shop.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -383,6 +385,8 @@ class Shop_Model extends Core_Entity
 		$this->Shop_Filter_Seos->deleteAll(FALSE);
 		$this->Shop_Tab_Dirs->deleteAll(FALSE);
 		$this->Shop_Tabs->deleteAll(FALSE);
+		$this->Shop_Gifts->deleteAll(FALSE);
+		$this->Shop_Gift_Dirs->deleteAll(FALSE);
 
 		// Fast filter tables
 		if ($this->filter)
@@ -863,8 +867,10 @@ class Shop_Model extends Core_Entity
 
 		if (!defined('DENY_INI_SET') || !DENY_INI_SET)
 		{
-			Core::isFunctionEnable('set_time_limit') && @set_time_limit(1200);
-			@ini_set('max_execution_time', '1200');
+			if (Core::isFunctionEnable('set_time_limit') && ini_get('safe_mode') != 1 && ini_get('max_execution_time') < 1200)
+			{
+				@set_time_limit(1200);
+			}
 		}
 
 		Core_Event::notify($this->_modelName . '.onBeforeRecount', $this);
@@ -1251,11 +1257,8 @@ class Shop_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function nameBadge()
 	{
 		!$this->structure_id && Core_Html_Entity::factory('Span')
 			->class('badge badge-darkorange badge-ico white')
@@ -1311,17 +1314,19 @@ class Shop_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @return string
 	 */
 	public function pathBackend()
 	{
 		$this->structure_id && $this->Structure->pathBackend();
 	}
 
-	/**
-	 * Backend callback method
-	 * @return string
-	 */
+    /**
+     * Backend callback method
+     * @param Admin_Form_Field_Model $oAdmin_Form_Field
+     * @param Admin_Form_Controller $oAdmin_Form_Controller
+     * @return string
+     * @throws Core_Exception
+     */
 	public function rebuildBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$return = '';
@@ -1388,11 +1393,8 @@ class Shop_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function shop_currency_idBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function shop_currency_idBadge()
 	{
 		$this->Shop_Currency->id == 0 && Core_Html_Entity::factory('I')
 			->class('fa fa-exclamation-triangle darkorange')

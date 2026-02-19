@@ -30,4 +30,7 @@ return array(
 	'seo_description' => '<acronym title="Meta element description">Description</acronym>',
 	'seo_keywords' => '<acronym title="Meta element keywords">Keywords</acronym>',
 	'h1' => "Heading H1",
+	'sorting' => 'Sorting order',
+	'apply_success' => "Information successfully changed",
+	'showed' => "Impressions",
 );

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Database
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_DataBase_Pdo extends Core_DataBase
 {
@@ -343,7 +343,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 		// Delete old items
 		if (/*rand(0, self::$_maxObjects) == 0 && */count($this->_quoteColumnNameCache) > self::$_maxObjects)
 		{
-			$this->_quoteColumnNameCache = array_slice($this->_quoteColumnNameCache, floor(self::$_maxObjects / 4));
+			$this->_quoteColumnNameCache = array_slice($this->_quoteColumnNameCache, floor(self::$_maxObjects / 4), NULL, TRUE);
 		}
 
 		$this->_quoteColumnNameCache[$columnName] = $value;
@@ -353,7 +353,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 	/**
 	 * Quote table name, e.g. `tableName` for 'tableName',
 	 * `tableName` AS `tableNameAlias` for array('tableName', 'tableNameAlias')
-	 * @param mixed $columnName string|array
+	 * @param mixed $tableName string|array
 	 * @return string
 	 */
 	public function quoteTableName($tableName)
@@ -425,7 +425,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 			return $this->_quoteColumnNameCache[$columnName];
 		}
 
-		// До проверки на точку, т.к. аргумент функции может ее содержать!
+		// До проверки на точку, т.к. аргумент функции может ее содержать
 		// SEC_TO_TIME(SUM(TIME_TO_SEC(time_col))) -> SEC_TO_TIME(SUM(TIME_TO_SEC(`time_col`)))
 		if (strpos($columnName, '(') !== FALSE && strpos($columnName, ')') !== FALSE)
 		{
@@ -641,7 +641,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 		parent::unbuffered($unbuffered);
 
 		$this->_connection
-			->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, !$this->_unbuffered);
+			->setAttribute(PHP_VERSION_ID < 80400 ? PDO::MYSQL_ATTR_USE_BUFFERED_QUERY : Pdo\Mysql::ATTR_USE_BUFFERED_QUERY, !$this->_unbuffered);
 
 		return $this;
 	}
@@ -887,6 +887,15 @@ class Core_DataBase_Pdo extends Core_DataBase
 	 */
 	public function free()
 	{
+		// Принудительно дочитываем unbuffered запросы
+		if ($this->_unbuffered && $this->_result)
+		{
+			while ($this->_result->fetch())
+			{
+				// Дочитываем все строки
+			}
+		}
+
 		$this->_free($this->_result);
 		$this->_result = NULL;
 

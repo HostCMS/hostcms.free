@@ -8,10 +8,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
-//class Core_Session_Database extends Core_Session
-//class Core_Session_Database //extends SessionHandler
 class Core_Session_Database implements SessionHandlerInterface
 {
 	/**
@@ -28,9 +26,21 @@ class Core_Session_Database implements SessionHandlerInterface
 
 	/**
 	 * Lock prefix
-	 * @var string
+	 * @var string|NULL
 	 */
 	protected $_lockPrefix = NULL;
+
+	/**
+     * Currently locked session ID
+     * @var string|NULL
+     */
+    protected $_currentLockId = NULL;
+    
+    /**
+     * Time when lock was acquired
+     * @var int|NULL
+     */
+    protected $_currentLockTime = NULL;
 
 	/**
 	 * GET_LOCK timeout (sec)
@@ -301,6 +311,18 @@ class Core_Session_Database implements SessionHandlerInterface
 	 */
 	protected function _lock($id)
 	{
+		// Проверяем, не заблокирована ли уже эта сессия
+        if ($this->_currentLockId === $id && $this->_isLockStillValid())
+		{
+            return TRUE;
+        }
+        
+        // Освобождаем предыдущую блокировку, если есть другая
+        if ($this->_currentLockId !== NULL && $this->_currentLockId !== $id)
+		{
+            $this->_unlock($this->_currentLockId);
+        }
+		
 		$iStartTime = time();
 
 		while (!connection_aborted())
@@ -319,12 +341,14 @@ class Core_Session_Database implements SessionHandlerInterface
 
 			if (isset($row['lock']) && $row['lock'] == 1)
 			{
+				// Сохраняем информацию о текущей блокировке
+                $this->_currentLockId = $id;
+                $this->_currentLockTime = time();
+				
 				return TRUE;
 			}
 
-			$iTime = time() - $iStartTime;
-
-			if ($iTime > $this->_lockTimeout)
+			if ((time() - $iStartTime) > $this->_lockTimeout)
 			{
 				Core_Session::error('HostCMS session lock error: Timeout.');
 				return FALSE;
@@ -336,25 +360,65 @@ class Core_Session_Database implements SessionHandlerInterface
 	}
 
 	/**
+     * Check if current lock is still valid
+     * @return boolean
+     */
+    protected function _isLockStillValid()
+    {
+        if (is_null($this->_currentLockTime))
+		{
+            return FALSE;
+        }
+        
+        // Блокировка действительна не более 30 секунд
+        $lockMaxAge = 30;
+        return (time() - $this->_currentLockTime) <= $lockMaxAge;
+    }
+	
+	/**
 	 * Unlock session
 	 * @param int $id session ID
 	 * @return boolean
 	 */
 	protected function _unlock($id)
 	{
-		$oDataBase = $this->_dataBase->setQueryType(0)
-			->query('SELECT RELEASE_LOCK(' . $this->_dataBase->quote($this->_getLockName($id)) . ') AS `lock`');
+		// Проверяем, что разблокируем именно текущую сессию
+        if ($this->_currentLockId !== $id)
+		{
+            // Пытаемся разблокировать, если блокировка устарела
+            if (!is_null($this->_currentLockId) && !$this->_isLockStillValid())
+			{
+                $this->_forceUnlock($this->_currentLockId);
+            }
+        }
+		
+		$row = $this->_forceUnlock($id);
 
-		$row = $oDataBase->asAssoc()->current();
-
-		$oDataBase->free();
+		// Сбрасываем информацию о блокировке
+        $this->_currentLockId = $this->_currentLockTime = NULL;
 
 		if (!is_array($row))
 		{
 			Core_Session::error('HostCMS session unlock error: Get row failure');
 		}
 
-		return TRUE;
+		//return TRUE;
+		return is_array($row) && isset($row['released']) && $row['released'] == 1;
+	}
+
+	/**
+	 * Unlock session
+	 * @param int $id session ID
+	 */
+	protected function _forceUnlock($id)
+	{
+		$oDataBase = $this->_dataBase->setQueryType(0)
+			->query('SELECT RELEASE_LOCK(' . $this->_dataBase->quote($this->_getLockName($id)) . ') AS `lock`');
+			
+		$row = $oDataBase->asAssoc()->current();
+		$oDataBase->free();
+		
+		return $row;
 	}
 
 	/**
@@ -365,4 +429,15 @@ class Core_Session_Database implements SessionHandlerInterface
 		$oDataBase = Core_QueryBuilder::truncate('sessions')->execute();
 		$oDataBase->free();
 	}
+	
+	/**
+	 * Destructor
+	 */
+	public function __destruct()
+    {
+        if (!is_null($this->_currentLockId))
+		{
+            $this->_unlock($this->_currentLockId);
+        }
+    }
 }

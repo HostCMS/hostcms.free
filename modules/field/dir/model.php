@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Field
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Field_Dir_Model extends Core_Entity
 {
@@ -32,7 +32,8 @@ class Field_Dir_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_belongsTo = array(
-		'field_dir' => array('foreign_key' => 'parent_id')
+		'field_dir' => array('foreign_key' => 'parent_id'),
+		'user' => array()
 	);
 
 	/**
@@ -42,6 +43,21 @@ class Field_Dir_Model extends Core_Entity
 	protected $_preloadValues = array(
 		'parent_id' => 0
 	);
+
+	/**
+	 * Constructor.
+	 * @param int $id entity ID
+	 */
+	public function __construct($id = NULL)
+	{
+		parent::__construct($id);
+
+		if (is_null($id) && !$this->loaded())
+		{
+			$oUser = Core_Auth::getCurrentUser();
+			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
+		}
+	}
 
 	/**
 	 * Get parent comment
@@ -61,11 +77,8 @@ class Field_Dir_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function nameBadge()
 	{
 
 		$countField_Dirs = $this->Field_Dirs->getCount();
@@ -105,8 +118,8 @@ class Field_Dir_Model extends Core_Entity
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return self
-	 * @hostcms-event field_dir.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event field_dir.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

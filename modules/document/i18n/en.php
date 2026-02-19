@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Document
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'menu' => 'Pages',
@@ -34,4 +34,5 @@ return array(
 	'template_id' => 'Website template',
 	'datetime' => 'Date',
 	'rollback_success' => 'Version restored successfully!',
+	'ai_prompt_default' => 'Write an article about..., don\'t use emoji, use HTML markup, lists, and tables. Provide only the meaning in your answer, no more than 2500 characters long.'
 );

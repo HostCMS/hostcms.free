@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -296,9 +296,13 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
-		->addCondition(array('open' => array()))
-			->addCondition(array('where' => array('tag_dirs.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
-			->addCondition(array('setOr' => array()))
+		->addCondition(array('open' => array()));
+
+	is_numeric($sGlobalSearch) && $oAdmin_Form_Dataset
+			->addCondition(array('where' => array('tag_dirs.id', '=', intval($sGlobalSearch))))
+			->addCondition(array('setOr' => array()));
+
+	$oAdmin_Form_Dataset
 			->addCondition(array('where' => array('tag_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
 }
@@ -321,9 +325,13 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
-		->addCondition(array('open' => array()))
-			->addCondition(array('where' => array('tags.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
-			->addCondition(array('setOr' => array()))
+		->addCondition(array('open' => array()));
+
+	is_numeric($sGlobalSearch) && $oAdmin_Form_Dataset
+			->addCondition(array('where' => array('tags.id', '=', intval($sGlobalSearch))))
+			->addCondition(array('setOr' => array()));
+
+	$oAdmin_Form_Dataset
 			->addCondition(array('where' => array('tags.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 			->addCondition(array('setOr' => array()))
 			->addCondition(array('where' => array('tags.path', 'LIKE', '%' . $sGlobalSearch . '%')))

@@ -5,7 +5,7 @@
 * @package HostCMS
 * @version 7.x
 * @author Hostmake LLC
-* @copyright © 2005-2025, https://www.hostcms.ru
+* @copyright © 2005-2026, https://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -108,9 +108,30 @@ $oAdmin_Form_Entity_Form = Admin_Form_Entity::factory('Form')
 
 $oAdmin_View->addChild($oAdmin_Form_Entity_Breadcrumbs);
 
+$increase_price_rate = Core_Array::getPost('increase_price_rate', '0.00', 'float');
+$increase_price_rate = str_replace(',', '.', $increase_price_rate);
+$increase_price_rate = number_format(floatval($increase_price_rate), 2);
+
+$multiply_price_rate = Core_Array::getPost('multiply_price_rate', '1.00', 'float');
+$multiply_price_rate = str_replace(',', '.', $multiply_price_rate);
+$multiply_price_rate = number_format(floatval($multiply_price_rate), 2);
+
+$bDeleteDiscount = Core_Array::getPost('flag_delete_discount', 0, 'int');
+$iDiscountID = Core_Array::getPost('shop_discount_id', 0, 'int');
+
+$bDeleteBonus = Core_Array::getPost('flag_delete_bonus', 0, 'int');
+$iBonusID = Core_Array::getPost('shop_bonus_id', 0, 'int');
+
+$iProducerID = Core_Array::getPost('shop_producers_list_id', 0, 'int');
+
+$iParentGroup = Core_Array::getPost('shop_groups_parent_id', 0, 'int');
+
+$bSpecialPrices = Core_Array::getPost('flag_include_spec_prices', 0, 'int');
+$bIncludeModifications = Core_Array::getPost('flag_include_modifications', 0, 'int');
+$bIncludeShortcutParentItem = Core_Array::getPost('flag_include_shortcut_parent_item', 0, 'int');
+
 $oMainTab = Admin_Form_Entity::factory('Tab')->name('main');
-$oMainTab
-	->add(Admin_Form_Entity::factory('Div')->class('row')
+$oMainTab->add(Admin_Form_Entity::factory('Div')->class('row')
 		->add(Admin_Form_Entity::factory('Radiogroup')
 			->radio(array(0 => Core::_('Shop_Item.add_price_to_digit')))
 			->caption(Core::_('Shop_Item.select_price_form'))
@@ -121,7 +142,7 @@ $oMainTab
 			->add(Admin_Form_Entity::factory('Input')
 				->name('increase_price_rate')
 				->caption('&nbsp;')
-				->value('0.00')
+				->value($increase_price_rate)
 				->divAttr(array('class' => 'form-group d-inline-block margin-left-10'))
 			)
 			->add(Admin_Form_Entity::factory('Span')
@@ -139,21 +160,66 @@ $oMainTab
 			->add(Admin_Form_Entity::factory('Input')
 				->name("multiply_price_rate")
 				->divAttr(array('class' => 'form-group d-inline-block margin-left-10'))
-				->value('1.00')
+				->value($multiply_price_rate)
 			)
 		)
+	);
+
+$oMainTab->add($oMainBlock = Admin_Form_Entity::factory('Div')->class('well with-header margin-bottom-10'));
+$oMainBlock
+	->add($oHeaderDiv = Admin_Form_Entity::factory('Div')
+		->class('header bordered-palegreen')
+		->value(Core::_('Shop_Item.change_price_main_header'))
 	)
-	->add(Admin_Form_Entity::factory('Div')->class('row')
+	->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+	->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+	->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+	->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
+	->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'));
+
+	$oMainRow1
 		->add(Admin_Form_Entity::factory('Checkbox')
 			->name('flag_include_modifications')
 			->caption(Core::_('Shop_Item.flag_include_modifications'))
-		)
-	)->add(Admin_Form_Entity::factory('Div')->class('row')
+			->value(1)
+			->checked($bIncludeModifications)
+		);
+
+	$oMainRow2
+		->add(Admin_Form_Entity::factory('Checkbox')
+			->name('flag_include_shortcut_parent_item')
+			->caption(Core::_('Shop_Item.flag_include_shortcut_parent_item'))
+			->value(1)
+			->checked($bIncludeShortcutParentItem)
+		);
+
+	$oMainRow3
 		->add(Admin_Form_Entity::factory('Checkbox')
 			->name('flag_include_spec_prices')
 			->caption(Core::_('Shop_Item.flag_include_spec_prices'))
-		)
-	);
+			->value(1)
+			->checked($bSpecialPrices)
+		);
+
+	$oMainRow4
+		->add(Admin_Form_Entity::factory('Select')
+			->name('shop_groups_parent_id')
+			->caption(Core::_('Shop_Item.select_parent_group'))
+			->options(array(Core::_('Shop_Item.load_parent_group')) + Shop_Item_Controller_Edit::fillShopGroup($oShop->id))
+			->divAttr(array('class' => 'form-group col-xs-12'))
+			->filter(TRUE)
+			->value($iParentGroup)
+		);
+
+	$oMainRow5
+		->add(Admin_Form_Entity::factory('Select')
+			->name('shop_producers_list_id')
+			->caption(Core::_('Shop_Item.shop_producer_id'))
+			->options(Shop_Item_Controller_Edit::fillProducersList($oShop->id))
+			->divAttr(array('class' => 'form-group col-xs-12'))
+			->filter(TRUE)
+			->value($iProducerID)
+		);
 
 if (Core::moduleIsActive('siteuser'))
 {
@@ -176,6 +242,8 @@ if (Core::moduleIsActive('siteuser'))
 				->divAttr(array('class' => 'form-group col-xs-12 col-md-3'))
 				->name('shop_price_' . $oShop_Price->id)
 				->caption(htmlspecialchars($oShop_Price->name))
+				->value(1)
+				->checked(Core_Array::getPost('shop_price_' . $oShop_Price->id, 0, 'int'))
 			);
 		}
 	}
@@ -190,23 +258,31 @@ foreach ($aShop_Discounts as $oShop_Discount)
 	$aDiscounts[$oShop_Discount->id] = $oShop_Discount->getOptions();
 }
 
-$oMainTab
-	->add(Admin_Form_Entity::factory('Div')->class('row')
-		->add(Admin_Form_Entity::factory('Select')
-			->options($aDiscounts)
-			->caption(Core::_('Shop_Item.select_discount_type'))
-			->name('shop_discount_id')
-			->divAttr(array('class' => 'form-group col-xs-12'))
-			->filter(TRUE)
-		)
+$oMainTab->add($oDiscountBlock = Admin_Form_Entity::factory('Div')->class('well with-header margin-bottom-10'));
+
+$oDiscountBlock
+	->add($oHeaderDiv = Admin_Form_Entity::factory('Div')
+		->class('header bordered-maroon')
+		->value(Core::_('Shop_Item.change_price_discount_header'))
 	)
-	->add(Admin_Form_Entity::factory('Div')->class('row')
-		->add(Admin_Form_Entity::factory('Checkbox')
-			->name('flag_delete_discount')
-			->caption(Core::_('Shop_Item.flag_delete_discount'))
-			->class('form-control colored-danger times')
-		)
-	);
+	->add($oDiscountRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+	->add($oDiscountRow2 = Admin_Form_Entity::factory('Div')->class('row'));
+
+$oDiscountRow1->add(Admin_Form_Entity::factory('Select')
+	->options($aDiscounts)
+	->caption(Core::_('Shop_Item.select_discount_type'))
+	->name('shop_discount_id')
+	->divAttr(array('class' => 'form-group col-xs-12'))
+	->filter(TRUE)
+	->value($iDiscountID)
+);
+$oDiscountRow2->add(Admin_Form_Entity::factory('Checkbox')
+	->name('flag_delete_discount')
+	->caption(Core::_('Shop_Item.flag_delete_discount'))
+	->class('form-control colored-danger times')
+	->value(1)
+	->checked($bDeleteDiscount)
+);
 
 // Получение бонусов
 if (Core::moduleIsActive('siteuser'))
@@ -218,41 +294,33 @@ if (Core::moduleIsActive('siteuser'))
 		$aBonuses[$oShop_Bonus->id] = $oShop_Bonus->getOptions();
 	}
 
-	$oMainTab
-		->add(Admin_Form_Entity::factory('Div')->class('row')
-			->add(Admin_Form_Entity::factory('Select')
-				->options($aBonuses)
-				->caption(Core::_('Shop_Item.select_bonus_type'))
-				->name('shop_bonus_id')
-				->divAttr(array('class' => 'form-group col-xs-12'))
-				->filter(TRUE))
-	)
-	->add(Admin_Form_Entity::factory('Div')->class('row')
-		->add(Admin_Form_Entity::factory('Checkbox')
-			->name('flag_delete_bonus')
-			->caption(Core::_('Shop_Item.flag_delete_bonus'))
-			->class('form-control colored-danger times')
+	$oMainTab->add($oBonusBlock = Admin_Form_Entity::factory('Div')->class('well with-header margin-bottom-10'));
+
+	$oBonusBlock
+		->add($oHeaderDiv = Admin_Form_Entity::factory('Div')
+			->class('header bordered-orange')
+			->value(Core::_('Shop_Item.change_price_bonus_header'))
 		)
+		->add($oBonusRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+		->add($oBonusRow2 = Admin_Form_Entity::factory('Div')->class('row'));
+
+	$oBonusRow1->add(Admin_Form_Entity::factory('Select')
+		->options($aBonuses)
+		->caption(Core::_('Shop_Item.select_bonus_type'))
+		->name('shop_bonus_id')
+		->divAttr(array('class' => 'form-group col-xs-12'))
+		->filter(TRUE)
+		->value($iBonusID)
+	);
+
+	$oBonusRow2->add(Admin_Form_Entity::factory('Checkbox')
+		->name('flag_delete_bonus')
+		->caption(Core::_('Shop_Item.flag_delete_bonus'))
+		->class('form-control colored-danger times')
+		->value(1)
+		->checked($bDeleteBonus)
 	);
 }
-
-$oMainTab
-	->add(Admin_Form_Entity::factory('Div')->class('row')
-		->add(Admin_Form_Entity::factory('Select')
-			->name('shop_groups_parent_id')
-			->caption(Core::_('Shop_Item.select_parent_group'))
-			->options(array(Core::_('Shop_Item.load_parent_group')) + Shop_Item_Controller_Edit::fillShopGroup($oShop->id))
-			->divAttr(array('class' => 'form-group col-xs-12'))
-			->filter(TRUE)
-			->value($oShopGroup->id)))
-	->add(Admin_Form_Entity::factory('Div')->class('row')
-		->add(Admin_Form_Entity::factory('Select')
-			->name('shop_producers_list_id')
-			->caption(Core::_('Shop_Item.shop_producer_id'))
-			->options(Shop_Item_Controller_Edit::fillProducersList($oShop->id))
-			->divAttr(array('class' => 'form-group col-xs-12'))
-			->filter(TRUE)))
-	;
 
 $oAdmin_Form_Entity_Form
 	->add($oMainTab)
@@ -272,33 +340,16 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 {
 	if (!$oUser->read_only)
 	{
-		$increase_price_rate = Core_Array::getPost('increase_price_rate');
-		$increase_price_rate = str_replace(',', '.', $increase_price_rate);
-
-		$multiply_price_rate = Core_Array::getPost('multiply_price_rate');
-		$multiply_price_rate = str_replace(',', '.', $multiply_price_rate);
-
-		$iDiscountID = intval(Core_Array::getPost('shop_discount_id', 0));
-		$iBonusID = intval(Core_Array::getPost('shop_bonus_id', 0));
-		$iProducerID = intval(Core_Array::getPost('shop_producers_list_id'));
-
-		$iParentGroup = intval(Core_Array::getPost('shop_groups_parent_id'));
-
-		$bSpecialPrices = !is_null(Core_Array::getPost('flag_include_spec_prices'));
-		$bIncludeModifications = !is_null(Core_Array::getPost('flag_include_modifications'));
-
-		$increase_price_rate = floatval($increase_price_rate);
-		$multiply_price_rate = floatval($multiply_price_rate);
-
 		$aShop_Prices = Core::moduleIsActive('siteuser')
 			? $oShop->Shop_Prices->findAll(FALSE)
 			: array();
 
-		// Если только увеличение цены в N раз и не указаны скидки или бонусы
-		if (Core_Array::getPost('type_of_change') == 1 && !$iDiscountID && !$iBonusID && !($bIncludeModifications && $iParentGroup))
+		// Если только увеличение цены в N раз и не указаны скидки или бонусы, не включая модификации и для всего магазина
+		if (Core_Array::getPost('type_of_change') == 1 && !$iDiscountID && !$iBonusID && !($bIncludeModifications && $iParentGroup) && !$bIncludeShortcutParentItem)
 		{
 			// Розничная
 			$offset = 0;
+
 			do {
 				$oShop_Price_Setting = Core_Entity::factory('Shop_Price_Setting');
 				$oShop_Price_Setting->shop_id = $oShop->id;
@@ -428,8 +479,11 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 			$oShop_Items = Core_Entity::factory('Shop', $oShop->id)->Shop_Items;
 			$oShop_Items
 				->queryBuilder()
-				->where('modification_id', '=', 0)
-				->where('shortcut_id', '=', 0);
+				//->where('shop_items.shortcut_id', '=', 0)
+				->where('shop_items.modification_id', '=', 0);
+
+			!$bIncludeShortcutParentItem
+				&& $oShop_Items->queryBuilder()->where('shop_items.shortcut_id', '=', 0);
 
 			$iParentGroup
 				&& $oShop_Items->queryBuilder()->where('shop_group_id', 'IN', array_merge(array($iParentGroup), Core_Entity::factory('Shop_Group', $iParentGroup)->Shop_Groups->getGroupChildrenId()));
@@ -460,6 +514,8 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 				}
 			}
 
+			$aAppliedIDs = array();
+
 			// Step-by-step
 			$offset = 0;
 			do {
@@ -470,14 +526,20 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 				$aShop_Items = $oShop_Items->findAll(FALSE);
 				foreach ($aShop_Items as $oShop_Item)
 				{
-					applySettings($oShop_Price_Setting, $oUser, $oShop_Item, $aShop_Price_IDs, $increase_price_rate, $multiply_price_rate, $iDiscountID, $iBonusID, $bSpecialPrices);
+					$oShop_Item->shortcut_id && $oShop_Item = $oShop_Item->Shop_Item;
 
-					if ($bIncludeModifications)
+					if (!in_array($oShop_Item->id, $aAppliedIDs))
 					{
-						$aShopItemModifications = $oShop_Item->Modifications->findAll(FALSE);
-						foreach ($aShopItemModifications as $oShopItemModification)
+						$aAppliedIDs[] = $oShop_Item->id;
+						applySettings($oShop_Price_Setting, $oUser, $oShop_Item, $aShop_Price_IDs, $increase_price_rate, $multiply_price_rate, $iDiscountID, $iBonusID, $bSpecialPrices);
+
+						if ($bIncludeModifications)
 						{
-							applySettings($oShop_Price_Setting, $oUser, $oShopItemModification, $aShop_Price_IDs, $increase_price_rate, $multiply_price_rate, $iDiscountID, $iBonusID, $bSpecialPrices);
+							$aShopItemModifications = $oShop_Item->Modifications->findAll(FALSE);
+							foreach ($aShopItemModifications as $oShopItemModification)
+							{
+								applySettings($oShop_Price_Setting, $oUser, $oShopItemModification, $aShop_Price_IDs, $increase_price_rate, $multiply_price_rate, $iDiscountID, $iBonusID, $bSpecialPrices);
+							}
 						}
 					}
 				}

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Ipaddress
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Ipaddress_Filter_Model extends Core_Entity
 {
@@ -86,7 +86,7 @@ class Ipaddress_Filter_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -115,11 +115,8 @@ class Ipaddress_Filter_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	protected function _showBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	protected function _showBadge()
 	{
 		$this->block_ip && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square darkorange')
@@ -140,11 +137,8 @@ class Ipaddress_Filter_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function jsonBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function jsonBackend()
 	{
 		$aJson = json_decode($this->json, TRUE);
 
@@ -187,13 +181,13 @@ class Ipaddress_Filter_Model extends Core_Entity
 		return $newObject;
 	}
 
-	/**
-	 * Move item to another group
-	 * @param int $ipaddress_dir_id target group id
-	 * @return Core_Entity
-	 * @hostcms-event ipaddress_filter.onBeforeMove
-	 * @hostcms-event ipaddress_filter.onAfterMove
-	 */
+    /**
+     * Move item to another group
+     * @param int $ipaddress_filter_dir_id
+     * @return Core_Entity
+     * @hostcms-event ipaddress_filter.onBeforeMove
+     * @hostcms-event ipaddress_filter.onAfterMove
+     */
 	public function move($ipaddress_filter_dir_id)
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($ipaddress_filter_dir_id));

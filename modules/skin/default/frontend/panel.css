@@ -102,6 +102,8 @@ input:focus {
 	height: 45px;
 	padding: 10px;
 	color: #717172;
+	margin-bottom: 1px;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 }
 .top-panel .icons {
 	display: flex;
@@ -109,34 +111,61 @@ input:focus {
 	justify-content: center;
 	max-height: 50px;
 }
-.top-panel .icons i {
+.top-panel .icons i, .top-panel .icons span {
 	width: 32px;
 	height: 32px;
 	font-size: 30px;
 	margin: 10px;
 	text-align: center;
 }
-.top-panel .icons i:nth-child(1), .top-panel .icons i:nth-child(3) {
+.top-panel .icons span {
+	background-color: #999; /* The desired color */
+	-webkit-mask-size: contain;
+	mask-size: contain;
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+}
+.top-panel .icons .desktop {
+	-webkit-mask-image: url('/modules/skin/default/frontend/images/desktop.svg'); /* For Safari */
+	mask-image: url('/modules/skin/default/frontend/images/desktop.svg');
+}
+.top-panel .icons .tablet, .top-panel .icons .tablet-wide {
+	-webkit-mask-image: url('/modules/skin/default/frontend/images/tablet.svg'); /* For Safari */
+	mask-image: url('/modules/skin/default/frontend/images/tablet.svg');
+}
+.top-panel .icons .mobile, .top-panel .icons .mobile-wide {
+	-webkit-mask-image: url('/modules/skin/default/frontend/images/mobile.svg'); /* For Safari */
+	mask-image: url('/modules/skin/default/frontend/images/mobile.svg');
+}
+
+.top-panel .icons span:nth-child(1), .top-panel .icons span:nth-child(3) {
 	margin-right: 30px;
 }
-.top-panel .icons i:hover {
+.top-panel .icons i:hover, .top-panel .icons span:hover {
 	cursor: pointer;
 }
-.top-panel .icons i:hover:not(.fa-circle-xmark){
-	color: #333;
+.top-panel .icons span:hover {
+	background-color: #333;
 }
-.top-panel .icons i.active {
-	color: #333;
+.top-panel .icons span.active {
+	background-color: #333;
+}
+.top-panel .icons .rotate {
+	rotate: 270deg;
 }
 
 #siteFrame {
 	height: 90vh;
 	width: 100%;
 	position:fixed;
+	background: #fff;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 .iframe-wrapper {
 	display: flex;
 	justify-content: center;
+	background: #f6f7f8;
+	height: 100vh;
 }
 .top-panel .btn-open-site {
 	color: #999;
@@ -150,7 +179,7 @@ input:focus {
 	.top-panel .icons {
 		width: 100%;
 	}
-	.top-panel .icons i:nth-child(1), .top-panel .icons i:nth-child(3) {
+	.top-panel .icons span:nth-child(1), .top-panel .icons span:nth-child(3) {
 		margin-right: 0 !important;
 	}
 }

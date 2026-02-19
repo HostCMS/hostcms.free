@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Lib
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Lib_Controller_Delete_File extends Admin_Form_Action_Controller
 {
@@ -32,7 +32,7 @@ class Lib_Controller_Delete_File extends Admin_Form_Action_Controller
 					? $aJson[$varible_name][$operation]
 					: $aJson[$varible_name];
 
-				if (strlen($filepath))
+				if (is_scalar($filepath) && strlen($filepath))
 				{
 					try {
 						Core_File::delete(CMS_FOLDER . ltrim($filepath, '/'));

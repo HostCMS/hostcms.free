@@ -4,14 +4,12 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
 if (Core_Auth::logged())
 {
-	Core_Auth::checkBackendBlockedIp();
-
 	if (!is_null(Core_Array::getGet('autocomplete'))
 		&& !is_null(Core_Array::getGet('show_dir'))
 		&& !is_null(Core_Array::getGet('queryString'))

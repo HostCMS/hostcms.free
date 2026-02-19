@@ -8,13 +8,13 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Company
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Company_Department_Controller_Delete extends Admin_Form_Action_Controller
 {
 	/**
 	 * Executes the business logic.
-	 * @param mixed $operation Operation name
+	 * @param mixed $sOperation Operation name
 	 * @return self
 	 */
 	public function execute($sOperation = NULL)

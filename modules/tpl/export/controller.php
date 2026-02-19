@@ -48,6 +48,13 @@ class Tpl_Export_Controller extends Core_Servant_Properties
 					!is_null($oTpl)
 						&& $this->_setObjects($oTpl);
 				}
+				else
+				{
+					$oTpl_Dir = Core_Entity::factory('Tpl_Dir')->getById($key);
+
+					!is_null($oTpl_Dir)
+						&& $this->_addDirs($oTpl_Dir);
+				}
 			}
 		}
 
@@ -55,14 +62,62 @@ class Tpl_Export_Controller extends Core_Servant_Properties
 	}
 
 	/**
-	 * Set objects
-	 * @param object Tpl_Model $oTpl xsl
+	 * Add from dirs
+	 * @param Tpl_Dir_Model $oTpl_Dir
 	 * @return self
 	 */
+	protected function _addDirs(Tpl_Dir_Model $oTpl_Dir)
+	{
+		$aTpls = $oTpl_Dir->Tpls->findAll(FALSE);
+		foreach ($aTpls as $oTpl)
+		{
+			$this->_setObjects($oTpl);
+		}
+
+		// subgroups
+		$aTpl_Dirs = $oTpl_Dir->Tpl_Dirs->findAll(FALSE);
+		foreach ($aTpl_Dirs as $oTpl_Dir)
+		{
+			$this->_addDirs($oTpl_Dir);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Get dir name
+	 * @param Tpl_Model $oTpl
+	 * @return string
+	 */
+	protected function _getDirName(Tpl_Model $oTpl)
+	{
+		$aReturn = array();
+
+		if ($oTpl->tpl_dir_id)
+		{
+			$oTpl_Dir = $oTpl->Tpl_Dir;
+
+			do {
+				$aReturn[] = $oTpl_Dir->name;
+				$oTpl_Dir = $oTpl_Dir->getParent();
+			} while ($oTpl_Dir);
+
+			$aReturn = array_reverse($aReturn);
+		}
+
+		return implode('/', $aReturn);
+	}
+
+    /**
+     * Set objects
+     * @param Tpl_Model $oTpl tpl
+     * @return self
+     */
 	protected function _setObjects(Tpl_Model $oTpl)
 	{
 		$this->_aObjects[$oTpl->name] = array(
 			'version' => CURRENT_VERSION,
+			'dirName' => strval($this->_getDirName($oTpl)),
 			'name' => $oTpl->name,
 			'tpl' => $oTpl->loadTplFile(),
 			'description' => $oTpl->description,

@@ -17,7 +17,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Xsl
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 abstract class Xsl_Processor
 {
@@ -128,7 +128,7 @@ abstract class Xsl_Processor
 
 	/**
 	 * Clear XMLNS attribute
-	 * @param string source data
+	 * @param string $sXsl source data
 	 * @return string
 	 */
 	protected function _clearXmlns($sXsl)
@@ -138,7 +138,7 @@ abstract class Xsl_Processor
 
 	/**
 	 * Clear XMLNS attribute
-	 * @param string source data
+	 * @param string $sXsl source data
 	 * @return string
 	 */
 	static public function clearXmlns($sXsl)

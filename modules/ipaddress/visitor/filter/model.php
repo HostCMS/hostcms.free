@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Ipaddress
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Ipaddress_Visitor_Filter_Model extends Core_Entity
 {
@@ -86,7 +86,7 @@ class Ipaddress_Visitor_Filter_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -115,11 +115,8 @@ class Ipaddress_Visitor_Filter_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	protected function _showBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	protected function _showBadge()
 	{
 		if ($this->block_mode)
 		{
@@ -191,11 +188,8 @@ class Ipaddress_Visitor_Filter_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function jsonBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function jsonBackend()
 	{
 		$aJson = json_decode($this->json, TRUE);
 
@@ -264,7 +258,7 @@ class Ipaddress_Visitor_Filter_Model extends Core_Entity
 
 	/**
 	 * Move item to another group
-	 * @param int $ipaddress_dir_id target group id
+	 * @param int $ipaddress_visitor_filter_dir_id target group id
 	 * @return Core_Entity
 	 * @hostcms-event ipaddress_visitor_filter.onBeforeMove
 	 * @hostcms-event ipaddress_visitor_filter.onAfterMove

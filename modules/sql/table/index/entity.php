@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Sql
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Sql_Table_Index_Entity extends Core_Empty_Entity
 {
@@ -45,8 +45,8 @@ class Sql_Table_Index_Entity extends Core_Empty_Entity
 
 	/**
 	 * Get primary key value
-	 * @return mixed
-	 */
+	 * @return string
+     */
 	public function getPrimaryKeyName()
 	{
 		return 'name';
@@ -75,8 +75,8 @@ class Sql_Table_Index_Entity extends Core_Empty_Entity
 	/**
 	 * Utilized for reading data from inaccessible properties
 	 * @param string $property property name
-	 * @return mixed
-	 */
+	 * @return string|void
+     */
 	public function __get($property)
 	{
 		if (isset($this->_tableColums[$property]))
@@ -130,7 +130,6 @@ class Sql_Table_Index_Entity extends Core_Empty_Entity
 
 	/**
 	 * Backend callback method
-	 * @return string
 	 */
 	public function uniqueBackend()
 	{

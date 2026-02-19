@@ -140,4 +140,18 @@ return array(
 
 	'delete_property_values' => 'Delete exist property values',
 	'delete_field_values' => 'Delete existing values of custom fields',
+
+	'change_attributes_items_title' => 'Change attributes',
+	'change_attributes_success' => 'Attributes changed successfully!',
+	'remove' => '× Remove',
+	'set' => '✓ Set',
+	'attribute_item_tab' => 'Items',
+	'attribute_group_tab' => 'Groups',
+	'include_subgroups' => 'Include subgroups',
+	'attribute_item_main_tab' => 'Main',
+	'apply_shortcut_parent_item' => 'Apply to shortcut main items',
+
+	'aiApply_success' => 'AI integration successfully applied!',
+	'ai_prompt_description' => 'Write a short description of the article for the "%1$s" section about "%2$s" for posting on the website. Do not use emoji. Use HTML markup, lists, and tables. In your response, provide only the description value, no more than 500 characters long.',
+	'ai_prompt_text' => 'Write the text of the article for the "%1$s" section about "%2$s" for posting on the website. Do not use emoji. Use HTML markup, lists, and tables. In your response, provide only the description value, no more than 5000 characters long.',
 );

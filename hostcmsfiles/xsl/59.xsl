@@ -14,7 +14,7 @@
 
 &labelLine3;
 &labelLogin; <xsl:value-of select="login"/>
-&labelPassword; <xsl:value-of select="new_password"/>
+&labelPassword; <xsl:value-of select="new_password" disable-output-escaping="yes"/>
 
 ---
 &labelAdministration; <xsl:value-of select="/siteuser/site/site_alias/alias_name_without_mask"/>

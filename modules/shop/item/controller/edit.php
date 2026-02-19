@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -284,6 +284,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oDescriptionField
 					->rows(10)
 					->wysiwyg(Core::moduleIsActive('wysiwyg'))
+					->data('ai_prompt_default', Core::_('Shop_Item.ai_prompt_description', $this->_object->name, $this->_object->Shop_Producer->name))
 					->template_id($template_id);
 
 				$oShopItemTabDescription->move($oDescriptionField, $oShopItemTabDescriptionRow1);
@@ -321,6 +322,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oTextField
 					->rows(18)
 					->wysiwyg(Core::moduleIsActive('wysiwyg'))
+					->data('ai_prompt_default', Core::_('Shop_Item.ai_prompt_text', $this->_object->name, $this->_object->Shop_Producer->name))
 					->template_id($template_id);
 
 				$oShopItemTabDescription->move($oTextField, $oShopItemTabDescriptionRow3);
@@ -2128,7 +2130,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		parent::_applyObjectProperty();
 
 		$oShop = /*$bNewObject
-			? Core_Entity::factory('Shop', intval(Core_Array::getGet('shop_id', 0)))
+			? Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0, 'int'))
 			: */ $this->_object->Shop;
 
 		$aConfig = Shop_Controller::getConfig();
@@ -3534,11 +3536,11 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		return $aReturn;
 	}
 
-	/**
-	 * Fill shortcut groups list
-	 * @param Shop_Item_Model $oShop_Item item
-	 * @return array
-	 */
+    /**
+     * Fill shortcut groups list
+     * @param object $oObject
+     * @return array
+     */
 	protected function _fillShortcutGroupList($oObject)
 	{
 		$aReturn = array();

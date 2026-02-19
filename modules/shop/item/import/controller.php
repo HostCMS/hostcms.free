@@ -8,37 +8,18 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Item_Import_Controller extends Core_Servant_Properties
 {
 	/**
-	 * Convert url to Punycode
-	 * @param string $url
-	 * @return string
-	 */
-	protected function _convertToPunycode($url)
-	{
-		return preg_replace_callback('~(https?://)([^/]*)(.*)~', function($a) {
-			$aTmp = array_map('rawurlencode', explode('/', $a[3]));
-
-			return (preg_match('/[А-Яа-яЁё]/u', $a[2])
-				? $a[1] . Core_Str::idnToAscii($a[2])
-				: $a[1] . $a[2]
-			) . implode('/', $aTmp);
-
-			}, $url
-		);
-	}
-
-	/**
 	 * Download file to the TMP dir
 	 * @param string $sSourceFile
-	 * @return path to the file
+	 * @return string path to the file
 	 */
 	public function _downloadHttpFile($sSourceFile)
 	{
-		$sSourceFile = $this->_convertToPunycode($sSourceFile);
+		$sSourceFile = Core_Http::convertToPunycode($sSourceFile);
 
 		$Core_Http = Core_Http::instance()
 			->clear()

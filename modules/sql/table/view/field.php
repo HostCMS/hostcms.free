@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Sql
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Sql_Table_View_Field
 {
@@ -37,7 +37,6 @@ class Sql_Table_View_Field
 	 * Run when writing data to inaccessible properties
 	 * @param string $property property name
 	 * @param string $value property value
-	 * @return self
 	 * @ignore
 	 */
 	public function __set($property, $value)
@@ -45,13 +44,13 @@ class Sql_Table_View_Field
 		$this->_columns[$property] = $value;
 	}
 
-	/**
-	 * Triggered when invoking inaccessible methods in an object context
-	 * @param string $name method name
-	 * @param array $arguments arguments
-	 * @return mixed
-	 * @hostcms-event modelname.onCall
-	 */
+    /**
+     * Triggered when invoking inaccessible methods in an object context
+     * @param string $methodName
+     * @param array $arguments arguments
+     * @return mixed
+     * @hostcms-event modelname.onCall
+     */
 	public function __call($methodName, $arguments)
 	{
 		if (isset($this->_columns[$methodName]) && count($arguments) == 0)

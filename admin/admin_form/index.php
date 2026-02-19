@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -15,12 +15,104 @@ $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
 if (Core_Auth::logged())
 {
-	Core_Auth::checkBackendBlockedIp();
-
 	// Контроллер формы
 	$oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 
 	$oAdmin_Form_Controller->formSettings();
+
+	if (!is_null(Core_Array::getPost('lock')))
+	{
+		$aReturn = array(
+			'id' => 0,
+			'status' => 'error'
+		);
+
+		$admin_form_id = Core_Array::getPost('admin_form_id', 0, 'intval');
+		$dataset = Core_Array::getPost('dataset', 0, 'intval');
+		$entity_id = Core_Array::getPost('entity_id', 0, 'intval');
+
+		if ($admin_form_id)
+		{
+			try {
+				$oAdmin_Form_Lock = Admin_Form_Lock_Controller::lock($admin_form_id, $dataset, $entity_id);
+
+				$aReturn = array(
+					'id' => $oAdmin_Form_Lock->id,
+					'status' => 'success'
+				);
+			}
+			catch (Exception $e)
+			{
+				$aReturn = array(
+					'status' => 'error'
+				);
+			}
+		}
+
+		Core::showJson($aReturn);
+	}
+
+	if (!is_null(Core_Array::getPost('show_locked')))
+	{
+		$aReturn = array(
+			'id' => 0,
+			'text' => '',
+			'status' => 'error'
+		);
+
+		$admin_form_id = Core_Array::getPost('admin_form_id', 0, 'intval');
+		$dataset = Core_Array::getPost('dataset', 0, 'intval');
+		$entity_id = Core_Array::getPost('entity_id', 0, 'intval');
+
+		$oAdmin_Form_Locks = Core_Entity::factory('Admin_Form_Lock');
+		$oAdmin_Form_Locks->queryBuilder()
+			->where('admin_form_locks.admin_form_id', '=', $admin_form_id)
+			->where('admin_form_locks.dataset', '=', $dataset)
+			->where('admin_form_locks.entity_id', '=', $entity_id);
+
+		$oAdmin_Form_Lock = $oAdmin_Form_Locks->getLast(FALSE);
+
+		if (!is_null($oAdmin_Form_Lock))
+		{
+			$oUser = Core_Auth::getCurrentUser();
+			$oUser_Locked = $oAdmin_Form_Lock->User;
+
+			if ($oUser->id != $oUser_Locked->id)
+			{
+				if (Core_Date::sql2timestamp($oAdmin_Form_Lock->datetime) + 600 >= time())
+				{
+					$text = '<div class="alert alert-danger admin-form-locked"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><i class="fa-fw fa fa-ban"></i> ' . Core::_('Admin_Form.form_locked', Core_Date::sql2datetime($oAdmin_Form_Lock->datetime), $oUser_Locked->login) . '</div>';
+
+					$aReturn = array(
+						'id' => $oAdmin_Form_Lock->id,
+						'text' => $text,
+						'status' => 'success'
+					);
+				}
+				else
+				{
+					$oAdmin_Form_Lock->delete();
+				}
+			}
+		}
+
+		Core::showJson($aReturn);
+	}
+
+	if (!is_null(Core_Array::getPost('delete_lock')))
+	{
+		$admin_form_id = Core_Array::getPost('admin_form_id', 0, 'intval');
+		$dataset = Core_Array::getPost('dataset', 0, 'intval');
+		$entity_id = Core_Array::getPost('entity_id', 0, 'intval');
+
+		Admin_Form_Lock_Controller::unlock($admin_form_id, $dataset, $entity_id);
+
+		$aReturn = array(
+			'status' => 'success'
+		);
+
+		Core::showJson($aReturn);
+	}
 
 	if (!is_null(Core_Array::getPost('autosave')))
 	{
@@ -54,6 +146,9 @@ if (Core_Auth::logged())
 				$oAdmin_Form_Autosave->json = $json;
 				$oAdmin_Form_Autosave->datetime = Core_Date::timestamp2sql(time());
 				$oAdmin_Form_Autosave->save();
+
+				// Произошла блокировка
+				Admin_Form_Lock_Controller::lock($admin_form_id, $dataset, $entity_id);
 
 				$aReturn = array(
 					'id' => $oAdmin_Form_Autosave->id,
@@ -444,6 +539,28 @@ $oAdmin_Form_Entity_Menus->add(
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 
+// Глобальный поиск
+$additionalParams = '';
+
+$sGlobalSearch = Core_Array::getGet('globalSearch', '', 'trim');
+
+$oAdmin_Form_Controller->addEntity(
+	Admin_Form_Entity::factory('Code')
+		->html('
+			<div class="row search-field margin-bottom-20">
+				<div class="col-xs-12">
+					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
+						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
+						<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
+						<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '"><i class="fa-solid fa-magnifying-glass fa-fw"></i></button>
+					</form>
+				</div>
+			</div>
+		')
+);
+
+$sGlobalSearch = str_replace(' ', '%', Core_DataBase::instance()->escapeLike($sGlobalSearch));
+
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
@@ -458,6 +575,9 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 			$oAdmin_Form_Controller->getAdminLoadAjax(array('path' => $oAdmin_Form_Controller->getPath()))
 	)
 );
+
+// Добавляем все хлебные крошки контроллеру
+$oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
 // Действие редактирования
 $oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
@@ -511,23 +631,31 @@ $oUser = Core_Auth::getCurrentUser();
 !$oUser->superuser && $oUser->only_access_my_own
 	&& $oAdmin_Form_Dataset->addUserConditions();
 
-$oAdmin_Form_Dataset->addCondition(
-	array('select' => array('admin_forms.*', array('admin_word_values.name', 'name')))
-)->addCondition(
-	array('leftJoin' => array('admin_words', 'admin_forms.admin_word_id', '=', 'admin_words.id'))
-)->addCondition(
-	array('leftJoin' => array('admin_word_values', 'admin_words.id', '=', 'admin_word_values.admin_word_id'))
-)->addCondition(
-	array('open' => array())
-)->addCondition(
-	array('where' => array('admin_word_values.admin_language_id', '=', CURRENT_LANGUAGE_ID))
-)->addCondition(
-	array('setOr' => array())
-)->addCondition(
-	array('where' => array('admin_forms.admin_word_id', '=', 0))
-)->addCondition(
-	array('close' => array())
-);
+$oAdmin_Form_Dataset
+	->addCondition(array('select' => array('admin_forms.*', array('admin_word_values.name', 'name'))))
+	->addCondition(array('leftJoin' => array('admin_words', 'admin_forms.admin_word_id', '=', 'admin_words.id')))
+	->addCondition(array('leftJoin' => array('admin_word_values', 'admin_words.id', '=', 'admin_word_values.admin_word_id')))
+	->addCondition(array('open' => array()))
+		->addCondition(array('where' => array('admin_word_values.admin_language_id', '=', CURRENT_LANGUAGE_ID)))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('admin_forms.admin_word_id', '=', 0)))
+	->addCondition(array('close' => array()));
+
+if (strlen($sGlobalSearch))
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('open' => array()));
+
+	is_numeric($sGlobalSearch) && $oAdmin_Form_Dataset
+			->addCondition(array('where' => array('admin_forms.id', '=', intval($sGlobalSearch))))
+			->addCondition(array('setOr' => array()));
+
+	$oAdmin_Form_Dataset
+			->addCondition(array('where' => array('admin_forms.guid', '=', $sGlobalSearch)))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('admin_word_values.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
+}
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(

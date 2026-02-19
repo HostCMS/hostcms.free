@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Market
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Market_Controller extends Core_Servant_Properties
 {
@@ -389,10 +389,13 @@ class Market_Controller extends Core_Servant_Properties
 			{
 				if (isset($oXml->module) && count($oXml->module))
 				{
-					(!defined('DENY_INI_SET') || !DENY_INI_SET)
-						&& function_exists('set_time_limit')
-						&& ini_get('safe_mode') != 1
-						&& @set_time_limit(120);
+					if (!defined('DENY_INI_SET') || !DENY_INI_SET)
+					{
+						if (Core::isFunctionEnable('set_time_limit') && ini_get('safe_mode') != 1 && ini_get('max_execution_time') < 120)
+						{
+							@set_time_limit(120);
+						}
+					}
 
 					// Объект с данными о модуле
 					$this->_Module = new StdClass();
@@ -833,7 +836,7 @@ class Market_Controller extends Core_Servant_Properties
 
 			Core_Log::instance()->clear()
 				->status(Core_Log::$MESSAGE)
-				->write(sprintf('Market, copy `files` directory'));
+				->write('Market, copy `files` directory');
 
 			Core_File::copyDir($sFilesDir, CMS_FOLDER);
 		}
@@ -869,7 +872,7 @@ class Market_Controller extends Core_Servant_Properties
 		{
 			Core_Log::instance()->clear()
 				->status(Core_Log::$MESSAGE)
-				->write(sprintf('Market, execute module.sql'));
+				->write('Market, execute module.sql');
 
 			$sSqlCode = Core_File::read($sSqlModuleFilename);
 			Sql_Controller::instance()->execute($sSqlCode);
@@ -881,7 +884,7 @@ class Market_Controller extends Core_Servant_Properties
 		{
 			Core_Log::instance()->clear()
 				->status(Core_Log::$MESSAGE)
-				->write(sprintf('Market, execute module.php'));
+				->write('Market, execute module.php');
 
 			include($sPhpModuleFilename);
 		}
@@ -896,7 +899,7 @@ class Market_Controller extends Core_Servant_Properties
 			{
 				Core_Log::instance()->clear()
 					->status(Core_Log::$MESSAGE)
-					->write(sprintf('Market, create module'));
+					->write('Market, create module');
 
 				$oAdminModule = Core_Entity::factory('Module');
 				$oAdminModule
@@ -920,7 +923,7 @@ class Market_Controller extends Core_Servant_Properties
 
 		Core_Log::instance()->clear()
 			->status(Core_Log::$MESSAGE)
-			->write(sprintf('Market, module installation is complete'));
+			->write('Market, module installation is complete');
 
 		clearstatcache();
 

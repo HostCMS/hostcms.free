@@ -26,6 +26,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - itemsMedia(TRUE|FALSE) выводить значения библиотеки файлов для информационных элементов, по умолчанию FALSE
  * - closed(TRUE|FALSE) ограничивать вывод закрытых информационных элементов, по умолчанию TRUE
  * - addFilter() добавить условие отобра информационных элементов, может задавать условие отобра по значению свойства ->addFilter('property', 17, '=', 1)
+ * - filterStrictMode(TRUE|FALSE|array()) фильтровать только по существующим значениям (кроме списков и checkbox), отсутствие значения считать неверным значением. Если указан массив с идентификаторами свойств, то только для них будет использоваться строгий режим, по умолчанию FALSE
  * - comments(TRUE|FALSE) показывать комментарии для выбранных информационных элементов, по умолчанию FALSE
  * - commentsRating(TRUE|FALSE) показывать оценки комментариев для выбранных информационных элементов, по умолчанию FALSE
  * - votes(TRUE|FALSE) показывать рейтинг элемента, по умолчанию TRUE
@@ -89,7 +90,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Informationsystem_Controller_Show extends Core_Controller
 {
@@ -114,6 +115,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 		'groupsMedia',
 		'itemsMedia',
 		'closed',
+		'filterStrictMode',
 		'itemsForbiddenTags',
 		'comments',
 		'commentsRating',
@@ -315,7 +317,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 		$this->group = $this->offset = $this->page = 0;
 		$this->item = NULL;
 		$this->groupsProperties = $this->itemsProperties = $this->commentsProperties = $this->propertiesForGroups = $this->comments = $this->commentsRating
-			= $this->tags = $this->calculateCounts = $this->siteuserProperties = $this->groupsMedia = $this->itemsMedia = FALSE;
+			= $this->tags = $this->filterStrictMode = $this->calculateCounts = $this->siteuserProperties = $this->groupsMedia = $this->itemsMedia = FALSE;
 
 		$this->siteuser = $this->cache = $this->itemsPropertiesList = $this->commentsPropertiesList = $this->groupsPropertiesList
 			= $this->votes = $this->showPanel = $this->calculateTotal = $this->parts = $this->sortPropertiesValues = $this->closed
@@ -1621,12 +1623,16 @@ class Informationsystem_Controller_Show extends Core_Controller
 		$Core_Router_Route = new Core_Router_Route($this->pattern, $this->patternExpressions);
 		$this->patternParams = $matches = $Core_Router_Route->applyPattern($this->url);
 
+		$bFilterApplied = FALSE;
+
 		if (isset($matches['page']) && is_numeric($matches['page']))
 		{
 			if ($matches['page'] > 1)
 			{
 				$this->page($matches['page'] - 1)
 					->offset($this->limit * $this->page);
+
+				$bFilterApplied = TRUE;
 			}
 			else
 			{
@@ -1657,6 +1663,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 			{
 				return $this->error404();
 			}
+
+			$bFilterApplied = TRUE;
 		}
 
 		$path = isset($matches['path']) && $matches['path'] != '/'
@@ -1717,6 +1725,11 @@ class Informationsystem_Controller_Show extends Core_Controller
 				}
 				else
 				{
+					if ($bFilterApplied)
+					{
+						return $this->error410();
+					}
+
 					// Attempt to receive Informationsystem_Item
 					$oInformationsystem_Items = $oInformationsystem->Informationsystem_Items;
 
@@ -2416,8 +2429,9 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 				$oXslSubPanel->add(
 					Core_Html_Entity::factory('A')
+						->data('confirm-message', Core::_('Admin_Form.msg_information_delete'))
 						->href("{$sPath}?{$sAdditional}")
-						->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { hQuery.openWindow({path: '{$sPath}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'});} return false")
+						->onclick("res = confirm(this.getAttribute('data-confirm-message')); if (res) { hQuery.openWindow({path: '{$sPath}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'});} return false")
 						->add(
 							Core_Html_Entity::factory('I')
 								->title($sTitle)
@@ -2468,8 +2482,9 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 			$oXslSubPanel->add(
 				Core_Html_Entity::factory('A')
+					->data('confirm-message', Core::_('Admin_Form.confirm_dialog', htmlspecialchars($sTitle)))
 					->href("{$sPath}?{$sAdditional}")
-					->onclick("res = confirm('".Core::_('Admin_Form.confirm_dialog', htmlspecialchars($sTitle))."'); if (res) { hQuery.openWindow({path: '{$sPath}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false } else { return false }")
+					->onclick("res = confirm(this.getAttribute('data-confirm-message')); if (res) { hQuery.openWindow({path: '{$sPath}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false } else { return false }")
 					->add(
 						Core_Html_Entity::factory('I')
 							->title($sTitle)
@@ -2516,8 +2531,9 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 			$oXslSubPanel->add(
 				Core_Html_Entity::factory('A')
+					->data('confirm-message', Core::_('Admin_Form.msg_information_delete'))
 					->href("{$sPath}?{$sAdditional}")
-					->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { hQuery.openWindow({path: '{$sPath}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'});} return false")
+					->onclick("res = confirm(this.getAttribute('data-confirm-message')); if (res) { hQuery.openWindow({path: '{$sPath}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'});} return false")
 					->add(
 						Core_Html_Entity::factory('I')
 							->title($sTitle)
@@ -2730,10 +2746,24 @@ class Informationsystem_Controller_Show extends Core_Controller
 					// Для строк фильтр LIKE %...%
 					if ($oProperty->type == 1)
 					{
-						foreach ($aPropertyValues as $propertyValue)
+						if ($condition == '=')
+						{
+							foreach ($aPropertyValues as $propertyValue)
+							{
+								$propertyValue = Core_DataBase::instance()->escapeLike(trim($propertyValue));
+
+								$this->informationsystemItems()->queryBuilder()
+									->where($tableName . '.value', 'LIKE', "%{$propertyValue}%");
+							}
+						}
+						else
 						{
 							$this->informationsystemItems()->queryBuilder()
-								->where($tableName . '.value', 'LIKE', "%{$propertyValue}%");
+								->where(
+									$tableName . '.value',
+									count($aPropertyValues) == 1 ? $condition : 'IN',
+									count($aPropertyValues) == 1 && $condition != 'IN' ? $aPropertyValues[0] : $aPropertyValues
+								);
 						}
 					}
 					else
@@ -2741,8 +2771,12 @@ class Informationsystem_Controller_Show extends Core_Controller
 						// 7 - Checkbox
 						$oProperty->type == 7 && $aPropertyValues[0] != '' && $aPropertyValues = array(1);
 
-						// 7 - Checkbox, 3 - List
-						$bCheckUnset = $oProperty->type != 7 && $oProperty->type != 3;
+						// Not strict mode and Type is '7 - Checkbox' or '3 - List'
+						$bCheckUnset = is_array($this->filterStrictMode)
+							? !in_array($oProperty->id, $this->filterStrictMode)
+							: !$this->filterStrictMode
+								&& $oProperty->type != 7
+								&& $oProperty->type != 3;
 
 						$bCheckUnset && $this->informationsystemItems()->queryBuilder()->open();
 
@@ -2842,6 +2876,41 @@ class Informationsystem_Controller_Show extends Core_Controller
 	}
 
 	/**
+	 * Set Filter Prices Conditions by $aData
+	 * @param array $aData
+	 * @return self
+	 */
+	public function setFilterPropertiesConditions($aData)
+	{
+		$oInformationsystem = $this->getEntity();
+		$oInformationsystem_Item_Property_List = Core_Entity::factory('Informationsystem_Item_Property_List', $oInformationsystem->id);
+
+		$aProperties = $oInformationsystem_Item_Property_List->Properties->findAll();
+
+		foreach ($aProperties as $oProperty)
+		{
+			$value = Core_Array::get($aData, 'property_' . $oProperty->id);
+			if ($value)
+			{
+				$this->addFilter('property', $oProperty->id, '=', $this->_convertReceivedPropertyValue($oProperty, $value));
+			}
+			elseif (!is_null(Core_Array::get($aData, 'property_' . $oProperty->id . '_from')))
+			{
+				$tmpFrom = Core_Array::get($aData, 'property_' . $oProperty->id . '_from');
+				$tmpTo = Core_Array::get($aData, 'property_' . $oProperty->id . '_to');
+
+				$tmpFrom != ''
+					&& $this->addFilter('property', $oProperty->id, '>=', $this->_convertReceivedPropertyValue($oProperty, $tmpFrom));
+
+				$tmpTo != ''
+					&& $this->addFilter('property', $oProperty->id, '<=', $this->_convertReceivedPropertyValue($oProperty, $tmpTo));
+			}
+		}
+
+		return $this;
+	}
+	
+	/**
 	 * Convert property value, e.g. '23.11.2020' => '2020-11-23 00:00:00'
 	 * @param Property_Model $oProperty
 	 * @param mixed $value
@@ -2851,6 +2920,9 @@ class Informationsystem_Controller_Show extends Core_Controller
 	{
 		switch ($oProperty->type)
 		{
+			case 7: // checkbox
+				$value = 1;
+			break;
 			case 8: // date
 				$value != ''
 					&& $value = Core_Date::date2sql($value);

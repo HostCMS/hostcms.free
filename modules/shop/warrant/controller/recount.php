@@ -8,15 +8,15 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Warrant_Controller_Recount extends Admin_Form_Action_Controller
 {
 	/**
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name
-	 * @return self
-	 */
+	 * @return true|void
+     */
 	public function execute($operation = NULL)
 	{
 		if (is_null($operation))

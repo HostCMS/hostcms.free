@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controller
 {
@@ -164,8 +164,13 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 		$this->clear();
 
 		// Устанавливаем лимит времени выполнения в 1 час
-		(!defined('DENY_INI_SET') || !DENY_INI_SET)
-			&& function_exists('set_time_limit') && ini_get('safe_mode') != 1 && @set_time_limit(3600);
+		if (!defined('DENY_INI_SET') || !DENY_INI_SET)
+		{
+			if (Core::isFunctionEnable('set_time_limit') && ini_get('safe_mode') != 1 && ini_get('max_execution_time') < 3600)
+			{
+				@set_time_limit(3600);
+			}
+		}
 	}
 
 	/**
@@ -258,6 +263,7 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 			Core::_('Shop_Exchange.item_barcode'),
 			Core::_('Shop_Exchange.item_sets_guid'),
 			Core::_('Shop_Exchange.item_tabs'),
+			Core::_('Shop_Exchange.associateds'),
 			Core::_('Shop_Exchange.siteuser_id'),
 			Core::_('Shop_Exchange.item_yandex_market_sales_notes')
 		);
@@ -351,7 +357,7 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 
 		// Заполняем цены
 		$this->exportPrices
-			&& $this->_aShopPrices = $oShop->Shop_prices->findAll(FALSE);
+			&& $this->_aShopPrices = $oShop->Shop_Prices->findAll(FALSE);
 
 		// Группы
 		$aGroupTitles = array_map(array($this, 'prepareCell'), $this->getGroupTitles());
@@ -576,7 +582,22 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 			$aTmpTabs[] = $oShop_Tab_Item->Shop_Tab->name;
 			$oShop_Tab_Item->clear();
 		}
-		unset($aShop_Item_Tabs);
+		unset($aShop_Tab_Items);
+
+		$aTmpAssociateds = array();
+		$aShop_Item_Associateds = $oShopItem->Item_Associateds->findAll(FALSE);
+		foreach ($aShop_Item_Associateds as $oShop_Item_Associated_Original)
+		{
+			$oShop_Item_Associated_Original->shortcut_id
+				&& $oShop_Item_Associated_Original = Core_Entity::factory('Shop_Item', $oShop_Item_Associated_Original->shortcut_id);
+
+			if ($oShop_Item_Associated_Original->id != $oShopItem->id && $oShop_Item_Associated_Original->marking != '')
+			{
+				$aTmpAssociateds[] = $oShop_Item_Associated_Original->marking;
+				$oShop_Item_Associated_Original->clear();
+			}
+		}
+		unset($aShop_Item_Associateds);
 
 		$result = array(
 			$this->prepareCell($oShopItem->guid),
@@ -642,6 +663,7 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 			sprintf('"%s"', implode(',', $aTmpBarcodes)),
 			sprintf('"%s"', implode(',', $aTmpSets)),
 			sprintf('"%s"', implode(',', $aTmpTabs)),
+			sprintf('"%s"', implode(',', $aTmpAssociateds)),
 			sprintf('"%s"', $oShopItem->siteuser_id),
 			sprintf('"%s"', $oShopItem->yandex_market_sales_notes)
 		);
@@ -909,15 +931,20 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 		//ob_get_clean();
 		while (ob_get_level() > 0)
 		{
-			ob_end_flush();
+			ob_end_clean();
 		}
 
-		header('Pragma: public');
 		header('Cache-Control: no-cache, must-revalidate');
-		header('Content-Type: text/html; charset=utf-8');
+
 		// Disable Nginx cache
 		header('X-Accel-Buffering: no');
-		header('Content-Encoding: none');
+
+		//header('Content-Type: application/force-download');
+		header('Content-Encoding: identity'); // вместо none
+		header('Content-Type: text/csv; charset=utf-8');
+
+		// Автоматический сброс буфера при каждом выводе
+		ob_implicit_flush(TRUE);
 
 		$oShop = Core_Entity::factory('Shop', $this->shopId);
 
@@ -960,17 +987,23 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 			}
 		}
 
-		// Автоматический сброс буфера при каждом выводе
-		ob_implicit_flush(TRUE);
-
 		if (!$this->exportToFile)
 		{
 			header('Content-Description: File Transfer');
 			header('Content-Type: application/force-download');
 			header('Content-Transfer-Encoding: binary');
 			header("Content-Disposition: attachment; filename = {$this->fileName};");
-		}
 
+			// Дополнительные настройки для потоковой передачи
+			if (function_exists('apache_setenv'))
+			{
+				@apache_setenv('no-gzip', 1);
+			}
+			@ini_set('output_buffering', 'off');
+			@ini_set('zlib.output_compression', 0);
+			@ini_set('implicit_flush', 1);
+		}
+		
 		if (is_null($this->lastGroupId))
 		{
 			Core_Log::instance()->clear()

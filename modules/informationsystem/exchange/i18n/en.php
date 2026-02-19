@@ -46,4 +46,6 @@ return array(
 	'item_additional_group' => 'Shortcute\'s GUID',
 	'item_siteuser_id' => 'Client ID',
 	'clear_matches' => 'clear matches',
+	'create_prop' => 'Create a property of type "%s"',
+	'create_field' => 'Create a field of type "%s"',
 );

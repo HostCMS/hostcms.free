@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage User
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class User_Session_Model extends Core_Entity
 {
@@ -67,16 +67,6 @@ class User_Session_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @return string
-	 */
- 	public function user_idBackend()
-	{
-		return $this->User->showAvatarWithName();
-	}
-
-	/**
-	 * Backend callback method
-	 * @return string
 	 */
 	public function imgBackend()
 	{
@@ -131,7 +121,7 @@ class User_Session_Model extends Core_Entity
 				case 3:
 					$icon = 'fa-tv';
 				break;
-				case 3:
+				case 4:
 					$icon = 'fa-clock-0';
 				break;
 			}

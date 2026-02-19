@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Rss
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Rss
 {
@@ -43,14 +43,14 @@ class Core_Rss
 	 */
 	protected $_entities = array();
 
-	/**
-	 * Add entity.
-	 *
-	 * @param string $name entity name
-	 * @param string $value entity value
-	 * @param string $attributes array attributes
-	 * @return self
-	 */
+    /**
+     * Add entity.
+     *
+     * @param string $name entity name
+     * @param string $value entity value
+     * @param array $attributes array attributes
+     * @return self
+     */
 	public function add($name, $value, array $attributes = array())
 	{
 		$this->_entities[] = array(

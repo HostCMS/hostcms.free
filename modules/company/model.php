@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Company
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Company_Model extends Core_Entity
 {
@@ -382,12 +382,12 @@ class Company_Model extends Core_Entity
 
 	/**
 	 * Build visual representation of group tree
-	 * @param int $iInformationsystemId information system ID
-	 * @param int $iInformationsystemGroupParentId parent ID
-	 * @param array $aExclude exclude group ID
-	 * @param int $iLevel current nesting level
-	 * @return array
-	 */
+     * @param int $iCompanyDepartmentParentId
+     * @param array $aExclude exclude group ID
+     * @param int $iLevel current nesting level
+     * @return array
+     * @throws Core_Exception
+    */
 	public function fillDepartments($iCompanyDepartmentParentId = 0, $aExclude = array(), $iLevel = 0)
 	{
 		$iCompanyDepartmentParentId = intval($iCompanyDepartmentParentId);
@@ -515,11 +515,8 @@ class Company_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function nameBadge()
 	{
 		$count = $this->Company_Department_Post_Users->getCount(FALSE, 'user_id', TRUE);
 		$count && Core_Html_Entity::factory('Span')
@@ -539,11 +536,8 @@ class Company_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function structureBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function structureBadge()
 	{
 		$count = $this->Company_Departments->getCount();
 		$count && Core_Html_Entity::factory('Span')
@@ -555,11 +549,8 @@ class Company_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function activityBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function activityBadge()
 	{
 		$count = $this->Company_Activities->getCount();
 		$count && Core_Html_Entity::factory('Span')
@@ -571,11 +562,8 @@ class Company_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function locationBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function locationBadge()
 	{
 		$count = $this->Company_Locations->getCount();
 		$count && Core_Html_Entity::factory('Span')
@@ -587,11 +575,8 @@ class Company_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function cashboxesBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function cashboxesBadge()
 	{
 		$count = $this->Company_Cashboxes->getCount();
 		$count && Core_Html_Entity::factory('Span')
@@ -603,11 +588,8 @@ class Company_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function accountsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function accountsBadge()
 	{
 		$count = $this->Company_Accounts->getCount();
 		$count && Core_Html_Entity::factory('Span')
@@ -618,7 +600,7 @@ class Company_Model extends Core_Entity
 	}
 
 	/**
-	 * Get company avatar
+	 * Backend
 	 * @return string
 	 */
 	public function getAvatar()
@@ -628,7 +610,11 @@ class Company_Model extends Core_Entity
 			: Admin_Form_Controller::correctBackendPath("/{admin}/company/index.php?loadCompanyAvatar={$this->id}");
 	}
 
-	public function imgBackend()
+	/**
+	 * Get company avatar
+	 * @return string
+	 */
+    public function imgBackend()
 	{
 		return '<img width="25" class="company-image" src="' . $this->getAvatar() . '"/>';
 	}
@@ -1046,8 +1032,9 @@ class Company_Model extends Core_Entity
 
 	/**
 	 * Add company CommerceML
-	 * @param Core_SimpleXMLElement $oXml
-	 */
+     * @param Core_SimpleXMLElement $oXml
+     * @return Company_Model
+    */
 	public function addCml(Core_SimpleXMLElement $oXml)
 	{
 		$oCompanyXml = $oXml->addChild('Владелец');

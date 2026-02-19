@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Discountcard_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -120,8 +120,8 @@ class Shop_Discountcard_Controller_Edit extends Admin_Form_Action_Controller_Typ
 	/**
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name
-	 * @return mixed
-	 */
+	 * @return bool
+     */
 	public function execute($operation = NULL)
 	{
 		if (!$this->_object->id && !is_null($operation) && $operation != '')

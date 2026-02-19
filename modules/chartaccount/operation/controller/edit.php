@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Chartaccount
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Chartaccount_Operation_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -37,7 +37,6 @@ class Chartaccount_Operation_Controller_Edit extends Admin_Form_Action_Controlle
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oEntryBlock = Admin_Form_Entity::factory('Div')->class('well with-header'));
-			;
 
 		$oMainTab
 			->move($this->getField('number')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow1)
@@ -70,7 +69,6 @@ class Chartaccount_Operation_Controller_Edit extends Admin_Form_Action_Controlle
 		$oMainTab
 			->move($this->getField('posted')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-lg-3 margin-top-21')), $oMainRow2)
 			->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow3);
-			;
 
 		// if ($this->_object->id)
 		// {

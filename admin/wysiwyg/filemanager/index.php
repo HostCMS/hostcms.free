@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -37,7 +37,7 @@ if ($additionalFields != '')
 			$globalAdditionalParams .= ($globalAdditionalParams == '' ? '' : '&') . rawurlencode($sTmp) . '=' . rawurlencode($_GET[$sTmp]);
 		}
 	}
-	
+
 	$oAdmin_Form_Controller->additionalParams($globalAdditionalParams);
 }
 
@@ -226,8 +226,8 @@ if (!$oUser->read_only)
 							dropzone.on("addedfile", function(file) {
 								aFilenames.push(file.name);
 
-								$(file.previewElement).on("click", function(){
-									window.opener.HostCMSFileManager.insertFile("' . rawurlencode(DIRECTORY_SEPARATOR . ltrim($cdir, DIRECTORY_SEPARATOR)) . '" + file.name); return false;
+								$(file.previewElement).on("click", function() {
+									window.opener.wysiwygFileManager.insertFile("' . rawurlencode(DIRECTORY_SEPARATOR . ltrim($cdir, DIRECTORY_SEPARATOR)) . '" + file.name); return false;
 								});
 							});
 
@@ -436,9 +436,8 @@ if (!$oAdmin_Form_Controller->getAjax())
 <title><?php echo $oAdmin_Form_Controller->getPageTitle()?></title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<link rel="apple-touch-icon" href="/modules/skin/bootstrap/ico/icon-iphone-retina.png" />
-<link rel="shortcut icon" type="image/x-icon" href="/modules/skin/bootstrap/ico/favicon.ico" />
-<link rel="icon" type="image/png" href="/modules/skin/bootstrap/ico/favicon.png" />
+<meta name="referrer" content="no-referrer" />
+<link rel="icon" type="image/svg+xml" href="/modules/skin/bootstrap/ico/favicon.svg" />
 <?php Core_Skin::instance()->showHead()?>
 </head>
 <body class="hostcms6 hostcmsWindow">

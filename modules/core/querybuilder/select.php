@@ -33,7 +33,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Querybuilder
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 {
@@ -567,6 +567,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	 * LIMIT for UNION
 	 * @param string $arg1 offset
 	 * @param string $arg2 count
+     * @return self
 	 */
 	public function unionLimit($arg1, $arg2 = NULL)
 	{
@@ -585,7 +586,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	 * Set UNION offset
 	 *
 	 * @param int $offset offset
-	 * @return selfion
+	 * @return self
 	 */
 	public function unionOffset($offset)
 	{

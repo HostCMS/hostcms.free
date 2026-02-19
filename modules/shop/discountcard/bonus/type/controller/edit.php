@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Discountcard_Bonus_Type_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -83,12 +83,10 @@ class Shop_Discountcard_Bonus_Type_Controller_Edit extends Admin_Form_Action_Con
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 	}
 
-	/**
-	 * Create visual tree of the statuses for dropdownlist
-	 * @param int $iParentId parent cell ID
-	 * @param int $iLevel current nesting level
-	 * @return array
-	 */
+    /**
+     * Create visual tree of the statuses for dropdownlist
+     * @return array
+     */
 	static public function getDropdownlistOptions()
 	{
 		$aReturn = array(array('value' => Core::_('Shop_Order.notStatus'), 'color' => '#aebec4'));

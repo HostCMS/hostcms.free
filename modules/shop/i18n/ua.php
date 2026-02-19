@@ -234,4 +234,6 @@ return array(
 	'watermark_item_header' => 'Товар',
 	'watermark_group_header' => 'Група',
 	'watermark_producer_header' => 'Виробник',
+
+	'marking_template' => 'Шаблон артикула товару',
 );

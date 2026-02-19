@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Constant
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Constant_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -142,8 +142,8 @@ class Constant_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	/**
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name
-	 * @return self
-	 */
+	 * @return bool
+     */
 	public function execute($operation = NULL)
 	{
 		if (!is_null($operation) && $operation != '')

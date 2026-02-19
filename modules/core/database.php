@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Database
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 abstract class Core_DataBase
 {
@@ -274,12 +274,12 @@ abstract class Core_DataBase
 	 */
 	abstract public function quoteColumnName($columnName);
 
-	/**
-	 * Quote table name, e.g. `tableName` for 'tableName',
-	 * `tableName` AS `tableNameAlias` for array('tableName', 'tableNameAlias')
-	 * @param mixed $columnName string|array
-	 * @return string
-	 */
+    /**
+     * Quote table name, e.g. `tableName` for 'tableName',
+     * `tableName` AS `tableNameAlias` for array('tableName', 'tableNameAlias')
+     * @param string $tableName
+     * @return string
+     */
 	abstract public function quoteTableName($tableName);
 
 	/**
@@ -525,7 +525,7 @@ abstract class Core_DataBase
 	/**
 	 * Get full driver name
 	 * @param string $driver driver name
-	 * @return srting
+	 * @return string
 	 */
 	static protected function _getDriverName($driver)
 	{
@@ -670,18 +670,6 @@ abstract class Core_DataBase
 		$quotedTableName = $this->quoteTableName($tableName);
 
 		$this->dumpStructure($tableName, $stdOut);
-
-		/*$stdOut->write(
-			"\r\n\r\n" .
-			"-- \r\n" .
-			"-- Structure for table " . $sQuoted . " \r\n" .
-			"-- \r\n\r\n" .
-			"DROP TABLE IF EXISTS " . $quotedTableName . ";\r\n"
-		);
-
-		$aCreate = $this->query("SHOW CREATE TABLE {$quotedTableName}")->asAssoc()->current();
-
-		$this->free();*/
 
 		$stdOut->write(
 			//"{$aCreate['Create Table']};\r\n\r\n" .
@@ -941,9 +929,9 @@ abstract class Core_DataBase
 	 * @var array
 	 */
 	protected $_likeReplacements = array(
+		'\\' => '\\\\',
 		'%' => '\%',
-		'_' => '\_',
-		'\\' => '\\\\'
+		'_' => '\_'
 	);
 
 	/**

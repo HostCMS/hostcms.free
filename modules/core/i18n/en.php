@@ -248,4 +248,5 @@ return array(
 	'error_log_backend_blocked_useragent' => "Access to the admin center is blocked, IP '%s', User Agent '%s'",
 	'csrf_wrong_token' => 'Invalid CSRF token, please update the form!',
 	'csrf_token_timeout' => 'CSRF token has expired, please refresh the form!',
+	'show_design' => 'Designer',
 );

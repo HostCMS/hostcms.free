@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Favorite_Model extends Core_Entity
 {
@@ -121,11 +121,11 @@ class Shop_Favorite_Model extends Core_Entity
 	 */
 	protected $_showXmlCommentsRating = FALSE;
 
-	/**
-	 * Add Comments Rating XML to item
-	 * @param boolean $showXmlComments mode
-	 * @return self
-	 */
+    /**
+     * Add Comments Rating XML to item
+     * @param bool $showXmlCommentsRating
+     * @return self
+     */
 	public function showXmlCommentsRating($showXmlCommentsRating = TRUE)
 	{
 		$this->_showXmlCommentsRating = $showXmlCommentsRating;
@@ -202,7 +202,7 @@ class Shop_Favorite_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -226,8 +226,8 @@ class Shop_Favorite_Model extends Core_Entity
 
 	/**
 	 * Delete Favorite Item
-	 * @return self
-	 */
+	 * @return Core_Entity
+     */
 	public function markDeleted()
 	{
 		return $this->delete();

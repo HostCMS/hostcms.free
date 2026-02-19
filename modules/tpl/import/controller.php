@@ -8,7 +8,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Tpl
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @author Hostmake LLC
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Tpl_Import_Controller extends Admin_Form_Action_Controller
 {
@@ -54,11 +55,44 @@ class Tpl_Import_Controller extends Admin_Form_Action_Controller
 		return $this;
 	}
 
+	/**
+	 * Import
+	 * @param array $aContent
+	 * @return self
+	 */
 	protected function _import(array $aContent = array())
 	{
+		$aExplodeDir = explode('/', $aContent['dirName']);
+
+		$iParent_Id = $this->tpl_dir_id;
+
+		foreach ($aExplodeDir as $sDirName)
+		{
+			if ($sDirName != '')
+			{
+				$oTpl_Dirs = Core_Entity::factory('Tpl_Dir');
+				$oTpl_Dirs
+					->queryBuilder()
+					->where('tpl_dirs.parent_id', '=', $iParent_Id);
+
+				$oTpl_Dir = $oTpl_Dirs->getByName($sDirName, FALSE);
+
+				if (is_null($oTpl_Dir))
+				{
+					$oTpl_Dir = Core_Entity::factory('Tpl_Dir');
+					$oTpl_Dir
+						->parent_id($iParent_Id)
+						->name($sDirName)
+						->save();
+				}
+
+				$iParent_Id = $oTpl_Dir->id;
+			}
+		}
+
 		$oTpl = Core_Entity::factory('Tpl');
 		$oTpl->name = $aContent['name'];
-		$oTpl->tpl_dir_id = $this->tpl_dir_id;
+		$oTpl->tpl_dir_id = $iParent_Id;
 		$oTpl->description = $aContent['description'];
 		$oTpl->save();
 

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Command
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Command_Controller
 {
@@ -28,12 +28,11 @@ class Core_Command_Controller
 		$this->_uri = $uri;
 		return $this;
 	}
-	
-	/**
-	 * Get URI
-	 * @param string $uri URI
-	 * @return Core_Command_Controller
-	 */
+
+    /**
+     * Get URI
+     * @return string|null
+     */
 	public function getUri()
 	{
 		return $this->_uri;

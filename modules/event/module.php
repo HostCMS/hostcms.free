@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Event_Module extends Core_Module_Abstract
 {
@@ -22,7 +22,7 @@ class Event_Module extends Core_Module_Abstract
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2025-08-19';
+	public $date = '2026-02-10';
 
 	/**
 	 * Module name
@@ -169,7 +169,7 @@ class Event_Module extends Core_Module_Abstract
 
 	/**
 	 * Get calendar context menu actions
-	 * @return void
+	 * @return array
 	 */
 	public function getCalendarContextMenuActions()
 	{
@@ -217,7 +217,7 @@ class Event_Module extends Core_Module_Abstract
 
 			$oTmpEvent->description = strip_tags(
 				Core_Str::br2nl(
-					html_entity_decode($oEvent->description, ENT_COMPAT, 'UTF-8')
+					html_entity_decode((string) $oEvent->description, ENT_COMPAT, 'UTF-8')
 				)
 			);
 			$oTmpEvent->place = $oEvent->place;
@@ -311,13 +311,13 @@ class Event_Module extends Core_Module_Abstract
 		return $aReturnEvents;
 	}
 
-	/**
-	 * Перемещение события на календаре
-	 * @param int $entity_id идентификатор события
-	 * @param int $startMilliseconds timestamp начала события
-	 * @param int $allDay весь день
-	 * @return array
-	 */
+    /**
+     * Перемещение события на календаре
+     * @param int $entity_id идентификатор события
+     * @param int $startTimestamp
+     * @param int $allDay весь день
+     * @return bool
+     */
 	public function calendarEventDrop($entity_id, $startTimestamp, $allDay)
 	{
 		$oEvent = Core_Entity::factory('Event', $entity_id);
@@ -373,8 +373,8 @@ class Event_Module extends Core_Module_Abstract
 	 * Изменяет продолжительность события, связанного с календарем
 	 * @param int $entity_id идентификатор события
 	 * @param int $deltaSeconds размер изменения продолжительности в секундах
-	 * @return array
-	 */
+	 * @return bool
+     */
 	public function calendarEventResize($entity_id, $deltaSeconds)
 	{
 		$oEvent = Core_Entity::factory('Event', $entity_id);
@@ -431,7 +431,6 @@ class Event_Module extends Core_Module_Abstract
 	/**
 	 * Показ формы добавления/редактирования события, связанного с календарем
 	 * @param int $entity_id идентификатор события
-	 * @return array
 	 */
 	public function calendarAddEvent($entity_id = 0)
 	{
@@ -495,8 +494,8 @@ class Event_Module extends Core_Module_Abstract
 	/**
 	 * Удаление события, связанного с календарем
 	 * @param int $entity_id идентификатор события
-	 * @return array
-	 */
+	 * @return bool
+     */
 	public function calendarEventDelete($entity_id)
 	{
 		$oEvent = Core_Entity::factory('Event', $entity_id);

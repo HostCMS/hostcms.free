@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Sql
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Sql_Table_Field_Entity extends Core_Empty_Entity
 {
@@ -115,9 +115,8 @@ class Sql_Table_Field_Entity extends Core_Empty_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
 	public function FieldBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
@@ -160,7 +159,6 @@ class Sql_Table_Field_Entity extends Core_Empty_Entity
 
 	/**
 	 * Backend callback method
-	 * @return string
 	 */
 	public function NullBackend()
 	{
@@ -201,7 +199,6 @@ class Sql_Table_Field_Entity extends Core_Empty_Entity
 	 * Run when writing data to inaccessible properties
 	 * @param string $property property name
 	 * @param string $value property value
-	 * @return self
 	 * @ignore
 	 */
 	public function __set($property, $value)
@@ -209,13 +206,13 @@ class Sql_Table_Field_Entity extends Core_Empty_Entity
 		$this->_values[$property] = $value;
 	}
 
-	/**
-	 * Triggered when invoking inaccessible methods in an object context
-	 * @param string $name method name
-	 * @param array $arguments arguments
-	 * @return mixed
-	 * @hostcms-event modelname.onCall
-	 */
+    /**
+     * Triggered when invoking inaccessible methods in an object context
+     * @param string $methodName
+     * @param array $arguments arguments
+     * @return mixed
+     * @hostcms-event modelname.onCall
+     */
 	public function __call($methodName, $arguments)
 	{
 		if (isset($this->_values[$methodName]) && count($arguments) == 0)

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -66,11 +66,20 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 				$oMainTab
 					->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oConditionsBlock = Admin_Form_Entity::factory('Div')->class('well with-header well-sm'))
+					->add($oSiteuserGroupBlock = Admin_Form_Entity::factory('Div')->class('well with-header well-sm'))
 					->add($oMainRow7 = Admin_Form_Entity::factory('Div')->class('row'));
+
+				$oConditionsBlock
+					->add(Admin_Form_Entity::factory('Div')
+						->class('header bordered-palegreen')
+						->value(Core::_("Shop_Purchase_Discount.conditions"))
+					)
+					->add($oConditionsBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oConditionsBlockRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oConditionsBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oConditionsBlockRow4 = Admin_Form_Entity::factory('Div')->class('row'))
+					;
 
 				$oAdditionalTab->delete($this->getField('shop_currency_id'));
 				$oMainTab
@@ -102,6 +111,13 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 					)
 				);
 
+				$this->getField('max_discount')
+					->add(
+						Core_Html_Entity::factory('Span')
+							->class('input-group-addon dimension_patch')
+							->value(htmlspecialchars((string) $this->_object->Shop->Shop_Currency->sign))
+					);
+
 				$oMainTab->move($this->getField('max_discount')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-2 col-lg-2 maxHidden-1')), $oMainRow1);
 
 				$oPositionSelectField = Admin_Form_Entity::factory('Select')
@@ -115,12 +131,12 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 				$oMainRow1->add($oPositionSelectField);
 
 				$oMainTab
-					->move($this->getField('start_datetime')->divAttr(array('class' => 'form-group col-xs-6 col-sm-6 col-md-3 col-lg-2')), $oMainRow1)
-					->move($this->getField('end_datetime')->divAttr(array('class' => 'form-group col-xs-6 col-sm-6 col-md-3 col-lg-2')), $oMainRow1);
+					->move($this->getField('start_datetime')->divAttr(array('class' => 'form-group col-xs-6 col-md-3')), $oMainRow1)
+					->move($this->getField('end_datetime')->divAttr(array('class' => 'form-group col-xs-6 col-md-3')), $oMainRow1);
 
 				$windowId = $this->_Admin_Form_Controller->getWindowId();
 
-				$oMainRow2->add(
+				$oConditionsBlockRow1->add(
 					Admin_Form_Entity::factory('Radiogroup')
 						->name('mode')
 						->value($this->_object->mode)
@@ -141,10 +157,10 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 				);
 
 				$oMainTab
-					->move($this->getField('min_amount')->divAttr(array('class' => 'form-group col-xs-4 col-sm-3')), $oMainRow3)
-					->move($this->getField('max_amount')->divAttr(array('class' => 'form-group col-xs-4 col-sm-3')), $oMainRow3);
+					->move($this->getField('min_amount')->divAttr(array('class' => 'form-group col-xs-4 col-sm-3')), $oConditionsBlockRow1)
+					->move($this->getField('max_amount')->divAttr(array('class' => 'form-group col-xs-4 col-sm-3')), $oConditionsBlockRow1);
 
-				$oMainRow3->add(
+				$oConditionsBlockRow1->add(
 					Admin_Form_Entity::factory('Select')
 						->name('shop_currency_id')
 						->caption(Core::_('Shop_Purchase_Discount.shop_currency_id'))
@@ -162,14 +178,14 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 				$measureName = $this->_object->Shop->Shop_Measure->name;
 
 				$oMainTab
-					->move($this->getField('min_count')->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 hidden-2')), $oMainRow4)
-					->move($this->getField('max_count')->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 hidden-2')), $oMainRow4)
-					->move($this->getField('min_weight')->caption(Core::_('Shop_Purchase_Discount.min_weight', $measureName))->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 hidden-2')), $oMainRow5)
-					->move($this->getField('max_weight')->caption(Core::_('Shop_Purchase_Discount.max_weight', $measureName))->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 hidden-2')), $oMainRow5);
+					->move($this->getField('min_count')->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 hidden-2')), $oConditionsBlockRow2)
+					->move($this->getField('max_count')->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 hidden-2')), $oConditionsBlockRow2)
+					->move($this->getField('min_weight')->caption(Core::_('Shop_Purchase_Discount.min_weight', $measureName))->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 hidden-2')), $oConditionsBlockRow3)
+					->move($this->getField('max_weight')->caption(Core::_('Shop_Purchase_Discount.max_weight', $measureName))->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 hidden-2')), $oConditionsBlockRow3);
 
 				if (Core::moduleIsActive('siteuser'))
 				{
-					$oMainTab->move($this->getField('first_order')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3')), $oMainRow6);
+					$oMainTab->move($this->getField('first_order')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3')), $oConditionsBlockRow4);
 				}
 				else
 				{
@@ -177,8 +193,44 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 				}
 
 				$oMainTab
-					->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3')), $oMainRow6)
-					->move($this->getField('coupon')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3')), $oMainRow6);
+					->move($this->getField('coupon')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3')), $oConditionsBlockRow4);
+
+				// Группа доступа
+				$aSiteuser_Groups = array(0 => Core::_('Shop_Discount.all'));
+
+				if (Core::moduleIsActive('siteuser'))
+				{
+					$oSiteuser_Controller_Edit = new Siteuser_Controller_Edit($this->_Admin_Form_Action);
+					$aSiteuser_Groups = $aSiteuser_Groups + $oSiteuser_Controller_Edit->fillSiteuserGroups($this->_object->Shop->site_id);
+				}
+
+				$oSiteuserGroupBlock
+					->add(Admin_Form_Entity::factory('Div')
+						->class('header bordered-azure')
+						->value(Core::_("Shop_Purchase_Discount.siteuser_groups"))
+					)
+					->add($oSiteuserGroupBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'));
+
+				$aTmp = array();
+
+				$aShop_Purchase_Discount_Siteuser_Groups = $this->_object->Shop_Purchase_Discount_Siteuser_Groups->findAll(FALSE);
+				foreach ($aShop_Purchase_Discount_Siteuser_Groups as $oShop_Purchase_Discount_Siteuser_Group)
+				{
+					!in_array($oShop_Purchase_Discount_Siteuser_Group->siteuser_group_id, $aTmp)
+						&& $aTmp[] = $oShop_Purchase_Discount_Siteuser_Group->siteuser_group_id;
+				}
+
+				foreach ($aSiteuser_Groups as $siteuser_group_id => $name)
+				{
+					$oSiteuserGroupBlockRow1->add($oCheckbox = Admin_Form_Entity::factory('Checkbox')
+						->divAttr(array('class' => 'form-group col-xs-12 col-md-4'))
+						->name('siteuser_group_' . $siteuser_group_id)
+						->caption(htmlspecialchars($name))
+					);
+
+					(!$this->_object->id || in_array($siteuser_group_id, $aTmp))
+						&& $oCheckbox->checked('checked');
+				}
 
 				// Удаляем группу
 				$oAdditionalTab->delete($this->getField('shop_purchase_discount_dir_id'));
@@ -195,7 +247,8 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 				$oMainRow7->add($oGroupSelect);
 
 				$oMainTab
-					->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-6 col-sm-6 col-md-3')), $oMainRow7);
+					->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-6 col-sm-6 col-md-3')), $oMainRow7)
+					->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 margin-top-21')), $oMainRow7);
 
 				$oMainTab->add(
 					Admin_Form_Entity::factory('Code')
@@ -250,6 +303,57 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 	protected function _applyObjectProperty()
 	{
 		parent::_applyObjectProperty();
+
+		$modelName = $this->_object->getModelName();
+
+		switch ($modelName)
+		{
+			case 'shop_purchase_discount':
+				// Группа доступа
+				$aSiteuser_Groups = array(0 => Core::_('Structure.all'));
+
+				if (Core::moduleIsActive('siteuser'))
+				{
+					$oSiteuser_Controller_Edit = new Siteuser_Controller_Edit($this->_Admin_Form_Action);
+					$aSiteuser_Groups = $aSiteuser_Groups + $oSiteuser_Controller_Edit->fillSiteuserGroups($this->_object->Shop->site_id);
+				}
+
+				$aTmp = array();
+
+				$aShop_Purchase_Discount_Siteuser_Groups = $this->_object->Shop_Purchase_Discount_Siteuser_Groups->findAll(FALSE);
+				foreach ($aShop_Purchase_Discount_Siteuser_Groups as $oShop_Purchase_Discount_Siteuser_Group)
+				{
+					!in_array($oShop_Purchase_Discount_Siteuser_Group->siteuser_group_id, $aTmp)
+						&& $aTmp[] = $oShop_Purchase_Discount_Siteuser_Group->siteuser_group_id;
+				}
+
+				foreach ($aSiteuser_Groups as $siteuser_group_id => $name)
+				{
+					$bSiteuserGroupChecked = Core_Array::getPost('siteuser_group_' . $siteuser_group_id);
+
+					if ($bSiteuserGroupChecked)
+					{
+						if (!in_array($siteuser_group_id, $aTmp))
+						{
+
+							$oShop_Purchase_Discount_Siteuser_Group = Core_Entity::factory('Shop_Purchase_Discount_Siteuser_Group');
+							$oShop_Purchase_Discount_Siteuser_Group->siteuser_group_id = $siteuser_group_id;
+							$this->_object->add($oShop_Purchase_Discount_Siteuser_Group);
+						}
+					}
+					else
+					{
+						if (in_array($siteuser_group_id, $aTmp))
+						{
+							$oShop_Purchase_Discount_Siteuser_Group = $this->_object->Shop_Purchase_Discount_Siteuser_Groups->getObject($this->_object, $siteuser_group_id);
+
+							!is_null($oShop_Purchase_Discount_Siteuser_Group)
+								&& $oShop_Purchase_Discount_Siteuser_Group->delete();
+						}
+					}
+				}
+			break;
+		}
 
 		Core::moduleIsActive('wysiwyg') && Wysiwyg_Controller::uploadImages($this->_formValues, $this->_object, $this->_Admin_Form_Controller);
 

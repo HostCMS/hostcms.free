@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Informationsystem_Group_Model extends Core_Entity
 {
@@ -94,7 +94,7 @@ class Informationsystem_Group_Model extends Core_Entity
 	/**
 	 * Has revisions
 	 *
-	 * @param boolean
+	 * @var boolean
 	 */
 	protected $_hasRevisions = TRUE;
 
@@ -328,8 +328,8 @@ class Informationsystem_Group_Model extends Core_Entity
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return self
-	 * @hostcms-event informationsystem_group.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event informationsystem_group.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -457,6 +457,15 @@ class Informationsystem_Group_Model extends Core_Entity
 						Core_File::copy($oPropertyValue->getSmallFilePath(), $oNewPropertyValue->getSmallFilePath());
 					} catch (Exception $e) {}
 				}
+			}
+		}
+
+		if (Core::moduleIsActive('media'))
+		{
+			$aMedia_Informationsystem_Groups = $this->Media_Informationsystem_Groups->findAll(FALSE);
+			foreach ($aMedia_Informationsystem_Groups as $oMedia_Informationsystem_Group)
+			{
+				$newObject->add(clone $oMedia_Informationsystem_Group);
 			}
 		}
 
@@ -639,8 +648,22 @@ class Informationsystem_Group_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($parent_id));
 
+		$oParent = $this->parent_id ? $this->getParent() : NULL;
+		if ($oParent)
+		{
+			$oParent->modifyCountItems($this->items_count * -1);
+			$oParent->modifyCountGroups($this->subgroups_count * -1);
+		}
+
 		$this->parent_id = $parent_id;
 		$this->checkDuplicatePath()->save()->clearCache();
+
+		$oParent = $this->parent_id ? $this->getParent() : NULL;
+		if ($oParent)
+		{
+			$oParent->modifyCountItems($this->items_count);
+			$oParent->modifyCountGroups($this->subgroups_count);
+		}
 
 		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
 
@@ -794,8 +817,8 @@ class Informationsystem_Group_Model extends Core_Entity
 
 	/**
 	 * Switch indexation mode
-	 * @return self
-	 */
+	 * @return Core_Entity
+     */
 	public function changeIndexation()
 	{
 		$this->indexing = 1 - $this->indexing;
@@ -880,6 +903,7 @@ class Informationsystem_Group_Model extends Core_Entity
 		{
 			$this->Informationsystem_Group->modifyCountItems($int, FALSE);
 		}
+
 		return $this;
 	}
 
@@ -937,9 +961,8 @@ class Informationsystem_Group_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
 	public function nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
@@ -1067,8 +1090,13 @@ class Informationsystem_Group_Model extends Core_Entity
 					{
 						$oSearch_Page->text .= htmlspecialchars(strip_tags((string) $oPropertyValue->value)) . ' ';
 					}
+					// File type
+					elseif ($oPropertyValue->Property->type == 2)
+					{
+						$oSearch_Page->text .= htmlspecialchars($oPropertyValue->file_name . ' ' . $oPropertyValue->file_description . ' ' . $oPropertyValue->file_small_name . ' ' . $oPropertyValue->file_small_description) . ' ';
+					}
 					// Other type
-					elseif ($oPropertyValue->Property->type != 2)
+					else
 					{
 						$oSearch_Page->text .= htmlspecialchars((string) $oPropertyValue->value) . ' ';
 					}
@@ -1119,8 +1147,13 @@ class Informationsystem_Group_Model extends Core_Entity
 				{
 					$oSearch_Page->text .= htmlspecialchars(strip_tags((string) $oField_Value->value)) . ' ';
 				}
+				// File type
+				elseif ($oField_Value->Property->type == 2)
+				{
+					$oSearch_Page->text .= htmlspecialchars($oField_Value->file_name . ' ' . $oField_Value->file_description . ' ' . $oField_Value->file_small_name . ' ' . $oField_Value->file_small_description) . ' ';
+				}
 				// Other type
-				elseif ($oField_Value->Field->type != 2)
+				else
 				{
 					$oSearch_Page->text .= htmlspecialchars((string) $oField_Value->value) . ' ';
 				}
@@ -1192,11 +1225,11 @@ class Informationsystem_Group_Model extends Core_Entity
 	 */
 	protected $_showXmlMedia = FALSE;
 
-	/**
-	 * Show properties in XML
-	 * @param mixed $showXmlProperties array of allowed properties ID or boolean
-	 * @return self
-	 */
+    /**
+     * Show properties in XML
+     * @param bool $showXmlMedia
+     * @return self
+     */
 	public function showXmlMedia($showXmlMedia = TRUE)
 	{
 		$this->_showXmlMedia = $showXmlMedia;
@@ -1236,6 +1269,7 @@ class Informationsystem_Group_Model extends Core_Entity
 	 * Prepare entity and children entities
 	 * @return self
 	 * @hostcms-event informationsystem_group.onBeforeAddPropertyValues
+	 * @hostcms-event informationsystem_group.onBeforeAddMediaItems
 	 */
 	protected function _prepareData()
 	{
@@ -1246,6 +1280,21 @@ class Informationsystem_Group_Model extends Core_Entity
 
 		$this->_isTagAvailable('dir')
 			&& $this->addXmlTag('dir', Core_Page::instance()->informationsystemCDN . $this->getGroupHref());
+
+		if (Core::moduleIsActive('cdn'))
+		{
+			if ($this->image_large !== '')
+			{
+				$this->_isTagAvailable('cdn_image_large')
+					&& $this->addXmlTag('cdn_image_large', $this->getLargeFileHref());
+			}
+
+			if ($this->image_small !== '')
+			{
+				$this->_isTagAvailable('cdn_image_small')
+					&& $this->addXmlTag('cdn_image_small', $this->getSmallFileHref());
+			}
+		}
 
 		if ($this->_showXmlProperties)
 		{
@@ -1263,6 +1312,8 @@ class Informationsystem_Group_Model extends Core_Entity
 			}
 
 			Core_Event::notify($this->_modelName . '.onBeforeAddPropertyValues', $this, array($aProperty_Values));
+			$eventResult = Core_Event::getLastReturn();
+			is_array($eventResult) && $aProperty_Values = $eventResult;
 
 			$aListIDs = array();
 
@@ -1295,6 +1346,11 @@ class Informationsystem_Group_Model extends Core_Entity
 		if ($this->_showXmlMedia && Core::moduleIsActive('media'))
 		{
 			$aEntities = Media_Item_Controller::getValues($this);
+
+			Core_Event::notify($this->_modelName . '.onBeforeAddMediaItems', $this, array($aEntities));
+			$eventResult = Core_Event::getLastReturn();
+			is_array($eventResult) && $aEntities = $eventResult;
+
 			foreach ($aEntities as $oEntity)
 			{
 				$oMedia_Item = $oEntity->Media_Item;
@@ -1443,13 +1499,13 @@ class Informationsystem_Group_Model extends Core_Entity
 		return $this;
 	}
 
-	/**
-	 * Get property value for SEO-templates
-	 * @param int $property_id Property ID
-	 * @param string $format string format, e.g. '%s: %s'. %1$s - Property Name, %2$s - List of Values
-	 * @param int $property_id Property ID
-	 * @return string
-	 */
+    /**
+     * Get property value for SEO-templates
+     * @param int $property_id Property ID
+     * @param string $format string format, e.g. '%s: %s'. %1$s - Property Name, %2$s - List of Values
+     * @param string $separator
+     * @return string
+     */
 	public function propertyValue($property_id, $format = '%2$s', $separator = ', ')
 	{
 		$oProperty = Core_Entity::factory('Property', $property_id);

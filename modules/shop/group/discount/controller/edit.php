@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Group_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -72,6 +72,15 @@ class Shop_Group_Discount_Controller_Edit extends Admin_Form_Action_Controller_T
 					? Core::_('Shop_Bonus.edit_title', $this->_object->name, FALSE)
 					: Core::_('Shop_Bonus.add_title');
 			break;
+			case 'shop_gift':
+				$caption = Core::_('Shop_Gift.item_gift_name');
+				$options = $this->_fillGifts($this->_object->shop_id);
+				$name = 'shop_gift_id';
+
+				$title = $this->_object->id
+					? Core::_('Shop_Gift.edit_title', $this->_object->name, FALSE)
+					: Core::_('Shop_Gift.add_title');
+			break;
 		}
 
 		$oMainRow1->add(Admin_Form_Entity::factory('Select')
@@ -122,6 +131,24 @@ class Shop_Group_Discount_Controller_Edit extends Admin_Form_Action_Controller_T
 	}
 
 	/**
+	 * Fill bonuses list
+	 * @param int $iShopId shop ID
+	 * @return array
+	 */
+	protected function _fillGifts($iShopId)
+	{
+		$aReturn = array(" … ");
+
+		$aShop_Gifts = Core_Entity::factory('Shop', $iShopId)->Shop_Gifts->findAll(FALSE);
+		foreach ($aShop_Gifts as $oShop_Gift)
+		{
+			$aReturn[$oShop_Gift->id] = $oShop_Gift->name;
+		}
+
+		return $aReturn;
+	}
+
+	/**
 	 * Processing of the form. Apply object fields.
 	 * @return self
 	 * @hostcms-event Shop_Group_Discount_Controller_Edit.onAfterRedeclaredApplyObjectProperty
@@ -135,7 +162,7 @@ class Shop_Group_Discount_Controller_Edit extends Admin_Form_Action_Controller_T
 		switch ($modelName)
 		{
 			case 'shop_discount':
-				$shop_discount_id = Core_Array::getPost('shop_discount_id', 0);
+				$shop_discount_id = Core_Array::getPost('shop_discount_id', 0, 'int');
 
 				if ($shop_discount_id)
 				{
@@ -154,12 +181,22 @@ class Shop_Group_Discount_Controller_Edit extends Admin_Form_Action_Controller_T
 				}
 			break;
 			case 'shop_bonus':
-				$shop_bonus_id = Core_Array::getPost('shop_bonus_id', 0);
+				$shop_bonus_id = Core_Array::getPost('shop_bonus_id', 0, 'int');
 
 				if ($shop_bonus_id)
 				{
 					$oObject = Core_Entity::factory('Shop_Bonus', $shop_bonus_id);
 					is_null($oShop_Group->Shop_Group_Bonuses->getByBonusId($oObject->id))
+						&& $oShop_Group->add($oObject)->clearCache();
+				}
+			break;
+			case 'shop_gift':
+				$shop_gift_id = Core_Array::getPost('shop_gift_id', 0, 'int');
+
+				if ($shop_gift_id)
+				{
+					$oObject = Core_Entity::factory('Shop_Gift', $shop_gift_id);
+					is_null($oShop_Group->Shop_Group_Gifts->getByGiftId($oObject->id))
 						&& $oShop_Group->add($oObject)->clearCache();
 				}
 			break;

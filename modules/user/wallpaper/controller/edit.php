@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage User
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class User_Wallpaper_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -180,5 +180,7 @@ class User_Wallpaper_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
+
+        return  $this;
 	}
 }

@@ -2,6 +2,7 @@
 
 if (Core::moduleIsActive('siteuser'))
 {
+	$oCore_Page = Core_Page::instance();
 	$Core_Router_Route = new Core_Router_Route(rawurldecode($oCore_Page->structure->getPath()) . '({login}/)', array());
 	$matches = $Core_Router_Route->applyPattern(Core::$url['path']);
 

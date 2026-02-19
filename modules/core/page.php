@@ -10,6 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - fileTimestamp(TRUE|FALSE) использовать в качестве временной метки дату файла, а не дату изменения макета, по умолчанию FALSE.
  * - compress(TRUE|FALSE) использовать компрессию, по умолчанию TRUE. Требует модуль "Компрессия страниц".
  * - doctype('html'|'xhtml') используемый DOCTYPE, влияет на формирование мета-тегов.
+ * - staticCache(NULL|TRUE|FALSE) позволяет запретить использование статичного кэша для определенных страниц.
  *
  * <code>
  * // Get Title
@@ -80,7 +81,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Page extends Core_Servant_Properties
 {
@@ -104,6 +105,7 @@ class Core_Page extends Core_Servant_Properties
 		'buildingPage',
 		'fileTimestamp',
 		'compress',
+		'staticCache',
 		'cssCDN',
 		'jsCDN',
 		'informationsystemCDN',
@@ -274,16 +276,17 @@ class Core_Page extends Core_Servant_Properties
 	 * Get block of linked css and clear added CSS list
 	 * @param boolean $bExternal add as link
 	 * @param string $rel default 'stylesheet'
+	 * @param array $attr tag attributes
 	 * @return string
 	 * @hostcms-event Core_Page.onBeforeGetCss
 	 */
-	public function getCss($bExternal = TRUE, $rel = 'stylesheet')
+	public function getCss($bExternal = TRUE, $rel = 'stylesheet', $attr = array())
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeGetCss', $this);
 
 		$return = $this->compress && Core::moduleIsActive('compression')
-			? $this->_getCssCompressed($bExternal, $rel)
-			: $this->_getCss($bExternal, $rel);
+			? $this->_getCssCompressed($bExternal, $rel, $attr)
+			: $this->_getCss($bExternal, $rel, $attr);
 
 		$this->css = array();
 
@@ -294,9 +297,10 @@ class Core_Page extends Core_Servant_Properties
 	 * Get block of linked css
 	 * @param boolean $bExternal add as link
 	 * @param string $rel
+	 * @param array $attr tag attributes
 	 * @return string
 	 */
-	protected function _getCss($bExternal, $rel)
+	protected function _getCss($bExternal, $rel, $attr = array())
 	{
 		$sReturn = $bExternal
 			? ''
@@ -309,12 +313,22 @@ class Core_Page extends Core_Servant_Properties
 				$timestamp = $this->fileTimestamp && Core_File::isFile($sPath = CMS_FOLDER . ltrim($css, DIRECTORY_SEPARATOR))
 					? filemtime($sPath)
 					: Core_Date::sql2timestamp($this->template->timestamp);
+					
+				$aAttr = array(
+					'rel="' . htmlspecialchars($rel) . '"',
+					'href="' . $this->cssCDN . $css . '?' . $timestamp . '"'
+				);
 
-				$type = $rel == 'preload' || $rel == 'prefetch'
-					? ' as="style"'
-					: ' type="text/css"';
+				$aAttr[] = $rel == 'preload' || $rel == 'prefetch'
+					? 'as="style"'
+					: 'type="text/css"';
+					
+				foreach ($attr as $key => $value)
+				{
+					$aAttr[] = "{$key}=\"" . htmlspecialchars($value) . "\"";
+				}
 
-				$sReturn .= '<link rel="' . htmlspecialchars($rel) . '"' . $type . ' href="' . $this->cssCDN . $css . '?' . $timestamp . '"' . ($this->doctype === 'xhtml' ? ' />' : '>') . "\n";
+				$sReturn .= '<link ' . implode(' ', $aAttr) . ($this->doctype === 'xhtml' ? ' />' : '>') . "\n";
 			}
 			else
 			{
@@ -334,9 +348,10 @@ class Core_Page extends Core_Servant_Properties
 	 * Get block of linked compressed css
 	 * @param boolean $bExternal add as link
 	 * @param string $rel
+	 * @param array $attr tag attributes
 	 * @return string
 	 */
-	protected function _getCssCompressed($bExternal, $rel)
+	protected function _getCssCompressed($bExternal, $rel, $attr = array())
 	{
 		try
 		{
@@ -348,17 +363,27 @@ class Core_Page extends Core_Servant_Properties
 				$oCompression_Controller->addCss($css);
 			}
 
-			$type = $rel == 'preload' || $rel == 'prefetch'
-				? ' as="style"'
-				: ' type="text/css"';
+			$aAttr = array(
+				'rel="' . htmlspecialchars($rel) . '"',
+				'href="' . $this->cssCDN . $oCompression_Controller->getPath() . '?' . Core_Date::sql2timestamp($this->template->timestamp) . '"'
+			);
+
+			$aAttr[] = $rel == 'preload' || $rel == 'prefetch'
+				? 'as="style"'
+				: 'type="text/css"';
+
+			foreach ($attr as $key => $value)
+			{
+				$aAttr[] = "{$key}=\"" . htmlspecialchars($value) . "\"";
+			}
 
 			$sReturn = $bExternal
-				? '<link rel="' . htmlspecialchars($rel) . '"' . $type . ' href="' . $this->cssCDN . $oCompression_Controller->getPath() . '?' . Core_Date::sql2timestamp($this->template->timestamp) . '"' . ($this->doctype === 'xhtml' ? ' />' : '>') . "\n"
+				? '<link ' . implode(' ', $aAttr) . ($this->doctype === 'xhtml' ? ' />' : '>') . "\n"
 				: "<style type=\"text/css\">\n" . $oCompression_Controller->getContent() . "\n</style>\n";
 		}
 		catch (Exception $e)
 		{
-			$sReturn = $this->_getCss($bExternal, $rel);
+			$sReturn = $this->_getCss($bExternal, $rel, $attr);
 		}
 
 		return $sReturn;
@@ -368,14 +393,15 @@ class Core_Page extends Core_Servant_Properties
 	 * Show block of linked css and clear added CSS list
 	 * @param boolean $bExternal add as link
 	 * @param string $rel default 'stylesheet'
+	 * @param array $attr tag attributes
 	 * @return self
 	 * @hostcms-event Core_Page.onBeforeShowCss
 	 */
-	public function showCss($bExternal = TRUE, $rel = 'stylesheet')
+	public function showCss($bExternal = TRUE, $rel = 'stylesheet', $attr = array())
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeShowCss', $this);
 
-		echo $this->getCss($bExternal, $rel);
+		echo $this->getCss($bExternal, $rel, $attr);
 		return $this;
 	}
 

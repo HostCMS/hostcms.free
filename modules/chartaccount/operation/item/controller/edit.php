@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Chartaccount
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Chartaccount_Operation_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -231,8 +231,8 @@ class Chartaccount_Operation_Item_Controller_Edit extends Admin_Form_Action_Cont
 	/**
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name
-	 * @return mixed
-	 */
+	 * @return bool
+     */
 	public function execute($operation = NULL)
 	{
 		$chartaccount_operation_id = Core_Array::getGet('chartaccount_operation_id', 0, 'int');

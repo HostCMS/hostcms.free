@@ -1216,7 +1216,7 @@ class Smarty extends Smarty_Internal_TemplateBase
     /**
      * Set right delimiter
      *
-     * @param string
+     * @param string $right_delimiter
      */
     public function setRightDelimiter($right_delimiter)
     {

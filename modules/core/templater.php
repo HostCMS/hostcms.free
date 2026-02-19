@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Templater extends Core_Meta
 {
@@ -89,7 +89,6 @@ class Core_Templater extends Core_Meta
 	 * Decorate template number input
 	 * @param object $oInput
 	 * @param array $aOptions
-	 * @return self
 	 */
 	static public function decorateInput($oInput, array $aOptions = array())
 	{

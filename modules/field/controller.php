@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Field
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Field_Controller
 {
@@ -17,6 +17,66 @@ class Field_Controller
 	 * @var array
 	 */
 	static protected $_fields = array();
+
+	/**
+	 * Types array
+	 * @var array|NULL
+	 */
+	static protected $_types = NULL;
+
+	static public function getTypes()
+	{
+		if (is_null(self::$_types))
+		{
+			self::$_types = array(
+				0 => Core::_('Field.type0'),
+				15 => Core::_('Field.type15'),
+				11 => Core::_('Field.type11'),
+				1 => Core::_('Field.type1'),
+				2 => Core::_('Field.type2'),
+				3 => Core::_('Field.type3'),
+				4 => Core::_('Field.type4'),
+				5 => Core::_('Field.type5'),
+				13 => Core::_('Field.type13'),
+				12 => Core::_('Field.type12'),
+				14 => Core::_('Field.type14'),
+				6 => Core::_('Field.type6'),
+				7 => Core::_('Field.type7'),
+				8 => Core::_('Field.type8'),
+				9 => Core::_('Field.type9'),
+				10 => Core::_('Field.type10')
+			);
+
+			// Delete list type if module is not active
+			if (!Core::moduleIsActive('list'))
+			{
+				unset(self::$_types[3]);
+			}
+			// Delete informationsystem type if module is not active
+			if (!Core::moduleIsActive('informationsystem'))
+			{
+				unset(self::$_types[5]);
+				unset(self::$_types[13]);
+			}
+			// Delete shop type if module is not active
+			if (!Core::moduleIsActive('shop'))
+			{
+				unset(self::$_types[12]);
+				unset(self::$_types[14]);
+			}
+		}
+
+		return self::$_types;
+	}
+
+	/**
+	 * Set Field Types
+	 * @param array $types
+	 */
+	static public function setTypes(array $types)
+	{
+		self::$_types = $types;
+	}
 
 	/**
 	 * Fill Model's Fields Cache

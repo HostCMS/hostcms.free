@@ -12,7 +12,7 @@
 		->css('/hostcmsfiles/jquery/lightbox/css/jquery.lightbox.css')
 		->css('/hostcmsfiles/jquery/slider/jquery-ui.css')
 		->css('/hostcmsfiles/jquery/wickedpicker/wickedpicker.css')
-		->showCss();
+		->showCss(true, 'stylesheet', array('media' => "print", 'onload' => 'this.media="all"'));
 	?>
 	<!--[if IE]>
 	<style>.header input[type=text],.header input[type=password]{border:1px solid #eee;height:20px}</style>

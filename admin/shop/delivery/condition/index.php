@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -16,12 +16,12 @@ $sAdminFormAction = '/{admin}/shop/delivery/condition/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
-$shop_id = intval(Core_Array::getGet('shop_id'));
+$shop_id = Core_Array::getGet('shop_id', 0, 'int');
 
 $shop_delivery_condition_dir_id = Core_Array::getGet('shop_delivery_condition_dir_id', 0);
 
 // Идентификатор группы товаров
-$shop_group_id = intval(Core_Array::getGet('shop_group_id', 0));
+$shop_group_id = Core_Array::getGet('shop_group_id', 0, 'int');
 
 // Идентификатор типа доставки
 $shop_delivery_id = intval(Core_Array::getGet('delivery_id', 0));

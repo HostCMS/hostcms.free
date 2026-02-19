@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -451,6 +451,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				$this->getField('description')
 					->rows(10)
 					->wysiwyg(Core::moduleIsActive('wysiwyg'))
+					->data('ai_prompt_default', Core::_('Informationsystem_Item.ai_prompt_description', $this->_object->Informationsystem_Group->name, $this->_object->name))
 					->template_id($template_id);
 
 				$oMainTab->move($this->getField('description'), $oDescriptionRow1);
@@ -488,6 +489,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				$this->getField('text')
 					->rows(18)
 					->wysiwyg(Core::moduleIsActive('wysiwyg'))
+					->data('ai_prompt_default', Core::_('Informationsystem_Item.ai_prompt_text', $this->_object->Informationsystem_Group->name, $this->_object->name))
 					->template_id($template_id);
 
 				$oMainTab->move($this->getField('text'), $oDescriptionRow3);
@@ -1793,11 +1795,11 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 			});");
 	}
 
-	/**
-	 * Fill shortcut groups list
-	 * @param Informationsystem_Item_Model $oInformationsystem_Item item
-	 * @return array
-	 */
+    /**
+     * Fill shortcut groups list
+     * @param object $oObject
+     * @return array
+     */
 	protected function _fillShortcutGroupList($oObject)
 	{
 		$aReturnArray = array();
@@ -1877,8 +1879,8 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 	/**
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name
-	 * @return self
-	 */
+	 * @return bool
+     */
 	public function execute($operation = NULL)
 	{
 		if (!is_null($operation) && $operation != '')

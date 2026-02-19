@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Command
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Command_Controller_Favicon extends Core_Command_Controller
 {
@@ -31,7 +31,13 @@ class Core_Command_Controller_Favicon extends Core_Command_Controller
 
 		if ($oSite)
 		{
-			$oSite_Favicon = $oSite->Site_Favicons->getFirst();
+			$mime = Core_Mime::getFileMime($this->_uri);
+			
+			$oSite_Favicons = $oSite->Site_Favicons;
+			$oSite_Favicons->queryBuilder()
+				->where('type', '=', $mime);
+			
+			$oSite_Favicon = $oSite_Favicons->getFirst();
 			
 			if ($oSite_Favicon && $oSite_Favicon->filename !== '')
 			{
@@ -45,7 +51,7 @@ class Core_Command_Controller_Favicon extends Core_Command_Controller
 				{
 					$oCore_Response
 						->status(200)
-						->header('Content-Type', Core_Mime::getFileMime($faviconPath))
+						->header('Content-Type', $mime)
 						->body(Core_File::read($faviconPath));
 				}
 				else

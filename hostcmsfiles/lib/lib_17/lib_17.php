@@ -281,7 +281,7 @@ elseif ($Forum_Controller_Show->category && !$Forum_Controller_Show->topic)
 								->select('forum_topic_posts.*')
 								->join('forum_topics', 'forum_topics.id', '=', 'forum_topic_posts.forum_topic_id')
 								->where('forum_topics.forum_category_id', '=', $oForum_Category->id)
-								->where('forum_topic_posts.ip', '=', Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1'));
+								->where('forum_topic_posts.ip', '=', Core::getClientIp());
 
 							if (!is_null($oSiteuser))
 							{

@@ -34,7 +34,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Seller_Controller_Show extends Core_Controller
 {
@@ -166,8 +166,8 @@ class Shop_Seller_Controller_Show extends Core_Controller
 
 	/**
 	 * Parse URL and set controller properties
-	 * @return Shop_Seller_ontroller_Show
-	 * @hostcms-event Shop_Seller_ontroller_Show.onBeforeParseUrl
+	 * @return Shop_Seller_Controller_Show
+     * @hostcms-event Shop_Seller_ontroller_Show.onBeforeParseUrl
 	 * @hostcms-event Shop_Seller_ontroller_Show.onAfterParseUrl
 	 */
 	public function parseUrl()

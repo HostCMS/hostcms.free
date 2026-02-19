@@ -14,7 +14,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Item_Controller extends Core_Servant_Properties
 {
@@ -45,7 +45,7 @@ class Shop_Item_Controller extends Core_Servant_Properties
 	/**
 	 * Set $this->_aPrice
 	 * @param array $aPrice
-	 * @return array
+	 * @return self
 	 */
 	public function setAPrice(array $aPrice)
 	{
@@ -162,11 +162,28 @@ class Shop_Item_Controller extends Core_Servant_Properties
 		return $this->_aPrice;
 	}
 
+	/**
+	 * Coupon property
+	 * @var string
+	 */
 	static protected $_coupon = NULL;
 
+	/**
+	 * Set coupon
+	 * @param string $coupon_text
+	 */
 	static public function coupon($coupon_text)
 	{
-		self::$_coupon = $coupon_text;
+		self::$_coupon = mb_strtolower($coupon_text);
+	}
+
+	/**
+	 * Get coupon
+	 * @return string
+	 */
+	static public function getCoupon()
+	{
+		return self::$_coupon;
 	}
 
 	/**
@@ -334,7 +351,7 @@ class Shop_Item_Controller extends Core_Servant_Properties
 
 			if (count($aDiscounts))
 			{
-				$discountPercent = $discountAmount = 0;
+				//$discountPercent = $discountAmount = 0;
 
 				// Скидка может повторяться в объединенных массивах
 				$aAppliedDiscounts = array();
@@ -349,8 +366,8 @@ class Shop_Item_Controller extends Core_Servant_Properties
 						$aAppliedDiscounts[$oShop_Discount->id] = $oShop_Discount->id;
 
 						if ($oShop_Discount->isActive()
-							&& ($oShop_Discount->coupon == 0
-								|| $bCoupon = !is_null(self::$_coupon) && strlen(self::$_coupon) && $oShop_Discount->coupon_text == self::$_coupon
+							&& (!$oShop_Discount->coupon
+								|| $bCoupon = !is_null(self::$_coupon) && strlen(self::$_coupon) && mb_strtolower($oShop_Discount->coupon_text) == self::$_coupon
 							)
 						)
 						{
@@ -387,7 +404,7 @@ class Shop_Item_Controller extends Core_Servant_Properties
 								($this->_aPrice['price'] - $this->_aPrice['discount']) > $discount
 									&& $this->_aPrice['discount'] += $discount;
 
-								if ($oShop_Discount->coupon == 1 && $bCoupon)
+								if ($oShop_Discount->coupon && $bCoupon)
 								{
 									$this->_aPrice['coupon'] = $oShop_Discount->coupon_text;
 								}

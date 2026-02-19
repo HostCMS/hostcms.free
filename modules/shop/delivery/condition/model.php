@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Delivery_Condition_Model extends Core_Entity
 {
@@ -82,7 +82,7 @@ class Shop_Delivery_Condition_Model extends Core_Entity
 	/**
 	 * Set $this->_aPrice
 	 * @param array $aPrice
-	 * @return array
+	 * @return self
 	 */
 	public function setAPrice(array $aPrice)
 	{
@@ -229,7 +229,7 @@ class Shop_Delivery_Condition_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -240,7 +240,7 @@ class Shop_Delivery_Condition_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -251,11 +251,8 @@ class Shop_Delivery_Condition_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function nameBadge()
 	{
 		if ($this->time_from != '00:00:00' || $this->time_to != '00:00:00')
 		{

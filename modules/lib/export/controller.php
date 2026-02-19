@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Lib
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Lib_Export_Controller extends Core_Servant_Properties
 {
@@ -48,6 +48,13 @@ class Lib_Export_Controller extends Core_Servant_Properties
 					!is_null($oLib)
 						&& $this->_setObjects($oLib);
 				}
+				else
+				{
+					$oLib_Dir = Core_Entity::factory('Lib_Dir')->getById($key);
+
+					!is_null($oLib_Dir)
+						&& $this->_addDirs($oLib_Dir);
+				}
 			}
 		}
 
@@ -55,26 +62,97 @@ class Lib_Export_Controller extends Core_Servant_Properties
 	}
 
 	/**
-	 * Set objects
-	 * @param object Lib_Model $oLib lib
+	 * Add from dirs
+	 * @param Lib_Dir_Model $oLib_Dir
 	 * @return self
 	 */
+	protected function _addDirs(Lib_Dir_Model $oLib_Dir)
+	{
+		$aLibs = $oLib_Dir->Libs->findAll(FALSE);
+		foreach ($aLibs as $oLib)
+		{
+			$this->_setObjects($oLib);
+		}
+
+		// subgroups
+		$aLib_Dirs = $oLib_Dir->Lib_Dirs->findAll(FALSE);
+		foreach ($aLib_Dirs as $oLib_Dir)
+		{
+			$this->_addDirs($oLib_Dir);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Get dir name
+	 * @param Lib_Model $oLib
+	 * @return string
+	 */
+	protected function _getDirName(Lib_Model $oLib)
+	{
+		$aReturn = array();
+
+		if ($oLib->lib_dir_id)
+		{
+			$oLib_Dir = $oLib->Lib_Dir;
+
+			do {
+				$aReturn[] = $oLib_Dir->name;
+				$oLib_Dir = $oLib_Dir->getParent();
+			} while ($oLib_Dir);
+
+			$aReturn = array_reverse($aReturn);
+		}
+
+		return implode('/', $aReturn);
+	}
+
+    /**
+     * Set objects
+     * @param Lib_Model $oLib lib
+     * @return self
+     */
 	protected function _setObjects(Lib_Model $oLib)
 	{
 		$this->_aObjects[$oLib->name] = array(
 			'version' => CURRENT_VERSION,
+			'dirName' => strval($this->_getDirName($oLib)),
 			'name' => $oLib->name,
 			'description' => $oLib->description,
+			'type' => intval($oLib->type),
+			'class' => $oLib->class,
+			'style' => $oLib->style,
 			'lib' => $oLib->loadLibFile(),
 			'lib_config' => $oLib->loadLibConfigFile(),
 			'options' => array()
 		);
+
+		// Изображение
+		if ($oLib->file != '')
+		{
+			$this->_aObjects[$oLib->name]['file'] = $oLib->file;
+
+			$filepath = $oLib->getFilePath();
+
+			if (Core_File::isFile($filepath))
+			{
+				$imageData = file_get_contents($filepath);
+				$base64Image = base64_encode($imageData);
+				$imageInfo = getimagesize($filepath);
+				$mimeType = $imageInfo['mime'];
+
+				$this->_aObjects[$oLib->name]['file_data'] = 'data:' . $mimeType . ';base64,' . $base64Image;
+			}
+		}
 
 		// Параметры ТДС
 		$aLib_Properties = $oLib->Lib_Properties->findAll(FALSE);
 		foreach ($aLib_Properties as $oLib_Property)
 		{
 			$aLibProperty = array(
+				'id' => $oLib_Property->id,
+				'parent_id' => $oLib_Property->parent_id,
 				'name' => $oLib_Property->name,
 				'varible_name' => $oLib_Property->varible_name,
 				'type' => $oLib_Property->type,

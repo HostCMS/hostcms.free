@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -19,8 +19,6 @@ $model = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getRequest('model', ''
 
 if (Core_Auth::logged())
 {
-	Core_Auth::checkBackendBlockedIp();
-
 	// Контроллер формы
 	$oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 

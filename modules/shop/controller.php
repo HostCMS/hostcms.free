@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Controller
 {
@@ -57,7 +57,7 @@ class Shop_Controller
 
 	/**
 	 * Set number of decimal digits
-	 * @param string $floatFormat format
+	 * @param string $decimalDigits format
 	 * @return self
 	 */
 	public function decimalDigits($decimalDigits)
@@ -149,8 +149,8 @@ class Shop_Controller
 	/**
 	 * Convert decimal
 	 * @param mixed $value
-	 * @return mixed
-	 */
+	 * @return array|int|string|string[]
+     */
 	public function convertFloat($value)
 	{
 		return self::convertDecimal($value);
@@ -159,14 +159,18 @@ class Shop_Controller
 	/**
 	 * Convert decimal
 	 * @param mixed $value
-	 * @return mixed
-	 */
+	 * @return array|int|string|string[]
+     */
 	static public function convertDecimal($value)
 	{
 		if (!is_null($value))
 		{
 			$value = preg_replace('/[^0-9.,\-]/u', '', $value);
-			$value = str_replace(array(',', '-'), '.', $value);
+
+			$value = strpos($value, ',') !== FALSE && strpos($value, '.') !== FALSE
+				? str_replace(',', '', $value)
+				: str_replace(array(',', '-'), '.', $value);
+
 			$value === '' && $value = 0;
 		}
 		else
@@ -181,8 +185,8 @@ class Shop_Controller
 	 * Convert price
 	 * @param mixed $price price
 	 * @param int $decimalDigits e.g. 2, default uses $this->_decimalDigits
-	 * @return mixed
-	 */
+	 * @return float|int
+     */
 	public function convertPrice($price, $decimalDigits = NULL)
 	{
 		$price = self::convertDecimal($price);
@@ -588,7 +592,7 @@ class Shop_Controller
 
 		return $model;
 	}
-	
+
 	/**
 	 * Get shop_config
 	 * @return array
@@ -597,11 +601,12 @@ class Shop_Controller
 	{
 		return Core_Config::instance()->get('shop_config', array()) + array(
 			'itemEditWarehouseLimit' => 20,
+			'fastFilterRebuildLimit' => 500,
 			'smallImagePrefix' => 'small_',
 			'itemLargeImage' => 'item_%d.%s',
 			'itemSmallImage' => 'small_item_%d.%s',
 			'groupLargeImage' => 'group_%d.%s',
-			'groupSmallImage' => 'small_group_%d.%s',
+			'groupSmallImage' => 'small_group_%d.%s'
 		);
 	}
 }

@@ -34,6 +34,30 @@ $Informationsystem_Controller_Show
 if ($Informationsystem_Controller_Show->item == 0)
 {
 	$Informationsystem_Controller_Show->itemsForbiddenTags(array('text'));
+
+	if (Core_Array::getGet('filter') || Core_Array::getGet('sorting'))
+	{
+		$Informationsystem_Controller_Show->addEntity(
+			Core::factory('Core_Xml_Entity')
+				->name('filter')->value(1)
+		);
+
+		// Sorting
+		$sorting = Core_Array::getGet('sorting', 0, 'int');
+
+		($sorting == 1 || $sorting == 2)
+			&& $Informationsystem_Controller_Show->orderBy('informationsystem_items.datetime', $sorting == 1 ? 'ASC' : 'DESC');
+
+		$sorting == 3 && $Informationsystem_Controller_Show->orderBy('informationsystem_items.name', 'ASC');
+
+		$Informationsystem_Controller_Show->addEntity(
+			Core::factory('Core_Xml_Entity')
+				->name('sorting')->value($sorting)
+		);
+
+		// Additional properties
+		$Informationsystem_Controller_Show->setFilterPropertiesConditions($_GET);
+	}
 }
 else
 {
@@ -43,9 +67,7 @@ else
 
 		$oInformationsystem = $Informationsystem_Controller_Show->getEntity();
 
-		$oLastComment = Core_Entity::factory('Comment')->getLastCommentByIp(
-			Core_Array::get($_SERVER, 'REMOTE_ADDR')
-		);
+		$oLastComment = Core_Entity::factory('Comment')->getLastCommentByIp(Core::getClientIp());
 
 		$oXmlCommentTag = Core::factory('Core_Xml_Entity')
 			->name('document');

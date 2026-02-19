@@ -5,7 +5,7 @@
 * @package HostCMS
 * @version 7.x
 * @author Hostmake LLC
-* @copyright © 2005-2025, https://www.hostcms.ru
+* @copyright © 2005-2026, https://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -23,7 +23,7 @@ $oAdmin_Form_Controller
 // ZipArchive
 if (!class_exists('ZipArchive'))
 {
-	class ZipArchive extends Core_Zip_Pclzip { };
+	class ZipArchive extends Core_ZipArchive_Pclzip { };
 }
 
 // Получаем параметры

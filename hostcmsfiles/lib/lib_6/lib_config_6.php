@@ -51,6 +51,8 @@ $Shop_Controller_Show
 	// ->warehouseMode('in-stock-modification')
 	// Выводить товары из подгрупп
 	->subgroups(TRUE)
+	->gifts(TRUE)
+	->giftsLimit(10)
 	->limit($limit)
 	->parseUrl();
 

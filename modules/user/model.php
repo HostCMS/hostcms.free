@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage User
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class User_Model extends Core_Entity
 {
@@ -23,6 +23,12 @@ class User_Model extends Core_Entity
 	 * @var string
 	 */
 	public $fullname = NULL;
+
+	/**
+	 * Callback property_id
+	 * @var int
+	 */
+	public $webauthn = 1;
 
 	/**
 	 * Belongs to relations
@@ -42,6 +48,7 @@ class User_Model extends Core_Entity
 		'admin_form_setting' => array(),
 		'admin_form_autosave' => array(),
 		'admin_form_field_setting' => array(),
+		'ai_chat' => array(),
 		'company_post' => array('through' => 'company_department_post_user'),
 		'company_department' => array('through' => 'company_department_post_user'),
 		'company_department_post_user' => array(),
@@ -113,6 +120,7 @@ class User_Model extends Core_Entity
 		'telephony' => array(),
 		'telephony_line' => array(),
 		'production_process_stage' => array(),
+		'production_task_process_plan_stage_user' => array(),
 	);
 
 	/**
@@ -186,7 +194,7 @@ class User_Model extends Core_Entity
 
 	/**
 	 * Get current user
-	 * @return User_Model|NULL
+	 * @return Core_Entity|NULL
 	 */
 	public function getCurrent()
 	{
@@ -619,6 +627,11 @@ class User_Model extends Core_Entity
 			$this->Telephony_Lines->deleteAll(FALSE);
 		}
 
+		if (Core::moduleIsActive('ai'))
+		{
+			$this->Ai_Chats->deleteAll(FALSE);
+		}
+
 		$this->User_Bookmarks->deleteAll(FALSE);
 		$this->User_Worktimes->deleteAll(FALSE);
 		$this->User_Workdays->deleteAll(FALSE);
@@ -788,7 +801,6 @@ class User_Model extends Core_Entity
 
 	/**
 	 * Backend
-	 * @return self
 	 */
 	public function smallAvatar()
 	{
@@ -843,9 +855,7 @@ class User_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 */
+    */
 	public function fullnameBadge()
 	{
 		if ($this->dismissed)
@@ -858,9 +868,7 @@ class User_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 */
+    */
 	public function loginBadge()
 	{
 		echo '&nbsp;' . $this->getOnlineStatus();
@@ -889,10 +897,7 @@ class User_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
-	 */
+    */
 	public function departmentBackend()
 	{
 		$aTempDepartmentPost = array();
@@ -910,7 +915,7 @@ class User_Model extends Core_Entity
 
 	/**
 	 * Get user age
-	 * @return string
+	 * @return float
 	 */
 	public function getAge()
 	{
@@ -1145,8 +1150,8 @@ class User_Model extends Core_Entity
 
 	/**
 	 * Является ли текущий сотрудник начальником для определенного сотрудника в заданой компании
-	 * @param $oCompany компания
-	 * @param $oEmployee сотрудник, подчинененность которого необходимо проверить
+	 * @param Company_Model $oCompany компания
+	 * @param User_Model $oEmployee сотрудник, подчинененность которого необходимо проверить
 	 * @return boolean
 	 */
 	public function isHeadOfEmployeeInCompany(Company_Model $oCompany, User_Model $oEmployee)
@@ -1194,11 +1199,10 @@ class User_Model extends Core_Entity
 
 	/**
 	 * Является ли текущий сотрудник начальником для определенного сотрудника хотя бы в одной компании
-	 * @param $oCompany компания
-	 * @param $oUser сотрудник, подчинененность которого необходимо проверить
+	 * @param User_Model $oUser сотрудник, подчинененность которого необходимо проверить
 	 * @return boolean
 	 */
-	public function isHeadOfEmployee($oUser)
+	public function isHeadOfEmployee(User_Model $oUser)
 	{
 		$aCompanies = Core_Entity::factory('Company')->findAll();
 
@@ -1421,5 +1425,18 @@ class User_Model extends Core_Entity
 			?>href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/user/index.php')?>?hostcms[action]=view&hostcms[checked][0][<?php echo $this->id?>]=1" onclick="$.modalLoad({path: hostcmsBackend + '/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $this->id?>]=1', windowId: '<?php echo $windowId?>', width: '<?php echo $width?>'}); return false"<?php
 		}
 		?>><?php echo htmlspecialchars($content)?></a><?php
+	}
+
+	/**
+	 * Backend badge
+	 */
+	public function webauthnBadge()
+	{
+		$count = $this->User_Webauthns->getCount();
+		$count && Core_Html_Entity::factory('Span')
+			->class('badge badge-ico badge-darkorange white')
+			->value($count < 100 ? $count : '∞')
+			->title($count)
+			->execute();
 	}
 }

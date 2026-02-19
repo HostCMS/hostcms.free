@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Xsl
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Xsl_Model extends Core_Entity
 {
@@ -53,7 +53,7 @@ class Xsl_Model extends Core_Entity
 	/**
 	 * Has revisions
 	 *
-	 * @param boolean
+	 * @var boolean
 	 */
 	protected $_hasRevisions = TRUE;
 

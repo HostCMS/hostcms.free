@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Purchase discounts',
@@ -53,4 +53,7 @@ return array(
 	'max_weight' => 'Weight &lt;, %s',
 	'max_discount' => 'Maximum discount',
 	'first_order' => 'Apply to first order',
+	'siteuser_groups' => "Access Group",
+	'all' => 'All',
+	'conditions' => 'Conditions',
 );

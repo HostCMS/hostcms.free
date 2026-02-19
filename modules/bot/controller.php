@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Bot
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 abstract class Bot_Controller
 {
@@ -48,11 +48,11 @@ abstract class Bot_Controller
 	 */
 	protected $_oBot_Module = NULL;
 
-	/**
-	 * Set bot module
-	 * @param string $oBot_Module Bot_Module_Model
-	 * @return self
-	 */
+    /**
+     * Set bot module
+     * @param Bot_Module_Model $oBot_Module
+     * @return self
+     */
 	public function setBotModule(Bot_Module_Model $oBot_Module)
 	{
 		$this->_oBot_Module = $oBot_Module;
@@ -135,7 +135,6 @@ abstract class Bot_Controller
 	 * @param int $type entity type
 	 * @param int $entity_id entity id
 	 * @param object $object object
-	 * @return self
 	 */
 	static public function notify($module_id, $type, $entity_id, $object)
 	{
@@ -194,13 +193,14 @@ abstract class Bot_Controller
 		}
 	}
 
-	/**
-	 * Get bot tab
-	 * @param int $module_id module id
-	 * @param int $entity_id entity id
-	 * @param int $type entity type
-	 * @return object
-	 */
+    /**
+     * Get bot tab
+     * @param object $oModule module id
+     * @param int $entity_id entity id
+     * @param int $type entity type
+     * @return object
+     * @throws Core_Exception
+     */
 	static public function getBotTab($oModule, $entity_id, $type)
 	{
 		$oBotsTab = Admin_Form_Entity::factory('Tab')

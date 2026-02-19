@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 abstract class Admin_Form_Action_Controller extends Core_Servant_Properties
 {
@@ -118,8 +118,8 @@ abstract class Admin_Form_Action_Controller extends Core_Servant_Properties
 
 	/**
 	 * Get content
-	 * @return object
-	 */
+	 * @return string|null
+     */
 	public function getContent()
 	{
 		return $this->_content;
@@ -148,8 +148,8 @@ abstract class Admin_Form_Action_Controller extends Core_Servant_Properties
 
 	/**
 	 * Get message
-	 * @return self
-	 */
+	 * @return string|null
+     */
 	public function getMessage()
 	{
 		return $this->_message;

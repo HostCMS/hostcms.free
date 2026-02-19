@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shortcode
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shortcode_Controller
 {
@@ -89,7 +89,6 @@ class Shortcode_Controller
 
 	/**
 	 * Rebuild Shortcode List
-	 * @return self
 	 */
 	public function rebuild()
 	{
@@ -107,7 +106,7 @@ defined(\'HOSTCMS\') || exit(\'HostCMS: access denied.\');
  *
  * @package HostCMS\Shortcode
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 
 class Shortcode_List

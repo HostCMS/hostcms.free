@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -23,7 +23,7 @@ $shop_id = Core_Array::getGet('shop_id', 0, 'int');
 $comment_parent_id = Core_Array::getGet('parent_id', 0, 'int');
 
 $oShop = Core_Entity::factory('Shop')->find($shop_id);
-$iShopGroupId = intval(Core_Array::getGet('shop_group_id', 0));
+$iShopGroupId = Core_Array::getGet('shop_group_id', 0, 'int');
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);

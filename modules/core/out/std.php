@@ -17,7 +17,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Out
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Out_Std extends Core_Out
 {
@@ -30,7 +30,10 @@ class Core_Out_Std extends Core_Out
 	/**
 	 * Open stream
 	 */
-	public function open() {}
+	public function open()
+	{
+		return $this;
+	}
 
 	/**
 	 * Write into stream
@@ -46,5 +49,8 @@ class Core_Out_Std extends Core_Out
 	/**
 	 * Close stream
 	 */
-	public function close() {}
+	public function close()
+	{
+		return $this;
+	}
 }

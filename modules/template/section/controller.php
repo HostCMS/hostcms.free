@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Template
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Template_Section_Controller
 {
@@ -156,9 +156,9 @@ class Template_Section_Controller
 			: 0;
 
 		ob_start();
-		?><div id="panel<?php echo $this->_oTemplate_Section->id?>" class="bootsrap-iso template-settings template-section-settings">
+		?><!-- <div id="panel<?php echo $this->_oTemplate_Section->id?>" class="bootsrap-iso template-settings template-section-settings">
 			<div class="slidepanel">
-				<div class="slidepanel-button-close"><i class="fa-solid fa-xmark"></i></div>
+				<div class="slidepanel-button-close"><i class="fa-solid fa-xmark"></i></div>-->
 				<div class="section-wrapper">
 					<div class="column">
 						<div class="dirs-wrapper"><?php
@@ -182,8 +182,57 @@ class Template_Section_Controller
 						<div class="libs-wrapper"></div>
 					</div>
 				</div>
-			</div>
-		</div><?php
+			<!-- </div>
+		</div>--><?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Add widget css and fonts
+	 */
+	static public function applyLinks()
+	{
+		$oTemplate = Core_Page::instance()->template;
+
+		if ($oTemplate->id)
+		{
+			Core_Page::instance()
+				->css('/modules/skin/default/frontend/hostcms.slider.css')
+				->css('/modules/skin/default/frontend/theme.css');
+
+			$aFonts = array();
+
+			$aTemplate_Sections = $oTemplate->Template_Sections->findAll(FALSE);
+
+			foreach ($aTemplate_Sections as $oTemplate_Section)
+			{
+				$oTemplate_Section_Libs = $oTemplate_Section->Template_Section_Libs;
+				$oTemplate_Section_Libs->queryBuilder()
+					->where('template_section_libs.active', '=', 1)
+					->where('template_section_libs.class', '!=', '');
+
+				$aTemplate_Section_Libs = $oTemplate_Section_Libs->findAll(FALSE);
+
+				foreach ($aTemplate_Section_Libs as $oTemplate_Section_Lib)
+				{
+					preg_match_all('/\bh-font-([^\s]+)/', $oTemplate_Section_Lib->class, $matches);
+
+					foreach ($matches[1] as $fontName)
+					{
+						if (!in_array($fontName, $aFonts))
+						{
+							$aFonts[] = $fontName;
+						}
+					}
+				}
+			}
+
+			foreach ($aFonts as $font)
+			{
+				$href = "/hostcmsfiles/fonts/{$font}/{$font}.css";
+
+				Core_Page::instance()->css($href);
+			}
+		}
 	}
 }

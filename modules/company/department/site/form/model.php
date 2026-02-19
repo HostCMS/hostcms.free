@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Company
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Company_Department_Site_Form_Model extends Admin_Form_Model
 {
@@ -38,11 +38,8 @@ class Company_Department_Site_Form_Model extends Admin_Form_Model
 
 	/**
 	 * Backend property
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function nameBadge()
 	{
 		$company_department_id = Core_Array::getGet('company_department_id', 0, 'int');
 		$oCompany_Department = Core_Entity::factory('Company_Department', $company_department_id);

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Delivery_Condition_Controller_Import extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -56,10 +56,10 @@ class Shop_Delivery_Condition_Controller_Import extends Admin_Form_Action_Contro
 
 	/**
 	 * Import
-	 * @param string sCSVFilePath file path
+	 * @param string $sCSVFilePath file path
 	 * @param Shop_Delivery_Model $oShopDelivery delivery
-	 * @return mixed
-	 */
+	 * @return int|true
+     */
 	public function import($sCSVFilePath, $oShopDelivery)
 	{
 		$counter = 0;
@@ -205,8 +205,8 @@ class Shop_Delivery_Condition_Controller_Import extends Admin_Form_Action_Contro
 
 	/**
 	 * Add form buttons
-	 * @return Admin_Form_Entity_Buttons
-	 */
+	 * @return object
+     */
 	protected function _addButtons()
 	{
 		// Кнопки

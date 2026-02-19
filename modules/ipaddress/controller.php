@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Ipaddress
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Ipaddress_Controller
 {
@@ -86,12 +86,13 @@ class Ipaddress_Controller
 		return $this->_DenyAccessIpaddresses;
 	}
 
-	/**
-	 * Check is IP blocked in Frontend
-	 * @param mixed $ip array of IPs or IP
-	 * @param bool $incBanned Increase blocked counter
-	 * @return boolean
-	 */
+    /**
+     * Check is IP blocked in Frontend
+     * @param array $aIp
+     * @param bool $incBanned Increase blocked counter
+     * @return boolean
+     * @throws Core_Exception
+     */
 	public function isBlocked($aIp, $incBanned = TRUE)
 	{
 		!is_array($aIp) && $aIp = array($aIp);
@@ -130,7 +131,7 @@ class Ipaddress_Controller
 					}
 				}
 			}
-			
+
 			$bCache
 				&& $oCore_Cache->set($cacheKey, $bBlocked, $this->_cacheName);
 		}
@@ -173,7 +174,7 @@ class Ipaddress_Controller
 
 		return $bBlocked;
 	}
-	
+
 	/**
 	 * Update banned fo Ipaddress
 	 * @param int $id
@@ -265,7 +266,7 @@ class Ipaddress_Controller
 
 		return $bNoStatistic;
 	}
-	
+
 	/**
 	 * Clear ipaddresses cache
 	 * @return self
@@ -309,7 +310,7 @@ class Ipaddress_Controller
 		}
 
 		// Request IP is IPv4
-		$bIpv4 = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== FALSE;
+		$bIpv4 = Core_Valid::ipv4($ip);
 
 		// IPv6 with subnet
 		$bCidrv6 = strpos($cidr, ':') !== FALSE;
@@ -376,5 +377,40 @@ class Ipaddress_Controller
 		}
 
 		return FALSE;
+	}
+
+	/**
+	 * Get PTR for IP-address
+	 * @param string $ip
+	 * @return string|FALSE
+	 */
+	public function gethostbyaddr($ip)
+	{
+		if (!Core_Valid::ip($ip))
+		{
+			return FALSE;
+		}
+
+		$bCache = Core::moduleIsActive('cache');
+
+		if ($bCache)
+		{
+			$oCore_Cache = Core_Cache::instance(Core::$mainConfig['defaultCache']);
+
+			$cacheKey = 'ptr_' . $ip;
+			$ptr = $oCore_Cache->get($cacheKey, $this->_cacheName);
+			
+			if (!is_null($ptr))
+			{
+				return $ptr;
+			}
+		}
+
+		$ptr = @gethostbyaddr($ip);
+
+		$bCache
+			&& $oCore_Cache->set($cacheKey, $ptr, $this->_cacheName);
+
+		return $ptr;
 	}
 }

@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -40,10 +40,9 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 	{
 		$sQueryLike = '%' . str_replace(' ', '%', $sQuery) . '%';
 
-		$shop_id = intval(Core_Array::getGet('shop_id'));
+		$shop_id = Core_Array::getGet('shop_id', 0, 'int');
 		$oShop = Core_Entity::factory('Shop', $shop_id);
 
-		$shop_warehouse_id = Core_Array::getGet('shop_warehouse_id');
 		$price_mode = Core_Array::getGet('price_mode', 'shop'); // 'shop' or 'item'
 		$datetime = Core_Array::getGet('datetime');
 
@@ -355,7 +354,7 @@ $oAdmin_Form_Entity_Menus->add(
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 
 // Идентификатор родительской группы
-$iShopDirId = intval(Core_Array::getGet('shop_dir_id', 0));
+$iShopDirId = Core_Array::getGet('shop_dir_id', 0, 'int');
 
 // Представитель класса хлебных крошек
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');

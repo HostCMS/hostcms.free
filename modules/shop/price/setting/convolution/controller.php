@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Price_Setting_Convolution_Controller extends Core_Servant_Properties
 {
@@ -68,8 +68,8 @@ class Shop_Price_Setting_Convolution_Controller extends Core_Servant_Properties
 
 	/**
 	 * Executes the business logic.
-	 * @return array
-	 */
+	 * @return string
+     */
 	public function execute()
 	{
 		$timeout = Core::getmicrotime();

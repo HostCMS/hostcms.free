@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Ipaddress
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Ipaddress_Visitor_Controller
 {
@@ -37,7 +37,7 @@ class Ipaddress_Visitor_Controller
 
 			$oIpaddress_Visitor = Core_Entity::factory('Ipaddress_Visitor');
 			$oIpaddress_Visitor->id = $tag;
-			$oIpaddress_Visitor->ip = Core_Array::get($_SERVER, 'REMOTE_ADDR', '', 'str');
+			$oIpaddress_Visitor->ip = Core::getClientIp();
 			$oIpaddress_Visitor->useragent = Core_Array::get($_SERVER, 'HTTP_USER_AGENT', '', 'str');
 			$oIpaddress_Visitor->datetime = Core_Date::timestamp2sql(time());
 			$oIpaddress_Visitor->site_id = CURRENT_SITE;
@@ -45,7 +45,7 @@ class Ipaddress_Visitor_Controller
 			$oIpaddress_Visitor->visits = 1;
 			$oIpaddress_Visitor->result = 1;
 			
-			$aHeaders = Core::getallheaders();
+			$aHeaders = array('URI' => Core_Array::get($_SERVER, 'REQUEST_URI', '', 'str')) + Core::getallheaders();
 			$oIpaddress_Visitor->headers = json_encode($aHeaders, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 			
 			$oIpaddress_Visitor->create();
@@ -66,12 +66,11 @@ class Ipaddress_Visitor_Controller
 
 		return $oIpaddress_Visitor;
 	}
-	
-	/**
-	 * Clear Old Data
-	 * @param int $site_id
-	 * @return self
-	 */
+
+    /**
+     * Clear Old Data
+     * @throws Core_Exception
+     */
 	static protected function _clearOldData()
 	{
 		$cleaningDate = date('Y-m-d', strtotime("-10 day"));

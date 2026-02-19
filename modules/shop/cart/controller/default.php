@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Cart_Controller_Default extends Shop_Cart_Controller
 {
@@ -100,6 +100,7 @@ class Shop_Cart_Controller_Default extends Shop_Cart_Controller
 
 				$oShop_Item_Controller->count($oShop_Cart->quantity);
 				$aPrices = $oShop_Item_Controller->getPrices($oShop_Item);
+
 				$this->totalAmount += $aPrices['price_discount'] * $oShop_Cart->quantity;
 
 				if ($bPositionDiscount && !$bSkipItem)
@@ -146,6 +147,76 @@ class Shop_Cart_Controller_Default extends Shop_Cart_Controller
 				$this->totalPackageVolume += Shop_Controller::convertSizeMeasure($oShop_Item->package_length, $oShop->size_measure, 0)
 					* Shop_Controller::convertSizeMeasure($oShop_Item->package_width, $oShop->size_measure, 0)
 					* Shop_Controller::convertSizeMeasure($oShop_Item->package_height, $oShop->size_measure, 0);
+			}
+		}
+
+		// Подарки
+		$oShop_Gift_Controller = new Shop_Gift_Controller($oShop);
+		$oShop_Gift_Controller
+			->limit(NULL)
+			->amount($this->totalAmount)
+			->quantity($this->totalQuantity)
+			->weight($this->totalWeight);
+
+		// Массив ИД товаров, которые одаривают другие товары и у него были найдены подарки, примененные к другим товарам
+		$aGivers = array();
+
+		foreach ($aShop_Cart as $oShop_Cart)
+		{
+			if ($oShop_Cart->postpone == 0 && $oShop_Cart->shop_item_id)
+			{
+				$oShop_Item = Core_Entity::factory('Shop_Item', $oShop_Cart->shop_item_id);
+				$oShop_Item->cartQuantity($oShop_Cart->quantity);
+
+				$aGifts = $oShop_Gift_Controller->getGifts($oShop_Item, $aShop_Cart);
+
+				//echo "<br>Товар {$oShop_Cart->shop_item_id}, количество подарков: " . count($aGifts);
+
+				if (count($aGifts))
+				{
+					$source_item_quantity = $oShop_Cart->quantity;
+
+					foreach ($aGifts as $gift_shop_item_id => $aGift)
+					{
+						$discount = $aGift['discount'];
+
+						foreach ($aShop_Cart as $oFind_Gifted_Shop_Cart)
+						{
+							if ($oFind_Gifted_Shop_Cart->shop_item_id == $gift_shop_item_id && !in_array($gift_shop_item_id, $aGivers))
+							{
+								// Товар $oShop_Item дал скидки на другие товары в корзине
+								!in_array($oShop_Item->id, $aGivers) && $aGivers[] = $oShop_Item->id;
+
+								if ($source_item_quantity > 0)
+								{
+									// Количество подарочного товара больше, чем количество оставшегося исхожного
+									if ($oFind_Gifted_Shop_Cart->quantity > $source_item_quantity)
+									{
+										$oOriginal_Find_Gifted_Shop_Cart = $oFind_Gifted_Shop_Cart;
+
+										$oFind_Gifted_Shop_Cart = clone $oOriginal_Find_Gifted_Shop_Cart;
+										$oFind_Gifted_Shop_Cart->quantity = 1;
+
+										$aShop_Cart[] = $oFind_Gifted_Shop_Cart;
+
+										$oOriginal_Find_Gifted_Shop_Cart->quantity = $oOriginal_Find_Gifted_Shop_Cart->quantity - 1;
+									}
+
+									// var_dump($oFind_Gifted_Shop_Cart->Shop_Item->getPrices());
+									$oFind_Gifted_Shop_Cart->additionalDiscount($discount);
+
+									$this->totalAmount -= $discount * $oFind_Gifted_Shop_Cart->quantity;
+
+									$source_item_quantity -= $oFind_Gifted_Shop_Cart->quantity;
+								}
+								else
+								{
+									break;
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 
@@ -284,6 +355,21 @@ class Shop_Cart_Controller_Default extends Shop_Cart_Controller
 						&& $aShop_Cart[] = $oShop_Cart;
 				}
 			}
+
+			usort($aShop_Cart, function ($a, $b) {
+				if ($a->shop_item_id && $b->shop_item_id)
+				{
+					$oShop_Item1 = $a->Shop_Item;
+					$oShop_Item2 = $b->Shop_Item;
+
+					if ($oShop_Item1->price == $oShop_Item2->price)
+					{
+						return 0;
+					}
+
+					return ($oShop_Item1->price > $oShop_Item2->price) ? -1 : 1;
+				}
+			});
 
 			!$isActive && Core_Session::close();
 		}

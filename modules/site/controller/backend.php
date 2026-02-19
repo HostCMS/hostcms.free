@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Site
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Site_Controller_Backend extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -155,8 +155,8 @@ class Site_Controller_Backend extends Admin_Form_Action_Controller_Type_Edit
 
 	/**
 	 * Get save button
-	 * @return Admin_Form_Entity_Buttons
-	 */
+	 * @return Admin_Form_Entity_Buttons|null
+     */
 	protected function _getSaveButton()
 	{
 		return NULL;

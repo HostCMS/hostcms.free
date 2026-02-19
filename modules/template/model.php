@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Template
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Template_Model extends Core_Entity
 {
@@ -76,7 +76,7 @@ class Template_Model extends Core_Entity
 	/**
 	 * Has revisions
 	 *
-	 * @param boolean
+	 * @var boolean
 	 */
 	protected $_hasRevisions = TRUE;
 
@@ -516,8 +516,8 @@ class Template_Model extends Core_Entity
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return self
-	 * @hostcms-event template.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event template.onBeforeRedeclaredDelete
 	 * @hostcms-event template.onAfterDeleteTemplateFile
 	 * @hostcms-event template.onAfterDeleteTemplateCssFile
 	 */
@@ -620,11 +620,8 @@ class Template_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function nameBadge()
 	{
 		if ($this->loadTemplateCssFile() != '')
 		{
@@ -665,11 +662,8 @@ class Template_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function template_sectionsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function template_sectionsBadge()
 	{
 		$count = $this->Template_Sections->getCount();
 
@@ -764,7 +758,6 @@ class Template_Model extends Core_Entity
 	/**
 	 * Show Section by Name
 	 * @param string $sectionName
-	 * @return self
 	 */
 	public function showSection($sectionName)
 	{
@@ -775,13 +768,18 @@ class Template_Model extends Core_Entity
 			$bUserAccess = $this->checkUserAccess();
 			// $bUserAccess = Core::checkPanel() && Core_Auth::logged();
 
-			if ($bUserAccess && isset($_GET['hostcmsAction']) && $_GET['hostcmsAction'] == 'SHOW_DESIGN')
+			$bShowDesign = isset($_GET['hostcmsAction']) && $_GET['hostcmsAction'] == 'SHOW_DESIGN';
+
+			if ($bUserAccess && $bShowDesign)
 			{
 				?><div class="hostcmsSection" id="hostcmsSection<?php echo $oTemplate_Section->id?>" style="border-color: <?php echo Core_Str::hex2rgba($oTemplate_Section->color, 0.8)?>">
 					<div class="hostcmsSectionIcon" data-template-section-id="<?php echo $oTemplate_Section->id?>" onclick="hQuery.showWidgetPanel(<?php echo $oTemplate_Section->id?>)"><i class="fa-solid fa-plus"></i></div>
-					<div class="hostcmsSectionPanel" style="display: none">
+					<!-- <div class="hostcmsSectionPanel" style="display: none"> -->
+					<div class="hostcmsSectionPanel">
 						<div class="draggable-indicator">
-							<svg width="16px" height="16px" viewBox="0 0 32 32"><rect height="4" width="4" y="4" x="4" /><rect height="4" width="4" y="12" x="4" /><rect height="4" width="4" y="4" x="12"/><rect height="4" width="4" y="12" x="12"/><rect height="4" width="4" y="4" x="20"/><rect height="4" width="4" y="12" x="20"/><rect height="4" width="4" y="4" x="28"/><rect height="4" width="4" y="12" x="28"/></svg>
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="mi-outline mi-drag-indicator" viewBox="0 0 24 24">
+								<path d="M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2m-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2m0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2m6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2m0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2m0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2"/>
+							</svg>
 						</div>
 						<?php
 						// Добавление виджета в секцию
@@ -819,7 +817,7 @@ class Template_Model extends Core_Entity
 
 			echo $oTemplate_Section->suffix;
 
-			if ($bUserAccess)
+			if ($bUserAccess && $bShowDesign)
 			{
 				?></div><?php
 			}
@@ -841,6 +839,10 @@ class Template_Model extends Core_Entity
 		return $this;
 	}
 
+	/**
+	 * Show manifest
+	 * @return self
+	 */
 	public function showManifest()
 	{
 		if ($this->type == 1)
@@ -866,8 +868,11 @@ class Template_Model extends Core_Entity
 
 					// print_r($this->_lessVariables);
 
-					?><div class="row panel-heading">
-						<div class="col-xs-12"><?php echo htmlspecialchars($this->name)?></div>
+					?>
+					<div class="row panel-heading">
+						<div class="col-12">
+							<?php echo htmlspecialchars($this->name)?>
+						</div>
 					</div><?php
 
 					$oXml = @simplexml_load_string($manifest);
@@ -876,11 +881,51 @@ class Template_Model extends Core_Entity
 					{
 						$this->_parseManifest($oXml);
 					}
+
+					?><script>
+						hQuery('.bootstrap-iso .colorpicker').each(function () {
+							hQuery(this).minicolors({
+								control: hQuery(this).attr('data-control') || 'hue',
+								defaultValue: hQuery(this).attr('data-defaultValue') || '',
+								inline: hQuery(this).attr('data-inline') === 'true',
+								letterCase: hQuery(this).attr('data-letterCase') || 'lowercase',
+								opacity: hQuery(this).attr('data-rgba'),
+								position: hQuery(this).attr('data-position') || 'bottom right',
+								format: hQuery(this).attr('data-format') || 'hex',
+								change: function (hex, opacity) {
+									if (!hex) return;
+									if (opacity) hex += ', ' + opacity;
+									try {
+									} catch (e) { }
+								},
+								hide: /*function() {*/
+									hQuery.sendLessVariable
+								/*}*/,
+								theme: 'bootstrap'
+							});
+						});
+
+						hQuery('.bootstrap-iso input:not(.colorpicker), .bootstrap-iso select').on('change', hQuery.sendLessVariable);
+
+						hQuery('.scroll-template-settings').slimscroll({
+							height: '100%',
+							color: '#fff',
+							size: '5px',
+							railOpacity: 1,
+							opacity: 1,
+						});
+					</script><?php
 				}
 			}
 		}
+
+		return $this;
 	}
 
+	/**
+	 * Parse manifest
+	 * @param object $oXml
+	 */
 	protected function _parseManifest($oXml)
 	{
 		$aSections = $oXml->xpath('section');
@@ -893,8 +938,9 @@ class Template_Model extends Core_Entity
 				$oSectionName = $oSection->xpath('caption[@lng="' . 'ru' .'"]');
 				if (isset($oSectionName[0]))
 				{
-					?><div class="row panel-section-heading">
-						<div class="col-xs-12">
+					?>
+					<div class="row panel-section-heading">
+						<div class="col-12">
 							<?php echo strval($oSectionName[0])?>
 						</div>
 					</div>
@@ -928,15 +974,15 @@ class Template_Model extends Core_Entity
 
 				if (!is_array($lessFieldValue))
 				{
-					?><div class="row panel-item">
-						<div class="col-xs-12">
-							<label for="<?php echo htmlspecialchars($fieldName)?>"><?php echo htmlspecialchars(strval($oOptionName[0]))?></label>
+					?><div class="settings-row-item-wrapper">
+						<!-- <div class="col-xs-12"> -->
+							<!-- <label for="<?php echo htmlspecialchars($fieldName)?>"><?php echo htmlspecialchars(strval($oOptionName[0]))?></label> -->
+							<div class="settings-row-title"><?php echo htmlspecialchars(strval($oOptionName[0]))?></div>
 							<?php
 							switch ($fieldType)
 							{
 								case 'select':
-									?>
-									<select name="<?php echo htmlspecialchars($fieldName)?>" class="form-control" data-template="<?php echo $this->id?>">
+									?><select name="<?php echo htmlspecialchars($fieldName)?>" class="form-control" data-template="<?php echo $this->id?>">
 										<?php
 											$aSelectOptions = $oOption->xpath('select/option');
 
@@ -961,19 +1007,16 @@ class Template_Model extends Core_Entity
 											}
 											else
 											{
-											?>
-												<option value="">...</option>
-											<?php
+												?><option value="">...</option><?php
 											}
 										?>
-									</select>
-									<?php
+									</select><?php
 								break;
 								default:
-									?><input type="text" class="form-control <?php echo $fieldType == 'color' ? 'colorpicker' : ''?>" name="<?php echo htmlspecialchars((string) $fieldName)?>" value="<?php echo htmlspecialchars((string) $lessFieldValue)?>" <?php echo $fieldType == 'color' && ($lessFieldType == 'rgb' || $lessFieldType == 'rgba') ? 'data-format="rgb"' : '' ?> <?php echo $fieldType == 'color' && $lessFieldType == 'rgba' ? 'data-rgba="true"' : '' ?> data-template="<?php echo $this->id?>" /><?php
+									?><input type="text" class="form-control <?php echo $fieldType == 'color' ? 'colorpicker colorpicker-manifest' : ''?>" name="<?php echo htmlspecialchars((string) $fieldName)?>" value="<?php echo htmlspecialchars((string) $lessFieldValue)?>" <?php echo $fieldType == 'color' && ($lessFieldType == 'rgb' || $lessFieldType == 'rgba') ? 'data-format="rgb"' : '' ?> <?php echo $fieldType == 'color' && $lessFieldType == 'rgba' ? 'data-rgba="true"' : '' ?> data-template="<?php echo $this->id?>" /><?php
 							}
 							?>
-						</div>
+						<!-- </div> -->
 					</div>
 					<?php
 				}
@@ -1052,12 +1095,11 @@ class Template_Model extends Core_Entity
 
 	protected $_i18n = array();
 
-	/**
-	 * Include lng file
-	 * @param string $className class name
-	 * @param string $lng language name
-	 * @return array
-	 */
+    /**
+     * Include lng file
+     * @param string $lng language name
+     * @return array
+     */
 	protected function _getLngFile($lng)
 	{
 		if (!isset($this->_i18n[$lng]))

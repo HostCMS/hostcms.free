@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properties
 {
@@ -122,12 +122,6 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 	protected $_cacheFieldValues = array();
 
 	/**
-	 * Item CML ID Position
-	 * @var int
-	 */
-	//private $guidItemPosition = 0;
-
-	/**
 	 * Constructor.
 	 * @param int $iInformationsystemId informationsystem ID
 	 * @param boolean $bItemPropertiesExport export item properties mode
@@ -147,8 +141,13 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 		$oInformationsystem = Core_Entity::factory('Informationsystem', $this->informationsystemId);
 
 		// Устанавливаем лимит времени выполнения в 1 час
-		(!defined('DENY_INI_SET') || !DENY_INI_SET)
-			&& function_exists('set_time_limit') && ini_get('safe_mode') != 1 && @set_time_limit(3600);
+		if (!defined('DENY_INI_SET') || !DENY_INI_SET)
+		{
+			if (Core::isFunctionEnable('set_time_limit') && ini_get('safe_mode') != 1 && ini_get('max_execution_time') < 3600)
+			{
+				@set_time_limit(3600);
+			}
+		}	
 
 		// Заполняем дополнительные свойства элемента
 		$this->exportItemExternalProperties
@@ -489,12 +488,12 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 		return $aRow;
 	}
 
-	/**
-	 * Get block of Item/Group Property values
-	 * @param array $aProperties
-	 * @param object $object
-	 * @return array
-	 */
+    /**
+     * Get block of Item/Group Property values
+     * @param array $aFields
+     * @param object $object
+     * @return array
+     */
 	public function getFieldsData(array $aFields, $object)
 	{
 		$aRow = array();

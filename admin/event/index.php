@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -632,7 +632,10 @@ $aEvent_Types = Core_Entity::factory('Event_Type')->findAll(FALSE);
 $aList = array();
 foreach ($aEvent_Types as $oEvent_Type)
 {
-	$aList[$oEvent_Type->id] = array('value' => $oEvent_Type->name);
+	$aList[$oEvent_Type->id] = array(
+		'value' => $oEvent_Type->name,
+		'attr' => array('style' => 'color: ' . $oEvent_Type->color)
+	);
 }
 
 $oAdmin_Form_Dataset
@@ -645,7 +648,10 @@ $aEvent_Statuses = Core_Entity::factory('Event_Status')->findAll(FALSE);
 $aList = array();
 foreach ($aEvent_Statuses as $oEvent_Status)
 {
-	$aList[$oEvent_Status->id] = array('value' => $oEvent_Status->name);
+	$aList[$oEvent_Status->id] = array(
+		'value' => $oEvent_Status->name,
+		'attr' => array('style' => 'color: ' . $oEvent_Status->color)
+	);
 }
 
 $oAdmin_Form_Dataset

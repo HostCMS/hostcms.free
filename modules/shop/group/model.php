@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Group_Model extends Core_Entity
 {
@@ -163,7 +163,7 @@ class Shop_Group_Model extends Core_Entity
 	/**
 	 * Has revisions
 	 *
-	 * @param boolean
+	 * @var boolean
 	 */
 	protected $_hasRevisions = TRUE;
 
@@ -242,6 +242,13 @@ class Shop_Group_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($parent_id));
 
+		$oParent = $this->parent_id ? $this->getParent() : NULL;
+		if ($oParent)
+		{
+			$oParent->modifyCountItems($this->items_count * -1);
+			$oParent->modifyCountGroups($this->subgroups_count * -1);
+		}
+
 		$oPreviousParent = clone $this;
 
 		$this->parent_id = $parent_id;
@@ -262,6 +269,13 @@ class Shop_Group_Model extends Core_Entity
 				$Shop_Filter_Group_Controller->fill($oParent->id);
 				$oParent = $oParent->getParent();
 			} while($oParent);
+		}
+
+		$oParent = $this->parent_id ? $this->getParent() : NULL;
+		if ($oParent)
+		{
+			$oParent->modifyCountItems($this->items_count);
+			$oParent->modifyCountGroups($this->subgroups_count);
 		}
 
 		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
@@ -619,8 +633,8 @@ class Shop_Group_Model extends Core_Entity
 
 	/**
 	 * Switch indexation mode
-	 * @return self
-	 */
+	 * @return Core_Entity
+     */
 	public function changeIndexation()
 	{
 		$this->indexing = 1 - $this->indexing;
@@ -939,9 +953,8 @@ class Shop_Group_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
 	public function nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
@@ -1096,8 +1109,8 @@ class Shop_Group_Model extends Core_Entity
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return self
-	 * @hostcms-event shop_group.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event shop_group.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -1251,6 +1264,15 @@ class Shop_Group_Model extends Core_Entity
 			$newObject->add(clone $oShop_Tab_Group);
 		}
 
+		if (Core::moduleIsActive('media'))
+		{
+			$aMedia_Shop_Groups = $this->Media_Shop_Groups->findAll(FALSE);
+			foreach ($aMedia_Shop_Groups as $oMedia_Shop_Group)
+			{
+				$newObject->add(clone $oMedia_Shop_Group);
+			}
+		}
+
 		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
@@ -1327,11 +1349,11 @@ class Shop_Group_Model extends Core_Entity
 	 */
 	protected $_showXmlMedia = FALSE;
 
-	/**
-	 * Show properties in XML
-	 * @param mixed $showXmlProperties array of allowed properties ID or boolean
-	 * @return self
-	 */
+    /**
+     * Show properties in XML
+     * @param bool $showXmlMedia
+     * @return self
+     */
 	public function showXmlMedia($showXmlMedia = TRUE)
 	{
 		$this->_showXmlMedia = $showXmlMedia;
@@ -1371,6 +1393,7 @@ class Shop_Group_Model extends Core_Entity
 	 * Prepare entity and children entities
 	 * @return self
 	 * @hostcms-event shop_group.onBeforeAddPropertyValues
+	 * @hostcms-event shop_group.onBeforeAddMediaItems
 	 */
 	protected function _prepareData()
 	{
@@ -1381,6 +1404,21 @@ class Shop_Group_Model extends Core_Entity
 
 		$this->_isTagAvailable('dir')
 			&& $this->addXmlTag('dir', Core_Page::instance()->shopCDN . $this->getGroupHref());
+
+		if (Core::moduleIsActive('cdn'))
+		{
+			if ($this->image_large !== '')
+			{
+				$this->_isTagAvailable('cdn_image_large')
+					&& $this->addXmlTag('cdn_image_large', $this->getLargeFileHref());
+			}
+
+			if ($this->image_small !== '')
+			{
+				$this->_isTagAvailable('cdn_image_small')
+					&& $this->addXmlTag('cdn_image_small', $this->getSmallFileHref());
+			}
+		}
 
 		if ($this->_showXmlProperties)
 		{
@@ -1398,6 +1436,8 @@ class Shop_Group_Model extends Core_Entity
 			}
 
 			Core_Event::notify($this->_modelName . '.onBeforeAddPropertyValues', $this, array($aProperty_Values));
+			$eventResult = Core_Event::getLastReturn();
+			is_array($eventResult) && $aProperty_Values = $eventResult;
 
 			$aListIDs = array();
 
@@ -1430,6 +1470,11 @@ class Shop_Group_Model extends Core_Entity
 		if ($this->_showXmlMedia && Core::moduleIsActive('media'))
 		{
 			$aEntities = Media_Item_Controller::getValues($this);
+
+			Core_Event::notify($this->_modelName . '.onBeforeAddMediaItems', $this, array($aEntities));
+			$eventResult = Core_Event::getLastReturn();
+			is_array($eventResult) && $aEntities = $eventResult;
+
 			foreach ($aEntities as $oEntity)
 			{
 				$oMedia_Item = $oEntity->Media_Item;
@@ -1688,9 +1733,8 @@ class Shop_Group_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
 	public function discountsBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
@@ -1721,11 +1765,8 @@ class Shop_Group_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function discountsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function discountsBadge()
 	{
 		$oShop_Group_Discounts = $this->Shop_Group_Discounts;
 		$oShop_Group_Discounts->queryBuilder()

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Sql
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Sql_Variable_Dataset extends Admin_Form_Dataset
 {
@@ -59,7 +59,7 @@ class Sql_Variable_Dataset extends Admin_Form_Dataset
 
 	/**
 	 * Load objects
-	 * @return array
+	 * @return self
 	 */
 	protected function _load()
 	{

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shortcode
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shortcode_Dir_Model extends Core_Entity
 {
@@ -39,6 +39,7 @@ class Shortcode_Dir_Model extends Core_Entity
 	 */
 	protected $_belongsTo = array(
 		'shortcode_dir' => array('foreign_key' => 'parent_id'),
+		'user' => array()
 	);
 
 	/**
@@ -56,6 +57,21 @@ class Shortcode_Dir_Model extends Core_Entity
 	protected $_preloadValues = array(
 		'sorting' => 0,
 	);
+
+	/**
+	 * Constructor.
+	 * @param int $id entity ID
+	 */
+	public function __construct($id = NULL)
+	{
+		parent::__construct($id);
+
+		if (is_null($id) && !$this->loaded())
+		{
+			$oUser = Core_Auth::getCurrentUser();
+			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
+		}
+	}
 
 	/**
 	 * Get parent
@@ -87,9 +103,8 @@ class Shortcode_Dir_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
 	public function nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
@@ -137,7 +152,7 @@ class Shortcode_Dir_Model extends Core_Entity
 		$this->id = $primaryKey;
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
-		
+
 		$this->Shortcode_Dirs->deleteAll(FALSE);
 		$this->Shortcodes->deleteAll(FALSE);
 

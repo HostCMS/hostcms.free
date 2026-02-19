@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -14,7 +14,7 @@ Core_Auth::authorization($sModule = 'shortcode');
 $iAdmin_Form_Id = 204;
 $sAdminFormAction = '/{admin}/shortcode/index.php';
 
-$oShortcode_Dir = Core_Entity::factory('Shortcode_Dir', Core_Array::getGet('shortcode_dir_id', 0));
+$oShortcode_Dir = Core_Entity::factory('Shortcode_Dir', Core_Array::getGet('shortcode_dir_id', 0, 'int'));
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 

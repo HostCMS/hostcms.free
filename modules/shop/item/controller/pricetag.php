@@ -4,6 +4,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 require_once(CMS_FOLDER . 'modules/vendor/PHPOffice/autoload.php');
 require_once(CMS_FOLDER . 'modules/vendor/Psr/simple-cache/CacheInterface.php');
 require_once(CMS_FOLDER . 'modules/vendor/Picqer/autoload.php');
+require_once(CMS_FOLDER . 'modules/vendor/pcre/autoload.php');
+require_once(CMS_FOLDER . 'modules/vendor/ZipStream/autoload.php');
+require_once(CMS_FOLDER . 'modules/vendor/PHPOffice/Enum.php');
 
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
@@ -13,7 +16,7 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Item_Controller_Pricetag extends Core_Servant_Properties
 {
@@ -137,16 +140,8 @@ class Shop_Item_Controller_Pricetag extends Core_Servant_Properties
 			$zipPath = $aExplode[0];
 			$filePathInZip = $aExplode[1];
 
-			$ZipArchive = new ZipArchive();
-			$ZipArchive->open($zipPath);
+			$ZipArchive = new Core_Zip($zipPath);
 			$imageContents = $ZipArchive->getFromName($filePathInZip);
-
-			//$zipReader = fopen($drawing->getPath(), 'r');
-			/*$imageContents = '';
-			while (!feof($zipReader)) {
-				$imageContents .= fread($zipReader, 1024);
-			}
-			fclose($zipReader);*/
 
 			Core_File::write($sTempFilePath, $imageContents);
 
@@ -302,18 +297,20 @@ class Shop_Item_Controller_Pricetag extends Core_Servant_Properties
 				$rowDim = $this->_newSheet->getRowDimension($destinationRow + $row);
 				$rowDim->setRowHeight($aRowsDimension[$row]->getRowHeight());
 
+				$toCell = Coordinate::stringFromColumnIndex($destinationCol + $col) . ($destinationRow + $row);
+
 				// Копируем стили до данных
 				$this->_newSheet->duplicateStyle(
 					$this->_sheet->getStyle($sCol . $row),
-					Coordinate::stringFromColumnIndex($destinationCol + $col) . ($destinationRow + $row)
+					$toCell
 				);
 
 				// Подмена значения ячейки
 				$sourceValue = $this->_sheet->getCell($sCol . $row);
+
 				if (strlen($sourceValue))
 				{
-					$destinationCell = $this->_newSheet->getCell(Coordinate::stringFromColumnIndex($destinationCol + $col) . ($destinationRow + $row));
-
+					$destinationCell = $this->_newSheet->getCell($toCell);
 					$destinationCell->setValueExplicit($this->_oCore_Meta->apply($sourceValue), $destinationCell->getDataType());
 				}
 			}
@@ -354,24 +351,28 @@ class Shop_Item_Controller_Pricetag extends Core_Servant_Properties
 				{
 					if (!is_null($oShop_Item_Barcode))
 					{
-						// Add the In-Memory image to a worksheet
-						$newContentDrawing = new \PhpOffice\PhpSpreadsheet\Worksheet\ContentDrawing();
-						$newContentDrawing->setName($destinationPoint . $drawing->getName());
-						$newContentDrawing->setCoordinates($newCoordinate);
-
 						// Barcode
 						$type = $this->_getBarcodeType($oShop_Item_Barcode, $generatorPNG);
 						$barcode = !is_null($type)
 							? $generatorPNG->getBarcode($oShop_Item_Barcode->value, $type)
 							: '';
 
-						$newContentDrawing->setImageResource($barcode);
-						$newContentDrawing->setRenderingFunction(__CLASS__ . '::printImage');
-						$newContentDrawing->setMimeType('image/png');
-						$newContentDrawing->setOffsetX($drawing->getOffsetX());
-						$newContentDrawing->setOffsetY($drawing->getOffsetY());
-						$newContentDrawing->setWidthAndHeight($drawing->getWidth(), $drawing->getHeight());
-						$newContentDrawing->setWorksheet($this->_newSheet);
+						if ($barcode != '')
+						{
+							// Add the In-Memory image to a worksheet
+							$newContentDrawing = \PhpOffice\PhpSpreadsheet\Worksheet\ContentDrawing::fromString($barcode);
+
+							$newContentDrawing->setName($destinationPoint . $drawing->getName());
+							$newContentDrawing->setCoordinates($newCoordinate);
+
+							// $newContentDrawing->setImageResource($drawing);
+							// $newContentDrawing->setRenderingFunction(__CLASS__ . '::printImage');
+							$newContentDrawing->setMimeType('image/png');
+							$newContentDrawing->setOffsetX($drawing->getOffsetX());
+							$newContentDrawing->setOffsetY($drawing->getOffsetY());
+							$newContentDrawing->setWidthAndHeight($drawing->getWidth(), $drawing->getHeight());
+							$newContentDrawing->setWorksheet($this->_newSheet);
+						}
 					}
 				}
 			}

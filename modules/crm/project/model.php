@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Crm_Project_Model extends Core_Entity
 {
@@ -76,9 +76,8 @@ class Crm_Project_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @return string
 	 */
-	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function nameBadge()
 	{
 		if (Core::moduleIsActive('event') && $countEvents = $this->Events->getCount())
 		{
@@ -203,8 +202,7 @@ class Crm_Project_Model extends Core_Entity
 
 	/**
 	 * Show crm project badge
-	 * @param Admin_Form_Controller_Model $oAdmin_Form_Controller
-	 * @return string
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 */
 	public function showBadge($oAdmin_Form_Controller)
 	{

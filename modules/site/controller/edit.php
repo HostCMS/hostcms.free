@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Site
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -354,6 +354,7 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			'sky',
 			'maroon',
 			'orange',
+			'yellow'
 		);
 
 		foreach ($this->_aCSPList as $wellHeader => $aWellFields)
@@ -589,7 +590,7 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->applyObjectProperty();
 
 		// Clear static cache
-		if (Core::moduleIsActive('cache') && !$this->_object->html_cache_use)
+		if (Core::moduleIsActive('cache') && Core_Cache::issetCacheConfig('static') && !$this->_object->html_cache_use)
 		{
 			Core_Cache::instance('static')->deleteAll($this->_object->id);
 		}
@@ -694,5 +695,13 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			"data:" => 'data',
 			"hosts" => 'hosts',
 		),
+		'frame-ancestors' => array(
+			"'none'" => 'none',
+			"*" => 'all',
+			"'self'" => 'self',
+			"blob:" => 'blob',
+			"data:" => 'data',
+			"hosts" => 'hosts',
+		)
 	);
 }

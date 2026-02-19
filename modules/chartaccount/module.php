@@ -11,7 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Chartaccount
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Chartaccount_Module extends Core_Module_Abstract
 {
@@ -25,13 +25,23 @@ class Chartaccount_Module extends Core_Module_Abstract
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2025-08-19';
+	public $date = '2026-02-10';
 
 	/**
 	 * Module name
 	 * @var string
 	 */
 	protected $_moduleName = 'chartaccount';
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct()
+	{
+		parent::__construct();
+
+		Core_Skin::instance()->addJs('/modules/chartaccount/assets/chartaccount.js');
+	}
 
 	/**
 	 * Get Module's Menu

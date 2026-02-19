@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Item_Export_Csv_Order_Controller extends Shop_Item_Export_Csv_Controller
 {
@@ -202,15 +202,17 @@ class Shop_Item_Export_Csv_Order_Controller extends Shop_Item_Export_Csv_Control
 		// Stop buffering
 		while (ob_get_level() > 0)
 		{
-			ob_end_flush();
+			ob_end_clean();
 		}
 
-		header('Pragma: public');
 		header('Cache-Control: no-cache, must-revalidate');
-		header('Content-Type: text/html; charset=utf-8');
+
 		// Disable Nginx cache
 		header('X-Accel-Buffering: no');
-		header('Content-Encoding: none');
+
+		//header('Content-Type: application/force-download');
+		header('Content-Encoding: identity'); // вместо none
+		header('Content-Type: text/csv; charset=utf-8');
 
 		// Автоматический сброс буфера при каждом выводе
 		ob_implicit_flush(TRUE);
@@ -221,6 +223,15 @@ class Shop_Item_Export_Csv_Order_Controller extends Shop_Item_Export_Csv_Control
 			header('Content-Type: application/force-download');
 			header('Content-Transfer-Encoding: binary');
 			header("Content-Disposition: attachment; filename = {$this->fileName};");
+
+			// Дополнительные настройки для потоковой передачи
+			if (function_exists('apache_setenv'))
+			{
+				@apache_setenv('no-gzip', 1);
+			}
+			@ini_set('output_buffering', 'off');
+			@ini_set('zlib.output_compression', 0);
+			@ini_set('implicit_flush', 1);
 		}
 		else
 		{

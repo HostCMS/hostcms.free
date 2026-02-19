@@ -18,6 +18,12 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - taxes(TRUE|FALSE) выводить список налогов, по умолчанию FALSE
  * - specialprices(TRUE|FALSE) показывать специальные цены для выбранных товаров, по умолчанию FALSE
  * - associatedItems(TRUE|FALSE) показывать сопутствующие товары для выбранных товаров, по умолчанию FALSE
+ * - favorite(TRUE|FALSE) выводить избранные товары, по умолчанию FALSE
+ * - favoriteLimit(10) максимальное количество выводимых избранных товаров, по умолчанию 10
+ * - favoriteOrder('ASC'|'DESC'|'RAND') направление сортировки избранных товаров, по умолчанию RAND
+ * - viewed(TRUE|FALSE) выводить просмотренные товары, по умолчанию FALSE
+ * - viewedLimit(10) максимальное количество выводимых просмотренных товаров, по умолчанию 10
+ * - viewedOrder('ASC'|'DESC'|'RAND') направление сортировки просмотренных товаров, по умолчанию DESC
  * - calculateCounts(TRUE|FALSE) вычислять общее количество товаров и групп в корневой группе, по умолчанию FALSE
  * - applyDiscounts(TRUE|FALSE) применять скидки от суммы заказа, по умолчанию TRUE
  * - applyDiscountCards(TRUE|FALSE) применять дисконтные карты, по умолчанию TRUE
@@ -38,6 +44,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - '/shop/shop_order_properties/property_dir' Раздел свойств в списке свойств заказов
  * - '/shop/shop_item_properties/property' Свойство в списке свойств товара
  * - '/shop/shop_item_properties/property_dir' Раздел свойств в списке свойств товара
+ * - '/shop/favorite/shop_item' Избранные товары, если не указаны, используются правила для '/shop/shop_item'
+ * - '/shop/viewed/shop_item' Просмотренные товары, если не указаны, используются правила для '/shop/shop_item'
  * - '/shop/shop_cart' Корзина магазина
  *
  * <code>
@@ -55,7 +63,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Cart_Controller_Show extends Core_Controller
 {
@@ -76,6 +84,12 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		'taxes',
 		'specialprices',
 		'associatedItems',
+		'favorite',
+		'favoriteLimit',
+		'favoriteOrder',
+		'viewed',
+		'viewedLimit',
+		'viewedOrder',
 		'cartUrl',
 		'amount',
 		'tax',
@@ -170,13 +184,18 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		);
 
 		$this->itemsProperties = $this->taxes = $this->specialprices
-			= $this->calculateCounts = $this->associatedItems
+			= $this->calculateCounts = $this->associatedItems = $this->favorite = $this->viewed
 			= $this->orderProperties = $this->modifications = $this->itemsMedia = FALSE;
 
 		$this->itemsPropertiesList = $this->warehousesItems
 			= $this->applyDiscounts = $this->applyDiscountCards = $this->sortPropertiesValues = TRUE;
 
 		$this->itemsForbiddenTags = array();
+
+		$this->viewedLimit = $this->favoriteLimit = 10;
+
+		$this->favoriteOrder = 'RAND';
+		$this->viewedOrder = 'DESC';
 
 		$this->cartUrl = $oShop->Structure->getPath() . 'cart/';
 
@@ -194,8 +213,8 @@ class Shop_Cart_Controller_Show extends Core_Controller
 
 	/**
 	 * Get Shop_Cart_Controller
-	 * @return Shop_Cart_Controller
-	 */
+	 * @return object
+     */
 	protected function _getCartController()
 	{
 		return Shop_Cart_Controller::instance();
@@ -213,6 +232,18 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		$bTpl = $this->_mode == 'tpl';
 
 		$oShop = $this->getEntity();
+
+		$hasSessionId = Core_Session::hasSessionId();
+
+		// Comparing, favorite and viewed goods
+		if ($hasSessionId)
+		{
+			// Favorite goods
+			$this->favorite && $this->_addFavorite();
+
+			// Viewed goods
+			$this->viewed && $this->_addViewed();
+		}
 
 		if (Core::moduleIsActive('property') && $this->orderProperties)
 		{
@@ -318,7 +349,8 @@ class Shop_Cart_Controller_Show extends Core_Controller
 			}
 		}
 
-		$quantityPurchaseDiscount = $amountPurchaseDiscount = $this->quantity = $this->amount = $this->tax = $this->weight = $this->volume = $this->packageWeight = $this->packageVolume = 0;
+		/*$quantityPurchaseDiscount = $amountPurchaseDiscount = */
+		$this->quantity = $this->amount = $this->tax = $this->weight = $this->volume = $this->packageWeight = $this->packageVolume = 0;
 
 		// Массив цен для расчета скидок каждый N-й со скидкой N%
 		//$this->_aDiscountPrices = array();
@@ -459,6 +491,160 @@ class Shop_Cart_Controller_Show extends Core_Controller
 	}
 
 	/**
+	 * Add favorite goods
+	 * @return self
+	 * @hostcms-event Shop_Cart_Controller_Show.onBeforeAddFavoriteEntity
+	 */
+	protected function _addFavorite()
+	{
+		$oShop = $this->getEntity();
+
+		$aFavorite = array();
+
+		$aShop_Favorites = Shop_Favorite_Controller::instance()->getAll($oShop);
+		foreach ($aShop_Favorites as $oShop_Favorite)
+		{
+			$aFavorite[] = $oShop_Favorite->shop_item_id;
+		}
+
+		if (count($aFavorite))
+		{
+			switch ($this->favoriteOrder)
+			{
+				case 'RAND':
+					shuffle($aFavorite);
+				break;
+				case 'ASC':
+					asort($aFavorite);
+				break;
+				case 'DESC':
+					arsort($aFavorite);
+				break;
+				default:
+					throw new Core_Exception("The favoriteOrder direction '%direction' doesn't allow",
+						array('%direction' => $this->favoriteOrder)
+					);
+			}
+
+			// Extract a slice of the array
+			$aFavorite = array_slice($aFavorite, 0, $this->favoriteLimit);
+
+			if ($this->_mode != 'tpl')
+			{
+				$this->addEntity(
+					$oFavouriteEntity = Core::factory('Core_Xml_Entity')
+						->name('favorite')
+				);
+
+				foreach ($aFavorite as $shop_item_id)
+				{
+					$oShop_Item = Core_Entity::factory('Shop_Item')->find($shop_item_id, FALSE);
+					if (!is_null($oShop_Item->id))
+					{
+						$oFavorite_Shop_Item = clone $oShop_Item;
+						$oFavorite_Shop_Item
+							->id($oShop_Item->id)
+							->showXmlProperties($this->itemsProperties, $this->sortPropertiesValues)
+							->showXmlSpecialprices($this->specialprices);
+
+						// Media
+						$this->itemsMedia
+							&& $oFavorite_Shop_Item->showXmlMedia($this->itemsMedia);
+
+						//$this->applyItemsForbiddenTags($oFavorite_Shop_Item);
+						$this->applyForbiddenAllowedTags('/shop/favorite/shop_item|/shop/shop_item', $oFavorite_Shop_Item);
+
+						Core_Event::notify(get_class($this) . '.onBeforeAddFavoriteEntity', $this, array($oFavorite_Shop_Item));
+
+						$oFavouriteEntity->addEntity($oFavorite_Shop_Item);
+					}
+				}
+			}
+			else
+			{
+				$this->append('aFavorite', $aFavorite);
+			}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Add viewed goods
+	 * @return self
+	 * @hostcms-event Shop_Cart_Controller_Show.onBeforeAddViewedEntity
+	 */
+	protected function _addViewed()
+	{
+		$oShop = $this->getEntity();
+
+		$aViewed = Core_Array::get(Core_Array::getSession('hostcmsViewed', array()), $oShop->id, array());
+
+		if (count($aViewed))
+		{
+			switch ($this->viewedOrder)
+			{
+				case 'RAND':
+					shuffle($aViewed);
+				break;
+				case 'ASC':
+					ksort($aViewed);
+				break;
+				case 'DESC':
+					krsort($aViewed);
+				break;
+				default:
+					throw new Core_Exception("The viewedOrder direction '%direction' doesn't allow",
+						array('%direction' => $this->viewedOrder)
+					);
+			}
+
+			// Extract a slice of the array
+			$aViewed = array_slice($aViewed, 0, $this->viewedLimit);
+
+			if ($this->_mode != 'tpl')
+			{
+				$this->addEntity(
+					$oViewedEntity = Core::factory('Core_Xml_Entity')
+						->name('viewed')
+				);
+
+				foreach ($aViewed as $view_item_id)
+				{
+					$oShop_Item = Core_Entity::factory('Shop_Item')->find($view_item_id, FALSE);
+
+					if (!is_null($oShop_Item->id) /*&& $oShop_Item->id != $this->item*/ && $oShop_Item->active)
+					{
+						$oViewed_Shop_Item = clone $oShop_Item;
+						$oViewed_Shop_Item
+							->id($oShop_Item->id)
+							->showXmlProperties($this->itemsProperties, $this->sortPropertiesValues)
+							->showXmlModifications($this->modifications)
+							->showXmlSpecialprices($this->specialprices);
+
+						//$this->applyItemsForbiddenTags($oViewed_Shop_Item);
+						$this->applyForbiddenAllowedTags('/shop/viewed/shop_item|/shop/shop_item', $oViewed_Shop_Item);
+
+						// Media
+						$this->itemsMedia
+							&& $oViewed_Shop_Item->showXmlMedia($this->itemsMedia);
+
+						Core_Event::notify(get_class($this) . '.onBeforeAddViewedEntity', $this, array($oViewed_Shop_Item));
+
+						$oViewedEntity->addEntity($oViewed_Shop_Item);
+					}
+				}
+			}
+			else
+			{
+				$this->append('aViewed', $aViewed);
+			}
+		}
+
+		return $this;
+	}
+
+	/**
 	 * Get Discount Amount
 	 * @return decimal
 	 */
@@ -493,11 +679,11 @@ class Shop_Cart_Controller_Show extends Core_Controller
 				$this->append('aShop_Purchase_Discounts', $oShop_Purchase_Discount);
 			}
 		}
-		
+
 		if (!is_null($aArray['discountcard']))
 		{
 			$oShop_Discountcard = $aArray['discountcard'];
-			
+
 			if (!$bTpl)
 			{
 				$this->addEntity($oShop_Discountcard->clearEntities());

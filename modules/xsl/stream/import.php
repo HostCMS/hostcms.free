@@ -17,7 +17,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Xsl
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Xsl_Stream_Import
 {
@@ -97,7 +97,7 @@ class Xsl_Stream_Import
 			}
 			else
 			{
-				throw new Core_Exception("Xsl_Stream_Lang: Undefined XSL '%name'", array('%name' => $this->_xslName));
+				throw new Core_Exception("Xsl_Stream_Import: Undefined XSL '%name'", array('%name' => $this->_xslName));
 			}
 		}
 		else
@@ -155,7 +155,7 @@ class Xsl_Stream_Import
 
 	/**
 	 * Tests for end-of-file on a file pointer
-	 * @return Should return TRUE if the read/write position is at the end of the stream and if no more data is available to be read, or FALSE otherwise.
+	 * @return bool return TRUE if the read/write position is at the end of the stream and if no more data is available to be read, or FALSE otherwise.
 	 */
 	public function stream_eof()
 	{
@@ -175,7 +175,7 @@ class Xsl_Stream_Import
 			case SEEK_SET:
 				if ($offset < strlen(self::$_aXSL[$this->_xslName]) && $offset >= 0)
 				{
-					$this->position = $offset;
+					$this->_position = $offset;
 					return TRUE;
 				}
 				return FALSE;
@@ -183,7 +183,7 @@ class Xsl_Stream_Import
 			case SEEK_CUR:
 				if ($offset >= 0)
 				{
-					$this->position += $offset;
+					$this->_position += $offset;
 					return TRUE;
 				}
 				return FALSE;
@@ -191,7 +191,7 @@ class Xsl_Stream_Import
 			case SEEK_END:
 				if (strlen(self::$_aXSL[$this->_xslName]) + $offset >= 0)
 				{
-					$this->position = strlen(self::$_aXSL[$this->_xslName]) + $offset;
+					$this->_position = strlen(self::$_aXSL[$this->_xslName]) + $offset;
 					return TRUE;
 				}
 				return FALSE;

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Filter_Group_Controller
 {
@@ -154,11 +154,12 @@ class Shop_Filter_Group_Controller
 		return $this;
 	}
 
-	/**
-	 * Fill table rows
-	 * @param object $oShop_Group Shop_Group_Model object
-	 * @return self
-	 */
+    /**
+     * Fill table rows
+     * @param $shop_group_id
+     * @return array
+     * @throws Core_Exception
+     */
 	public function fill($shop_group_id)
 	{
 		$shop_group_id = intval($shop_group_id);

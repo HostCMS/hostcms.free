@@ -10,7 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Image_Imagick extends Core_Image
 {
@@ -68,7 +68,7 @@ class Core_Image_Imagick extends Core_Image
 					'sigma' => 1
 				)
 			);
-			
+
 			if ($preserveAspectRatio)
 			{
 				$destX = $sourceX;
@@ -210,15 +210,16 @@ class Core_Image_Imagick extends Core_Image
 			}
 
 			// Save ICC-profile
-			$aProfiles = $oImagick->getImageProfiles("icc", true);
+			$aProfiles = $oImagick->getImageProfiles("*", true);
+			$iccProfile = isset($aProfiles['icc']) ? $aProfiles['icc'] : NULL;
 
 			// Удаляем метаданные
 			$oImagick->stripImage();
-			
-			if(!empty($aProfiles))
+
+			if ($iccProfile)
 			{
-				// Restore ICC-profile
-				$oImagick->profileImage("icc", $aProfiles['icc']);
+				// restore ICC
+				$oImagick->profileImage("icc", $iccProfile);
 			}
 
 			if (!$preserveAspectRatio)
@@ -277,7 +278,7 @@ class Core_Image_Imagick extends Core_Image
 			$watermarkImage = new Imagick($watermark);
 
 			$iSourceImagetype = self::exifImagetype($source);
-			
+
 			// Change output format
 			$iDestImagetype = !is_null($outputFormat)
 				? self::getImagetypeByFormat($outputFormat)
@@ -376,17 +377,23 @@ class Core_Image_Imagick extends Core_Image
 	/**
 	 * Get image size
 	 * @param string $path path
-	 * @return mixed
-	 */
+	 * @return array|null
+     */
 	public function getImageSize($path)
 	{
 		if (Core_File::isFile($path) && is_readable($path) && filesize($path) > 12 && self::exifImagetype($path))
 		{
 			$oImagick = new Imagick($path);
 
-			return array(
-				'width' => $oImagick->getImageWidth(), 'height' => $oImagick->getImageHeight()
-			);
+			$result = [
+				'width' => $oImagick->getImageWidth(),
+				'height' => $oImagick->getImageHeight()
+			];
+
+			$oImagick->clear();
+			$oImagick->destroy();
+
+			return $result;
 		}
 
 		return NULL;
@@ -432,6 +439,9 @@ class Core_Image_Imagick extends Core_Image
 	{
 		$oImagick = new Imagick($path);
 		$format = $oImagick->getImageFormat();
+
+		$oImagick->clear();
+		$oImagick->destroy();
 
 		return isset(self::$_aFormats[$format])
 			? self::$_aFormats[$format]

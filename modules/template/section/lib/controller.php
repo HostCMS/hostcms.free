@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Template
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Template_Section_Lib_Controller
 {
@@ -46,7 +46,9 @@ class Template_Section_Lib_Controller
 			'range',
 			'colorpicker-range',
 			'separator',
-			'select'
+			'select',
+			'font',
+			'user_css'
 		);
 	}
 
@@ -61,14 +63,80 @@ class Template_Section_Lib_Controller
 		{
 			case 'solid':
 				$aBackgrounds = array(
-					'black',
+					/*'black',
 					'lightblack',
 					'green',
 					'blue',
 					'yellow',
 					'orange',
 					'lightgray',
-					'white'
+					'white',
+					'red',
+					'lightgreen',
+					'darkred',*/
+					'ebony',
+					'charcoal',
+					'fiord',
+					'plum',
+					'jade',
+					'dodger-blue',
+					'indigo',
+					'gold',
+					'sandy-brown',
+					'romance',
+					'athens-gray',
+					'white',
+					'boulder',
+					'lynch',
+					'atlantis',
+					'shakespeare',
+					'curious-blue',
+					'mojo',
+					'metallic-bronze',
+					'cabaret',
+					'dolly',
+					'porsche',
+					'blue-marguerite',
+					'lavender-rose',
+					'carissma',
+					'sea-pink',
+					'romantic',
+					'reef',
+					'mint-green',
+					'portage',
+					'malibu',
+					'sky-blue',
+					'honey-flower',
+					'zest',
+					'heliotrope',
+					'sunglow',
+					'electric-violet',
+					'pirate-gold',
+					'paco',
+					'japonica',
+					'midnight-blue',
+					'wattle',
+					'atomic-tangerine',
+					'rajah',
+					'cocoa-brown',
+					'soapstone',
+					'spring-roll',
+					'dusty-gray',
+					'kelp',
+					'rum',
+					'perfume',
+					'cold-purple',
+					'canary',
+					'antique-brass',
+					'bronze',
+					'alto',
+					'mine-shaft',
+					'olivine',
+					'monza',
+					'jacarta',
+					'bianca',
+					'pale-brown',
+					'alabaster'
 				);
 			break;
 			case 'gradient':
@@ -76,7 +144,33 @@ class Template_Section_Lib_Controller
 					'pink-gradient',
 					'blue-gradient',
 					'violet-gradient',
-					'green-gradient'
+					'green-gradient',
+
+					'purple-violet-gradient',
+					'yellow-green-gradient',
+					'blue-mint-gradient',
+					'cyan-blue-gradient',
+					'red-yellow-gradient',
+					'pink-rose-gradient',
+					'lavender-pink-gradient',
+					'lemon-lime-gradient',
+					'sky-mint-gradient',
+					'lightblue-blue-gradient',
+					'beige-orange-gradient',
+					'indigo-navy-gradient',
+					'gray-silver-gradient',
+					'orange-coral-gradient',
+					'darkblue-steel-gradient',
+					'lightblue-white-gradient',
+					'lime-white-gradient',
+					'white-lime-gradient',
+					'black-gray-gradient',
+					'peach-apricot-gradient',
+					'apricot-white-gradient',
+					'brown-coffee-gradient',
+					'green-forest-gradient',
+					'cream-beige-gradient',
+					'charcoal-darkgray-gradient'
 				);
 			break;
 			default:
@@ -84,6 +178,29 @@ class Template_Section_Lib_Controller
 		}
 
 		return $aBackgrounds;
+	}
+
+	/**
+	 * Fonts list
+	 * @return array
+	 */
+	protected function _getFontsList()
+	{
+		return array(
+			// '' => '...',
+			'h-font-roboto' => 'Roboto',
+			'h-font-ubuntu' => 'Ubuntu',
+			'h-font-montserrat' => 'Montserrat',
+			'h-font-nunito' => 'Nunito',
+			'h-font-inter' => 'Inter',
+			'h-font-open-sans' => 'Open Sans',
+			'h-font-pacifico' => 'Pacifico',
+			'h-font-noto-sans-jp' => 'Noto Sans JP',
+			'h-font-raleway' => 'Raleway',
+			'h-font-roboto-condensed' => 'Roboto Condensed',
+			'h-font-oswald' => 'Oswald',
+			'h-font-great-vibes' => 'Great Vibes',
+		);
 	}
 
 	/**
@@ -181,11 +298,6 @@ class Template_Section_Lib_Controller
 			}
 		}
 
-		// echo "<pre>";
-		// var_dump($aReturn);
-		// var_dump($bIssetGradient);
-		// echo "</pre>";
-
 		if ($type == 'colorpicker'
 			&& isset($aEntity['property'])  && $aEntity['property'] == 'background'
 			&& isset($aReturn['background'])
@@ -204,10 +316,6 @@ class Template_Section_Lib_Controller
 			unset($aReturn['background']);
 		}
 
-		// echo "<pre>";
-		// var_dump($aReturn);
-		// echo "</pre>";
-
 		return $aReturn;
 	}
 
@@ -223,7 +331,10 @@ class Template_Section_Lib_Controller
 
 		foreach ($aStyles as $name => $value)
 		{
-			$aTmp[] = $name . ': ' . $value;
+			if ($value != '')
+			{
+				$aTmp[] = $name . ': ' . $value;
+			}
 		}
 
 		return implode('; ', $aTmp);
@@ -265,14 +376,15 @@ class Template_Section_Lib_Controller
 		return implode(' ', array_filter($aClasses));
 	}
 
-	/**
-	 * Get colorpicker html block
-	 * @param string $name
-	 * @param string $property
-	 * @param array $aStyle
-	 * @param array $aEntity
-	 * @return self
-	 */
+    /**
+     * Get colorpicker html block
+     * @param $type
+     * @param string $name
+     * @param string $property
+     * @param array $aEntity
+     * @param string $field
+     * @return self
+     */
 	protected function _getColorpickerBlock($type, $name, $property, $aEntity, $field = '')
 	{
 		// $aStyles = $this->parseStyles($type, $aEntity);
@@ -385,7 +497,7 @@ class Template_Section_Lib_Controller
 	/**
 	 * Show background block
 	 * @param string $type
-	 * @return string
+	 * @return self
 	 */
 	protected function _showBlock($type, $aEntity, $field = '')
 	{
@@ -415,17 +527,24 @@ class Template_Section_Lib_Controller
 
 				$aClasses = $this->parseClasses($type, $field);
 
-				// var_dump($aClasses);
-
-				foreach ($aBackgrounds as $background)
+				foreach ($aBackgrounds as $key => $background)
 				{
 					$active = in_array('preset-' . $background, $aClasses)
 						? 'background-active'
-						: ''
+						: '';
 
-					?><div onclick="hQuery.changePreset(this, <?php echo $this->_oTemplate_Section_Lib->id?>)" class="background-item background-<?php echo $type?>-item <?php echo $active?>" data-id="<?php echo $this->_oTemplate_Section_Lib->id?>" data-type="<?php echo $type?>" data-background="preset-<?php echo $background?>">
+					$hidden = $key > 8
+						? 'hidden'
+						: '';
+
+					?><div onclick="hQuery.changePreset(this, <?php echo $this->_oTemplate_Section_Lib->id?>)" class="background-item background-<?php echo $type?>-item <?php echo $active?> <?php echo $hidden?>" data-id="<?php echo $this->_oTemplate_Section_Lib->id?>" data-type="<?php echo $type?>" data-background="preset-<?php echo $background?>">
 						<i class="fa-solid fa-align-left"></i>
 					</div><?php
+				}
+
+				if (count($aBackgrounds) > 9)
+				{
+					?><div class="background-item all-backgrounds" onclick="hQuery.showAllBackgrounds(this)"><?php echo Core::_('Template_Section_Lib.all_backgrounds')?></div><?php
 				}
 			break;
 			case 'colorpicker':
@@ -463,15 +582,35 @@ class Template_Section_Lib_Controller
 								? ' selected="selected"'
 								: '';
 
-							$style = $option_value != ''
-								? ' style="font-family: ' . htmlspecialchars($option_value) . ' !important;"'
-								: '';
-
-							?><option <?php echo $style?> value="<?php echo htmlspecialchars($option_value)?>" <?php echo $selected?>><?php echo htmlspecialchars($option_name)?></option><?php
+							?><option value="<?php echo htmlspecialchars($option_value)?>" <?php echo $selected?>><?php echo htmlspecialchars($option_name)?></option><?php
 						}
 						?>
 					</select><?php
 				}
+			break;
+			case 'font':
+				if (isset($aEntity['options']) && is_array($aEntity['options']) && count($aEntity['options']))
+				{
+					$aClasses = $this->parseClasses($type, $field);
+
+					$value = $current_font = '';
+					foreach ($aEntity['options'] as $option_value => $option_name)
+					{
+						if (in_array($option_value, $aClasses))
+						{
+							$value = $option_name;
+							$current_font = $option_value;
+							break;
+						}
+					}
+
+					?><div class="input-block-wrapper" onclick="hQuery.showFontsPanel(<?php echo $this->_oTemplate_Section_Lib->id?>)">
+						<div class="input-block" data-id="<?php echo $this->_oTemplate_Section_Lib->id?>" data-type="<?php echo $type?>" data-property="font" data-current-font="<?php echo htmlspecialchars($current_font)?>"><?php echo htmlspecialchars($value)?></div>
+					</div><?php
+				}
+			break;
+			case 'user_css':
+				?><div class="textarea-block-wrapper"><textarea class="textarea-block" data-id="<?php echo $this->_oTemplate_Section_Lib->id?>" data-type="<?php echo $type?>" data-property="user_css" onchange="hQuery.refreshStyle(this, hQuery(this).val())"><?php echo htmlspecialchars((string) $this->_oTemplate_Section_Lib->user_css)?></textarea></div><?php
 			break;
 		}
 
@@ -487,102 +626,108 @@ class Template_Section_Lib_Controller
 		$aTypes = $this->_getTypes();
 		$aEntities = $this->_getEntities();
 
-		// echo "<pre>";
-		// var_dump($aAttributes);
-		// echo "</pre>";
+		// $attributes = count($aAttributes)
+		// 	? implode(' ', $aAttributes)
+		// 	: '';
 
-		$attributes = count($aAttributes)
-			? implode(' ', $aAttributes)
-			: '';
+		$aExcludeTypes = array(2, 4, 7);
 
-		// echo "<pre>";
-		// var_dump($attributes);
-		// echo "</pre>";
+		$oLib_Properties = $this->_oTemplate_Section_Lib->Lib->Lib_Properties;
+		$oLib_Properties->queryBuilder()
+			-> where('lib_properties.type', 'NOT IN', $aExcludeTypes);
+
+		$iCountOptions = $oLib_Properties->getCount(FALSE);
 
 		ob_start();
 
-		?><div id="panel<?php echo $this->_oTemplate_Section_Lib->id?>" <?php echo htmlspecialchars($attributes)?> class="bootsrap-iso template-settings template-section-lib-settings">
-			<div class="slidepanel">
-				<div class="slidepanel-button-close"><i class="fa-solid fa-xmark"></i></div>
-				<div class="background-wrapper">
-					<div class="tab">
-						<input checked id="tab-btn-1" name="tab-btn" type="radio" value="">
-						<label for="tab-btn-1">Дизайн</label>
+		?><div class="background-wrapper">
+			<div class="tab">
+				<input checked id="tab-btn-1" name="tab-btn" type="radio" value="">
+				<label for="tab-btn-1"><?php echo Core::_('Template_Section_Lib.design')?></label>
 
-						<input id="tab-btn-2" name="tab-btn" type="radio" value="">
-						<label for="tab-btn-2">Настройки</label>
+				<?php
+				if ($iCountOptions)
+				{
+					?><input id="tab-btn-2" name="tab-btn" type="radio" value="">
+					<label for="tab-btn-2"><?php echo Core::_('Template_Section_Lib.settings')?></label><?php
+				}
+				?>
 
-						<div id="main" class="tab-content">
-							<?php
-							foreach ($aEntities as $aEntity)
-							{
-								if (isset($aEntity['type']) && in_array($aEntity['type'], $aTypes))
+				<div id="main" class="tab-content">
+					<?php
+					foreach ($aEntities as $aEntity)
+					{
+						if (isset($aEntity['type']) && in_array($aEntity['type'], $aTypes))
+						{
+							$type = $aEntity['type'];
+
+							$class = Core_Array::get($aEntity, 'class', '', 'trim');
+							$title = Core_Array::get($aEntity, 'title', NULL);
+
+							?><div class="background-block <?php echo $class?>" data-type="<?php echo htmlspecialchars($type)?>">
+								<?php if (!is_null($title))
 								{
-									$type = $aEntity['type'];
-
-									$class = Core_Array::get($aEntity, 'class', '', 'trim');
-									$title = Core_Array::get($aEntity, 'title', NULL);
-
-									?><div class="background-block <?php echo $class?>" data-type="<?php echo htmlspecialchars($type)?>">
-										<?php if (!is_null($title))
+									?><div class="background-title">
+										<div><?php echo $title?></div>
+										<?php
+										if (!in_array($type, array('solid', 'gradient', 'user_css')))
 										{
-											?><div class="background-title">
-												<div><?php echo $title?></div>
-												<?php
-												if (!in_array($type, array('solid', 'gradient')))
-												{
-													$defaultValue = isset($aEntity['defaultValue'])
-														? htmlspecialchars($aEntity['defaultValue'])
-														: '';
+											$defaultValue = isset($aEntity['defaultValue'])
+												? htmlspecialchars($aEntity['defaultValue'])
+												: '';
 
-													$measure = isset($aEntity['measure'])
-														? htmlspecialchars($aEntity['measure'])
-														: '';
+											$measure = isset($aEntity['measure'])
+												? htmlspecialchars($aEntity['measure'])
+												: '';
 
-													?><i class="fa-solid fa-circle-xmark" title="Clear" onclick="hQuery.clearBlock(this, '<?php echo htmlspecialchars($type)?>', '<?php echo htmlspecialchars($defaultValue)?>', '<?php echo htmlspecialchars($measure)?>')"></i><?php
-												}
-												?>
-											</div><?php
+											?><i class="fa-solid fa-circle-xmark" title="Clear" onclick="hQuery.clearBlock(this, '<?php echo htmlspecialchars($type)?>', '<?php echo htmlspecialchars($defaultValue)?>', '<?php echo htmlspecialchars($measure)?>')"></i><?php
 										}
-
-										$this->_showBlock($type, $aEntity, $field);
-									?></div><?php
+										?>
+									</div><?php
 								}
-							}
-							?>
-						</div>
-						<div id="settings" class="tab-content">
-							<?php echo $this->showSettingsBlock()?>
-						</div>
-					</div>
-				</div>
-			</div>
-			<script>
-				hQuery('.template-section-lib-settings .colorpicker').each(function () {
-					var data_swatches = $(this).attr('data-swatches') || '',
-						swatches = data_swatches.split('|').filter(function(i){return i});
 
-					hQuery(this).minicolors({
-						control: $(this).attr('data-control') || 'hue',
-						defaultValue: $(this).attr('data-defaultValue') || '',
-						inline: $(this).attr('data-inline') === 'true',
-						letterCase: $(this).attr('data-letterCase') || 'lowercase',
-						opacity: $(this).attr('data-rgba'),
-						position: $(this).attr('data-position') || 'bottom right',
-						format: $(this).attr('data-format') || 'hex',
-						change: function (hex, opacity) {
+								$this->_showBlock($type, $aEntity, $field);
+							?></div><?php
+						}
+					}
+					?>
+				</div>
+
+				<?php
+				if ($iCountOptions)
+				{
+					?><div id="settings" class="tab-content">
+						<?php echo $this->showSettingsBlock()?>
+					</div><?php
+				}
+				?>
+			</div>
+		</div>
+		<script>
+			hQuery('.template-section-lib-settings .colorpicker').each(function () {
+				var data_swatches = $(this).attr('data-swatches') || '',
+					swatches = data_swatches.split('|').filter(function(i){return i});
+
+				hQuery(this).minicolors({
+					control: $(this).attr('data-control') || 'hue',
+					defaultValue: $(this).attr('data-defaultValue') || '',
+					inline: $(this).attr('data-inline') === 'true',
+					letterCase: $(this).attr('data-letterCase') || 'lowercase',
+					opacity: $(this).attr('data-rgba'),
+					position: $(this).attr('data-position') || 'bottom right',
+					format: $(this).attr('data-format') || 'hex',
+					change: function (hex, opacity) {
 							if (!hex) return;
 							if (opacity) hex += ', ' + opacity;
-							try {
-							} catch (e) { }
-						},
-						hide: hQuery.updateMinicolors,
-						theme: 'bootstrap',
-						swatches: swatches
-					});
+						try {
+						} catch (e) { }
+					},
+					hide: hQuery.updateMinicolors,
+					theme: 'bootstrap',
+					swatches: swatches
 				});
-			</script>
-		</div><?php
+			});
+		</script><?php
 
 		return ob_get_clean();
 	}
@@ -600,7 +745,7 @@ class Template_Section_Lib_Controller
 				$this->_showSettings();
 			?>
 			<div class="button-wrapper">
-				<button class="button-1" onclick="hQuery.saveSettings(this, <?php echo intval($this->_oTemplate_Section_Lib->id)?>, <?php echo intval($this->_oTemplate_Section_Lib->Template_Section->id)?>)"><?php echo Core::_('Admin_Form.save')?></button>
+				<button class="button-1" onclick="hQuery.saveSettings(this, <?php echo intval($this->_oTemplate_Section_Lib->id)?>, <?php echo intval($this->_oTemplate_Section_Lib->Template_Section->id)?>, event)"><?php echo Core::_('Admin_Form.save')?></button>
 			</div>
 		</form><?php
 
@@ -629,26 +774,29 @@ class Template_Section_Lib_Controller
 		foreach ($aLib_Properties as $oLib_Property)
 		{
 			// Получаем значение параметра
-			$value = isset($aLibOptions[$oLib_Property->varible_name])
+			$mValue = isset($aLibOptions[$oLib_Property->varible_name])
 				? $aLibOptions[$oLib_Property->varible_name]
 				: ($oLib_Property->type != 8
 					? $oLib_Property->default_value
 					: NULL
 				);
 
-			// echo "<pre>";
-			// var_dump($value);
-			// echo "</pre>";
-
 			if ($oLib_Property->type != 10)
 			{
-				$this->_showSettingRow($oLib_Property, $value);
+				$aValues = is_array($mValue)
+					? $mValue
+					: array($mValue);
+
+				foreach ($aValues as $key => $value)
+				{
+					$this->_showSettingRow($oLib_Property, $value, $key);
+				}
 			}
 			else
 			{
 				$aTmp = $oLib->Lib_Properties->getAllByparent_id($oLib_Property->id, FALSE);
 
-				!is_array($value) && $value = array($value);
+				!is_array($mValue) && $mValue = array($mValue);
 
 				?><div class="details-wrapper details-sort<?php echo intval($oLib_Property->id)?>">
 					<div class="details-title">
@@ -656,16 +804,18 @@ class Template_Section_Lib_Controller
 						<i title="Add" class="fa-solid fa-plus" onclick="hQuery.addPoint(this, <?php echo intval($this->_oTemplate_Section_Lib->id)?>, '<?php echo intval($oLib_Property->id)?>', '<?php echo htmlspecialchars($oLib_Property->varible_name)?>');"></i>
 					</div>
 					<div class="details-item-wrapper" data-block-name="<?php echo htmlspecialchars($oLib_Property->varible_name)?>"><?php
-						foreach (array_keys($value) as $key => $blockId)
+						foreach (array_keys($mValue) as $key => $blockId)
 						{
-							$this->showDetailsItem($oLib_Property, $value, $aTmp, $key, $blockId);
+							$this->showDetailsItem($oLib_Property, $mValue, $aTmp, $key, $blockId);
 						}
 					?></div>
 				</div>
 				<script>
-					var $object = hQuery(".details-sort<?php echo intval($oLib_Property->id)?>");
+					var selector = ".details-sort<?php echo intval($oLib_Property->id)?> .details-item-wrapper",
+						$object = hQuery(selector);
+
 					$object.sortable({
-						connectWith: ".details-sort<?php echo intval($oLib_Property->id)?>",
+						connectWith: selector,
 						items: "> .details-item",
 						handle: ".fa-grip",
 						scroll: false,
@@ -738,66 +888,64 @@ class Template_Section_Lib_Controller
 	{
 		if ($oLib_Property->type != 2)
 		{
-			/*$name = $prefix . $oLib_Property->varible_name . '_' . $oLib_Property->id;
-			$name .= $position
-				? '_' . $position
-				: '[]';*/
-
-			// card[0][647]
-
+			// card[0][text]
 			$name = $prefix != ''
 				? $prefix . '[' . $position . '][' . $oLib_Property->varible_name . ']'
-				: $oLib_Property->varible_name;
+				: $oLib_Property->varible_name . '[' . $position . ']';
 
 			$old_position = $position
 				? $oLib_Property->varible_name . '_' . $position
 				: $oLib_Property->varible_name;
 
-			?><div class="settings-row-title"><?php echo htmlspecialchars($oLib_Property->name)?></div><?php
+			?><div class="settings-row-item-wrapper" data-lib-property-id="<?php echo htmlspecialchars($oLib_Property->id)?>"><div class="settings-row-title"><?php echo htmlspecialchars($oLib_Property->name)?></div><?php
 
 			switch ($oLib_Property->type)
 			{
+				// Поле ввода
+				case 0:
+					?><input type="text" class="form-control" placeholder="<?php echo htmlspecialchars($oLib_Property->name)?>" name="<?php echo $name?>" data-old-position="<?php echo htmlspecialchars($old_position)?>" value="<?php echo htmlspecialchars($value)?>"/><?php
+				break;
+				// Флажок
+				case 1:
+					$checked = $value
+						? 'checked="checked"'
+						: '';
+
+					?><div class=""><input class="form-control" type="checkbox" <?php echo $checked?> value="1" name="<?php echo $name?>" data-old-position="<?php echo htmlspecialchars($old_position)?>"/></div><?php
+				break;
+				// Список
+				case 3:
+					?><select class="form-control" name="<?php echo $name?>" data-old-position="<?php echo htmlspecialchars($old_position)?>">
+						<?php
+						$aLib_Property_List_Values = $oLib_Property->Lib_Property_List_Values->findAll(FALSE);
+						foreach ($aLib_Property_List_Values as $oLib_Property_List_Value)
+						{
+							$selected = $oLib_Property_List_Value->value == $value
+								? 'selected="selected"'
+								: '';
+
+							?><option <?php echo $selected?> value="<?php echo htmlspecialchars($oLib_Property_List_Value->value)?>"><?php echo htmlspecialchars($oLib_Property_List_Value->name)?></option><?php
+						}
+						?>
+					</select><?php
+				break;
 				// Большое текстовое поле
 				case 5:
-					?><textarea class="form-control mb-2" name="<?php echo $name?>" data-old-position="<?php echo htmlspecialchars($old_position)?>"><?php echo htmlspecialchars($value)?></textarea><?php
+					?><textarea class="form-control" rows="4" name="<?php echo $name?>" data-old-position="<?php echo htmlspecialchars($old_position)?>"><?php echo htmlspecialchars($value)?></textarea><?php
 				break;
 				// Визуальный редактор
 				case 9:
-					?><textarea class="form-control mb-2" data-wysiwyg="1" name="<?php echo $name?>" data-old-position="<?php echo htmlspecialchars($old_position)?>"><?php echo $value?></textarea>
+					?><textarea class="form-control" data-wysiwyg="1" name="<?php echo $name?>" data-old-position="<?php echo htmlspecialchars($old_position)?>"><?php echo $value?></textarea>
 					<script>
 						setTimeout(function(){
 							var object = hQuery("textarea[name = '<?php echo $name?>']");
-							// console.log(object);
-
-							// object.addClass('editing');
-
-							object.tinymce({
-								language: backendLng,
-								language_url: hostcmsBackend + '/wysiwyg/langs/' + backendLng + '.js',
-								init_instance_callback: function (editor) {
-									editor.on('init', function (e) {
-										e.stopImmediatePropagation();
-										editor.remove();
-										object.css('visibility', '');
-									});
-								},
-								script_url: hostcmsBackend + "/wysiwyg/tinymce.min.js",
-								menubar: false,
-								toolbar_mode: 'sliding',
-								toolbar_items_size: 'small',
-								promotion: false,
-								statusbar: false,
-								// inline: true,
-								plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table importcss',
-								toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist | link unlink image media preview table | removeformat code',
-								font_size_formats: "8pt 9pt 10pt 11pt 12pt 14pt 16pt 18pt 20pt 24pt 30pt 36pt 48pt 60pt 72pt 96pt"
-							});
+							wysiwyg.frontendSettingsRow(object);
 						}, 1000);
 					</script><?php
 				break;
 				// Файл
 				case 8:
-					?><div class="settings-row-icon-wrapper mb-2">
+					?><div class="settings-row-icon-wrapper">
 						<input type="file" class="form-control" name="<?php echo $name?>" data-old-position="<?php echo htmlspecialchars($old_position)?>"/><?php
 						if ($value != '' && Core_File::isFile(CMS_FOLDER . $value))
 						{
@@ -812,18 +960,290 @@ class Template_Section_Lib_Controller
 				break;
 				// Иконка
 				case 11:
-					?><div class="settings-row-icon-wrapper mb-2">
+					?><div class="settings-row-icon-wrapper">
 						<input type="text" class="form-control" placeholder="<?php echo htmlspecialchars($oLib_Property->name)?>" name="<?php echo $name?>" data-old-position="<?php echo htmlspecialchars($old_position)?>" value="<?php echo htmlspecialchars($value)?>"/>
-						<span class="settings-row-icon" onclick="hQuery.showSettingsCrmIcons(this, '<?php echo $name?>')">
+						<span class="settings-row-icon" onclick="hQuery.showSettingsCrmIcons(this, '<?php echo $name?>', <?php echo $this->_oTemplate_Section_Lib->id?>)">
 						<i class="<?php echo htmlspecialchars($value)?>"></i></span>
 					</div><?php
 				break;
-				default:
-					?><input type="text" class="form-control mb-2" placeholder="<?php echo htmlspecialchars($oLib_Property->name)?>" name="<?php echo $name?>" data-old-position="<?php echo htmlspecialchars($old_position)?>" value="<?php echo htmlspecialchars($value)?>"/><?php
+				// Цвет
+				case 12:
+					?><input type="text" class="form-control colorpicker" placeholder="<?php echo htmlspecialchars($oLib_Property->name)?>" name="<?php echo $name?>" data-old-position="<?php echo htmlspecialchars($old_position)?>" value="<?php echo htmlspecialchars($value)?>"/><?php
+				break;
+				/*default:
+					?><input type="text" class="form-control" placeholder="<?php echo htmlspecialchars($oLib_Property->name)?>" name="<?php echo $name?>" data-old-position="<?php echo htmlspecialchars($old_position)?>" value="<?php echo htmlspecialchars($value)?>"/><?php*/
 			}
+
+			if ($oLib_Property->multivalue)
+			{
+				?><div class="settings-row-item-actions">
+					<div onclick="hQuery.copySettingsRow(this, <?php echo $oLib_Property->id?>); return false;"><i class="fa-solid fa-plus-circle add"></i></div>
+					<div onclick="hQuery(this).closest('.settings-row-item-wrapper').remove(); return false;"><i class="fa-solid fa-minus-circle delete"></i></div>
+				</div><?php
+			}
+			?></div><?php
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Show right panel with fonts
+	 * @return string
+	 */
+	public function showFontsPanel()
+	{
+		$aFonts = $this->_getFontsList();
+
+		ob_start();
+
+		?><div class="fonts-wrapper">
+			<?php
+			foreach ($aFonts as $font_class => $font_name)
+			{
+				$aExplode = explode('h-font-', $font_class, 2);
+				$font = $aExplode[1];
+
+				?><div class="font" data-font="<?php echo htmlspecialchars($font_class)?>" data-font-name="<?php echo htmlspecialchars($font_name)?>" onclick="hQuery.changeFont(this, <?php echo $this->_oTemplate_Section_Lib->id?>)">
+					<div class="caption"><?php echo htmlspecialchars($font_name)?></div>
+					<div class="content <?php echo htmlspecialchars($font_class)?>">
+						<div>Съешь же ещё этих мягких французских булок, <b>да выпей чаю</b>.</div>
+						<div class="mt-2">The quick brown fox jumps <i>over the lazy dog</i>.</div>
+						<div class="mt-2">456₽, €3210, $987 (~3.14%)</div>
+					</div>
+				</div>
+				<?php
+				if ($font != '')
+				{
+					?><script>
+						var fontName = '<?php echo htmlspecialchars($font)?>';
+
+						var isConnected = hQuery('head link[rel="stylesheet"][data-type="panel"]').filter(function() {
+							var href = hQuery(this).attr('href') || '';
+							return href.indexOf( + '/' + fontName + '.css') !== -1;
+						}).length > 0;
+
+						if (!isConnected)
+						{
+							hQuery('head').append('<link data-type="panel" rel="stylesheet" href="/hostcmsfiles/fonts/' + fontName + '/' + fontName + '.css" type="text/css" />');
+						}
+					</script><?php
+				}
+			}
+			?>
+		</div><?php
+
+		return ob_get_clean();
+	}
+
+	/**
+	 * Upload widget file
+	 * @param Lib_Property_Model $oLib_Property
+	 * @return array
+	 */
+	public function uploadWidgetFile(Lib_Property_Model $oLib_Property)
+	{
+		$aOldOptions = !is_null($this->_oTemplate_Section_Lib->options)
+			? json_decode($this->_oTemplate_Section_Lib->options, TRUE)
+			: array();
+
+		$aTmp = Core_Array::getFiles($oLib_Property->varible_name);
+
+		if (isset($aTmp['name']))
+		{
+			$fileValue = array();
+
+			foreach ($aTmp['name'] as $key => $sName)
+			{
+				$fileValue[] = array(
+					'name' => $sName,
+					'tmp_name' => $aTmp['tmp_name'][$key],
+					'size' => $aTmp['size'][$key]
+				);
+			}
+		}
+		else
+		{
+			$fileValue = $aTmp;
+		}
+
+		$aFileValues = is_array($fileValue)
+			? $fileValue
+			: array(NULL);
+
+		$aNewValues = array();
+
+		// Для файлов необходимо сохранить прежние значения, так как они заново не будут переданы из формы
+		if (isset($aOldOptions[$oLib_Property->varible_name]))
+		{
+			$aTmp = is_array($aOldOptions[$oLib_Property->varible_name])
+				? $aOldOptions[$oLib_Property->varible_name]
+				: array($aOldOptions[$oLib_Property->varible_name]);
+
+			foreach ($aTmp as $fileName)
+			{
+				// Сохраняем  только непустые значения
+				$fileName !== ''
+					&& $aNewValues[] = $fileName;
+			}
+		}
+
+		foreach ($aFileValues as $key => $fileValue)
+		{
+			if (is_array($fileValue) && isset($fileValue['name']))
+			{
+				// Для одиночного значения очищаем ранее восстановленные значения
+				if (!$oLib_Property->multivalue)
+				{
+					// Удаление ранее загруженных файлов
+					foreach ($aNewValues as $oldValue)
+					{
+						$oldValue = ltrim($oldValue, '/');
+						if (strpos($oldValue, $this->_oTemplate_Section_Lib->getLibFileHref()) === 0)
+						{
+							try
+							{
+								Core_File::delete(CMS_FOLDER . $oldValue);
+							}
+							catch (Exception $e)
+							{
+								Core_Message::show($e->getMessage(), 'error');
+							}
+						}
+					}
+
+					$aNewValues = array();
+				}
+
+				$aFile = $fileValue;
+
+				$fileValue = NULL;
+
+				if (intval($aFile['size']) > 0 && strlen($aFile['name']))
+				{
+					if (Core_File::isValidExtension($aFile['name'], Core::$mainConfig['availableExtension']))
+					{
+						$ext = Core_File::getExtension($aFile['name']);
+
+						$imageName = $oLib_Property->change_filename
+							? strtolower(Core_Guid::get()) . '.' . $ext
+							: Core_File::filenameCorrection($aFile['name']);
+
+						Core_File::moveUploadedFile($aFile['tmp_name'], $this->_oTemplate_Section_Lib->getLibFilePath() . $imageName);
+
+						$fileValue = '/' . $this->_oTemplate_Section_Lib->getLibFileHref() . $imageName;
+					}
+				}
+			}
+		}
+
+		!is_null($fileValue)
+			&& $aNewValues[] = $fileValue;
+
+		return $aNewValues;
+	}
+
+	/**
+	 * Upload widget complex file
+	 * @param Lib_Property_Model $oSub_Lib_Property
+	 * @param int $position
+	 * @return array
+	 */
+	public function uploadWidgetComplexFile(Lib_Property_Model $oSub_Lib_Property, $position)
+	{
+		$aOldOptions = !is_null($this->_oTemplate_Section_Lib->options)
+			? json_decode($this->_oTemplate_Section_Lib->options, TRUE)
+			: array();
+
+		$oLib_Property = $oSub_Lib_Property->Lib_Property;
+
+		$aTmp = Core_Array::getFiles($oLib_Property->varible_name);
+
+		$fileValue = array();
+
+		if (isset($aTmp['name'][$position][$oSub_Lib_Property->varible_name]))
+		{
+			$fileValue[] = array(
+				'name' => $aTmp['name'][$position][$oSub_Lib_Property->varible_name],
+				'tmp_name' => $aTmp['tmp_name'][$position][$oSub_Lib_Property->varible_name],
+				'size' => $aTmp['size'][$position][$oSub_Lib_Property->varible_name]
+			);
+		}
+
+		$aFileValues = is_array($fileValue)
+			? $fileValue
+			: array(NULL);
+
+		$aNewValues = array();
+
+		// Для файлов необходимо сохранить прежние значения, так как они заново не будут переданы из формы
+		if (isset($aOldOptions[$oLib_Property->varible_name][$position][$oSub_Lib_Property->varible_name]))
+		{
+			$aTmp = is_array($aOldOptions[$oLib_Property->varible_name][$position][$oSub_Lib_Property->varible_name])
+				? $aOldOptions[$oLib_Property->varible_name][$position][$oSub_Lib_Property->varible_name]
+				: array($aOldOptions[$oLib_Property->varible_name][$position][$oSub_Lib_Property->varible_name]);
+
+			foreach ($aTmp as $fileName)
+			{
+				// Сохраняем  только непустые значения
+				$fileName !== ''
+					&& $aNewValues[] = $fileName;
+			}
+		}
+
+		foreach ($aFileValues as $key => $fileValue)
+		{
+			if (is_array($fileValue) && isset($fileValue['name']))
+			{
+				// Для одиночного значения очищаем ранее восстановленные значения
+				if (!$oSub_Lib_Property->multivalue)
+				{
+					// Удаление ранее загруженных файлов
+					foreach ($aNewValues as $oldValue)
+					{
+						$oldValue = ltrim($oldValue, '/');
+						if (strpos($oldValue, $this->_oTemplate_Section_Lib->getLibFileHref()) === 0)
+						{
+							try
+							{
+								Core_File::delete(CMS_FOLDER . $oldValue);
+							}
+							catch (Exception $e)
+							{
+								Core_Message::show($e->getMessage(), 'error');
+							}
+						}
+					}
+
+					$aNewValues = array();
+				}
+
+				$aFile = $fileValue;
+
+				$fileValue = NULL;
+
+				if (intval($aFile['size']) > 0 && strlen($aFile['name']))
+				{
+					if (Core_File::isValidExtension($aFile['name'], Core::$mainConfig['availableExtension']))
+					{
+						$ext = Core_File::getExtension($aFile['name']);
+
+						$imageName = $oSub_Lib_Property->change_filename
+							? strtolower(Core_Guid::get()) . '.' . $ext
+							: Core_File::filenameCorrection($aFile['name']);
+
+						Core_File::moveUploadedFile($aFile['tmp_name'], $this->_oTemplate_Section_Lib->getLibFilePath() . $imageName);
+
+						$fileValue = '/' . $this->_oTemplate_Section_Lib->getLibFileHref() . $imageName;
+					}
+				}
+			}
+		}
+
+		!is_null($fileValue)
+			&& $aNewValues[] = $fileValue;
+
+		return $aNewValues;
 	}
 
 	/**
@@ -844,7 +1264,7 @@ class Template_Section_Lib_Controller
 			array(
 				'type' => 'colorpicker',
 				'title' => Core::_('Template_Section_Lib.background'),
-				'class' => ' col-6',
+				// 'class' => ' col-6',
 				'property' => 'background',
 				'swatches' => array(
 					'#ef9a9a',
@@ -866,7 +1286,7 @@ class Template_Section_Lib_Controller
 			array(
 				'type' => 'colorpicker',
 				'title' => Core::_('Template_Section_Lib.color'),
-				'class' => ' col-6',
+				// 'class' => ' col-6',
 				'property' => 'color'
 			),
 			array(
@@ -894,15 +1314,9 @@ class Template_Section_Lib_Controller
 			),
 			array('type' => 'separator'),
 			array(
-				'type' => 'select',
+				'type' => 'font',
 				'title' => Core::_('Template_Section_Lib.font_family'),
-				'property' => 'font-family',
-				'options' => array(
-					'' => '...',
-					"'Roboto', sans-serif" => 'Roboto',
-					"'Ubuntu', sans-serif" => 'Ubuntu',
-					"'Montserrat', sans-serif" => 'Montserrat'
-				)
+				'options' => $this->_getFontsList()
 			),
 			array(
 				'type' => 'range',
@@ -965,17 +1379,52 @@ class Template_Section_Lib_Controller
 				'measure' => 'px',
 				'defaultValue' => 0
 			),
+			array('type' => 'separator'),
 			array(
 				'type' => 'range',
 				'title' => Core::_('Template_Section_Lib.margin_top'),
 				'property' => 'margin-top',
 				'from' => 0,
-				'to' => 170,
+				'to' => 150,
 				'step' => 1,
 				'measure' => 'px',
 				'defaultValue' => 0
 			),
-			array('type' => 'separator')
+			array(
+				'type' => 'range',
+				'title' => Core::_('Template_Section_Lib.margin_bottom'),
+				'property' => 'margin-bottom',
+				'from' => 0,
+				'to' => 150,
+				'step' => 1,
+				'measure' => 'px',
+				'defaultValue' => 0
+			),
+			array(
+				'type' => 'range',
+				'title' => Core::_('Template_Section_Lib.margin_left'),
+				'property' => 'margin-left',
+				'from' => 0,
+				'to' => 150,
+				'step' => 1,
+				'measure' => 'px',
+				'defaultValue' => 0
+			),
+			array(
+				'type' => 'range',
+				'title' => Core::_('Template_Section_Lib.margin_right'),
+				'property' => 'margin-right',
+				'from' => 0,
+				'to' => 150,
+				'step' => 1,
+				'measure' => 'px',
+				'defaultValue' => 0
+			),
+			array('type' => 'separator'),
+			array(
+				'type' => 'user_css',
+				'title' => Core::_('Template_Section_Lib.user_css'),
+			)
 		);
 	}
 }

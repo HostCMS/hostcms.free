@@ -37,7 +37,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Informationsystem_Controller_Tag_Show extends Core_Controller
 {
@@ -129,10 +129,14 @@ class Informationsystem_Controller_Tag_Show extends Core_Controller
 		$this->_tags = Core_Entity::factory('Tag');
 
 		$this->_tags->queryBuilder()
+			->clearSelect()
+			->straightJoin()
 			->select(array('COUNT(tag_id)', 'count'), 'tags.*')
-			//->from('tag_informationsystem_items')
-			//->leftJoin('tags', 'tag_informationsystem_items.tag_id', '=', 'tags.id')
-			->join('tag_informationsystem_items', 'tag_informationsystem_items.tag_id', '=', 'tags.id')
+			->join('tag_informationsystem_items', 'tag_informationsystem_items.tag_id', '=', 'tags.id',
+				array(
+					array('AND' => array('tag_informationsystem_items.site_id', '=', $oInformationsystem->site_id))
+				)
+			)
 			->join('informationsystem_items', 'tag_informationsystem_items.informationsystem_item_id', '=', 'informationsystem_items.id')
 			->leftJoin('informationsystem_groups', 'informationsystem_items.informationsystem_group_id', '=', 'informationsystem_groups.id',
 				array(
@@ -140,11 +144,15 @@ class Informationsystem_Controller_Tag_Show extends Core_Controller
 					array('AND' => array('informationsystem_groups.siteuser_group_id', 'IN', $aSiteuserGroups))
 				)
 			)
+			->open()
+				->where('informationsystem_items.informationsystem_group_id', '=', 0)
+				->setOr()
+				->where('informationsystem_groups.id', 'IS NOT', NULL)
+			->close()
 			->where('informationsystem_items.siteuser_group_id', 'IN', $aSiteuserGroups)
 			->where('informationsystem_items.informationsystem_id', '=', $oInformationsystem->id)
 			->where('informationsystem_items.deleted', '=', 0)
-			//->where('tags.deleted', '=', 0)
-			->groupBy('tag_informationsystem_items.tag_id')
+			->groupBy('tags.id')
 			->having('count', '>', 0)
 			->orderBy('tags.sorting', 'ASC')
 			->orderBy('tags.name', 'ASC');
@@ -153,7 +161,7 @@ class Informationsystem_Controller_Tag_Show extends Core_Controller
 	}
 
 	/**
-	 * Get queryBuilder
+	 * Get queryBuilder instance
 	 * @return Core_QueryBuilder_Select
 	 */
 	public function queryBuilder()

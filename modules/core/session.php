@@ -18,7 +18,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 abstract class Core_Session
 {
@@ -39,7 +39,6 @@ abstract class Core_Session
 	
 	/**
 	 * Set started
-	 * @return boolean
 	 */
 	static public function setStarted()
 	{
@@ -124,7 +123,7 @@ abstract class Core_Session
 
 	/**
 	 * Correct domain
-	 * @param str domain
+	 * @param str $domain domain
 	 * @return string
 	 */
 	static public function correctDomain($domain)
@@ -474,7 +473,7 @@ abstract class Core_Session
 	/**
 	 * Get full driver name
 	 * @param string $driver driver name
-	 * @return srting
+	 * @return string
 	 */
 	static protected function _getDriverName($driver)
 	{
@@ -642,7 +641,6 @@ abstract class Core_Session
 	 * This callback is executed when a session sets maxlifetime
 	 * @param int $maxlifetime
 	 * @param bool $overwrite overwrite previous maxlifetime
-	 * @return boolean
 	 */
 	public function sessionMaxlifetime($maxlifetime, $overwrite = FALSE)
 	{

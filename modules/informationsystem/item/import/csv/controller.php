@@ -26,7 +26,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properties
 {
@@ -89,6 +89,12 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 	 * @var int
 	 */
 	protected $_iCurrentGroupId = 0;
+
+	/**
+	 * First line
+	 * @var mixed
+	 */
+	protected $_firstLine = NULL;
 
 	/**
 	 * Current informationsystem
@@ -155,6 +161,18 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 	 * @var array
 	 */
 	protected $_aAdditionalGroups = array();
+
+	/**
+	 * Array of CREATED properties
+	 * @var array
+	 */
+	protected $_aCreatedProperties = array();
+
+	/**
+	 * Array of CREATED fields
+	 * @var array
+	 */
+	protected $_aCreatedFields = array();
 
 	/**
 	 * Allowed object properties
@@ -395,8 +413,8 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 	/**
 	 * Save group
 	 * @param Informationsystem_Group_Model $oInformationsystem_Group group
-	 * @return Informationsystem_Group
-	 */
+	 * @return Informationsystem_Group_Model
+     */
 	protected function _doSaveGroup(Informationsystem_Group_Model $oInformationsystem_Group)
 	{
 		is_null($oInformationsystem_Group->path) && $oInformationsystem_Group->path = '';
@@ -476,6 +494,11 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 			else
 			{
 				fseek($fInputFile, 0);
+			}
+
+			if ($this->firstlineheader)
+			{
+				$this->_firstLine = $this->getCSVLine($fInputFile);
 			}
 		}
 		else
@@ -1135,6 +1158,41 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 								$this->_aExternalProperties[$aPropertyInfo[1]][] = $sData;
 							}
 
+							// Создавать новые свойства "на лету"
+							if (strpos($sFieldName, "createprop-") === 0)
+							{
+								$aTmpExplode = explode('-', $sFieldName, 2);
+
+								if (!isset($this->_aCreatedProperties[$iKey]))
+								{
+									$oProperty = Core_Entity::factory('Property');
+									$oProperty->name = Core_Array::get($this->_firstLine, $iKey, 'Unnamed');
+									$oProperty->type = $aTmpExplode[1];
+									$oProperty->tag_name = Core_Str::transliteration($oProperty->name);
+
+									if ($oProperty->type == 3)
+									{
+										$oList = Core_Entity::factory('List');
+										$oList->name = $oProperty->name;
+										$oList->site_id = $this->_oCurrentInformationsystem->site_id;
+										$oList->save();
+
+										$oProperty->list_id = $oList->id;
+									}
+
+									$oProperty->save();
+
+									$linkedObject = Core_Entity::factory('Informationsystem_Item_Property_List', $this->_oCurrentInformationsystem->id);
+									$linkedObject->add($oProperty);
+
+									$this->_aCreatedProperties[$iKey] = $oProperty->id;
+								}
+
+								$oProperty = Core_Entity::factory('Property', $this->_aCreatedProperties[$iKey]);
+
+								$this->_aExternalProperties[$oProperty->id][] = $sData;
+							}
+
 							if (strpos($sFieldName, "fieldsmall-") === 0)
 							{
 								// Дополнительный файл пользовательских полей/Малое изображение картинки пользовательских полей
@@ -1156,6 +1214,43 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 								$aFieldInfo = explode("-", $sFieldName);
 
 								$this->_aExternalFields[$aFieldInfo[1]][] = $sData;
+							}
+
+							// Создавать новые пользовательские поля "на лету"
+							if (strpos($sFieldName, "createfield-") === 0)
+							{
+								$aTmpExplode = explode('-', $sFieldName, 2);
+
+								if (!isset($this->_aCreatedFields[$iKey]))
+								{
+									$oField = Core_Entity::factory('Field');
+									$oField->model = 'informationsystem_item';
+									$oField->site_id = 0;
+									$oField->field_dir_id = 0;
+									$oField->sorting = 0;
+									$oField->hide_small_image = 0;
+									$oField->name = Core_Array::get($this->_firstLine, $iKey, 'Unnamed');
+									$oField->type = $aTmpExplode[1];
+									$oField->tag_name = Core_Str::transliteration($oField->name);
+
+									if ($oField->type == 3)
+									{
+										$oList = Core_Entity::factory('List');
+										$oList->name = $oField->name;
+										$oList->site_id = $this->_oCurrentInformationsystem->site_id;
+										$oList->save();
+
+										$oField->list_id = $oList->id;
+									}
+
+									$oField->save();
+
+									$this->_aCreatedFields[$iKey] = $oField->id;
+								}
+
+								$oField = Core_Entity::factory('Field', $this->_aCreatedFields[$iKey]);
+
+								$this->_aExternalFields[$oField->id][] = $sData;
 							}
 
 							if (strpos($sFieldName, "prop_group-") === 0)
@@ -1672,8 +1767,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 				// Вставка тэгов автоматически разрешена
 				if ($this->_sCurrentTags == '' && $this->_oCurrentInformationsystem->apply_tags_automatically)
 				{
-					$sTmpString = '';
-					$sTmpString .= $this->_oCurrentItem->name ? ' ' . $this->_oCurrentItem->name : '';
+                    $sTmpString = $this->_oCurrentItem->name ? ' ' . $this->_oCurrentItem->name : '';
 					$sTmpString .= $this->_oCurrentItem->description ? ' ' . $this->_oCurrentItem->description : '';
 					$sTmpString .= $this->_oCurrentItem->text ? ' ' . $this->_oCurrentItem->text : '';
 
@@ -2345,13 +2439,16 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 		return $iCurrentSeekPosition;
 	}
 
-	/**
-	 * Add property to item
-	 * @param Informationsystem_Item_Model $oInformationsystemItem
-	 * @param Property_Model $oProperty
-	 * @param string $sPropertyValue property value
-	 * @hostcms-event Informationsystem_Item_Import_Csv_Controller.onAddItemPropertyValueDefault
-	 */
+    /**
+     * Add property to item
+     * @param Informationsystem_Item_Model $oInformationsystemItem
+     * @param Property_Model $oProperty
+     * @param string $sPropertyValue property value
+     * @param int $position
+     * @return false|mixed|Property_Value_Model
+     * @throws Core_Exception
+     * @hostcms-event Informationsystem_Item_Import_Csv_Controller.onAddItemPropertyValueDefault
+     */
 	protected function _addItemPropertyValue(Informationsystem_Item_Model $oInformationsystemItem, Property_Model $oProperty, $sPropertyValue, $position = 0)
 	{
 		$aPropertyValues = $oProperty->getValues($oInformationsystemItem->id, FALSE);
@@ -2755,13 +2852,16 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 		return FALSE;
 	}
 
-	/**
-	 * Add field to item
-	 * @param Informationsystem_Item_Model $oInformationsystemItem
-	 * @param Field_Model $oField
-	 * @param string $sFieldValue field value
-	 * @hostcms-event Informationsystem_Item_Import_Csv_Controller.onAddItemFieldValueDefault
-	 */
+    /**
+     * Add field to item
+     * @param Informationsystem_Item_Model $oInformationsystemItem
+     * @param Field_Model $oField
+     * @param string $sFieldValue field value
+     * @param int $position
+     * @return false|mixed|object
+     * @throws Core_Exception
+     * @hostcms-event Informationsystem_Item_Import_Csv_Controller.onAddItemFieldValueDefault
+     */
 	protected function _addItemFieldValue(Informationsystem_Item_Model $oInformationsystemItem, Field_Model $oField, $sFieldValue, $position = 0)
 	{
 		$aFieldValues = $oField->getValues($oInformationsystemItem->id, FALSE);
@@ -3208,7 +3308,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 
 	/**
 	 * Get CSV line from file
-	 * @param handler file descriptor
+	 * @param handler $fileDescriptor file descriptor
 	 * @return array
 	 */
 	public function getCSVLine($fileDescriptor)
@@ -3293,32 +3393,13 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 	}
 
 	/**
-	 * Convert url to Punycode
-	 * @param string $url
-	 * @return string
-	 */
-	protected function _convertToPunycode($url)
-	{
-		return preg_replace_callback('~(https?://)([^/]*)(.*)~', function($a) {
-			$aTmp = array_map('rawurlencode', explode('/', $a[3]));
-
-			return (preg_match('/[А-Яа-яЁё]/u', $a[2])
-				? $a[1] . Core_Str::idnToAscii($a[2])
-				: $a[1] . $a[2]
-			) . implode('/', $aTmp);
-
-			}, $url
-		);
-	}
-
-	/**
 	 * Download file to the TMP dir
 	 * @param string $sSourceFile
-	 * @return path to the file
+	 * @return false|string
 	 */
 	protected function _downloadHttpFile($sSourceFile)
 	{
-		$sSourceFile = $this->_convertToPunycode($sSourceFile);
+		$sSourceFile = Core_Http::convertToPunycode($sSourceFile);
 
 		$Core_Http = Core_Http::instance()
 			->clear()
@@ -3354,8 +3435,8 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 	/**
 	 * Correct checkbox value
 	 * @param string $value
-	 * @return bool
-	 */
+	 * @return int
+     */
 	protected function _correctCheckbox($value)
 	{
 		return $value == 1 || strtolower($value) === 'true' || strtolower($value) === 'да'

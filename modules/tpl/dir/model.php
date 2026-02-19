@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Tpl
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Tpl_Dir_Model extends Core_Entity
 {
@@ -63,8 +63,8 @@ class Tpl_Dir_Model extends Core_Entity
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return Tpl_Dir_Model
-	 * @hostcms-event tpl_dir.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event tpl_dir.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

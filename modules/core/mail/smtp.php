@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Mail
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Mail_Smtp extends Core_Mail
 {
@@ -254,8 +254,8 @@ class Core_Mail_Smtp extends Core_Mail
 
 	/**
 	 * fgets 256 bytes
-	 * @return mixed
-	 */
+	 * @return false|string
+     */
 	protected function _serverFgets()
 	{
 		$return = fgets($this->_fp, 256);
@@ -280,8 +280,8 @@ class Core_Mail_Smtp extends Core_Mail
 	 * Parse server answer
 	 * @param string $server_response
 	 * @param string $response response
-	 * @return string
-	 */
+	 * @return bool
+     */
 	protected function _serverParse($server_response, $response)
 	{
 		$result = $this->_getResponseStatus($server_response) == $response;

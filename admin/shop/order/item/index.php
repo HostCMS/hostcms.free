@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -138,7 +138,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 )
 {
 	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
-	$iShopId = intval(Core_Array::getGet('shop_id'));
+	$iShopId = Core_Array::getGet('shop_id', 0, 'int');
 	$oShop = Core_Entity::factory('Shop', $iShopId);
 
 	$aJSON[0] = array(

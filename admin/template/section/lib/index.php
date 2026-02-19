@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -59,10 +59,10 @@ $oAdminFormEntityBreadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Template.menu'))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/template/index.php', NULL, NULL, '')
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/template/index.php', NULL, NULL, '')
 		)
 );
 

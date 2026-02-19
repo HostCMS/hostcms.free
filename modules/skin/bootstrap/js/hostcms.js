@@ -372,7 +372,7 @@ function Notify(message, description, position, timeout, theme, icon, closable, 
 	soundAvailable = $('#sound-switch').data('soundEnabled') === undefined
 		? false
 		: !!$('#sound-switch').data('soundEnabled');
-	
+
 	if (typeof sound != 'undefined')
 	{
 		soundAvailable = soundAvailable && sound;
@@ -396,6 +396,7 @@ function Notify(message, description, position, timeout, theme, icon, closable, 
 /*#region handle Settings*/
 function InitiateSettings() {
 	readCookiesForInitiateSettings();
+	// $.readCookiesForInitiateSettings();
 
 	$('#checkbox_fixednavbar')
 		.change(function () {

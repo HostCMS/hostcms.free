@@ -1,12 +1,5 @@
 <?php
-/**
- * Tags.
- *
- * @package HostCMS
- * @subpackage Tag
- * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'Tag sections',
 	'menu_group' => 'Section',
@@ -23,4 +16,5 @@ return array(
 	'move_success' => 'Tag sections have been transferred',
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
+	'apply_success' => "Information changed successfully",
 );

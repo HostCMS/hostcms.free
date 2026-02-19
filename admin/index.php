@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once ('../bootstrap.php');
 
@@ -44,9 +44,240 @@ if (Core::moduleIsActive('ipaddress'))
 	}
 }
 
+Core_Session::start();
+
+if (!is_null(Core_Array::getGet('webauthnLoadList')))
+{
+	$ids = [];
+
+	$login = Core_Array::getCookie('_h_login', '', 'trim');
+
+	$oUser = Core_Entity::factory('User')->getByLogin($login);
+
+	if ($oUser)
+	{
+		$oCore_Webauthn = new Core_Webauthn();
+
+		$aUser_Webauthns = $oUser->User_Webauthns->findAll(FALSE);
+		foreach ($aUser_Webauthns as $oUser_Webauthn)
+		{
+			$ids[] = base64_decode($oUser_Webauthn->credential_id);
+		}
+	}
+
+	if (count($ids) === 0) {
+		throw new Core_Exception('no registrations in session for userId ' . $login);
+	}
+
+	$args = $oCore_Webauthn->getGetArgs($ids, 60*4, true, 'discouraged');
+
+	if ($args)
+	{
+		$_SESSION['challenge'] = $args->publicKey->challenge->getBinaryString();
+	}
+
+	Core::showJson($args);
+}
+
+if (!is_null(Core_Array::getGet('webauthnCheck')))
+{
+	$aReturn = array();
+
+	try
+	{
+		$post = trim(file_get_contents('php://input'));
+		if ($post)
+		{
+			$post = json_decode($post, NULL, 512, defined('JSON_THROW_ON_ERROR') ? JSON_THROW_ON_ERROR : 0);
+
+			if (is_object($post))
+			{
+				$clientDataJSON = !empty($post->clientDataJSON) ? base64_decode($post->clientDataJSON) : NULL;
+
+				$authenticatorData = !empty($post->authenticatorData) ? base64_decode($post->authenticatorData) : NULL;
+				$signature = !empty($post->signature) ? base64_decode($post->signature) : NULL;
+				$userHandle = !empty($post->userHandle) ? base64_decode($post->userHandle) : NULL;
+				$credentialId = !empty($post->id) ? $post->id : NULL;
+				$challenge = isset($_SESSION['challenge']) ? $_SESSION['challenge'] : '';
+
+				$login = Core_Array::getCookie('_h_login', '', 'trim');
+				$oUser = Core_Entity::factory('User')->getByLogin($login);
+
+				if ($oUser)
+				{
+					$credentialPublicKey = NULL;
+					$allowedCredentials = array();
+
+					$aUser_Webauthns = $oUser->User_Webauthns->findAll(FALSE);
+					foreach ($aUser_Webauthns as $oUser_Webauthn)
+					{
+						$allowedCredentials[] = $oUser_Webauthn->credential_id;
+
+						if ($oUser_Webauthn->credential_id === $credentialId)
+						{
+							$credentialPublicKey = $oUser_Webauthn->credential_public_key;
+							//break;
+						}
+					}
+
+					/*if ($credentialPublicKey === NULL)
+					{
+						Core::showJson(array(
+							'success' => FALSE,
+							'msg' => Core_Message::get(Core::_('Admin.wrong_public_key'), 'error')
+						));
+					}*/
+
+					// Process the get request
+					$oCore_Webauthn = new Core_Webauthn();
+					$processGetResult = $oCore_Webauthn->processGet(
+						$clientDataJSON,
+						$authenticatorData,
+						$signature,
+						$credentialId,
+						$allowedCredentials,
+						$oUser->id,
+						$credentialPublicKey,
+						$challenge,
+						NULL,
+						FALSE
+					);
+				}
+				else
+				{
+					$processGetResult = FALSE;
+				}
+
+				$bSuccess = is_array($processGetResult) && $processGetResult['success'];
+
+				$aReturn['success'] = $bSuccess;
+
+				if ($bSuccess)
+				{
+					Core_Auth::setCurrentUser($oUser, FALSE);
+				}
+				else
+				{
+					$aReturn['msg'] = Core_Message::get(Core::_('Admin.wrong_fast_login'), 'error');
+				}
+			}
+			else
+			{
+				$aReturn['msg'] = 'webauthnCheck JSON error';
+			}
+		}
+		else
+		{
+			$aReturn['msg'] = 'webauthnCheck data error';
+		}
+	}
+	catch (Exception $e)
+	{
+		$aReturn['msg'] = 'webauthnCheck error';
+	}
+
+	Core::showJson($aReturn);
+}
+
+if (Core_Auth::logged())
+{
+	$oCurrentUser = Core_Auth::getCurrentUser();
+
+	if (!is_null(Core_Array::getGet('webauthnRegisterList')))
+	{
+		try
+		{
+			$userId = sha1($oCurrentUser->guid);
+			$userName = $userDisplayName = $oCurrentUser->login;
+
+			$excludeCredentialIds = array();
+
+			$aUser_Webauthns = $oCurrentUser->User_Webauthns->findAll(FALSE);
+			foreach ($aUser_Webauthns as $oUser_Webauthn)
+			{
+				$excludeCredentialIds[] = base64_decode($oUser_Webauthn->credential_id);
+			}
+
+			$oCore_Webauthn = new Core_Webauthn();
+
+			$args = $oCore_Webauthn->getCreateArgs(
+				hex2bin($userId),
+				$userName,
+				$userDisplayName,
+				60*4,
+				FALSE,
+				'discouraged',
+				FALSE,
+				$excludeCredentialIds
+			);
+
+			if ($args)
+			{
+				$_SESSION['challenge'] = $args->publicKey->challenge->getBinaryString();
+			}
+		}
+		catch (Exception $e)
+		{
+			$args['msg'] = 'webauthnRegisterList error';
+		}
+
+		Core::showJson($args);
+	}
+
+	if (!is_null(Core_Array::getGet('webauthnRegister')))
+	{
+		$aReturn = array();
+		try
+		{
+			$post = trim(file_get_contents('php://input'));
+			if ($post)
+			{
+				$post = json_decode($post, NULL, 512, defined('JSON_THROW_ON_ERROR') ? JSON_THROW_ON_ERROR : 0);
+
+				if (is_object($post))
+				{
+					$clientDataJSON = !empty($post->clientDataJSON) ? base64_decode($post->clientDataJSON) : NULL;
+					$attestationObject = !empty($post->attestationObject) ? base64_decode($post->attestationObject) : NULL;
+					$challenge = isset($_SESSION['challenge']) ? $_SESSION['challenge'] : NULL;
+
+					$aReturn['success'] = FALSE;
+
+					$oCore_Webauthn = new Core_Webauthn();
+
+					$data = $oCore_Webauthn->processCreate($clientDataJSON, $attestationObject, $challenge, $oCurrentUser->id, TRUE, TRUE);
+
+					if ($data instanceof stdClass)
+					{
+						$oUser_WebAuthn = Core_Entity::factory('User_Webauthn');
+						$oUser_WebAuthn->user_id = $oCurrentUser->id;
+						$oUser_WebAuthn->credential_id = base64_encode($data->credentialId);
+						$oUser_WebAuthn->credential_public_key = $data->credentialPublicKey;
+						$oUser_WebAuthn->save();
+
+						$aReturn['success'] = TRUE;
+					}
+				}
+				else
+				{
+					$aReturn['msg'] = 'webauthnRegister JSON error';
+				}
+			}
+			else
+			{
+				$aReturn['msg'] = 'webauthnRegister data error';
+			}
+		}
+		catch (Exception $e)
+		{
+			$aReturn['msg'] = 'webauthnRegister error';
+		}
+
+		Core::showJson($aReturn);
+	}
+}
+
 ob_start();
 
-Core_Session::start();
 if (!is_null(Core_Array::getGet('skinName')))
 {
 	$skinName = Core_Array::getGet('skinName');
@@ -107,6 +338,9 @@ if (!is_null(Core_Array::getPost('submit')) && !Core_Auth::logged())
 
 		$authResult = Core_Auth::login($login, $password, $bDeviceTracking);
 
+		$authResult
+			&& Core_Cookie::set('_h_login', $login, array('expires' => time() + 15552000, 'path' => '/')); // half year
+
 		Core_Auth::setCurrentSite();
 	}
 	catch (Exception $e)
@@ -131,9 +365,7 @@ if (!Core_Auth::logged())
 				->write(Core::_('Core.error_log_authorization_error', $login, FALSE));
 
 			$oAdmin_Answer->message(
-				Core_Message::get(
-					Core::_('Admin.authorization_error_valid_user', $login, Core::getClientIp())
-				, 'error')
+				Core_Message::get(Core::_('Admin.authorization_error_valid_user', $login, Core::getClientIp()), 'error')
 			);
 		}
 		// если пользователю сейчас запрещен ввод пароля
@@ -142,9 +374,7 @@ if (!Core_Auth::logged())
 			$error_admin_access = $authResult['value'];
 
 			$oAdmin_Answer->message(
-				Core_Message::get(
-					Core::_('Admin.authorization_error_access_temporarily_unavailable', $error_admin_access),
-				'error')
+				Core_Message::get(Core::_('Admin.authorization_error_access_temporarily_unavailable', $error_admin_access), 'error')
 			);
 		}
 	}
@@ -153,7 +383,7 @@ if (!Core_Auth::logged())
 }
 else
 {
-	$title = Core::_('Admin.index_title', 'HostCMS', Core_Auth::logged() ? strip_tags(CURRENT_VERSION) : 6);
+	$title = Core::_('Admin.index_title', 'HostCMS', Core_Auth::logged() ? strip_tags(CURRENT_VERSION) : 7);
 	Core::initConstants(Core_Entity::factory('Site', CURRENT_SITE));
 	Core_Skin::instance()->index();
 }

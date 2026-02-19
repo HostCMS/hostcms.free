@@ -354,6 +354,7 @@ if (Core_Array::getPost('recount') || Core_Array::getPost('step') == 1)
 	foreach ($aCart as $oShop_Cart)
 	{
 		$quantity = Core_Array::getPost('quantity_' . $oShop_Cart->shop_item_id);
+		is_array($quantity) && $quantity = array_sum($quantity);
 
 		// Количество было передано
 		if (!is_null($quantity))

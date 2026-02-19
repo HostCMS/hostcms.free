@@ -16,7 +16,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Tpl
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Tpl_Processor
 {
@@ -96,8 +96,8 @@ class Tpl_Processor
 
 	/**
 	 * Execute processor
-	 * @return mixed
-	 * @hostcms-event Tpl_Processor.onBeforeProcess
+	 * @return false|string
+     * @hostcms-event Tpl_Processor.onBeforeProcess
 	 * @hostcms-event Tpl_Processor.onAfterProcess
 	 */
 	public function process()
@@ -174,15 +174,15 @@ class Tpl_Processor
 
 	/**
 	 * XSL
-	 * @var Xsl_Model
+	 * @var Tpl_Model
 	 */
 	protected $_tpl = NULL;
 
-	/**
-	 * Set XSL
-	 * @param Xsl_Model $oXsl XSL
-	 * @return self
-	 */
+    /**
+     * Set XSL
+     * @param Tpl_Model $oTpl
+     * @return self
+     */
 	public function tpl(Tpl_Model $oTpl)
 	{
 		$this->_tpl = $oTpl;
@@ -224,7 +224,6 @@ class Tpl_Processor
 
 	/**
 	 * Format TPL variables
-	 * @return string
 	 */
 	public function format()
 	{

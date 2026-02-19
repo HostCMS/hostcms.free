@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Field
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Field_Controller_Tab
 {
@@ -82,8 +82,8 @@ class Field_Controller_Tab
 
 	/**
 	* Get object
-	* @return Core_Entity
-	*/
+	* @return object|null
+     */
 	public function getObject()
 	{
 		return $this->_object;
@@ -193,14 +193,12 @@ class Field_Controller_Tab
 	* Show plus button
 	* @param Field_Model $oField field
 	* @param string $addFunction function name
-	* @return string
 	*/
 	public function getImgAdd($oField, $addFunction = '$.cloneField') {}
 
 	/**
 	* Show minus button
 	* @param string $onclick onclick attribute value
-	* @return string
 	*/
 	public function getImgDelete($onclick = '$.deleteNewField(this)') {}
 
@@ -488,9 +486,15 @@ class Field_Controller_Tab
 
 									if ($oField_Value->file != '')
 									{
+										$link = Core::moduleIsActive('cdn')
+											? Cdn_Controller::link($sDirHref . $oField_Value->file)
+											: NULL;
+
 										$oNewAdmin_Form_Entity->largeImage(
 											Core_Array::union($oNewAdmin_Form_Entity->largeImage, array(
-												'path' => $sDirHref . rawurlencode($oField_Value->file),
+												'path' => !is_null($link)
+													? $link
+													: $sDirHref . rawurlencode($oField_Value->file),
 												'originalName' => $oField_Value->file_name,
 												// 'delete_onclick' => $this->_Admin_Form_Controller->getAdminActionLoadAjax('/{admin}/field/modelfield/index.php', 'deleteFieldValue', "large_field_{$oField->id}_{$oField_Value->id}", $this->_datasetId, $this->_object->id)
 												'delete_onclick' => $this->getImgDeleteFilePath($oField_Value, 'large')
@@ -506,9 +510,15 @@ class Field_Controller_Tab
 
 									if ($oField_Value->file_small != '')
 									{
+										$link = Core::moduleIsActive('cdn')
+											? Cdn_Controller::link($sDirHref . $oField_Value->file_small)
+											: NULL;
+
 										$oNewAdmin_Form_Entity->smallImage(
 											Core_Array::union($oNewAdmin_Form_Entity->smallImage, array(
-												'path' => $sDirHref . rawurlencode($oField_Value->file_small),
+												'path' => !is_null($link)
+													? $link
+													: $sDirHref . rawurlencode($oField_Value->file_small),
 												'originalName' => $oField_Value->file_small_name,
 												// 'delete_onclick' => $this->_Admin_Form_Controller->getAdminActionLoadAjax('/{admin}/field/modelfield/index.php', 'deleteFieldValue', "small_field_{$oField->id}_{$oField_Value->id}", $this->_datasetId, $this->_object->id),
 												'delete_onclick' => $this->getImgDeleteFilePath($oField_Value, 'small'),

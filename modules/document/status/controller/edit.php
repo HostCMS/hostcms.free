@@ -8,14 +8,12 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Document
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Document_Status_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
 	/**
 	 * Prepare backend item's edit form
-	 *
-	 * @return self
 	 */
 	protected function _prepareForm()
 	{

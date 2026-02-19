@@ -9,15 +9,16 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Informationsystem_Controller_Load_Select_Options extends Admin_Form_Action_Controller_Type_Load_Select_Options
 {
-	/**
-	 * Get Informationsystem_Item option name
-	 * @param Informationsystem_Item_Model $oInformationsystem_Item
-	 * @hostcms-event Informationsystem_Controller_Load_Select_Options.onGetOptionName
-	 */
+    /**
+     * Get Informationsystem_Item option name
+     * @param Informationsystem_Item_Model $oInformationsystem_Item
+     * @return array|bool|float|int|mixed|string
+     * @hostcms-event Informationsystem_Controller_Load_Select_Options.onGetOptionName
+     */
 	static public function getOptionName(Informationsystem_Item_Model $oInformationsystem_Item)
 	{
 		Core_Event::notify('Informationsystem_Controller_Load_Select_Options.onGetOptionName', $oInformationsystem_Item);
@@ -49,8 +50,8 @@ class Informationsystem_Controller_Load_Select_Options extends Admin_Form_Action
 
 	/**
 	 * Get count of objects
-	 * @return self
-	 */
+	 * @return int
+     */
 	protected function _getCount()
 	{
 		return $this->_model->getCount();
@@ -59,6 +60,7 @@ class Informationsystem_Controller_Load_Select_Options extends Admin_Form_Action
 	/**
 	 * Find objects by $this->_model
 	 * @return self
+	 * @hostcms-event Informationsystem_Controller_Load_Select_Options.onBeforeFindObjects
 	 */
 	protected function _findObjects()
 	{
@@ -107,6 +109,8 @@ class Informationsystem_Controller_Load_Select_Options extends Admin_Form_Action
 		}
 
 		$this->_objects = array();
+
+		Core_Event::notify('Informationsystem_Controller_Load_Select_Options.onBeforeFindObjects', $this, array($this->_model));
 
 		do {
 			$this->_model

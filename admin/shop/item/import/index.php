@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -359,6 +359,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('delete_property_values')->value(isset($_POST['delete_property_values']) ? 1 : 0))
 								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('delete_field_values')->value(isset($_POST['delete_field_values']) ? 1 : 0))
 								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('delete_unsent_modifications_by_properties')->value(isset($_POST['delete_unsent_modifications_by_properties']) ? 1 : 0))
+								->add(Core_Html_Entity::factory('Input')->type('hidden')->name('delete_associated_items')->value(isset($_POST['delete_associated_items']) ? 1 : 0))
 							);
 
 							$oAdmin_Form_Entity_Form->add($oMainTab);
@@ -485,15 +486,17 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 				->deleteImage(Core_Array::getPost('import_price_action_delete_image') == 1)
 				->deletePropertyValues(Core_Array::getPost('delete_property_values') == 1)
 				->deleteFieldValues(Core_Array::getPost('delete_field_values') == 1)
-				->deleteUnsentModificationsByProperties(Core_Array::getPost('delete_unsent_modifications_by_properties') == 1);
+				->deleteUnsentModificationsByProperties(Core_Array::getPost('delete_unsent_modifications_by_properties') == 1)
+				->deleteAssociatedItems(Core_Array::getPost('delete_associated_items') == 1)
+				->firstlineheader(Core_Array::getPost('firstlineheader', 0, 'bool'));
 
-			if (Core_Array::getPost('firstlineheader', 0))
+			/*if (Core_Array::getPost('firstlineheader', 0))
 			{
 				$fInputFile = fopen($Shop_Item_Import_Csv_Controller->getFilePath(), 'rb');
-				@fgetcsv($fInputFile, 0, $Shop_Item_Import_Csv_Controller->separator, $Shop_Item_Import_Csv_Controller->limiter);
+				@fgetcsv($fInputFile, 0, $Shop_Item_Import_Csv_Controller->separator, $Shop_Item_Import_Csv_Controller->limiter, "\\");
 				$iNextSeekPosition = ftell($fInputFile);
 				fclose($fInputFile);
-			}
+			}*/
 		}
 
 		// Режим - импорт или проведение документов
@@ -771,25 +774,43 @@ else
 		->caption(Core::_('Shop_Item.import_price_list_action_delete_image'))
 		->divAttr(array('class' => 'form-group col-xs-12 hidden-1')))
 	)
-	->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
-		->name("delete_property_values")
-		->class('form-control colored-danger times')
-		->caption(Core::_('Shop_Item.delete_property_values'))
-		->divAttr(array('class' => 'form-group col-xs-12 hidden-1'))
-		->value(1))
+	->add(
+		Admin_Form_Entity::factory('Div')
+			->class('row')
+			->add(
+				Admin_Form_Entity::factory('Checkbox')
+					->name("delete_property_values")
+					->class('form-control colored-danger times')
+					->caption(Core::_('Shop_Item.delete_property_values'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-md-6 hidden-1'))
+					->value(1)
+			)
+			->add(
+				Admin_Form_Entity::factory('Checkbox')
+					->name("delete_field_values")
+					->class('form-control colored-danger times')
+					->caption(Core::_('Shop_Item.delete_field_values'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-md-6 hidden-1'))
+					->value(1)
+			)
 	)
-	->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
-		->name("delete_field_values")
-		->class('form-control colored-danger times')
-		->caption(Core::_('Shop_Item.delete_field_values'))
-		->divAttr(array('class' => 'form-group col-xs-12 hidden-1'))
-		->value(1))
-	)
-	->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
-		->name("delete_unsent_modifications_by_properties")
-		->class('form-control colored-danger times')
-		->caption(Core::_('Shop_Item.delete_unsent_modifications_by_properties'))
-		->divAttr(array('class' => 'form-group col-xs-12 hidden-1')))
+	->add(
+		Admin_Form_Entity::factory('Div')
+			->class('row')
+			->add(
+				Admin_Form_Entity::factory('Checkbox')
+					->name("delete_unsent_modifications_by_properties")
+					->class('form-control colored-danger times')
+					->caption(Core::_('Shop_Item.delete_unsent_modifications_by_properties'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-md-6 hidden-1'))
+			)
+			->add(
+				Admin_Form_Entity::factory('Checkbox')
+					->name("delete_associated_items")
+					->class('form-control colored-danger times')
+					->caption(Core::_('Shop_Item.delete_associated_items'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-md-6 hidden-1'))
+			)
 	)
 	->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
 		->name("search_event_indexation")
@@ -859,12 +880,35 @@ if ($sOnClick)
 	);
 }
 
+$language = Core_I18n::instance()->getLng();
+
 $oAdmin_Form_Entity_Form->add(
 	Core_Html_Entity::factory('Script')
-		->type("text/javascript")
-		->value("(function($){
-			$('select.import-select').each(function(index, obj){
+		->type('text/javascript')
+		->value("(function($) {
+			$('select.import-select').each(function(index, obj) {
 				setIColor(obj);
+
+				$(this).select2({
+					language: '{$language}',
+					templateResult: function (data, container) {
+						// We only really care if there is an element to pull classes from
+						if (!data.element) {
+							return data.text;
+						}
+
+						$(container).addClass('select2-import-select-li');
+
+						var jElement = $(data.element),
+							jWrapper = $('<span class=\'select2-import-select-option\'></span>'),
+							style = jElement[0].getAttribute('style');
+
+						jWrapper.attr('style', style);
+						jWrapper.text(data.text);
+
+						return jWrapper;
+					}
+				});
 			})
 		})(jQuery);")
 );

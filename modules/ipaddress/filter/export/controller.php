@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Ipaddress
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Ipaddress_Filter_Export_Controller extends Core_Servant_Properties
 {
@@ -108,11 +108,11 @@ class Ipaddress_Filter_Export_Controller extends Core_Servant_Properties
 		return implode('/', $aReturn);
 	}
 
-	/**
-	 * Set objects
-	 * @param object Ipaddress_Filter_Model $oIpaddress_Filter filter
-	 * @return self
-	 */
+    /**
+     * Set objects
+     * @param Ipaddress_Filter_Model $oIpaddress_Filter filter
+     * @return self
+     */
 	protected function _setObjects(Ipaddress_Filter_Model $oIpaddress_Filter)
 	{
 		$this->_aObjects[$oIpaddress_Filter->name] = array(

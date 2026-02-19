@@ -10,7 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Item_Model extends Core_Entity
 {
@@ -92,9 +92,11 @@ class Shop_Item_Model extends Core_Entity
 		'comment' => array('through' => 'comment_shop_item'),
 		'shop_bonus' => array('through' => 'shop_item_bonus'),
 		'shop_discount' => array('through' => 'shop_item_discount'),
+		'shop_gift' => array('through' => 'shop_item_gift'),
 		'shop_item_bonus' => array(),
 		'shop_item_discount' => array(),
 		'shop_item_digital' => array(),
+		'shop_item_gift' => array(),
 		'shop_item' => array('foreign_key' => 'shortcut_id'),
 		'modification' => array('model' => 'Shop_Item', 'foreign_key' => 'modification_id'),
 		'media_shop_item' => array(),
@@ -137,6 +139,7 @@ class Shop_Item_Model extends Core_Entity
 		'production_process_stage_manufacture' => array(),
 		'production_process_plan' => array('through' => 'production_process_plan_manufacture'),
 		'production_task_process_plan_manufacture' => array(),
+		'production_task_process_plan_stage_material' => array(),
 
 	);
 
@@ -218,7 +221,7 @@ class Shop_Item_Model extends Core_Entity
 	/**
 	 * Has revisions
 	 *
-	 * @param boolean
+	 * @var boolean
 	 */
 	protected $_hasRevisions = TRUE;
 
@@ -470,15 +473,44 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
+	 * Cache for getPrices
+	 * @var array|NULL
+	 */
+	protected $_aPrice = NULL;
+
+	/**
 	 * Get Prices
 	 * @param boolean $bCache cache mode status
+	 * @param boolean $bRound
 	 * @return array
 	 */
-	public function getPrices($bCache = TRUE)
+	public function getPrices($bCache = TRUE, $bRound = TRUE)
 	{
+		if ($bCache && !is_null($this->_aPrice))
+		{
+			return $this->_aPrice;
+		}
+
 		$this->setShop_Item_Controller();
 
-		return $this->_Shop_Item_Controller->getPrices($this, TRUE, $bCache);
+		$return = $this->_Shop_Item_Controller->getPrices($this, $bRound, $bCache);
+
+		$bCache
+			&& $this->_aPrice = $return;
+
+		return $return;
+	}
+
+	/**
+	 * Set Prices
+	 * @param array $aPrice
+	 * @return self
+	 */
+	public function setPrices(array $aPrice)
+	{
+		$this->_aPrice = $aPrice + array('tax' => 0, 'rate' => 0, 'price' => 0, 'price_discount' => 0, 'price_tax' => 0, 'coupon' => NULL, 'discount' => 0, 'discounts' => array());
+
+		return $this;
 	}
 
 	/**
@@ -495,6 +527,23 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
+	 * Gifts limit
+	 * @var integer
+	 */
+	protected $_giftsLimit = 0;
+
+	/**
+	 * Set gifts limit
+	 * @param int $limit
+	 * @return self
+	 */
+	public function setGiftsLimit($limit)
+	{
+		$this->_giftsLimit = intval($limit);
+		return $this;
+	}
+
+	/**
 	 * Cache for getRest()
 	 * @var mixed
 	 */
@@ -505,6 +554,7 @@ class Shop_Item_Model extends Core_Entity
 	 * @param boolean $bCache cache mode status
 	 * @return float
 	 * @hostcms-event shop_item.onBeforeGetRest
+	 * @hostcms-event shop_item.onAfterGetRest
 	 */
 	public function getRest($bCache = TRUE)
 	{
@@ -530,6 +580,14 @@ class Shop_Item_Model extends Core_Entity
 
 		$this->_rest = $aResult['count'];
 
+		Core_Event::notify($this->_modelName . '.onAfterGetRest', $this, array($this->_rest));
+		$eventResult = Core_Event::getLastReturn();
+
+		if (!is_null($eventResult) && is_numeric($eventResult))
+		{
+			$this->_rest = $eventResult;
+		}
+
 		return $this->_rest;
 	}
 
@@ -539,7 +597,7 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
-	 * Cache for getRest()
+	 * Cache for getReserved()
 	 * @var mixed
 	 */
 	protected $_reserved = NULL;
@@ -578,8 +636,8 @@ class Shop_Item_Model extends Core_Entity
 	/**
 	 * Backend callback method
 	 * @param mixed $value value
-	 * @return float
-	 */
+	 * @return self
+     */
 	public function adminRest($value = NULL)
 	{
 		// Get value
@@ -1153,6 +1211,7 @@ class Shop_Item_Model extends Core_Entity
 			$newObject->add(clone $oShop_Item_Associated);
 		}
 
+		// Метки
 		if (Core::moduleIsActive('tag'))
 		{
 			$aTags = $this->Tags->findAll(FALSE);
@@ -1162,10 +1221,31 @@ class Shop_Item_Model extends Core_Entity
 			}
 		}
 
+		// Вкладки
 		$aShop_Tab_Items = $this->Shop_Tab_Items->findAll(FALSE);
 		foreach ($aShop_Tab_Items as $oShop_Tab_Item)
 		{
 			$newObject->add(clone $oShop_Tab_Item);
+		}
+
+		// Комплекты
+		if ($this->type == 3)
+		{
+			$aShop_Item_Sets = $this->Shop_Item_Sets->findAll(FALSE);
+
+			foreach ($aShop_Item_Sets as $oShop_Item_Set)
+			{
+				$newObject->add(clone $oShop_Item_Set);
+			}
+		}
+
+		if (Core::moduleIsActive('media'))
+		{
+			$aMedia_Shop_Items = $this->Media_Shop_Items->findAll(FALSE);
+			foreach ($aMedia_Shop_Items as $oMedia_Shop_Item)
+			{
+				$newObject->add(clone $oMedia_Shop_Item);
+			}
 		}
 
 		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
@@ -1302,8 +1382,8 @@ class Shop_Item_Model extends Core_Entity
 
 	/**
 	 * Change indexation mode
-	 *	@return self
-	 */
+	 *	@return Core_Entity
+     */
 	public function changeIndexation()
 	{
 		$this->indexing = 1 - $this->indexing;
@@ -1549,8 +1629,13 @@ class Shop_Item_Model extends Core_Entity
 					{
 						$oSearch_Page->text .= htmlspecialchars(strip_tags((string) $oPropertyValue->value)) . ' ';
 					}
+					// File type
+					elseif ($oPropertyValue->Property->type == 2)
+					{
+						$oSearch_Page->text .= htmlspecialchars($oPropertyValue->file_name . ' ' . $oPropertyValue->file_description . ' ' . $oPropertyValue->file_small_name . ' ' . $oPropertyValue->file_small_description) . ' ';
+					}
 					// Other type
-					elseif ($oPropertyValue->Property->type != 2)
+					else
 					{
 						$oSearch_Page->text .= htmlspecialchars((string) $oPropertyValue->value) . ' ';
 					}
@@ -1601,8 +1686,13 @@ class Shop_Item_Model extends Core_Entity
 				{
 					$oSearch_Page->text .= htmlspecialchars(strip_tags((string) $oField_Value->value)) . ' ';
 				}
+				// File type
+				elseif ($oField_Value->Field->type == 2)
+				{
+					$oSearch_Page->text .= htmlspecialchars($oField_Value->file_name . ' ' . $oField_Value->file_description . ' ' . $oField_Value->file_small_name . ' ' . $oField_Value->file_small_description) . ' ';
+				}
 				// Other type
-				elseif ($oField_Value->Field->type != 2)
+				else
 				{
 					$oSearch_Page->text .= htmlspecialchars((string) $oField_Value->value) . ' ';
 				}
@@ -1656,7 +1746,7 @@ class Shop_Item_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -1664,7 +1754,7 @@ class Shop_Item_Model extends Core_Entity
 	{
 		ob_start();
 
-		$iShopItemId = intval(Core_Array::getGet('shop_item_id', 0));
+		$iShopItemId = Core_Array::getGet('shop_item_id', 0, 'int');
 
 		$queryBuilder = Core_QueryBuilder::select(array('COUNT(*)', 'count'))
 			->from('shop_item_associated')
@@ -1675,7 +1765,7 @@ class Shop_Item_Model extends Core_Entity
 
 		$iCount = $aItemAssociatedCount['count'];
 
-		$window_id = $oAdmin_Form_Controller->getWindowId();
+		// $window_id = $oAdmin_Form_Controller->getWindowId();
 
 		Core_Html_Entity::factory('A')
 			->add(
@@ -1689,53 +1779,52 @@ class Shop_Item_Model extends Core_Entity
 		return ob_get_clean();
 	}
 
-	/**
-	 * Backend callback method
-	 * @return string
-	 */
-	public function adminSetAssociated()
+    /**
+     * Backend callback method
+     * @param Admin_Form_Field_Model $oAdmin_Form_Field
+     */
+	public function adminSetAssociated($oAdmin_Form_Field)
 	{
-		$oShopItem = Core_Entity::factory('Shop_Item', Core_Array::getGet('shop_item_id', 0));
+		$oShopItem = Core_Entity::factory('Shop_Item', Core_Array::getGet('shop_item_id', 0, 'int'));
 
-		$oShopAssociatedItem = $oShopItem
-		->Shop_Item_Associateds
-		->getByAssociatedId($this->id);
+		$oShopAssociatedItem = $oShopItem->Shop_Item_Associateds->getByAssociatedId($this->id);
 
 		if (is_null($oShopAssociatedItem))
 		{
 			$oShopAssociatedItem = Core_Entity::factory('Shop_Item_Associated');
 			$oShopAssociatedItem->shop_item_associated_id = $this->id;
-			$oShopAssociatedItem->count = intval(Core_Array::getPost("apply_check_1_{$this->id}_fv_887", 0));
+			$oShopAssociatedItem->count = intval(Core_Array::getPost("apply_check_1_{$this->id}_fv_{$oAdmin_Form_Field->id}", 0));
 			$oShopItem->add($oShopAssociatedItem);
 		}
 	}
 
 	/**
 	 * Backend callback method
-	 * @return string
+	 * @return self
 	 */
 	public function adminUnsetAssociated()
 	{
-		$oShopItem = Core_Entity::factory('Shop_Item', Core_Array::getGet('shop_item_id', 0));
+		$oShopItem = Core_Entity::factory('Shop_Item', Core_Array::getGet('shop_item_id', 0, 'int'));
 
 		$oShopAssociatedItem = $oShopItem
-		->Shop_Item_Associateds
-		->getByAssociatedId($this->id);
+			->Shop_Item_Associateds
+			->getByAssociatedId($this->id);
 
 		if (!is_null($oShopAssociatedItem))
 		{
 			$oShopAssociatedItem->delete();
 		}
+
 		return $this;
 	}
 
-	/**
-	 * Backend callback method
-	 * @return string
-	 */
-	public function adminChangeAssociated()
+    /**
+     * Backend callback method
+     * @param Admin_Form_Field_Model $oAdmin_Form_Field
+     */
+	public function adminChangeAssociated($oAdmin_Form_Field)
 	{
-		$oShopItem = Core_Entity::factory('Shop_Item', Core_Array::getGet('shop_item_id', 0));
+		$oShopItem = Core_Entity::factory('Shop_Item', Core_Array::getGet('shop_item_id', 0, 'int'));
 
 		$oShopItem->clearCache();
 
@@ -1745,7 +1834,7 @@ class Shop_Item_Model extends Core_Entity
 
 		!is_null($oShopAssociatedItem)
 			? $this->adminUnsetAssociated()
-			: $this->adminSetAssociated();
+			: $this->adminSetAssociated($oAdmin_Form_Field);
 	}
 
 	/**
@@ -1774,8 +1863,8 @@ class Shop_Item_Model extends Core_Entity
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return self
-	 * @hostcms-event shop_item.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event shop_item.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -1815,6 +1904,8 @@ class Shop_Item_Model extends Core_Entity
 
 		// Удаляем связи со скидками
 		$this->Shop_Item_Discounts->deleteAll(FALSE);
+
+		$this->Shop_Item_Gifts->deleteAll(FALSE);
 
 		// Электронные товары
 		$this->Shop_Item_Digitals->deleteAll(FALSE);
@@ -1942,13 +2033,13 @@ class Shop_Item_Model extends Core_Entity
 		return $this->findAll();
 	}
 
-	/**
-	 * Get item by group id and path
-	 * @param int $group_id group id
-	 * @param string $path path
-	 * @param boolean $bCache cache mode
-	 * @return self|NULL
-	 */
+    /**
+     * Get item by group id and path
+     * @param int $group_id group id
+     * @param string $path path
+     * @return self|NULL
+     * @throws Core_Exception
+     */
 	public function getByGroupIdAndPath($group_id, $path)
 	{
 		$this->queryBuilder()
@@ -1968,7 +2059,6 @@ class Shop_Item_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @return string
 	 */
 	public function nameBackend()
 	{
@@ -2068,7 +2158,6 @@ class Shop_Item_Model extends Core_Entity
 
 	/**
 	 * Show set badges
-	 * @return string
 	 */
 	public function showSetBadges()
 	{
@@ -2131,6 +2220,23 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
+	 * Show gifts in XML
+	 * @var boolean
+	 */
+	protected $_showXmlGifts = FALSE;
+
+	/**
+	 * Add barcodes XML to item
+	 * @param boolean $showXmlGifts mode
+	 * @return self
+	 */
+	public function showXmlGifts($showXmlGifts = TRUE)
+	{
+		$this->_showXmlGifts = $showXmlGifts;
+		return $this;
+	}
+
+	/**
 	 * Show barcodes in XML
 	 * @var boolean
 	 */
@@ -2170,11 +2276,11 @@ class Shop_Item_Model extends Core_Entity
 	 */
 	protected $_showXmlCommentsRating = FALSE;
 
-	/**
-	 * Add Comments Rating XML to item
-	 * @param boolean $showXmlComments mode
-	 * @return self
-	 */
+    /**
+     * Add Comments Rating XML to item
+     * @param bool $showXmlCommentsRating
+     * @return self
+     */
 	public function showXmlCommentsRating($showXmlCommentsRating = TRUE)
 	{
 		$this->_showXmlCommentsRating = $showXmlCommentsRating;
@@ -2323,11 +2429,11 @@ class Shop_Item_Model extends Core_Entity
 	 */
 	protected $_showXmlVotes = FALSE;
 
-	/**
-	 * Add votes XML to item
-	 * @param boolean $showXmlSiteuser mode
-	 * @return self
-	 */
+    /**
+     * Add votes XML to item
+     * @param bool $showXmlVotes
+     * @return self
+     */
 	public function showXmlVotes($showXmlVotes = TRUE)
 	{
 		$this->_showXmlVotes = $showXmlVotes;
@@ -2422,11 +2528,11 @@ class Shop_Item_Model extends Core_Entity
 	 */
 	protected $_showXmlMedia = FALSE;
 
-	/**
-	 * Show properties in XML
-	 * @param mixed $showXmlProperties array of allowed properties ID or boolean
-	 * @return self
-	 */
+    /**
+     * Show properties in XML
+     * @param bool $showXmlMedia
+     * @return self
+     */
 	public function showXmlMedia($showXmlMedia = TRUE)
 	{
 		$this->_showXmlMedia = $showXmlMedia;
@@ -2440,11 +2546,11 @@ class Shop_Item_Model extends Core_Entity
 	 */
 	protected $_itemsActivity = 'active';
 
-	/**
-	 * Show properties in XML
-	 * @param mixed $showXmlProperties array of allowed properties ID or boolean
-	 * @return self
-	 */
+    /**
+     * Show properties in XML
+     * @param string $itemsActivity
+     * @return self
+     */
 	public function itemsActivity($itemsActivity)
 	{
 		$this->_itemsActivity = strtolower($itemsActivity);
@@ -2534,6 +2640,7 @@ class Shop_Item_Model extends Core_Entity
 	 * @hostcms-event shop_item.onBeforeSelectShopWarehouseItems
 	 * @hostcms-event shop_item.onAfterAddSetEntity
 	 * @hostcms-event shop_item.onBeforeAddPropertyValues
+	 * @hostcms-event shop_item.onBeforeAddMediaItems
 	 */
 	protected function _prepareData()
 	{
@@ -2565,11 +2672,17 @@ class Shop_Item_Model extends Core_Entity
 
 		if (Core::moduleIsActive('cdn'))
 		{
-			$this->_isTagAvailable('cdn_image_large')
-				&& $this->addXmlTag('cdn_image_large', $this->getLargeFileHref());
+			if ($this->image_large !== '')
+			{
+				$this->_isTagAvailable('cdn_image_large')
+					&& $this->addXmlTag('cdn_image_large', $this->getLargeFileHref());
+			}
 
-			$this->_isTagAvailable('cdn_image_small')
-				&& $this->addXmlTag('cdn_image_small', $this->getSmallFileHref());
+			if ($this->image_small !== '')
+			{
+				$this->_isTagAvailable('cdn_image_small')
+					&& $this->addXmlTag('cdn_image_small', $this->getSmallFileHref());
+			}
 		}
 
 		if ($this->_showXmlVotes && Core::moduleIsActive('siteuser'))
@@ -2756,6 +2869,127 @@ class Shop_Item_Model extends Core_Entity
 		$this->shop_seller_id && $this->_isTagAvailable('shop_seller') && $this->addEntity($this->Shop_Seller->clearEntities());
 		$this->shop_producer_id && $this->_isTagAvailable('shop_producer') && $this->addEntity($this->Shop_Producer->clearEntities());
 		$this->shop_measure_id && $this->_isTagAvailable('shop_measure') && $this->addEntity($this->Shop_Measure->clearEntities());
+
+		// Gifts
+		if ($this->_showXmlGifts && $this->_giftsLimit)
+		{
+			$Shop_Cart_Controller = Shop_Cart_Controller::instance();
+			$oShop_Gift_Controller = new Shop_Gift_Controller($oShop);
+
+			$oShop_Gift_Controller
+				->amount($Shop_Cart_Controller->totalAmount)
+				->quantity($Shop_Cart_Controller->totalQuantity)
+				->weight($Shop_Cart_Controller->totalWeight)
+				->limit($this->_giftsLimit);
+
+			$aGifts = $oShop_Gift_Controller->getGifts($this);
+
+			if (count($aGifts))
+			{
+				$oGiftEntity = Core::factory('Core_Xml_Entity')
+					->name('gifts');
+
+				$this->addEntity($oGiftEntity);
+
+				$aForbiddenTags = $this->getForbiddenTags();
+
+				foreach ($aGifts as $aGift)
+				{
+					$oShop_Item_Gift = $aGift['shop_item'];
+					$price = $aGift['price'];
+					$discount = $aGift['discount'];
+
+					$oTmp_Shop_Item_Gift = clone $oShop_Item_Gift;
+
+					$oTmp_Shop_Item_Gift
+						->id($oShop_Item_Gift->id)
+						->clearEntities();
+
+					// Apply forbidden tags
+					foreach ($aForbiddenTags as $tagName)
+					{
+						$oTmp_Shop_Item_Gift->addForbiddenTag($tagName);
+					}
+
+					if ($this->_isTagAvailable('getGiftPrices'))
+					{
+						$oTmp_Shop_Item_Gift->addForbiddenTag('getPrices');
+
+						$aOriginalPrices = $oTmp_Shop_Item_Gift->getPrices();
+
+						if ($oTmp_Shop_Item_Gift->shop_currency_id)
+						{
+							$oShopGiftCurrency = $oTmp_Shop_Item_Gift->Shop->Shop_Currency;
+
+							$oTmp_Shop_Item_Gift->addEntity(
+								Core::factory('Core_Xml_Entity')
+									->name('original_price')
+									->value($aOriginalPrices['price'])
+									->addAttribute('formatted', $oShopGiftCurrency->format($aOriginalPrices['price']))
+									->addAttribute('formattedWithCurrency', $oShopGiftCurrency->formatWithCurrency($aOriginalPrices['price']))
+							);
+
+							$oTmp_Shop_Item_Gift->addEntity(
+								Core::factory('Core_Xml_Entity')
+									->name('price')
+									->value($price)
+									->addAttribute('formatted', $oShopGiftCurrency->format($price))
+									->addAttribute('formattedWithCurrency', $oShopGiftCurrency->formatWithCurrency($price))
+							);
+
+							$this->_isTagAvailable('discount') && $oTmp_Shop_Item_Gift->addEntity(
+								Core::factory('Core_Xml_Entity')
+									->name('discount')
+									->value($discount)
+									->addAttribute('formatted', $oShopGiftCurrency->format($discount))
+									->addAttribute('formattedWithCurrency', $oShopGiftCurrency->formatWithCurrency($discount))
+							);
+							$this->_isTagAvailable('tax') && $oTmp_Shop_Item_Gift->addEntity(
+								Core::factory('Core_Xml_Entity')
+									->name('tax')
+									->value($aOriginalPrices['tax'])
+									->addAttribute('formatted', $oShopGiftCurrency->format($aOriginalPrices['tax']))
+									->addAttribute('formattedWithCurrency', $oShopGiftCurrency->formatWithCurrency($aOriginalPrices['tax']))
+							);
+							$this->_isTagAvailable('price_tax') && $oTmp_Shop_Item_Gift->addEntity(
+								Core::factory('Core_Xml_Entity')
+									->name('price_tax')
+									->value($aOriginalPrices['price_tax'])
+									->addAttribute('formatted', $oShopGiftCurrency->format($aOriginalPrices['price_tax']))
+									->addAttribute('formattedWithCurrency', $oShopGiftCurrency->formatWithCurrency($aOriginalPrices['price_tax']))
+							);
+
+							$this->_isTagAvailable('shop_discount') && count($aOriginalPrices['discounts'])
+								&& $oTmp_Shop_Item_Gift->addEntities($aOriginalPrices['discounts']);
+
+							// Валюта от магазина
+							$oTmp_Shop_Item_Gift->addEntity(
+								Core::factory('Core_Xml_Entity')
+									->name('currency')
+									->value($oShopGiftCurrency->sign)
+							);
+						}
+					}
+
+					$oTmp_Shop_Item_Gift
+						->showXmlComments($this->_showXmlComments)
+						->showXmlAssociatedItems(FALSE)
+						->showXmlModifications(FALSE)
+						->showXmlSpecialprices($this->_showXmlSpecialprices)
+						->showXmlTags($this->_showXmlTags)
+						->showXmlWarehousesItems($this->_showXmlWarehousesItems)
+						->showXmlBonuses($this->_showXmlBonuses)
+						->showXmlSiteuser($this->_showXmlSiteuser)
+						->showXmlProperties($this->_showXmlProperties, $this->_xmlSortPropertiesValues)
+						->showXmlMedia($this->_showXmlMedia)
+						->cartQuantity(1);
+
+					Core_Event::notify($this->_modelName . '.onBeforeAddGift', $this, array($oTmp_Shop_Item_Gift));
+
+					$oGiftEntity->addEntity($oTmp_Shop_Item_Gift);
+				}
+			}
+		}
 
 		// Barcodes
 		$this->_showXmlBarcodes && $this->addEntities($this->Shop_Item_Barcodes->findAll());
@@ -3069,6 +3303,8 @@ class Shop_Item_Model extends Core_Entity
 			}
 
 			Core_Event::notify($this->_modelName . '.onBeforeAddPropertyValues', $this, array($aProperty_Values));
+			$eventResult = Core_Event::getLastReturn();
+			is_array($eventResult) && $aProperty_Values = $eventResult;
 
 			$aListIDs = array();
 
@@ -3101,6 +3337,11 @@ class Shop_Item_Model extends Core_Entity
 		if ($this->_showXmlMedia && Core::moduleIsActive('media'))
 		{
 			$aEntities = Media_Item_Controller::getValues($this);
+
+			Core_Event::notify($this->_modelName . '.onBeforeAddMediaItems', $this, array($aEntities));
+			$eventResult = Core_Event::getLastReturn();
+			is_array($eventResult) && $aEntities = $eventResult;
+
 			foreach ($aEntities as $oEntity)
 			{
 				$oMedia_Item = $oEntity->Media_Item;
@@ -3151,8 +3392,8 @@ class Shop_Item_Model extends Core_Entity
 
 	/**
 	 * Create item
-	 * @return self
-	 */
+	 * @return Core_Entity
+     */
 	public function create()
 	{
 		$return = parent::create();
@@ -3217,11 +3458,8 @@ class Shop_Item_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function adminCurrencyBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function adminCurrencyBadge()
 	{
 		$oShop_Item = $this->shortcut_id
 			? Core_Entity::factory('Shop_Item', $this->shortcut_id)
@@ -3235,11 +3473,8 @@ class Shop_Item_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function relatedBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function relatedBadge()
 	{
 		$count = $this->Shop_Item_Associateds->getCount();
 		$count && Core_Html_Entity::factory('Span')
@@ -3251,11 +3486,8 @@ class Shop_Item_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function modificationsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function modificationsBadge()
 	{
 		$count = $this->Modifications->getCount();
 		$count && Core_Html_Entity::factory('Span')
@@ -3267,11 +3499,8 @@ class Shop_Item_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function discountsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function discountsBadge()
 	{
 		$oShop_Item_Discounts = $this->Shop_Item_Discounts;
 		$oShop_Item_Discounts->queryBuilder()
@@ -3296,11 +3525,8 @@ class Shop_Item_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function reviewsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function reviewsBadge()
 	{
 		if (Core::moduleIsActive('comment'))
 		{
@@ -3315,11 +3541,8 @@ class Shop_Item_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function adminPriceBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function adminPriceBadge()
 	{
 		switch ($this->type)
 		{
@@ -3579,8 +3802,8 @@ class Shop_Item_Model extends Core_Entity
 
 	/**
 	 * Get price of set
-	 * @return decimal
-	 * @hostcms-event shop_item.onAfterGetSetPrice
+	 * @return float|int
+     * @hostcms-event shop_item.onAfterGetSetPrice
 	 */
 	public function getSetPrice()
 	{

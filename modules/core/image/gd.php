@@ -8,10 +8,25 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Image_Gd extends Core_Image
 {
+    /**
+     * ICC header size in APP2 segment
+     */
+    const ICC_HEADER_LEN = 14;
+
+    /**
+     * maximum data len of a JPEG marker
+     */
+    const MAX_BYTES_IN_MARKER = 65533;
+
+    /**
+     * ICC header marker
+     */
+    const ICC_MARKER = "ICC_PROFILE\x00";
+
 	/**
 	 * Пропорциональное масштабирование изображения
 	 *
@@ -48,9 +63,17 @@ class Core_Image_Gd extends Core_Image
 		$sourceY = $picsize['height'];
 
 		$iSourceImagetype = self::exifImagetype($sourceFile);
-		
+
+		// ИЗВЛЕКАЕМ ICC-ПРОФИЛЬ ТОЛЬКО ДЛЯ JPEG
+		$icc_profile = NULL;
+
+		if ($iSourceImagetype == IMAGETYPE_JPEG)
+		{
+			$icc_profile = $this->_extractIccProfile($sourceFile);
+		}
+
 		// Change output format
-		$iDestImagetype = !is_null($outputFormat)
+		$iDestImagetype = !is_NULL($outputFormat)
 			? self::getImagetypeByFormat($outputFormat)
 			: $iSourceImagetype;
 
@@ -220,22 +243,24 @@ class Core_Image_Gd extends Core_Image
 				$src_y = 0;
 			}
 
-			$targetResourceStep1 = imagecreatetruecolor($destX, $destY);
+			$targetResourceStep1 = imagecreateTRUEcolor($destX, $destY);
 
 			if (!$preserveAspectRatio)
 			{
 				if ($destX_step2 == 0 || $destY_step2 == 0)
 				{
-					imagedestroy($targetResourceStep1);
-					$targetResourceStep1 = NULL;
+					PHP_VERSION_ID < 80500 && imagedestroy($targetResourceStep1);
+					unset($targetResourceStep1);
+
 					return FALSE;
 				}
-				$targetResourceStep2 = imagecreatetruecolor($destX_step2, $destY_step2);
+
+				$targetResourceStep2 = imagecreateTRUEcolor($destX_step2, $destY_step2);
 			}
 
 			if ($iDestImagetype == IMAGETYPE_JPEG)
 			{
-				$quality = is_null($quality)
+				$quality = is_NULL($quality)
 					? (defined('JPG_QUALITY') ? JPG_QUALITY : 60)
 					: intval($quality);
 
@@ -245,23 +270,37 @@ class Core_Image_Gd extends Core_Image
 				if ($preserveAspectRatio)
 				{
 					imagejpeg($targetResourceStep1, $targetFile, $quality);
+
+					// ВОССТАНАВЛИВАЕМ ICC-ПРОФИЛЬ
+					if ($icc_profile)
+					{
+						$this->_embedIccProfile($targetFile, $icc_profile);
+					}
 				}
 				else
 				{
 					imagecopy($targetResourceStep2, $targetResourceStep1, 0, 0, $src_x, $src_y, $destX_step2, $destY_step2);
 
 					imagejpeg($targetResourceStep2, $targetFile, $quality);
-					imagedestroy($targetResourceStep2);
-					$targetResourceStep2 = NULL;
+
+					// ВОССТАНАВЛИВАЕМ ICC-ПРОФИЛЬ
+					if ($icc_profile)
+					{
+						$this->_embedIccProfile($targetFile, $icc_profile);
+					}
+
+					PHP_VERSION_ID < 80500 && imagedestroy($targetResourceStep2);
+					unset($targetResourceStep2);
 				}
+
 				@chmod($targetFile, CHMOD_FILE);
 
-				imagedestroy($sourceResource);
-				$sourceResource = NULL;
+				PHP_VERSION_ID < 80500 && imagedestroy($sourceResource);
+				unset($sourceResource);
 			}
 			elseif ($iDestImagetype == IMAGETYPE_PNG)
 			{
-				$quality = is_null($quality)
+				$quality = is_NULL($quality)
 					? (defined('PNG_QUALITY') ? PNG_QUALITY : 6)
 					: intval($quality);
 
@@ -286,13 +325,14 @@ class Core_Image_Gd extends Core_Image
 					imagecopyresampled($targetResourceStep2, $targetResourceStep1, 0, 0, $src_x, $src_y, $destX_step2, $destY_step2, $destX_step2, $destY_step2);
 
 					imagepng($targetResourceStep2, $targetFile, $quality);
-					imagedestroy($targetResourceStep2);
-					$targetResourceStep2 = NULL;
+
+					PHP_VERSION_ID < 80500 && imagedestroy($targetResourceStep2);
+					unset($targetResourceStep2);
 				}
 				@chmod($targetFile, CHMOD_FILE);
 
-				imagedestroy($sourceResource);
-				$sourceResource = NULL;
+				PHP_VERSION_ID < 80500 && imagedestroy($sourceResource);
+				unset($sourceResource);
 			}
 			elseif ($iDestImagetype == IMAGETYPE_GIF)
 			{
@@ -311,17 +351,18 @@ class Core_Image_Gd extends Core_Image
 					imagecopyresampled($targetResourceStep2, $targetResourceStep1, 0, 0, $src_x, $src_y, $destX_step2, $destY_step2, $destX_step2, $destY_step2);
 
 					imagegif($targetResourceStep2, $targetFile);
-					imagedestroy($targetResourceStep2);
-					$targetResourceStep2 = NULL;
+
+					PHP_VERSION_ID < 80500 && imagedestroy($targetResourceStep2);
+					unset($targetResourceStep2);
 				}
 				@chmod($targetFile, CHMOD_FILE);
 
-				imagedestroy($sourceResource);
-				$sourceResource = NULL;
+				PHP_VERSION_ID < 80500 && imagedestroy($sourceResource);
+				unset($sourceResource);
 			}
 			elseif (defined('IMAGETYPE_WEBP') && $iDestImagetype == IMAGETYPE_WEBP)
 			{
-				$quality = is_null($quality)
+				$quality = is_NULL($quality)
 					? (defined('WEBP_QUALITY') ? WEBP_QUALITY : 50)
 					: intval($quality);
 
@@ -344,17 +385,18 @@ class Core_Image_Gd extends Core_Image
 					imagecopyresampled($targetResourceStep2, $targetResourceStep1, 0, 0, $src_x, $src_y, $destX_step2, $destY_step2, $destX_step2, $destY_step2);
 
 					imagewebp($targetResourceStep2, $targetFile, $quality);
-					imagedestroy($targetResourceStep2);
-					$targetResourceStep2 = NULL;
+
+					PHP_VERSION_ID < 80500 && imagedestroy($targetResourceStep2);
+					unset($targetResourceStep2);
 				}
 				@chmod($targetFile, CHMOD_FILE);
 
-				imagedestroy($sourceResource);
-				$sourceResource = NULL;
+				PHP_VERSION_ID < 80500 && imagedestroy($sourceResource);
+				unset($sourceResource);
 			}
 			elseif (defined('IMAGETYPE_AVIF') && $iDestImagetype == IMAGETYPE_AVIF)
 			{
-				$quality = is_null($quality)
+				$quality = is_NULL($quality)
 					? (defined('AVIF_QUALITY') ? AVIF_QUALITY : 50)
 					: intval($quality);
 
@@ -377,30 +419,31 @@ class Core_Image_Gd extends Core_Image
 					imagecopyresampled($targetResourceStep2, $targetResourceStep1, 0, 0, $src_x, $src_y, $destX_step2, $destY_step2, $destX_step2, $destY_step2);
 
 					imageavif($targetResourceStep2, $targetFile, $quality);
-					imagedestroy($targetResourceStep2);
-					$targetResourceStep2 = NULL;
+
+					PHP_VERSION_ID < 80500 && imagedestroy($targetResourceStep2);
+					unset($targetResourceStep2);
 				}
 				@chmod($targetFile, CHMOD_FILE);
 
-				imagedestroy($sourceResource);
-				$sourceResource = NULL;
+				PHP_VERSION_ID < 80500 && imagedestroy($sourceResource);
+				unset($sourceResource);
 			}
 			/*else
 			{
-				imagedestroy($targetResourceStep1);
-				$targetResourceStep1 = NULL;
+				PHP_VERSION_ID < 80500 && imagedestroy($targetResourceStep1);
+				unset($targetResourceStep1);
 
 				if (!$preserveAspectRatio)
 				{
-					imagedestroy($targetResourceStep2);
-					$targetResourceStep2 = NULL;
+					PHP_VERSION_ID < 80500 && imagedestroy($targetResourceStep2);
+					unset($targetResourceStep2);
 				}
 
 				return FALSE;
 			}*/
 
-			imagedestroy($targetResourceStep1);
-			$targetResourceStep1 = NULL;
+			PHP_VERSION_ID < 80500 && imagedestroy($targetResourceStep1);
+			unset($targetResourceStep1);
 		}
 		else
 		{
@@ -440,15 +483,25 @@ class Core_Image_Gd extends Core_Image
 
 		$return = FALSE;
 
+		// ИЗВЛЕКАЕМ ICC-ПРОФИЛЬ ТОЛЬКО ДЛЯ JPEG
+		$icc_profile = NULL;
+
+		$iSourceImagetype = self::exifImagetype($source);
+
+		if ($iSourceImagetype == IMAGETYPE_JPEG)
+		{
+			$icc_profile = $this->_extractIccProfile($source);
+		}
+
 		if (Core_File::isFile($watermark))
 		{
 			$watermarkResource = imagecreatefrompng($watermark);
 
 			//$ext = Core_File::getExtension($target);
 			$iSourceImagetype = self::exifImagetype($source);
-			
+
 			// Change output format
-			$iDestImagetype = !is_null($outputFormat)
+			$iDestImagetype = !is_NULL($outputFormat)
 				? self::getImagetypeByFormat($outputFormat)
 				: $iSourceImagetype;
 
@@ -508,12 +561,13 @@ class Core_Image_Gd extends Core_Image
 					$height = $picsize['height'];
 
 					// New Image
-					$sourceResource = imagecreatetruecolor($width, $height);
+					$sourceResource = imagecreateTRUEcolor($width, $height);
 					$this->setTransparency($sourceResource, $sourceResourceTmp);
 
 					imagecopyresampled($sourceResource, $sourceResourceTmp, 0, 0, 0, 0, $width, $height, $width, $height);
-					imagedestroy($sourceResourceTmp);
-					$sourceResourceTmp = NULL;
+
+					PHP_VERSION_ID < 80500 && imagedestroy($sourceResourceTmp);
+					unset($sourceResourceTmp);
 
 					$sourceResource = $this->_addWatermark($sourceResource, $watermarkResource, $watermarkX, $watermarkY);
 				}
@@ -524,8 +578,8 @@ class Core_Image_Gd extends Core_Image
 				$sourceResource = NULL;
 			}
 
-			imagedestroy($watermarkResource);
-			$watermarkResource = NULL;
+			PHP_VERSION_ID < 80500 && imagedestroy($watermarkResource);
+			unset($watermarkResource);
 
 			if ($sourceResource)
 			{
@@ -533,6 +587,12 @@ class Core_Image_Gd extends Core_Image
 				if ($iDestImagetype == IMAGETYPE_JPEG)
 				{
 					$return = imagejpeg($sourceResource, $target, intval(JPG_QUALITY));
+
+					// ВОССТАНАВЛИВАЕМ ICC-ПРОФИЛЬ
+					if ($icc_profile)
+					{
+						$this->_embedIccProfile($target, $icc_profile);
+					}
 				}
 				elseif ($iDestImagetype == IMAGETYPE_PNG)
 				{
@@ -544,7 +604,7 @@ class Core_Image_Gd extends Core_Image
 				}
 				elseif (defined('IMAGETYPE_AVIF') && $iDestImagetype == IMAGETYPE_AVIF && function_exists('imagecreatefromavif'))
 				{
-					$return = imageavif($sourceResource, $target, defined('AVIF_QUALITY') ? 'AVIF_QUALITY' : 50);
+					$return = imageavif($sourceResource, $target, defined('AVIF_QUALITY') ? AVIF_QUALITY : 50);
 				}
 				elseif ($iDestImagetype == IMAGETYPE_GIF)
 				{
@@ -552,8 +612,9 @@ class Core_Image_Gd extends Core_Image
 				}
 
 				@chmod($target, CHMOD_FILE);
-				imagedestroy($sourceResource);
-				$sourceResource = NULL;
+
+				PHP_VERSION_ID < 80500 && imagedestroy($sourceResource);
+				unset($sourceResource);
 			}
 		}
 		else
@@ -587,7 +648,7 @@ class Core_Image_Gd extends Core_Image
 		$watermarkResource_w = imagesx($watermarkResource);
 		$watermarkResource_h = imagesy($watermarkResource);
 
-		if (!is_null($watermarkX))
+		if (!is_NULL($watermarkX))
 		{
 			// Если передан атрибут в %-ах
 			if (preg_match("/^([0-9]*)%$/", $watermarkX, $regs))
@@ -599,7 +660,7 @@ class Core_Image_Gd extends Core_Image
 			}
 		}
 
-		if (!is_null($watermarkY))
+		if (!is_NULL($watermarkY))
 		{
 			// Если передан атрибут в %-ах
 			if (preg_match("/^([0-9]*)%$/", $watermarkY, $regs))
@@ -619,10 +680,10 @@ class Core_Image_Gd extends Core_Image
 
 		imagealphablending($sourceResource, TRUE);
 
-		// Convert source image to true-color image
-		if (!imageistruecolor($sourceResource))
+		// Convert source image to TRUE-color image
+		if (!imageisTRUEcolor($sourceResource))
 		{
-			$this->imagepalettetotruecolor($sourceResource);
+			$this->imagepalettetoTRUEcolor($sourceResource);
 		}
 
 		imagecopy($sourceResource, $watermarkResource, (int) $watermarkX, (int) $watermarkY, 0, 0, $watermarkResource_w, $watermarkResource_h);
@@ -631,26 +692,26 @@ class Core_Image_Gd extends Core_Image
 	}
 
 	/**
-	 * Function imagepalettetotruecolor() (PHP 5 >= 5.5.0, PHP 7, PHP 8)
+	 * Function imagepalettetoTRUEcolor() (PHP 5 >= 5.5.0, PHP 7, PHP 8)
 	 * @param GdImage $src
 	 * @return bool
 	 */
-	public function imagepalettetotruecolor(&$src)
+	public function imagepalettetoTRUEcolor(&$src)
 	{
-		if (function_exists('imagepalettetotruecolor'))
+		if (function_exists('imagepalettetoTRUEcolor'))
 		{
-			return imagepalettetotruecolor($src);
+			return imagepalettetoTRUEcolor($src);
 		}
 
-		if (imageistruecolor($src))
+		if (imageisTRUEcolor($src))
 		{
 			return TRUE;
 		}
 
-		$dst = imagecreatetruecolor(imagesx($src), imagesy($src));
+		$dst = imagecreateTRUEcolor(imagesx($src), imagesy($src));
 
 		imagecopy($dst, $src, 0, 0, 0, 0, imagesx($src), imagesy($src));
-		imagedestroy($src);
+		PHP_VERSION_ID < 80500 && imagedestroy($src);
 
 		$src = $dst;
 
@@ -680,8 +741,8 @@ class Core_Image_Gd extends Core_Image
 	/**
 	 * Get image size
 	 * @param string $path path
-	 * @return mixed
-	 */
+	 * @return array|NULL
+     */
 	public function getImageSize($path)
 	{
 		if (Core_File::isFile($path) && is_readable($path) && filesize($path) > 12 && self::exifImagetype($path))
@@ -722,7 +783,7 @@ class Core_Image_Gd extends Core_Image
 	public function isAnimatedGif($filePath)
 	{
 		$fp = fopen($filePath, "rb");
-		
+
 		if (fread($fp, 3) !== "GIF")
 		{
 			fclose($fp);
@@ -740,7 +801,7 @@ class Core_Image_Gd extends Core_Image
 				// * a static 4-byte sequence (\x00\x21\xF9\x04)
 				// * 4 variable bytes
 				// * a static 2-byte sequence (\x00\x2C)
-	
+
 				// Some of the animated GIFs do not contain graphic control extension (starts with 21 f9)
 				$byte = fread($fp, 1);
 				if ($byte === "\x2c"
@@ -755,6 +816,317 @@ class Core_Image_Gd extends Core_Image
 		fclose($fp);
 
 		return $iFrames > 1;
+	}
+
+	/**
+	 * Извлечение ICC-профиля из JPEG файла
+	 * @param string $file путь к файлу
+	 * @return string|NULL данные профиля или NULL
+	 */
+	protected function _extractIccProfile($file)
+	{
+		if (self::exifImagetype($file) != IMAGETYPE_JPEG)
+		{
+			return NULL;
+		}
+
+		$data = @file_get_contents($file);
+		if ($data === FALSE)
+		{
+			return NULL;
+		}
+
+		$len = strlen($data);
+		$pos = 0;
+		$counter = 0;
+		$profile_chunks = array();
+
+		while ($pos < $len && $counter < 1000)
+		{
+			$pos = strpos($data, "\xff", $pos);
+			if ($pos === FALSE) break;
+
+			$type = $this->_getJpegSegmentType($data, $pos);
+
+			if ($type == 0xe2) // APP2
+			{
+				$size = $this->_getJpegSegmentSize($data, $pos);
+
+				if ($this->_jpegSegmentContainsIcc($data, $pos, $size))
+				{
+					list($chunk_no, $chunk_cnt) = $this->_getJpegSegmentIccChunkInfo($data, $pos);
+
+					if ($chunk_no <= $chunk_cnt)
+					{
+						$profile_chunks[$chunk_no] = $this->_getJpegSegmentIccChunk($data, $pos);
+
+						if ($chunk_no == $chunk_cnt)
+						{
+							ksort($profile_chunks);
+							return implode('', $profile_chunks);
+						}
+					}
+				}
+
+				$pos += $size + 2;
+			}
+			else
+			{
+				// Пропускаем другие сегменты
+				if (in_array($type, array(0xe0, 0xe1, 0xe3, 0xe4, 0xe5, 0xe6, 0xe7, 0xe8, 0xe9, 0xea,
+										0xeb, 0xec, 0xed, 0xee, 0xef, 0xc0, 0xc2, 0xc4, 0xdb, 0xda, 0xfe)))
+				{
+					$size = $this->_getJpegSegmentSize($data, $pos);
+					$pos += $size + 2;
+				}
+				else
+				{
+					$pos += 2;
+				}
+			}
+
+			$counter++;
+		}
+
+		return NULL;
+	}
+
+	/**
+	 * Внедрение ICC-профиля в JPEG файл
+	 * @param string $file путь к файлу
+	 * @param string $icc_profile данные профиля
+	 * @return bool успех операции
+	 */
+	protected function _embedIccProfile($file, $icc_profile)
+	{
+		if (empty($icc_profile) || !file_exists($file) || !is_readable($file))
+		{
+			return FALSE;
+		}
+
+		$jpeg_data = @file_get_contents($file);
+		if ($jpeg_data === FALSE)
+		{
+			return FALSE;
+		}
+
+		// Удаляем существующие ICC-профили
+		$this->_removeIccProfile($jpeg_data);
+
+		// Вставляем новый профиль
+		if ($this->_insertIccProfile($jpeg_data, $icc_profile))
+		{
+			return file_put_contents($file, $jpeg_data) !== FALSE;
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * Удаление ICC-профиля из JPEG данных
+	 * @param string &$jpeg_data данные JPEG
+	 * @return bool
+	 */
+	protected function _removeIccProfile(&$jpeg_data)
+	{
+		$len = strlen($jpeg_data);
+		$pos = 0;
+		$counter = 0;
+		$chunks_to_go = -1;
+
+		while ($pos < $len && $counter < 100)
+		{
+			$pos = strpos($jpeg_data, "\xff", $pos);
+			if ($pos === FALSE) break;
+
+			$type = $this->_getJpegSegmentType($jpeg_data, $pos);
+
+			if ($type == 0xe2) // APP2
+			{
+				$size = $this->_getJpegSegmentSize($jpeg_data, $pos);
+
+				if ($this->_jpegSegmentContainsIcc($jpeg_data, $pos, $size))
+				{
+					list($chunk_no, $chunk_cnt) = $this->_getJpegSegmentIccChunkInfo($jpeg_data, $pos);
+					if ($chunks_to_go == -1) $chunks_to_go = $chunk_cnt;
+
+					// Удаляем сегмент
+					$jpeg_data = substr_replace($jpeg_data, '', $pos, $size + 2);
+					$len -= $size + 2;
+
+					if (--$chunks_to_go == 0) return TRUE;
+
+					continue;
+				}
+
+				$pos += $size + 2;
+			}
+			else
+			{
+				// Пропускаем другие сегменты
+				if (in_array($type, array(0xe0, 0xe1, 0xe3, 0xe4, 0xe5, 0xe6, 0xe7, 0xe8, 0xe9, 0xea,
+										0xeb, 0xec, 0xed, 0xee, 0xef, 0xc0, 0xc2, 0xc4, 0xdb, 0xda, 0xfe)))
+				{
+					$size = $this->_getJpegSegmentSize($jpeg_data, $pos);
+					$pos += $size + 2;
+				}
+				else
+				{
+					$pos += 2;
+				}
+			}
+
+			$counter++;
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * Вставка ICC-профиля в JPEG данные
+	 * @param string &$jpeg_data данные JPEG
+	 * @param string $icc_profile данные профиля
+	 * @return bool
+	 */
+	protected function _insertIccProfile(&$jpeg_data, $icc_profile)
+	{
+		$len = strlen($jpeg_data);
+		$pos = 0;
+		$counter = 0;
+
+		while ($pos < $len && $counter < 100)
+		{
+			$pos = strpos($jpeg_data, "\xff", $pos);
+			if ($pos === FALSE) break;
+
+			$type = $this->_getJpegSegmentType($jpeg_data, $pos);
+
+			if ($type == 0xd8) // SOI - Start of Image
+			{
+				$pos += 2;
+				$profile_data = $this->_prepareJpegProfileData($icc_profile);
+
+				if (!empty($profile_data))
+				{
+					$jpeg_data = substr($jpeg_data, 0, $pos) . $profile_data . substr($jpeg_data, $pos);
+					return TRUE;
+				}
+
+				return FALSE;
+			}
+			else
+			{
+				// Пропускаем другие сегменты
+				if (in_array($type, array(0xe0, 0xe1, 0xe2, 0xe3, 0xe4, 0xe5, 0xe6, 0xe7, 0xe8, 0xe9, 0xea,
+										0xeb, 0xec, 0xed, 0xee, 0xef, 0xc0, 0xc2, 0xc4, 0xdb, 0xda, 0xfe)))
+				{
+					$size = $this->_getJpegSegmentSize($jpeg_data, $pos);
+					$pos += $size + 2;
+				}
+				else
+				{
+					$pos += 2;
+				}
+			}
+
+			$counter++;
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * Подготовка данных профиля для вставки в JPEG
+	 * @param string $icc_profile данные профиля
+	 * @return string
+	 */
+	protected function _prepareJpegProfileData($icc_profile)
+	{
+		$icc_size = strlen($icc_profile);
+		$icc_chunks = ceil($icc_size / (self::MAX_BYTES_IN_MARKER - self::ICC_HEADER_LEN));
+		$result = '';
+
+		for ($i = 1; $i <= $icc_chunks; $i++)
+		{
+			$max_chunk_size = self::MAX_BYTES_IN_MARKER - self::ICC_HEADER_LEN;
+			$from = ($i - 1) * $max_chunk_size;
+			$bytes = ($i < $icc_chunks) ? $max_chunk_size : $icc_size % $max_chunk_size;
+
+			$chunk = substr($icc_profile, $from, $bytes);
+			$chunk_size = strlen($chunk);
+
+			// APP2 segment marker + size field
+			$result .= "\xff\xe2" . pack('n', $chunk_size + 2 + self::ICC_HEADER_LEN);
+			// Profile marker + chunk number + total chunks
+			$result .= self::ICC_MARKER . pack('CC', $i, $icc_chunks);
+			// Chunk data
+			$result .= $chunk;
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Получение размера JPEG сегмента
+	 * @param string &$data данные JPEG
+	 * @param int $pos позиция
+	 * @return int
+	 */
+	protected function _getJpegSegmentSize(&$data, $pos)
+	{
+		$arr = unpack('nint', substr($data, $pos + 2, 2));
+		return $arr['int'];
+	}
+
+	/**
+	 * Получение типа JPEG сегмента
+	 * @param string &$data данные JPEG
+	 * @param int $pos позиция
+	 * @return int
+	 */
+	protected function _getJpegSegmentType(&$data, $pos)
+	{
+		$arr = unpack('Cchar', substr($data, $pos + 1, 1));
+		return $arr['char'];
+	}
+
+	/**
+	 * Проверка содержит ли сегмент ICC профиль
+	 * @param string &$data данные JPEG
+	 * @param int $pos позиция
+	 * @param int $size размер
+	 * @return bool
+	 */
+	protected function _jpegSegmentContainsIcc(&$data, $pos, $size)
+	{
+		if ($size < self::ICC_HEADER_LEN) return FALSE;
+		return substr($data, $pos + 4, self::ICC_HEADER_LEN - 2) == self::ICC_MARKER;
+	}
+
+	/**
+	 * Получение информации о чанке ICC профиля
+	 * @param string &$data данные JPEG
+	 * @param int $pos позиция
+	 * @return array [chunk_no, chunk_cnt]
+	 */
+	protected function _getJpegSegmentIccChunkInfo(&$data, $pos)
+	{
+		$a = unpack('Cchunk_no/Cchunk_count', substr($data, $pos + 16, 2));
+		return array_values($a);
+	}
+
+	/**
+	 * Получение данных чанка ICC профиля
+	 * @param string &$data данные JPEG
+	 * @param int $pos позиция
+	 * @return string
+	 */
+	protected function _getJpegSegmentIccChunk(&$data, $pos)
+	{
+		$data_offset = $pos + 4 + self::ICC_HEADER_LEN;
+		$size = $this->_getJpegSegmentSize($data, $pos);
+		$data_size = $size - self::ICC_HEADER_LEN - 2;
+		return substr($data, $data_offset, $data_size);
 	}
 
 	/**

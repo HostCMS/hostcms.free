@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Discountcard_Import_Controller extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -57,7 +57,7 @@ class Shop_Discountcard_Import_Controller extends Admin_Form_Action_Controller_T
 	 */
 	protected function _applyObjectProperty()
 	{
-		$shop_id = intval(Core_Array::getGet('shop_id', 0));
+		$shop_id = Core_Array::getGet('shop_id', 0, 'int');
 		$oShop = Core_Entity::factory('Shop')->find($shop_id);
 
 		if (!is_null($oShop->id))

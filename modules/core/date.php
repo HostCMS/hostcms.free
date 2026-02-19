@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Date
 {
@@ -246,11 +246,11 @@ class Core_Date
 
 		$sReturn = '';
 
-		$dateZ = date('z', $timestamp);
-		$currentZ = date('z');
+		$dateZ = intval(date('z', $timestamp));
+		$currentZ = intval(date('z'));
 
-		$dateY = date('Y', $timestamp);
-		$currentY = date('Y');
+		$dateY = intval(date('Y', $timestamp));
+		$currentY = intval(date('Y'));
 
 		// Прошло часов
 		$estimate_hours = floor($estimate_time / 3600);

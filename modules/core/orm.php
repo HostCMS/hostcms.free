@@ -62,7 +62,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_ORM
 {
@@ -356,7 +356,7 @@ class Core_ORM
 
 	/**
 	 * Set table name
-	 * @return selg
+	 * @return self
 	 */
 	public function setTableName($tableName)
 	{
@@ -1136,8 +1136,8 @@ class Core_ORM
 
 	/**
 	 * Check if model is loaded
-	 * @return self
-	 * @ignore
+	 * @return bool
+     * @ignore
 	 */
 	public function loaded()
 	{

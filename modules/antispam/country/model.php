@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Antispam
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Antispam_Country_Model extends Core_Entity
 {
@@ -75,7 +75,6 @@ class Antispam_Country_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @return string
 	 */
 	public function country_flagBackend()
 	{
@@ -95,8 +94,8 @@ class Antispam_Country_Model extends Core_Entity
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return self
-	 * @hostcms-event antispam_country.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event antispam_country.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

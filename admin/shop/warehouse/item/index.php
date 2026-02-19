@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -19,9 +19,9 @@ $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 // Идентификатор склада
 $shop_warehouse_id = intval(Core_Array::getGet('shop_warehouse_id'));
 // Идентификатор магазина
-$shop_id = intval(Core_Array::getGet('shop_id'));
+$shop_id = Core_Array::getGet('shop_id', 0, 'int');
 // Идентификатор группы товаров
-$shop_group_id = intval(Core_Array::getGet('shop_group_id', 0));
+$shop_group_id = Core_Array::getGet('shop_group_id', 0, 'int');
 
 // Текущий склад
 $oShop_Warehouse = Core_Entity::factory('Shop_Warehouse')->find($shop_warehouse_id);

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Lib
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 {
@@ -30,99 +30,99 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 		return $this;
 	}
 
-	/**
-	 * Get json
-	 * @param Core_Entity $oObject
-	 * @param array $aLib_Properties
-	 * @param array $aOptionsz
-	 * @return array
-	 */
-	static protected function _getJson(Core_Entity $oObject, $aLib_Properties, $aOptions)
+	static protected $_aSortingTree = array();
+
+    /**
+     * Get JSON
+     * @param Core_Entity $oObject
+     * @param array $aLib_Properties
+     * @param array $aOptions
+     * @param string $prefix
+     * @return array
+     */
+	static protected function _getJson(Core_Entity $oObject, $aLib_Properties, $aOptions, $prefix = 'lib_property_')
 	{
 		$LA = array();
 
+		$iPrefixLen = strlen($prefix);
+		foreach ($_POST as $key => $value)
+		{
+			if (strpos($key, $prefix) === 0)
+			{
+				// lib_property_107_0
+				// lib_property_107[]
+				// lib_property_0_	107_0
+				// lib_property_0_	109_0
+				// lib_property_1_	107_1
+				// lib_property_1_	109_1
+				$aTmp = explode('_', substr($key, $iPrefixLen));
+				if (count($aTmp) == 2)
+				{
+					!isset(self::$_aSortingTree[$aTmp[0]]) && self::$_aSortingTree[$aTmp[0]] = array();
+
+					!in_array($aTmp[1], self::$_aSortingTree[$aTmp[0]])
+						&& self::$_aSortingTree[$aTmp[0]][] = $aTmp[1];
+				}
+			}
+		}
+
+		// echo "<pre>";
+		// var_dump($_POST);
+		// echo "</pre>";
+
 		foreach ($aLib_Properties as $oLib_Property)
 		{
-			$propertyName = 'lib_property_' . $oLib_Property->id;
+			$propertyName = $prefix . $oLib_Property->id;
 
+			$propertyValue = $oLib_Property->multivalue
+				? array()
+				: NULL;
+
+			// Существующие значения, не файл
 			if ($oLib_Property->type != 8)
 			{
-				$propertyValue = Core_Array::getPost($propertyName);
-			}
-			else
-			{
-				$aTmp = Core_Array::getFiles($propertyName);
+				//$propertyValue = Core_Array::getPost($propertyName);
+				//$propertyValue = Core_Array::get(self::$_aSortingTree, $oLib_Property->id);
 
-				if (isset($aTmp['name']))
+				/*$propertyValue = $oLib_Property->multivalue
+					? array()
+					: NULL;*/
+
+				if ($oLib_Property->multivalue)
 				{
-					$propertyValue = array();
-
-					if ($oLib_Property->multivalue)
+					if (isset(self::$_aSortingTree[$oLib_Property->id]))
 					{
-						foreach ($aTmp['name'] as $key => $sName)
+						foreach (self::$_aSortingTree[$oLib_Property->id] as $sortingKey)
 						{
-							$propertyValue[] = array(
-								'name' => $sName,
-								'tmp_name' => $aTmp['tmp_name'][$key],
-								'size' => $aTmp['size'][$key]
-							);
+							$existsValue = Core_Array::getPost($propertyName . '_' . $sortingKey);
+
+							!is_null($existsValue) && $propertyValue[] = $existsValue;
 						}
 					}
-					else
+				}
+				elseif (isset(self::$_aSortingTree[$oLib_Property->id]))
+				{
+					$propertyValue = Core_Array::getPost($propertyName . '_' . self::$_aSortingTree[$oLib_Property->id][0]);
+				}
+			}
+			// Файлы и есть значения ранее загруженные
+			elseif (isset($aOptions[$oLib_Property->varible_name]))
+			{
+				if ($oLib_Property->multivalue)
+				{
+					if (isset(self::$_aSortingTree[$oLib_Property->id]))
 					{
-						$propertyValue[] = $aTmp;
-					}
-				}
-				else
-				{
-					$propertyValue = $aTmp;
-				}
-			}
-
-			// Множественные значения или файл
-			if ($oLib_Property->multivalue || $oLib_Property->type == 8)
-			{
-				$aPropertyValues = is_array($propertyValue)
-					? $propertyValue
-					: array(NULL);
-			}
-			else
-			{
-				$aPropertyValues = is_array($propertyValue)
-					? array() // Delete wrong value
-					: array($propertyValue);
-			}
-
-
-			$aNewValues = array();
-
-			// Для файлов необходимо сохранить прежние значения, так как они заново не будут переданы из формы
-			if ($oLib_Property->type == 8 && isset($aOptions[$oLib_Property->varible_name]))
-			{
-				$aTmp = is_array($aOptions[$oLib_Property->varible_name])
-					? $aOptions[$oLib_Property->varible_name]
-					: array($aOptions[$oLib_Property->varible_name]);
-
-				foreach ($aTmp as $fileName)
-				{
-					// Сохраняем  только непустые значения
-					$fileName !== '' && $aNewValues[] = $fileName;
-				}
-			}
-
-			foreach ($aPropertyValues as $key => $propertyValue)
-			{
-				// Файлы
-				if ($oLib_Property->type == 8)
-				{
-					if (is_array($propertyValue) && isset($propertyValue['name']))
-					{
-						// Для одиночного значения очищаем ранее восстановленные значения
-						if (!$oLib_Property->multivalue)
+						foreach (self::$_aSortingTree[$oLib_Property->id] as $sortingKey)
 						{
-							// Удаление ранее загруженных файлов
-							foreach ($aNewValues as $oldValue)
+							if (!is_null(Core_Array::getPost($propertyName . '_' . $sortingKey)) && isset($aOptions[$oLib_Property->varible_name][$sortingKey]))
 							{
+								$propertyValue[] = $aOptions[$oLib_Property->varible_name][$sortingKey];
+							}
+							// Старое значение множественного файла, которое не пришло
+							elseif (isset($aOptions[$oLib_Property->varible_name][$sortingKey]))
+							{
+								$oldValue = $aOptions[$oLib_Property->varible_name][$sortingKey];
+
 								$oldValue = ltrim($oldValue, '/');
 								if (strpos($oldValue, $oObject->getLibFileHref()) === 0)
 								{
@@ -136,58 +136,145 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 									}
 								}
 							}
-
-							$aNewValues = array();
 						}
 					}
-				}
-
-				// Не составное свойство
-				if ($oLib_Property->type != 10)
-				{
-					$propertyValue = self::_correctPropertyValue($oLib_Property, $oObject, $propertyValue);
 				}
 				else
 				{
-					$aNewValues = array();
-
-					$oLib = $oObject->Lib;
-					$aTmp = $oLib->Lib_Properties->getAllByparent_id($oLib_Property->id, FALSE);
-
-					foreach ($aTmp as $key => $oSub_Lib_Property)
+					if (!is_null(Core_Array::getPost($propertyName . '_0')))
 					{
-						//$aTmpValues = array();
+						$propertyValue = $aOptions[$oLib_Property->varible_name];
+					}
+					// Старое значение одиночного файла, которое не пришло
+					elseif (isset($aOptions[$oLib_Property->varible_name][0]))
+					{
+						$oldValue = $aOptions[$oLib_Property->varible_name][0];
 
-						$subPropertyName = 'lib_property_' . $oSub_Lib_Property->id;
-
-						if ($oLib_Property->type != 8)
+						$oldValue = ltrim($oldValue, '/');
+						if (strpos($oldValue, $oObject->getLibFileHref()) === 0)
 						{
-							// У составного значения всегда массив
-							$aSubPropertyValue = Core_Array::getPost($subPropertyName, array(), 'array');
-
-							foreach ($aSubPropertyValue as $keySub => $subValue)
+							try
 							{
-								$aNewValues[$keySub][$oSub_Lib_Property->varible_name] = $subValue;
+								Core_File::delete(CMS_FOLDER . $oldValue);
+							}
+							catch (Exception $e)
+							{
+								Core_Message::show($e->getMessage(), 'error');
 							}
 						}
+						$propertyValue = NULL;
 					}
-
-					/*$LA[$oLib_Property->varible_name] = self::_getJson($oObject, $aTmp, isset($LA[$oLib_Property->varible_name]) ? $LA[$oLib_Property->varible_name] : array());*/
-
-					//echo "<pre>"; var_dump($aNewValues); echo "</pre>";
 				}
-
-				!is_null($propertyValue)
-					&& $aNewValues[] = $propertyValue;
+			}
+			else
+			{
+				$propertyValue = NULL;
 			}
 
-			$LA[$oLib_Property->varible_name] = $oLib_Property->multivalue || $oLib_Property->type == 10
-				/*? ($oLib_Property->type == 8 && isset($aOptions[$oLib_Property->varible_name]) && is_array($aOptions[$oLib_Property->varible_name])
-					? array_merge($aOptions[$oLib_Property->varible_name], $aPropertyValues)
-					: $aPropertyValues
-				)*/
-				? $aNewValues
-				: Core_Array::get($aNewValues, 0);
+			if ($oLib_Property->type == 8)
+			{
+				$aTmp = Core_Array::getFiles($propertyName);
+
+				// echo "<pre>";
+				// var_dump($propertyName);
+				// var_dump($aTmp);
+				// echo "</pre>";
+
+				if (isset($aTmp['name']))
+				{
+					if ($oLib_Property->multivalue)
+					{
+						foreach ($aTmp['name'] as $key => $sName)
+						{
+							$tmpValue = array(
+								'name' => $sName,
+								'tmp_name' => $aTmp['tmp_name'][$key],
+								'size' => $aTmp['size'][$key]
+							);
+
+							$propertyValue[] = self::_correctPropertyValue($oLib_Property, $oObject, $tmpValue);
+						}
+					}
+					else
+					{
+						$propertyValue = self::_correctPropertyValue($oLib_Property, $oObject, $aTmp);
+					}
+				}
+			}
+			// Составное свойство
+			elseif ($oLib_Property->type == 10)
+			{
+				$aNewValues = array();
+
+				$oLib = $oObject->Lib;
+				$aSub_Lib_Properties = $oLib->Lib_Properties->getAllByParent_id($oLib_Property->id, FALSE);
+
+				$aBlocks = array();
+				foreach ($aSub_Lib_Properties as $oSub_Lib_Property)
+				{
+					foreach ($_POST as $key => $value)
+					{
+						if (preg_match('/' . preg_quote($prefix) . '(\d+)_' . $oSub_Lib_Property->id . '(_\d+)?/', $key, $matches))
+						{
+							!in_array($matches[1], $aBlocks) && $aBlocks[] = $matches[1];
+						}
+					}
+				}
+
+				foreach ($aBlocks as $iBlockId)
+				{
+					$complexPrefix = "lib_property_{$iBlockId}_";
+
+					$aBlockValue = isset($aOptions[$oLib_Property->varible_name][$iBlockId])
+						? $aOptions[$oLib_Property->varible_name][$iBlockId]
+						: array();
+
+					$aBlockValues = self::_getJson($oObject, $aSub_Lib_Properties, $aBlockValue, $complexPrefix);
+
+					$propertyValue[] = $aBlockValues;
+				}
+			}
+			else
+			{
+				$aNewValues = Core_Array::getPost($propertyName);
+
+				if (!is_array($aNewValues))
+				{
+					$aNewValues = $oLib_Property->type == 1 || !is_null($aNewValues)
+						? array($aNewValues)
+						: array();
+				}
+
+				foreach ($aNewValues as $newValue)
+				{
+					$tmpValue = self::_correctPropertyValue($oLib_Property, $oObject, $newValue);
+
+					if ($oLib_Property->multivalue)
+					{
+						$propertyValue[] = $tmpValue;
+					}
+					else
+					{
+						$propertyValue = $tmpValue;
+					}
+				}
+			}
+
+			// Множественные значения или файл
+			if ($oLib_Property->multivalue/* || $oLib_Property->type == 8*/)
+			{
+				$propertyValue = is_array($propertyValue)
+					? $propertyValue
+					: array();
+			}
+			else
+			{
+				$propertyValue = is_array($propertyValue)
+					? array() // Delete wrong value
+					: $propertyValue;
+			}
+
+			$LA[$oLib_Property->varible_name] = $propertyValue;
 		}
 
 		return $LA;
@@ -278,15 +365,15 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 
 		// echo "<pre>"; var_dump($LA); echo "</pre>";
 
-		return json_encode($LA);
+		return json_encode($LA, defined('JSON_UNESCAPED_UNICODE') ? JSON_UNESCAPED_UNICODE : 0);
 	}
 
-	/**
-	 * Get options list
-	 * @param array $LA
-	 * @return self
-	 * @hostcms-event Lib_Controller_Libproperties.onGetOptionsList
-	 */
+    /**
+     * Get options list
+     * @param array $LA
+     * @param Core_Entity $oObject
+     * @hostcms-event Lib_Controller_Libproperties.onGetOptionsList
+     */
 	public function getOptionsList(array $LA, Core_Entity $oObject)
 	{
 		$oLib = Core_Entity::factory('Lib', $this->_libId);
@@ -312,6 +399,10 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 		!is_array($value)
 			&& $value = !is_null($value) ? array($value) : array();
 
+		// Было удалено последнее значение
+		$oLib_Property->multivalue && !count($value) && $oLib_Property->type != 8
+			&& $value = array(NULL);
+
 		count($value) > 1 && !$oLib_Property->multivalue && $oLib_Property->type != 10
 			&& $value = array_slice($value, 0, 1);
 
@@ -320,43 +411,29 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 			: '<acronym title="' . htmlspecialchars($oLib_Property->description) . '">'
 				. htmlspecialchars($oLib_Property->name) . '</acronym>';
 
-		/*$oDivCaption = Core_Html_Entity::factory('Div')
-			->class('col-xs-6 col-sm-5 col-lg-4 no-padding-right')
-			->add(
-				Core_Html_Entity::factory('Span')
-					->class('caption')
-					->value($acronym)
-			);*/
-
-		$oDivInputs = Core_Html_Entity::factory('Div')
-			->add(
-				Core_Html_Entity::factory('Span')
-					->class('caption')
-					->value($acronym)
-			)
-			->class('col-xs-12');
-
-		$oDivRow = Core_Html_Entity::factory('Div')
-			->class('row form-group')
-			// ->add($oDivCaption)
-			->add($oDivInputs);
-
-		$sFieldName = $oLib_Property->multivalue || $oLib_Property->parent_id > 0
-			? "lib_property_{$oLib_Property->id}[]"
-			: "lib_property_{$oLib_Property->id}";
-
-// var_dump($oLib_Property->type);
-// var_dump($value);
+		$oDivSection = Core_Html_Entity::factory('Div')
+			->class('section-' . $oLib_Property->id);
 
 		switch ($oLib_Property->type)
 		{
-			case 0: /* Текстовое поле */
+			case 0: // Поле ввода
 				$oValue = Core_Html_Entity::factory('Input')
-					->class('form-control')
-					->name($sFieldName);
+					->class('form-control');
 
-				foreach ($value as $valueItem)
+				foreach ($value as $key => $valueItem)
 				{
+					$oDivRow = Core_Html_Entity::factory('Div')
+						->id('lib_property_' . $oLib_Property->id)
+						->class('row form-group');
+
+					$oDivInputs = Core_Html_Entity::factory('Div')
+						->add(
+							Core_Html_Entity::factory('Span')
+								->class('caption')
+								->value($acronym)
+						)
+						->class('col-xs-12');
+
 					if ($oLib_Property->multivalue)
 					{
 						$oValue = clone $oValue;
@@ -364,7 +441,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 						$oDivInputs
 							->add($oDivOpen)
 							->add($oValue->value($valueItem))
-							->add($this->imgBox())
+							->add($this->imgBox($oLib_Property))
 							->add($oDivClose);
 					}
 					else
@@ -373,53 +450,55 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 							$oValue->value($valueItem)
 						);
 					}
+
+					$oValue->name = "{$entityId}_{$key}";
+					$oValue->id = "id_{$entityId}_{$key}";
+
+					$oDivSection->add(
+						$oDivRow->add($oDivInputs)
+					);
 				}
 			break;
-			case 1: /* Флажок */
+			case 1: // Флажок
 				$oValue = Core_Html_Entity::factory('Input')
-					->name($sFieldName)
 					->type('checkbox')
-					->id("lib_property_id_{$oLib_Property->id}");
+					->name("{$entityId}")
+					->id("id_{$entityId}_0");
 
-				foreach ($value as $valueItem)
+				$oDivRow = Core_Html_Entity::factory('Div')
+					->id('lib_property_' . $oLib_Property->id)
+					->class('row form-group');
+
+				$oDivInputs = Core_Html_Entity::factory('Div')
+					->add(
+						Core_Html_Entity::factory('Span')
+							->class('caption')
+							->value($acronym)
+					)
+					->class('col-xs-12');
+
+				if (strtolower($value[0]) == 'true')
 				{
-					if ($oLib_Property->multivalue)
-					{
-						$oValue = clone $oValue;
-					}
-
-					if (strtolower($valueItem) == 'true')
-					{
-						$oValue->checked('checked');
-					}
-
-					if ($oLib_Property->multivalue)
-					{
-						$oDivInputs
-							->add($oDivOpen);
-					}
-
-					$oDivInputs->add(
-						Core_Html_Entity::factory('Td')
-							->add(
-								Core_Html_Entity::factory('Label')
-									->for("lib_property_id_{$oLib_Property->id}")
-									->add($oValue)
-									->add(
-										Core_Html_Entity::factory('Span')
-											->class('text')
-											->value('&nbsp;' . Core::_('Admin_Form.yes'))
-									)
-							)
-					);
-
-					if ($oLib_Property->multivalue)
-					{
-						$oDivInputs
-							->add($this->imgBox())
-							->add($oDivClose);
-					}
+					$oValue->checked('checked');
 				}
+
+				$oDivInputs->add(
+					Core_Html_Entity::factory('Td')
+						->add(
+							Core_Html_Entity::factory('Label')
+								->for("id_{$entityId}_0")
+								->add($oValue)
+								->add(
+									Core_Html_Entity::factory('Span')
+										->class('text')
+										->value('&nbsp;' . Core::_('Admin_Form.yes'))
+								)
+						)
+				);
+
+				$oDivSection->add(
+					$oDivRow->add($oDivInputs)
+				);
 			break;
 			case 2: // XSL шаблон
 				$oXsl_Controller_Edit = new Xsl_Controller_Edit($this->_Admin_Form_Action);
@@ -427,6 +506,18 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 
 				foreach ($value as $valueItem)
 				{
+					$oDivRow = Core_Html_Entity::factory('Div')
+						->id('lib_property_' . $oLib_Property->id)
+						->class('row form-group');
+
+					$oDivInputs = Core_Html_Entity::factory('Div')
+						->add(
+							Core_Html_Entity::factory('Span')
+								->class('caption')
+								->value($acronym)
+						)
+						->class('col-xs-12');
+
 					$xsl_id = $xsl_dir_id = 0;
 
 					$oXsl = Core_Entity::factory('Xsl')->getByName($valueItem);
@@ -451,7 +542,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 												array(' … ') + $aXslDirs
 											)
 											->value($xsl_dir_id)
-											->onchange("$.ajaxRequest({path: hostcmsBackend + '/structure/index.php', context: 'lib_property_id_{$oLib_Property->id}', callBack: [$.loadSelectOptionsCallback, function(){var xsl_id = \$('#{$windowId} #lib_property_id_{$oLib_Property->id} [value=\'{$xsl_id}\']').get(0) ? {$xsl_id} : 0; \$('#{$windowId} #lib_property_id_{$oLib_Property->id}').val(xsl_id)}], action: 'loadXslList',additionalParams: 'xsl_dir_id=' + this.value + '&lib_property_id={$oLib_Property->id}',windowId: '{$windowId}'}); return false")
+											->onchange("$.ajaxRequest({path: hostcmsBackend + '/structure/index.php', context: 'id_{$entityId}', callBack: [$.loadSelectOptionsCallback, function(){var xsl_id = \$('#{$windowId} #id_{$entityId} [value=\'{$xsl_id}\']').get(0) ? {$xsl_id} : 0; \$('#{$windowId} #id_{$entityId}').val(xsl_id)}], action: 'loadXslList',additionalParams: 'xsl_dir_id=' + this.value + '&lib_property_id={$oLib_Property->id}',windowId: '{$windowId}'}); return false")
 									)
 							)
 							->add(
@@ -465,8 +556,8 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 											->class('input-group')
 											->add(
 												Core_Html_Entity::factory('Select')
-													->name($sFieldName)
-													->id("lib_property_id_{$oLib_Property->id}")
+													->id("id_{$entityId}")
+													->name("{$entityId}")
 													->class('form-control')
 													->value($xsl_id)
 											)
@@ -480,24 +571,40 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 									)
 							)
 					);
+
+					$oDivSection->add(
+						$oDivRow->add($oDivInputs)
+					);
 				}
 			break;
 			case 3: // Список
-				$aLib_Property_List_Values = $oLib_Property->Lib_Property_List_Values->findAll();
+				$aLib_Property_List_Values = $oLib_Property->Lib_Property_List_Values->findAll(FALSE);
+
 				$aOptions = array();
+
 				foreach ($aLib_Property_List_Values as $oLib_Property_List_Value)
 				{
 					$aOptions[$oLib_Property_List_Value->value] = $oLib_Property_List_Value->name;
 				}
 
 				$oValue = Core_Html_Entity::factory('Select')
-					->name($sFieldName)
-					->id("lib_property_id_{$oLib_Property->id}")
 					->class('form-control')
 					->options($aOptions);
 
-				foreach ($value as $valueItem)
+				foreach ($value as $key => $valueItem)
 				{
+					$oDivRow = Core_Html_Entity::factory('Div')
+						->id('lib_property_' . $oLib_Property->id)
+						->class('row form-group');
+
+					$oDivInputs = Core_Html_Entity::factory('Div')
+						->add(
+							Core_Html_Entity::factory('Span')
+								->class('caption')
+								->value($acronym)
+						)
+						->class('col-xs-12');
+
 					if ($oLib_Property->multivalue)
 					{
 						$oValue = clone $oValue;
@@ -505,7 +612,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 						$oDivInputs
 							->add($oDivOpen)
 							->add($oValue->value($valueItem))
-							->add($this->imgBox())
+							->add($this->imgBox($oLib_Property))
 							->add($oDivClose);
 					}
 					else
@@ -514,6 +621,13 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 							$oValue->value($valueItem)
 						);
 					}
+
+					$oValue->name = "{$entityId}_{$key}";
+					$oValue->id = "id_{$entityId}_{$key}";
+
+					$oDivSection->add(
+						$oDivRow->add($oDivInputs)
+					);
 				}
 			break;
 			case 4: // SQL-запрос
@@ -552,13 +666,23 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 				if (count($aOptions))
 				{
 					$oValue = Core_Html_Entity::factory('Select')
-						->name($sFieldName)
-						->id("lib_property_id_{$oLib_Property->id}")
 						->class('form-control')
 						->options($aOptions);
 
-					foreach ($value as $valueItem)
+					foreach ($value as $key => $valueItem)
 					{
+						$oDivRow = Core_Html_Entity::factory('Div')
+							->id('lib_property_' . $oLib_Property->id)
+							->class('row form-group');
+
+						$oDivInputs = Core_Html_Entity::factory('Div')
+							->add(
+								Core_Html_Entity::factory('Span')
+									->class('caption')
+									->value($acronym)
+							)
+							->class('col-xs-12');
+
 						if ($oLib_Property->multivalue)
 						{
 							$oValue = clone $oValue;
@@ -566,7 +690,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 							$oDivInputs
 								->add($oDivOpen)
 								->add($oValue->value($valueItem))
-								->add($this->imgBox())
+								->add($this->imgBox($oLib_Property))
 								->add($oDivClose);
 						}
 						else
@@ -575,16 +699,34 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 								$oValue->value($valueItem)
 							);
 						}
+
+						$oValue->name = "{$entityId}_{$key}";
+						$oValue->id = "id_{$entityId}_{$key}";
+
+						$oDivSection->add(
+							$oDivRow->add($oDivInputs)
+						);
 					}
 				}
 			break;
-			case 5: // Текстовое поле
+			case 5: // Большое текстовое поле
 				$oValue = Core_Html_Entity::factory('Textarea')
-					->class('form-control')
-					->name($sFieldName);
+					->class('form-control');
 
-				foreach ($value as $valueItem)
+				foreach ($value as $key => $valueItem)
 				{
+					$oDivRow = Core_Html_Entity::factory('Div')
+						->id('lib_property_' . $oLib_Property->id)
+						->class('row form-group');
+
+					$oDivInputs = Core_Html_Entity::factory('Div')
+						->add(
+							Core_Html_Entity::factory('Span')
+								->class('caption')
+								->value($acronym)
+						)
+						->class('col-xs-12');
+
 					if ($oLib_Property->multivalue)
 					{
 						$oValue = clone $oValue;
@@ -592,7 +734,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 						$oDivInputs
 							->add($oDivOpen)
 							->add($oValue->value($valueItem))
-							->add($this->imgBox())
+							->add($this->imgBox($oLib_Property))
 							->add($oDivClose);
 					}
 					else
@@ -601,27 +743,49 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 							$oValue->value($valueItem)
 						);
 					}
+
+					$oValue->name = "{$entityId}_{$key}";
+					$oValue->id = "id_{$entityId}_{$key}";
+
+					$oDivSection->add(
+						$oDivRow->add($oDivInputs)
+					);
 				}
 			break;
 			case 6: // Множественные значения
-				$oDivOpen = Core_Html_Entity::factory('Code')->value('<div class="input-group margin-bottom-10 multiple_value item_div clear">');
-				$oDivClose = Core_Html_Entity::factory('Code')->value('</div>');
-
 				$oValue = Core_Html_Entity::factory('Input')
-					->class('form-control')
-					->name("lib_property_id_{$oLib_Property->id}[]");
+					->class('form-control');
 
 				!is_array($value) && $value = array($value);
 
-				foreach ($value as $valueItem)
+				foreach ($value as $key => $valueItem)
 				{
+					$oDivRow = Core_Html_Entity::factory('Div')
+						->id('lib_property_' . $oLib_Property->id)
+						->class('row form-group');
+
+					$oDivInputs = Core_Html_Entity::factory('Div')
+						->add(
+							Core_Html_Entity::factory('Span')
+								->class('caption')
+								->value($acronym)
+						)
+						->class('col-xs-12');
+
 					$oValue = clone $oValue;
 
 					$oDivInputs
 						->add($oDivOpen)
 						->add($oValue->value($valueItem))
-						->add($this->imgBox())
+						->add($this->imgBox($oLib_Property))
 						->add($oDivClose);
+
+					$oValue->name = "{$entityId}_{$key}";
+					$oValue->id = "id_{$entityId}_{$key}";
+
+					$oDivSection->add(
+						$oDivRow->add($oDivInputs)
+					);
 				}
 			break;
 			case 7: // TPL шаблон
@@ -630,6 +794,18 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 
 				foreach ($value as $valueItem)
 				{
+					$oDivRow = Core_Html_Entity::factory('Div')
+						->id('lib_property_' . $oLib_Property->id)
+						->class('row form-group');
+
+					$oDivInputs = Core_Html_Entity::factory('Div')
+						->add(
+							Core_Html_Entity::factory('Span')
+								->class('caption')
+								->value($acronym)
+						)
+						->class('col-xs-12');
+
 					$oTpl = Core_Entity::factory('Tpl')->getByName($valueItem);
 
 					if ($oTpl)
@@ -658,7 +834,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 												array(' … ') + $aTplDirs
 											)
 											->value($tpl_dir_id)
-											->onchange("$.ajaxRequest({path: hostcmsBackend + '/structure/index.php', context: 'lib_property_id_{$oLib_Property->id}', callBack: [$.loadSelectOptionsCallback, function(){var tpl_id = \$('#{$windowId} #lib_property_id_{$oLib_Property->id} [value=\'{$tpl_id}\']').get(0) ? {$tpl_id} : 0; \$('#{$windowId} #lib_property_id_{$oLib_Property->id}').val(tpl_id)}], action: 'loadTplList',additionalParams: 'tpl_dir_id=' + this.value + '&lib_property_id={$oLib_Property->id}',windowId: '{$windowId}'}); return false")
+											->onchange("$.ajaxRequest({path: hostcmsBackend + '/structure/index.php', context: 'id_{$entityId}', callBack: [$.loadSelectOptionsCallback, function(){var tpl_id = \$('#{$windowId} #id_{$entityId} [value=\'{$tpl_id}\']').get(0) ? {$tpl_id} : 0; \$('#{$windowId} #id_{$entityId}').val(tpl_id)}], action: 'loadTplList',additionalParams: 'tpl_dir_id=' + this.value + '&lib_property_id={$oLib_Property->id}',windowId: '{$windowId}'}); return false")
 									)
 							)
 							->add(
@@ -672,8 +848,8 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 											->class('input-group')
 											->add(
 												Core_Html_Entity::factory('Select')
-													->name($sFieldName)
-													->id("lib_property_id_{$oLib_Property->id}")
+													->name("{$entityId}")
+													->id("id_{$entityId}")
 													->class('form-control')
 													->value($tpl_dir_id)
 											)
@@ -687,14 +863,16 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 									)
 							)
 					);
+
+					$oDivSection->add(
+						$oDivRow->add($oDivInputs)
+					);
 				}
 			break;
-			// Файл
-			case 8:
+			case 8: // Файл
 				$oFile = Admin_Form_Entity::factory('File')
 					->controller($this->_Admin_Form_Controller)
 					->type('file')
-					->name($sFieldName)
 					->divAttr(array('class' => 'lib-property-file-row'))
 					->largeImage(
 						array('show_params' => FALSE)
@@ -705,6 +883,21 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 
 				foreach ($value as $key => $valueItem)
 				{
+					$oDivRow = Core_Html_Entity::factory('Div')
+						->id('lib_property_' . $oLib_Property->id)
+						->class('row form-group');
+
+					$oDivInputs = Core_Html_Entity::factory('Div')
+						->add(
+							Core_Html_Entity::factory('Span')
+								->class('caption')
+								->value($acronym)
+						)
+						->class('col-xs-12');
+
+					$oLib_Property->multivalue
+						&& $oDivInputs->add($oDivOpen);
+
 					switch ($oObject->getModelName())
 					{
 						case 'structure':
@@ -726,8 +919,8 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 
 						$oFileClone->largeImage(
 							array(
-								// 'path' => '/' . $oObject->getLibFileHref() . $valueItem,
-								'id' => "id_libproperty{$oLib_Property->id}_{$key}",
+								'id' => "id_{$entityId}_{$key}",
+								'name' => "{$entityId}_{$key}",
 								'path' => $valueItem,
 								'show_params' => FALSE,
 								'originalName' => basename($valueItem),
@@ -736,10 +929,48 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 							)
 						);
 					}
+					else
+					{
+						$oFileClone->largeImage(
+							array(
+								'id' => "id_{$entityId}_{$key}",
+								'name' => "{$entityId}_{$key}",
+								'show_params' => FALSE,
+								'show_description' => FALSE
+							)
+						);
+					}
+
+					$oLib_Property->multivalue
+						&& $oDivInputs
+							->add($this->imgBox($oLib_Property))
+							->add($oDivClose);
+
+					$oDivSection->add(
+						$oDivRow->add($oDivInputs)
+					);
 				}
 
-				if ($oLib_Property->multivalue || !count($value))
+				if (/*$oLib_Property->multivalue || */!count($value))
 				{
+					$oFile->name = $oLib_Property->multivalue
+						? "{$entityId}[]"
+						: "{$entityId}";
+
+					$oFile->id = "id_{$entityId}_0";
+
+					$oDivRow = Core_Html_Entity::factory('Div')
+						->id('lib_property_' . $oLib_Property->id)
+						->class('row form-group');
+
+					$oDivInputs = Core_Html_Entity::factory('Div')
+						->add(
+							Core_Html_Entity::factory('Span')
+								->class('caption')
+								->value($acronym)
+						)
+						->class('col-xs-12');
+
 					$oLib_Property->multivalue
 						&& $oDivInputs->add($oDivOpen);
 
@@ -754,8 +985,12 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 
 					$oLib_Property->multivalue
 						&& $oDivInputs
-							->add($this->imgBox())
+							->add($this->imgBox($oLib_Property))
 							->add($oDivClose);
+
+					$oDivSection->add(
+						$oDivRow->add($oDivInputs)
+					);
 				}
 			break;
 			case 9: // Визуальный редактор
@@ -764,12 +999,23 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 					->wysiwyg(Core::moduleIsActive('wysiwyg'))
 					->rows(10)
 					->template_id(0)
-					->name($sFieldName)
 					->divAttr(array('class' => ''))
 					->controller($this->_Admin_Form_Controller);
 
-				foreach ($value as $valueItem)
+				foreach ($value as $key => $valueItem)
 				{
+					$oDivRow = Core_Html_Entity::factory('Div')
+						->id('lib_property_' . $oLib_Property->id)
+						->class('row form-group');
+
+					$oDivInputs = Core_Html_Entity::factory('Div')
+						->add(
+							Core_Html_Entity::factory('Span')
+								->class('caption')
+								->value($acronym)
+						)
+						->class('col-xs-12');
+
 					if ($oLib_Property->multivalue)
 					{
 						$oValue = clone $oValue;
@@ -777,7 +1023,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 						$oDivInputs
 							->add($oDivOpen)
 							->add($oValue->value($valueItem))
-							->add($this->imgBox())
+							->add($this->imgBox($oLib_Property))
 							->add($oDivClose);
 					}
 					else
@@ -786,6 +1032,13 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 							$oValue->value($valueItem)
 						);
 					}
+
+					$oValue->name = "{$entityId}_{$key}";
+					$oValue->id = "id_{$entityId}_{$key}";
+
+					$oDivSection->add(
+						$oDivRow->add($oDivInputs)
+					);
 				}
 			break;
 			// Иконка
@@ -811,30 +1064,104 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 
 				$oInput = Admin_Form_Entity::factory('Input')
 					->type('hidden')
-					->name($sFieldName)
 					->class('input-' . $entityId)
 					->divAttr(array('class' => ''))
 					->value($oCrm_Icon->value);
 
+				$oInput->name = "{$entityId}";
+				$oInput->id = "id_{$entityId}_0";
+
+				$oDivRow = Core_Html_Entity::factory('Div')
+					->id('lib_property_' . $oLib_Property->id)
+					->class('row form-group');
+
+				$oDivInputs = Core_Html_Entity::factory('Div')
+					->add(
+						Core_Html_Entity::factory('Span')
+							->class('caption')
+							->value($acronym)
+					)
+					->class('col-xs-12');
+
 				$oDivInputs
 					->add($oValue)
 					->add($oInput);
+
+				$oDivSection->add(
+					$oDivRow->add($oDivInputs)
+				);
+			break;
+			case 12:
+				$oValue = Admin_Form_Entity::factory('Input')
+					->class('form-control')
+					->colorpicker(TRUE)
+					->controller($this->_Admin_Form_Controller)
+					->divAttr(array('class' => ''));
+
+				foreach ($value as $key => $valueItem)
+				{
+					$oDivRow = Core_Html_Entity::factory('Div')
+						->id('lib_property_' . $oLib_Property->id)
+						->class('row form-group');
+
+					$oDivInputs = Core_Html_Entity::factory('Div')
+						->add(
+							Core_Html_Entity::factory('Span')
+								->class('caption')
+								->value($acronym)
+						)
+						->class('col-xs-12');
+
+					if ($oLib_Property->multivalue)
+					{
+						$oValue = clone $oValue;
+
+						$oDivInputs
+							->add($oDivOpen)
+							->add($oValue->value($valueItem))
+							->add($this->imgBox($oLib_Property))
+							->add($oDivClose);
+					}
+					else
+					{
+						$oDivInputs->add(
+							$oValue->value($valueItem)
+						);
+					}
+
+					$oValue->name = "{$entityId}_{$key}";
+					$oValue->id = "id_{$entityId}_{$key}";
+
+					$oDivSection->add(
+						$oDivRow->add($oDivInputs)
+					);
+				}
 			break;
 			default:
-				Core_Event::notify('Lib_Controller_Libproperties.onGetOptionsList', $this, array($oLib_Property, $oDivInputs, $value));
+				Core_Event::notify('Lib_Controller_Libproperties.onGetOptionsList', $this, array($oLib_Property, $oDivSection, $value));
 		}
 
-		$oDivRow->execute();
+		// $oDivRow->execute();
+		$oDivSection->execute();
+
+		if ($oLib_Property->multivalue)
+		{
+			Core_Html_Entity::factory('Script')
+				->value("$.applyLibPropertySortable('{$windowId}', '{$oLib_Property->id}');")
+				->execute();
+		}
 
 		return $this;
 	}
 
-	/**
-	 * Get options list
-	 * @param array $LA
-	 * @return self
-	 * @hostcms-event Lib_Controller_Libproperties.onGetOptionsList
-	 */
+    /**
+     * Get options list
+     * @param $aLib_Properties
+     * @param array $LA
+     * @param Core_Entity $oObject
+     * @throws Core_Exception
+     * @hostcms-event Lib_Controller_Libproperties.onGetOptionsList
+     */
 	protected function _showLevelOptionsList($aLib_Properties, array $LA, Core_Entity $oObject)
 	{
 		if (is_array($LA))
@@ -872,9 +1199,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 			else
 			{
 				$oLib = Core_Entity::factory('Lib', $this->_libId);
-				$aTmp = $oLib->Lib_Properties->getAllByparent_id($oLib_Property->id, FALSE);
-
-				// var_dump($value);
+				$aSub_Lib_Property = $oLib->Lib_Properties->getAllByparent_id($oLib_Property->id, FALSE);
 
 				!is_array($value) && $value = array($value);
 
@@ -892,33 +1217,30 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 					->execute();
 
 				$oDivRow = Core_Html_Entity::factory('Div')
-					->class('complex-lib-property');
+					->class('complex-lib-property section-' . $oLib_Property->id);
 
 				// Количество блоков
 				foreach (array_keys($value) as $blockKey => $blockId)
 				{
-					$oDivOpen = Core_Html_Entity::factory('Code')->value('<div class="input-group margin-bottom-10 item_div clear' . ($oLib_Property->multivalue ? ' multiple_value' : '') . '">');
+					$oDivOpen = Core_Html_Entity::factory('Code')->value('<div id="lib_property_' . $oLib_Property->id . '" class="complex-block input-group margin-bottom-10 item_div clear' . ($oLib_Property->multivalue ? ' multiple_value' : '') . '">');
 					$oDivClose = Core_Html_Entity::factory('Code')->value('</div>');
 
 					$oDivRow
 						->add($oDivOpen);
 
-					foreach ($aTmp as $rowKey => $oSub_Lib_Property)
+					foreach ($aSub_Lib_Property as $rowKey => $oSub_Lib_Property)
 					{
 						$subValue = Core_Array::get($value[$blockId], $oSub_Lib_Property->varible_name, '');
 
-						// var_dump($tmpKey);
-
 						ob_start();
-						$this->_showLevelOptionItem($oSub_Lib_Property, $oObject, $subValue, $entityId . '_' . $blockKey . '_' . $rowKey);
-
+						$this->_showLevelOptionItem($oSub_Lib_Property, $oObject, $subValue, "lib_property_{$blockKey}_{$oSub_Lib_Property->id}"  /*. '_' . $rowKey*/);
 						$oDivRow->add(Core_Html_Entity::factory('Code')->value(ob_get_clean()));
 					}
 
 					if ($oLib_Property->multivalue)
 					{
 						$oDivRow
-							->add($this->imgBox());
+							->add($this->imgBox($oLib_Property));
 					}
 
 					$oDivRow
@@ -927,25 +1249,14 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 
 				$oDivRow->execute();
 
-				/*
-				ob_start();
-				$this->_showLevelOptionsList($aTmp, isset($LA[$oLib_Property->varible_name]) ? $LA[$oLib_Property->varible_name] : array(), $oObject);
-
-				$oDivOpen = Core_Html_Entity::factory('Code')->value('<div class="input-group margin-bottom-10 item_div clear' . ($oLib_Property->multivalue ? ' multiple_value' : '') . '">');
-				$oDivClose = Core_Html_Entity::factory('Code')->value('</div>');
-
-				$oDivInputs
-					->add($oDivOpen)
-					->add(Core_Html_Entity::factory('Code')->value(ob_get_clean()));
-
-				if ($oLib_Property->multivalue)
+				/*if ($oLib_Property->multivalue)
 				{
-					$oDivInputs
-						->add($this->imgBox());
-				}
+					$windowId = $this->_Admin_Form_Controller->getWindowId();
 
-				$oDivInputs
-					->add($oDivClose);*/
+					Core_Html_Entity::factory('Script')
+						->value("$.applyLibPropertySortable('{$windowId}', '{$oLib_Property->id}');")
+						->execute();
+				}*/
 			}
 		}
 	}
@@ -956,7 +1267,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 	 * @param string $deleteOnclick
 	 * @return self
 	 */
-	public function imgBox($addFunction = '$.cloneMultipleValue', $deleteOnclick = '$.deleteNewMultipleValue(this)')
+	public function imgBox($oLib_Property, $addFunction = '$.cloneMultipleValue', $deleteOnclick = '$.deleteNewMultipleValue')
 	{
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
@@ -968,15 +1279,15 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 					->class('no-padding-left col-lg-12')
 					->add(
 						Admin_Form_Entity::factory('Div')
-							->class('btn btn-palegreen')
+							->class('btn btn-palegreen btn-clone inverted')
 							->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-plus-circle close"></i>'))
-							->onclick("{$addFunction}('{$windowId}', this);")
+							->onclick("{$addFunction}('{$windowId}', {$oLib_Property->id}, this); event.stopPropagation();")
 					)
 					->add(
 						Admin_Form_Entity::factory('Div')
-							->class('btn btn-darkorange btn-delete')
+							->class('btn btn-darkorange btn-delete inverted')
 							->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-minus-circle close"></i>'))
-							->onclick($deleteOnclick)
+							->onclick("{$deleteOnclick}(this, {$oLib_Property->id}); event.stopPropagation();")
 					)
 				)
 				->execute();

@@ -27,7 +27,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Mail
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Mail_Imap extends Core_Servant_Properties
 {
@@ -485,6 +485,48 @@ class Core_Mail_Imap extends Core_Servant_Properties
 		// Индекс элемента массива вложений
 		$n = 0;
 
+		// Если это простое письмо без частей
+		if (empty($aStructureParts) || count($aStructureParts) == 0)
+		{
+			 // Получаем все тело письма
+			$body = imap_body($this->_stream, $i);
+
+			// Определяем кодировку
+			$encoding = isset($structure->encoding) ? $structure->encoding : 0;
+
+			// Декодируем тело
+			$decodedBody = $this->_bodyDecode($body, $encoding);
+
+			// Определяем charset
+			$charset = 'utf-8';
+			if (isset($structure->parameters))
+			{
+				foreach ($structure->parameters as $param)
+				{
+					if (strtolower($param->attribute) == 'charset')
+					{
+						$charset = $param->value;
+						break;
+					}
+				}
+			}
+
+			// Конвертируем кодировку если нужно
+			if (strtolower($charset) != 'utf-8')
+			{
+				$decodedBody = $this->_convertEncoding($decodedBody, $charset);
+			}
+
+			// Сохраняем тело и subtype
+			$this->_aMessages[$i]['body'] = $decodedBody;
+			$this->_aMessages[$i]['subtype'] = isset($structure->subtype)
+				? $structure->subtype
+				: 'plain';
+
+			return $this;
+		}
+
+		// Части письма
 		foreach ($aStructureParts as $iStructurePartNumber => $aStructurePart)
 		{
 			/*
@@ -528,7 +570,8 @@ class Core_Mail_Imap extends Core_Servant_Properties
 						$messageNumber = ($iStructurePartNumber + 1) . '.' . ($iPartNumber + 1);
 
 						$sPartBody = $this->_bodyDecode(
-							imap_fetchbody($this->_stream, $i, $messageNumber), $aPart['encoding']
+							imap_fetchbody($this->_stream, $i, $messageNumber),
+							isset($aPart['encoding']) ? $aPart['encoding'] : 0
 						);
 
 						!is_null($partCharset) && strtolower($partCharset) != 'utf-8'
@@ -536,15 +579,15 @@ class Core_Mail_Imap extends Core_Servant_Properties
 
 						$subtypeId = isset($aPart['id'])
 							? trim($aPart['id'], '<>')
-							: $aPart['subtype'];
+							: (isset($aPart['subtype']) ? $aPart['subtype'] : 'unknown');
 
 						$aPart['body'] = $sPartBody;
 
 						$this->_aMessages[$i]['multipart'][$subtypeId] = $aPart;
 					}
-
 					//var_dump($this->_aMessages[$i]['multipart']); die();
 
+					// Определение предпочтительного тела письма из multipart
 					if (isset($this->_aMessages[$i]['multipart']['HTML']))
 					{
 						$this->_aMessages[$i]['subtype'] = 'HTML';
@@ -555,13 +598,34 @@ class Core_Mail_Imap extends Core_Servant_Properties
 						$this->_aMessages[$i]['subtype'] = 'PLAIN';
 						$this->_aMessages[$i]['body'] = $this->_aMessages[$i]['multipart']['PLAIN']['body'];
 					}
+					elseif (isset($this->_aMessages[$i]['multipart']['TEXT']))
+					{
+						$this->_aMessages[$i]['subtype'] = 'TEXT';
+						$this->_aMessages[$i]['body'] = $this->_aMessages[$i]['multipart']['TEXT']['body'];
+					}
 					else
 					{
-						// В сообщение идет первый блок
-						$defaultPart = $aStructurePart['parts'][0];
+						// Берем первую текстовую часть
+						foreach ($this->_aMessages[$i]['multipart'] as $subtype => $part)
+						{
+							if (isset($part['type']) && $part['type'] == 0)
+							{
+								// text type
+								$this->_aMessages[$i]['subtype'] = strtoupper($subtype);
+								$this->_aMessages[$i]['body'] = $part['body'];
+								break;
+							}
+						}
 
-						$this->_aMessages[$i]['subtype'] = $defaultPart['subtype'];
-						$this->_aMessages[$i]['body'] = $this->_aMessages[$i]['multipart'][$defaultPart['subtype']]['body'];
+						// Если не нашли текстовую часть, берем первую доступную
+						if (empty($this->_aMessages[$i]['body']) && !empty($this->_aMessages[$i]['multipart']))
+						{
+							$firstPart = reset($this->_aMessages[$i]['multipart']);
+							$firstSubtype = key($this->_aMessages[$i]['multipart']);
+
+							$this->_aMessages[$i]['subtype'] = strtoupper($firstSubtype);
+							$this->_aMessages[$i]['body'] = $firstPart['body'];
+						}
 					}
 				}
 			}
@@ -570,7 +634,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 				$body = imap_fetchbody($this->_stream, $i, strval($iStructurePartNumber + 1));
 				$body = $this->_bodyDecode($body, $aStructurePart['encoding']);
 
-				// $aStructurePart encoding
+				// Определяем кодировку
 				$charset = isset($aStructurePart['charset']) && $aStructurePart['charset'] != ''
 					? $aStructurePart['charset']
 					: NULL;
@@ -583,43 +647,28 @@ class Core_Mail_Imap extends Core_Servant_Properties
 				!is_null($charset) && strtolower($charset) != 'utf-8'
 					&& $body = $this->_convertEncoding($body, $charset);
 
+				$subtype = Core_Array::get($aStructurePart, 'subtype', '');
+
 				switch ($partType)
 				{
-					// multipart see above
-					//case 1:
-					//break;
-					// text
-					case 0:
-					// message
-					case 2:
-						// Если уже было тело письма, остальные идут как вложения
-						if (!strlen($this->_aMessages[$i]['body']))
+					case 0: // text
+					case 2: // message
+						// Сохраняем как тело письма только если это текстовый тип
+						if (in_array(strtolower($subtype), array('plain', 'html', 'text')))
 						{
-							$this->_aMessages[$i]['subtype'] = Core_Array::get($aStructurePart, 'subtype', 'text');
+							$this->_aMessages[$i]['subtype'] = strtoupper($subtype);
 							$this->_aMessages[$i]['body'] = $body;
-
-							// Если было тело письма, то остальное пойдет во вложения
-							break;
 						}
-					// Other files
+						else
+						{
+							// Иначе сохраняем как вложение
+							$this->_saveAsAttachment($i, $aStructurePart, $body, $n);
+							$n++;
+						}
+					break;
 					default:
-						// Тип вложения
-						$this->_aMessages[$i]['attachments'][$n]['type'] = $partType;
-						$this->_aMessages[$i]['attachments'][$n]['body'] = $body;
-
-						if (isset($aStructurePart['parameters']['name']))
-						{
-							$this->_aMessages[$i]['attachments'][$n]['name'] = mb_decode_mimeheader(
-								$aStructurePart['parameters']['name']
-							);
-
-						}
-						elseif (isset($aStructurePart['dparameters']['filename']))
-						{
-							$this->_aMessages[$i]['attachments'][$n]['name'] = mb_decode_mimeheader(
-								$aStructurePart['dparameters']['filename']
-							);
-						}
+						// Все остальное - вложения
+						$this->_saveAsAttachment($i, $aStructurePart, $body, $n);
 						$n++;
 					break;
 				}
@@ -627,6 +676,35 @@ class Core_Mail_Imap extends Core_Servant_Properties
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Сохранение части как вложения
+	 *
+	 * @param int $i Порядковый номер письма
+	 * @param array $aStructurePart Структура части
+	 * @param string $body Тело части
+	 * @param int $n Счетчик вложений
+	 */
+	protected function _saveAsAttachment($i, $aStructurePart, $body, $n)
+	{
+		$this->_aMessages[$i]['attachments'][$n]['type'] = Core_Array::get($aStructurePart, 'type', 0);
+		$this->_aMessages[$i]['attachments'][$n]['subtype'] = Core_Array::get($aStructurePart, 'subtype', '');
+		$this->_aMessages[$i]['attachments'][$n]['body'] = $body;
+
+		// Определяем имя файла
+		$filename = '';
+		if (isset($aStructurePart['parameters']['name']))
+		{
+			$filename = $aStructurePart['parameters']['name'];
+		}
+		elseif (isset($aStructurePart['dparameters']['filename']))
+		{
+			$filename = $aStructurePart['dparameters']['filename'];
+		}
+
+		// Декодируем имя файла если нужно
+		$this->_aMessages[$i]['attachments'][$n]['name'] = !empty($filename) ? mb_decode_mimeheader($filename) : '';
 	}
 
 	/**
@@ -645,7 +723,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 		{
 			$str = Core_Str::deleteIllegalCharacters($str);
 		}
-		
+
 		return $str;
 	}
 
@@ -658,6 +736,14 @@ class Core_Mail_Imap extends Core_Servant_Properties
 	 */
 	protected function _bodyDecode($text, $encoding = 0)
 	{
+		// Убираем лишние пробелы и переводы строк
+		$text = trim($text);
+
+		if (empty($text))
+		{
+			return '';
+		}
+
 		switch ($encoding)
 		{
 			case 1: // 8bit
@@ -665,7 +751,14 @@ class Core_Mail_Imap extends Core_Servant_Properties
 			case 2: // Binary
 				return imap_base64(imap_binary($text));
 			case 3: // Base64
-				return imap_base64($text);
+				// Проверяем, является ли строка валидным base64
+				$decoded = base64_decode($text, TRUE);
+				if ($decoded === FALSE)
+				{
+					// Если не валидный base64, пробуем через imap_base64
+					$decoded = imap_base64($text);
+				}
+				return $decoded !== FALSE ? $decoded : $text;
 			case 4: // Quoted-Printable
 				return imap_qprint($text);
 			case 0: // 7bit
@@ -710,8 +803,8 @@ class Core_Mail_Imap extends Core_Servant_Properties
 	 *
 	 * @param string $str Закодированная строка
 	 * @param string $code Кодировка
-	 * @return str
-	 */
+	 * @return string
+     */
 	protected function _headerDecode($str, $code = '')
 	{
 		// Передана пустая строка

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Benchmark
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Benchmark_Model extends Core_Entity
 {
@@ -96,8 +96,8 @@ class Benchmark_Model extends Core_Entity
 
 	/**
 	 * Get coefficient for benchmark
-	 * @return self
-	 */
+	 * @return int
+     */
 	public function getCoefficient($value, $max)
 	{
 		$iCoefficient = intval($value * 100 / $max);
@@ -109,8 +109,8 @@ class Benchmark_Model extends Core_Entity
 
 	/**
 	 * Get coefficient for mail
-	 * @return self
-	 */
+	 * @return float|int
+     */
 	public function getMailCoefficient()
 	{
 		// $iMin = $this->etalon_mail;
@@ -129,8 +129,8 @@ class Benchmark_Model extends Core_Entity
 
 	/**
 	 * Get benchmark
-	 * @return int
-	 */
+	 * @return float
+     */
 	public function getBenchmark()
 	{
 		return ceil(
@@ -147,11 +147,8 @@ class Benchmark_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function getBenchmarkBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function getBenchmarkBackend()
 	{
 		$iBenchmark = $this->getBenchmark();
 
@@ -166,66 +163,54 @@ class Benchmark_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function mysql_writeBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function mysql_writeBackend()
 	{
 		return Benchmark_Controller::format($this->mysql_write);
 	}
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function mysql_readBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function mysql_readBackend()
 	{
 		return Benchmark_Controller::format($this->mysql_read);
 	}
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function mysql_updateBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function mysql_updateBackend()
 	{
 		return Benchmark_Controller::format($this->mysql_update);
 	}
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function filesystemBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function filesystemBackend()
 	{
 		return Benchmark_Controller::format($this->filesystem);
 	}
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function cpu_mathBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function cpu_mathBackend()
 	{
 		return Benchmark_Controller::format($this->cpu_math);
 	}
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function cpu_stringBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function cpu_stringBackend()
 	{
 		return Benchmark_Controller::format($this->cpu_string);
 	}

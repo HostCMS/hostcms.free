@@ -8,16 +8,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Property
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
-	/**
-	 *
-	 * @var array
-	 */
-	protected $_types = array();
-
 	/**
 	 * Constructor.
 	 * @param Admin_Form_Action_Model $oAdmin_Form_Action action
@@ -29,63 +23,28 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		parent::__construct($oAdmin_Form_Action);
 
-		$this->_types = array(
-			0 => Core::_('Property.type0'),
-			15 => Core::_('Property.type15'),
-			11 => Core::_('Property.type11'),
-			1 => Core::_('Property.type1'),
-			2 => Core::_('Property.type2'),
-			3 => Core::_('Property.type3'),
-			4 => Core::_('Property.type4'),
-			5 => Core::_('Property.type5'),
-			13 => Core::_('Property.type13'),
-			12 => Core::_('Property.type12'),
-			14 => Core::_('Property.type14'),
-			6 => Core::_('Property.type6'),
-			7 => Core::_('Property.type7'),
-			8 => Core::_('Property.type8'),
-			9 => Core::_('Property.type9'),
-			10 => Core::_('Property.type10')
-		);
-
-		// Delete list type if module is not active
-		if (!Core::moduleIsActive('list'))
-		{
-			unset($this->_types[3]);
-		}
-		// Delete informationsystem type if module is not active
-		if (!Core::moduleIsActive('informationsystem'))
-		{
-			unset($this->_types[5]);
-			unset($this->_types[13]);
-		}
-		// Delete shop type if module is not active
-		if (!Core::moduleIsActive('shop'))
-		{
-			unset($this->_types[12]);
-			unset($this->_types[14]);
-		}
-
 		Core_Event::notify(get_class($this) . '.onAfterConstruct', $this, array($this->_Admin_Form_Controller));
 	}
 
 	/**
 	 * Get Property Types
+	 * Backward compatibility, see Property_Controller::getTypes()
 	 * @return array
 	 */
 	public function getTypes()
 	{
-		return $this->_types;
+		return Property_Controller::getTypes();
 	}
 
 	/**
 	 * Set Property Types
+	 * Backward compatibility, see Property_Controller::setTypes()
 	 * @param array $types
 	 * @return self
 	 */
 	public function setTypes(array $types)
 	{
-		$this->_types = $types;
+		Property_Controller::setTypes($types);
 		return $this;
 	}
 
@@ -191,7 +150,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$windowId = $this->_Admin_Form_Controller->getWindowId();
 
-				$aListTypes = $this->getTypes();
+				$aListTypes = Property_Controller::getTypes();
 
 				$sRadiogroupOnChangeList = implode(',', array_keys($aListTypes));
 

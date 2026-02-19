@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Html
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 abstract class Core_Html_Entity extends Core_Servant_Properties
 {
@@ -136,7 +136,7 @@ abstract class Core_Html_Entity extends Core_Servant_Properties
 
 	/**
 	 * Add Skip Property
-	 * @param name $name
+	 * @param string $name
 	 * @return self
 	 */
 	public function addSkipProperty($name)
@@ -291,14 +291,14 @@ abstract class Core_Html_Entity extends Core_Servant_Properties
 		);
 	}
 
-	/**
-	 * Delete object
-	 * @param object $oSource_Object
-	 * @param Core_Html_Entity $oCore_Html_Entity
-	 * @return boolean
-	 * @ignore
-	 */
-	protected function _deleteObject($oSource_Object, $Core_Html_Entity)
+    /**
+     * Delete object
+     * @param object $oSource_Object
+     * @param Core_Html_Entity $Core_Html_Entity
+     * @return boolean
+     * @ignore
+     */
+	protected function _deleteObject($oSource_Object, Core_Html_Entity $Core_Html_Entity)
 	{
 		$haystack = $oSource_Object->getChildren();
 
@@ -479,12 +479,11 @@ abstract class Core_Html_Entity extends Core_Servant_Properties
 		return $this;
 	}
 
-	/**
-	 * Get/set data, e.g. $obj->data('foo', 'bar'); echo $obj->data('foo');
-	 * @param string $name
-	 * @param string $value
-	 * @return self|string
-	 */
+    /**
+     * Get/set data, e.g. $obj->data('foo', 'bar'); echo $obj->data('foo');
+     * @param string $name
+     * @return self|string
+     */
 	public function data($name)
 	{
 		$args = func_get_args();

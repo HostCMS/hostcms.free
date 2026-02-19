@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Site
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Site_Favicon_Controller_Tab extends Core_Servant_Properties
 {
@@ -25,12 +25,6 @@ class Site_Favicon_Controller_Tab extends Core_Servant_Properties
 	 * @var Admin_Form_Controller
 	 */
 	protected $_Admin_Form_Controller = NULL;
-
-	/**
-	 * Site object
-	 * @var Site_Model
-	 */
-	protected $_oSite = NULL;
 
 	/**
 	 * Constructor.
@@ -230,6 +224,7 @@ class Site_Favicon_Controller_Tab extends Core_Servant_Properties
 				if ($favicon !== '')
 				{
 					$oSite_Favicon = Core_Entity::factory('Site_Favicon')
+						->site_id($this->site_id)
 						->rel(Core_Array::get($aSiteFaviconRel, $key, '', 'trim'))
 						->sizes(Core_Array::get($aSiteFaviconSizes, $key, '', 'trim'))
 						->save();

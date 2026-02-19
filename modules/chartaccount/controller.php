@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Chartaccount
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Chartaccount_Controller
 {
@@ -16,8 +16,7 @@ class Chartaccount_Controller
 
 	/**
 	 * Set admin form controller
-	 * @param object $oAdmin_Form_Controller
-	 * @return self
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 */
 	static public function setAdminFormController($oAdmin_Form_Controller)
 	{
@@ -96,7 +95,7 @@ class Chartaccount_Controller
 	 * Get options
 	 * @param array $aParams
 	 * @param boolean $ajax
-	 * @return object
+	 * @return array
 	 */
 	static public function getOptions(array $aParams = array(), $ajax = FALSE)
 	{

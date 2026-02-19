@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Cache
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Cache_Memory extends Core_Cache
 {
@@ -83,7 +83,7 @@ class Core_Cache_Memory extends Core_Cache
 		// Delete old items
 		if (/*rand(0, self::$_maxObjects) == 0 && */isset($this->_data[$cacheName]) && count($this->_data[$cacheName]) > self::$_maxObjects)
 		{
-			$this->_data[$cacheName] = array_slice($this->_data[$cacheName], floor(self::$_maxObjects / 4));
+			$this->_data[$cacheName] = array_slice($this->_data[$cacheName], floor(self::$_maxObjects / 4), NULL, TRUE);
 			
 			// Forces collection of any existing garbage cycles
 			function_exists('gc_collect_cycles') && gc_collect_cycles();

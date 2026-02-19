@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -16,8 +16,8 @@ $sFormAction = '/{admin}/shop/item/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
-$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0));
-$oShopGroup = Core_Entity::factory('Shop_Group', Core_Array::getGet('shop_group_id', 0));
+$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0, 'int'));
+$oShopGroup = Core_Entity::factory('Shop_Group', Core_Array::getGet('shop_group_id', 0, 'int'));
 $oShopDir = $oShop->Shop_Dir;
 
 $sFormTitle = $oShopGroup->id
@@ -560,7 +560,7 @@ if (!is_null(Core_Array::getPost('refresh_sorting_sets')))
 // Меню формы
 $oMenu = Admin_Form_Entity::factory('Menus');
 
-$additionalParams = "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}";
+$additionalParams = "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}" . (isset($_GET['debug']) ? '&debug' : '');
 
 $oDiscountMenu = Admin_Form_Entity::factory('Menu')
 ->name(Core::_('Shop_Item.shop_menu_title'))
@@ -585,6 +585,17 @@ $oDiscountMenu = Admin_Form_Entity::factory('Menu')
 		)
 		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/purchase/discount/index.php', NULL, NULL, $additionalParams)
+		)
+)
+->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Shop_Item.shop_gift_show_title'))
+		->icon('fa-solid fa-gift')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/gift/index.php', NULL, NULL, $additionalParams)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/gift/index.php', NULL, NULL, $additionalParams)
 		)
 );
 
@@ -1444,6 +1455,63 @@ if ($oAdminFormActionRollback && $oAdmin_Form_Controller->getAction() == 'rollba
 	$oAdmin_Form_Controller->addAction($oControllerRollback);
 }
 
+// Действие "AI"
+$oAdminFormActionAiApply = $oAdmin_Form->Admin_Form_Actions->getByName('aiApply');
+
+if (Core::moduleIsActive('ai') && $oAdminFormActionAiApply && $oAdmin_Form_Controller->getAction() == 'aiApply')
+{
+	$oAi_Prompt_Controller_Apply = Admin_Form_Action_Controller::factory(
+		'Ai_Prompt_Controller_Apply', $oAdminFormActionAiApply
+	);
+
+	$aModels = array();
+
+	$aChecked = $oAdmin_Form_Controller->getChecked();
+	foreach ($aChecked as $datasetKey => $checkedItems)
+	{
+		switch ($datasetKey)
+		{
+			case 0:
+				$model = 'shop_group';
+			break;
+			case 1:
+				$model = 'shop_item';
+			break;
+			default:
+				$model = NULL;
+		}
+
+		if (!is_null($model) && !in_array($model, $aModels))
+		{
+			$aModels[] = $model;
+		}
+	}
+
+	$oAi_Prompt_Controller_Apply
+		->title(Core::_('Ai_Prompt.apply'))
+		->selectCaption(Core::_('Ai_Prompt.ai_prompt_id'))
+		->autocompletePath(Admin_Form_Controller::correctBackendPath('/{admin}/ai/index.php?autocomplete=1&site_id=' . $oShop->site_id . '&models=' . implode(',', $aModels) . '&show_prompts=1'))
+		->autocompleteEntityId($oShop->site_id);
+
+	if (count($aModels))
+	{
+		$aAi_Prompts = Ai_Prompt_Controller::getPrompts($oShop->Site, $aModels);
+
+		if (count($aAi_Prompts) < Core::$mainConfig['switchSelectToAutocomplete'])
+		{
+			$oAi_Prompt_Controller_Apply
+				->selectOptions(array(' … ') + Ai_Prompt_Controller::fillAiPrompts($oShop->Site, $aModels));
+		}
+		else
+		{
+			$oAi_Prompt_Controller_Apply->autocomplete(TRUE);
+		}
+	}
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oAi_Prompt_Controller_Apply);
+}
+
 // Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(Core_Entity::factory('Shop_Group'));
 $oAdmin_Form_Dataset
@@ -1509,7 +1577,7 @@ $oUser = Core_Auth::getCurrentUser();
 
 $oAdmin_Form_Dataset
 	->addCondition(
-		array('select' => array('shop_items.*', array('shop_items.price', 'adminPrice'), array('SUM(shop_warehouse_items.count)', 'adminRest'), array(Core_QueryBuilder::expression('IF(shortcut_id, 0, 1)'), 'related'), array(Core_QueryBuilder::expression('IF(shortcut_id, 0, 1)'), 'modifications'), array(Core_QueryBuilder::expression('IF(shortcut_id, 0, 1)'), 'discounts'), array(Core_QueryBuilder::expression('IF(shortcut_id, 0, 1)'), 'reviews')))
+		array('select' => array('shop_items.*', array('shop_items.price', 'adminPrice'), array('SUM(shop_warehouse_items.count)', 'adminRest'), array(Core_QueryBuilder::expression('IF(shop_items.shortcut_id, 0, 1)'), 'related'), array(Core_QueryBuilder::expression('IF(shop_items.shortcut_id, 0, 1)'), 'modifications'), array(Core_QueryBuilder::expression('IF(shop_items.shortcut_id, 0, 1)'), 'discounts'), array(Core_QueryBuilder::expression('IF(shop_items.shortcut_id, 0, 1)'), 'reviews')))
 	)
 	->addCondition(
 		array('leftJoin' => array('shop_warehouse_items', 'shop_items.id', '=', 'shop_warehouse_items.shop_item_id'))
@@ -1551,7 +1619,65 @@ if (strlen($sGlobalSearch))
 			->addCondition(array('where' => array('shop_items.seo_keywords', 'LIKE', '%' . $sGlobalSearch . '%')))
 			->addCondition(array('setOr' => array()))
 			//->addCondition(array('where' => array('shop_item_barcodes.value', '=', $sGlobalSearch)))
-			->addCondition(array('where' => array('shop_items.id', 'IN', Core_QueryBuilder::select('shop_item_id')->from('shop_item_barcodes')->where('value', 'LIKE', $sGlobalSearch))))
+			->addCondition(array('where' => array('shop_items.id', 'IN', Core_QueryBuilder::select('shop_item_id')->from('shop_item_barcodes')->where('value', 'LIKE', $sGlobalSearch))));
+
+		// Расширенный поиск по ярлыкам ведется только при выбранном режиме поиска "Ярлык" с целью оптимизации скорости базового поиска
+		/*if ($iGlobalSearchMode == 4)
+		{
+			$oAdmin_Form_Dataset
+				->addCondition(
+					array('leftJoin' => array(array('shop_items', 'shop_items_shortcuts'), 'shop_items_shortcuts.id', '=', 'shop_items.shortcut_id'))
+				)
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_items_shortcuts.guid', '=', $sGlobalSearch)))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_items_shortcuts.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_items_shortcuts.path', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_items_shortcuts.marking', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_items_shortcuts.vendorcode', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_items_shortcuts.seo_title', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_items_shortcuts.seo_description', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_items_shortcuts.seo_keywords', 'LIKE', '%' . $sGlobalSearch . '%')));
+		}*/
+
+		// Поиск по ярлыкам имеет смысла только при поиске по товарам/ярлыкам, но не модификациям
+		if ($iGlobalSearchMode == 0 || $iGlobalSearchMode == 4)
+		{
+			$oAdmin_Form_Dataset
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_items.shortcut_id', 'IN',
+					Core_QueryBuilder::select('shortcuts.id')
+						->from(array('shop_items', 'shortcuts'))
+						//->where('shortcuts.id', '=', Core_QueryBuilder::raw('`shop_items`.`shortcut_id`'))
+						->open()
+							->where('shortcuts.guid', '=', $sGlobalSearch)
+							->setOr()
+							->where('shortcuts.name', 'LIKE', '%' . $sGlobalSearch . '%')
+							->setOr()
+							->where('shortcuts.path', 'LIKE', '%' . $sGlobalSearch . '%')
+							->setOr()
+							->where('shortcuts.marking', 'LIKE', '%' . $sGlobalSearch . '%')
+							->setOr()
+							->where('shortcuts.vendorcode', 'LIKE', '%' . $sGlobalSearch . '%')
+							->setOr()
+							->where('shortcuts.seo_title', 'LIKE', '%' . $sGlobalSearch . '%')
+							->setOr()
+							->where('shortcuts.seo_description', 'LIKE', '%' . $sGlobalSearch . '%')
+							->setOr()
+							->where('shortcuts.seo_keywords', 'LIKE', '%' . $sGlobalSearch . '%')
+						->close()
+						->where('shortcuts.deleted', '=', 0)
+						->where('shortcuts.shop_id', '=', $oShop->id)
+				)));
+		}
+
+		$oAdmin_Form_Dataset
 			->addCondition(array('close' => array()));
 
 		// Товар
@@ -1587,92 +1713,110 @@ else
 		->addCondition(array('where' => array('shop_items.modification_id', '=', 0)));
 }
 
-// Producers
-$oShop_Producers = $oShop->Shop_Producers;
-$oShop_Producers->queryBuilder()
-	->distinct()
-	->select('shop_producers.*')
-	->join('shop_items', 'shop_producers.id', '=', 'shop_items.shop_producer_id')
-	->where('shop_items.shop_group_id', '=', $oShopGroup->id)
-	->where('shop_items.modification_id', '=', 0)
-	->where('shop_items.shortcut_id', '=', 0)
-	->where('shop_items.deleted', '=', 0)
-	//->groupBy('shop_producers.id')
-	->clearOrderBy()
-	->orderBy('shop_producers.sorting', 'ASC')
-	->orderBy('shop_producers.name', 'ASC');
-
-$aShop_Producers = $oShop_Producers->findAll(FALSE);
-
-if (count($aShop_Producers))
+if ($oEditAction && $oAdmin_Form_Controller->getAction() != 'edit')
 {
-	$aOptions = array();
-	foreach ($aShop_Producers as $oShop_Producer)
+	// Producers
+	$oShop_Producers = $oShop->Shop_Producers;
+	$oShop_Producers->queryBuilder()
+		->distinct()
+		->select('shop_producers.*')
+		->join(array(Core_QueryBuilder::select('shop_producer_id')
+				->from('shop_items')
+				->where('shop_items.shop_id', '=', $oShop->id)
+				->where('shop_items.shop_group_id', '=', $oShopGroup->id)
+				->where('shop_items.modification_id', '=', 0)
+				->where('shop_items.shortcut_id', '=', 0)
+				->where('shop_items.deleted', '=', 0)
+				->groupBy('shop_items.shop_producer_id')
+			, 'si'), 'shop_producers.id', '=', 'si.shop_producer_id'
+		)
+		->clearOrderBy()
+		->orderBy('shop_producers.sorting', 'ASC')
+		->orderBy('shop_producers.name', 'ASC');
+
+	$aShop_Producers = $oShop_Producers->findAll(FALSE);
+	if (count($aShop_Producers))
 	{
-		$aOptions[$oShop_Producer->id] = $oShop_Producer->name;
+		$aOptions = array();
+		foreach ($aShop_Producers as $oShop_Producer)
+		{
+			$aOptions[$oShop_Producer->id] = $oShop_Producer->name;
+		}
+
+		$oAdmin_Form_Dataset->changeField('shop_producer_id', 'list', $aOptions);
 	}
 
-	$oAdmin_Form_Dataset->changeField('shop_producer_id', 'list', $aOptions);
-}
+	// Sellers
+	$oShop_Sellers = $oShop->Shop_Sellers;
+	$oShop_Sellers->queryBuilder()
+		->distinct()
+		->select('shop_sellers.*')
+		->join(array(Core_QueryBuilder::select('shop_seller_id')
+				->from('shop_items')
+				->where('shop_items.shop_id', '=', $oShop->id)
+				->where('shop_items.shop_group_id', '=', $oShopGroup->id)
+				->where('shop_items.modification_id', '=', 0)
+				->where('shop_items.shortcut_id', '=', 0)
+				->where('shop_items.deleted', '=', 0)
+				->groupBy('shop_items.shop_seller_id')
+			, 'si'), 'shop_sellers.id', '=', 'si.shop_seller_id'
+		)
+		->clearOrderBy()
+		->orderBy('shop_sellers.sorting', 'ASC')
+		->orderBy('shop_sellers.name', 'ASC');
 
-// Sellers
-$oShop_Sellers = $oShop->Shop_Sellers;
-$oShop_Sellers->queryBuilder()
-	->distinct()
-	->select('shop_sellers.*')
-	->join('shop_items', 'shop_sellers.id', '=', 'shop_items.shop_seller_id')
-	->where('shop_items.shop_group_id', '=', $oShopGroup->id)
-	->where('shop_items.modification_id', '=', 0)
-	->where('shop_items.shortcut_id', '=', 0)
-	->where('shop_items.deleted', '=', 0)
-	//->groupBy('shop_sellers.id')
-	->clearOrderBy()
-	->orderBy('shop_sellers.sorting', 'ASC')
-	->orderBy('shop_sellers.name', 'ASC');
-
-$aShop_Sellers = $oShop_Sellers->findAll(FALSE);
-
-if (count($aShop_Sellers))
-{
-	$aOptions = array();
-	foreach ($aShop_Sellers as $oShop_Seller)
+	$aShop_Sellers = $oShop_Sellers->findAll(FALSE);
+	if (count($aShop_Sellers))
 	{
-		$aOptions[$oShop_Seller->id] = $oShop_Seller->name;
+		$aOptions = array();
+		foreach ($aShop_Sellers as $oShop_Seller)
+		{
+			$aOptions[$oShop_Seller->id] = $oShop_Seller->name;
+		}
+
+		$oAdmin_Form_Dataset->changeField('shop_seller_id', 'list', $aOptions);
 	}
 
-	$oAdmin_Form_Dataset->changeField('shop_seller_id', 'list', $aOptions);
-}
+	// Shop_Measure
+	$oShop_Measures = Core_Entity::factory('Shop_Measure');
+	$oShop_Measures->queryBuilder()
+		->distinct()
+		->select('shop_measures.*')
+		->join(array(Core_QueryBuilder::select('shop_measure_id')
+				->from('shop_items')
+				->where('shop_items.shop_id', '=', $oShop->id)
+				->where('shop_items.shop_group_id', '=', $oShopGroup->id)
+				->where('shop_items.modification_id', '=', 0)
+				->where('shop_items.shortcut_id', '=', 0)
+				->where('shop_items.deleted', '=', 0)
+				->groupBy('shop_items.shop_measure_id')
+			, 'si'), 'shop_measures.id', '=', 'si.shop_measure_id'
+		)
+		->clearOrderBy()
+		->orderBy('shop_measures.name', 'ASC');
 
-// Shop_Measure
-$oShop_Measures = Core_Entity::factory('Shop_Measure');
-$oShop_Measures->queryBuilder()
-	->distinct()
-	->select('shop_measures.*')
-	->join('shop_items', 'shop_measures.id', '=', 'shop_items.shop_measure_id')
-	->where('shop_items.shop_group_id', '=', $oShopGroup->id)
-	->where('shop_items.modification_id', '=', 0)
-	->where('shop_items.shortcut_id', '=', 0)
-	->where('shop_items.deleted', '=', 0)
-	->clearOrderBy()
-	->orderBy('shop_measures.name', 'ASC');
-
-$aShop_Measures = $oShop_Measures->findAll(FALSE);
-
-if (count($aShop_Measures))
-{
-	$aOptions = array();
-	foreach ($aShop_Measures as $oShop_Measure)
+	$aShop_Measures = $oShop_Measures->findAll(FALSE);
+	if (count($aShop_Measures))
 	{
-		$aOptions[$oShop_Measure->id] = $oShop_Measure->name;
-	}
+		$aOptions = array();
+		foreach ($aShop_Measures as $oShop_Measure)
+		{
+			$aOptions[$oShop_Measure->id] = $oShop_Measure->name;
+		}
 
-	$oAdmin_Form_Dataset->changeField('shop_measure_id', 'list', $aOptions);
+		$oAdmin_Form_Dataset->changeField('shop_measure_id', 'list', $aOptions);
+	}
 }
 
 // Change field type
 if (Core_Entity::factory('Shop', $oShop->id)->Shop_Warehouses->getCount() == 1)
 {
 	$oAdmin_Form_Dataset->changeField('adminRest', 'type', 2);
+}
+
+if (!Core::moduleIsActive('ai'))
+{
+	$oAdmin_Form_Controller->deleteAdminFormActionById(1980);
 }
 
 // Change field type

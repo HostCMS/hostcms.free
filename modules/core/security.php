@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Security
 {
@@ -108,8 +108,6 @@ class Core_Security
 		switch (self::getCsrfError())
 		{
 			case 'wrong-length':
-				throw new Core_Exception(Core::_('Core.csrf_wrong_token'), array(), 0, FALSE);
-			break;
 			case 'wrong-token':
 			default:
 				throw new Core_Exception(Core::_('Core.csrf_wrong_token'), array(), 0, FALSE);

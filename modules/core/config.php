@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Config
 {
@@ -227,9 +227,9 @@ class Core_Config
 
 	/**
 	 * Escape key or value
-	 * @param mixed
-	 * @return mixed
-	 */
+	 * @param mixed $value
+     * @return float|int|string
+     */
 	protected function _escape($value)
 	{
 		if (is_int($value) || is_float($value))

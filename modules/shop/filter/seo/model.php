@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Filter_Seo_Model extends Core_Entity
 {
@@ -121,7 +121,6 @@ class Shop_Filter_Seo_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @return string
 	 */
 	public function nameBackend()
 	{
@@ -172,7 +171,6 @@ class Shop_Filter_Seo_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @return string
 	 */
 	public function conditionsBackend()
 	{
@@ -634,6 +632,25 @@ class Shop_Filter_Seo_Model extends Core_Entity
 		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
+	}
+
+	/**
+	 * Move seo to another dir
+	 * @param int $iFilterSeoDirId target dir id
+	 * @return Core_Entity
+	 * @hostcms-event shop_filter_seo.onBeforeMove
+	 * @hostcms-event shop_filter_seo.onAfterMove
+	 */
+	public function move($iFilterSeoDirId)
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($iFilterSeoDirId));
+
+		$this->shop_filter_seo_dir_id = $iFilterSeoDirId;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
+
+		return $this;
 	}
 
 	/**

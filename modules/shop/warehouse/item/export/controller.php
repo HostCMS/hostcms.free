@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Warehouse_Item_Export_Controller
 {
@@ -26,7 +26,7 @@ class Shop_Warehouse_Item_Export_Controller
 
 	/**
 	 * Constructor.
-	 * @param object $oShop_Warehouse Shop_Warehouse_Model object
+	 * @param Shop_Warehouse_Model $oShop_Warehouse
 	 */
 	public function __construct(Shop_Warehouse_Model $oShop_Warehouse)
 	{

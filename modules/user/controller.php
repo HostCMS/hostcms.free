@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage User
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class User_Controller
 {
@@ -27,12 +27,12 @@ class User_Controller
 		</script><?php
 	}
 
-	/**
-	 * Show popover
-	 * @param object $object
-	 * @param array $args
-	 * @param array $options
-	 */
+    /**
+     * Show popover
+     * @param $controller
+     * @param array $args
+     * @throws Core_Exception
+     */
 	static public function onAfterRedeclaredPrepareForm($controller, $args)
 	{
 		list($object, $Admin_Form_Controller) = $args;

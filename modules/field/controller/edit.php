@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Field
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -33,63 +33,27 @@ class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	{
 		parent::__construct($oAdmin_Form_Action);
 
-		$this->_types = array(
-			0 => Core::_('Field.type0'),
-			15 => Core::_('Field.type15'),
-			11 => Core::_('Field.type11'),
-			1 => Core::_('Field.type1'),
-			2 => Core::_('Field.type2'),
-			3 => Core::_('Field.type3'),
-			4 => Core::_('Field.type4'),
-			5 => Core::_('Field.type5'),
-			13 => Core::_('Field.type13'),
-			12 => Core::_('Field.type12'),
-			14 => Core::_('Field.type14'),
-			6 => Core::_('Field.type6'),
-			7 => Core::_('Field.type7'),
-			8 => Core::_('Field.type8'),
-			9 => Core::_('Field.type9'),
-			10 => Core::_('Field.type10')
-		);
-
-		// Delete list type if module is not active
-		if (!Core::moduleIsActive('list'))
-		{
-			unset($this->_types[3]);
-		}
-		// Delete informationsystem type if module is not active
-		if (!Core::moduleIsActive('informationsystem'))
-		{
-			unset($this->_types[5]);
-			unset($this->_types[13]);
-		}
-		// Delete shop type if module is not active
-		if (!Core::moduleIsActive('shop'))
-		{
-			unset($this->_types[12]);
-			unset($this->_types[14]);
-		}
-
 		Core_Event::notify(get_class($this) . '.onAfterConstruct', $this, array($this->_Admin_Form_Controller));
 	}
 
 	/**
 	 * Get Field Types
+	 * Backward compatibility, see Field_Controller::getTypes()
 	 * @return array
 	 */
 	public function getTypes()
 	{
-		return $this->_types;
+		return Field_Controller::getTypes();
 	}
 
 	/**
 	 * Set Field Types
 	 * @param array $types
-	 * @return self
+	 * Backward compatibility, see Field_Controller::setTypes()
 	 */
 	public function setTypes(array $types)
 	{
-		$this->_types = $types;
+		Field_Controller::setTypes($types);
 		return $this;
 	}
 
@@ -213,7 +177,7 @@ class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$windowId = $this->_Admin_Form_Controller->getWindowId();
 
-				$aListTypes = $this->getTypes();
+				$aListTypes = Field_Controller::getTypes();
 
 				$sRadiogroupOnChangeList = implode(',', array_keys($aListTypes));
 
@@ -502,13 +466,15 @@ class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		return $this;
 	}
 
-	/**
-	 * Create visual tree of the directories
-	 * @param int $iFieldDirParentId parent directory ID
-	 * @param boolean $bExclude exclude group ID
-	 * @param int $iLevel current nesting level
-	 * @return array
-	 */
+    /**
+     * Create visual tree of the directories
+     * @param string $model
+     * @param int $iFieldDirParentId parent directory ID
+     * @param array $aExclude
+     * @param int $iLevel current nesting level
+     * @return array
+     * @throws Core_Exception
+     */
 	static public function fillFieldDir($model, $iFieldDirParentId = 0, $aExclude = array(), $iLevel = 0)
 	{
 		$iFieldDirParentId = intval($iFieldDirParentId);

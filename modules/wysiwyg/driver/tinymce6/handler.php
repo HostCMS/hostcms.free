@@ -134,21 +134,108 @@ class Wysiwyg_Driver_Tinymce6_Handler extends Wysiwyg_Handler
 			'images_upload_handler' => 'function (blobInfo, progress) { return hostcms_image_upload_handler(blobInfo, progress) }'
 		);
 
-		if (Core::moduleIsActive('shortcode'))
+		// $initSetup = NULL;
+
+		$initSetup = 'function(editor) {';
+
+		$initSetup .= "editor.on('init', () => {
+			// Сброс шрифта к стандартному
+			const fontFormats = editor.options.get('font_family_formats');
+
+			if (fontFormats && !fontFormats.includes('Default=')) {
+				editor.options.set('font_family_formats',
+					'Default=inherit; ' + fontFormats
+				);
+			}
+		});";
+
+		if (Core::moduleIsActive('ai') || Core::moduleIsActive('shortcode'))
 		{
-			$aShortcodes = Core_Entity::factory('Shortcode')->getAllByActive(1);
-
-			$aTmpShortcodes = array();
-
-			foreach ($aShortcodes as $oShortcode)
+			if (Core::moduleIsActive('ai'))
 			{
-				$aTmpShortcodes[] = "{ text: '" . Core_Str::escapeJavascriptVariable($oShortcode->name) . " [" . $oShortcode->id . "]', value: '" . Core_Str::escapeJavascriptVariable($oShortcode->example) . "' }";
+				$oSite = Core_Entity::factory('Site', CURRENT_SITE);
+				$oAi = $oSite->Ais->getDefault();
+
+				if (!is_null($oAi))
+				{
+					$initSetup .= 'editor.ui.registry.addButton(\'insertAiResponse\', {
+						text: "AI",
+						type: \'button\',
+						onAction: function (_) {
+							tinymce.activeEditor.windowManager.open({
+								size: \'large\',
+								title: "AI",
+								body: {
+									type: \'panel\',
+									items: [
+										{
+											type: \'textarea\', // component type
+											name: \'ai_prompt\', // identifier
+											enabled: true, // enabled state
+										}
+									]
+								},
+								initialData: {
+									ai_prompt: \'' . Core_Str::escapeJavascriptVariable($oAdmin_Form_Entity_Textarea->data('ai_prompt_default')) . '\'
+								},
+								buttons: [
+									{
+										type: \'custom\',
+										name: \'applyAiPrompt\',
+										enabled: true,
+										text: \'OK\',
+										buttonType: \'primary\',
+									}
+								],
+								onAction: (api, details) => {
+									const data = api.getData();
+
+									if (data.ai_prompt !== \'\')
+									{
+										$.loadingScreen(\'show\');
+
+										$.ajax({
+											url: hostcmsBackend + \'/ai/index.php\',
+											data: { \'aiSendWysiwygQuery\': 1, \'ai_id\': ' . $oAi->id . ', \'query\': data.ai_prompt },
+											dataType: \'json\',
+											type: \'POST\',
+											success: function(response){
+												$.loadingScreen(\'hide\');
+
+												if (response.status == \'success\')
+												{
+													tinymce.activeEditor.execCommand(\'mceInsertContent\', false, response.text);
+												}
+												else
+												{
+													Notify(\'<span>AI response error! Please try again later.</span>\', \'\', \'bottom-left\', \'5000\', \'danger\', \'fa-ban\', true);
+												}
+											}
+										});
+									}
+
+									api.close();
+								}
+							});
+						}
+					});';
+				}
 			}
 
-			$sShortcodes = implode(',', $aTmpShortcodes);
+			if (Core::moduleIsActive('shortcode'))
+			{
+				$aShortcodes = Core_Entity::factory('Shortcode')->getAllByActive(1);
 
-			$init['setup'] = 'function(editor) {
-				editor.ui.registry.addButton(\'insertShortcode\', {
+				$aTmpShortcodes = array();
+
+				foreach ($aShortcodes as $oShortcode)
+				{
+					$aTmpShortcodes[] = "{ text: '" . Core_Str::escapeJavascriptVariable($oShortcode->name) . " [" . $oShortcode->id . "]', value: '" . Core_Str::escapeJavascriptVariable($oShortcode->example) . "' }";
+				}
+
+				$sShortcodes = implode(',', $aTmpShortcodes);
+
+				$initSetup .= 'editor.ui.registry.addButton(\'insertShortcode\', {
 					text: "' . Core::_('Shortcode.title') . '",
 					type: \'button\',
 					onAction: function (_) {
@@ -188,9 +275,16 @@ class Wysiwyg_Driver_Tinymce6_Handler extends Wysiwyg_Handler
 							}
 						});
 					}
-				});
-			}';
+				});';
+			}
 		}
+
+		$initSetup .= '}';
+
+		/*!is_null($initSetup)
+			&& $init['setup'] = $initSetup;*/
+
+		$init['setup'] = $initSetup;
 
 		!isset($init['height'])
 			&& $init['height'] = '"' . ($oAdmin_Form_Entity_Textarea->rows * 30) . 'px"';

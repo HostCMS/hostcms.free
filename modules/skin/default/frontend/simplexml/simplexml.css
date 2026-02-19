@@ -1,0 +1,61 @@
+﻿.simpleXML ul {
+	list-style: none;
+	margin: 0px;
+	padding-left: 32px;
+}
+
+.simpleXML {
+	/* font-family: 'Courier New'; */
+	display: block;
+	font-size: 13px !important;
+	color: #333;
+}
+
+.simpleXML-comment {
+	color: gray;
+}
+
+.simpleXML-cdata {
+	color: rgb(129, 89, 167);
+}
+
+.simpleXML-tagHeader {
+	color: #3fa13f;
+}
+
+.simpleXML-tagValue {
+	color: #229b22;
+}
+
+.simpleXML-collapsedText {
+	color: lightgray;
+}
+
+.simpleXML-attrName {
+	color: #f22b2b;
+}
+
+.simpleXML-attrValue {
+	color: blue;
+}
+
+.simpleXML span.simpleXML-expander, .simpleXML span.simpleXML-expanderClose {
+	height: 9px;
+	width: 9px;
+	display: inline-block;
+	margin-left: 1px;
+	margin-right: 1px;
+}
+
+.simpleXML span.simpleXML-expanderHeader {
+	cursor: pointer;
+}
+
+.simpleXML span.simpleXML-expander-expanded {
+	background-image: url( "minus.svg" );
+	background-position: center;
+}
+
+.simpleXML span.simpleXML-expander-collapsed {
+	background-image: url( "plus.svg" );
+}

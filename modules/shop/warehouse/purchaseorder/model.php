@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Warehouse_Purchaseorder_Model extends Core_Entity
 {
@@ -92,7 +92,7 @@ class Shop_Warehouse_Purchaseorder_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -116,7 +116,7 @@ class Shop_Warehouse_Purchaseorder_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -130,7 +130,7 @@ class Shop_Warehouse_Purchaseorder_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -141,7 +141,7 @@ class Shop_Warehouse_Purchaseorder_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -173,7 +173,7 @@ class Shop_Warehouse_Purchaseorder_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -229,7 +229,7 @@ class Shop_Warehouse_Purchaseorder_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -259,14 +259,14 @@ class Shop_Warehouse_Purchaseorder_Model extends Core_Entity
 			// Счета поставщика на основе Заказа поставщику <==> Приемки
 			$aShop_Document_Relations_Second = Core_Entity::factory('Shop_Document_Relation')->getAllByRelated_document_id($oShop_Document_Relation->document_id, FALSE);
 
-			foreach ($aShop_Document_Relations_Second as $oShop_Document_Relation)
+			foreach ($aShop_Document_Relations_Second as $oShop_Document_Relation_Second)
 			{
-				$type = Shop_Controller::getDocumentType($oShop_Document_Relation->document_id);
+				$type = Shop_Controller::getDocumentType($oShop_Document_Relation_Second->document_id);
 
 				// Приемки
 				if ($type == 8)
 				{
-					$oShop_Warehouse_Supply = Shop_Controller::getDocument($oShop_Document_Relation->document_id);
+					$oShop_Warehouse_Supply = Shop_Controller::getDocument($oShop_Document_Relation_Second->document_id);
 
 					if ($oShop_Warehouse_Supply->posted)
 					{
@@ -347,8 +347,8 @@ class Shop_Warehouse_Purchaseorder_Model extends Core_Entity
 
 	/**
 	 * Get amount
-	 * @return float
-	 */
+	 * @return string
+     */
 	public function getAmount()
 	{
 		$amount = 0;
@@ -405,10 +405,11 @@ class Shop_Warehouse_Purchaseorder_Model extends Core_Entity
 		return $this;
 	}
 
-	/**
-	 * Backend callback method
-	 * @return string
-	 */
+    /**
+     * Backend callback method
+     * @param Admin_Form_Field_Model $oAdmin_Form_Field
+     * @param Admin_Form_Controller $oAdmin_Form_Controller
+     */
 	public function printBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		Core::moduleIsActive('printlayout')
@@ -514,11 +515,8 @@ class Shop_Warehouse_Purchaseorder_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function count_itemsBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function count_itemsBackend()
 	{
 		$count = $this->Shop_Warehouse_Purchaseorder_Items->getCount();
 		$count && Core_Html_Entity::factory('Span')

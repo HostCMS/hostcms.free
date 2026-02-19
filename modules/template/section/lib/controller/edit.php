@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Template
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -128,6 +128,7 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 			->html(ob_get_clean());
 
 		$oMainTab->move($this->getField('description')->rows(2)->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2);
+		$oMainTab->move($this->getField('user_css')->rows(4)->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2);
 
 		$oMainRow3->add($Select_LibDir);
 		$oMainRow4->add($Select_Lib);
@@ -172,6 +173,13 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 			$(window.frameElement).parentsUntil('.ui-dialog').parent().find(".ui-dialog-titlebar-close").trigger('click');
 			</script><?php
 		}
+
+		ob_start();
+		Core_Html_Entity::factory('Script')
+			->value("if($('div.ui-sortable').length) { $('div.ui-sortable').each(function(index, object) { $(object).sortable('refresh'); }); }")
+			->execute();
+
+		$this->_Admin_Form_Controller->addMessage(ob_get_clean());
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 	}

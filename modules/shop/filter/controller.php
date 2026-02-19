@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Filter_Controller
 {
@@ -100,11 +100,11 @@ class Shop_Filter_Controller
 		);
 	}
 
-	/**
-	 * Get price sql string
-	 * @param Property_Model $oProperty
-	 * @return array array('column' => ..., 'index' => ...)
-	 */
+    /**
+     * Get price sql string
+     * @param Shop_Price_Model $oShop_Price
+     * @return array array('column' => ..., 'index' => ...)
+     */
 	protected function _getPriceSql(Shop_Price_Model $oShop_Price)
 	{
 		return array(
@@ -400,6 +400,10 @@ class Shop_Filter_Controller
 	 */
 	protected $_cachePriceIDs = NULL;
 
+	/**
+	 * Get price ids
+	 * @return array
+	 */
 	protected function _getPriceIDs()
 	{
 		if (is_null($this->_cachePriceIDs))
@@ -444,7 +448,8 @@ class Shop_Filter_Controller
 	/**
 	 * Fill table rows
 	 * @param Shop_Item_Model $oShop_Item
-	 * @return self
+	 * @hostcms-event Shop_Filter_Controller.onAfterBaseInsert
+	 * @hostcms-event Shop_Filter_Controller.onAfterFillPropertyValues
 	 */
 	public function fill(Shop_Item_Model $oShop_Item)
 	{
@@ -457,18 +462,6 @@ class Shop_Filter_Controller
 			&& (!$oShop_Item->modification_id || $oShop_Item->Modification->active)
 		)
 		{
-			/*Core_Log::instance()->clear()
-				->status(Core_Log::$MESSAGE)
-				->write('Filter Fill ' . $oShop_Item->id);*/
-
-			/*$oDefaultCurrency = Core_Entity::factory('Shop_Currency')->getDefault();
-
-			$fCurrencyCoefficient = $oShop_Item->Shop_Currency->id > 0 && $oDefaultCurrency->id > 0
-				? Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
-					$oShop_Item->Shop_Currency, $oDefaultCurrency
-				)
-				: 0;*/
-
 			$oOriginal_Shop_Item = $oShop_Item->shortcut_id
 				? $oShop_Item->Shop_Item
 				: $oShop_Item;
@@ -481,11 +474,10 @@ class Shop_Filter_Controller
 			$available = $oOriginal_Shop_Item->getRest(FALSE) > 0 ? 1 : 0;
 
 			// prices
-			//$aPrices = $this->_oShop_Item_Controller->calculatePriceInItemCurrency($oShop_Item->price, $oShop_Item);
 			$aPrices = $this->_oShop_Item_Controller->calculatePrice($oOriginal_Shop_Item->price, $oOriginal_Shop_Item);
 
 			// Используется также ниже в блоке цен для групп клиентов
-			$price_absolute = $aPrices['price_discount'] /* * $fCurrencyCoefficient*/;
+			$price_absolute = $aPrices['price_discount'];
 
 			$aBaseInserts = array(
 				$oShop_Item->id,
@@ -493,11 +485,13 @@ class Shop_Filter_Controller
 				$oShop_Item->modification_id,
 				$shop_group_id,
 				$oOriginal_Shop_Item->shop_producer_id,
-				//$oShop_Item->shop_currency_id,
-				//$aPrices['price_discount'], // price
 				$price_absolute, // price_absolute
 				$available
 			);
+
+			Core_Event::notify('Shop_Filter_Controller.onAfterBaseInsert', $this, array($oShop_Item, $aBaseInserts));
+			$eventResult = Core_Event::getLastReturn();
+			!is_null($eventResult) && $aBaseInserts = $eventResult;
 
 			$aPropertyIds = $this->_getPropertyIDs();
 
@@ -524,6 +518,10 @@ class Shop_Filter_Controller
 					}
 				}
 
+				Core_Event::notify('Shop_Filter_Controller.onAfterFillPropertyValues', $this, array($oShop_Item, $aTmp));
+				$eventResult = Core_Event::getLastReturn();
+				!is_null($eventResult) && $aTmp = $eventResult;
+
 				foreach ($aPropertyIds as $property_id)
 				{
 					$aPV[] = isset($aTmp[$property_id]) ? $aTmp[$property_id] : array($this->_getDefaultValue($property_id));
@@ -531,39 +529,41 @@ class Shop_Filter_Controller
 				unset($aTmp);
 			}
 
+			$oCore_DataBase = Core_DataBase::instance();
+			$sFilterTableColumnNames = implode(',', $this->_getFilterTableColumns());
+			$aInserts = array();
+
+			// Флаг: были ли сгенерированы комбинации
+			$bHasCombinations = false;
+
 			if (count($aPV))
 			{
 				// Get All Posible Combinations
-				//$aCombinations = count($aPV) > 1 ? $this->_combinations($aPV) : $aPV;
+				// $aCombinations МОЖЕТ БЫТЬ ГЕНЕРАТОРОМ ИЛИ МАССИВОМ
 				if (count($aPV) > 1)
 				{
+					// Здесь возвращается Generator, память не расходуется
 					$aCombinations = $this->_combinations($aPV);
 				}
 				else
 				{
+					// Для одного элемента генератор избыточен, оставляем массив
 					$aCombinations = array();
 					foreach ($aPV[0] as $scalar)
 					{
 						$aCombinations[] = array($scalar);
 					}
 				}
+
 				unset($aPV);
-			}
-			else
-			{
-				$aCombinations = array();
-			}
 
-			$oCore_DataBase = Core_DataBase::instance();
+				// Счетчик для определения первой итерации (вместо $key)
+				$iCombinationCounter = 0;
 
-			$sFilterTableColumnNames = implode(',', $this->_getFilterTableColumns());
-
-			$aInserts = array();
-
-			if (count($aCombinations))
-			{
-				foreach ($aCombinations as $key => $aCombination)
+				foreach ($aCombinations as $aCombination)
 				{
+					$bHasCombinations = true;
+
 					$aValues = array_merge($aBaseInserts, $aCombination);
 					$aValues = array_map(array($oCore_DataBase, 'quote'), $aValues);
 
@@ -572,25 +572,38 @@ class Shop_Filter_Controller
 					if (count($aInserts) > 50)
 					{
 						$this->_insert($filterTableName, $sFilterTableColumnNames, $aInserts);
-
 						$aInserts = array();
 					}
 
-					// reset primary to 0
-					$key == 0
-						&& $aBaseInserts[1] = 0;
+					// reset primary to 0 AFTER the first iteration
+					// Мы меняем значение в $aBaseInserts, чтобы СЛЕДУЮЩИЕ итерации использовали 0
+					if ($iCombinationCounter === 0)
+					{
+						$aBaseInserts[1] = 0;
+					}
+
+					$iCombinationCounter++;
+				}
+			}
+
+			// Если комбинации были — дописываем остатки буфера
+			if ($bHasCombinations)
+			{
+				if (count($aInserts))
+				{
+					$this->_insert($filterTableName, $sFilterTableColumnNames, $aInserts);
 				}
 			}
 			else
 			{
+				// Логика "else" из старого кода: если комбинаций нет (нет свойств), вставляем просто BaseInserts
 				$aValues = array_map(array($oCore_DataBase, 'quote'), $aBaseInserts);
 				$aInserts[] = '(' . implode(', ', $aValues) . ')';
+
+				$this->_insert($filterTableName, $sFilterTableColumnNames, $aInserts);
 			}
 
-			count($aInserts)
-				&& $this->_insert($filterTableName, $sFilterTableColumnNames, $aInserts);
-
-			// Prices
+			// Prices block remains unchanged
 			$aPriceIds = $this->_getPriceIDs();
 
 			if (count($aPriceIds))
@@ -604,10 +617,8 @@ class Shop_Filter_Controller
 				$aShop_Item_Prices = $oShop_Item->Shop_Item_Prices->findAll(FALSE);
 				foreach ($aShop_Item_Prices as $oShop_Item_Price)
 				{
-					//$aPrices = $this->_oShop_Item_Controller->calculatePriceInItemCurrency($oShop_Item_Price->value, $oShop_Item);
 					$aPrices = $this->_oShop_Item_Controller->calculatePrice($oShop_Item_Price->value, $oShop_Item);
-
-					$aPriceValues[$oShop_Item_Price->shop_price_id] = $aPrices['price_discount'] /* * $fCurrencyCoefficient*/;
+					$aPriceValues[$oShop_Item_Price->shop_price_id] = $aPrices['price_discount'];
 				}
 
 				foreach ($aPriceIds as $shop_price_id)
@@ -625,37 +636,40 @@ class Shop_Filter_Controller
 		}
 	}
 
+	/**
+	 * Get combinations
+	 * @param array $aPV
+	 * @param int $i
+	 */
 	protected function _combinations($aPV, $i = 0)
 	{
-		if (!isset($aPV[$i]))
-		{
-			return array();
+		// Если вышли за пределы массива, возвращаем пустой массив для слияния
+		if (!isset($aPV[$i])) {
+			yield array();
+			return;
 		}
 
-		if ($i == count($aPV) - 1)
-		{
-			return $aPV[$i];
-		}
-
-		// get combinations from subsequent arrays
-		$tmp = $this->_combinations($aPV, $i + 1);
-
-		$result = array();
-
-		// concat each array from tmp with each element from $aPV[$i]
-		foreach ($aPV[$i] as $v)
-		{
-			foreach ($tmp as $t)
-			{
-				$result[] = is_array($t)
-					? array_merge(array($v), $t)
-					: array($v, $t);
+		// Перебираем текущий уровень
+		foreach ($aPV[$i] as $v) {
+			// Если это последний уровень, просто возвращаем элемент (обернутый в массив)
+			if ($i == count($aPV) - 1) {
+				yield array($v);
+			} else {
+				foreach ($this->_combinations($aPV, $i + 1) as $t) {
+					// array_merge здесь безопасен, так как мы не храним результат
+					yield array_merge(array($v), $t);
+				}
 			}
 		}
-
-		return $result;
 	}
 
+	/**
+	 * Insert row
+	 * @param string $tableName
+	 * @param string $sFilterTableColumnNames
+	 * @param array $aValues
+	 * @return self
+	 */
 	protected function _insert($tableName, $sFilterTableColumnNames, array $aValues)
 	{
 		Core_DataBase::instance()->query(
@@ -668,7 +682,7 @@ class Shop_Filter_Controller
 	/**
 	 * Get property default value
 	 * @param int $property_id property id
-	 * @return mixed int|string
+	 * @return int|string|null
 	 */
 	protected function _getDefaultValue($property_id)
 	{

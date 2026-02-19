@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Item_Discount_Controller_Delete extends Admin_Form_Action_Controller
 {
@@ -19,7 +19,7 @@ class Shop_Item_Discount_Controller_Delete extends Admin_Form_Action_Controller
 	public function execute($operation = NULL)
 	{
 		$shop_item_id = Core_Array::getGet('shop_item_id', 0, 'int');
-		
+
 		if ($shop_item_id && $this->_object->id)
 		{
 			$oShop_Item = Core_Entity::factory('Shop_Item', $shop_item_id);
@@ -31,6 +31,9 @@ class Shop_Item_Discount_Controller_Delete extends Admin_Form_Action_Controller
 				break;
 				case 'Shop_Discount_Model':
 					$oEntity = $oShop_Item->Shop_Item_Discounts->getByShop_discount_id($this->_object->id);
+				break;
+				case 'Shop_Gift_Model':
+					$oEntity = $oShop_Item->Shop_Item_Gifts->getByShop_gift_id($this->_object->id);
 				break;
 				default:
 					$oEntity = NULL;

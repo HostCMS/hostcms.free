@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Filter_Seo_Dir_Model extends Core_Entity
 {
@@ -73,11 +73,8 @@ class Shop_Filter_Seo_Dir_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function nameBadge()
 	{
 		$count = $this->getChildCount();
 
@@ -102,6 +99,29 @@ class Shop_Filter_Seo_Dir_Model extends Core_Entity
 		}
 
 		return $count;
+	}
+
+	/**
+	 * Get dir path with separator
+	 * @return string
+	 */
+	public function groupPathWithSeparator($separator = ' → ', $offset = 0)
+	{
+		$aParentGroups = array();
+
+		$aTmpGroup = $this;
+
+		// Добавляем все директории от текущей до родителя.
+		do {
+			$aParentGroups[] = $aTmpGroup->name;
+		} while ($aTmpGroup = $aTmpGroup->getParent());
+
+		$offset > 0
+			&& $aParentGroups = array_slice($aParentGroups, $offset);
+
+		$sParents = implode($separator, array_reverse($aParentGroups));
+
+		return $sParents;
 	}
 
 	/**

@@ -8,14 +8,13 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Filter_Controller_Rebuild extends Admin_Form_Action_Controller
 {
 	/**
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name
-	 * @return self
 	 */
 	public function execute($operation = NULL)
 	{
@@ -25,11 +24,13 @@ class Shop_Filter_Controller_Rebuild extends Admin_Form_Action_Controller
 		{
 			$oAdmin_Form_Controller = $this->getController();
 
-			$position = Core_Array::getRequest('position', 0);
-			$mode = Core_Array::getRequest('mode', 0);
-			$limit = intval(Core_Array::getRequest('limit', 500));
-			$iDelay = intval(Core_Array::getRequest('delay', 1));
-			$iMaxTime = intval(Core_Array::getRequest('max_time', 10));
+			$aShopConfig = Shop_Controller::getConfig();
+
+			$position = Core_Array::getRequest('position', 0, 'int');
+			$mode = Core_Array::getRequest('mode', 0, 'int');
+			$limit = Core_Array::getRequest('limit', $aShopConfig['fastFilterRebuildLimit'], 'int');
+			$iDelay = Core_Array::getRequest('delay', 1, 'int');
+			$iMaxTime = Core_Array::getRequest('max_time', 10, 'int');
 
 			$oShop_Filter_Controller = new Shop_Filter_Controller($oShop);
 

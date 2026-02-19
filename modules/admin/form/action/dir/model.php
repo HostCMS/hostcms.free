@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Admin_Form
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Admin_Form_Action_Dir_Model extends Core_Entity
 {
@@ -79,8 +79,8 @@ class Admin_Form_Action_Dir_Model extends Core_Entity
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return Admin_Form_Action_Dir_Model
-	 * @hostcms-event admin_form_action_dir.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event admin_form_action_dir.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -144,9 +144,8 @@ class Admin_Form_Action_Dir_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
 	public function word_nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{

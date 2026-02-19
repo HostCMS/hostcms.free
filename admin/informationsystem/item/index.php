@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -297,7 +297,7 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
 $sInformationsystemItemProperties = Admin_Form_Controller::correctBackendPath('/{admin}/informationsystem/item/property/index.php');
-$additionalParamsItemProperties = 'informationsystem_id=' . $iInformationsystemId . '&informationsystem_group_id=' . $iInformationsystemGroupId;
+$additionalParamsItemProperties = 'informationsystem_id=' . $iInformationsystemId . '&informationsystem_group_id=' . $iInformationsystemGroupId . (isset($_GET['debug']) ? '&debug' : '');
 
 $sInformationsystemGroupProperties = Admin_Form_Controller::correctBackendPath('/{admin}/informationsystem/group/property/index.php');
 
@@ -704,9 +704,10 @@ if ($oAdminFormActionLoadInformationItemList && $oAdmin_Form_Controller->getActi
 		)
 		->defaultValue(' … ')
 		->addCondition(
-			array('where' => array('informationsystem_group_id', '=', $iInformationsystemGroupId))
-		)->addCondition(
-			array('where' => array('informationsystem_id', '=', $iInformationsystemId))
+			array('where' => array('informationsystem_items.informationsystem_id', '=', $iInformationsystemId))
+		)
+		->addCondition(
+			array('where' => array('informationsystem_items.informationsystem_group_id', '=', $iInformationsystemGroupId))
 		);
 
 	$oAdmin_Form_Controller->addAction($oInformationsystem_Controller_Load_Select_Options);
@@ -759,6 +760,63 @@ if ($oAdminFormActionChangeAttribute && $oAdmin_Form_Controller->getAction() == 
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($oInformationsystem_Item_Controller_Change_Attribute);
+}
+
+// Действие "AI"
+$oAdminFormActionAiApply = $oAdmin_Form->Admin_Form_Actions->getByName('aiApply');
+
+if (Core::moduleIsActive('ai') && $oAdminFormActionAiApply && $oAdmin_Form_Controller->getAction() == 'aiApply')
+{
+	$oAi_Prompt_Controller_Apply = Admin_Form_Action_Controller::factory(
+		'Ai_Prompt_Controller_Apply', $oAdminFormActionAiApply
+	);
+
+	$aModels = array();
+
+	$aChecked = $oAdmin_Form_Controller->getChecked();
+	foreach ($aChecked as $datasetKey => $checkedItems)
+	{
+		switch ($datasetKey)
+		{
+			case 0:
+				$model = 'informationsystem_group';
+			break;
+			case 1:
+				$model = 'informationsystem_item';
+			break;
+			default:
+				$model = NULL;
+		}
+
+		if (!is_null($model) && !in_array($model, $aModels))
+		{
+			$aModels[] = $model;
+		}
+	}
+
+	$oAi_Prompt_Controller_Apply
+		->title(Core::_('Ai_Prompt.apply'))
+		->selectCaption(Core::_('Ai_Prompt.ai_prompt_id'))
+		->autocompletePath(Admin_Form_Controller::correctBackendPath('/{admin}/ai/index.php?autocomplete=1&site_id=' . $oInformationsystem->site_id . '&models=' . implode(',', $aModels) . '&show_prompts=1'))
+		->autocompleteEntityId($oInformationsystem->site_id);
+
+	if (count($aModels))
+	{
+		$aAi_Prompts = Ai_Prompt_Controller::getPrompts($oInformationsystem->Site, $aModels);
+
+		if (count($aAi_Prompts) < Core::$mainConfig['switchSelectToAutocomplete'])
+		{
+			$oAi_Prompt_Controller_Apply
+				->selectOptions(array(' … ') + Ai_Prompt_Controller::fillAiPrompts($oInformationsystem->Site, $aModels));
+		}
+		else
+		{
+			$oAi_Prompt_Controller_Apply->autocomplete(TRUE);
+		}
+	}
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oAi_Prompt_Controller_Apply);
 }
 
 // Источник данных 0
@@ -850,9 +908,9 @@ if (strlen($sGlobalSearch))
 				->addCondition(array('setOr' => array()));
 
 		$oAdmin_Form_Dataset
-				->addCondition(array('where' => array('informationsystem_items.name', 'LIKE', '%' . $sGlobalSearch . '%')))
-				->addCondition(array('setOr' => array()))
 				->addCondition(array('where' => array('informationsystem_items.guid', '=', $sGlobalSearch)))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('informationsystem_items.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 				->addCondition(array('setOr' => array()))
 				->addCondition(array('where' => array('informationsystem_items.path', 'LIKE', '%' . $sGlobalSearch . '%')))
 				->addCondition(array('setOr' => array()))
@@ -860,7 +918,30 @@ if (strlen($sGlobalSearch))
 				->addCondition(array('setOr' => array()))
 				->addCondition(array('where' => array('informationsystem_items.seo_description', 'LIKE', '%' . $sGlobalSearch . '%')))
 				->addCondition(array('setOr' => array()))
-				->addCondition(array('where' => array('informationsystem_items.seo_keywords', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('where' => array('informationsystem_items.seo_keywords', 'LIKE', '%' . $sGlobalSearch . '%')));
+
+		// Расширенный поиск по ярлыкам ведется только при выбранном режиме поиска "Ярлык" с целью оптимизации скорости базового поиска
+		if ($iGlobalSearchMode == 3)
+		{
+			$oAdmin_Form_Dataset
+				->addCondition(
+					array('leftJoin' => array(array('informationsystem_items', 'informationsystem_items_shortcuts'), 'informationsystem_items_shortcuts.id', '=', 'informationsystem_items.shortcut_id'))
+				)
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('informationsystem_items_shortcuts.guid', '=', $sGlobalSearch)))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('informationsystem_items_shortcuts.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('informationsystem_items_shortcuts.path', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('informationsystem_items_shortcuts.seo_title', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('informationsystem_items_shortcuts.seo_description', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('informationsystem_items_shortcuts.seo_keywords', 'LIKE', '%' . $sGlobalSearch . '%')));
+		}
+
+		$oAdmin_Form_Dataset
 			->addCondition(array('close' => array()));
 
 		// Товар

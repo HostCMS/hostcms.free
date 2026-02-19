@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Structure
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Structure_Model extends Core_Entity
 {
@@ -103,7 +103,7 @@ class Structure_Model extends Core_Entity
 
 	/**
 	 * Has revisions
-	 * @param boolean
+	 * @var boolean
 	 */
 	protected $_hasRevisions = TRUE;
 
@@ -461,7 +461,7 @@ class Structure_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -474,10 +474,12 @@ class Structure_Model extends Core_Entity
 			->execute();
 	}*/
 
-	/**
-	 * Backend callback method
-	 * @return string
-	 */
+    /**
+     * Backend callback method
+     * @param Admin_Form_Field_Model $oAdmin_Form_Field
+     * @param Admin_Form_Controller $oAdmin_Form_Controller
+     * @throws Core_Exception
+     */
 	public function nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$object = $this->shortcut_id
@@ -550,7 +552,6 @@ class Structure_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @return string
 	 */
 	public function pathBackend()
 	{
@@ -563,21 +564,16 @@ class Structure_Model extends Core_Entity
 		$oSite_Alias = Core_Entity::factory('Site', $object->site_id)->getCurrentAlias();
 		if ($oSite_Alias)
 		{
-			$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div');
-
-			$oCore_Html_Entity_Div
-				->class('hostcms-linkbox')
-				->add(
-					Core_Html_Entity::factory('A')
-						->href(($object->https ? 'https://' : 'http://') . $oSite_Alias->name . $sPath)
-						->target("_blank")
-						->value(htmlspecialchars(rawurldecode($sPath)))
-				);
+			$oCore_Html_Entity_A = Core_Html_Entity::factory('A')
+				->class('badge badge-sky inverted fw-normal')
+				->href(($object->https ? 'https://' : 'http://') . $oSite_Alias->name . $sPath)
+				->target("_blank")
+				->value(htmlspecialchars(rawurldecode($sPath)));
 
 			!$object->active
-				&& $oCore_Html_Entity_Div->class($oCore_Html_Entity_Div->class . ' line-through');
+				&& $oCore_Html_Entity_A->class($oCore_Html_Entity_A->class . ' line-through');
 
-			$oCore_Html_Entity_Div->execute();
+			$oCore_Html_Entity_A->execute();
 		}
 		else
 		{
@@ -859,6 +855,15 @@ class Structure_Model extends Core_Entity
 			catch (Exception $e) {}
 		}
 
+		if (Core::moduleIsActive('media'))
+		{
+			$aMedia_Structures = $this->Media_Structures->findAll(FALSE);
+			foreach ($aMedia_Structures as $oMedia_Structure)
+			{
+				$newObject->add(clone $oMedia_Structure);
+			}
+		}
+
 		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
@@ -916,11 +921,11 @@ class Structure_Model extends Core_Entity
 	 */
 	protected $_showXmlMedia = FALSE;
 
-	/**
-	 * Show properties in XML
-	 * @param mixed $showXmlProperties array of allowed properties ID or boolean
-	 * @return self
-	 */
+    /**
+     * Show properties in XML
+     * @param bool $showXmlMedia
+     * @return self
+     */
 	public function showXmlMedia($showXmlMedia = TRUE)
 	{
 		$this->_showXmlMedia = $showXmlMedia;
@@ -960,6 +965,7 @@ class Structure_Model extends Core_Entity
 	 * Prepare entity and children entities
 	 * @return self
 	 * @hostcms-event structure.onBeforeAddPropertyValues
+	 * @hostcms-event structure.onBeforeAddMediaItems
 	 */
 	protected function _prepareData()
 	{
@@ -982,6 +988,8 @@ class Structure_Model extends Core_Entity
 			}
 
 			Core_Event::notify($this->_modelName . '.onBeforeAddPropertyValues', $this, array($aProperty_Values));
+			$eventResult = Core_Event::getLastReturn();
+			is_array($eventResult) && $aProperty_Values = $eventResult;
 
 			// Add all values
 			$this->addEntities($aProperty_Values);
@@ -990,6 +998,11 @@ class Structure_Model extends Core_Entity
 		if ($this->_showXmlMedia && Core::moduleIsActive('media'))
 		{
 			$aEntities = Media_Item_Controller::getValues($this);
+			
+			Core_Event::notify($this->_modelName . '.onBeforeAddMediaItems', $this, array($aEntities));
+			$eventResult = Core_Event::getLastReturn();
+			is_array($eventResult) && $aEntities = $eventResult;
+			
 			foreach ($aEntities as $oEntity)
 			{
 				$oMedia_Item = $oEntity->Media_Item;
@@ -1482,7 +1495,7 @@ class Structure_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */

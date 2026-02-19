@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Chartaccount
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Chartaccount_Trialbalance_Entry_Controller extends Chartaccount_Trialbalance_Controller
 {
@@ -126,7 +126,7 @@ class Chartaccount_Trialbalance_Entry_Controller extends Chartaccount_Trialbalan
 
 								// $aTmp = array('code' => $oChartaccount->code, 'name' => $oChartaccount->name);
 
-								// Сальдо Д,К на начало периода
+								// Сальдо Д, К на начало периода
 								$aOptions = array('company_id' => self::$company_id, 'dchartaccount_id' => $oChartaccount->id, 'date_to' => $periodBeforeEndDate);
 								$aOptions['debit_sc'] = $sc;
 								$dAmountBeforePeriod = Chartaccount_Entry_Controller::getEntriesAmount($aOptions);
@@ -350,13 +350,13 @@ class Chartaccount_Trialbalance_Entry_Controller extends Chartaccount_Trialbalan
 								}
 							?>
 							<tr class="total">
-								<td scope="col" colspan="2" style="text-align: left"><?php echo Core::_('Chartaccount_Trialbalance_Entry.period_transactions')?></th>
+								<td scope="col" colspan="2" style="text-align: left"><?php echo Core::_('Chartaccount_Trialbalance_Entry.period_transactions')?></td>
 								<td scope="col" colspan="3" style="text-align: right"><?php echo self::printAmount($dAmountPeriod);?></td>
 								<td scope="col" colspan="3" style="text-align: right"><?php echo self::printAmount($cAmountPeriod);?></td>
 								<td scope="col"></td>
 							</tr>
 							<tr class="total">
-								<td scope="col" colspan="2" style="text-align: left"><?php echo Core::_('Chartaccount_Trialbalance_Entry.end_balance')?></th>
+								<td scope="col" colspan="2" style="text-align: left"><?php echo Core::_('Chartaccount_Trialbalance_Entry.end_balance')?></td>
 								<td scope="col" colspan="3" style="text-align: right">
 								<?php
 									$afterDebit = 0;

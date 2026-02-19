@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Price_Entry_Controller extends Core_Servant_Properties
 {
@@ -17,8 +17,8 @@ class Shop_Price_Entry_Controller extends Core_Servant_Properties
 	 * @param $shop_price_id shop price id
 	 * @param $shop_item_id shop item id
 	 * @param $dateTo date
-	 * @return float
-	 */
+	 * @return string|null
+     */
 	public function getPrice($shop_price_id, $shop_item_id, $dateTo = NULL)
 	{
 		$price = NULL;
@@ -67,7 +67,6 @@ class Shop_Price_Entry_Controller extends Core_Servant_Properties
 	 * @param $shop_price_id shop price id
 	 * @param $shop_item_id shop item id
 	 * @param $value value
-	 * @return self
 	 */
 	public function setPrice($shop_price_id, $shop_item_id, $value)
 	{

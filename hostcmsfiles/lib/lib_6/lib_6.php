@@ -77,7 +77,7 @@ else
 		$Shop_Controller_Show->cache(FALSE);
 
 		$oLastComment = Core_Entity::factory('Comment')->getLastCommentByIp(
-			Core_Array::get($_SERVER, 'REMOTE_ADDR')
+			Core::getClientIp()
 		);
 
 		$oXmlCommentTag = Core::factory('Core_Xml_Entity')
@@ -315,6 +315,7 @@ $Shop_Controller_Show
 	)
 	->addMinMaxWidth()
 	->addMinMaxLength()
+    // ->itemsMedia(TRUE)
 	//->addAllowedTags('/shop', array('name'))
 	//->addAllowedTags('/shop/shop_item', array('name'))
 	//->addAllowedTags('/shop/shop_group', array('name'))

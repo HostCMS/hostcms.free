@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -848,7 +848,8 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				function appendRow(item_id, name, quantity, price, rate, marking, shop_item_id, image_small, href)
 				{
-					var position = $('#{$windowId} .shop-item-table.shop-order-items > tbody tr:not(:last-child)').length + 1,
+					var tbody = $('#{$windowId} .shop-item-table.shop-order-items > tbody').eq(0),
+						position = tbody.find('tr:not(:last-child)').length + 1,
 						img = image_small != ''
 							? '<img class=\"backend-thumbnail\" src=\"' + image_small + '\" />'
 							: '',
@@ -858,18 +859,15 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					if (href != '')
 					{
 						link = '<a href=\"' + href + '\" target=\"_blank\"><i class=\"fa fa-external-link\"></i></a>';
-
 						status = '{$status_select}';
 					}
 
-					$('#{$windowId} .shop-item-table.shop-order-items > tbody tr:last-child').before(
+					tbody.find('tr:last-child').before(
 						$('<tr data-item-id=\"' + item_id + '\"><td class=\"index\">' + position + '</td><td></td>' + img + '<td class=\"shop-order-item-name\"><input class=\"form-control\" onsubmit=\"$(\'.add-item-autocomplete\').focus();return false;\" name=\"shop_order_item_name[]\" value=\"' + $.escapeHtml(name) + '\"/>' + link + '</td><td></td><td width=\"5%\"><input class=\"form-control\" name=\"shop_order_item_quantity[]\" value=\"' + quantity + '\"/></td><td width=\"10%\"><input class=\"form-control\" name=\"shop_order_item_price[]\" value=\"' + price + '\"/></td><td width=\"5%\"><input class=\"form-control\" name=\"shop_order_item_rate[]\" value=\"' + rate + '\"/></td><td width=\"10%\">{$type_select}</td><td width=\"10%\"><input class=\"form-control\" name=\"shop_order_item_marking[]\" value=\"' + $.escapeHtml(marking) + '\"/></td><td width=\"10%\">{$warehouse_select}</td><td width=\"10%\">' + status + '</td><td width=\"10%\"><input readonly=\"readonly\" class=\"form-control\" name=\"shop_order_item_id[]\" value=\"' + shop_item_id + '\"/></td><td width=\"22\"><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove(); recountPosition()\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>')
 					);
 				}
 
-				$('body').on('change', '.shop-item-table.shop-order-items > tbody tr:not(:last-child) input[name ^= \'shop_order_item_quantity\'], .shop-item-table.shop-order-items > tbody tr:not(:last-child) input[name ^= \'shop_order_item_price\'], .shop-item-table.shop-order-items > tbody tr:not(:last-child) input[name ^= \'shop_order_item_rate\']', function(){
-						$.recountTotal();
-					});
+				$('body').on('change', '#{$windowId} .shop-item-table.shop-order-items > tbody tr:not(:last-child) input[name ^= \'shop_order_item_quantity\'], #{$windowId} .shop-item-table.shop-order-items > tbody tr:not(:last-child) input[name ^= \'shop_order_item_price\'], #{$windowId} .shop-item-table.shop-order-items > tbody tr:not(:last-child) input[name ^= \'shop_order_item_rate\']', function(){ $.recountTotal(); });
 
 				$.recountTotal();
 			");
@@ -1190,7 +1188,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 									<td><?php if ($oShop_Order_History->shop_order_status_id)
 									{
 										echo '<i class="fa fa-circle margin-right-5" style="color: ' . ($oShop_Order_History->Shop_Order_Status->color ? htmlspecialchars($oShop_Order_History->Shop_Order_Status->color) : '#eee') . '"></i> '
-										. htmlspecialchars($oShop_Order_History->Shop_Order_Status->name);
+										. htmlspecialchars((string) $oShop_Order_History->Shop_Order_Status->name);
 									}?></td>
 									<td><?php echo $oShop_Order_History->user_id ? $oShop_Order_History->User->showAvatarWithName() : ''?></td>
 									<td><?php echo $oShop_Order_History->ip?></td>

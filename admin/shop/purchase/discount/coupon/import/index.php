@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../../../../bootstrap.php');
 
@@ -156,7 +156,7 @@ else
 
 			while (!feof($fInputFile))
 			{
-				$aCurrentCSVLine = fgetcsv($fInputFile, 10000, ';', '"');
+				$aCurrentCSVLine = @fgetcsv($fInputFile, 10000, ';', '"', "\\");
 
 				// Если пустая строка - пропускаем
 				if (!is_array($aCurrentCSVLine) || (count($aCurrentCSVLine) == 1 && empty ($aCurrentCSVLine[0])))
