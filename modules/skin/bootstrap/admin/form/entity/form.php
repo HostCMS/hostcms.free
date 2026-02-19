@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Form extends Skin_Default_Admin_Form_Entity_Form {
 	/**
@@ -36,6 +36,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Form extends Skin_Default_Admin_Form_Enti
 		?><script>$(function() {
 			mainFieldChecker.checkAll('<?php echo Core_Str::escapeJavascriptVariable($windowId)?>', "<?php echo htmlspecialchars((string) $this->id)?>"); });
 			$.showAutosave($('#<?php echo $windowId?> form.adminForm'));
+			$.showLocked($('#<?php echo $windowId?> form.adminForm'));
 		</script><?php
 		}
 		?>

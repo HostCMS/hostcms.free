@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Calendar
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Calendar_Caldav_Model extends Core_Entity
 {
@@ -52,7 +52,6 @@ class Calendar_Caldav_Model extends Core_Entity
 	/**
 	 * Sync
 	 * @param Calendar_Caldav_User_Model $oCalendar_Caldav_User object
-	 * @return self
 	 */
 	public function sync($oCalendar_Caldav_User)
 	{
@@ -258,8 +257,8 @@ EOD;
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return self
-	 * @hostcms-event admin_form_action.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event admin_form_action.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

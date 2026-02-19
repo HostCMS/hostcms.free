@@ -8,14 +8,12 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Order_Comment_Controller_Edit extends Comment_Controller_Edit
 {
 	/**
 	 * Prepare backend item's edit form
-	 *
-	 * @return self
 	 */
 	protected function _prepareForm()
 	{

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Structure
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -283,7 +283,6 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->options($aDocumentForDir)
 			->value($this->_object->document_id)
 			->onchange("$('#{$windowId} .document-edit').removeClass('hidden'); $.ajaxRequest({path: hostcmsBackend + '/structure/index.php', context: '{$this->_formId}', callBack: $.loadDocumentText, additionalParams: 'loadDocumentText&document_id=' + this.value, windowId: '{$windowId}'}); return false");
-			;
 
 		$Select_Document
 			->add(

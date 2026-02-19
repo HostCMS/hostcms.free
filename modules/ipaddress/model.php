@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Ipaddress
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Ipaddress_Model extends Core_Entity
 {
@@ -231,7 +231,7 @@ class Ipaddress_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -242,13 +242,13 @@ class Ipaddress_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
 	public function commentBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		return '<span class="editable" data-editable-type="textarea" id="apply_check_1_' . $this->id . '_fv_90">' . nl2br(htmlspecialchars((string) $this->comment)) . '</span>';
+		return '<span class="editable" data-editable-type="textarea" id="apply_check_1_' . $this->id . '_fv_' . $oAdmin_Form_Field->id . '">' . nl2br(htmlspecialchars((string) $this->comment)) . '</span>';
 	}
 
 	/**

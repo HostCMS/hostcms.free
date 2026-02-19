@@ -20,5 +20,7 @@ var i18n =
 "minute": " м.",
 "ban_success": "IP-адреса заблокована!",
 "ban_error": "IP-адреса вже був заблокований!",
-"important": "важно"
+"important": "важно",
+"webauth_register_success": "Авторизація успішно збережена",
+"copy_error_clipboard": "Копіювати помилку в буфер обміну"
 };

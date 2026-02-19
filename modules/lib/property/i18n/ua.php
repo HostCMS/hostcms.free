@@ -27,6 +27,7 @@ return array(
 	'lib_property_type_9' => 'Візуальний редактор',
 	'lib_property_type_10' => 'Складений',
 	'lib_property_type_11' => 'Іконка',
+	'lib_property_type_12' => 'Колір',
 	'value' => 'Значення',
 	'multivalue' => 'Множинні значення',
 	'copy_from' => ' [Копія від %s]' ,

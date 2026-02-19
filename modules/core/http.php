@@ -49,7 +49,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Http
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 abstract class Core_Http
 {
@@ -530,7 +530,7 @@ abstract class Core_Http
 
 			$this->_execute($host, $path, $query, $scheme, Core_Array::get($aUrl, 'user'), Core_Array::get($aUrl, 'pass'));
 		}
-		
+
 		return $this;
 	}
 
@@ -759,7 +759,7 @@ abstract class Core_Http
 	 * Parse chunk for requestParseBody()
 	 * @param string $chunk
 	 * @param string $boundary
-	 * @return rest of chunk
+	 * @return string
 	 */
 	static protected function _parseChunk($chunk, $boundary)
 	{
@@ -869,5 +869,68 @@ abstract class Core_Http
 		while ($boundaryPos !== FALSE);
 
 		return $chunk;
+	}
+
+	/**
+	 * Convert domain to punycode and urlencode
+	 * @param string $url
+	 * @return string
+	 */
+	static public function convertToPunycode($url)
+	{
+		return preg_replace_callback('~(https?://)([^/]*)(.*?)(\?.*)?$~', function($a) {
+				$aTmp = array_map('rawurlencode', explode('/', $a[3]));
+
+				return $a[1] . (preg_match('/[А-Яа-яЁё]/u', $a[2])
+						? Core_Str::idnToAscii($a[2])
+						: $a[2]
+					) . implode('/', $aTmp) . (isset($a[4]) ? $a[4] : '');
+			}, $url
+		);
+	}
+	
+	/**
+	 * Parse Cookie string to array
+	 * @param string $str e.g. 'foo=bar; baz=qux"
+	 * @return array
+	 */
+	static public function parseCookieToArray($str)
+	{
+		$aReturn = array();
+
+		$aTmp = explode('; ', $str);
+		foreach ($aTmp as $str)
+		{
+			if (strpos($str, '=') !== FALSE)
+			{
+				list($key, $value) = explode('=', $str, 2);
+				$aReturn[$key] = $value;
+			}
+		}
+
+		return $aReturn;
+	}
+
+	/**
+	 * Extract array of cookies from raw headers
+	 * @param string $headers
+	 * @return array 
+	 */
+	static public function extractCookiesFromHeaders($headers)
+	{
+		$lines = explode("\r\n", $headers);
+
+		$aCookies = array();
+		foreach ($lines as $line) {
+			if (stripos($line, 'Set-Cookie:') === 0)
+			{
+				$value = trim(substr($line, 11));
+				list($tmp) = explode(';', $value);
+
+				$aCookies += self::parseCookieToArray($tmp);
+			}
+		}
+
+		return $aCookies;
 	}
 }

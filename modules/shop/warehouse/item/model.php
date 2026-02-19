@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Warehouse_Item_Model extends Core_Entity
 {
@@ -220,7 +220,7 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 	/**
 	 * Backend callback method
 	 * @param object $value value
-	 * @return string
+	 * @return self
 	 * @hostcms-event shop_warehouse_item.onBeforeAdminPrice
 	 * @hostcms-event shop_warehouse_item.onAfterAdminPrice
 	 */
@@ -242,11 +242,8 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function adminPriceBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function adminPriceBadge()
 	{
 		$this->Shop_Item->type == 3 && Core_Html_Entity::factory('Span')
 			->class('badge badge-ico badge-purple white')
@@ -283,11 +280,13 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 		return htmlspecialchars((string) $oShop_Item->Shop_Measure->name);
 	}
 
-	/**
-	 * Get item's name
-	 * @return string
-	 */
-	public function name()
+    /**
+     * Get item's name
+     * @param Admin_Form_Field_Model $oAdmin_Form_Field
+     * @param Admin_Form_Controller $oAdmin_Form_Controller
+     * @throws Core_Exception
+     */
+	public function name($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$oShop_Item = $this->Shop_Item;
 
@@ -335,6 +334,18 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 				);
 		}
 
+		$oCore_Html_Entity_Div
+			->add(
+				Core_Html_Entity::factory('A')
+				->href(
+					$oAdmin_Form_Controller->getAdminActionLoadHref('/{admin}/shop/item/index.php', 'edit', NULL, 1, $oShop_Item->id)
+				)
+				->target('_blank')
+				->add(
+					Core_Html_Entity::factory('I')->class('fa-solid fa-pencil palegreen pull-right')
+				)
+			);
+
 		$oCore_Html_Entity_Div->execute();
 	}
 
@@ -353,11 +364,8 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function adminCurrencyBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function adminCurrencyBadge()
 	{
 		$oShop_Item = $this->Shop_Item->shortcut_id
 			? Core_Entity::factory('Shop_Item', $this->Shop_Item->shortcut_id)
@@ -394,11 +402,8 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function countBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function countBadge()
 	{
 		$reserved = $this->getReserved();
 		$reserved && Core_Html_Entity::factory('Span')
@@ -410,7 +415,6 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @return string
 	 */
 	public function countBackend()
 	{

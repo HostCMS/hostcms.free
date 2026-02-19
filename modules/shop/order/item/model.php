@@ -18,7 +18,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Order_Item_Model extends Core_Entity
 {
@@ -167,7 +167,7 @@ class Shop_Order_Item_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -263,9 +263,8 @@ class Shop_Order_Item_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
 	public function shop_warehouse_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
@@ -393,16 +392,30 @@ class Shop_Order_Item_Model extends Core_Entity
 	 */
 	public function getTax()
 	{
-		return Shop_Controller::instance()->round($this->price * $this->rate / (100 + $this->rate));
+		return Shop_Controller::instance()->round($this->getPrice(FALSE) * $this->rate / (100 + $this->rate));
 	}
 
 	/**
 	 * Get order's item price
+	 * @param boolean $round
 	 * @return float
+	 * @hostcms-event shop_order_item.onAfterGetPrice
 	 */
-	public function getPrice()
+	public function getPrice($round = TRUE)
 	{
-		return Shop_Controller::instance()->round($this->price);
+		$price = $this->price;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetPrice', $this, array($price));
+		$eventResult = Core_Event::getLastReturn();
+
+		if (!is_null($eventResult) && is_numeric($eventResult))
+		{
+			$price = $eventResult;
+		}
+
+		return $round
+			? Shop_Controller::instance()->round($price)
+			: $price;
 	}
 
 	/**
@@ -451,11 +464,11 @@ class Shop_Order_Item_Model extends Core_Entity
 	 */
 	protected $_showXmlMedia = FALSE;
 
-	/**
-	 * Show properties in XML
-	 * @param mixed $showXmlProperties array of allowed properties ID or boolean
-	 * @return self
-	 */
+    /**
+     * Show properties in XML
+     * @param bool $showXmlMedia
+     * @return self
+     */
 	public function showXmlMedia($showXmlMedia = TRUE)
 	{
 		$this->_showXmlMedia = $showXmlMedia;

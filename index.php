@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 
 if (is_dir('install/') && is_file('install/index.php'))
@@ -215,7 +215,7 @@ $bBlockedIp = $bBlockedFilter = $bBlockedVisitorFilter = $bCaptchaVisitorFilter 
 
 if (Core::moduleIsActive('ipaddress'))
 {
-	$sRemoteAddr = Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1');
+	$sRemoteAddr = Core::getClientIp();
 	$aIp = array($sRemoteAddr);
 
 	$HTTP_X_FORWARDED_FOR = Core_Array::get($_SERVER, 'HTTP_X_FORWARDED_FOR');

@@ -8,6 +8,7 @@ if (Core::moduleIsActive('search'))
 		->xsl(
 			Core_Entity::factory('Xsl')->getByName(Core_Page::instance()->libParams['xsl'])
 		)
+		//->orderField('datetime')
 		->show();
 }
 else

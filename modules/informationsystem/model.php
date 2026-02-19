@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Informationsystem_Model extends Core_Entity
 {
@@ -184,11 +184,11 @@ class Informationsystem_Model extends Core_Entity
 	 */
 	protected $_showXmlCounts = TRUE;
 
-	/**
-	 * Add comments XML to item
-	 * @param boolean $showXmlComments mode
-	 * @return self
-	 */
+    /**
+     * Add comments XML to item
+     * @param bool $showXmlCounts
+     * @return self
+     */
 	public function showXmlCounts($showXmlCounts = TRUE)
 	{
 		$this->_showXmlCounts = $showXmlCounts;
@@ -337,7 +337,6 @@ class Informationsystem_Model extends Core_Entity
 
 	/**
 	 * Delete watermark file
-	 * @return self
 	 * @hostcms-event informationsystem.onAfterDeleteWatermarkFile
 	 */
 	public function deleteWatermarkFile()
@@ -356,8 +355,8 @@ class Informationsystem_Model extends Core_Entity
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return self
-	 * @hostcms-event informationsystem.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event informationsystem.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -534,8 +533,10 @@ class Informationsystem_Model extends Core_Entity
 
 		if (!defined('DENY_INI_SET') || !DENY_INI_SET)
 		{
-			@set_time_limit(1200);
-			ini_set('max_execution_time', '1200');
+			if (Core::isFunctionEnable('set_time_limit') && ini_get('safe_mode') != 1 && ini_get('max_execution_time') < 3600)
+			{
+				@set_time_limit(1200);
+			}
 		}
 
 		Core_Event::notify($this->_modelName . '.onBeforeRecount', $this);
@@ -767,11 +768,8 @@ class Informationsystem_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function nameBadge()
 	{
 		!$this->structure_id && Core_Html_Entity::factory('Span')
 			->class('badge badge-darkorange badge-ico white')
@@ -813,7 +811,6 @@ class Informationsystem_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @return string
 	 */
 	public function pathBackend()
 	{

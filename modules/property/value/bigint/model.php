@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Property
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Property_Value_Bigint_Model extends Core_Entity
 {
@@ -126,11 +126,11 @@ class Property_Value_Bigint_Model extends Core_Entity
 	 */
 	protected $_showXmlMedia = FALSE;
 
-	/**
-	 * Show properties in XML
-	 * @param mixed $showXmlProperties array of allowed properties ID or boolean
-	 * @return self
-	 */
+    /**
+     * Show properties in XML
+     * @param bool $showXmlMedia
+     * @return self
+     */
 	public function showXmlMedia($showXmlMedia = TRUE)
 	{
 		$this->_showXmlMedia = $showXmlMedia;

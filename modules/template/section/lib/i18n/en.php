@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Template
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Widgets of Template Sections',
@@ -43,7 +43,16 @@ return array(
 	'padding_bottom' => 'Padding bottom',
 	'padding_left' => 'Padding left',
 	'padding_right' => 'Padding right',
-	'margin_top' => 'Padding top',
+	'margin_top' => 'Margin top',
+	'margin_bottom' => 'Margin bottom',
+	'margin_left' => 'Margin left',
+	'margin_right' => 'Margin right',
 	'opacity' => 'Transparency',
 	'gradient_background' => 'Gradient',
+	'up_widget' => 'Up',
+	'down_widget' => 'Down',
+	'all_backgrounds' => 'All',
+	'design' => 'Design',
+	'settings' => 'Settings',
+	'user_css' => 'Custom CSS',
 );

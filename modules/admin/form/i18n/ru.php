@@ -6,7 +6,7 @@
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'save' => 'Сохранить',
@@ -107,6 +107,7 @@ return array(
 	'filter_selected' => 'Выбрано',
 	'filter_not_selected' => 'Не выбрано',
 
+
 	'export_csv' => 'Экспорт в CSV',
 	'file_description' => 'Описание файла',
 	'delete_success' => 'Элемент удален!',
@@ -164,5 +165,7 @@ return array(
 	'select_all' => 'Выбрать все',
 	'disable_all' => 'Отменить все',
 
-	'rename' => 'Переименовать'
+	'rename' => 'Переименовать',
+
+	'form_locked' => 'Форма заблокирована %s пользователем <b>%s</b>.',
 );

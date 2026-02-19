@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Http
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Http_Curl extends Core_Http
 {
@@ -142,9 +142,11 @@ class Core_Http_Curl extends Core_Http
 			if (ini_get('open_basedir') == ''
 				&& ini_get('safe_mode') != 1
 				&& strtolower(ini_get('safe_mode')) != 'off'
+				&& !isset($this->_additionalHeaders['Cookie'])
 			)
 			{
-				// When CURLOPT_FOLLOWLOCATION and CURLOPT_HEADER are both true and redirects have happened then the header returned by curl_exec() will contain all the headers in the redirect chain in the order they were encountered.
+				// When CURLOPT_FOLLOWLOCATION and CURLOPT_HEADER are both true and redirects have happened then the header returned by curl_exec()
+				// will contain all the headers in the redirect chain in the order they were encountered.
 				curl_setopt($curl, CURLOPT_FOLLOWLOCATION, TRUE);
 			}
 			else
@@ -170,23 +172,53 @@ class Core_Http_Curl extends Core_Http
 				$code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 				if ($code == 301 || $code == 302)
 				{
-					preg_match('/Location:\s*(.*?)\n/i', $datastr, $matches);
+					$iHeaderSize = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+					$this->_headers = substr($datastr, 0, $iHeaderSize);
+
+					preg_match('/Location:\s*(.*?)\n/i', $this->_headers, $matches);
 					$newurl = array_pop($matches);
 					if (!is_null($newurl) && strlen(trim($newurl)))
 					{
+						if (strpos(strtolower($newurl), 'http') !== 0)
+						{
+							$newurl = "{$scheme}://{$host}" . $newurl;
+						}
+
+						// Merge new and previous request's cookies
+						$aExist = array();
+						if (isset($this->_additionalHeaders['Cookie']))
+						{
+							$aExist = self::parseCookieToArray($this->_additionalHeaders['Cookie']);
+						}
+						// Read additional cookies
+						$aCookies = self::extractCookiesFromHeaders($this->_headers) + $aExist;
+
 						$rch = curl_copy_handle($curl);
-						@curl_close($curl);
+						PHP_VERSION_ID < 80500 && @curl_close($curl);
 						unset($curl); // PHP-8: curl_close no longer closes the resource
 
 						$curl = $rch;
 						//curl_setopt($rch, CURLOPT_FORBID_REUSE, TRUE);
 						curl_setopt($curl, CURLOPT_URL, trim($newurl));
 
+						if (count($aCookies))
+						{
+							$aTmp = array();
+							foreach ($aCookies as $key => $value)
+							{
+								$aTmp[] = $key . '=' . $value;
+							}
+
+							curl_setopt($curl, CURLOPT_COOKIE, implode('; ', $aTmp));
+						}
+
 						// follow location
 						$datastr = @curl_exec($curl);
 
 						// set new errno
 						$this->_errno = curl_errno($curl);
+						
+						$code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 					}
 					else
 					{
@@ -215,7 +247,7 @@ class Core_Http_Curl extends Core_Http
 		}
 
 		// Close PHP cURL handle
-		@curl_close($curl);
+		PHP_VERSION_ID < 80500 && @curl_close($curl);
 		unset($curl); // PHP-8: curl_close no longer closes the resource
 
 		//$aTmp = explode("\r\n\r\n", $datastr, 2);

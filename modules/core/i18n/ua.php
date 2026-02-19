@@ -252,4 +252,5 @@ return array(
 	'error_log_backend_blocked_useragent' => "Доступ до центру адміністрування заблокований, IP '%s', User Agent '%s'",
 	'csrf_wrong_token' => 'Неправильний CSRF-токен, оновіть форму!',
 	'csrf_token_timeout' => 'CSRF-токен закінчився, оновіть форму!',
+	'show_design' => 'Конструктор',
 );

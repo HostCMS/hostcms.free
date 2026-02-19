@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
  class Shop_Discountcard_Bonus_Model extends Core_Entity
 {
@@ -54,7 +54,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -122,7 +122,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -152,8 +152,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return self
-	 * @hostcms-event shop_discountcard_bonus.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event shop_discountcard_bonus.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

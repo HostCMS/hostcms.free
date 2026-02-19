@@ -8,15 +8,15 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm_Project
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Crm_Project_Note_Controller_Edit extends Crm_Note_Controller_Edit
 {
 	/**
 	 * Set object
 	 * @param object $object object
-	 * @return self
-	 */
+	 * @return Crm_Note_Controller_Edit
+     */
 	public function setObject($object)
 	{
 		$crm_project_id = Core_Array::getGet('crm_project_id', 0, 'int');
@@ -60,8 +60,8 @@ class Crm_Project_Note_Controller_Edit extends Crm_Note_Controller_Edit
 	/**
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name
-	 * @return mixed
-	 */
+	 * @return bool
+     */
 	public function execute($operation = NULL)
 	{
 		$crm_project_id = Core_Array::getGet('crm_project_id', 0, 'int');

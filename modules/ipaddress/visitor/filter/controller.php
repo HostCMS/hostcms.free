@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Ipaddress
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Ipaddress_Visitor_Filter_Controller
 {
@@ -53,7 +53,8 @@ class Ipaddress_Visitor_Filter_Controller
 			'!^' => Core::_('Ipaddress_Visitor_Filter.condition_!^'),
 			'$' => Core::_('Ipaddress_Visitor_Filter.condition_$'),
 			'!$' => Core::_('Ipaddress_Visitor_Filter.condition_!$'),
-			'reg' => Core::_('Ipaddress_Visitor_Filter.condition_reg')
+			'reg' => Core::_('Ipaddress_Visitor_Filter.condition_reg'),
+			'!reg' => Core::_('Ipaddress_Visitor_Filter.condition_!reg')
 		);
 	}
 
@@ -69,6 +70,7 @@ class Ipaddress_Visitor_Filter_Controller
 			'host' => Core::_('Ipaddress_Visitor_Filter.host'),
 			'uri' => Core::_('Ipaddress_Visitor_Filter.uri'),
 			'ip' => Core::_('Ipaddress_Visitor_Filter.ip'),
+			'ptr' => Core::_('Ipaddress_Visitor_Filter.ptr'),
 			'get' => Core::_('Ipaddress_Visitor_Filter.get'),
 			'lang' => Core::_('Ipaddress_Visitor_Filter.lang'),
 			'header' => Core::_('Ipaddress_Visitor_Filter.header'),
@@ -135,11 +137,11 @@ class Ipaddress_Visitor_Filter_Controller
 	{
 		if (!isset($this->_cacheGetCounterData[$hours]))
 		{
-			$ip = Core_Array::get($_SERVER, 'REMOTE_ADDR', '', 'str');
+			$ip = Core::getClientIp();
 
 			$oCounter_Visits = Core_Entity::factory('Counter_Visit');
 			$oCounter_Visits->queryBuilder()
-				->where('ip', '=', Core_Str::ip2hex($ip))
+				->where('ip', '=', Core_Ip::ip2hex($ip))
 				->where('site_id', '=', CURRENT_SITE)
 				->where('datetime', '>', Core_Date::timestamp2sql(time() - $hours * 3600))
 				->clearOrderBy()
@@ -172,7 +174,7 @@ class Ipaddress_Visitor_Filter_Controller
 
 	/**
 	 * Clear $this->_cacheGetCounterData
-	 * @return selft
+	 * @return self
 	 */
 	protected function clearCacheGetCounterData()
 	{
@@ -223,11 +225,13 @@ class Ipaddress_Visitor_Filter_Controller
 		$this->_blockMode = $this->_filterId = 0;
 		$this->_blockHours = NULL;
 
-		$ip = Core_Array::get($_SERVER, 'REMOTE_ADDR', '', 'str');
-		if (!Core::moduleIsActive('counter') || !Core_Valid::ipv4($ip))
+		if (!Core::moduleIsActive('counter'))
 		{
 			return FALSE;
 		}
+
+		// IP проверяется по _h_tag из $aCounter_Visits
+		//$ip = Core::getClientIp();
 
 		$bBlocked = FALSE;
 
@@ -282,6 +286,7 @@ class Ipaddress_Visitor_Filter_Controller
 										}
 
 										$compared = NULL;
+										
 										switch ($aCondition['type'])
 										{
 											case 'referer':
@@ -305,7 +310,10 @@ class Ipaddress_Visitor_Filter_Controller
 												$compared = isset($aParseUrl['path']) ? $aParseUrl['path'] : NULL;
 											break;
 											case 'ip':
-												$compared = $ip;
+												$compared = Core_Ip::hex2ip($oCounter_Visit->ip);
+											break;
+											case 'ptr':
+												$compared = Ipaddress_Controller::instance()->gethostbyaddr(Core_Ip::hex2ip($oCounter_Visit->ip));
 											break;
 											case 'get':
 												isset($aParseUrl['query']) && $aParseUrl['query'] !== ''
@@ -336,7 +344,7 @@ class Ipaddress_Visitor_Filter_Controller
 										// NULL может проверяться в режимах содержит/не содержит
 										//if (!is_null($compared) || $aCondition['condition'] == 'like' || $aCondition['condition'] == 'not-like')
 										//{
-											if (!is_null($compared) && $aCondition['condition'] !== 'reg' && !$bCaseSensitive)
+											if (!is_null($compared) && !in_array($aCondition['condition'], array('reg', '!reg')) && !$bCaseSensitive)
 											{
 												$compared = mb_strtolower($compared);
 												$aCondition['value'] = mb_strtolower($aCondition['value']);
@@ -408,12 +416,12 @@ class Ipaddress_Visitor_Filter_Controller
 												break;
 												case '$':
 													$bReturn = is_scalar($compared) && $aCondition['value'] != ''
-														? mb_strpos($compared, $aCondition['value']) === (mb_strlen($compared) - mb_strlen($aCondition['value']))
+														? mb_strrpos($compared, $aCondition['value']) === (mb_strlen($compared) - mb_strlen($aCondition['value']))
 														: FALSE;
 												break;
 												case '!$':
 													$bReturn = is_scalar($compared) && $aCondition['value'] != ''
-														? mb_strpos($compared, $aCondition['value']) !== (mb_strlen($compared) - mb_strlen($aCondition['value']))
+														? mb_strrpos($compared, $aCondition['value']) !== (mb_strlen($compared) - mb_strlen($aCondition['value']))
 														: FALSE;
 												break;
 												case 'reg':
@@ -421,6 +429,12 @@ class Ipaddress_Visitor_Filter_Controller
 													$pattern = '/' . str_replace('/', '\/', $aCondition['value']) . '/' . ($bCaseSensitive ? '' : 'i');
 													$bReturn = is_scalar($compared)
 														? preg_match($pattern, $compared, $matches) > 0
+														: FALSE;
+												break;
+												case '!reg':
+													$pattern = '/' . str_replace('/', '\/', $aCondition['value']) . '/' . ($bCaseSensitive ? '' : 'i');
+													$bReturn = is_scalar($compared)
+														? preg_match($pattern, $compared, $matches) == 0
 														: FALSE;
 												break;
 												default:

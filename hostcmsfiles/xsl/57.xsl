@@ -196,11 +196,18 @@
 				</xsl:if>
 			</td>
 			<td>
-				<input type="text" size="3" name="quantity_{shop_item/@id}" id="quantity_{shop_item/@id}" value="{quantity}"/>
+				<input type="text" size="3" name="quantity_{shop_item/@id}[]" id="quantity_{shop_item/@id}" value="{quantity}"/>
 			</td>
 			<td>
 				<!-- Цена -->
 				<xsl:value-of select="format-number(shop_item/price, '### ##0,00', 'my')"/><xsl:text> </xsl:text><xsl:value-of select="shop_item/currency" disable-output-escaping="yes"/>
+
+				<!-- Если цена со скидкой - выводим ее -->
+				<xsl:if test="shop_item/discount != 0">
+					<div class="oldPrice" style="font-size: 10pt;">
+						<xsl:value-of select="format-number(shop_item/price + shop_item/discount, '### ##0,00', 'my')"/><xsl:text> </xsl:text><xsl:value-of select="shop_item/currency" />
+					</div><xsl:text> </xsl:text>
+				</xsl:if>
 			</td>
 			<td>
 				<!-- Amount -->

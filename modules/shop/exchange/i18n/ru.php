@@ -139,4 +139,7 @@ return array(
 	'shop_warehouse_inventory' => "Инвентаризация при импорте товара",
 	'shop_price_setting' => "Установка цены при импорте товара",
 	'clear_matches' => 'очистить соответствия',
+	'create_prop' => 'Создать свойство типа "%s"',
+	'create_field' => 'Создать поле типа "%s"',
+	'associateds' => 'Сопутствующие товары'
 );

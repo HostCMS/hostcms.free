@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Country_Location_City_Area_Model extends Core_Entity
 {
@@ -112,10 +112,11 @@ class Shop_Country_Location_City_Area_Model extends Core_Entity
 		return $this;
 	}
 
-	/**
-	 * Backend callback method
-	 * @return string
-	 */
+    /**
+     * Backend callback method
+     * @param Admin_Form_Field_Model $oAdmin_Form_Field
+     * @throws Core_Exception
+     */
 	public function nameBackend($oAdmin_Form_Field)
 	{
 		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')->value(
@@ -126,7 +127,7 @@ class Shop_Country_Location_City_Area_Model extends Core_Entity
 		{
 			$oCore_Html_Entity_Div
 				->class('editable')
-				->id('apply_check_0_' . $this->id . '_fv_230');
+				->id('apply_check_0_' . $this->id . '_fv_' . $oAdmin_Form_Field->id);
 		}
 
 		if (!$this->active)

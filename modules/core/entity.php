@@ -20,7 +20,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Entity extends Core_ORM
 {
@@ -245,13 +245,13 @@ class Core_Entity extends Core_ORM
 	/**
 	 * Marks deleted entity
 	 *
-	 * @param mixed Name of field with 'deleted' status. If NULL, marks deleted will not be allowed.
+	 * @var mixed Name of field with 'deleted' status. If NULL, marks deleted will not be allowed.
 	 */
 	protected $_marksDeleted = 'deleted';
 
 	/**
 	 * Has revisions
-	 * @param boolean
+	 * @var boolean
 	 */
 	protected $_hasRevisions = FALSE;
 
@@ -833,7 +833,7 @@ class Core_Entity extends Core_ORM
 		foreach ($aField_Values as $oField_Value)
 		{
 			$oField_Value->Field->type == 2 && $oField_Value->setDir(CMS_FOLDER . ($sPath = Field_Controller::getPath($this)))->setHref('/' . $sPath);
-			
+
 			$xml .= $oField_Value->getXml();
 		}
 
@@ -848,7 +848,7 @@ class Core_Entity extends Core_ORM
 
 	/**
 	 * Is $tagName Available
-	 * @param $tagName Tag Name
+	 * @param string $tagName Tag Name
 	 * @return bool
 	 */
 	protected function _isTagAvailable($tagName)
@@ -934,7 +934,7 @@ class Core_Entity extends Core_ORM
 		foreach ($this->_childrenEntities as $oChildEntity)
 		{
 			$bModel = $oChildEntity instanceof Core_ORM;
-			
+
 			$childName = $bModel
 				? $oChildEntity->getXmlTagName()
 				: $oChildEntity->name;
@@ -986,7 +986,7 @@ class Core_Entity extends Core_ORM
 	protected function _checkEntityIsHasManyRelation($oEntity)
 	{
 		$modelName = $oEntity->getModelName();
-		
+
 		return isset($this->_hasMany[$modelName]) || isset($this->_hasMany[Core_Inflection::getPlural($modelName)]);
 	}
 
@@ -1231,6 +1231,17 @@ class Core_Entity extends Core_ORM
 		Core_Event::notify($this->_modelName . '.onAfterCopy', $newObject, array($this));
 
 		return $newObject;
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function user_idBackend()
+	{
+		return $this->user_id
+			? $this->User->getAvatarWithName()
+			: '';
 	}
 
 	/**

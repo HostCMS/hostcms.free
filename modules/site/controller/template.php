@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Site
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Site_Controller_Template extends Core_Servant_Properties
 {
@@ -77,8 +77,8 @@ class Site_Controller_Template extends Core_Servant_Properties
 
 	/**
 	 * Get XML of selected template
-	 * @return mixed
-	 */
+	 * @return array|false
+     */
 	public function getSelectedTemplateXml()
 	{
 		$template_content_filepath = $this->templatePath . $this->templateSelectedFilename;
@@ -145,7 +145,7 @@ class Site_Controller_Template extends Core_Servant_Properties
 
 	/**
 	 * Load template's XML
-	 * @return mixed
+	 * @return string|true
 	 */
 	public function loadTemplatesXml()
 	{

@@ -35,7 +35,7 @@ $Shop_Controller_YandexMarket
 	//->checkRest(TRUE)
 	->marketMode($fileMode)
 	->mode('offset')
-	->collections(TRUE)
+	//->collections(TRUE)
 	// ->collectionActiveFieldId(310)
 	// ->additionalGroupImages(array('group_image'))
 	->show();

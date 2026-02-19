@@ -38,7 +38,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Controller_Tag_Show extends Core_Controller
 {
@@ -131,22 +131,32 @@ class Shop_Controller_Tag_Show extends Core_Controller
 		$this->_tags = Core_Entity::factory('Tag');
 
 		$this->_tags->queryBuilder()
+			->clearSelect()
+			->straightJoin()
 			->select(array('COUNT(tag_id)', 'count'), 'tags.*')
-			//->from('tag_shop_items')
-			//->leftJoin('tags', 'tag_shop_items.tag_id', '=', 'tags.id')
-			->join('tag_shop_items', 'tag_shop_items.tag_id', '=', 'tags.id')
+			->join('tag_shop_items', 'tag_shop_items.tag_id', '=', 'tags.id',
+				array(
+					array('AND' => array('tag_shop_items.site_id', '=', $oShop->site_id))
+				)
+			)
 			->join('shop_items', 'tag_shop_items.shop_item_id', '=', 'shop_items.id')
 			->leftJoin('shop_groups', 'shop_items.shop_group_id', '=', 'shop_groups.id',
 				array(
 					array('AND' => array('shop_groups.siteuser_group_id', 'IN', $aSiteuserGroups)),
-					array('AND' => array('shop_groups.deleted', '=', 0)),
+					array('AND' => array('shop_groups.deleted', '=', 0))
 				)
 			)
+			->open()
+				->where('shop_items.shop_group_id', '=', 0)
+				->setOr()
+				->where('shop_groups.id', 'IS NOT', NULL)
+			->close()
 			->where('shop_items.siteuser_group_id', 'IN', $aSiteuserGroups)
 			->where('shop_items.shop_id', '=', $oShop->id)
-			->where('shop_items.deleted', '=', 0)
-			//->where('tags.deleted', '=', 0)
-			->groupBy('tag_shop_items.tag_id')
+			->where('shop_items.deleted', '=', 0);
+
+		$this->_tags->queryBuilder()
+			->groupBy('tags.id')
 			->having('count', '>', 0)
 			->orderBy('tags.sorting', 'ASC')
 			->orderBy('tags.name', 'ASC');
@@ -219,6 +229,61 @@ class Shop_Controller_Tag_Show extends Core_Controller
 
 		$oQueryBuilder = $this->_tags->queryBuilder();
 
+		$this->applyFilterGroupCondition($oQueryBuilder);
+
+		// Ярлыки
+		if ($this->group !== FALSE)
+		{
+			$oShop = $this->getEntity();
+
+			$oCore_QueryBuilder_Select_Shortcuts = Core_QueryBuilder::select('shop_items.shortcut_id')
+				->from('shop_items')
+				->where('shop_items.shop_id', '=', $oShop->id)
+				->where('shop_items.deleted', '=', 0)
+				->where('shop_items.shortcut_id', '>', 0);
+
+			$this->group
+				? $this->applyFilterGroupCondition($oCore_QueryBuilder_Select_Shortcuts, 'shop_items.shop_group_id')
+				: $oCore_QueryBuilder_Select_Shortcuts->where('shop_items.shop_group_id', '=', $this->group);
+
+			$this->_tags
+				->queryBuilder()
+				->setOr()
+				->where('shop_items.id', 'IN', $oCore_QueryBuilder_Select_Shortcuts);
+		}
+
+		if ($this->tag_dir !== FALSE)
+		{
+			$oQueryBuilder->where('tag_dir_id', is_array($this->tag_dir) ? 'IN' : '=', $this->tag_dir);
+		}
+
+		if ($this->limit > 0)
+		{
+			$oQueryBuilder->limit($this->offset, $this->limit);
+		}
+
+		$aTags = $this->_tags->findAll(FALSE);
+
+		foreach ($aTags as $oTag)
+		{
+			$oTag->clearEntities();
+			$this->applyForbiddenAllowedTags('/shop/tag', $oTag);
+			$this->addEntity($oTag);
+		}
+
+		echo $content = $this->get();
+		$this->cache && Core::moduleIsActive('cache') && $oCore_Cache->set($cacheKey, $content, $cacheName);
+
+		return $this;
+	}
+
+	/**
+	 * Apply Condition By Group, depends on $this->group, $this->subgroups
+	 * @param Core_QueryBuilder_Select $oQueryBuilder
+	 * @return self
+	 */
+	public function applyFilterGroupCondition($oQueryBuilder)
+	{
 		if ($this->group !== FALSE)
 		{
 			if ($this->subgroups)
@@ -248,34 +313,9 @@ class Shop_Controller_Tag_Show extends Core_Controller
 			}
 			else
 			{
-				$oQueryBuilder
-					->where('shop_items.shop_group_id', is_array($this->group) ? 'IN' : '=', $this->group);
+				$oQueryBuilder->where('shop_items.shop_group_id', is_array($this->group) ? 'IN' : '=', $this->group);
 			}
 		}
-
-		if ($this->tag_dir !== FALSE)
-		{
-			$oQueryBuilder
-				->where('tag_dir_id', is_array($this->tag_dir) ? 'IN' : '=', $this->tag_dir);
-		}
-
-		if ($this->limit > 0)
-		{
-			$oQueryBuilder
-				->limit($this->offset, $this->limit);
-		}
-
-		$aTags = $this->_tags->findAll(FALSE);
-
-		foreach ($aTags as $oTag)
-		{
-			$oTag->clearEntities();
-			$this->applyForbiddenAllowedTags('/shop/tag', $oTag);
-			$this->addEntity($oTag);
-		}
-
-		echo $content = $this->get();
-		$this->cache && Core::moduleIsActive('cache') && $oCore_Cache->set($cacheKey, $content, $cacheName);
 
 		return $this;
 	}

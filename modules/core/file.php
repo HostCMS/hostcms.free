@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_File
 {
@@ -322,11 +322,12 @@ class Core_File
 		{
 			if ($dh = @opendir($dirname))
 			{
+				self::clearCache();
+				
 				while (($file = readdir($dh)) !== FALSE)
 				{
 					if ($file != '.' && $file != '..')
 					{
-						self::clearCache();
 						$pathName = $dirname . DIRECTORY_SEPARATOR . $file;
 
 						if (self::isFile($pathName))
@@ -469,7 +470,7 @@ class Core_File
 	/**
 	 * Get filesize
 	 * @param string $fileName The file path.
-	 * @return mixed filesize or NULL
+	 * @return false|int|null filesize or NULL
 	 */
 	static public function filesize($fileName)
 	{
@@ -632,7 +633,7 @@ class Core_File
 	 * @param $id идентификатор сущности
 	 * @param $level уровень вложенности, по умолчанию 3
 	 * @param $type тип возвращаемого результата, 0 (по умолчанию) - строка, 1 - массив
-	 * @return mixed строка или массив названий групп
+	 * @return array|string строка или массив названий групп
 	 */
 	static public function getNestingDirPath($id, $level = 3, $type = 0)
 	{
@@ -724,8 +725,47 @@ class Core_File
 				array('%file' => Core::cutRootPath($file)));
 		}
 
+		$fileSize = filesize($file);
+		$fileTime = filemtime($file);
+
+		// Получаем информацию о диапазоне из заголовка Range
+		$HTTP_RANGE = Core_Array::get($_SERVER, 'HTTP_RANGE');
+		$aRanges = array();
+
+		if ($HTTP_RANGE != NULL && $fileSize > 0)
+		{
+			// Обрабатываем заголовок Range: bytes=start-end
+			if (preg_match('/bytes=\h*(\d+)-(\d*)[\D.*]?/i', $HTTP_RANGE, $matches))
+			{
+				$start = intval($matches[1]);
+				$end = $matches[2] === '' ? $fileSize - 1 : intval($matches[2]);
+				
+				// Корректируем конечную позицию
+				if ($end >= $fileSize)
+				{
+					$end = $fileSize - 1;
+				}
+				
+				if ($start > $end || $start >= $fileSize)
+				{
+					header('HTTP/1.1 416 Requested Range Not Satisfiable');
+					header("Content-Range: bytes */{$fileSize}");
+					return FALSE;
+				}
+				
+				$aRanges = array(array($start, $end));
+			}
+			else
+			{
+				// Неверный формат Range заголовка
+				header('HTTP/1.1 416 Requested Range Not Satisfiable');
+				header("Content-Range: bytes */{$fileSize}");
+				return FALSE;
+			}
+		}
+
 		header('Pragma: public');
-		header('Content-Type: ' . Core_Mime::getFileMime($file));
+		header('Content-Type: ' . Core_Mime::getFileMime($fileName));
 
 		$contentDisposition = isset($param['content_disposition']) && strtolower($param['content_disposition']) == 'attachment'
 			? 'attachment'
@@ -733,20 +773,65 @@ class Core_File
 
 		header("Content-Disposition: {$contentDisposition}; filename=\"" . rawurlencode(Core_Http::sanitizeHeader($fileName)) . "\";");
 		header('Content-Transfer-Encoding: binary');
-		header('Content-Length: ' . filesize($file));
+		header('Accept-Ranges: bytes');
+		header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $fileTime) . ' GMT');
 
-		self::flush();
-
-		if ($fd = fopen($file, "rb"))
+		if (!empty($aRanges))
 		{
-			while (!feof($fd))
-			{
-				echo fread($fd, 1048576);
-				self::flush();
-			}
-			fclose($fd);
-		}
+			// Отправка части файла
+			$start = $aRanges[0][0];
+			$end = $aRanges[0][1];
+			$length = $end - $start + 1;
+			
+			header('HTTP/1.1 206 Partial Content');
+			header("Content-Range: bytes {$start}-{$end}/{$fileSize}");
+			header('Content-Length: ' . $length);
+			
+			self::flush();
 
+			if ($fd = fopen($file, "rb"))
+			{
+				if (fseek($fd, $start) === 0)
+				{
+					$bytesSent = 0;
+					$bufferSize = 1048576; // 1MB chunks
+					
+					while (!feof($fd) && $bytesSent < $length)
+					{
+						$bytesToRead = min($bufferSize, $length - $bytesSent);
+						$data = fread($fd, $bytesToRead);
+						
+						if ($data === FALSE)
+						{
+							break;
+						}
+						
+						echo $data;
+						$bytesSent += strlen($data);
+						self::flush();
+					}
+				}
+				fclose($fd);
+			}
+		}
+		else
+		{
+			// Отправка полного файла
+			header('Content-Length: ' . $fileSize);
+			
+			self::flush();
+
+			if ($fd = fopen($file, "rb"))
+			{
+				while (!feof($fd))
+				{
+					echo fread($fd, 1048576);
+					self::flush();
+				}
+				fclose($fd);
+			}
+		}
+		
 		return TRUE;
 	}
 

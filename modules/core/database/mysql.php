@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Database
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_DataBase_Mysql extends Core_DataBase
 {
@@ -379,7 +379,7 @@ class Core_DataBase_Mysql extends Core_DataBase
 		// Delete old items
 		if (/*rand(0, self::$_maxObjects) == 0 && */count($this->_quoteColumnNameCache) > self::$_maxObjects)
 		{
-			$this->_quoteColumnNameCache = array_slice($this->_quoteColumnNameCache, floor(self::$_maxObjects / 4));
+			$this->_quoteColumnNameCache = array_slice($this->_quoteColumnNameCache, floor(self::$_maxObjects / 4), NULL, TRUE);
 		}
 
 		$this->_quoteColumnNameCache[$columnName] = $value;
@@ -389,7 +389,7 @@ class Core_DataBase_Mysql extends Core_DataBase
 	/**
 	 * Quote table name, e.g. `tableName` for 'tableName',
 	 * `tableName` AS `tableNameAlias` for array('tableName', 'tableNameAlias')
-	 * @param mixed $columnName string|array
+	 * @param mixed $tableName string|array
 	 * @return string
 	 */
 	public function quoteTableName($tableName)
@@ -799,8 +799,8 @@ class Core_DataBase_Mysql extends Core_DataBase
 	/**
 	 * Get mysql_fetch_assoc() last result
 	 * @param $result resource
-	 * @return mixed
-	 */
+	 * @return array
+     */
 	protected function _currentAssoc($result = NULL)
 	{
 		return mysql_fetch_assoc(is_null($result) ? $this->_result : $result);

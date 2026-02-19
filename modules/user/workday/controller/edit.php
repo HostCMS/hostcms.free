@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage User
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class User_Workday_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -63,8 +63,8 @@ class User_Workday_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 	/**
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name
-	 * @return mixed
-	 */
+	 * @return bool
+     */
 	public function execute($operation = NULL)
 	{
 		// Всегда id_content

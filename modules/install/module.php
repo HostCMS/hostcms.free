@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Install
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Install_Module extends Core_Module_Abstract
 {
@@ -22,5 +22,5 @@ class Install_Module extends Core_Module_Abstract
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2025-08-19';
+	public $date = '2026-02-10';
 }

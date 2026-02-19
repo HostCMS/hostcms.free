@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Informationsystem_Dir_Model extends Core_Entity
 {
@@ -80,8 +80,8 @@ class Informationsystem_Dir_Model extends Core_Entity
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return self
-	 * @hostcms-event informationsystem_dir.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event informationsystem_dir.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

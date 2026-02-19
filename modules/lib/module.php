@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Lib
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Lib_Module extends Core_Module_Abstract
 {
@@ -22,7 +22,7 @@ class Lib_Module extends Core_Module_Abstract
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2025-08-19';
+	public $date = '2026-02-10';
 
 	/**
 	 * Module name
@@ -50,14 +50,16 @@ class Lib_Module extends Core_Module_Abstract
 		return parent::getMenu();
 	}
 
-	/**
-	 * Функция обратного вызова для поисковой индексации
-	 *
-	 * @param $offset
-	 * @param $limit
-	 * @return array
-	 * @hostcms-event Lib_Module.indexing
-	 */
+    /**
+     * Функция обратного вызова для поисковой индексации
+     *
+     * @param int $site_id
+     * @param int $offset
+     * @param int $limit
+     * @return array
+     * @throws Core_Exception
+     * @hostcms-event Lib_Module.indexing
+     */
 	public function indexing($site_id, $offset, $limit)
 	{
 		$offset = intval($offset);

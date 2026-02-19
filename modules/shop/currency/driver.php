@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 abstract class Shop_Currency_Driver
 {
@@ -26,7 +26,7 @@ abstract class Shop_Currency_Driver
 	/**
 	 * Get full driver name
 	 * @param string $driver driver name
-	 * @return srting
+	 * @return string
 	 */
 	static protected function _getDriverName($driver)
 	{

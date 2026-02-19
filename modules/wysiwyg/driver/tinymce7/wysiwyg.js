@@ -174,13 +174,12 @@ class wysiwyg {
 	{
 		$parent.tinymce({
 			language: backendLng,
-			language_url: '/modules/wysiwyg/driver/tinymce6/langs/' + backendLng + '.js',
+			language_url: '/modules/wysiwyg/driver/tinymce7/langs/' + backendLng + '.js',
 			init_instance_callback: function (editor) {
 				editor.on('blur', function (e) {
 					e.stopImmediatePropagation();
 					editor.remove();
 					$parent.css('visibility', '');
-
 					$parent.removeClass('editing');
 				});
 			},
@@ -199,7 +198,7 @@ class wysiwyg {
 			// theme: "silver",
 			// toolbar_items_size: "small",
 			language: backendLng,
-			language_url: '/modules/wysiwyg/driver/tinymce6/langs/' + backendLng + '.js',
+			language_url: '/modules/wysiwyg/driver/tinymce7/langs/' + backendLng + '.js',
 			init_instance_callback: function (editor) {
 				editor.on('blur', function (e) {
 					settings.blur($parent);
@@ -211,6 +210,31 @@ class wysiwyg {
 			toolbar: 'undo redo | styleselect formatselect | bold italic underline backcolor | alignleft aligncenter alignright alignjustify | bullist numlist | link unlink image media preview table | removeformat code',
 			content_css: aCss
 		}, settings.wysiwygConfig));
+	}
+
+	static frontendSettingsRow($parent)
+	{
+		$parent.tinymce({
+			language: backendLng,
+			language_url: '/modules/wysiwyg/driver/tinymce6/langs/' + backendLng + '.js',
+			init_instance_callback: function (editor) {
+				editor.on('init', function (e) {
+					e.stopImmediatePropagation();
+					editor.remove();
+					$parent.css('visibility', '');
+				});
+			},
+			// script_url: hostcmsBackend + "/wysiwyg/tinymce.min.js",
+			menubar: false,
+			toolbar_mode: 'sliding',
+			toolbar_items_size: 'small',
+			promotion: false,
+			statusbar: false,
+			// inline: true,
+			plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table importcss',
+			toolbar: 'undo redo bold italic underline forecolor backcolor | blocks fontfamily fontsize | alignleft aligncenter alignright alignjustify | bullist numlist | link unlink image media preview table | removeformat code',
+			font_size_formats: "8pt 9pt 10pt 11pt 12pt 14pt 16pt 18pt 20pt 24pt 30pt 36pt 48pt 60pt 72pt 96pt"
+		});
 	}
 }
 

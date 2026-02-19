@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Skin_Bootstrap extends Core_Skin
 {
@@ -31,7 +31,7 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/skins.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/jquery-2.2.4.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/bootstrap.min.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/bootstrap-hostcms.js')
+			// ->addJs('/modules/skin/' . $this->_skinName . '/js/bootstrap-hostcms.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/datetime/moment.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/datetime/bootstrap-datetimepicker.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/datetime/daterangepicker.js')
@@ -40,6 +40,23 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/toastr/toastr.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/bootbox/bootbox.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/jquery.form.js');
+
+			$this
+				->addJs('/modules/skin/' . $this->_skinName . '/js/modules/admin/admin-form.js')
+				->addJs('/modules/skin/' . $this->_skinName . '/js/modules/admin/admin-utils.js')
+				->addJs('/modules/skin/' . $this->_skinName . '/js/modules/core/utils.js')
+				->addJs('/modules/skin/' . $this->_skinName . '/js/modules/core/extensions.js')
+				->addJs('/modules/skin/' . $this->_skinName . '/js/modules/core/webauthn.js')
+				->addJs('/modules/skin/' . $this->_skinName . '/js/modules/framework/ajax.js')
+				->addJs('/modules/skin/' . $this->_skinName . '/js/modules/framework/ui.js')
+				->addJs('/modules/skin/' . $this->_skinName . '/js/modules/framework/validation.js')
+				->addJs('/modules/skin/' . $this->_skinName . '/js/modules/module/kanban.js')
+				;
+
+			if (Core::$mainConfig['chat'])
+			{
+				$this->addJs('/modules/skin/' . $this->_skinName . '/js/modules/module/chat.js');
+			}
 
 			//https://github.com/ajaxorg/ace-builds
 			/*->addJs('/modules/skin/' . $this->_skinName . '/js/ace/ace.js')
@@ -80,35 +97,6 @@ class Skin_Bootstrap extends Core_Skin
 		}
 
 		$this
-			->addJs('/modules/skin/' . $this->_skinName . '/js/star-rating.min.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/typeahead-bs2.min.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/ui/jquery-ui.min.js')
-
-			->addJs('/modules/skin/' . $this->_skinName . '/js/ui/jquery.ui.touch-punch.min.js')
-
-			->addJs('/modules/skin/' . $this->_skinName . '/js/jquery.mousewheel.min.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/select2/select2.min.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/select2/i18n/' . $lng . '.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/dropzone/dropzone.min.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/colorpicker/jquery.minicolors.min.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/nouislider/nouislider.min.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/wickedpicker/wickedpicker.min.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/cropper/cropper.min.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/cropper/jquery-cropper.min.js')
-
-			->addJs('/modules/skin/' . $this->_skinName . '/js/bootstrap-editable/js/bootstrap-editable.min.js')
-
-			->addJs('/modules/skin/' . $this->_skinName . '/js/sip/howler.min.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/sip/jssip.min.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/sip/softophone.js', 'module')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/sip/jquery.softophone.js', 'module')
-
-			//->addJs('/modules/skin/' . $this->_skinName . '/js/timeslider/timeslider.js')
-			//->addJs('/modules/skin/' . $this->_skinName . '/js/fuelux/wizard/wizard-custom.min.js')
-			//->addJs('/modules/skin/' . $this->_skinName . '/js/jRange/jquery.range-min.js')
-			;
-
-		$this
 			->addCss('/modules/skin/' . $this->_skinName . '/css/bootstrap.min.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/fonts/fontawesome/6/css/all.min.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/fonts/fontawesome/5/css/all.min.css')
@@ -118,20 +106,49 @@ class Skin_Bootstrap extends Core_Skin
 			->addCss('/modules/skin/' . $this->_skinName . '/css/animate.min.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/dataTables.bootstrap.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/bootstrap-datetimepicker.css')
-			// ->addCss('/modules/skin/' . $this->_skinName . '/js/codemirror/lib/codemirror.css')
-			// ->addCss('/modules/skin/' . $this->_skinName . '/js/codemirror/addon/dialog/dialog.css')
-			->addCss('/modules/skin/' . $this->_skinName . '/css/star-rating.min.css')
+
+			->addJs('/modules/skin/' . $this->_skinName . '/js/star-rating/js/star-rating.min.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/star-rating/themes/krajee-fas/theme.min.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/star-rating/js/locales/' . $lng . '.js')
+			->addCss('/modules/skin/' . $this->_skinName . '/js/star-rating/css/star-rating.min.css')
+			->addCss('/modules/skin/' . $this->_skinName . '/js/star-rating/themes/krajee-fas/theme.min.css')
+
 			->addCss('/modules/skin/' . $this->_skinName . '/css/bootstrap-hostcms.css')
+
+			->addJs('/modules/skin/' . $this->_skinName . '/js/typeahead-bs2.min.js')
+
+			->addJs('/modules/skin/' . $this->_skinName . '/js/ui/jquery-ui.min.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/ui/jquery.ui.touch-punch.min.js')
+
+			->addJs('/modules/skin/' . $this->_skinName . '/js/jquery.mousewheel.min.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/select2/select2.min.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/select2/i18n/' . $lng . '.js')
+
+			->addJs('/modules/skin/' . $this->_skinName . '/js/dropzone/dropzone.min.js')
 			->addCss('/modules/skin/' . $this->_skinName . '/js/dropzone/dropzone.css')
+
+			->addJs('/modules/skin/' . $this->_skinName . '/js/colorpicker/jquery.minicolors.min.js')
+
+			->addJs('/modules/skin/' . $this->_skinName . '/js/nouislider/nouislider.min.js')
 			->addCss('/modules/skin/' . $this->_skinName . '/js/nouislider/nouislider.min.css')
+
+			->addJs('/modules/skin/' . $this->_skinName . '/js/wickedpicker/wickedpicker.min.js')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/wickedpicker.min.css')
+
+			->addJs('/modules/skin/' . $this->_skinName . '/js/cropper/cropper.min.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/cropper/jquery-cropper.min.js')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/cropper/cropper.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/cropper/jquery-cropper.css')
 
+			->addJs('/modules/skin/' . $this->_skinName . '/js/bootstrap-editable/js/bootstrap-editable.min.js')
 			->addCss('/modules/skin/' . $this->_skinName . '/js/bootstrap-editable/css/bootstrap-editable.css')
 
-			//->addCss('/modules/skin/' . $this->_skinName . '/css/timeslider.css')
-			//->addCss('/modules/skin/' . $this->_skinName . '/js/jRange/jquery.range.css')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/sip/howler.min.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/sip/jssip.min.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/sip/softophone.js', 'module')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/sip/jquery.softophone.js', 'module')
+
+			//->addJs('/modules/skin/' . $this->_skinName . '/js/fuelux/wizard/wizard-custom.min.js')
 			;
 	}
 
@@ -308,6 +325,68 @@ class Skin_Bootstrap extends Core_Skin
 						?><div class="navbar-account">
 							<ul class="account-area">
 								<?php
+								if (Core::moduleIsActive('ai'))
+								{
+									$oAis = Core_Entity::factory('Ai');
+									$oAis->queryBuilder()
+										->where('ais.site_id', '=', CURRENT_SITE)
+										->where('ais.active', '=', 1)
+										->where('ais.driver', '!=', '');
+
+									$aAis = $oAis->findAll(FALSE);
+
+									?><li id="ai">
+										<a href="#" title="<?php echo Core::_('Admin.ai')?>" data-toggle="dropdown" class="dropdown-toggle">
+											<i class="icon fa-solid fa-microchip"></i>
+											<span class="badge hidden"></span>
+										</a>
+										<div id="aiListBox" class="pull-left dropdown-menu dropdown-arrow dropdown-bookmark dropdown-notifications">
+											<div class="scroll-ai">
+												<ul class="ai-list">
+													<?php
+													if (count($aAis))
+													{
+														foreach ($aAis as $oAi)
+														{
+															$oAi_Controller = Ai_Controller::instance($oAi->driver);
+
+															?><li id="ai-<?php echo htmlspecialchars($oAi->id)?>">
+																	<a href="" onclick="$(this).parents('li.open').click(); $.showAiChatModal(<?php echo $oAi->id?>); return false">
+																	<div class="clearfix notification-clock d-flex align-items-center">
+																		<div class="notification-icon">
+																			<img src="<?php echo htmlspecialchars($oAi_Controller->getIcon())?>" width="20px" height="20px" class="margin-right-10">
+																		</div>
+																		<div class="notification-body">
+																			<span class="title"><?php echo htmlspecialchars($oAi->name)?></span>
+																			<span class="description"><?php echo htmlspecialchars($oAi->modelBackend())?></span>
+																		</div>
+																	</div>
+																</a>
+															</li><?php
+														}
+													}
+													else
+													{
+														?><li id="ai-0">
+															<a href="#">
+																<div class="clearfix">
+																	<div class="notification-icon">
+																		<i class="fa fa-info bg-themeprimary white"></i>
+																	</div>
+																	<div class="notification-body">
+																		<span class="title margin-top-5"><?php echo Core::_('Ai.no_active_ai')?></span>
+																	</div>
+																</div>
+															</a>
+														</li><?php
+													}
+													?>
+												</ul>
+											</div>
+										</div>
+									</li><?php
+								}
+
 								if (Core::moduleIsActive('telephony'))
 								{
 									$aTelephonies = Core_Entity::factory('Telephony')->getTelephonies();
@@ -795,45 +874,7 @@ class Skin_Bootstrap extends Core_Skin
 													window.chatMessagesListScrollDown = false;
 												}
 											});
-										});
-
-										/* $(window).on('load', function() {
-
-											// Создаем и сохраняем уникальный идентификатор вкладки браузера
-										 	window.tabId = 'tab_' + Math.random().toString().split('.')[1];
-
-										 	var storageWindowTabs = localStorage.getItem('window_tabs'),
-												windowTabs = storageWindowTabs ? JSON.parse(storageWindowTabs) : [];
-
-												windowTabs.push(window.tabId);
-
-											localStorage.setItem('window_tabs', JSON.stringify(windowTabs));
-
-											console.log('window load');
-										})
-										.on('unload', function() {
-											// Удаляем уникальный идентификатор вкладки браузера
-											var storageWindowTabs = localStorage.getItem('window_tabs');
-
-											if (storageWindowTabs)
-											{
-												windowTabs = JSON.parse(storageWindowTabs);
-
-												for( var i = 0; i < windowTabs.length; i++)
-												{
-													if ( windowTabs[i] === window.tabId)
-													{
-														windowTabs.splice(i, 1);
-														break;
-													}
-												}
-
-												localStorage.setItem('window_tabs', JSON.stringify(windowTabs));
-											}
-											console.log('window unload');
-										}); */
-
-										$(function(){
+										
 											// Chat
 											$('.page-container').append($('#chatbar'));
 											$("#chat-link, #chatbar div.back").on('click', {path: '<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/index.php?ajaxWidgetLoad&moduleId={$oModule->id}&type=77")?>', context: $('#chatbar .contacts-list') }, function(event) { $(this).hasClass('open') && $.chatGetUsersList(event) });
@@ -948,6 +989,7 @@ class Skin_Bootstrap extends Core_Skin
 											</ul>
 										</li>
 										<li class="dropdown-footer">
+											<a class="fast-login-link" onclick="createRegistration(location); return false;"><i class="fa-solid fa-fingerprint"></i><?php echo htmlspecialchars(Core::_('Admin.fast_login'))?></a>
 											<a href="<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/logout.php?secret_csrf=$csrf_token")?>" onmousedown="$(window).off('beforeunload')"><?php echo Core::_('Admin.exit')?></a>
 										</li>
 									</ul>
@@ -1353,80 +1395,123 @@ class Skin_Bootstrap extends Core_Skin
 		$this->_mode = 'authorization';
 
 		?><div class="login-container animated fadeInDown">
-		<div class="loginbox-largelogo">
-			<img src="/modules/skin/bootstrap/img/large-logo.png">
-		</div>
+			<div class="loginbox-largelogo">
+				<img src="/modules/skin/bootstrap/img/large-logo.png">
+			</div>
 
-		<?php
-		$message = Core_Skin::instance()->answer()->message;
-		if ($message)
-		{
-			Core_Html_Entity::factory('Div')
-				->id('authorizationError')
-				->value($message)
-				->execute();
+			<?php
 
-			// Reset message
-			Core_Skin::instance()->answer()->message('');
-		}
+			$oAuthorizationErrorDiv = Core_Html_Entity::factory('Div')
+				->id('authorizationError');
 
-		$bDeviceTracking = Core::$mainConfig['backendAssignSessionToIp']
-			&& !isset($_SERVER['HTTP_CF_IPCOUNTRY']) && Core_Array::getCookie('hostcms_device_tracking', 'on') == 'on'
-			&& strtolower(Core_Array::get($_SERVER, 'HTTP_SAVE_DATA', 'off')) !== 'on';
+			$message = Core_Skin::instance()->answer()->message;
+			if ($message)
+			{
+				$oAuthorizationErrorDiv->value($message);
 
-		$time = time();
-		?>
+				// Reset message
+				Core_Skin::instance()->answer()->message('');
+			}
 
-		<div class="loginbox">
-			<form class="form-horizontal" action="<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/index.php")?>" method="post">
-				<div class="loginbox-textbox">
-					<span class="input-icon">
-						<input type="text" name="login" class="form-control" placeholder="<?php echo Core::_('Admin.authorization_form_login')?>" required="required" />
-						<i class="fa fa-user"></i>
-					</span>
-				</div>
-				<div class="loginbox-textbox">
-					<span class="input-icon">
-						<input type="password" name="password" class="form-control" placeholder="<?php echo Core::_('Admin.authorization_form_password')?>" required="required" />
-						<i class="fa fa-lock"></i>
-					</span>
-				</div>
-				<div class="loginbox-forgot">
-					<label>
-						<input type="checkbox"<?php echo $bDeviceTracking ? ' checked="checked"' : ''?> name="ip" /><span class="text"><?php echo Core::_('Admin.authorization_form_ip')?></span>
-					</label>
-				</div>
-				<div class="loginbox-submit">
-					<input type="submit" name="submit" class="btn btn-danger btn-block" value="<?php echo Core::_('Admin.authorization_form_button')?>">
-				</div>
-				<input type="hidden" name="secret_csrf" value="<?php echo Core_Security::getCsrfToken()?>">
-			</form>
-		</div>
+			$oAuthorizationErrorDiv->execute();
+
+			$bDeviceTracking = Core::$mainConfig['backendAssignSessionToIp']
+				&& !isset($_SERVER['HTTP_CF_IPCOUNTRY']) && Core_Array::getCookie('hostcms_device_tracking', 'on') == 'on'
+				&& strtolower(Core_Array::get($_SERVER, 'HTTP_SAVE_DATA', 'off')) !== 'on';
+
+			$savedLogin = Core_Array::getCookie('_h_login', '', 'trim');
+
+			$oUserTmp = Core_Entity::factory('User')->getByLogin($savedLogin, FALSE);
+
+			$bExistsCredentials = !is_null($oUserTmp)
+				? $oUserTmp->User_Webauthns->getCount(FALSE) > 0
+				: FALSE;
+			?>
+			<div class="loginbox">
+				<form class="form-horizontal" action="<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/index.php")?>" method="post">
+					<?php
+					if ($bExistsCredentials)
+					{
+						?><div class="loginbox-auth-by-biometric">
+							<div class="loginbox-textbox loginbox-fast-login">
+								<b><?php echo htmlspecialchars($savedLogin)?></b>
+								<br/>
+								<span><?php echo Core::_('Admin.authorization_fast_button_accept')?></span>
+							</div>
+
+							<div class="loginbox-submit">
+								<button type="submit" name="submit" class="btn btn-danger btn-block" onclick="$('.loginbox-auth-by-password input').removeAttr('required'); checkRegistration(location).then(function(result) { if (typeof result == 'string') { $('#authorizationError').html(result); } }); return false;">
+									<i class="fa-solid fa-fingerprint"></i>
+									<?php echo Core::_('Admin.authorization_form_button')?>
+								</button>
+							</div>
+
+							<div class="loginbox-textbox loginbox-fast-login">
+								<span class="auth-by-password" onclick="$('.loginbox-auth-by-password').removeClass('hidden'); $('.loginbox-auth-by-biometric').addClass('hidden');">Войти по паролю</span>
+							</div>
+						</div><?php
+					}
+
+					$wrapperClass = $bExistsCredentials ? ' hidden' : '';
+					?>
+					<div class="loginbox-auth-by-password<?php echo htmlspecialchars($wrapperClass)?>">
+						<div class="loginbox-textbox">
+							<span class="input-icon">
+								<input type="text" name="login" value="<?php echo htmlspecialchars($savedLogin)?>" class="form-control" placeholder="<?php echo Core::_('Admin.authorization_form_login')?>" required="required" />
+								<i class="fa fa-user"></i>
+							</span>
+						</div>
+						<div class="loginbox-textbox">
+							<span class="input-icon">
+								<input type="password" name="password" class="form-control" placeholder="<?php echo Core::_('Admin.authorization_form_password')?>" required="required" />
+								<i class="fa fa-lock"></i>
+							</span>
+						</div>
+						<div class="loginbox-forgot">
+							<label>
+								<input type="checkbox"<?php echo $bDeviceTracking ? ' checked="checked"' : ''?> name="ip" /><span class="text"><?php echo Core::_('Admin.authorization_form_ip')?></span>
+							</label>
+						</div>
+						<div class="loginbox-submit">
+							<input type="submit" name="submit" class="btn btn-danger btn-block" value="<?php echo Core::_('Admin.authorization_form_button')?>">
+						</div>
+					</div>
+
+					<input type="hidden" name="secret_csrf" value="<?php echo Core_Security::getCsrfToken()?>">
+				</form>
+
+				<script>
+					if ($.unavailableWebauthn()) {
+						$('.loginbox-auth-by-password').removeClass('hidden');
+						$('.loginbox-auth-by-biometric').remove();
+					}
+				</script>
+			</div>
 		</div>
 
 		<div class="widget hostcms-notice transparent">
-		<div class="widget-body">
-			<?php echo Core::_('Admin.authorization_notice')?>
-		</div>
-		<div class="widget-body">
-			<?php echo Core::_('Admin.authorization_notice2')?>
-		</div>
-		<div class="widget-body text-align-center">
-			<a href="/"><?php echo Core::_('Admin.authorization_back_to_frontend')?></a>
-		</div>
+			<div class="widget-body">
+				<?php echo Core::_('Admin.authorization_notice')?>
+			</div>
+			<div class="widget-body">
+				<?php echo Core::_('Admin.authorization_notice2')?>
+			</div>
+			<div class="widget-body text-align-center">
+				<a href="/"><?php echo Core::_('Admin.authorization_back_to_frontend')?></a>
+			</div>
 		</div>
 
 		<script>
-		$("#authorization input[name='login']").focus();
+			$("#authorization input[name='login']").focus();
 
-		// Check Google chrome data saver mode
-		if ('connection' in navigator)
-		{
-			if (navigator.connection.saveData)
+			// Check Google chrome data saver mode
+			if ('connection' in navigator)
 			{
-				$("input[name='ip']").prop('checked', false);
+				if (navigator.connection.saveData)
+				{
+					$("input[name='ip']").prop('checked', false);
+				}
 			}
-		}
 		</script>
 		<?php
 		}
@@ -1456,7 +1541,7 @@ class Skin_Bootstrap extends Core_Skin
 <div class="container">
 	<div class="row">
 		<div class="col-xs-12">
-			<p class="copy pull-left copyright">Copyright © 2005–2025 <?php echo Core::_('Admin.company')?></p>
+			<p class="copy pull-left copyright">Copyright © 2005–2026 <?php echo Core::_('Admin.company')?></p>
 			<p class="copy text-right contacts">
 				<?php echo Core::_('Admin.website')?> <a href="http://<?php echo Core::_('Admin.company-website')?>" target="_blank"><?php echo Core::_('Admin.company-website')?></a>
 				<br/>
@@ -1547,8 +1632,8 @@ class Skin_Bootstrap extends Core_Skin
 			ob_start();
 			if (!is_null(Core_Array::getGet('moduleId')))
 			{
-				$moduleId = intval(Core_Array::getGet('moduleId'));
-				$type = intval(Core_Array::getGet('type', 0));
+				$moduleId = Core_Array::getGet('moduleId', 0, 'int');
+				$type = Core_Array::getGet('type', 0, 'int');
 
 				$oUser_Setting = $oUser->User_Settings->getByModuleIdAndTypeAndEntityId($moduleId, $type, 0);
 				!is_null($oUser_Setting) && $oUser_Setting->active(1)->save();
@@ -1569,7 +1654,7 @@ class Skin_Bootstrap extends Core_Skin
 					}
 					else
 					{
-						throw new Core_Exception('SkinModuleName does not found.');
+						throw new Core_Exception(sprintf('Module "%s" SkinModuleName does not found.', htmlspecialchars($modulePath)));
 					}
 				}
 			}
@@ -1757,11 +1842,11 @@ class Skin_Bootstrap extends Core_Skin
 
 					foreach ($aTypes as $type => $title)
 					{
-						//$oUser_Setting = $oUser->User_Settings->getByModuleIdAndTypeAndEntityId(0, $type, 0);
+						$oUser_Setting = $oUser->User_Settings->getByModuleIdAndTypeAndEntityId(0, $type, 0);
 
 						// Временно отключена проверка
-						//if (is_null($oUser_Setting) || $oUser_Setting->active)
-						if (TRUE)
+						if (is_null($oUser_Setting) || $oUser_Setting->active)
+						// if (TRUE)
 						{
 							$Core_Module->adminPage($type);
 						}
@@ -1769,7 +1854,34 @@ class Skin_Bootstrap extends Core_Skin
 				}
 				?>
 			</div>
-		</div><?php
+		</div>
+
+		<div id="modal-success-register" class="modal modal-message fade" style="display: none;" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<!-- <i class="fa-solid fa-fingerprint fa-2xl"></i> -->
+					</div>
+					<!-- <div class="modal-title"><?php echo htmlspecialchars(Core::_('Admin.fast_login'))?></div> -->
+
+					<div class="modal-body">
+						Подключить быстрый вход?
+						<div class="margin-top-20"><i class="fa-solid fa-fingerprint fa-2xl darkgray"></i></div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-success" data-dismiss="modal" onclick="createRegistration(location)"><?php echo htmlspecialchars(Core::_('Admin_Form.yes'))?></button>
+						<button type="button" class="btn btn-danger" data-dismiss="modal" onclick="$.setCookie('_h_webauthn_show_modal', false, 2592000 * 12);"><?php echo htmlspecialchars(Core::_('Admin_Form.no'))?></button>
+					</div>
+				</div> <!-- / .modal-content -->
+			</div> <!-- / .modal-dialog -->
+		</div>
+
+		<script>
+			if (!$.unavailableWebauthn() && readCookie('_h_webauthn_show_modal') !== 'false') {
+				$('#modal-success-register').modal('show');
+			}
+		</script>
+		<?php
 
 		return $this;
 	}
@@ -1848,9 +1960,13 @@ class Skin_Bootstrap extends Core_Skin
 		}
 
 		?><link rel="stylesheet" type="text/css" href="/modules/skin/default/frontend/frontend.css?<?php echo $iTimestamp?>" /><?php
+		?><link rel="stylesheet" type="text/css" href="/modules/skin/default/frontend/theme.css?<?php echo $iTimestamp?>" /><?php
 		?><link rel="stylesheet" type="text/css" href="/modules/skin/bootstrap/fonts/fontawesome/6/css/all.min.css?<?php echo $iTimestamp?>" /><?php
+		?><link rel="stylesheet" type="text/css" href="/modules/skin/default/frontend/simplexml/simplexml.css?<?php echo $iTimestamp?>" /><?php
 		?><script src="/modules/skin/default/frontend/jquery.min.js"></script><?php
 		?><script src="/modules/skin/default/frontend/jquery-ui.min.js"></script><?php
+		?><script src="/modules/skin/default/frontend/simplexml/simplexml.js"></script><?php
+		?><script src="/modules/skin/default/frontend/hostcms.slidepanel.js"></script><?php
 
 		/*?><script src="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/wysiwyg/jquery.tinymce.min.js')?>"></script><?php*/
 
@@ -1883,7 +1999,7 @@ class Skin_Bootstrap extends Core_Skin
 			?><script src="/modules/skin/bootstrap/js/toastr/toastr.js"></script><?php
 			?><script src="/modules/skin/bootstrap/js/jquery.form.js"></script><?php
 			/*?><script src="/modules/skin/bootstrap/js/select2/select2.min.js"></script><?php
-			?><script src="/modules/skin/bootstrap/js/select2/i18n/<?php echo $this->getLng()?>.js"></script><?php*/
+			?><script src="/modules/skin/bootstrap/js/select2/i18n/<?php echo $lng?>.js"></script><?php*/
 		}
 		?><script>var hQuery = $.noConflict(true);</script><?php
 		?><script src="/modules/skin/<?php echo $this->_skinName?>/js/lng/<?php echo $lng?>/<?php echo $lng?>.js"></script><?php
@@ -1891,56 +2007,14 @@ class Skin_Bootstrap extends Core_Skin
 
 		if ($bLess)
 		{
-			?><div class="bootstrap-iso">
-				<div class="template-settings">
-					<span id="slidepanel-settings" onclick="hQuery.toggleSlidePanel()"><i class="fa fa-fw fa-cog"></i></span>
-					<div class="slidepanel">
-						<div class="container scroll-template-settings">
-							<?php
-							foreach ($aTemplates as $oTemplate)
-							{
-								$oTemplate->showManifest();
-							}
-							?>
-						</div>
-					</div>
-				</div>
-			</div>
+			$aTemplateIds = array();
+			foreach ($aTemplates as $oTemplate)
+			{
+				!in_array($oTemplate->id, $aTemplateIds)
+					&& $aTemplateIds[] = $oTemplate->id;
+			}
 
-			<script>
-			hQuery('.bootstrap-iso .colorpicker').each(function () {
-				hQuery(this).minicolors({
-					control: hQuery(this).attr('data-control') || 'hue',
-					defaultValue: hQuery(this).attr('data-defaultValue') || '',
-					inline: hQuery(this).attr('data-inline') === 'true',
-					letterCase: hQuery(this).attr('data-letterCase') || 'lowercase',
-					opacity: hQuery(this).attr('data-rgba'),
-					position: hQuery(this).attr('data-position') || 'bottom right',
-					format: hQuery(this).attr('data-format') || 'hex',
-					change: function (hex, opacity) {
-						if (!hex) return;
-						if (opacity) hex += ', ' + opacity;
-						try {
-						} catch (e) { }
-					},
-					hide: /*function() {*/
-						hQuery.sendLessVariable
-					/*}*/,
-					theme: 'bootstrap'
-				});
-			});
-
-			hQuery('.bootstrap-iso input:not(.colorpicker), .bootstrap-iso select').on('change', hQuery.sendLessVariable);
-
-			hQuery('.scroll-template-settings').slimscroll({
-				height: '100%',
-				color: '#fff',
-				size: '5px',
-				railOpacity: 1,
-				opacity: 1,
-			});
-			</script>
-			<?php
+			?><span id="slidepanel-settings" onclick="hQuery.toggleSlidePanel('<?php echo implode(',', $aTemplateIds)?>')"><i class="fa-solid fa-fw fa-palette"></i></span><?php
 		}
 
 		$locked = Core_Array::getCookie('lock-panel', 0, 'int')
@@ -2122,22 +2196,22 @@ class Skin_Bootstrap extends Core_Skin
 
 		if ($oUser->checkModuleAccess(array('template'), $oSite))
 		{
-			// $activeDesign = Core_Type_Conversion::toBool($_SESSION['HOSTCMS_SHOW_DESIGN'])
-			// 	? ' active-design'
-			// 	: '';
 			$activeDesign = isset($_GET['hostcmsAction']) && $_GET['hostcmsAction'] == 'SHOW_DESIGN'
-				? ' active-design'
+				? 'active-design'
 				: '';
+
+			$href = $activeDesign == ''
+				? '?hostcmsAction=SHOW_DESIGN'
+				: '#';
 
 			$oHostcmsSubPanel->add(
 				Core_Html_Entity::factory('A')
-					->href(
-						'?hostcmsAction=SHOW_DESIGN'
-					)
+					->class($activeDesign)
+					->href($href)
 					->add(
 						Core_Html_Entity::factory('I')
 							->id('hostcmsDesign')
-							->class('fa-solid fa-fill-drip fa-fw' . $activeDesign)
+							->class('fa-solid fa-palette fa-fw')
 							->title(Core::_('Core.show_design'))
 					)
 			);
@@ -2258,7 +2332,7 @@ class Skin_Bootstrap extends Core_Skin
 
 		$oHostcmsSubPanel->add(
 			Core_Html_Entity::factory('A')
-				->onclick("hQuery.showWindow('debugWindow', '" . Core_Str::escapeJavascriptVariable($form_content) . "', {width: 400, height: 220, title: '" . Core::_('Core.debug_information') . "', Maximize: false})")
+				->onclick("hQuery.showWindow('debugWindow', '" . Core_Str::escapeJavascriptVariable($form_content) . "', {width: window.innerWidth < 567 ? 300 : 400, height: 220, title: '" . Core::_('Core.debug_information') . "', Maximize: false})")
 				->add(
 					Core_Html_Entity::factory('I')
 						->id('hostcmsShowDebugWindow')

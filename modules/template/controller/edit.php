@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Template
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -364,7 +364,7 @@ EOD;
 
 	/**
 	 * Processing of the form. Apply object fields.
-	 * @return this
+	 * @return self
 	 * @hostcms-event Template_Controller_Edit.onAfterRedeclaredApplyObjectProperty
 	 */
 	protected function _applyObjectProperty()

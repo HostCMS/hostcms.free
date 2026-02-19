@@ -32,5 +32,9 @@ return array(
 	'copy_success' => "Фильтр успешно скопирован!",
 	'price_from' => "Цена от",
 	'price_to' => "Цена до",
-	'prices' => '<span class="field-name">Цена</span> <span>от %s до %s</span>'
+	'prices' => '<span class="field-name">Цена</span> <span>от %s до %s</span>',
+	'root' => "Корень",
+	'move_dirs_title' => "Перенос разделов и элементов SEO-фильтров",
+	'move_items_dirs' => "Родительский раздел",
+	'move_success' => 'SEO-фильтры перенесены',
 );

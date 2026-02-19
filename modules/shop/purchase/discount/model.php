@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Purchase_Discount_Model extends Core_Entity
 {
@@ -22,7 +22,8 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_hasMany = array(
-		'shop_purchase_discount_coupon' => array()
+		'shop_purchase_discount_coupon' => array(),
+		'shop_purchase_discount_siteuser_group' => array()
 	);
 
 	/**
@@ -193,6 +194,12 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 			$newObject->add($oNew_Shop_Purchase_Discount_Coupon);
 		}
 
+		$aShop_Purchase_Discount_Siteuser_Groups = $this->Shop_Purchase_Discount_Siteuser_Groups->findAll(FALSE);
+		foreach ($aShop_Purchase_Discount_Siteuser_Groups as $oShop_Purchase_Discount_Siteuser_Group)
+		{
+			$newObject->add(clone $oShop_Purchase_Discount_Siteuser_Group);
+		}
+
 		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
@@ -235,6 +242,7 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
 
 		$this->Shop_Purchase_Discount_Coupons->deleteAll(FALSE);
+		$this->Shop_Purchase_Discount_Siteuser_Groups->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);
 	}
@@ -281,7 +289,7 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -319,7 +327,6 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @return string
 	 */
 	public function nameBackend()
 	{
@@ -357,12 +364,50 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 			);
 		}
 
+		$oShop_Purchase_Discount_Siteuser_Groups = $this->Shop_Purchase_Discount_Siteuser_Groups;
+
+		$oShop_Purchase_Discount_Siteuser_Groups->queryBuilder()
+			->clearOrderBy()
+			->orderBy('siteuser_group_id', 'ASC');
+
+		$aShop_Purchase_Discount_Siteuser_Groups = $oShop_Purchase_Discount_Siteuser_Groups->findAll(FALSE);
+		if (count($aShop_Purchase_Discount_Siteuser_Groups))
+		{
+			foreach ($aShop_Purchase_Discount_Siteuser_Groups as $oShop_Purchase_Discount_Siteuser_Group)
+			{
+				$siteuserGroupName = $oShop_Purchase_Discount_Siteuser_Group->siteuser_group_id
+					? htmlspecialchars($oShop_Purchase_Discount_Siteuser_Group->Siteuser_Group->name)
+					: Core::_('Shop_Purchase_Discount.all');
+
+				$oCore_Html_Entity_Div->add(
+					Core_Html_Entity::factory('Span')
+						->class('badge badge-square badge-hostcms')
+						->value('<i class="fa fa-users darkgray"></i> ' . $siteuserGroupName)
+					);
+
+				// Если "Все", то прерываем формирование списка
+				if (!$oShop_Purchase_Discount_Siteuser_Group->siteuser_group_id)
+				{
+					break;
+				}
+			}
+		}
+		else
+		{
+			$oCore_Html_Entity_Div->add(
+				Core_Html_Entity::factory('Span')
+					->class('badge badge-darkorange badge-ico white')
+					->add(Core_Html_Entity::factory('I')->class('fa fa-exclamation-triangle'))
+					->title('Empty group list!')
+			);
+		}
+
 		$oCore_Html_Entity_Div->execute();
 	}
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -375,7 +420,7 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */

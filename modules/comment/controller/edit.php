@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Comment
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Comment_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -147,7 +147,8 @@ class Comment_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		Core::moduleIsActive('wysiwyg') && Wysiwyg_Controller::uploadImages($this->_formValues, $this->_object, $this->_Admin_Form_Controller);
 
-		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
+		// Вызывается непосредственно в потомках, например Shop_Item_Comment_Controller_Edit
+		//Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 
 		return $this;
 	}

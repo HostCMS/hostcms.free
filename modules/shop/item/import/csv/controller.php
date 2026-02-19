@@ -23,12 +23,13 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - deletePropertyValues(TRUE|FALSE|array()) удалять существующие значения дополнительных свойств перед импортом новых, по умолчанию TRUE
  * - deleteFieldValues(TRUE|FALSE|array()) удалять существующие значения пользовательских полей перед импортом новых, по умолчанию TRUE
  * - deleteUnsentModificationsByProperties(TRUE|FALSE) удалять непереданные модификации, созданные по дополнительным свойствам, по умолчанию FALSE
+ * - deleteAssociatedItems(TRUE|FALSE) удалять непереданные модификации, созданные по дополнительным свойствам, по умолчанию FALSE
  * - deleteImage(TRUE|FALSE) удалять основные изображения
  *
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 {
@@ -61,6 +62,24 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 	 * @var array
 	 */
 	protected $_aClearedGroupsFieldValues = array();
+	
+	/**
+	 * Array of ID's parent items for which associated products were cleared
+	 * @var array
+	 */
+	protected $_aClearedAssociatedItems = array();
+
+	/**
+	 * Array of CREATED properties
+	 * @var array
+	 */
+	protected $_aCreatedProperties = array();
+
+	/**
+	 * Array of CREATED fields
+	 * @var array
+	 */
+	protected $_aCreatedFields = array();
 
 	/**
 	 * Array of updated groups
@@ -93,6 +112,12 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 	protected $_iCurrentGroupId = 0;
 
 	/**
+	 * First line
+	 * @var mixed
+	 */
+	protected $_firstLine = NULL;
+
+	/**
 	 * Current shop
 	 * @var Shop_Model
 	 */
@@ -112,7 +137,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 
 	/**
 	 * Current order
-	 * @var Shop_Item_Model
+	 * @var Shop_Order_Model
 	 */
 	protected $_oCurrentOrder;
 
@@ -273,6 +298,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 		'deletePropertyValues',
 		'deleteFieldValues',
 		'deleteUnsentModificationsByProperties',
+		'deleteAssociatedItems',
 		'deleteImage'
 	);
 
@@ -494,7 +520,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 	/**
 	 * Get $this->_oCurrentOrder
 	 * @return Shop_Order_Model
-	 */
+     */
 	public function getCurrentOrder()
 	{
 		return $this->_oCurrentOrder;
@@ -546,7 +572,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 		//$this->_aCreatedItemIDs = array();
 
 		$this->deletePropertyValues = $this->deleteFieldValues = TRUE;
-		$this->searchIndexation = $this->deleteUnsentModificationsByProperties = FALSE;
+		$this->searchIndexation = $this->deleteUnsentModificationsByProperties = $this->deleteAssociatedItems = FALSE;
 
 		$oShop = Core_Entity::factory('Shop', $iCurrentShopId);
 
@@ -969,6 +995,15 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 				unset($aItemProperties);
 				unset($aItemPropertyDirs);
 			}
+
+			$aProperty_Types = Property_Controller::getTypes();
+			foreach ($aProperty_Types as $type => $name)
+			{
+				$this->aEntities['createprop-' . $type] = array(
+					'caption' => Core::_('Shop_Exchange.create_prop', $name),
+					'attr' => array('style' => 'background-color: #4db97aff')
+				);
+			}
 		}
 
 		if (Core::moduleIsActive('field'))
@@ -999,6 +1034,15 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 				$this->_aFieldsTree = $this->_aFieldDirsTree = array();
 				unset($aItemFields);
 				unset($aItemFieldDirs);
+			}
+
+			$aField_Types = Field_Controller::getTypes();
+			foreach ($aField_Types as $type => $name)
+			{
+				$this->aEntities['createfield-' . $type] = array(
+					'caption' => Core::_('Shop_Exchange.create_field', $name),
+					'attr' => array('style' => 'background-color: #cfe4fdff')
+				);
 			}
 		}
 
@@ -1417,7 +1461,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 	/**
 	 * Save group
 	 * @param Shop_Group_Model $oShop_Group group
-	 * @return Shop_Group
+	 * @return Shop_Group_Model
 	 */
 	protected function _doSaveGroup(Shop_Group_Model $oShop_Group)
 	{
@@ -1506,6 +1550,11 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 			else
 			{
 				fseek($fInputFile, 0);
+			}
+
+			if ($this->firstlineheader)
+			{
+				$this->_firstLine = $this->getCSVLine($fInputFile);
 			}
 		}
 		else
@@ -2581,51 +2630,51 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 						break;
 						// вес товара
 						case 'item_weight':
-							$this->_oCurrentItem->weight = Shop_Controller::instance()->convertPrice($sData);
+							$this->_oCurrentItem->weight = Shop_Controller::instance()->convertPrice($sData, 3);
 						break;
 						// длина
 						case 'item_length':
-							$this->_oCurrentItem->length = Shop_Controller::instance()->convertPrice($sData);
+							$this->_oCurrentItem->length = Shop_Controller::instance()->convertPrice($sData, 3);
 						break;
 						// ширина
 						case 'item_width':
-							$this->_oCurrentItem->width = Shop_Controller::instance()->convertPrice($sData);
+							$this->_oCurrentItem->width = Shop_Controller::instance()->convertPrice($sData, 3);
 						break;
 						// высота
 						case 'item_height':
-							$this->_oCurrentItem->height = Shop_Controller::instance()->convertPrice($sData);
+							$this->_oCurrentItem->height = Shop_Controller::instance()->convertPrice($sData, 3);
 						break;
 						// вес товара с упаковкой
 						case 'item_weight_package':
-							$this->_oCurrentItem->package_weight = Shop_Controller::instance()->convertPrice($sData);
+							$this->_oCurrentItem->package_weight = Shop_Controller::instance()->convertPrice($sData, 3);
 						break;
 						// длина упаковки
 						case 'item_length_package':
-							$this->_oCurrentItem->package_length = Shop_Controller::instance()->convertPrice($sData);
+							$this->_oCurrentItem->package_length = Shop_Controller::instance()->convertPrice($sData, 3);
 						break;
 						// ширина упаковки
 						case 'item_width_package':
-							$this->_oCurrentItem->package_width = Shop_Controller::instance()->convertPrice($sData);
+							$this->_oCurrentItem->package_width = Shop_Controller::instance()->convertPrice($sData, 3);
 						break;
 						// высота упаковки
 						case 'item_height_package':
-							$this->_oCurrentItem->package_height = Shop_Controller::instance()->convertPrice($sData);
+							$this->_oCurrentItem->package_height = Shop_Controller::instance()->convertPrice($sData, 3);
 						break;
 						// минимальное количество
 						case 'item_min_quantity':
-							$this->_oCurrentItem->min_quantity = Shop_Controller::instance()->convertPrice($sData);
+							$this->_oCurrentItem->min_quantity = Shop_Controller::instance()->convertPrice($sData, 2);
 						break;
 						// максимальное количество
 						case 'item_max_quantity':
-							$this->_oCurrentItem->max_quantity = Shop_Controller::instance()->convertPrice($sData);
+							$this->_oCurrentItem->max_quantity = Shop_Controller::instance()->convertPrice($sData, 2);
 						break;
 						// шаг
 						case 'item_quantity_step':
-							$this->_oCurrentItem->quantity_step = Shop_Controller::instance()->convertPrice($sData);
+							$this->_oCurrentItem->quantity_step = Shop_Controller::instance()->convertPrice($sData, 2);
 						break;
 						// цена товара
 						case 'item_price':
-							$this->_aExternalPrices[0] = Shop_Controller::instance()->convertPrice($sData);
+							$this->_aExternalPrices[0] = Shop_Controller::instance()->convertPrice($sData, 2);
 						break;
 						// активность товара
 						case 'item_active':
@@ -2765,22 +2814,26 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 						case 'item_siteuser_id':
 							$this->_oCurrentItem->siteuser_id = $sData;
 						break;
-						// артикул родительского товара для сопутствующего товара
+						// артикул родительского товара для сопутствующего товара, делает текущий товар сопутствующим
 						case 'item_parent_associated':
 							$this->_sAssociatedItemMark = $sData;
 						break;
-						// артикулы сопутствующих товаров
+						// артикулы сопутствующих товаров, делает указанные товары сопутствующими текущему товару
 						case 'item_associated_markings':
-							$aTmp_Markings = explode(',', $sData);
-							$aTmp_Markings = array_map('trim', $aTmp_Markings);
-
-							foreach ($aTmp_Markings as $sAssociatedMarking)
+							if ($this->_oCurrentItem->id)
 							{
-								if ($this->_oCurrentItem->id && $sAssociatedMarking != '')
+								if ($this->deleteAssociatedItems && !in_array($this->_oCurrentItem->id, $this->_aClearedAssociatedItems))
 								{
-									$oTmp_Shop_Item = $this->_oCurrentShop
-										->Shop_Items
-										->getByMarking($sAssociatedMarking, FALSE);
+									$this->_aClearedAssociatedItems[] = $this->_oCurrentItem->id;
+									$this->_oCurrentItem->Shop_Item_Associateds->deleteAll(FALSE);
+								}
+								
+								$aTmp_Markings = array_map('trim', explode(',', $sData));
+								$aTmp_Markings = array_filter($aTmp_Markings, 'strlen');
+								
+								foreach ($aTmp_Markings as $sAssociatedMarking)
+								{
+									$oTmp_Shop_Item = $this->_oCurrentShop->Shop_Items->getByMarking($sAssociatedMarking, FALSE);
 
 									if (!is_null($oTmp_Shop_Item)
 										// Ранее не было связи с ассоциированным
@@ -2822,7 +2875,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 							$this->_oCurrentShopSpecialPrice->max_quantity = $sData;
 						break;
 						case 'item_special_price_price':
-							$this->_oCurrentShopSpecialPrice->price = Shop_Controller::instance()->convertPrice($sData);
+							$this->_oCurrentShopSpecialPrice->price = Shop_Controller::instance()->convertPrice($sData, 2);
 						break;
 						case 'item_special_price_percent':
 							$this->_oCurrentShopSpecialPrice->percent = $sData;
@@ -2898,6 +2951,41 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 								$this->_aExternalProperties[$aTmpExplode[1]][] = $sData;
 							}
 
+							// Создавать новые свойства "на лету"
+							if (strpos($sFieldName, "createprop-") === 0)
+							{
+								$aTmpExplode = explode('-', $sFieldName, 2);
+
+								if (!isset($this->_aCreatedProperties[$iKey]))
+								{
+									$oProperty = Core_Entity::factory('Property');
+									$oProperty->name = Core_Array::get($this->_firstLine, $iKey, 'Unnamed');
+									$oProperty->type = $aTmpExplode[1];
+									$oProperty->tag_name = Core_Str::transliteration($oProperty->name);
+
+									if ($oProperty->type == 3)
+									{
+										$oList = Core_Entity::factory('List');
+										$oList->name = $oProperty->name;
+										$oList->site_id = $this->_oCurrentShop->site_id;
+										$oList->save();
+
+										$oProperty->list_id = $oList->id;
+									}
+
+									$oProperty->save();
+
+									$linkedObject = Core_Entity::factory('Shop_Item_Property_List', $this->_oCurrentShop->id);
+									$linkedObject->add($oProperty);
+
+									$this->_aCreatedProperties[$iKey] = $oProperty->id;
+								}
+
+								$oProperty = Core_Entity::factory('Property', $this->_aCreatedProperties[$iKey]);
+
+								$this->_aExternalProperties[$oProperty->id][] = $sData;
+							}
+
 							// Создание модификаций по свойствам
 							if (strpos($sFieldName, "modification-") === 0)
 							{
@@ -2924,6 +3012,43 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 							{
 								$aTmpExplode = explode('-', $sFieldName, 2);
 								$this->_aExternalFields[$aTmpExplode[1]][] = $sData;
+							}
+
+							// Создавать новые пользовательские поля "на лету"
+							if (strpos($sFieldName, "createfield-") === 0)
+							{
+								$aTmpExplode = explode('-', $sFieldName, 2);
+
+								if (!isset($this->_aCreatedFields[$iKey]))
+								{
+									$oField = Core_Entity::factory('Field');
+									$oField->model = 'shop_item';
+									$oField->site_id = 0;
+									$oField->field_dir_id = 0;
+									$oField->sorting = 0;
+									$oField->hide_small_image = 0;
+									$oField->name = Core_Array::get($this->_firstLine, $iKey, 'Unnamed');
+									$oField->type = $aTmpExplode[1];
+									$oField->tag_name = Core_Str::transliteration($oField->name);
+
+									if ($oField->type == 3)
+									{
+										$oList = Core_Entity::factory('List');
+										$oList->name = $oField->name;
+										$oList->site_id = $this->_oCurrentShop->site_id;
+										$oList->save();
+
+										$oField->list_id = $oList->id;
+									}
+
+									$oField->save();
+
+									$this->_aCreatedFields[$iKey] = $oField->id;
+								}
+
+								$oField = Core_Entity::factory('Field', $this->_aCreatedFields[$iKey]);
+
+								$this->_aExternalFields[$oField->id][] = $sData;
 							}
 
 							// Дополнительное свойство группы товаров
@@ -3065,8 +3190,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 					&& (isset($aChangedColumns['name']) || isset($aChangedColumns['description']) || isset($aChangedColumns['text']))
 				)
 				{
-					$sTmpString = '';
-					$sTmpString .= $this->_oCurrentItem->name ? ' ' . $this->_oCurrentItem->name : '';
+                    $sTmpString = $this->_oCurrentItem->name ? ' ' . $this->_oCurrentItem->name : '';
 					$sTmpString .= $this->_oCurrentItem->description ? ' ' . $this->_oCurrentItem->description : '';
 					$sTmpString .= $this->_oCurrentItem->text ? ' ' . $this->_oCurrentItem->text : '';
 
@@ -3137,16 +3261,22 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 				{
 					$oShop_Item = $this->_oCurrentShop->Shop_Items->getByMarking($this->_sAssociatedItemMark, FALSE);
 
-					if (!is_null($oShop_Item)
-						// Ранее не было связи с ассоциированным
-						&& is_null($oShop_Item->Shop_Item_Associateds->getByAssociatedId($this->_oCurrentItem->id, FALSE))
-					)
+					if (!is_null($oShop_Item))
 					{
-						Core_Entity::factory('Shop_Item_Associated')
-							->shop_item_id($oShop_Item->id) // Кому
-							->shop_item_associated_id($this->_oCurrentItem->id) // Кто
-							->count(1)
-							->save();
+						if ($this->deleteAssociatedItems && !in_array($oShop_Item->id, $this->_aClearedAssociatedItems))
+						{
+							$this->_aClearedAssociatedItems[] = $oShop_Item->id;
+							$oShop_Item->Shop_Item_Associateds->deleteAll(FALSE);
+						}
+
+						if (is_null($oShop_Item->Shop_Item_Associateds->getByAssociatedId($this->_oCurrentItem->id, FALSE)))
+						{
+							Core_Entity::factory('Shop_Item_Associated')
+								->shop_item_id($oShop_Item->id) // Кому
+								->shop_item_associated_id($this->_oCurrentItem->id) // Кто
+								->count(1)
+								->save();
+						}
 					}
 				}
 
@@ -3162,7 +3292,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 						$oShop_Warehouse_Items = $this->_oCurrentItem->Shop_Warehouse_Items->getByWarehouseId($oShop_Warehouse->id, FALSE);
 						$rest = $oShop_Warehouse_Items ? $oShop_Warehouse_Items->count : NULL;
 
-						$newRest = Shop_Controller::instance()->convertPrice($iWarehouseCount);
+						$newRest = Shop_Controller::instance()->convertPrice($iWarehouseCount, 2);
 
 						if (is_null($rest) || $rest != $newRest)
 						{
@@ -3202,7 +3332,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 					else
 					{
 						$oSpecialPrice = $aTmpObjecs[0];
-						
+
 						// В соответствии с формой редактирования товара спеццены без цены или процента удаляются
 						if ($this->_oCurrentShopSpecialPrice->price || $this->_oCurrentShopSpecialPrice->percent)
 						{
@@ -4142,7 +4272,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 				? $oShop_Item_Price->value
 				: $oShop_Item->price;
 
-			$newPrice = Shop_Controller::instance()->convertPrice($sPriceValue);
+			$newPrice = Shop_Controller::instance()->convertPrice($sPriceValue, 2);
 
 			if (floatval($old_price) != floatval($newPrice))
 			{
@@ -4211,18 +4341,21 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 		return $this;
 	}
 
-	/**
-	 * Add property to item
-	 * @param Shop_Item_Model $oShopItem
-	 * @param Property_Model $oProperty
-	 * @param string $sPropertyValue property value
-	 * @hostcms-event Shop_Item_Import_Csv_Controller.onAddItemPropertyValueDefault
-	 */
+    /**
+     * Add property to item
+     * @param Shop_Item_Model $oShopItem
+     * @param Property_Model $oProperty
+     * @param string $sPropertyValue property value
+     * @param integer $position
+     * @return false|mixed|Property_Value_Model
+     * @throws Core_Exception
+     * @hostcms-event Shop_Item_Import_Csv_Controller.onAddItemPropertyValueDefault
+     */
 	protected function _addItemPropertyValue(Shop_Item_Model $oShopItem, Property_Model $oProperty, $sPropertyValue, $position = 0)
 	{
 		$aPropertyValues = $oProperty->getValues($oShopItem->id, FALSE);
 
-		// Удалять ранее загруженные свойства или свойство в массиве у удалению перед загрузкой
+		// Удалять ранее загруженные свойства или свойство в массиве к удалению перед загрузкой
 		if ($this->deletePropertyValues === TRUE
 			|| is_array($this->deletePropertyValues) && in_array($oProperty->id, $this->deletePropertyValues))
 		{
@@ -4621,13 +4754,16 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 		return FALSE;
 	}
 
-	/**
-	 * Add field to item
-	 * @param Shop_Item_Model $oShopItem
-	 * @param Field_Model $oField
-	 * @param string $sFieldValue field value
-	 * @hostcms-event Shop_Item_Import_Csv_Controller.onAddItemFieldValueDefault
-	 */
+    /**
+     * Add field to item
+     * @param Shop_Item_Model $oShopItem
+     * @param Field_Model $oField
+     * @param string $sFieldValue field value
+     * @param int $position
+     * @return false|mixed|object
+     * @throws Core_Exception
+     * @hostcms-event Shop_Item_Import_Csv_Controller.onAddItemFieldValueDefault
+     */
 	protected function _addItemFieldValue(Shop_Item_Model $oShopItem, Field_Model $oField, $sFieldValue, $position = 0)
 	{
 		$aFieldValues = $oField->getValues($oShopItem->id, FALSE);
@@ -5031,14 +5167,17 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 		return FALSE;
 	}
 
-	/**
-	 * Add property to group
-	 * @param Shop_Group_Model $oShop_Group
-	 * @param Property_Model $oProperty
-	 * @param string $sPropertyValue property value
-	 * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeImportGroupProperty
-	 * @hostcms-event Shop_Item_Import_Csv_Controller.onAddGroupPropertyValueDefault
-	 */
+    /**
+     * Add property to group
+     * @param Shop_Group_Model $oShop_Group
+     * @param Property_Model $oProperty
+     * @param string $sPropertyValue property value
+     * @param int $position
+     * @return Shop_Item_Import_Csv_Controller
+     * @throws Core_Exception
+     * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeImportGroupProperty
+     * @hostcms-event Shop_Item_Import_Csv_Controller.onAddGroupPropertyValueDefault
+     */
 	protected function _addGroupPropertyValue(Shop_Group_Model $oShop_Group, Property_Model $oProperty, $sPropertyValue, $position = 0)
 	{
 		Core_Event::notify('Shop_Item_Import_Csv_Controller.onBeforeImportGroupProperty', $this, array($this->_oCurrentShop, $oShop_Group, $oProperty, $sPropertyValue));
@@ -5429,14 +5568,17 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 		return $this;
 	}
 
-	/**
-	 * Add field to group
-	 * @param Shop_Group_Model $oShop_Group
-	 * @param Field_Model $oField
-	 * @param string $sFieldValue field value
-	 * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeImportGroupField
-	 * @hostcms-event Shop_Item_Import_Csv_Controller.onAddGroupFieldValueDefault
-	 */
+    /**
+     * Add field to group
+     * @param Shop_Group_Model $oShop_Group
+     * @param Field_Model $oField
+     * @param string $sFieldValue field value
+     * @param int $position
+     * @return Shop_Item_Import_Csv_Controller
+     * @throws Core_Exception
+     * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeImportGroupField
+     * @hostcms-event Shop_Item_Import_Csv_Controller.onAddGroupFieldValueDefault
+     */
 	protected function _addGroupFieldValue(Shop_Group_Model $oShop_Group, Field_Model $oField, $sFieldValue, $position = 0)
 	{
 		Core_Event::notify('Shop_Item_Import_Csv_Controller.onBeforeImportGroupField', $this, array($this->_oCurrentShop, $oShop_Group, $oField, $sFieldValue));
@@ -5870,7 +6012,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 
 	/**
 	 * Get CSV line from file
-	 * @param handler file descriptor
+	 * @param handler $fileDescriptor file descriptor
 	 * @return array
 	 */
 	public function getCSVLine($fileDescriptor)
@@ -5902,13 +6044,13 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 		$this->_oCurrentShop = $this->_oCurrentGroup = $this->_oCurrentItem = $this->_oCurrentOrder
 			= $this->_oCurrentOrderItem = $this->_oCurrentShopEItem = $this->_oCurrentShopSpecialPrice = NULL;
 
-		$this->_aTags = NULL;
-
-		$this->_aClearedItemsPropertyValues = $this->_aClearedGroupsPropertyValues = $this->_aClearedItemsFieldValues = $this->_aClearedGroupsFieldValues = array();
+		$this->_aTags = $this->_firstLine = NULL;
 
 		// see __sleep()/__wakeup()
-		$this->_aInsertedGroupIDs = $this->_aClearedItemsPropertyValues = $this->_aClearedGroupsPropertyValues = $this->_aClearedItemsFieldValues =
-		$this->_aClearedGroupsFieldValues = $this->_aUpdatedGroupIDs = $this->_aInsertedItemIDs = $this->_aUpdatedItemIDs = $this->_aCreatedItemIDs = array();
+		$this->_aInsertedGroupIDs = $this->_aUpdatedGroupIDs = $this->_aInsertedItemIDs = $this->_aUpdatedItemIDs = $this->_aCreatedItemIDs = array();
+		
+		$this->_aClearedItemsPropertyValues = $this->_aClearedGroupsPropertyValues = $this->_aClearedItemsFieldValues
+			= $this->_aClearedGroupsFieldValues = $this->_aCreatedProperties = $this->_aCreatedFields = $this->_aClearedAssociatedItems = array();
 
 		return $this;
 	}
@@ -5921,15 +6063,19 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 	{
 		file_put_contents($this->_jsonPath, json_encode(
 			array(
+				'_firstLine' => $this->_firstLine,
 				'_aInsertedGroupIDs' => $this->_aInsertedGroupIDs,
 				'_aClearedItemsPropertyValues' => $this->_aClearedItemsPropertyValues,
 				'_aClearedGroupsPropertyValues' => $this->_aClearedGroupsPropertyValues,
 				'_aClearedItemsFieldValues' => $this->_aClearedItemsFieldValues,
 				'_aClearedGroupsFieldValues' => $this->_aClearedGroupsFieldValues,
+				'_aClearedAssociatedItems' => $this->_aClearedAssociatedItems,
 				'_aUpdatedGroupIDs' => $this->_aUpdatedGroupIDs,
 				'_aInsertedItemIDs' => $this->_aInsertedItemIDs,
 				'_aUpdatedItemIDs' => $this->_aUpdatedItemIDs,
-				'_aCreatedItemIDs' => $this->_aCreatedItemIDs
+				'_aCreatedItemIDs' => $this->_aCreatedItemIDs,
+				'_aCreatedProperties' => $this->_aCreatedProperties,
+				'_aCreatedFields' => $this->_aCreatedFields
 			)
 		));
 
@@ -5971,15 +6117,19 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 		{
 			$aJSON = json_decode(Core_File::read($this->_jsonPath), TRUE);
 
+			$this->_firstLine = Core_Array::get($aJSON, '_firstLine');
 			$this->_aInsertedGroupIDs = Core_Array::get($aJSON, '_aInsertedGroupIDs', array());
 			$this->_aClearedItemsPropertyValues = Core_Array::get($aJSON, '_aClearedItemsPropertyValues', array());
 			$this->_aClearedGroupsPropertyValues = Core_Array::get($aJSON, '_aClearedGroupsPropertyValues', array());
 			$this->_aClearedItemsFieldValues = Core_Array::get($aJSON, '_aClearedItemsFieldValues', array());
 			$this->_aClearedGroupsFieldValues = Core_Array::get($aJSON, '_aClearedGroupsFieldValues', array());
+			$this->_aClearedAssociatedItems = Core_Array::get($aJSON, '_aClearedAssociatedItems', array());
 			$this->_aUpdatedGroupIDs = Core_Array::get($aJSON, '_aUpdatedGroupIDs', array());
 			$this->_aInsertedItemIDs = Core_Array::get($aJSON, '_aInsertedItemIDs', array());
 			$this->_aUpdatedItemIDs = Core_Array::get($aJSON, '_aUpdatedItemIDs', array());
 			$this->_aCreatedItemIDs = Core_Array::get($aJSON, '_aCreatedItemIDs', array());
+			$this->_aCreatedProperties = Core_Array::get($aJSON, '_aCreatedProperties', array());
+			$this->_aCreatedFields = Core_Array::get($aJSON, '_aCreatedFields', array());
 		}
 
 		return $this;
@@ -6113,8 +6263,8 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 	/**
 	 * Correct checkbox value
 	 * @param string $value
-	 * @return bool
-	 */
+	 * @return int
+     */
 	protected function _correctCheckbox($value)
 	{
 		return $value == 1 || strtolower($value) === 'true' || strtolower($value) === 'да'

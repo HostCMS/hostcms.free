@@ -27,7 +27,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Router
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Router
 {
@@ -39,8 +39,8 @@ class Core_Router
 
 	/**
 	 * Add route Core_Router_Route with name $routeName for URI with routing rules $uri
-	 * @param $routeName Name of route
-	 * @param $uri URI pattern
+	 * @param string $routeName Name of route
+	 * @param string $uri URI pattern
 	 * @param array $expressions list of expressions
 	 * @return Core_Router_Route
 	 */

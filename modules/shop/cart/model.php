@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Cart_Model extends Core_Entity
 {
@@ -83,9 +83,8 @@ class Shop_Cart_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
 	public function nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
@@ -125,11 +124,9 @@ class Shop_Cart_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function restBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function restBackend()
 	{
 		return Core_Str::hideZeros($this->Shop_Item->getRest());
 	}
@@ -156,7 +153,7 @@ class Shop_Cart_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -189,8 +186,8 @@ class Shop_Cart_Model extends Core_Entity
 	{
 		$this->queryBuilder()
 			//->clear()
-			->where('shop_item_id', '=', $shop_item_id)
-			->where('siteuser_id', '=', $siteuser_id)
+			->where('shop_carts.shop_item_id', '=', $shop_item_id)
+			->where('shop_carts.siteuser_id', '=', $siteuser_id)
 			->limit(1);
 
 		$aShopCarts = $this->findAll($bCache);
@@ -208,7 +205,12 @@ class Shop_Cart_Model extends Core_Entity
 	{
 		$this->queryBuilder()
 			//->clear()
-			->where('siteuser_id', '=', $siteuser_id);
+			->select('shop_carts.*')
+			->leftJoin('shop_items', 'shop_items.id', '=', 'shop_carts.shop_item_id')
+			->where('shop_carts.siteuser_id', '=', $siteuser_id)
+			->clearOrderBy()
+			->orderBy('shop_items.price', 'DESC')
+			;
 
 		return $this->findAll($bCache);
 	}
@@ -313,11 +315,11 @@ class Shop_Cart_Model extends Core_Entity
 	 */
 	protected $_showXmlMedia = FALSE;
 
-	/**
-	 * Show properties in XML
-	 * @param mixed $showXmlProperties array of allowed properties ID or boolean
-	 * @return self
-	 */
+    /**
+     * Show properties in XML
+     * @param bool $showXmlMedia
+     * @return self
+     */
 	public function showXmlMedia($showXmlMedia = TRUE)
 	{
 		$this->_showXmlMedia = $showXmlMedia;
@@ -354,13 +356,56 @@ class Shop_Cart_Model extends Core_Entity
 	}
 
 	/**
+	 * Additional discount property
+	 * @var integer
+	 */
+	protected $_additionalDiscount = 0;
+
+	/**
+	 * Set additional dsicount
+	 * @param int $additionalDiscount
+	 * @return self
+	 */
+	public function additionalDiscount($additionalDiscount)
+	{
+		$this->_additionalDiscount = $additionalDiscount;
+		return $this;
+	}
+
+	/**
+	 * Get price
+	 * @param boolean $bRound
+	 * @return array
+	 */
+	public function getPrices($bRound = TRUE)
+	{
+		$oShop_Item = $this->Shop_Item;
+
+		$oShop_Item->cartQuantity($this->quantity);
+
+		$aPrices = $oShop_Item->getPrices(TRUE, $bRound);
+
+		if ($this->_additionalDiscount <= $aPrices['price_discount'])
+		{
+			$aPrices['discount'] += $this->_additionalDiscount;
+			$aPrices['price_discount'] -= $this->_additionalDiscount;
+			$aPrices['price_tax'] -= $this->_additionalDiscount;
+		}
+
+		return $aPrices;
+	}
+
+	/**
 	 * Prepare entity and children entities
 	 * @return self
 	 * @hostcms-event shop_cart.onBeforeAddShopItem
 	 */
 	protected function _prepareData()
 	{
-		$oShop_Item = $this->Shop_Item
+		$oShop_Item = clone $this->Shop_Item;
+
+		$oShop_Item
+			->id($this->Shop_Item->id)
 			->clearEntities()
 			->showXmlBonuses(TRUE)
 			->showXmlProperties($this->_showXmlProperties, $this->_xmlSortPropertiesValues)
@@ -370,6 +415,12 @@ class Shop_Cart_Model extends Core_Entity
 			->showXmlMedia($this->_showXmlMedia)
 			->showXmlModifications($this->_showXmlModifications)
 			->cartQuantity($this->quantity);
+
+		if ($this->_additionalDiscount)
+		{
+			$aPrices = $this->getPrices();
+			$oShop_Item->setPrices($aPrices);
+		}
 
 		// Parent item for modification
 		if ($this->Shop_Item->modification_id)
@@ -387,6 +438,8 @@ class Shop_Cart_Model extends Core_Entity
 		$this->applyItemsForbiddenTags($oShop_Item);
 
 		$this->clearXmlTags()
+			->addForbiddenTag('quantity')
+			->addXmlTag('quantity', Core_Str::hideZeros($this->quantity))
 			->addEntity($oShop_Item);
 
 		return $this;

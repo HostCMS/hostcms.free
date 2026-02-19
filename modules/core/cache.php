@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Cache
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 abstract class Core_Cache
 {
@@ -122,8 +122,20 @@ abstract class Core_Cache
 	 * @param string $cacheName
 	 * @return boolean
 	 */
+	static public function issetCacheConfig($cacheName)
+	{
+		$aConfig = Core::$config->get('core_cache', array());
+		return isset($aConfig[$cacheName]) && isset($aConfig[$cacheName]['driver']);
+	}
+	
+	/**
+	 * Check cache config isset
+	 * @param string $cacheName
+	 * @return boolean
+	 */
 	protected function _issetCacheConfig($cacheName)
 	{
+		// Depends on instance config
 		return isset($this->_config['caches'][$cacheName]);
 	}
 
@@ -232,7 +244,7 @@ abstract class Core_Cache
 
 	/**
 	 * Save array of tags into table
-	 * @param string cache cache name
+	 * @param string $cacheName $cacheName cache cache name
 	 * @param string $actualKey cache key
 	 * @param array $tags array of tags
 	 * @return self

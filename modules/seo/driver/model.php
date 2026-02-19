@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Seo
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Seo_Driver_Model extends Core_Entity
 {
@@ -43,8 +43,8 @@ class Seo_Driver_Model extends Core_Entity
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return self
-	 * @hostcms-event seo_driver.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event seo_driver.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

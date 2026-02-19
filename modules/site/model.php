@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Site
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Site_Model extends Core_Entity
 {
@@ -62,6 +62,9 @@ class Site_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_hasMany = array(
+		'ai' => array(),
+		'ai_prompt' => array(),
+		'ai_prompt_dir' => array(),
 		'affiliate_plan' => array(),
 		'advertisement' => array(),
 		'advertisement_group' => array(),
@@ -102,7 +105,6 @@ class Site_Model extends Core_Entity
 		'dms_participant' => array(),
 		'dms_workflow_template_dir' => array(),
 		'dms_workflow_template' => array(),
-		'dms_workflow' => array(),
 		'dms_workflow' => array(),
 		'dms_document_transfer' => array(),
 		'dms_document_checkpoint' => array(),
@@ -212,8 +214,8 @@ class Site_Model extends Core_Entity
 
 	/**
 	 * Change status of activity for site
-	 * @return self
-	 */
+	 * @return Core_Entity
+     */
 	public function changeStatus()
 	{
 		$this->active = 1 - $this->active;
@@ -250,6 +252,13 @@ class Site_Model extends Core_Entity
 		$this->id = $primaryKey;
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
+
+		if (Core::moduleIsActive('ai'))
+		{
+			$this->Ais->deleteAll(FALSE);
+			$this->Ai_Prompt_Dirs->deleteAll(FALSE);
+			$this->Ai_Prompts->deleteAll(FALSE);
+		}
 
 		if (Core::moduleIsActive('advertisement'))
 		{
@@ -1749,11 +1758,8 @@ class Site_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function nameBadge()
 	{
 		if ($this->https)
 		{

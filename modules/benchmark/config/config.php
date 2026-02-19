@@ -9,5 +9,6 @@ return array(
 	'files_count' => 1000,
 	'math_count' => 100000,
 	'string_count' => 1000,
-	'benchmark_file_path' => 'http://www.hostcms.ru/download/benchmark/1mb'
+	'benchmark_file_path' => 'http://www.hostcms.ru/download/benchmark/1mb',
+	'xsl' => 'КартаСайта'
 );

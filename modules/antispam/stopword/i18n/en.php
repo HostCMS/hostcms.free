@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Antispam
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'title' => 'Stopwords',
@@ -27,4 +27,5 @@ return array(
 	'case_sensitive' => 'Case sensitive',
 	'active' => 'Activity',
 	'changeActive_success' => 'Activity changed successfully!',
+	'changeCaseSesitive_success' => 'Case sensitive changed successfully!',
 );

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Template
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 abstract class Template_Preprocessor
 {
@@ -30,17 +30,18 @@ abstract class Template_Preprocessor
 	/**
 	 * Get full driver name
 	 * @param string $driver driver name
-	 * @return srting
+	 * @return string
 	 */
 	static protected function _getDriverName($driver)
 	{
 		return 'Template_Preprocessor_' . ucfirst($driver);
 	}
 
-	/**
-	 * Create and return an object of preprocessor
-	 * @param string $driveName
-	 */
+    /**
+     * Create and return an object of preprocessor
+     * @param string $driverName
+     * @return mixed
+     */
 	static public function factory($driverName)
 	{
 		$driver = self::_getDriverName($driverName);

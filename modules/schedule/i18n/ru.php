@@ -29,4 +29,5 @@ return array(
 	'days' => 'дней',
 	'active' => 'Активность',
 	'changeActive_success' => 'Информация успешно изменена',
+	'execute_success' => 'Задача выполнена успешно!',
 );

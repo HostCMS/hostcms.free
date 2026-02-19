@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -19,7 +19,7 @@ $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 $iShopItemId = intval(Core_Array::getGet('shop_item_id', 0));
 $oShop_Item = Core_Entity::factory('Shop_Item')->find($iShopItemId);
 
-$shop_id = intval(Core_Array::getGet('shop_id', 0));
+$shop_id = Core_Array::getGet('shop_id', 0, 'int');
 
 $comment_parent_id = intval(Core_Array::getGet('parent_id', 0));
 
@@ -33,7 +33,7 @@ if (!is_null($oShop_Item->id))
 else
 {
 	$oShop = Core_Entity::factory('Shop')->find($shop_id);
-	$iShopGroupId = intval(Core_Array::getGet('shop_group_id', 0));
+	$iShopGroupId = Core_Array::getGet('shop_group_id', 0, 'int');
 }
 
 // Контроллер формы

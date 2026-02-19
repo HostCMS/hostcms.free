@@ -95,8 +95,8 @@ return array(
 	'siteuser_id' => "Client ID",
 	'digital_item_name' => "Digital Item Name",
 	'item_yandex_market_sales_notes' => "Sales Notes",
-	'item_parent_associated' => "Associated Goods, Parent Goods Marking",
-	'item_associated_markings' => "Associated Goods's margings",
+	'item_parent_associated' => "Related Goods, Parent Goods Marking",
+	'item_associated_markings' => "Related Goods's markings",
 	'item_tabs' => "Tabs of Goods",
 	'caption_modifications' => "Modifications by Properties",
 	'modification_by_property' => "Modifications by %s",
@@ -139,4 +139,7 @@ return array(
 	'shop_warehouse_inventory' => "Inventory by importing goods",
 	'shop_price_setting' => "Set prices by importing goods",
 	'clear_matches' => 'clear matches',
+	'create_prop' => 'Create a property of type "%s"',
+	'create_field' => 'Create a field of type "%s"',
+	'associateds' => 'Related products'
 );

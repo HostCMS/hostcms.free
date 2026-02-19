@@ -67,4 +67,6 @@ return array(
 	'shortcut_success' => 'Ярлик успішно створений.',
 	'seo_group_h1_template' => 'Шаблон H1',
 	'seo_item_h1_template' => 'Шаблон H1',
+	'apply_shortcut_parent_group' => 'Застосовувати до основних груп ярликів',
+	'change_attributes_success' => 'Атрибути успішно змінені!',
 );

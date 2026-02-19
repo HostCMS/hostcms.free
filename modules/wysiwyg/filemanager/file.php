@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Wysiwyg
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Wysiwyg_Filemanager_File extends Core_Empty_Entity
 {
@@ -162,9 +162,18 @@ class Wysiwyg_Filemanager_File extends Core_Empty_Entity
 		$filePath = $this->_getFullPath();
 		$dirname = dirname($filePath);
 
-		$Core_Tar = new Core_Tar($filePath);
-		$Core_Tar->addReplace('admin/', Core::$mainConfig['backend'] . '/');
-		$Core_Tar->extractModify($dirname, $dirname);
+		if ($this->_availableExtractCoreTar())
+		{
+			$Core_Tar = new Core_Tar($filePath);
+			$Core_Tar->addReplace('admin/', Core::$mainConfig['backend'] . '/');
+			$Core_Tar->extractModify($dirname, $dirname);
+		}
+		elseif ($this->_availableExtractCoreZip())
+		{
+			$Core_Zip = new Core_Zip($filePath);
+			$Core_Zip->addReplace('admin/', Core::$mainConfig['backend'] . '/');
+			$Core_Zip->extract($dirname);
+		}
 
 		return $this;
 	}
@@ -237,7 +246,7 @@ class Wysiwyg_Filemanager_File extends Core_Empty_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -308,35 +317,6 @@ class Wysiwyg_Filemanager_File extends Core_Empty_Entity
 								$destY = $maxHeight;
 							}
 
-							// в $destX и $destY теперь хранятся размеры оригинального изображения после уменьшения
-							// от них рассчитываем размеры для обрезания на втором шаге
-							$destX_step2 = $maxWidth;
-							// Масштабируем сначала по X
-							if ($destX > $maxWidth && $maxWidth != 0)
-							{
-								// Позиции, с которых необходимо вырезать
-								$src_x = ceil(($destX - $maxWidth) / 2);
-							}
-							else
-							{
-								$src_x = 0;
-							}
-
-							// Масштабируем по Y
-							if ($destY > $maxHeight && $maxHeight != 0)
-							{
-								$destY_step2 = $maxHeight;
-								$destX_step2 = $destX;
-
-								// Позиции, с которых необходимо вырезать
-								$src_y = ceil(($destY - $maxHeight) / 2);
-							}
-							else
-							{
-								$destY_step2 = $destY;
-								$src_y = 0;
-							}
-
 							$targetResourceStep1 = imagecreatetruecolor($destX, $destY);
 
 							$iImagetype = Core_Image::instance()->exifImagetype($filePath);
@@ -355,7 +335,8 @@ class Wysiwyg_Filemanager_File extends Core_Empty_Entity
 									imagejpeg($targetResourceStep1);
 									$sImgContent = ob_get_clean();
 
-									imagedestroy($sourceResource);
+									PHP_VERSION_ID < 80500 && imagedestroy($sourceResource);
+									unset($sourceResource);
 								}
 							}
 							elseif ($iImagetype == IMAGETYPE_PNG)
@@ -373,7 +354,8 @@ class Wysiwyg_Filemanager_File extends Core_Empty_Entity
 									imagepng($targetResourceStep1);
 									$sImgContent = ob_get_clean();
 
-									imagedestroy($sourceResource);
+									PHP_VERSION_ID < 80500 && imagedestroy($sourceResource);
+									unset($sourceResource);
 								}
 							}
 							elseif ($iImagetype == IMAGETYPE_GIF)
@@ -387,20 +369,23 @@ class Wysiwyg_Filemanager_File extends Core_Empty_Entity
 									imagecopyresampled($targetResourceStep1, $sourceResource, 0, 0, 0, 0, $destX, $destY, $sourceX, $sourceY);
 
 									ob_start();
-									imagegif ($targetResourceStep1);
+									imagegif($targetResourceStep1);
 									$sImgContent = ob_get_clean();
 
-									imagedestroy($sourceResource);
+									PHP_VERSION_ID < 80500 && imagedestroy($sourceResource);
+									unset($sourceResource);
 								}
 							}
 							else
 							{
-								imagedestroy($targetResourceStep1);
+								PHP_VERSION_ID < 80500 && imagedestroy($targetResourceStep1);
+								unset($targetResourceStep1);
 
 								return FALSE;
 							}
 
-							imagedestroy($targetResourceStep1);
+							PHP_VERSION_ID < 80500 && imagedestroy($targetResourceStep1);
+							unset($targetResourceStep1);
 						}
 						else
 						{
@@ -439,6 +424,34 @@ class Wysiwyg_Filemanager_File extends Core_Empty_Entity
 	}
 
 	/**
+	 * Available Core_Tar
+	 * @return bool
+	 */
+	protected function _availableExtractCoreTar()
+	{
+		if ((substr($this->name, -7) === '.tar.gz' || substr($this->name, -4) === '.tgz') && extension_loaded('zlib'))
+		{
+			return TRUE;
+		}
+
+		$ext = Core_File::getExtension($this->name);
+
+		return $ext == 'tar'
+			|| $ext == 'bz2' && extension_loaded('bz2');
+	}
+
+	/**
+	 * Available Core_Zip
+	 * @return bool
+	 */
+	protected function _availableExtractCoreZip()
+	{
+		$ext = Core_File::getExtension($this->name);
+
+		return $ext == 'zip';
+	}
+
+	/**
 	 * Check user access to admin form action
 	 * @param string $actionName admin form action name
 	 * @param User_Model $oUser user object
@@ -449,11 +462,7 @@ class Wysiwyg_Filemanager_File extends Core_Empty_Entity
 		switch ($actionName)
 		{
 			case 'extract':
-				$ext = Core_File::getExtension($this->name);
-
-				return substr($this->name, -7) === '.tar.gz' && extension_loaded('zlib')
-					|| $ext == 'tar'
-					|| $ext == 'bz2' && extension_loaded('bz2');
+				return $this->_availableExtractCoreTar() || $this->_availableExtractCoreZip();
 			break;
 			case 'edit':
 				$ext = Core_File::getExtension($this->name);

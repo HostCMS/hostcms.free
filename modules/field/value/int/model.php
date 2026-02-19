@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Field
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Field_Value_Int_Model extends Core_Entity
 {
@@ -50,14 +50,6 @@ class Field_Value_Int_Model extends Core_Entity
 	protected $_forbiddenTags = array(
 		'entity_id'
 	);
-
-	/**
-	 * Default sorting for models
-	 * @var array
-	 */
-	/*protected $_sorting = array(
-		'field_value_ints.id' => 'ASC'
-	);*/
 
 	/**
 	 * Set field value

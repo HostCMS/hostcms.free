@@ -3,7 +3,7 @@
 return array(
 	'theme' => '"silver"',
 	'plugins' => '"advlist autolink lists link image charmap preview anchor pagebreak searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking save table directionality emoticons codesample importcss help paste"',
-	'toolbar' => '"bold italic underline strikethrough cut copy paste removeformat undo redo blocks fontfamily fontsize | alignleft aligncenter alignright alignjustify bullist numlist link unlink image media table forecolor backcolor hr subscript superscript pagebreak codesample preview code insertShortcode"',
+	'toolbar' => '"bold italic underline strikethrough cut copy paste removeformat undo redo blocks fontfamily fontsize | alignleft aligncenter alignright alignjustify bullist numlist link unlink image media table forecolor backcolor hr subscript superscript pagebreak codesample preview code insertShortcode insertAiResponse"',
 	'toolbar_mode' => '"sliding"',
 	'image_advtab' => 'true',
 	'image_title' => 'true',
@@ -15,6 +15,7 @@ return array(
 	'valid_elements' => '"*[*]"',
 	//'invalid_elements' => '""',
 	'extended_valid_elements' => '"meta[*],i[*],noindex[*]"',
+	'protect' => '[/<i[^>]*><\/i>/g]',
 	'file_picker_callback' => 'function (callback, value, meta) { wysiwygFileManager.fileBrowser(callback, value, meta) }',
 	'convert_urls' => 'false',
 	'relative_urls' => 'false',

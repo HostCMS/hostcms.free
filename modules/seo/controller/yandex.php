@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Seo
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Seo_Controller_Yandex extends Seo_Controller
 {
@@ -151,8 +151,8 @@ class Seo_Controller_Yandex extends Seo_Controller
 
 	/**
 	 * Get user id
-	 * @return id|NULL
-	 */
+	 * @return int
+     */
 	public function getUserId()
 	{
 		if (is_null($this->_user_id))
@@ -243,8 +243,8 @@ class Seo_Controller_Yandex extends Seo_Controller
 
 	/**
 	 * Add current site
-	 * @return id|NULL
-	 */
+	 * @return string|NULL
+     */
 	public function addCurrentSite()
 	{
 		// "host_url": "http://example.com"
@@ -391,7 +391,6 @@ class Seo_Controller_Yandex extends Seo_Controller
 	/**
 	 * Verification
 	 * @param int $host_id Yandex.Webmaster site id
-	 * @return array
 	 */
 	public function verification($host_id)
 	{
@@ -630,12 +629,12 @@ class Seo_Controller_Yandex extends Seo_Controller
 		return "тИЦ";
 	}
 
-	/**
-	 * Get site popular queries
-	 * @param int $host_id Yandex.Webmaster site id
-	 * @param int $limit limit
-	 * @return array
-	 */
+    /**
+     * Get site popular queries
+     * @param int $host_id Yandex.Webmaster site id
+     * @return array
+     * @throws Core_Exception
+     */
 	public function getSitePopularQueries($host_id)
 	{
 		$limit = 100;

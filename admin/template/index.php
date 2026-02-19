@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -78,6 +78,16 @@ if (!is_null(Core_Array::getPost('refreshStyle')))
 		{
 			$value = Core_Array::getPost('value', '', 'trim');
 			$field = Core_Array::getPost('field', '', 'trim');
+
+			if ($type == 'user_css')
+			{
+				$oTemplate_Section_Lib->user_css = $value;
+				$oTemplate_Section_Lib->save();
+
+				Core::showJson(array(
+					'status' => 'success'
+				));
+			}
 
 			$oTemplate_Section_Lib_Controller = new Template_Section_Lib_Controller($oTemplate_Section_Lib);
 
@@ -158,7 +168,7 @@ if (!is_null(Core_Array::getPost('changePreset')))
 
 			if ($field == '')
 			{
-				$oTemplate_Section_Lib->class = $class;
+				$oTemplate_Section_Lib->class = implode(' ', array_unique(array_map('trim', explode(' ', $class))));
 			}
 			else
 			{
@@ -166,11 +176,65 @@ if (!is_null(Core_Array::getPost('changePreset')))
 					? json_decode($oTemplate_Section_Lib->field_classes, TRUE)
 					: array();
 
-				$aFieldClasses[$field] = implode(' ', array_unique(explode(' ', $class))); // only unique classes
+				$aFieldClasses[$field] = implode(' ', array_unique(array_map('trim', explode(' ', $class)))); // only unique classes
 
 				$oTemplate_Section_Lib->field_classes = json_encode($aFieldClasses, defined('JSON_UNESCAPED_UNICODE') ? JSON_UNESCAPED_UNICODE : 0);
 			}
 
+			$oTemplate_Section_Lib->save();
+
+			$aJSON = array(
+				'status' => 'success'
+			);
+		}
+	}
+
+	Core::showJson($aJSON);
+}
+
+if (!is_null(Core_Array::getPost('showFontsPanel')))
+{
+	$aJSON = array(
+		'status' => 'error'
+	);
+
+	$template_section_lib_id = Core_Array::getPost('template_section_lib_id', 0, 'int');
+
+	if ($template_section_lib_id)
+	{
+		$oTemplate_Section_Lib = Core_Entity::factory('Template_Section_Lib')->getById($template_section_lib_id);
+
+		if (!is_null($oTemplate_Section_Lib))
+		{
+			$oTemplate_Section_Lib_Controller = new Template_Section_Lib_Controller($oTemplate_Section_Lib);
+
+			$aJSON = array(
+				'status' => 'success',
+				'html' => $oTemplate_Section_Lib_Controller->showFontsPanel()
+			);
+		}
+	}
+
+	Core::showJson($aJSON);
+}
+
+if (!is_null(Core_Array::getPost('changeFont')))
+{
+	$aJSON = array(
+		'status' => 'error'
+	);
+
+	$template_section_lib_id = Core_Array::getPost('template_section_lib_id', 0, 'int');
+
+	if ($template_section_lib_id)
+	{
+		$oTemplate_Section_Lib = Core_Entity::factory('Template_Section_Lib')->getById($template_section_lib_id);
+
+		if (!is_null($oTemplate_Section_Lib))
+		{
+			$class = Core_Array::getPost('class', '', 'trim');
+
+			$oTemplate_Section_Lib->class = implode(' ', array_unique(array_map('trim', explode(' ', $class))));
 			$oTemplate_Section_Lib->save();
 
 			$aJSON = array(
@@ -348,10 +412,20 @@ if (!is_null(Core_Array::getPost('saveContent')))
 
 			if ($prefix == '' && isset($aOptions[$name]))
 			{
+				$oLib_Property = $oTemplate_Section_Lib->Lib->Lib_Properties->getByvarible_name($name);
+				$oLib_Property && $oLib_Property->type != 9 && $value = strip_tags($value);
+
 				$aOptions[$name] = $value;
 			}
 			elseif($prefix != '' && isset($aOptions[$prefix][$position - 1][$name]))
 			{
+				$oLib_Property = $oTemplate_Section_Lib->Lib->Lib_Properties->getByvarible_name($prefix);
+				if ($oLib_Property)
+				{
+					$oLib_Property = $oLib_Property->Lib_Properties->getByvarible_name($name);
+					$oLib_Property && $oLib_Property->type != 9 && $value = strip_tags($value);
+				}
+
 				$aOptions[$prefix][$position - 1][$name] = $value;
 			}
 
@@ -364,6 +438,161 @@ if (!is_null(Core_Array::getPost('saveContent')))
 
 	Core::showJson($aJSON);
 }
+
+/*if (!is_null(Core_Array::getPost('saveSettings')))
+{
+	$aJSON = array(
+		'status' => 'error',
+		'html' => ''
+	);
+
+	$template_section_lib_id = Core_Array::getPost('template_section_lib_id', 0, 'int');
+
+	$oTemplate_Section_Lib = Core_Entity::factory('Template_Section_Lib')->getById($template_section_lib_id);
+
+	if (!is_null($oTemplate_Section_Lib) && $oTemplate_Section_Lib->lib_id)
+	{
+		$oLib = $oTemplate_Section_Lib->Lib;
+
+		$aFieldClasses = !is_null($oTemplate_Section_Lib->field_classes)
+			? json_decode($oTemplate_Section_Lib->field_classes, TRUE)
+			: array();
+
+		$aFieldStyles = !is_null($oTemplate_Section_Lib->field_styles)
+			? json_decode($oTemplate_Section_Lib->field_styles, TRUE)
+			: array();
+
+		$aOldOptions = !is_null($oTemplate_Section_Lib->options)
+			? json_decode($oTemplate_Section_Lib->options, TRUE)
+			: array();
+
+		$oTemplate_Section_Lib_Controller = new Template_Section_Lib_Controller($oTemplate_Section_Lib);
+
+		$aOptions = $aSubOptions = array();
+		$aNewFieldClasses = $aNewFieldStyles = array();
+
+		$aLib_Properties = $oLib->Lib_Properties->getAllByparent_id(0, FALSE);
+		foreach ($aLib_Properties as $oLib_Property)
+		{
+
+// echo "<pre>";
+// var_dump($_POST[$oLib_Property->varible_name]);
+// echo "</pre>";
+
+			if (isset($_POST[$oLib_Property->varible_name]) || isset($_FILES[$oLib_Property->varible_name]))
+			{
+				if ($oLib_Property->type == 10)
+				{
+					$position = 0;
+
+					foreach ($_POST[$oLib_Property->varible_name] as $old_position => $aElement)
+					{
+						$old_position++;
+						$new_position = $position + 1;
+
+						$aTmp = array();
+
+						$aSub_Lib_Properties = $oLib_Property->Lib_Properties->findAll(FALSE);
+						foreach ($aSub_Lib_Properties as $oSub_Lib_Property)
+						{
+							$aTmp[$oSub_Lib_Property->varible_name] = isset($aElement[$oSub_Lib_Property->varible_name])
+								? $aElement[$oSub_Lib_Property->varible_name]
+								: '';
+						}
+
+						foreach ($aTmp as $name => $value)
+						{
+							$oSub_Lib_Property = $oLib_Property->Lib_Properties->getByVarible_name($name, FALSE);
+
+							if (!is_null($oSub_Lib_Property))
+							{
+								if ($oSub_Lib_Property->type == 8)
+								{
+									$aNewValues = $oTemplate_Section_Lib_Controller->uploadWidgetComplexFile($oSub_Lib_Property, $position);
+
+									$value = $oSub_Lib_Property->multivalue
+										? $aNewValues
+										: Core_Array::get($aNewValues, 0);
+								}
+							}
+
+							$aSubOptions[$position][$name] = $value;
+
+							// Стили и классы составных элементов
+							isset($aFieldClasses[$name . '_' . $old_position])
+								&& $aNewFieldClasses[$name . '_' . $new_position] = $aFieldClasses[$name . '_' . $old_position];
+
+							isset($aFieldStyles[$name . '_' . $old_position])
+								&& $aNewFieldStyles[$name . '_' . $new_position] = $aFieldStyles[$name . '_' . $old_position];
+						}
+
+						$position++;
+					}
+
+					$aOptions[$oLib_Property->varible_name] = $aSubOptions;
+				}
+				else
+				{
+					if ($oLib_Property->type == 8)
+					{
+
+						$aNewValues = $oTemplate_Section_Lib_Controller->uploadWidgetFile($oLib_Property);
+
+						$aOptions[$oLib_Property->varible_name] = $oLib_Property->multivalue
+							? $aNewValues
+							: Core_Array::get($aNewValues, 0);
+					}
+					else
+					{
+						$newValue = Core_Array::getPost($oLib_Property->varible_name, '');
+
+						$newValue = is_array($newValue)
+							? $newValue[0]
+							: $newValue;
+
+						switch ($oLib_Property->type)
+						{
+							case 1:
+								$newValue = boolval($newValue);
+							break;
+						}
+
+						if (is_array($newValue))
+						{
+							ksort($newValue);
+							$newValue = array_values($newValue);
+						}
+
+						$aOptions[$oLib_Property->varible_name] = $newValue;
+					}
+
+					// Стили и классы не составных элементов
+					isset($aFieldClasses[$oLib_Property->varible_name])
+						&& $aNewFieldClasses[$oLib_Property->varible_name] = $aFieldClasses[$oLib_Property->varible_name];
+
+					isset($aFieldStyles[$oLib_Property->varible_name])
+						&& $aNewFieldStyles[$oLib_Property->varible_name] = $aFieldStyles[$oLib_Property->varible_name];
+				}
+			}
+			elseif (in_array($oLib_Property->type, Template_Section_Lib_Controller::$forbiddenToShow))
+			{
+				if (isset($aOldOptions[$oLib_Property->varible_name]))
+				{
+					$aOptions[$oLib_Property->varible_name] = $aOldOptions[$oLib_Property->varible_name];
+				}
+			}
+		}
+
+		$oTemplate_Section_Lib->options = json_encode($aOptions, defined('JSON_UNESCAPED_UNICODE') ? JSON_UNESCAPED_UNICODE : 0);
+		$oTemplate_Section_Lib->field_classes = json_encode($aNewFieldClasses, defined('JSON_UNESCAPED_UNICODE') ? JSON_UNESCAPED_UNICODE : 0);
+		$oTemplate_Section_Lib->field_styles = json_encode($aNewFieldStyles, defined('JSON_UNESCAPED_UNICODE') ? JSON_UNESCAPED_UNICODE : 0);
+		$oTemplate_Section_Lib->save();
+
+		$aJSON['status'] = 'success';
+	}
+
+	Core::showJson($aJSON);
+}*/
 
 if (!is_null(Core_Array::getPost('saveSettings')))
 {
@@ -392,14 +621,12 @@ if (!is_null(Core_Array::getPost('saveSettings')))
 			? json_decode($oTemplate_Section_Lib->options, TRUE)
 			: array();
 
-		// echo "<pre>";
-		// var_dump($aFieldClasses);
-		// echo "</pre>";
+		$oTemplate_Section_Lib_Controller = new Template_Section_Lib_Controller($oTemplate_Section_Lib);
 
 		$aOptions = $aSubOptions = array();
 		$aNewFieldClasses = $aNewFieldStyles = array();
 
-		$aLib_Properties = $oLib->Lib_Properties->findAll();
+		$aLib_Properties = $oLib->Lib_Properties->getAllByparent_id(0, FALSE);
 		foreach ($aLib_Properties as $oLib_Property)
 		{
 			if (isset($_POST[$oLib_Property->varible_name]) || isset($_FILES[$oLib_Property->varible_name]))
@@ -408,21 +635,75 @@ if (!is_null(Core_Array::getPost('saveSettings')))
 				{
 					$position = 0;
 
+					// Получаем старые значения для этого свойства, если они есть
+					$aOldSubOptions = isset($aOldOptions[$oLib_Property->varible_name])
+						? $aOldOptions[$oLib_Property->varible_name]
+						: array();
+
 					foreach ($_POST[$oLib_Property->varible_name] as $old_position => $aElement)
 					{
 						$old_position++;
 						$new_position = $position + 1;
 
-						// var_dump($old_position);
-						// var_dump($new_position);
+						$aTmp = array();
 
-						foreach ($aElement as $name => $value)
+						$aSub_Lib_Properties = $oLib_Property->Lib_Properties->findAll(FALSE);
+						foreach ($aSub_Lib_Properties as $oSub_Lib_Property)
 						{
+							$aTmp[$oSub_Lib_Property->varible_name] = isset($aElement[$oSub_Lib_Property->varible_name])
+								? $aElement[$oSub_Lib_Property->varible_name]
+								: '';
+						}
+
+						foreach ($aTmp as $name => $value)
+						{
+							$oSub_Lib_Property = $oLib_Property->Lib_Properties->getByVarible_name($name, FALSE);
+
+							if (!is_null($oSub_Lib_Property))
+							{
+								if ($oSub_Lib_Property->type == 8)
+								{
+									// Проверяем, загружен ли новый файл для текущей позиции
+									$bFileUploaded = FALSE;
+
+									if (isset($_FILES[$oLib_Property->varible_name]))
+									{
+										$aFiles = $_FILES[$oLib_Property->varible_name];
+
+										// Проверяем, есть ли файл для текущей позиции и поля
+										if (isset($aFiles['name'][$old_position - 1][$name]) &&
+											isset($aFiles['error'][$old_position - 1][$name]) &&
+											$aFiles['error'][$old_position - 1][$name] != 4)
+										{
+											// Загружаем новый файл
+											$aNewValues = $oTemplate_Section_Lib_Controller->uploadWidgetComplexFile($oSub_Lib_Property, $old_position - 1);
+
+											$value = $oSub_Lib_Property->multivalue
+												? $aNewValues
+												: Core_Array::get($aNewValues, 0);
+
+											$bFileUploaded = TRUE;
+										}
+									}
+
+									// Если новый файл не загружен, используем старое значение
+									if (!$bFileUploaded)
+									{
+										$value = isset($aOldSubOptions[$old_position - 1][$name])
+											? $aOldSubOptions[$old_position - 1][$name]
+											: '';
+									}
+								}
+							}
+
 							$aSubOptions[$position][$name] = $value;
 
 							// Стили и классы составных элементов
-							isset($aFieldClasses[$name . '_' . $old_position]) && $aNewFieldClasses[$name . '_' . $new_position] = $aFieldClasses[$name . '_' . $old_position];
-							isset($aFieldStyles[$name . '_' . $old_position]) && $aNewFieldStyles[$name . '_' . $new_position] = $aFieldStyles[$name . '_' . $old_position];
+							isset($aFieldClasses[$name . '_' . $old_position])
+								&& $aNewFieldClasses[$name . '_' . $new_position] = $aFieldClasses[$name . '_' . $old_position];
+
+							isset($aFieldStyles[$name . '_' . $old_position])
+								&& $aNewFieldStyles[$name . '_' . $new_position] = $aFieldStyles[$name . '_' . $old_position];
 						}
 
 						$position++;
@@ -434,126 +715,57 @@ if (!is_null(Core_Array::getPost('saveSettings')))
 				{
 					if ($oLib_Property->type == 8)
 					{
-						$aTmp = Core_Array::getFiles($oLib_Property->varible_name);
-
-						if (isset($aTmp['name']))
+						// Проверяем, загружен ли новый файл
+						if (isset($_FILES[$oLib_Property->varible_name]) && $_FILES[$oLib_Property->varible_name]['error'][0] != 4)
 						{
-							$fileValue = array();
-
-							if ($oLib_Property->multivalue)
-							{
-								foreach ($aTmp['name'] as $key => $sName)
-								{
-									$fileValue[] = array(
-										'name' => $sName,
-										'tmp_name' => $aTmp['tmp_name'][$key],
-										'size' => $aTmp['size'][$key]
-									);
-								}
-							}
-							else
-							{
-								$fileValue[] = $aTmp;
-							}
+							$aNewValues = $oTemplate_Section_Lib_Controller->uploadWidgetFile($oLib_Property);
+							$aOptions[$oLib_Property->varible_name] = $oLib_Property->multivalue
+								? $aNewValues
+								: Core_Array::get($aNewValues, 0);
 						}
 						else
 						{
-							$fileValue = $aTmp;
-						}
-
-						// echo "<pre>";
-						// var_dump($fileValue);
-						// echo "</pre>";
-
-						$aFileValues = is_array($fileValue)
-							? $fileValue
-							: array(NULL);
-
-						$aNewValues = array();
-
-						// Для файлов необходимо сохранить прежние значения, так как они заново не будут переданы из формы
-						if (isset($aOldOptions[$oLib_Property->varible_name]))
-						{
-							$aTmp = is_array($aOldOptions[$oLib_Property->varible_name])
-								? $aOldOptions[$oLib_Property->varible_name]
-								: array($aOldOptions[$oLib_Property->varible_name]);
-
-							foreach ($aTmp as $fileName)
+							// Используем старое значение файла
+							if (isset($aOldOptions[$oLib_Property->varible_name]))
 							{
-								// Сохраняем  только непустые значения
-								$fileName !== ''
-									&& $aNewValues[] = $fileName;
+								$aOptions[$oLib_Property->varible_name] = $aOldOptions[$oLib_Property->varible_name];
+							}
+							else
+							{
+								$aOptions[$oLib_Property->varible_name] = '';
 							}
 						}
-
-						foreach ($aFileValues as $key => $fileValue)
-						{
-							if (is_array($fileValue) && isset($fileValue['name']))
-							{
-								// Для одиночного значения очищаем ранее восстановленные значения
-								if (!$oLib_Property->multivalue)
-								{
-									// Удаление ранее загруженных файлов
-									foreach ($aNewValues as $oldValue)
-									{
-										$oldValue = ltrim($oldValue, '/');
-										if (strpos($oldValue, $oObject->getLibFileHref()) === 0)
-										{
-											try
-											{
-												Core_File::delete(CMS_FOLDER . $oldValue);
-											}
-											catch (Exception $e)
-											{
-												Core_Message::show($e->getMessage(), 'error');
-											}
-										}
-									}
-
-									$aNewValues = array();
-								}
-
-								$aFile = $fileValue;
-
-								$fileValue = NULL;
-
-								if (intval($aFile['size']) > 0 && strlen($aFile['name']))
-								{
-									if (Core_File::isValidExtension($aFile['name'], Core::$mainConfig['availableExtension']))
-									{
-										$ext = Core_File::getExtension($aFile['name']);
-
-										$imageName = $oLib_Property->change_filename
-											? strtolower(Core_Guid::get()) . '.' . $ext
-											: Core_File::filenameCorrection($aFile['name']);
-
-										Core_File::moveUploadedFile($aFile['tmp_name'], $oTemplate_Section_Lib->getLibFilePath() . $imageName);
-
-										$fileValue = '/' . $oTemplate_Section_Lib->getLibFileHref() . $imageName;
-									}
-								}
-							}
-						}
-
-						!is_null($fileValue)
-							&& $aNewValues[] = $fileValue;
-
-						// echo "<pre>";
-						// var_dump($aNewValues);
-						// echo "</pre>";
-
-						$aOptions[$oLib_Property->varible_name] = $oLib_Property->multivalue
-							? $aNewValues
-							: Core_Array::get($aNewValues, 0);
 					}
 					else
 					{
-						$aOptions[$oLib_Property->varible_name] = Core_Array::getPost($oLib_Property->varible_name, '', 'trim');
+						$newValue = Core_Array::getPost($oLib_Property->varible_name, '');
+
+						$newValue = is_array($newValue)
+							? $newValue[0]
+							: $newValue;
+
+						switch ($oLib_Property->type)
+						{
+							case 1:
+								$newValue = boolval($newValue);
+							break;
+						}
+
+						if (is_array($newValue))
+						{
+							ksort($newValue);
+							$newValue = array_values($newValue);
+						}
+
+						$aOptions[$oLib_Property->varible_name] = $newValue;
 					}
 
 					// Стили и классы не составных элементов
-					isset($aFieldClasses[$oLib_Property->varible_name]) && $aNewFieldClasses[$oLib_Property->varible_name] = $aFieldClasses[$oLib_Property->varible_name];
-					isset($aFieldStyles[$oLib_Property->varible_name]) && $aNewFieldStyles[$oLib_Property->varible_name] = $aFieldStyles[$oLib_Property->varible_name];
+					isset($aFieldClasses[$oLib_Property->varible_name])
+						&& $aNewFieldClasses[$oLib_Property->varible_name] = $aFieldClasses[$oLib_Property->varible_name];
+
+					isset($aFieldStyles[$oLib_Property->varible_name])
+						&& $aNewFieldStyles[$oLib_Property->varible_name] = $aFieldStyles[$oLib_Property->varible_name];
 				}
 			}
 			elseif (in_array($oLib_Property->type, Template_Section_Lib_Controller::$forbiddenToShow))
@@ -563,15 +775,7 @@ if (!is_null(Core_Array::getPost('saveSettings')))
 					$aOptions[$oLib_Property->varible_name] = $aOldOptions[$oLib_Property->varible_name];
 				}
 			}
-
 		}
-
-		// echo "<pre>";
-		// var_dump($aOldOptions);
-		// var_dump($aOptions);
-		// echo "</pre>";
-
-		// die();
 
 		$oTemplate_Section_Lib->options = json_encode($aOptions, defined('JSON_UNESCAPED_UNICODE') ? JSON_UNESCAPED_UNICODE : 0);
 		$oTemplate_Section_Lib->field_classes = json_encode($aNewFieldClasses, defined('JSON_UNESCAPED_UNICODE') ? JSON_UNESCAPED_UNICODE : 0);
@@ -617,16 +821,18 @@ if (!is_null(Core_Array::getPost('showSettingsCrmIcons')))
 
 	if ($input_name != '')
 	{
+		$template_section_lib_id = Core_Array::getPost('template_section_lib_id', 0, 'int');
+
 		ob_start();
 
-		?><div class="modal fade" id="settingsCrmIcons" tabindex="-1" aria-labelledby="settingsCrmIconsLabel" aria-hidden="true">
+		?><!--<div class="modal fade" id="settingsCrmIcons" tabindex="-1" aria-labelledby="settingsCrmIconsLabel" aria-hidden="true">
 			<div class="modal-dialog modal-dialog-centered">
 				<div class="modal-content">
 					<div class="modal-header">
 						<h1 class="modal-title fs-5" id="settingsCrmIconsLabel">Modal title</h1>
 						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
-					<div class="modal-body">
+					<div class="modal-body">-->
 						<input type="text" class="icon-filter margin-bottom-20 w-100 input-lg" class="form-control" placeholder="Введите название иконки, например, 'arrow'"/>
 						<div class="crm-icon-wrapper">
 							<div class="crm-icon-modal">
@@ -636,15 +842,15 @@ if (!is_null(Core_Array::getPost('showSettingsCrmIcons')))
 									{
 										$value = htmlspecialchars($oCrm_Icon->value);
 
-										?><span onclick="hQuery.selectSettingsCrmIcon(this, '<?php echo $input_name?>')" class="crm-project-id" data-id="<?php echo $oCrm_Icon->id?>" data-value="<?php echo $value?>"><i class="<?php echo $value?>"></i></span><?php
+										?><span onclick="hQuery.selectSettingsCrmIcon(this, '<?php echo $input_name?>', <?php echo $template_section_lib_id?>)" class="crm-project-id" data-id="<?php echo $oCrm_Icon->id?>" data-value="<?php echo $value?>"><i class="<?php echo $value?>"></i></span><?php
 									}
 								?>
 							</div>
 						</div>
-					</div>
+					<!-- </div>
 				</div>
 			</div>
-		</div>
+		</div>-->
 		<script>
 			$(function() {
 				$(".icon-filter").on('keyup', function(){
@@ -732,6 +938,36 @@ if (!is_null(Core_Array::getPost('addPoint')) || !is_null(Core_Array::getPost('c
 				);
 			}
 		}
+	}
+
+	Core::showJson($aJSON);
+}
+
+if (!is_null(Core_Array::getPost('showLessPanel')))
+{
+	$aJSON = array(
+		'status' => 'error',
+		'html' => ''
+	);
+
+	$ids = Core_Array::getPost('ids', '', 'trim');
+
+	if ($ids != '')
+	{
+		ob_start();
+
+		$aTemplatIds = explode(',', $ids);
+		foreach ($aTemplatIds as $template_id)
+		{
+			$oTemplate = Core_Entity::factory('Template')->getById($template_id, FALSE);
+			if (!is_null($oTemplate))
+			{
+				$oTemplate->showManifest();
+			}
+		}
+
+		$aJSON['html'] = ob_get_clean();
+		$aJSON['status'] = 'success';
 	}
 
 	Core::showJson($aJSON);
@@ -991,9 +1227,13 @@ $oAdmin_Form_Dataset
 if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
-		->addCondition(array('open' => array()))
-			->addCondition(array('where' => array('templates.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
-			->addCondition(array('setOr' => array()))
+		->addCondition(array('open' => array()));
+
+	is_numeric($sGlobalSearch) && $oAdmin_Form_Dataset
+			->addCondition(array('where' => array('templates.id', '=', intval($sGlobalSearch))))
+			->addCondition(array('setOr' => array()));
+
+	$oAdmin_Form_Dataset
 			->addCondition(array('where' => array('templates.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
 }

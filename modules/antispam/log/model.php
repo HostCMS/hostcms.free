@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Antispam
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Antispam_Log_Model extends Core_Entity
 {
@@ -62,7 +62,6 @@ class Antispam_Log_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @return string
 	 */
 	public function country_flagBackend()
 	{

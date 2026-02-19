@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Lib
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Parameters of sample dynamic pages',
@@ -34,6 +34,7 @@ return array(
 	'lib_property_type_9' => 'Visual Editor',
 	'lib_property_type_10' => 'Composite',
 	'lib_property_type_11' => 'Icon',
+	'lib_property_type_12' => 'Color',
 	'value' => 'Value',
 	'multivalue' => 'Multiple values',
 	'copy_from' => ' [Copy of %s]',

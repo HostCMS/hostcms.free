@@ -37,6 +37,7 @@ if (Core::moduleIsActive('siteuser'))
 	}
 
 	$bTwitter = is_string($oauth_token = Core_Array::getGet('oauth_token')) && is_string($oauth_verifier = Core_Array::getGet('oauth_verifier'));
+	$bVK = !is_null($device_id = Core_Array::getGet('device_id'));
 
 	// Встречаем ответ Вконтакте/Facebook/Одноклассники/Google+/Яндекс/Mail.ru/Twitter
 	if (is_string($code = Core_Array::getGet('code')) || $bTwitter)
@@ -62,6 +63,11 @@ if (Core::moduleIsActive('siteuser'))
 			else
 			{
 				$oSiteuser_Oauth_Controller->code = $code;
+
+				if ($bVK)
+				{
+					$oSiteuser_Oauth_Controller->device_id = $device_id;
+				}
 			}
 
 			$aResult = $oSiteuser_Oauth_Controller->execute();
@@ -77,6 +83,8 @@ if (Core::moduleIsActive('siteuser'))
 					// Пользователь через oAuth не найден и текущий пользователь не авторизован
 					if (is_null($oFoundSiteuser) && !$oSiteuser->id)
 					{
+						$sUserLogin = $sUserEmail = '';
+
 						$oSite = Core_Entity::factory('Site', CURRENT_SITE);
 
 						if (!is_null($user_login = Core_Array::get($aResult, 'login')))
@@ -87,19 +95,11 @@ if (Core::moduleIsActive('siteuser'))
 							$oSiteuser = $oSite->Siteusers->getByLogin($user_login, FALSE);
 							$sUserLogin = is_null($oSiteuser) ? $user_login : '';
 						}
-						else
-						{
-							$sUserLogin = '';
-						}
 
 						if (!is_null($user_email = Core_Array::get($aResult, 'email')))
 						{
 							$oSiteuser = $oSite->Siteusers->getByEmail($user_email, FALSE);
 							$sUserEmail = is_null($oSiteuser) ? $user_email : '';
-						}
-						else
-						{
-							$sUserEmail = '';
 						}
 
 						// Create new siteuser
@@ -271,7 +271,7 @@ if (Core::moduleIsActive('siteuser'))
 		{
 			$login = Core_Array::getPost('login', '', 'str');
 			$password = Core_Array::getPost('password', '', 'str');
-			
+
 			// May be NULL if the siteuser is not found or FALSE if access is temporarily denied
 			$oSiteuser = $Siteuser_Controller_Show->getByLoginAndPassword($login, $password);
 
@@ -303,7 +303,7 @@ if (Core::moduleIsActive('siteuser'))
 						Core::factory('Core_Xml_Entity')
 							->name('error_code')->value('siteuserInactive')
 						);
-					
+
 					// Log action
 					Core_Log::instance()->clear()
 						->status(Core_Log::$MESSAGE)
@@ -317,7 +317,7 @@ if (Core::moduleIsActive('siteuser'))
 					Core::factory('Core_Xml_Entity')
 						->name('error_code')->value('accessTemporarilyDenied')
 				);
-				
+
 				// Log action
 				Core_Log::instance()->clear()
 					->status(Core_Log::$MESSAGE)
@@ -330,7 +330,7 @@ if (Core::moduleIsActive('siteuser'))
 					Core::factory('Core_Xml_Entity')
 						->name('error_code')->value('wrongLoginPassword')
 				);
-				
+
 				// Log action
 				Core_Log::instance()->clear()
 					->status(Core_Log::$MESSAGE)
@@ -344,7 +344,7 @@ if (Core::moduleIsActive('siteuser'))
 				Core::factory('Core_Xml_Entity')
 					->name('error_code')->value('wrongCsrf')
 			);
-			
+
 			// Log action
 			Core_Log::instance()->clear()
 				->status(Core_Log::$MESSAGE)

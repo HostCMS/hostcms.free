@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Schedule
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Schedule_Load_Select_Options extends Admin_Form_Action_Controller
 {
@@ -19,11 +19,11 @@ class Schedule_Load_Select_Options extends Admin_Form_Action_Controller
 	 */
 	protected $_moduleId = NULL;
 
-	/**
-	 * Set model
-	 * @param Core_Entity $model object
-	 * @return self
-	 */
+    /**
+     * Set model
+     * @param int $moduleId
+     * @return self
+     */
 	public function moduleId($moduleId)
 	{
 		$this->_moduleId = $moduleId;

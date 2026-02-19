@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Event_Controller_Kanban extends Skin_Bootstrap_Admin_Form_Controller_List
 {
@@ -219,7 +219,13 @@ class Event_Controller_Kanban extends Skin_Bootstrap_Admin_Form_Controller_List
 												<!-- <span data-popover="hover" data-user-id="<?php echo $oUser->id?>"><img src="<?php echo $oUser->getAvatar()?>" title="<?php echo htmlspecialchars($oUser->getFullName())?>"/></span> -->
 											</div>
 										</div>
-										<div class="d-flex align-items-center justify-content-between">
+										<div class="d-flex align-items-center justify-content-between1">
+											<?php
+											if ($oEntity->Event_Attachments->getCount(FALSE))
+											{
+												?><i class="fa fa-paperclip name-attachments"></i><?php
+											}
+											?>
 											<a class="evetn-title name" onclick="$.modalLoad({path: hostcmsBackend + '/event/index.php', action: 'edit',operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oEntity->id?>]=1&parentWindowId=id_content', windowId: 'id_content', width: '90%'});"><?php echo htmlspecialchars($oEntity->name)?></a>
 											<?php
 											echo $oEntity->showChecklists(TRUE);

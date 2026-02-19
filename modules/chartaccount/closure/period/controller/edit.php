@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Chartaccount
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Chartaccount_Closure_Period_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -75,7 +75,6 @@ class Chartaccount_Closure_Period_Controller_Edit extends Admin_Form_Action_Cont
 			->move($this->getField('financial_result')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow4)
 			->move($this->getField('balance_reformation')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow5)
 			->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow6);
-			;
 
 		return $this;
 	}

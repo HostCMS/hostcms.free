@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core
 {
@@ -64,8 +64,8 @@ class Core
 
 	/**
 	 * Check if self::init() has been called
-	 * @return boolean
-	 */
+	 * @return boolean|null
+     */
 	static public function isInit()
 	{
 		return self::$_init;
@@ -181,7 +181,7 @@ class Core
 	{
 		// Main config
 		self::$mainConfig = self::$config->get('core_config') + array(
-			'skin' => 'default',
+			'skin' => 'bootstrap',
 			'dateFormat' => 'd.m.Y',
 			'dateTimeFormat' => 'd.m.Y H:i:s',
 			'datePickerFormat' => 'DD.MM.YYYY',
@@ -189,6 +189,7 @@ class Core
 			'timePickerFormat' => 'HH:mm:ss',
 			'availableExtension' => array('JPG', 'JPEG', 'JFIF', 'GIF', 'PNG', 'WEBP', 'AVIF', 'SVG', 'PDF', 'ZIP', 'GZ', 'DOC', 'DOCX', 'XLS', 'XLSX', 'TXT'),
 			'availableGetVariables' => array('_openstat', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'srsltid', 'gclid', 'yclid', 'ymclid', 'ysclid', 'yadclid', 'fbclid', 'yadordid', 'from', 'etext'),
+			'clientIpHeaders' => array('HTTP_CF_CONNECTING_IP', 'HTTP_DDG_CONNECTING_IP', 'HTTP_X_FORWARDED_FOR_Y', 'HTTP_X_QRATOR_IP_SOURCE', 'HTTP_X_REAL_IP'),
 			'defaultCache' => 'file',
 			'timezone' => 'America/New_York',
 			'translate' => TRUE,
@@ -539,6 +540,14 @@ class Core
 	static protected $_autoloadCache = array();
 
 	/**
+	 * Clear _autoload cache
+	 */
+	static public function clearAutoloadCache()
+	{
+		self::$_autoloadCache = array();
+	}
+
+	/**
 	 * Callback function
 	 * @param string $class path to class file
 	 * @return mixed
@@ -650,8 +659,8 @@ class Core
 
 	/**
 	 * Get Site Language
-	 * @return string
-	 */
+	 * @return string|null
+     */
 	static public function getLng()
 	{
 		return self::$_lng;
@@ -786,7 +795,7 @@ class Core
 	}
 
 	/**
-	 * Generate an unique ID
+	 * Generate an unique Hex ID
 	 * @param int $bytes default 16
 	 * @return string
 	 */
@@ -802,7 +811,12 @@ class Core
 		}
 		else
 		{
-			$raw = hash($bytes == 16 ? 'md5' : 'sha256', uniqid(strval(mt_rand()), TRUE), TRUE);
+			//$raw = hash($bytes == 16 ? 'md5' : 'sha256', uniqid(strval(mt_rand()), TRUE), TRUE);
+			$raw = '';
+			for ($i = 0; $i < $bytes; $i++)
+			{
+				$raw .= chr(mt_rand(0, 255));
+			}
 		}
 
 		return bin2hex($raw);
@@ -1006,8 +1020,8 @@ class Core
 	{
 		if (!headers_sent())
 		{
-			header('Pragma: no-cache');
 			header('Cache-Control: private, no-cache');
+			header('Pragma: no-cache'); // для старых систем
 			header('Content-Disposition: inline; filename="files.json"');
 			header('Vary: Accept');
 
@@ -1036,27 +1050,12 @@ class Core
 	 */
 	static public function getClientIp()
 	{
-		// CF-Connecting-IP provides the client IP address, connecting to Cloudflare, to the origin web server.
-		// This header will only be sent on the traffic from Cloudflare's edge to your origin webserver.
-		if (isset($_SERVER['HTTP_CF_CONNECTING_IP']))
+		foreach (self::$mainConfig['clientIpHeaders'] as $headerName)
 		{
-			return $_SERVER['HTTP_CF_CONNECTING_IP'];
-		}
-		elseif (isset($_SERVER['HTTP_DDG_CONNECTING_IP']))
-		{
-			return $_SERVER['HTTP_DDG_CONNECTING_IP'];
-		}
-		elseif (isset($_SERVER['HTTP_X_QRATOR_IP_SOURCE']))
-		{
-			return $_SERVER['HTTP_X_QRATOR_IP_SOURCE'];
-		}
-		elseif (isset($_SERVER['X-REAL-IP']))
-		{
-			return $_SERVER['X-REAL-IP'];
-		}
-		elseif (isset($_SERVER['HTTP_X_REAL_IP']))
-		{
-			return $_SERVER['HTTP_X_REAL_IP'];
+			if (isset($_SERVER[$headerName]))
+			{
+				return $_SERVER[$headerName];
+			}
 		}
 
 		return Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1');
@@ -1081,7 +1080,7 @@ class Core
 	*/
 	static public function checkBot($agent)
 	{
-		// gptbot|LetsearchBot|LightspeedSystemsCrawler|
+		// gptbot|LetsearchBot|LightspeedSystemsCrawler|Amazonbot
 		return is_string($agent)
 			? (bool) preg_match('/http|bot|spide|craw|finder|curl|mail|yandex|applebot|seach|seek|site|sogou|yahoo|msnbot|snoopy|google|bing|feedreader|links|megaindex|simplepie|siteimprove/iu', $agent)
 			: FALSE;

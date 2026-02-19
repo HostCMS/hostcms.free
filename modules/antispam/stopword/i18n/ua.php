@@ -20,4 +20,5 @@ return array(
 	'case_sensitive' => 'З урахуванням регістру',
 	'active' => 'Активність',
 	'changeActive_success' => 'Активність успішно змінена!',
+	'changeCaseSesitive_success' => 'Регістр успішно змінено!',
 );

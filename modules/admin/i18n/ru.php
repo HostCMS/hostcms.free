@@ -118,4 +118,11 @@ return array(
 	'minutes' => '%d минут',
 	'second' => 'секунда',
 	'seconds' => '%d секунд',
+
+	'fast_login' => 'Быстрый вход',
+	'wrong_fast_login' => 'Авторизация не удалась, войдите через пароль.',
+	'wrong_public_key' => 'Авторизация не удалась, нет данных для пользователя.',
+	'authorization_fast_button_accept' => 'Вам доступен быстрый вход',
+
+	'ai' => 'AI',
 );

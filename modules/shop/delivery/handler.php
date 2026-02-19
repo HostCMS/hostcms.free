@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 abstract class Shop_Delivery_Handler
 {
@@ -207,10 +207,11 @@ abstract class Shop_Delivery_Handler
 		self::_check($oShop, 'checkPaymentBeforeContent');
 	}
 
-	/**
-	 * Call ->checkPaymentAfterContent() on each shop's Shop_Delivery_Handler
-	 * @param Shop_Model $oShop
-	 */
+    /**
+     * Call ->checkPaymentAfterContent() on each shop's Shop_Delivery_Handler
+     * @param Shop_Model $oShop
+     * @return null
+     */
 	static public function checkAfterContent(Shop_Model $oShop)
 	{
 		return self::_check($oShop, 'checkPaymentAfterContent');

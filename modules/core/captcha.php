@@ -10,7 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @version 7.x
  * @author Kruglov Sergei
  * @copyright © 2006, 2007, 2008, 2011 Kruglov Sergei, http://www.captcha.ru
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Captcha
 {
@@ -127,8 +127,8 @@ class Core_Captcha
 
 	/**
 	 * Получить уникальный индекс для CAPTCHA
-	 * @return int
-	 */
+	 * @return string
+     */
 	static public function getCaptchaId()
 	{
 		/*$max = 99999;
@@ -537,7 +537,8 @@ class Core_Captcha
 		$img3 = imagecreatetruecolor(self::$_config['width'], self::$_config['height']);
 		imagecopyresampled($img3, $img2, 0, 0, 0, 0, self::$_config['width'], self::$_config['height'], $width, $height);
 
-		imagedestroy($img2);
+		PHP_VERSION_ID < 80500 && imagedestroy($img2);
+		unset($img2);
 
 		ob_start(array($this, 'contentLength'));
 
@@ -558,7 +559,9 @@ class Core_Captcha
 			imagejpeg($img3, NULL, defined('JPG_QUALITY') ? JPG_QUALITY : 100);
 		}
 
-		imagedestroy($img3);
+		PHP_VERSION_ID < 80500 && imagedestroy($img3);
+		unset($img3);
+		
 		ob_end_flush();
 	}
 

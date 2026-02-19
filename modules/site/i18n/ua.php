@@ -93,6 +93,7 @@ return array(
 	'csp-header-media-src' => 'Media',
 	'csp-header-object-src' => 'Object',
 	'csp-header-frame-src' => 'Frame',
+	'csp-header-frame-ancestors' => 'Frame-Ancestors',
 
 	'none' => 'Заборонити доступ до всього',
 	'all' => 'Повний доступ, виключаючи схеми data: blob: filesystem:',

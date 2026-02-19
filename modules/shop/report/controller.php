@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Report_Controller
 {
@@ -775,7 +775,7 @@ class Shop_Report_Controller
 
 				$aPopularItems[$iId] = array(
 					'name' => $oShop_Order_Item->name,
-					'marking' => $oShop_Order_Item->marking,
+					'marking' => strval($oShop_Order_Item->marking),
 					'avgPrice' => /*number_format((float)*/ $oShop_Order_Item->dataAvgPrice/*, 2, '.', ' ')*/,
 					'quantityAmount' => $oShop_Order_Item->dataQuantityAmount,
 					'totalAmount' => /*number_format((float) */$oShop_Order_Item->dataTotalAmount/*, 2, '.', ' ')*/

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Auth
 {
@@ -65,11 +65,10 @@ class Core_Auth
 					);
 
 				$oCore_Response = new Core_Response();
-
 				$oCore_Response
 					->status(403)
-					->header('Pragma', 'no-cache')
 					->header('Cache-Control', 'private, no-cache')
+					->header('Pragma', 'no-cache') // для старых систем
 					->header('Last-Modified', gmdate('D, d M Y H:i:s', time()) . ' GMT')
 					->header('X-Powered-By', 'HostCMS')
 					->body('HostCMS: Error 403. Access Forbidden!')
@@ -112,7 +111,7 @@ class Core_Auth
 			if (isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_AUTH_PW'])
 				&& Core_Type_Conversion::toBool($_SESSION['HOSTCMS_HTTP_AUTH_FLAG']) == TRUE)
 			{
-				ob_start();
+				//ob_start();
 
 				try
 				{
@@ -121,78 +120,88 @@ class Core_Auth
 				}
 				catch (Exception $e)
 				{
-					Core_Message::show($e->getMessage(), 'error');
+					//Core_Message::show($e->getMessage(), 'error');
 				}
 
 				// Авторизация не произошла по причине неправильных данных
-				if (!self::logged() && self::$_lastError == 'wrong data')
+				/*if (!self::logged() && self::$_lastError == 'wrong data')
 				{
 					Core_Log::instance()->clear()
 						->status(Core_Log::$ERROR)
 						->write(Core::_('Core.error_log_attempt_to_access', $sModuleName));
 				}
 
-				$message = ob_get_clean();
+				ob_get_clean();
+				$message = ob_get_clean();*/
 			}
-			else
+			/*else
 			{
 				$message = '';
-			}
+			}*/
 
 			if (!self::logged())
 			{
-				// Нужен старт сессии, чтобы записать в нее HOSTCMS_HTTP_AUTH_FLAG
-				if (@session_id() == '')
+				// webauthn
+				if (Core_Array::getRequest('_', FALSE) && is_null(Core_Array::getGet('noWebauthns')))
 				{
-					@session_start();
-				}
-
-				// Флаг начала HTTP-авторизации
-				$_SESSION['HOSTCMS_HTTP_AUTH_FLAG'] = TRUE;
-
-				$oCore_Response = new Core_Response();
-
-				$oCore_Response
-					->header('Content-Type', "text/html; charset=UTF-8")
-					->header('Last-Modified', gmdate('D, d M Y H:i:s', time()) . ' GMT')
-					->header('X-Powered-By', 'HostCMS');
-
-				// Not 'cgi', 'cgi-fcgi'
-				if (substr(php_sapi_name(), 0, 3) != 'cgi')
-				{
-					$oCore_Response
-						->status(401)
-						->header('Pragma', 'no-cashe')
-						->header('WWW-authenticate', "basic realm='HostCMS'");
+					Core::showJson(array(
+						'action' => 'showWebauthn'
+					));
 				}
 				else
 				{
-					$oCore_Response->status(403);
+					// Нужен старт сессии, чтобы записать в нее HOSTCMS_HTTP_AUTH_FLAG
+					if (@session_id() == '')
+					{
+						@session_start();
+					}
+
+					// Флаг начала HTTP-авторизации
+					$_SESSION['HOSTCMS_HTTP_AUTH_FLAG'] = TRUE;
+
+					$oCore_Response = new Core_Response();
+					$oCore_Response
+						->header('Content-Type', "text/html; charset=UTF-8")
+						->header('Last-Modified', gmdate('D, d M Y H:i:s', time()) . ' GMT')
+						->header('X-Powered-By', 'HostCMS');
+
+					// Not 'cgi', 'cgi-fcgi'
+					if (substr(php_sapi_name(), 0, 3) != 'cgi')
+					{
+						$oCore_Response
+							->status(401)
+							->header('Pragma', 'no-cashe')
+							->header('WWW-authenticate', "basic realm='HostCMS'");
+					}
+					else
+					{
+						$oCore_Response->status(403);
+					}
+
+					// Выводим страницу, которая отобразится, если пользователь нажмет "Отмена"
+					$title = Core::_('Core.error_log_access_was_denied', $sModuleName);
+
+					ob_start();
+					$oSkin = Core_Skin::instance()
+						->title($title)
+						->setMode('authorization')
+						->header();
+
+					Core_Html_Entity::factory('Div')
+						->class('indexMessage')
+						->add(Core_Html_Entity::factory('H1')->value($title))
+						->add(Core_Html_Entity::factory('Script')->value('checkRegistration(location)'))
+						->execute();
+
+					$oSkin->footer();
+
+					$oCore_Response
+						->body(ob_get_clean())
+						->sendHeaders()
+						->showBody();
+
+					exit();
 				}
-
-				// Выводим страницу, которая отобразится, если пользователь нажмет "Отмена"
-				$title = Core::_('Core.error_log_access_was_denied', $sModuleName);
-
-				ob_start();
-				$oSkin = Core_Skin::instance()
-					->title($title)
-					->setMode('authorization')
-					->header();
-
-				Core_Html_Entity::factory('Div')
-					->class('indexMessage')
-					->add(Core_Html_Entity::factory('H1')->value($title))
-					->execute();
-
-				$oSkin->footer();
-
-				$oCore_Response->body(ob_get_clean());
-
-				$oCore_Response
-					->sendHeaders()
-					->showBody();
-
-				exit();
 			}
 
 			// Флаг того, что окно авторизации было выведено удаляем
@@ -298,7 +307,7 @@ class Core_Auth
 
 		header('Content-type: text/html; charset=UTF-8');
 		header('Cache-Control: no-cache, must-revalidate, max-age=0');
-		header('Pragma: no-cache');
+		header('Pragma: no-cache'); // для старых систем
 		header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
 		header('X-Frame-Options: SAMEORIGIN');
 		header('X-Content-Type-Options: nosniff');
@@ -397,11 +406,14 @@ class Core_Auth
 
 					// Привязки к IP не было или сети для IP совпадают
 					if (!isset($_SESSION['current_user_ip'])
-						// IPv4 network comparison
-						|| Core_Valid::ipv4($_SESSION['current_user_ip']) && Core_Valid::ipv4($ip)
-							&& Core_Ip::ipv4Network($_SESSION['current_user_ip'], Core::$mainConfig['backendAssignSessionIpMask']) == Core_Ip::ipv4Network($ip, Core::$mainConfig['backendAssignSessionIpMask'])
-						// or IPv6 comparison
-						|| $_SESSION['current_user_ip'] === $ip
+						|| isset($_SESSION['current_bf']) && $_SESSION['current_bf'] === self::_getBrowserFingerprint()
+						|| (
+							// IPv4 network comparison
+							Core_Valid::ipv4($_SESSION['current_user_ip']) && Core_Valid::ipv4($ip)
+								&& Core_Ip::ipv4Network($_SESSION['current_user_ip'], Core::$mainConfig['backendAssignSessionIpMask']) === Core_Ip::ipv4Network($ip, Core::$mainConfig['backendAssignSessionIpMask'])
+							// or IPv6 comparison
+							|| $_SESSION['current_user_ip'] === $ip
+						)
 					)
 					{
 						// Пользователь существует
@@ -421,12 +433,10 @@ class Core_Auth
 					}
 					else
 					{
-						$sessionId = session_id();
-
 						Core_Log::instance()->clear()
 							->status(Core_Log::$ERROR)
 							->notify(FALSE)
-							->write(Core::_('Core.session_change_ip', $sessionId, $ip));
+							->write(Core::_('Core.session_change_ip', session_id(), $ip));
 
 						self::logout();
 					}
@@ -437,6 +447,19 @@ class Core_Auth
 		}
 
 		return self::$_logged;
+	}
+
+	/**
+	 * Get hash for Browser Fingerprint
+	 * @return string
+	 */
+	static protected function _getBrowserFingerprint()
+	{
+		return hash('sha256', Core_Array::get($_SERVER, 'HTTP_USER_AGENT', '')
+			. '|' . Core_Array::get($_SERVER, 'HTTP_ACCEPT_LANGUAGE', '')
+			. '|' . Core_Array::get($_SERVER, 'HTTP_ACCEPT_ENCODING', '')
+			//. '|' . Core_Array::get($_SERVER, 'HTTP_ACCEPT', '')
+		);
 	}
 
 	/**
@@ -560,8 +583,8 @@ class Core_Auth
 	 * @param string $login логин
 	 * @param string $password пароль
 	 * @param boolean $assignSessionToIp привязать сессию к IP-адресу
-	 * @return mixed
-	 * <br />true -- автооризация произведена успешно
+	 * @return bool
+     * <br />true -- автооризация произведена успешно
 	 * <br />false -- неправильные данные доступа
 	 * <br />-1 -- не истекло время до следующей попытки авторизации
 	 */
@@ -646,56 +669,7 @@ class Core_Auth
 
 		if ($oUser)
 		{
-			// Сессия может быть уже запущена и при повторном отправке данных POST-ом при авторизации
-			//if (!isset($_SESSION['valid_user']))
-			if (@session_id() == '')
-			{
-				Core_Session::start();
-			}
-
-			// Записываем ID пользователя
-			$_SESSION['current_users_id'] = $oUser->id;
-			$_SESSION['valid_user'] = $oUser->login;
-			$_SESSION['date_user'] = date('d.m.Y H:i:s');
-			$_SESSION['is_superuser'] = $oUser->superuser;
-
-			$assignSessionToIp && $_SESSION['current_user_ip'] = $ip;
-
-			// Создаем новый ID сессии без уничтожения предыдущей
-			self::$_regenerateId && Core_Session::regenerateId(FALSE);
-
-			self::$_logged = TRUE;
-			self::$_currentUser = $oUser;
-
-			// Destroy Old Sessions
-			User_Controller::destroyOldUserSessions();
-
-			// Log to the `user_sessions` table
-			User_Controller::logToUserSession();
-
-			Core_Log::instance()->clear()
-				->status(Core_Log::$ERROR)
-				->notify(FALSE)
-				->write(Core::_('Core.error_log_logged'));
-
-			// Удаление всех неудачных попыток входа систему за период ранее 24 часов с момента успешного входа
-			$limit = 500;
-			do {
-				$oUser_Accessdenieds = Core_Entity::factory('User_Accessdenied');
-				$oUser_Accessdenieds->queryBuilder()
-					->clear()
-					->where('datetime', '<', Core_Date::timestamp2sql(time() - 86400))
-					// Удаляем все попытки доступа с текущего IP
-					->setOr()
-					->where('ip', '=', $ip)
-					->limit($limit);
-
-				$aUser_Accessdenieds = $oUser_Accessdenieds->findAll(FALSE);
-				foreach ($aUser_Accessdenieds as $oUser_Accessdenied)
-				{
-					$oUser_Accessdenied->delete();
-				}
-			} while (count($aUser_Accessdenieds) == $limit);
+			self::setCurrentUser($oUser, $assignSessionToIp);
 		}
 		else
 		{
@@ -713,9 +687,70 @@ class Core_Auth
 	}
 
 	/**
+	 * Set current user
+	 * @param User_Model $oUser
+	 * @param boolean $assignSessionToIp привязать сессию к IP-адресу
+	 */
+	static public function setCurrentUser(User_Model $oUser, $assignSessionToIp)
+	{
+		$ip = Core::getClientIp();
+
+		// Сессия может быть уже запущена и при повторном отправке данных POST-ом при авторизации
+		//if (!isset($_SESSION['valid_user']))
+		if (@session_id() == '')
+		{
+			Core_Session::start();
+		}
+
+		// Записываем ID пользователя
+		$_SESSION['current_users_id'] = $oUser->id;
+		$_SESSION['valid_user'] = $oUser->login;
+		$_SESSION['date_user'] = date('d.m.Y H:i:s');
+		$_SESSION['is_superuser'] = $oUser->superuser;
+		$_SESSION['current_bf'] = self::_getBrowserFingerprint();
+
+		$assignSessionToIp && $_SESSION['current_user_ip'] = $ip;
+
+		// Создаем новый ID сессии без уничтожения предыдущей
+		self::$_regenerateId && Core_Session::regenerateId(FALSE);
+
+		self::$_logged = TRUE;
+		self::$_currentUser = $oUser;
+
+		// Destroy Old Sessions
+		User_Controller::destroyOldUserSessions();
+
+		// Log to the `user_sessions` table
+		User_Controller::logToUserSession();
+
+		Core_Log::instance()->clear()
+			->status(Core_Log::$ERROR)
+			->notify(FALSE)
+			->write(Core::_('Core.error_log_logged'));
+
+		// Удаление всех неудачных попыток входа систему за период ранее 24 часов с момента успешного входа
+		$limit = 500;
+		do {
+			$oUser_Accessdenieds = Core_Entity::factory('User_Accessdenied');
+			$oUser_Accessdenieds->queryBuilder()
+				->clear()
+				->where('datetime', '<', Core_Date::timestamp2sql(time() - 86400))
+				// Удаляем все попытки доступа с текущего IP
+				->setOr()
+				->where('ip', '=', $ip)
+				->limit($limit);
+
+			$aUser_Accessdenieds = $oUser_Accessdenieds->findAll(FALSE);
+			foreach ($aUser_Accessdenieds as $oUser_Accessdenied)
+			{
+				$oUser_Accessdenied->delete();
+			}
+		} while (count($aUser_Accessdenieds) == $limit);
+	}
+
+	/**
 	 * Add User_Accessdenied
-	 * @param strin $ip
-	 * @return self
+	 * @param string $ip
 	 */
 	static protected function _addUserAccessdenied($ip)
 	{
@@ -737,7 +772,8 @@ class Core_Auth
 			'valid_user',
 			'date_user',
 			'is_superuser',
-			'current_user_ip'
+			'current_user_ip',
+			'current_bf'
 		);
 
 		foreach ($aUnsets as $sUnsetName)

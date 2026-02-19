@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Seo
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Seo_Controller_Google extends Seo_Controller
 {
@@ -144,8 +144,8 @@ class Seo_Controller_Google extends Seo_Controller
 
 	/**
 	 * Add current site
-	 * @return id|NULL
-	 */
+	 * @return string|NULL
+     */
 	public function addCurrentSite()
 	{
 		// "host_url": "http://example.com"
@@ -330,7 +330,6 @@ class Seo_Controller_Google extends Seo_Controller
 
 	/**
 	 * Get rating name
-	 * @return string
 	 */
 	public function getRatingName(){}
 

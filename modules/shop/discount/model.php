@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
  class Shop_Discount_Model extends Core_Entity
 {
@@ -18,6 +18,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 */
 	protected $_hasMany = array(
 		'shop_item_discount' => array(),
+		'shop_group_discount' => array(),
 		'shop_discount_siteuser_group' => array()
 	);
 
@@ -100,45 +101,52 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	/**
 	 * Check if discount active is
 	 * @return boolean
+	 * @hostcms-event shop_discount.onBeforeIsActive
 	 */
 	public function isActive()
 	{
 		if (is_null($this->_cacheIsActive))
 		{
-			$time = time();
-			$dayFieldName = 'day' . date('N');
+			Core_Event::notify($this->_modelName . '.onBeforeIsActive', $this);
+			$active = Core_Event::getLastReturn();
 
-			$active = $this->active
-				&& Core_Date::sql2timestamp($this->start_datetime) <= $time
-				&& Core_Date::sql2timestamp($this->end_datetime) >= $time
-				&& $time >= strtotime($this->start_time)
-				&& $time <= strtotime($this->end_time)
-				&& $this->$dayFieldName == 1;
-
-			if ($active)
+			if (is_null($active))
 			{
-				$aSiteuser_Group_IDs = array(0);
+				$time = time();
+				$dayFieldName = 'day' . date('N');
 
-				if (Core::moduleIsActive('siteuser'))
+				$active = $this->active
+					&& Core_Date::sql2timestamp($this->start_datetime) <= $time
+					&& Core_Date::sql2timestamp($this->end_datetime) >= $time
+					&& $time >= strtotime($this->start_time)
+					&& $time <= strtotime($this->end_time)
+					&& $this->$dayFieldName == 1;
+
+				if ($active)
 				{
-					$oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
-					if ($oSiteuser)
+					$aSiteuser_Group_IDs = array(0);
+
+					if (Core::moduleIsActive('siteuser'))
 					{
-						$aSiteuser_Groups = $oSiteuser->Siteuser_Groups->findAll();
-						foreach ($aSiteuser_Groups as $oSiteuser_Group)
+						$oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
+						if ($oSiteuser)
 						{
-							$aSiteuser_Group_IDs[] = $oSiteuser_Group->id;
+							$aSiteuser_Groups = $oSiteuser->Siteuser_Groups->findAll();
+							foreach ($aSiteuser_Groups as $oSiteuser_Group)
+							{
+								$aSiteuser_Group_IDs[] = $oSiteuser_Group->id;
+							}
 						}
 					}
+
+					$oShop_Discount_Siteuser_Groups = $this->Shop_Discount_Siteuser_Groups;
+					$oShop_Discount_Siteuser_Groups->queryBuilder()
+						->where('shop_discount_siteuser_groups.siteuser_group_id', 'IN', $aSiteuser_Group_IDs);
+
+					$iCount = $oShop_Discount_Siteuser_Groups->getCount();
+
+					!$iCount && $active = FALSE;
 				}
-
-				$oShop_Discount_Siteuser_Groups = $this->Shop_Discount_Siteuser_Groups;
-				$oShop_Discount_Siteuser_Groups->queryBuilder()
-					->where('shop_discount_siteuser_groups.siteuser_group_id', 'IN', $aSiteuser_Group_IDs);
-
-				$iCount = $oShop_Discount_Siteuser_Groups->getCount();
-
-				!$iCount && $active = FALSE;
 			}
 
 			$this->_cacheIsActive = $active;
@@ -203,8 +211,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return self
-	 * @hostcms-event shop_discount.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event shop_discount.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -278,7 +286,6 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 	/**
 	 * Backend callback method
-	 * @return string
 	 */
 	public function nameBackend()
 	{
@@ -456,7 +463,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -494,11 +501,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function shop_itemsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function shop_itemsBadge()
 	{
 		$count = $this->Shop_Item_Discounts->getCount(FALSE);
 		$count && Core_Html_Entity::factory('Span')
@@ -510,11 +514,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function siteuser_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function siteuser_idBackend()
 	{
 		$sResult = '';
 

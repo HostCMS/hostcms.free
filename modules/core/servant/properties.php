@@ -24,7 +24,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Servant_Properties
 {
@@ -164,8 +164,8 @@ class Core_Servant_Properties
 	 * Triggered when invoking inaccessible methods in an object context
 	 * @param string $name method name
 	 * @param array $arguments arguments
-	 * @return mixed
-	 * @ignore
+	 * @return Core_Servant_Properties
+     * @ignore
 	 */
 	public function __call($name, $arguments)
 	{

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Meta
 {
@@ -108,7 +108,10 @@ class Core_Meta
 			isset($this->_replaceFunctions[$functionName])
 				&& $functionName = $this->_replaceFunctions[$functionName];
 
-			if (!function_exists($functionName) && !is_callable($functionName))
+			isset($this->_functions[$functionName])
+				&& $functionName = $this->_functions[$functionName];
+
+			if (/*!function_exists($functionName) && */!is_callable($functionName))
 			{
 				// skip replacing
 				return $matches[0];
@@ -119,73 +122,26 @@ class Core_Meta
 			$functionName = NULL;
 		}
 
-		// shop.company.name => objectName = shop, fieldName = company + name
-		$aTmpExplode = explode('.', $matches[2]);
-		$objectName = array_shift($aTmpExplode);
+		// var_dump($matches);
 
-		// object
-		if (isset($this->_objects[$objectName]))
+		$fieldReturn = $this->_executeField($matches[2], isset($matches[3]) ? $matches[3] : '');
+
+		if (!is_null($fieldReturn))
 		{
-			//if (isset($this->_objects['Items'])) print_r($this->_objects['Items']);
-			$object = $this->_objects[$objectName];
-
-			if (count($aTmpExplode))
-			{
-				/*$fieldNames = $matches[3];
-
-				// shop.company.name => object = shop, fieldName = company.name
-				$aTmpExplode = explode('.', $fieldNames);*/
-
-				foreach ($aTmpExplode as $fieldName)
-				{
-					// xyzField
-					if (substr($fieldName, -5) === 'Field' && ($sTmp = substr($fieldName, 0, -5)) && isset($object->$sTmp))
-					{
-						$return = $object->$sTmp;
-					}
-					// ->xyz()
-					//is_callable(array($object, $fieldName)) вернёт true для произвольного метода объекта, который реализует метод __call(), даже если метод не определили в классе
-					elseif (method_exists($object, $fieldName) || method_exists($object, '__isset') && $object->__isset($fieldName))
-					{
-						$attr = isset($matches[3]) && $matches[3] != ''
-							? $this->_parseArgs($matches[3])
-							: array();
-
-						$return = call_user_func_array(array($object, $fieldName), $attr);
-					}
-					// ->xyz
-					elseif (isset($object->$fieldName))
-					{
-						$return = $object->$fieldName;
-					}
-					// Items.0.item.name
-					elseif (is_array($object) && is_numeric($fieldName) && isset($object[$fieldName]))
-					{
-						$return = $object[$fieldName];
-					}
-					else
-					{
-						// skip replacing
-						$return = $matches[0];
-					}
-
-					// shop.company.name => first iteration $object is shop, second iteration $object is company
-					$object = $return;
-				}
-
-				$return = strip_tags((string) $return);
-
-				return is_null($functionName)
-					? $return
-					: call_user_func($functionName, $return);
-					//: $functionName($return);
-			}
-			else
-			{
-				return $object;
-			}
+			return is_null($functionName)
+				? $fieldReturn
+				: call_user_func($functionName, $fieldReturn);
+				//: $functionName($return);
 		}
-		elseif (isset($this->_functions[$matches[2]]))
+		elseif (!is_null($functionName)) // "{ifexist 'aaaaaa'}"
+		{
+			$attr = $matches[2] != ''
+				? $this->_parseArgs(implode(array_slice($matches, 2)))
+				: array();
+
+			return call_user_func_array($functionName, $attr);
+		}
+		elseif (isset($this->_functions[$matches[2]])) // "{mb_strtolower ifexist 'aaaaaa'}"
 		{
 			$attr = isset($matches[3]) && $matches[3] != ''
 				? $this->_parseArgs($matches[3])
@@ -193,7 +149,7 @@ class Core_Meta
 
 			return call_user_func_array($this->_functions[$matches[2]], $attr);
 		}
-		else
+		else // generateChars(7)
 		{
 			preg_match_all('/\s*([a-zA-Z]*)\s*\(([^\)]*)\)/', $matches[2], $matchesAttr);
 
@@ -213,6 +169,75 @@ class Core_Meta
 				return $matches[0];
 			}
 		}
+	}
+
+	/**
+	 * Execute field
+	 * @param string $fieldName
+	 * @param string $attr
+	 * @return mixed
+	 */
+	protected function _executeField($fieldName, $attr = '')
+	{
+		// shop.company.name => objectName = shop, fieldName = company + name
+		$aTmpExplode = explode('.', $fieldName);
+		$objectName = array_shift($aTmpExplode);
+
+		// object
+		if (isset($this->_objects[$objectName]))
+		{
+			//if (isset($this->_objects['Items'])) print_r($this->_objects['Items']);
+			$object = $this->_objects[$objectName];
+
+			if (count($aTmpExplode))
+			{
+				foreach ($aTmpExplode as $subFieldName)
+				{
+					// xyzField
+					if (substr($subFieldName, -5) === 'Field' && ($sTmp = substr($subFieldName, 0, -5)) && isset($object->$sTmp))
+					{
+						$return = $object->$sTmp;
+					}
+					// ->xyz()
+					//is_callable(array($object, $subFieldName)) вернёт true для произвольного метода объекта, который реализует метод __call(), даже если метод не определили в классе
+					elseif (is_object($object) && (method_exists($object, $subFieldName) || method_exists($object, '__isset') && $object->__isset($subFieldName)))
+					{
+						$aAttr = $attr != ''
+							? $this->_parseArgs($attr)
+							: array();
+
+						$return = call_user_func_array(array($object, $subFieldName), $aAttr);
+					}
+					// ->xyz
+					elseif (isset($object->$subFieldName))
+					{
+						$return = $object->$subFieldName;
+					}
+					// Items.0.item.name
+					elseif (is_array($object) && is_numeric($subFieldName) && isset($object[$subFieldName]))
+					{
+						$return = $object[$subFieldName];
+					}
+					else
+					{
+						// skip replacing
+						//$return = $matches[0];
+						$return = NULL;
+					}
+
+					// shop.company.name => first iteration $object is shop, second iteration $object is company
+					$object = $return;
+				}
+
+				return strip_tags((string) $return);
+			}
+			else
+			{
+				return $object;
+			}
+		}
+
+		return NULL;
 	}
 
 	/**
@@ -236,6 +261,12 @@ class Core_Meta
 							? $matchesAttr[2][$key]
 							: $matchesAttr[3][$key]
 					);
+
+				if (strpos($value, '.') !== FALSE)
+				{
+					$tmpValue = $this->_executeField($value);
+					!is_null($tmpValue) && $value = $tmpValue;
+				}
 
 				($value === 'true' || $value === 'TRUE') && $value = TRUE;
 				($value === 'false' || $value === 'FALSE') && $value = FALSE;

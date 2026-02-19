@@ -72,7 +72,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Controller_YandexMarket extends Core_Controller
 {
@@ -295,8 +295,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			$tag = $path;
 			$path = '/shop/offers/offer';
 		}
-		/*$this->_forbiddenTags[$tag] = $tag;
-		return $this;*/
+
 		return parent::addForbiddenTag($path, $tag);
 	}
 
@@ -314,11 +313,6 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			$path = '/shop/offers/offer';
 		}
 
-		/*if (isset($this->_forbiddenTags[$tag]))
-		{
-			unset($this->_forbiddenTags[$tag]);
-		}
-		return $this;*/
 		return parent::removeForbiddenTag($path, $tag);
 	}
 
@@ -337,8 +331,6 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			$path = '/shop/offers/offer';
 		}
 
-		//$this->_forbiddenTags = array_merge($this->_forbiddenTags, array_combine($aTags, $aTags));
-		//return $this;
 		return parent::addForbiddenTags($path, $aTags);
 	}
 
@@ -350,7 +342,6 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	{
 		parent::__construct($oShop->clearEntities());
 
-		//$this->protocol = Core::httpsUses() ? 'https' : 'http';
 		$this->protocol = $oShop->Structure->https ? 'https' : 'http';
 
 		$this->_aSiteuserGroups = array(0, -1);
@@ -499,8 +490,8 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 	/**
 	 * Get groups set
-	 * @return Shop_Item_Model
-	 */
+	 * @return Shop_Group_Model|null
+     */
 	public function shopGroups()
 	{
 		return $this->_Shop_Groups;
@@ -1052,29 +1043,33 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	}
 
 	/**
-	 * Print offer's content
+	 * Get Path
 	 * @param Shop_Item_Model $oShop_Item
-	 * @return self
-	 * @hostcms-event Shop_Controller_YandexMarket.onBeforeOffer
-	 * @hostcms-event Shop_Controller_YandexMarket.onAfterOffer
+	 * @return string
+	 * @hostcms-event Shop_Controller_YandexMarket.onAfterGetPath
 	 */
-	protected function _showOffer(Shop_Item_Model $oShop_Item)
+	protected function _getPath(Shop_Item_Model $oShop_Item)
 	{
-		$oShop = $this->getEntity();
-
-		$this->_makeOfferTag($oShop_Item);
-
-		Core_Event::notify(get_class($this) . '.onBeforeOffer', $this, array($oShop_Item));
-
 		/* URL */
 		/* Если модификация и включен groupModifications, то путь берется от родительского товара */
+		$url = $this->groupModifications && $oShop_Item->modification_id
+			? $this->_shopPath . $oShop_Item->Modification->getPath() . $this->_getUtm($oShop_Item->Modification)
+			: $this->_shopPath . $oShop_Item->getPath() . $this->_getUtm($oShop_Item);
 
-		$this->write('<url>' . Core_Str::xml(
-			$this->groupModifications && $oShop_Item->modification_id
-				? $this->_shopPath . $oShop_Item->Modification->getPath() . $this->_getUtm($oShop_Item->Modification)
-				: $this->_shopPath . $oShop_Item->getPath() . $this->_getUtm($oShop_Item)
-		) . '</url>'. "\n");
+		Core_Event::notify(get_class($this) . '.onAfterGetPath', $this, array($oShop_Item, $url));
+		$eventResult = Core_Event::getLastReturn();
 
+		return !is_null($eventResult) ? $eventResult : $url;
+	}
+
+	/**
+	 * Get Price
+	 * @param Shop_Item_Model $oShop_Item
+	 * @return array
+	 * @hostcms-event Shop_Controller_YandexMarket.onAfterGetPrice
+	 */
+	protected function _getPrice(Shop_Item_Model $oShop_Item)
+	{
 		/* Определяем цену со скидкой */
 		/* Ограничения для моделей ADV и DBS
 		В формате YML не поддерживается элемент currencies с информацией о валютах магазина и курсах конвертации. */
@@ -1092,6 +1087,31 @@ class Shop_Controller_YandexMarket extends Core_Controller
 				array('%priceMode' => $this->priceMode)
 			);
 		}
+
+		Core_Event::notify(get_class($this) . '.onAfterGetPrice', $this, array($oShop_Item, $aPrices));
+		$eventResult = Core_Event::getLastReturn();
+
+		return is_array($eventResult) ? $eventResult : $aPrices;
+	}
+
+	/**
+	 * Print offer's content
+	 * @param Shop_Item_Model $oShop_Item
+	 * @return self
+	 * @hostcms-event Shop_Controller_YandexMarket.onBeforeOffer
+	 * @hostcms-event Shop_Controller_YandexMarket.onAfterOffer
+	 */
+	protected function _showOffer(Shop_Item_Model $oShop_Item)
+	{
+		$oShop = $this->getEntity();
+
+		$this->_makeOfferTag($oShop_Item);
+
+		Core_Event::notify(get_class($this) . '.onBeforeOffer', $this, array($oShop_Item));
+
+		$this->write('<url>' . Core_Str::xml($this->_getPath($oShop_Item)) . '</url>'. "\n");
+
+		$aPrices = $this->_getPrice($oShop_Item);
 
 		/* Цена. Цена указывается в рублях. Число должно быть целым */
 		$this->write('<price>' . intval($aPrices['price_discount']) . '</price>'. "\n");
@@ -1579,11 +1599,13 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	 */
 	protected $_cacheListItems = array();
 
-	/**
-	 * Get List_Item value by ID
-	 * @param int $property_id
-	 */
-	protected function _getCacheListItem($oProperty, $listItemId)
+    /**
+     * Get List_Item value by ID
+     * @param Property_Model $oProperty
+     * @param int $listItemId
+     * @return mixed|null
+     */
+	protected function _getCacheListItem(Property_Model $oProperty, $listItemId)
 	{
 		if (!isset($this->_cacheListItems[$listItemId]))
 		{
@@ -1781,7 +1803,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 					$sAttr = '';
 				}
 			}
-		
+
 			if (!in_array($sTagName, $this->_aForbid))
 			{
 				$this->write('<' . $sTagName . $sAttr . '>'
@@ -1846,7 +1868,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 					throw new Core_Exception("Wrong auth-token '{$requestToken}' from Y.Market!");
 				}
 			}
-			elseif (!in_array($path, array('catalog', 'terms')))
+			elseif (!in_array($path, array('catalog', 'terms', '/notification')))
 			{
 				!is_null(Core_Page::instance()->response) && Core_Page::instance()->response->status(403);
 
@@ -1863,6 +1885,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 				case '/order/accept':
 				case '/order/status':
 				case '/order/shipment/status':
+				case '/notification':
 					$this->marketMode = $path;
 				break;
 				case 'catalog':
@@ -1930,7 +1953,6 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 	/**
 	 * Show built data
-	 * @return self
 	 * @hostcms-event Shop_Controller_YandexMarket.onBeforeRedeclaredShow
 	 */
 	public function show()
@@ -1954,6 +1976,22 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			case '/order/shipment/status':
 				$this->orderShipmentStatus();
 			break;
+			case '/notification':
+				// Диапазоны IP-адресов, которые использует Маркет:
+					// 	5.45.207.0/25
+					// 	141.8.142.0/25
+					// 	5.255.253.0/25
+
+				$ip = Core::getClientIp();
+				$bCheckIp = Ipaddress_Controller::instance()->ipCheck($ip, '5.45.207.0/25')
+					|| Ipaddress_Controller::instance()->ipCheck($ip, '141.8.142.0/25')
+					|| Ipaddress_Controller::instance()->ipCheck($ip, '5.255.253.0/25')
+					|| Ipaddress_Controller::instance()->ipCheck($ip, '2a02:6b8::/36');
+
+				$bCheckIp
+					? $this->checkNotifications()
+					: !is_null(Core_Page::instance()->response) && Core_Page::instance()->response->status(403);
+			break;
 			case 'catalog':
 			case 'terms':
 			case 'show':
@@ -1964,8 +2002,103 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	}
 
 	/**
+	 * Check notification
+	 */
+	public function checkNotifications()
+	{
+		$oShop = $this->getEntity();
+
+		// Название магазина
+		$shop_name = trim(
+			!empty($oShop->yandex_market_name)
+				? $oShop->yandex_market_name
+				: $oShop->Site->name
+		);
+
+		$body = $this->getRequest();
+
+		$aResponse = json_decode($body, TRUE);
+
+		$aAnswer = array(
+			'name' => $shop_name,
+			'time' => date('c'),
+			'version' => Core::getVersion(),
+			'error' => array(
+				'type' => 'UNKNOWN',
+				'message' => 'UNKNOWN ERROR'
+			)
+		);
+
+		if (isset($aResponse['notificationType']) && $aResponse['notificationType'] != '')
+		{
+			switch ($aResponse['notificationType'])
+			{
+				case 'PING':
+					$aAnswer = array(
+						'name' => $shop_name,
+						'time' => date('c'),
+						'version' => Core::getVersion()
+					);
+				break;
+				case 'ORDER_STATUS_UPDATED':
+					if (isset($aResponse['orderId']) && isset($aResponse['status']))
+					{
+						$oShop_Order = Core_Entity::factory('Shop_Order')->getBySystem_information(intval($aResponse['orderId']));
+
+						if (!is_null($oShop_Order))
+						{
+							switch($aResponse['status'])
+							{
+								case 'CANCELLED':
+									$oShop_Order->canceled = 1;
+									$oShop_Order->save();
+								break;
+								case 'DELIVERED':
+									$oShop_Order->paid = 1;
+									$oShop_Order->save();
+								break;
+							}
+
+							$oShop_Order->save();
+
+							if ($oShop_Order->shop_payment_system_id)
+							{
+								$oShop_Payment_System_Handler = Shop_Payment_System_Handler::factory(
+									Core_Entity::factory('Shop_Payment_System', $oShop_Order->shop_payment_system_id)
+								);
+
+								if ($oShop_Payment_System_Handler)
+								{
+									$oShop_Payment_System_Handler->shopOrder($oShop_Order)
+										->shopOrderBeforeAction(clone $oShop_Order);
+
+									// Создание уведомлений
+									$oShop_Payment_System_Handler->createNotification();
+
+									// Установка XSL-шаблонов в соответствии с настройками в узле структуры
+									$oShop_Payment_System_Handler->setXSLs();
+
+									// Отправка писем клиенту и пользователю
+									$oShop_Payment_System_Handler->send();
+								}
+							}
+
+							$aAnswer = array(
+								'name' => $shop_name,
+								'time' => date('c'),
+								'version' => Core::getVersion()
+							);
+						}
+					}
+				break;
+			}
+		}
+
+		Core::showJson($aAnswer);
+	}
+
+	/**
 	 * Response cart
-	 * @return array
 	 */
 	public function responseCart()
 	{
@@ -2288,7 +2421,6 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 	/**
 	 * Order accept
-	 * @return array
 	 */
 	public function responseStocks()
 	{
@@ -2339,7 +2471,6 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 	/**
 	 * Order accept
-	 * @return array
 	 */
 	public function orderAccept()
 	{
@@ -2570,7 +2701,6 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	 * Update order
 	 * @param Shop_Order_Model $oShop_Order
 	 * @param array $aOrderParams
-	 * @return array
 	 */
 	public function updateOrder(Shop_Order_Model $oShop_Order, array $aOrderParams)
 	{
@@ -2635,7 +2765,6 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 	/**
 	 * Order shipment status
-	 * @return array
 	 */
 	public function orderShipmentStatus()
 	{
@@ -2666,11 +2795,20 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		if (!$this->_headersSent && !headers_sent())
 		{
 			// Stop buffering
-			ob_get_clean();
+			while (ob_get_level() > 0)
+			{
+				ob_end_clean();
+			}
 
-			header('Content-Type: raw/data');
-			header("Cache-Control: no-cache, must-revalidate");
+			header('Pragma: public');
+			header('Cache-Control: no-cache, must-revalidate');
+
+			// Disable Nginx cache
 			header('X-Accel-Buffering: no');
+
+			//header('Content-Type: application/force-download');
+			header('Content-Encoding: identity'); // вместо none
+			header('Content-Type: application/xml');
 
 			$this->_headersSent = TRUE;
 		}
@@ -2734,7 +2872,6 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	/**
 	 * Show promo
 	 * @param Shop_Discount_Model $oShop_Discount
-	 * @return self
 	 */
 	protected function _showPromo(Shop_Discount_Model $oShop_Discount)
 	{
@@ -2863,7 +3000,6 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 	/**
 	 * Show collections
-	 * @return self
 	 */
 	protected function _collections()
 	{
@@ -2923,7 +3059,6 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 	/**
 	 * Show UML built data
-	 * @return self
 	 * @hostcms-event Shop_Controller_YandexMarket.onBeforeRedeclaredShowYml
 	 * @hostcms-event Shop_Controller_YandexMarket.onBeforeShop
 	 * @hostcms-event Shop_Controller_YandexMarket.onBeforeCategories
@@ -2943,7 +3078,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		$oSite = $oShop->Site;
 
 		!is_null(Core_Page::instance()->response) && Core_Page::instance()->response
-			->header('Content-Type', "text/xml; charset={$oSite->coding}")
+			->header('Content-Type', "application/xml; charset={$oSite->coding}")
 			->sendHeaders();
 
 		$this->write('<?xml version="1.0" encoding="' . $oSite->coding . '"?>' . "\n");

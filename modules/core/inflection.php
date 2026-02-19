@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Inflection
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 abstract class Core_Inflection
 {
@@ -147,7 +147,7 @@ abstract class Core_Inflection
 
 	/**
 	 * Get plural form by singular
-	 * @param string $word word
+	 * @param string $singularWord word
 	 * @param int $count
 	 * @return string
 	 */
@@ -160,7 +160,7 @@ abstract class Core_Inflection
 
 		if (rand(0, self::$_maxObjects) == 0 && count($this->_pluralCache) > self::$_maxObjects)
 		{
-			$this->_pluralCache = array_slice($this->_pluralCache, floor(self::$_maxObjects / 4));
+			$this->_pluralCache = array_slice($this->_pluralCache, floor(self::$_maxObjects / 4), NULL, TRUE);
 		}
 
 		$plural = $this->_getPlural($singularWord, $count);
@@ -178,7 +178,7 @@ abstract class Core_Inflection
 	/**
 	 * Get singular form by plural
 	 * @param string $pluralWord word
-	 * @param int count
+	 * @param int $count count
 	 * @return string
 	 */
 	public function singular($pluralWord, $count = NULL)
@@ -190,7 +190,7 @@ abstract class Core_Inflection
 
 		if (rand(0, self::$_maxObjects) == 0 && count($this->_singularCache) > self::$_maxObjects)
 		{
-			$this->_singularCache = array_slice($this->_singularCache, floor(self::$_maxObjects / 4));
+			$this->_singularCache = array_slice($this->_singularCache, floor(self::$_maxObjects / 4), NULL, TRUE);
 		}
 
 		$singular = $this->_getSingular($pluralWord, $count);

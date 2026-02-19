@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -241,6 +241,23 @@ if ($oAdminFormActionRollback && $oAdmin_Form_Controller->getAction() == 'rollba
 	$oAdmin_Form_Controller->addAction($oControllerRollback);
 }
 
+// Действие "Удаление файла"
+$oAction = $oAdmin_Form->Admin_Form_Actions->getByName('deleteFile');
+
+if ($oAction && $oAdmin_Form_Controller->getAction() == 'deleteFile')
+{
+	$oDeleteFileController = Admin_Form_Action_Controller::factory(
+		'Admin_Form_Action_Controller_Type_Delete_File', $oAction
+	);
+
+	$oDeleteFileController
+		->methodName('deleteFile')
+		->divId(array('preview_large_file', 'delete_large_file'));
+
+	// Добавляем контроллер удаления изображения к контроллеру формы
+	$oAdmin_Form_Controller->addAction($oDeleteFileController);
+}
+
 // Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Lib_Dir')
@@ -249,10 +266,14 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
-		->addCondition(array('open' => array()))
-		->addCondition(array('where' => array('lib_dirs.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('lib_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('open' => array()));
+
+	is_numeric($sGlobalSearch) && $oAdmin_Form_Dataset
+			->addCondition(array('where' => array('lib_dirs.id', '=', intval($sGlobalSearch))))
+			->addCondition(array('setOr' => array()));
+
+	$oAdmin_Form_Dataset
+			->addCondition(array('where' => array('lib_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
 }
 else
@@ -279,10 +300,14 @@ $oUser = Core_Auth::getCurrentUser();
 if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
-		->addCondition(array('open' => array()))
-		->addCondition(array('where' => array('libs.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('libs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('open' => array()));
+
+	is_numeric($sGlobalSearch) && $oAdmin_Form_Dataset
+			->addCondition(array('where' => array('libs.id', '=', intval($sGlobalSearch))))
+			->addCondition(array('setOr' => array()));
+
+	$oAdmin_Form_Dataset
+			->addCondition(array('where' => array('libs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
 }
 else

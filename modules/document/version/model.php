@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Document
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Document_Version_Model extends Core_Entity
 {
@@ -95,7 +95,6 @@ class Document_Version_Model extends Core_Entity
 	/**
 	 * Save document file
 	 * @param string $content content
-	 * @return boolean
 	 */
 	public function saveFile($content)
 	{
@@ -142,7 +141,6 @@ class Document_Version_Model extends Core_Entity
 
 	/**
 	 * Set current version of the document
-	 * @return self
 	 */
 	public function setCurrent()
 	{

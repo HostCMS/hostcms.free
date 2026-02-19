@@ -33,5 +33,9 @@ return array(
 	'copy_success' => "Filter copied successfully!",
 	'price_from' => "Price from",
 	'price_to' => "Price to",
-	'prices' => '<span class = "field-name"> Price </span> <span>%s to %s </span>'
+	'prices' => '<span class = "field-name"> Price </span> <span>%s to %s </span>',
+	'root' => "Root",
+	'move_dirs_title' => "Moving sections and SEO filter elements",
+	'move_items_dirs' => "Parent section",
+	'move_success' => 'SEO filters moved'
 );

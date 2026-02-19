@@ -32,7 +32,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Cart_Controller_Onestep extends Core_Controller
 {
@@ -385,11 +385,12 @@ class Shop_Cart_Controller_Onestep extends Core_Controller
 		return $this;
 	}
 
-	/**
-	 * Calculate amount and weight
-	 * @param object Shop_Item_Model $oShop_Item
-	 * @return array
-	 */
+    /**
+     * Calculate amount and weight
+     * @param Shop_Item_Model $oShop_Item
+     * @return array
+     * @throws Core_Exception
+     */
 	public function calculatePrice(Shop_Item_Model $oShop_Item)
 	{
 		$aTotal = array(

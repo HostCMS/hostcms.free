@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Order_Item_Code_Model extends Core_Entity
 {
@@ -29,29 +29,35 @@ class Shop_Order_Item_Code_Model extends Core_Entity
 
 	/**
 	 * Get Nomenclature Code
+	 * @return string
 	 */
 	public function getNomenclatureCode()
 	{
-		$code = NULL;
+		$code = $this->code;
 
-		if (strlen($this->code))
+		if ($this->shop_codetype_id && strlen($this->code))
 		{
-			/*
-			01 - идентификатор применения
-			02900000578296 - код товара (0 и GTIN)
-			21 - идентификатор применения
-			ljWMSdmijz"Y0 - индивидуальный серийный номер единицы товара
-			91 - идентификатор применения
-			003A - индивидуальный порядковый номер ключа проверки
-			92 - идентификатор применения
-			UxabXQuJ7gRQEUwJHEIHExxQMc2dXkQ53TkFsxMIbmpTP8QbWNlbMA5UOyxLdAUnLdDSMJBCcZvAkZ5vNt52Ow== - значение кода проверки
-			*/
-			preg_match('/^(01\d{14}21.*?)91/', $this->code, $matches);
-
-			if (isset($matches[1]))
+			switch ($this->Shop_Codetype->code)
 			{
-				$hex = strtoupper(bin2hex($matches[1]));
-				$code = wordwrap($hex, 2, ' ', TRUE);
+				case 'shoes':
+					/*
+					01 - идентификатор применения, 2 символа
+					02900000578296 - код товара (0 и GTIN 13 цифр, всего 14)
+					21 - идентификатор применения, 2 символа
+					ljWMSdmijz"Y0 - индивидуальный серийный номер единицы товара (13 символов)
+					91 - идентификатор применения, 2 символа
+					003A - индивидуальный порядковый номер ключа проверки
+					92 - идентификатор применения, 2 символа
+					UxabXQuJ7gRQEUwJHEIHExxQMc2dXkQ53TkFsxMIbmpTP8QbWNlbMA5UOyxLdAUnLdDSMJBCcZvAkZ5vNt52Ow== - значение кода проверки
+					*/
+					preg_match('/^(01\d{14}21.*?)91/', $this->code, $matches);
+
+					if (isset($matches[1]))
+					{
+						$hex = strtoupper(bin2hex($matches[1]));
+						$code = wordwrap($hex, 2, ' ', TRUE);
+					}
+				break;
 			}
 		}
 

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -209,6 +209,13 @@ class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 						)
 					)
 				);
+
+				$this->getField('max_discount')
+					->add(
+						Core_Html_Entity::factory('Span')
+							->class('input-group-addon dimension_patch')
+							->value(htmlspecialchars((string) $this->_object->Shop->Shop_Currency->sign))
+					);
 
 				$oMainTab->move($this->getField('max_discount')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-2 col-lg-2 hidden-1')), $oMainRow1);
 

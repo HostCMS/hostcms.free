@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
  class Shop_Discountcard_Level_Model extends Core_Entity
 {
@@ -56,15 +56,15 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 * Backend callback method
 	 * @return string
 	 */
-	public function nameBackend()
+	public function nameBackend($oAdmin_Form_Field)
 	{
 		return '<i class="fa fa-circle" style="margin-right: 5px; color: ' . ($this->color ? htmlspecialchars($this->color) : '#aebec4') . '"></i> '
-			. '<span class="editable" id="apply_check_0_' . $this->id . '_fv_1404">' . htmlspecialchars($this->name) . '</span>';
+			. '<span class="editable" id="apply_check_0_' . $this->id . '_fv_' . $oAdmin_Form_Field->id . '">' . htmlspecialchars($this->name) . '</span>';
 	}
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -86,7 +86,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -97,11 +97,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function levelBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function levelBackend()
 	{
 		ob_start();
 
@@ -119,11 +117,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function nameBadge()
 	{
 		$this->apply_max_discount && Core_Html_Entity::factory('Span')
 			->class('label label-yellow label-sm')
@@ -134,8 +129,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return self
-	 * @hostcms-event shop_discountcard.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event shop_discountcard.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

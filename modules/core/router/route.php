@@ -17,7 +17,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Router
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Router_Route
 {
@@ -104,7 +104,7 @@ class Core_Router_Route
 	/**
 	 * Apply pattern
 	 * @param string $uri URI
-	 * @return mixed array with data from URI or NULL
+	 * @return false|string[] array with data from URI or NULL
 	 */
 	public function applyPattern($uri)
 	{

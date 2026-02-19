@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Tag
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Tag_Model extends Core_Entity
 {
@@ -318,8 +318,8 @@ class Tag_Model extends Core_Entity
 
 	/**
 	 * Check if there another tag with this name is
-	 * @return self
-	 */
+	 * @return Core_Entity
+     */
 	public function update()
 	{
 		!$this->deleted && $this->_setPath()

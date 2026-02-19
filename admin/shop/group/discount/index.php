@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -46,60 +46,33 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Discount.show_groups_discount'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
 		->onclick(
 			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
-	/* Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Shop_Discount.show_groups_discount'))
-		->icon('fa fa-money')
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Admin_Form.add'))
-				->icon('fa fa-plus')
-				->href(
-					$oAdmin_Form_Controller->getAdminActionLoadHref(
-						$oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0
-					)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminActionLoadAjax(
-						$oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0
-					)
-				)
-		) */
-)
-->add(
+)->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Bonus.bonus'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
 		)
 		->onclick(
 			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
 		)
-	/* Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Shop_Bonus.bonus'))
-		->icon('fa fa-star')
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Admin_Form.add'))
-				->icon('fa fa-plus')
-				->href(
-					$oAdmin_Form_Controller->getAdminActionLoadHref(
-						$oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0
-					)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminActionLoadAjax(
-						$oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0
-					)
-				)
-		) */
+)->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Shop_Gift.gift'))
+		->icon('fa-solid fa-plus')
+		->href(
+			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 2, 0)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 2, 0)
+		)
 )
 ;
 
@@ -290,6 +263,27 @@ $oAdmin_Form_Dataset
 	->addCondition(array('where' => array('shop_group_bonuses.shop_group_id', '=', $oShop_Group->id)));
 
 $oAdmin_Form_Dataset->changeField('name', 'type', 1);
+
+$oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
+
+// Источник данных 1 - Подарки
+$oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
+	Core_Entity::factory('Shop_Gift')
+);
+
+// Доступ только к своим
+$oUser = Core_Auth::getCurrentUser();
+!$oUser->superuser && $oUser->only_access_my_own
+	&& $oAdmin_Form_Dataset->addUserConditions();
+
+$oAdmin_Form_Dataset
+	->addCondition(
+		array('select' => array('shop_gifts.*'))
+	)
+	->addCondition(
+		array('join' => array('shop_group_gifts', 'shop_gifts.id', '=', 'shop_group_gifts.shop_gift_id'))
+	)
+	->addCondition(array('where' => array('shop_group_gifts.shop_group_id', '=', $oShop_Group->id)));
 
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 

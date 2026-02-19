@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Template
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Виджеты секции макета сайта',
@@ -45,6 +45,17 @@ return array(
 	'padding_left' => 'Внутренний отступ слева',
 	'padding_right' => 'Внутренний отступ справа',
 	'margin_top' => 'Внешний отступ сверху',
+	'margin_bottom' => 'Внешний отступ снизу',
+	'margin_left' => 'Внешний отступ слева',
+	'margin_right' => 'Внешний отступ справа',
 	'opacity' => 'Прозрачность',
 	'gradient_background' => 'Градиент',
+
+	'up_widget' => 'Поднять',
+	'down_widget' => 'Опустить',
+	'all_backgrounds' => 'Все',
+
+	'design' => 'Дизайн',
+	'settings' => 'Настройки',
+	'user_css' => 'Пользовательский CSS',
 );

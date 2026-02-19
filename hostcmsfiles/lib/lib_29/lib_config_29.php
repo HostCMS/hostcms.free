@@ -46,6 +46,7 @@ try
 	//$oCore_Sitemap = new My_Core_Sitemap($oSite);
 	$oCore_Sitemap
 		->createIndex($createIndex)
+		->compress(TRUE)
 		->perFile($perFile)
 		// Перегенерировать раз в 3 дня
 		->rebuildTime(60*60*24 * 3);

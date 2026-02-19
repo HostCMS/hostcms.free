@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Revision
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Revision_Model extends Core_Entity
 {
@@ -69,25 +69,8 @@ class Revision_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
-	 */
-	public function user_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
-	{
-		/*$oUser = $this->User;
-
-		return '<span class="badge badge-hostcms badge-square">' . htmlspecialchars(
-				!is_null($oUser->id) ? $oUser->login : 'Unknown User'
-			) . '</span>';*/
-		return $this->User->getAvatarWithName();
-	}
-
-	/**
-	 * Print decoded json
+	 * Print decoded JSON
 	 * @param mixed $value json value
-	 * @return string
 	 */
 	protected function _printJson($value)
 	{
@@ -115,7 +98,7 @@ class Revision_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -136,8 +119,8 @@ class Revision_Model extends Core_Entity
 
 		$aValue = json_decode($oRevision->value, TRUE);
 
-		?><div id="revision<?php echo $this->id?>" class="hidden"><div class="revision-details"><?php		
-		$this->_printJson($aValue);		
+		?><div id="revision<?php echo $this->id?>" class="hidden"><div class="revision-details"><?php
+		$this->_printJson($aValue);
 		?></div></div>
 		<script>
 		$(function() {
@@ -159,7 +142,7 @@ class Revision_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */

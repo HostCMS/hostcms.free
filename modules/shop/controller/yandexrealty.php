@@ -16,7 +16,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Controller_YandexRealty extends Core_Controller
 {
@@ -501,7 +501,6 @@ class Shop_Controller_YandexRealty extends Core_Controller
 
 	/**
 	 * Show built data
-	 * @return self
 	 * @hostcms-event Shop_Controller_YandexRealty.onBeforeRedeclaredShow
 	 */
 	public function show()

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 abstract class Shop_Payment_System_Handler
 {
@@ -51,10 +51,11 @@ abstract class Shop_Payment_System_Handler
 		self::_check($oShop, 'checkPaymentBeforeContent');
 	}
 
-	/**
-	 * Call ->checkPaymentAfterContent() on each shop's Shop_Payment_System_Handlers
-	 * @param Shop_Model $oShop
-	 */
+    /**
+     * Call ->checkPaymentAfterContent() on each shop's Shop_Payment_System_Handlers
+     * @param Shop_Model $oShop
+     * @return null
+     */
 	static public function checkAfterContent(Shop_Model $oShop)
 	{
 		return self::_check($oShop, 'checkPaymentAfterContent');
@@ -504,7 +505,7 @@ abstract class Shop_Payment_System_Handler
 
 											$oProperty_Value->save();
 										}
-										catch (Exception $e) {};
+										catch (Exception $e) {}
 									}
 								}
 							}
@@ -571,7 +572,7 @@ abstract class Shop_Payment_System_Handler
 		$Shop_Cart_Controller = Shop_Cart_Controller::instance();
 
 		$aShop_Cart = $Shop_Cart_Controller->getAll($oShop);
-		foreach ($aShop_Cart as $oShop_Cart)
+		foreach ($aShop_Cart as $key => $oShop_Cart)
 		{
 			$oShop_Item = $oShop_Cart->Shop_Item;
 
@@ -580,13 +581,6 @@ abstract class Shop_Payment_System_Handler
 				if ($oShop_Cart->postpone == 0)
 				{
 					$this->createOrderItem($oShop_Cart, $oShop_Item);
-
-					// Save coupon
-					if (isset($aPrices['coupon']))
-					{
-						$this->_shopOrder->coupon = $aPrices['coupon'];
-						$this->_shopOrder->save();
-					}
 
 					// Delete item from the cart
 					$Shop_Cart_Controller
@@ -690,7 +684,8 @@ abstract class Shop_Payment_System_Handler
 
 		$oShop_Item_Controller->count($oShop_Order_Item->quantity);
 
-		$aPrices = $oShop_Item_Controller->getPrices($oShop_Item, $this->_round);
+		//$aPrices = $oShop_Item_Controller->getPrices($oShop_Item, $this->_round);
+		$aPrices = $oShop_Cart->getPrices($this->_round);
 
 		Core_Event::notify('Shop_Payment_System_Handler.onAfterItemGetPrices', $this, array($aPrices, $oShop_Cart));
 
@@ -754,6 +749,13 @@ abstract class Shop_Payment_System_Handler
 		}
 
 		$this->_shopOrder->add($oShop_Order_Item);
+
+		// Save coupon
+		if (isset($aPrices['coupon']))
+		{
+			$this->_shopOrder->coupon = $aPrices['coupon'];
+			$this->_shopOrder->save();
+		}
 
 		Core_Event::notify('Shop_Payment_System_Handler.onAfterAddShopOrderItem', $this, array($oShop_Order_Item, $oShop_Cart));
 
@@ -1024,11 +1026,12 @@ abstract class Shop_Payment_System_Handler
 		return $this;
 	}
 
-	/**
-	 * Get delivery name
-	 * @param Shop_Delivery_Model $oShop_Delivery
-	 * @return string
-	 */
+    /**
+     * Get delivery name
+     * @param Shop_Delivery_Model $oShop_Delivery
+     * @param null $shop_delivery_condition_name
+     * @return string
+     */
 	protected function _getDeliveryName(Shop_Delivery_Model $oShop_Delivery, $shop_delivery_condition_name = NULL)
 	{
 		return is_null($shop_delivery_condition_name)
@@ -1369,11 +1372,11 @@ abstract class Shop_Payment_System_Handler
 	 */
 	protected $_senderName = NULL;
 
-	/**
-	 * Set subject to user e-mail
-	 * @param string $subject subject
-	 * @return self
-	 */
+    /**
+     * Set subject to user e-mail
+     * @param string $senderName
+     * @return self
+     */
 	public function senderName($senderName)
 	{
 		$this->_senderName = $senderName;
@@ -1773,7 +1776,7 @@ abstract class Shop_Payment_System_Handler
 
 	/**
 	 * Set $this->_notificationModes
-	 * @param array array of modes, e.g. array('changeStatusPaid', 'edit', 'changeStatusPaid')
+	 * @param array $notificationModes array of modes, e.g. array('changeStatusPaid', 'edit', 'changeStatusPaid')
 	 * @return self
 	 */
 	public function setNotificationModes(array $notificationModes)

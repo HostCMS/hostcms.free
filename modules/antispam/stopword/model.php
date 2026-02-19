@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Antispam
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Antispam_Stopword_Model extends Core_Entity
 {
@@ -51,11 +51,8 @@ class Antispam_Stopword_Model extends Core_Entity
 
 	/**
 	 * Backend
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function typeBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function typeBackend()
 	{
 		Core_Html_Entity::factory('Span')
 			->class('badge badge-round badge-max-width blue')

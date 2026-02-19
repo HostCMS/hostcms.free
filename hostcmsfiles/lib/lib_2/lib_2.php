@@ -68,7 +68,7 @@ if ($Informationsystem_Controller_Show->item == 0)
 		$oInformationsystem = $Informationsystem_Controller_Show->getEntity();
 		$oInformationsystemItems = $oInformationsystem->Informationsystem_Items;
 		$oInformationsystemItems->queryBuilder()
-			->where('ip', '=', Core_Array::get($_SERVER, 'REMOTE_ADDR'))
+			->where('ip', '=', Core::getClientIp())
 			->orderBy('id', 'DESC')
 			->limit(1);
 
@@ -192,7 +192,7 @@ else
 		$Informationsystem_Controller_Show->cache(FALSE);
 
 		$oLastComment = Core_Entity::factory('Comment')->getLastCommentByIp(
-			Core_Array::get($_SERVER, 'REMOTE_ADDR')
+			Core::getClientIp()
 		);
 
 		$oXmlCommentTag = Core::factory('Core_Xml_Entity')

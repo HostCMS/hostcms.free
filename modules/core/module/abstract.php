@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 abstract class Core_Module_Abstract
 {
@@ -90,13 +90,6 @@ abstract class Core_Module_Abstract
 		$this->_configType = $array;
 		return $this;
 	}
-
-	/**
-	 * Module
-	 * @var Core_Entity
-	 */
-	//protected $_module = NULL;
-
 
 	/**
 	 * The singleton instances.
@@ -211,19 +204,9 @@ abstract class Core_Module_Abstract
 	}
 
 	/**
-	 * Set module
-	 * @param Core_Entity Module
-	 */
-	/*public function setModule(Core_Entity $Module)
-	{
-		$this->_module = $Module;
-		return $this;
-	}*/
-
-	/**
 	 * Get module name
-	 * @return array
-	 */
+	 * @return string|null
+     */
 	public function getModuleName()
 	{
 		return $this->_moduleName;
@@ -557,7 +540,6 @@ abstract class Core_Module_Abstract
 
 	/**
 	 * Get Module Options
-	 * @param string $configName if not defined uses 'config'
 	 * @return array
 	 * @hostcms-event Core_Module.onBeforeGetOptions
 	 */
@@ -576,13 +558,14 @@ abstract class Core_Module_Abstract
 		return $aOptions;
 	}
 
-	/**
-	 * Validate option
-	 * @param array $aNewConfig
-	 * @param array $aOldConfig
-	 * @param array $aModule_Options
-	 * @return array
-	 */
+    /**
+     * Validate option
+     * @param array $aNewConfig
+     * @param array $aOldConfig
+     * @param array $aModule_Options
+     * @param array $aSettings
+     * @return array
+     */
 	protected function _setOptionValidate(array $aNewConfig, array $aOldConfig, array $aModule_Options = array(), $aSettings = array())
 	{
 		//echo "<pre>"; var_dump($aSettings); echo "</pre>";
@@ -631,7 +614,7 @@ abstract class Core_Module_Abstract
 					case 'xsl':
 						$value = intval($value);
 
-						$oXsl = Core_Entity::factory('Xsl')->getById($value);
+						$oXsl = Core_Entity::factory('Xsl')->getById($value, FALSE);
 
 						$value = !is_null($oXsl)
 							? strval($oXsl->name)

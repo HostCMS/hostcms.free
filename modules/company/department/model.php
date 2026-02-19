@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Company
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Company_Department_Model extends Core_Entity
 {
@@ -95,7 +95,6 @@ class Company_Department_Model extends Core_Entity
 	 * Show deal templates step access
 	 * @param int $deal_template_step_id
 	 * @param Deal_Template_Step_Access_Department_Model $oDeal_Template_Step_Access_Department
-	 * @return string
 	 */
 	public function showDealTemplateStepAccess($deal_template_step_id, $oDeal_Template_Step_Access_Department = NULL)
 	{

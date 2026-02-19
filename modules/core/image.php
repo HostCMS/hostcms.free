@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 abstract class Core_Image
 {
@@ -26,7 +26,7 @@ abstract class Core_Image
 	/**
 	 * Get full driver name
 	 * @param string $driver driver name
-	 * @return srting
+	 * @return string
 	 */
 	static protected function _getDriverName($driver)
 	{
@@ -165,7 +165,8 @@ abstract class Core_Image
 		header('ETag: "' . $etag . '"');
 
 		imagepng($image);
-		imagedestroy($image);
+
+		PHP_VERSION_ID < 80500 && imagedestroy($image);
 
 		exit();
 	}
@@ -188,7 +189,7 @@ abstract class Core_Image
 					$iImagetype = IMAGETYPE_JPEG;
 				break;
 				case 'png':
-					$iImagetype = IMAGETYPE_GIF;
+					$iImagetype = IMAGETYPE_PNG;
 				break;
 				// PHP 7.1.0+
 				case 'webp':

@@ -38,4 +38,5 @@ return array(
 	'apply_success' => "Information has been successfully changed",
 	'extract_success' => "The archive was successfully unpacked",
 	'new_name' => "New name",
+	'exist_files' => 'The files "%s" already exist, are you sure you want to replace them?'
 );

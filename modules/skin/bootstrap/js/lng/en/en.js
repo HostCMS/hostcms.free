@@ -20,5 +20,7 @@ var i18n =
 "minute": " m",
 "ban_success": "IP address blocked!",
 "ban_error": "IP address already blocked!",
-"important": "important"
+"important": "important",
+"webauth_register_success": "Authorization saved successfully",
+"copy_error_clipboard": "Copy error to clipboard"
 };

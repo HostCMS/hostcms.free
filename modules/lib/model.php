@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Lib
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Lib_Model extends Core_Entity
 {
@@ -51,7 +51,7 @@ class Lib_Model extends Core_Entity
 	/**
 	 * Has revisions
 	 *
-	 * @param boolean
+	 * @var boolean
 	 */
 	protected $_hasRevisions = TRUE;
 
@@ -268,8 +268,8 @@ class Lib_Model extends Core_Entity
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return self
-	 * @hostcms-event lib.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event lib.onBeforeRedeclaredDelete
 	 * @hostcms-event lib.onAfterDeleteLibFile
 	 * @hostcms-event lib.onAfterDeleteLibConfigFile
 	 */
@@ -328,7 +328,7 @@ class Lib_Model extends Core_Entity
 
 		$content = trim($content);
 		Core_File::write($sLibFilePath, $content);
-		
+
 		clearstatcache();
 
 		Core_Cache::opcacheReset();
@@ -416,11 +416,35 @@ class Lib_Model extends Core_Entity
 			Core_File::copy($this->getLibConfigFilePath(), $newObject->getLibConfigFilePath());
 		} catch (Exception $e) {}
 
-		$aLibProperties = $this->lib_properties->findAll();
+		// $aLib_Properties = $this->Lib_Properties->findAll();
 
-		foreach ($aLibProperties as $oLibProperty)
+		// foreach ($aLib_Properties as $oLib_Property)
+		// {
+		// 	$newObject->add($oLib_Property->copy());
+		// }
+
+		$aTmp = array();
+
+		$aLib_Properties = $this->Lib_Properties->findAll(FALSE);
+		foreach ($aLib_Properties as $oLib_Property)
 		{
-			$newObject->add($oLibProperty->copy());
+			$oNew_Lib_Property = clone $oLib_Property;
+			$newObject->add($oNew_Lib_Property);
+
+			$aTmp[$oLib_Property->id] = $oNew_Lib_Property->id;
+
+			$aLib_Property_List_Values = $oLib_Property->Lib_Property_List_Values->findAll(FALSE);
+			foreach ($aLib_Property_List_Values as $oLib_Property_List_Value)
+			{
+				$newObject->add(clone $oLib_Property_List_Value);
+			}
+		}
+
+		$aNew_Lib_Properties = $newObject->Lib_Properties->findAll(FALSE);
+		foreach ($aNew_Lib_Properties as $oLib_Property)
+		{
+			$oLib_Property->parent_id = Core_Array::get($aTmp, $oLib_Property->parent_id, 0);
+			$oLib_Property->save();
 		}
 
 		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
@@ -590,7 +614,7 @@ class Lib_Model extends Core_Entity
 
 		$bShow = isset($_GET['hostcmsAction']) && $_GET['hostcmsAction'] == 'SHOW_DESIGN';
 
-		if ($userAccess && $bShow) // && preg_match(, $fieldName)
+		if ($userAccess && $bShow)
 		{
 			$oTemplate_Section_Lib = Core_Page::instance()->templateSectionLib;
 
@@ -678,11 +702,8 @@ class Lib_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function propertiesBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function propertiesBadge()
 	{
 		$count = $this->Lib_Properties->getCountByParent_id(0, FALSE);
 		$count && Core_Html_Entity::factory('Span')

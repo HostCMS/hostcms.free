@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Document
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Document_Model extends Core_Entity
 {
@@ -39,7 +39,7 @@ class Document_Model extends Core_Entity
 	/**
 	 * Has revisions
 	 *
-	 * @param boolean
+	 * @var boolean
 	 */
 	protected $_hasRevisions = TRUE;
 
@@ -84,11 +84,10 @@ class Document_Model extends Core_Entity
 		return htmlspecialchars((string) $this->Template->name);
 	}
 
-	/**
-	 * Edit-in-Place callback
-	 * @param string $text Text of document
-	 * @return self
-	 */
+    /**
+     * Edit-in-Place callback
+     * @return self
+     */
 	public function editInPlace()
 	{
 		$args = func_get_args();
@@ -225,11 +224,8 @@ class Document_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function nameBadge()
 	{
 		$oStructures = Core_Entity::factory('Structure');
 		$oStructures->queryBuilder()
@@ -488,8 +484,8 @@ class Document_Model extends Core_Entity
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return self
-	 * @hostcms-event document.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event document.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

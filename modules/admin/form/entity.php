@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 abstract class Admin_Form_Entity extends Core_Html_Entity
 {
@@ -20,7 +20,7 @@ abstract class Admin_Form_Entity extends Core_Html_Entity
 
 	/**
 	 * Set controller
-	 * @param Admin_Form_Controller controller
+	 * @param Admin_Form_Controller $controller controller
 	 * @return self
 	 */
 	public function controller($controller)

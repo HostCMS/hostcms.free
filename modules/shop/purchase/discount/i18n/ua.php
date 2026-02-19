@@ -46,4 +46,7 @@ return array(
 	'max_weight' => 'Вага &lt;, %s',
 	'max_discount' => 'Максимальна знижка',
 	'first_order' => 'Застосовувати до першого замовлення',
+	'siteuser_groups' => "Група доступу",
+	'all' => 'Всі',
+	'conditions' => 'Умови',
 );

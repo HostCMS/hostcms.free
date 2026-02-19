@@ -8,14 +8,13 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Crm_Note_Controller_Add extends Admin_Form_Action_Controller
 {
 	/**
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name
-	 * @return self
 	 */
 	public function execute($operation = NULL)
 	{

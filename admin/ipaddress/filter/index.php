@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -400,9 +400,13 @@ $oAdmin_Form_Dataset->changeField('name', 'class', 'semi-bold');
 if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
-		->addCondition(array('open' => array()))
-			->addCondition(array('where' => array('ipaddress_filter_dirs.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
-			->addCondition(array('setOr' => array()))
+		->addCondition(array('open' => array()));
+
+	is_numeric($sGlobalSearch) && $oAdmin_Form_Dataset
+			->addCondition(array('where' => array('ipaddress_filter_dirs.id', '=', intval($sGlobalSearch))))
+			->addCondition(array('setOr' => array()));
+
+	$oAdmin_Form_Dataset
 			->addCondition(array('where' => array('ipaddress_filter_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
 }
@@ -427,15 +431,18 @@ $oUser = Core_Auth::getCurrentUser();
 if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
-		->addCondition(array('open' => array()))
-			->addCondition(array('where' => array('ipaddress_filters.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
-			->addCondition(array('setOr' => array()))
+		->addCondition(array('open' => array()));
+
+	is_numeric($sGlobalSearch) && $oAdmin_Form_Dataset
+			->addCondition(array('where' => array('ipaddress_filters.id', '=', intval($sGlobalSearch))))
+			->addCondition(array('setOr' => array()));
+
+	$oAdmin_Form_Dataset
 			->addCondition(array('where' => array('ipaddress_filters.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
 }
 else
 {
-	// Ограничение источника 1 по родительской группе
 	$oAdmin_Form_Dataset->addCondition(array('where' => array('ipaddress_filter_dir_id', '=', $oIpaddress_Filter_Dir->id)));
 }
 

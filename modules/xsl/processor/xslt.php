@@ -10,14 +10,14 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Xsl
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Xsl_Processor_Xslt extends Xsl_Processor
 {
 	/**
 	 * Execute processor
-	 * @return mixed
-	 * @hostcms-event Xsl_Processor.onBeforeProcess
+	 * @return string|null
+     * @hostcms-event Xsl_Processor.onBeforeProcess
 	 * @hostcms-event Xsl_Processor.onAfterProcess
 	 */
 	public function process()

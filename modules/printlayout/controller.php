@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Printlayout
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Printlayout_Controller extends Core_Controller
 {
@@ -105,19 +105,21 @@ class Printlayout_Controller extends Core_Controller
 		if (Core_File::copy($this->_oPrintlayout->getFilePath(), $copyFilePath))
 		{
 			// $zip = new ZipArchive();
-			$zip = Core_Zip::getZipClass();
+			/*$zip = Core_ZipArchive::getZipClass();
 
 			$resultCode = $zip->open($copyFilePath);
 			if ($resultCode !== TRUE)
 			{
 				$error = $this->_getError($resultCode);
 				throw new Core_Exception($error);
-			}
+			}*/
+
+			$zip = new Core_Zip($copyFilePath);
 
 			$this->_documentXml = $zip->getFromName($this->_documentPath);
 
 			// Удаляем файл, создаем с новым содержимым
-			$zip->deleteName($this->_documentPath);
+			$zip->delete($this->_documentPath);
 
 			foreach ($this->replace as $replaceSearch => $replaceValue)
 			{
@@ -189,7 +191,7 @@ class Printlayout_Controller extends Core_Controller
 			$this->_documentXml = $oCore_Meta->apply($this->_documentXml);
 
 			// Перезаписываем word/document.xml
-			$zip->addFromString($this->_documentPath, $this->_documentXml);
+			$zip->addFile($this->_documentXml, $this->_documentPath);
 
 			// Закрываем архив
 			$zip->close();
@@ -222,7 +224,6 @@ class Printlayout_Controller extends Core_Controller
 	/**
 	 * Union nodes
 	 * @param object $oXml
-	 * @return array
 	 */
 	protected function _unionNodes($oXml)
 	{

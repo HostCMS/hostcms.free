@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Document
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'menu' => 'Страницы и документы',
@@ -34,4 +34,5 @@ return array(
 	'template_id' => 'Макет',
 	'datetime' => 'Дата',
 	'rollback_success' => 'Версия восстановлена успешно!',
+	'ai_prompt_default' => 'Напиши статью про ..., не используй эмодзи, используй HTML-разметку, списки и таблицы. В ответе предоставь только значение без рассуждений, длина ответа не более 2500 символов'
 );

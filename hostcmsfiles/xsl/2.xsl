@@ -7,7 +7,6 @@
 	<xsl:output xmlns="http://www.w3.org/TR/xhtml1/strict" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" encoding="utf-8" indent="yes" method="html" omit-xml-declaration="no" version="1.0" media-type="text/xml"/>
 
 	<!-- ВерхнееМеню -->
-
 	<xsl:template match="/site">
 		<ul class="top_menu">
 			<!-- Выбираем узлы структуры первого уровня -->

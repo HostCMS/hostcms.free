@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Diagram extends Core_Servant_Properties
 {
@@ -802,7 +802,9 @@ class Core_Diagram extends Core_Servant_Properties
 		}
 
 		imagepng($im);
-		imagedestroy($im);
+		
+		PHP_VERSION_ID < 80500 && imagedestroy($im);
+		unset($im);
 
 		return $this;
 	}
@@ -876,13 +878,11 @@ class Core_Diagram extends Core_Servant_Properties
 				break;
 				// Системные цвета, используются для рисования фона
 			case 18:
+            case 20:
 				$return = imagecolorallocate($im, 250, 250, 250);
 				break;
 			case 19:
 				$return = imagecolorallocate($im, 220, 220, 220);
-				break;
-			case 20:
-				$return = imagecolorallocate($im, 250, 250, 250);
 				break;
 				// Черный
 			case 21:
@@ -1191,7 +1191,9 @@ class Core_Diagram extends Core_Servant_Properties
 		imagefill($im, 0, 0, $white);
 
 		imagepng($im);
-		imagedestroy($im);
+		
+		PHP_VERSION_ID < 80500 && imagedestroy($im);
+		unset($im);
 
 		return $this;
 	}
@@ -1611,7 +1613,9 @@ class Core_Diagram extends Core_Servant_Properties
 		}
 
 		imagepng($im);
-		imagedestroy($im);
+		
+		PHP_VERSION_ID < 80500 && imagedestroy($im);
+		unset($im);
 	}
 
 	/**
@@ -1890,7 +1894,10 @@ class Core_Diagram extends Core_Servant_Properties
 
 		header("Content-Type: image/png");
 		imagepng($im);
-		imagedestroy($im);
+		
+		PHP_VERSION_ID < 80500 && imagedestroy($im);
+		unset($im);
+		
 		return TRUE;
 	}
 

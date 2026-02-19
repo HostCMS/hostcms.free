@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Chartaccount
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Chartaccount_Trialbalance_Controller
 {
@@ -39,29 +39,25 @@ class Chartaccount_Trialbalance_Controller
 	/**
 	 * Set path
 	 * @param string $path
-	 * @return self
 	 */
 	static public function setPath($path)
 	{
 		self::$_path = $path;
 	}
 
-	/**
-	 * Set path
-	 * @param string $path
-	 * @return self
-	 */
+    /**
+     * Set path
+     * @return string
+     */
 	static public function getPath()
 	{
 		return Admin_Form_Controller::correctBackendPath(self::$_path);
 	}
-
 	static protected $_Admin_Form_Controller = NULL;
 
 	/**
 	 * Set admin form controller
-	 * @param object $oAdmin_Form_Controller
-	 * @return self
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 */
 	static public function setAdminFormController($oAdmin_Form_Controller)
 	{
@@ -71,7 +67,6 @@ class Chartaccount_Trialbalance_Controller
 	/**
 	 * Init
 	 * @param array $aOptions
-	 * @return self
 	 */
 	static protected function _init($aOptions)
 	{
@@ -147,7 +142,7 @@ class Chartaccount_Trialbalance_Controller
 		ob_start();
 		?>
 		<div class="col-xs-12 col-sm-6 col-lg-3 report-company">
-			<select name="company_id" class="input-xs" onchange="$.sendRequest({context: $('.mainForm')});">
+			<select name="company_id" class="input-xs" onchange="$.sendRequest({path: '<?php echo self::getPath()?>', context: $('.mainForm')});">
 				<?php
 					foreach ($aCompanies as $oCompany)
 					{
@@ -199,7 +194,7 @@ class Chartaccount_Trialbalance_Controller
 			</div>
 		</div>
 		<div class="col-xs-12 col-sm-5 col-lg-1 report-select report-selectMonth <?php echo self::$period == 0 ? '' : 'hidden'?>">
-			<select name="month" class="input-xs" onchange="$.sendRequest({context: $('.mainForm')});">
+			<select name="month" class="input-xs" onchange="$.sendRequest({path: '<?php echo self::getPath()?>', context: $('.mainForm')});">
 				<?php
 					for ($i = 1; $i <= 12; $i++)
 					{
@@ -213,7 +208,7 @@ class Chartaccount_Trialbalance_Controller
 			</select>
 		</div>
 		<div class="col-xs-12 col-sm-5 col-lg-1 report-select report-selectQuarter <?php echo self::$period == 1 ? '' : 'hidden'?>">
-			<select name="quarter" class="input-xs" onchange="$.sendRequest({context: $('.mainForm')});">
+			<select name="quarter" class="input-xs" onchange="$.sendRequest({path: '<?php echo self::getPath()?>', context: $('.mainForm')});">
 				<?php
 					for ($i = 1; $i <= 4; $i++)
 					{
@@ -227,7 +222,7 @@ class Chartaccount_Trialbalance_Controller
 			</select>
 		</div>
 		<div class="col-xs-12 col-sm-5 col-lg-1 report-select report-selectYear">
-			<select name="year" class="input-xs" onchange="$.sendRequest({context: $('.mainForm')});">
+			<select name="year" class="input-xs" onchange="$.sendRequest({path: '<?php echo self::getPath()?>', context: $('.mainForm')});">
 				<?php
 					for ($i = 10; $i > -1; $i--)
 					{
@@ -323,7 +318,7 @@ class Chartaccount_Trialbalance_Controller
 
 					$('.report-' + selectName).removeClass('hidden');
 
-					$.sendRequest({context: $('.mainForm')});
+					$.sendRequest({path: '<?php echo self::getPath()?>', context: $('.mainForm')});
 				});
 
 				$('#daterange').daterangepicker({
@@ -347,7 +342,7 @@ class Chartaccount_Trialbalance_Controller
 
 					$('span#daterange').text(startDateText + ' — ' + endDateText);
 
-					$.sendRequest({context: $('.mainForm')});
+					$.sendRequest({path: '<?php echo self::getPath()?>', context: $('.mainForm')});
 				});
 			});
 		</script>
@@ -356,12 +351,13 @@ class Chartaccount_Trialbalance_Controller
 		return ob_get_clean();
 	}
 
-	/**
-	 * Show content
-	 * @param object $oTab
-	 * @param array $aOptions
-	 * @return object
-	 */
+    /**
+     * Show content
+     * @param object $oTab
+     * @param array $aParams
+     * @return object
+     * @throws Core_Exception
+     */
 	static public function showContent($oTab, array $aParams = array())
 	{
 		if (!Core::moduleIsActive('company'))

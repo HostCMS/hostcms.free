@@ -8,9 +8,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Seo
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
-abstract class Seo_Controller{
+abstract class Seo_Controller
+{
 	/**
 	 * Token
 	 * @var string
@@ -38,8 +39,8 @@ abstract class Seo_Controller{
 	/**
 	 * Get full driver name
 	 * @param string $driver driver name
-	 * @return srting
-	 */
+	 * @return string
+     */
 	static protected function _getDriverName($driver)
 	{
 		return __CLASS__ . '_' . ucfirst($driver);
@@ -107,22 +108,22 @@ abstract class Seo_Controller{
 		return $this;
 	}
 
-	/**
-	 * Set site
-	 * @param string $oSite Site Model
-	 * @return self
-	 */
+    /**
+     * Set site
+     * @param Site_Model $oSite Site Model
+     * @return self
+     */
 	public function setSite(Site_Model $oSite)
 	{
 		$this->_oSite = $oSite;
 		return $this;
 	}
 
-	/**
-	 * Set seo site
-	 * @param string $oSite Site Model
-	 * @return self
-	 */
+    /**
+     * Set seo site
+     * @param Seo_Site_Model $oSeo_Site
+     * @return self
+     */
 	public function setSeoSite(Seo_Site_Model $oSeo_Site)
 	{
 		$this->_oSeo_Site = $oSeo_Site;
@@ -134,4 +135,5 @@ abstract class Seo_Controller{
 		$this->setSite($this->_oSeo_Site->Site);
 
 		return $this;
-	}}
+	}
+}

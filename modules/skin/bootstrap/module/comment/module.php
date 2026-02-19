@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 {
@@ -66,8 +66,8 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 	 * Show admin widget
 	 * @param int $type
 	 * @param boolean $ajax
-	 * @return self
-	 */
+	 * @return true
+     */
 	public function adminPage($type = 0, $ajax = FALSE)
 	{
 		$type = intval($type);

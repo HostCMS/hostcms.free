@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 {
@@ -35,24 +35,14 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 		$this->shopId = $iShopId;
 
 		// Устанавливаем лимит времени выполнения в 1 час
-		(!defined('DENY_INI_SET') || !DENY_INI_SET)
-			&& function_exists('set_time_limit') && ini_get('safe_mode') != 1 && @set_time_limit(3600);
+		if (!defined('DENY_INI_SET') || !DENY_INI_SET)
+		{
+			if (Core::isFunctionEnable('set_time_limit') && ini_get('safe_mode') != 1 && ini_get('max_execution_time') < 3600)
+			{
+				@set_time_limit(3600);
+			}
+		}
 	}
-
-	/**
-	 * Get File Name
-	 * @var string|NULL
-	 */
-	//protected $_fileName = NULL;
-
-	/**
-	 * Get File Name
-	 * @return string
-	 */
-	/*public function getFileName()
-	{
-		return $this->_fileName;
-	}*/
 
 	/**
 	 * Array of titile line
@@ -295,7 +285,6 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 
 	/**
 	 * Save rest data
-	 * @return self
 	 */
 	protected function _finish()
 	{

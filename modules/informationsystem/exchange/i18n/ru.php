@@ -16,7 +16,7 @@ return array(
 	'group_image_small' => 'Файл малого изображения для группы элементов',
 	'group_sorting' => 'Порядок сортировки группы',
 	'group_active' => 'Активность группы',
-	
+
 	'group_seo_group_title_template' => 'Шаблон title группы',
 	'group_seo_group_description_template' => 'Шаблон description группы',
 	'group_seo_group_keywords_template' => 'Шаблон keywords группы',
@@ -46,4 +46,6 @@ return array(
 	'item_additional_group' => 'Ярлыки GUID',
 	'item_siteuser_id' => 'Идентификатор пользователя сайта',
 	'clear_matches' => 'очистить соответствия',
+	'create_prop' => 'Создать свойство типа "%s"',
+	'create_field' => 'Создать поле типа "%s"',
 );

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Price_Model extends Core_Entity
 {
@@ -131,8 +131,10 @@ class Shop_Price_Model extends Core_Entity
 	{
 		if (!defined('DENY_INI_SET') || !DENY_INI_SET)
 		{
-			Core::isFunctionEnable('set_time_limit') && @set_time_limit(1200);
-			@ini_set('max_execution_time', '1200');
+			if (Core::isFunctionEnable('set_time_limit') && ini_get('safe_mode') != 1 && ini_get('max_execution_time') < 1200)
+			{
+				@set_time_limit(1200);
+			}
 		}
 
 		$offset = 0;

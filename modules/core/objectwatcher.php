@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_ObjectWatcher
 {
@@ -98,7 +98,7 @@ class Core_ObjectWatcher
 		
 		if (isset($this->_cache[$databaseDriver]))
 		{
-			$this->_cache[$databaseDriver] = array_slice($this->_cache[$databaseDriver], floor(self::$_maxObjects / 4));
+			$this->_cache[$databaseDriver] = array_slice($this->_cache[$databaseDriver], floor(self::$_maxObjects / 4), NULL, TRUE);
 
 			// Forces collection of any existing garbage cycles
 			function_exists('gc_collect_cycles') && gc_collect_cycles();

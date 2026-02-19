@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Property
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Property_Controller_Tab extends Core_Servant_Properties
 {
@@ -95,8 +95,8 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 	/**
 	* Get object
-	* @return Core_Entity
-	*/
+	* @return object|null
+     */
 	public function getObject()
 	{
 		return $this->_object;
@@ -165,7 +165,6 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	* @param Property_Model $oProperty property
 	* @param string $addFunction function name
 	* @param string $deleteOnclick onclick attribute value
-	* @return string
 	*/
 	public function imgBox($oAdmin_Form_Entity, $oProperty, $addFunction = '$.cloneProperty', $deleteOnclick = '$.deleteNewProperty(this)') {}
 
@@ -173,14 +172,12 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	* Show plus button
 	* @param Property_Model $oProperty property
 	* @param string $addFunction function name
-	* @return string
 	*/
 	public function getImgAdd($oProperty, $addFunction = '$.cloneProperty') {}
 
 	/**
 	* Show minus button
 	* @param string $onclick onclick attribute value
-	* @return string
 	*/
 	public function getImgDelete($onclick = '$.deleteNewProperty(this)') {}
 
@@ -493,9 +490,15 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 									if ($oProperty_Value->file != '')
 									{
+										$link = Core::moduleIsActive('cdn')
+											? Cdn_Controller::link($sDirHref . $oProperty_Value->file)
+											: NULL;
+
 										$oNewAdmin_Form_Entity->largeImage(
 											Core_Array::union($oNewAdmin_Form_Entity->largeImage, array(
-												'path' => $sDirHref . rawurlencode($oProperty_Value->file),
+												'path' => !is_null($link)
+													? $link
+													: $sDirHref . rawurlencode($oProperty_Value->file),
 												'originalName' => $oProperty_Value->file_name,
 												'delete_onclick' => $this->_Admin_Form_Controller->getAdminActionLoadAjax($this->_Admin_Form_Controller->getPath(), 'deletePropertyValue', "large_property_{$oProperty->id}_{$oProperty_Value->id}", $this->_datasetId, $this->_object->id)
 											))
@@ -510,9 +513,15 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 									if ($oProperty_Value->file_small != '')
 									{
+										$link = Core::moduleIsActive('cdn')
+											? Cdn_Controller::link($sDirHref . $oProperty_Value->file_small)
+											: NULL;
+
 										$oNewAdmin_Form_Entity->smallImage(
 											Core_Array::union($oNewAdmin_Form_Entity->smallImage, array(
-												'path' => $sDirHref . rawurlencode($oProperty_Value->file_small),
+												'path' => !is_null($link)
+													? $link
+													: $sDirHref . rawurlencode($oProperty_Value->file_small),
 												'originalName' => $oProperty_Value->file_small_name,
 												'delete_onclick' => $this->_Admin_Form_Controller->getAdminActionLoadAjax($this->_Admin_Form_Controller->getPath(), 'deletePropertyValue', "small_property_{$oProperty->id}_{$oProperty_Value->id}", $this->_datasetId, $this->_object->id),
 												'create_small_image_from_large_checked' => FALSE,
@@ -1080,23 +1089,23 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	*/
 	protected function _fillInformationSystem($value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_InfGroups, $oAdmin_Form_Entity_InfItemsSelect, $oAdmin_Form_Entity_InfItemsInput)
 	{
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
+
 		$Informationsystem_Item = Core_Entity::factory('Informationsystem_Item', $value);
 
 		$bIsNullValue = is_null($value);
 		$bIsNullValue && $value = $oProperty->default_value;
 
+		$oInformationsystem = $oProperty->Informationsystem;
+
 		$group_id = $value == 0
 			? 0
 			: intval($Informationsystem_Item->informationsystem_group_id);
 
-		$windowId = $this->_Admin_Form_Controller->getWindowId();
-
-		$oInformationsystem = $oProperty->Informationsystem;
-
 		// Groups
 		$aOptions = Informationsystem_Item_Controller_Edit::fillInformationsystemGroup($oProperty->informationsystem_id, 0);
 		$oAdmin_Form_Entity_InfGroups
-			->value($Informationsystem_Item->informationsystem_group_id)
+			->value($group_id)
 			->options(array(' … ') + $aOptions)
 			->onchange("$.ajaxRequest({path: hostcmsBackend + '/informationsystem/item/index.php', context: '{$oAdmin_Form_Entity_InfItemsSelect->id}', callBack: $.loadSelectOptionsCallback, action: 'loadInformationItemList',additionalParams: 'informationsystem_group_id=' + this.value + '&informationsystem_id={$oProperty->informationsystem_id}',windowId: '{$windowId}'}); return false");
 
@@ -1216,6 +1225,12 @@ class Property_Controller_Tab extends Core_Servant_Properties
 			);
 	}
 
+	/**
+	 * Get shop items
+	 * @param Shop_Item_Model $oShop_Item
+	 * @return array
+	* @hostcms-event Property_Controller_Tab.onBeforeGetShopItems
+	 */
 	static public function getShopItems(Shop_Item_Model $oShop_Item)
 	{
 		$oShop = $oShop_Item->Shop;
@@ -1264,6 +1279,8 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		}
 
 		$objects = array();
+
+		Core_Event::notify('Property_Controller_Tab.onBeforeGetShopItems', $oShop_Item);
 
 		do {
 			$oShop_Item
@@ -1545,6 +1562,11 @@ class Property_Controller_Tab extends Core_Servant_Properties
 				}
 			}
 		}
+
+		// echo "<pre>";
+		// var_dump($_POST);
+		// var_dump($this->_aSortingTree);
+		// echo "</pre>";
 
 		// Values already exist
 		$aAll_Property_Values = $this->_object->getPropertyValues(FALSE);

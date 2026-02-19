@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Field
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Field_Entity extends Core_Empty_Entity
 {
@@ -50,11 +50,8 @@ class Field_Entity extends Core_Empty_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function countBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function countBackend()
 	{
 		$this->count && Core_Html_Entity::factory('Span')
 			->class('badge badge-azure badge-square')

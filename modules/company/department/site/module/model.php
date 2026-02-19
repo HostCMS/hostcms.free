@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Company
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Company_Department_Site_Module_Model extends Module_Model
 {
@@ -38,7 +38,6 @@ class Company_Department_Site_Module_Model extends Module_Model
 
 	/**
 	 * Save object. Use self::update() or self::create()
-	 * @return User_Site_Module_Model
 	 */
 	public function save()
 	{

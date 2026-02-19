@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 abstract class Admin_Form_Controller extends Core_Servant_Properties
 {
@@ -26,13 +26,13 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 	/**
 	 * Admin form
-	 * @var Admin_Form
+	 * @var Admin_Form_Model|NULL
 	 */
 	protected $_Admin_Form = NULL;
 
 	/**
 	 * Current language in administrator's center
-	 * @var object
+	 * @var Admin_Language_Model|NULL
 	 */
 	protected $_Admin_Language = NULL;
 
@@ -102,7 +102,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 	/**
 	 * Set additional param
-	 * @param string $key param name
+	 * @param string $value param name
 	 * @return self
 	 */
 	public function setAdditionalParam($value)
@@ -541,7 +541,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	{
 		$this->loadAdminFormFields();
 
-		return isset($this->_Admin_Form_Fields[$id])
+		return !is_null($id) && isset($this->_Admin_Form_Fields[$id])
 			? $this->_Admin_Form_Fields[$id]
 			: NULL;
 	}
@@ -554,7 +554,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	{
 		$this->loadAdminFormFields();
 
-		foreach ($this->_Admin_Form_Fields as $id => $oAdmin_Form_Field)
+		foreach ($this->_Admin_Form_Fields as $oAdmin_Form_Field)
 		{
 			if ($oAdmin_Form_Field->name == $name)
 			{
@@ -573,7 +573,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	{
 		$this->loadAdminFormFields();
 
-		if (isset($this->_Admin_Form_Fields[$id]))
+		if (!is_null($id) && isset($this->_Admin_Form_Fields[$id]))
 		{
 			unset($this->_Admin_Form_Fields[$id]);
 		}
@@ -1512,13 +1512,14 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 					{
 						$field = $oAdmin_Form_Field->name;
 
-						$value = Core_Array::getPost('topFilter_' . $oAdmin_Form_Field->id, '', 'trim');
+						$value = Core_Array::getPost("topFilter_{$oAdmin_Form_Field->id}", '', 'trim');
 
 						if (strlen($value))
 						{
 							$bCreated = TRUE;
 							$aNewTab['fields'][$field]['show'] = 1;
 							$aNewTab['fields'][$field]['value'] = $value;
+							$aNewTab['fields'][$field]['condition'] = Core_Array::getPost("topFilter_{$oAdmin_Form_Field->id}_condition", '=', 'trim');
 						}
 						else
 						{
@@ -1574,12 +1575,13 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 					{
 						$field = $oAdmin_Form_Field->name;
 
-						$value = Core_Array::getPost('topFilter_' . $oAdmin_Form_Field->id, '', 'trim');
+						$value = Core_Array::getPost("topFilter_{$oAdmin_Form_Field->id}", '', 'trim');
 
 						if (strlen($value))
 						{
 							$tabs[$tabName]['fields'][$field]['show'] = 1;
 							$tabs[$tabName]['fields'][$field]['value'] = $value;
+							$tabs[$tabName]['fields'][$field]['condition'] = Core_Array::getPost("topFilter_{$oAdmin_Form_Field->id}_condition", '=', 'trim');
 						}
 						else
 						{
@@ -2744,13 +2746,14 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		?><label style="padding-top:7px"><input type="checkbox" <?php echo $checked?> name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" value="1" style="width: 100%" class="form-control input-sm" /><span class="text"></span></label><?php
 	}
 
-	/**
-	 * Filter datetime callback
-	 * @param string $value
-	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
-	 * @param string $filterPrefix
-	 * @param string $tabName
-	 */
+    /**
+     * Filter datetime callback
+     * @param $date_from
+     * @param $date_to
+     * @param Admin_Form_Field_Model $oAdmin_Form_Field
+     * @param string $filterPrefix
+     * @param string $tabName
+     */
 	protected function _filterCallbackDatetime($date_from, $date_to, $oAdmin_Form_Field, $filterPrefix, $tabName)
 	{
 		$date_from = htmlspecialchars((string) $date_from);
@@ -2876,7 +2879,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		}
 
 		$oSelect
-			->options(array('HOST_CMS_ALL' => Core::_('Admin_Form.filter_selected_all')) + $aValue)
+			->options(array('HOST_CMS_ALL' => Core::_('Admin_Form.filter_selected_all'), 0 => Core::_('Admin_Form.filter_not_selected')) + $aValue)
 			->execute();
 	}
 
@@ -3117,7 +3120,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param string $filterPrefix
 	 * @param string|NULL $tabName
-	 * @return void
+	 * @return self
 	 */
 	public function showFilterField($oAdmin_Form_Field, $filterPrefix, $tabName = NULL)
 	{
@@ -3462,7 +3465,9 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 										}
 									break;
 									case 7: // Картинка-ссылка
-										if (!strlen($oAdmin_Form_Field_Changed->list))
+										// Иначе проверка ведется в блоке 8, 12
+										// Список значений для выпадающего фильтра не задан и значение 0, '0' или ''
+										if (!strlen($oAdmin_Form_Field_Changed->list) && empty($mFilterValue))
 										{
 											break;
 										}
@@ -3714,7 +3719,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 	/**
 	 * Apply external changes for fields
 	 * @param Admin_Form_Dataset $oAdmin_Form_Dataset dataset
-	 * @param Admin_Form_Field $oAdmin_Form_Field field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field field
 	 * @return object
 	 */
 	public function changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field)

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Controller_Load_Select_Options extends Admin_Form_Action_Controller_Type_Load_Select_Options
 {
@@ -90,8 +90,8 @@ class Shop_Controller_Load_Select_Options extends Admin_Form_Action_Controller_T
 
 	/**
 	 * Get count of objects
-	 * @return self
-	 */
+	 * @return int
+     */
 	protected function _getCount()
 	{
 		return $this->_model->getCount();

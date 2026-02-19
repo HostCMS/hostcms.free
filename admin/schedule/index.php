@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -101,6 +101,18 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($oControllerApply);
+}
+
+$oAdminFormActionExecute = $oAdmin_Form->Admin_Form_Actions->getByName('execute');
+
+if ($oAdminFormActionExecute && $oAdmin_Form_Controller->getAction() == 'execute')
+{
+	$oSchedule_Controller_Execute = Admin_Form_Action_Controller::factory(
+		'Schedule_Controller_Execute', $oAdminFormActionExecute
+	);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oSchedule_Controller_Execute);
 }
 
 // Источник данных 1

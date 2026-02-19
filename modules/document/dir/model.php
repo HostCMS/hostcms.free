@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Document
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Document_Dir_Model extends Core_Entity
 {
@@ -108,8 +108,8 @@ class Document_Dir_Model extends Core_Entity
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return self
-	 * @hostcms-event document_dir.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event document_dir.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -158,11 +158,8 @@ class Document_Dir_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function nameBadge()
 	{
 		$count = $this->getChildrenCount();
 		$count && Core_Html_Entity::factory('Span')

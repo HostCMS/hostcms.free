@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Order_Model extends Core_Entity
 {
@@ -171,11 +171,8 @@ class Shop_Order_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function companyBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function companyBadge()
 	{
 		if ($this->source_id)
 		{
@@ -898,11 +895,11 @@ class Shop_Order_Model extends Core_Entity
 	 */
 	protected $_showXmlMedia = FALSE;
 
-	/**
-	 * Show properties in XML
-	 * @param mixed $showXmlProperties array of allowed properties ID or boolean
-	 * @return self
-	 */
+    /**
+     * Show properties in XML
+     * @param bool $showXmlMedia
+     * @return self
+     */
 	public function showXmlMedia($showXmlMedia = TRUE)
 	{
 		$this->_showXmlMedia = $showXmlMedia;
@@ -933,11 +930,11 @@ class Shop_Order_Model extends Core_Entity
 	 */
 	protected $_showXmlCommentsRating = FALSE;
 
-	/**
-	 * Add Comments Rating XML to item
-	 * @param boolean $showXmlComments mode
-	 * @return self
-	 */
+    /**
+     * Add Comments Rating XML to item
+     * @param bool $showXmlCommentsRating
+     * @return self
+     */
 	public function showXmlCommentsRating($showXmlCommentsRating = TRUE)
 	{
 		$this->_showXmlCommentsRating = $showXmlCommentsRating;
@@ -1164,6 +1161,8 @@ class Shop_Order_Model extends Core_Entity
 			}
 
 			Core_Event::notify($this->_modelName . '.onBeforeAddPropertyValues', $this, array($aProperty_Values));
+			$eventResult = Core_Event::getLastReturn();
+			is_array($eventResult) && $aProperty_Values = $eventResult;
 
 			// Add all values
 			$this->addEntities($aProperty_Values);
@@ -1781,6 +1780,10 @@ class Shop_Order_Model extends Core_Entity
 					$oShop_Purchase_Discount_Coupon->text = $coupon;
 					$oShop_Purchase_Discount_Coupon->save();
 
+					// Дописываем название кода сертификата к товару в заказе.
+					$oShop_Order_Item->name .= ". {$coupon}";
+					$oShop_Order_Item->save();
+
 					if (strlen(trim($this->email)))
 					{
 						$oCore_Meta = new Core_Meta();
@@ -2344,12 +2347,13 @@ class Shop_Order_Model extends Core_Entity
 		return $newObject;
 	}
 
-	/**
-	 * Add order CommerceML
-	 * @param Core_SimpleXMLElement $oXml
-	 * @hostcms-event shop_order.onBeforeGetCmlUserName
-	 * @hostcms-event shop_order.onAddCmlSelectShopOrderItems
-	 */
+    /**
+     * Add order CommerceML
+     * @param Core_SimpleXMLElement $oXml
+     * @return Shop_Order_Model
+     * @hostcms-event shop_order.onBeforeGetCmlUserName
+     * @hostcms-event shop_order.onAddCmlSelectShopOrderItems
+     */
 	public function addCml(Core_SimpleXMLElement $oXml)
 	{
 		$oOrderXml = $oXml->addChild('Документ');
@@ -2847,7 +2851,7 @@ class Shop_Order_Model extends Core_Entity
 							<?php echo Core::_("Shop_Order.table_nds_tax")?>
 						</th>
 						<th width="10%">
-							<?php echo Core::_("Shop_Order.table_nds_value")?>
+							<?php echo Core::_("Shop_Order.table_nds_value") . ", " . $sig?>
 						</th>
 						<th width="10%">
 							<?php echo Core::_("Shop_Order.table_amount_value") . ", " . $sig?>
@@ -2862,68 +2866,65 @@ class Shop_Order_Model extends Core_Entity
 
 				$fShopTaxValueSum = $fShopOrderItemSum = 0.0;
 
-				if (count($aShop_Order_Items))
+				foreach ($aShop_Order_Items as $oShop_Order_Item)
 				{
-					foreach ($aShop_Order_Items as $oShop_Order_Item)
-					{
-						$sShopTaxRate = $oShop_Order_Item->rate;
+					$sShopTaxRate = $oShop_Order_Item->rate;
 
-						$fShopTaxValue = $sShopTaxRate
-							? $oShop_Order_Item->getTax()
-							: 0;
+					$fShopTaxValue = $sShopTaxRate
+						? $oShop_Order_Item->getTax() * $oShop_Order_Item->quantity
+						: 0;
 
-						// Не установлен статус у товара или статус НЕ отмененный
-						$bNotCanceled = !$oShop_Order_Item->isCanceled();
+					// Не установлен статус у товара или статус НЕ отмененный
+					$bNotCanceled = !$oShop_Order_Item->isCanceled();
 
-						$fItemAmount = $bNotCanceled
-							? $oShop_Order_Item->getAmount()
-							: 0;
+					$fItemAmount = $bNotCanceled
+						? $oShop_Order_Item->getAmount()
+						: 0;
 
-						$fShopTaxValueSum += $fShopTaxValue;
-						$fShopOrderItemSum += $fItemAmount;
+					$fShopTaxValueSum += $fShopTaxValue;
+					$fShopOrderItemSum += $fItemAmount;
 
-						?>
-						<tr>
-							<td>
-								<?php echo $i++?>
-							</td>
-							<td width="40" align="center"><?php
-								if ($oShop_Order_Item->type == 0)
-								{
-									echo $oShop_Order_Item->Shop_Item->imgBackend();
-								}
-								?>
-							</td>
-							<td>
-								<?php
-								if ($oShop_Order_Item->shop_order_item_status_id)
-								{
-									?><i class="fa <?php echo $oShop_Order_Item->Shop_Order_Item_Status->canceled ? 'fa-times-circle' : 'fa-circle'?>" style="color: <?php echo htmlspecialchars($oShop_Order_Item->Shop_Order_Item_Status->color)?>" title="<?php echo htmlspecialchars($oShop_Order_Item->Shop_Order_Item_Status->name)?>"></i> <?php
-								}
-								echo htmlspecialchars($oShop_Order_Item->name);
-								?>
-							</td>
-							<td>
-								<?php echo htmlspecialchars((string) $oShop_Order_Item->marking)?>
-							</td>
-							<td>
-								<?php echo number_format(Shop_Controller::instance()->round($oShop_Order_Item->getPrice()), 2, '.', '')?>
-							</td>
-							<td>
-								<?php echo Core_Str::hideZeros($oShop_Order_Item->quantity)?>
-							</td>
-							<td>
-								<?php echo $sShopTaxRate != 0 ? "{$sShopTaxRate}%" : '-'?>
-							</td>
-							<td>
-								<?php echo $fShopTaxValue != 0 ? $fShopTaxValue : '-'?>
-							</td>
-							<td>
-								<?php echo $bNotCanceled ? number_format($fItemAmount, 2, '.', '') : '-'?>
-							</td>
-						</tr>
-						<?php
-					}
+					?>
+					<tr>
+						<td>
+							<?php echo $i++?>
+						</td>
+						<td width="40" align="center"><?php
+							if ($oShop_Order_Item->type == 0)
+							{
+								echo $oShop_Order_Item->Shop_Item->imgBackend();
+							}
+							?>
+						</td>
+						<td>
+							<?php
+							if ($oShop_Order_Item->shop_order_item_status_id)
+							{
+								?><i class="fa <?php echo $oShop_Order_Item->Shop_Order_Item_Status->canceled ? 'fa-times-circle' : 'fa-circle'?>" style="color: <?php echo htmlspecialchars($oShop_Order_Item->Shop_Order_Item_Status->color)?>" title="<?php echo htmlspecialchars($oShop_Order_Item->Shop_Order_Item_Status->name)?>"></i> <?php
+							}
+							echo htmlspecialchars($oShop_Order_Item->name);
+							?>
+						</td>
+						<td>
+							<?php echo htmlspecialchars((string) $oShop_Order_Item->marking)?>
+						</td>
+						<td>
+							<?php echo $this->Shop_Currency->format($oShop_Order_Item->getPrice())?>
+						</td>
+						<td>
+							<?php echo Core_Str::hideZeros($oShop_Order_Item->quantity)?>
+						</td>
+						<td>
+							<?php echo $sShopTaxRate != 0 ? "{$sShopTaxRate}%" : '-'?>
+						</td>
+						<td>
+							<?php echo $fShopTaxValue != 0 ? $this->Shop_Currency->format($fShopTaxValue) : '-'?>
+						</td>
+						<td>
+							<?php echo $bNotCanceled ? $this->Shop_Currency->format($fItemAmount) : '-'?>
+						</td>
+					</tr>
+					<?php
 				}
 				?>
 					<tr class="footer">
@@ -2987,11 +2988,8 @@ class Shop_Order_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function order_itemsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function order_itemsBadge()
 	{
 		$count = $this->Shop_Order_items->getCount();
 
@@ -3004,11 +3002,8 @@ class Shop_Order_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function reviewsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function reviewsBadge()
 	{
 		if (Core::moduleIsActive('comment'))
 		{
@@ -3832,11 +3827,11 @@ class Shop_Order_Model extends Core_Entity
 		return $this;
 	}
 
-	/**
-	 * Merge list item with another one
-	 * @param List_Item_Model $oList_Item list item object
-	 * @return self
-	 */
+    /**
+     * Merge orders with another one
+     * @param Shop_Order_Model $oShop_Order
+     * @return self
+     */
 	public function merge(Shop_Order_Model $oShop_Order)
 	{
 		// Основные

@@ -29,4 +29,5 @@ return array(
 	'days' => 'days',
 	'active' => 'Activity',
 	'changeActive_success' => 'Information changed successfully',
+	'execute_success' => 'The task was completed successfully!',
 );

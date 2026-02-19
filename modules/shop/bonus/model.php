@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
  class Shop_Bonus_Model extends Core_Entity
 {
@@ -90,8 +90,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return self
-	 * @hostcms-event shop_bonus.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event shop_bonus.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -153,11 +153,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function valueBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function valueBadge()
 	{
 		echo $this->type == 0
 			? '%'
@@ -166,11 +163,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function nameBadge()
 	{
 		if ($this->accrual_date != '0000-00-00 00:00:00')
 		{
@@ -188,7 +182,6 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 	/**
 	 * Backend callback method
-	 * @return string
 	 */
 	public function min_amountBackend()
 	{

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Admin_Language_Model extends Core_Entity
 {
@@ -111,8 +111,8 @@ class Admin_Language_Model extends Core_Entity
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return self
-	 * @hostcms-event admin_language.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event admin_language.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

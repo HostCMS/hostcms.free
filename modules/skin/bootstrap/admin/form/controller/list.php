@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_View
 {
@@ -194,29 +194,31 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 			)
 			->execute();
 
-		// $oUser = Core_Auth::getCurrentUser();
-
-		$aModelNames = array();
-		$aDatasets = $oAdmin_Form_Controller->getDatasets();
-		foreach ($aDatasets as $datasetKey => $oAdmin_Form_Dataset)
-		{
-			$oEntity = $oAdmin_Form_Dataset->getEntity();
-			if ($oEntity instanceof Core_Entity)
-			{
-				$aModelNames[] = $oEntity->getModelName();
-			}
-		}
-
 		// Settings
-		Core_Html_Entity::factory('Span')
-			->class('btn btn-sm btn-default margin-right-10')
-			->id('adminFormSettings')
-			->title(Core::_('Admin_Form.admin_form_field_settings'))
-			->onclick('$.showAdminFormSettings(' . $oAdmin_Form->id . ', ' . CURRENT_SITE . ', \'' . implode(',', $aModelNames) . '\')')
-			->add(
-				Core_Html_Entity::factory('I')->class('fa-solid fa-cog no-margin')
-			)
-			->execute();
+		if ($oAdmin_Form->Admin_Form_Fields->getCount(FALSE))
+		{
+			$aModelNames = array();
+
+			$aDatasets = $oAdmin_Form_Controller->getDatasets();
+			foreach ($aDatasets as $datasetKey => $oAdmin_Form_Dataset)
+			{
+				$oEntity = $oAdmin_Form_Dataset->getEntity();
+				if ($oEntity instanceof Core_Entity)
+				{
+					$aModelNames[] = $oEntity->getModelName();
+				}
+			}
+
+			Core_Html_Entity::factory('Span')
+				->class('btn btn-sm btn-default margin-right-10')
+				->id('adminFormSettings')
+				->title(Core::_('Admin_Form.admin_form_field_settings'))
+				->onclick('$.showAdminFormSettings(' . $oAdmin_Form->id . ', ' . CURRENT_SITE . ', \'' . implode(',', $aModelNames) . '\')')
+				->add(
+					Core_Html_Entity::factory('I')->class('fa-solid fa-cog no-margin')
+				)
+				->execute();
+		}
 
 		$oAdmin_Form_Controller->pageSelector();
 	}
@@ -397,6 +399,10 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 											$sInputId = "id_{$filterPrefix}{$oAdmin_Form_Field_Changed->id}";
 
+											$tabFieldCondition = isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field_Changed->name]['condition'])
+												? $aTabs[$tabName]['fields'][$oAdmin_Form_Field_Changed->name]['condition']
+												: '=';
+
 											?><div class="form-group" id="<?php echo htmlspecialchars($sFormGroupId)?>">
 												<label for="<?php echo htmlspecialchars($sInputId)?>" class="col-sm-3 col-lg-2 control-label no-padding-right">
 													<?php echo htmlspecialchars($fieldName)?>
@@ -419,7 +425,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 																?>
 																<select name="<?php echo $filterPrefix, $oAdmin_Form_Field_Changed->id, '_condition'?>" class="form-control input-sm">
 																	<?php
-																	$filterCondition = Core_Array::get($oAdmin_Form_Controller->request, "{$filterPrefix}{$oAdmin_Form_Field_Changed->id}_condition", '=');
+																	$filterCondition = Core_Array::get($oAdmin_Form_Controller->request, "{$filterPrefix}{$oAdmin_Form_Field_Changed->id}_condition", $tabFieldCondition);
 
 																	foreach ($aOptions as $key => $value)
 																	{
@@ -561,7 +567,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 													<?php
 													$sDelete = Core::_('Admin_Form.delete');
 													?>
-													<a href="javascript:void(0);" onclick="res = confirm('<?php echo htmlspecialchars(Core::_('Admin_Form.confirm_dialog', $sDelete))?>'); if (res) { $.filterDelete($(this)) } return res;"><?php echo $sDelete?></a>
+													<a href="javascript:void(0);" data-confirm-message="<?php echo htmlspecialchars(Core::_('Admin_Form.confirm_dialog', $sDelete))?>" onclick="res = confirm(this.getAttribute('data-confirm-message')); if (res) { $.filterDelete($(this)) } return res;"><?php echo $sDelete?></a>
 													<?php
 													}
 													?>
@@ -894,7 +900,15 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 							$entityKey = NULL;
 						}
 
-						?><tr id="row_<?php echo $quotedDatasetKey?>_<?php echo $quotedEntityKey?>">
+						$currentRowClass = '';
+
+						$aChecked = $oAdmin_Form_Controller->getChecked();
+
+						$currentRowClass = isset($aChecked[$quotedDatasetKey][$quotedEntityKey])
+							? 'current-row'
+							: '';
+
+						?><tr id="row_<?php echo $quotedDatasetKey?>_<?php echo $quotedEntityKey?>" class="<?php echo $currentRowClass?>">
 						<?php
 						// Чекбокс "Для элемента" показываем только при наличии действий
 						if ($oAdmin_Form->show_operations && $oAdmin_Form_Controller->showOperations)
@@ -943,7 +957,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 								try
 								{
-									Core_Event::notify('Admin_Form_Controller.onBeforeShowField', $oAdmin_Form_Controller, array($oEntity, $oAdmin_Form_Field));
+									Core_Event::notify('Admin_Form_Controller.onBeforeShowField', $oAdmin_Form_Controller, array($oEntity, $oAdmin_Form_Field, $oAdmin_Form_Field_Changed));
 
 									// Не вычисляемое поле и нет Backend-метода
 									if ($oAdmin_Form_Field_Changed->type != 10 && !$oAdmin_Form_Controller->isCallable($oEntity, $backendName))
@@ -1152,17 +1166,20 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 													? $fieldCaption
 													: '—';
 
-												if (empty($alt_array[$value]))
+												if (!is_null($value))
 												{
-													$alt_array[$value] = $fieldCaption;
+													if (empty($alt_array[$value]))
+													{
+														$alt_array[$value] = $fieldCaption;
+													}
+
+													if (empty($title_array[$value]))
+													{
+														$title_array[$value] = $fieldCaption;
+													}
 												}
 
-												if (empty($title_array[$value]))
-												{
-													$title_array[$value] = $fieldCaption;
-												}
-
-												if (isset($value_array[$value]))
+												if (!is_null($value) && isset($value_array[$value]))
 												{
 													$src = $value_array[$value];
 												}
@@ -1175,7 +1192,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 													$src = NULL;
 												}
 
-												if (isset($ico_array[$value]))
+												if (!is_null($value) && isset($ico_array[$value]))
 												{
 													$ico = $ico_array[$value];
 												}
@@ -1197,11 +1214,11 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 												// Отображаем картинку без ссылки
 												if (!is_null($ico))
 												{
-													?><i class="<?php echo htmlspecialchars($ico)?>" title="<?php echo htmlspecialchars(Core_Array::get($title_array, $value))?>"></i><?php
+													?><i class="<?php echo htmlspecialchars($ico)?>" title="<?php echo htmlspecialchars(Core_Array::get($title_array, $value, $fieldCaption))?>"></i><?php
 												}
 												elseif (!is_null($src))
 												{
-													?><img src="<?php echo htmlspecialchars($src)?>" alt="<?php echo htmlspecialchars(Core_Array::get($alt_array, $value))?>" title="<?php echo htmlspecialchars(Core_Array::get($title_array, $value))?>" /><?php
+													?><img src="<?php echo htmlspecialchars($src)?>" alt="<?php echo htmlspecialchars(Core_Array::get($alt_array, $value, $fieldCaption))?>" title="<?php echo htmlspecialchars(Core_Array::get($title_array, $value, $fieldCaption))?>" /><?php
 												}
 												/*elseif (!empty($link) && !isset($value_array[$value]))
 												{
@@ -1301,7 +1318,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 											echo '<span>' . htmlspecialchars((string) $oEntity->$fieldName) . '</span>';
 										}
 									}
-									Core_Event::notify('Admin_Form_Controller.onAfterShowField', $oAdmin_Form_Controller, array($oEntity, $oAdmin_Form_Field));
+									Core_Event::notify('Admin_Form_Controller.onAfterShowField', $oAdmin_Form_Controller, array($oEntity, $oAdmin_Form_Field, $oAdmin_Form_Field_Changed));
 								}
 								catch (Exception $e)
 								{
@@ -1441,9 +1458,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 										// Добавляем установку метки для чекбокса и строки + добавлем уведомление, если необходимо
 										if ($oAdmin_Form_Action->confirm)
 										{
-											$onclick = "res = confirm('" .
-												htmlspecialchars(Core::_('Admin_Form.confirm_dialog', $name)) .
-												"'); if (!res) { $('#{$windowId} #row_{$escapedDatasetKey}_{$escapedEntityKey}').toggleHighlight(); } else {{$onclick}} return res;";
+											$onclick = "res = confirm(this.getAttribute('data-confirm-message')); if (!res) { $('#{$windowId} #row_{$escapedDatasetKey}_{$escapedEntityKey}').toggleHighlight(); } else {{$onclick}} return res;";
 										}
 
 										is_null($oAdmin_Form_Action->color) && $oAdmin_Form_Action->color = 'info';
@@ -1456,7 +1471,8 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 										$aAttrs += array(
 											'title' => $name,
 											'href' => $href,
-											'onclick' => "mainFormLocker.unlock(); $onclick"
+											'onclick' => "mainFormLocker.unlock(); $onclick",
+											'data-confirm-message' => htmlspecialchars(Core::_('Admin_Form.confirm_dialog', $name))
 										);
 
 										$oAdmin_Form_Action->new_window
@@ -1614,14 +1630,14 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 						// Нужно подтверждение для действия
 						if ($oAdmin_Form_Action->confirm)
 						{
-							$onclick = "res = confirm('" . Core::_('Admin_Form.confirm_dialog', htmlspecialchars($text)) . "'); if (res) { {$onclick} } else {return false}";
+							$onclick = "res = confirm(this.getAttribute('data-confirm-message')); if (res) { {$onclick} } else {return false}";
 						}
 
-						$sLi = '<li><a title="' . htmlspecialchars($text) . '" href="' . $href . '" onclick="mainFormLocker.unlock(); ' . $onclick .'"><i class="' . htmlspecialchars($oAdmin_Form_Action->icon) . ' fa-fw btn-sm btn-' . htmlspecialchars($oAdmin_Form_Action->color) . '"></i>' . htmlspecialchars($text) . '</a></li>';
+						$sLi = '<li><a title="' . htmlspecialchars($text) . '" href="' . $href . '" onclick="mainFormLocker.unlock(); ' . $onclick .'" data-confirm-message="' . Core::_('Admin_Form.confirm_dialog', htmlspecialchars($text)) . '"><i class="' . htmlspecialchars($oAdmin_Form_Action->icon) . ' fa-fw btn-sm btn-' . htmlspecialchars($oAdmin_Form_Action->color) . '"></i>' . htmlspecialchars($text) . '</a></li>';
 
 						if ($admin_form_action_dir_id == 0)
 						{
-							$sActionsFullView .= '<a href="' . htmlspecialchars($href) . '" onclick="mainFormLocker.unlock(); ' . $onclick . '" class="btn-labeled btn btn-'. htmlspecialchars($oAdmin_Form_Action->color) . '"><i class="btn-label ' . htmlspecialchars($oAdmin_Form_Action->icon) . '"></i>' . htmlspecialchars($text) . '</a>';
+							$sActionsFullView .= '<a href="' . htmlspecialchars($href) . '" onclick="mainFormLocker.unlock(); ' . $onclick . '" class="btn-labeled btn btn-'. htmlspecialchars($oAdmin_Form_Action->color) . '" data-confirm-message="' . Core::_('Admin_Form.confirm_dialog', htmlspecialchars($text)) . '"><i class="btn-label ' . htmlspecialchars($oAdmin_Form_Action->icon) . '"></i>' . htmlspecialchars($text) . '</a>';
 						}
 						else
 						{

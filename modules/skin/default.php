@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Skin_Default extends Core_Skin
 {
@@ -120,8 +120,8 @@ class Skin_Default extends Core_Skin
 
 		<?php
 		$this->addJs("/modules/skin/bootstrap/js/lng/{$lng}/{$lng}.js");
-		$aJs = $this->getJs();
-		foreach ($aJs as $aJs)
+		$aJses = $this->getJs();
+		foreach ($aJses as $aJs)
 		{
 			Core_Html_Entity::factory('Script')
 				->src($aJs['src'] . '?' . $timestamp)
@@ -909,7 +909,7 @@ if ($this->_mode != 'blank')
 		if ($this->_mode != 'blank')
 		{
 		?><div id="footer">
-			<div id="copyright">&copy; 2005–2025 ООО «Хостмэйк»</div>
+			<div id="copyright">&copy; 2005–2026 ООО «Хостмэйк»</div>
 			<div id="links">
 				<p><?php echo Core::_('Admin.website')?> <a href="http://www.hostcms.ru" target="_blank">www.hostcms.ru</a></p>
 				<p><?php echo Core::_('Admin.support_email')?> <a href="mailto:support@hostcms.ru">support@hostcms.ru</a></p>

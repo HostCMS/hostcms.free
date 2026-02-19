@@ -36,7 +36,7 @@ else
 	if (Core_Array::getPost('add_comment') && Core_Array::get(Core_Page::instance()->libParams, 'showComments', 1))
 	{
 		$oLastComment = Core_Entity::factory('Comment')->getLastCommentByIp(
-			Core_Array::get($_SERVER, 'REMOTE_ADDR')
+			Core::getClientIp()
 		);
 
 		$oXmlCommentTag = Core::factory('Core_Xml_Entity')

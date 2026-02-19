@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Crm_Project_Attachment_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -109,8 +109,8 @@ class Crm_Project_Attachment_Controller_Edit extends Admin_Form_Action_Controlle
 
 	/**
 	 * Get save button
-	 * @return Admin_Form_Entity_Buttons
-	 */
+	 * @return Admin_Form_Entity_Buttons|null
+     */
 	protected function _getSaveButton()
 	{
 		return NULL;

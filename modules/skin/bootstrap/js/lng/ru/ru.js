@@ -23,5 +23,7 @@ var i18n =
 "edit_error": "Редактирование файла невозможно!",
 "autosave_icon_title": "Черновик сохранен ",
 "confirm_unsign": "Вы уверены, что хотите отозвать сертификат?",
-"important": "важно"
+"important": "важно",
+"webauth_register_success": "Авторизация успешно сохранена",
+"copy_error_clipboard": "Скопировать ошибку в буфер"
 };

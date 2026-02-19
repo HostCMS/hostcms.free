@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Event_Controller
 {
@@ -30,9 +30,8 @@ class Event_Controller
 	}
 
 	/**
-	 * Get get date
+	 * Get date
 	 * @param string $datetime SQL datetime
-	 * @return string
 	 */
 	static public function getDate($datetime)
 	{
@@ -56,7 +55,6 @@ class Event_Controller
 	/**
 	 * Show related events
 	 * @param Core_Entity $oEntity entity
-	 * @return mixed
 	 */
 	static public function showRelatedEvents(Core_Entity $oEntity)
 	{
@@ -130,8 +128,8 @@ class Event_Controller
 
 	/**
 	 * Show crm projects filter
-	 * @return self
-	 */
+	 * @return false|string
+     */
 	static public function showCrmProjectFilter()
 	{
 		ob_start();
@@ -171,7 +169,7 @@ class Event_Controller
 					? 'active'
 					: '';
 
-				?><div onclick="<?php echo $onclick?>" class="crm-project-filter-item <?php echo $active?>" title="<?php echo htmlspecialchars($oCrm_Project->name)?>" style="background-color: <?php echo htmlspecialchars($color)?>"><i class="<?php echo htmlspecialchars($icon)?>"></i></div><?php
+				?><div onclick="<?php echo $onclick?>" class="crm-project-filter-item <?php echo $active?>" title="<?php echo htmlspecialchars($oCrm_Project->name)?>" style="background-color: <?php echo htmlspecialchars($color)?>"><i class="fa-fw <?php echo htmlspecialchars($icon)?>"></i></div><?php
 			}
 		?></div><?php
 

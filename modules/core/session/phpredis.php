@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Session_Phpredis implements SessionHandlerInterface
 {
@@ -238,7 +238,11 @@ class Core_Session_Phpredis implements SessionHandlerInterface
 		{
 			$key = $this->_getKey($id);
 
-			self::$_redis->del($key);
+			method_exists(self::$_redis, 'unlink')
+				// Use the non-blocking UNLINK command if available
+				? self::$_redis->unlink($key)
+				// Fallback to the blocking DEL command
+				: self::$_redis->del($key);
 
 			$this->_unlock($id);
 

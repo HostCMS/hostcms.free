@@ -27,7 +27,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Controller extends Core_Servant_Properties
 {
@@ -219,8 +219,8 @@ class Core_Controller extends Core_Servant_Properties
 
 	/**
 	 * Get ARRAY for entity and children entities
-	 * @return array
-	 */
+	 * @return stdClass
+     */
 	public function getStdObject()
 	{
 		$this->_entity

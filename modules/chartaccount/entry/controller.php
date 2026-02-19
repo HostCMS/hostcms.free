@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Chartaccount
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Chartaccount_Entry_Controller
 {
@@ -267,7 +267,6 @@ class Chartaccount_Entry_Controller
 	 * @param int $document_id
 	 * @param int $company_id
 	 * @param array $aEntries
-	 * @return self
 	 */
 	static public function insertEntries($document_id, $company_id, $aEntries)
 	{

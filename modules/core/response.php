@@ -20,7 +20,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Response
 {
@@ -179,11 +179,12 @@ class Core_Response
 	 * </code>
 	 * @param string $name
 	 * @param string $value
+	 * @param string $replace default TRUE
 	 * @return Core_Response
 	 */
-	public function header($name, $value)
+	public function header($name, $value, $replace = TRUE)
 	{
-		$this->_headers[] = array($name, $value);
+		$this->_headers[] = array($name, $value, $replace);
 		return $this;
 	}
 
@@ -271,7 +272,7 @@ class Core_Response
 
 		foreach ($this->_headers as $value)
 		{
-			header($value[0] . ': ' . Core_Http::sanitizeHeader($value[1]));
+			header($value[0] . ': ' . Core_Http::sanitizeHeader($value[1]), $value[2]);
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterSendHeaders', $this);

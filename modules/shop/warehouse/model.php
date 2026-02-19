@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Warehouse_Model extends Core_Entity
 {
@@ -43,6 +43,7 @@ class Shop_Warehouse_Model extends Core_Entity
 		'shop_warehouse_invoice' => array(),
 		'shop_warehouse_supply' => array(),
 		'shop_warehouse_purchasereturn' => array(),
+		'production_task' => array()
 	);
 
 	/**
@@ -203,11 +204,8 @@ class Shop_Warehouse_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function nameBadge()
 	{
 		$count = $this->Shop_Warehouse_Items->getCount();
 		$count && Core_Html_Entity::factory('Span')
@@ -247,7 +245,7 @@ class Shop_Warehouse_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -263,10 +261,10 @@ class Shop_Warehouse_Model extends Core_Entity
 
 	/**
 	 * Get rest
-	 * @param $shop_item_id shop item id
-	 * @param $dateTo date
-	 * @return float
-	 */
+	 * @param int $shop_item_id shop item id
+	 * @param string|null $dateTo date
+	 * @return string|null
+     */
 	public function getRest($shop_item_id, $dateTo = NULL)
 	{
 		// Get last accumulated value
@@ -381,7 +379,7 @@ class Shop_Warehouse_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */

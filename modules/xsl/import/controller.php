@@ -8,7 +8,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Xsl
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @author Hostmake LLC
+ * @copyright © 2005-2023 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Xsl_Import_Controller extends Admin_Form_Action_Controller
 {
@@ -54,16 +55,51 @@ class Xsl_Import_Controller extends Admin_Form_Action_Controller
 		return $this;
 	}
 
+	/**
+	 * Import
+	 * @param array $aContent
+	 * @return self
+	 */
 	protected function _import(array $aContent = array())
 	{
+		$aExplodeDir = explode('/', $aContent['dirName']);
+
+		$iParent_Id = $this->xsl_dir_id;
+
+		foreach ($aExplodeDir as $sDirName)
+		{
+			if ($sDirName != '')
+			{
+				$oXsl_Dirs = Core_Entity::factory('Xsl_Dir');
+				$oXsl_Dirs
+					->queryBuilder()
+					->where('xsl_dirs.parent_id', '=', $iParent_Id);
+
+				$oXsl_Dir = $oXsl_Dirs->getByName($sDirName, FALSE);
+
+				if (is_null($oXsl_Dir))
+				{
+					$oXsl_Dir = Core_Entity::factory('Xsl_Dir');
+					$oXsl_Dir
+						->parent_id($iParent_Id)
+						->name($sDirName)
+						->save();
+				}
+
+				$iParent_Id = $oXsl_Dir->id;
+			}
+		}
+
+		$oXslExist = Core_Entity::factory('Xsl')->getByName($aContent['name'], FALSE);
+
 		$oXsl = Core_Entity::factory('Xsl');
 		$oXsl->name = $aContent['name'];
-		$oXsl->xsl_dir_id = $this->xsl_dir_id;
+		$oXsl->xsl_dir_id = $iParent_Id;
 		$oXsl->format = intval($aContent['format']);
 		$oXsl->description = $aContent['description'];
 		$oXsl->save();
 
-		$oXsl->name = $oXsl->name . " [{$oXsl->id}]";
+		$oXsl->name = $oXsl->name . (!is_null($oXslExist) ? " [{$oXsl->id}]" : '');
 		$oXsl->save();
 
 		isset($aContent['xsl'])

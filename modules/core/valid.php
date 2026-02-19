@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Valid
 {
@@ -72,11 +72,11 @@ class Core_Valid
 		|| version_compare($ip, "10.0.0.0", ">") && version_compare($ip, "10.255.255.255", "<");
 	}
 
-	/**
-	 * Checks if $url is valid URL
-	 * @param string $ip URL
-	 * @return boolean
-	 */
+    /**
+     * Checks if $url is valid URL
+     * @param string $url
+     * @return boolean
+     */
 	static public function url($url)
 	{
 		return is_string($url)

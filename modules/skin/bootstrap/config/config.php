@@ -15,7 +15,7 @@ return array (
 		'services' => array(
 			'ico' => 'fa fa-cubes',
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_services'),
-			'modules' => array('helpdesk', 'production',  'dms', 'form', 'list', 'forum', 'maillist', 'poll', 'search', 'bot', 'message'),
+			'modules' => array('helpdesk', 'production',  'dms', 'form', 'list', 'forum', 'ai', 'search', 'maillist', 'poll', 'bot', 'message'),
 		),
 		'crm' => array(
 			'ico' => 'fa fa-users',
@@ -50,7 +50,7 @@ return array (
 		'system' => array(
 			'ico' => 'fa fa-gear',
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_system'),
-			'modules' => array('site', 'eventlog', 'certificate', 'notification', 'field', 'benchmark', 'admin_form', 'module', 'mail', 'wysiwyg', 'syntaxhighlighter', 'constant', 'restapi', 'webhook', 'ipaddress'),
+			'modules' => array('site', 'eventlog', 'notification', 'field', 'ipaddress', 'constant', 'restapi', 'webhook', 'certificate', 'benchmark', 'admin_form', 'module', 'mail', 'wysiwyg', 'syntaxhighlighter'),
 		),
 		'cache' => array(
 			'ico' => 'fa fa-archive',

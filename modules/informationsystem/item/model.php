@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Informationsystem_Item_Model extends Core_Entity
 {
@@ -108,7 +108,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	/**
 	 * Has revisions
 	 *
-	 * @param boolean
+	 * @var boolean
 	 */
 	protected $_hasRevisions = TRUE;
 
@@ -289,8 +289,8 @@ class Informationsystem_Item_Model extends Core_Entity
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return self
-	 * @hostcms-event informationsystem_item.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event informationsystem_item.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -498,6 +498,15 @@ class Informationsystem_Item_Model extends Core_Entity
 			foreach ($aTags as $oTag)
 			{
 				$newObject->add($oTag);
+			}
+		}
+
+		if (Core::moduleIsActive('media'))
+		{
+			$aMedia_Informationsystem_Items = $this->Media_Informationsystem_Items->findAll(FALSE);
+			foreach ($aMedia_Informationsystem_Items as $oMedia_Informationsystem_Item)
+			{
+				$newObject->add(clone $oMedia_Informationsystem_Item);
 			}
 		}
 
@@ -1023,7 +1032,6 @@ class Informationsystem_Item_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @return string
 	 */
 	public function nameBackend()
 	{
@@ -1177,8 +1185,13 @@ class Informationsystem_Item_Model extends Core_Entity
 					{
 						$oSearch_Page->text .= htmlspecialchars(strip_tags((string) $oPropertyValue->value)) . ' ';
 					}
+					// File type
+					elseif ($oPropertyValue->Property->type == 2)
+					{
+						$oSearch_Page->text .= htmlspecialchars($oPropertyValue->file_name . ' ' . $oPropertyValue->file_description . ' ' . $oPropertyValue->file_small_name . ' ' . $oPropertyValue->file_small_description) . ' ';
+					}
 					// Other type
-					elseif ($oPropertyValue->Property->type != 2)
+					else
 					{
 						$oSearch_Page->text .= htmlspecialchars((string) $oPropertyValue->value) . ' ';
 					}
@@ -1229,8 +1242,13 @@ class Informationsystem_Item_Model extends Core_Entity
 				{
 					$oSearch_Page->text .= htmlspecialchars(strip_tags((string) $oField_Value->value)) . ' ';
 				}
+				// File type
+				elseif ($oField_Value->Field->type == 2)
+				{
+					$oSearch_Page->text .= htmlspecialchars($oField_Value->file_name . ' ' . $oField_Value->file_description . ' ' . $oField_Value->file_small_name . ' ' . $oField_Value->file_small_description) . ' ';
+				}
 				// Other type
-				elseif ($oField_Value->Field->type != 2)
+				else
 				{
 					$oSearch_Page->text .= htmlspecialchars((string) $oField_Value->value) . ' ';
 				}
@@ -1290,11 +1308,11 @@ class Informationsystem_Item_Model extends Core_Entity
 	 */
 	protected $_showXmlCommentsRating = FALSE;
 
-	/**
-	 * Add Comments Rating XML to item
-	 * @param boolean $showXmlComments mode
-	 * @return self
-	 */
+    /**
+     * Add Comments Rating XML to item
+     * @param bool $showXmlCommentsRating
+     * @return self
+     */
 	public function showXmlCommentsRating($showXmlCommentsRating = TRUE)
 	{
 		$this->_showXmlCommentsRating = $showXmlCommentsRating;
@@ -1358,11 +1376,11 @@ class Informationsystem_Item_Model extends Core_Entity
 	 */
 	protected $_showXmlVotes = FALSE;
 
-	/**
-	 * Add votes XML to item
-	 * @param boolean $showXmlSiteuser mode
-	 * @return self
-	 */
+    /**
+     * Add votes XML to item
+     * @param bool $showXmlVotes
+     * @return self
+     */
 	public function showXmlVotes($showXmlVotes = TRUE)
 	{
 		$this->_showXmlVotes = $showXmlVotes;
@@ -1420,11 +1438,11 @@ class Informationsystem_Item_Model extends Core_Entity
 	 */
 	protected $_showXmlMedia = FALSE;
 
-	/**
-	 * Show properties in XML
-	 * @param mixed $showXmlProperties array of allowed properties ID or boolean
-	 * @return self
-	 */
+    /**
+     * Show properties in XML
+     * @param bool $showXmlMedia
+     * @return self
+     */
 	public function showXmlMedia($showXmlMedia = TRUE)
 	{
 		$this->_showXmlMedia = $showXmlMedia;
@@ -1524,6 +1542,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	 * @return self
 	 * @hostcms-event informationsystem_item.onBeforeSelectComments
 	 * @hostcms-event informationsystem_item.onBeforeAddPropertyValues
+	 * @hostcms-event informationsystem_item.onBeforeAddMediaItems
 	 */
 	protected function _prepareData()
 	{
@@ -1552,6 +1571,21 @@ class Informationsystem_Item_Model extends Core_Entity
 
 		$this->_isTagAvailable('dir')
 			&& $this->addXmlTag('dir', Core_Page::instance()->informationsystemCDN . $this->getItemHref());
+
+		if (Core::moduleIsActive('cdn'))
+		{
+			if ($this->image_large !== '')
+			{
+				$this->_isTagAvailable('cdn_image_large')
+					&& $this->addXmlTag('cdn_image_large', $this->getLargeFileHref());
+			}
+
+			if ($this->image_small !== '')
+			{
+				$this->_isTagAvailable('cdn_image_small')
+					&& $this->addXmlTag('cdn_image_small', $this->getSmallFileHref());
+			}
+		}
 
 		// Отображается часть текста
 		if ($this->_showXmlPart > 0 && $this->_isTagAvailable('text'))
@@ -1709,6 +1743,8 @@ class Informationsystem_Item_Model extends Core_Entity
 			}
 
 			Core_Event::notify($this->_modelName . '.onBeforeAddPropertyValues', $this, array($aProperty_Values));
+			$eventResult = Core_Event::getLastReturn();
+			is_array($eventResult) && $aProperty_Values = $eventResult;
 
 			$aListIDs = array();
 
@@ -1738,6 +1774,11 @@ class Informationsystem_Item_Model extends Core_Entity
 		if ($this->_showXmlMedia && Core::moduleIsActive('media'))
 		{
 			$aEntities = Media_Item_Controller::getValues($this);
+
+			Core_Event::notify($this->_modelName . '.onBeforeAddMediaItems', $this, array($aEntities));
+			$eventResult = Core_Event::getLastReturn();
+			is_array($eventResult) && $aEntities = $eventResult;
+
 			foreach ($aEntities as $oEntity)
 			{
 				$oMedia_Item = $oEntity->Media_Item;
@@ -1789,8 +1830,8 @@ class Informationsystem_Item_Model extends Core_Entity
 
 	/**
 	 * Create item
-	 * @return self
-	 */
+	 * @return Core_Entity
+     */
 	public function create()
 	{
 		$return = parent::create();
@@ -1853,9 +1894,8 @@ class Informationsystem_Item_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
 	public function reviewsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
@@ -1991,13 +2031,13 @@ class Informationsystem_Item_Model extends Core_Entity
 		}
 	}
 
-	/**
-	 * Get property value for SEO-templates
-	 * @param int $property_id Property ID
-	 * @param string $format string format, e.g. '%s: %s'. %1$s - Property Name, %2$s - List of Values
-	 * @param int $property_id Property ID
-	 * @return string
-	 */
+    /**
+     * Get property value for SEO-templates
+     * @param int $property_id Property ID
+     * @param string $format string format, e.g. '%s: %s'. %1$s - Property Name, %2$s - List of Values
+     * @param string $separator
+     * @return string
+     */
 	public function propertyValue($property_id, $format = '%2$s', $separator = ', ')
 	{
 		$oProperty = Core_Entity::factory('Property', $property_id);

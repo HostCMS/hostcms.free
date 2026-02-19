@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Tag
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Tag_Dir_Model extends Core_Entity
 {
@@ -109,8 +109,8 @@ class Tag_Dir_Model extends Core_Entity
 	/**
 	 * Get dir by name
 	 * @param string $name
-	 * @return Tag_Dir_Model
-	 */
+	 * @return Core_Entity
+     */
 	public function getByName($name)
 	{
 		$this->queryBuilder()

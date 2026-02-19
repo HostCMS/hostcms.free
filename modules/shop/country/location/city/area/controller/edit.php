@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Country_Location_City_Area_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -16,8 +16,8 @@ class Shop_Country_Location_City_Area_Controller_Edit extends Admin_Form_Action_
 	 * Load object's fields when object has been set
 	 * После установки объекта загружаются данные о его полях
 	 * @param object $object
-	 * @return Shop_Country_Controller_Edit
-	 */
+	 * @return Shop_Country_Location_City_Area_Controller_Edit
+     */
 	public function setObject($object)
 	{
 		if (!$object->id)
@@ -28,11 +28,12 @@ class Shop_Country_Location_City_Area_Controller_Edit extends Admin_Form_Action_
 		return parent::setObject($object);
 	}
 
-	/**
-	 * Prepare backend item's edit form
-	 *
-	 * @return self
-	 */
+    /**
+     * Prepare backend item's edit form
+     *
+     * @return self
+     * @throws Core_Exception
+     */
 	protected function _prepareForm()
 	{
 		parent::_prepareForm();

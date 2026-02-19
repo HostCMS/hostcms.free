@@ -6,7 +6,7 @@
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'save' => 'Save',
@@ -167,5 +167,7 @@ return array(
 	'disable_all' => 'Disable all',
 
 	'upload_files' => 'Upload files',
-	'rename' => 'Rename'
+	'rename' => 'Rename',
+
+	'form_locked' => 'Form locked %s by user <b>%s</b>.'
 );

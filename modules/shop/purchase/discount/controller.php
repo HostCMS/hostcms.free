@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 {
@@ -114,120 +114,137 @@ class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 
 		$oShop_Controller = Shop_Controller::instance();
 
+		$aSiteuser_Group_IDs = array(0);
+
+		if (Core::moduleIsActive('siteuser'))
+		{
+			$oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
+			if ($oSiteuser)
+			{
+				$aSiteuser_Groups = $oSiteuser->Siteuser_Groups->findAll();
+				foreach ($aSiteuser_Groups as $oSiteuser_Group)
+				{
+					$aSiteuser_Group_IDs[] = $oSiteuser_Group->id;
+				}
+			}
+		}
+
 		// Извлекаем все активные скидки, доступные для текущей даты
 		$oShop_Purchase_Discounts = $this->_shop->Shop_Purchase_Discounts;
 		$oShop_Purchase_Discounts->queryBuilder()
-			->where('active', '=', 1)
-			//->where('coupon', '=', 0)
-			->where('start_datetime', '<=', $this->dateTime)
-			->where('end_datetime', '>=', $this->dateTime);
+			->select('shop_purchase_discounts.*')
+			->join('shop_purchase_discount_siteuser_groups', 'shop_purchase_discount_siteuser_groups.shop_purchase_discount_id', '=', 'shop_purchase_discounts.id')
+			->where('shop_purchase_discounts.active', '=', 1)
+			//->where('shop_purchase_discounts.coupon', '=', 0)
+			->where('shop_purchase_discounts.start_datetime', '<=', $this->dateTime)
+			->where('shop_purchase_discounts.end_datetime', '>=', $this->dateTime)
+			->where('shop_purchase_discount_siteuser_groups.siteuser_group_id', 'IN', $aSiteuser_Group_IDs);
 
 		$aShop_Purchase_Discounts = $oShop_Purchase_Discounts->findAll();
 
 		foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
 		{
-			// Определяем коэффициент пересчета
-			$fCoefficient = $oShop_Purchase_Discount->Shop_Currency->id > 0 && $this->_shop->Shop_Currency->id > 0
-				? $oShop_Controller->getCurrencyCoefficientInShopCurrency(
-					$oShop_Purchase_Discount->Shop_Currency, $this->_shop->Shop_Currency
+			if (!$oShop_Purchase_Discount->coupon || in_array($oShop_Purchase_Discount->id, $aShop_Purchase_Discount_IDs))
+			{
+				// Определяем коэффициент пересчета
+				$fCoefficient = $oShop_Purchase_Discount->Shop_Currency->id > 0 && $this->_shop->Shop_Currency->id > 0
+					? $oShop_Controller->getCurrencyCoefficientInShopCurrency(
+						$oShop_Purchase_Discount->Shop_Currency, $this->_shop->Shop_Currency
+					)
+					: 0;
+
+				// Нижний предел суммы
+				$min_amount = $fCoefficient * $oShop_Purchase_Discount->min_amount;
+
+				// Верхний предел суммы
+				$max_amount = $fCoefficient * $oShop_Purchase_Discount->max_amount;
+
+				$bCheckAmount = $amount >= $min_amount
+					&& ($amount < $max_amount || $max_amount == 0);
+
+				$bCheckQuantity = $quantity >= $oShop_Purchase_Discount->min_count
+					&& ($quantity < $oShop_Purchase_Discount->max_count || $oShop_Purchase_Discount->max_count == 0);
+
+				$bCheckWeight = $weight >= $oShop_Purchase_Discount->min_weight
+					&& ($weight < $oShop_Purchase_Discount->max_weight || $oShop_Purchase_Discount->max_weight == 0);
+
+				$bCheckOrdersSum = FALSE;
+
+				if ($oShop_Purchase_Discount->mode == 2 && $this->siteuserId)
+				{
+					$oSiteuser = Core_Entity::factory('Siteuser')->find($this->siteuserId);
+					if (!is_null($oSiteuser->id))
+					{
+						$fSum = 0.0;
+
+						$oShop_Orders = $oSiteuser->Shop_Orders->getAllBypaid(1);
+						foreach ($oShop_Orders as $oShop_Order)
+						{
+							$fSum += $oShop_Order->getAmount();
+						}
+
+						$bCheckOrdersSum = $fSum >= $min_amount
+							&& ($fSum < $max_amount || $max_amount == 0)
+							&& (!$oShop_Purchase_Discount->coupon || in_array($oShop_Purchase_Discount->id, $aShop_Purchase_Discount_IDs));
+					}
+				}
+
+				if (
+					// И
+					$oShop_Purchase_Discount->mode == 0 && $bCheckAmount && $bCheckQuantity && $bCheckWeight
+					// ИЛИ
+					|| $oShop_Purchase_Discount->mode == 1 && ($bCheckAmount || $bCheckQuantity || $bCheckWeight)
+					// Накопленная сумма
+					|| $oShop_Purchase_Discount->mode == 2 && $bCheckOrdersSum
 				)
-				: 0;
-
-			// Нижний предел суммы
-			$min_amount = $fCoefficient * $oShop_Purchase_Discount->min_amount;
-
-			// Верхний предел суммы
-			$max_amount = $fCoefficient * $oShop_Purchase_Discount->max_amount;
-
-			$bCheckAmount = $amount >= $min_amount
-				&& ($amount < $max_amount || $max_amount == 0)
-				&& (!$oShop_Purchase_Discount->coupon || in_array($oShop_Purchase_Discount->id, $aShop_Purchase_Discount_IDs));
-
-			$bCheckQuantity = $quantity >= $oShop_Purchase_Discount->min_count
-				&& ($quantity < $oShop_Purchase_Discount->max_count || $oShop_Purchase_Discount->max_count == 0)
-				&& (!$oShop_Purchase_Discount->coupon || in_array($oShop_Purchase_Discount->id, $aShop_Purchase_Discount_IDs));
-
-			$bCheckWeight = $weight >= $oShop_Purchase_Discount->min_weight
-				&& ($weight < $oShop_Purchase_Discount->max_weight || $oShop_Purchase_Discount->max_weight == 0)
-				&& (!$oShop_Purchase_Discount->coupon || in_array($oShop_Purchase_Discount->id, $aShop_Purchase_Discount_IDs))
-				;
-
-			$bCheckOrdersSum = FALSE;
-
-			if ($oShop_Purchase_Discount->mode == 2 && $this->siteuserId)
-			{
-				$oSiteuser = Core_Entity::factory('Siteuser')->find($this->siteuserId);
-				if (!is_null($oSiteuser->id))
 				{
-					$fSum = 0.0;
+					$fTmpAmount = $amount;
 
-					$oShop_Orders = $oSiteuser->Shop_Orders->getAllBypaid(1);
-					foreach ($oShop_Orders as $oShop_Order)
+					// Скидка на N-й товар
+					if ($oShop_Purchase_Discount->position)
 					{
-						$fSum += $oShop_Order->getAmount();
+						// В заказе товаров достаточно для применения скидки на N-й
+						if (count($this->prices) >= $oShop_Purchase_Discount->position && isset($aPrices[$oShop_Purchase_Discount->position - 1]))
+						{
+							$fTmpAmount = $aPrices[$oShop_Purchase_Discount->position - 1];
+						}
+						else
+						{
+							// Товара недостаточно для применения этой скидки
+							continue;
+						}
 					}
 
-					$bCheckOrdersSum = $fSum >= $min_amount
-						&& ($fSum < $max_amount || $max_amount == 0)
-						&& (!$oShop_Purchase_Discount->coupon || in_array($oShop_Purchase_Discount->id, $aShop_Purchase_Discount_IDs));
-				}
-			}
+					// Учитываем перерасчет суммы скидки в валюту магазина
+					/*$discount = $fCoefficient * ($oShop_Purchase_Discount->type == 0
+						// Процент
+						? $fTmpAmount * $oShop_Purchase_Discount->value / 100
+						// Фиксированная скидка
+						: ($oShop_Purchase_Discount->value <= $fTmpAmount
+							? $oShop_Purchase_Discount->value
+							: $fTmpAmount
+							)
+						);*/
 
-			if (
-				// И
-				$oShop_Purchase_Discount->mode == 0 && $bCheckAmount && $bCheckQuantity && $bCheckWeight
-				// ИЛИ
-				|| $oShop_Purchase_Discount->mode == 1 && ($bCheckAmount || $bCheckQuantity || $bCheckWeight)
-				// Накопленная сумма
-				|| $oShop_Purchase_Discount->mode == 2 && $bCheckOrdersSum
-			)
-			{
-				$fTmpAmount = $amount;
-
-				// Скидка на N-й товар
-				if ($oShop_Purchase_Discount->position)
-				{
-					// В заказе товаров достаточно для применения скидки на N-й
-					if (count($this->prices) >= $oShop_Purchase_Discount->position && isset($aPrices[$oShop_Purchase_Discount->position - 1]))
-					{
-						$fTmpAmount = $aPrices[$oShop_Purchase_Discount->position - 1];
-					}
-					else
-					{
-						// Товара недостаточно для применения этой скидки
-						continue;
-					}
-				}
-
-				// Учитываем перерасчет суммы скидки в валюту магазина
-				/*$discount = $fCoefficient * ($oShop_Purchase_Discount->type == 0
 					// Процент
-					? $fTmpAmount * $oShop_Purchase_Discount->value / 100
-					// Фиксированная скидка
-					: ($oShop_Purchase_Discount->value <= $fTmpAmount
-						? $oShop_Purchase_Discount->value
-						: $fTmpAmount
-						)
-					);*/
+					if ($oShop_Purchase_Discount->type == 0)
+					{
+						$discount = $fCoefficient * ($fTmpAmount * $oShop_Purchase_Discount->value / 100);
 
-				// Процент
-				if ($oShop_Purchase_Discount->type == 0)
-				{
-					$discount = $fCoefficient * ($fTmpAmount * $oShop_Purchase_Discount->value / 100);
+						$oShop_Purchase_Discount->max_discount > 0 && $discount > $oShop_Purchase_Discount->max_discount
+							&& $discount = $oShop_Purchase_Discount->max_discount;
+					}
+					else // Фиксированная скидка
+					{
+						$discount = $fCoefficient * ($oShop_Purchase_Discount->value <= $fTmpAmount
+							? $oShop_Purchase_Discount->value
+							: $fTmpAmount);
+					}
 
-					$oShop_Purchase_Discount->max_discount > 0 && $discount > $oShop_Purchase_Discount->max_discount
-						&& $discount = $oShop_Purchase_Discount->max_discount;
+					$discount = $oShop_Controller->round($discount);
+
+					$this->_aReturn[] = $oShop_Purchase_Discount->discountAmount($discount);
 				}
-				else // Фиксированная скидка
-				{
-					$discount = $fCoefficient * ($oShop_Purchase_Discount->value <= $fTmpAmount
-						? $oShop_Purchase_Discount->value
-						: $fTmpAmount);
-				}
-
-				$discount = $oShop_Controller->round($discount);
-
-				$this->_aReturn[] = $oShop_Purchase_Discount->discountAmount($discount);
 			}
 		}
 

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Comment
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Comment_Model extends Core_Entity
 {
@@ -124,11 +124,11 @@ class Comment_Model extends Core_Entity
 	 */
 	protected $_showXmlVotes = FALSE;
 
-	/**
-	 * Add votes XML to item
-	 * @param boolean $showXmlSiteuser mode
-	 * @return self
-	 */
+    /**
+     * Add votes XML to item
+     * @param bool $showXmlVotes
+     * @return self
+     */
 	public function showXmlVotes($showXmlVotes = TRUE)
 	{
 		$this->_showXmlVotes = $showXmlVotes;
@@ -220,7 +220,7 @@ class Comment_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -282,7 +282,7 @@ class Comment_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -617,6 +617,8 @@ class Comment_Model extends Core_Entity
 			}
 
 			Core_Event::notify($this->_modelName . '.onBeforeAddPropertyValues', $this, array($aProperty_Values));
+			$eventResult = Core_Event::getLastReturn();
+			is_array($eventResult) && $aProperty_Values = $eventResult;
 
 			$aListIDs = array();
 

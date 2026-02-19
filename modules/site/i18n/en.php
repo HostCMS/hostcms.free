@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Site
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Sites',
@@ -100,6 +100,7 @@ return array(
 	'csp-header-media-src' => 'Media',
 	'csp-header-object-src' => 'Object',
 	'csp-header-frame-src' => 'Frame',
+	'csp-header-frame-ancestors' => 'Frame-Ancestors',
 
 	'none' => 'Deny all access',
 	'all' => 'Wildcard, allows any URL except data: blob: filesystem: schemes.',

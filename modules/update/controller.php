@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Update
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Update_Controller extends Core_Servant_Properties
 {
@@ -71,6 +71,10 @@ class Update_Controller extends Core_Servant_Properties
 		return $this->getPath() . '/updatelist.xml';
 	}
 
+	/**
+	 * Delete update .xml file
+	 * @return self
+	 */
 	public function deleteUpdateFile()
 	{
 		$filePath = $this->getFilePath();
@@ -275,12 +279,13 @@ class Update_Controller extends Core_Servant_Properties
 		return $this;
 	}
 
-	/**
-	 * Загрузка файла для обновления $update_key_id
-	 *
-	 * @param int $update_id update ID
-	 * @return string
-	 */
+    /**
+     * Загрузка файла для обновления $update_key_id
+     *
+     * @param $update_key_id
+     * @return string
+     * @throws Core_Exception
+     */
 	public function getUpdate($update_key_id)
 	{
 		$url = 'https://' . $this->update_server . "/hostcmsupdate/?action=get_update&domain=".rawurlencode($this->domain) .

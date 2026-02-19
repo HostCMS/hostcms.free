@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Ipaddress
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Ipaddress_Visitor_Model extends Core_Entity
 {
@@ -88,11 +88,8 @@ class Ipaddress_Visitor_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function ipBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function ipBadge()
 	{
 		Ipaddress_Controller::instance()->isBlocked($this->ip, FALSE) && Core_Html_Entity::factory('I')
 			->class('fa-solid fa-ban darkorange')
@@ -118,7 +115,6 @@ class Ipaddress_Visitor_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @return string
 	 */
 	public function ipaddress_visitor_filter_idBackend()
 	{
@@ -170,8 +166,8 @@ class Ipaddress_Visitor_Model extends Core_Entity
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return self
-	 * @hostcms-event ipaddress_visitor.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event ipaddress_visitor.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

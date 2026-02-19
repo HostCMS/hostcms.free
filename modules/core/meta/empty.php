@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Meta_Empty
 {
@@ -18,6 +18,11 @@ class Core_Meta_Empty
 	}
 
 	public function __get($name)
+	{
+		return '';
+	}
+
+	public function __call($name, $params)
 	{
 		return '';
 	}

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Type_Load_Select_Options extends Admin_Form_Action_Controller
 {
@@ -80,6 +80,15 @@ class Admin_Form_Action_Controller_Type_Load_Select_Options extends Admin_Form_A
 		$this->_model = $model;
 		return $this;
 	}
+	
+	/**
+	 * Get model
+	 * @return Core_Entity
+	 */
+	public function getModel()
+	{
+		return $this->_model;
+	}
 
 	/**
 	 * Array of objects
@@ -141,8 +150,8 @@ class Admin_Form_Action_Controller_Type_Load_Select_Options extends Admin_Form_A
 
 	/**
 	 * Get count of objects
-	 * @return self
-	 */
+	 * @return int|null
+     */
 	protected function _getCount()
 	{
 		return NULL;

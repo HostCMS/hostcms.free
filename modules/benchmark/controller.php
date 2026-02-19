@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Benchmark
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Benchmark_Controller
 {
@@ -279,7 +279,16 @@ class Benchmark_Controller
 		{
 			$startTime = Core::getmicrotime();
 
-			$sFileContent = file_get_contents(self::$aConfig['benchmark_file_path']);
+			$context = stream_context_create(array(
+				'http' => array(
+					'method' => 'GET',
+					'header' => 'Accept-language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3\r\n' .
+						'Accept-Charset: utf-8,*;q=0.9\r\n' .
+						'Accept: text/html,application/xml,application/xhtml+xml;q=0.9,text/plain;q=0.8,*/*;q=0.7\r\n' .
+						'User-Agent: Mozilla/5.0 (compatible; HostCMS/7.x; +https://www.hostcms.ru)\r\n'
+				)
+			));
+			$sFileContent = file_get_contents(self::$aConfig['benchmark_file_path'], FALSE, $context);
 
 			$fQueryTime = Core::getmicrotime() - $startTime;
 

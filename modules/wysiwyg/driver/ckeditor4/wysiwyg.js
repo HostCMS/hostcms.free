@@ -249,6 +249,43 @@ class wysiwyg {
 			contentsCss: aCss
 		}, settings.wysiwygConfig));
 	}
+
+	static frontendSettingsRow($parent)
+	{
+		$parent.ckeditor({
+			versionCheck: false,
+			language: backendLng,
+			removeButtons: 'Source,Save,NewPage,ExportPdf,Preview,Print,Templates,PasteText,PasteFromWord,Find,Replace,SelectAll,Scayt,Form,Checkbox,Radio,TextField,Textarea,Select,Button,ImageButton,HiddenField,Subscript,Superscript,CopyFormatting,Outdent,Indent,Blockquote,CreateDiv,BidiLtr,BidiRtl,Language,Link,Unlink,Anchor,Image,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe,Format,Styles,Font,FontSize,TextColor,BGColor,Maximize,ShowBlocks,About',
+			toolbarGroups: [
+				{ name: 'document', groups: [ 'mode', 'document', 'doctools' ] },
+				{ name: 'clipboard', groups: [ 'clipboard', 'undo' ] },
+				{ name: 'editing', groups: [ 'find', 'selection', 'spellchecker', 'editing' ] },
+				{ name: 'forms', groups: [ 'forms' ] },
+				{ name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ] },
+				{ name: 'paragraph', groups: [ 'list', 'indent', 'blocks', 'align', 'bidi', 'paragraph' ] },
+				{ name: 'links', groups: [ 'links' ] },
+				{ name: 'insert', groups: [ 'insert' ] },
+				'/',
+				{ name: 'styles', groups: [ 'styles' ] },
+				{ name: 'colors', groups: [ 'colors' ] },
+				{ name: 'tools', groups: [ 'tools' ] },
+				{ name: 'others', groups: [ 'others' ] },
+				{ name: 'about', groups: [ 'about' ] }
+			],
+			on: {
+				instanceReady: function(evt) {
+					var editor = evt.editor;
+
+					editor.on('blur', function (e) {
+						e.stopImmediatePropagation();
+						editor.destroy();
+						$parent.css('visibility', '');
+						$parent.removeClass('editing');
+					});
+				}
+			}
+		});
+	}
 }
 
 // https://ckeditor.com/docs/ckeditor4/latest/guide/dev_file_browser_api.html

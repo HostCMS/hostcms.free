@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -16,13 +16,13 @@ $sAdminFormAction = '/{admin}/shop/filter/seo/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
-$shop_id = intval(Core_Array::getGet('shop_id'));
-
-$shop_group_id = intval(Core_Array::getGet('shop_group_id', 0));
+$shop_id = Core_Array::getGet('shop_id', 0, 'int');
+$shop_group_id = Core_Array::getGet('shop_group_id', 0, 'int');
 
 $oShop = Core_Entity::factory('Shop')->find($shop_id);
 
-$shop_filter_seo_dir_id = Core_Array::getGet('shop_filter_seo_dir_id', 0);
+$shop_filter_seo_dir_id = Core_Array::getGet('shop_filter_seo_dir_id', 0, 'int');
+$oShop_Filter_Seo_Dir = Core_Entity::factory('Shop_Filter_Seo_Dir')->find($shop_filter_seo_dir_id);
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
@@ -32,6 +32,75 @@ $oAdmin_Form_Controller
 	->path($sAdminFormAction)
 	->title(Core::_('Shop_Filter_Seo.title'))
 	->pageTitle(Core::_('Shop_Filter_Seo.title'));
+
+if (!is_null(Core_Array::getGet('autocomplete'))
+	&& !is_null(Core_Array::getGet('show_move_dirs'))
+	&& !is_null(Core_Array::getGet('queryString'))
+	&& Core_Array::getGet('entity_id')
+)
+{
+	$sQuery = trim(Core_DataBase::instance()->escapeLike(Core_Str::stripTags(strval(Core_Array::getGet('queryString')))));
+	$entity_id = intval(Core_Array::getGet('entity_id'));
+	$mode = intval(Core_Array::getGet('mode'));
+
+	$oShop = Core_Entity::factory('Shop', $entity_id);
+
+	$aExclude = strlen(Core_Array::getGet('exclude'))
+		? json_decode(Core_Array::getGet('exclude'), TRUE)
+		: array();
+
+	$aJSON = array();
+
+	if (strlen($sQuery))
+	{
+		$aJSON[0] = array(
+			'id' => 0,
+			'label' => Core::_('Shop_Filter_Seo.root') . ' [0]'
+		);
+
+		$oShop_Filter_Seo_Dirs = $oShop->Shop_Filter_Seo_Dirs;
+		$oShop_Filter_Seo_Dirs->queryBuilder()
+			->limit(Core::$mainConfig['autocompleteItems']);
+
+		switch ($mode)
+		{
+			// Вхождение
+			case 0:
+			default:
+				$oShop_Filter_Seo_Dirs->queryBuilder()->where('shop_filter_seo_dirs.name', 'LIKE', '%' . str_replace(' ', '%', $sQuery) . '%');
+			break;
+			// Вхождение с начала
+			case 1:
+				$oShop_Filter_Seo_Dirs->queryBuilder()->where('shop_filter_seo_dirs.name', 'LIKE', $sQuery . '%');
+			break;
+			// Вхождение с конца
+			case 2:
+				$oShop_Filter_Seo_Dirs->queryBuilder()->where('shop_filter_seo_dirs.name', 'LIKE', '%' . $sQuery);
+			break;
+			// Точное вхождение
+			case 3:
+				$oShop_Filter_Seo_Dirs->queryBuilder()->where('shop_filter_seo_dirs.name', '=', $sQuery);
+			break;
+		}
+
+		count($aExclude) && $oShop_Filter_Seo_Dirs->queryBuilder()
+			->where('shop_filter_seo_dirs.id', 'NOT IN', $aExclude);
+
+		$aShop_Filter_Seo_Dirs = $oShop_Filter_Seo_Dirs->findAll();
+
+		foreach ($aShop_Filter_Seo_Dirs as $oShop_Filter_Seo_Dir)
+		{
+			$sParents = $oShop_Filter_Seo_Dir->groupPathWithSeparator();
+
+			$aJSON[] = array(
+				'id' => $oShop_Filter_Seo_Dir->id,
+				'label' => $sParents . ' [' . $oShop_Filter_Seo_Dir->id . ']'
+			);
+		}
+	}
+
+	Core::showJson($aJSON);
+}
 
 $aAvailableProperties = array(0, 11, 1, 7, 8, 9);
 Core::moduleIsActive('list') && $aAvailableProperties[] = 3;
@@ -261,6 +330,28 @@ if (Core_Array::getPost('add_property') && Core_Array::getPost('property_id'))
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
+// Глобальный поиск
+$additionalParams = 'shop_id=' . $shop_id . '&shop_group_id=' . $shop_group_id;
+
+$sGlobalSearch = Core_Array::getGet('globalSearch', '', 'trim');
+
+$oAdmin_Form_Controller->addEntity(
+	Admin_Form_Entity::factory('Code')
+		->html('
+			<div class="row search-field margin-bottom-20">
+				<div class="col-xs-12">
+					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
+						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
+						<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
+						<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '"><i class="fa-solid fa-magnifying-glass fa-fw"></i></button>
+					</form>
+				</div>
+			</div>
+		')
+);
+
+$sGlobalSearch = str_replace(' ', '%', Core_DataBase::instance()->escapeLike($sGlobalSearch));
+
 // Элементы меню
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
@@ -376,17 +467,17 @@ $oAdmin_Form_Entity_Breadcrumbs->add(Admin_Form_Entity::factory('Breadcrumb')
 
 if ($shop_filter_seo_dir_id)
 {
-	$oShop_Filter_Seo_Dir = Core_Entity::factory('Shop_Filter_Seo_Dir', $shop_filter_seo_dir_id);
+	$oShop_Filter_Seo_Dir_Breadcrumbs = Core_Entity::factory('Shop_Filter_Seo_Dir', $shop_filter_seo_dir_id);
 
 	$aBreadcrumbs = array();
 
 	do
 	{
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
-			->name($oShop_Filter_Seo_Dir->name)
-			->href($oAdmin_Form_Controller->getAdminLoadHref($sAdminFormAction, NULL, NULL, "shop_id={$shop_id}&shop_group_id={$shop_group_id}&shop_filter_seo_dir_id={$oShop_Filter_Seo_Dir->id}"))
-			->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sAdminFormAction, NULL, NULL, "shop_id={$shop_id}&shop_group_id={$shop_group_id}&shop_filter_seo_dir_id={$oShop_Filter_Seo_Dir->id}"));
-	} while ($oShop_Filter_Seo_Dir = $oShop_Filter_Seo_Dir->getParent());
+			->name($oShop_Filter_Seo_Dir_Breadcrumbs->name)
+			->href($oAdmin_Form_Controller->getAdminLoadHref($sAdminFormAction, NULL, NULL, "shop_id={$shop_id}&shop_group_id={$shop_group_id}&shop_filter_seo_dir_id={$oShop_Filter_Seo_Dir_Breadcrumbs->id}"))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sAdminFormAction, NULL, NULL, "shop_id={$shop_id}&shop_group_id={$shop_group_id}&shop_filter_seo_dir_id={$oShop_Filter_Seo_Dir_Breadcrumbs->id}"));
+	} while ($oShop_Filter_Seo_Dir_Breadcrumbs = $oShop_Filter_Seo_Dir_Breadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -442,12 +533,87 @@ if ($oAdminFormActionDeleteCondition && $oAdmin_Form_Controller->getAction() == 
 	$oAdmin_Form_Controller->addAction($Shop_Filter_Seo_Property_Controller_Delete);
 }
 
-$oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(Core_Entity::factory('Shop_Filter_Seo_Dir'));
-$oAdmin_Form_Dataset->changeField('active', 'type', 1);
-$oAdmin_Form_Dataset->changeField('shop_producer_id', 'type', 1);
-$oAdmin_Form_Dataset->addCondition(array('where' => array('shop_id', '=', $shop_id)));
-$oAdmin_Form_Dataset->addCondition(array('where' => array('parent_id', '=', $shop_filter_seo_dir_id )));
-$oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
+// Действие "Перенести"
+$oAdminFormActionMove = $oAdmin_Form->Admin_Form_Actions->getByName('move');
+
+if ($oAdminFormActionMove && $oAdmin_Form_Controller->getAction() == 'move')
+{
+	$Admin_Form_Action_Controller_Type_Move = Admin_Form_Action_Controller::factory(
+		'Admin_Form_Action_Controller_Type_Move', $oAdminFormActionMove
+	);
+
+	$Admin_Form_Action_Controller_Type_Move
+		->title(Core::_('Shop_Filter_Seo.move_dirs_title'))
+		->selectCaption(Core::_('Shop_Filter_Seo.move_items_dirs'))
+		->value($oShop_Filter_Seo_Dir->id)
+		->autocompletePath(Admin_Form_Controller::correctBackendPath('/{admin}/shop/filter/seo/index.php?autocomplete=1&show_move_dirs=1'))
+		->autocompleteEntityId($oShop->id);
+
+	$iCount = $oShop->Shop_Filter_Seo_Dirs->getCount();
+
+	if ($iCount < Core::$mainConfig['switchSelectToAutocomplete'])
+	{
+		$aExclude = array();
+
+		$aChecked = $oAdmin_Form_Controller->getChecked();
+
+		foreach ($aChecked as $datasetKey => $checkedItems)
+		{
+			// Exclude just dirs
+			if ($datasetKey == 0)
+			{
+				foreach ($checkedItems as $key => $value)
+				{
+					$aExclude[] = $key;
+				}
+			}
+		}
+
+		$Shop_Filter_Seo_Controller_Edit = new Shop_Filter_Seo_Controller_Edit($oAdminFormActionMove);
+
+		$Admin_Form_Action_Controller_Type_Move
+			// Список директорий генерируется другим контроллером
+			->selectOptions(array(' … ') + $Shop_Filter_Seo_Controller_Edit->fillGroupList($oShop->id, 0, $aExclude));
+	}
+	else
+	{
+		$Admin_Form_Action_Controller_Type_Move->autocomplete(TRUE);
+	}
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($Admin_Form_Action_Controller_Type_Move);
+}
+
+$oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
+	Core_Entity::factory('Shop_Filter_Seo_Dir')
+);
+
+$oAdmin_Form_Dataset
+	->addCondition(array('where' => array('shop_filter_seo_dirs.shop_id', '=', $shop_id)))
+	->changeField('active', 'type', 1)
+	->changeField('shop_producer_id', 'type', 1);
+
+if (strlen($sGlobalSearch))
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('open' => array()));
+
+	is_numeric($sGlobalSearch) && $oAdmin_Form_Dataset
+			->addCondition(array('where' => array('shop_filter_seo_dirs.id', '=', intval($sGlobalSearch))))
+			->addCondition(array('setOr' => array()));
+
+	$oAdmin_Form_Dataset
+			->addCondition(array('where' => array('shop_filter_seo_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
+}
+else
+{
+	$oAdmin_Form_Dataset->addCondition(array('where' => array('shop_filter_seo_dirs.parent_id', '=', $shop_filter_seo_dir_id )));
+}
+
+$oAdmin_Form_Controller->addDataset(
+	$oAdmin_Form_Dataset
+);
 
 // Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
@@ -458,6 +624,22 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 $oUser = Core_Auth::getCurrentUser();
 !$oUser->superuser && $oUser->only_access_my_own
 	&& $oAdmin_Form_Dataset->addUserConditions();
+
+$oAdmin_Form_Dataset->addCondition(array('where' => array('shop_filter_seos.shop_id', '=', $oShop->id)));
+
+if (strlen($sGlobalSearch))
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('open' => array()))
+			->addCondition(array('where' => array('shop_filter_seos.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('shop_filter_seos.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
+}
+else
+{
+	$oAdmin_Form_Dataset->addCondition(array('where' => array('shop_filter_seos.shop_filter_seo_dir_id', '=', $shop_filter_seo_dir_id)));
+}
 
 // Фильтр по группе
 if (isset($oAdmin_Form_Controller->request['admin_form_filter_1556']) && $oAdmin_Form_Controller->request['admin_form_filter_1556'] != '')
@@ -475,10 +657,6 @@ if (isset($oAdmin_Form_Controller->request['admin_form_filter_1556']) && $oAdmin
 
 	$oAdmin_Form_Controller->request['admin_form_filter_1556'] = NULL;
 }
-
-$oAdmin_Form_Dataset
-	->addCondition(array('where' => array('shop_filter_seos.shop_id', '=', $oShop->id)))
-	->addCondition(array('where' => array('shop_filter_seos.shop_filter_seo_dir_id', '=', $shop_filter_seo_dir_id)));
 
 // Список значений для фильтра и поля
 $oAdmin_Form_Dataset

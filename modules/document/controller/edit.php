@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Document
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -81,6 +81,7 @@ class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->caption(Core::_('Document.text'))
 					->name('text')
 					->wysiwyg(Core::moduleIsActive('wysiwyg'))
+					->data('ai_prompt_default', Core::_('Document.ai_prompt_default'))
 					->divAttr(array('class' => 'form-group col-xs-12'))
 					->template_id($this->_object->template_id);
 

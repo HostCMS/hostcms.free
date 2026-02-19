@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Xsl
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Xsl_Processor_Observer
 {
@@ -78,12 +78,33 @@ class Xsl_Processor_Observer
 					->value($object->formatXml($object->getXml()))
 					//->onclick('$(this).select()')
 					->execute();
+
+			Core_Html_Entity::factory('Div')
+				->style('overflow-y: scroll')
+				->class('dynamicXML-output selectable')
+				->tabindex(0)
+				->execute();
+
+			?><script>
+				$(document).ready(function () {
+					var $textarea = hQuery("#xmlWindow<?php echo $iCount?> > textarea"),
+						xml = $textarea.val();
+
+					try {
+						hQuery('#xmlWindow<?php echo $iCount?> > .dynamicXML-output').simpleXML({ xmlString: xml });
+						$textarea.remove();
+					} catch (e) {
+						console.log("Unable to process XML: " + e);
+					}
+				});
+			</script><?php
+
 			$form_content = ob_get_clean();
 
 			$sTitle = Core::_('Xsl.panel_edit_xml', $oXsl->name);
 			$oXslSubPanel->add(
 				Core_Html_Entity::factory('A')
-					->onclick("hQuery.showWindow('xmlWindow{$iCount}', '" . Core_Str::escapeJavascriptVariable($form_content) . "', {width: 600, height: 450, title: '{$sTitle}'})")
+					->onclick("hQuery.showWindow('xmlWindow{$iCount}', '" . Core_Str::escapeJavascriptVariable($form_content) . "', { width: 600, height: 450, title: '{$sTitle}' }); hQuery('#xmlWindow{$iCount} > .dynamicXML-output').css('height', hQuery('#xmlWindow{$iCount}').height())")
 					->add(
 						Core_Html_Entity::factory('I')
 							->id('hostcmsShowXml')

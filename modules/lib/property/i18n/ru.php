@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Lib
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Свойства типовой динамической страницы',
@@ -34,6 +34,7 @@ return array(
 	'lib_property_type_9' => 'Визуальный редактор',
 	'lib_property_type_10' => 'Составной',
 	'lib_property_type_11' => 'Иконка',
+	'lib_property_type_12' => 'Цвет',
 	'value' => 'Значение',
 	'multivalue' => 'Множественные значения',
 	'copy_from' => ' [Копия от %s]' ,

@@ -37,7 +37,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Producer_Controller_Show extends Core_Controller
 {
@@ -73,7 +73,7 @@ class Shop_Producer_Controller_Show extends Core_Controller
 
 	/**
 	 * Shop producer dirs object
-	 * @var Shop_Group_Model
+	 * @var Shop_Producer_Dir_Model
 	 */
 	protected $_Shop_Producer_Dirs = NULL;
 
@@ -171,8 +171,8 @@ class Shop_Producer_Controller_Show extends Core_Controller
 
 	/**
 	 * Get producer dirs
-	 * @return array
-	 */
+	 * @return Shop_Producer_Dir_Model|null
+     */
 	public function shopProducerDirs()
 	{
 		return $this->_Shop_Producer_Dirs;

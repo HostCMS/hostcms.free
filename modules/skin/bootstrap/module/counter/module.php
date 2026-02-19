@@ -6,7 +6,7 @@
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Counter_Module extends Counter_Module
 {
@@ -32,8 +32,8 @@ class Skin_Bootstrap_Module_Counter_Module extends Counter_Module
 	 * Show admin widget
 	 * @param int $type
 	 * @param boolean $ajax
-	 * @return self
-	 */
+	 * @return true
+     */
 	public function adminPage($type = 0, $ajax = FALSE)
 	{
 		$oModule = Core_Entity::factory('Module')->getByPath($this->getModuleName());

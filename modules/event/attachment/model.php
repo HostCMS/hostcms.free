@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Events
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Event_Attachment_Model extends Core_Entity
 {
@@ -110,8 +110,8 @@ class Event_Attachment_Model extends Core_Entity
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return self
-	 * @hostcms-event event_attachment.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event event_attachment.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

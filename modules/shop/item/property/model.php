@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Item_Property_Model extends Core_Entity
 {
@@ -48,8 +48,8 @@ class Shop_Item_Property_Model extends Core_Entity
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return self
-	 * @hostcms-event shop_item_property.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event shop_item_property.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

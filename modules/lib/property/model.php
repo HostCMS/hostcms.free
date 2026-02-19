@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Lib
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Lib_Property_Model extends Core_Entity
 {
@@ -36,6 +36,7 @@ class Lib_Property_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_preloadValues = array(
+		'default_value' => '',
 		'sorting' => 0
 	);
 
@@ -108,11 +109,8 @@ class Lib_Property_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function valuesBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function valuesBadge()
 	{
 		$count = $this->Lib_Properties->getCount(FALSE);
 		$count && Core_Html_Entity::factory('Span')
@@ -169,8 +167,8 @@ class Lib_Property_Model extends Core_Entity
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return self
-	 * @hostcms-event lib_property.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event lib_property.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

@@ -64,4 +64,6 @@ return array(
 	'shortcut_success' => "Group shortcut added successfully",
 	'seo_group_h1_template' => 'H1 Template',
 	'seo_item_h1_template' => 'H1 Template',
+	'apply_shortcut_parent_group' => 'Apply to parent shortcut groups',
+	'change_attributes_success' => 'Attributes changed successfully!',
 );

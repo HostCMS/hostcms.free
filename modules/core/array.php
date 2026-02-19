@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Array
 {
@@ -35,19 +35,20 @@ class Core_Array
 	static public function get($array, $key, $defaultValue = NULL, $filter = NULL)
 	{
 		return self::_filter(
-			is_array($array) && array_key_exists($key, $array)
+			is_array($array) && !is_null($key) && array_key_exists($key, $array)
 				? $array[$key]
 				: $defaultValue,
 			$filter
 		);
 	}
 
-	/**
-	 * Filter Value
-	 * @param mixed $value
-	 * @param string|array|NULL $filter filter or array of filters, e.g. 'str'|'string'|'strval', 'trim', 'stripTags'|'strip_tags', 'int'|'integer'|'intval', 'filterVarInt', 'float'|'floatval', 'filterVarFloat', 'bool'|'boolean'|'boolval', 'filterVarBoolean', 'array'
-	 * @return mixed
-	 */
+    /**
+     * Filter Value
+     * @param mixed $value
+     * @param array $aFilter
+     * @return mixed
+     * @throws Core_Exception
+     */
 	static protected function _filter($value, $aFilter)
 	{
 		if (!is_null($aFilter))
@@ -278,8 +279,8 @@ class Core_Array
 	 * $array = Core_Array::toInt($array);
 	 * var_dump($array);
 	 * </code>
-	 * @return mixed
-	 */
+	 * @return array
+     */
 	static public function toInt($array)
 	{
 		$array = Core_Type_Conversion::toArray($array);
@@ -551,13 +552,14 @@ class Core_Array
 		return $bIsList && ($array === array_filter($array, 'is_scalar'));
 	}
 
-	/**
-	 * Change $oldKey to the $newKey with $newValue (optional)
-	 * @param array $array
-	 * @param mixed $oldKey Old Key
-	 * @param mixed $newKey New Key
-	 * @param mixed $newValue New Value, if NULL the old value is used
-	 */
+    /**
+     * Change $oldKey to the $newKey with $newValue (optional)
+     * @param array $array
+     * @param mixed $oldKey Old Key
+     * @param mixed $newKey New Key
+     * @param mixed $newValue New Value, if NULL the old value is used
+     * @return array
+     */
 	static public function changeKey(array $array, $oldKey, $newKey, $newValue = NULL)
 	{
 		if (!array_key_exists($oldKey, $array))

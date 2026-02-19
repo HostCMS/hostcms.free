@@ -139,4 +139,7 @@ return array(
 	'shop_warehouse_inventory' => "Інвентаризація при імпорті товару",
 	'shop_price_setting' => "Установка ціни при імпорті товару",
 	'clear_matches' => 'очистити відповідності',
+	'create_prop' => 'Створити властивість типу %s',
+	'create_field' => 'Створити поле типу %s',
+	'associateds' => 'Супутні товари'
 );

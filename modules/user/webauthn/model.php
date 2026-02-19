@@ -8,10 +8,16 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage User
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class User_Webauthn_Model extends Core_Entity
 {
+	/**
+	 * Disable markDeleted()
+	 * @var mixed
+	 */
+	protected $_marksDeleted = NULL;
+
 	/**
 	 * Belongs to relations
 	 * @var array
@@ -36,5 +42,27 @@ class User_Webauthn_Model extends Core_Entity
 			$this->_preloadValues['ip'] = Core::getClientIp();
 			$this->_preloadValues['user_agent'] = Core_Array::get($_SERVER, 'HTTP_USER_AGENT', '');
 		}
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+ 	// public function browserBackend()
+ 	public function browserBackend()
+	{
+		$browser = !is_null($this->user_agent)
+			? Core_Browser::getBrowser($this->user_agent)
+			: '—';
+
+		if (!is_null($browser))
+		{
+			$ico = Core_Browser::getBrowserIco($browser);
+
+			!is_null($ico)
+				&& $browser = '<i class="' . $ico . '"></i> ' . $browser;
+		}
+
+		return $browser;
 	}
 }

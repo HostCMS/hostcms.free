@@ -117,4 +117,11 @@ return array(
 	'minutes' => '%d minutes',
 	'second' => 'second',
 	'seconds' => '%d seconds',
+
+	'fast_login' => 'Fast login',
+	'wrong_fast_login' => 'Authentication failed, please login with password.',
+	'wrong_public_key' => 'Authentication failed, no user data.',
+	'authorization_fast_button_accept' => 'Fast login is available for you',
+
+	'ai' => 'AI',
 );

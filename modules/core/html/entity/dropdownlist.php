@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Html
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Html_Entity_Dropdownlist extends Core_Html_Entity
 {
@@ -57,7 +57,7 @@ class Core_Html_Entity_Dropdownlist extends Core_Html_Entity
 			$aAttr = $this->getAttrsString();
 
 			// Индекс элемента массива, который показываем как выбранное значение
-			$indexValueItem = isset($aOptions[$this->value])
+			$indexValueItem = !is_null($this->value) && isset($aOptions[$this->value])
 				? $this->value
 				: key($aOptions); // Get First Key
 

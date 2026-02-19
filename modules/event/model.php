@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Event_Model extends Core_Entity
 {
@@ -168,16 +168,14 @@ class Event_Model extends Core_Entity
 			? 'opacity'
 			: '';
 
-		?><div class="d-flex align-items-center justify-content-between <?php echo $opacity?>"><?php
+		?><div class="d-flex align-items-center <?php echo $opacity?>"><?php
 
 		// Название вместе с attachments в одном div
-		?><div><?php
 		if ($this->Event_Attachments->getCount(FALSE))
 		{
 			?><i class="fa fa-paperclip name-attachments"></i><?php
 		}
-		?><div class="semi-bold editable" data-editable-type="textarea" style="display: inline-block;" id="apply_check_0_<?php echo $this->id?>_fv_1226"><?php echo nl2br(htmlspecialchars((string) $this->name))?></div><?php
-		?></div><?php
+		?><div class="semi-bold editable" data-editable-type="textarea" style="display: inline-block;" id="apply_check_0_<?php echo $this->id?>_fv_<?php echo $oAdmin_Form_Field->id?>"><?php echo nl2br(htmlspecialchars((string) $this->name))?></div><?php
 
 		echo $this->showChecklists();
 		?></div><?php
@@ -187,7 +185,7 @@ class Event_Model extends Core_Entity
 			$bExpand = mb_strlen((string) $this->description) > 250;
 			?><div class="crm-description-wrapper">
 			<div class="crm-description<?php echo $bExpand ? ' expand' : ''?>">
-				<span><?php echo strip_tags($this->description, '<br><p><b><i><u><strong><em>')?></span>
+				<?php echo strip_tags($this->description, '<br><p><b><i><u><strong><em>')?>
 			</div>
 			<?php if ($bExpand)
 			{
@@ -288,8 +286,8 @@ class Event_Model extends Core_Entity
 			$style = "min-width: 45px; color: " . Core_Str::hex2darker($color, 0.2) . "; background-color: " . Core_Str::hex2lighter($color, 0.88) . ';';
 
 			$margin = !$kanban
-				? ' margin-left: 5px;'
-				: ' margin-bottom: 5px; margin-top: 5px;';
+				? ' margin-left: auto;'
+				: ' margin-left: auto; margin-bottom: 5px; margin-top: 5px;';
 
 			$style .= $margin;
 
@@ -438,7 +436,7 @@ class Event_Model extends Core_Entity
 
 	/**
 	 * Show deal badge
-	 * @param Admin_Form_Controller_Model $oAdmin_Form_Controller
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 */
 	public function showDeals($oAdmin_Form_Controller)
 	{
@@ -460,7 +458,7 @@ class Event_Model extends Core_Entity
 
 	/**
 	 * Show lead badge
-	 * @param Admin_Form_Controller_Model $oAdmin_Form_Controller
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 */
 	public function showLeads($oAdmin_Form_Controller)
 	{
@@ -482,7 +480,7 @@ class Event_Model extends Core_Entity
 
 	/**
 	 * Show document badge
-	 * @param Admin_Form_Controller_Model $oAdmin_Form_Controller
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
 	public function showDocuments($oAdmin_Form_Controller)
@@ -526,8 +524,7 @@ class Event_Model extends Core_Entity
 
 	/**
 	 * Show document badge
-	 * @param Admin_Form_Controller_Model $oAdmin_Form_Controller
-	 * @return string
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 */
 	public function showCrmProjects($oAdmin_Form_Controller)
 	{
@@ -578,7 +575,7 @@ class Event_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -630,7 +627,7 @@ class Event_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -727,7 +724,7 @@ class Event_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
@@ -1172,7 +1169,6 @@ class Event_Model extends Core_Entity
 
 	/**
 	 * Show type badge
-	 * @return string
 	 */
 	public function showType()
 	{

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Compare_Model extends Core_Entity
 {
@@ -96,11 +96,11 @@ class Shop_Compare_Model extends Core_Entity
 	 */
 	protected $_showXmlCommentsRating = FALSE;
 
-	/**
-	 * Add Comments Rating XML to item
-	 * @param boolean $showXmlComments mode
-	 * @return self
-	 */
+    /**
+     * Add Comments Rating XML to item
+     * @param bool $showXmlCommentsRating
+     * @return self
+     */
 	public function showXmlCommentsRating($showXmlCommentsRating = TRUE)
 	{
 		$this->_showXmlCommentsRating = $showXmlCommentsRating;

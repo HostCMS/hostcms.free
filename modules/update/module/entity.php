@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Update
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Update_Module_Entity extends Core_Empty_Entity
 {
@@ -93,10 +93,13 @@ class Update_Module_Entity extends Core_Empty_Entity
 	public function install()
 	{
 		// Устанавливаем время выполнения
-		(!defined('DENY_INI_SET') || !DENY_INI_SET)
-			&& function_exists('set_time_limit')
-			&& ini_get('safe_mode') != 1
-			&& @set_time_limit(3600);
+		if (!defined('DENY_INI_SET') || !DENY_INI_SET)
+		{
+			if (Core::isFunctionEnable('set_time_limit') && ini_get('safe_mode') != 1 && ini_get('max_execution_time') < 3600)
+			{
+				@set_time_limit(3600);
+			}
+		}
 
 		Core_Event::notify(get_class($this) . '.onBeforeInstall', $this);
 
@@ -197,11 +200,8 @@ class Update_Module_Entity extends Core_Empty_Entity
 
 	/**
 	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function numberBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function numberBadge()
 	{
 		$this->beta && Core_Html_Entity::factory('Span')
 			->class('badge badge-darkorange')

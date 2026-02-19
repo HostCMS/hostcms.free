@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Country_Location_Model extends Core_Entity
 {
@@ -104,11 +104,8 @@ class Shop_Country_Location_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
 	 */
-	public function citiesBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function citiesBadge()
 	{
 		$count = $this->Shop_Country_Location_Cities->getCount();
 		$count && Core_Html_Entity::factory('Span')
@@ -118,10 +115,11 @@ class Shop_Country_Location_Model extends Core_Entity
 			->execute();
 	}
 
-	/**
-	 * Backend callback method
-	 * @return string
-	 */
+    /**
+     * Backend callback method
+     * @param Admin_Form_Field_Model $oAdmin_Form_Field
+     * @throws Core_Exception
+     */
 	public function nameBackend($oAdmin_Form_Field)
 	{
 		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')->value(
@@ -132,7 +130,7 @@ class Shop_Country_Location_Model extends Core_Entity
 		{
 			$oCore_Html_Entity_Div
 				->class('editable')
-				->id('apply_check_0_' . $this->id . '_fv_226');
+				->id('apply_check_0_' . $this->id . '_fv_' . $oAdmin_Form_Field->id);
 		}
 
 		if (!$this->active)

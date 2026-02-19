@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Sql
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Sql_Controller
 {
@@ -53,7 +53,7 @@ class Sql_Controller
 	 * Выполнение SQL-запроса
 	 *
 	 * @param string $sql SQL-запрос
-	 * @return mixed количество выполненных запросов или NULL
+	 * @return int количество выполненных запросов или NULL
 	 * @see executeByString()
 	 */
 	public function execute($sql)
@@ -65,7 +65,7 @@ class Sql_Controller
 	 * Выполнение SQL-запроса из строки
 	 *
 	 * @param string $sql SQL-запрос
-	 * @return mixed количество выполненных запросов
+	 * @return int количество выполненных запросов
 	 *
 	 * <code>
 	 * <?php
@@ -137,7 +137,7 @@ class Sql_Controller
 	 * Выполнение SQL-запроса из файла
 	 *
 	 * @param string $filePath путь к файлу
-	 * @return mixed количество выполненных запросов или NULL
+	 * @return int количество выполненных запросов или NULL
 	 *
 	 * <code>
 	 * <?php
@@ -244,8 +244,8 @@ class Sql_Controller
 
 	/**
 	 * Sanitize MySQL Identifiers
-	 * @param string
-	 * @return string
+	 * @param string $str
+     * @return string
 	 */
 	static public function sanitizeIdentifiers($str)
 	{
@@ -259,12 +259,13 @@ class Sql_Controller
 		return !is_null($str) ? preg_replace('/[^A-Za-z0-9$_\x{0001}-\x{007F}\x{0080}-\x{FFFF}]/u', '', $str) : '';
 	}
 
-	/**
-	 * Get fields icon
-	 * @param string $href
-	 * @param string $class
-	 * @return Admin_Form_Entity
-	 */
+    /**
+     * Get fields icon
+     * @param string $tableName
+     * @param string $class
+     * @return Admin_Form_Entity
+     * @throws Core_Exception
+     */
 	static public function getTableViewIcon($tableName, $class = 'fa fa-table h5-edit-icon warning')
 	{
 		$href = Admin_Form_Controller::correctBackendPath('/{admin}/sql/table/view/index.php?table=') . $tableName;
@@ -285,12 +286,13 @@ class Sql_Controller
 		');
 	}
 
-	/**
-	 * Get fields icon
-	 * @param string $href
-	 * @param string $class
-	 * @return Admin_Form_Entity
-	 */
+    /**
+     * Get fields icon
+     * @param string $tableName
+     * @param string $class
+     * @return Admin_Form_Entity
+     * @throws Core_Exception
+     */
 	static public function getFieldsIcon($tableName, $class = 'fa fa-th-list h5-edit-icon azure')
 	{
 		$href = Admin_Form_Controller::correctBackendPath('/{admin}/sql/table/field/index.php?table=') . $tableName;
@@ -311,12 +313,13 @@ class Sql_Controller
 		');
 	}
 
-	/**
-	 * Get indexes icon
-	 * @param string $href
-	 * @param string $class
-	 * @return Admin_Form_Entity
-	 */
+    /**
+     * Get indexes icon
+     * @param string $tableName
+     * @param string $class
+     * @return Admin_Form_Entity
+     * @throws Core_Exception
+     */
 	static public function getIndexesIcon($tableName, $class = 'fas fa-key h5-edit-icon success')
 	{
 		$href = Admin_Form_Controller::correctBackendPath('/{admin}/sql/table/index/index.php?table=') . $tableName;

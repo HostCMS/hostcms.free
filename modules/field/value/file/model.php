@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Field
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Field_Value_File_Model extends Core_Entity
 {
@@ -98,8 +98,8 @@ class Field_Value_File_Model extends Core_Entity
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return self
-	 * @hostcms-event field_value_file.onBeforeRedeclaredDelete
+	 * @return Core_Entity
+     * @hostcms-event field_value_file.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -151,13 +151,10 @@ class Field_Value_File_Model extends Core_Entity
 
 		if ($this->file != '')
 		{
-			if (Core_File::isFile($path))
+			try
 			{
-				try
-				{
-					Core_File::delete($path);
-				} catch (Exception $e) {}
-			}
+				Core_File::delete($path);
+			} catch (Exception $e) {}
 
 			Core_Event::notify($this->_modelName . '.onAfterDeleteLargeFile', $this);
 
@@ -166,6 +163,7 @@ class Field_Value_File_Model extends Core_Entity
 			//$this->file_description = '';
 			$this->save();
 		}
+
 		return $this;
 	}
 
@@ -198,13 +196,10 @@ class Field_Value_File_Model extends Core_Entity
 
 		if ($this->file_small != '')
 		{
-			if (Core_File::isFile($path))
+			try
 			{
-				try
-				{
-					Core_File::delete($path);
-				} catch (Exception $e) {}
-			}
+				Core_File::delete($path);
+			} catch (Exception $e) {}
 
 			Core_Event::notify($this->_modelName . '.onAfterDeleteSmallFile', $this);
 
@@ -213,6 +208,7 @@ class Field_Value_File_Model extends Core_Entity
 			//$this->file_small_description = '';
 			$this->save();
 		}
+
 		return $this;
 	}
 
@@ -309,6 +305,29 @@ class Field_Value_File_Model extends Core_Entity
 								->addAttribute('height', $picsize[1]);
 						}
 					}
+				}
+			}
+
+			if (Core::moduleIsActive('cdn'))
+			{
+				if ($this->file !== '')
+				{
+					$link = Core::moduleIsActive('cdn')
+						? Cdn_Controller::link($this->getLargeFileHref())
+						: NULL;
+
+					$this->_isTagAvailable('cdn_file')
+						&& $this->addXmlTag('cdn_file', !is_null($link) ? $link : $this->getLargeFileHref());
+				}
+
+				if ($this->file_small !== '')
+				{
+					$link = Core::moduleIsActive('cdn')
+						? Cdn_Controller::link($this->getSmallFileHref())
+						: NULL;
+
+					$this->_isTagAvailable('cdn_file_small')
+						&& $this->addXmlTag('cdn_file_small', !is_null($link) ? $link : $this->getSmallFileHref());
 				}
 			}
 

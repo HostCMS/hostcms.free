@@ -16,4 +16,5 @@ return array(
 	'move_success' => 'Групи міток перенесені',
 	'delete_success' => 'Елемент видалений!',
 	'undelete_success' => 'Елемент відновлено!',
+	'apply_success' => "Інформація успішно змінена",
 );

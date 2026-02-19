@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Printlayout
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 abstract class Printlayout_Driver_Controller
 {
@@ -42,17 +42,18 @@ abstract class Printlayout_Driver_Controller
 	/**
 	 * Get full driver name
 	 * @param string $driver driver name
-	 * @return srting
+	 * @return string
 	 */
 	static protected function _getDriverName($driver)
 	{
 		return 'Printlayout_Driver_' . ucfirst($driver);
 	}
 
-	/**
-	 * Create and return an object of printlayout
-	 * @param string $driveName
-	 */
+    /**
+     * Create and return an object of printlayout
+     * @param $driverName
+     * @return mixed|string
+     */
 	static public function factory($driverName)
 	{
 		$driver = self::_getDriverName($driverName);
@@ -61,7 +62,7 @@ abstract class Printlayout_Driver_Controller
 
 	/**
 	 * Get file
-	 * @return string
+	 * @return self
 	 */
 	public function setFile($sourceDocx)
 	{
@@ -71,7 +72,7 @@ abstract class Printlayout_Driver_Controller
 
 	/**
 	 * Set title
-	 * @return string
+	 * @return self
 	 */
 	public function setTitle($title)
 	{

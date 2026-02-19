@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 define('CMS_FOLDER', dirname(__FILE__) . DIRECTORY_SEPARATOR);
 define('HOSTCMS', TRUE);
@@ -44,7 +44,6 @@ if (Core_Auth::logged())
 	Core_Event::attach('Core_Cache.onBeforeSet', array('Core_Cache_Observer', 'onBeforeSet'));
 	Core_Event::attach('Core_Cache.onAfterSet', array('Core_Cache_Observer', 'onAfterSet'));
 }
-
 
 // Robokassa SMS observers
 // Core_Event::attach('shop_order.onAfterChangeStatusPaid', array('Shop_Observer_Robokassa', 'onAfterChangeStatusPaid'));
@@ -334,10 +333,7 @@ Core_Event::attach('ASMP_MegaImport_Controller.onBeforeImportPrices', array('Hos
 	return $next();
 });*/
 
-
-/*Core_Event::attach('shop_item.onCallmultiLng', function($object, $args) {
-	var_dump($args);
-});*/
-
 //Core::moduleIsActive('cache') && Cache_Static::ignoreQuery('parameter');
 //Core::moduleIsActive('cache') && Cache_Static::ignoreQueries(array('parameter', 'foo', 'bar'));
+
+//Core_Event::attach('Shop_Item_Comment_Controller_Edit.onAfterRedeclaredApplyObjectProperty', function(){ echo 111; });

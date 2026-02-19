@@ -8,30 +8,39 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Command
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Command_Controller_Default extends Core_Command_Controller
 {
+	/**
+	 * Core_Page instance
+	 * @var Core_Page|NULL
+	 */
+	protected $_Core_Page = NULL;
+
 	/**
 	 * Check possibility of using static cache
 	 * @hostcms-event Core_Command_Controller_Default.onCheckCache
 	 */
 	protected function _checkCache()
 	{
-		$return = (
-			!isset($_SESSION)
-			|| !isset($_SESSION['siteuser_id']) && !Core_Auth::logged() && empty($_SESSION['SCART'])
-			)
-			&& empty($_COOKIE['CART']) && count($_POST) == 0
-			// HostCMS cookie agree
-			&& !isset($_COOKIE['_hccagree']);
+		if (is_null($this->_Core_Page->staticCache))
+		{
+			$this->_Core_Page->staticCache = (
+				!isset($_SESSION)
+				|| !isset($_SESSION['siteuser_id']) && !Core_Auth::logged() && empty($_SESSION['SCART'])
+				)
+				&& empty($_COOKIE['CART']) && count($_POST) == 0
+				// HostCMS cookie agree
+				&& !isset($_COOKIE['_hccagree']);
+		}
 
 		Core_Event::notify(get_class($this) . '.onCheckCache', $this);
 
 		$eventResult = Core_Event::getLastReturn();
-		!is_null($eventResult) && $return = $eventResult;
+		!is_null($eventResult) && $this->_Core_Page->staticCache = $eventResult;
 
-		return $return;
+		return $this->_Core_Page->staticCache;
 	}
 
 	/**
@@ -49,7 +58,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 
 		$oCore_Response = new Core_Response();
 
-		$oCore_Page = Core_Page::instance()
+		$this->_Core_Page = Core_Page::instance()
 			->response($oCore_Response);
 
 		$oCore_Response->header('X-Powered-By', 'HostCMS');
@@ -468,12 +477,12 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 				->execute();
 		}
 
-		$oCore_Page
+		$this->_Core_Page
 			->template($oTemplate)
 			->structure($oStructure);
 
-		$oStructure->setCorePageSeo($oCore_Page);
-		$oCore_Page->addChild($oStructure->getRelatedObjectByType());
+		$oStructure->setCorePageSeo($this->_Core_Page);
+		$this->_Core_Page->addChild($oStructure->getRelatedObjectByType());
 
 		// CDN
 		if (Core::moduleIsActive('cdn'))
@@ -491,15 +500,15 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 					$oCdn_Controller->setCdn($oCdn);
 
 					$oCdn_Site->css
-						&& $oCore_Page->cssCDN = '//' . htmlspecialchars($oCdn_Controller->getCssDomain());
+						&& $this->_Core_Page->cssCDN = '//' . htmlspecialchars($oCdn_Controller->getCssDomain());
 					$oCdn_Site->js
-						&& $oCore_Page->jsCDN = '//' . htmlspecialchars($oCdn_Controller->getJsDomain());
+						&& $this->_Core_Page->jsCDN = '//' . htmlspecialchars($oCdn_Controller->getJsDomain());
 					$oCdn_Site->informationsystem
-						&& $oCore_Page->informationsystemCDN = '//' . htmlspecialchars($oCdn_Controller->getInformationsystemDomain());
+						&& $this->_Core_Page->informationsystemCDN = '//' . htmlspecialchars($oCdn_Controller->getInformationsystemDomain());
 					$oCdn_Site->shop
-						&& $oCore_Page->shopCDN = '//' . htmlspecialchars($oCdn_Controller->getShopDomain());
+						&& $this->_Core_Page->shopCDN = '//' . htmlspecialchars($oCdn_Controller->getShopDomain());
 					$oCdn_Site->structure
-						&& $oCore_Page->structureCDN = '//' . htmlspecialchars($oCdn_Controller->getStructureDomain());
+						&& $this->_Core_Page->structureCDN = '//' . htmlspecialchars($oCdn_Controller->getStructureDomain());
 				}
 			}
 		}
@@ -566,6 +575,8 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 		<meta name="description" content="<?php Core_Page::instance()->showDescription()?>">
 		<meta name="keywords" content="<?php Core_Page::instance()->showKeywords()?>">
 
+		<?php Core_Page::instance()->showFavicons(); ?>
+
 		<link rel="stylesheet" type="text/css" href="/modules/skin/default/frontend/panel.css"/>
 		<link rel="stylesheet" type="text/css" href="/modules/skin/bootstrap/fonts/fontawesome/6/css/all.min.css?<?php echo $iTimestamp?>" />
 
@@ -576,11 +587,12 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 	<body>
 		<div class="top-panel">
 			<div class="icons">
-				<i title="<?php echo Core::_('Template.design_icon_desktop')?>" class="fa-solid fa-desktop fa-fw active" onclick="hQuery.changeDevice(this, 'desktop')"></i>
-				<i title="<?php echo Core::_('Template.design_icon_tablet')?>" class="fa-solid fa-tablet-screen-button fa-fw" onclick="hQuery.changeDevice(this, 'tablet')"></i>
-				<i title="<?php echo Core::_('Template.design_icon_tablet_wide')?>" class="fa-solid fa-tablet-screen-button fa-rotate-270 fa-fw" onclick="hQuery.changeDevice(this, 'tablet-wide')"></i>
-				<i title="<?php echo Core::_('Template.design_icon_mobile')?>" class="fa-solid fa-mobile-screen-button fa-fw" onclick="hQuery.changeDevice(this, 'mobile')"></i>
-				<i title="<?php echo Core::_('Template.design_icon_mobile_wide')?>" class="fa-solid fa-mobile-screen-button fa-rotate-270 fa-fw" onclick="hQuery.changeDevice(this, 'mobile-wide')"></i>
+				<span class="desktop active" onclick="hQuery.changeDevice(this, 'desktop')" title="<?php echo Core::_('Template.design_icon_desktop')?>"></span>
+				<span class="tablet" onclick="hQuery.changeDevice(this, 'tablet')" title="<?php echo Core::_('Template.design_icon_tablet')?>"></span>
+				<span class="tablet-wide rotate" onclick="hQuery.changeDevice(this, 'tablet-wide')" title="<?php echo Core::_('Template.design_icon_tablet_wide')?>"></span>
+				<span class="mobile" onclick="hQuery.changeDevice(this, 'mobile')" title="<?php echo Core::_('Template.design_icon_mobile')?>"></span>
+				<span class="mobile-wide rotate" onclick="hQuery.changeDevice(this, 'mobile-wide')" title="<?php echo Core::_('Template.design_icon_mobile_wide')?>"></span>
+
 				<a href="<?php echo htmlspecialchars(Core::$url['path'])?>" class="btn-open-site" title="Close"><i class="fa-regular fa-circle-xmark"></i></a>
 			</div>
 		</div>
@@ -594,7 +606,6 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 		</div>
 	</body>
 </html><?php
-
 				$sContent = ob_get_clean();
 
 				$oCore_Response->body($sContent);
@@ -621,12 +632,12 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 
 			!$bAvailableGetVariable
 				&& (Core::$mainConfig['httpCodeNotFound'] == 404
-					? $oCore_Page->error404()
-					: $oCore_Page->error410()
+					? $this->_Core_Page->error404()
+					: $this->_Core_Page->error410()
 				);
 		}
 
-		Core_Event::notify(get_class($this) . '.onBeforeContentCreation', $this, array($oCore_Page, $oCore_Response));
+		Core_Event::notify(get_class($this) . '.onBeforeContentCreation', $this, array($this->_Core_Page, $oCore_Response));
 
 		// isn't document
 		if ($oStructure->type != 0)
@@ -645,7 +656,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 			}
 			elseif ($oStructure->type == 2)
 			{
-				$oCore_Page->libParams
+				$this->_Core_Page->libParams
 					= $oStructure->Lib->getDat($oStructure->id);
 
 				$LibConfig = $oStructure->Lib->getLibConfigFilePath();
@@ -660,50 +671,55 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 			);
 		}
 
-		$bLogged && $fBeginTime = Core::getmicrotime();
-
-		// Headers
-		$iExpires = time() + (defined('EXPIRES_TIME')
-			? EXPIRES_TIME
-			: 300);
+		// Headers after lib-config, conditions may be changed
+		$iExpires = defined('EXPIRES_TIME') ? EXPIRES_TIME : 300;
 
 		if (!defined('SET_EXPIRES') || SET_EXPIRES)
 		{
 			$oCore_Response
-				->header('Expires', gmdate("D, d M Y H:i:s", $iExpires) . " GMT");
+				->header('Expires', gmdate("D, d M Y H:i:s", time() + $iExpires) . " GMT");
 		}
 
 		if (!defined('SET_LAST_MODIFIED') || SET_LAST_MODIFIED)
 		{
-			$iLastModified = time() + (defined('LAST_MODIFIED_TIME')
-				? LAST_MODIFIED_TIME
-				: 0);
+			$iLastModified = time() + (defined('LAST_MODIFIED_TIME') ? LAST_MODIFIED_TIME : 0);
 
 			$oCore_Response
 				->header('Last-Modified', gmdate("D, d M Y H:i:s", $iLastModified) . " GMT");
 		}
 
+		// _checkCache may be changed after lib-config!
+		$bCacheAvailable = $this->_checkCache();
+
 		if (!defined('SET_CACHE_CONTROL') || SET_CACHE_CONTROL)
 		{
-			$sCacheControlType = $iStructureAccess == 0
-				? 'public'
-				: 'private';
+			if ($iStructureAccess == 0 && $bCacheAvailable)
+			{
+				$sCacheControlType = 'public';
+				$sVary = 'Accept-Language';
+			}
+			else
+			{
+				$sCacheControlType = 'private';
+				$sVary = '*';
+			}
 
 			// Расчитываем максимальное время истечения
-			$max_age = $iExpires > time()
-				? $iExpires - time()
-				: 0;
+			$max_age = $iExpires > 0 ? $iExpires : 0;
 
 			$oCore_Response
-				->header('Cache-control', "{$sCacheControlType}, max-age={$max_age}");
+				->header('Vary', $sVary)
+				->header('Cache-Control', "{$sCacheControlType}, max-age={$max_age}");
 		}
 
-		Core_Event::notify(get_class($this) . '.onBeforeSetTemplate', $this, array($oCore_Page, $oCore_Response));
+		$bLogged && $fBeginTime = Core::getmicrotime();
+
+		Core_Event::notify(get_class($this) . '.onBeforeSetTemplate', $this, array($this->_Core_Page, $oCore_Response));
 
 		// Template might be changed at lib config
-		$oTemplate = $oCore_Page->template;
+		$oTemplate = $this->_Core_Page->template;
 
-		$oCore_Page
+		$this->_Core_Page
 			->addTemplates($oTemplate)
 			->buildingPage(TRUE)
 			->execute();
@@ -794,7 +810,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 				$Core_Cache->deleteAll($oSite->id);
 			}
 
-			if ($this->_checkCache() && strlen($sContent) > 0)
+			if ($bCacheAvailable && strlen($sContent) > 0)
 			{
 				$Core_Cache->insert($this->_uri, $sContent);
 			}

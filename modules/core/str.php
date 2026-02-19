@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Str
 {
@@ -297,6 +297,9 @@ class Core_Str
 			'spaceSeparator' => '-',
 			// ISO 9, Транслитерация по системе Б с использованием буквосочетаний
 			'transliteration' => array(
+				// сочетания
+				'ай' => 'ay', 'ей' => 'ey', 'ий' => 'y', 'ой' => 'oy', 'уй' => 'uy', 'ый' => 'yy', 'эй' => 'ey', 'юй' => 'yuy', 'яй' => 'yay',
+				// буквы
 				'а' => 'a', 'б' => 'b', 'в' => 'v', 'г' => 'g', 'д' => 'd', 'е' => 'e', 'ё' => 'yo',
 				'ж' => 'zh', 'з' => 'z', 'и' => 'i', 'й' => 'j', 'к' => 'k', 'л' => 'l', 'м' => 'm',
 				'н' => 'n', 'о' => 'o', 'п' => 'p', 'р' => 'r', 'с' => 's', 'т' => 't', 'у' => 'u',
@@ -365,49 +368,23 @@ class Core_Str
 	/**
 	 * Convert IP into hexadecimal value
 	 * @param string $ip IP
-	 * @return mixed
+	 * @return string|NULL
+     * @see Core_Ip::ip2hex()
 	 */
 	static public function ip2hex($ip)
 	{
-		if (Core_Valid::ip($ip))
-		{
-			$ip_code = explode('.', $ip);
-
-			if (isset($ip_code[3]))
-			{
-				return sprintf('%02x%02x%02x%02x', $ip_code[0], $ip_code[1], $ip_code[2], $ip_code[3]);
-			}
-		}
-
-		return NULL;
+		return Core_Ip::ip2hex($ip);
 	}
 
 	/**
 	 * Convert hexadecimal value into IP
 	 * @param string $hex source value
 	 * @return string
+	 * @see Core_Ip::hex2ip()
 	 */
 	static public function hex2ip($hex)
 	{
-		$aReturn = array();
-
-		if (is_scalar($hex))
-		{
-			$aHex = explode('.', chunk_split($hex, 2, '.'));
-
-			if (count($aHex) > 0)
-			{
-				foreach ($aHex as $field)
-				{
-					if (!empty($field))
-					{
-						$aReturn[] = hexdec($field);
-					}
-				}
-			}
-		}
-
-		return implode('.', $aReturn);
+		return Core_Ip::hex2ip($hex);
 	}
 
 	/**
@@ -707,7 +684,7 @@ class Core_Str
 	/**
 	 * Convert size from bytes to kb, mb, etc
 	 *
-	 * @param int $int e.g. 20480000
+	 * @param int $size e.g. 20480000
 	 * @return string
 	 */
 	static public function getTextSize($size)
@@ -745,7 +722,7 @@ class Core_Str
 	/**
 	 * Convert count from int to K thousands, M million and B billion suffix, e.g. 102010 => 102K
 	 *
-	 * @param int $int e.g. 102010
+	 * @param int $count e.g. 102010
 	 * @return string
 	 */
 	static public function getTextCount($count)
@@ -782,7 +759,7 @@ class Core_Str
 
 	/**
 	 * Cut first and last slash
-	 * @param string URI
+	 * @param string $uri URI
 	 * @return string
 	 */
 	static public function trimUri($uri)
@@ -792,7 +769,7 @@ class Core_Str
 
 	/**
 	 * Cut first slash
-	 * @param string URI
+	 * @param string $uri URI
 	 * @return string
 	 */
 	static public function ltrimUri($uri)
@@ -806,7 +783,7 @@ class Core_Str
 
 	/**
 	 * Cut last slash
-	 * @param string URI
+	 * @param string $uri URI
 	 * @return string
 	 */
 	static public function rtrimUri($uri)
@@ -847,29 +824,117 @@ class Core_Str
 
 	/**
 	 * Get Color By Entity ID
-	 * @param int $id Entity ID
+	 * @param mixed $id Entity ID or string
 	 * @param int $maxColor Max color, 0-255, default 210
 	 * @return string HEX color, e.g. #B781AF
 	 */
-	static public function createColor($id, $maxColor = 210)
+	static public function createColor($id, $maxColor = 240)
 	{
-		$maxColorItem = $maxColor / 3;
-		$crc32 = abs(Core::crc32($id));
-		$iLast = 90;
-		$mod = $crc32 % $iLast;
+		// Золотое сечение для равномерного распределения цветов в HSL-пространстве с последующей конвертацией в RGB
+		$goldenRatio = 0.618033988749895;
 
-		return self::rgb2hex(
-			Core_Array::randomShuffle(array(
-									$maxColorItem / $iLast * $mod,
-				$maxColorItem + 	$maxColorItem / $iLast * $mod,
-				$maxColorItem * 2 + $maxColorItem / $iLast * $mod
-			), $id)
-		);
+		!is_int($id) && $id = abs(crc32($id));
+
+		// Генерируем hue (оттенок) от 0 до 360
+		$hue = fmod($id * $goldenRatio * 360, 360);
+
+		// Фиксированные значения для насыщенности и яркости, для создания приятных, но различимых цветов
+		$saturation = 70 + ($id % 30); // 70-100%
+		$lightness = 50 + (($id * 3) % 20); // 50-70%
+
+		// Конвертируем HSL в RGB
+		list($r, $g, $b) = self::hslToRgb($hue / 360, $saturation / 100, $lightness / 100);
+
+		$scale = $maxColor / 255;
+		$r = min(round($r * $scale), $maxColor);
+		$g = min(round($g * $scale), $maxColor);
+		$b = min(round($b * $scale), $maxColor);
+
+		return self::rgb2hex(array($r, $g, $b));
+	}
+
+	/**
+	* Конвертация HSL в RGB
+	* @param float $h Оттенок (0-1)
+	* @param float $s Насыщенность (0-1)
+	* @param float $l Яркость (0-1)
+	* @return array [R, G, B]
+	*/
+	static public function hslToRgb($h, $s, $l)
+	{
+		if ($s == 0)
+		{
+			$r = $g = $b = $l * 255;
+		}
+		else
+		{
+			// вспомогательная переменная, зависящая от яркости ($l) и насыщенности ($s)
+			$q = $l < 0.5 ? $l * (1 + $s) : $l + $s - $l * $s;
+			// временная переменная
+			$p = 2 * $l - $q;
+
+			$r = self::hueToRgb($p, $q, $h + 1/3);
+			$g = self::hueToRgb($p, $q, $h);
+			$b = self::hueToRgb($p, $q, $h - 1/3);
+		}
+
+		return array(round($r * 255), round($g * 255), round($b * 255));
+	}
+
+	/**
+	 * Convert Hue-component to RGB Color Converter
+	 * @param float $p Вспомогательная переменная p
+	 * @param float $q Вспомогательная переменная q
+	 * @param float $t Нормализованное значение hue (оттенка)
+	 * @return float Значение RGB компоненты (0-1)
+	 */
+	static public function hueToRgb($p, $q, $t)
+	{
+		// Нормализация значения $t к диапазону [0, 1], так как оттенок в HSL цикличен (0° и 360° - это один и тот же красный цвет)
+
+		// Если t отрицательное, приводим к диапазону [0, 1]
+		if ($t < 0)
+		{
+			$t += 1;
+		}
+
+		// Если t больше 1, приводим к диапазону [0, 1]
+		if ($t > 1)
+		{
+			$t -= 1;
+		}
+
+		// Расчет для секторов цветового круга, цветовой круг HSL (0°-360°) делится на 6 частей по 60°:
+		//	0°		(1.0): Красный  [t = 0 или 1]
+		//	60°		(1/6): Желтый   [t = 1/6]
+		//	120°	(2/6): Зеленый  [t = 1/3]
+		//	180°	(3/6): Голубой  [t = 1/2]
+		//	240°	(4/6): Синий    [t = 2/3]
+		//	300°	(5/6): Пурпурный [t = 5/6]
+
+		// Сектор 1: t ∈ [0, 1/6) - переход от красного к желтому
+		if ($t < 1/6)
+		{
+			return $p + ($q - $p) * 6 * $t;
+		}
+		// Сектор 2: t ∈ [1/6, 1/2) - переход от желтого к зеленому
+		elseif ($t < 1/2)
+		{
+			return $q;
+		}
+		// Сектор 3: t ∈ [1/2, 2/3) - переход от зеленого к голубому
+		elseif ($t < 2/3)
+		{
+			return $p + ($q - $p) * (2/3 - $t) * 6;
+		}
+
+		// Сектор 4: t ∈ [2/3, 1] - переход от голубого к красному
+		return $p;
 	}
 
 	/**
 	 * Convert RGB to HEX color
-	 * @param string $hex HEX color, e.g. #B781AF or #FF0
+	 * @param array $array
 	 * @return string HEX color, e.g. #B781AF
 	 */
 	static public function rgb2hex(array $array)
@@ -882,7 +947,7 @@ class Core_Str
 	/**
 	 * Convert HEX color to RGB or RGBA
 	 * @param string $hex HEX color, e.g. #B781AF or #FF0
-	 * @param float|NULL opacity between 0 and 1, e.g. 0.85
+	 * @param float|NULL $opacity opacity between 0 and 1, e.g. 0.85
 	 * @return string
 	 */
 	static public function hex2rgba($hex, $opacity = NULL)
@@ -931,9 +996,8 @@ class Core_Str
 	/**
 	 * Convert HEX color to RGB or HSL
 	 * @param string $hex HEX color, e.g. #B781AF or #FF0
-	 * @param float|NULL opacity between 0 and 1, e.g. 0.85
-	 * @return string
-	 */
+	 * @return array
+     */
 	static public function hex2hsl($hex)
 	{
 		$hex = ltrim($hex, '#');
@@ -992,7 +1056,7 @@ class Core_Str
 	/**
 	 * Lighter HEX color
 	 * @param string $hex HEX color, e.g. #B781AF or #FF0
-	 * @param float opacity between 0 and 1, e.g. 0.85
+	 * @param float $opacity opacity between 0 and 1, e.g. 0.85
 	 */
 	static public function hex2lighter($hex, $opacity)
 	{
@@ -1037,7 +1101,7 @@ class Core_Str
 	/**
 	 * Darker HEX color
 	 * @param string $hex HEX color, e.g. #B781AF or #FF0
-	 * @param float opacity between 0 and 1, e.g. 0.85
+	 * @param float $opacity opacity between 0 and 1, e.g. 0.85
 	 */
 	static public function hex2darker($hex, $opacity)
 	{
@@ -1526,8 +1590,8 @@ class Core_Str
 	 * @param string $from_encoding The input charset.
 	 * @param string $to_encoding The output charset, e.g. 'UTF-8'
 	 * @param string|array $mValue
-	 * @return mixed
-	 */
+	 * @return array|false|string
+     */
 	static public function iconv($from_encoding, $to_encoding, $mValue)
 	{
 		if (is_array($mValue))
@@ -1550,11 +1614,11 @@ class Core_Str
 		return $mValue;
 	}
 
-	/**
-	 * Convert $str to the string
-	 * @param mixed $str
-	 * @return string
-	 */
+    /**
+     * Convert $str to the string
+     * @param mixed $mixed
+     * @return string
+     */
 	static public function toStr($mixed)
 	{
 		if (is_array($mixed))
@@ -1575,8 +1639,8 @@ class Core_Str
 	 * @param string $from, $to, $value
 	 * @param string $to
 	 * @param mixed $value
-	 * @return float
-	 */
+	 * @return string
+     */
 	static public function convertWeight($from, $to, $value)
 	{
 		switch ($from)
@@ -1642,8 +1706,8 @@ class Core_Str
 	 * @param string $from, $to, $value
 	 * @param string $to
 	 * @param mixed $value
-	 * @return float
-	 */
+	 * @return string
+     */
 	static public function convertDimension($from, $to, $value)
 	{
 		switch ($from)
@@ -1762,7 +1826,7 @@ class Core_Str
 
 	/**
 	 * Hide last zeros, e.g. '.00', (locale dependent)
-	 * @var string
+	 * @param string $str
 	 * @return string
 	 */
 	public static function hideZeros($str)

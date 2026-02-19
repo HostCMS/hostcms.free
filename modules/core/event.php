@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Event
 {
@@ -161,7 +161,7 @@ class Core_Event
 
 	/**
 	 * Last returned value
-	 * @var misex
+	 * @var mixed
 	 */
 	static protected $_lastReturn = NULL;
 
@@ -187,9 +187,9 @@ class Core_Event
 	 * Core_Event::notify('Class.onBeforeDelete', $this, array($primaryKey));
 	 * </code>
 	 *
-	 * @param $eventName Name of event
-	 * @param $object
-	 * @param $args
+	 * @param string $eventName Name of event
+	 * @param object $object
+	 * @param array $args
 	 */
 	static public function notify($eventName, $object = NULL, $args = array())
 	{
