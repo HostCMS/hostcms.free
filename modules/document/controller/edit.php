@@ -26,7 +26,7 @@ class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			switch ($modelName)
 			{
 				case 'document':
-					$object->document_dir_id = Core_Array::getGet('document_dir_id');
+					$object->document_dir_id = Core_Array::getGet('document_dir_id', 0, 'int');
 
 					$aTypographConfig = Typograph_Controller::instance()->getConfig();
 
@@ -34,7 +34,7 @@ class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$object->trailing_punctuation = $aTypographConfig['trailing_punctuation'];
 				break;
 				case 'document_dir':
-					$object->parent_id = Core_Array::getGet('document_dir_id');
+					$object->parent_id = Core_Array::getGet('document_dir_id', 0, 'int');
 				break;
 			}
 		}
@@ -186,7 +186,7 @@ class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oSelect_Dirs
 					->options(
-						array(' … ') + $this->fillDocumentDir(CURRENT_SITE, 0, $this->_object->id)
+						array(' … ') + $this->fillDocumentDir(CURRENT_SITE, 0, array($this->_object->id))
 					)
 					->name('parent_id')
 					->value($this->_object->parent_id)
@@ -260,37 +260,56 @@ class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	}
 
 	/**
+	 * Groups tree
+	 * @var array
+	 */
+	protected $_aGroupTree = array();
+
+	/**
 	 * Create visual tree of the document directories
 	 * @param int $iSiteId site ID
-	 * @param int $iDocumentDirParentId initial directory
-	 * @param boolean $bExclude exclude group ID
+	 * @param int $parent_id initial directory
+	 * @param array $aExclude exclude group IDs array
 	 * @param int $iLevel current nesting level
 	 * @return array
 	 */
-	public function fillDocumentDir($iSiteId, $iDocumentDirParentId = 0, $bExclude = FALSE, $iLevel = 0)
+	public function fillDocumentDir($iSiteId, $parent_id = 0, $aExclude = array(), $iLevel = 0)
 	{
 		$iSiteId = intval($iSiteId);
-		$iDocumentDirParentId = intval($iDocumentDirParentId);
+		$parent_id = intval($parent_id);
 		$iLevel = intval($iLevel);
 
-		$oDocument_Dir = Core_Entity::factory('Document_Dir', $iDocumentDirParentId);
+		if ($iLevel == 0)
+		{
+			$aTmp = Core_QueryBuilder::select('id', 'parent_id', 'name')
+				->from('document_dirs')
+				->where('site_id', '=', $iSiteId)
+				->where('deleted', '=', 0)
+				->orderBy('name')
+				->execute()->asAssoc()->result();
+
+			foreach ($aTmp as $aGroup)
+			{
+				$this->_aGroupTree[$aGroup['parent_id']][] = $aGroup;
+			}
+		}
 
 		$aReturn = array();
 
-		// Дочерние разделы
-		$childrenDirs = $oDocument_Dir->Document_Dirs->getBySiteId($iSiteId);
-
-		if (count($childrenDirs))
+		if (isset($this->_aGroupTree[$parent_id]))
 		{
-			foreach ($childrenDirs as $childrenDir)
+			$countExclude = count($aExclude);
+			foreach ($this->_aGroupTree[$parent_id] as $childrenDir)
 			{
-				if ($bExclude != $childrenDir->id)
+				if ($countExclude == 0 || !in_array($childrenDir['id'], $aExclude))
 				{
-					$aReturn[$childrenDir->id] = str_repeat('  ', $iLevel) . $childrenDir->name;
-					$aReturn += $this->fillDocumentDir($iSiteId, $childrenDir->id, $bExclude, $iLevel+1);
+					$aReturn[$childrenDir['id']] = str_repeat('  ', $iLevel) . '[' . $childrenDir['id'] . '] ' . $childrenDir['name'];
+					$aReturn += $this->fillDocumentDir($iSiteId, $childrenDir['id'], $aExclude, $iLevel + 1);
 				}
 			}
 		}
+
+		$iLevel == 0 && $this->_aGroupTree = array();
 
 		return $aReturn;
 	}

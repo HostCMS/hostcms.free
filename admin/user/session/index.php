@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -33,7 +33,7 @@ $additionalParams = "secret_csrf={$secret_csrf}";
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('User_Session.destroy_all'))
-		->icon('fa fa-times')
+		->icon('fa-solid fa-xmark')
 		->class('btn btn-danger')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'destroyAll', NULL, 0, 0, $additionalParams)

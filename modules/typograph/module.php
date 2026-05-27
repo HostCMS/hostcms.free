@@ -20,9 +20,9 @@ class Typograph_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 	/**
 	 * Module name
@@ -55,7 +55,7 @@ class Typograph_Module extends Core_Module_Abstract
 			array(
 				'sorting' => 260,
 				'block' => 3,
-				'ico' => 'fa fa-paragraph',
+				'ico' => 'fa-solid fa-paragraph',
 				'name' => Core::_('typograph.menu'),
 				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/typograph/index.php"),
 				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/typograph/index.php'}); return false")

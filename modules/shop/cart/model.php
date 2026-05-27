@@ -114,7 +114,7 @@ class Shop_Cart_Model extends Core_Entity
 					->target('_blank')
 					->value(htmlspecialchars($this->name))
 					->add(
-						Core_Html_Entity::factory('I')->class('fa fa-external-link')
+						Core_Html_Entity::factory('I')->class('fa-solid fa-arrow-up-right-from-square small')
 					)
 			);
 		}
@@ -209,8 +209,7 @@ class Shop_Cart_Model extends Core_Entity
 			->leftJoin('shop_items', 'shop_items.id', '=', 'shop_carts.shop_item_id')
 			->where('shop_carts.siteuser_id', '=', $siteuser_id)
 			->clearOrderBy()
-			->orderBy('shop_items.price', 'DESC')
-			;
+			->orderBy('shop_items.price', 'DESC');
 
 		return $this->findAll($bCache);
 	}
@@ -315,11 +314,11 @@ class Shop_Cart_Model extends Core_Entity
 	 */
 	protected $_showXmlMedia = FALSE;
 
-    /**
-     * Show properties in XML
-     * @param bool $showXmlMedia
-     * @return self
-     */
+	/**
+	 * Show properties in XML
+	 * @param bool $showXmlMedia
+	 * @return self
+	 */
 	public function showXmlMedia($showXmlMedia = TRUE)
 	{
 		$this->_showXmlMedia = $showXmlMedia;
@@ -343,7 +342,7 @@ class Shop_Cart_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event shop_cart.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')

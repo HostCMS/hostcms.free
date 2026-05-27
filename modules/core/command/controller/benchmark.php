@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Command
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Command_Controller_Benchmark extends Core_Command_Controller
 {
@@ -49,7 +49,6 @@ class Core_Command_Controller_Benchmark extends Core_Command_Controller
 
 		$oCore_Response
 			->status(200)
-			->header('Pragma', 'no-cache')
 			->header('Cache-Control', 'private, no-cache')
 			->header('Vary', 'Accept')
 			->header('Last-Modified', gmdate('D, d M Y H:i:s', time()) . ' GMT')

@@ -16,16 +16,16 @@
  */
 class Smarty_Internal_Compile_Private_Object_Block_Function extends Smarty_Internal_Compile_Private_Block_Plugin
 {
-    /**
-     * Setup callback and parameter array
-     *
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler
-     * @param array                                 $_attr attributes
-     * @param string                                $tag
-     * @param string                                $method
-     *
-     * @return array
-     */
+	/**
+	 * Setup callback and parameter array
+	 *
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler
+	 * @param array                                 $_attr attributes
+	 * @param string                                $tag
+	 * @param string                                $method
+	 *
+	 * @return array
+	 */
     public function setup(Smarty_Internal_TemplateCompilerBase $compiler, $_attr, $tag, $method)
     {
         $_paramsArray = array();

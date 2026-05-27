@@ -156,45 +156,63 @@
 									</xsl:when>
 									<xsl:otherwise>
 										<xsl:if test="expire_after_days/node() or expire_after_hours/node() or expire_after_minutes/node()">
-										<span class="helpdesk_status_2">&labelAnswer;<xsl:choose>
-										<xsl:when test="expire_after_days/node()">
-										<xsl:if test="expire_after_days/node()"><xsl:text> </xsl:text><xsl:value-of select="expire_after_days"/><xsl:text> </xsl:text>
-												<xsl:variable name="nominative">&labelDay;</xsl:variable>
-												<xsl:variable name="genitive_singular">&labelDays;</xsl:variable>
-												<xsl:variable name="genitive_plural">&labelDays;</xsl:variable>
+											<span class="helpdesk_status_2">&labelAnswer;<xsl:choose>
+											<xsl:when test="expire_after_days/node()">
+												<!-- Дни -->
+												<xsl:if test="expire_after_days/node()"><xsl:text> </xsl:text><xsl:value-of select="expire_after_days"/><xsl:text> </xsl:text>
+													<xsl:variable name="nominative">&labelDay;</xsl:variable>
+													<xsl:variable name="genitive_singular">&labelDays;</xsl:variable>
+													<xsl:variable name="genitive_plural">&labelDays;</xsl:variable>
 
-												<xsl:call-template name="declension">
-													<xsl:with-param name="number" select="expire_after_days"/>
-													<xsl:with-param name="nominative" select="$nominative"/>
-													<xsl:with-param name="genitive_singular" select="$genitive_singular"/>
-													<xsl:with-param name="genitive_plural" select="$genitive_plural"/>
-												</xsl:call-template>
-											</xsl:if>
+													<xsl:call-template name="declension">
+														<xsl:with-param name="number" select="expire_after_days"/>
+														<xsl:with-param name="nominative" select="$nominative"/>
+														<xsl:with-param name="genitive_singular" select="$genitive_singular"/>
+														<xsl:with-param name="genitive_plural" select="$genitive_plural"/>
+													</xsl:call-template>
+												</xsl:if>
+												
+												<!-- Часы -->
+												<xsl:if test="expire_after_hours/node()"><xsl:text> </xsl:text><xsl:value-of select="expire_after_hours"/><xsl:text> </xsl:text>
+													<xsl:variable name="nominative">&labelHour;</xsl:variable>
+													<xsl:variable name="genitive_singular">&labelHours;</xsl:variable>
+													<xsl:variable name="genitive_plural">&labelHours;</xsl:variable>
+
+													<xsl:call-template name="declension">
+														<xsl:with-param name="number" select="expire_after_hours"/>
+														<xsl:with-param name="nominative" select="$nominative"/>
+														<xsl:with-param name="genitive_singular" select="$genitive_singular"/>
+														<xsl:with-param name="genitive_plural" select="$genitive_plural"/>
+													</xsl:call-template>
+												</xsl:if>
 											</xsl:when>
 											<xsl:otherwise>
-											<xsl:if test="expire_after_hours/node()"><xsl:text> </xsl:text><xsl:value-of select="expire_after_hours"/><xsl:text> </xsl:text>
-												<xsl:variable name="nominative">&labelHour;</xsl:variable>
-												<xsl:variable name="genitive_singular">&labelHours;</xsl:variable>
-												<xsl:variable name="genitive_plural">&labelHours;</xsl:variable>
+												<!-- Часы -->
+												<xsl:if test="expire_after_hours/node()"><xsl:text> </xsl:text><xsl:value-of select="expire_after_hours"/><xsl:text> </xsl:text>
+													<xsl:variable name="nominative">&labelHour;</xsl:variable>
+													<xsl:variable name="genitive_singular">&labelHours;</xsl:variable>
+													<xsl:variable name="genitive_plural">&labelHours;</xsl:variable>
 
-												<xsl:call-template name="declension">
-													<xsl:with-param name="number" select="expire_after_hours"/>
-													<xsl:with-param name="nominative" select="$nominative"/>
-													<xsl:with-param name="genitive_singular" select="$genitive_singular"/>
-													<xsl:with-param name="genitive_plural" select="$genitive_plural"/>
-												</xsl:call-template>
-											</xsl:if>
-											<xsl:if test="expire_after_minutes/node()"><xsl:text> </xsl:text><xsl:value-of select="expire_after_minutes"/><xsl:text> </xsl:text><xsl:variable name="nominative">&labelMinute;</xsl:variable>
-												<xsl:variable name="genitive_singular">&labelMinutes;</xsl:variable>
-												<xsl:variable name="genitive_plural">&labelMinutes;</xsl:variable>
+													<xsl:call-template name="declension">
+														<xsl:with-param name="number" select="expire_after_hours"/>
+														<xsl:with-param name="nominative" select="$nominative"/>
+														<xsl:with-param name="genitive_singular" select="$genitive_singular"/>
+														<xsl:with-param name="genitive_plural" select="$genitive_plural"/>
+													</xsl:call-template>
+												</xsl:if>
+												
+												<!-- Минуты -->
+												<xsl:if test="expire_after_minutes/node()"><xsl:text> </xsl:text><xsl:value-of select="expire_after_minutes"/><xsl:text> </xsl:text><xsl:variable name="nominative">&labelMinute;</xsl:variable>
+													<xsl:variable name="genitive_singular">&labelMinutes;</xsl:variable>
+													<xsl:variable name="genitive_plural">&labelMinutes;</xsl:variable>
 
-												<xsl:call-template name="declension">
-													<xsl:with-param name="number" select="expire_after_minutes"/>
-													<xsl:with-param name="nominative" select="$nominative"/>
-													<xsl:with-param name="genitive_singular" select="$genitive_singular"/>
-													<xsl:with-param name="genitive_plural" select="$genitive_plural"/>
-												</xsl:call-template>
-											</xsl:if>.
+													<xsl:call-template name="declension">
+														<xsl:with-param name="number" select="expire_after_minutes"/>
+														<xsl:with-param name="nominative" select="$nominative"/>
+														<xsl:with-param name="genitive_singular" select="$genitive_singular"/>
+														<xsl:with-param name="genitive_plural" select="$genitive_plural"/>
+													</xsl:call-template>
+												</xsl:if>.
 											</xsl:otherwise>
 											</xsl:choose>
 											</span>

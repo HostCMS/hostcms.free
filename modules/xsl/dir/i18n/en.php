@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Xsl
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'XSL sections',
@@ -24,4 +24,5 @@ return array(
 	'sorting' => 'Sort',
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
+	'move_success' => 'XSL sections moved',
 );

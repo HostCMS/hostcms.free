@@ -70,6 +70,83 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 					->add($oSiteuserGroupBlock = Admin_Form_Entity::factory('Div')->class('well with-header well-sm'))
 					->add($oMainRow7 = Admin_Form_Entity::factory('Div')->class('row'));
 
+				$aShop_Purchase_Discount_Coupons = $this->_object->Shop_Purchase_Discount_Coupons->findAll(FALSE);
+
+				if (count($aShop_Purchase_Discount_Coupons))
+				{
+					$oTabCoupons = Admin_Form_Entity::factory('Tab')
+						->caption(Core::_('Shop_Purchase_Discount.tab_coupons'))
+						->name('Coupons');
+
+					$oTabCoupons->add($oCouponsBlock = Admin_Form_Entity::factory('Div')->class('well with-header well-sm'));
+
+					$oCouponsBlock
+						->add(Admin_Form_Entity::factory('Div')
+							->class('header bordered-palegreen')
+							->value(Core::_('Shop_Purchase_Discount.coupon_header'))
+						)
+						->add($oCouponsRow1 = Admin_Form_Entity::factory('Div')->class('row'));
+
+					$itemTable = '
+						<div class="table-scrollable">
+							<table class="table table-striped table-hover shop-item-table deals-aggregate-user-info">
+								<thead>
+									<tr>
+										<th rowspan="2" scope="col"></th>
+										<th rowspan="2" scope="col">' . Core::_('Shop_Purchase_Discount_Coupon.name') . '</th>
+										<th rowspan="2" scope="col">' . Core::_('Shop_Purchase_Discount_Coupon.text') . '</th>
+										<th rowspan="2" scope="col">' . Core::_('Shop_Purchase_Discount_Coupon.active') . '</th>
+										<th rowspan="2" scope="col">' . Core::_('Shop_Purchase_Discount_Coupon.count') . '</th>
+										<th rowspan="2" scope="col">' . Core::_('Shop_Purchase_Discount_Coupon.start_datetime') . '</th>
+										<th rowspan="2" scope="col">' . Core::_('Shop_Purchase_Discount_Coupon.end_datetime') . '</th>
+								</tr>
+							</thead>
+							<tbody>
+					';
+
+					$path = Admin_Form_Controller::correctBackendPath('/{admin}/shop/purchase/discount/coupon/index.php');
+
+					foreach ($aShop_Purchase_Discount_Coupons as $oShop_Purchase_Discount_Coupon)
+					{
+						$href = $this->_Admin_Form_Controller->getAdminActionLoadHref($path, 'edit', NULL, 1, $oShop_Purchase_Discount_Coupon->id);
+
+						$externalLink = '<a class="margin-left-5" target="_blank" href="' . $href . '"><i class="fa-solid fa-arrow-up-right-from-square small gray"></i></a>';
+
+						$active = $oShop_Purchase_Discount_Coupon->active
+							? '<i class="fa-regular fa-lightbulb"></i>'
+							: '<i class="fa-regular fa-lightbulb fa-inactive"></i>';
+
+						$itemTable .= '
+							<tr>
+								<td class="index">' . htmlspecialchars($oShop_Purchase_Discount_Coupon->id) . '</td>
+								<td>' . htmlspecialchars((string) $oShop_Purchase_Discount_Coupon->name) . $externalLink . '</td>
+								<td><strong>' . htmlspecialchars((string) $oShop_Purchase_Discount_Coupon->text) . '</strong></td>
+								<td>' .  $active . '</td>
+								<td>' . htmlspecialchars($oShop_Purchase_Discount_Coupon->count) . '</td>
+								<td>' . htmlspecialchars(Core_Date::sql2datetime($oShop_Purchase_Discount_Coupon->start_datetime)) . '</td>
+								<td>' . htmlspecialchars(Core_Date::sql2datetime($oShop_Purchase_Discount_Coupon->end_datetime)) . '</td>
+							</tr>
+						';
+					}
+
+					$itemTable .= '
+							</tbody>
+						</table>
+					</div>
+					';
+
+					$oCouponsRow1
+						->add(Admin_Form_Entity::factory('Div')
+							->class('form-group col-xs-12')
+							->add(
+								Admin_Form_Entity::factory('Code')->html($itemTable)
+							)
+					);
+
+					$this
+						->addTabAfter($oTabCoupons, $oMainTab);
+				}
+
 				$oConditionsBlock
 					->add(Admin_Form_Entity::factory('Div')
 						->class('header bordered-palegreen')
@@ -149,7 +226,7 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 							array(
 								'fa-solid fa-chevron-up',
 								'fa-solid fa-chevron-down',
-								'fa-solid fa-shopping-cart',
+								'fa-solid fa-cart-shopping',
 							)
 						)
 						->divAttr(array('class' => 'form-group col-xs-12 rounded-radio-group'))

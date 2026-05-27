@@ -11,26 +11,26 @@
  */
 class Smarty_Internal_Method_GetTags
 {
-    /**
-     * Valid for Smarty and template object
-     *
-     * @var int
-     */
+	/**
+	 * Valid for Smarty and template object
+	 *
+	 * @var int
+	 */
     public $objMap = 3;
 
-    /**
-     * Return array of tag/attributes of all tags used by an template
-     *
-     * @api  Smarty::getTags()
-     * @link https://www.smarty.net/docs/en/api.get.tags.tpl
-     *
-     * @param \Smarty_Internal_TemplateBase|\Smarty_Internal_Template|\Smarty $obj
-     * @param null|string|Smarty_Internal_Template                            $template
-     *
-     * @return array of tag/attributes
-     * @throws \Exception
-     * @throws \SmartyException
-     */
+	/**
+	 * Return array of tag/attributes of all tags used by an template
+	 *
+	 * @api  Smarty::getTags()
+	 * @link https://www.smarty.net/docs/en/api.get.tags.tpl
+	 *
+	 * @param \Smarty_Internal_TemplateBase|\Smarty_Internal_Template|\Smarty $obj
+	 * @param null|string|Smarty_Internal_Template                            $template
+	 *
+	 * @return array of tag/attributes
+	 * @throws \Exception
+	 * @throws \SmartyException
+	 */
     public function getTags(Smarty_Internal_TemplateBase $obj, $template = null)
     {
         /* @var Smarty $smarty */

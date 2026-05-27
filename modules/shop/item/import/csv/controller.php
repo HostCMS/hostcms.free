@@ -520,7 +520,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 	/**
 	 * Get $this->_oCurrentOrder
 	 * @return Shop_Order_Model
-     */
+	 */
 	public function getCurrentOrder()
 	{
 		return $this->_oCurrentOrder;
@@ -4341,16 +4341,16 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 		return $this;
 	}
 
-    /**
-     * Add property to item
-     * @param Shop_Item_Model $oShopItem
-     * @param Property_Model $oProperty
-     * @param string $sPropertyValue property value
-     * @param integer $position
-     * @return false|mixed|Property_Value_Model
-     * @throws Core_Exception
-     * @hostcms-event Shop_Item_Import_Csv_Controller.onAddItemPropertyValueDefault
-     */
+	/**
+	 * Add property to item
+	 * @param Shop_Item_Model $oShopItem
+	 * @param Property_Model $oProperty
+	 * @param string $sPropertyValue property value
+	 * @param integer $position
+	 * @return false|mixed|Property_Value_Model
+	 * @throws Core_Exception
+	 * @hostcms-event Shop_Item_Import_Csv_Controller.onAddItemPropertyValueDefault
+	 */
 	protected function _addItemPropertyValue(Shop_Item_Model $oShopItem, Property_Model $oProperty, $sPropertyValue, $position = 0)
 	{
 		$aPropertyValues = $oProperty->getValues($oShopItem->id, FALSE);
@@ -4754,16 +4754,16 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 		return FALSE;
 	}
 
-    /**
-     * Add field to item
-     * @param Shop_Item_Model $oShopItem
-     * @param Field_Model $oField
-     * @param string $sFieldValue field value
-     * @param int $position
-     * @return false|mixed|object
-     * @throws Core_Exception
-     * @hostcms-event Shop_Item_Import_Csv_Controller.onAddItemFieldValueDefault
-     */
+	/**
+	 * Add field to item
+	 * @param Shop_Item_Model $oShopItem
+	 * @param Field_Model $oField
+	 * @param string $sFieldValue field value
+	 * @param int $position
+	 * @return false|mixed|object
+	 * @throws Core_Exception
+	 * @hostcms-event Shop_Item_Import_Csv_Controller.onAddItemFieldValueDefault
+	 */
 	protected function _addItemFieldValue(Shop_Item_Model $oShopItem, Field_Model $oField, $sFieldValue, $position = 0)
 	{
 		$aFieldValues = $oField->getValues($oShopItem->id, FALSE);
@@ -5167,17 +5167,17 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 		return FALSE;
 	}
 
-    /**
-     * Add property to group
-     * @param Shop_Group_Model $oShop_Group
-     * @param Property_Model $oProperty
-     * @param string $sPropertyValue property value
-     * @param int $position
-     * @return Shop_Item_Import_Csv_Controller
-     * @throws Core_Exception
-     * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeImportGroupProperty
-     * @hostcms-event Shop_Item_Import_Csv_Controller.onAddGroupPropertyValueDefault
-     */
+	/**
+	 * Add property to group
+	 * @param Shop_Group_Model $oShop_Group
+	 * @param Property_Model $oProperty
+	 * @param string $sPropertyValue property value
+	 * @param int $position
+	 * @return Shop_Item_Import_Csv_Controller
+	 * @throws Core_Exception
+	 * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeImportGroupProperty
+	 * @hostcms-event Shop_Item_Import_Csv_Controller.onAddGroupPropertyValueDefault
+	 */
 	protected function _addGroupPropertyValue(Shop_Group_Model $oShop_Group, Property_Model $oProperty, $sPropertyValue, $position = 0)
 	{
 		Core_Event::notify('Shop_Item_Import_Csv_Controller.onBeforeImportGroupProperty', $this, array($this->_oCurrentShop, $oShop_Group, $oProperty, $sPropertyValue));
@@ -5568,17 +5568,17 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 		return $this;
 	}
 
-    /**
-     * Add field to group
-     * @param Shop_Group_Model $oShop_Group
-     * @param Field_Model $oField
-     * @param string $sFieldValue field value
-     * @param int $position
-     * @return Shop_Item_Import_Csv_Controller
-     * @throws Core_Exception
-     * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeImportGroupField
-     * @hostcms-event Shop_Item_Import_Csv_Controller.onAddGroupFieldValueDefault
-     */
+	/**
+	 * Add field to group
+	 * @param Shop_Group_Model $oShop_Group
+	 * @param Field_Model $oField
+	 * @param string $sFieldValue field value
+	 * @param int $position
+	 * @return Shop_Item_Import_Csv_Controller
+	 * @throws Core_Exception
+	 * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeImportGroupField
+	 * @hostcms-event Shop_Item_Import_Csv_Controller.onAddGroupFieldValueDefault
+	 */
 	protected function _addGroupFieldValue(Shop_Group_Model $oShop_Group, Field_Model $oField, $sFieldValue, $position = 0)
 	{
 		Core_Event::notify('Shop_Item_Import_Csv_Controller.onBeforeImportGroupField', $this, array($this->_oCurrentShop, $oShop_Group, $oField, $sFieldValue));
@@ -6264,7 +6264,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 	 * Correct checkbox value
 	 * @param string $value
 	 * @return int
-     */
+	 */
 	protected function _correctCheckbox($value)
 	{
 		return $value == 1 || strtolower($value) === 'true' || strtolower($value) === 'да'

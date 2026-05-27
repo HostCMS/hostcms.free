@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Order_Item_Status_Model extends Core_Entity
 {
@@ -74,7 +74,7 @@ class Shop_Order_Item_Status_Model extends Core_Entity
 		$link = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $link);
 		$onclick = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $onclick);
 
-		$return = '<i class="fa ' . ($this->canceled ? 'fa-times-circle' : 'fa-circle') . '" style="margin-right: 5px; color: ' . ($this->color ? htmlspecialchars($this->color) : '#aebec4') . '"></i> '
+		$return = '<i class="fa-solid ' . ($this->canceled ? 'fa-circle-xmark' : 'fa-circle') . '" style="margin-right: 5px; color: ' . ($this->color ? htmlspecialchars($this->color) : '#aebec4') . '"></i> '
 			. '<a href="' . $link . '" onclick="' . $onclick . '">' . htmlspecialchars($this->name) . '</a>';
 
 		$count = $this->getChildCount();

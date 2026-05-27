@@ -50,7 +50,7 @@ $sAdditionalParams = "shop_id={$oShop->id}&shop_group_id={$shop_group_id}";
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Admin_Form.add'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
@@ -60,7 +60,7 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Price_Setting.convolution'))
-		->icon('fa fa-database')
+		->icon('fa-solid fa-database')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/price/setting/convolution/index.php', NULL, NULL, $sAdditionalParams)
 		)

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -106,7 +106,7 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 				ob_start();
 				?>
 				<div class="form-group col-xs-12">
-					<a class="btn btn-sky" onclick="$('#<?php echo $windowId?>-conditionsModal').modal('show')"><i class="fa fa-plus"></i> <?php echo Core::_('Shop_Filter_Seo.condition')?></a>
+					<a class="btn btn-sky" onclick="$('#<?php echo $windowId?>-conditionsModal').modal('show')"><i class="fa-solid fa-plus"></i> <?php echo Core::_('Shop_Filter_Seo.condition')?></a>
 				</div>
 
 				<div class="modal fade" id="<?php echo $windowId?>-conditionsModal" tabindex="-1" role="dialog" aria-labelledby="conditionsModalLabel">
@@ -184,7 +184,7 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 				?>
 				<div class="col-xs-12">
 					<div class="well well-sm margin-bottom-10 filter-conditions">
-						<p class="semi-bold"><i class="widget-icon fa fa-list icon-separator palegreen"></i><?php echo Core::_('Shop_Filter_Seo.conditions')?></p>
+						<p class="semi-bold"><i class="widget-icon fa-solid fa-list icon-separator palegreen"></i><?php echo Core::_('Shop_Filter_Seo.conditions')?></p>
 
 						<?php
 						if (count($aShop_Filter_Seo_Properties))
@@ -285,7 +285,7 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 																	->execute();
 															}
 															?>
-															<a class="delete-associated-item" onclick="<?php echo $onclick?>"><i class="fa fa-times-circle darkorange"></i></a>
+															<a class="delete-associated-item" onclick="<?php echo $onclick?>"><i class="fa-solid fa-circle-xmark darkorange"></i></a>
 														</div>
 														<input type="hidden" name="property_value_sorting<?php echo $oShop_Filter_Seo_Property->id?>" value="<?php echo $oShop_Filter_Seo_Property->sorting?>"/>
 													</div>

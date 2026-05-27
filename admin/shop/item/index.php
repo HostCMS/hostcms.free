@@ -564,11 +564,11 @@ $additionalParams = "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}" . (is
 
 $oDiscountMenu = Admin_Form_Entity::factory('Menu')
 ->name(Core::_('Shop_Item.shop_menu_title'))
-->icon('fa fa-money')
+->icon('fa-regular fa-money-bill-1')
 ->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Item.show_discount_link'))
-		->icon('fa fa-money')
+		->icon('fa-regular fa-money-bill-1')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/discount/index.php', NULL, NULL, $additionalParams)
 		)
@@ -579,7 +579,7 @@ $oDiscountMenu = Admin_Form_Entity::factory('Menu')
 ->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Item.order_discount_show_title'))
-		->icon('fa fa-money')
+		->icon('fa-regular fa-money-bill-1')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/purchase/discount/index.php', NULL, NULL, $additionalParams)
 		)
@@ -617,7 +617,7 @@ if (Core::moduleIsActive('siteuser'))
 $oDiscountMenu->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Item.bonus_link'))
-		->icon('fa fa-star')
+		->icon('fa-solid fa-star')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/bonus/index.php', NULL, NULL, $additionalParams)
 		)
@@ -628,7 +628,7 @@ $oDiscountMenu->add(
 ->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Item.coupon_group_link'))
-		->icon('fa fa-ticket')
+		->icon('fa-solid fa-ticket')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/purchase/discount/coupon/index.php', NULL, NULL, $additionalParams)
 		)
@@ -639,7 +639,7 @@ $oDiscountMenu->add(
 ->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Item.disountcard_link'))
-		->icon('fa fa-credit-card-alt')
+		->icon('fa-solid fa-credit-card')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/discountcard/index.php', NULL, NULL, $additionalParams)
 		)
@@ -656,7 +656,7 @@ $oMenu->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.links_items_add'))
-				->icon('fa fa-plus')
+				->icon('fa-solid fa-plus')
 				->href(
 					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
 				)
@@ -667,7 +667,7 @@ $oMenu->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.shops_add_form_link_properties'))
-				->icon('fa fa-cogs')
+				->icon('fa-solid fa-gears')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/property/index.php', NULL, NULL, $additionalParams)
 				)
@@ -678,7 +678,7 @@ $oMenu->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.properties_item_for_groups_link'))
-				->icon('fa fa-folder-o')
+				->icon('fa-regular fa-folder')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/property/for/group/index.php', NULL, NULL, $additionalParams)
 				)
@@ -700,7 +700,7 @@ $oMenu->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.items_catalog_add_form_comment_link'))
-				->icon('fa fa-comments')
+				->icon('fa-solid fa-comments')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/comment/index.php', NULL, NULL, $additionalParams)
 				)
@@ -722,7 +722,7 @@ $oMenu->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.change_prices_for_shop_group'))
-				->icon('fa fa-usd')
+				->icon('fa-solid fa-dollar-sign')
 				->href(
           $oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/change/index.php', NULL, NULL, $additionalParams)
 				)
@@ -733,7 +733,7 @@ $oMenu->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.import_price_list_link'))
-				->icon('fa fa-download')
+				->icon('fa-solid fa-download')
 				->href(
           $oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/import/index.php', NULL, NULL, $additionalParams)
 				)
@@ -744,7 +744,7 @@ $oMenu->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.export_shop'))
-				->icon('fa fa-upload')
+				->icon('fa-solid fa-upload')
 				->href(
           $oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/export/index.php', NULL, NULL, $additionalParams)
 				)
@@ -766,7 +766,7 @@ $oMenu->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.item_cards'))
-				->icon('fa fa-tag')
+				->icon('fa-solid fa-tags')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/card/index.php', NULL, NULL, $additionalParams)
 				)
@@ -777,7 +777,7 @@ $oMenu->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.item_warehouse'))
-				->icon('fa fa-balance-scale')
+				->icon('fa-solid fa-balance-scale')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/warehouse/index.php', NULL, NULL, $additionalParams)
 				)
@@ -792,7 +792,7 @@ $oMenu->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Group.links_groups_add'))
-				->icon('fa fa-plus')
+				->icon('fa-solid fa-plus')
 				->href(
 					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 				)
@@ -803,7 +803,7 @@ $oMenu->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Group.properties'))
-				->icon('fa fa-cogs')
+				->icon('fa-solid fa-gears')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/group/property/index.php', NULL, NULL, $additionalParams)
 				)
@@ -814,7 +814,7 @@ $oMenu->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Item.shops_link_orders'))
-		->icon('fa fa-shopping-cart')
+		->icon('fa-solid fa-cart-shopping')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/order/index.php', NULL, NULL, $additionalParams)
 		)
@@ -826,7 +826,7 @@ $oMenu->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Item.show_prices_title'))
-		->icon('fa fa-usd')
+		->icon('fa-solid fa-dollar-sign')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/price/index.php', NULL, NULL, $additionalParams)
 		)
@@ -856,11 +856,11 @@ $oMenu->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Item.show_sds_link'))
-		->icon('fa fa-book')
+		->icon('fa-solid fa-book')
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Order_Status.model_name'))
-				->icon('fa fa-circle')
+				->icon('fa-solid fa-circle')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref($sOrderStatusFormPath = '/{admin}/shop/order/status/index.php', NULL, NULL, $additionalParams)
 				)
@@ -871,7 +871,7 @@ $oMenu->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Order_Item_Status.model_name'))
-				->icon('fa fa-circle-o')
+				->icon('fa-regular fa-circle')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref($sOrderItemStatusFormPath = '/{admin}/shop/order/item/status/index.php', NULL, NULL, $additionalParams)
 				)
@@ -882,7 +882,7 @@ $oMenu->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.seo_filter'))
-				->icon('fa fa-filter')
+				->icon('fa-solid fa-filter')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/filter/seo/index.php', NULL, NULL, $additionalParams)
 				)
@@ -893,7 +893,7 @@ $oMenu->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.system_of_pays'))
-				->icon('fa fa-credit-card')
+				->icon('fa-solid fa-credit-card')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/payment/system/index.php', NULL, NULL, $additionalParams)
 				)
@@ -904,7 +904,7 @@ $oMenu->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.show_delivery_on'))
-				->icon('fa fa-truck')
+				->icon('fa-solid fa-truck')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/delivery/index.php', NULL, NULL, $additionalParams)
 				)
@@ -915,7 +915,7 @@ $oMenu->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.affiliate_menu_title'))
-				->icon('fa fa-group')
+				->icon('fa-solid fa-people-group')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/affiliate/plan/index.php', NULL, NULL, $additionalParams)
 				)
@@ -926,7 +926,7 @@ $oMenu->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.print_forms'))
-				->icon('fa fa-print')
+				->icon('fa-solid fa-print')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/print/form/index.php', NULL, NULL, $additionalParams)
 				)
@@ -937,7 +937,7 @@ $oMenu->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.show_producers_link'))
-				->icon('fa fa-industry')
+				->icon('fa-solid fa-industry')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/producer/index.php', NULL, NULL, $additionalParams)
 				)
@@ -948,7 +948,7 @@ $oMenu->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.show_sellers_link'))
-				->icon('fa fa-trademark')
+				->icon('fa-solid fa-trademark')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/seller/index.php', NULL, NULL, $additionalParams)
 				)
@@ -959,11 +959,11 @@ $oMenu->add(
 )/*->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Item.show_reports_title'))
-		->icon('fa fa-book')
+		->icon('fa-solid fa-book')
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.show_sales_order_link'))
-				->icon('fa fa-book')
+				->icon('fa-solid fa-book')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/order/report/index.php', NULL, NULL, $additionalParams)
 				)
@@ -974,7 +974,7 @@ $oMenu->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.show_brands_order_link'))
-				->icon('fa fa-book')
+				->icon('fa-solid fa-book')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/order/report/producer/index.php', NULL, NULL, $additionalParams)
 				)
@@ -1043,7 +1043,7 @@ $oAdmin_Form_Controller->addEntity(
 							' . $modeContent . '
 							<div class="col-xs-6 col-md-10">
 								<input type="text" name="globalSearch" class="form-control w-100" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
-								<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
+								<i class="fa-solid fa-circle-xmark no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
 								<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '"><i class="fa-solid fa-magnifying-glass fa-fw"></i></button>
 							</div>
 						</div>
@@ -1491,7 +1491,11 @@ if (Core::moduleIsActive('ai') && $oAdminFormActionAiApply && $oAdmin_Form_Contr
 		->title(Core::_('Ai_Prompt.apply'))
 		->selectCaption(Core::_('Ai_Prompt.ai_prompt_id'))
 		->autocompletePath(Admin_Form_Controller::correctBackendPath('/{admin}/ai/index.php?autocomplete=1&site_id=' . $oShop->site_id . '&models=' . implode(',', $aModels) . '&show_prompts=1'))
-		->autocompleteEntityId($oShop->site_id);
+		->autocompleteEntityId($oShop->site_id)
+		->datasets(array(
+			0 => 'Shop_Group',
+			1 => 'Shop_Item'
+		));
 
 	if (count($aModels))
 	{
@@ -1558,6 +1562,8 @@ if (strlen($sGlobalSearch))
 		$oAdmin_Form_Dataset
 			->addCondition(array('whereRaw' => array('0 = 1')));
 	}
+
+	Core_Event::notify('Shop_Item_GlobalSearch.onAfterSetConditions', NULL, array($oAdmin_Form_Dataset, $sGlobalSearch, $iGlobalSearchMode));
 }
 else
 {
@@ -1705,6 +1711,8 @@ if (strlen($sGlobalSearch))
 		$oAdmin_Form_Dataset
 			->addCondition(array('whereRaw' => array('0 = 1')));
 	}
+
+	Core_Event::notify('Shop_Item_GlobalSearch.onAfterSetConditions', NULL, array($oAdmin_Form_Dataset, $sGlobalSearch, $iGlobalSearchMode));
 }
 else
 {

@@ -210,10 +210,16 @@ class Core_File
 	 * Renames a file or directory
 	 * @param string $oldname The old name.
 	 * @param string $newname The new name.
-	 * @param bool $recursive Recursive rename.
+	 * @param bool $recursive Recursive rename if $newname exists.
+	 * @return bool
 	 */
 	static public function rename($oldname, $newname, $recursive = FALSE)
 	{
+		if ($oldname === $newname)
+		{
+			return TRUE;
+		}
+			
 		if (self::isFile($oldname) || self::isDir($oldname))
 		{
 			if (!self::isDir($newname))
@@ -251,6 +257,8 @@ class Core_File
 			throw new Core_Exception("The file/dir '%oldname' does not exist.",
 				array('%oldname' => Core::cutRootPath($oldname)));
 		}
+		
+		return TRUE;
 	}
 
 	/**
@@ -764,15 +772,15 @@ class Core_File
 			}
 		}
 
-		header('Pragma: public');
 		header('Content-Type: ' . Core_Mime::getFileMime($fileName));
 
 		$contentDisposition = isset($param['content_disposition']) && strtolower($param['content_disposition']) == 'attachment'
 			? 'attachment'
 			: 'inline';
 
-		header("Content-Disposition: {$contentDisposition}; filename=\"" . rawurlencode(Core_Http::sanitizeHeader($fileName)) . "\";");
+		header("Content-Disposition: {$contentDisposition}; filename=\"" . rawurlencode(Core_Http::sanitizeHeader($fileName)) . "\"");
 		header('Content-Transfer-Encoding: binary');
+		header('X-Content-Type-Options: nosniff');
 		header('Accept-Ranges: bytes');
 		header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $fileTime) . ' GMT');
 

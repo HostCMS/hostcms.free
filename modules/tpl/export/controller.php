@@ -108,11 +108,11 @@ class Tpl_Export_Controller extends Core_Servant_Properties
 		return implode('/', $aReturn);
 	}
 
-    /**
-     * Set objects
-     * @param Tpl_Model $oTpl tpl
-     * @return self
-     */
+	/**
+	 * Set objects
+	 * @param Tpl_Model $oTpl tpl
+	 * @return self
+	 */
 	protected function _setObjects(Tpl_Model $oTpl)
 	{
 		$this->_aObjects[$oTpl->name] = array(
@@ -147,7 +147,6 @@ class Tpl_Export_Controller extends Core_Servant_Properties
 
 		$fileName = $prefix . '_' . date("Y_m_d_H_i_s") . '.json';
 
-		header("Pragma: public");
 		header("Content-Description: File Transfer");
 		header("Content-Type: " . Core_Mime::getFileMime($fileName));
 		header("Content-Disposition: attachment; filename = \"" . rawurlencode(Core_Http::sanitizeHeader($fileName)) . "\";");

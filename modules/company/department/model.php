@@ -104,7 +104,7 @@ class Company_Department_Model extends Core_Entity
 		}
 
 		echo '<div class="department"><span class="department_name">' . htmlspecialchars($this->name) . '</span><span class="icons_permissions">';
-		//<i class="fa fa-circle"></i><i class="fa fa-circle"></i><i class="fa fa-circle"></i><i class="fa fa-circle"></i>'
+
 		for ($bitNumber = 0; $bitNumber < 4 ; $bitNumber++)
 		{
 
@@ -133,7 +133,7 @@ class Company_Department_Model extends Core_Entity
 					break;
 			}
 
-			echo '<i id="department_' . $oDeal_Template_Step_Access_Department->company_department_id . '_' . $deal_template_step_id . '_' . $bitNumber. '" title="' . $actionTitle . '" data-action="' . $actionName . '" data-allowed="' . $bitValue . '" class="fa ' . ($bitValue ? 'fa-circle' : 'fa-circle-o'). '"></i>';
+			echo '<i id="department_' . $oDeal_Template_Step_Access_Department->company_department_id . '_' . $deal_template_step_id . '_' . $bitNumber. '" title="' . $actionTitle . '" data-action="' . $actionName . '" data-allowed="' . $bitValue . '" class="' . ($bitValue ? 'fa-solid fa-circle' : 'fa-regular fa-circle'). '"></i>';
 
 		}
 		echo '</span></div>';

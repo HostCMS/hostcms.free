@@ -11,25 +11,25 @@
  */
 class Smarty_Internal_Method_LoadPlugin
 {
-    /**
-     * Cache of searched plugin files
-     *
-     * @var array
-     */
+	/**
+	 * Cache of searched plugin files
+	 *
+	 * @var array
+	 */
     public $plugin_files = array();
 
-    /**
-     * Takes unknown classes and loads plugin files for them
-     * class name format: Smarty_PluginType_PluginName
-     * plugin filename format: plugintype.pluginname.php
-     *
-     * @param \Smarty $smarty
-     * @param string  $plugin_name class plugin name to load
-     * @param bool    $check       check if already loaded
-     *
-     * @return bool|string
-     * @throws \SmartyException
-     */
+	/**
+	 * Takes unknown classes and loads plugin files for them
+	 * class name format: Smarty_PluginType_PluginName
+	 * plugin filename format: plugintype.pluginname.php
+	 *
+	 * @param \Smarty $smarty
+	 * @param string  $plugin_name class plugin name to load
+	 * @param bool    $check       check if already loaded
+	 *
+	 * @return bool|string
+	 * @throws \SmartyException
+	 */
     public function loadPlugin(Smarty $smarty, $plugin_name, $check)
     {
         // if function or class exists, exit silently (already loaded)

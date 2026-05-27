@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Tpl
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'TPL Templates',
@@ -40,4 +40,7 @@ return array(
 	'import_file' => 'Choose file to upload',
 	'import_button' => 'Upload',
 	'importTpls_success' => 'Import completed successfully!',
+	'move_tpl_dir_title' => "Moving TPL Templates",
+	'move_tpl_dir_id' => "Parent Group",
+	'move_success' => 'TPL Templates Moved'
 );

@@ -56,4 +56,7 @@ return array(
 	'siteuser_groups' => "Группа доступа",
 	'all' => 'Все',
 	'conditions' => 'Условия',
+	'coupon_not_check' => 'Не установлен флаг "Применять только с купоном"',
+	'tab_coupons' => 'Купоны',
+	'coupon_header' => 'Купоны, связанные со скидкой',
 );

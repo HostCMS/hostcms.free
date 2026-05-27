@@ -8,35 +8,15 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Property
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
-class Property_Value_Datetime_Model extends Core_Entity
+class Property_Value_Datetime_Model extends Property_Value_Abstract
 {
 	/**
 	 * Model name
 	 * @var mixed
 	 */
 	protected $_modelName = 'property_value_datetime';
-
-	/**
-	 * Column consist item's name
-	 * @var string
-	 */
-	protected $_nameColumn = 'id';
-
-	/**
-	 * Disable markDeleted()
-	 * @var mixed
-	 */
-	protected $_marksDeleted = NULL;
-
-	/**
-	 * Belongs to relations
-	 * @var array
-	 */
-	protected $_belongsTo = array(
-		'property' => array()
-	);
 
 	/**
 	 * Forbidden tags. If list of tags is empty, all tags will show.
@@ -93,40 +73,6 @@ class Property_Value_Datetime_Model extends Core_Entity
 	}
 
 	/**
-	 * Name of tag
-	 * @var string
-	 */
-	protected $_tagName = 'property_value';
-
-	/**
-	 * Get XML for entity and children entities
-	 * @return string
-	 * @hostcms-event property_value_datetime.onBeforeRedeclaredGetXml
-	 */
-	public function getXml()
-	{
-		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
-
-		$this->_prepareData();
-
-		return parent::getXml();
-	}
-
-	/**
-	 * Get stdObject for entity and children entities
-	 * @return stdObject
-	 * @hostcms-event property_value_datetime.onBeforeRedeclaredGetStdObject
-	 */
-	public function getStdObject($attributePrefix = '_')
-	{
-		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
-
-		$this->_prepareData();
-
-		return parent::getStdObject($attributePrefix);
-	}
-
-	/**
 	 * Prepare entity and children entities
 	 * @return self
 	 */
@@ -141,6 +87,7 @@ class Property_Value_Datetime_Model extends Core_Entity
 		!$oProperty->multiple && $this->addForbiddenTag('sorting');
 
 		$value = '';
+
 		if ($this->value != '0000-00-00 00:00:00')
 		{
 			$value = $oProperty->type == 8
@@ -151,19 +98,5 @@ class Property_Value_Datetime_Model extends Core_Entity
 		$this->addXmlTag('value', $value);
 
 		return $this;
-	}
-	
-/**
-	 * Convert Object to Array
-	 * @return array
-	 * @hostcms-event modelname.onAfterToArray
-	 */
-	public function toArray()
-	{
-		$return = parent::toArray();
-
-		$return['__model_name'] = $this->_modelName;
-
-		return $return;
 	}
 }

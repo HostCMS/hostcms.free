@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Warehouse_Movement_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -123,8 +123,8 @@ class Shop_Warehouse_Movement_Controller_Edit extends Admin_Form_Action_Controll
 		{
 			$printlayoutsButton = '
 				<div class="btn-group">
-					<a class="btn btn-labeled btn-success" href="javascript:void(0);"><i class="btn-label fa fa-print"></i>' . Core::_('Printlayout.print') . '</a>
-					<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
+					<a class="btn btn-labeled btn-success" href="javascript:void(0);"><i class="btn-label fa-solid fa-print"></i>' . Core::_('Printlayout.print') . '</a>
+					<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa-solid fa-angle-down"></i></a>
 					<ul class="dropdown-menu dropdown-palegreen">
 			';
 
@@ -214,7 +214,7 @@ class Shop_Warehouse_Movement_Controller_Edit extends Admin_Form_Action_Controll
 					$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'deleteShopItem', NULL, 0, $oShop_Item->id, "shop_warehouse_movement_item_id={$oShop_Warehouse_Movement_Item->id}");
 
 					$externalLink = $sShopUrl
-						? '<a class="margin-left-5" target="_blank" href="' . htmlspecialchars($sShopUrl . $oShop_Item->getPath()) . '"><i class="fa fa-external-link"></i></a>'
+						? '<a class="margin-left-5" target="_blank" href="' . htmlspecialchars($sShopUrl . $oShop_Item->getPath()) . '"><i class="fa-solid fa-arrow-up-right-from-square small"></i></a>'
 						: '';
 
 					// Цены
@@ -232,7 +232,7 @@ class Shop_Warehouse_Movement_Controller_Edit extends Admin_Form_Action_Controll
 							<td>' . htmlspecialchars((string) $oShop_Item->Shop_Currency->sign) . '</td>
 							<td width="80"><input class="set-item-count form-control" name="shop_item_quantity_' . $oShop_Warehouse_Movement_Item->id . '" value="' . $oShop_Warehouse_Movement_Item->count . '" /></td>
 							<td><span class="calc-warehouse-sum">' . ($oShop_Warehouse_Movement_Item->count * $price) . '</span></td>
-							<td><a class="delete-associated-item" onclick="mainFormLocker.unlock(); res = confirm(\'' . Core::_('Shop_Warehouse_Incoming.delete_dialog') . '\'); if (res) { var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next); ' . $onclick . ' } return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
+							<td><a class="delete-associated-item" onclick="mainFormLocker.unlock(); res = confirm(\'' . Core::_('Shop_Warehouse_Incoming.delete_dialog') . '\'); if (res) { var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next); ' . $onclick . ' } return res;"><i class="fa-solid fa-circle-xmark darkorange"></i></a></td>
 						</tr>
 					';
 				}
@@ -266,7 +266,7 @@ class Shop_Warehouse_Movement_Controller_Edit extends Admin_Form_Action_Controll
 
 		$oCore_Html_Entity_Script = Core_Html_Entity::factory('Script')
 			->value("var jAddShopItem = $('#{$windowId} .add-shop-item'); jAddShopItem.autocompleteShopItem({ shop_id: '{$oShop->id}', price_mode: 'item', shop_currency_id: 0 }, function(event, ui) {
-				var newRow = $('<tr data-item-id=\"' + ui.item.id + '\"><td class=\"index\">' + $('#{$windowId} .index_value').val() + '</td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td><span class=\"price\">' + ui.item.price_with_tax + '</span></td><td>' + $.escapeHtml(ui.item.currency) + '</td><td width=\"80\"><input class=\"set-item-count form-control\" onsubmit=\"$(\'.add-shop-item\').focus();return false;\" name=\"shop_item_quantity[]\" value=\"\"/></td><td><span class=\"calc-warehouse-sum\"></span></td><td><a class=\"delete-associated-item\" onclick=\"var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>'),
+				var newRow = $('<tr data-item-id=\"' + ui.item.id + '\"><td class=\"index\">' + $('#{$windowId} .index_value').val() + '</td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td><span class=\"price\">' + ui.item.price_with_tax + '</span></td><td>' + $.escapeHtml(ui.item.currency) + '</td><td width=\"80\"><input class=\"set-item-count form-control\" onsubmit=\"$(\'.add-shop-item\').focus();return false;\" name=\"shop_item_quantity[]\" value=\"\"/></td><td><span class=\"calc-warehouse-sum\"></span></td><td><a class=\"delete-associated-item\" onclick=\"var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)\"><i class=\"fa-solid fa-circle-xmark darkorange\"></i></a></td></tr>'),
 				jNewItemCount = newRow.find('.set-item-count');
 
 				$('#{$windowId} .shop-item-table > tbody').append(

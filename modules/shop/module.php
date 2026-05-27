@@ -34,9 +34,9 @@ class Shop_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 	/**
 	 * Module name
@@ -145,7 +145,7 @@ class Shop_Module extends Core_Module_Abstract
 			array(
 				'sorting' => 40,
 				'block' => 0,
-				'ico' => 'fa fa-shopping-cart',
+				'ico' => 'fa-solid fa-cart-shopping',
 				'name' => Core::_('Shop.menu'),
 				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/shop/index.php"),
 				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/shop/index.php'}); return false")
@@ -701,7 +701,7 @@ class Shop_Module extends Core_Module_Abstract
 		}
 
 		return array(
-			'icon' => 'fa-shopping-cart',
+			'icon' => 'fa-solid fa-cart-shopping',
 			'href' => $href,
 			'onclick' => $onclick
 		);
@@ -888,19 +888,19 @@ class Shop_Module extends Core_Module_Abstract
 		switch ($type)
 		{
 			case 1: // Новый заказ
-				$sIconIco = "fa-shopping-basket";
+				$sIconIco = "fa-solid fa-shopping-basket";
 				$sIconColor = "white";
 				$sBackgroundColor = "bg-azure";
 				$sNotificationColor = 'azure';
 			break;
 			case 2: // Оплата
-				$sIconIco = "fa-money";
+				$sIconIco = "fa-solid fa-money-bill";
 				$sIconColor = "white";
 				$sBackgroundColor = "bg-palegreen";
 				$sNotificationColor = 'palegreen';
 			break;
 			default:
-				$sIconIco = "fa-info";
+				$sIconIco = "fa-solid fa-info";
 				$sIconColor = "white";
 				$sBackgroundColor = "bg-themeprimary";
 				$sNotificationColor = 'info';
@@ -910,7 +910,7 @@ class Shop_Module extends Core_Module_Abstract
 
 		return array(
 			'icon' => array(
-				'ico' => "fa {$sIconIco}",
+				'ico' => $sIconIco,
 				'color' => $sIconColor,
 				'background-color' => $sBackgroundColor
 			),

@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -32,7 +32,7 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Antispam.stopwords'))
-		->icon('fa fa-ban')
+		->icon('fa-solid fa-ban')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/antispam/stopword/index.php', NULL, NULL, '')
 		)
@@ -42,7 +42,7 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Antispam.countries_list'))
-		->icon('fa fa-flag')
+		->icon('fa-solid fa-flag')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/antispam/country/index.php', NULL, NULL, '')
 		)
@@ -52,7 +52,7 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Antispam.domains'))
-		->icon('fa fa-globe')
+		->icon('fa-solid fa-globe')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/antispam/domain/index.php', NULL, NULL, '')
 		)

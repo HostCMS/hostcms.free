@@ -465,7 +465,7 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 
 								$ico = is_array($aMenu) && isset($aMenu[0])
 									? strval(Core_Array::get($aMenu[0], 'ico'))
-									: 'fa fa-bookmark';
+									: 'fa-solid fa-bookmark';
 
 								$path = Admin_Form_Controller::correctBackendPath($oUser_Bookmark->path);
 

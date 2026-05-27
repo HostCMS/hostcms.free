@@ -23,8 +23,8 @@ function smarty_modifiercompiler_unescape($params, Smarty_Internal_TemplateCompi
     $compiler->template->_checkPlugins(
         array(
             array(
-                'function' => 'smarty_literal_compiler_param',
-                'file'     => SMARTY_PLUGINS_DIR . 'shared.literal_compiler_param.php'
+            	'function' => 'smarty_literal_compiler_param',
+            	'file'     => SMARTY_PLUGINS_DIR . 'shared.literal_compiler_param.php'
             )
         )
     );

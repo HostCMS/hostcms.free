@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Tpl
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Tpl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -142,7 +142,7 @@ class Tpl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oSelect_Dirs
 					->options(
-						array(' … ') + $this->fillTplDir(0, $this->_object->id)
+						array(' … ') + $this->fillTplDir(0, array($this->_object->id))
 					)
 					->name('parent_id')
 					->value($this->_object->parent_id)
@@ -160,40 +160,6 @@ class Tpl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$this->title($title);
 
 		return $this;
-	}
-
-	/**
-	 * Create visual tree of the directories
-	 * @param int $iTplDirParentId parent directory ID
-	 * @param boolean $bExclude exclude group ID
-	 * @param int $iLevel current nesting level
-	 * @return array
-	 */
-	public function fillTplDir($iTplDirParentId = 0, $bExclude = FALSE, $iLevel = 0)
-	{
-		$iTplDirParentId = intval($iTplDirParentId);
-		$iLevel = intval($iLevel);
-
-		$oTpl_Dir = Core_Entity::factory('Tpl_Dir', $iTplDirParentId);
-
-		$aReturn = array();
-
-		// Дочерние разделы
-		$childrenDirs = $oTpl_Dir->Tpl_Dirs->findAll();
-
-		if (count($childrenDirs))
-		{
-			foreach ($childrenDirs as $childrenDir)
-			{
-				if ($bExclude != $childrenDir->id)
-				{
-					$aReturn[$childrenDir->id] = str_repeat('  ', $iLevel) . $childrenDir->name;
-					$aReturn += $this->fillTplDir($childrenDir->id, $bExclude, $iLevel+1);
-				}
-			}
-		}
-
-		return $aReturn;
 	}
 
 	/**
@@ -268,5 +234,40 @@ class Tpl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		}
 
 		return parent::execute($operation);
+	}
+
+	/**
+	 * Create visual tree of the directories
+	 * @param int $iTplDirParentId parent directory ID
+	 * @param array $aExclude exclude group ID
+	 * @param int $iLevel current nesting level
+	 * @return array
+	 */
+	public function fillTplDir($iTplDirParentId = 0, $aExclude = array(), $iLevel = 0)
+	{
+		$iTplDirParentId = intval($iTplDirParentId);
+		$iLevel = intval($iLevel);
+
+		$oTpl_Dir = Core_Entity::factory('Tpl_Dir', $iTplDirParentId);
+
+		$aReturn = array();
+
+		// Дочерние разделы
+		$childrenDirs = $oTpl_Dir->Tpl_Dirs->findAll();
+
+		if (count($childrenDirs))
+		{
+			$countExclude = count($aExclude);
+			foreach ($childrenDirs as $childrenDir)
+			{
+				if ($countExclude == 0 || !in_array($childrenDir->id, $aExclude))
+				{
+					$aReturn[$childrenDir->id] = str_repeat('  ', $iLevel) . '[' . $childrenDir->id . '] ' . $childrenDir->name;
+					$aReturn += $this->fillTplDir($childrenDir->id, $aExclude, $iLevel+1);
+				}
+			}
+		}
+
+		return $aReturn;
 	}
 }

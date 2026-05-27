@@ -48,11 +48,11 @@ abstract class Bot_Controller
 	 */
 	protected $_oBot_Module = NULL;
 
-    /**
-     * Set bot module
-     * @param Bot_Module_Model $oBot_Module
-     * @return self
-     */
+	/**
+	 * Set bot module
+	 * @param Bot_Module_Model $oBot_Module
+	 * @return self
+	 */
 	public function setBotModule(Bot_Module_Model $oBot_Module)
 	{
 		$this->_oBot_Module = $oBot_Module;
@@ -193,14 +193,14 @@ abstract class Bot_Controller
 		}
 	}
 
-    /**
-     * Get bot tab
-     * @param object $oModule module id
-     * @param int $entity_id entity id
-     * @param int $type entity type
-     * @return object
-     * @throws Core_Exception
-     */
+	/**
+	 * Get bot tab
+	 * @param object $oModule module id
+	 * @param int $entity_id entity id
+	 * @param int $type entity type
+	 * @return object
+	 * @throws Core_Exception
+	 */
 	static public function getBotTab($oModule, $entity_id, $type)
 	{
 		$oBotsTab = Admin_Form_Entity::factory('Tab')

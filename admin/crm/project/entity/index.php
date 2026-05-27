@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -69,7 +69,7 @@ if (Core::moduleIsActive('event'))
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Crm_Project.add_event'))
-				->icon('fa fa-plus')
+				->icon('fa-solid fa-plus')
 				->onclick(
 					"$.modalLoad({path: hostcmsBackend + '/event/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&{$additionalParams}', windowId: '{$windowId}'}); return false"
 				)
@@ -81,7 +81,7 @@ if (Core::moduleIsActive('deal'))
 	$oAdmin_Form_Entity_Menus->add(
 		Admin_Form_Entity::factory('Menu')
 			->name(Core::_('Crm_Project.add_deal'))
-			->icon('fa fa-plus')
+			->icon('fa-solid fa-plus')
 			->onclick(
 				"$.modalLoad({path: hostcmsBackend + '/deal/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&{$additionalParams}', windowId: '{$windowId}'}); return false"
 			)
@@ -93,7 +93,7 @@ if (Core::moduleIsActive('dms'))
 	$oAdmin_Form_Entity_Menus->add(
 		Admin_Form_Entity::factory('Menu')
 			->name(Core::_('Crm_Project.add_document'))
-			->icon('fa fa-plus')
+			->icon('fa-solid fa-plus')
 			->onclick(
 				"$.modalLoad({path: hostcmsBackend + '/dms/document/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&{$additionalParams}', windowId: '{$windowId}'}); return false"
 			)
@@ -103,14 +103,14 @@ if (Core::moduleIsActive('dms'))
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Crm_Project.add_note'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->onclick(
 			"$.modalLoad({path: hostcmsBackend + '/crm/project/note/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&{$additionalParams}', windowId: '{$windowId}'}); return false"
 		)
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Crm_Project.add_attachment'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->onclick(
 			"$.modalLoad({path: hostcmsBackend + '/crm/project/attachment/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&{$additionalParams}', windowId: '{$windowId}'}); return false"
 		)

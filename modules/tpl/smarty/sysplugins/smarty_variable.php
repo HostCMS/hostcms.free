@@ -10,37 +10,37 @@
 #[\AllowDynamicProperties]
 class Smarty_Variable
 {
-    /**
-     * template variable
-     *
-     * @var mixed
-     */
+	/**
+	 * template variable
+	 *
+	 * @var mixed
+	 */
     public $value = null;
 
-    /**
-     * if true any output of this variable will be not cached
-     *
-     * @var boolean
-     */
+	/**
+	 * if true any output of this variable will be not cached
+	 *
+	 * @var boolean
+	 */
     public $nocache = false;
 
-    /**
-     * create Smarty variable object
-     *
-     * @param mixed   $value   the value to assign
-     * @param boolean $nocache if true any output of this variable will be not cached
-     */
+	/**
+	 * create Smarty variable object
+	 *
+	 * @param mixed   $value   the value to assign
+	 * @param boolean $nocache if true any output of this variable will be not cached
+	 */
     public function __construct($value = null, $nocache = false)
     {
         $this->value = $value;
         $this->nocache = $nocache;
     }
 
-    /**
-     * <<magic>> String conversion
-     *
-     * @return string
-     */
+	/**
+	 * <<magic>> String conversion
+	 *
+	 * @return string
+	 */
     public function __toString()
     {
         return (string)$this->value;

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Discount_Siteuser_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -53,7 +53,7 @@ class Shop_Discount_Siteuser_Controller_Edit extends Admin_Form_Action_Controlle
 		if (Core::moduleIsActive('siteuser'))
 		{
 			$oSiteuser = !is_null(Core_Array::getGet('siteuser_id'))
-				? Core_Entity::factory('Siteuser')->find(Core_Array::getGet('siteuser_id'))
+				? Core_Entity::factory('Siteuser')->find(Core_Array::getGet('siteuser_id', 0, 'int'))
 				: $this->_object->Siteuser;
 
 			$options = !is_null($oSiteuser->id)
@@ -232,6 +232,30 @@ class Shop_Discount_Siteuser_Controller_Edit extends Admin_Form_Action_Controlle
 		}
 
 		return $aReturn;
+	}
+
+	/**
+	 * Executes the business logic.
+	 * @param mixed $operation Operation name
+	 * @return boolean
+	 */
+	public function execute($operation = NULL)
+	{
+		if (!is_null($operation) && $operation != '' && $operation != 'modal')
+		{
+			$siteuser_id = Core_Array::getPost('siteuser_id', 0, 'int');
+
+			if (!$siteuser_id)
+			{
+				$this->addMessage(
+					Core_Message::get(Core::_('Shop_Discount_Siteuser.empty_siteuser_id'), 'error')
+				);
+
+				return TRUE;
+			}
+		}
+
+		return parent::execute($operation);
 	}
 
 	/**

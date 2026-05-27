@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -70,7 +70,7 @@ if (!is_null($oInformationsystem_Item->id) || $comment_parent_id)
 	$oAdmin_Form_Entity_Menus->add(
 		Admin_Form_Entity::factory('Menu')
 			->name(Core::_('Admin_Form.add'))
-			->icon('fa fa-plus')
+			->icon('fa-solid fa-plus')
 			->href(
 				$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 			)
@@ -87,7 +87,7 @@ if ($oInformationsystem->id)
 	$oAdmin_Form_Entity_Menus->add(
 		Admin_Form_Entity::factory('Menu')
 			->name(Core::_('Informationsystem_Item.show_information_groups_link3'))
-			->icon('fa fa-gears')
+			->icon('fa-solid fa-gears')
 			->href(
 				$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/informationsystem/comment/property/index.php', NULL, NULL, $additionalParamsProperties)
 			)

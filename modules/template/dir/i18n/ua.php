@@ -24,4 +24,5 @@ return array(
 	'root' => 'Макети',
 	'delete_success' => 'Елемент видалений!',
 	'undelete_success' => 'Елемент відновлено!',
+	'move_success' => 'Розділи макетів перенесені',
 );

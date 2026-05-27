@@ -112,7 +112,7 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 							: ''
 					)
 					->class('lib-edit input-group-addon blue' . ($this->_object->lib_id ? '' : ' hidden'))
-					->value('<i class="fa fa-pencil"></i>')
+					->value('<i class="fa-solid fa-pencil"></i>')
 			);
 
 		$Div_Lib_Properties = Admin_Form_Entity::factory('Code');

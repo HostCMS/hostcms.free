@@ -17,7 +17,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * @var array
 	 */
 	protected $_with = array();
-	
+
 	/**
 	 * WITH RECURCIVE option
 	 * @var array
@@ -185,7 +185,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 			}
 
 			$sql .= ' AS (' . $aWith['subquery']->build() . ')';
-			
+
 			$aTmp[] = $sql;
 		}
 
@@ -389,12 +389,12 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 		return implode(' ', $sql);
 	}
 
-    /**
-     * Quote columns
-     * @param string $tableName
-     * @return array
-     * @throws Core_Exception
-     */
+	/**
+	 * Quote columns
+	 * @param string|object $tableName
+	 * @return array
+	 * @throws Core_Exception
+	 */
 	public function quoteTable($tableName)
 	{
 		if (is_array($tableName) && count($tableName) == 2 && $this->_isObjectSelect($tableName[0]))
@@ -706,9 +706,9 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * // WHERE `a7` BETWEEN 1 AND 10
 	 * $Core_QueryBuilder_Select->where('a7', 'BETWEEN', array(1, 10));
 	 * </code>
-	 * @param string $column column
-	 * @param string $expression expression
-	 * @param string $value value
+	 * @param string|object $column column
+	 * @param string|NULL $expression expression
+	 * @param string|NULL $value value
 	 * @return self
 	 */
 	public function where($column, $expression = NULL, $value = NULL)
@@ -886,33 +886,33 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 			->whereNotBetween($column, $from, $to);
 	}
 
-    /**
-     * Add WHERE $column IN (x, y)
-     *
-     * <code>
-     * // WHERE `a7` IN (1, 2, 'aaa')
-     * $Core_QueryBuilder_Select->whereIn('a7', array(1, 2, 'aaa'));
-     * </code>
-     * @param string $column column
-     * @param array $value value
-     * @return self
-     */
+	/**
+	 * Add WHERE $column IN (x, y)
+	 *
+	 * <code>
+	 * // WHERE `a7` IN (1, 2, 'aaa')
+	 * $Core_QueryBuilder_Select->whereIn('a7', array(1, 2, 'aaa'));
+	 * </code>
+	 * @param string $column column
+	 * @param array $value value
+	 * @return self
+	 */
 	public function whereIn($column, array $value)
 	{
 		return $this->where($column, 'IN', $value);
 	}
 
-    /**
-     * Add OR and WHERE $column IN (x, y)
-     *
-     * <code>
-     * // WHERE ... OR `a7` IN (1, 2, 'aaa')
-     * $Core_QueryBuilder_Select->orWhereIn('a7', array(1, 2, 'aaa'));
-     * </code>
-     * @param string $column column
-     * @param array $value value
-     * @return self
-     */
+	/**
+	 * Add OR and WHERE $column IN (x, y)
+	 *
+	 * <code>
+	 * // WHERE ... OR `a7` IN (1, 2, 'aaa')
+	 * $Core_QueryBuilder_Select->orWhereIn('a7', array(1, 2, 'aaa'));
+	 * </code>
+	 * @param string $column column
+	 * @param array $value value
+	 * @return self
+	 */
 	public function orWhereIn($column, array $value)
 	{
 		return $this
@@ -920,33 +920,33 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 			->whereIn($column, $value);
 	}
 
-    /**
-     * Add WHERE $column NOT IN (x, y)
-     *
-     * <code>
-     * // WHERE `a7` NOT IN (1, 2, 'aaa')
-     * $Core_QueryBuilder_Select->whereNotIn('a7', array(1, 2, 'aaa'));
-     * </code>
-     * @param string $column column
-     * @param array $value value
-     * @return self
-     */
+	/**
+	 * Add WHERE $column NOT IN (x, y)
+	 *
+	 * <code>
+	 * // WHERE `a7` NOT IN (1, 2, 'aaa')
+	 * $Core_QueryBuilder_Select->whereNotIn('a7', array(1, 2, 'aaa'));
+	 * </code>
+	 * @param string $column column
+	 * @param array $value value
+	 * @return self
+	 */
 	public function whereNotIn($column, array $value)
 	{
 		return $this->where($column, 'NOT IN', $value);
 	}
 
-    /**
-     * Add OR and WHERE $column NOT IN (x, y)
-     *
-     * <code>
-     * // WHERE ... OR `a7` NOT IN (1, 2, 'aaa')
-     * $Core_QueryBuilder_Select->orWhereNotIn('a7', array(1, 2, 'aaa'));
-     * </code>
-     * @param string $column column
-     * @param array $value value
-     * @return self
-     */
+	/**
+	 * Add OR and WHERE $column NOT IN (x, y)
+	 *
+	 * <code>
+	 * // WHERE ... OR `a7` NOT IN (1, 2, 'aaa')
+	 * $Core_QueryBuilder_Select->orWhereNotIn('a7', array(1, 2, 'aaa'));
+	 * </code>
+	 * @param string $column column
+	 * @param array $value value
+	 * @return self
+	 */
 	public function orWhereNotIn($column, array $value)
 	{
 		return $this
@@ -1064,7 +1064,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * Build expression for one condition
 	 * @param string $column column
 	 * @param string $expression expression
-	 * @param string $value value
+	 * @param string|object|array $value value
 	 * @return string The SQL query
 	 * @see _buildExpression()
 	 */

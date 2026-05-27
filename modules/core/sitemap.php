@@ -82,20 +82,6 @@ class Core_Sitemap extends Core_Servant_Properties
 
 		$this->_aSiteuserGroups = array(0, -1);
 
-		/*if (Core::moduleIsActive('siteuser'))
-		{
-			$oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
-
-			if ($oSiteuser)
-			{
-				$aSiteuser_Groups = $oSiteuser->Siteuser_Groups->findAll(FALSE);
-				foreach ($aSiteuser_Groups as $oSiteuser_Group)
-				{
-					$this->_aSiteuserGroups[] = $oSiteuser_Group->id;
-				}
-			}
-		}*/
-
 		$this->rebuildTime = 14400; // 4 часа
 		$this->limit = 1000;
 
@@ -270,7 +256,8 @@ class Core_Sitemap extends Core_Servant_Properties
 					list($loc, $changefreq, $priority, $entity) = $lastReturn;
 				}
 
-				$this->addNode($loc, $changefreq, $priority, $entity);
+				$lastReturn !== FALSE
+					&& $this->addNode($loc, $changefreq, $priority, $entity);
 
 				// Informationsystem
 				if ($this->showInformationsystemGroups && isset($this->_Informationsystems[$oStructure->id]) && Core::moduleIsActive('informationsystem'))
@@ -371,7 +358,8 @@ class Core_Sitemap extends Core_Servant_Properties
 					list($loc, $changefreq, $priority, $entity) = $lastReturn;
 				}
 
-				$this->addNode($loc, $changefreq, $priority, $entity);
+				$lastReturn !== FALSE
+					&& $this->addNode($loc, $changefreq, $priority, $entity);
 			}
 			$iFrom += $this->limit;
 		}
@@ -453,7 +441,8 @@ class Core_Sitemap extends Core_Servant_Properties
 							list($loc, $changefreq, $priority, $entity) = $lastReturn;
 						}
 
-						$this->addNode($loc, $changefreq, $priority, $entity);
+						$lastReturn !== FALSE
+							&& $this->addNode($loc, $changefreq, $priority, $entity);
 					}
 				}
 
@@ -523,7 +512,8 @@ class Core_Sitemap extends Core_Servant_Properties
 						list($loc, $changefreq, $priority, $entity) = $lastReturn;
 					}
 
-					$this->addNode($loc, $changefreq, $priority, $entity);
+					$lastReturn !== FALSE
+						&& $this->addNode($loc, $changefreq, $priority, $entity);
 				}
 
 				$iFrom += $this->limit;
@@ -534,20 +524,20 @@ class Core_Sitemap extends Core_Servant_Properties
 		return $this;
 	}
 
-    /**
-     * Add Shop Nodes
-     *
-     * @param Structure_Model $oStructure
-     * @param Shop_Model $oShop
-     * @return self
-     * @hostcms-event Core_Sitemap.onBeforeSelectShopGroups
-     * @hostcms-event Core_Sitemap.onBeforeAddShopGroup
-     * @hostcms-event Core_Sitemap.onBeforeSelectShopItems
-     * @hostcms-event Core_Sitemap.onBeforeAddShopItem
-     * @hostcms-event Core_Sitemap.onBeforeSelectShopTags
-     * @hostcms-event Core_Sitemap.onBeforeAddShopTag
-     * @hostcms-event Core_Sitemap.onBeforeAddShopFilter
-     */
+	/**
+	 * Add Shop Nodes
+	 *
+	 * @param Structure_Model $oStructure
+	 * @param Shop_Model $oShop
+	 * @return self
+	 * @hostcms-event Core_Sitemap.onBeforeSelectShopGroups
+	 * @hostcms-event Core_Sitemap.onBeforeAddShopGroup
+	 * @hostcms-event Core_Sitemap.onBeforeSelectShopItems
+	 * @hostcms-event Core_Sitemap.onBeforeAddShopItem
+	 * @hostcms-event Core_Sitemap.onBeforeSelectShopTags
+	 * @hostcms-event Core_Sitemap.onBeforeAddShopTag
+	 * @hostcms-event Core_Sitemap.onBeforeAddShopFilter
+	 */
 	protected function _fillShop(Structure_Model $oStructure, Shop_Model $oShop)
 	{
 		$oCore_QueryBuilder_Select = Core_QueryBuilder::select(array('MAX(id)', 'max_id'));
@@ -610,7 +600,8 @@ class Core_Sitemap extends Core_Servant_Properties
 					list($loc, $changefreq, $priority, $entity) = $lastReturn;
 				}
 
-				$this->addNode($loc, $changefreq, $priority, $entity);
+				$lastReturn !== FALSE
+					&& $this->addNode($loc, $changefreq, $priority, $entity);
 			}
 
 			$iFrom += $this->limit;
@@ -697,7 +688,8 @@ class Core_Sitemap extends Core_Servant_Properties
 							list($loc, $changefreq, $priority, $entity) = $lastReturn;
 						}
 
-						$this->addNode($loc, $changefreq, $priority, $entity);
+						$lastReturn !== FALSE
+							&& $this->addNode($loc, $changefreq, $priority, $entity);
 					}
 				}
 
@@ -767,7 +759,8 @@ class Core_Sitemap extends Core_Servant_Properties
 						list($loc, $changefreq, $priority, $entity) = $lastReturn;
 					}
 
-					$this->addNode($loc, $changefreq, $priority, $entity);
+					$lastReturn !== FALSE
+						&& $this->addNode($loc, $changefreq, $priority, $entity);
 				}
 
 				$iFrom += $this->limit;
@@ -817,7 +810,8 @@ class Core_Sitemap extends Core_Servant_Properties
 						list($loc, $changefreq, $priority, $entity) = $lastReturn;
 					}
 
-					$this->addNode($loc, $changefreq, $priority, $entity);
+					$lastReturn !== FALSE
+						&& $this->addNode($loc, $changefreq, $priority, $entity);
 				}
 
 				$iFrom += $this->limit;
@@ -834,24 +828,24 @@ class Core_Sitemap extends Core_Servant_Properties
 	 */
 	protected $_bRebuild = TRUE;
 
-    /**
-     * Add Informationsystem
-     * @param int $structure_id
-     * @param Informationsystem_Model $oInformationsystem
-     * @return Core_Sitemap
-     */
+	/**
+	 * Add Informationsystem
+	 * @param int $structure_id
+	 * @param Informationsystem_Model $oInformationsystem
+	 * @return Core_Sitemap
+	 */
 	public function addInformationsystem($structure_id, Informationsystem_Model $oInformationsystem)
 	{
 		$this->_Informationsystems[$structure_id] = $oInformationsystem;
 		return $this;
 	}
 
-    /**
-     * Add Shop
-     * @param int $structure_id
-     * @param Shop_Model $oShop
-     * @return Core_Sitemap
-     */
+	/**
+	 * Add Shop
+	 * @param int $structure_id
+	 * @param Shop_Model $oShop
+	 * @return Core_Sitemap
+	 */
 	public function addShop($structure_id, Shop_Model $oShop)
 	{
 		$this->_Shops[$structure_id] = $oShop;

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Crm_Note_Model extends Core_Entity
 {
@@ -23,6 +23,7 @@ class Crm_Note_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_belongsTo = array(
+		'crm_note' => array('foreign_key' => 'parent_id'),
 		'user' => array()
 	);
 
@@ -41,6 +42,7 @@ class Crm_Note_Model extends Core_Entity
 		'deal' => array('through' => 'deal_crm_note'),
 		'siteuser_crm_note' => array('foreign_key' => 'crm_note_id'),
 		'siteuser' => array('through' => 'siteuser_crm_note'),
+		'timeline' => array('foreign_key' => 'crm_note_id'),
 	);
 
 	/**
@@ -48,7 +50,9 @@ class Crm_Note_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_hasMany = array(
+		'crm_note' => array('foreign_key' => 'parent_id'),
 		'crm_note_attachment' => array(),
+		'crm_note_reaction' => array()
 	);
 
 	/**
@@ -89,31 +93,31 @@ class Crm_Note_Model extends Core_Entity
 	}
 
 	/**
-	 * Delete object from database
-	 * @param mixed $primaryKey primary key for deleting object
-	 * @return Core_Entity
-	 * @hostcms-event event.onBeforeRedeclaredDelete
+	 * Get parent
+	 * @return Crm_Note_Model|NULL
 	 */
-	public function delete($primaryKey = NULL)
+	public function getParent()
 	{
-		if (is_null($primaryKey))
+		return $this->parent_id
+			? Core_Entity::factory('Crm_Note', $this->parent_id)
+			: NULL;
+	}
+
+	/**
+	 * Get count of items all levels
+	 * @return int
+	 */
+	public function getChildCount()
+	{
+		$count = $this->Crm_Notes->getCount();
+
+		$aCrm_Notes = $this->Crm_Notes->findAll(FALSE);
+		foreach ($aCrm_Notes as $oCrm_Note)
 		{
-			$primaryKey = $this->getPrimaryKey();
+			$count += $oCrm_Note->getChildCount();
 		}
 
-		$this->id = $primaryKey;
-
-		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
-
-		$aCrm_Note_Attachments = $this->Crm_Note_Attachments->findAll(FALSE);
-		foreach ($aCrm_Note_Attachments as $oCrm_Note_Attachment)
-		{
-			$oCrm_Note_Attachment
-				->setDir(CMS_FOLDER . $this->dir)
-				->delete();
-		}
-
-		return parent::delete($primaryKey);
+		return $count;
 	}
 
 	/**
@@ -146,7 +150,8 @@ class Crm_Note_Model extends Core_Entity
 
 				$ext = Core_File::getExtension($oCrm_Note_Attachment->file_name);
 
-				$bAudio = in_array($ext, array('mp3', 'ogg', 'acc'));
+				$bAudio = in_array($ext, array('mp3', 'ogg', 'acc', 'weba'));
+				$bVideo = in_array($ext, array('mp4', 'webm'));
 
 				if ($bModuleAccess)
 				{
@@ -176,6 +181,13 @@ class Crm_Note_Model extends Core_Entity
 								<span class="size"><?php echo $oCrm_Note_Attachment->getTextSize()?></span>
 							</div><?php
 						}
+						elseif ($bVideo)
+						{
+							?><div class="video resizable-video">
+								<video controls preload="metadata" src="<?php echo $src?>"></video>
+								<span class="size"><?php echo $oCrm_Note_Attachment->getTextSize()?></span>
+							</div><?php
+						}
 						else
 						{
 							?><div class="image">
@@ -195,6 +207,13 @@ class Crm_Note_Model extends Core_Entity
 						{
 							?><div class="audio">
 								<audio controls src="<?php echo $file?>"></audio>
+								<span class="size"><?php echo $oCrm_Note_Attachment->getTextSize()?></span>
+							</div><?php
+						}
+						elseif ($bVideo)
+						{
+							?><div class="video resizable-video">
+								<video controls preload="metadata" playsinline src="<?php echo $file?>"></video>
 								<span class="size"><?php echo $oCrm_Note_Attachment->getTextSize()?></span>
 							</div><?php
 						}
@@ -265,5 +284,41 @@ class Crm_Note_Model extends Core_Entity
 		}
 
 		return TRUE;
+	}
+
+	/**
+	 * Delete object from database
+	 * @param mixed $primaryKey primary key for deleting object
+	 * @return Core_Entity
+	 * @hostcms-event crm_note.onBeforeRedeclaredDelete
+	 */
+	public function delete($primaryKey = NULL)
+	{
+		if (is_null($primaryKey))
+		{
+			$primaryKey = $this->getPrimaryKey();
+		}
+
+		$this->id = $primaryKey;
+
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
+
+		$this->Crm_Notes->deleteAll(FALSE);
+		$this->Crm_Note_Reactions->deleteAll(FALSE);
+
+		$aCrm_Note_Attachments = $this->Crm_Note_Attachments->findAll(FALSE);
+		foreach ($aCrm_Note_Attachments as $oCrm_Note_Attachment)
+		{
+			$oCrm_Note_Attachment
+				->setDir(CMS_FOLDER . $this->dir)
+				->delete();
+		}
+
+		if (Core::moduleIsActive('timeline'))
+		{
+			$this->Timeline->delete();
+		}
+
+		return parent::delete($primaryKey);
 	}
 }

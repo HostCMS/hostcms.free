@@ -29,10 +29,10 @@ class Core_Command_Controller
 		return $this;
 	}
 
-    /**
-     * Get URI
-     * @return string|null
-     */
+	/**
+	 * Get URI
+	 * @return string|null
+	 */
 	public function getUri()
 	{
 		return $this->_uri;

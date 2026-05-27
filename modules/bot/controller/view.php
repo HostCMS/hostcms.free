@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Bot
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Bot_Controller_View extends Admin_Form_Controller_View
 {
@@ -201,7 +201,7 @@ class Bot_Controller_View extends Admin_Form_Controller_View
 		<div class="row">
 			<div class="col-xs-12">
 				<div class="well well-sm margin-bottom-10 bot-modules">
-					<p class="semi-bold"><i class="widget-icon fa fa-list icon-separator palegreen"></i><?php echo Core::_('Bot.bot_modules')?></p>
+					<p class="semi-bold"><i class="widget-icon fa-solid fa-list icon-separator palegreen"></i><?php echo Core::_('Bot.bot_modules')?></p>
 
 					<?php
 					foreach ($aEntities as $oBot_Module)
@@ -228,8 +228,8 @@ class Bot_Controller_View extends Admin_Form_Controller_View
 													<div class="col-xs-12 col-sm-3"><span class="<?php echo $oBot_Module->getDeadlineClass()?>"><?php echo $oBot_Module->getDeadline()?></span></div>
 
 													<div class="bot-actions">
-														<a class="show-settings" onclick="$.showBotModuleSettings(<?php echo $oBot_Module->id?>)"><i class="fa fa-cog azure"></i></a>
-														<a class="delete-associated-item margin-left-5" onclick="<?php echo $onclick?>"><i class="fa fa-times-circle darkorange"></i></a>
+														<a class="show-settings" onclick="$.showBotModuleSettings(<?php echo $oBot_Module->id?>)"><i class="fa-solid fa-gear azure"></i></a>
+														<a class="delete-associated-item margin-left-5" onclick="<?php echo $onclick?>"><i class="fa-solid fa-circle-xmark darkorange"></i></a>
 													</div>
 												</div>
 											</div>
@@ -306,7 +306,7 @@ class Bot_Controller_View extends Admin_Form_Controller_View
 				{
 					$additionalParams = $this->_Admin_Form_Controller->additionalParams . '&bot_id=' . $oBot->id;
 
-					$return .= '<li><a href="#" onclick="' . $this->_Admin_Form_Controller->getAdminActionLoadAjax('/{admin}/bot/module/index.php', 'addBot', NULL, 0, 0, $additionalParams) . '"><i class="fa fa-android"></i>' . htmlspecialchars($oBot->name) . '</a></li>';
+					$return .= '<li><a href="#" onclick="' . $this->_Admin_Form_Controller->getAdminActionLoadAjax('/{admin}/bot/module/index.php', 'addBot', NULL, 0, 0, $additionalParams) . '"><i class="fa-solid fa-robot"></i>' . htmlspecialchars($oBot->name) . '</a></li>';
 				}
 			}
 

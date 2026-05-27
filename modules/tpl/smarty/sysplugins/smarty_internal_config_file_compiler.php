@@ -17,69 +17,69 @@
  */
 class Smarty_Internal_Config_File_Compiler
 {
-    /**
-     * Lexer class name
-     *
-     * @var string
-     */
+	/**
+	 * Lexer class name
+	 *
+	 * @var string
+	 */
     public $lexer_class;
 
-    /**
-     * Parser class name
-     *
-     * @var string
-     */
+	/**
+	 * Parser class name
+	 *
+	 * @var string
+	 */
     public $parser_class;
 
-    /**
-     * Lexer object
-     *
-     * @var object
-     */
+	/**
+	 * Lexer object
+	 *
+	 * @var object
+	 */
     public $lex;
 
-    /**
-     * Parser object
-     *
-     * @var object
-     */
+	/**
+	 * Parser object
+	 *
+	 * @var object
+	 */
     public $parser;
 
-    /**
-     * Smarty object
-     *
-     * @var Smarty object
-     */
+	/**
+	 * Smarty object
+	 *
+	 * @var Smarty object
+	 */
     public $smarty;
 
-    /**
-     * Smarty object
-     *
-     * @var Smarty_Internal_Template object
-     */
+	/**
+	 * Smarty object
+	 *
+	 * @var Smarty_Internal_Template object
+	 */
     public $template;
 
-    /**
-     * Compiled config data sections and variables
-     *
-     * @var array
-     */
+	/**
+	 * Compiled config data sections and variables
+	 *
+	 * @var array
+	 */
     public $config_data = array();
 
-    /**
-     * compiled config data must always be written
-     *
-     * @var bool
-     */
+	/**
+	 * compiled config data must always be written
+	 *
+	 * @var bool
+	 */
     public $write_compiled_code = true;
 
-    /**
-     * Initialize compiler
-     *
-     * @param string $lexer_class  class name
-     * @param string $parser_class class name
-     * @param Smarty $smarty       global instance
-     */
+	/**
+	 * Initialize compiler
+	 *
+	 * @param string $lexer_class  class name
+	 * @param string $parser_class class name
+	 * @param Smarty $smarty       global instance
+	 */
     public function __construct($lexer_class, $parser_class, Smarty $smarty)
     {
         $this->smarty = $smarty;
@@ -91,14 +91,14 @@ class Smarty_Internal_Config_File_Compiler
         $this->config_data[ 'vars' ] = array();
     }
 
-    /**
-     * Method to compile Smarty config source.
-     *
-     * @param Smarty_Internal_Template $template
-     *
-     * @return bool true if compiling succeeded, false if it failed
-     * @throws \SmartyException
-     */
+	/**
+	 * Method to compile Smarty config source.
+	 *
+	 * @param Smarty_Internal_Template $template
+	 *
+	 * @return bool true if compiling succeeded, false if it failed
+	 * @throws \SmartyException
+	 */
     public function compileTemplate(Smarty_Internal_Template $template)
     {
         $this->template = $template;
@@ -168,16 +168,16 @@ class Smarty_Internal_Config_File_Compiler
         return $template_header . $this->template->smarty->ext->_codeFrame->create($this->template, $code);
     }
 
-    /**
-     * display compiler error messages without dying
-     * If parameter $args is empty it is a parser detected syntax error.
-     * In this case the parser is called to obtain information about expected tokens.
-     * If parameter $args contains a string this is used as error message
-     *
-     * @param string $args individual error message or null
-     *
-     * @throws SmartyCompilerException
-     */
+	/**
+	 * display compiler error messages without dying
+	 * If parameter $args is empty it is a parser detected syntax error.
+	 * In this case the parser is called to obtain information about expected tokens.
+	 * If parameter $args contains a string this is used as error message
+	 *
+	 * @param string $args individual error message or null
+	 *
+	 * @throws SmartyCompilerException
+	 */
     public function trigger_config_file_error($args = null)
     {
         // get config source line which has error

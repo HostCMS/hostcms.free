@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -32,7 +32,7 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Directory_Phone_Type.phone_type_show_title_add'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
@@ -42,7 +42,7 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Directory_Phone.formats'))
-		->icon('fa fa-list')
+		->icon('fa-solid fa-list')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref('/{admin}/directory/phone/format/index.php', NULL, NULL, '', 0)
 		)

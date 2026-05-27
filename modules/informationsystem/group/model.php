@@ -329,7 +329,7 @@ class Informationsystem_Group_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event informationsystem_group.onBeforeRedeclaredDelete
+	 * @hostcms-event informationsystem_group.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -818,7 +818,7 @@ class Informationsystem_Group_Model extends Core_Entity
 	/**
 	 * Switch indexation mode
 	 * @return Core_Entity
-     */
+	 */
 	public function changeIndexation()
 	{
 		$this->indexing = 1 - $this->indexing;
@@ -872,7 +872,7 @@ class Informationsystem_Group_Model extends Core_Entity
 
 	/**
 	 * Увеличение на 1 количества элементов в группе и во всех родительских группах
-	 * @retrun self
+	 * @return self
 	 */
 	public function incCountItems()
 	{
@@ -880,7 +880,7 @@ class Informationsystem_Group_Model extends Core_Entity
 	}
 	/**
 	 * Уменьшение на 1 количества элементов в группе и во всех родительских группах
-	 * @retrun self
+	 * @return self
 	 */
 	public function decCountItems()
 	{
@@ -909,7 +909,7 @@ class Informationsystem_Group_Model extends Core_Entity
 
 	/**
 	 * Увеличение на 1 количества подгрупп в группе и во всех родительских группах
-	 * @retrun self
+	 * @return self
 	 */
 	public function incCountGroups()
 	{
@@ -918,7 +918,7 @@ class Informationsystem_Group_Model extends Core_Entity
 
 	/**
 	 * Уменьшение на 1 количества подгрупп в группе и во всех родительских группах
-	 * @retrun self
+	 * @return self
 	 */
 	public function decCountGroups()
 	{
@@ -1006,7 +1006,7 @@ class Informationsystem_Group_Model extends Core_Entity
 						->target('_blank')
 						->add(
 							Core_Html_Entity::factory('I')
-								->class('fa fa-external-link')
+								->class('fa-solid fa-arrow-up-right-from-square small')
 						)
 				);
 			}
@@ -1148,7 +1148,7 @@ class Informationsystem_Group_Model extends Core_Entity
 					$oSearch_Page->text .= htmlspecialchars(strip_tags((string) $oField_Value->value)) . ' ';
 				}
 				// File type
-				elseif ($oField_Value->Property->type == 2)
+				elseif ($oField_Value->Field->type == 2)
 				{
 					$oSearch_Page->text .= htmlspecialchars($oField_Value->file_name . ' ' . $oField_Value->file_description . ' ' . $oField_Value->file_small_name . ' ' . $oField_Value->file_small_description) . ' ';
 				}
@@ -1225,11 +1225,11 @@ class Informationsystem_Group_Model extends Core_Entity
 	 */
 	protected $_showXmlMedia = FALSE;
 
-    /**
-     * Show properties in XML
-     * @param bool $showXmlMedia
-     * @return self
-     */
+	/**
+	 * Show properties in XML
+	 * @param bool $showXmlMedia
+	 * @return self
+	 */
 	public function showXmlMedia($showXmlMedia = TRUE)
 	{
 		$this->_showXmlMedia = $showXmlMedia;
@@ -1253,7 +1253,7 @@ class Informationsystem_Group_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event informationsystem_group.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')
@@ -1499,13 +1499,13 @@ class Informationsystem_Group_Model extends Core_Entity
 		return $this;
 	}
 
-    /**
-     * Get property value for SEO-templates
-     * @param int $property_id Property ID
-     * @param string $format string format, e.g. '%s: %s'. %1$s - Property Name, %2$s - List of Values
-     * @param string $separator
-     * @return string
-     */
+	/**
+	 * Get property value for SEO-templates
+	 * @param int $property_id Property ID
+	 * @param string $format string format, e.g. '%s: %s'. %1$s - Property Name, %2$s - List of Values
+	 * @param string $separator
+	 * @return string
+	 */
 	public function propertyValue($property_id, $format = '%2$s', $separator = ', ')
 	{
 		$oProperty = Core_Entity::factory('Property', $property_id);
@@ -1616,7 +1616,7 @@ class Informationsystem_Group_Model extends Core_Entity
 
 	/**
 	 * RestApi Upload Large Image from $_FILES['image']
-	 * @retrun string|NULL Uploaded image path
+	 * @return string|NULL Uploaded image path
 	 */
 	public function uploadLargeImage()
 	{
@@ -1661,7 +1661,7 @@ class Informationsystem_Group_Model extends Core_Entity
 
 	/**
 	 * RestApi Upload Small Image from $_FILES['image']
-	 * @retrun string|NULL Uploaded image path
+	 * @return string|NULL Uploaded image path
 	 */
 	public function uploadSmallImage()
 	{

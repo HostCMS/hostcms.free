@@ -58,6 +58,26 @@ class Shop_Purchase_Discount_Coupon_Model extends Core_Entity
 	}
 
 	/**
+	 * Backend badge
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 */
+	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		if ($this->shop_purchase_discount_id)
+		{
+			$oShop_Purchase_Discount = $this->Shop_Purchase_Discount;
+
+			$path = Admin_Form_Controller::correctBackendPath('/{admin}/shop/purchase/discount/index.php');
+
+			$href = $oAdmin_Form_Controller->getAdminActionLoadHref($path, 'edit', NULL, 1, $this->shop_purchase_discount_id);
+			// $onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($path, 'edit', NULL, 1, $this->shop_purchase_discount_id);
+
+			?><span class="badge badge-square badge-hostcms margin-left-5 small"><a class="darkgray" target="_blank" href="<?php echo $href?>"><?php echo htmlspecialchars((string) $oShop_Purchase_Discount->name)?></a></span><?php
+		}
+	}
+
+	/**
 	 * Generate Unique Random Coupon Code
 	 * @return self
 	 * @hostcms-event shop_purchase_discount_coupon.onAfterGenerateCode

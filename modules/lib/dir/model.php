@@ -64,10 +64,95 @@ class Lib_Dir_Model extends Core_Entity
 	}
 
 	/**
+	 * Move group to another group
+	 * @param int $lib_dir_id dir id
+	 * @return self
+	 * @hostcms-event lib_dir.onBeforeMove
+	 * @hostcms-event lib_dir.onAfterMove
+	 */
+	public function move($lib_dir_id)
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($lib_dir_id));
+
+		$this->parent_id = $lib_dir_id;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
+
+		return $this;
+	}
+
+	/**
+	 * Get parent lib dir
+	 * @return Lib_Dir_Model|NULL
+	 */
+	public function getParent()
+	{
+		if ($this->parent_id)
+		{
+			return Core_Entity::factory('Lib_Dir', $this->parent_id);
+		}
+
+		return NULL;
+	}
+
+	/**
+	 * Get count of items all levels
+	 * @return int
+	 */
+	public function getChildCount()
+	{
+		$count = $this->Libs->getCount();
+
+		$aLib_Dirs = $this->Lib_Dirs->findAll(FALSE);
+		foreach ($aLib_Dirs as $oLib_Dir)
+		{
+			$count += $oLib_Dir->getChildCount();
+		}
+
+		return $count;
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 */
+	public function nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$link = $oAdmin_Form_Field->link;
+		$onclick = $oAdmin_Form_Field->onclick;
+
+		$link = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $link);
+		$onclick = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $onclick);
+
+		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div');
+
+		$oCore_Html_Entity_Div
+			->add(
+				Core_Html_Entity::factory('A')
+					->href($link)
+					->onclick($onclick)
+					->value(htmlspecialchars($this->name))
+			);
+
+		$iCount = $this->getChildCount();
+
+		$iCount > 0 && $oCore_Html_Entity_Div
+			->add(
+				Core_Html_Entity::factory('Span')
+					->class('badge badge-hostcms badge-square')
+					->value($iCount)
+			);
+
+		$oCore_Html_Entity_Div->execute();
+	}
+
+	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event lib_dir.onBeforeRedeclaredDelete
+	 * @hostcms-event lib_dir.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -84,19 +169,5 @@ class Lib_Dir_Model extends Core_Entity
 		$this->Lib_Dirs->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);
-	}
-
-	/**
-	 * Get parent lib dir
-	 * @return Lib_Dir_Model|NULL
-	 */
-	public function getParent()
-	{
-		if ($this->parent_id)
-		{
-			return Core_Entity::factory('Lib_Dir', $this->parent_id);
-		}
-
-		return NULL;
 	}
 }

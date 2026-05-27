@@ -22,5 +22,6 @@ var i18n =
 "ban_error": "IP-адреса вже був заблокований!",
 "important": "важно",
 "webauth_register_success": "Авторизація успішно збережена",
-"copy_error_clipboard": "Копіювати помилку в буфер обміну"
+"copy_error_clipboard": "Копіювати помилку в буфер обміну",
+"copy_success": "Скопійовано!"
 };

@@ -4,7 +4,7 @@ return array(
 	'license_key' => '"gpl"',
 	'theme' => '"silver"',
 	'plugins' => '"advlist autolink lists link image charmap preview anchor pagebreak searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking save table directionality emoticons codesample importcss help"',
-	'toolbar' => '"bold italic underline strikethrough cut copy paste removeformat undo redo blocks fontfamily fontsize | alignleft aligncenter alignright alignjustify bullist numlist link unlink image media table forecolor backcolor hr subscript superscript pagebreak codesample preview code insertShortcode"',
+	'toolbar' => '"bold italic underline strikethrough cut copy paste removeformat undo redo blocks fontfamily fontsize | alignleft aligncenter alignright alignjustify bullist numlist link unlink image media table forecolor backcolor hr subscript superscript pagebreak codesample preview code insertShortcode insertAiResponse"',
 	'toolbar_mode' => '"sliding"',
 	'image_advtab' => 'true',
 	'image_title' => 'true',

@@ -17,36 +17,36 @@
  */
 class Smarty_Data extends Smarty_Internal_Data
 {
-    /**
-     * Counter
-     *
-     * @var int
-     */
+	/**
+	 * Counter
+	 *
+	 * @var int
+	 */
     public static $count = 0;
 
-    /**
-     * Data block name
-     *
-     * @var string
-     */
+	/**
+	 * Data block name
+	 *
+	 * @var string
+	 */
     public $dataObjectName = '';
 
-    /**
-     * Smarty object
-     *
-     * @var Smarty
-     */
+	/**
+	 * Smarty object
+	 *
+	 * @var Smarty
+	 */
     public $smarty = null;
 
-    /**
-     * create Smarty data object
-     *
-     * @param Smarty|array                    $_parent parent template
-     * @param Smarty|Smarty_Internal_Template $smarty  global smarty instance
-     * @param string                          $name    optional data block name
-     *
-     * @throws SmartyException
-     */
+	/**
+	 * create Smarty data object
+	 *
+	 * @param Smarty|array                    $_parent parent template
+	 * @param Smarty|Smarty_Internal_Template $smarty  global smarty instance
+	 * @param string                          $name    optional data block name
+	 *
+	 * @throws SmartyException
+	 */
     public function __construct($_parent = null, $smarty = null, $name = null)
     {
         parent::__construct();

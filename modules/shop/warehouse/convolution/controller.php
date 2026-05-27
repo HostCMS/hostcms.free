@@ -70,7 +70,7 @@ class Shop_Warehouse_Convolution_Controller extends Core_Servant_Properties
 	/**
 	 * Executes the business logic.
 	 * @return string
-     */
+	 */
 	public function execute()
 	{
 		if ($this->shop_warehouse_id > 0)

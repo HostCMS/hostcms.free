@@ -1,3 +1,4 @@
+/* global createCookie readCookie _windowSettings */
 /*Sets Themed Colors Based on Themes*/
 
 var themeprimary = getThemeColorFromCss('themeprimary');
@@ -22,7 +23,7 @@ $("#skin-changer li a").click(function () {
 });
 
 //Checks Not to Do rtl-support for Arabic and Persian Demo Pages
-var rtlchanger = document.getElementById('rtl-changer');
+/*var rtlchanger = document.getElementById('rtl-changer');
 
 if (location.pathname != "/index-rtl-fa.html" && location.pathname != "/index-rtl-ar.html") {
 	if (readCookie("rtl-support")) {
@@ -52,7 +53,8 @@ if (location.pathname != "/index-rtl-fa.html" && location.pathname != "/index-rt
 
 		};
 	}
-}
+}*/
+
 /*Loading*/
 $(window).load(function () {
 	setTimeout(function () {
@@ -63,7 +65,7 @@ $(window).load(function () {
 
 /*Account Area --> Setting Button*/
 $('#btn-setting')
-	.on('click', function (e) {
+	.on('click', function () {
 		$('.navbar-account')
 			.toggleClass('setting-open');
 	});
@@ -71,7 +73,7 @@ $('#btn-setting')
 /*Toggle FullScreen*/
 $('.page-content')
 	// fullscreen
-	.on('click', '#fullscreen-toggler', function (e) {
+	.on('click', '#fullscreen-toggler', function () {
 		var element = document.documentElement;
 		if (!$('body')
 			.hasClass("full-screen")) {
@@ -104,7 +106,7 @@ $('.page-content')
 		}
 	})
 	// refresh
-	.on('click', '#refresh-toggler', function (e) {
+	.on('click', '#refresh-toggler', function () {
 		if (typeof _windowSettings == 'undefined')
 		{
 			window.location.reload();
@@ -178,6 +180,7 @@ $('body').on("mouseenter", '[data-toggle=popover-hover]', function() {
 /*Handles ToolTips*/
 $('body').tooltip({
 	selector: 'acronym',
+	// trigger: 'click',
 	template: '<div class="tooltip-magenta tooltip" role="tooltip"><div class="tooltip-inner"></div><div class="tooltip-arrow"></div></div>'
 });
 
@@ -296,8 +299,8 @@ function InitiateWidgets() {
 		event.preventDefault();
 		var widget = $(this).parents(".widget").eq(0);
 		var button = $(this).find("i").eq(0);
-		var compress = "fa-compress";
-		var expand = "fa-expand";
+		var compress = "fa-down-left-and-up-right-to-center",
+			expand = "fa-up-right-and-down-left-from-center";
 		if (widget.hasClass("maximized")) {
 			if (button) {
 				button.addClass(expand).removeClass(compress);
@@ -362,40 +365,14 @@ function maximize(widgetbox) {
 }
 
 /* Scroll To */
-function scrollTo(el, offset) {
+/*function scrollTo(el, offset) {
 	var pos = (el && el.size() > 0) ? el.offset().top : 0;
 	jQuery('html,body').animate({ scrollTop: pos + (offset ? offset : 0) }, 'slow');
-}
-
-/*Show Notification*/
-function Notify(message, description, position, timeout, theme, icon, closable, sound) {
-	soundAvailable = $('#sound-switch').data('soundEnabled') === undefined
-		? false
-		: !!$('#sound-switch').data('soundEnabled');
-
-	if (typeof sound != 'undefined')
-	{
-		soundAvailable = soundAvailable && sound;
-	}
-
-	toastr.options.positionClass = 'toast-' + position;
-	toastr.options.extendedTimeOut = 0; //1000;
-	toastr.options.timeOut = timeout;
-	toastr.options.closeButton = closable;
-	toastr.options.iconClass = icon + ' toast-' + theme;
-	toastr.options.playSound = soundAvailable;
-
-	if (timeout == 0)
-	{
-		toastr.options.tapToDismiss = false;
-	}
-
-	toastr['custom'](description, message);
-}
+}*/
 
 /*#region handle Settings*/
 function InitiateSettings() {
-	readCookiesForInitiateSettings();
+	readCookiesForInitiateSettings(); // eslint-disable-line
 	// $.readCookiesForInitiateSettings();
 
 	$('#checkbox_fixednavbar')
@@ -537,7 +514,7 @@ function InitiateSettings() {
 					.prop('checked', false);
 			}
 			setCookiesForFixedSettings();
-			setResizableAdminTableTh();
+			setResizableAdminTableTh(); // eslint-disable-line
 		});
 }
 
@@ -550,7 +527,7 @@ function setCookiesForFixedSettings() {
 
 	if ($('#checkbox_fixedsidebar').is(':checked')) {
 
-		setSlimScrolling4SidebarMenu();
+		setSlimScrolling4SidebarMenu(); // eslint-disable-line
 
 	} else {
 		if ($(".sidebar-menu").closest("div").hasClass("slimScrollDiv")) {
@@ -563,7 +540,7 @@ function setCookiesForFixedSettings() {
 
 /*#region Get Colors*/
 //Get colors from a string base on theme colors
-function getcolor(colorString) {
+function getcolor(colorString) { // eslint-disable-line
 	switch (colorString) {
 		case ("themeprimary"):
 			return themeprimary;
@@ -583,7 +560,7 @@ function getcolor(colorString) {
 
 
 //Switch Classes Function
-function switchClasses(firstClass, secondClass) {
+function switchClasses(firstClass, secondClass) { // eslint-disable-line
 
 	var firstclasses = document.getElementsByClassName(firstClass);
 
@@ -603,9 +580,9 @@ function switchClasses(firstClass, secondClass) {
 		}
 	}
 
-	tempClasses = document.getElementsByClassName(firstClass + '-temp');
+	var tempClasses = document.getElementsByClassName(firstClass + '-temp');
 
-	for (i = tempClasses.length - 1; i >= 0; i--) {
+	for (var i = tempClasses.length - 1; i >= 0; i--) {
 		if (!hasClass(tempClasses[i], 'dropdown-menu')) {
 			addClass(tempClasses[i], secondClass);
 			removeClass(tempClasses[i], firstClass + '-temp');

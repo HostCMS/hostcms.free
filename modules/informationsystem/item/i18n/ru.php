@@ -53,7 +53,7 @@ return array(
 	'seo_description' => 'Описание (Description)',
 	'seo_keywords' => 'Ключевые слова (Keywords)',
 
-	'tags' => '<acronym title="Метки (теги) информационного элемента, разделяются запятой, например процессоры, AMD, Intel">Метки (теги)</acronym>',
+	'tags' => '<acronym title="Метки информационного элемента, разделяются запятой">Метки</acronym>',
 	'type_tag' => 'Введите тэг ...',
 
 	'error_information_group_URL_item' => 'В группе уже существует информационный элемент с таким названием в URL!',

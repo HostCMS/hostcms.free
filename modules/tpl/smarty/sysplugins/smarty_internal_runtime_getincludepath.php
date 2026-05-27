@@ -15,69 +15,69 @@
  */
 class Smarty_Internal_Runtime_GetIncludePath
 {
-    /**
-     * include path cache
-     *
-     * @var string
-     */
+	/**
+	 * include path cache
+	 *
+	 * @var string
+	 */
     public $_include_path = '';
 
-    /**
-     * include path directory cache
-     *
-     * @var array
-     */
+	/**
+	 * include path directory cache
+	 *
+	 * @var array
+	 */
     public $_include_dirs = array();
 
-    /**
-     * include path directory cache
-     *
-     * @var array
-     */
+	/**
+	 * include path directory cache
+	 *
+	 * @var array
+	 */
     public $_user_dirs = array();
 
-    /**
-     * stream cache
-     *
-     * @var string[][]
-     */
+	/**
+	 * stream cache
+	 *
+	 * @var string[][]
+	 */
     public $isFile = array();
 
-    /**
-     * stream cache
-     *
-     * @var string[]
-     */
+	/**
+	 * stream cache
+	 *
+	 * @var string[]
+	 */
     public $isPath = array();
 
-    /**
-     * stream cache
-     *
-     * @var int[]
-     */
+	/**
+	 * stream cache
+	 *
+	 * @var int[]
+	 */
     public $number = array();
 
-    /**
-     * status cache
-     *
-     * @var bool
-     */
+	/**
+	 * status cache
+	 *
+	 * @var bool
+	 */
     public $_has_stream_include = null;
 
-    /**
-     * Number for array index
-     *
-     * @var int
-     */
+	/**
+	 * Number for array index
+	 *
+	 * @var int
+	 */
     public $counter = 0;
 
-    /**
-     * Check if include path was updated
-     *
-     * @param \Smarty $smarty
-     *
-     * @return bool
-     */
+	/**
+	 * Check if include path was updated
+	 *
+	 * @param \Smarty $smarty
+	 *
+	 * @return bool
+	 */
     public function isNewIncludePath(Smarty $smarty)
     {
         $_i_path = get_include_path();
@@ -95,28 +95,28 @@ class Smarty_Internal_Runtime_GetIncludePath
         return false;
     }
 
-    /**
-     * return array with include path directories
-     *
-     * @param \Smarty $smarty
-     *
-     * @return array
-     */
+	/**
+	 * return array with include path directories
+	 *
+	 * @param \Smarty $smarty
+	 *
+	 * @return array
+	 */
     public function getIncludePathDirs(Smarty $smarty)
     {
         $this->isNewIncludePath($smarty);
         return $this->_include_dirs;
     }
 
-    /**
-     * Return full file path from PHP include_path
-     *
-     * @param string[] $dirs
-     * @param string   $file
-     * @param \Smarty  $smarty
-     *
-     * @return bool|string full filepath or false
-     */
+	/**
+	 * Return full file path from PHP include_path
+	 *
+	 * @param string[] $dirs
+	 * @param string   $file
+	 * @param \Smarty  $smarty
+	 *
+	 * @return bool|string full filepath or false
+	 */
     public function getIncludePath($dirs, $file, Smarty $smarty)
     {
         //if (!(isset($this->_has_stream_include) ? $this->_has_stream_include : $this->_has_stream_include = false)) {

@@ -41,7 +41,7 @@ class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 	 * @param int $type
 	 * @param boolean $ajax
 	 * @return true
-     */
+	 */
 	public function adminPage($type = 0, $ajax = FALSE)
 	{
 		$type = intval($type);
@@ -182,11 +182,11 @@ class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 		?>
 		<div class="widget">
 			<div class="widget-header bordered-bottom bordered-sky">
-				<i class="widget-icon fa fa-calendar sky"></i>
+				<i class="widget-icon fa-solid fa-calendar-days sky"></i>
 				<span class="widget-caption sky"><?php echo Core::_('Calendar.widget_title')?></span>
 				<div class="widget-buttons">
 					<a data-toggle="maximize">
-						<i class="fa fa-expand gray"></i>
+						<i class="fa-solid fa-expand gray"></i>
 					</a>
 					<a data-toggle="upload" onclick="$(this).find('i').addClass('fa-spin'); $.widgetLoad({ path: hostcmsBackend + '/index.php?ajaxWidgetLoad&moduleId=<?php echo $oModule->id?>&type=0', context: $('#calendarAdminPage')});">
 						<i class="fa-solid fa-rotate gray"></i>

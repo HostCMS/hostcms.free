@@ -1,12 +1,20 @@
 if (typeof CKEDITOR != 'undefined')
 {
-	if (typeof mainFormLocker != 'undefined' && typeof mainFormAutosave != 'undefined')
-	{
-		CKEDITOR.on('instanceReady', function(evt) {
+	CKEDITOR.on('instanceReady', function(evt) {
+		const domElement = evt.editor.element.$;
+
+		domElement.ckeditorInstance = evt.editor;
+
+		evt.editor.on('destroy', function() {
+			delete domElement.ckeditorInstance;
+		});
+
+		if (typeof mainFormLocker != 'undefined' && typeof mainFormAutosave != 'undefined')
+		{
 			evt.editor.on('change', function() { mainFormLocker.lock() });
 			evt.editor.on('input', function(e) { mainFormAutosave.changed($('form[id ^= "formEdit"]'), e) });
-		});
-	}
+		}
+	});
 }
 
 document.addEventListener('focusin', (e) => {
@@ -28,16 +36,30 @@ class wysiwyg {
 	{
 		if (typeof CKEDITOR != 'undefined')
 		{
-			for (name in CKEDITOR.instances)
-			{
-				CKEDITOR.instances[name].destroy()
+			if ($parent && $parent.length) {
+				$parent.find('textarea, div').each(function() {
+					if (this.ckeditorInstance) {
+						this.ckeditorInstance.destroy();
+					}
+				});
+			} else {
+				for (let name in CKEDITOR.instances)
+				{
+					CKEDITOR.instances[name].destroy();
+				}
 			}
 		}
 	}
 
 	static clear($parent)
 	{
-		$parent.find('.cke').remove();
+		$parent.find('textarea, div').each(function() {
+			if (this.ckeditorInstance) {
+				this.ckeditorInstance.destroy();
+			} else if (typeof CKEDITOR != 'undefined' && this.id && CKEDITOR.instances[this.id]) {
+				CKEDITOR.instances[this.id].destroy();
+			}
+		});
 
 		$parent.find("textarea")
 			.removeAttr('wysiwyg')
@@ -46,17 +68,14 @@ class wysiwyg {
 
 	static remove($textarea)
 	{
-		if (typeof CKEDITOR != 'undefined')
-		{
-			var elementId = $textarea.attr('id'),
-				elementName = $textarea.attr('name'),
-				editor = CKEDITOR.instances[elementId];
+		const domElement = $textarea[0];
 
-			if (editor != null)
-			{
-				CKEDITOR.instances[elementId].destroy();
-				$textarea.attr('name', elementName);
-			}
+		if (domElement && domElement.ckeditorInstance) {
+			var elementName = $textarea.attr('name');
+
+			domElement.ckeditorInstance.destroy();
+
+			$textarea.attr('name', elementName);
 		}
 	}
 
@@ -136,6 +155,17 @@ class wysiwyg {
 		let $form = $(textarea).parents('form');
 		let entity_id = $form.data('entity_id');
 		let entity_type = $form.data('entity_type');
+
+		// frontend
+		if (typeof entity_id == 'undefined')
+		{
+			const item = $(textarea).prevAll('.hostcmsEditable').first();
+			if (item)
+			{
+				entity_id = item.attr('hostcms:id');
+				entity_type = item.attr('hostcms:entity');
+			}
+		}
 
 		// formData.append('upload', fileLoader.file, fileLoader.fileName);
 		formData.append('blob', fileLoader.file);
@@ -248,43 +278,6 @@ class wysiwyg {
 			stylesSet: [],
 			contentsCss: aCss
 		}, settings.wysiwygConfig));
-	}
-
-	static frontendSettingsRow($parent)
-	{
-		$parent.ckeditor({
-			versionCheck: false,
-			language: backendLng,
-			removeButtons: 'Source,Save,NewPage,ExportPdf,Preview,Print,Templates,PasteText,PasteFromWord,Find,Replace,SelectAll,Scayt,Form,Checkbox,Radio,TextField,Textarea,Select,Button,ImageButton,HiddenField,Subscript,Superscript,CopyFormatting,Outdent,Indent,Blockquote,CreateDiv,BidiLtr,BidiRtl,Language,Link,Unlink,Anchor,Image,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe,Format,Styles,Font,FontSize,TextColor,BGColor,Maximize,ShowBlocks,About',
-			toolbarGroups: [
-				{ name: 'document', groups: [ 'mode', 'document', 'doctools' ] },
-				{ name: 'clipboard', groups: [ 'clipboard', 'undo' ] },
-				{ name: 'editing', groups: [ 'find', 'selection', 'spellchecker', 'editing' ] },
-				{ name: 'forms', groups: [ 'forms' ] },
-				{ name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ] },
-				{ name: 'paragraph', groups: [ 'list', 'indent', 'blocks', 'align', 'bidi', 'paragraph' ] },
-				{ name: 'links', groups: [ 'links' ] },
-				{ name: 'insert', groups: [ 'insert' ] },
-				'/',
-				{ name: 'styles', groups: [ 'styles' ] },
-				{ name: 'colors', groups: [ 'colors' ] },
-				{ name: 'tools', groups: [ 'tools' ] },
-				{ name: 'others', groups: [ 'others' ] },
-				{ name: 'about', groups: [ 'about' ] }
-			],
-			on: {
-				instanceReady: function(evt) {
-					var editor = evt.editor;
-
-					editor.on('blur', function (e) {
-						e.stopImmediatePropagation();
-						editor.destroy();
-						$parent.css('visibility', '');
-						$parent.removeClass('editing');
-					});
-				}
-			}
-		});
 	}
 }
 

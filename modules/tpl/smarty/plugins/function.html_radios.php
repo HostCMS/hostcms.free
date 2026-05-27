@@ -47,8 +47,8 @@ function smarty_function_html_radios($params, Smarty_Internal_Template $template
     $template->_checkPlugins(
         array(
             array(
-                'function' => 'smarty_function_escape_special_chars',
-                'file'     => SMARTY_PLUGINS_DIR . 'shared.escape_special_chars.php'
+            	'function' => 'smarty_function_escape_special_chars',
+            	'file'     => SMARTY_PLUGINS_DIR . 'shared.escape_special_chars.php'
             )
         )
     );
@@ -77,8 +77,8 @@ function smarty_function_html_radios($params, Smarty_Internal_Template $template
                         $selected = smarty_function_escape_special_chars((string)$_val->__toString());
                     } else {
                         trigger_error(
-                            'html_radios: selected attribute is an object of class \'' . get_class($_val) .
-                            '\' without __toString() method',
+                        	'html_radios: selected attribute is an object of class \'' . get_class($_val) .
+                        	'\' without __toString() method',
                             E_USER_NOTICE
                         );
                     }
@@ -100,7 +100,7 @@ function smarty_function_html_radios($params, Smarty_Internal_Template $template
                 break;
             case 'radios':
                 trigger_error(
-                    'html_radios: the use of the "radios" attribute is deprecated, use "options" instead',
+                	'html_radios: the use of the "radios" attribute is deprecated, use "options" instead',
                     E_USER_WARNING
                 );
                 $options = (array)$_val;
@@ -208,8 +208,8 @@ function smarty_function_html_radios_output(
             $value = (string)$value->__toString();
         } else {
             trigger_error(
-                'html_options: value is an object of class \'' . get_class($value) .
-                '\' without __toString() method',
+            	'html_options: value is an object of class \'' . get_class($value) .
+            	'\' without __toString() method',
                 E_USER_NOTICE
             );
             return '';
@@ -222,8 +222,8 @@ function smarty_function_html_radios_output(
             $output = (string)$output->__toString();
         } else {
             trigger_error(
-                'html_options: output is an object of class \'' . get_class($output) .
-                '\' without __toString() method',
+            	'html_options: output is an object of class \'' . get_class($output) .
+            	'\' without __toString() method',
                 E_USER_NOTICE
             );
             return '';
@@ -235,8 +235,8 @@ function smarty_function_html_radios_output(
         if ($label_ids) {
             $_id = smarty_function_escape_special_chars(
                 preg_replace(
-                    '![^\w\-\.]!' . Smarty::$_UTF8_MODIFIER,
-                    '_',
+                	'![^\w\-\.]!' . Smarty::$_UTF8_MODIFIER,
+                	'_',
                     $name . '_' . $value
                 )
             );

@@ -121,12 +121,12 @@ class Core_Cbor
 		return self::_parseSimple($val);
 	}
 
-    /**
-     * Parse simple
-     * @param int $val
-     * @return bool|null
-     * @throws Core_Exception
-     */
+	/**
+	 * Parse simple
+	 * @param int $val
+	 * @return bool|null
+	 * @throws Core_Exception
+	 */
 	static protected function _parseSimple($val)
 	{
 		if ($val === 20)
@@ -147,14 +147,14 @@ class Core_Cbor
 		throw new Core_Exception(sprintf('Unsupported simple value %d.', $val));
 	}
 
-    /**
-     * Parse extra length
-     * @param string $val
-     * @param Core_Bytebuffer $buf
-     * @param int $offset
-     * @return int|string
-     * @throws Core_Exception
-     */
+	/**
+	 * Parse extra length
+	 * @param string $val
+	 * @param Core_Bytebuffer $buf
+	 * @param int $offset
+	 * @return int|string
+	 * @throws Core_Exception
+	 */
 	static protected function _parseExtraLength($val, Core_Bytebuffer $buf, &$offset)
 	{
 		switch ($val)

@@ -20,9 +20,9 @@ class Module_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 	/**
 	 * Module name
@@ -40,7 +40,7 @@ class Module_Module extends Core_Module_Abstract
 			array(
 				'sorting' => 220,
 				'block' => 3,
-				'ico' => 'fa fa-puzzle-piece',
+				'ico' => 'fa-solid fa-boxes-stacked',
 				'name' => Core::_('Module.menu'),
 				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/module/index.php"),
 				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/module/index.php'}); return false")

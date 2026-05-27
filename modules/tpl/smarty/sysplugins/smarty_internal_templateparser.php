@@ -4,9 +4,9 @@ class TP_yyStackEntry
 {
     public $stateno;       /* The state-number */
     public $major;         /* The major token value.  This is the code
-                     ** number for the token at this stack level */
+                	 ** number for the token at this stack level */
     public $minor; /* The user-supplied minor token value.  This
-                     ** is the value of the token  */
+                	 ** is the value of the token  */
 };
 
 
@@ -27,128 +27,128 @@ class Smarty_Internal_Templateparser
     const ERR1 = 'Security error: Call to private object member not allowed';
     const ERR2 = 'Security error: Call to dynamic object member not allowed';
 
-    /**
-     * result status
-     *
-     * @var bool
-     */
+	/**
+	 * result status
+	 *
+	 * @var bool
+	 */
     public $successful = true;
 
-    /**
-     * return value
-     *
-     * @var mixed
-     */
+	/**
+	 * return value
+	 *
+	 * @var mixed
+	 */
     public $retvalue = 0;
 
-    /**
-     * @var
-     */
+	/**
+	 * @var
+	 */
     public $yymajor;
 
-    /**
-     * last index of array variable
-     *
-     * @var mixed
-     */
+	/**
+	 * last index of array variable
+	 *
+	 * @var mixed
+	 */
     public $last_index;
 
-    /**
-     * last variable name
-     *
-     * @var string
-     */
+	/**
+	 * last variable name
+	 *
+	 * @var string
+	 */
     public $last_variable;
 
-    /**
-     * root parse tree buffer
-     *
-     * @var Smarty_Internal_ParseTree_Template
-     */
+	/**
+	 * root parse tree buffer
+	 *
+	 * @var Smarty_Internal_ParseTree_Template
+	 */
     public $root_buffer;
 
-    /**
-     * current parse tree object
-     *
-     * @var Smarty_Internal_ParseTree
-     */
+	/**
+	 * current parse tree object
+	 *
+	 * @var Smarty_Internal_ParseTree
+	 */
     public $current_buffer;
 
-    /**
-     * lexer object
-     *
-     * @var Smarty_Internal_Templatelexer
-     */
+	/**
+	 * lexer object
+	 *
+	 * @var Smarty_Internal_Templatelexer
+	 */
     public $lex;
 
-    /**
-     * internal error flag
-     *
-     * @var bool
-     */
+	/**
+	 * internal error flag
+	 *
+	 * @var bool
+	 */
     private $internalError = false;
 
-    /**
-     * {strip} status
-     *
-     * @var bool
-     */
+	/**
+	 * {strip} status
+	 *
+	 * @var bool
+	 */
     public $strip = false;
-    /**
-     * compiler object
-     *
-     * @var Smarty_Internal_TemplateCompilerBase
-     */
+	/**
+	 * compiler object
+	 *
+	 * @var Smarty_Internal_TemplateCompilerBase
+	 */
     public $compiler = null;
 
-    /**
-     * smarty object
-     *
-     * @var Smarty
-     */
+	/**
+	 * smarty object
+	 *
+	 * @var Smarty
+	 */
     public $smarty = null;
 
-    /**
-     * template object
-     *
-     * @var Smarty_Internal_Template
-     */
+	/**
+	 * template object
+	 *
+	 * @var Smarty_Internal_Template
+	 */
     public $template = null;
 
-    /**
-     * block nesting level
-     *
-     * @var int
-     */
+	/**
+	 * block nesting level
+	 *
+	 * @var int
+	 */
     public $block_nesting_level = 0;
 
-    /**
-     * security object
-     *
-     * @var Smarty_Security
-     */
+	/**
+	 * security object
+	 *
+	 * @var Smarty_Security
+	 */
     public $security = null;
 
-    /**
-     * template prefix array
-     *
-     * @var \Smarty_Internal_ParseTree[]
-     */
+	/**
+	 * template prefix array
+	 *
+	 * @var \Smarty_Internal_ParseTree[]
+	 */
     public $template_prefix = array();
 
-    /**
-     * template prefix array
-     *
-     * @var \Smarty_Internal_ParseTree[]
-     */
+	/**
+	 * template prefix array
+	 *
+	 * @var \Smarty_Internal_ParseTree[]
+	 */
     public $template_postfix = array();
 
-    /**
-     * constructor
-     *
-     * @param Smarty_Internal_Templatelexer        $lex
-     * @param Smarty_Internal_TemplateCompilerBase $compiler
-     */
+	/**
+	 * constructor
+	 *
+	 * @param Smarty_Internal_Templatelexer        $lex
+	 * @param Smarty_Internal_TemplateCompilerBase $compiler
+	 */
     public function __construct(Smarty_Internal_Templatelexer $lex, Smarty_Internal_TemplateCompilerBase $compiler)
     {
         $this->lex = $lex;
@@ -159,20 +159,20 @@ class Smarty_Internal_Templateparser
         $this->current_buffer = $this->root_buffer = new Smarty_Internal_ParseTree_Template();
     }
 
-     /**
-     * insert PHP code in current buffer
-     *
-     * @param string $code
-     */
+ 	/**
+	 * insert PHP code in current buffer
+	 *
+	 * @param string $code
+	 */
     public function insertPhpCode($code)
     {
         $this->current_buffer->append_subtree($this, new Smarty_Internal_ParseTree_Tag($this, $code));
     }
 
-    /**
-     * error rundown
-     *
-     */
+	/**
+	 * error rundown
+	 *
+	 */
     public function errorRunDown()
     {
         while ($this->yystack !== array()) {
@@ -183,13 +183,13 @@ class Smarty_Internal_Templateparser
         }
     }
 
-    /**
-     *  merge PHP code with prefix code and return parse tree tag object
-     *
-     * @param string $code
-     *
-     * @return Smarty_Internal_ParseTree_Tag
-     */
+	/**
+	 *  merge PHP code with prefix code and return parse tree tag object
+	 *
+	 * @param string $code
+	 *
+	 * @return Smarty_Internal_ParseTree_Tag
+	 */
     public function mergePrefixCode($code)
     {
         $tmp = '';
@@ -1117,32 +1117,32 @@ public static $yy_action = array(
     public $yystack = array();  /* The parser's stack */
 
     public $yyTokenName = array(
-  '$',             'VERT',          'COLON',         'TEXT',        
-  'STRIPON',       'STRIPOFF',      'LITERALSTART',  'LITERALEND',  
-  'LITERAL',       'SIMPELOUTPUT',  'SIMPLETAG',     'SMARTYBLOCKCHILDPARENT',
-  'LDEL',          'RDEL',          'DOLLARID',      'EQUAL',       
-  'ID',            'PTR',           'LDELMAKENOCACHE',  'LDELIF',      
-  'LDELFOR',       'SEMICOLON',     'INCDEC',        'TO',          
-  'STEP',          'LDELFOREACH',   'SPACE',         'AS',          
-  'APTR',          'LDELSETFILTER',  'CLOSETAG',      'LDELSLASH',   
-  'ATTR',          'INTEGER',       'COMMA',         'OPENP',       
-  'CLOSEP',        'MATH',          'UNIMATH',       'ISIN',        
-  'QMARK',         'NOT',           'TYPECAST',      'HEX',         
-  'DOT',           'INSTANCEOF',    'SINGLEQUOTESTRING',  'DOUBLECOLON', 
-  'NAMESPACE',     'AT',            'HATCH',         'OPENB',       
-  'CLOSEB',        'DOLLAR',        'LOGOP',         'SLOGOP',      
-  'TLOGOP',        'SINGLECOND',    'ARRAYOPEN',     'QUOTE',       
-  'BACKTICK',      'error',         'start',         'template',    
-  'literal_e2',    'literal_e1',    'smartytag',     'tagbody',     
-  'tag',           'outattr',       'eqoutattr',     'varindexed',  
-  'output',        'attributes',    'variable',      'value',       
-  'expr',          'modifierlist',  'statement',     'statements',  
-  'foraction',     'varvar',        'modparameters',  'attribute',   
-  'ternary',       'tlop',          'lop',           'scond',       
-  'array',         'function',      'ns1',           'doublequoted_with_quotes',
-  'static_class_access',  'arraydef',      'object',        'arrayindex',  
-  'indexdef',      'varvarele',     'objectchain',   'objectelement',
-  'method',        'params',        'modifier',      'modparameter',
+  '$',         	'VERT',      	'COLON',     	'TEXT',        
+  'STRIPON',   	'STRIPOFF',  	'LITERALSTART',  'LITERALEND',  
+  'LITERAL',   	'SIMPELOUTPUT',  'SIMPLETAG', 	'SMARTYBLOCKCHILDPARENT',
+  'LDEL',      	'RDEL',      	'DOLLARID',  	'EQUAL',       
+  'ID',        	'PTR',       	'LDELMAKENOCACHE',  'LDELIF',      
+  'LDELFOR',   	'SEMICOLON', 	'INCDEC',    	'TO',          
+  'STEP',      	'LDELFOREACH',   'SPACE',     	'AS',          
+  'APTR',      	'LDELSETFILTER',  'CLOSETAG',  	'LDELSLASH',   
+  'ATTR',      	'INTEGER',   	'COMMA',     	'OPENP',       
+  'CLOSEP',    	'MATH',      	'UNIMATH',   	'ISIN',        
+  'QMARK',     	'NOT',       	'TYPECAST',  	'HEX',         
+  'DOT',       	'INSTANCEOF',	'SINGLEQUOTESTRING',  'DOUBLECOLON', 
+  'NAMESPACE', 	'AT',        	'HATCH',     	'OPENB',       
+  'CLOSEB',    	'DOLLAR',    	'LOGOP',     	'SLOGOP',      
+  'TLOGOP',    	'SINGLECOND',	'ARRAYOPEN', 	'QUOTE',       
+  'BACKTICK',  	'error',     	'start',     	'template',    
+  'literal_e2',	'literal_e1',	'smartytag', 	'tagbody',     
+  'tag',       	'outattr',   	'eqoutattr', 	'varindexed',  
+  'output',    	'attributes',	'variable',  	'value',       
+  'expr',      	'modifierlist',  'statement', 	'statements',  
+  'foraction', 	'varvar',    	'modparameters',  'attribute',   
+  'ternary',   	'tlop',      	'lop',       	'scond',       
+  'array',     	'function',  	'ns1',       	'doublequoted_with_quotes',
+  'static_class_access',  'arraydef',  	'object',    	'arrayindex',  
+  'indexdef',  	'varvarele', 	'objectchain',   'objectelement',
+  'method',    	'params',    	'modifier',  	'modparameter',
   'arrayelements',  'arrayelement',  'doublequoted',  'doublequotedcontent',
     );
 
@@ -2667,19 +2667,19 @@ public static $yy_action = array(
 // line 1139 "../smarty/lexer/smarty_internal_templateparser.y"
     public function yy_r164(){
     static $lops = array(
-        'eq' => ' == ',
-        'ne' => ' != ',
-        'neq' => ' != ',
-        'gt' => ' > ',
-        'ge' => ' >= ',
-        'gte' => ' >= ',
-        'lt' =>  ' < ',
-        'le' =>  ' <= ',
-        'lte' => ' <= ',
-        'mod' =>  ' % ',
-        'and' => ' && ',
-        'or' => ' || ',
-        'xor' => ' xor ',
+    	'eq' => ' == ',
+    	'ne' => ' != ',
+    	'neq' => ' != ',
+    	'gt' => ' > ',
+    	'ge' => ' >= ',
+    	'gte' => ' >= ',
+    	'lt' =>  ' < ',
+    	'le' =>  ' <= ',
+    	'lte' => ' <= ',
+    	'mod' =>  ' % ',
+    	'and' => ' && ',
+    	'or' => ' || ',
+    	'xor' => ' xor ',
          );
     $op = strtolower(preg_replace('/\s*/', '', $this->yystack[$this->yyidx + 0]->minor));
     $this->_retvalue = $lops[$op];
@@ -2687,12 +2687,12 @@ public static $yy_action = array(
 // line 1158 "../smarty/lexer/smarty_internal_templateparser.y"
     public function yy_r165(){
      static $tlops = array(
-         'isdivby' => array('op' => ' % ', 'pre' => '!('),
-         'isnotdivby' => array('op' => ' % ', 'pre' => '('),
-         'isevenby' => array('op' => ' / ', 'pre' => '!(1 & '),
-         'isnotevenby' => array('op' => ' / ', 'pre' => '(1 & '),
-         'isoddby' => array('op' => ' / ', 'pre' => '(1 & '),
-         'isnotoddby' => array('op' => ' / ', 'pre' => '!(1 & '),
+     	'isdivby' => array('op' => ' % ', 'pre' => '!('),
+     	'isnotdivby' => array('op' => ' % ', 'pre' => '('),
+     	'isevenby' => array('op' => ' / ', 'pre' => '!(1 & '),
+     	'isnotevenby' => array('op' => ' / ', 'pre' => '(1 & '),
+     	'isoddby' => array('op' => ' / ', 'pre' => '(1 & '),
+     	'isnotoddby' => array('op' => ' / ', 'pre' => '!(1 & '),
          );
      $op = strtolower(preg_replace('/\s*/', '', $this->yystack[$this->yyidx + 0]->minor));
      $this->_retvalue = $tlops[$op];
@@ -2700,10 +2700,10 @@ public static $yy_action = array(
 // line 1171 "../smarty/lexer/smarty_internal_templateparser.y"
     public function yy_r166(){
         static $scond = array (
-            'iseven' => '!(1 & ',
-            'isnoteven' => '(1 & ',
-            'isodd' => '(1 & ',
-            'isnotodd' => '!(1 & ',
+        	'iseven' => '!(1 & ',
+        	'isnoteven' => '(1 & ',
+        	'isodd' => '(1 & ',
+        	'isnotodd' => '!(1 & ',
         );
    $op = strtolower(str_replace(' ', '', $this->yystack[$this->yyidx + 0]->minor));
    $this->_retvalue = $scond[$op];

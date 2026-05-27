@@ -82,7 +82,6 @@ class Template_Section_Command_Controller extends Core_Command_Controller
 
 			$oCore_Response
 				->status(200)
-				->header('Pragma', 'no-cache')
 				->header('Cache-Control', 'private, no-cache')
 				->header('Vary', 'Accept')
 				->header('Last-Modified', gmdate('D, d M Y H:i:s', time()) . ' GMT')

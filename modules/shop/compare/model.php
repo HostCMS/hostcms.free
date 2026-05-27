@@ -96,11 +96,11 @@ class Shop_Compare_Model extends Core_Entity
 	 */
 	protected $_showXmlCommentsRating = FALSE;
 
-    /**
-     * Add Comments Rating XML to item
-     * @param bool $showXmlCommentsRating
-     * @return self
-     */
+	/**
+	 * Add Comments Rating XML to item
+	 * @param bool $showXmlCommentsRating
+	 * @return self
+	 */
 	public function showXmlCommentsRating($showXmlCommentsRating = TRUE)
 	{
 		$this->_showXmlCommentsRating = $showXmlCommentsRating;
@@ -123,7 +123,7 @@ class Shop_Compare_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event shop_compare.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')

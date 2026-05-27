@@ -20,9 +20,9 @@ class Sql_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 	/**
 	 * Module name
@@ -40,7 +40,7 @@ class Sql_Module extends Core_Module_Abstract
 			array(
 				'sorting' => 270,
 				'block' => 3,
-				'ico' => 'fa fa-database',
+				'ico' => 'fa-solid fa-database',
 				'name' => Core::_('sql.menu'),
 				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/sql/index.php"),
 				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/sql/index.php'}); return false")

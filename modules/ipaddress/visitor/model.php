@@ -52,19 +52,27 @@ class Ipaddress_Visitor_Model extends Core_Entity
 		{
 			case 0:
 				$color = 'red';
-				$icon = 'fa-times-circle-o';
+				$icon = 'fa-regular fa-circle-xmark';
 			break;
 			case 1:
 				$color = 'green';
-				$icon = 'fa-check-circle-o';
+				$icon = 'fa-regular fa-circle-check';
 			break;
 			case 2:
 				$color = 'blue';
-				$icon = 'fa-clock';
+				$icon = 'fa-regular fa-clock';
+			break;
+			case 3:
+				$color = 'blue';
+				$icon = 'fa-solid fa-robot';
+			break;
+			default:
+				$color = 'gray';
+				$icon = 'fa-solid fa-ellipsis';
 			break;
 		}
 
-		return '<i class="fa ' . $icon . ' ' . $color . '" title="' . $title . '">';
+		return '<i class="' . $icon . ' ' . $color . '" title="' . $title . '">';
 	}
 
 	/**
@@ -133,19 +141,29 @@ class Ipaddress_Visitor_Model extends Core_Entity
 		{
 			?><span title="<?php echo htmlspecialchars($this->useragent)?>"><?php
 
-				$browser = htmlspecialchars(Core_Browser::getBrowser($this->useragent));
+				$browser = Core_Browser::getBrowser($this->useragent);
 
-				/*if ($browser != '-')
-				{*/
+				$browser === '-' && Core::moduleIsActive('counter')
+					&& $browser = Counter_Bot::getName($this->useragent);
+
+				if (is_string($browser) && $browser != '-')
+				{
 					$ico = Core_Browser::getBrowserIco($browser);
 
-					!is_null($ico)
-						&& $browser = '<i class="' . $ico . '"></i> ' . $browser;
+					if (!is_null($ico))
+					{
+						echo '<i class="' . htmlspecialchars($ico) . '"></i> ';
+					}
 
-					echo $browser . ' ';
-				//}
+					echo htmlspecialchars($browser) . ' ';
+				}
 			?></span>
-			<span class="label label-sm label-success"><?php echo htmlspecialchars(Core_Browser::getOs($this->useragent));?></span><?php
+			<?php
+			$os = Core_Browser::getOs($this->useragent);
+			if ($os != '-')
+			{
+				?> <span class="label label-sm label-success"><?php echo htmlspecialchars($os)?></span><?php
+			}
 		}
 
 		if ($this->headers != '')
@@ -167,7 +185,7 @@ class Ipaddress_Visitor_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event ipaddress_visitor.onBeforeRedeclaredDelete
+	 * @hostcms-event ipaddress_visitor.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

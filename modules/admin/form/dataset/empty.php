@@ -43,7 +43,7 @@ class Admin_Form_Dataset_Empty extends Admin_Form_Dataset
 	 * Get object
 	 * @param int $primaryKey ID
 	 * @return object|null
-     */
+	 */
 	public function getObject($primaryKey)
 	{
 		return NULL;

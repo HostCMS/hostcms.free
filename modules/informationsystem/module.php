@@ -20,9 +20,9 @@ class Informationsystem_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 	/**
 	 * Module name
@@ -89,7 +89,7 @@ class Informationsystem_Module extends Core_Module_Abstract
 			array(
 				'sorting' => 30,
 				'block' => 0,
-				'ico' => 'fa fa-newspaper-o',
+				'ico' => 'fa-regular fa-newspaper',
 				'name' => Core::_('Informationsystem.menu'),
 				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/informationsystem/index.php"),
 				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/informationsystem/index.php'}); return false")
@@ -374,7 +374,7 @@ class Informationsystem_Module extends Core_Module_Abstract
 
 						$href = $oAdmin_Form_Controller->getAdminActionLoadHref($sPath, 'edit', NULL, 1, $oInformationsystem_Item->id, $additionalParams);
 						$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($sPath, 'edit', NULL, 1, $oInformationsystem_Item->id, $additionalParams);
-						$icon = "fa fa-file-text-o";
+						$icon = "fa-regular fa-file-text";
 					}
 				break;
 			}

@@ -94,8 +94,8 @@ class Shop_Warrant_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 
 			$printlayoutsButton = '
 				<div class="btn-group print-button margin-right-20' . (!$this->_object->id ? ' hidden' : '') . '">
-					<a class="btn btn-labeled btn-success" href="javascript:void(0);"><i class="btn-label fa fa-print"></i>' . Core::_('Printlayout.print') . '</a>
-					<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
+					<a class="btn btn-labeled btn-success" href="javascript:void(0);"><i class="btn-label fa-solid fa-print"></i>' . Core::_('Printlayout.print') . '</a>
+					<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa-solid fa-angle-down"></i></a>
 					<ul class="dropdown-menu dropdown-palegreen">
 			';
 
@@ -341,7 +341,7 @@ class Shop_Warrant_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 
 		$oAlertSpan->add(
 			Core_Html_Entity::factory('I')
-				->class('fa fa-exclamation-triangle darkorange amount-alert' . $hiddenClass)
+				->class('fa-solid fa-triangle-exclamation darkorange amount-alert' . $hiddenClass)
 				->title(Core::_('Shop_Warrant.wrong_amount'))
 		);
 
@@ -446,7 +446,7 @@ class Shop_Warrant_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name
 	 * @return bool
-     */
+	 */
 	public function execute($operation = NULL)
 	{
 		// createFrom=supply&createFromId=123

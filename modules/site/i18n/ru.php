@@ -127,4 +127,5 @@ return array(
 	'error_bot' => 'Страница для проверки ботов',
 	'favicon_header' => 'Favicon',
 	'rename_backend_error' => 'Не удалось изменить адрес панели центра администрирования!',
+	'check_browser' => 'Антибот',
 );

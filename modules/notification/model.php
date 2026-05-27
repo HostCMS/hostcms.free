@@ -74,7 +74,7 @@ class Notification_Model extends Core_Entity
 
 		return !is_null($aIcon)
 			? "<i class=\"notification-ico {$aIcon['ico']} {$aIcon['background-color']} {$aIcon['color']} fa-fw\"></i>"
-			: '<i class="notification-ico fa fa-info bg-themeprimary white fa-fw"></i>';
+			: '<i class="notification-ico fa-solid fa-info bg-themeprimary white fa-fw"></i>';
 	}
 
 	/**
@@ -142,7 +142,7 @@ class Notification_Model extends Core_Entity
 	 * @param int $entity_id
 	 * @param int $type
 	 * @return Core_ORM|NULL
-     */
+	 */
 	public function getNotification($module_id, $type, $entity_id)
 	{
 		$this->queryBuilder()

@@ -93,13 +93,13 @@ class Property_Controller
 		return $name . $oProperty_Value->id . '.' . Core_File::getExtension($originalFileName);
 	}
 
-    /**
-     * Get property small image file name
-     * @param Core_Entity $oEntity
-     * @param Property_Value_File_Model $oProperty_Value entity of property_value
-     * @param string $originalFileName original file name
-     * @return string
-     */
+	/**
+	 * Get property small image file name
+	 * @param Core_Entity $oEntity
+	 * @param Property_Value_File_Model $oProperty_Value entity of property_value
+	 * @param string $originalFileName original file name
+	 * @return string
+	 */
 	static public function getSmallFileName(Core_Entity $oEntity, $oProperty_Value, $originalFileName)
 	{
 		$modelName = $oEntity->getModelName();

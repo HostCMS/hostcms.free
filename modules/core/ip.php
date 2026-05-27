@@ -22,7 +22,7 @@ class Core_Ip
 	{
 		return long2ip(ip2long($ipv4) & ip2long($mask));
 	}
-	
+
 	/**
 	 * Get IPv4 broadcast, e.g. '11.22.255.255' for '11.22.5.6' and mask '255.255.0.0'
 	 * @param string $ipv4 IPv4
@@ -33,7 +33,7 @@ class Core_Ip
 	{
 		return long2ip(ip2long($ipv4) | ~ip2long($mask));
 	}
-	
+
 	/**
 	 * Convert IPv4 or IPV6 into hexadecimal value
 	 * @param string $ip IP
@@ -53,10 +53,15 @@ class Core_Ip
 	 */
 	static public function hex2ip($hex)
 	{
-		$hexLen = strlen($hex);
+		if (is_string($hex))
+		{
+			$hexLen = strlen($hex);
+
+			return $hexLen == 8 || $hexLen == 32
+				? inet_ntop(hex2bin($hex))
+				: '';
+		}
 		
-		return $hexLen == 8 || $hexLen == 32
-			? inet_ntop(hex2bin($hex))
-			: '';
+		return '';
 	}
 }

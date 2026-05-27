@@ -19,11 +19,11 @@ class Schedule_Load_Select_Options extends Admin_Form_Action_Controller
 	 */
 	protected $_moduleId = NULL;
 
-    /**
-     * Set model
-     * @param int $moduleId
-     * @return self
-     */
+	/**
+	 * Set model
+	 * @param int $moduleId
+	 * @return self
+	 */
 	public function moduleId($moduleId)
 	{
 		$this->_moduleId = $moduleId;

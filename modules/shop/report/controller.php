@@ -880,8 +880,8 @@ class Shop_Report_Controller
 			? 'table-wrapper-scroll-y report-table-scrollbar'
 			: '';
 		?>
-		<div class="<?php echo $class?>">
-			<table class="table table-hover">
+		<div class="<?php echo $class?>" style="overflow-x: auto;">
+			<table class="modern-table priority-table">
 				<thead>
 					<tr>
 						<th><?php echo Core::_('Report.item_group')?></th>
@@ -913,7 +913,7 @@ class Shop_Report_Controller
 						}
 
 						$imgSrc = '';
-						if (strlen($oShop_Item->image_small))
+						if (strlen((string) $oShop_Item->image_small))
 						{
 							$imgSrc = htmlspecialchars($oShop_Item->getSmallFileHref());
 						}
@@ -1042,13 +1042,13 @@ class Shop_Report_Controller
 
 	static protected function _orders($functionName, $aOptions)
 	{
-		$compare_previous_period = Core_Array::get($aOptions, 'compare_previous_period', 0);
+		$compare_previous_period = Core_Array::get($aOptions, 'compare_previous_period', 0, 'int');
 
 		$checked = self::$_allow_delivery
 			? 'checked="checked"'
 			: '';
 
-		$group_by = Core_Array::get($aOptions, 'group_by', 1);
+		$group_by = Core_Array::get($aOptions, 'group_by', 1, 'int');
 
 		switch ($group_by)
 		{
@@ -1064,28 +1064,25 @@ class Shop_Report_Controller
 			break;
 		}
 		?>
-		<div class="row">
-			<div class="form-group col-xs-12 col-sm-4">
-				<?php
-				$aShopOptions = array(0 => Core::_('Report.all_shops'));
+		<div class="local-filters"><?php
+			$aShopOptions = array(0 => Core::_('Report.all_shops'));
 
-				$aShops = Core_Entity::factory('Shop')->getAllBySite_id(CURRENT_SITE, FALSE);
-				foreach ($aShops as $oShop)
-				{
-					$aShopOptions[$oShop->id] = $oShop->name;
-				}
+			$aShops = Core_Entity::factory('Shop')->getAllBySite_id(CURRENT_SITE, FALSE);
+			foreach ($aShops as $oShop)
+			{
+				$aShopOptions[$oShop->id] = $oShop->name;
+			}
 
-				Admin_Form_Entity::factory('Select')
-					->id('shop_id')
-					->options($aShopOptions)
-					->value(self::$_shop_id)
-					->name('shop_id')
-					->divAttr(array('class' => ''))
-					->onchange('sendRequest({tab: $(\'.report-tabs .nav-tabs li.active\'), data: {shop_id: $(this).val()}});')
-					->execute();
-				?>
-			</div>
-			<?php
+			Admin_Form_Entity::factory('Select')
+				->id('shop_id')
+				->options($aShopOptions)
+				->value(self::$_shop_id)
+				->name('shop_id')
+				->divAttr(array('class' => ''))
+				->class('select-modern')
+				->onchange('sendRequest({tab: $(\'.report-layout aside.sidebar .tab-item.active\'), data: {shop_id: $(this).val()}});')
+				->execute();
+
 			if (self::$_shop_id)
 			{
 				$aPriceOptions = array(0 => Core::_('Report.select_price'));
@@ -1100,31 +1097,27 @@ class Shop_Report_Controller
 						$aPriceOptions[$oShop_Price->id] = $oShop_Price->name;
 					}
 				}
-				?>
-				<div class="col-xs-12 col-sm-4">
-					<?php
-					Admin_Form_Entity::factory('Select')
-						->id('shop_price_id')
-						->options($aPriceOptions)
-						->value(self::$_shop_price_id)
-						->name('shop_price_id')
-						->divAttr(array('class' => ''))
-						->onchange('sendRequest({tab: $(\'.report-tabs .nav-tabs li.active\'), data: {shop_id: ' . self::$_shop_id . ', shop_price_id: $(this).val()}});')
-						->execute();
-					?>
-				</div>
-			<?php
+
+				Admin_Form_Entity::factory('Select')
+					->id('shop_price_id')
+					->options($aPriceOptions)
+					->value(self::$_shop_price_id)
+					->name('shop_price_id')
+					->divAttr(array('class' => ''))
+					->class('select-modern')
+					->onchange('sendRequest({tab: $(\'.report-layout aside.sidebar .tab-item.active\'), data: {shop_id: ' . self::$_shop_id . ', shop_price_id: $(this).val()}});')
+					->execute();
 			}
 			?>
-			<div class="form-group col-xs-12 col-sm-4 margin-top-5">
-				<div class="pull-left text margin-right-10"><?php echo Core::_('Report.allow_delivery')?></div>
-				<label>
-					<input class="checkbox-slider toggle colored-success" name="allow_delivery" onchange="$(this).val(+this.checked); sendRequest({tab: $('.report-tabs .nav-tabs li.active'), data: {allow_delivery: $(this).val()}});" type="checkbox" value="<?php echo self::$_allow_delivery?>" <?php echo $checked?>/>
-					<span class="text"></span>
+			<div class="toggle-wrapper" style="height: auto;">
+				<label class="switch">
+					<input name="allow_delivery" type="checkbox" value="<?php echo self::$_allow_delivery?>" onchange="$(this).val(+this.checked); sendRequest({tab: $('.report-layout aside.sidebar .tab-item.active'), data: {allow_delivery: $(this).val()}});" <?php echo $checked?>/>
+					<span class="slider" style="border-radius: 20px;"></span>
 				</label>
+				<span style="font-size: 14px;"><?php echo Core::_('Report.allow_delivery')?></span>
 			</div>
-		</div>
-		<?php
+		</div><?php
+
 		if ($functionName == '_selectOrders')
 		{
 			self::$_debug && $fBeginTime = Core::getmicrotime();
@@ -1146,7 +1139,7 @@ class Shop_Report_Controller
 			$iCountTotalOrdersAmount = array_sum(self::$_aOrderedAmount);
 
 			$avgOrdersAmount = $iCountOrderSiteusers
-				? $iCountTotalOrdersAmount / $iCountOrderSiteusers
+				? round($iCountTotalOrdersAmount / $iCountOrderSiteusers)
 				: 0;
 
 			// Canceled orders
@@ -1157,7 +1150,7 @@ class Shop_Report_Controller
 
 			// Avg orders amount
 			$avgCommonOrdersAmount = $iCountTotalOrders
-				? $iCountTotalOrdersAmount / $iCountTotalOrders
+				? round($iCountTotalOrdersAmount / $iCountTotalOrders)
 				: 0;
 
 			$iCountTotalOrdersItem = array_sum(self::$_total_order_items);
@@ -1244,49 +1237,47 @@ class Shop_Report_Controller
 				}
 			}
 			?>
-			<div class="row siteusers-block">
-				<div class="col-xs-12 col-sm-3">
-					<div class="report-name"><?php echo Core::_('Report.widget_new_clients')?></div>
-					<div class="report-description">
+			<div class="kpi-grid">
+				<div class="kpi-card">
+					<div class="kpi-label"><?php echo Core::_('Report.widget_new_clients')?></div>
+					<div class="kpi-val">
 						<?php echo $iCountNewSiteusers?>
 						<?php echo $newSiteusersDeltaPercent?>
 					</div>
 				</div>
-				<div class="col-xs-12 col-sm-3">
-					<div class="report-name"><?php echo Core::_('Report.widget_orders_by_client')?></div>
-					<div class="report-description">
+				<div class="kpi-card">
+					<div class="kpi-label"><?php echo Core::_('Report.widget_orders_by_client')?></div>
+					<div class="kpi-val">
 						<?php echo number_format((float) $avgOrders, 2, '.', ' ')?>
 						<?php echo $avgOrdersDeltaPercent?>
 					</div>
 				</div>
-				<div class="col-xs-12 col-sm-3">
-					<div class="report-name"><?php echo Core::_('Report.widget_client_avg_price')?></div>
-					<div class="report-description">
+				<div class="kpi-card">
+					<div class="kpi-label"><?php echo Core::_('Report.widget_client_avg_price')?></div>
+					<div class="kpi-val">
 						<?php echo htmlspecialchars(self::$_oDefault_Currency->formatWithCurrency($avgOrdersAmount))?>
 						<?php echo $avgOrdersAmountDeltaPercent?>
 					</div>
 				</div>
-				<div class="col-xs-12 col-sm-3">
-					<div class="report-name"><?php echo Core::_('Report.widget_canceled_orders')?></div>
-					<div class="report-description">
-						<?php echo $canceledPercent?>%
-						<?php echo $canceledDeltaPercent?>
-					</div>
-				</div>
-			</div>
-			<div class="row siteusers-block margin-top-20">
-				<div class="col-xs-12 col-sm-3">
-					<div class="report-name"><?php echo Core::_('Report.widget_avg_price')?></div>
-					<div class="report-description">
+				<div class="kpi-card">
+					<div class="kpi-label"><?php echo Core::_('Report.widget_avg_price')?></div>
+					<div class="kpi-val">
 						<?php echo htmlspecialchars(self::$_oDefault_Currency->formatWithCurrency($avgCommonOrdersAmount))?>
 						<?php echo $avgCommonOrdersAmountDeltaPercent?>
 					</div>
 				</div>
-				<div class="col-xs-12 col-sm-3">
-					<div class="report-name"><?php echo Core::_('Report.widget_avg_order_items')?></div>
-					<div class="report-description">
+				<div class="kpi-card">
+					<div class="kpi-label"><?php echo Core::_('Report.widget_avg_order_items')?></div>
+					<div class="kpi-val">
 						<?php echo number_format((float) $avgCountOrdersItem, 2, '.', ' ')?>
 						<?php echo $avgCountOrdersItemDeltaPercent?>
+					</div>
+				</div>
+				<div class="kpi-card">
+					<div class="kpi-label"><?php echo Core::_('Report.widget_canceled_orders')?></div>
+					<div class="kpi-val">
+						<?php echo $canceledPercent?>%
+						<?php echo $canceledDeltaPercent?>
 					</div>
 				</div>
 			</div>
@@ -1294,158 +1285,150 @@ class Shop_Report_Controller
 			self::$_debug && self::$_debugMessages[] = sprintf('_orders(), _selectOrders %.5f', Core::getmicrotime() - $fBeginTime);
 		}
 		?>
-		<div class="row">
-			<div class="col-xs-12">
-				<div id="bar-chart<?php echo $functionName?>" class="chart chart-lg margin-top-20 <?php echo $group_by == 2 ? 'rotate-legend' : ''?>"></div>
-			</div>
+		<div class="card no-padding">
+			<div id="bar-chart<?php echo $functionName?>" class="chart chart-lg margin-top-20 <?php echo $group_by == 2 ? 'rotate-legend' : ''?>"></div>
 		</div>
 		<?php
 		if (self::$_oDefault_Currency)
 		{
 			self::$_debug && $fBeginTime = Core::getmicrotime();
 			?>
-			<div class="row">
-				<div class="col-xs-12">
-					<div class="show-table-button margin-top-20 padding-10">
-						<div class="row">
-							<div class="col-xs-12 col-sm-3">
-								<div class="report-name"><?php echo $functionName == '_selectOrders' ? Core::_('Report.order_costs') : Core::_('Report.order_paid_costs');?></div>
-								<div class="amount"></div>
-							</div>
-							<?php
-							if (self::$_shop_price_id)
-							{
-								?><div class="col-xs-12 col-sm-3">
-									<div class="report-name"><?php echo $functionName == '_selectOrders' ? Core::_('Report.order_costs_profit') : Core::_('Report.order_paid_profit');?></div>
-									<div class="amount-profit"></div>
-								</div><?php
-							}
-							?>
-							<div class="col-xs-12 col-sm-6 margin-top-10">
-								<a onclick="$('.data-table').toggleClass('hidden')" class="btn btn-primary"><?php echo Core::_('Report.show_table')?></a>
-							</div>
-						</div>
+			<div class="table-card">
+				<div class="table-header-banner">
+					<div>
+						<div class="kpi-label" style="font-size: 14px;"><?php echo $functionName == '_selectOrders' ? Core::_('Report.order_costs') : Core::_('Report.order_paid_costs');?></div>
+						<div class="kpi-val amount" style="font-size: 28px;"></div>
 					</div>
+					<?php
+					if (self::$_shop_price_id)
+					{
+						?><div>
+							<div class="kpi-label" style="font-size: 14px;"><?php echo $functionName == '_selectOrders' ? Core::_('Report.order_costs_profit') : Core::_('Report.order_paid_profit');?></div>
+							<div class="kpi-val amount-profit" style="font-size: 28px;"></div>
+						</div><?php
+					}
+					?>
+					<span class="btn-primary" onclick="$('.data-table').toggleClass('hidden')"><?php echo Core::_('Report.show_table')?></span>
 				</div>
-				<div class="col-xs-12 margin-top-20">
-					<div class="data-table hidden margin-bottom-20">
-						<div class="table-scrollable">
-							<table class="table table-striped table-bordered table-hover">
-								<thead>
-									<tr>
-										<th><?php echo Core::_('Report.table_period')?></th>
-										<th><?php echo Core::_('Report.table_orders')?></th>
-										<th><?php echo Core::_('Report.table_items')?></th>
-										<th><?php echo Core::_('Report.table_amount')?></th>
-										<th><?php echo Core::_('Report.table_profit')?></th>
-									</tr>
-								</thead>
-								<tbody>
-								<?php
-								switch ($delta)
-								{
-									case 'week':
-									default:
-										$label = Core::_('Report.table_week');
-										$isWeek = 1;
-									break;
-									case 'day':
-									case 'month':
-										$label = '';
-										$isWeek = 0;
-									break;
-								}
+				<div class="data-table hidden" style="overflow-x: auto;">
+					<table class="modern-table">
+						<thead>
+							<tr>
+								<th><?php echo Core::_('Report.table_period')?></th>
+								<th><?php echo Core::_('Report.table_orders')?></th>
+								<th><?php echo Core::_('Report.table_items')?></th>
+								<th><?php echo Core::_('Report.table_amount')?></th>
+								<th><?php echo Core::_('Report.table_profit')?></th>
+							</tr>
+						</thead>
+						<tbody>
+						<?php
+						switch ($delta)
+						{
+							case 'week':
+							default:
+								$label = Core::_('Report.table_week');
+								$isWeek = 1;
+							break;
+							case 'day':
+							case 'month':
+								$label = '';
+								$isWeek = 0;
+							break;
+						}
 
-								$aDates = array();
+						$aDates = array();
 
-								$end_date1 = date('Y-m-d', strtotime(self::$_endDatetime . ' + 7 days'));
+						$end_date1 = date('Y-m-d', strtotime(self::$_endDatetime . ' + 7 days'));
 
-								for ($date = self::$_startDatetime; $date <= $end_date1; $date = date('Y-m-d', strtotime($date. ' + 7 days')))
-								{
-									$week = date('W', strtotime($date));
-									$year = date('Y', strtotime($date));
+						for ($date = self::$_startDatetime; $date <= $end_date1; $date = date('Y-m-d', strtotime($date. ' + 7 days')))
+						{
+							$week = date('W', strtotime($date));
+							$year = date('Y', strtotime($date));
 
-									$from = date("Y-m-d", strtotime("{$year}-W{$week}+1"));
-									$from < self::$_startDatetime && $from = self::$_startDatetime;
-									$to = date("Y-m-d", strtotime("{$year}-W{$week}-7"));
-									$to > self::$_endDatetime && $to = self::$_endDatetime;
+							$from = date("Y-m-d", strtotime("{$year}-W{$week}+1"));
+							$from < self::$_startDatetime && $from = self::$_startDatetime;
+							$to = date("Y-m-d", strtotime("{$year}-W{$week}-7"));
+							$to > self::$_endDatetime && $to = self::$_endDatetime;
 
-									$aDates[$week] = array(
-										'from' => Core_Date::sql2date($from),
-										'to' => Core_Date::sql2date($to)
-									);
-								}
+							$aDates[$week] = array(
+								'from' => Core_Date::sql2date($from),
+								'to' => Core_Date::sql2date($to)
+							);
+						}
 
-								$totalPeriodAmount = $totalPeriodOrders = $totalPeriodOrderItems = $totalPeriodProfit = 0;
-								foreach (self::$_aOrderedAmount as $date => $amount)
-								{
-									$profit = isset(self::$_aProfitAmount[$date])
-										? self::$_aProfitAmount[$date]
-										: 0;
+						$totalPeriodAmount = $totalPeriodOrders = $totalPeriodOrderItems = $totalPeriodProfit = 0;
+						foreach (self::$_aOrderedAmount as $date => $amount)
+						{
+							$amount = round($amount);
 
-									$profitClass = $profit < 0
-										? 'darkorange'
-										: '';
+							$profit = isset(self::$_aProfitAmount[$date])
+								? round(self::$_aProfitAmount[$date])
+								: 0;
 
-									$ordersCount = isset(self::$_total_orders[$date])? self::$_total_orders[$date] : 0;
-									$orderItemsCount = isset(self::$_total_order_items[$date])? self::$_total_order_items[$date] : 0;
-									?>
-									<tr>
-										<td>
-											<b><?php echo $date?> <?php echo $label?></b><br/>
-											<?php
-											if ($isWeek)
-											{
-												if (isset($aDates[$date]))
-												{
-												?>
-													<span><b><?php echo $aDates[$date]['from']?> — <?php echo $aDates[$date]['to']?></b></span>
-												<?php
-												}
-											}
-											?>
-										</td>
-										<td><?php echo $ordersCount?></td>
-										<td><?php echo $orderItemsCount?></td>
-										<td class="text-align-left"><?php echo htmlspecialchars(self::$_oDefault_Currency->formatWithCurrency($amount))?></td>
-										<td class="text-align-left <?php echo $profitClass?>"><?php echo htmlspecialchars(self::$_oDefault_Currency->formatWithCurrency($profit))?></td>
-									</tr>
+							$profitClass = $profit < 0
+								? 'darkorange'
+								: '';
+
+							$ordersCount = isset(self::$_total_orders[$date])? self::$_total_orders[$date] : 0;
+							$orderItemsCount = isset(self::$_total_order_items[$date])? self::$_total_order_items[$date] : 0;
+							?>
+							<tr>
+								<td>
+									<div class="period-cell">
+									<span class="period-week"><?php echo $date?> <?php echo $label?></span>
 									<?php
+									if ($isWeek)
+									{
+										if (isset($aDates[$date]))
+										{
+										?>
+											<span class="period-dates"><?php echo $aDates[$date]['from']?> — <?php echo $aDates[$date]['to']?></span>
+										<?php
+										}
+									}
+									?>
+									</div>
+								</td>
+								<td><?php echo $ordersCount?></td>
+								<td><?php echo $orderItemsCount?></td>
+								<td class="text-align-left"><?php echo htmlspecialchars(self::$_oDefault_Currency->formatWithCurrency($amount))?></td>
+								<td class="text-align-left <?php echo $profitClass?>"><?php echo htmlspecialchars(self::$_oDefault_Currency->formatWithCurrency($profit))?></td>
+							</tr>
+							<?php
 
-									$totalPeriodOrders += $ordersCount;
-									$totalPeriodOrderItems += $orderItemsCount;
-									$totalPeriodAmount += $amount;
-									$totalPeriodProfit += $profit;
-								}
+							$totalPeriodOrders += $ordersCount;
+							$totalPeriodOrderItems += $orderItemsCount;
+							$totalPeriodAmount += $amount;
+							$totalPeriodProfit += $profit;
+						}
 
-								$totalProfitClass = $totalPeriodProfit < 0
-									? 'darkorange'
-									: '';
-								?>
-								<tr class="semi-bold">
-									<td class="text-align-right">∑</td>
-									<td><?php echo $totalPeriodOrders?></td>
-									<td><?php echo $totalPeriodOrderItems?></td>
-									<td class="text-align-left"><?php echo htmlspecialchars(self::$_oDefault_Currency->formatWithCurrency($totalPeriodAmount))?></td>
-									<td class="text-align-left <?php echo $totalProfitClass?>"><?php echo htmlspecialchars(self::$_oDefault_Currency->formatWithCurrency($totalPeriodProfit))?></td>
-								</tr>
-								</tbody>
-							</table>
-						</div>
-					</div>
+						$totalPeriodAmount = round($totalPeriodAmount);
+						$totalPeriodProfit = round($totalPeriodProfit);
+
+						$totalProfitClass = $totalPeriodProfit < 0
+							? 'darkorange'
+							: '';
+						?>
+						<tr class="table-footer">
+							<td class="text-align-right">∑</td>
+							<td><?php echo $totalPeriodOrders?></td>
+							<td><?php echo $totalPeriodOrderItems?></td>
+							<td class="text-align-left"><?php echo htmlspecialchars(self::$_oDefault_Currency->formatWithCurrency($totalPeriodAmount))?></td>
+							<td class="text-align-left <?php echo $totalProfitClass?>"><?php echo htmlspecialchars(self::$_oDefault_Currency->formatWithCurrency($totalPeriodProfit))?></td>
+						</tr>
+						</tbody>
+					</table>
 				</div>
 			</div>
 			<?php
 			self::$_debug && self::$_debugMessages[] = sprintf('_orders(), Table %.5f', Core::getmicrotime() - $fBeginTime);
 		}
 		?>
-		<div class="row">
+		<div class="card">
 			<div class="display" id="break_page" style="page-break-before:always"></div>
-
-			<div class="col-xs-12 margin-bottom-10">
-				<div class="report-title"><?php echo Core::_('Report.parameters')?></div>
-			</div>
-			<div class="col-xs-12 col-sm-3">
+			<div class="card-header"><?php echo Core::_('Report.parameters')?></div>
+			<div class="card-select-wrapper">
 				<?php
 				Admin_Form_Entity::factory('Select')
 					->id('order_parameter_y')
@@ -1463,12 +1446,10 @@ class Shop_Report_Controller
 					->value(self::$_order_parameter_y)
 					->name('order_parameter_y')
 					->divAttr(array('class' => ''))
-					->onchange('sendRequest({tab: $(\'.report-tabs .nav-tabs li.active\'), data: {order_parameter_y: $(this).val()}});')
+					->class('select-modern')
+					->onchange('sendRequest({tab: $(\'.report-layout aside.sidebar .tab-item.active\'), data: {order_parameter_y: $(this).val()}});')
 					->execute();
-				?>
-			</div>
-			<div class="col-xs-12 col-sm-3">
-				<?php
+
 				Admin_Form_Entity::factory('Select')
 					->id('order_parameter_x')
 					->options(array(
@@ -1480,12 +1461,11 @@ class Shop_Report_Controller
 					->value(self::$_order_parameter_x)
 					->name('order_parameter_x')
 					->divAttr(array('class' => ''))
-					->onchange('sendRequest({tab: $(\'.report-tabs .nav-tabs li.active\'), data: {order_parameter_x: $(this).val()}});')
+					->class('select-modern')
+					->onchange('sendRequest({tab: $(\'.report-layout aside.sidebar .tab-item.active\'), data: {order_parameter_x: $(this).val()}});')
 					->execute();
 				?>
-			</div>
-			<div class="col-xs-12 col-sm-6">
-				<div class="segmentation pull-right">
+				<div class="segmentation">
 					<div><?php echo Core::_('Report.segmentation')?></div>
 					<div><?php
 					Admin_Form_Entity::factory('Select')
@@ -1503,21 +1483,22 @@ class Shop_Report_Controller
 						->value(self::$_order_segment)
 						->name('order_segment')
 						->divAttr(array('class' => ''))
-						->onchange('sendRequest({tab: $(\'.report-tabs .nav-tabs li.active\'), data: {order_segment: $(this).val()}});')
+						->class('select-modern')
+						->onchange('sendRequest({tab: $(\'.report-layout aside.sidebar .tab-item.active\'), data: {order_segment: $(this).val()}});')
 						->execute();
 					?></div>
 				</div>
 			</div>
-		</div>
-		<div class="row">
-			<div class="col-xs-12">
-				<?php
-				$height = count(self::$_aOrderedByParams) ? count(self::$_aOrderedByParams) * 40 : 200;
-				?>
-				<div id="horizontal-chart<?php echo $functionName?>" class="chart chart-lg margin-top-20" style="height: <?php echo $height?>px;"></div>
-			</div>
-			<div class="col-xs-12">
-				<div class="legend-container<?php echo $functionName?>"></div>
+			<div class="row">
+				<div class="col-xs-12">
+					<?php
+					$height = count(self::$_aOrderedByParams) ? count(self::$_aOrderedByParams) * 40 : 200;
+					?>
+					<div id="horizontal-chart<?php echo $functionName?>" class="chart chart-lg margin-top-20" style="height: <?php echo $height?>px;"></div>
+				</div>
+				<div class="col-xs-12">
+					<div class="legend-container<?php echo $functionName?>"></div>
+				</div>
 			</div>
 		</div>
 		<?php
@@ -1550,6 +1531,8 @@ class Shop_Report_Controller
 					$i++;
 				}
 
+				$totalAmount = round($totalAmount);
+
 				if ($compare_previous_period)
 				{
 					$i = 0;
@@ -1564,6 +1547,8 @@ class Shop_Report_Controller
 					}
 				}
 
+				$previousTotalAmount = round($previousTotalAmount);
+
 				$i = 0;
 				foreach (self::$_aProfitAmount as $date => $profit)
 				{
@@ -1573,6 +1558,8 @@ class Shop_Report_Controller
 					$totalProfit += $profit;
 					$i++;
 				}
+
+				$totalProfit = round($totalProfit);
 
 				if ($compare_previous_period)
 				{
@@ -1587,6 +1574,8 @@ class Shop_Report_Controller
 						$i++;
 					}
 				}
+
+				$previousTotalProfit = round($previousTotalProfit);
 
 				$i = 0;
 				foreach (self::$_total_order_items as $date => $count)
@@ -1629,6 +1618,7 @@ class Shop_Report_Controller
 						color: themeprimary,
 						data: dataArr,
 						label: '<?php echo Core::_("Report.label_amount")?>',
+						shadowSize: 0,
 						bars: {
 							show: true,
 							fillColor: { colors: [{ opacity: 0.8 }, { opacity: 1 }] },
@@ -1647,6 +1637,7 @@ class Shop_Report_Controller
 							color: "#fb7863",
 							data: previousDataArr,
 							label: '<?php echo Core::_("Report.label_previuos_amount")?>',
+							shadowSize: 0,
 							lines: {
 								show: true,
 								fill: true,
@@ -1669,6 +1660,7 @@ class Shop_Report_Controller
 						color: '#53a93f',
 						data: dataProfitArr,
 						label: '<?php echo Core::_("Report.label_profit")?>',
+						shadowSize: 0,
 						bars: {
 							show: true,
 							fillColor: { colors: [{ opacity: 0.8 }, { opacity: 1 }] },
@@ -1684,9 +1676,10 @@ class Shop_Report_Controller
 					{
 					?>
 						{ // previous preiod profit
-							color: "#53a93f",
+							color: "#a0d468",
 							data: previousDataProfitArr,
 							label: '<?php echo Core::_("Report.label_previuos_profit")?>',
+							shadowSize: 0,
 							lines: {
 								show: true,
 								fill: true,
@@ -1706,9 +1699,10 @@ class Shop_Report_Controller
 					}
 					?>
 					{ // total order items
-						color: "#a0d468",
+						color: "#8b5cf6",
 						data: totalOrdersItemsArr,
 						label: '<?php echo Core::_("Report.label_total_items")?>',
+						shadowSize: 0,
 						lines: {
 							show: true,
 							fill: false,
@@ -1720,13 +1714,14 @@ class Shop_Report_Controller
 								}]
 							}
 						},
-						points: { show: true },
+						points: { show: false },
 						yaxis: 2
 					},
 					{ // total orders
 						color: "#ffcf54",
 						data: totalOrdersArr,
 						label: '<?php echo Core::_("Report.label_total_orders")?>',
+						shadowSize: 0,
 						lines: {
 							show: true,
 							fill: false,
@@ -1734,12 +1729,15 @@ class Shop_Report_Controller
 								colors: [{opacity: 0.3 }, { opacity: 0 }]
 							}
 						},
-						points: { show: true },
+						points: { show: false },
 						yaxis: 2
 					}
 				];
 
 				var options = {
+					series: {
+						shadowSize: 0
+					},
 					yaxes: [
 						{
 							min: 0,
@@ -1831,7 +1829,9 @@ class Shop_Report_Controller
 						$i = 0;
 						foreach (self::$_aOrderedByParams as $yaxis => $xaxis)
 						{
-							$maxValueByParams = array_sum(self::$_aOrderedByParamSegments[$yaxis]);
+							$maxValueByParams = isset(self::$_aOrderedByParamSegments[$yaxis])
+								? array_sum(self::$_aOrderedByParamSegments[$yaxis])
+								: array();
 
 							$value = isset(self::$_aOrderedByParamSegments[$yaxis][$segmentName]) && $xaxis > 0
 								? self::$_aOrderedByParamSegments[$yaxis][$segmentName] * ($xaxis / $maxValueByParams)
@@ -1853,6 +1853,7 @@ class Shop_Report_Controller
 				?>
 				var optionsHorizontal = {
 					series: {
+						shadowSize: 0,
 						stack: true,
 						bars: {
 							show: true,
@@ -2057,8 +2058,8 @@ class Shop_Report_Controller
 						}); */
 					});
 
-					var currentTab = $('.report-tabs .nav-tabs li.active'),
-						currentContentId = currentTab.find('a').attr('href'),
+					var currentTab = $('.report-layout aside.sidebar .tab-item.active'),
+						currentContentId = currentTab.data('tab'),
 						currentContent = $(currentContentId);
 
 					currentContent.find('div.amount').text('<?php echo htmlspecialchars(self::$_oDefault_Currency->formatWithCurrency($totalAmount))?>');
@@ -2175,183 +2176,175 @@ class Shop_Report_Controller
 
 		$byParamSegments = self::$_byParamSegments;
 		?>
-		<div class="row">
-			<div class="col-xs-12 col-sm-4">
-				<?php
-				$aShopOptions = array(0 => Core::_('Report.all_shops'));
+		<div class="local-filters">
+			<?php
+			$aShopOptions = array(0 => Core::_('Report.all_shops'));
 
-				$aShops = Core_Entity::factory('Shop')->getAllBySite_id(CURRENT_SITE, FALSE);
-				foreach ($aShops as $oShop)
-				{
-					$aShopOptions[$oShop->id] = $oShop->name;
-				}
+			$aShops = Core_Entity::factory('Shop')->getAllBySite_id(CURRENT_SITE, FALSE);
+			foreach ($aShops as $oShop)
+			{
+				$aShopOptions[$oShop->id] = $oShop->name;
+			}
 
-				Admin_Form_Entity::factory('Select')
-					->id('shop_id')
-					->options($aShopOptions)
-					->value(self::$_shop_id)
-					->name('shop_id')
-					->divAttr(array('class' => ''))
-					->onchange('sendRequest({tab: $(\'.report-tabs .nav-tabs li.active\'), data: {shop_id: $(this).val()}});')
-					->execute();
-				?>
-			</div>
-			<div class="col-xs-12 col-sm-4 margin-top-5">
-				<div class="pull-left text margin-right-10"><?php echo Core::_('Report.group_modifications')?></div>
-				<label>
-					<input class="checkbox-slider toggle colored-success" name="group_modifications" onchange="$(this).val(+this.checked); sendRequest({tab: $('.report-tabs .nav-tabs li.active'), data: {group_modifications: $(this).val()}});" type="checkbox" value="<?php echo self::$_group_modifications?>" <?php echo $checked?>/>
-					<span class="text"></span>
+			Admin_Form_Entity::factory('Select')
+				->id('shop_id')
+				->options($aShopOptions)
+				->value(self::$_shop_id)
+				->name('shop_id')
+				->divAttr(array('class' => ''))
+				->class('select-modern')
+				->onchange('sendRequest({tab: $(\'.report-layout aside.sidebar .tab-item.active\'), data: {shop_id: $(this).val()}});')
+				->execute();
+			?>
+			<div class="toggle-wrapper" style="height: auto;">
+				<label class="switch">
+					<input name="group_modifications" type="checkbox" value="<?php echo self::$_group_modifications?>" onchange="$(this).val(+this.checked); sendRequest({tab: $('.report-layout aside.sidebar .tab-item.active'), data: {group_modifications: $(this).val()}});" <?php echo $checked?>/>
+					<span class="slider" style="border-radius: 20px;"></span>
 				</label>
+				<span style="font-size: 14px;"><?php echo Core::_('Report.group_modifications')?></span>
 			</div>
-			<div class="col-xs-12 col-sm-4">
-				<div class="segmentation pull-right">
-					<div><?php echo Core::_('Report.popular_quantity')?></div>
-					<div>
-						<?php
-						Admin_Form_Entity::factory('Select')
-							->id('popular_limit')
-							->options(array(
-								10 => 10,
-								20 => 20,
-								30 => 30,
-								40 => 40,
-								50 => 50,
-								100 => 100,
-								500 => 500,
-								1000 => 1000
-							))
-							->value(self::$_popular_limit)
-							->name('popular_limit')
-							->divAttr(array('class' => ''))
-							->onchange('sendRequest({tab: $(\'.report-tabs .nav-tabs li.active\'), data: {popular_limit: $(this).val()}});')
-							->execute();
-						?>
-					</div>
+			<div class="segmentation">
+				<div><?php echo Core::_('Report.popular_quantity')?></div>
+				<div>
+					<?php
+					Admin_Form_Entity::factory('Select')
+						->id('popular_limit')
+						->options(array(
+							10 => 10,
+							20 => 20,
+							30 => 30,
+							40 => 40,
+							50 => 50,
+							100 => 100,
+							500 => 500,
+							1000 => 1000
+						))
+						->value(self::$_popular_limit)
+						->name('popular_limit')
+						->divAttr(array('class' => ''))
+						->class('select-modern')
+						->onchange('sendRequest({tab: $(\'.report-layout aside.sidebar .tab-item.active\'), data: {popular_limit: $(this).val()}});')
+						->execute();
+					?>
 				</div>
 			</div>
 		</div>
-		<div class="row">
-			<div class="col-xs-12 margin-top-20">
-				<div class="tabbable report-popular-tab">
-					<ul class="nav nav-tabs tabs-flat nav-justified" id="reportPopularTab">
-						<?php
-						$totalItemsAmount = $totalItemsModificationsCount = 0;
-						$iCount = count($aPopularItems);
-						foreach ($aPopularItems as $shop_item_id => $aTmp)
-						{
-							$oShop_Item = Core_Entity::factory('Shop_Item', $shop_item_id);
+		<div class="card">
+			<div class="tabbable report-popular-tab">
+				<ul class="nav nav-tabs tabs-flat nav-justified" id="reportPopularTab">
+					<?php
+					$totalItemsAmount = $totalItemsModificationsCount = 0;
+					$iCount = count($aPopularItems);
+					foreach ($aPopularItems as $shop_item_id => $aTmp)
+					{
+						$oShop_Item = Core_Entity::factory('Shop_Item', $shop_item_id);
 
-							$totalItemsAmount += $aTmp['quantityAmount'];
+						$totalItemsAmount += $aTmp['quantityAmount'];
 
-							$oShop_Item->modification_id && $totalItemsModificationsCount += 1;
-						}
-						?>
-						<li class="active">
-							<a data-toggle="tab" href="#all_items" aria-expanded="true">
-								<?php echo Core::_('Report.popular_total_items')?>
-								<div class="tab-data"><?php echo $iCount?></div>
-								<div class="tab-additional-info">
-									<?php
-									if (!self::$_group_modifications)
-									{
-										?>
-										<?php echo Core::_('Report.popular_total_modifications', number_format((float) $totalItemsModificationsCount, 0, '.', ' '))?>
-										<?php
-									}
-									else
-									{
-										?>
-										—
-										<?php
-									}
+						$oShop_Item->modification_id && $totalItemsModificationsCount += 1;
+					}
+					?>
+					<li class="active">
+						<a data-toggle="tab" href="#all_items" aria-expanded="true">
+							<?php echo Core::_('Report.popular_total_items')?>
+							<div class="tab-data"><?php echo $iCount?></div>
+							<div class="tab-additional-info">
+								<?php
+								if (!self::$_group_modifications)
+								{
 									?>
-								</div>
-							</a>
-						</li>
-						<?php
-						// High & Low importance
-						$highImportanceCount = $totalItemsAmount * 0.25;
-						$mediumImportanceCount = $totalItemsAmount * 0.75;
+									<?php echo Core::_('Report.popular_total_modifications', number_format((float) $totalItemsModificationsCount, 0, '.', ' '))?>
+									<?php
+								}
+								else
+								{
+									?>
+									—
+									<?php
+								}
+								?>
+							</div>
+						</a>
+					</li>
+					<?php
+					// High & Low importance
+					$highImportanceCount = $totalItemsAmount * 0.25;
+					$mediumImportanceCount = $totalItemsAmount * 0.75;
 
-						$aHighPopularItems = $aMediumPopularItems = $aLowPopularItems = array();
-						$totalHighItemsCount = $iCountHighImportanceItems = $iCountMediumImportanceItems = $iCountLowImportanceItems = 0;
-						foreach ($aPopularItems as $shop_item_id => $aTmp)
+					$aHighPopularItems = $aMediumPopularItems = $aLowPopularItems = array();
+					$totalHighItemsCount = $iCountHighImportanceItems = $iCountMediumImportanceItems = $iCountLowImportanceItems = 0;
+					foreach ($aPopularItems as $shop_item_id => $aTmp)
+					{
+						if ($totalHighItemsCount <= $highImportanceCount)
 						{
-							if ($totalHighItemsCount <= $highImportanceCount)
-							{
-								$iCountHighImportanceItems++;
-								$aHighPopularItems[$shop_item_id] = $aTmp;
-							}
-							elseif ($totalHighItemsCount <= $mediumImportanceCount)
-							{
-								$iCountMediumImportanceItems++;
-								$aMediumPopularItems[$shop_item_id] = $aTmp;
-							}
-							else
-							{
-								$iCountLowImportanceItems++;
-								$aLowPopularItems[$shop_item_id] = $aTmp;
-							}
-
-							$totalHighItemsCount += $aTmp['quantityAmount'];
+							$iCountHighImportanceItems++;
+							$aHighPopularItems[$shop_item_id] = $aTmp;
+						}
+						elseif ($totalHighItemsCount <= $mediumImportanceCount)
+						{
+							$iCountMediumImportanceItems++;
+							$aMediumPopularItems[$shop_item_id] = $aTmp;
+						}
+						else
+						{
+							$iCountLowImportanceItems++;
+							$aLowPopularItems[$shop_item_id] = $aTmp;
 						}
 
-						$highImportancePercent = $mediumImportancePercent = $lowImportancePercent = 0;
+						$totalHighItemsCount += $aTmp['quantityAmount'];
+					}
 
-						if ($iCount)
-						{
-							$highImportancePercent = round($iCountHighImportanceItems * 100 / $iCount, 2);
-							$mediumImportancePercent = round($iCountMediumImportanceItems * 100 / $iCount, 2);
-							$lowImportancePercent = round($iCountLowImportanceItems * 100 / $iCount, 2);
-						}
-						?>
-						<li class="tab-darkorange">
-							<a data-toggle="tab" href="#high_importance" aria-expanded="false">
-								<?php echo Core::_('Report.popular_high_importance')?>
-								<div class="tab-data"><?php echo $highImportancePercent?>%</div>
-								<div class="tab-additional-info"><?php echo Core::_('Report.popular_count_items', $iCountHighImportanceItems)?></div>
-							</a>
-						</li>
-						<li class="tab-yellow">
-							<a data-toggle="tab" href="#medium_importance" aria-expanded="false">
-								<?php echo Core::_('Report.popular_medium_importance')?>
-								<div class="tab-data"><?php echo $mediumImportancePercent?>%</div>
-								<div class="tab-additional-info"><?php echo Core::_('Report.popular_count_items', $iCountMediumImportanceItems)?></div>
-							</a>
-						</li>
-						<li class="tab-palegreen">
-							<a data-toggle="tab" href="#low_importance" aria-expanded="false">
-								<?php echo Core::_('Report.popular_low_importance')?>
-								<div class="tab-data"><?php echo $lowImportancePercent?>%</div>
-								<div class="tab-additional-info"><?php echo Core::_('Report.popular_count_items', $iCountLowImportanceItems)?></div>
-							</a>
-						</li>
-					</ul>
-					<div class="tab-content tabs-flat">
-						<div id="all_items" class="tab-pane active">
-							<?php self::_getPriorityContent(array_slice($aPopularItems, 0, self::$_popular_limit, TRUE))?>
-						</div>
-						<div id="low_importance" class="tab-pane">
-							<?php self::_getPriorityContent(array_slice($aLowPopularItems, 0, self::$_popular_limit, TRUE))?>
-						</div>
-						<div id="medium_importance" class="tab-pane">
-							<?php self::_getPriorityContent(array_slice($aMediumPopularItems, 0, self::$_popular_limit, TRUE))?>
-						</div>
-						<div id="high_importance" class="tab-pane">
-							<?php self::_getPriorityContent(array_slice($aHighPopularItems, 0, self::$_popular_limit, TRUE))?>
-						</div>
+					$highImportancePercent = $mediumImportancePercent = $lowImportancePercent = 0;
+
+					if ($iCount)
+					{
+						$highImportancePercent = round($iCountHighImportanceItems * 100 / $iCount, 2);
+						$mediumImportancePercent = round($iCountMediumImportanceItems * 100 / $iCount, 2);
+						$lowImportancePercent = round($iCountLowImportanceItems * 100 / $iCount, 2);
+					}
+					?>
+					<li class="tab-darkorange">
+						<a data-toggle="tab" href="#high_importance" aria-expanded="false">
+							<?php echo Core::_('Report.popular_high_importance')?>
+							<div class="tab-data"><?php echo $highImportancePercent?>%</div>
+							<div class="tab-additional-info"><?php echo Core::_('Report.popular_count_items', $iCountHighImportanceItems)?></div>
+						</a>
+					</li>
+					<li class="tab-yellow">
+						<a data-toggle="tab" href="#medium_importance" aria-expanded="false">
+							<?php echo Core::_('Report.popular_medium_importance')?>
+							<div class="tab-data"><?php echo $mediumImportancePercent?>%</div>
+							<div class="tab-additional-info"><?php echo Core::_('Report.popular_count_items', $iCountMediumImportanceItems)?></div>
+						</a>
+					</li>
+					<li class="tab-palegreen">
+						<a data-toggle="tab" href="#low_importance" aria-expanded="false">
+							<?php echo Core::_('Report.popular_low_importance')?>
+							<div class="tab-data"><?php echo $lowImportancePercent?>%</div>
+							<div class="tab-additional-info"><?php echo Core::_('Report.popular_count_items', $iCountLowImportanceItems)?></div>
+						</a>
+					</li>
+				</ul>
+				<div class="tab-content tabs-flat">
+					<div id="all_items" class="tab-pane active">
+						<?php self::_getPriorityContent(array_slice($aPopularItems, 0, self::$_popular_limit, TRUE))?>
+					</div>
+					<div id="low_importance" class="tab-pane">
+						<?php self::_getPriorityContent(array_slice($aLowPopularItems, 0, self::$_popular_limit, TRUE))?>
+					</div>
+					<div id="medium_importance" class="tab-pane">
+						<?php self::_getPriorityContent(array_slice($aMediumPopularItems, 0, self::$_popular_limit, TRUE))?>
+					</div>
+					<div id="high_importance" class="tab-pane">
+						<?php self::_getPriorityContent(array_slice($aHighPopularItems, 0, self::$_popular_limit, TRUE))?>
 					</div>
 				</div>
 			</div>
 		</div>
-		<hr/>
-		<div class="row">
+		<div class="card">
 			<div class="display" id="break_page" style="page-break-before:always"></div>
-
-			<div class="col-xs-12 margin-bottom-10">
-				<div class="report-title"><?php echo Core::_('Report.parameters')?></div>
-			</div>
-			<div class="col-xs-12 col-sm-3">
+			<div class="card-header"><?php echo Core::_('Report.parameters')?></div>
+			<div class="card-select-wrapper">
 				<?php
 				Admin_Form_Entity::factory('Select')
 					->id('popular_parameter_y')
@@ -2362,12 +2355,10 @@ class Shop_Report_Controller
 					->value(self::$_popular_parameter_y)
 					->name('popular_parameter_y')
 					->divAttr(array('class' => ''))
-					->onchange('sendRequest({tab: $(\'.report-tabs .nav-tabs li.active\'), data: {popular_parameter_y: $(this).val()}});')
+					->class('select-modern')
+					->onchange('sendRequest({tab: $(\'.report-layout aside.sidebar .tab-item.active\'), data: {popular_parameter_y: $(this).val()}});')
 					->execute();
-				?>
-			</div>
-			<div class="col-xs-12 col-sm-3">
-				<?php
+
 				Admin_Form_Entity::factory('Select')
 					->id('popular_parameter_x')
 					->options(array(
@@ -2378,12 +2369,11 @@ class Shop_Report_Controller
 					->value(self::$_popular_parameter_x)
 					->name('popular_parameter_x')
 					->divAttr(array('class' => ''))
-					->onchange('sendRequest({tab: $(\'.report-tabs .nav-tabs li.active\'), data: {popular_parameter_x: $(this).val()}});')
+					->class('select-modern')
+					->onchange('sendRequest({tab: $(\'.report-layout aside.sidebar .tab-item.active\'), data: {popular_parameter_x: $(this).val()}});')
 					->execute();
 				?>
-			</div>
-			<div class="col-xs-12 col-sm-6">
-				<div class="segmentation pull-right">
+				<div class="segmentation">
 					<div><?php echo Core::_('Report.segmentation')?></div>
 					<div><?php
 					Admin_Form_Entity::factory('Select')
@@ -2396,19 +2386,17 @@ class Shop_Report_Controller
 						->value(self::$_popular_segment)
 						->name('popular_segment')
 						->divAttr(array('class' => ''))
-						->onchange('sendRequest({tab: $(\'.report-tabs .nav-tabs li.active\'), data: {popular_segment: $(this).val()}});')
+						->class('select-modern')
+						->onchange('sendRequest({tab: $(\'.report-layout aside.sidebar .tab-item.active\'), data: {popular_segment: $(this).val()}});')
 						->execute();
 					?></div>
 				</div>
 			</div>
-		</div>
-		<div class="row">
-			<div class="col-xs-12">
-				<?php
-				$height = count($aPopularItems) ? count($aPopularItems) * 40 : 200;
-				?>
-				<div id="horizontal-chart<?php echo $functionName?>" class="chart chart-lg margin-top-20" style="height: <?php echo $height?>"></div>
-			</div>
+
+			<?php
+			$height = count($aPopularItems) ? count($aPopularItems) * 40 : 200;
+			?>
+			<div id="horizontal-chart<?php echo $functionName?>" class="chart chart-lg margin-top-20" style="height: <?php echo $height?>"></div>
 		</div>
 
 		<script>
@@ -2481,6 +2469,7 @@ class Shop_Report_Controller
 
 		var optionsHorizontal = {
 			series: {
+				shadowSize: 0,
 				stack: true,
 				bars: {
 					show: true,
@@ -2720,65 +2709,62 @@ class Shop_Report_Controller
 
 		$aPopularProducers = self::_getPopularProducers($functionName, self::$_startDatetime, self::$_endDatetime, $groupDate, $groupInc);
 		?>
-		<div class="row">
-			<div class="col-xs-12 col-sm-4">
-				<?php
-				$aShopOptions = array(0 => Core::_('Report.all_shops'));
+		<div class="local-filters">
+			<?php
+			$aShopOptions = array(0 => Core::_('Report.all_shops'));
 
-				$aShops = Core_Entity::factory('Shop')->getAllBySite_id(CURRENT_SITE, FALSE);
-				foreach ($aShops as $oShop)
-				{
-					$aShopOptions[$oShop->id] = $oShop->name;
-				}
+			$aShops = Core_Entity::factory('Shop')->getAllBySite_id(CURRENT_SITE, FALSE);
+			foreach ($aShops as $oShop)
+			{
+				$aShopOptions[$oShop->id] = $oShop->name;
+			}
 
-				Admin_Form_Entity::factory('Select')
-					->id('shop_id')
-					->options($aShopOptions)
-					->value(self::$_shop_id)
-					->name('shop_id')
-					->divAttr(array('class' => ''))
-					->onchange('sendRequest({tab: $(\'.report-tabs .nav-tabs li.active\'), data: {shop_id: $(this).val()}});')
-					->execute();
-				?>
-			</div>
-			<div class="col-xs-12 col-sm-4 margin-top-5">
-				<div class="pull-left text margin-right-10"><?php echo Core::_('Report.group_modifications')?></div>
-				<label>
-					<input class="checkbox-slider toggle colored-success" name="group_modifications" onchange="$(this).val(+this.checked); sendRequest({tab: $('.report-tabs .nav-tabs li.active'), data: {group_modifications: $(this).val()}});" type="checkbox" value="<?php echo self::$_group_modifications?>" <?php echo $checked?>/>
-					<span class="text"></span>
+			Admin_Form_Entity::factory('Select')
+				->id('shop_id')
+				->options($aShopOptions)
+				->value(self::$_shop_id)
+				->name('shop_id')
+				->divAttr(array('class' => ''))
+				->class('select-modern')
+				->onchange('sendRequest({tab: $(\'.report-layout aside.sidebar .tab-item.active\'), data: {shop_id: $(this).val()}});')
+				->execute();
+			?>
+			<div class="toggle-wrapper" style="height: auto;">
+				<label class="switch">
+					<input name="group_modifications" type="checkbox" value="<?php echo self::$_group_modifications?>" onchange="$(this).val(+this.checked); sendRequest({tab: $('.report-layout aside.sidebar .tab-item.active'), data: {group_modifications: $(this).val()}});" <?php echo $checked?>/>
+					<span class="slider" style="border-radius: 20px;"></span>
 				</label>
+				<span style="font-size: 14px;"><?php echo Core::_('Report.group_modifications')?></span>
 			</div>
-			<div class="col-xs-12 col-sm-4">
-				<div class="segmentation pull-right">
-					<div><?php echo Core::_('Report.popular_quantity')?></div>
-					<div>
-						<?php
-						Admin_Form_Entity::factory('Select')
-							->id('popular_producers_limit')
-							->options(array(
-								10 => 10,
-								20 => 20,
-								30 => 30,
-								40 => 40,
-								50 => 50,
-								100 => 100,
-								500 => 500,
-								1000 => 1000
-							))
-							->value(self::$_popular_producers_limit)
-							->name('popular_producers_limit')
-							->divAttr(array('class' => ''))
-							->onchange('sendRequest({tab: $(\'.report-tabs .nav-tabs li.active\'), data: {popular_producers_limit: $(this).val()}});')
-							->execute();
-						?>
-					</div>
+			<div class="segmentation">
+				<div><?php echo Core::_('Report.popular_quantity')?></div>
+				<div>
+					<?php
+					Admin_Form_Entity::factory('Select')
+						->id('popular_producers_limit')
+						->options(array(
+							10 => 10,
+							20 => 20,
+							30 => 30,
+							40 => 40,
+							50 => 50,
+							100 => 100,
+							500 => 500,
+							1000 => 1000
+						))
+						->value(self::$_popular_producers_limit)
+						->name('popular_producers_limit')
+						->divAttr(array('class' => ''))
+						->class('select-modern')
+						->onchange('sendRequest({tab: $(\'.report-layout aside.sidebar .tab-item.active\'), data: {popular_producers_limit: $(this).val()}});')
+						->execute();
+					?>
 				</div>
 			</div>
 		</div>
-		<div class="row">
-			<div class="col-xs-12">
-				<div id="pie-chart<?php echo $functionName?>" class="chart chart-lg margin-top-20" style="height: 400px;"></div>
-			</div>
+
+		<div class="card">
+			<div id="pie-chart<?php echo $functionName?>" class="chart chart-lg margin-top-20" style="height: 400px;"></div>
 		</div>
 
 		<script>
@@ -2883,6 +2869,12 @@ class Shop_Report_Controller
 		<?php
 	}
 
+	/**
+	 * ordersCost
+	 * @param array $aFields
+	 * @param array $aOptions
+	 * @return array
+	 */
 	static public function ordersCost($aFields, $aOptions)
 	{
 		$aReturn = array();
@@ -2925,6 +2917,8 @@ class Shop_Report_Controller
 					$deltaPercent = '<span class="' . ($percent > 0 ? 'palegreen' : 'darkorange') . '">' . ($percent > 0 ? '+' : '') . $percent . '%</span>';
 				}
 			}
+
+			$totalAmount = round($totalAmount);
 
 			$aReturn['captionHTML'] = '<div class="tab-description">' . htmlspecialchars(self::$_oDefault_Currency->formatWithCurrency($totalAmount)) . $deltaPercent . '</div>';
 		}
@@ -2983,6 +2977,8 @@ class Shop_Report_Controller
 					$deltaPercent = '<span class="' . ($percent > 0 ? 'palegreen' : 'darkorange') . '">' . ($percent > 0 ? '+' : '') . $percent . '%</span>';
 				}
 			}
+
+			$totalAmount = round($totalAmount);
 
 			$aReturn['captionHTML'] = '<div class="tab-description">' . htmlspecialchars(self::$_oDefault_Currency->formatWithCurrency($totalAmount)) . $deltaPercent . '</div>';
 		}

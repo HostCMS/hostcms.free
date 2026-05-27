@@ -9,4 +9,5 @@ return array(
 	'select_group' => 'Select group',
 	'select_producer' => 'Select producer',
 	'quantity' => 'Quantity',
+	'empty_siteuser_id' => 'Select a client!',
 );

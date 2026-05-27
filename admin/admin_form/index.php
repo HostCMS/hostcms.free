@@ -81,7 +81,7 @@ if (Core_Auth::logged())
 			{
 				if (Core_Date::sql2timestamp($oAdmin_Form_Lock->datetime) + 600 >= time())
 				{
-					$text = '<div class="alert alert-danger admin-form-locked"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><i class="fa-fw fa fa-ban"></i> ' . Core::_('Admin_Form.form_locked', Core_Date::sql2datetime($oAdmin_Form_Lock->datetime), $oUser_Locked->login) . '</div>';
+					$text = '<div class="alert alert-danger admin-form-locked"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><i class="fa-fw fa-solid fa-ban"></i> ' . Core::_('Admin_Form.form_locked', Core_Date::sql2datetime($oAdmin_Form_Lock->datetime), $oUser_Locked->login) . '</div>';
 
 					$aReturn = array(
 						'id' => $oAdmin_Form_Lock->id,
@@ -183,7 +183,7 @@ if (Core_Auth::logged())
 
 		if (!is_null($oAdmin_Form_Autosave))
 		{
-			$text = '<div class="alert alert-info admin-form-autosave"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><i class="fa-fw fa fa-warning"></i> ' . Core::_('Admin_Form_Autosave.autosave_success') . ' <a href="#">' . Core::_('Admin_Form_Autosave.autosave_link') . '</a></div>';
+			$text = '<div class="alert alert-info admin-form-autosave"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><i class="fa-fw fa-solid fa-triangle-exclamation"></i> ' . Core::_('Admin_Form_Autosave.autosave_success') . ' <a href="#">' . Core::_('Admin_Form_Autosave.autosave_link') . '</a></div>';
 
 			$aReturn = array(
 				'id' => $oAdmin_Form_Autosave->id,
@@ -516,7 +516,7 @@ $sLanguagePath = '/{admin}/admin_form/language/index.php';
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Admin_Form.show_form_menu_admin_forms_top1'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref(array('path' => $oAdmin_Form_Controller->getPath(), 'action' => 'edit', 'datasetKey' => 0, 'datasetValue' => 0))
 		)
@@ -526,7 +526,7 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Admin_Form.show_form_menu_admin_forms_top2'))
-		->icon('fa fa-flag')
+		->icon('fa-solid fa-flag')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref(array('path' => $sLanguagePath))
 
@@ -551,7 +551,7 @@ $oAdmin_Form_Controller->addEntity(
 				<div class="col-xs-12">
 					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
 						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
-						<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
+						<i class="fa-solid fa-circle-xmark no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
 						<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '"><i class="fa-solid fa-magnifying-glass fa-fw"></i></button>
 					</form>
 				</div>
@@ -655,6 +655,8 @@ if (strlen($sGlobalSearch))
 			->addCondition(array('setOr' => array()))
 			->addCondition(array('where' => array('admin_word_values.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
+		
+	Core_Event::notify('Admin_Form_GlobalSearch.onAfterSetConditions', NULL, array($oAdmin_Form_Dataset, $sGlobalSearch));
 }
 
 // Добавляем источник данных контроллеру формы

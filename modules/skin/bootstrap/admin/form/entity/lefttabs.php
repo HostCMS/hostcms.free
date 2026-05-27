@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Lefttabs extends Skin_Default_Admin_Form_Entity_Lefttabs
 {
@@ -26,8 +26,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Lefttabs extends Skin_Default_Admin_Form_
 		// Tab-ы выводим только если их больше 1-го.
 		if (count($this->_children))
 		{
-			?><div class="tabbable tabs-left"><?php
-				?><ul class="nav nav-tabs"><?php
+			?><aside class="sidebar"><?php
 				$tab_id = 0;
 				foreach ($this->_children as $oAdmin_Form_Tab_Entity)
 				{
@@ -38,21 +37,24 @@ class Skin_Bootstrap_Admin_Form_Entity_Lefttabs extends Skin_Default_Admin_Form_
 
 						$aAttr = $oAdmin_Form_Tab_Entity->getAttrsString();
 
-						?><li <?php echo implode(' ', $aAttr) ?> class="tab-<?php echo htmlspecialchars((string) $oAdmin_Form_Tab_Entity->color)?><?php echo $class?>"><?php
-							?><a href="#<?php echo htmlspecialchars((string) $windowId . '-tab-' . $tab_id)?>" data-toggle="tab"><?php echo htmlspecialchars((string) $oAdmin_Form_Tab_Entity->caption)?><i class="<?php echo htmlspecialchars((string) $oAdmin_Form_Tab_Entity->ico)?>"></i><?php echo $oAdmin_Form_Tab_Entity->captionHTML?></a><?php
-						?></li><?php
+						?><div <?php echo implode(' ', $aAttr)?> class="tab-item tab-<?php echo htmlspecialchars((string) $oAdmin_Form_Tab_Entity->color)?><?php echo $class?>" data-tab="#<?php echo htmlspecialchars((string) $windowId . '-tab-' . $tab_id)?>">
+							<div class="tab-title"><i class="<?php echo htmlspecialchars((string) $oAdmin_Form_Tab_Entity->ico)?>"></i><?php echo htmlspecialchars((string) $oAdmin_Form_Tab_Entity->caption)?></div>
+							<div class="tab-value"><?php echo $oAdmin_Form_Tab_Entity->captionHTML?></div>
+						</div><?php
 						$tab_id++;
 					}
 				}
-				$tab_id = 0;
-				?></ul>
-				<div class="tab-content"><?php
-					foreach ($this->_children as $oAdmin_Form_Tab_Entity)
-					{
-						?><div class="tab-pane <?php echo $tab_id == 0 ? 'in active' : ''?>" id="<?php echo htmlspecialchars((string) $windowId . '-tab-' . $tab_id)?>"><?php $oAdmin_Form_Tab_Entity->execute()?></div><?php
-						$oAdmin_Form_Tab_Entity->active && $tab_id++;
-					}
-			?></div><?php
+			?></aside><?php
+
+			$tab_id = 0;
+			?>
+			<main class="content"><?php
+				foreach ($this->_children as $oAdmin_Form_Tab_Entity)
+				{
+					?><div class="tab-item-content <?php echo $tab_id == 0 ? 'active' : ''?>" id="<?php echo htmlspecialchars((string) $windowId . '-tab-' . $tab_id)?>"><?php $oAdmin_Form_Tab_Entity->execute()?></div><?php
+					$oAdmin_Form_Tab_Entity->active && $tab_id++;
+				}
+			?></main><?php
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterExecute', $this);

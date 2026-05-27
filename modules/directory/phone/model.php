@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Directory
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Directory_Phone_Model extends Core_Entity
 {
@@ -116,7 +116,7 @@ class Directory_Phone_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event directory_phone.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')

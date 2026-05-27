@@ -165,7 +165,7 @@ class Core_Servant_Properties
 	 * @param string $name method name
 	 * @param array $arguments arguments
 	 * @return Core_Servant_Properties
-     * @ignore
+	 * @ignore
 	 */
 	public function __call($name, $arguments)
 	{

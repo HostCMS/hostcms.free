@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -68,12 +68,12 @@ $oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('edit');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
-	$oCrm_Project_Note_Controller_Edit = Admin_Form_Action_Controller::factory(
+	$oCrm_Project_Attachment_Controller_Edit = Admin_Form_Action_Controller::factory(
 		'Crm_Project_Attachment_Controller_Edit', $oAdmin_Form_Action
 	);
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
-	$oAdmin_Form_Controller->addAction($oCrm_Project_Note_Controller_Edit);
+	$oAdmin_Form_Controller->addAction($oCrm_Project_Attachment_Controller_Edit);
 }
 
 $oAdminFormActionUploadFiles = $oAdmin_Form->Admin_Form_Actions->getByName('uploadFiles');

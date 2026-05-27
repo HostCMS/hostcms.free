@@ -174,7 +174,7 @@ class Field_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event field.onBeforeRedeclaredDelete
+	 * @hostcms-event field.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -205,7 +205,7 @@ class Field_Model extends Core_Entity
 		if ($this->obligatory)
 		{
 			Core_Html_Entity::factory('Span')
-				->value('<i class="fa fa-asterisk darkorange fa-small"></i>')
+				->value('<i class="fa-solid fa-asterisk darkorange fa-small"></i>')
 				->execute();
 		}
 	}
@@ -224,7 +224,7 @@ class Field_Model extends Core_Entity
 
 		if ($this->type == 3 && $this->list_id && Core::moduleIsActive('list'))
 		{
-			$return .= Admin_Form_Controller::correctBackendPath('<a href="/{admin}/list/item/index.php?list_id=') . $this->list_id . '" target="_blank"><i title="' . Core::_('Property.move_to_list') . '" class="fa fa-external-link margin-left-5"></i></a>';
+			$return .= Admin_Form_Controller::correctBackendPath('<a href="/{admin}/list/item/index.php?list_id=') . $this->list_id . '" target="_blank"><i title="' . Core::_('Property.move_to_list') . '" class="fa-solid fa-arrow-up-right-from-square small margin-left-5"></i></a>';
 		}
 
 		return $return;
@@ -327,7 +327,7 @@ class Field_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event field.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')

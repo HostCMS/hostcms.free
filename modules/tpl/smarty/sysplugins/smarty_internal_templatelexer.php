@@ -18,217 +18,217 @@
  */
 class Smarty_Internal_Templatelexer
 {
-    /**
-     * Source
-     *
-     * @var string
-     */
+	/**
+	 * Source
+	 *
+	 * @var string
+	 */
     public $data;
 
-    /**
-     * Source length
-     *
-     * @var int
-     */
+	/**
+	 * Source length
+	 *
+	 * @var int
+	 */
     public $dataLength = null;
 
-    /**
-     * byte counter
-     *
-     * @var int
-     */
+	/**
+	 * byte counter
+	 *
+	 * @var int
+	 */
     public $counter;
 
-    /**
-     * token number
-     *
-     * @var int
-     */
+	/**
+	 * token number
+	 *
+	 * @var int
+	 */
     public $token;
 
-    /**
-     * token value
-     *
-     * @var string
-     */
+	/**
+	 * token value
+	 *
+	 * @var string
+	 */
     public $value;
 
-    /**
-     * current line
-     *
-     * @var int
-     */
+	/**
+	 * current line
+	 *
+	 * @var int
+	 */
     public $line;
 
-    /**
-     * tag start line
-     *
-     * @var
-     */
+	/**
+	 * tag start line
+	 *
+	 * @var
+	 */
     public $taglineno;
 
-    /**
-     * php code type
-     *
-     * @var string
-     */
+	/**
+	 * php code type
+	 *
+	 * @var string
+	 */
     public $phpType = '';
 
    /**
-     * state number
-     *
-     * @var int
-     */
+	 * state number
+	 *
+	 * @var int
+	 */
     public $state = 1;
 
-    /**
-     * Smarty object
-     *
-     * @var Smarty
-     */
+	/**
+	 * Smarty object
+	 *
+	 * @var Smarty
+	 */
     public $smarty = null;
 
-    /**
-     * compiler object
-     *
-     * @var Smarty_Internal_TemplateCompilerBase
-     */
+	/**
+	 * compiler object
+	 *
+	 * @var Smarty_Internal_TemplateCompilerBase
+	 */
     public $compiler = null;
 
-    /**
-     * trace file
-     *
-     * @var resource
-     */
+	/**
+	 * trace file
+	 *
+	 * @var resource
+	 */
     public $yyTraceFILE;
 
-    /**
-     * trace prompt
-     *
-     * @var string
-     */
+	/**
+	 * trace prompt
+	 *
+	 * @var string
+	 */
     public $yyTracePrompt;
 
-    /**
-     * XML flag true while processing xml
-     *
-     * @var bool
-     */
+	/**
+	 * XML flag true while processing xml
+	 *
+	 * @var bool
+	 */
     public $is_xml = false;
 
-    /**
-     * state names
-     *
-     * @var array
-     */
+	/**
+	 * state names
+	 *
+	 * @var array
+	 */
     public $state_name = array(1 => 'TEXT', 2 => 'TAG', 3 => 'TAGBODY', 4 => 'LITERAL', 5 => 'DOUBLEQUOTEDSTRING',);
 
-    /**
-     * token names
-     *
-     * @var array
-     */
+	/**
+	 * token names
+	 *
+	 * @var array
+	 */
     public $smarty_token_names = array(        // Text for parser error messages
-                                               'NOT'         => '(!,not)',
-                                               'OPENP'       => '(',
-                                               'CLOSEP'      => ')',
-                                               'OPENB'       => '[',
-                                               'CLOSEB'      => ']',
-                                               'PTR'         => '->',
-                                               'APTR'        => '=>',
-                                               'EQUAL'       => '=',
-                                               'NUMBER'      => 'number',
-                                               'UNIMATH'     => '+" , "-',
-                                               'MATH'        => '*" , "/" , "%',
-                                               'INCDEC'      => '++" , "--',
-                                               'SPACE'       => ' ',
-                                               'DOLLAR'      => '$',
-                                               'SEMICOLON'   => ';',
-                                               'COLON'       => ':',
-                                               'DOUBLECOLON' => '::',
-                                               'AT'          => '@',
-                                               'HATCH'       => '#',
-                                               'QUOTE'       => '"',
-                                               'BACKTICK'    => '`',
-                                               'VERT'        => '"|" modifier',
-                                               'DOT'         => '.',
-                                               'COMMA'       => '","',
-                                               'QMARK'       => '"?"',
-                                               'ID'          => 'id, name',
-                                               'TEXT'        => 'text',
-                                               'LDELSLASH'   => '{/..} closing tag',
-                                               'LDEL'        => '{...} Smarty tag',
-                                               'COMMENT'     => 'comment',
-                                               'AS'          => 'as',
-                                               'TO'          => 'to',
-                                               'PHP'         => '"<?php", "<%", "{php}" tag',
-                                               'LOGOP'       => '"<", "==" ... logical operator',
-                                               'TLOGOP'      => '"lt", "eq" ... logical operator; "is div by" ... if condition',
-                                               'SCOND'       => '"is even" ... if condition',
+                                           	'NOT'         => '(!,not)',
+                                           	'OPENP'       => '(',
+                                           	'CLOSEP'      => ')',
+                                           	'OPENB'       => '[',
+                                           	'CLOSEB'      => ']',
+                                           	'PTR'         => '->',
+                                           	'APTR'        => '=>',
+                                           	'EQUAL'       => '=',
+                                           	'NUMBER'      => 'number',
+                                           	'UNIMATH'     => '+" , "-',
+                                           	'MATH'        => '*" , "/" , "%',
+                                           	'INCDEC'      => '++" , "--',
+                                           	'SPACE'       => ' ',
+                                           	'DOLLAR'      => '$',
+                                           	'SEMICOLON'   => ';',
+                                           	'COLON'       => ':',
+                                           	'DOUBLECOLON' => '::',
+                                           	'AT'          => '@',
+                                           	'HATCH'       => '#',
+                                           	'QUOTE'       => '"',
+                                           	'BACKTICK'    => '`',
+                                           	'VERT'        => '"|" modifier',
+                                           	'DOT'         => '.',
+                                           	'COMMA'       => '","',
+                                           	'QMARK'       => '"?"',
+                                           	'ID'          => 'id, name',
+                                           	'TEXT'        => 'text',
+                                           	'LDELSLASH'   => '{/..} closing tag',
+                                           	'LDEL'        => '{...} Smarty tag',
+                                           	'COMMENT'     => 'comment',
+                                           	'AS'          => 'as',
+                                           	'TO'          => 'to',
+                                           	'PHP'         => '"<?php", "<%", "{php}" tag',
+                                           	'LOGOP'       => '"<", "==" ... logical operator',
+                                           	'TLOGOP'      => '"lt", "eq" ... logical operator; "is div by" ... if condition',
+                                           	'SCOND'       => '"is even" ... if condition',
     );
 
-    /**
-     * literal tag nesting level
-     *
-     * @var int
-     */
+	/**
+	 * literal tag nesting level
+	 *
+	 * @var int
+	 */
     private $literal_cnt = 0;
 
-    /**
-     * preg token pattern for state TEXT
-     *
-     * @var string
-     */
+	/**
+	 * preg token pattern for state TEXT
+	 *
+	 * @var string
+	 */
     private $yy_global_pattern1 = null;
 
-    /**
-     * preg token pattern for state TAG
-     *
-     * @var string
-     */
+	/**
+	 * preg token pattern for state TAG
+	 *
+	 * @var string
+	 */
     private $yy_global_pattern2 = null;
 
-    /**
-     * preg token pattern for state TAGBODY
-     *
-     * @var string
-     */
+	/**
+	 * preg token pattern for state TAGBODY
+	 *
+	 * @var string
+	 */
     private $yy_global_pattern3 = null;
 
-    /**
-     * preg token pattern for state LITERAL
-     *
-     * @var string
-     */
+	/**
+	 * preg token pattern for state LITERAL
+	 *
+	 * @var string
+	 */
     private $yy_global_pattern4 = null;
 
-    /**
-     * preg token pattern for state DOUBLEQUOTEDSTRING
-     *
-     * @var null
-     */
+	/**
+	 * preg token pattern for state DOUBLEQUOTEDSTRING
+	 *
+	 * @var null
+	 */
     private $yy_global_pattern5 = null;
 
-    /**
-     * preg token pattern for text
-     *
-     * @var null
-     */
+	/**
+	 * preg token pattern for text
+	 *
+	 * @var null
+	 */
     private $yy_global_text = null;
 
-    /**
-     * preg token pattern for literal
-     *
-     * @var null
-     */
+	/**
+	 * preg token pattern for literal
+	 *
+	 * @var null
+	 */
     private $yy_global_literal = null;
 
-    /**
-     * constructor
-     *
-     * @param   string                             $source template source
-     * @param Smarty_Internal_TemplateCompilerBase $compiler
-     */
+	/**
+	 * constructor
+	 *
+	 * @param   string                             $source template source
+	 * @param Smarty_Internal_TemplateCompilerBase $compiler
+	 */
     public function __construct($source, Smarty_Internal_TemplateCompilerBase $compiler)
     {
         $this->data = $source;
@@ -245,10 +245,10 @@ class Smarty_Internal_Templatelexer
         $this->smarty_token_names['RDEL'] = $this->smarty->getRightDelimiter();
     }
 
-    /**
-     * open lexer/parser trace file
-     *
-     */
+	/**
+	 * open lexer/parser trace file
+	 *
+	 */
     public function PrintTrace()
     {
         $this->yyTraceFILE = fopen('php://output', 'w');
@@ -256,22 +256,22 @@ class Smarty_Internal_Templatelexer
     }
 
    /**
-     * replace placeholders with runtime preg  code
-     *
-     * @param string $preg
-     *
-     * @return string
-     */
+	 * replace placeholders with runtime preg  code
+	 *
+	 * @param string $preg
+	 *
+	 * @return string
+	 */
    public function replace($preg)
    {
         return $this->compiler->replaceDelimiter($preg);
    }
 
-    /**
-     * check if current value is an autoliteral left delimiter
-     *
-     * @return bool
-     */
+	/**
+	 * check if current value is an autoliteral left delimiter
+	 *
+	 * @return bool
+	 */
     public function isAutoLiteral()
     {
         return $this->smarty->getAutoLiteral() && isset($this->value[ $this->compiler->getLdelLength() ]) ?
@@ -342,7 +342,7 @@ class Smarty_Internal_Templatelexer
                 }
                 if (empty($yymatches)) {
                     throw new Exception('Error: lexing failed because a rule matched' .
-                        ' an empty string.  Input "' . substr($this->data,
+                    	' an empty string.  Input "' . substr($this->data,
                         $this->counter, 5) . '... state TEXT');
                 }
                 next($yymatches); // skip global match
@@ -368,7 +368,7 @@ class Smarty_Internal_Templatelexer
                     continue;
                 }            } else {
                 throw new Exception('Unexpected input at line' . $this->line .
-                    ': ' . $this->data[$this->counter]);
+                	': ' . $this->data[$this->counter]);
             }
             break;
         } while (true);
@@ -455,7 +455,7 @@ class Smarty_Internal_Templatelexer
                 }
                 if (empty($yymatches)) {
                     throw new Exception('Error: lexing failed because a rule matched' .
-                        ' an empty string.  Input "' . substr($this->data,
+                    	' an empty string.  Input "' . substr($this->data,
                         $this->counter, 5) . '... state TAG');
                 }
                 next($yymatches); // skip global match
@@ -481,7 +481,7 @@ class Smarty_Internal_Templatelexer
                     continue;
                 }            } else {
                 throw new Exception('Unexpected input at line' . $this->line .
-                    ': ' . $this->data[$this->counter]);
+                	': ' . $this->data[$this->counter]);
             }
             break;
         } while (true);
@@ -597,7 +597,7 @@ class Smarty_Internal_Templatelexer
                 }
                 if (empty($yymatches)) {
                     throw new Exception('Error: lexing failed because a rule matched' .
-                        ' an empty string.  Input "' . substr($this->data,
+                    	' an empty string.  Input "' . substr($this->data,
                         $this->counter, 5) . '... state TAGBODY');
                 }
                 next($yymatches); // skip global match
@@ -623,7 +623,7 @@ class Smarty_Internal_Templatelexer
                     continue;
                 }            } else {
                 throw new Exception('Unexpected input at line' . $this->line .
-                    ': ' . $this->data[$this->counter]);
+                	': ' . $this->data[$this->counter]);
             }
             break;
         } while (true);
@@ -893,7 +893,7 @@ class Smarty_Internal_Templatelexer
                 }
                 if (empty($yymatches)) {
                     throw new Exception('Error: lexing failed because a rule matched' .
-                        ' an empty string.  Input "' . substr($this->data,
+                    	' an empty string.  Input "' . substr($this->data,
                         $this->counter, 5) . '... state LITERAL');
                 }
                 next($yymatches); // skip global match
@@ -919,7 +919,7 @@ class Smarty_Internal_Templatelexer
                     continue;
                 }            } else {
                 throw new Exception('Unexpected input at line' . $this->line .
-                    ': ' . $this->data[$this->counter]);
+                	': ' . $this->data[$this->counter]);
             }
             break;
         } while (true);
@@ -984,7 +984,7 @@ class Smarty_Internal_Templatelexer
                 }
                 if (empty($yymatches)) {
                     throw new Exception('Error: lexing failed because a rule matched' .
-                        ' an empty string.  Input "' . substr($this->data,
+                    	' an empty string.  Input "' . substr($this->data,
                         $this->counter, 5) . '... state DOUBLEQUOTEDSTRING');
                 }
                 next($yymatches); // skip global match
@@ -1010,7 +1010,7 @@ class Smarty_Internal_Templatelexer
                     continue;
                 }            } else {
                 throw new Exception('Unexpected input at line' . $this->line .
-                    ': ' . $this->data[$this->counter]);
+                	': ' . $this->data[$this->counter]);
             }
             break;
         } while (true);

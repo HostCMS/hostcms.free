@@ -8,14 +8,14 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Directory
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Directory_Controller_Tab_Website extends Directory_Controller_Tab
 {
 	protected $_directoryTypeName = 'Directory_Website_Type';
 	protected $_titleHeaderColor = 'gray';
 	// protected $_titleHeaderColor = 'bordered-gray';
-	protected $_faTitleIcon = 'fa fa-globe';
+	protected $_faTitleIcon = 'fa-solid fa-globe';
 
 	protected function _execute($oPersonalDataInnerWrapper)
 	{
@@ -62,7 +62,7 @@ class Directory_Controller_Tab_Website extends Directory_Controller_Tab
 						Admin_Form_Entity::factory('A')
 							->id('pathLink')
 							->class('input-group-addon blue')
-							->value('<i class="fa fa-external-link"></i>')
+							->value('<i class="fa-solid fa-arrow-up-right-from-square small"></i>')
 							->target('_blank')
 							->href($oUser_Directory_Website ? $oUser_Directory_Website->Directory_Website->value : '/')
 					)

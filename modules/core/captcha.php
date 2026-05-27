@@ -128,7 +128,7 @@ class Core_Captcha
 	/**
 	 * Получить уникальный индекс для CAPTCHA
 	 * @return string
-     */
+	 */
 	static public function getCaptchaId()
 	{
 		/*$max = 99999;
@@ -530,7 +530,6 @@ class Core_Captcha
 		header('X-Robots-Tag: none');
 		header('Cache-Control: no-store, no-cache, must-revalidate');
 		header('Cache-Control: post-check=0, pre-check=0', FALSE);
-		header('Pragma: no-cache');
 		header('X-Powered-By: HostCMS');
 
 		// Масштабируем базовое изображение до необходимого

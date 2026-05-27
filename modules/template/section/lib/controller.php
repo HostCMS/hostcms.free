@@ -376,15 +376,15 @@ class Template_Section_Lib_Controller
 		return implode(' ', array_filter($aClasses));
 	}
 
-    /**
-     * Get colorpicker html block
-     * @param $type
-     * @param string $name
-     * @param string $property
-     * @param array $aEntity
-     * @param string $field
-     * @return self
-     */
+	/**
+	 * Get colorpicker html block
+	 * @param $type
+	 * @param string $name
+	 * @param string $property
+	 * @param array $aEntity
+	 * @param string $field
+	 * @return self
+	 */
 	protected function _getColorpickerBlock($type, $name, $property, $aEntity, $field = '')
 	{
 		// $aStyles = $this->parseStyles($type, $aEntity);
@@ -977,8 +977,8 @@ class Template_Section_Lib_Controller
 			if ($oLib_Property->multivalue)
 			{
 				?><div class="settings-row-item-actions">
-					<div onclick="hQuery.copySettingsRow(this, <?php echo $oLib_Property->id?>); return false;"><i class="fa-solid fa-plus-circle add"></i></div>
-					<div onclick="hQuery(this).closest('.settings-row-item-wrapper').remove(); return false;"><i class="fa-solid fa-minus-circle delete"></i></div>
+					<div onclick="hQuery.copySettingsRow(this, <?php echo $oLib_Property->id?>); return false;"><i class="fa-solid fa-circle-plus add"></i></div>
+					<div onclick="hQuery(this).closest('.settings-row-item-wrapper').remove(); return false;"><i class="fa-solid fa-circle-minus delete"></i></div>
 				</div><?php
 			}
 			?></div><?php

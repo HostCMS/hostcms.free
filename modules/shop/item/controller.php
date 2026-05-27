@@ -309,9 +309,13 @@ class Shop_Item_Controller extends Core_Servant_Properties
 	{
 		if ($this->_aPrice['price'])
 		{
+			$shop_group_id = $oShop_Item->modification_id
+				? $oShop_Item->Modification->shop_group_id
+				: $oShop_Item->shop_group_id;
+			
 			// Скидки на товары группы
-			$aShop_Group_Discounts = $oShop_Item->shop_group_id
-				? self::_getShopGroupDiscounts($oShop_Item->shop_group_id)
+			$aShop_Group_Discounts = $shop_group_id
+				? self::_getShopGroupDiscounts($shop_group_id)
 				: array();
 
 			// Скидки на товары производителя

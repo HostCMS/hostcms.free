@@ -81,7 +81,7 @@ class Informationsystem_Dir_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event informationsystem_dir.onBeforeRedeclaredDelete
+	 * @hostcms-event informationsystem_dir.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

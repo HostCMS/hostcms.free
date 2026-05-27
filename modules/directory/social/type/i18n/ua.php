@@ -9,7 +9,7 @@ return array(
 	'edit_title' => 'Редагування інформації про соціальну мережу',
 	'name' => 'Назва соціальної мережі',
 	'address' => '<acronym title="Посилання на соціальну мережу">Адреса</acronym>',
-	'ico' => '<acronym title="CSS-стиль логотипу, наприклад fa fa-share-alt">CSS-стиль логотипу</acronym>',
+	'ico' => '<acronym title="CSS-стиль логотипу, наприклад fa-solid fa-share-nodes">CSS-стиль логотипу</acronym>',
 
 	'id' => 'Ідентифікатор',
 	'delete_success' => 'Елемент видалений!',

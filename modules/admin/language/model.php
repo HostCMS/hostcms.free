@@ -112,7 +112,7 @@ class Admin_Language_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event admin_language.onBeforeRedeclaredDelete
+	 * @hostcms-event admin_language.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

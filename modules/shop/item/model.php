@@ -67,6 +67,11 @@ class Shop_Item_Model extends Core_Entity
 	 * @var string
 	 */
 	public $absolute_price = NULL;
+
+	/**
+	 * Callback property_id
+	 * @var string
+	 */
 	public $price_absolute = NULL;
 
 	/**
@@ -285,7 +290,7 @@ class Shop_Item_Model extends Core_Entity
 	{
 		return strtolower($property) == 'adminprice'
 			? ($this->shortcut_id
-				? Core_Entity::factory('Shop_Item', $this->shortcut_id)->price
+				? $this->Shop_Item->price
 				: $this->price)
 			: parent::__get($property);
 	}
@@ -347,7 +352,9 @@ class Shop_Item_Model extends Core_Entity
 					if ($this->Shop->url_type == 1)
 					{
 						try {
-							Core::$mainConfig['translate'] && $sTranslated = Core_Str::translate($tag_name);
+							$sTranslated = Core::$mainConfig['translate']
+								? Core_Str::translate($tag_name)
+								: '';
 
 							$oTag->path = Core::$mainConfig['translate'] && strlen((string) $sTranslated)
 								? $sTranslated
@@ -420,7 +427,7 @@ class Shop_Item_Model extends Core_Entity
 
 	/**
 	 * Prepare Property Value
-	 * @param Property_Value_Model $oProperty_Value
+	 * @param object $oProperty_Value
 	 */
 	protected function _preparePropertyValue($oProperty_Value)
 	{
@@ -515,6 +522,7 @@ class Shop_Item_Model extends Core_Entity
 
 	/**
 	 * Get Bonuses
+	 * @param array $aPrices
 	 * @return array
 	 */
 	public function getBonuses($aPrices)
@@ -616,7 +624,7 @@ class Shop_Item_Model extends Core_Entity
 
 		$oShop_Item = !$this->shortcut_id
 			? $this
-			: Core_Entity::factory('Shop_Item', $this->shortcut_id);
+			: $this->Shop_Item;
 
 		$oShop_Item_Reserveds = $oShop_Item->Shop_Item_Reserveds;
 		$oShop_Item_Reserveds->queryBuilder()
@@ -637,7 +645,7 @@ class Shop_Item_Model extends Core_Entity
 	 * Backend callback method
 	 * @param mixed $value value
 	 * @return self
-     */
+	 */
 	public function adminRest($value = NULL)
 	{
 		// Get value
@@ -684,7 +692,7 @@ class Shop_Item_Model extends Core_Entity
 		if (is_null($value) || is_object($value))
 		{
 			$oShop_Item = $this->shortcut_id
-				? Core_Entity::factory('Shop_Item', $this->shortcut_id)
+				? $this->Shop_Item
 				: $this;
 
 			return Core_Str::hideZeros($oShop_Item->price);
@@ -718,7 +726,7 @@ class Shop_Item_Model extends Core_Entity
 	public function adminCurrency()
 	{
 		$oShop_Item = $this->shortcut_id
-			? Core_Entity::factory('Shop_Item', $this->shortcut_id)
+			? $this->Shop_Item
 			: $this;
 
 		return $oShop_Item->shop_currency_id
@@ -733,7 +741,7 @@ class Shop_Item_Model extends Core_Entity
 	public function adminMeasure()
 	{
 		$oShop_Item = $this->shortcut_id
-			? Core_Entity::factory('Shop_Item', $this->shortcut_id)
+			? $this->Shop_Item
 			: $this;
 
 		return htmlspecialchars((string) $oShop_Item->Shop_Measure->name);
@@ -997,7 +1005,9 @@ class Shop_Item_Model extends Core_Entity
 			break;
 			case 1:
 				try {
-					Core::$mainConfig['translate'] && $sTranslated = Core_Str::translate($this->name);
+					$sTranslated = Core::$mainConfig['translate']
+						? Core_Str::translate($this->name)
+						: '';
 
 					$this->path = Core::$mainConfig['translate'] && strlen((string) $sTranslated)
 						? $sTranslated
@@ -1383,7 +1393,7 @@ class Shop_Item_Model extends Core_Entity
 	/**
 	 * Change indexation mode
 	 *	@return Core_Entity
-     */
+	 */
 	public function changeIndexation()
 	{
 		$this->indexing = 1 - $this->indexing;
@@ -1526,7 +1536,7 @@ class Shop_Item_Model extends Core_Entity
 
 	/**
 	 * Search indexation
-	 * @return Search_Page
+	 * @return Search_Page_Model
 	 * @hostcms-event shop_item.onBeforeIndexing
 	 * @hostcms-event shop_item.onAfterIndexing
 	 */
@@ -1770,7 +1780,7 @@ class Shop_Item_Model extends Core_Entity
 		Core_Html_Entity::factory('A')
 			->add(
 				Core_Html_Entity::factory('I')
-					->class('fa fa-lightbulb-o ' . ($iCount ? 'fa-active' : 'fa-inactive'))
+					->class('fa-regular fa-lightbulb ' . ($iCount ? 'fa-active' : 'fa-inactive'))
 			)
 			->href($oAdmin_Form_Controller->getAdminActionLoadHref("/{admin}/shop/item/associated/index.php", 'adminChangeAssociated', NULL, 1, intval($this->id)))
 			->onclick($oAdmin_Form_Controller->getAdminActionLoadAjax("/{admin}/shop/item/associated/index.php", 'adminChangeAssociated', NULL, 1, intval($this->id)))
@@ -1779,11 +1789,10 @@ class Shop_Item_Model extends Core_Entity
 		return ob_get_clean();
 	}
 
-    /**
-     * Backend callback method
-     * @param Admin_Form_Field_Model $oAdmin_Form_Field
-     */
-	public function adminSetAssociated($oAdmin_Form_Field)
+	/**
+	 * Backend callback method
+	 */
+	public function adminSetAssociated()
 	{
 		$oShopItem = Core_Entity::factory('Shop_Item', Core_Array::getGet('shop_item_id', 0, 'int'));
 
@@ -1793,7 +1802,8 @@ class Shop_Item_Model extends Core_Entity
 		{
 			$oShopAssociatedItem = Core_Entity::factory('Shop_Item_Associated');
 			$oShopAssociatedItem->shop_item_associated_id = $this->id;
-			$oShopAssociatedItem->count = intval(Core_Array::getPost("apply_check_1_{$this->id}_fv_{$oAdmin_Form_Field->id}", 0));
+			// Может вызываться из общего списка, 887 указано фиксировано
+			$oShopAssociatedItem->count = Core_Array::getPost("apply_check_1_{$this->id}_fv_887", 0, 'int');
 			$oShopItem->add($oShopAssociatedItem);
 		}
 	}
@@ -1818,11 +1828,10 @@ class Shop_Item_Model extends Core_Entity
 		return $this;
 	}
 
-    /**
-     * Backend callback method
-     * @param Admin_Form_Field_Model $oAdmin_Form_Field
-     */
-	public function adminChangeAssociated($oAdmin_Form_Field)
+	/**
+	 * Backend callback method
+	 */
+	public function adminChangeAssociated()
 	{
 		$oShopItem = Core_Entity::factory('Shop_Item', Core_Array::getGet('shop_item_id', 0, 'int'));
 
@@ -1834,7 +1843,7 @@ class Shop_Item_Model extends Core_Entity
 
 		!is_null($oShopAssociatedItem)
 			? $this->adminUnsetAssociated()
-			: $this->adminSetAssociated($oAdmin_Form_Field);
+			: $this->adminSetAssociated();
 	}
 
 	/**
@@ -1864,7 +1873,7 @@ class Shop_Item_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event shop_item.onBeforeRedeclaredDelete
+	 * @hostcms-event shop_item.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -2033,13 +2042,13 @@ class Shop_Item_Model extends Core_Entity
 		return $this->findAll();
 	}
 
-    /**
-     * Get item by group id and path
-     * @param int $group_id group id
-     * @param string $path path
-     * @return self|NULL
-     * @throws Core_Exception
-     */
+	/**
+	 * Get item by group id and path
+	 * @param int $group_id group id
+	 * @param string $path path
+	 * @return self|NULL
+	 * @throws Core_Exception
+	 */
 	public function getByGroupIdAndPath($group_id, $path)
 	{
 		$this->queryBuilder()
@@ -2074,7 +2083,7 @@ class Shop_Item_Model extends Core_Entity
 			$oCore_Html_Entity_Div
 			->add(
 				Core_Html_Entity::factory('I')
-					->class('fa fa-lock darkorange locked-item order-first')
+					->class('fa-solid fa-lock darkorange locked-item order-first')
 					->title(Core::_('Shop_Item.closed'))
 			);
 		}
@@ -2083,7 +2092,7 @@ class Shop_Item_Model extends Core_Entity
 		{
 			$oCore_Html_Entity_Div
 				->add(
-					Core_Html_Entity::factory('I')->class('fa fa-code-fork margin-right-5 order-first')
+					Core_Html_Entity::factory('I')->class('fa-solid fa-code-fork margin-right-5 order-first')
 				);
 		}
 
@@ -2093,11 +2102,11 @@ class Shop_Item_Model extends Core_Entity
 
 		if ($object->modification_id)
 		{
-			$oCore_Html_Entity_Div->value .= '<span class="small darkgray margin-left-5"> → ' . htmlspecialchars($object->Modification->name) . '</span>';
+			$oCore_Html_Entity_Div->value .= '<span class="small darkgray margin-left-5"> → ' . htmlspecialchars((string) $object->Modification->name) . '</span>';
 		}
 		elseif ($object->shortcut_id)
 		{
-			$oCore_Html_Entity_Div->value .= '<span class="small darkgray margin-left-5"> → ' . htmlspecialchars($object->Shop_Item->name) . '</span>';
+			$oCore_Html_Entity_Div->value .= '<span class="small darkgray margin-left-5"> → ' . htmlspecialchars((string) $object->Shop_Item->name) . '</span>';
 		}
 
 		// Barcodes
@@ -2138,7 +2147,7 @@ class Shop_Item_Model extends Core_Entity
 						->href($href)
 						->target('_blank')
 						->add(
-							Core_Html_Entity::factory('I')->class('fa fa-external-link margin-left-5')
+							Core_Html_Entity::factory('I')->class('fa-solid fa-arrow-up-right-from-square small margin-left-5')
 						)
 				);
 			}
@@ -2147,7 +2156,7 @@ class Shop_Item_Model extends Core_Entity
 		{
 			$oCore_Html_Entity_Div
 				->add(
-					Core_Html_Entity::factory('I')->class('fa fa-clock-o black margin-left-5')
+					Core_Html_Entity::factory('I')->class('fa-regular fa-clock black margin-left-5')
 				);
 		}
 
@@ -2185,7 +2194,7 @@ class Shop_Item_Model extends Core_Entity
 				$oCore_Html_Entity_Div->add(
 					Core_Html_Entity::factory('Span')
 						->class('badge badge-sky inverted')
-						->value('<i class="fa fa-archive fa-fw no-margin"></i>')
+						->value('<i class="fa-solid fa-box-archive fa-fw no-margin"></i>')
 				);
 
 				foreach ($aSets as $name)
@@ -2276,11 +2285,11 @@ class Shop_Item_Model extends Core_Entity
 	 */
 	protected $_showXmlCommentsRating = FALSE;
 
-    /**
-     * Add Comments Rating XML to item
-     * @param bool $showXmlCommentsRating
-     * @return self
-     */
+	/**
+	 * Add Comments Rating XML to item
+	 * @param bool $showXmlCommentsRating
+	 * @return self
+	 */
 	public function showXmlCommentsRating($showXmlCommentsRating = TRUE)
 	{
 		$this->_showXmlCommentsRating = $showXmlCommentsRating;
@@ -2429,11 +2438,11 @@ class Shop_Item_Model extends Core_Entity
 	 */
 	protected $_showXmlVotes = FALSE;
 
-    /**
-     * Add votes XML to item
-     * @param bool $showXmlVotes
-     * @return self
-     */
+	/**
+	 * Add votes XML to item
+	 * @param bool $showXmlVotes
+	 * @return self
+	 */
 	public function showXmlVotes($showXmlVotes = TRUE)
 	{
 		$this->_showXmlVotes = $showXmlVotes;
@@ -2528,11 +2537,11 @@ class Shop_Item_Model extends Core_Entity
 	 */
 	protected $_showXmlMedia = FALSE;
 
-    /**
-     * Show properties in XML
-     * @param bool $showXmlMedia
-     * @return self
-     */
+	/**
+	 * Show properties in XML
+	 * @param bool $showXmlMedia
+	 * @return self
+	 */
 	public function showXmlMedia($showXmlMedia = TRUE)
 	{
 		$this->_showXmlMedia = $showXmlMedia;
@@ -2546,11 +2555,11 @@ class Shop_Item_Model extends Core_Entity
 	 */
 	protected $_itemsActivity = 'active';
 
-    /**
-     * Show properties in XML
-     * @param string $itemsActivity
-     * @return self
-     */
+	/**
+	 * Show properties in XML
+	 * @param string $itemsActivity
+	 * @return self
+	 */
 	public function itemsActivity($itemsActivity)
 	{
 		$this->_itemsActivity = strtolower($itemsActivity);
@@ -2616,7 +2625,7 @@ class Shop_Item_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event shop_item.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')
@@ -2815,9 +2824,9 @@ class Shop_Item_Model extends Core_Entity
 			{
 				$oShopCurrency = $this->Shop->Shop_Currency;
 
-				$this->addXmlTag('original_price', $aPrices['price'], array(
-					'formatted' => $oShopCurrency->format($aPrices['price']),
-					'formattedWithCurrency' => $oShopCurrency->formatWithCurrency($aPrices['price']))
+				$this->addXmlTag('original_price', $aPrices['price'] + $aPrices['tax'], array(
+					'formatted' => $oShopCurrency->format($aPrices['price'] + $aPrices['tax']),
+					'formattedWithCurrency' => $oShopCurrency->formatWithCurrency($aPrices['price'] + $aPrices['tax']))
 				);
 
 				// Будет совпадать с ценой вместе с налогом
@@ -2837,6 +2846,15 @@ class Shop_Item_Model extends Core_Entity
 					'formatted' => $oShopCurrency->format($aPrices['price_tax']),
 					'formattedWithCurrency' => $oShopCurrency->formatWithCurrency($aPrices['price_tax']))
 				);
+
+				if ($this->_cartQuantity > 0)
+				{
+					$amount = $aPrices['price_discount'] * $this->_cartQuantity;
+					$this->addXmlTag('amount', $amount, array(
+						'formatted' => $oShopCurrency->format($amount),
+						'formattedWithCurrency' => $oShopCurrency->formatWithCurrency($amount))
+					);
+				}
 
 				$this->_isTagAvailable('shop_discount') && count($aPrices['discounts'])
 					&& $this->addEntities($aPrices['discounts']);
@@ -3393,7 +3411,7 @@ class Shop_Item_Model extends Core_Entity
 	/**
 	 * Create item
 	 * @return Core_Entity
-     */
+	 */
 	public function create()
 	{
 		$return = parent::create();
@@ -3434,20 +3452,19 @@ class Shop_Item_Model extends Core_Entity
 				$oSiteAlias = $oSite->getCurrentAlias();
 				if ($oSiteAlias)
 				{
-					if ($this->shop_group_id)
-					{
-						$url = $oSiteAlias->name
-							. $this->Shop->Structure->getPath()
-							. $this->Shop_Group->getPath();
-					}
-					else
-					{
-						$url = $oSiteAlias->name
-							. $this->Shop->Structure->getPath();
-							//. $this->getPath();
-					}
-
 					$oCache_Static = Core_Cache::instance('static');
+
+					// Group
+					$url = $oSiteAlias->name
+						. $this->Shop->Structure->getPath();
+					$this->shop_group_id
+						&& $url .= $this->Shop_Group->getPath();
+					$oCache_Static->delete($url);
+
+					// Item
+					$url = $oSiteAlias->name
+						. $this->Shop->Structure->getPath()
+						. $this->getPath();
 					$oCache_Static->delete($url);
 				}
 			}
@@ -3462,11 +3479,11 @@ class Shop_Item_Model extends Core_Entity
 	public function adminCurrencyBadge()
 	{
 		$oShop_Item = $this->shortcut_id
-			? Core_Entity::factory('Shop_Item', $this->shortcut_id)
+			? $this->Shop_Item
 			: $this;
 
 		!$oShop_Item->shop_currency_id && Core_Html_Entity::factory('I')
-			->class('fa fa-exclamation-triangle darkorange')
+			->class('fa-solid fa-triangle-exclamation darkorange')
 			->title(Core::_('Shop_Item.shop_item_not_currency'))
 			->execute();
 	}
@@ -3550,8 +3567,8 @@ class Shop_Item_Model extends Core_Entity
 				// Digital
 				Core_Html_Entity::factory('Span')
 					->class('badge badge-ico badge-danger white')
-					->style('padding-left: 1px;')
-					->value('<i class="fa fa-table fa-fw"></i>')
+					// ->style('padding-left: 1px;')
+					->value('<i class="fa-solid fa-table fa-fw"></i>')
 					->title(Core::_('Shop_Item.item_type_selection_group_buttons_name_electronic'))
 					->execute();
 			break;
@@ -3559,8 +3576,8 @@ class Shop_Item_Model extends Core_Entity
 				// Divisible
 				Core_Html_Entity::factory('Span')
 					->class('badge badge-ico badge-warning white')
-					->style('padding-left: 2px;')
-					->value('<i class="fa fa-puzzle-piece fa-fw"></i>')
+					// ->style('padding-left: 2px;')
+					->value('<i class="fa-solid fa-puzzle-piece fa-fw"></i>')
 					->title(Core::_('Shop_Item.item_type_selection_group_buttons_name_divisible'))
 					->execute();
 			break;
@@ -3568,8 +3585,8 @@ class Shop_Item_Model extends Core_Entity
 				// Set
 				Core_Html_Entity::factory('Span')
 					->class('badge badge-ico badge-sky white')
-					->style('padding-left: 1px;')
-					->value('<i class="fa fa-archive fa-fw"></i>')
+					// ->style('padding-left: 1px;')
+					->value('<i class="fa-solid fa-box-archive fa-fw"></i>')
 					->title(Core::_('Shop_Item.item_type_selection_group_buttons_name_set'))
 					->execute();
 			break;
@@ -3577,8 +3594,8 @@ class Shop_Item_Model extends Core_Entity
 				// Certificate
 				Core_Html_Entity::factory('Span')
 					->class('badge badge-ico badge-maroon white')
-					->style('padding-left: 1px;')
-					->value('<i class="fa fa-certificate fa-fw"></i>')
+					// ->style('padding-left: 1px;')
+					->value('<i class="fa-solid fa-certificate fa-fw"></i>')
 					->title(Core::_('Shop_Item.item_type_selection_group_buttons_name_certificate'))
 					->execute();
 			break;
@@ -3801,9 +3818,22 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function markingBackend()
+	{
+		$oShop_Item = $this->shortcut_id
+			? $this->Shop_Item
+			: $this;
+
+		return htmlspecialchars($oShop_Item->marking);
+	}
+
+	/**
 	 * Get price of set
 	 * @return float|int
-     * @hostcms-event shop_item.onAfterGetSetPrice
+	 * @hostcms-event shop_item.onAfterGetSetPrice
 	 */
 	public function getSetPrice()
 	{
@@ -3922,6 +3952,11 @@ class Shop_Item_Model extends Core_Entity
 		return NULL;
 	}
 
+	/**
+	 * Load price
+	 * @param int $shop_price_id
+	 * @return float
+	 */
 	public function loadPrice($shop_price_id)
 	{
 		if ($shop_price_id)
@@ -3981,7 +4016,7 @@ class Shop_Item_Model extends Core_Entity
 
 	/**
 	 * RestApi Upload Large Image from $_FILES['image']
-	 * @retrun string|NULL Uploaded image path
+	 * @return string|NULL Uploaded image path
 	 */
 	public function uploadLargeImage()
 	{
@@ -4026,7 +4061,7 @@ class Shop_Item_Model extends Core_Entity
 
 	/**
 	 * RestApi Upload Small Image from $_FILES['image']
-	 * @retrun string|NULL Uploaded image path
+	 * @return string|NULL Uploaded image path
 	 */
 	public function uploadSmallImage()
 	{

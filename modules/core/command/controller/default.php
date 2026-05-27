@@ -30,9 +30,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 				!isset($_SESSION)
 				|| !isset($_SESSION['siteuser_id']) && !Core_Auth::logged() && empty($_SESSION['SCART'])
 				)
-				&& empty($_COOKIE['CART']) && count($_POST) == 0
-				// HostCMS cookie agree
-				&& !isset($_COOKIE['_hccagree']);
+				&& empty($_COOKIE['CART']) && count($_POST) == 0;
 		}
 
 		Core_Event::notify(get_class($this) . '.onCheckCache', $this);
@@ -58,7 +56,8 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 
 		$oCore_Response = new Core_Response();
 
-		$this->_Core_Page = Core_Page::instance()
+		// $oCore_Page используется иногда в настройках ТДС без ее объявления
+		$this->_Core_Page = $oCore_Page = Core_Page::instance()
 			->response($oCore_Response);
 
 		$oCore_Response->header('X-Powered-By', 'HostCMS');
@@ -230,7 +229,24 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 
 				if ($result !== FALSE)
 				{
+					$iExpires = defined('EXPIRES_TIME') ? EXPIRES_TIME : 300;
+
+					if (!defined('SET_EXPIRES') || SET_EXPIRES)
+					{
+						$oCore_Response
+							->header('Expires', gmdate("D, d M Y H:i:s", time() + $iExpires) . " GMT");
+					}
+
+					if (!defined('SET_LAST_MODIFIED') || SET_LAST_MODIFIED)
+					{
+						$iLastModified = time() + (defined('LAST_MODIFIED_TIME') ? LAST_MODIFIED_TIME : 0);
+
+						$oCore_Response
+							->header('Last-Modified', gmdate("D, d M Y H:i:s", $iLastModified) . " GMT");
+					}
+
 					$oCore_Response
+						->header('X-Cache', 'static')
 						->header('Content-Type', 'text/html; charset=' . $oSite->coding)
 						->body($result);
 
@@ -578,7 +594,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 		<?php Core_Page::instance()->showFavicons(); ?>
 
 		<link rel="stylesheet" type="text/css" href="/modules/skin/default/frontend/panel.css"/>
-		<link rel="stylesheet" type="text/css" href="/modules/skin/bootstrap/fonts/fontawesome/6/css/all.min.css?<?php echo $iTimestamp?>" />
+		<link rel="stylesheet" type="text/css" href="/modules/skin/bootstrap/fonts/fontawesome/7/css/all.min.css?<?php echo $iTimestamp?>" />
 
 		<script src="/modules/skin/default/frontend/jquery.min.js"></script>
 		<script>var hQuery = $.noConflict(true);</script>
@@ -596,7 +612,12 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 				<a href="<?php echo htmlspecialchars(Core::$url['path'])?>" class="btn-open-site" title="Close"><i class="fa-regular fa-circle-xmark"></i></a>
 			</div>
 		</div>
-		<div class="iframe-wrapper">
+
+		<div class="iframe-wrapper" style="position: relative;">
+			<div id="iframePreloader">
+				<i class="fa-solid fa-spinner fa-spin fa-3x"></i>
+			</div>
+
 			<iframe id="siteFrame" frameBorder="0" allowfullscreen="" src="<?php echo htmlspecialchars(
 				Core::$url['path'] . '?'
 					. (Core::$url['query'] !== '' ? Core::$url['query'] : '')
@@ -604,6 +625,128 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 					. 'hostcmsShowDesign')?>">
 			</iframe>
 		</div>
+
+		<script>
+		(function() {
+			var iframe = document.getElementById('siteFrame');
+			var preloader = document.getElementById('iframePreloader');
+			var preloaderTimeout; // Переменная для хранения таймера
+
+			// Появляется мгновенно
+			function showPreloader() {
+				// Очищаем предыдущий таймер, если он был
+				if (preloaderTimeout) clearTimeout(preloaderTimeout);
+
+				preloader.style.transition = 'none';
+				preloader.style.opacity = '1';
+				preloader.style.visibility = 'visible';
+
+				// Устанавливаем принудительное скрытие через 10 секунд
+				preloaderTimeout = setTimeout(function() {
+					console.warn("HostCMS: Загрузка заняла слишком много времени. Скрываем прелоадер.");
+					hidePreloader();
+				}, 10000);
+			}
+
+			// Исчезает плавно
+			function hidePreloader() {
+				// Сбрасываем таймер, так как страница загрузилась успешно
+				if (preloaderTimeout) clearTimeout(preloaderTimeout);
+
+				preloader.style.transition = 'opacity 0.3s ease-out, visibility 0.3s ease-out';
+				preloader.style.opacity = '0';
+				preloader.style.visibility = 'hidden';
+			}
+
+			function syncParentUrl(url) {
+				var parentUrl = new URL(url);
+				parentUrl.searchParams.delete('hostcmsShowDesign');
+				parentUrl.searchParams.set('hostcmsAction', 'SHOW_DESIGN');
+
+				if (window.location.href !== parentUrl.href) {
+					window.history.pushState({ iframeSrc: parentUrl.href }, '', parentUrl.href);
+				}
+			}
+
+			iframe.addEventListener('load', function() {
+				hidePreloader();
+
+				try {
+					var iframeWin = this.contentWindow;
+					var iframeDoc = iframeWin.document;
+					var iframeLocation = iframeWin.location;
+
+					if (iframeLocation.href !== 'about:blank' && iframeLocation.origin === window.location.origin) {
+
+						syncParentUrl(iframeLocation.href);
+
+						// Страховка на случай непредвиденных переходов (JS-редиректы и т.д.)
+						iframeWin.addEventListener('beforeunload', function() {
+							showPreloader();
+						});
+
+						// Клики по ссылкам
+						iframeDoc.addEventListener('click', function(e) {
+							var link = e.target.closest('a');
+
+							if (link && link.href) {
+								var hrefAttr = link.getAttribute('href') || '';
+								if (hrefAttr.startsWith('javascript:') || hrefAttr.startsWith('#')) return;
+
+								var linkUrl = new URL(link.href, iframeLocation.href);
+
+								if (linkUrl.origin === window.location.origin) {
+									if (!link.target || link.target === '_self') {
+										e.preventDefault();
+
+										showPreloader();
+										syncParentUrl(linkUrl.href);
+
+										linkUrl.searchParams.set('hostcmsAction', 'SHOW_DESIGN');
+										linkUrl.searchParams.set('hostcmsShowDesign', '');
+										iframeWin.location.href = linkUrl.href;
+									} else {
+										linkUrl.searchParams.set('hostcmsAction', 'SHOW_DESIGN');
+										linkUrl.searchParams.set('hostcmsShowDesign', '');
+										link.href = linkUrl.href;
+									}
+								}
+							}
+						});
+
+						// Отправка форм
+						iframeDoc.addEventListener('submit', function(e) {
+							showPreloader();
+
+							var form = e.target;
+							if (form.method && form.method.toLowerCase() === 'get') {
+								if (!form.querySelector('input[name="hostcmsAction"]')) {
+									form.insertAdjacentHTML('beforeend', '<input type="hidden" name="hostcmsAction" value="SHOW_DESIGN">');
+								}
+								if (!form.querySelector('input[name="hostcmsShowDesign"]')) {
+									form.insertAdjacentHTML('beforeend', '<input type="hidden" name="hostcmsShowDesign" value="">');
+								}
+							} else {
+								var actionUrl = new URL(form.action || iframeLocation.href, iframeLocation.href);
+								actionUrl.searchParams.set('hostcmsAction', 'SHOW_DESIGN');
+								actionUrl.searchParams.set('hostcmsShowDesign', '');
+								form.action = actionUrl.href;
+							}
+						});
+					}
+				} catch (e) {
+					console.warn("HostCMS: Cross-origin access blocked", e);
+				}
+			});
+
+			window.addEventListener('popstate', function(e) {
+				showPreloader();
+				var currentUrl = new URL(window.location.href);
+				currentUrl.searchParams.set('hostcmsShowDesign', '');
+				iframe.src = currentUrl.href;
+			});
+		})();
+		</script>
 	</body>
 </html><?php
 				$sContent = ob_get_clean();
@@ -693,19 +836,23 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 
 		if (!defined('SET_CACHE_CONTROL') || SET_CACHE_CONTROL)
 		{
-			if ($iStructureAccess == 0 && $bCacheAvailable)
+			if ($iStructureAccess == 0 && $bCacheAvailable
+				&& !$bLogged && !isset($_SESSION['siteuser_id'])
+			)
 			{
+				// Расчитываем максимальное время истечения
+				$max_age = $iExpires > 0 ? $iExpires : 0;
+
 				$sCacheControlType = 'public';
 				$sVary = 'Accept-Language';
 			}
 			else
 			{
-				$sCacheControlType = 'private';
+				$max_age = 0;
+
+				$sCacheControlType = 'no-cache, private';
 				$sVary = '*';
 			}
-
-			// Расчитываем максимальное время истечения
-			$max_age = $iExpires > 0 ? $iExpires : 0;
 
 			$oCore_Response
 				->header('Vary', $sVary)

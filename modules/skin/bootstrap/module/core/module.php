@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Core_Module extends Core_Module
 {
@@ -141,11 +141,11 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 
 		?><div class="widget">
 			<div class="widget-header bordered-bottom bordered-themeprimary">
-				<i class="widget-icon fa fa-tasks themeprimary"></i>
+				<i class="widget-icon fa-solid fa-list-check themeprimary"></i>
 				<span class="widget-caption themeprimary"><?php echo Core::_('Admin.index_systems_events');?></span>
 				<div class="widget-buttons">
 					<a data-toggle="maximize">
-						<i class="fa fa-expand gray"></i>
+						<i class="fa-solid fa-expand gray"></i>
 					</a>
 					<a data-toggle="refresh" onclick="$(this).find('i').addClass('fa-spin'); $.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#coreEventsAdminPage'), 'button': $(this).find('i') });">
 						<i class="fa-solid fa-rotate gray"></i>
@@ -194,23 +194,23 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 									switch (intval($aLine[3]))
 									{
 										case 1:
-											$statusCharClassName = ' fa-check';
+											$statusCharClassName = 'fa-solid fa-check';
 											$statusColorName = 'palegreen';
 										break;
 										case 2:
-											$statusCharClassName = 'fa-exclamation';
+											$statusCharClassName = 'fa-solid fa-exclamation';
 											$statusColorName = 'yellow';
 										break;
 										case 3:
-											$statusCharClassName = 'fa-exclamation';
+											$statusCharClassName = 'fa-solid fa-exclamation';
 											$statusColorName = 'orange';
 										break;
 										case 4:
-											$statusCharClassName = 'fa-exclamation';
+											$statusCharClassName = 'fa-solid fa-exclamation';
 											$statusColorName = 'red';
 										break;
 										default:
-											$statusCharClassName = 'fa-info';
+											$statusCharClassName = 'fa-solid fa-info';
 											$statusColorName = 'darkgray';
 									}
 									?><li class="ticket-item">
@@ -220,16 +220,16 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 											</div>
 											<div class="ticket-time col-xs-6 col-lg-3">
 												<div class="divider hidden-md hidden-sm hidden-xs"></div>
-												<i class="fa fa-clock-o"></i>
+												<i class="fa-regular fa-clock"></i>
 												<span class="time"><?php echo htmlspecialchars(Core_Date::sql2datetime($aLine[0]));?></span>
 											</div>
 											<div class="ticket-type col-xs-6 col-lg-2">
 												<span class="divider hidden-xs"></span>
-												<i class="fa fa-user"></i>
+												<i class="fa-solid fa-user"></i>
 												<span class="type user-login"><?php echo htmlspecialchars($aLine[1])?></span>
 											</div>
 											<div class="ticket-state bg-<?php echo $statusColorName?>">
-												<i class="fa <?php echo $statusCharClassName?>"></i>
+												<i class="<?php echo $statusCharClassName?>"></i>
 											</div>
 										</div>
 									</li>
@@ -246,7 +246,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 								?>
 								<br />
 								<div class="footer">
-									<a class="btn btn-info" href="<?php echo $sEventlogHref?>" onclick="$.adminLoad({path: '<?php echo $sEventlogHref?>'}); return false"><i class="fa fa-book"></i><?php echo Core::_('Admin.index_events_journal_link')?></a>
+									<a class="btn btn-info" href="<?php echo $sEventlogHref?>" onclick="$.adminLoad({path: '<?php echo $sEventlogHref?>'}); return false"><i class="fa-solid fa-book"></i><?php echo Core::_('Admin.index_events_journal_link')?></a>
 								</div>
 								<?php
 							}
@@ -277,14 +277,14 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 		$maxExecutionTime = intval(ini_get('max_execution_time'));
 		?><div class="widget">
 			<div class="widget-header bordered-bottom bordered-blue">
-				<i class="widget-icon fa fa-gears blue"></i>
+				<i class="widget-icon fa-solid fa-gears blue"></i>
 				<span class="widget-caption blue"><?php echo Core::_('Admin.index_systems_characteristics')?></span>
 				<div class="widget-buttons">
 					<a data-toggle="maximize">
-						<i class="fa fa-expand gray"></i>
+						<i class="fa-solid fa-expand gray"></i>
 					</a>
 					<a data-toggle="refresh" onclick="$(this).find('i').addClass('fa-spin'); $.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#characteristicsAdminPage'), 'button': $(this).find('i') });">
-						<i class="fa fa-refresh gray"></i>
+						<i class="fa-solid fa-arrows-rotate gray"></i>
 					</a>
 				</div>
 			</div>
@@ -299,7 +299,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 										<span class="user-company"><?php echo Core::getVersion()?></span>
 									</div>
 									<div class="ticket-state bg-palegreen">
-										<i class="fa fa-check"></i>
+										<i class="fa-solid fa-check"></i>
 									</div>
 								</div>
 							</li>
@@ -310,7 +310,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 										<span class="user-company"><?php echo Core::_('Core.redaction' . Core_Array::get(Core::$config->get('core_hostcms'), 'integration', 0))?></span>
 									</div>
 									<div class="ticket-state bg-palegreen">
-										<i class="fa fa-check"></i>
+										<i class="fa-solid fa-check"></i>
 									</div>
 								</div>
 							</li>
@@ -324,16 +324,16 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 									if (version_compare(phpversion(), '5.4.0', '>='))
 									{
 										$divClass = ' bg-palegreen';
-										$iClass = ' fa-check';
+										$iClass = 'fa-solid fa-check';
 									}
 									else
 									{
 										$divClass = ' bg-darkorange';
-										$iClass = ' fa-times';
+										$iClass = 'fa-solid fa-xmark';
 									}
 									?>
 									<div class="ticket-state<?php echo $divClass?>">
-										<i class="fa<?php echo $iClass?>"></i>
+										<i class="<?php echo $iClass?>"></i>
 									</div>
 								</div>
 							</li>
@@ -347,16 +347,16 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 									if (!is_null($dbVersion) && version_compare($dbVersion, '5.1.0', '>='))
 									{
 										$divClass = ' bg-palegreen';
-										$iClass = ' fa-check';
+										$iClass = 'fa-solid fa-check';
 									}
 									else
 									{
 										$divClass = ' bg-darkorange';
-										$iClass = ' fa-times';
+										$iClass = 'fa-solid fa-xmark';
 									}
 									?>
 									<div class="ticket-state<?php echo $divClass?>">
-										<i class="fa<?php echo $iClass?>"></i>
+										<i class="<?php echo $iClass?>"></i>
 									</div>
 								</div>
 							</li>
@@ -370,16 +370,16 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 									if (!is_null($gdVersion) && version_compare($gdVersion, '2.0', '>='))
 									{
 										$divClass = ' bg-palegreen';
-										$iClass = ' fa-check';
+										$iClass = 'fa-solid fa-check';
 									}
 									else
 									{
 										$divClass = ' bg-darkorange';
-										$iClass = ' fa-times';
+										$iClass = 'fa-solid fa-xmark';
 									}
 									?>
 									<div class="ticket-state<?php echo $divClass?>">
-										<i class="fa<?php echo $iClass?>"></i>
+										<i class="<?php echo $iClass?>"></i>
 									</div>
 								</div>
 							</li>
@@ -394,16 +394,16 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 									if (!is_null($pcreVersion) && version_compare($pcreVersion, '7.0', '>='))
 									{
 										$divClass = ' bg-palegreen';
-										$iClass = ' fa-check';
+										$iClass = 'fa-solid fa-check';
 									}
 									else
 									{
 										$divClass = ' bg-darkorange';
-										$iClass = ' fa-times';
+										$iClass = 'fa-solid fa-xmark';
 									}
 									?>
 									<div class="ticket-state<?php echo $divClass?>">
-										<i class="fa<?php echo $iClass?>"></i>
+										<i class="<?php echo $iClass?>"></i>
 									</div>
 								</div>
 							</li>
@@ -418,16 +418,16 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 									if (!$maxExecutionTime || $maxExecutionTime >= 30)
 									{
 										$divClass = ' bg-palegreen';
-										$iClass = ' fa-check';
+										$iClass = 'fa-solid fa-check';
 									}
 									else
 									{
 										$divClass = ' bg-darkorange';
-										$iClass = ' fa-times';
+										$iClass = 'fa-solid fa-xmark';
 									}
 									?>
 									<div class="ticket-state<?php echo $divClass?>">
-										<i class="fa<?php echo $iClass?>"></i>
+										<i class="<?php echo $iClass?>"></i>
 									</div>
 								</div>
 							</li>
@@ -442,16 +442,16 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 									if (Core_Str::convertSizeToBytes($memoryLimit) >= Core_Str::convertSizeToBytes('16M'))
 									{
 										$divClass = ' bg-palegreen';
-										$iClass = ' fa-check';
+										$iClass = 'fa-solid fa-check';
 									}
 									else
 									{
 										$divClass = ' bg-darkorange';
-										$iClass = ' fa-times';
+										$iClass = 'fa-solid fa-xmark';
 									}
 									?>
 									<div class="ticket-state<?php echo $divClass?>">
-										<i class="fa<?php echo $iClass?>"></i>
+										<i class="<?php echo $iClass?>"></i>
 									</div>
 								</div>
 							</li>
@@ -466,16 +466,16 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 									if (function_exists('mb_internal_encoding'))
 									{
 										$divClass = ' bg-palegreen';
-										$iClass = ' fa-check';
+										$iClass = 'fa-solid fa-check';
 									}
 									else
 									{
 										$divClass = ' bg-darkorange';
-										$iClass = ' fa-times';
+										$iClass = 'fa-solid fa-xmark';
 									}
 									?>
 									<div class="ticket-state<?php echo $divClass?>">
-										<i class="fa<?php echo $iClass?>"></i>
+										<i class="<?php echo $iClass?>"></i>
 									</div>
 								</div>
 							</li>
@@ -492,7 +492,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 												<span class="user-company"><?php echo htmlspecialchars($mb_overload)?></span>
 											</div>
 											<div class="ticket-state bg-darkorange">
-												<i class="fa fa-times"></i>
+												<i class="fa-solid fa-xmark"></i>
 											</div>
 										</div>
 									</li><?php
@@ -510,16 +510,16 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 									if (function_exists('json_encode'))
 									{
 										$divClass = ' bg-palegreen';
-										$iClass = ' fa-check';
+										$iClass = 'fa-solid fa-check';
 									}
 									else
 									{
 										$divClass = ' bg-darkorange';
-										$iClass = ' fa-times';
+										$iClass = 'fa-solid fa-xmark';
 									}
 									?>
 									<div class="ticket-state<?php echo $divClass?>">
-										<i class="fa<?php echo $iClass?>"></i>
+										<i class="<?php echo $iClass?>"></i>
 									</div>
 								</div>
 							</li>
@@ -534,16 +534,16 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 									if (function_exists('simplexml_load_string'))
 									{
 										$divClass = ' bg-palegreen';
-										$iClass = ' fa-check';
+										$iClass = 'fa-solid fa-check';
 									}
 									else
 									{
 										$divClass = ' bg-darkorange';
-										$iClass = ' fa-times';
+										$iClass = 'fa-solid fa-xmark';
 									}
 									?>
 									<div class="ticket-state<?php echo $divClass?>">
-										<i class="fa<?php echo $iClass?>"></i>
+										<i class="<?php echo $iClass?>"></i>
 									</div>
 								</div>
 							</li>
@@ -558,16 +558,16 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 									if (function_exists('iconv'))
 									{
 										$divClass = ' bg-palegreen';
-										$iClass = ' fa-check';
+										$iClass = 'fa-solid fa-check';
 									}
 									else
 									{
 										$divClass = ' bg-darkorange';
-										$iClass = ' fa-times';
+										$iClass = 'fa-solid fa-xmark';
 									}
 									?>
 									<div class="ticket-state<?php echo $divClass?>">
-										<i class="fa<?php echo $iClass?>"></i>
+										<i class="<?php echo $iClass?>"></i>
 									</div>
 								</div>
 							</li>
@@ -590,14 +590,14 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 				<div class="col-xs-12">
 					<div class="widget">
 						<div class="widget-header bordered-bottom bordered-darkorange">
-							<i class="widget-icon fa fa-tasks darkorange"></i>
+							<i class="widget-icon fa-solid fa-list-check darkorange"></i>
 							<span class="widget-caption darkorange"><?php echo Core::_('Admin.notes')?></span>
 							<?php
 							if (!$oUser->read_only)
 							{
 								?><div class="widget-buttons">
 								<a onclick="$.addNote()">
-									<i class="fa fa-plus darkorange" title="<?php echo Core::_('Admin.add_note')?>"></i>
+									<i class="fa-solid fa-plus darkorange" title="<?php echo Core::_('Admin.add_note')?>"></i>
 								</a>
 								</div><?php
 							}
@@ -613,7 +613,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 												<textarea<?php echo $oUser->read_only ? ' readonly="readonly"' : ''?>></textarea>
 											</div>
 											<div class="user-note-state bg-darkorange">
-												<a data-id="0" onclick="res = confirm('<?php echo Core::_('Admin_form.msg_information_delete')?>'); if (res) { $.destroyNote($(this).parents('div.user-note')) } return false"><i class="fa fa-remove"></i></a>
+												<a data-id="0" onclick="res = confirm('<?php echo Core::_('Admin_form.msg_information_delete')?>'); if (res) { $.destroyNote($(this).parents('div.user-note')) } return false"><i class="fa-solid fa-xmark"></i></a>
 											</div>
 										</div>
 									</div>
@@ -679,7 +679,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 				$oSite_Alias = $oSite->Site_Aliases->getByCurrent(1);
 
 				$sSite = '<div class="notification-icon">
-					<i class="fa ' . $aSiteColors[$iCountColor < 4 ? $iCountColor++ : $iCountColor = 0] . ' white hostcms-font"><b>' . $oSite->id . '</b></i>
+					<i class="' . $aSiteColors[$iCountColor < 4 ? $iCountColor++ : $iCountColor = 0] . ' white"><b>' . $oSite->id . '</b></i>
 				</div>
 				<div class="notification-body">
 					<span class="title">' . htmlspecialchars(Core_Str::cut($oSite->name, 35)) . '</span>
@@ -707,7 +707,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 						<a>
 							<div class="clearfix">
 								' . $sSite . '
-								<div class="notification-extra"><i class="fa fa-check-circle-o green"></i></div>
+								<div class="notification-extra"><i class="fa-regular fa-circle-check green"></i></div>
 							</div>
 						</a></li>' . $sListSitesContent;
 				}
@@ -846,7 +846,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 			?><!-- Core Password -->
 			<div class="col-xs-12">
 				<div class="well bordered-left bordered-themesecondary">
-					<i class="fa fa-star yellow margin-right-5"></i>
+					<i class="fa-solid fa-star yellow margin-right-5"></i>
 					<strong><?php echo Core::_('Admin_Form.note')?>: </strong><?php echo Core::_('Admin_Form.note-bad-password')?>
 				</div>
 			</div>

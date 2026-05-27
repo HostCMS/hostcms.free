@@ -136,41 +136,35 @@ $additionalParamsProperties = "structure_id={$parent_id}";
 // Элементы меню
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Structure.main_menu'))
-		->icon('fa fa-sitemap')
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Admin_Form.add'))
-				->icon('fa fa-plus')
-				->href(
-					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-				)
-		)->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Structure.properties'))
-				->icon('fa fa-gears')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref($sPropertyPath, NULL, NULL, $additionalParamsProperties)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax($sPropertyPath, NULL, NULL, $additionalParamsProperties)
-				)
+		->name(Core::_('Admin_Form.add'))
+		->icon('fa-solid fa-plus')
+		->href(
+			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
+		)
+)->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Structure.properties'))
+		->icon('fa-solid fa-gears')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref($sPropertyPath, NULL, NULL, $additionalParamsProperties)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax($sPropertyPath, NULL, NULL, $additionalParamsProperties)
 		)
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Structure_Menu.menus'))
-		->icon('fa fa-list-ul')
+		->icon('fa-solid fa-list-ul')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($sMenuPath, NULL, NULL, '')
 		)
 		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($sMenuPath, NULL, NULL, '')
 		)
-)
-;
+);
 
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
@@ -195,7 +189,7 @@ $oAdmin_Form_Controller->addEntity(
 				<div class="col-xs-12">
 					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
 						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
-						<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParamsProperties) . '"></i>
+						<i class="fa-solid fa-circle-xmark no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParamsProperties) . '"></i>
 						<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParamsProperties) . '"><i class="fa-solid fa-magnifying-glass fa-fw"></i></button>
 					</form>
 				</div>
@@ -507,6 +501,8 @@ if (strlen($sGlobalSearch))
 			->addCondition(array('setOr' => array()))
 			->addCondition(array('where' => array('structures.seo_keywords', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
+		
+	Core_Event::notify('Structure_GlobalSearch.onAfterSetConditions', NULL, array($oAdmin_Form_Dataset, $sGlobalSearch));
 }
 else
 {

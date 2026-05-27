@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Informationsystem_Item_Comment_Model extends Comment_Model
 {
@@ -43,7 +43,7 @@ class Informationsystem_Item_Comment_Model extends Comment_Model
 			->href($href)
 			->target('_blank')
 			->add(
-				Core_Html_Entity::factory('I')->class('fa fa-external-link')
+				Core_Html_Entity::factory('I')->class('fa-solid fa-arrow-up-right-from-square small')
 			)
 			->execute();
 

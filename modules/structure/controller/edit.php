@@ -200,10 +200,10 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->buttonset(TRUE)
 			->ico(
 				array(
-					0 => 'fa-regular fa-file-lines fa-fw',
-					2 => 'fa-regular fa-rectangle-list fa-fw',
-					1 => 'fa-solid fa-code fa-fw',
-					3 => 'fa-solid fa-link fa-fw'
+					0 => 'fa-fw fa-regular fa-file',
+					2 => 'fa-fw fa-solid fa-layer-group',
+					1 => 'fa-fw fa-solid fa-code',
+					3 => 'fa-fw fa-solid fa-link'
 				)
 			)
 			->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [0,1,2,3]); window.dispatchEvent(new Event('resize'));");
@@ -294,7 +294,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							: ''
 					)
 					->class('document-edit input-group-addon blue' . ($oDocument->id ? '' : ' hidden'))
-					->value('<i class="fa fa-pencil"></i>')
+					->value('<i class="fa-solid fa-pencil"></i>')
 			);
 
 		$oMainRow7->add($Select_Document);
@@ -332,7 +332,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				Admin_Form_Entity::factory('A')
 					->target('_blank')
 					->class('template-edit input-group-addon blue')
-					->value('<i class="fa fa-pencil"></i>')
+					->value('<i class="fa-solid fa-pencil"></i>')
 			);
 
 		$oMainRow13->add($oSelect_Template);
@@ -352,7 +352,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$pathLink = Admin_Form_Entity::factory('A')
 					->id('pathLink')
 					->class('input-group-addon blue')
-					->value('<i class="fa fa-external-link"></i>')
+					->value('<i class="fa-solid fa-arrow-up-right-from-square small"></i>')
 			);
 
 			if ($this->_object->id)
@@ -414,7 +414,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							: ''
 					)
 					->class('lib-edit input-group-addon blue ' . ($oLib->id ? '' : ' hidden'))
-					->value('<i class="fa fa-pencil"></i>')
+					->value('<i class="fa-solid fa-pencil"></i>')
 			);
 
 		$Div_Lib_Properties = Admin_Form_Entity::factory('Code');

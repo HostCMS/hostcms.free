@@ -20,9 +20,9 @@ class Constant_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 	/**
 	 * Module name
@@ -40,7 +40,7 @@ class Constant_Module extends Core_Module_Abstract
 			array(
 				'sorting' => 250,
 				'block' => 3,
-				'ico' => 'fa fa-wrench',
+				'ico' => 'fa-solid fa-ellipsis-vertical',
 				'name' => Core::_('constant.menu'),
 				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/constant/index.php"),
 				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/constant/index.php'}); return false")

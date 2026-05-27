@@ -274,12 +274,12 @@ abstract class Core_DataBase
 	 */
 	abstract public function quoteColumnName($columnName);
 
-    /**
-     * Quote table name, e.g. `tableName` for 'tableName',
-     * `tableName` AS `tableNameAlias` for array('tableName', 'tableNameAlias')
-     * @param string $tableName
-     * @return string
-     */
+	/**
+	 * Quote table name, e.g. `tableName` for 'tableName',
+	 * `tableName` AS `tableNameAlias` for array('tableName', 'tableNameAlias')
+	 * @param string $tableName
+	 * @return string
+	 */
 	abstract public function quoteTableName($tableName);
 
 	/**

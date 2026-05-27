@@ -195,16 +195,16 @@
 								<div class="row">
 									<div class="col-md-9 docs-buttons">
 										<div class="btn-group">
-											<button type="button" class="btn btn-primary" data-method="zoom" data-option="0.1" title="Zoom In"><span class="fa fa-search-plus"></span></button>
-											<button type="button" class="btn btn-primary" data-method="zoom" data-option="-0.1" title="Zoom Out"><span class="fa fa-search-minus"></span></button>
+											<button type="button" class="btn btn-primary" data-method="zoom" data-option="0.1" title="Zoom In"><span class="fa-solid fa-magnifying-glass-plus"></span></button>
+											<button type="button" class="btn btn-primary" data-method="zoom" data-option="-0.1" title="Zoom Out"><span class="fa-solid fa-magnifying-glass-minus"></span></button>
 										</div>
 										<div class="btn-group">
-											<button type="button" class="btn btn-warning" data-method="rotate" data-option="-90" title="Rotate Left"><span class="fa fa-rotate-left"></span></button>
-											<button type="button" class="btn btn-warning" data-method="rotate" data-option="90" title="Rotate Right"><span class="fa fa-rotate-right"></span></button>
+											<button type="button" class="btn btn-warning" data-method="rotate" data-option="-90" title="Rotate Left"><span class="fa-solid fa-rotate-left"></span></button>
+											<button type="button" class="btn btn-warning" data-method="rotate" data-option="90" title="Rotate Right"><span class="fa-solid fa-rotate-right"></span></button>
 										</div>
 										<div class="btn-group">
-											<button type="button" class="btn btn-palegreen" data-method="scaleX" data-option="-1" title="Flip Horizontal"><span class="fa fa-arrows-h"></span></button>
-											<button type="button" class="btn btn-palegreen" data-method="scaleY" data-option="-1" title="Flip Vertical"><span class="fa fa-arrows-v"></span></button>
+											<button type="button" class="btn btn-palegreen" data-method="scaleX" data-option="-1" title="Flip Horizontal"><span class="fa-solid fa-arrows-left-right"></span></button>
+											<button type="button" class="btn btn-palegreen" data-method="scaleY" data-option="-1" title="Flip Vertical"><span class="fa-solid fa-arrows-up-down"></span></button>
 										</div>
 										<div class="btn-group margin-left-20">
 											<span id="dataWidth${id}">0</span> &times; <span id="dataHeight${id}">0</span>
@@ -542,9 +542,9 @@
 					$.loadingScreen('hide');
 
 					if (answer.result === 'ok') {
-						Notify('<span>' + i18n['ban_success'] + '</span>', '', 'top-right', '5000', 'success', 'fa-check', true);
+						Notify('<span>' + i18n['ban_success'] + '</span>', '', 'top-right', '5000', 'success', 'fa-solid fa-check', true);
 					} else if (answer.result === 'error') {
-						Notify('<span>' + i18n['ban_error'] + '</span>', '', 'top-right', '5000', 'danger', 'fa-ban', true);
+						Notify('<span>' + i18n['ban_error'] + '</span>', '', 'top-right', '5000', 'danger', 'fa-solid fa-ban', true);
 					}
 				}
 			});
@@ -588,7 +588,7 @@
 						const newSorting = (sorting.length ? sorting[sorting.length - 1] : 0) + 1;
 
 						$('.ipaddress-filter-conditions').append(
-							`<div class="dd"><ol class="dd-list"><li class="dd-item bordered-palegreen" data-sorting="${newSorting}"><div class="dd-handle"><div class="form-horizontal"><div class="form-group no-margin-bottom ipaddress-filter-row">${result.html}<a class="delete-associated-item" onclick="if (confirm(i18n['confirm_delete'])) { $(this).parents('.dd-item').remove() } return false "><i class="fa fa-times-circle darkorange"></i></a></div></div></li></ol></div></div><input type="hidden" name="ipaddress_filter_sorting[]" value="${newSorting}"/>`
+							`<div class="dd"><ol class="dd-list"><li class="dd-item bordered-palegreen" data-sorting="${newSorting}"><div class="dd-handle"><div class="form-horizontal"><div class="form-group no-margin-bottom ipaddress-filter-row">${result.html}<a class="delete-associated-item" onclick="if (confirm(i18n['confirm_delete'])) { $(this).parents('.dd-item').remove() } return false "><i class="fa-regular fa-circle-xmark darkorange"></i></a></div></div></li></ol></div></div><input type="hidden" name="ipaddress_filter_sorting[]" value="${newSorting}"/>`
 						);
 
 						$.loadIpaddressFilterNestable();
@@ -672,7 +672,7 @@
 						const newSorting = (sorting.length ? sorting[sorting.length - 1] : 0) + 1;
 
 						$('.ipaddress-filter-conditions').append(
-							`<div class="dd"><ol class="dd-list"><li class="dd-item bordered-palegreen" data-sorting="${newSorting}"><div class="dd-handle"><div class="form-horizontal"><div class="form-group no-margin-bottom ipaddress-filter-row">${result.html}<a class="delete-associated-item" onclick="if (confirm(i18n['confirm_delete'])) { $(this).parents('.dd-item').remove() } return false"><i class="fa fa-times-circle darkorange"></i></a></div></div></li></ol></div></div><input type="hidden" name="ipaddress_filter_sorting[]" value="${newSorting}"/>`
+							`<div class="dd"><ol class="dd-list"><li class="dd-item bordered-palegreen" data-sorting="${newSorting}"><div class="dd-handle"><div class="form-horizontal"><div class="form-group no-margin-bottom ipaddress-filter-row">${result.html}<a class="delete-associated-item" onclick="if (confirm(i18n['confirm_delete'])) { $(this).parents('.dd-item').remove() } return false"><i class="fa-regular fa-circle-xmark darkorange"></i></a></div></div></li></ol></div></div><input type="hidden" name="ipaddress_filter_sorting[]" value="${newSorting}"/>`
 						);
 
 						$.loadIpaddressFilterNestable();

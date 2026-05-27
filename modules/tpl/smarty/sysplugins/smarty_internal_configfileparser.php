@@ -4,9 +4,9 @@ class TPC_yyStackEntry
 {
     public $stateno;       /* The state-number */
     public $major;         /* The major token value.  This is the code
-                     ** number for the token at this stack level */
+                	 ** number for the token at this stack level */
     public $minor; /* The user-supplied minor token value.  This
-                     ** is the value of the token  */
+                	 ** is the value of the token  */
 }
 
 // line 12 "../smarty/lexer/smarty_internal_configfileparser.y"
@@ -131,28 +131,28 @@ class Smarty_Internal_Configfileparser
     public static $yyFallback       = array();
 
     public static $yyRuleName       = array(
-        'start ::= global_vars sections',
-        'global_vars ::= var_list',
-        'sections ::= sections section',
-        'sections ::=',
-        'section ::= OPENB SECTION CLOSEB newline var_list',
-        'section ::= OPENB DOT SECTION CLOSEB newline var_list',
-        'var_list ::= var_list newline',
-        'var_list ::= var_list var',
-        'var_list ::=',
-        'var ::= ID EQUAL value',
-        'value ::= FLOAT',
-        'value ::= INT',
-        'value ::= BOOL',
-        'value ::= SINGLE_QUOTED_STRING',
-        'value ::= DOUBLE_QUOTED_STRING',
-        'value ::= TRIPPLE_QUOTES TRIPPLE_TEXT TRIPPLE_QUOTES_END',
-        'value ::= TRIPPLE_QUOTES TRIPPLE_QUOTES_END',
-        'value ::= NAKED_STRING',
-        'value ::= OTHER',
-        'newline ::= NEWLINE',
-        'newline ::= COMMENTSTART NEWLINE',
-        'newline ::= COMMENTSTART NAKED_STRING NEWLINE',
+    	'start ::= global_vars sections',
+    	'global_vars ::= var_list',
+    	'sections ::= sections section',
+    	'sections ::=',
+    	'section ::= OPENB SECTION CLOSEB newline var_list',
+    	'section ::= OPENB DOT SECTION CLOSEB newline var_list',
+    	'var_list ::= var_list newline',
+    	'var_list ::= var_list var',
+    	'var_list ::=',
+    	'var ::= ID EQUAL value',
+    	'value ::= FLOAT',
+    	'value ::= INT',
+    	'value ::= BOOL',
+    	'value ::= SINGLE_QUOTED_STRING',
+    	'value ::= DOUBLE_QUOTED_STRING',
+    	'value ::= TRIPPLE_QUOTES TRIPPLE_TEXT TRIPPLE_QUOTES_END',
+    	'value ::= TRIPPLE_QUOTES TRIPPLE_QUOTES_END',
+    	'value ::= NAKED_STRING',
+    	'value ::= OTHER',
+    	'newline ::= NEWLINE',
+    	'newline ::= COMMENTSTART NEWLINE',
+    	'newline ::= COMMENTSTART NAKED_STRING NEWLINE',
     );
 
     public static $yyRuleInfo       = array(
@@ -205,47 +205,47 @@ class Smarty_Internal_Configfileparser
         18 => 17,
     );
 
-    /**
-     * helper map
-     *
-     * @var array
-     */
+	/**
+	 * helper map
+	 *
+	 * @var array
+	 */
     private static $escapes_single = array(
-        '\\' => '\\',
-        '\'' => '\''
+    	'\\' => '\\',
+    	'\'' => '\''
     );
 
-    /**
-     * result status
-     *
-     * @var bool
-     */
+	/**
+	 * result status
+	 *
+	 * @var bool
+	 */
     public $successful = true;
 
-    /**
-     * return value
-     *
-     * @var mixed
-     */
+	/**
+	 * return value
+	 *
+	 * @var mixed
+	 */
     public $retvalue = 0;
 
-    /**
-     * @var
-     */
+	/**
+	 * @var
+	 */
     public $yymajor;
 
-    /**
-     * compiler object
-     *
-     * @var Smarty_Internal_Config_File_Compiler
-     */
+	/**
+	 * compiler object
+	 *
+	 * @var Smarty_Internal_Config_File_Compiler
+	 */
     public $compiler = null;
 
-    /**
-     * smarty object
-     *
-     * @var Smarty
-     */
+	/**
+	 * smarty object
+	 *
+	 * @var Smarty
+	 */
     public $smarty      = null;
 
     public $yyTraceFILE;
@@ -259,51 +259,51 @@ class Smarty_Internal_Configfileparser
     public $yystack     = array();
 
     public $yyTokenName = array(
-        '$', 'OPENB', 'SECTION', 'CLOSEB',
-        'DOT', 'ID', 'EQUAL', 'FLOAT',
-        'INT', 'BOOL', 'SINGLE_QUOTED_STRING', 'DOUBLE_QUOTED_STRING',
-        'TRIPPLE_QUOTES', 'TRIPPLE_TEXT', 'TRIPPLE_QUOTES_END', 'NAKED_STRING',
-        'OTHER', 'NEWLINE', 'COMMENTSTART', 'error',
-        'start', 'global_vars', 'sections', 'var_list',
-        'section', 'newline', 'var', 'value',
+    	'$', 'OPENB', 'SECTION', 'CLOSEB',
+    	'DOT', 'ID', 'EQUAL', 'FLOAT',
+    	'INT', 'BOOL', 'SINGLE_QUOTED_STRING', 'DOUBLE_QUOTED_STRING',
+    	'TRIPPLE_QUOTES', 'TRIPPLE_TEXT', 'TRIPPLE_QUOTES_END', 'NAKED_STRING',
+    	'OTHER', 'NEWLINE', 'COMMENTSTART', 'error',
+    	'start', 'global_vars', 'sections', 'var_list',
+    	'section', 'newline', 'var', 'value',
     );
 
-    /**
-     * lexer object
-     *
-     * @var Smarty_Internal_Configfilelexer
-     */
+	/**
+	 * lexer object
+	 *
+	 * @var Smarty_Internal_Configfilelexer
+	 */
     private $lex;
 
-    /**
-     * internal error flag
-     *
-     * @var bool
-     */
+	/**
+	 * internal error flag
+	 *
+	 * @var bool
+	 */
     private $internalError = false;
 
-    /**
-     * copy of config_overwrite property
-     *
-     * @var bool
-     */
+	/**
+	 * copy of config_overwrite property
+	 *
+	 * @var bool
+	 */
     private $configOverwrite = false;
 
-    /**
-     * copy of config_read_hidden property
-     *
-     * @var bool
-     */
+	/**
+	 * copy of config_read_hidden property
+	 *
+	 * @var bool
+	 */
     private $configReadHidden = false;
 
     private $_retvalue;
 
-    /**
-     * constructor
-     *
-     * @param Smarty_Internal_Configfilelexer      $lex
-     * @param Smarty_Internal_Config_File_Compiler $compiler
-     */
+	/**
+	 * constructor
+	 *
+	 * @param Smarty_Internal_Configfilelexer      $lex
+	 * @param Smarty_Internal_Config_File_Compiler $compiler
+	 */
     public function __construct(Smarty_Internal_Configfilelexer $lex, Smarty_Internal_Config_File_Compiler $compiler)
     {
         $this->lex = $lex;
@@ -321,15 +321,15 @@ class Smarty_Internal_Configfileparser
         }
     }
 
-    /**
-     * parse single quoted string
-     *  remove outer quotes
-     *  unescape inner quotes
-     *
-     * @param string $qstr
-     *
-     * @return string
-     */
+	/**
+	 * parse single quoted string
+	 *  remove outer quotes
+	 *  unescape inner quotes
+	 *
+	 * @param string $qstr
+	 *
+	 * @return string
+	 */
     private static function parse_single_quoted_string($qstr)
     {
         $escaped_string = substr($qstr, 1, strlen($qstr) - 2); //remove outer quotes
@@ -345,25 +345,25 @@ class Smarty_Internal_Configfileparser
         }
         return $str;
     }                    /* Index of top element in stack */
-    /**
-     * parse double quoted string
-     *
-     * @param string $qstr
-     *
-     * @return string
-     */
+	/**
+	 * parse double quoted string
+	 *
+	 * @param string $qstr
+	 *
+	 * @return string
+	 */
     private static function parse_double_quoted_string($qstr)
     {
         $inner_str = substr($qstr, 1, strlen($qstr) - 2);
         return stripcslashes($inner_str);
     }                 /* Shifts left before out of the error */
-    /**
-     * parse triple quoted string
-     *
-     * @param string $qstr
-     *
-     * @return string
-     */
+	/**
+	 * parse triple quoted string
+	 *
+	 * @param string $qstr
+	 *
+	 * @return string
+	 */
     private static function parse_tripple_double_quoted_string($qstr)
     {
         return stripcslashes($qstr);
@@ -748,8 +748,8 @@ class Smarty_Internal_Configfileparser
     {
         $this->_retvalue =
             array(
-                'key'   => $this->yystack[ $this->yyidx + -2 ]->minor,
-                'value' => $this->yystack[ $this->yyidx + 0 ]->minor
+            	'key'   => $this->yystack[ $this->yyidx + -2 ]->minor,
+            	'value' => $this->yystack[ $this->yyidx + 0 ]->minor
             );
     }
 
@@ -977,13 +977,13 @@ class Smarty_Internal_Configfileparser
         } while ($yymajor !== self::YYNOCODE && $this->yyidx >= 0);
     }
 
-    /**
-     * parse optional boolean keywords
-     *
-     * @param string $str
-     *
-     * @return bool
-     */
+	/**
+	 * parse optional boolean keywords
+	 *
+	 * @param string $str
+	 *
+	 * @return bool
+	 */
     private function parse_bool($str)
     {
         $str = strtolower($str);
@@ -995,12 +995,12 @@ class Smarty_Internal_Configfileparser
         return $res;
     }
 
-    /**
-     * set a config variable in target array
-     *
-     * @param array $var
-     * @param array $target_array
-     */
+	/**
+	 * set a config variable in target array
+	 *
+	 * @param array $var
+	 * @param array $target_array
+	 */
     private function set_var(array $var, array &$target_array)
     {
         $key = $var[ 'key' ];
@@ -1013,11 +1013,11 @@ class Smarty_Internal_Configfileparser
         }
     }
 
-    /**
-     * add config variable to global vars
-     *
-     * @param array $vars
-     */
+	/**
+	 * add config variable to global vars
+	 *
+	 * @param array $vars
+	 */
     private function add_global_vars(array $vars)
     {
         if (!isset($this->compiler->config_data[ 'vars' ])) {
@@ -1028,12 +1028,12 @@ class Smarty_Internal_Configfileparser
         }
     }
 
-    /**
-     * add config variable to section
-     *
-     * @param string $section_name
-     * @param array  $vars
-     */
+	/**
+	 * add config variable to section
+	 *
+	 * @param string $section_name
+	 * @param array  $vars
+	 */
     private function add_section_vars($section_name, array $vars)
     {
         if (!isset($this->compiler->config_data[ 'sections' ][ $section_name ][ 'vars' ])) {

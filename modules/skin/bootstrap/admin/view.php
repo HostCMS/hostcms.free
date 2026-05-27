@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_View extends Admin_View
 {
@@ -21,7 +21,7 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 		?><div class="page-breadcrumbs">
 		<ul class="breadcrumb">
 			<li>
-				<i class="fa fa-home"></i>
+				<i class="fa-solid fa-home"></i>
 				<a href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/index.php')?>" onclick="$.adminLoad({path: hostcmsBackend + '/index.php'}); return false"><?php echo Core::_('Admin.home')?></a>
 			</li><?php
 
@@ -119,7 +119,7 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 
 				?><div class="header-buttons">
 					<a href="#" class="sidebar-toggler">
-						<i class="fa-solid fa-right-left"></i>
+						<i class="fa-solid fa-left-right"></i>
 					</a>
 					<a href="#" id="refresh-toggler" class="refresh">
 						<i class="fa-solid fa-refresh"></i>
@@ -157,8 +157,8 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 				$ico = !is_null($this->module)
 					&& ($aMenu = $this->module->getMenu())
 					&& isset($aMenu[0])
-					? Core_Array::get($aMenu[0], 'ico', 'fa fa-barcode')
-					: 'fa fa-barcode';
+					? Core_Array::get($aMenu[0], 'ico', 'fa-solid fa-barcode')
+					: 'fa-solid fa-barcode';
 
 				?><h5 class="row-title before-pink"><i class="<?php echo htmlspecialchars($ico)?>"></i><?php
 				if (is_object($this->pageTitle))

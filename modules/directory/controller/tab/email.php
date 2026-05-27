@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Directory
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Directory_Controller_Tab_Email extends Directory_Controller_Tab
 {
@@ -16,7 +16,7 @@ class Directory_Controller_Tab_Email extends Directory_Controller_Tab
 
 	protected $_titleHeaderColor = 'warning';
 
-	protected $_faTitleIcon = 'fa fa-envelope-o';
+	protected $_faTitleIcon = 'fa-regular fa-envelope';
 
 	protected function _execute($oPersonalDataInnerWrapper)
 	{

@@ -1,0 +1,1 @@
+var hQuery = $.noConflict(true);

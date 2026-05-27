@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Calendar
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -239,7 +239,7 @@ $(function () {
 					click: function() {
 						$('#caldav-dropdown').dropdown().toggle();
 					},
-					icon: 'fa fa-calendar'
+					icon: 'fa-solid fa-calendar-days'
 				}
 			},
 			header: {
@@ -321,7 +321,7 @@ $(function () {
 			}
 		?>
 		<li role="separator" class="divider"></li>
-		<li><a class="caldav-settings" href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/calendar/caldav/index.php')?>" onclick="$.adminLoad({path: '<?php Admin_Form_Controller::correctBackendPath('/{admin}/calendar/caldav/index.php')?>',action: '',operation: '',additionalParams: '',current: '1',sortingFieldId: '1290',sortingDirection: '1',windowId: 'id_content'}); return false"><i class="fa fa-cog"></i><?php echo Core::_('Calendar.settings')?></a></li>
+		<li><a class="caldav-settings" href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/calendar/caldav/index.php')?>" onclick="$.adminLoad({path: '<?php Admin_Form_Controller::correctBackendPath('/{admin}/calendar/caldav/index.php')?>',action: '',operation: '',additionalParams: '',current: '1',sortingFieldId: '1290',sortingDirection: '1',windowId: 'id_content'}); return false"><i class="fa-solid fa-gear"></i><?php echo Core::_('Calendar.settings')?></a></li>
 	</ul>
 </div>
 

@@ -11,48 +11,48 @@
  */
 class Smarty_Internal_Method_ConfigLoad
 {
-    /**
-     * Valid for all objects
-     *
-     * @var int
-     */
+	/**
+	 * Valid for all objects
+	 *
+	 * @var int
+	 */
     public $objMap = 7;
 
-    /**
-     * load a config file, optionally load just selected sections
-     *
-     * @api  Smarty::configLoad()
-     * @link https://www.smarty.net/docs/en/api.config.load.tpl
-     *
-     * @param \Smarty_Internal_Data|\Smarty_Internal_Template|\Smarty $data
-     * @param string                                                  $config_file filename
-     * @param mixed                                                   $sections    array of section names, single
-     *                                                                             section or null
-     *
-     * @return \Smarty|\Smarty_Internal_Data|\Smarty_Internal_Template
-     * @throws \Exception
-     */
+	/**
+	 * load a config file, optionally load just selected sections
+	 *
+	 * @api  Smarty::configLoad()
+	 * @link https://www.smarty.net/docs/en/api.config.load.tpl
+	 *
+	 * @param \Smarty_Internal_Data|\Smarty_Internal_Template|\Smarty $data
+	 * @param string                                                  $config_file filename
+	 * @param mixed                                                   $sections    array of section names, single
+	 *                                                                             section or null
+	 *
+	 * @return \Smarty|\Smarty_Internal_Data|\Smarty_Internal_Template
+	 * @throws \Exception
+	 */
     public function configLoad(Smarty_Internal_Data $data, $config_file, $sections = null)
     {
         $this->_loadConfigFile($data, $config_file, $sections, null);
         return $data;
     }
 
-    /**
-     * load a config file, optionally load just selected sections
-     *
-     * @api  Smarty::configLoad()
-     * @link https://www.smarty.net/docs/en/api.config.load.tpl
-     *
-     * @param \Smarty|\Smarty_Internal_Data|\Smarty_Internal_Template $data
-     * @param string                                                  $config_file filename
-     * @param mixed                                                   $sections    array of section names, single
-     *                                                                             section or null
-     * @param int                                                     $scope       scope into which config variables
-     *                                                                             shall be loaded
-     *
-     * @throws \Exception
-     */
+	/**
+	 * load a config file, optionally load just selected sections
+	 *
+	 * @api  Smarty::configLoad()
+	 * @link https://www.smarty.net/docs/en/api.config.load.tpl
+	 *
+	 * @param \Smarty|\Smarty_Internal_Data|\Smarty_Internal_Template $data
+	 * @param string                                                  $config_file filename
+	 * @param mixed                                                   $sections    array of section names, single
+	 *                                                                             section or null
+	 * @param int                                                     $scope       scope into which config variables
+	 *                                                                             shall be loaded
+	 *
+	 * @throws \Exception
+	 */
     public function _loadConfigFile(Smarty_Internal_Data $data, $config_file, $sections = null, $scope = 0)
     {
         /* @var \Smarty $smarty */
@@ -70,12 +70,12 @@ class Smarty_Internal_Method_ConfigLoad
         }
     }
 
-    /**
-     * load config variables into template object
-     *
-     * @param \Smarty_Internal_Template $tpl
-     * @param array                     $new_config_vars
-     */
+	/**
+	 * load config variables into template object
+	 *
+	 * @param \Smarty_Internal_Template $tpl
+	 * @param array                     $new_config_vars
+	 */
     public function _loadConfigVars(Smarty_Internal_Template $tpl, $new_config_vars)
     {
         $this->_assignConfigVars($tpl->parent->config_vars, $tpl, $new_config_vars);
@@ -104,13 +104,13 @@ class Smarty_Internal_Method_ConfigLoad
         }
     }
 
-    /**
-     * Assign all config variables in given scope
-     *
-     * @param array                     $config_vars     config variables in scope
-     * @param \Smarty_Internal_Template $tpl
-     * @param array                     $new_config_vars loaded config variables
-     */
+	/**
+	 * Assign all config variables in given scope
+	 *
+	 * @param array                     $config_vars     config variables in scope
+	 * @param \Smarty_Internal_Template $tpl
+	 * @param array                     $new_config_vars loaded config variables
+	 */
     public function _assignConfigVars(&$config_vars, Smarty_Internal_Template $tpl, $new_config_vars)
     {
         // copy global config vars
@@ -138,12 +138,12 @@ class Smarty_Internal_Method_ConfigLoad
         }
     }
 
-    /**
-     * Update config variables in template local variable stack
-     *
-     * @param \Smarty_Internal_Template $tpl
-     * @param array                     $config_vars
-     */
+	/**
+	 * Update config variables in template local variable stack
+	 *
+	 * @param \Smarty_Internal_Template $tpl
+	 * @param array                     $config_vars
+	 */
     public function _updateVarStack(Smarty_Internal_Template $tpl, $config_vars)
     {
         $i = 0;
@@ -153,15 +153,15 @@ class Smarty_Internal_Method_ConfigLoad
         }
     }
 
-    /**
-     * gets  a config variable value
-     *
-     * @param \Smarty|\Smarty_Internal_Data|\Smarty_Internal_Template $data
-     * @param string                                                  $varName the name of the config variable
-     * @param bool                                                    $errorEnable
-     *
-     * @return null|string  the value of the config variable
-     */
+	/**
+	 * gets  a config variable value
+	 *
+	 * @param \Smarty|\Smarty_Internal_Data|\Smarty_Internal_Template $data
+	 * @param string                                                  $varName the name of the config variable
+	 * @param bool                                                    $errorEnable
+	 *
+	 * @return null|string  the value of the config variable
+	 */
     public function _getConfigVariable(Smarty_Internal_Data $data, $varName, $errorEnable = true)
     {
         $_ptr = $data;

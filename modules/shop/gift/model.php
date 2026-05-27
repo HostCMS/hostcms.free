@@ -173,7 +173,7 @@ class Shop_Gift_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event shop_gift.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')
@@ -205,11 +205,11 @@ class Shop_Gift_Model extends Core_Entity
 
 		/*if ($this->value > 80 && $this->type == 0)
 		{
-			$return = '<i class="fa fa-exclamation-triangle warning" title="More than 80%"></i> ';
+			$return = '<i class="fa-solid fa-triangle-exclamation warning" title="More than 80%"></i> ';
 		}
 		else*/if($this->value == 0)
 		{
-			$return = '<i class="fa fa-exclamation-triangle warning" title="Zero Discount"></i> ';
+			$return = '<i class="fa-solid fa-triangle-exclamation warning" title="Zero Discount"></i> ';
 		}
 		else
 		{
@@ -254,7 +254,7 @@ class Shop_Gift_Model extends Core_Entity
 		{
 			$oCore_Html_Entity_Div
 				->add(
-					Core_Html_Entity::factory('I')->class('fa fa-clock-o black')
+					Core_Html_Entity::factory('I')->class('fa-regular fa-clock black')
 				);
 		}
 
@@ -285,7 +285,7 @@ class Shop_Gift_Model extends Core_Entity
 				$oCore_Html_Entity_Div->add(
 					Core_Html_Entity::factory('Span')
 						->class('badge badge-square badge-hostcms')
-						->value('<i class="fa fa-users darkgray"></i> ' . $siteuserGroupName)
+						->value('<i class="fa-solid fa-users darkgray"></i> ' . $siteuserGroupName)
 					);
 
 				// Если "Все", то прерываем формирование списка
@@ -300,7 +300,7 @@ class Shop_Gift_Model extends Core_Entity
 			$oCore_Html_Entity_Div->add(
 				Core_Html_Entity::factory('Span')
 					->class('badge badge-darkorange badge-ico white')
-					->add(Core_Html_Entity::factory('I')->class('fa fa-exclamation-triangle'))
+					->add(Core_Html_Entity::factory('I')->class('fa-solid fa-triangle-exclamation'))
 					->title('Empty group list!')
 			);
 		}

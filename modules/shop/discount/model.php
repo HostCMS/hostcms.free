@@ -212,7 +212,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event shop_discount.onBeforeRedeclaredDelete
+	 * @hostcms-event shop_discount.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -247,7 +247,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event shop_discount.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')
@@ -293,7 +293,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 		$oCore_Html_Entity_Div->add(
 			$Core_Html_Entity_Span = Core_Html_Entity::factory('Span')->value(
-				'<i class="fa fa-circle" style="color: ' . ($this->color ? htmlspecialchars($this->color) : '#aebec4') . '"></i> '
+				'<i class="fa-solid fa-circle" style="color: ' . ($this->color ? htmlspecialchars($this->color) : '#aebec4') . '"></i> '
 			)
 		);
 
@@ -317,7 +317,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		{
 			$Core_Html_Entity_Span
 				->add(
-					Core_Html_Entity::factory('I')->class('fa fa-clock-o black')
+					Core_Html_Entity::factory('I')->class('fa-regular fa-clock black')
 				);
 		}
 
@@ -346,7 +346,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 					->class('fa-stack')
 					->style('font-size: 0.7em;')
 					->title(Core::_('Shop_Discount.not_apply_purchase_discount'))
-					->value('<i class="fas fa-percent fa-stack-1x"></i><i class="fas fa-ban fa-stack-2x danger"></i>')
+					->value('<i class="fa-solid fa-percent fa-stack-1x"></i><i class="fa-solid fa-ban fa-stack-2x danger"></i>')
 			);
 		}
 
@@ -405,7 +405,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 				$oCore_Html_Entity_Div->add(
 					Core_Html_Entity::factory('Span')
 						->class('badge badge-square badge-hostcms')
-						->value('<i class="fa fa-users darkgray"></i> ' . $siteuserGroupName)
+						->value('<i class="fa-solid fa-users darkgray"></i> ' . $siteuserGroupName)
 					);
 
 				// Если "Все", то прерываем формирование списка
@@ -420,7 +420,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 			$oCore_Html_Entity_Div->add(
 				Core_Html_Entity::factory('Span')
 					->class('badge badge-darkorange badge-ico white')
-					->add(Core_Html_Entity::factory('I')->class('fa fa-exclamation-triangle'))
+					->add(Core_Html_Entity::factory('I')->class('fa-solid fa-triangle-exclamation'))
 					->title('Empty group list!')
 			);
 		}
@@ -473,11 +473,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 		if ($this->value > 80 && $this->type == 0)
 		{
-			$return = '<i class="fa fa-exclamation-triangle warning" title="More than 80%"></i> ';
+			$return = '<i class="fa-solid fa-triangle-exclamation warning" title="More than 80%"></i> ';
 		}
 		elseif($this->value == 0)
 		{
-			$return = '<i class="fa fa-exclamation-triangle warning" title="Zero Discount"></i> ';
+			$return = '<i class="fa-solid fa-triangle-exclamation warning" title="Zero Discount"></i> ';
 		}
 		else
 		{

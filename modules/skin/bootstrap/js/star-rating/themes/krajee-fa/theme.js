@@ -23,8 +23,8 @@
 }(function ($) {
     "use strict";
     $.fn.ratingThemes['krajee-fa'] = {
-        filledStar: '<i class="fa fa-star"></i>',
-        emptyStar: '<i class="fa fa-star-o"></i>',
-        clearButton: '<i class="fa fa-lg fa-minus-circle"></i>'
+        filledStar: '<i class="fa-solid fa-star"></i>',
+        emptyStar: '<i class="fa-regular fa-star"></i>',
+        clearButton: '<i class="fa-solid fa-circle-minus fa-lg"></i>'
     };
 }));

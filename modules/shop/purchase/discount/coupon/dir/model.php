@@ -122,7 +122,7 @@ class Shop_Purchase_Discount_Coupon_Dir_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event shop_purchase_discount_coupon_dir.onBeforeRedeclaredDelete
+	 * @hostcms-event shop_purchase_discount_coupon_dir.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

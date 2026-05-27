@@ -41,7 +41,7 @@ class Xsl_Processor_Observer
 
 		if (Core::checkPanel() && Core_Array::getSession('HOSTCMS_SHOW_XML'))
 		{
-// var_dump('=======', count(Xsl_Stream_Import::getImported()));
+			// var_dump('=======', count(Xsl_Stream_Import::getImported()));
 
 			$oXslPanel = Core_Html_Entity::factory('Div')
 				->class('hostcmsPanel')
@@ -86,7 +86,7 @@ class Xsl_Processor_Observer
 				->execute();
 
 			?><script>
-				$(document).ready(function () {
+				hQuery(document).ready(function () {
 					var $textarea = hQuery("#xmlWindow<?php echo $iCount?> > textarea"),
 						xml = $textarea.val();
 

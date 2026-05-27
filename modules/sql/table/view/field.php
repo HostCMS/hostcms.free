@@ -44,13 +44,13 @@ class Sql_Table_View_Field
 		$this->_columns[$property] = $value;
 	}
 
-    /**
-     * Triggered when invoking inaccessible methods in an object context
-     * @param string $methodName
-     * @param array $arguments arguments
-     * @return mixed
-     * @hostcms-event modelname.onCall
-     */
+	/**
+	 * Triggered when invoking inaccessible methods in an object context
+	 * @param string $methodName
+	 * @param array $arguments arguments
+	 * @return mixed
+	 * @hostcms-event modelname.onCall
+	 */
 	public function __call($methodName, $arguments)
 	{
 		if (isset($this->_columns[$methodName]) && count($arguments) == 0)

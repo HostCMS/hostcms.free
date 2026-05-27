@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 {
@@ -267,14 +267,14 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 							->class('input-group-addon control-item')
 							->href($this->largeImage['path'])
 							->target('_blank')
-							->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-image"></i>'))
+							->add(Admin_Form_Entity::factory('Code')->html('<i class="fa-regular fa-image"></i>'))
 					)
 					->add(
 						Core_Html_Entity::factory('A')
 							->id('delete_' . 'large_' . $this->largeImage['id'])
 							->class('input-group-addon control-item')
 							->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { {$this->largeImage['delete_onclick']} } else {return false;}")
-							->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-trash"></i>'))
+							->add(Admin_Form_Entity::factory('Code')->html('<i class="fa-solid fa-trash-can"></i>'))
 					);
 			}
 
@@ -288,7 +288,7 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 							->class('input-group-addon control-item')
 							//->style('margin: 10px 0 0 15px')
 							->add(
-								Admin_Form_Entity::factory('Code')->html('<i class="fa fa-cog"></i>')
+								Admin_Form_Entity::factory('Code')->html('<i class="fa-solid fa-gear"></i>')
 							)
 							->onclick("$('#{$windowId}_watermark_" . $this->_correctId($this->largeImage['name']) . "').HostCMSWindow('open')")
 					);
@@ -522,14 +522,14 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 								->class('input-group-addon control-item')
 								->href($this->smallImage['path'])
 								->target('_blank')
-								->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-image"></i>'))
+								->add(Admin_Form_Entity::factory('Code')->html('<i class="fa-regular fa-image"></i>'))
 						)
 						->add(
 							Core_Html_Entity::factory('A')
 								->id('delete_' . 'small_' . $this->smallImage['id'])
 								->class('input-group-addon control-item')
 								->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { {$this->smallImage['delete_onclick']} } else {return false;}")
-								->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-trash"></i>'))
+								->add(Admin_Form_Entity::factory('Code')->html('<i class="fa-solid fa-trash-can"></i>'))
 						);
 				}
 
@@ -542,7 +542,7 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 								->id('file_small_settings_' . $iAdmin_Form_Count)
 								->class('input-group-addon control-item')
 								->add(
-									Admin_Form_Entity::factory('Code')->html('<i class="fa fa-cog"></i>')
+									Admin_Form_Entity::factory('Code')->html('<i class="fa-solid fa-gear"></i>')
 								)
 								->onclick("$('#{$windowId}_watermark_" . $this->_correctId($this->smallImage['name']) . "').HostCMSWindow('open')")
 						);

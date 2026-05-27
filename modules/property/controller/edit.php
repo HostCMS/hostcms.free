@@ -212,7 +212,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$pathLink = Admin_Form_Entity::factory('A')
 						->id('pathLink')
 						->class('input-group-addon blue')
-						->value('<i class="fa fa-external-link"></i>');
+						->value('<i class="fa-solid fa-arrow-up-right-from-square small"></i>');
 
 					if ($this->_object->id && $this->_object->list_id)
 					{

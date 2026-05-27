@@ -97,7 +97,7 @@ class Tpl_Processor
 	/**
 	 * Execute processor
 	 * @return false|string
-     * @hostcms-event Tpl_Processor.onBeforeProcess
+	 * @hostcms-event Tpl_Processor.onBeforeProcess
 	 * @hostcms-event Tpl_Processor.onAfterProcess
 	 */
 	public function process()
@@ -178,11 +178,11 @@ class Tpl_Processor
 	 */
 	protected $_tpl = NULL;
 
-    /**
-     * Set XSL
-     * @param Tpl_Model $oTpl
-     * @return self
-     */
+	/**
+	 * Set XSL
+	 * @param Tpl_Model $oTpl
+	 * @return self
+	 */
 	public function tpl(Tpl_Model $oTpl)
 	{
 		$this->_tpl = $oTpl;

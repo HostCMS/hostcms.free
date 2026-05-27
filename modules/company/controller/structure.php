@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Company
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Company_Controller_Structure extends Admin_Form_Controller_View
 {
@@ -161,7 +161,7 @@ class Company_Controller_Structure extends Admin_Form_Controller_View
 																	->class('btn btn-palegreen')
 																	->add(
 																		Admin_Form_Entity::factory('Code')
-																			->html('<i class="fa fa-plus"></i>' . Core::_('Company_Department.addDepartmentButtonTitle'))
+																			->html('<i class="fa-solid fa-plus"></i>' . Core::_('Company_Department.addDepartmentButtonTitle'))
 																	)
 															)
 													)
@@ -502,7 +502,7 @@ class Company_Controller_Structure extends Admin_Form_Controller_View
 								{
 								?>
 									<a href="javascript:void(0);" class="bordered-palegreen" data-action="add_user" title="<?php echo Core::_('Company_Department.addUserTitleAction')?>" alt="<?php echo Core::_('Company_Department.addUserTitleAction');?>">
-										<i class="fa fa-user-plus palegreen"></i>
+										<i class="fa-solid fa-user-plus palegreen"></i>
 									</a>
 								<?php
 								}
@@ -511,7 +511,7 @@ class Company_Controller_Structure extends Admin_Form_Controller_View
 								{
 								?>
 									<a href="javascript:void(0);" class="bordered-gray" data-action="edit" title="<?php echo Core::_('Company_Department.editTitleAction', htmlspecialchars($oCompany_Department->name))?>" alt="<?php echo Core::_('Company_Department.editTitleAction', htmlspecialchars($oCompany_Department->name))?>">
-										<i class="fa fa-pencil darkgray"></i>
+										<i class="fa-solid fa-pencil darkgray"></i>
 									</a>
 								<?php
 								}
@@ -520,7 +520,7 @@ class Company_Controller_Structure extends Admin_Form_Controller_View
 								{
 								?>
 									<a href="javascript:void(0);" class="bordered-darkorange" data-action="delete" title="<?php echo Core::_('Company_Department.deleteTitleAction')?>" alt="<?php echo Core::_('Company_Department.deleteTitleAction')?>">
-										<i class="fa fa-trash-o darkorange "></i>
+										<i class="fa-regular fa-trash-can darkorange "></i>
 									</a>
 								<?php
 								}
@@ -530,10 +530,10 @@ class Company_Controller_Structure extends Admin_Form_Controller_View
 								{
 								?>
 									<a href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/user/site/index.php')?>?company_department_id=<?php echo $oCompany_Department->id?>" onclick="$.adminLoad({path: hostcmsBackend + '/user/site/index.php',action: '',operation: '',additionalParams: 'company_department_id=<?php echo $oCompany_Department->id?>',current: '1',windowId: 'id_content'}); return false" class="bordered-sky" data-action="module_access" title="<?php echo Core::_('Company_Department.moduleTitleAction')?>" alt="<?php echo Core::_('Company_Department.moduleTitleAction')?>">
-										<i class="fa fa-cogs sky"></i>
+										<i class="fa-solid fa-gears sky"></i>
 									</a>
 									<a href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/user/site/index.php')?>?company_department_id=<?php echo $oCompany_Department->id?>&mode=action" onclick="$.adminLoad({path: hostcmsBackend + '/user/site/index.php',action: '',operation: '',additionalParams: 'mode=action&company_department_id=<?php echo $oCompany_Department->id?>',current: '1',windowId: 'id_content'}); return false" class="bordered-yellow" data-action="action_access" title="<?php echo Core::_('Company_Department.actionTitleAction'); ?>" alt="<?php echo Core::_('Company_Department.actionTitleAction'); ?>">
-										<i class="fa fa-bolt yellow"></i>
+										<i class="fa-solid fa-bolt yellow"></i>
 									</a>
 								<?php
 								}
@@ -559,7 +559,7 @@ class Company_Controller_Structure extends Admin_Form_Controller_View
 								</div>
 								<div class="widget-buttons pull-left widget-button-chevron">
 									<a href="#" data-toggle="collapse">
-										<i class="fa fa-chevron-down sky"></i>
+										<i class="fa-solid fa-chevron-down sky"></i>
 									</a>
 								</div>
 							</div>
@@ -591,7 +591,7 @@ class Company_Controller_Structure extends Admin_Form_Controller_View
 													if ($bHead)
 													{
 														?>
-														<i class="fas fa-crown gold"></i>
+														<i class="fa-solid fa-crown gold"></i>
 														<?php
 													}
 													?>
@@ -611,7 +611,7 @@ class Company_Controller_Structure extends Admin_Form_Controller_View
 														{
 														?>
 															<a href="javascript:void(0);" data-action="edit_user" title="<?php echo Core::_('Company_Department.editUserDepartmentPostTitleAction'); ?>" alt="<?php echo Core::_('Company_Department.editUserDepartmentPostTitleAction'); ?>" class="bordered-darkgray">
-																<i class="fa fa-pencil darkgray"></i>
+																<i class="fa-solid fa-pencil darkgray"></i>
 															</a>
 														<?php
 														}
@@ -621,7 +621,7 @@ class Company_Controller_Structure extends Admin_Form_Controller_View
 														?>
 
 															<a href="javascript:void(0);" data-action="delete_user" title="<?php echo Core::_('Company_Department.deleteUserDepartmentPostTitleAction'); ?>" alt="<?php echo Core::_('Company_Department.deleteUserDepartmentPostTitleAction'); ?>" class="bordered-darkorange">
-																<i class="fa fa-user-times darkorange"></i>
+																<i class="fa-solid fa-user-times darkorange"></i>
 															</a>
 														<?php
 														}

@@ -31,16 +31,16 @@ class Core_Session_Database implements SessionHandlerInterface
 	protected $_lockPrefix = NULL;
 
 	/**
-     * Currently locked session ID
-     * @var string|NULL
-     */
-    protected $_currentLockId = NULL;
-    
-    /**
-     * Time when lock was acquired
-     * @var int|NULL
-     */
-    protected $_currentLockTime = NULL;
+	 * Currently locked session ID
+	 * @var string|NULL
+	 */
+	protected $_currentLockId = NULL;
+	
+	/**
+	 * Time when lock was acquired
+	 * @var int|NULL
+	 */
+	protected $_currentLockTime = NULL;
 
 	/**
 	 * GET_LOCK timeout (sec)
@@ -107,7 +107,7 @@ class Core_Session_Database implements SessionHandlerInterface
 	{
 		if ($this->_lock($id))
 		{
-			$queryBuilder = Core_QueryBuilder::select('time', 'value', 'maxlifetime')
+			$queryBuilder = Core_QueryBuilder::select('time', 'value', 'maxlifetime', 'expired')
 				->from('sessions')
 				->where('id', '=', $id)
 				->limit(1);
@@ -123,13 +123,15 @@ class Core_Session_Database implements SessionHandlerInterface
 
 			if ($row)
 			{
+				$time = time();
 				// Session's still available
-				if ($row['time'] + $row['maxlifetime'] > time())
+				if ($row['expired'] > $time)
 				{
 					// Update last change time
 					$oDataBase = Core_QueryBuilder::update('sessions')
 						//->columns(array('time' => 'UNIX_TIMESTAMP(NOW())'))
-						->columns(array('time' => time()))
+						->columns(array('time' => $time))
+						->columns(array('expired' => $time + $row['maxlifetime']))
 						->where('id', '=', $id)
 						->execute();
 
@@ -164,10 +166,13 @@ class Core_Session_Database implements SessionHandlerInterface
 		{
 			$value = base64_encode($value);
 
+			$time = time();
+			
 			$oDataBase = Core_QueryBuilder::update('sessions')
 				//->columns(array('time' => 'UNIX_TIMESTAMP(NOW())'))
 				->set('value', $value)
-				->set('time', time())
+				->set('time', $time)
+				->set('expired', Core_QueryBuilder::raw("{$time} + `maxlifetime`"))
 				->where('id', '=', $id)
 				->execute();
 
@@ -181,8 +186,8 @@ class Core_Session_Database implements SessionHandlerInterface
 
 				$oDataBase = Core_QueryBuilder::insert('sessions')
 					->ignore()
-					->columns('id', 'value', 'time', 'maxlifetime')
-					->values($id, $value, time(), $maxlifetime)
+					->columns('id', 'value', 'time', 'maxlifetime', 'expired')
+					->values($id, $value, $time, $maxlifetime, $time + $maxlifetime)
 					->execute();
 			}
 
@@ -234,6 +239,7 @@ class Core_Session_Database implements SessionHandlerInterface
 	{
 		$oCore_QueryBuilder = Core_QueryBuilder::update('sessions')
 			->set('maxlifetime', $maxlifetime)
+			->set('expired', time() + $maxlifetime)
 			->where('id', '=', session_id());
 
 		!$overwrite
@@ -255,7 +261,7 @@ class Core_Session_Database implements SessionHandlerInterface
 	public function gc($maxlifetime)
 	{
 		$oDataBase = Core_QueryBuilder::delete('sessions')
-			->where('time + maxlifetime', '<', time())
+			->where('expired', '<', time())
 			->execute();
 
 		$oDataBase->free();
@@ -312,16 +318,16 @@ class Core_Session_Database implements SessionHandlerInterface
 	protected function _lock($id)
 	{
 		// Проверяем, не заблокирована ли уже эта сессия
-        if ($this->_currentLockId === $id && $this->_isLockStillValid())
+		if ($this->_currentLockId === $id && $this->_isLockStillValid())
 		{
-            return TRUE;
-        }
-        
-        // Освобождаем предыдущую блокировку, если есть другая
-        if ($this->_currentLockId !== NULL && $this->_currentLockId !== $id)
+			return TRUE;
+		}
+		
+		// Освобождаем предыдущую блокировку, если есть другая
+		if ($this->_currentLockId !== NULL && $this->_currentLockId !== $id)
 		{
-            $this->_unlock($this->_currentLockId);
-        }
+			$this->_unlock($this->_currentLockId);
+		}
 		
 		$iStartTime = time();
 
@@ -342,8 +348,8 @@ class Core_Session_Database implements SessionHandlerInterface
 			if (isset($row['lock']) && $row['lock'] == 1)
 			{
 				// Сохраняем информацию о текущей блокировке
-                $this->_currentLockId = $id;
-                $this->_currentLockTime = time();
+				$this->_currentLockId = $id;
+				$this->_currentLockTime = time();
 				
 				return TRUE;
 			}
@@ -360,20 +366,20 @@ class Core_Session_Database implements SessionHandlerInterface
 	}
 
 	/**
-     * Check if current lock is still valid
-     * @return boolean
-     */
-    protected function _isLockStillValid()
-    {
-        if (is_null($this->_currentLockTime))
+	 * Check if current lock is still valid
+	 * @return boolean
+	 */
+	protected function _isLockStillValid()
+	{
+		if (is_null($this->_currentLockTime))
 		{
-            return FALSE;
-        }
-        
-        // Блокировка действительна не более 30 секунд
-        $lockMaxAge = 30;
-        return (time() - $this->_currentLockTime) <= $lockMaxAge;
-    }
+			return FALSE;
+		}
+		
+		// Блокировка действительна не более 30 секунд
+		$lockMaxAge = 30;
+		return (time() - $this->_currentLockTime) <= $lockMaxAge;
+	}
 	
 	/**
 	 * Unlock session
@@ -383,19 +389,19 @@ class Core_Session_Database implements SessionHandlerInterface
 	protected function _unlock($id)
 	{
 		// Проверяем, что разблокируем именно текущую сессию
-        if ($this->_currentLockId !== $id)
+		if ($this->_currentLockId !== $id)
 		{
-            // Пытаемся разблокировать, если блокировка устарела
-            if (!is_null($this->_currentLockId) && !$this->_isLockStillValid())
+			// Пытаемся разблокировать, если блокировка устарела
+			if (!is_null($this->_currentLockId) && !$this->_isLockStillValid())
 			{
-                $this->_forceUnlock($this->_currentLockId);
-            }
-        }
+				$this->_forceUnlock($this->_currentLockId);
+			}
+		}
 		
 		$row = $this->_forceUnlock($id);
 
 		// Сбрасываем информацию о блокировке
-        $this->_currentLockId = $this->_currentLockTime = NULL;
+		$this->_currentLockId = $this->_currentLockTime = NULL;
 
 		if (!is_array($row))
 		{
@@ -413,7 +419,7 @@ class Core_Session_Database implements SessionHandlerInterface
 	protected function _forceUnlock($id)
 	{
 		$oDataBase = $this->_dataBase->setQueryType(0)
-			->query('SELECT RELEASE_LOCK(' . $this->_dataBase->quote($this->_getLockName($id)) . ') AS `lock`');
+			->query('SELECT RELEASE_LOCK(' . $this->_dataBase->quote($this->_getLockName($id)) . ') AS `released`');
 			
 		$row = $oDataBase->asAssoc()->current();
 		$oDataBase->free();
@@ -434,10 +440,10 @@ class Core_Session_Database implements SessionHandlerInterface
 	 * Destructor
 	 */
 	public function __destruct()
-    {
-        if (!is_null($this->_currentLockId))
+	{
+		if (!is_null($this->_currentLockId))
 		{
-            $this->_unlock($this->_currentLockId);
-        }
-    }
+			$this->_unlock($this->_currentLockId);
+		}
+	}
 }

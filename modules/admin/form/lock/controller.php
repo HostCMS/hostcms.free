@@ -52,6 +52,14 @@ class Admin_Form_Lock_Controller
 		{
 			$oAdmin_Form_Lock->delete();
 		}
+		
+		// Remove old items
+		if (rand(0, 99) == 0)
+		{
+			Core_QueryBuilder::delete('admin_form_locks')
+				->where('datetime', '<', Core_Date::timestamp2sql(strtotime('-1 month')))
+				->execute();
+		}
 
 		return TRUE;
 	}

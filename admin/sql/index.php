@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -108,11 +108,11 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Sql.database'))
-		->icon('fa fa-database')
+		->icon('fa-solid fa-database')
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Sql.optimize_table'))
-				->icon('fa fa-database')
+				->icon('fa-solid fa-database')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/sql/optimize/index.php', '', NULL)
 				)
@@ -122,7 +122,7 @@ $oAdmin_Form_Entity_Menus->add(
 		)->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Sql.repair_table'))
-				->icon('fa fa-wrench')
+				->icon('fa-solid fa-wrench')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/sql/repair/index.php', '', NULL)
 				)
@@ -133,7 +133,7 @@ $oAdmin_Form_Entity_Menus->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Sql.duplicate_indexes'))
-				->icon('fa fa-key')
+				->icon('fa-solid fa-key')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/sql/index.php', 'duplicate', NULL)
 				)
@@ -145,7 +145,7 @@ $oAdmin_Form_Entity_Menus->add(
 ->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Sql.manage'))
-		->icon('fa fa-table')
+		->icon('fa-solid fa-table')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/sql/table/index.php', '', NULL)
 		)
@@ -156,7 +156,7 @@ $oAdmin_Form_Entity_Menus->add(
 ->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Sql.variables'))
-		->icon('fa fa-list')
+		->icon('fa-solid fa-list')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/sql/variable/index.php', '', NULL)
 		)
@@ -167,7 +167,7 @@ $oAdmin_Form_Entity_Menus->add(
 ->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Sql.processlist'))
-		->icon('fa fa-list')
+		->icon('fa-solid fa-list')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/sql/processlist/index.php', '', NULL)
 		)

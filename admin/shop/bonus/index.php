@@ -111,7 +111,7 @@ $additionalParams = "shop_bonus_dir_id={$oShop_Bonus_Dir->id}";
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Admin_Form.add'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref(
 				$oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0
@@ -125,7 +125,7 @@ $oAdmin_Form_Entity_Menus->add(
 	)->add(
 		Admin_Form_Entity::factory('Menu')
 			->name(Core::_('Shop_Bonus_Dir.menu'))
-			->icon('fa fa-plus')
+			->icon('fa-solid fa-plus')
 			->href(
 				$oAdmin_Form_Controller->getAdminActionLoadHref(
 					$oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0

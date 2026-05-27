@@ -20,9 +20,9 @@ class Seo_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 	/**
 	 * Module name
@@ -55,7 +55,7 @@ class Seo_Module extends Core_Module_Abstract
 			array(
 				'sorting' => 150,
 				'block' => 3,
-				'ico' => 'fa fa-bullseye',
+				'ico' => 'fa-solid fa-bullseye',
 				'name' => Core::_('Seo.menu'),
 				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/seo/index.php"),
 				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/seo/index.php'}); return false")

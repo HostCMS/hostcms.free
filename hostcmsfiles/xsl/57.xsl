@@ -257,22 +257,24 @@
 	</xsl:template>
 
 	<xsl:template match="shop_discountcard">
-		<tr>
-			<td>
-				Дисконтная карта <xsl:value-of select="number"/>
-			</td>
-			<td></td>
-			<td></td>
-			<td>
-				<!-- Amount -->
-				<xsl:value-of select="format-number(discount_amount * -1, '### ##0,00', 'my')"/><xsl:text> </xsl:text><xsl:value-of select="/shop/shop_currency/sign" disable-output-escaping="yes"/>
-			</td>
-			<xsl:if test="count(/shop/shop_warehouse)">
+		<xsl:if test="discount_amount/node()">
+			<tr>
+				<td>
+					Дисконтная карта <xsl:value-of select="number"/>
+				</td>
 				<td></td>
-			</xsl:if>
-			<td></td>
-			<td></td>
-		</tr>
+				<td></td>
+				<td>
+					<!-- Amount -->
+					<xsl:value-of select="format-number(discount_amount * -1, '### ##0,00', 'my')"/><xsl:text> </xsl:text><xsl:value-of select="/shop/shop_currency/sign" disable-output-escaping="yes"/>
+				</td>
+				<xsl:if test="count(/shop/shop_warehouse)">
+					<td></td>
+				</xsl:if>
+				<td></td>
+				<td></td>
+			</tr>
+		</xsl:if>
 	</xsl:template>
 
 	<!-- Warehouse option -->

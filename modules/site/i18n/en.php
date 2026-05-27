@@ -126,4 +126,5 @@ return array(
 	'backend_title' => 'Backend panel address',
 	'panelBackend_success' => 'Information changed successfully!',
 	'rename_backend_error' => 'Failed to change the admin center address!',
+	'check_browser' => 'Antibot',
 );

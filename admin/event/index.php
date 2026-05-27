@@ -218,7 +218,7 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Event.events_menu_add_event'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->class($bShow_subs && $parent_id ? 'btn btn-gray' : NULL)
 		->href(
 			$bShow_subs
@@ -238,11 +238,11 @@ if (!$siteuser_id && is_null(Core_Array::getGet('hideMenu')))
 	$oAdmin_Form_Entity_Menus->add(
 		Admin_Form_Entity::factory('Menu')
 			->name(Core::_('Event.events_menu_directories'))
-			->icon('fa fa-book')
+			->icon('fa-solid fa-book')
 			->add(
 				Admin_Form_Entity::factory('Menu')
 					->name(Core::_('Event.events_menu_types'))
-					->icon('fa fa-bars')
+					->icon('fa-solid fa-bars')
 					->href(
 						$oAdmin_Form_Controller->getAdminLoadHref(array('path' => $sPath = '/{admin}/event/type/index.php'))
 					)
@@ -253,7 +253,7 @@ if (!$siteuser_id && is_null(Core_Array::getGet('hideMenu')))
 			->add(
 				Admin_Form_Entity::factory('Menu')
 					->name(Core::_('Event.events_menu_groups'))
-					->icon('fa fa-folder-o')
+					->icon('fa-regular fa-folder')
 					->href(
 						$oAdmin_Form_Controller->getAdminLoadHref(array('path' => $sPath = '/{admin}/event/group/index.php'))
 					)
@@ -264,7 +264,7 @@ if (!$siteuser_id && is_null(Core_Array::getGet('hideMenu')))
 			->add(
 				Admin_Form_Entity::factory('Menu')
 					->name(Core::_('Event.events_menu_statuses'))
-					->icon('fa fa-circle')
+					->icon('fa-solid fa-circle')
 					->href(
 						$oAdmin_Form_Controller->getAdminLoadHref(array('path' => $sPath = '/{admin}/event/status/index.php'))
 					)
@@ -288,7 +288,7 @@ if (!$siteuser_id && !$oCurrentUser->read_only && is_null(Core_Array::getGet('hi
 						<input type="text" name="event_name" class="form-control" placeholder="' . Core::_('Event.placeholderEventName') . '">
 						<span class="input-group-btn">
 							<button id="sendForm" class="btn btn-gray" type="submit" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('addEvent', NULL, '') . '">
-								<i class="fa fa-check no-margin"></i>
+								<i class="fa-solid fa-check no-margin"></i>
 							</button>
 						</span>
 						<input type="hidden" name="hostcms[checked][0][0]" value="1"/>

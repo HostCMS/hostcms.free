@@ -154,12 +154,12 @@ class Shop_Filter_Group_Controller
 		return $this;
 	}
 
-    /**
-     * Fill table rows
-     * @param $shop_group_id
-     * @return array
-     * @throws Core_Exception
-     */
+	/**
+	 * Fill table rows
+	 * @param $shop_group_id
+	 * @return array
+	 * @throws Core_Exception
+	 */
 	public function fill($shop_group_id)
 	{
 		$shop_group_id = intval($shop_group_id);

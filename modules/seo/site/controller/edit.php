@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Seo
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Seo_Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -47,7 +47,7 @@ class Seo_Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$sAlertText = Core::_('Seo_Site.alert_text');
 
-		$sAlertTextShow = "<div class=\"col-xs-12\"><div class=\"alert alert-info fade in\"><i class=\"fa-fw fa fa-info\"></i>{$sAlertText}</div></div>";
+		$sAlertTextShow = "<div class=\"col-xs-12\"><div class=\"alert alert-info fade in\"><i class=\"fa-solid fa-circle-info margin-right-5\"></i>{$sAlertText}</div></div>";
 
 		$oMainRow0->add(
 			Admin_Form_Entity::factory('Code')->html($sAlertTextShow)
@@ -104,7 +104,7 @@ class Seo_Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oTokenLink
 			->icon
-				->class('btn-label fa fa-code-fork');
+				->class('btn-label fa-solid fa-code-fork');
 
 		$oMainRow1->add($oTokenLink);
 

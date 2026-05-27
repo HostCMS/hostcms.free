@@ -11,23 +11,23 @@
 class Smarty_Internal_ErrorHandler
 {
 
-    /**
-     * Allows {$foo} where foo is unset.
-     * @var bool
-     */
+	/**
+	 * Allows {$foo} where foo is unset.
+	 * @var bool
+	 */
     public $allowUndefinedVars = true;
 
-    /**
-     * Allows {$foo.bar} where bar is unset and {$foo.bar1.bar2} where either bar1 or bar2 is unset.
-     * @var bool
-     */
+	/**
+	 * Allows {$foo.bar} where bar is unset and {$foo.bar1.bar2} where either bar1 or bar2 is unset.
+	 * @var bool
+	 */
     public $allowUndefinedArrayKeys = true;
 
     private $previousErrorHandler = null;
 
-    /**
-     * Enable error handler to intercept errors
-     */
+	/**
+	 * Enable error handler to intercept errors
+	 */
     public function activate() {
         /*
             Error muting is done because some people implemented custom error_handlers using
@@ -39,31 +39,31 @@ class Smarty_Internal_ErrorHandler
             however you are still able to read the current value of error_reporting and act appropriately.
             Of particular note is that this value will be 0 if the statement that caused the error was
             prepended by the @ error-control operator.
-        */
+   	 */
         $this->previousErrorHandler = set_error_handler([$this, 'handleError']);
     }
 
-    /**
-     * Disable error handler
-     */
+	/**
+	 * Disable error handler
+	 */
     public function deactivate() {
         restore_error_handler();
         $this->previousErrorHandler = null;
     }
 
-    /**
-     * Error Handler to mute expected messages
-     *
-     * @link https://php.net/set_error_handler
-     *
-     * @param integer $errno Error level
-     * @param         $errstr
-     * @param         $errfile
-     * @param         $errline
-     * @param         $errcontext
-     *
-     * @return bool
-     */
+	/**
+	 * Error Handler to mute expected messages
+	 *
+	 * @link https://php.net/set_error_handler
+	 *
+	 * @param integer $errno Error level
+	 * @param         $errstr
+	 * @param         $errfile
+	 * @param         $errline
+	 * @param         $errcontext
+	 *
+	 * @return bool
+	 */
     public function handleError($errno, $errstr, $errfile, $errline, $errcontext = [])
     {
         if ($this->allowUndefinedVars && $errstr == 'Attempt to read property "value" on null') {
@@ -71,7 +71,7 @@ class Smarty_Internal_ErrorHandler
         }
 
         if ($this->allowUndefinedArrayKeys && preg_match(
-            '/^(Undefined array key|Trying to access array offset on value of type null)/',
+        	'/^(Undefined array key|Trying to access array offset on value of type null)/',
             $errstr
         )) {
             return; // suppresses this error

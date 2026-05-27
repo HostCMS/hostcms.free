@@ -16,34 +16,34 @@
  */
 class Smarty_Internal_Compile_Private_Block_Plugin extends Smarty_Internal_CompileBase
 {
-    /**
-     * Attribute definition: Overwrites base class.
-     *
-     * @var array
-     * @see Smarty_Internal_CompileBase
-     */
+	/**
+	 * Attribute definition: Overwrites base class.
+	 *
+	 * @var array
+	 * @see Smarty_Internal_CompileBase
+	 */
     public $optional_attributes = array('_any');
 
-    /**
-     * nesting level
-     *
-     * @var int
-     */
+	/**
+	 * nesting level
+	 *
+	 * @var int
+	 */
     public $nesting = 0;
 
-    /**
-     * Compiles code for the execution of block plugin
-     *
-     * @param array                                 $args      array with attributes from parser
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler  compiler object
-     * @param array                                 $parameter array with compilation parameter
-     * @param string                                $tag       name of block plugin
-     * @param string                                $function  PHP function name
-     *
-     * @return string compiled code
-     * @throws \SmartyCompilerException
-     * @throws \SmartyException
-     */
+	/**
+	 * Compiles code for the execution of block plugin
+	 *
+	 * @param array                                 $args      array with attributes from parser
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler  compiler object
+	 * @param array                                 $parameter array with compilation parameter
+	 * @param string                                $tag       name of block plugin
+	 * @param string                                $function  PHP function name
+	 *
+	 * @return string compiled code
+	 * @throws \SmartyCompilerException
+	 * @throws \SmartyException
+	 */
     public function compile($args, Smarty_Internal_TemplateCompilerBase $compiler, $parameter, $tag, $function = null)
     {
         if (!isset($tag[ 5 ]) || substr($tag, -5) !== 'close') {
@@ -84,11 +84,11 @@ class Smarty_Internal_Compile_Private_Block_Plugin extends Smarty_Internal_Compi
                 $mod_content = "\$_block_content{$this->nesting} = ob_get_clean();\n";
                 $mod_pre = "ob_start();\n";
                 $mod_post = 'echo ' . $compiler->compileTag(
-                        'private_modifier',
+                    	'private_modifier',
                         array(),
                         array(
-                            'modifierlist' => $parameter[ 'modifier_list' ],
-                            'value'        => 'ob_get_clean()'
+                        	'modifierlist' => $parameter[ 'modifier_list' ],
+                        	'value'        => 'ob_get_clean()'
                         )
                     ) . ";\n";
             }
@@ -99,16 +99,16 @@ class Smarty_Internal_Compile_Private_Block_Plugin extends Smarty_Internal_Compi
         return $output;
     }
 
-    /**
-     * Setup callback and parameter array
-     *
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler
-     * @param array                                 $_attr attributes
-     * @param string                                $tag
-     * @param string                                $function
-     *
-     * @return array
-     */
+	/**
+	 * Setup callback and parameter array
+	 *
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler
+	 * @param array                                 $_attr attributes
+	 * @param string                                $tag
+	 * @param string                                $function
+	 *
+	 * @return array
+	 */
     public function setup(Smarty_Internal_TemplateCompilerBase $compiler, $_attr, $tag, $function)
     {
         $_paramsArray = array();

@@ -355,7 +355,7 @@ class Core_Entity extends Core_ORM
 	 * Create and return an object of model
 	 * @param string $modelName Entity name
 	 * @param mixed $primaryKey Primary key
-	 * @retrun self
+	 * @return self
 	 */
 	static public function factory($modelName, $primaryKey = NULL)
 	{
@@ -661,6 +661,27 @@ class Core_Entity extends Core_ORM
 	}
 
 	/**
+	 * Remove a children entity from the list
+	 * @param Core_Entity $oEntity entity to remove
+	 * @return self
+	 */
+	public function removeEntity($oEntity)
+	{
+		foreach ($this->_childrenEntities as $key => $entity)
+		{
+			if ($entity === $oEntity)
+			{
+				unset($this->_childrenEntities[$key]);
+			}
+		}
+
+		// Re-index array to avoid gaps
+		$this->_childrenEntities = array_values($this->_childrenEntities);
+
+		return $this;
+	}
+
+	/**
 	 * Entity Attributes
 	 * @var array
 	 */
@@ -823,7 +844,8 @@ class Core_Entity extends Core_ORM
 				// Forbidden Tags
 				if ($bForbiddenTagsIsEmpty || !isset($this->_forbiddenTags[$field_name]))
 				{
-					$xml .= "<{$field_name}>" . Core_Str::xml($field_value) . "</{$field_name}>\n";
+					is_scalar($field_value)
+						&& $xml .= "<{$field_name}>" . Core_Str::xml($field_value) . "</{$field_name}>\n";
 				}
 			}
 		}
@@ -859,7 +881,7 @@ class Core_Entity extends Core_ORM
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event modelname.onBeforeGetArray
 	 * @hostcms-event modelname.onAfterGetArray
 	 */
@@ -869,13 +891,13 @@ class Core_Entity extends Core_ORM
 
 		Core_Event::notify($this->_modelName . '.onBeforeGetArray', $this);
 
-		$oRetrun = new stdClass();
+		$oReturn = new stdClass();
 
 		// Primary key as tag property
 		if (array_key_exists($this->_primaryKey, $this->_modelColumns))
 		{
 			$properttName = $attributePrefix . $this->_primaryKey;
-			$oRetrun->$properttName = $this->getPrimaryKey();
+			$oReturn->$properttName = $this->getPrimaryKey();
 		}
 
 		$bAllowedTagsIsEmpty = count($this->_allowedTags) == 0;
@@ -902,7 +924,7 @@ class Core_Entity extends Core_ORM
 					{
 						$field_value = $oShortcode_Controller->applyShortcodes($field_value);
 					}
-					$oRetrun->$field_name = $field_value;
+					$oReturn->$field_name = $field_value;
 				}
 			}
 		}
@@ -913,7 +935,7 @@ class Core_Entity extends Core_ORM
 			$sTmp = $aTag[0];
 			if (empty($aTag[2]))
 			{
-				$oRetrun->$sTmp = $aTag[1];
+				$oReturn->$sTmp = $aTag[1];
 			}
 			else
 			{
@@ -926,7 +948,7 @@ class Core_Entity extends Core_ORM
 					$stdClass->$properttName = $tagValue;
 				}
 
-				$oRetrun->$sTmp = $stdClass;
+				$oReturn->$sTmp = $stdClass;
 			}
 		}
 
@@ -941,19 +963,19 @@ class Core_Entity extends Core_ORM
 
 			$childArray = $oChildEntity->getStdObject($attributePrefix);
 
-			if (!isset($oRetrun->$childName))
+			if (!isset($oReturn->$childName))
 			{
-				$oRetrun->$childName = $bModel && $this->_checkEntityIsHasManyRelation($oChildEntity)
+				$oReturn->$childName = $bModel && $this->_checkEntityIsHasManyRelation($oChildEntity)
 					? array($childArray)
 					: $childArray;
 			}
 			else
 			{
 				// Convert to array
-				!is_array($oRetrun->$childName)
-					&& $oRetrun->$childName = array($oRetrun->$childName);
+				!is_array($oReturn->$childName)
+					&& $oReturn->$childName = array($oReturn->$childName);
 
-				$oRetrun->{$childName}[] = $childArray;
+				$oReturn->{$childName}[] = $childArray;
 			}
 		}
 
@@ -966,7 +988,7 @@ class Core_Entity extends Core_ORM
 				// Forbidden Tags
 				if ($bForbiddenTagsIsEmpty || !isset($this->_forbiddenTags[$field_name]))
 				{
-					$oRetrun->$field_name = $field_value;
+					$oReturn->$field_name = $field_value;
 				}
 			}
 		}
@@ -975,7 +997,7 @@ class Core_Entity extends Core_ORM
 
 		Core_Event::notify($this->_modelName . '.onAfterGetArray', $this);
 
-		return $oRetrun;
+		return $oReturn;
 	}
 
 	/**
@@ -1168,7 +1190,7 @@ class Core_Entity extends Core_ORM
 
 	/**
 	 * Copy object
-	 * @return new copied object
+	 * @return object new copied object
 	 * @hostcms-event modelname.onBeforeCopy
 	 * @hostcms-event modelname.onAfterCopy
 	 */

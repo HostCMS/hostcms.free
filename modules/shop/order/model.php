@@ -181,7 +181,7 @@ class Shop_Order_Model extends Core_Entity
 			switch ($this->Source->service)
 			{
 				case 'google':
-					echo ' <span title="' . $title . '" class="badge badge-ico badge-blue white"><i class="fa fa-google"></i></span>';
+					echo ' <span title="' . $title . '" class="badge badge-ico badge-blue white"><i class="fa-brands fa-google"></i></span>';
 				break;
 				case 'direct.yandex.ru':
 				case 'yandex.ru':
@@ -189,10 +189,10 @@ class Shop_Order_Model extends Core_Entity
 					echo ' <span title="' . $title . '" class="badge badge-ico badge-darkorange white">Я</span>';
 				break;
 				case 'twitterfeed':
-					echo ' <span title="' . $title . '" class="badge badge-ico badge-blue white"><i class="fa fa-twitter"></i></span>';
+					echo ' <span title="' . $title . '" class="badge badge-ico badge-blue white"><i class="fa-brands fa-twitter"></i></span>';
 				break;
 				default:
-					echo ' <span title="' . $title . '" class="badge badge-ico badge-palegreen white"><i class="fa fa-tag"></i></span>';
+					echo ' <span title="' . $title . '" class="badge badge-ico badge-palegreen white"><i class="fa-solid fa-tags"></i></span>';
 				break;
 			}
 		}
@@ -204,7 +204,7 @@ class Shop_Order_Model extends Core_Entity
 			foreach ($aTags as $oTag)
 			{
 				Core_Html_Entity::factory('Code')
-					->value('<span class="badge badge-square badge-tag badge-max-width badge-lightgray margin-left-5" title="' . htmlspecialchars($oTag->name) . '"><i class="fa fa-tag"></i> ' . htmlspecialchars($oTag->name) . '</span>')
+					->value('<span class="badge badge-square badge-tag badge-max-width badge-lightgray margin-left-5" title="' . htmlspecialchars($oTag->name) . '"><i class="fa-solid fa-tags"></i> ' . htmlspecialchars($oTag->name) . '</span>')
 					->execute();
 			}
 		}
@@ -895,11 +895,11 @@ class Shop_Order_Model extends Core_Entity
 	 */
 	protected $_showXmlMedia = FALSE;
 
-    /**
-     * Show properties in XML
-     * @param bool $showXmlMedia
-     * @return self
-     */
+	/**
+	 * Show properties in XML
+	 * @param bool $showXmlMedia
+	 * @return self
+	 */
 	public function showXmlMedia($showXmlMedia = TRUE)
 	{
 		$this->_showXmlMedia = $showXmlMedia;
@@ -930,11 +930,11 @@ class Shop_Order_Model extends Core_Entity
 	 */
 	protected $_showXmlCommentsRating = FALSE;
 
-    /**
-     * Add Comments Rating XML to item
-     * @param bool $showXmlCommentsRating
-     * @return self
-     */
+	/**
+	 * Add Comments Rating XML to item
+	 * @param bool $showXmlCommentsRating
+	 * @return self
+	 */
 	public function showXmlCommentsRating($showXmlCommentsRating = TRUE)
 	{
 		$this->_showXmlCommentsRating = $showXmlCommentsRating;
@@ -1012,7 +1012,7 @@ class Shop_Order_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event shop_order.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')
@@ -2347,13 +2347,13 @@ class Shop_Order_Model extends Core_Entity
 		return $newObject;
 	}
 
-    /**
-     * Add order CommerceML
-     * @param Core_SimpleXMLElement $oXml
-     * @return Shop_Order_Model
-     * @hostcms-event shop_order.onBeforeGetCmlUserName
-     * @hostcms-event shop_order.onAddCmlSelectShopOrderItems
-     */
+	/**
+	 * Add order CommerceML
+	 * @param Core_SimpleXMLElement $oXml
+	 * @return Shop_Order_Model
+	 * @hostcms-event shop_order.onBeforeGetCmlUserName
+	 * @hostcms-event shop_order.onAddCmlSelectShopOrderItems
+	 */
 	public function addCml(Core_SimpleXMLElement $oXml)
 	{
 		$oOrderXml = $oXml->addChild('Документ');
@@ -2799,13 +2799,13 @@ class Shop_Order_Model extends Core_Entity
 		if ($this->shop_payment_system_id)
 		{
 			?><div>
-				<b><?php echo Core::_('Shop_Order.order_card_paymentsystem')?>:</b> <?php echo htmlspecialchars($this->Shop_Payment_System->name)?>
+				<b><?php echo Core::_('Shop_Order.order_card_paymentsystem')?>:</b> <?php echo htmlspecialchars((string) $this->Shop_Payment_System->name)?>
 			</div><?php
 		}
 		if ($this->shop_order_status_id)
 		{
 			?><div>
-				<b><?php echo Core::_('Shop_Order.order_card_order_status')?>:</b> <?php echo htmlspecialchars($this->Shop_Order_Status->name)?>
+				<b><?php echo Core::_('Shop_Order.order_card_order_status')?>:</b> <?php echo htmlspecialchars((string) $this->Shop_Order_Status->name)?>
 			</div><?php
 		}
 		if (!is_null($this->description) && $this->description !== '')
@@ -2900,7 +2900,7 @@ class Shop_Order_Model extends Core_Entity
 							<?php
 							if ($oShop_Order_Item->shop_order_item_status_id)
 							{
-								?><i class="fa <?php echo $oShop_Order_Item->Shop_Order_Item_Status->canceled ? 'fa-times-circle' : 'fa-circle'?>" style="color: <?php echo htmlspecialchars($oShop_Order_Item->Shop_Order_Item_Status->color)?>" title="<?php echo htmlspecialchars($oShop_Order_Item->Shop_Order_Item_Status->name)?>"></i> <?php
+								?><i class="fa-solid <?php echo $oShop_Order_Item->Shop_Order_Item_Status->canceled ? 'fa-circle-xmark' : 'fa-circle'?>" style="color: <?php echo htmlspecialchars($oShop_Order_Item->Shop_Order_Item_Status->color)?>" title="<?php echo htmlspecialchars($oShop_Order_Item->Shop_Order_Item_Status->name)?>"></i> <?php
 							}
 							echo htmlspecialchars($oShop_Order_Item->name);
 							?>
@@ -2983,7 +2983,7 @@ class Shop_Order_Model extends Core_Entity
 		//data-popover="hover"
 		//data-container="#php echo $windowId
 
-		?><a id="popover-hover" href="<?php echo $link?>" onclick="$('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_0_<?php echo $this->id?>').toggleHighlight();<?php echo $onclick?>" data-popover="hover" data-id="<?php echo $this->id?>" data-title="<?php echo htmlspecialchars(Core::_('Shop_Order.popover_title', $this->invoice, Core_Date::sql2datetime($this->datetime)))?>"><i class="fa fa-list" title=""></i></a><?php
+		?><a id="popover-hover" href="<?php echo $link?>" onclick="$('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_0_<?php echo $this->id?>').toggleHighlight();<?php echo $onclick?>" data-popover="hover" data-id="<?php echo $this->id?>" data-title="<?php echo htmlspecialchars(Core::_('Shop_Order.popover_title', $this->invoice, Core_Date::sql2datetime($this->datetime)))?>"><i class="fa-solid fa-list" title=""></i></a><?php
 	}
 
 	/**
@@ -3282,7 +3282,7 @@ class Shop_Order_Model extends Core_Entity
 				->style("color: {$this->Shop_Order_Status->color}; background-color: {$bgColor}")
 				->class('margin-left-10 badge badge-square')
 				->title(Core::_('Shop_Order_Status.deadline', Core_Date::sql2datetime($this->shop_order_status_deadline)))
-				->value("<i class='fas fa-stopwatch margin-right-5'></i>" . Core_Date::sql2string($this->shop_order_status_deadline))
+				->value("<i class='fa-solid fa-stopwatch margin-right-5'></i>" . Core_Date::sql2string($this->shop_order_status_deadline))
 				->execute();
 		}
 
@@ -3827,11 +3827,11 @@ class Shop_Order_Model extends Core_Entity
 		return $this;
 	}
 
-    /**
-     * Merge orders with another one
-     * @param Shop_Order_Model $oShop_Order
-     * @return self
-     */
+	/**
+	 * Merge orders with another one
+	 * @param Shop_Order_Model $oShop_Order
+	 * @return self
+	 */
 	public function merge(Shop_Order_Model $oShop_Order)
 	{
 		// Основные

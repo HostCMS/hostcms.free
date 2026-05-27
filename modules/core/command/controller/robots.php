@@ -29,7 +29,7 @@ class Core_Command_Controller_Robots extends Core_Command_Controller
 	/**
 	 * Set robots.txt content
 	 * @param string $robots
-     * @return self
+	 * @return self
 	 */
 	public function setRobots($robots)
 	{

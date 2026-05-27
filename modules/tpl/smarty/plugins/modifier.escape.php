@@ -106,16 +106,16 @@ function smarty_modifier_escape($string, $esc_type = 'html', $char_set = null, $
             return strtr(
                 $string,
                 array(
-                    '\\' => '\\\\',
+                	'\\' => '\\\\',
                     "'"  => "\\'",
-                    '"'  => '\\"',
+                	'"'  => '\\"',
                     "\r" => '\\r',
                     "\n" => '\\n',
-                    '</' => '<\/',
+                	'</' => '<\/',
                     // see https://html.spec.whatwg.org/multipage/scripting.html#restrictions-for-contents-of-script-elements
-                    '<!--' => '<\!--',
-                    '<s'   => '<\s',
-                    '<S'   => '<\S'
+                	'<!--' => '<\!--',
+                	'<s'   => '<\s',
+                	'<S'   => '<\S'
                 )
             );
         case 'mail':
@@ -128,12 +128,12 @@ function smarty_modifier_escape($string, $esc_type = 'html', $char_set = null, $
                 }
                 return smarty_mb_str_replace(
                     array(
-                        '@',
-                        '.'
+                    	'@',
+                    	'.'
                     ),
                     array(
-                        ' [AT] ',
-                        ' [DOT] '
+                    	' [AT] ',
+                    	' [DOT] '
                     ),
                     $string
                 );
@@ -141,12 +141,12 @@ function smarty_modifier_escape($string, $esc_type = 'html', $char_set = null, $
             // no MBString fallback
             return str_replace(
                 array(
-                    '@',
-                    '.'
+                	'@',
+                	'.'
                 ),
                 array(
-                    ' [AT] ',
-                    ' [DOT] '
+                	' [AT] ',
+                	' [DOT] '
                 ),
                 $string
             );

@@ -277,7 +277,7 @@ class Shop_Warehouse_Purchasereturn_Controller_Edit extends Admin_Form_Action_Co
 				->value(Core::_('Shop_Warehouse_Purchasereturn.recalc_price'));
 		$oRecalcPriceLink
 			->icon
-				->class('btn-label fa fa-recycle');
+				->class('btn-label fa-solid fa-recycle');
 
 		$oMainRow3->add($oRecalcPriceLink);
 
@@ -286,8 +286,8 @@ class Shop_Warehouse_Purchasereturn_Controller_Edit extends Admin_Form_Action_Co
 		{
 			$printlayoutsButton = '
 				<div class="btn-group btn-group-short1">
-					<a class="btn btn-labeled btn-success" data-toggle="dropdown" href="javascript:void(0);"><i class="btn-label fa fa-print"></i><span>' . Core::_('Printlayout.print') . '</span></a>
-					<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
+					<a class="btn btn-labeled btn-success" data-toggle="dropdown" href="javascript:void(0);"><i class="btn-label fa-solid fa-print"></i><span>' . Core::_('Printlayout.print') . '</span></a>
+					<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa-solid fa-angle-down"></i></a>
 					<ul class="dropdown-menu dropdown-palegreen">
 			';
 
@@ -392,7 +392,7 @@ class Shop_Warehouse_Purchasereturn_Controller_Edit extends Admin_Form_Action_Co
 						: '';
 
 					$externalLink = $sShopUrl
-						? '<a class="margin-left-5" target="_blank" href="' . htmlspecialchars($sShopUrl . $oShop_Item->getPath()) . '"><i class="fa fa-external-link"></i></a>'
+						? '<a class="margin-left-5" target="_blank" href="' . htmlspecialchars($sShopUrl . $oShop_Item->getPath()) . '"><i class="fa-solid fa-arrow-up-right-from-square small"></i></a>'
 						: '';
 
 					$itemTable .= '
@@ -404,7 +404,7 @@ class Shop_Warehouse_Purchasereturn_Controller_Edit extends Admin_Form_Action_Co
 							<td>' . htmlspecialchars((string) $oShop_Item->Shop_Currency->sign) . '</td>
 							<td width="80"><input class="set-item-count form-control" name="shop_item_quantity' . (!$createFrom ? ('_' . $oShop_Warehouse_Purchasereturn_Item->id) : '[]')  . '" value="' . $oShop_Warehouse_Purchasereturn_Item->count . '" /></td>
 							<td><span class="calc-warehouse-sum">' . ($oShop_Warehouse_Purchasereturn_Item->count * $oShop_Warehouse_Purchasereturn_Item->price) . '</span></td>
-							<td><a class="delete-associated-item" onclick="mainFormLocker.unlock(); res = confirm(\'' . Core::_('Shop_Warehouse_Purchasereturn.delete_dialog') . '\'); if (res) { var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next); ' . $onclick . ' } return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
+							<td><a class="delete-associated-item" onclick="mainFormLocker.unlock(); res = confirm(\'' . Core::_('Shop_Warehouse_Purchasereturn.delete_dialog') . '\'); if (res) { var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next); ' . $onclick . ' } return res;"><i class="fa-solid fa-circle-xmark darkorange"></i></a></td>
 						</tr>
 					';
 				}
@@ -438,7 +438,7 @@ class Shop_Warehouse_Purchasereturn_Controller_Edit extends Admin_Form_Action_Co
 
 		$oCore_Html_Entity_Script = Core_Html_Entity::factory('Script')
 			->value("var jAddShopItem = $('#{$windowId} .add-shop-item'); jAddShopItem.autocompleteShopItem({shop_id: '{$oShop->id}', price_mode: 'item', shop_currency_id: 0}, function(event, ui) {
-				var newRow = $('<tr data-item-id=\"' + ui.item.id + '\"><td class=\"index\">' + $('#{$windowId} .index_value').val() + '</td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td width=\"110\"><input type=\"text\" class=\"price set-item-price form-control\" name=\"shop_item_price[]\" value=\"' + ui.item.price_with_tax +'\"/></td><td>' + $.escapeHtml(ui.item.currency) + '</td><td width=\"80\"><input class=\"set-item-count form-control\"  name=\"shop_item_quantity[]\" value=\"\"/></td>	<td><span class=\"calc-warehouse-sum\"></span></td><td><a class=\"delete-associated-item\" onclick=\"var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>'),
+				var newRow = $('<tr data-item-id=\"' + ui.item.id + '\"><td class=\"index\">' + $('#{$windowId} .index_value').val() + '</td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td width=\"110\"><input type=\"text\" class=\"price set-item-price form-control\" name=\"shop_item_price[]\" value=\"' + ui.item.price_with_tax +'\"/></td><td>' + $.escapeHtml(ui.item.currency) + '</td><td width=\"80\"><input class=\"set-item-count form-control\"  name=\"shop_item_quantity[]\" value=\"\"/></td>	<td><span class=\"calc-warehouse-sum\"></span></td><td><a class=\"delete-associated-item\" onclick=\"var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)\"><i class=\"fa-solid fa-circle-xmark darkorange\"></i></a></td></tr>'),
 
 				jNewItemCount = newRow.find('.set-item-count'),
 				jNewItemPrice = newRow.find('.set-item-price');
@@ -498,7 +498,7 @@ class Shop_Warehouse_Purchasereturn_Controller_Edit extends Admin_Form_Action_Co
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name
 	 * @return bool
-     */
+	 */
 	public function execute($operation = NULL)
 	{
 		$createFrom = Core_Array::getGet('createFrom', '', 'trim');

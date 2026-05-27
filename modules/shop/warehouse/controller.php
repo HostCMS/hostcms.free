@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Warehouse_Controller
 {
@@ -92,7 +92,7 @@ class Shop_Warehouse_Controller
 		{
 			?><div id="create-document-button" class="btn-group btn-group-short <?php echo (!$oEntity->id ? ' hidden' : '')?>">
 				<a class="btn btn-labeled btn-info" data-toggle="dropdown" href="javascript:void(0);"><i class="btn-label fa-solid fa-file-import"></i><span><?php echo Core::_('Shop_Warehouse_Purchaseorder.create_document')?><span></a>
-				<a class="btn btn-azure dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
+				<a class="btn btn-azure dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa-solid fa-angle-down"></i></a>
 				<ul class="dropdown-menu dropdown-default">
 					<?php
 					foreach ($aTmp as $aLink)

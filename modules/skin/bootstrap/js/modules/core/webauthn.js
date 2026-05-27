@@ -49,11 +49,18 @@ async function createRegistration(location) { // eslint-disable-line
 		// prompt server response
 		if (authenticatorAttestationServerResponse.success) {
 			// console.log('register success');
-			Notify('<span>' + i18n['webauth_register_success'] + '</span>', '', 'top-left', '5000', 'success', 'fa-fingerprint', true);
+			Notify('<span>' + i18n['webauth_register_success'] + '</span>', '', 'top-left', '5000', 'success', 'fa-solid fa-fingerprint', true);
 		}
 	} catch (err) {
-		console.log(err.message || 'unknown error occured');
-		Notify('<span>Error: ' + (err.message || 'unknown error occured') + '</span>', '', 'top-left', '5000', 'danger', 'fa-fingerprint', true);
+		if (err.name === 'InvalidStateError') {
+			Notify('<span>' + (err.message || 'unknown error occured') + '</span>', '', 'top-left', '5000', 'warning', 'fa-solid fa-fingerprint', true);
+		}
+		else if (err.name === 'NotAllowedError') {
+			Notify('<span>' + (err.message || 'unknown error occured') + '</span>', '', 'top-left', '5000', 'info', 'fa-solid fa-fingerprint', true);
+		}
+		else {
+			Notify('<span>Error: ' + (err.message || 'unknown error occured') + '</span>', '', 'top-left', '5000', 'danger', 'fa-solid fa-fingerprint', true);
+		}
 	}
 
 	$.setCookie('_h_webauthn_show_modal', false, 2592000 * 12);

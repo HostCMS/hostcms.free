@@ -177,8 +177,8 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			))
 			->ico(
 				array(
-					0 => 'fa-mars',
-					1 => 'fa-venus',
+					0 => 'fa-solid fa-mars',
+					1 => 'fa-solid fa-venus',
 			))
 			->colors(
 				array(
@@ -870,7 +870,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name
 	 * @return bool
-     */
+	 */
 	public function execute($operation = NULL)
 	{
 		if (!is_null($operation) && $operation != '')

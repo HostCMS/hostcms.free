@@ -49,7 +49,7 @@ class Shop_Item_Property_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event shop_item_property.onBeforeRedeclaredDelete
+	 * @hostcms-event shop_item_property.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

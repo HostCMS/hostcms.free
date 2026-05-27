@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Radiogroup extends Skin_Default_Admin_Form_Entity_Radiogroup
 {
@@ -83,7 +83,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Radiogroup extends Skin_Default_Admin_For
 			if (isset($this->ico[$key]))
 			{
 				$ico = strpos($this->ico[$key], ' ') === FALSE
-					? 'fa ' . $this->ico[$key]
+					? 'fa-solid ' . $this->ico[$key]
 					: $this->ico[$key];
 				?><i class="btn-label <?php echo htmlspecialchars((string) $ico)?>"></i><?php
 			}

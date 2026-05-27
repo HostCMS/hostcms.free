@@ -9,56 +9,56 @@
  */
 class Smarty_Internal_Runtime_Capture
 {
-    /**
-     * Flag that this instance  will not be cached
-     *
-     * @var bool
-     */
+	/**
+	 * Flag that this instance  will not be cached
+	 *
+	 * @var bool
+	 */
     public $isPrivateExtension = true;
 
-    /**
-     * Stack of capture parameter
-     *
-     * @var array
-     */
+	/**
+	 * Stack of capture parameter
+	 *
+	 * @var array
+	 */
     private $captureStack = array();
 
-    /**
-     * Current open capture sections
-     *
-     * @var int
-     */
+	/**
+	 * Current open capture sections
+	 *
+	 * @var int
+	 */
     private $captureCount = 0;
 
-    /**
-     * Count stack
-     *
-     * @var int[]
-     */
+	/**
+	 * Count stack
+	 *
+	 * @var int[]
+	 */
     private $countStack = array();
 
-    /**
-     * Named buffer
-     *
-     * @var string[]
-     */
+	/**
+	 * Named buffer
+	 *
+	 * @var string[]
+	 */
     private $namedBuffer = array();
 
-    /**
-     * Flag if callbacks are registered
-     *
-     * @var bool
-     */
+	/**
+	 * Flag if callbacks are registered
+	 *
+	 * @var bool
+	 */
     private $isRegistered = false;
 
-    /**
-     * Open capture section
-     *
-     * @param \Smarty_Internal_Template $_template
-     * @param string                    $buffer capture name
-     * @param string                    $assign variable name
-     * @param string                    $append variable name
-     */
+	/**
+	 * Open capture section
+	 *
+	 * @param \Smarty_Internal_Template $_template
+	 * @param string                    $buffer capture name
+	 * @param string                    $assign variable name
+	 * @param string                    $append variable name
+	 */
     public function open(Smarty_Internal_Template $_template, $buffer, $assign, $append)
     {
         if (!$this->isRegistered) {
@@ -73,43 +73,43 @@ class Smarty_Internal_Runtime_Capture
         ob_start();
     }
 
-    /**
-     * Register callbacks in template class
-     *
-     * @param \Smarty_Internal_Template $_template
-     */
+	/**
+	 * Register callbacks in template class
+	 *
+	 * @param \Smarty_Internal_Template $_template
+	 */
     private function register(Smarty_Internal_Template $_template)
     {
         $_template->startRenderCallbacks[] = array(
             $this,
-            'startRender'
+        	'startRender'
         );
         $_template->endRenderCallbacks[] = array(
             $this,
-            'endRender'
+        	'endRender'
         );
         $this->startRender($_template);
         $this->isRegistered = true;
     }
 
-    /**
-     * Start render callback
-     *
-     * @param \Smarty_Internal_Template $_template
-     */
+	/**
+	 * Start render callback
+	 *
+	 * @param \Smarty_Internal_Template $_template
+	 */
     public function startRender(Smarty_Internal_Template $_template)
     {
         $this->countStack[] = $this->captureCount;
         $this->captureCount = 0;
     }
 
-    /**
-     * Close capture section
-     *
-     * @param \Smarty_Internal_Template $_template
-     *
-     * @throws \SmartyException
-     */
+	/**
+	 * Close capture section
+	 *
+	 * @param \Smarty_Internal_Template $_template
+	 *
+	 * @throws \SmartyException
+	 */
     public function close(Smarty_Internal_Template $_template)
     {
         if ($this->captureCount) {
@@ -127,26 +127,26 @@ class Smarty_Internal_Runtime_Capture
         }
     }
 
-    /**
-     * Error exception on not matching {capture}{/capture}
-     *
-     * @param \Smarty_Internal_Template $_template
-     *
-     * @throws \SmartyException
-     */
+	/**
+	 * Error exception on not matching {capture}{/capture}
+	 *
+	 * @param \Smarty_Internal_Template $_template
+	 *
+	 * @throws \SmartyException
+	 */
     public function error(Smarty_Internal_Template $_template)
     {
         throw new SmartyException("Not matching {capture}{/capture} in '{$_template->template_resource}'");
     }
 
-    /**
-     * Return content of named capture buffer by key or as array
-     *
-     * @param \Smarty_Internal_Template $_template
-     * @param string|null               $name
-     *
-     * @return string|string[]|null
-     */
+	/**
+	 * Return content of named capture buffer by key or as array
+	 *
+	 * @param \Smarty_Internal_Template $_template
+	 * @param string|null               $name
+	 *
+	 * @return string|string[]|null
+	 */
     public function getBuffer(Smarty_Internal_Template $_template, $name = null)
     {
         if (isset($name)) {
@@ -156,13 +156,13 @@ class Smarty_Internal_Runtime_Capture
         }
     }
 
-    /**
-     * End render callback
-     *
-     * @param \Smarty_Internal_Template $_template
-     *
-     * @throws \SmartyException
-     */
+	/**
+	 * End render callback
+	 *
+	 * @param \Smarty_Internal_Template $_template
+	 *
+	 * @throws \SmartyException
+	 */
     public function endRender(Smarty_Internal_Template $_template)
     {
         if ($this->captureCount) {

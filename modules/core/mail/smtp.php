@@ -255,7 +255,7 @@ class Core_Mail_Smtp extends Core_Mail
 	/**
 	 * fgets 256 bytes
 	 * @return false|string
-     */
+	 */
 	protected function _serverFgets()
 	{
 		$return = fgets($this->_fp, 256);
@@ -281,7 +281,7 @@ class Core_Mail_Smtp extends Core_Mail
 	 * @param string $server_response
 	 * @param string $response response
 	 * @return bool
-     */
+	 */
 	protected function _serverParse($server_response, $response)
 	{
 		$result = $this->_getResponseStatus($server_response) == $response;

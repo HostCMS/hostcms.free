@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -21,6 +21,9 @@ $oShop = Core_Entity::factory('Shop')->find($shop_id);
 
 $shop_group_id = Core_Array::getGet('shop_group_id', 0, 'int');
 $shop_item_id = Core_Array::getGet('shop_item_id', 0, 'int');
+
+$shop_warehouse_id = Core_Array::getGet('shop_warehouse_id', 0, 'int');
+$oShop_Warehouse = Core_Entity::factory('Shop_Warehouse')->find($shop_warehouse_id);
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
@@ -110,15 +113,20 @@ if ($shop_group_id)
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop_Warehouse.main_menu_warehouses_list'))
-		->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/warehouse/index.php', NULL, NULL, $sAdditionalParam = "&shop_id={$shop_id}&shop_group_id={$shop_group_id}"))
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/warehouse/index.php', NULL, NULL, $sAdditionalParam = "shop_id={$shop_id}&shop_group_id={$shop_group_id}"))
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/warehouse/index.php', NULL, NULL, $sAdditionalParam))
+)->add(
+	Admin_Form_Entity::factory('Breadcrumb')
+		->name(Core::_('Shop_Warehouse_Item.title', $oShop_Warehouse->name, FALSE))
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/warehouse/item/index.php', NULL, NULL, $sAdditionalParams = "shop_warehouse_id={$shop_warehouse_id}&shop_id={$oShop->id}&shop_group_id={$shop_group_id}"))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/warehouse/item/index.php', NULL, NULL, $sAdditionalParams))
 );
 
 // Добавляем крошку на текущую форму
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop_Warehouse_Entry.title'))
-		->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParam = "&shop_id={$shop_id}&shop_group_id={$shop_group_id}"))
+		->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParam = "shop_warehouse_id={$shop_warehouse_id}&shop_item_id={$shop_item_id}&shop_id={$shop_id}&shop_group_id={$shop_group_id}"))
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParam))
 );
 

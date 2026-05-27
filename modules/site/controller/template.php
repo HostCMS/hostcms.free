@@ -78,7 +78,7 @@ class Site_Controller_Template extends Core_Servant_Properties
 	/**
 	 * Get XML of selected template
 	 * @return array|false
-     */
+	 */
 	public function getSelectedTemplateXml()
 	{
 		$template_content_filepath = $this->templatePath . $this->templateSelectedFilename;

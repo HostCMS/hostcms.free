@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Template
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Тemplates',
@@ -52,4 +52,8 @@ return array(
 	'design_icon_tablet_wide' => 'Tablet horizontal',
 	'design_icon_mobile' => 'Smartphone',
 	'design_icon_mobile_wide' => 'Smartphone horizontal',
+
+	'move_templates_dir_title' => "Moving Templates",
+	'move_templates_dir_id' => "Parent Group",
+	'move_success' => 'Templates moved'
 );

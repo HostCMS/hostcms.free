@@ -20,9 +20,9 @@ class Notification_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 
 	/**
@@ -51,7 +51,7 @@ class Notification_Module extends Core_Module_Abstract
 			array(
 				'sorting' => 150,
 				'block' => 3,
-				'ico' => 'fa fa-warning',
+				'ico' => 'fa-solid fa-warning',
 				'name' => Core::_('Notification.model_name'),
 				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/notification/index.php"),
 				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/notification/index.php'}); return false")

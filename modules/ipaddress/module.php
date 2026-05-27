@@ -20,9 +20,9 @@ class Ipaddress_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 	/**
 	 * Module name
@@ -40,7 +40,7 @@ class Ipaddress_Module extends Core_Module_Abstract
 			array(
 				'sorting' => 260,
 				'block' => 3,
-				'ico' => 'fa fa-link',
+				'ico' => 'fa-solid fa-link',
 				'name' => Core::_('ipaddress.menu'),
 				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/ipaddress/index.php"),
 				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/ipaddress/index.php'}); return false")

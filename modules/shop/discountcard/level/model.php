@@ -58,7 +58,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 */
 	public function nameBackend($oAdmin_Form_Field)
 	{
-		return '<i class="fa fa-circle" style="margin-right: 5px; color: ' . ($this->color ? htmlspecialchars($this->color) : '#aebec4') . '"></i> '
+		return '<i class="fa-solid fa-circle" style="margin-right: 5px; color: ' . ($this->color ? htmlspecialchars($this->color) : '#aebec4') . '"></i> '
 			. '<span class="editable" id="apply_check_0_' . $this->id . '_fv_' . $oAdmin_Form_Field->id . '">' . htmlspecialchars($this->name) . '</span>';
 	}
 
@@ -80,8 +80,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	public function roundBackend()
 	{
 		return $this->round
-			? '<i class="fa fa-check-circle-o green">'
-			: '<i class="fa fa-times-circle-o red">';
+			? '<i class="fa-regular fa-circle-check green">'
+			: '<i class="fa-regular fa-circle-xmark red">';
 	}
 
 	/**
@@ -130,7 +130,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event shop_discountcard.onBeforeRedeclaredDelete
+	 * @hostcms-event shop_discountcard.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

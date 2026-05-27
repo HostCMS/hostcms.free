@@ -16,78 +16,78 @@
  */
 class Smarty_Internal_Compile_Section extends Smarty_Internal_Compile_Private_ForeachSection
 {
-    /**
-     * Attribute definition: Overwrites base class.
-     *
-     * @var array
-     * @see Smarty_Internal_CompileBase
-     */
+	/**
+	 * Attribute definition: Overwrites base class.
+	 *
+	 * @var array
+	 * @see Smarty_Internal_CompileBase
+	 */
     public $required_attributes = array('name', 'loop');
 
-    /**
-     * Attribute definition: Overwrites base class.
-     *
-     * @var array
-     * @see Smarty_Internal_CompileBase
-     */
+	/**
+	 * Attribute definition: Overwrites base class.
+	 *
+	 * @var array
+	 * @see Smarty_Internal_CompileBase
+	 */
     public $shorttag_order = array('name', 'loop');
 
-    /**
-     * Attribute definition: Overwrites base class.
-     *
-     * @var array
-     * @see Smarty_Internal_CompileBase
-     */
+	/**
+	 * Attribute definition: Overwrites base class.
+	 *
+	 * @var array
+	 * @see Smarty_Internal_CompileBase
+	 */
     public $optional_attributes = array('start', 'step', 'max', 'show', 'properties');
 
-    /**
-     * counter
-     *
-     * @var int
-     */
+	/**
+	 * counter
+	 *
+	 * @var int
+	 */
     public $counter = 0;
 
-    /**
-     * Name of this tag
-     *
-     * @var string
-     */
+	/**
+	 * Name of this tag
+	 *
+	 * @var string
+	 */
     public $tagName = 'section';
 
-    /**
-     * Valid properties of $smarty.section.name.xxx variable
-     *
-     * @var array
-     */
+	/**
+	 * Valid properties of $smarty.section.name.xxx variable
+	 *
+	 * @var array
+	 */
     public $nameProperties = array(
-        'first', 'last', 'index', 'iteration', 'show', 'total', 'rownum', 'index_prev',
-        'index_next', 'loop'
+    	'first', 'last', 'index', 'iteration', 'show', 'total', 'rownum', 'index_prev',
+    	'index_next', 'loop'
     );
 
-    /**
-     * {section} tag has no item properties
-     *
-     * @var array
-     */
+	/**
+	 * {section} tag has no item properties
+	 *
+	 * @var array
+	 */
     public $itemProperties = null;
 
-    /**
-     * {section} tag has always name attribute
-     *
-     * @var bool
-     */
+	/**
+	 * {section} tag has always name attribute
+	 *
+	 * @var bool
+	 */
     public $isNamed = true;
 
-    /**
-     * Compiles code for the {section} tag
-     *
-     * @param array                                 $args     array with attributes from parser
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler compiler object
-     *
-     * @return string compiled code
-     * @throws \SmartyCompilerException
-     * @throws \SmartyException
-     */
+	/**
+	 * Compiles code for the {section} tag
+	 *
+	 * @param array                                 $args     array with attributes from parser
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler compiler object
+	 *
+	 * @return string compiled code
+	 * @throws \SmartyCompilerException
+	 * @throws \SmartyException
+	 */
     public function compile($args, Smarty_Internal_TemplateCompilerBase $compiler)
     {
         $compiler->loopNesting++;
@@ -111,8 +111,8 @@ class Smarty_Internal_Compile_Section extends Smarty_Internal_Compile_Private_Fo
         $incFor = array();
         $cmpFor = array();
         $propValue = array(
-            'index'     => "{$sectionVar}->value['index']", 'show' => 'true', 'step' => 1,
-            'iteration' => "{$local}iteration",
+        	'index'     => "{$sectionVar}->value['index']", 'show' => 'true', 'step' => 1,
+        	'iteration' => "{$local}iteration",
         );
         $propType = array('index' => 2, 'iteration' => 2, 'show' => 0, 'step' => 0,);
         // search for used tag attributes
@@ -407,14 +407,14 @@ class Smarty_Internal_Compile_Section extends Smarty_Internal_Compile_Private_Fo
  */
 class Smarty_Internal_Compile_Sectionelse extends Smarty_Internal_CompileBase
 {
-    /**
-     * Compiles code for the {sectionelse} tag
-     *
-     * @param array                                 $args     array with attributes from parser
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler compiler object
-     *
-     * @return string compiled code
-     */
+	/**
+	 * Compiles code for the {sectionelse} tag
+	 *
+	 * @param array                                 $args     array with attributes from parser
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler compiler object
+	 *
+	 * @return string compiled code
+	 */
     public function compile($args, Smarty_Internal_TemplateCompilerBase $compiler)
     {
         // check and get attributes
@@ -433,14 +433,14 @@ class Smarty_Internal_Compile_Sectionelse extends Smarty_Internal_CompileBase
  */
 class Smarty_Internal_Compile_Sectionclose extends Smarty_Internal_CompileBase
 {
-    /**
-     * Compiles code for the {/section} tag
-     *
-     * @param array                                 $args     array with attributes from parser
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler compiler object
-     *
-     * @return string compiled code
-     */
+	/**
+	 * Compiles code for the {/section} tag
+	 *
+	 * @param array                                 $args     array with attributes from parser
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler compiler object
+	 *
+	 * @return string compiled code
+	 */
     public function compile($args, Smarty_Internal_TemplateCompilerBase $compiler)
     {
         $compiler->loopNesting--;

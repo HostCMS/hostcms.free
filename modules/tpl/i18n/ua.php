@@ -33,4 +33,7 @@ return array(
 	'import_file' => "Виберіть файл з комп/'ютера",
 	'import_button' => 'Завантажити',
 	'importTpls_success' => 'Імпорт завершено!',
+	'move_tpl_dir_title' => "Перенесення TPL-шаблонів",
+	'move_tpl_dir_id' => "Батьківська група",
+	'move_success' => 'TPL-шаблони перенесені',
 );

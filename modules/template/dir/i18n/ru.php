@@ -1,12 +1,5 @@
 <?php
-/**
- * Templates.
- *
- * @package HostCMS
- * @subpackage Template
- * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'Раздел макетов',
 	'menu' => 'Раздел макетов',
@@ -31,4 +24,5 @@ return array(
 	'root' => 'Макеты',
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
+	'move_success' => 'Разделы макетов перенесены',
 );

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 abstract class Core_Skin
 {
@@ -129,6 +129,16 @@ abstract class Core_Skin
 	}
 
 	/**
+	 * Clear array of JS's paths
+	 * @return self
+	 */
+	public function clearJs()
+	{
+		$this->_js = array();
+		return $this;
+	}
+
+	/**
 	 * List of CSS files
 	 * @var array
 	 */
@@ -152,6 +162,459 @@ abstract class Core_Skin
 	public function getCss()
 	{
 		return $this->_css;
+	}
+
+	/**
+	 * Clear array of CSS's paths
+	 * @return self
+	 */
+	public function clearCss()
+	{
+		$this->_css = array();
+		return $this;
+	}
+
+	/**
+	 * Get filename. Depends on $aCss
+	 * @param array $aCss Array of paths
+	 * @return string
+	 */
+	public function getCssFilename($aCss)
+	{
+		return md5(implode(',', $aCss) . '-' . Core::getVersion()) . '.css';
+	}
+
+	/**
+	 * Get filename. Depends on $aJs
+	 * @param array $aJs Array of paths
+	 * @return string
+	 */
+	public function getJsFilename($aJs)
+	{
+		return md5(implode(',', $aJs) . '-' . Core::getVersion()) . '.js';
+	}
+
+	/**
+	 * Get min dir path
+	 * @return string
+	 */
+	public function getMinDirPath()
+	{
+		return 'modules/skin/' . $this->_skinName . '/min/';
+	}
+
+	/**
+	 * Compress and minify css
+	 * @return string
+	 */
+	public function compressCss()
+	{
+		$sCssFileName = $this->getCssFilename($this->_css);
+
+		$sMinPath = '/' . $this->getMinDirPath();
+		$sMinDir = CMS_FOLDER . $this->getMinDirPath();
+
+		if (!Core_File::isFile($sMinDir . $sCssFileName))
+		{
+			!Core_File::isDir($sMinDir)
+				&& Core_File::mkdir($sMinDir);
+
+			$sContent = '';
+			foreach ($this->_css as $css)
+			{
+				$sPath = Core_File::pathCorrection(CMS_FOLDER . ltrim($css, '/\\'));
+
+				if (Core_File::isFile($sPath))
+				{
+					$str = Core_File::read($sPath);
+
+					$str = Core_Str::removeBOM($str);
+
+					if (strpos($sPath, '.min.') === FALSE)
+					{
+						if (Core::moduleIsActive('compression'))
+						{
+							$oCompression_Controller_Css = new Compression_Controller_Css();
+							$str = $oCompression_Controller_Css->compressCss($str);
+						}
+						else
+						{
+							// Нативная минимизация CSS
+							$sContent = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $sContent);
+							$sContent = str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $sContent);
+							$sContent = preg_replace('/ {2,}/', ' ', $sContent);
+							$sContent = preg_replace('/\s*([\{\}\;\:\,\>\+])\s*/', '$1', $sContent);
+							$sContent = preg_replace('/;}/', '}', $sContent);
+						}
+					}
+
+					$dirname = dirname($css) . '/';
+					$str = preg_replace(
+						'/(url\()\s*(["\']?)(?![a-z\-]+:|data:)([^\/"\'])/i',
+						'${1}${2}' . $dirname . '${3}',
+						$str
+					);
+
+					$sContent .= $str . "\n";
+				}
+			}
+
+			Core_File::write($sMinDir . $sCssFileName, trim($sContent));
+		}
+
+		return $sMinPath . $sCssFileName;
+	}
+
+	/**
+	 * Compress and minify JS
+	 * @param array $aJs
+	 * @return string
+	 */
+	public function compressJs($aJs)
+	{
+		$sJsFileName = $this->getJsFilename($aJs);
+
+		$sMinPath = '/' . $this->getMinDirPath();
+		$sMinDir = CMS_FOLDER . $this->getMinDirPath();
+
+		if (!Core_File::isFile($sMinDir . $sJsFileName))
+		{
+			$aFilePaths = array();
+			$sContent = '';
+
+			foreach ($aJs as $js)
+			{
+				$sPath = ltrim($js, '/\\');
+				$aFilePaths[] = $sPath;
+				$sFullPath = Core_File::pathCorrection(CMS_FOLDER . $sPath);
+
+				if (Core_File::isFile($sFullPath))
+				{
+					$str = Core_File::read($sFullPath);
+
+					$str = $this->_fixJsPaths(
+						$str,
+						'/' . $sPath,
+						$sMinPath . $sJsFileName
+					);
+
+					if (strpos($sPath, '.min.') === FALSE)
+					{
+						if (Core::moduleIsActive('compression'))
+						{
+							$str = Compression_Controller_JSMin::minify($str);
+						}
+						else
+						{
+							$str = Core_Str::removeBOM($str);
+
+							// Удаляем комментарии
+							$lines = explode("\n", $str);
+							$output = [];
+							$inBlockComment = FALSE; // внутри многострочного комментария, который начался с начала строки
+
+							foreach ($lines as $line)
+							{
+								// Если мы внутри многострочного комментария (начался с /* в начале строки)
+								if ($inBlockComment)
+								{
+									$pos = strpos($line, '*/');
+
+									if ($pos !== FALSE)
+									{
+										// Нашли закрытие – выходим из режима комментария
+										$inBlockComment = FALSE;
+
+										$rest = substr($line, $pos + 2);
+
+										// Если после */ есть код – добавляем его (как новую строку)
+										if ($rest !== '')
+										{
+											$output[] = $rest;
+										}
+									}
+
+									// Иначе пропускаем всю строку (она внутри комментария)
+									continue;
+								}
+
+								// Проверяем, начинается ли строка с // (после пробелов)
+								$trimmed = ltrim($line);
+
+								if (strpos($trimmed, '//') === 0)
+								{
+									// Однострочный комментарий – полностью пропускаем строку
+									continue;
+								}
+
+								// Проверяем, начинается ли строка с /* (после пробелов)
+								if (strpos($trimmed, '/*') === 0)
+								{
+									// Ищем закрытие */ на этой же строке
+									$pos = strpos($line, '*/');
+
+									if ($pos !== FALSE)
+									{
+										// Комментарий закрылся на той же строке – оставляем только то, что после */
+										$rest = substr($line, $pos + 2);
+
+										if ($rest !== '')
+										{
+											$output[] = $rest;
+										}
+									}
+									else
+									{
+										// Закрытия на этой строке нет – начинаем режим пропуска следующих строк
+										$inBlockComment = TRUE;
+									}
+
+									continue;
+								}
+
+								// Обычная строка (не начинается с комментария)
+								$output[] = $line;
+							}
+
+							$str = implode("\n", $output);
+							// /удаление комментариев
+
+							// Удаляем sourceMappingURL
+							$str = preg_replace('~^//[#@]\s*(source(?:Mapping)?URL)=\s*(\S+)~m', '', $str);
+
+							$str = str_replace(array("\r\n", "\r"), "\n", $str);
+							while (mb_strpos($str, "\n\n") !== FALSE)
+							{
+								$str = str_replace("\n\n", "\n", $str);
+							}
+
+							// Убираем пробелы вокруг операторов
+							$search = [' = ', ' + ', ' - ', ' * ', ' / ', ' > ', ' < ', ' >= ', ' <= ', ' == ', ' != ', ' && ', ' || '];
+							$replace = ['=', '+', '-', '*', '/', '>', '<', '>=', '<=', '==', '!=', '&&', '||'];
+							$str = str_replace($search, $replace, $str);
+
+							// Убираем пробелы после ключевых слов
+							$str = preg_replace('/\b(if|else|for|while|switch|function|return)\s*\(/', '$1(', $str);
+
+							// Убираем пробелы перед else
+							$str = preg_replace('/\}\s*else/', '}else', $str);
+
+							$str = preg_replace('/^[ \t]+|[ \t]+$/m', '', $str);
+							$str = preg_replace('/[ \t]+/', ' ', $str);
+
+							$str = trim($str);
+
+							// Убеждаемся что файл заканчивается ; или }
+							$str = rtrim($str);
+							if (!preg_match('/[;}\]]$/', $str)) {
+								$str .= ';';
+							}
+						}
+					}
+
+					$sContent .= $str . "\n";
+				}
+			}
+
+			clearstatcache();
+			if (!Core_File::isDir($sMinDir))
+			{
+				Core_File::mkdir($sMinDir);
+			}
+
+			$sMapFileName = $sJsFileName . '.map';
+			$sContent .= "\n//# sourceMappingURL={$sMapFileName}";
+
+			// Генерация Source Map
+			$aMapContent = new stdClass();
+			$aMapContent->version = 3;
+			$aMapContent->file = $sJsFileName;
+			$aMapContent->sources = $aFilePaths;
+			$aMapContent->sourcesContent = array_fill(0, count($aFilePaths), NULL);
+
+			Core_File::write($sMinDir . $sJsFileName, $sContent);
+			Core_File::write($sMinDir . $sMapFileName, json_encode($aMapContent));
+		}
+
+		return $sMinPath . $sJsFileName;
+	}
+
+	/**
+	 * Преобразование относительных путей в JS-коде в абсолютные
+	 * @param string $content Исходный JS-код
+	 * @param string $originalPath Оригинальный путь к файлу (относительно корня сайта)
+	 * @param string $targetPath Путь к результирующему файлу (относительно корня сайта)
+	 * @return string
+	 */
+	protected function _fixJsPaths($content, $originalPath, $targetPath)
+	{
+		// Получаем директорию исходного файла
+		$originalDir = dirname($originalPath);
+
+		// Получаем директорию целевого файла
+		$targetDir = dirname($targetPath);
+
+		// Если директории совпадают, ничего не делаем
+		if ($originalDir == $targetDir) {
+			return $content;
+		}
+
+		// Заменяем базовый путь в qualifyURL и подобных функциях
+		// Ищем паттерны вида: qualifyURL('../path/file.js') или похожие
+		$content = preg_replace_callback(
+			'/((?:qualifyURL|resolvePath|getPath|normalizePath)\s*\(\s*)(["\'])((?:\.\.\/|\.\/)?[^"\']+)\2/',
+			function($matches) use ($originalDir) {
+				$funcName = $matches[1];
+				$quote = $matches[2];
+				$url = $matches[3];
+
+				// Проверяем, является ли путь относительным
+				if (strpos($url, './') === 0 || strpos($url, '../') === 0) {
+					// Разрешаем относительный путь
+					$resolved = $this->_resolvePath($originalDir . '/' . $url);
+					return $funcName . $quote . $resolved . $quote;
+				}
+
+				// Если путь не абсолютный и не URL, считаем его относительным
+				if (!preg_match('#^(/|https?://|data:)#i', $url)) {
+					return $funcName . $quote . $originalDir . '/' . $url . $quote;
+				}
+
+				return $matches[0];
+			},
+			$content
+		);
+
+		// Заменяем базовый URL в строках с относительными путями
+		// Паттерн: basePath = "../" или подобные
+		$content = preg_replace_callback(
+			'/(\b(?:basePath|rootPath|workerPath|modulePath)\s*=\s*)(["\'])((?:\.\.\/|\.\/)?[^"\']*)\2/',
+			function($matches) use ($originalDir) {
+				$varName = $matches[1];
+				$quote = $matches[2];
+				$url = $matches[3];
+
+				// Если путь относительный
+				if (strpos($url, './') === 0 || strpos($url, '../') === 0) {
+					$resolved = $this->_resolvePath($originalDir . '/' . $url);
+					return $varName . $quote . $resolved . $quote;
+				}
+
+				// Если путь не абсолютный и не URL
+				if (!preg_match('#^(/|https?://|data:)#i', $url) && !empty($url)) {
+					return $varName . $quote . $originalDir . '/' . $url . $quote;
+				}
+
+				return $matches[0];
+			},
+			$content
+		);
+
+		// Заменяем относительные пути в объектах конфигурации
+		// Паттерн: { url: "../path/file.js" } или { path: "../path/file.js" }
+		$content = preg_replace_callback(
+			'/(\b(?:url|path|src|worker|workerSrc)\s*:\s*)(["\'])((?:\.\.\/|\.\/)?[^"\']+)\2/',
+			function($matches) use ($originalDir) {
+				$propName = $matches[1];
+				$quote = $matches[2];
+				$url = $matches[3];
+
+				// Пропускаем URL и data: URI
+				if (preg_match('#^(https?://|data:)#i', $url)) {
+					return $matches[0];
+				}
+
+				// Если путь относительный
+				if (strpos($url, './') === 0 || strpos($url, '../') === 0) {
+					$resolved = $this->_resolvePath($originalDir . '/' . $url);
+					return $propName . $quote . $resolved . $quote;
+				}
+
+				// Если путь не абсолютный
+				if (!preg_match('#^/#', $url)) {
+					return $propName . $quote . $originalDir . '/' . $url . $quote;
+				}
+
+				return $matches[0];
+			},
+			$content
+		);
+
+		// Дополнительно: ищем паттерны конкатенации с базовым путем
+		// Паттерн: basePath + "../path/file.js" или basePath + 'path/file.js'
+		$content = preg_replace_callback(
+			'/(\b(?:basePath|rootPath|modulePath|workerPath)\s*\+\s*)(["\'])((?:\.\.\/|\.\/)?[^"\']+)\2/',
+			function($matches) use ($originalDir) {
+				$prefix = $matches[1];
+				$quote = $matches[2];
+				$url = $matches[3];
+
+				// Если путь относительный
+				if (strpos($url, './') === 0 || strpos($url, '../') === 0) {
+					$resolved = $this->_resolvePath($originalDir . '/' . $url);
+					return '\'' . $resolved . '\'';
+				}
+
+				return $matches[0];
+			},
+			$content
+		);
+
+		return $content;
+	}
+
+	/**
+	 * Вычисление относительного пути между двумя директориями
+	 * @param string $from Исходная директория
+	 * @param string $to Целевая директория
+	 * @return string
+	 */
+	protected function _getRelativePath($from, $to)
+	{
+		$from = trim($from, '/');
+		$to = trim($to, '/');
+
+		if ($from === $to) {
+			return '';
+		}
+
+		$fromParts = explode('/', $from);
+		$toParts = explode('/', $to);
+
+		// Находим общую часть пути
+		$commonLength = 0;
+		$maxCommonLength = min(count($fromParts), count($toParts));
+
+		while ($commonLength < $maxCommonLength && $fromParts[$commonLength] === $toParts[$commonLength]) {
+			$commonLength++;
+		}
+
+		// Строим относительный путь
+		$relativeParts = array_fill(0, count($fromParts) - $commonLength, '..');
+		$relativeParts = array_merge($relativeParts, array_slice($toParts, $commonLength));
+
+		return implode('/', $relativeParts);
+	}
+
+	/**
+	 * Разрешение пути с . и ..
+	 * @param string $path Исходный путь
+	 * @return string
+	 */
+	protected function _resolvePath($path)
+	{
+		$parts = explode('/', trim($path, '/'));
+		$resolved = [];
+
+		foreach ($parts as $part) {
+			if ($part === '..') {
+				array_pop($resolved);
+			} elseif ($part !== '.' && $part !== '') {
+				$resolved[] = $part;
+			}
+		}
+
+		return '/' . implode('/', $resolved);
 	}
 
 	/**
@@ -246,14 +709,21 @@ abstract class Core_Skin
 		return $this->_answer;
 	}
 
+	protected $_timestamp = NULL;
+
 	/**
 	 * Mark of current version
 	 * @return int
 	 */
 	protected function _getTimestamp()
 	{
-		$currentVersion = Core::getVersion();
-		return abs(Core::crc32($currentVersion . $currentVersion));
+		if (is_null($this->_timestamp))
+		{
+			$currentVersion = Core::getVersion();
+			$this->_timestamp = abs(Core::crc32($currentVersion . $currentVersion));
+		}
+
+		return $this->_timestamp;
 	}
 
 	/**

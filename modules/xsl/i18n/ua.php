@@ -34,4 +34,7 @@ return array(
 	'import_file' => "Виберіть файл з комп/'ютера",
 	'import_button' => 'Завантажити',
 	'importXsls_success' => 'Імпорт завершено!',
+	'move_xsl_dir_title' => "Перенесення XSL-шаблонів",
+	'move_xsl_dir_id' => "Батьківська група",
+	'move_success' => 'XSL-шаблони перенесені',
 );

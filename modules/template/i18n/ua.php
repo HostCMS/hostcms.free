@@ -45,4 +45,8 @@ return array(
 	'design_icon_tablet_wide' => 'Планшет горизонтально',
 	'design_icon_mobile' => 'Смартфон',
 	'design_icon_mobile_wide' => 'Смартфон горизонтально',
+
+	'move_templates_dir_title' => "Перенесення макетів",
+	'move_templates_dir_id' => "Батьківська група",
+	'move_success' => 'Макети перенесені',
 );

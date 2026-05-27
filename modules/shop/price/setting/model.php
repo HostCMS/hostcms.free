@@ -100,8 +100,8 @@ class Shop_Price_Setting_Model extends Core_Entity
 	public function postedBackend()
 	{
 		return $this->posted
-			? '<i class="fa fa-check-circle-o green">'
-			: '<i class="fa fa-times-circle-o red">';
+			? '<i class="fa-regular fa-circle-check green">'
+			: '<i class="fa-regular fa-circle-xmark red">';
 	}
 
 	/**
@@ -264,11 +264,11 @@ class Shop_Price_Setting_Model extends Core_Entity
 		return $this;
 	}
 
-    /**
-     * Backend callback method
-     * @param Admin_Form_Field_Model $oAdmin_Form_Field
-     * @param Admin_Form_Controller $oAdmin_Form_Controller
-     */
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 */
 	public function printBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		Core::moduleIsActive('printlayout')

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -65,8 +65,8 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 		{
 			$printlayoutsButton = '
 				<div class="btn-group">
-					<a class="btn btn-success" href="javascript:void(0);"><!--<i class="btn-label fa fa-print"></i>-->' . Core::_('Printlayout.print') . '</a>
-					<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
+					<a class="btn btn-success" href="javascript:void(0);"><!--<i class="btn-label fa-solid fa-print"></i>-->' . Core::_('Printlayout.print') . '</a>
+					<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa-solid fa-angle-down"></i></a>
 					<ul class="dropdown-menu dropdown-palegreen">
 			';
 
@@ -287,7 +287,7 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 
 				$currencyName = $oShop_Item->shop_currency_id && $oShop_Item->Shop_Currency->sign != ''
 					? htmlspecialchars($oShop_Item->Shop_Currency->sign)
-					: '<i class="fa fa-exclamation-triangle darkorange" title="' . Core::_('Shop_Item.shop_item_not_currency') . '"></i>';
+					: '<i class="fa-solid fa-triangle-exclamation darkorange" title="' . Core::_('Shop_Item.shop_item_not_currency') . '"></i>';
 
 				$measureName = $oShop_Item->Shop_Measure->name;
 
@@ -303,7 +303,7 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 						. $oShop->Structure->getPath()
 						. $oShop_Item->getPath();
 
-					$externalLink = '<a class="margin-left-5" target="_blank" href="' . $sItemUrl . '"><i class="fa fa-external-link"></i></a>';
+					$externalLink = '<a class="margin-left-5" target="_blank" href="' . $sItemUrl . '"><i class="fa-solid fa-arrow-up-right-from-square small"></i></a>';
 				}
 
 				$itemTable .= '
@@ -352,7 +352,7 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 				}
 
 				$itemTable .= '
-						<td><a class="delete-associated-item" onclick="res = confirm(\'' . Core::_('Shop_Price_Setting.delete_dialog') . '\'); if (res) {' . $onclick . '} return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
+						<td><a class="delete-associated-item" onclick="res = confirm(\'' . Core::_('Shop_Price_Setting.delete_dialog') . '\'); if (res) {' . $onclick . '} return res;"><i class="fa-solid fa-circle-xmark darkorange"></i></a></td>
 					</tr>
 				';
 			}
@@ -411,7 +411,7 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 					});
 				}
 
-				$('#{$windowId} .shop-item-table > tbody tr:last-child').append($('<td><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove()\"><i class=\"fa fa-times-circle darkorange\"></i></a></td>'));
+				$('#{$windowId} .shop-item-table > tbody tr:last-child').append($('<td><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove()\"><i class=\"fa-solid fa-circle-xmark darkorange\"></i></a></td>'));
 
 				ui.item.value = '';
 

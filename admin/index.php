@@ -48,32 +48,46 @@ Core_Session::start();
 
 if (!is_null(Core_Array::getGet('webauthnLoadList')))
 {
-	$ids = [];
-
-	$login = Core_Array::getCookie('_h_login', '', 'trim');
-
-	$oUser = Core_Entity::factory('User')->getByLogin($login);
-
-	if ($oUser)
+	try
 	{
 		$oCore_Webauthn = new Core_Webauthn();
 
-		$aUser_Webauthns = $oUser->User_Webauthns->findAll(FALSE);
-		foreach ($aUser_Webauthns as $oUser_Webauthn)
+		// Передаем пустой массив ключей ($ids), чтобы устройство показало пользователю список сохраненных аккаунтов
+		$args = $oCore_Webauthn->getGetArgs(array(), 60*4, true, 'discouraged');
+
+		if ($args)
 		{
-			$ids[] = base64_decode($oUser_Webauthn->credential_id);
+			$challengeBinary = $args->publicKey->challenge->getBinaryString();
+
+			if (!isset($_SESSION['webauthn_challenges']) || !is_array($_SESSION['webauthn_challenges']))
+			{
+				$_SESSION['webauthn_challenges'] = array();
+			}
+
+			$now = time();
+
+			// Очищаем протухшие challenge (старше 5 минут)
+			foreach ($_SESSION['webauthn_challenges'] as $key => $expires)
+			{
+				if ($expires < $now)
+				{
+					unset($_SESSION['webauthn_challenges'][$key]);
+				}
+			}
+
+			// Ограничиваем размер массива, чтобы сессия не раздувалась (максимум 10 вкладок/попыток)
+			if (count($_SESSION['webauthn_challenges']) > 10)
+			{
+				array_shift($_SESSION['webauthn_challenges']); // Удаляем самый старый
+			}
+
+			// Добавляем новый challenge со сроком жизни 5 минут (300 секунд)
+			$_SESSION['webauthn_challenges'][$challengeBinary] = $now + 300;
 		}
 	}
-
-	if (count($ids) === 0) {
-		throw new Core_Exception('no registrations in session for userId ' . $login);
-	}
-
-	$args = $oCore_Webauthn->getGetArgs($ids, 60*4, true, 'discouraged');
-
-	if ($args)
+	catch (Exception $e)
 	{
-		$_SESSION['challenge'] = $args->publicKey->challenge->getBinaryString();
+		$args = array('error' => $e->getMessage());
 	}
 
 	Core::showJson($args);
@@ -81,7 +95,7 @@ if (!is_null(Core_Array::getGet('webauthnLoadList')))
 
 if (!is_null(Core_Array::getGet('webauthnCheck')))
 {
-	$aReturn = array();
+	$aReturn = array('success' => FALSE);
 
 	try
 	{
@@ -94,67 +108,92 @@ if (!is_null(Core_Array::getGet('webauthnCheck')))
 			{
 				$clientDataJSON = !empty($post->clientDataJSON) ? base64_decode($post->clientDataJSON) : NULL;
 
+				// 1. Извлекаем challenge из ответа клиента
+				$clientData = $clientDataJSON ? json_decode($clientDataJSON) : NULL;
+				$challenge = '';
+
+				if (is_object($clientData) && property_exists($clientData, 'challenge'))
+				{
+					$challengeBinary = Core_Bytebuffer::fromBase64Url($clientData->challenge)->getBinaryString();
+
+					// Проверяем, есть ли такой challenge в сессии и не истек ли его срок
+					if (isset($_SESSION['webauthn_challenges'][$challengeBinary]) && $_SESSION['webauthn_challenges'][$challengeBinary] >= time())
+					{
+						$challenge = $challengeBinary;
+
+						// Сразу удаляем использованный challenge (защита от Replay-атак)
+						unset($_SESSION['webauthn_challenges'][$challengeBinary]);
+					}
+				}
+
+				if (empty($challenge))
+				{
+					throw new Core_Exception('Session challenge expired, missing or invalid');
+				}
+
 				$authenticatorData = !empty($post->authenticatorData) ? base64_decode($post->authenticatorData) : NULL;
 				$signature = !empty($post->signature) ? base64_decode($post->signature) : NULL;
-				$userHandle = !empty($post->userHandle) ? base64_decode($post->userHandle) : NULL;
 				$credentialId = !empty($post->id) ? $post->id : NULL;
-				$challenge = isset($_SESSION['challenge']) ? $_SESSION['challenge'] : '';
 
-				$login = Core_Array::getCookie('_h_login', '', 'trim');
-				$oUser = Core_Entity::factory('User')->getByLogin($login);
-
-				if ($oUser)
+				if (!is_null($credentialId))
 				{
-					$credentialPublicKey = NULL;
-					$allowedCredentials = array();
+					// Ищем ключ в БД по credentialId
+					$oUser_Webauthn = Core_Entity::factory('User_Webauthn');
+					$oUser_Webauthn->queryBuilder()
+						->where('credential_id', '=', $credentialId)
+						->limit(1);
 
-					$aUser_Webauthns = $oUser->User_Webauthns->findAll(FALSE);
-					foreach ($aUser_Webauthns as $oUser_Webauthn)
+					$aUser_Webauthns = $oUser_Webauthn->findAll(FALSE);
+
+					if (isset($aUser_Webauthns[0]) && $aUser_Webauthns[0]->User->id)
 					{
-						$allowedCredentials[] = $oUser_Webauthn->credential_id;
+						$oFoundKey = $aUser_Webauthns[0];
+						$oUser = $oFoundKey->User;
 
-						if ($oUser_Webauthn->credential_id === $credentialId)
+						$credentialPublicKey = $oFoundKey->credential_public_key;
+						$allowedCredentials = array($oFoundKey->credential_id);
+
+						// Формируем expectedUserHandle так же, как при регистрации
+						$expectedUserHandle = hex2bin(sha1($oUser->guid));
+
+						// Получаем предыдущий счетчик подписей
+						$prevSignatureCnt = isset($oFoundKey->signature_counter) ? (int)$oFoundKey->signature_counter : 0;
+
+						$oCore_Webauthn = new Core_Webauthn();
+						$processGetResult = $oCore_Webauthn->processGet(
+							$clientDataJSON,
+							$authenticatorData,
+							$signature,
+							$credentialId,
+							$allowedCredentials,
+							$expectedUserHandle,
+							$credentialPublicKey,
+							$challenge,
+							$prevSignatureCnt,
+							FALSE
+						);
+
+						if (is_array($processGetResult) && $processGetResult['success'])
 						{
-							$credentialPublicKey = $oUser_Webauthn->credential_public_key;
-							//break;
+							$aReturn['success'] = TRUE;
+
+							// Обновляем счетчик для защиты от клонирования ключа
+							if (isset($processGetResult['newSignatureCounter'])) {
+								$oFoundKey->signature_counter = $processGetResult['newSignatureCounter'];
+								$oFoundKey->save();
+							}
+
+							Core_Auth::setCurrentUser($oUser, FALSE);
+						}
+						else
+						{
+							$aReturn['msg'] = Core_Message::get(Core::_('Admin.wrong_fast_login'), 'error');
 						}
 					}
-
-					/*if ($credentialPublicKey === NULL)
+					else
 					{
-						Core::showJson(array(
-							'success' => FALSE,
-							'msg' => Core_Message::get(Core::_('Admin.wrong_public_key'), 'error')
-						));
-					}*/
-
-					// Process the get request
-					$oCore_Webauthn = new Core_Webauthn();
-					$processGetResult = $oCore_Webauthn->processGet(
-						$clientDataJSON,
-						$authenticatorData,
-						$signature,
-						$credentialId,
-						$allowedCredentials,
-						$oUser->id,
-						$credentialPublicKey,
-						$challenge,
-						NULL,
-						FALSE
-					);
-				}
-				else
-				{
-					$processGetResult = FALSE;
-				}
-
-				$bSuccess = is_array($processGetResult) && $processGetResult['success'];
-
-				$aReturn['success'] = $bSuccess;
-
-				if ($bSuccess)
-				{
-					Core_Auth::setCurrentUser($oUser, FALSE);
+						$aReturn['msg'] = Core_Message::get(Core::_('Admin.wrong_fast_login'), 'error');
+					}
 				}
 				else
 				{
@@ -173,7 +212,7 @@ if (!is_null(Core_Array::getGet('webauthnCheck')))
 	}
 	catch (Exception $e)
 	{
-		$aReturn['msg'] = 'webauthnCheck error';
+		$aReturn['msg'] = 'webauthnCheck unknown error, check logs';
 	}
 
 	Core::showJson($aReturn);
@@ -205,15 +244,40 @@ if (Core_Auth::logged())
 				$userName,
 				$userDisplayName,
 				60*4,
-				FALSE,
-				'discouraged',
-				FALSE,
+				TRUE, // requireResidentKey = TRUE (заставляем ключ запомнить пользователя)
+				'discouraged', // requireUserVerification
+				FALSE, // crossPlatformAttachment
 				$excludeCredentialIds
 			);
 
 			if ($args)
 			{
-				$_SESSION['challenge'] = $args->publicKey->challenge->getBinaryString();
+				$challengeBinary = $args->publicKey->challenge->getBinaryString();
+
+				if (!isset($_SESSION['webauthn_challenges']) || !is_array($_SESSION['webauthn_challenges']))
+				{
+					$_SESSION['webauthn_challenges'] = array();
+				}
+
+				$now = time();
+
+				// Очищаем протухшие challenge (старше 5 минут)
+				foreach ($_SESSION['webauthn_challenges'] as $key => $expires)
+				{
+					if ($expires < $now)
+					{
+						unset($_SESSION['webauthn_challenges'][$key]);
+					}
+				}
+
+				// Ограничиваем размер массива, чтобы сессия не раздувалась (максимум 10 вкладок/попыток)
+				if (count($_SESSION['webauthn_challenges']) > 10)
+				{
+					array_shift($_SESSION['webauthn_challenges']); // Удаляем самый старый
+				}
+
+				// Добавляем новый challenge со сроком жизни 5 минут (300 секунд)
+				$_SESSION['webauthn_challenges'][$challengeBinary] = $now + 300;
 			}
 		}
 		catch (Exception $e)
@@ -227,9 +291,11 @@ if (Core_Auth::logged())
 	if (!is_null(Core_Array::getGet('webauthnRegister')))
 	{
 		$aReturn = array();
+
 		try
 		{
 			$post = trim(file_get_contents('php://input'));
+
 			if ($post)
 			{
 				$post = json_decode($post, NULL, 512, defined('JSON_THROW_ON_ERROR') ? JSON_THROW_ON_ERROR : 0);
@@ -238,7 +304,25 @@ if (Core_Auth::logged())
 				{
 					$clientDataJSON = !empty($post->clientDataJSON) ? base64_decode($post->clientDataJSON) : NULL;
 					$attestationObject = !empty($post->attestationObject) ? base64_decode($post->attestationObject) : NULL;
-					$challenge = isset($_SESSION['challenge']) ? $_SESSION['challenge'] : NULL;
+
+					$clientData = $clientDataJSON ? json_decode($clientDataJSON) : NULL;
+					$challenge = NULL;
+
+					if (is_object($clientData) && property_exists($clientData, 'challenge'))
+					{
+						$challengeBinary = Core_Bytebuffer::fromBase64Url($clientData->challenge)->getBinaryString();
+
+						if (isset($_SESSION['webauthn_challenges'][$challengeBinary]) && $_SESSION['webauthn_challenges'][$challengeBinary] >= time())
+						{
+							$challenge = $challengeBinary;
+							unset($_SESSION['webauthn_challenges'][$challengeBinary]);
+						}
+					}
+
+					if (empty($challenge))
+					{
+						throw new Core_Exception('Session challenge expired, missing or invalid for registration');
+					}
 
 					$aReturn['success'] = FALSE;
 
@@ -253,6 +337,8 @@ if (Core_Auth::logged())
 						$oUser_WebAuthn->credential_id = base64_encode($data->credentialId);
 						$oUser_WebAuthn->credential_public_key = $data->credentialPublicKey;
 						$oUser_WebAuthn->save();
+
+						Core_Cookie::set('_h_login', $oCurrentUser->login, array('expires' => time() + 15552000, 'path' => '/')); // half year
 
 						$aReturn['success'] = TRUE;
 					}

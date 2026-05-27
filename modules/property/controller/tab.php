@@ -96,7 +96,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	/**
 	* Get object
 	* @return object|null
-     */
+	 */
 	public function getObject()
 	{
 		return $this->_object;
@@ -292,7 +292,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 		if ($oProperty->description != '')
 		{
-			$sCaption .= '<acronym title="" data-html="1" data-original-title="' . htmlspecialchars($oProperty->description) . '"><i class="fa-solid fa-circle-info property-info" ></i></acronym>';
+			$sCaption .= '<acronym data-trigger="click" data-html="1" data-original-title="' . htmlspecialchars($oProperty->description) . '"><i class="fa-regular fa-circle-question property-info" ></i></acronym>';
 		}
 
 		switch ($oProperty->type)
@@ -606,9 +606,9 @@ class Property_Controller_Tab extends Core_Servant_Properties
 					{
 						$windowId = $this->_Admin_Form_Controller->getWindowId();
 
-						$sCaption .= '<a href="#" onclick="$.addPropertyListItem(event, this, \'' . $windowId . '\')" data-list-id=' . $oProperty->list_id . '><i title="' . Core::_('Property.add_to_list') . '" class="fa fa-circle-plus fa-small property-info"></i></a>';
+						$sCaption .= '<a href="#" onclick="$.addPropertyListItem(event, this, \'' . $windowId . '\')" data-list-id=' . $oProperty->list_id . '><i title="' . Core::_('Property.add_to_list') . '" class="fa-solid fa-circle-plus fa-small property-info"></i></a>';
 
-						$sCaption .= '<a href="' . Admin_Form_Controller::correctBackendPath('/{admin}/list/item/index.php') . '?list_id=' . $oProperty->list_id . '" target="_blank"><i title="' . Core::_('Property.move_to_list') . '" class="fa fa-external-link fa-small property-info"></i></a>';
+						$sCaption .= '<a href="' . Admin_Form_Controller::correctBackendPath('/{admin}/list/item/index.php') . '?list_id=' . $oProperty->list_id . '" target="_blank"><i title="' . Core::_('Property.move_to_list') . '" class="fa-solid fa-arrow-up-right-from-square small fa-small property-info"></i></a>';
 					}
 
 					$oAdmin_Form_Entity_ListItems = Admin_Form_Entity::factory('Select')
@@ -1703,23 +1703,28 @@ class Property_Controller_Tab extends Core_Servant_Properties
 					$aNewValueSmall = Core_Array::getFiles("small_property_{$oProperty->id}", array());
 
 					// New values of property
-					if (is_array($aNewValueLarge) && isset($aNewValueLarge['name']))
+					if (is_array($aNewValueLarge) && isset($aNewValueLarge['name'])
+						|| is_array($aNewValueSmall) && isset($aNewValueSmall['name'])
+					)
 					{
-						$iCount = count($aNewValueLarge['name']);
+						$iLargeCount = isset($aNewValueLarge['name']) ? count($aNewValueLarge['name']) : 0;
+						$iSmallCount = isset($aNewValueSmall['name']) ? count($aNewValueSmall['name']) : 0;
+
+						$iCount = max($iLargeCount, $iSmallCount);
 
 						for ($i = 0; $i < $iCount; $i++)
 						{
-							$oProperty_Value = $oProperty->createNewValue($this->_object->id);
-
 							ob_start();
 
-							$aLargeFile = array(
-								'name' => $aNewValueLarge['name'][$i],
-								'type' => $aNewValueLarge['type'][$i],
-								'tmp_name' => $aNewValueLarge['tmp_name'][$i],
-								'error' => $aNewValueLarge['error'][$i],
-								'size' => $aNewValueLarge['size'][$i],
-							);
+							$aLargeFile = isset($aNewValueLarge['name'][$i])
+								? array(
+									'name' => $aNewValueLarge['name'][$i],
+									'type' => $aNewValueLarge['type'][$i],
+									'tmp_name' => $aNewValueLarge['tmp_name'][$i],
+									'error' => $aNewValueLarge['error'][$i],
+									'size' => $aNewValueLarge['size'][$i],
+								)
+								: NULL;
 
 							$aSmallFile = isset($aNewValueSmall['name'][$i])
 								? array(
@@ -1731,54 +1736,58 @@ class Property_Controller_Tab extends Core_Servant_Properties
 								)
 								: NULL;
 
-							// -------
-							$description = $this->_getEachPost("description_property_{$oProperty->id}");
-							if (!is_null($description))
+							if (!is_null($aLargeFile) || !is_null($aSmallFile))
 							{
-								$oProperty_Value->file_description = $description;
+								$oProperty_Value = $oProperty->createNewValue($this->_object->id);
+
+								$description = $this->_getEachPost("description_property_{$oProperty->id}");
+								if (!is_null($description))
+								{
+									$oProperty_Value->file_description = $description;
+								}
+
+								$description_small = $this->_getEachPost("description_small_property_{$oProperty->id}");
+
+								if (!is_null($description_small))
+								{
+									$oProperty_Value->file_small_description = $description_small;
+								}
+								// -------
+
+								$oProperty_Value
+									->sorting($this->_getSorting($oProperty_Value))
+									->save();
+
+								$this->_loadFiles($aLargeFile, $aSmallFile, $oProperty_Value, "property_{$oProperty->id}");
+
+								$this->_Admin_Form_Controller->addMessage(ob_get_clean());
+
+								ob_start();
+								Core_Html_Entity::factory('Script')
+									->value("$(\"#{$windowId} div#property_{$oProperty->id}.new-property\").eq(0).removeClass('new-property');" .
+									"$(\"#{$windowId} div[id^='file_large'] input[name='property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'property_{$oProperty->id}_{$oProperty_Value->id}');" .
+									"$(\"#{$windowId} div[id^='file_small'] input[name='small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_property_{$oProperty->id}_{$oProperty_Value->id}');" .
+									// Description
+									"$(\"#{$windowId} input[name='description_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'description_property_{$oProperty->id}_{$oProperty_Value->id}');" .
+									"$(\"#{$windowId} input[name='description_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'description_small_property_{$oProperty->id}_{$oProperty_Value->id}');" .
+									// Large
+									"$(\"#{$windowId} input[name='large_max_width_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'large_max_width_property_{$oProperty->id}_{$oProperty_Value->id}');" .
+									"$(\"#{$windowId} input[name='large_max_height_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'large_max_height_property_{$oProperty->id}_{$oProperty_Value->id}');" .
+									"$(\"#{$windowId} input[name='large_preserve_aspect_ratio_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'large_preserve_aspect_ratio_property_{$oProperty->id}_{$oProperty_Value->id}');" .
+									"$(\"#{$windowId} input[name='large_place_watermark_checkbox_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'large_place_watermark_checkbox_property_{$oProperty->id}_{$oProperty_Value->id}');" .
+									"$(\"#{$windowId} input[name='watermark_position_x_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'watermark_position_x_property_{$oProperty->id}_{$oProperty_Value->id}');" .
+									"$(\"#{$windowId} input[name='watermark_position_y_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'watermark_position_y_property_{$oProperty->id}_{$oProperty_Value->id}');" .
+									// Small
+									"$(\"#{$windowId} input[name='small_max_width_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_max_width_small_property_{$oProperty->id}_{$oProperty_Value->id}');" .
+									"$(\"#{$windowId} input[name='small_max_height_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_max_height_small_property_{$oProperty->id}_{$oProperty_Value->id}');" .
+									"$(\"#{$windowId} input[name='small_preserve_aspect_ratio_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_preserve_aspect_ratio_small_property_{$oProperty->id}_{$oProperty_Value->id}');" .
+									"$(\"#{$windowId} input[name='small_place_watermark_checkbox_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_place_watermark_checkbox_small_property_{$oProperty->id}_{$oProperty_Value->id}');" .
+									"$(\"#{$windowId} input[name='create_small_image_from_large_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'create_small_image_from_large_small_property_{$oProperty->id}_{$oProperty_Value->id}');"
+									)
+									->execute();
+
+								$this->_Admin_Form_Controller->addMessage(ob_get_clean());
 							}
-
-							$description_small = $this->_getEachPost("description_small_property_{$oProperty->id}");
-
-							if (!is_null($description_small))
-							{
-								$oProperty_Value->file_small_description = $description_small;
-							}
-							// -------
-
-							$oProperty_Value
-								->sorting($this->_getSorting($oProperty_Value))
-								->save();
-
-							$this->_loadFiles($aLargeFile, $aSmallFile, $oProperty_Value, "property_{$oProperty->id}");
-
-							$this->_Admin_Form_Controller->addMessage(ob_get_clean());
-
-							ob_start();
-							Core_Html_Entity::factory('Script')
-								->value("$(\"#{$windowId} div#property_{$oProperty->id}.new-property\").eq(0).removeClass('new-property');" .
-								"$(\"#{$windowId} div[id^='file_large'] input[name='property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'property_{$oProperty->id}_{$oProperty_Value->id}');" .
-								"$(\"#{$windowId} div[id^='file_small'] input[name='small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_property_{$oProperty->id}_{$oProperty_Value->id}');" .
-								// Description
-								"$(\"#{$windowId} input[name='description_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'description_property_{$oProperty->id}_{$oProperty_Value->id}');" .
-								"$(\"#{$windowId} input[name='description_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'description_small_property_{$oProperty->id}_{$oProperty_Value->id}');" .
-								// Large
-								"$(\"#{$windowId} input[name='large_max_width_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'large_max_width_property_{$oProperty->id}_{$oProperty_Value->id}');" .
-								"$(\"#{$windowId} input[name='large_max_height_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'large_max_height_property_{$oProperty->id}_{$oProperty_Value->id}');" .
-								"$(\"#{$windowId} input[name='large_preserve_aspect_ratio_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'large_preserve_aspect_ratio_property_{$oProperty->id}_{$oProperty_Value->id}');" .
-								"$(\"#{$windowId} input[name='large_place_watermark_checkbox_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'large_place_watermark_checkbox_property_{$oProperty->id}_{$oProperty_Value->id}');" .
-								"$(\"#{$windowId} input[name='watermark_position_x_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'watermark_position_x_property_{$oProperty->id}_{$oProperty_Value->id}');" .
-								"$(\"#{$windowId} input[name='watermark_position_y_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'watermark_position_y_property_{$oProperty->id}_{$oProperty_Value->id}');" .
-								// Small
-								"$(\"#{$windowId} input[name='small_max_width_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_max_width_small_property_{$oProperty->id}_{$oProperty_Value->id}');" .
-								"$(\"#{$windowId} input[name='small_max_height_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_max_height_small_property_{$oProperty->id}_{$oProperty_Value->id}');" .
-								"$(\"#{$windowId} input[name='small_preserve_aspect_ratio_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_preserve_aspect_ratio_small_property_{$oProperty->id}_{$oProperty_Value->id}');" .
-								"$(\"#{$windowId} input[name='small_place_watermark_checkbox_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_place_watermark_checkbox_small_property_{$oProperty->id}_{$oProperty_Value->id}');" .
-								"$(\"#{$windowId} input[name='create_small_image_from_large_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'create_small_image_from_large_small_property_{$oProperty->id}_{$oProperty_Value->id}');"
-								)
-								->execute();
-
-							$this->_Admin_Form_Controller->addMessage(ob_get_clean());
 						}
 					}
 				break;
@@ -2059,6 +2068,23 @@ class Property_Controller_Tab extends Core_Servant_Properties
 					$oProperty_Value->file_name = is_null($param['large_image_name'])
 						? ''
 						: $param['large_image_name'];
+
+					$oProperty_Value->width = $oProperty_Value->height = $oProperty_Value->size = 0;
+
+					if (Core_File::isFile($large_image) && is_readable($large_image))
+					{
+						$oProperty_Value->size = filesize($large_image);
+
+						if ($oProperty_Value->size > 12 && Core_Image::instance()->exifImagetype($large_image))
+						{
+							$picsize = @getimagesize($large_image);
+							if ($picsize)
+							{
+								$oProperty_Value->width = $picsize[0];
+								$oProperty_Value->height = $picsize[1];
+							}
+						}
+					}
 				}
 
 				if ($result['small_image'])
@@ -2067,6 +2093,23 @@ class Property_Controller_Tab extends Core_Servant_Properties
 					$oProperty_Value->file_small_name = is_null($param['small_image_name'])
 						? ''
 						: $param['small_image_name'];
+
+					$oProperty_Value->small_width = $oProperty_Value->small_height = $oProperty_Value->small_size = 0;
+
+					if (Core_File::isFile($small_image) && is_readable($small_image))
+					{
+						$oProperty_Value->small_size = filesize($small_image);
+
+						if ($oProperty_Value->small_size > 12 && Core_Image::instance()->exifImagetype($small_image))
+						{
+							$picsize = @getimagesize($small_image);
+							if ($picsize)
+							{
+								$oProperty_Value->small_width = $picsize[0];
+								$oProperty_Value->small_height = $picsize[1];
+							}
+						}
+					}
 				}
 
 				$oProperty_Value->save();

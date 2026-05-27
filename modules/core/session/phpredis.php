@@ -308,7 +308,7 @@ class Core_Session_Phpredis implements SessionHandlerInterface
 		$key = $this->_getKey($id);
 		$value = self::$_redis->get($key);
 
-		return $value === FALSE;
+		return $value !== FALSE;
 	}
 
 	/**
@@ -320,7 +320,9 @@ class Core_Session_Phpredis implements SessionHandlerInterface
 	{
 		$iStartTime = time();
 
-		$this->_lockToken = uniqid();
+		//$this->_lockToken = uniqid();
+		$this->_lockToken = Core::generateUniqueId(16);
+		
 		$this->_lockKey = $this->_getKey($id) . '.lock';
 
 		while (!is_null(self::$_redis) && !connection_aborted())

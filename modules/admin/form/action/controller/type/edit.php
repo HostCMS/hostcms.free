@@ -464,7 +464,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 			//->caption(Core::_('admin_form.form_forms_tab_1'))
 			->name('main')
 			->class($this->tabClass)
-			->icon('fas fa-grip-horizontal')
+			->icon('fa-solid fa-grip')
 			->iconTitle(Core::_('admin_form.form_forms_tab_1'));
 
 		$this->addTab($oAdmin_Form_Tab_EntityMain);
@@ -476,7 +476,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				//->caption(Core::_('admin_form.form_forms_tab_2'))
 				->name('additional')
 				->class($this->tabClass)
-				->icon('fas fa-gear')
+				->icon('fa-solid fa-gear')
 				->iconTitle(Core::_('admin_form.form_forms_tab_2'));
 
 			// $oUser = Core_Auth::getCurrentUser();
@@ -493,7 +493,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				//->caption(Core::_('admin_form.form_forms_tab_1'))
 				->name('user_fields')
 				->class($this->tabClass)
-				->icon('fas fa-user-cog')
+				->icon('fa-solid fa-user-gear')
 				->iconTitle(Core::_('admin_form.form_forms_tab_3'));
 
 			$this->addTabBefore($oAdmin_Form_Tab_EntityFields, $oAdmin_Form_Tab_EntityAdditional);
@@ -1071,6 +1071,9 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 		// Autosave
 		$this->autosave && $this->_deleteAutosave();
 
+		// Delete Form Locks
+		$this->_deleteLock();
+
 		// Webhooks
 		if (Core::moduleIsActive('webhook'))
 		{
@@ -1107,18 +1110,19 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 	 */
 	protected function _deleteAutosave()
 	{
-		$aChecked = $this->_Admin_Form_Controller->getChecked();
-		$datasetId = is_array($aChecked) ? key($aChecked) : '';
+		//$aChecked = $this->_Admin_Form_Controller->getChecked();
+		//$datasetId = is_array($aChecked) ? key($aChecked) : '';
 
 		$oAdmin_Form = $this->_Admin_Form_Controller->getAdminForm();
 
-		if ($datasetId !== '')
-		{
-			$oAdmin_Form_Autosave = Core_Entity::factory('Admin_Form_Autosave')->getObject($oAdmin_Form->id, $datasetId, intval($this->_object->getPrimaryKey()));
+		//if ($datasetId !== '')
+		//{
+			$oAdmin_Form_Autosave = Core_Entity::factory('Admin_Form_Autosave')
+				->getObject($oAdmin_Form->id, intval($this->getDatasetId()), intval($this->_object->getPrimaryKey()));
 
 			!is_null($oAdmin_Form_Autosave)
 				&& $oAdmin_Form_Autosave->delete();
-		}
+		//}
 
 		// Remove old items
 		if (rand(0, 99) == 0)
@@ -1127,6 +1131,18 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				->where('datetime', '<', Core_Date::timestamp2sql(strtotime('-1 month')))
 				->execute();
 		}
+
+		return $this;
+	}
+
+	/**
+	 * Delete locks
+	 * @return self
+	 */
+	protected function _deleteLock()
+	{
+		$oAdmin_Form = $this->_Admin_Form_Controller->getAdminForm();
+		Admin_Form_Lock_Controller::unlock($oAdmin_Form->id, intval($this->getDatasetId()), intval($this->_object->getPrimaryKey()));
 
 		return $this;
 	}
@@ -1348,7 +1364,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 							->onclick("res = confirm('" . Core::_('Admin_Form.confirm_dialog', Core::_('Admin_Form.delete')) . "'); if (res) {" . $onclick . " } else { return false }")
 							->add(
 								Admin_Form_Entity::factory('Code')
-									->html('<i class="fa fa-trash no-margin-right"></i>')
+									->html('<i class="fa-solid fa-trash-can no-margin-right"></i>')
 							);
 
 						$oAdmin_Form_Entity_Buttons->add($oAdmin_Form_Entity_Button_Delete);
@@ -1371,7 +1387,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				->onclick($this->_Admin_Form_Controller->getAdminLoadAjax($path))
 				->add(
 					Admin_Form_Entity::factory('Code')
-						->html('<i class="fa fa-arrow-circle-left no-margin-right darkgray"></i>')
+						->html('<i class="fa-solid fa-circle-left no-margin-right darkgray"></i>')
 				);
 
 			$oAdmin_Form_Entity_Buttons->add($oAdmin_Form_Entity_Button_Back);

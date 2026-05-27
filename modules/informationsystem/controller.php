@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Informationsystem
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Informationsystem_Controller
 {
@@ -48,8 +48,8 @@ class Informationsystem_Controller
 
 			</script>
 			<div class="btn-group pull-right">
-				<a class="btn btn-sm btn-default"><i class="fa fa-plus"></i></a>
-				<a class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
+				<a class="btn btn-sm btn-default"><i class="fa-solid fa-plus"></i></a>
+				<a class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-angle-down"></i></a>
 				<ul class="dropdown-menu dropdown-default" role="menu">
 					<li class="disabled">
 						<a class="bold">' . Core::_("Informationsystem.seo_template_informationsystem") . '</a>
@@ -94,8 +94,8 @@ class Informationsystem_Controller
 				});
 			</script>
 			<div class="btn-group pull-right">
-				<a class="btn btn-sm btn-default"><i class="fa fa-plus"></i></a>
-				<a class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
+				<a class="btn btn-sm btn-default"><i class="fa-solid fa-plus"></i></a>
+				<a class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-angle-down"></i></a>
 				<ul class="dropdown-menu dropdown-default" role="menu">
 					<li class="disabled">
 						<a class="bold">' . Core::_("Informationsystem.seo_template_informationsystem") . '</a>
@@ -156,8 +156,8 @@ class Informationsystem_Controller
 				});
 			</script>
 			<div class="btn-group pull-right">
-				<a class="btn btn-sm btn-default"><i class="fa fa-plus"></i></a>
-				<a class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
+				<a class="btn btn-sm btn-default"><i class="fa-solid fa-plus"></i></a>
+				<a class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-angle-down"></i></a>
 				<ul class="dropdown-menu dropdown-default" role="menu">
 					<li class="disabled">
 						<a class="bold">' . Core::_("Informationsystem.seo_template_informationsystem") . '</a>

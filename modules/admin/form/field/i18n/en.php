@@ -6,7 +6,7 @@
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Back-end form fields',
@@ -30,7 +30,7 @@ return array(
 	'allow_filter' => 'Allow filter',
 	'editable' => 'Allow edit-in-place',
 	'width' => 'Field width (px, %)',
-	'ico' => '<acronym title="Field\'s ico, e.g. &quot;fa fa-comment&quot;">Icon class</acronym>',
+	'ico' => '<acronym title="Field\'s ico">Icon class</acronym>',
 	'class' => 'CSS class',
 	'attributes' => '<acronym title="Field HTML-attribute list">Attributes</acronym>',
 	'image' => '<acronym title="Correspondence of pictures and field values that is set as <Field value>=<Path to picture>">Correspondence of pictures and field values</acronym>',

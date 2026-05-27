@@ -11,26 +11,26 @@
  */
 class Smarty_Internal_Method_GetTemplateVars
 {
-    /**
-     * Valid for all objects
-     *
-     * @var int
-     */
+	/**
+	 * Valid for all objects
+	 *
+	 * @var int
+	 */
     public $objMap = 7;
 
-    /**
-     * Returns a single or all template variables
-     *
-     * @api  Smarty::getTemplateVars()
-     * @link https://www.smarty.net/docs/en/api.get.template.vars.tpl
-     *
-     * @param \Smarty_Internal_Data|\Smarty_Internal_Template|\Smarty $data
-     * @param string                                                  $varName       variable name or null
-     * @param \Smarty_Internal_Data|\Smarty_Internal_Template|\Smarty $_ptr          optional pointer to data object
-     * @param bool                                                    $searchParents include parent templates?
-     *
-     * @return mixed variable value or or array of variables
-     */
+	/**
+	 * Returns a single or all template variables
+	 *
+	 * @api  Smarty::getTemplateVars()
+	 * @link https://www.smarty.net/docs/en/api.get.template.vars.tpl
+	 *
+	 * @param \Smarty_Internal_Data|\Smarty_Internal_Template|\Smarty $data
+	 * @param string                                                  $varName       variable name or null
+	 * @param \Smarty_Internal_Data|\Smarty_Internal_Template|\Smarty $_ptr          optional pointer to data object
+	 * @param bool                                                    $searchParents include parent templates?
+	 *
+	 * @return mixed variable value or or array of variables
+	 */
     public function getTemplateVars(
         Smarty_Internal_Data $data,
         $varName = null,
@@ -73,17 +73,17 @@ class Smarty_Internal_Method_GetTemplateVars
         }
     }
 
-    /**
-     * gets the object of a Smarty variable
-     *
-     * @param \Smarty_Internal_Data|\Smarty_Internal_Template|\Smarty $data
-     * @param string                                                  $varName       the name of the Smarty variable
-     * @param \Smarty_Internal_Data|\Smarty_Internal_Template|\Smarty $_ptr          optional pointer to data object
-     * @param bool                                                    $searchParents search also in parent data
-     * @param bool                                                    $errorEnable
-     *
-     * @return \Smarty_Variable
-     */
+	/**
+	 * gets the object of a Smarty variable
+	 *
+	 * @param \Smarty_Internal_Data|\Smarty_Internal_Template|\Smarty $data
+	 * @param string                                                  $varName       the name of the Smarty variable
+	 * @param \Smarty_Internal_Data|\Smarty_Internal_Template|\Smarty $_ptr          optional pointer to data object
+	 * @param bool                                                    $searchParents search also in parent data
+	 * @param bool                                                    $errorEnable
+	 *
+	 * @return \Smarty_Variable
+	 */
     public function _getVariable(
         Smarty_Internal_Data $data,
         $varName,

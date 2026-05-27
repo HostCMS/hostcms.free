@@ -145,6 +145,8 @@
 			const $doc = hQuery(document);
 
 			$doc.on("click", "*[hostcms\\:id]", function(event) {
+				event.stopImmediatePropagation();
+
 				const $object = hQuery(this);
 
 				if (!event.isDefaultPrevented()) {
@@ -224,8 +226,12 @@
 										$obj.css('display', '');
 										input.remove();
 									}
-								})
-								.focus();
+								});
+
+							// Фокусируемся только если это НЕ визуальный редактор
+							if (type !== 'wysiwyg') {
+								jEditInPlace.focus();
+							}
 
 							if (type === 'wysiwyg') {
 								setTimeout(function() {
@@ -353,19 +359,55 @@
 				width: $win.width() * 0.7,
 				height: $win.height() * 0.7,
 				path: '',
-				additionalParams: ''
+				additionalParams: '',
+				justAction: false
 			}, settings);
 
-			const jDivWin = hQuery.createWindow(settings);
 			let cmsrequest = settings.path;
 
 			if (settings.additionalParams && settings.additionalParams.trim() !== '') {
 				cmsrequest += '?' + settings.additionalParams;
 			}
 
+			// Если установлен флаг justAction, выполняем AJAX-запрос без открытия окна
+			if (settings.justAction) {
+				hQuery.ajax({
+					url: cmsrequest,
+					method: 'GET',
+					data: { '_': Date.now(), 'hostcms[view]': 'empty' },
+					dataType: 'json',
+					success: function(response) {
+						hQuery('body').append('<div class="action-toast" id="actionToast">\
+							<div class="content">\
+								<div class="desc">\
+									' + response.error + '\
+								</div>\
+							</div>\
+							<button class="close-btn" id="closeToastBtn">✕</button>\
+						</div>');
+
+						document.getElementById('closeToastBtn').addEventListener('click', function() {
+							const toast = document.getElementById('actionToast');
+							if (toast) {
+								toast.remove();
+							}
+						});
+					},
+					error: function(jqXHR, textStatus) {
+						console.error(jqXHR.responseText);
+					}
+				});
+
+				return null;
+			}
+
+			// Обычное поведение - создаем окно с iframe
+			const jDivWin = hQuery.createWindow(settings);
+
 			jDivWin
 				.append('<iframe src="' + cmsrequest + '&hostcmsMode=blank"></iframe>')
 				.dialog('open');
+
 			return jDivWin;
 		},
 		changeActive: function(settings) {
@@ -488,7 +530,7 @@
 					if (result === 'OK') {
 						hQuery.reloadStylesheets();
 					} else {
-						frontendNotify(result, 'top-left', '5000', 'danger', 'fa-gear', true, false);
+						frontendNotify(result, 'top-left', '5000', 'danger', 'fa-solid fa-gear', true, false);
 					}
 				}
 			});
@@ -1132,7 +1174,8 @@
 		toastr.options.extendedTimeOut = 0;
 		toastr.options.timeOut = timeout;
 		toastr.options.closeButton = closable;
-		toastr.options.iconClass = icon + ' toast-' + theme;
+		toastr.options.toastClass = ' toast-' + theme;
+		toastr.options.iconClass = icon;
 		toastr.options.playSound = sound;
 		toastr['custom'](message);
 	}

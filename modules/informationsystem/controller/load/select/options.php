@@ -13,12 +13,12 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  */
 class Informationsystem_Controller_Load_Select_Options extends Admin_Form_Action_Controller_Type_Load_Select_Options
 {
-    /**
-     * Get Informationsystem_Item option name
-     * @param Informationsystem_Item_Model $oInformationsystem_Item
-     * @return array|bool|float|int|mixed|string
-     * @hostcms-event Informationsystem_Controller_Load_Select_Options.onGetOptionName
-     */
+	/**
+	 * Get Informationsystem_Item option name
+	 * @param Informationsystem_Item_Model $oInformationsystem_Item
+	 * @return array|bool|float|int|mixed|string
+	 * @hostcms-event Informationsystem_Controller_Load_Select_Options.onGetOptionName
+	 */
 	static public function getOptionName(Informationsystem_Item_Model $oInformationsystem_Item)
 	{
 		Core_Event::notify('Informationsystem_Controller_Load_Select_Options.onGetOptionName', $oInformationsystem_Item);
@@ -51,7 +51,7 @@ class Informationsystem_Controller_Load_Select_Options extends Admin_Form_Action
 	/**
 	 * Get count of objects
 	 * @return int
-     */
+	 */
 	protected function _getCount()
 	{
 		return $this->_model->getCount();

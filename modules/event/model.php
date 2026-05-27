@@ -161,7 +161,7 @@ class Event_Model extends Core_Entity
 			: '';
 
 		$deadlineIcon = $this->deadline()
-			? '<i class="fa fa-clock-o event-title-deadline"></i>'
+			? '<i class="fa-regular fa-clock event-title-deadline"></i>'
 			: '';*/
 
 		$opacity = $this->completed != 0
@@ -173,7 +173,7 @@ class Event_Model extends Core_Entity
 		// Название вместе с attachments в одном div
 		if ($this->Event_Attachments->getCount(FALSE))
 		{
-			?><i class="fa fa-paperclip name-attachments"></i><?php
+			?><i class="fa-solid fa-paperclip name-attachments"></i><?php
 		}
 		?><div class="semi-bold editable" data-editable-type="textarea" style="display: inline-block;" id="apply_check_0_<?php echo $this->id?>_fv_<?php echo $oAdmin_Form_Field->id?>"><?php echo nl2br(htmlspecialchars((string) $this->name))?></div><?php
 
@@ -189,7 +189,7 @@ class Event_Model extends Core_Entity
 			</div>
 			<?php if ($bExpand)
 			{
-				?><div class="more-wrapper"><div class="more" onclick="$.showAllDescription(this)"><?php echo Core::_('Event.more')?> <i class="fas fa-chevron-down"></i></div></div><?php
+				?><div class="more-wrapper"><div class="more" onclick="$.showAllDescription(this)"><?php echo Core::_('Event.more')?> <i class="fa-solid fa-chevron-down"></i></div></div><?php
 			}
 			?>
 			</div><?php
@@ -204,7 +204,7 @@ class Event_Model extends Core_Entity
 			foreach ($aTags as $oTag)
 			{
 				Core_Html_Entity::factory('Code')
-					->value('<span class="badge badge-square badge-tag badge-max-width badge-lightgray margin-right-5" title="' . htmlspecialchars($oTag->name) . '"><i class="fa fa-tag"></i> ' . htmlspecialchars($oTag->name) . '</span>')
+					->value('<span class="badge badge-square badge-tag badge-max-width badge-lightgray margin-right-5" title="' . htmlspecialchars($oTag->name) . '"><i class="fa-solid fa-tags"></i> ' . htmlspecialchars($oTag->name) . '</span>')
 					->execute();
 			}
 		}
@@ -240,7 +240,7 @@ class Event_Model extends Core_Entity
 			}
 		}
 
-		?></div><span class="small darkgray text-align-right"><i class="fa fa-clock-o"></i><?php echo Core_Date::time2string(time() - Core_Date::sql2timestamp($this->datetime))?></span><?php
+		?></div><span class="small darkgray text-align-right"><i class="fa-regular fa-clock"></i><?php echo Core_Date::time2string(time() - Core_Date::sql2timestamp($this->datetime))?></span><?php
 		?></div><?php
 
 		return ob_get_clean();
@@ -347,15 +347,15 @@ class Event_Model extends Core_Entity
 			{
 				$oEvent_Status = Core_Entity::factory('Event_Status', $this->event_status_id);
 
-				$sEventStatusName = htmlspecialchars($oEvent_Status->name);
-				$sEventStatusColor = htmlspecialchars($oEvent_Status->color);
+				$sEventStatusName = $oEvent_Status->name;
+				$sEventStatusColor = $oEvent_Status->color;
 			}
 			else
 			{
 				$sEventStatusName = Core::_('Event.notStatus');
 				$sEventStatusColor = '#aebec4';
 			}
-			?><div class="event-status margin-right-10"><i class="fa fa-circle margin-right-5" style="color: <?php echo $sEventStatusColor?>"></i><span style="color: <?php echo $sEventStatusColor?>"><?php echo $sEventStatusName?></span></div><?php
+			?><div class="event-status margin-right-10"><i class="fa-solid fa-circle margin-right-5" style="color: <?php echo $sEventStatusColor?>"></i><span style="color: <?php echo htmlspecialchars($sEventStatusColor)?>"><?php echo htmlspecialchars($sEventStatusName)?></span></div><?php
 		}
 
 		return ob_get_clean();
@@ -449,7 +449,7 @@ class Event_Model extends Core_Entity
 			if (!is_null($oDeal->Deal_Template->color) && !is_null($oDeal->name))
 			{
 				?><div class="related-events-wrapper">
-					<div class="related-events" style="color: <?php echo $oDeal->Deal_Template->color?>; background-color:<?php echo Core_Str::hex2lighter($oDeal->Deal_Template->color, 0.88)?>"><i class="fa fa-handshake-o"></i></div>
+					<div class="related-events" style="color: <?php echo $oDeal->Deal_Template->color?>; background-color:<?php echo Core_Str::hex2lighter($oDeal->Deal_Template->color, 0.88)?>"><i class="fa-regular fa-handshake"></i></div>
 					<div><a style="color: <?php echo $oDeal->Deal_Template->color?>" href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/deal/index.php')?>?hostcms[action]=edit&hostcms[checked][0][<?php echo $oDeal->id?>]=1" onclick="$.modalLoad({path: hostcmsBackend + '/deal/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oDeal->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>', width: '90%'}); return false"><?php echo htmlspecialchars($oDeal->name)?></a></div>
 				</div><?php
 			}
@@ -471,7 +471,7 @@ class Event_Model extends Core_Entity
 			if (!is_null($oLead->Lead_Status->color))
 			{
 				?><div class="related-events-wrapper">
-					<div class="related-events" style="color: <?php echo $oLead->Lead_Status->color?>; background-color:<?php echo Core_Str::hex2lighter($oLead->Lead_Status->color, 0.88)?>"><i class="fa fa-user-circle-o"></i></div>
+					<div class="related-events" style="color: <?php echo $oLead->Lead_Status->color?>; background-color:<?php echo Core_Str::hex2lighter($oLead->Lead_Status->color, 0.88)?>"><i class="fa-regular fa-circle-user"></i></div>
 					<div><a style="color: <?php echo $oLead->Lead_Status->color?>;" href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/lead/index.php')?>?hostcms[action]=edit&hostcms[checked][0][<?php echo $oLead->id?>]=1" onclick="$.modalLoad({path: hostcmsBackend + '/lead/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oLead->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>', width: '90%'}); return false"><?php echo htmlspecialchars($oLead->getFullName())?></a></div>
 				</div><?php
 			}
@@ -512,7 +512,7 @@ class Event_Model extends Core_Entity
 				if (!is_null($oDms_Document->Dms_Document_Type->color) && !is_null($action))
 				{
 					?><div class="related-events-wrapper">
-						<div class="related-events" style="color: <?php echo $oDms_Document->Dms_Document_Type->color?>; background-color:<?php echo Core_Str::hex2lighter($oDms_Document->Dms_Document_Type->color, 0.88)?>"><i class="fa fa-columns"></i></div>
+						<div class="related-events" style="color: <?php echo $oDms_Document->Dms_Document_Type->color?>; background-color:<?php echo Core_Str::hex2lighter($oDms_Document->Dms_Document_Type->color, 0.88)?>"><i class="fa-solid fa-table-columns"></i></div>
 						<div><a style="color: <?php echo $oDms_Document->Dms_Document_Type->color?>;" href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/dms/document/index.php')?>?hostcms[action]=edit&hostcms[checked][0][<?php echo $oDms_Document->id?>]=1" onclick="$.modalLoad({path: hostcmsBackend + '/dms/document/index.php', action: '<?php echo $action?>', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oDms_Document->id?>]=1', windowId: 'modal<?php echo $oDms_Document->id?>', width: '90%'}); return false"><?php echo htmlspecialchars($name)?></a></div>
 					</div><?php
 				}
@@ -615,7 +615,7 @@ class Event_Model extends Core_Entity
 
 				if ($key > 1)
 				{
-					$sResult .= '<div class="more" onclick="$.showCounterparty(this)">' . Core::_('Event.more') . ' <i class="fas fa-chevron-down"></div>';
+					$sResult .= '<div class="more" onclick="$.showCounterparty(this)">' . Core::_('Event.more') . ' <i class="fa-solid fa-chevron-down"></div>';
 				}
 
 				$sResult .= '</div>';
@@ -624,70 +624,6 @@ class Event_Model extends Core_Entity
 
 		return $sResult;
 	}
-
-	/**
-	 * Backend callback method
-	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
-	 */
-	/* public function event_group_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
-	{
-		ob_start();
-
-		$path = $oAdmin_Form_Controller->getPath();
-
-		$oEventCreator = $this->getCreator();
-		$oCurrentUser = Core_Auth::getCurrentUser();
-
-		// Сотрудник - создатель дела
-		$userIsEventCreator = (!is_null($oEventCreator) && $oEventCreator->id == $oCurrentUser->id);
-
-		// Менять группу дела может только его создатель
-		if ($userIsEventCreator)
-		{
-			$aMasEventGroups = array(array('value' => Core::_('Event.notGroup'), 'color' => '#aebec4'));
-
-			// Группы дел
-			$aEventGroups = Core_Entity::factory('Event_Group')->findAll();
-
-			foreach ($aEventGroups as $oEventGroup)
-			{
-				$aMasEventGroups[$oEventGroup->id] = array('value' => $oEventGroup->name, 'color' => $oEventGroup->color);
-			}
-
-			$oCore_Html_Entity_Dropdownlist = new Core_Html_Entity_Dropdownlist();
-
-			$oCore_Html_Entity_Dropdownlist
-				->value($this->event_group_id)
-				->options($aMasEventGroups)
-				->data('change-context', 'true')
-				->onchange("mainFormLocker.unlock(); $.adminLoad({path: '{$path}', additionalParams: 'hostcms[checked][0][{$this->id}]=0&eventGroupId=' + $(this).find('li[selected]').prop('id'), action: 'changeGroup', windowId: '{$oAdmin_Form_Controller->getWindowId()}'});")
-				->execute();
-		}
-		else
-		{
-			if ($this->event_group_id)
-			{
-				$oEventGroup = Core_Entity::factory('Event_Group', $this->event_group_id);
-
-				$sEventGroupName = htmlspecialchars($oEventGroup->name);
-				$sEventGroupColor = htmlspecialchars($oEventGroup->color);
-			}
-			else
-			{
-				$sEventGroupName = Core::_('Event.notGroup');
-				$sEventGroupColor = '#aebec4';
-			}
-			?>
-			<div class="event-group">
-				<i class="fa fa-circle" style="margin-right: 5px; color: <?php echo $sEventGroupColor?>"></i><span style="color: <?php echo $sEventGroupColor?>"><?php echo $sEventGroupName?></span>
-			</div>
-			<?php
-		}
-
-		return ob_get_clean();
-	} */
 
 	public function getCompletedDropdown($oAdmin_Form_Controller)
 	{
@@ -705,7 +641,7 @@ class Event_Model extends Core_Entity
 			1 => array(
 				'value' => $successfully,
 				'color' => '#a0d468',
-				'icon' => 'fa-solid fa-circle-check fa-fw margin-right-5'
+				'icon' => 'fa-regular fa-circle-check fa-fw margin-right-5'
 			),
 			-1 => array(
 				'value' => $failed,
@@ -717,7 +653,7 @@ class Event_Model extends Core_Entity
 		return Admin_Form_Entity::factory('Dropdownlist')
 			->options($aCompleted)
 			->name('completed')
-			->divAttr(array('class' => 'margin-left-10 event-completed hidden'))
+			->divAttr(array('class' => 'margin-left-10 crm-note-completed hidden'))
 			->controller($oAdmin_Form_Controller)
 			->execute();
 	}
@@ -912,13 +848,13 @@ class Event_Model extends Core_Entity
 		switch ($this->completed)
 		{
 			case 0:
-				$ico = '<i class="fa fa-circle-o fa-inactive" title="' . Core::_('Event.in_process') . '"></i>';
+				$ico = '<i class="fa-regular fa-circle fa-inactive" title="' . Core::_('Event.in_process') . '"></i>';
 			break;
 			case 1:
-				$ico = '<i class="fa fa-check-circle fa-active palegreen" title="' . Core::_('Event.complete') . '"></i>';
+				$ico = '<i class="fa-solid fa-check-circle fa-active palegreen" title="' . Core::_('Event.complete') . '"></i>';
 			break;
 			case -1:
-				$ico = '<i class="fa fa-times darkorange" title="' . Core::_('Event.failed') . '"></i>';
+				$ico = '<i class="fa-solid fa-xmark darkorange" title="' . Core::_('Event.failed') . '"></i>';
 			break;
 			default:
 				$ico = '—';
@@ -1065,7 +1001,6 @@ class Event_Model extends Core_Entity
 		//$this->Event_Notes->deleteAll(FALSE);
 		$this->Events->deleteAll(FALSE);
 		$this->Event_Histories->deleteAll(FALSE);
-		$this->Crm_Notes->deleteAll(FALSE);
 		$this->Event_Crm_Notes->deleteAll(FALSE);
 		$this->Event_Checklists->deleteAll(FALSE);
 
@@ -1073,6 +1008,8 @@ class Event_Model extends Core_Entity
 		$this->Event_Siteusers->deleteAll(FALSE);
 		$this->Event_Calendar_Caldavs->deleteAll(FALSE);
 		$this->Event_Crm_Projects->deleteAll(FALSE);
+
+		$this->Crm_Notes->deleteAll(FALSE);
 
 		if (Core::moduleIsActive('deal'))
 		{
@@ -1351,7 +1288,7 @@ class Event_Model extends Core_Entity
 			}
 			?>
 			<div class="event-status">
-				<i class="fa fa-circle" style="margin-right: 5px; color: <?php echo $sEventStatusColor?>"></i><span style="color: <?php echo $sEventStatusColor?>"><?php echo $sEventStatusName?></span>
+				<i class="fa-solid fa-circle" style="margin-right: 5px; color: <?php echo $sEventStatusColor?>"></i><span style="color: <?php echo $sEventStatusColor?>"><?php echo $sEventStatusName?></span>
 			</div>
 			<?php
 		}
@@ -1361,7 +1298,7 @@ class Event_Model extends Core_Entity
 			: '';
 
 		$deadlineIcon = $this->deadline()
-			? '<i class="fa fa-clock-o event-title-deadline"></i>'
+			? '<i class="fa-regular fa-clock event-title-deadline"></i>'
 			: '';
 
 		?>
@@ -1731,7 +1668,7 @@ class Event_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event event.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')

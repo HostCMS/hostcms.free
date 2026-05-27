@@ -123,6 +123,7 @@ class Wysiwyg_Driver_Tinymce8_Handler extends Wysiwyg_Handler
 
 		// add
 		$init += array(
+			'license_key' => '"gpl"',
 			//'script_url' => Admin_Form_Controller::correctBackendPath("'{$basePath}/tinymce.min.js?v=" . HOSTCMS_UPDATE_NUMBER . "'"),
 			'language' => '"' . $lng . '"',
 			'language_url' => Admin_Form_Controller::correctBackendPath("'{$basePath}/langs/{$lng}.js'"),
@@ -134,21 +135,106 @@ class Wysiwyg_Driver_Tinymce8_Handler extends Wysiwyg_Handler
 			'images_upload_handler' => 'function (blobInfo, progress) { return hostcms_image_upload_handler(blobInfo, progress) }'
 		);
 
-		if (Core::moduleIsActive('shortcode'))
+		$initSetup = 'function(editor) {';
+
+		$initSetup .= "editor.on('init', () => {
+			// Сброс шрифта к стандартному
+			const fontFormats = editor.options.get('font_family_formats');
+
+			if (fontFormats && !fontFormats.includes('Default=')) {
+				editor.options.set('font_family_formats',
+					'Default=inherit; ' + fontFormats
+				);
+			}
+		});";
+
+		if (Core::moduleIsActive('ai') || Core::moduleIsActive('shortcode'))
 		{
-			$aShortcodes = Core_Entity::factory('Shortcode')->getAllByActive(1);
-
-			$aTmpShortcodes = array();
-
-			foreach ($aShortcodes as $oShortcode)
+			if (Core::moduleIsActive('ai'))
 			{
-				$aTmpShortcodes[] = "{ text: '" . Core_Str::escapeJavascriptVariable($oShortcode->name) . " [" . $oShortcode->id . "]', value: '" . Core_Str::escapeJavascriptVariable($oShortcode->example) . "' }";
+				$oSite = Core_Entity::factory('Site', CURRENT_SITE);
+				$oAi = $oSite->Ais->getDefault();
+
+				if (!is_null($oAi))
+				{
+					$initSetup .= 'editor.ui.registry.addButton(\'insertAiResponse\', {
+						text: "AI",
+						type: \'button\',
+						onAction: function (_) {
+							tinymce.activeEditor.windowManager.open({
+								size: \'large\',
+								title: "AI",
+								body: {
+									type: \'panel\',
+									items: [
+										{
+											type: \'textarea\', // component type
+											name: \'ai_prompt\', // identifier
+											enabled: true, // enabled state
+										}
+									]
+								},
+								initialData: {
+									ai_prompt: \'' . Core_Str::escapeJavascriptVariable($oAdmin_Form_Entity_Textarea->data('ai_prompt_default')) . '\'
+								},
+								buttons: [
+									{
+										type: \'custom\',
+										name: \'applyAiPrompt\',
+										enabled: true,
+										text: \'OK\',
+										buttonType: \'primary\',
+									}
+								],
+								onAction: (api, details) => {
+									const data = api.getData();
+
+									if (data.ai_prompt !== \'\')
+									{
+										$.loadingScreen(\'show\');
+
+										$.ajax({
+											url: hostcmsBackend + \'/ai/index.php\',
+											data: { \'aiSendWysiwygQuery\': 1, \'ai_id\': ' . $oAi->id . ', \'query\': data.ai_prompt },
+											dataType: \'json\',
+											type: \'POST\',
+											success: function(response){
+												$.loadingScreen(\'hide\');
+
+												if (response.status == \'success\')
+												{
+													tinymce.activeEditor.execCommand(\'mceInsertContent\', false, response.text);
+												}
+												else
+												{
+													Notify(\'<span>AI response error! Please try again later.</span>\', \'\', \'bottom-left\', \'5000\', \'danger\', \'fa-solid fa-ban\', true);
+												}
+											}
+										});
+									}
+
+									api.close();
+								}
+							});
+						}
+					});';
+				}
 			}
 
-			$sShortcodes = implode(',', $aTmpShortcodes);
+			if (Core::moduleIsActive('shortcode'))
+			{
+				$aShortcodes = Core_Entity::factory('Shortcode')->getAllByActive(1);
 
-			$init['setup'] = 'function(editor) {
-				editor.ui.registry.addButton(\'insertShortcode\', {
+				$aTmpShortcodes = array();
+
+				foreach ($aShortcodes as $oShortcode)
+				{
+					$aTmpShortcodes[] = "{ text: '" . Core_Str::escapeJavascriptVariable($oShortcode->name) . " [" . $oShortcode->id . "]', value: '" . Core_Str::escapeJavascriptVariable($oShortcode->example) . "' }";
+				}
+
+				$sShortcodes = implode(',', $aTmpShortcodes);
+
+				$initSetup .= 'editor.ui.registry.addButton(\'insertShortcode\', {
 					text: "' . Core::_('Shortcode.title') . '",
 					type: \'button\',
 					onAction: function (_) {
@@ -188,14 +274,77 @@ class Wysiwyg_Driver_Tinymce8_Handler extends Wysiwyg_Handler
 							}
 						});
 					}
-				});
-			}';
+				});';
+			}
 		}
+
+		if (is_array($oAdmin_Form_Entity_Textarea->wysiwygMentions) && count($oAdmin_Form_Entity_Textarea->wysiwygMentions)
+			&& $oAdmin_Form_Entity_Textarea->wysiwygMentionTemplate != ''
+		)
+		{
+			$initSetup .= '
+				const employees = ' . json_encode($oAdmin_Form_Entity_Textarea->wysiwygMentions, defined('JSON_UNESCAPED_UNICODE') ? JSON_UNESCAPED_UNICODE : 0) . ';
+
+				editor.ui.registry.addAutocompleter(\'mentions\', {
+					trigger: \'@\',
+					minChars: 0,
+					columns: 1,
+
+					fetch: function (pattern) {
+						return new Promise((resolve) => {
+							const searchString = pattern.toLowerCase();
+
+							// ФИЛЬТРАЦИЯ: Ищем совпадения ИЛИ в имени, ИЛИ в логине
+							const filtered = employees.filter(emp =>
+								emp.name.toLowerCase().includes(searchString) ||
+								emp.login.toLowerCase().includes(searchString)
+							);
+
+							const results = filtered.map(emp => ({
+								type: \'autocompleteitem\',
+								value: emp.id.toString(),
+								// ОТОБРАЖЕНИЕ В СПИСКЕ: Показываем "Имя (@login)"
+								text: emp.name != \'\'
+									? `${emp.name} (@${emp.login})`
+									: `@${emp.login}`
+							}));
+
+							resolve(results);
+						});
+					},
+
+					onAction: function (autocompleteApi, rng, value) {
+						editor.selection.setRng(rng);
+
+						const selectedEmp = employees.find(e => e.id.toString() === value);
+
+						const mentionText = selectedEmp.name != \'\'
+							? `${selectedEmp.name} (@${selectedEmp.login})`
+							: `${selectedEmp.login}`;
+
+						// Формируем HTML-плашку
+						const mentionHtml = `' . $oAdmin_Form_Entity_Textarea->wysiwygMentionTemplate . '`;
+
+						editor.insertContent(mentionHtml);
+						autocompleteApi.hide();
+					}
+				});
+			';
+		}
+
+		$initSetup .= '}';
+
+		$init['setup'] = $initSetup;
 
 		!isset($init['height'])
 			&& $init['height'] = '"' . ($oAdmin_Form_Entity_Textarea->rows * 30) . 'px"';
 
 		// $init['theme'] = '$(window).width() < 700 ? "inlite" : "modern"';
+
+		if (!isset($init['content_style']) && $oAdmin_Form_Entity_Textarea->wysiwygContentStyle != '')
+		{
+			$init['content_style'] = "`" . $oAdmin_Form_Entity_Textarea->wysiwygContentStyle . "`";
+		}
 
 		$userCss = trim(Core_Array::get($init, 'content_css', ''), '\'"');
 
@@ -248,7 +397,27 @@ class Wysiwyg_Driver_Tinymce8_Handler extends Wysiwyg_Handler
 
 		$Core_Html_Entity_Script = new Core_Html_Entity_Script();
 		$Core_Html_Entity_Script
-			->value("$(function() { setTimeout(function(){ $('#" . Core_Str::escapeJavascriptVariable($windowId) . " #" . Core_Str::escapeJavascriptVariable($oAdmin_Form_Entity_Textarea->id) . "').tinymce({ {$sInit} }); }, 300); });")
+			->value("$(function() {
+				var selector = '#" . Core_Str::escapeJavascriptVariable($windowId) . " #" . Core_Str::escapeJavascriptVariable($oAdmin_Form_Entity_Textarea->id) . "';
+				var attempts = 0;
+
+				var initEditor = function() {
+					var textarea = $(selector);
+
+					if (textarea.length > 0) {
+						var id = textarea.attr('id');
+						if (tinymce.get(id)) {
+							tinymce.execCommand('mceRemoveEditor', false, id);
+						}
+
+						setTimeout(function(){ textarea.tinymce({ {$sInit} }); }, 500);
+					} else if (attempts < 10) {
+						attempts++;
+						setTimeout(initEditor, 100);
+					}
+				};
+				initEditor();
+			});")
 			->execute();
 	}
 }

@@ -86,8 +86,8 @@ class Shop_Warehouse_Purchasereturn_Model extends Core_Entity
 	public function postedBackend()
 	{
 		return $this->posted
-			? '<i class="fa fa-check-circle-o green">'
-			: '<i class="fa fa-times-circle-o red">';
+			? '<i class="fa-regular fa-circle-check green">'
+			: '<i class="fa-regular fa-circle-xmark red">';
 	}
 
 	/**
@@ -194,7 +194,7 @@ class Shop_Warehouse_Purchasereturn_Model extends Core_Entity
 
 		$modalWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('modalWindowId', '', 'str'));
 
-		return '<i class="fa fa-check-circle-o green shop-document-related-select" onclick="$.selectShopDocumentRelated(this, \'' . $windowId . '\', \'' . $modalWindowId . '\')" data-id="' . $this->id . '" data-type="' . $this->getEntityType() . '" data-document-id="' . $document_id . '" data-shop-id="' . $this->Shop_Warehouse->shop_id . '" data-amount="' . $this->getAmount() . '"></i>';
+		return '<i class="fa-regular fa-circle-check green shop-document-related-select" onclick="$.selectShopDocumentRelated(this, \'' . $windowId . '\', \'' . $modalWindowId . '\')" data-id="' . $this->id . '" data-type="' . $this->getEntityType() . '" data-document-id="' . $document_id . '" data-shop-id="' . $this->Shop_Warehouse->shop_id . '" data-amount="' . $this->getAmount() . '"></i>';
 	}
 
 	/**
@@ -405,11 +405,11 @@ class Shop_Warehouse_Purchasereturn_Model extends Core_Entity
 		return $this;
 	}
 
-    /**
-     * Backend callback method
-     * @param Admin_Form_Field_Model $oAdmin_Form_Field
-     * @param Admin_Form_Controller $oAdmin_Form_Controller
-     */
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 */
 	public function printBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		Core::moduleIsActive('printlayout')

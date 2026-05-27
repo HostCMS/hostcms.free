@@ -136,7 +136,7 @@ class Template_Section_Controller
 					<div class="title"><?php echo htmlspecialchars($oLib->name)?></div>
 					<div class="image">
 						<img src="<?php echo htmlspecialchars($oLib->getFileHref())?>"/>
-						<i class="fa-solid fa-plus-circle" onclick="hQuery.addWidget(this, <?php echo $template_section_id?>, <?php echo $template_section_lib_id?>, <?php echo $oLib->id?>)"></i>
+						<i class="fa-solid fa-circle-plus" onclick="hQuery.addWidget(this, <?php echo $template_section_id?>, <?php echo $template_section_lib_id?>, <?php echo $oLib->id?>)"></i>
 					</div>
 				</div><?php
 			}
@@ -202,30 +202,34 @@ class Template_Section_Controller
 
 			$aFonts = array();
 
-			$aTemplate_Sections = $oTemplate->Template_Sections->findAll(FALSE);
+			$oParentTemplate = $oTemplate;
+			do {
+				$aTemplate_Sections = $oParentTemplate->Template_Sections->findAll(FALSE);
 
-			foreach ($aTemplate_Sections as $oTemplate_Section)
-			{
-				$oTemplate_Section_Libs = $oTemplate_Section->Template_Section_Libs;
-				$oTemplate_Section_Libs->queryBuilder()
-					->where('template_section_libs.active', '=', 1)
-					->where('template_section_libs.class', '!=', '');
-
-				$aTemplate_Section_Libs = $oTemplate_Section_Libs->findAll(FALSE);
-
-				foreach ($aTemplate_Section_Libs as $oTemplate_Section_Lib)
+				foreach ($aTemplate_Sections as $oTemplate_Section)
 				{
-					preg_match_all('/\bh-font-([^\s]+)/', $oTemplate_Section_Lib->class, $matches);
+					$oTemplate_Section_Libs = $oTemplate_Section->Template_Section_Libs;
+					$oTemplate_Section_Libs->queryBuilder()
+						->where('template_section_libs.active', '=', 1)
+						->where('template_section_libs.class', '!=', '');
 
-					foreach ($matches[1] as $fontName)
+					$aTemplate_Section_Libs = $oTemplate_Section_Libs->findAll(FALSE);
+
+					foreach ($aTemplate_Section_Libs as $oTemplate_Section_Lib)
 					{
-						if (!in_array($fontName, $aFonts))
+						preg_match_all('/\bh-font-([^\s]+)/', $oTemplate_Section_Lib->class, $matches);
+
+						foreach ($matches[1] as $fontName)
 						{
-							$aFonts[] = $fontName;
+							if (!in_array($fontName, $aFonts))
+							{
+								$aFonts[] = $fontName;
+							}
 						}
 					}
 				}
-			}
+				$oParentTemplate = $oParentTemplate->getParent();
+			} while($oParentTemplate);
 
 			foreach ($aFonts as $font)
 			{

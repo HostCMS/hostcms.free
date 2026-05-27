@@ -635,7 +635,7 @@ button.backendBody .ui-button::-moz-focus-inner {
 	align-items: center;
 	justify-content: center;
 	font-size: 20px;
-	z-index: 1000;
+	z-index: 10999;
 	color: initial;
 }
 .backendBody .hostcmsSection .hostcmsSectionIcon:hover, .backendBody .hostcmsSectionWidget .hostcmsWidgetIcon:hover {
@@ -1386,9 +1386,9 @@ button.backendBody .ui-button::-moz-focus-inner {
 .bootstrap-iso .settings-row-item-wrapper input::placeholder {
 	color: #eee;
 }
-.bootstrap-iso .settings-row-item-wrapper .minicolors .minicolors-swatch {
+/* .bootstrap-iso .settings-row-item-wrapper .minicolors .minicolors-swatch {
 	top: 11px;
-}
+} */
 .bootstrap-iso .settings-row-item-wrapper .minicolors .colorpicker-manifest ~.minicolors-swatch {
 	top: 6px;
 }
@@ -1558,51 +1558,6 @@ button.backendBody .ui-button::-moz-focus-inner {
 .cyan { color: #0dcaf0; }
 .pink { color: #e685b5; }
 
-.block-3-column-text-icon-bg-white .caption {
-	text-align: center;
-	margin: 10px 0;
-	font-size: 30px;
-}
-.block-3-column-text-icon-bg-white .card-wrapper {
-	display: flex;
-	flex-wrap: wrap;
-}
-
-/* columns */
-.block-3-column-text-icon-bg-white .card-wrapper .card-item {
-    width: 100%;
-    padding: 1rem;
-}
-
-.block-3-column-text-icon-bg-white .card-wrapper .card-item {
-	text-align: center;
-}
-.block-3-column-text-icon-bg-white .card-wrapper .card-item .card-item-icon i {
-	font-size: 50px;
-}
-.block-3-column-text-icon-bg-white .card-wrapper .card-item .card-item-name {
-	margin: 5px 0;
-	font-size: 20px;
-}
-.block-3-column-text-icon-bg-white .card-wrapper .card-item .card-item-descr {
-	font-size: 14px;
-	font-weight: 300;
-}
-
-.hostcms-slider-bar {
-	background-color: initial;
-	border-bottom: none;
-}
-.hostcms-slider-bar-text p {
-	color: inherit;
-}
-.hostcms-slider-nav:hover {
-	background-color: initial;
-}
-.hostcms-slider-nav {
-	color: inherit;
-}
-
 .bootstrap-iso .tab {
 	display: flex;
 	flex-wrap: wrap;
@@ -1762,7 +1717,7 @@ button.backendBody .ui-button::-moz-focus-inner {
 }
 .bootstrap-iso summary::after {
 	content: "\f107";
-	font-family: "Font Awesome 6 Free";
+	font-family: "Font Awesome 7 Free";
 	transition: 0.3s;
 }
 .bootstrap-iso details[open] > summary::after {
@@ -1909,6 +1864,7 @@ button.backendBody .ui-button::-moz-focus-inner {
 	top: 0;
 	left: 0;
 	width: 100%;
+	z-index: 99;
 }
 
 .bootstrap-iso .setting-icon-popover {
@@ -1917,7 +1873,6 @@ button.backendBody .ui-button::-moz-focus-inner {
 .bootstrap-iso .setting-icon-popover img {
 	height: 500px;
 }
-
 .bootstrap-iso .fonts-wrapper {
 	display: flex;
 	align-items: center;
@@ -1950,12 +1905,92 @@ button.backendBody .ui-button::-moz-focus-inner {
 	font-size: 14px;
 }
 
-/* tablet breakpoint */
-@media (min-width: 767.99px) {
-    .block-3-column-text-icon-bg-white .card-wrapper .card-item {
-        width: calc(100% / 3);
-    }
+/* Основной контейнер окна */
+.action-toast {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%); /* Идеальное центрирование */
+	background: #ffffff;
+	border-radius: 12px;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
+	padding: 16px 20px;
+	display: flex;
+	align-items: flex-start;
+	gap: 16px;
+	font-family: system-ui, -apple-system, sans-serif;
+	min-width: 300px;
+	max-width: 400px;
+	z-index: 9999;
+	animation: fadeInFrontend 0.3s ease-out;
 }
+/* Иконка */
+.action-toast .icon {
+	font-size: 22px;
+	line-height: 1;
+	background: #FFF0F0;
+	padding: 10px;
+	border-radius: 50%;
+	width: 22px;
+	height: 22px;
+	text-align: center;
+}
+/* Контентная часть */
+.action-toast .content {
+	flex: 1;
+	padding-top: 2px;
+}
+.action-toast .title {
+	font-weight: 600;
+	font-size: 16px;
+	color: #1a1a1a;
+	margin-bottom: 4px;
+}
+/* Сброс лишних стилей (если используете классы bootstrap внутри) */
+.action-toast .alert {
+	font-size: 14px;
+	color: #5e5e5e;
+	margin: 0;
+}
+.action-toast .alert.alert-success {
+	color: #4ab600;
+}
+.action-toast .alert.alert-danger {
+	color: #e11414;
+}
+/* Прячем дублирующийся внутренний крестик из .alert */
+.action-toast .alert .close {
+	display: none;
+}
+.action-toast .fade.in {
+	opacity: 1 !important;
+}
+/* Основная кнопка закрытия */
+.action-toast .close-btn {
+	background: none;
+	border: none;
+	color: #a0a0a0;
+	cursor: pointer;
+	font-size: 16px;
+	padding: 4px;
+	line-height: 1;
+	transition: color 0.2s;
+	position: absolute;
+	right: 10px;
+	top: 5px;
+}
+.action-toast .close-btn:hover {
+	color: #1a1a1a;
+}
+
+/* Легкая анимация появления */
+@keyframes fadeInFrontend {
+  from { opacity: 0; transform: translate(-50%, -45%); }
+  to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+/* tablet breakpoint */
+@media (min-width: 767.99px) {}
 @media (max-width: 566.99px) {
 	.hostcmsInformationPanel { font-size: 12px; }
 	.hostcmsInformationPanel .hostcmsInformationPanelLeft { width: 40px; }

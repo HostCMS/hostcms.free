@@ -109,7 +109,7 @@ class Document_Dir_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event document_dir.onBeforeRedeclaredDelete
+	 * @hostcms-event document_dir.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -154,6 +154,25 @@ class Document_Dir_Model extends Core_Entity
 		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
+	}
+
+	/**
+	 * Move group to another group
+	 * @param int $document_dir_id dir id
+	 * @return self
+	 * @hostcms-event document_dir.onBeforeMove
+	 * @hostcms-event document_dir.onAfterMove
+	 */
+	public function move($document_dir_id)
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($document_dir_id));
+
+		$this->parent_id = $document_dir_id;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
+
+		return $this;
 	}
 
 	/**

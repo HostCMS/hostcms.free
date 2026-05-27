@@ -7,15 +7,15 @@
  */
 class SmartyCompilerException extends SmartyException
 {
-    /**
-     * The constructor of the exception
-     *
-     * @param string         $message  The Exception message to throw.
-     * @param int            $code     The Exception code.
-     * @param string|null    $filename The filename where the exception is thrown.
-     * @param int|null       $line     The line number where the exception is thrown.
-     * @param Throwable|null $previous The previous exception used for the exception chaining.
-     */
+	/**
+	 * The constructor of the exception
+	 *
+	 * @param string         $message  The Exception message to throw.
+	 * @param int            $code     The Exception code.
+	 * @param string|null    $filename The filename where the exception is thrown.
+	 * @param int|null       $line     The line number where the exception is thrown.
+	 * @param Throwable|null $previous The previous exception used for the exception chaining.
+	 */
     public function __construct(
         string $message = "",
         int $code = 0,
@@ -34,40 +34,40 @@ class SmartyCompilerException extends SmartyException
         }
     }
 
-    /**
-     * @return string
-     */
+	/**
+	 * @return string
+	 */
     public function __toString()
     {
         return ' --> Smarty Compiler: ' . $this->message . ' <-- ';
     }
 
-    /**
-     * @param int $line
-     */
+	/**
+	 * @param int $line
+	 */
     public function setLine($line)
     {
         $this->line = $line;
     }
 
-    /**
-     * The template source snippet relating to the error
-     *
-     * @type string|null
-     */
+	/**
+	 * The template source snippet relating to the error
+	 *
+	 * @type string|null
+	 */
     public $source = null;
 
-    /**
-     * The raw text of the error message
-     *
-     * @type string|null
-     */
+	/**
+	 * The raw text of the error message
+	 *
+	 * @type string|null
+	 */
     public $desc = null;
 
-    /**
-     * The resource identifier or template name
-     *
-     * @type string|null
-     */
+	/**
+	 * The resource identifier or template name
+	 *
+	 * @type string|null
+	 */
     public $template = null;
 }

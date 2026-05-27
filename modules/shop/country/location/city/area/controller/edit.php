@@ -17,7 +17,7 @@ class Shop_Country_Location_City_Area_Controller_Edit extends Admin_Form_Action_
 	 * После установки объекта загружаются данные о его полях
 	 * @param object $object
 	 * @return Shop_Country_Location_City_Area_Controller_Edit
-     */
+	 */
 	public function setObject($object)
 	{
 		if (!$object->id)
@@ -28,12 +28,12 @@ class Shop_Country_Location_City_Area_Controller_Edit extends Admin_Form_Action_
 		return parent::setObject($object);
 	}
 
-    /**
-     * Prepare backend item's edit form
-     *
-     * @return self
-     * @throws Core_Exception
-     */
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 * @throws Core_Exception
+	 */
 	protected function _prepareForm()
 	{
 		parent::_prepareForm();

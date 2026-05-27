@@ -263,7 +263,7 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event shop_purchase_discount.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')
@@ -299,11 +299,11 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 
 		if ($this->value > 80 && $this->type == 0)
 		{
-			$return = '<i class="fa fa-exclamation-triangle warning" title="More than 80%"></i> ';
+			$return = '<i class="fa-solid fa-triangle-exclamation warning" title="More than 80%"></i> ';
 		}
 		elseif($this->value == 0)
 		{
-			$return = '<i class="fa fa-exclamation-triangle warning" title="Zero Discount"></i> ';
+			$return = '<i class="fa-solid fa-triangle-exclamation warning" title="Zero Discount"></i> ';
 		}
 		else
 		{
@@ -348,20 +348,27 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 		{
 			$oCore_Html_Entity_Div
 				->add(
-					Core_Html_Entity::factory('I')->class('fa fa-clock-o black')
+					Core_Html_Entity::factory('I')->class('fa-regular fa-clock black')
 				);
 		}
 
-		if ($this->coupon)
-		{
-			$count = $this->Shop_Purchase_Discount_Coupons->getCountByShop_purchase_discount_id($this->id);
+		$count = $this->Shop_Purchase_Discount_Coupons->getCountByShop_purchase_discount_id($this->id);
 
-			$count && $oCore_Html_Entity_Div->add(
-				Core_Html_Entity::factory('Span')
-					->class('badge badge-warning badge-square badge-sm')
-					->title(Core::_('Shop_Purchase_Discount.badge_coupon_count'))
-					->value($count)
-			);
+		$count && $oCore_Html_Entity_Div->add(
+			Core_Html_Entity::factory('Span')
+				->class('badge badge-orange inverted badge-sm')
+				->title(Core::_('Shop_Purchase_Discount.badge_coupon_count'))
+				->value($count)
+		);
+
+		if (!$this->coupon && $count)
+		{
+			$oCore_Html_Entity_Div
+				->add(
+					Core_Html_Entity::factory('I')
+						->class('fa-solid fa-triangle-exclamation orange')
+						->title(Core::_('Shop_Purchase_Discount.coupon_not_check'))
+				);
 		}
 
 		$oShop_Purchase_Discount_Siteuser_Groups = $this->Shop_Purchase_Discount_Siteuser_Groups;
@@ -382,7 +389,7 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 				$oCore_Html_Entity_Div->add(
 					Core_Html_Entity::factory('Span')
 						->class('badge badge-square badge-hostcms')
-						->value('<i class="fa fa-users darkgray"></i> ' . $siteuserGroupName)
+						->value('<i class="fa-solid fa-users darkgray"></i> ' . $siteuserGroupName)
 					);
 
 				// Если "Все", то прерываем формирование списка
@@ -397,7 +404,7 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 			$oCore_Html_Entity_Div->add(
 				Core_Html_Entity::factory('Span')
 					->class('badge badge-darkorange badge-ico white')
-					->add(Core_Html_Entity::factory('I')->class('fa fa-exclamation-triangle'))
+					->add(Core_Html_Entity::factory('I')->class('fa-solid fa-triangle-exclamation'))
 					->title('Empty group list!')
 			);
 		}

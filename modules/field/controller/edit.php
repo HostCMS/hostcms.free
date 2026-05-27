@@ -466,15 +466,15 @@ class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		return $this;
 	}
 
-    /**
-     * Create visual tree of the directories
-     * @param string $model
-     * @param int $iFieldDirParentId parent directory ID
-     * @param array $aExclude
-     * @param int $iLevel current nesting level
-     * @return array
-     * @throws Core_Exception
-     */
+	/**
+	 * Create visual tree of the directories
+	 * @param string $model
+	 * @param int $iFieldDirParentId parent directory ID
+	 * @param array $aExclude
+	 * @param int $iLevel current nesting level
+	 * @return array
+	 * @throws Core_Exception
+	 */
 	static public function fillFieldDir($model, $iFieldDirParentId = 0, $aExclude = array(), $iLevel = 0)
 	{
 		$iFieldDirParentId = intval($iFieldDirParentId);

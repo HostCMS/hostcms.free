@@ -20,9 +20,9 @@ class Mail_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 	/**
 	 * Module name
@@ -54,7 +54,7 @@ class Mail_Module extends Core_Module_Abstract
 			array(
 				'sorting' => 260,
 				'block' => 3,
-				'ico' => 'fa-solid fa-envelope-o',
+				'ico' => 'fa-regular fa-envelope',
 				'name' => Core::_('Mail.menu'),
 				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/mail/index.php"),
 				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/mail/index.php'}); return false")

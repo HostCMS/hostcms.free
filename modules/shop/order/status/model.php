@@ -80,7 +80,7 @@ class Shop_Order_Status_Model extends Core_Entity
 		$link = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $link);
 		$onclick = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $onclick);
 
-		$return = '<i class="fa fa-circle" style="margin-right: 5px; color: ' . ($this->color ? htmlspecialchars($this->color) : '#aebec4') . '"></i> '
+		$return = '<i class="fa-solid fa-circle" style="margin-right: 5px; color: ' . ($this->color ? htmlspecialchars($this->color) : '#aebec4') . '"></i> '
 			. '<a href="' . $link . '" onclick="' . $onclick . '">' . htmlspecialchars($this->name) . '</a>';
 
 		$count = $this->getChildCount();
@@ -169,7 +169,7 @@ class Shop_Order_Status_Model extends Core_Entity
 
 				Core_Html_Entity::factory('Span')
 					->class('badge badge-square badge-hostcms')
-					->value('<i class="fa fa-android"></i> ' . $sParents . htmlspecialchars($oBot->name))
+					->value('<i class="fa-solid fa-robot"></i> ' . $sParents . htmlspecialchars($oBot->name))
 					->execute();
 			}
 		}

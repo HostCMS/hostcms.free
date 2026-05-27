@@ -69,7 +69,7 @@ class Shop_Price_Setting_Convolution_Controller extends Core_Servant_Properties
 	/**
 	 * Executes the business logic.
 	 * @return string
-     */
+	 */
 	public function execute()
 	{
 		$timeout = Core::getmicrotime();

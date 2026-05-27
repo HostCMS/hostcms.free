@@ -33,7 +33,7 @@ class Skin_Bootstrap_Module_Market_Module extends Market_Module
 	 * @param int $type
 	 * @param boolean $ajax
 	 * @return true
-     */
+	 */
 	public function adminPage($type = 0, $ajax = FALSE)
 	{
 		$oModule = Core_Entity::factory('Module')->getByPath($this->getModuleName());
@@ -64,7 +64,7 @@ class Skin_Bootstrap_Module_Market_Module extends Market_Module
 			$oMarket_Controller = Market_Controller::instance();
 			$oMarket_Controller
 				->setMarketOptions()
-				->limit(3)
+				->limit(4)
 				->order('rand')
 				->getMarket();
 
@@ -72,11 +72,11 @@ class Skin_Bootstrap_Module_Market_Module extends Market_Module
 			{
 				?><div class="widget market">
 					<div class="widget-header bordered-bottom bordered-themesecondary">
-						<i class="widget-icon fa fa-cogs themesecondary"></i>
+						<i class="widget-icon fa-solid fa-gears themesecondary"></i>
 						<span class="widget-caption themesecondary"><?php echo Core::_('Market.title')?></span>
 						<div class="widget-buttons">
 							<a data-toggle="maximize">
-								<i class="fa fa-expand gray"></i>
+								<i class="fa-solid fa-expand gray"></i>
 							</a>
 							<a data-toggle="refresh" onclick="$(this).find('i').addClass('fa-spin'); $.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#marketAdminPage'), 'button': $(this).find('i') });">
 								<i class="fa-solid fa-rotate gray"></i>
@@ -84,8 +84,8 @@ class Skin_Bootstrap_Module_Market_Module extends Market_Module
 						</div>
 					</div>
 					<div class="widget-body">
-						<div class="row">
-						<?php echo $oMarket_Controller->getMarketItemsHtml()?>
+						<div class="market-wrapper">
+							<?php echo $oMarket_Controller->getMarketItemsHtml()?>
 						</div>
 					</div>
 				</div><?php

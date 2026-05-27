@@ -35,11 +35,11 @@ class Mail_Model extends Core_Entity
 	 */
 	protected $_search = NULL;
 
-    /**
-     * Set search messages
-     * @param string $search
-     * @return self
-     */
+	/**
+	 * Set search messages
+	 * @param string $search
+	 * @return self
+	 */
 	public function search($search)
 	{
 		$this->_search = $search;

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Directory
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Социальные сети',
@@ -16,7 +16,7 @@ return array(
 	'edit_title' => 'Редактирование информации о социальной сети',
 	'name' => 'Название социальной сети',
 	'address' => '<acronym title="Ссылка на социальную сеть">Адрес</acronym>',
-	'ico' => '<acronym title="CSS-стиль логотипа, например fa fa-share-alt">CSS-стиль логотипа</acronym>',
+	'ico' => '<acronym title="CSS-стиль логотипа, например fa-solid fa-share-nodes">CSS-стиль логотипа</acronym>',
 
 	'id' => 'Идентификатор',
 	'delete_success' => 'Элемент удален!',

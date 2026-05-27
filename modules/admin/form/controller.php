@@ -9,6 +9,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 7.x
  * @copyright © 2005-2026, https://www.hostcms.ru
+ * @method static string getAdminActionLoadHref(mixed ...$options) Returns a string produced according to the formatting string.
+ * @method static string getAdminActionLoadAjax(mixed ...$options) Returns a string produced according to the formatting string.
+ * @method static string getAdminLoadHref(mixed ...$options) Returns a string produced according to the formatting string.
+ * @method static string getAdminLoadAjax(mixed ...$options) Returns a string produced according to the formatting string.
  */
 abstract class Admin_Form_Controller extends Core_Servant_Properties
 {
@@ -37,6 +41,51 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	protected $_Admin_Language = NULL;
 
 	/**
+	 * Allowed object properties
+	 * @var array
+	 */
+	protected $_allowedProperties = array(
+		//'request', // Нельзя, т.к. к request используется прямой доступ в различных index.php
+		// Page title <h1>
+		'title',
+		// Page title <title>
+		'pageTitle',
+		// Limits elements on page
+		'limit',
+		// Current page
+		'current',
+		// ID of sorting field
+		'sortingFieldId',
+		// Sorting direction
+		'sortingDirection',
+		// Current Filter Id
+		'filterId',
+		// Controller view
+		'view',
+		'viewList',
+		// Action name
+		'action',
+		// Action's operation e.g. "save" or "apply"
+		'operation',
+		// Array of checked items
+		'checked',
+		// Window ID
+		'windowId',
+		// Use AJAX
+		'ajax',
+		'module',
+		// Is showing operations necessary
+		'showOperations',
+		// String of additional parameters
+		'additionalParams',
+		// Set filter settings
+		//'filterSettings',
+		// Admin_View
+		'Admin_View',
+		'showTopFilterTags',
+	);
+
+	/**
 	 * Create new form controller
 	 * @param Admin_Form_Model|NULL $oAdmin_Form
 	 * @return object
@@ -59,12 +108,12 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	 * @var array
 	 */
 	static protected $_icon = array(
-		'fa fa-address-book', 'fa fa-address-card', 'fa fa-barcode', 'fa fa-bars', 'fa fa-beer', 'fa fa-bell', 'fa fa-bicycle', 'fa fa-binoculars',
-		'fa fa-birthday-cake', 'fa fa-bolt', 'fa fa-book', 'fa fa-bookmark', 'fa fa-briefcase', 'fa fa-bullseye', 'fa fa-camera', 'fa fa-car',
-		'fa fa-certificate', 'fa fa-cloud', 'fa fa-code', 'fa fa-coffee', 'fa fa-cube', 'fa fa-dashboard', 'fa fa-database', 'fa fa-dot-circle-o',
-		'fa fa-flask', 'fa fa-futbol-o', 'fa fa-gift', 'fa fa-glass', 'fa fa-heart', 'fa fa-hourglass', 'fa fa-leaf', 'fa fa-location-arrow',
-		'fa fa-magic', 'fa fa-magnet', 'fa fa-paper-plane', 'fa fa-paw', 'fa fa-plane', 'fa fa-plug', 'fa fa-road', 'fa fa-rocket',
-		'fa fa-smile-o', 'fa fa-snowflake-o', 'fa fa-space-shuttle', 'fa fa-star', 'fa fa-thumbs-up', 'fa fa-tree', 'fa fa-trophy', 'fa fa-wrench'
+		'fa-solid fa-address-book', 'fa-solid fa-address-card', 'fa-solid fa-barcode', 'fa-solid fa-bars', 'fa-solid fa-beer-mug-empty', 'fa-solid fa-bell', 'fa-solid fa-bicycle', 'fa-solid fa-binoculars',
+		'fa-solid fa-cake-candles', 'fa-solid fa-bolt', 'fa-solid fa-book', 'fa-solid fa-bookmark', 'fa-solid fa-briefcase', 'fa-solid fa-bullseye', 'fa-solid fa-camera', 'fa-solid fa-car',
+		'fa-solid fa-certificate', 'fa-solid fa-cloud', 'fa-solid fa-code', 'fa-solid fa-mug-hot', 'fa-solid fa-cube', 'fa-solid fa-gauge', 'fa-solid fa-database', 'fa-regular fa-circle-dot',
+		'fa-solid fa-flask', 'fa-regular fa-futbol', 'fa-solid fa-gift', 'fa-solid fa-glasses', 'fa-solid fa-heart', 'fa-solid fa-hourglass', 'fa-solid fa-leaf', 'fa-solid fa-location-arrow',
+		'fa-solid fa-wand-magic', 'fa-solid fa-magnet', 'fa-solid fa-paper-plane', 'fa-solid fa-paw', 'fa-solid fa-plane', 'fa-solid fa-plug', 'fa-solid fa-road', 'fa-solid fa-rocket',
+		'fa-regular fa-face-smile', 'fa-regular fa-snowflake', 'fa-solid fa-shuttle-space', 'fa-solid fa-star', 'fa-solid fa-thumbs-up', 'fa-solid fa-tree', 'fa-solid fa-trophy', 'fa-solid fa-wrench'
 	);
 
 	/**
@@ -206,51 +255,6 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	protected $_oAdmin_Form_Setting = NULL;
 
 	/**
-	 * Allowed object properties
-	 * @var array
-	 */
-	protected $_allowedProperties = array(
-		//'request', // Нельзя, т.к. к request используется прямой доступ в различных index.php
-		// Page title <h1>
-		'title',
-		// Page title <title>
-		'pageTitle',
-		// Limits elements on page
-		'limit',
-		// Current page
-		'current',
-		// ID of sorting field
-		'sortingFieldId',
-		// Sorting direction
-		'sortingDirection',
-		// Current Filter Id
-		'filterId',
-		// Controller view
-		'view',
-		'viewList',
-		// Action name
-		'action',
-		// Action's operation e.g. "save" or "apply"
-		'operation',
-		// Array of checked items
-		'checked',
-		// Window ID
-		'windowId',
-		// Use AJAX
-		'ajax',
-		'module',
-		// Is showing operations necessary
-		'showOperations',
-		// String of additional parameters
-		'additionalParams',
-		// Set filter settings
-		//'filterSettings',
-		// Admin_View
-		'Admin_View',
-		'showTopFilterTags',
-	);
-
-	/**
 	 * Apply form settings
 	 * @return self
 	 */
@@ -275,7 +279,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 			}
 
 			// Load Admin_Form_Setting
-			if (!is_null($oUserCurrent))
+			if ($oUserCurrent)
 			{
 				$this->_oAdmin_Form_Setting = $this->_Admin_Form->getSettingForUser($oUserCurrent->id);
 
@@ -295,6 +299,11 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 				}
 				else
 				{
+					$this->_oAdmin_Form_Setting = Core_Entity::factory('Admin_Form_Setting');
+					$this->_oAdmin_Form_Setting->user_id = $oUserCurrent->id;
+					$this->_oAdmin_Form_Setting->admin_form_id = $this->_Admin_Form->id;
+					$this->_oAdmin_Form_Setting->save();
+
 					$oAdmin_Form_Field = $this->getAdminFormFieldByName($this->_Admin_Form->default_order_field);
 
 					// Данные по умолчанию из настроек формы
@@ -359,16 +368,9 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 			->window($formSettings['window'])
 			->ajax(Core_Array::get($this->request, '_', FALSE));
 
-		// Save Admin_Form_Setting
-		if ($this->_Admin_Form && $oUserCurrent)
+		// Save Admin_Form_Setting, is_null($this->action) чтобы не сохранять view='empty' при удалении из клиентского раздела
+		if ($this->_Admin_Form && $oUserCurrent && is_null($this->action))
 		{
-			if (!$this->_oAdmin_Form_Setting)
-			{
-				$this->_oAdmin_Form_Setting = Core_Entity::factory('Admin_Form_Setting');
-				$this->_oAdmin_Form_Setting->user_id = $oUserCurrent->id;
-				$this->_oAdmin_Form_Setting->admin_form_id = $this->_Admin_Form->id;
-			}
-
 			!is_null($this->limit)
 				&& $this->_oAdmin_Form_Setting->on_page = intval($this->limit);
 
@@ -1541,19 +1543,8 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 					// Change current filter
 					$this->filterId(key($tabs));
-					/*$aJSON = array('message' => 'OK', 'id' => key($tabs));*/
-				}
-				else
-				{
-					//$aJSON = array('message' => 'Error, empty conditions');
 				}
 			}
-			else
-			{
-				//$aJSON = array('message' => 'Error');
-			}
-
-			//Core::showJson($aJSON);
 		}
 
 		// Filter: Save
@@ -1804,7 +1795,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		$formSettings = Core_Array::get($this->request, 'hostcms');
 		if (is_array($formSettings) && Core_Array::get($formSettings, 'export') == 'csv')
 		{
-			header('Pragma: public');
+			header('Cache-Control: no-cache, must-revalidate');
 			header('Content-Description: File Transfer');
 			header('Content-Type: application/force-download');
 			header('Content-Disposition: attachment; filename="' . addslashes($this->title) . '_' .date('Y_m_d_H_i_s').'.csv";');
@@ -1996,8 +1987,10 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 			die();
 		}
 
+		$this->view != 'empty'
+			&& $this->perform();
+
 		$this
-			->perform()
 			->show();
 
 		Core_Event::notify('Admin_Form_Controller.onAfterExecute', $this);
@@ -2746,14 +2739,14 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		?><label style="padding-top:7px"><input type="checkbox" <?php echo $checked?> name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" value="1" style="width: 100%" class="form-control input-sm" /><span class="text"></span></label><?php
 	}
 
-    /**
-     * Filter datetime callback
-     * @param $date_from
-     * @param $date_to
-     * @param Admin_Form_Field_Model $oAdmin_Form_Field
-     * @param string $filterPrefix
-     * @param string $tabName
-     */
+	/**
+	 * Filter datetime callback
+	 * @param $date_from
+	 * @param $date_to
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
+	 * @param string $filterPrefix
+	 * @param string $tabName
+	 */
 	protected function _filterCallbackDatetime($date_from, $date_to, $oAdmin_Form_Field, $filterPrefix, $tabName)
 	{
 		$date_from = htmlspecialchars((string) $date_from);
@@ -2878,8 +2871,15 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			}
 		}
 
+		$aOptions = array(
+			'HOST_CMS_ALL' => Core::_('Admin_Form.filter_selected_all')
+		);
+
+		// Не выбрано
+		!isset($aValue[0]) && $aOptions[0] = Core::_('Admin_Form.filter_not_selected');
+
 		$oSelect
-			->options(array('HOST_CMS_ALL' => Core::_('Admin_Form.filter_selected_all'), 0 => Core::_('Admin_Form.filter_not_selected')) + $aValue)
+			->options($aOptions + $aValue)
 			->execute();
 	}
 

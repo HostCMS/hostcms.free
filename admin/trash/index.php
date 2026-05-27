@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -143,7 +143,7 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Trash.empty_trash'))
-		->icon('fa fa-trash')
+		->icon('fa-solid fa-trash-can')
 		->class("btn btn-danger")
 		->onclick(
 			"res = confirm('" . htmlspecialchars(Core::_('Admin_Form.confirm_dialog', Core::_('Trash.empty_trash'))) . "'); if (res) { " . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), 'deleteAll', NULL, 'secret_csrf=' . Core_Security::getCsrfToken()) . " } return res;"

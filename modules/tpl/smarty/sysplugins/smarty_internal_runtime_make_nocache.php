@@ -9,15 +9,15 @@
  */
 class Smarty_Internal_Runtime_Make_Nocache
 {
-    /**
-     * Save current variable value while rendering compiled template and inject nocache code to
-     * assign variable value in cahed template
-     *
-     * @param \Smarty_Internal_Template $tpl
-     * @param string                    $var variable name
-     *
-     * @throws \SmartyException
-     */
+	/**
+	 * Save current variable value while rendering compiled template and inject nocache code to
+	 * assign variable value in cahed template
+	 *
+	 * @param \Smarty_Internal_Template $tpl
+	 * @param string                    $var variable name
+	 *
+	 * @throws \SmartyException
+	 */
     public function save(Smarty_Internal_Template $tpl, $var)
     {
         if (isset($tpl->tpl_vars[ $var ])) {
@@ -32,13 +32,13 @@ class Smarty_Internal_Runtime_Make_Nocache
         }
     }
 
-    /**
-     * Store variable value saved while rendering compiled template in cached template context
-     *
-     * @param \Smarty_Internal_Template $tpl
-     * @param string                    $var variable name
-     * @param array                     $properties
-     */
+	/**
+	 * Store variable value saved while rendering compiled template in cached template context
+	 *
+	 * @param \Smarty_Internal_Template $tpl
+	 * @param string                    $var variable name
+	 * @param array                     $properties
+	 */
     public function store(Smarty_Internal_Template $tpl, $var, $properties)
     {
         // do not overwrite existing nocache variables

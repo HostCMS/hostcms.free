@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Directory
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Social networks',
@@ -16,7 +16,7 @@ return array(
 	'edit_title' => 'Edit social network type',
 	'name' => 'Name',
 	'address' => 'Address',
-	'ico' => '<acronym title="CSS for logo, e.g. fa fa-comments">Logo CSS</acronym>',
+	'ico' => '<acronym title="CSS for logo, e.g. fa-solid fa-comments">Logo CSS</acronym>',
 	'id' => 'ID',
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',

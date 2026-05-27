@@ -115,11 +115,11 @@ class Shop_Country_Location_Model extends Core_Entity
 			->execute();
 	}
 
-    /**
-     * Backend callback method
-     * @param Admin_Form_Field_Model $oAdmin_Form_Field
-     * @throws Core_Exception
-     */
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
+	 * @throws Core_Exception
+	 */
 	public function nameBackend($oAdmin_Form_Field)
 	{
 		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')->value(
@@ -175,7 +175,7 @@ class Shop_Country_Location_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event shop_country_location.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')

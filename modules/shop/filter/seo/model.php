@@ -140,7 +140,7 @@ class Shop_Filter_Seo_Model extends Core_Entity
 				->href($sPath)
 				->target('_blank')
 				->add(
-					Core_Html_Entity::factory('I')->class('fa fa-external-link')
+					Core_Html_Entity::factory('I')->class('fa-solid fa-arrow-up-right-from-square small')
 				)
 		);
 
@@ -421,7 +421,7 @@ class Shop_Filter_Seo_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event shop_filter_seo.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')

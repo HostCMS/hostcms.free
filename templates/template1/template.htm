@@ -6,7 +6,6 @@
 	<meta name="keywords" content="<?php Core_Page::instance()->showKeywords()?>" />
 	<meta content="text/html; charset=<?php echo SITE_CODING?>" http-equiv="Content-Type" />
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-
 	<?php
 	Core_Page::instance()
 		->css('/hostcmsfiles/jquery/lightbox/css/jquery.lightbox.css')
@@ -14,13 +13,7 @@
 		->css('/hostcmsfiles/jquery/wickedpicker/wickedpicker.css')
 		->showCss(true, 'stylesheet', array('media' => "print", 'onload' => 'this.media="all"'));
 	?>
-	<!--[if IE]>
-	<style>.header input[type=text],.header input[type=password]{border:1px solid #eee;height:20px}</style>
-	<![endif]-->
-	<?php Core_Browser::check()?>
-
-	<link rel="shortcut icon" href="/favicon.ico" />
-
+	
 	<?php Core_Page::instance()->showFavicons()?>
 
 	<link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/news/rss/" />
@@ -272,14 +265,14 @@
 	</div>
 	<div class="right_block footer">
 		<?php
-		// Если модуль рекламы доступен
+		// Если модуль статистики доступен
 		if (Core::moduleIsActive('counter'))
 		{
 		?><!--HostCMS counter--><a href="https://www.hostcms.ru" target="_blank"><img id="hcntr0" width="1" height="1" style="border:0" title="HostCMS Counter" alt="" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"/></a>
-<script >(function(h,c,m,s){h.getElementById("hcntr0").src="//hostcms6/counter/counter.php?r="+Math.random()+"&id=1&refer="+escape(h.referrer)+"&current_page="+escape(s.location.href)+"&cookie="+(h.cookie?"Y":"N")+"&java="+(m.javaEnabled()?"Y":"N")+"&screen="+c.width+'x'+c.height+"&counter=0"})(document,screen,navigator,window)</script>
+<script >(function(h,c,m,s){h.getElementById("hcntr0").src="/counter/counter.php?r="+Math.random()+"&id=1&refer="+escape(h.referrer)+"&current_page="+escape(s.location.href)+"&cookie="+(h.cookie?"Y":"N")+"&java="+(m.javaEnabled()?"Y":"N")+"&screen="+c.width+'x'+c.height+"&counter=0"})(document,screen,navigator,window)</script>
 <noscript>
 <a href="https://www.hostcms.ru">
-<img alt="HostCMS Counter" height="1" src="//hostcms6/counter/counter.php?id=1&amp;counter=0" width="1" /></a></noscript><!--/HostCMS--><?php
+<img alt="HostCMS Counter" height="1" src="/counter/counter.php?id=1&amp;counter=0" width="1" /></a></noscript><!--/HostCMS--><?php
 		}
 		?>
 	</div>

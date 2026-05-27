@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Select extends Skin_Default_Admin_Form_Entity_Select
 {
@@ -135,7 +135,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Select extends Skin_Default_Admin_Form_En
 						Admin_Form_Entity::factory('Code')
 							->html('<span class="input-group-addon"><i class="fa-solid fa-magnifying-glass"></i></span>
 								<input class="form-control" type="text" id="filter_' . $this->id . '" onkeyup="clearTimeout(' . $filterName . '.timeout); ' . $filterName . '.timeout = setTimeout(function(){' . $filterName . ".Set($(event.target).val()); {$filterName}.Filter(); }, 500)". '" onkeypress="if (event.keyCode == 13) return false;" />' .
-								'<span class="input-group-addon" onclick="' . "$(this).prev('input').val(''); {$filterName}.Set(''); {$filterName}.Filter();" . '"><i class="fa fa-times-circle no-margin"></i></span>'
+								'<span class="input-group-addon" onclick="' . "$(this).prev('input').val(''); {$filterName}.Set(''); {$filterName}.Filter();" . '"><i class="fa-solid fa-circle-xmark no-margin"></i></span>'
 							)
 					)
 			)

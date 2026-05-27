@@ -590,6 +590,11 @@ class Core_ORM
 			$offset += $count;
 		} while (count($aObjects) == $count);
 
+		$this
+			->queryBuilder()
+			->clearLimit()
+			->clearOffset();
+
 		return TRUE;
 	}
 
@@ -1137,7 +1142,7 @@ class Core_ORM
 	/**
 	 * Check if model is loaded
 	 * @return bool
-     * @ignore
+	 * @ignore
 	 */
 	public function loaded()
 	{

@@ -1,12 +1,5 @@
 <?php
-/**
- * TPL.
- *
- * @package HostCMS
- * @subpackage Tpl
- * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'Разделы TPL',
 	'main_menu' => 'Раздел TPL',
@@ -24,4 +17,5 @@ return array(
 	'sorting' => 'Порядок сортировки',
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
+	'move_success' => 'Разделы TPL перенесены',
 );

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Browser
 {
@@ -24,7 +24,7 @@ class Core_Browser
 			return 0;
 		}
 
-		// Tablet
+		// --- TABLETS ---
 		if (preg_match('/iP(a|ro)d|FOLIO|playbook/i', $userAgent)
 			|| preg_match('/tablet/i', $userAgent) && !preg_match('/RX-34/i', $userAgent)
 		)
@@ -57,7 +57,12 @@ class Core_Browser
 		{
 			return 1;
 		}
-		// unique Mobile User Agent
+
+		// --- PHONES / MOBILE ---
+		elseif (preg_match('/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|hiptop|iemobile|ip(hone|od)|iris|lge |maemo|midp|mmp|mobile.+firefox|palm( os)?|p(ixi|re)\/|plucker|pocket|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xiino/i', $userAgent))
+		{
+			return 2;
+		}
 		elseif (preg_match('/BOLT|Fennec|Iris|Maemo|Minimo|Mobi|mowser|NetFront|Novarra|Prism|RX-34|Skyfire|Tear|XV6875|XV6975|Google.Wireless.Transcoder|sd4930ur/i', $userAgent))
 		{
 			return 2;
@@ -69,6 +74,8 @@ class Core_Browser
 		{
 			return 2;
 		}
+
+		// --- DESKTOP & OTHER ---
 		// cros - Chromeos
 		elseif (preg_match('/Windows (NT|XP|ME|9)/i', $userAgent) || preg_match('/(?!Mi)CrOS(?!oft)/i', $userAgent))
 		{
@@ -78,8 +85,8 @@ class Core_Browser
 		}
 		// Mac Desktop
 		elseif (preg_match('/Macintosh/i', $userAgent)
-			&& !preg_match('/Silk/i', $userAgent))
-
+			&& !preg_match('/Silk/i', $userAgent)
+		)
 		{
 			return 0;
 		}
@@ -93,6 +100,8 @@ class Core_Browser
 		{
 			return 0;
 		}
+
+		// --- TV ---
 		elseif (preg_match('/GoogleTV|SmartTV|smart\-tv|tuner|crkey|aftb|hbbtv|Internet.TV|adt\-|dtv|NetCast|vizio|NETTV|AppleTV|boxee|Kylo|Roku|viera|aquos|DLNADOC|CE\-HTML/i', $userAgent))
 		{
 			return 3;
@@ -102,10 +111,14 @@ class Core_Browser
 		{
 			return 3;
 		}
+
+		// Final mobile check
 		elseif (preg_match('/mobile|touch| mobi|phone/i', $userAgent))
 		{
 			return 2;
 		}
+
+		// --- WATCH ---
 		elseif (preg_match('/glass|watch|sm\-v/i', $userAgent))
 		{
 			return 4;
@@ -146,7 +159,10 @@ class Core_Browser
 		{
 			$browser = 'Miui Browser '. $matches[1];
 		}
-		elseif (preg_match('#(?:Edge|Edg)/([0-9]*)#', $userAgent, $matches))
+		// Edg/xxx: Используется в актуальных версиях Microsoft Edge на базе Chromium (на ПК и мобильных устройствах)
+		// EdgA/xxx: Специфический маркер для Microsoft Edge на Android (EdgAndroid)
+		// Edge/xxx: Обычно относится к старому Edge Legacy
+		elseif (preg_match('#(?:Edg|EdgA|Edge)/([0-9]*)#', $userAgent, $matches))
 		{
 			$browser = 'Edge '. $matches[1];
 		}
@@ -177,15 +193,21 @@ class Core_Browser
 		{
 			$browser = 'Opera Mini '. $matches[1];
 		}
-		elseif (// (9.80) взято в скобки, чтобы индекс был [2], т.к. во втором выражении он [2]
-		preg_match('#Opera/(9.80).*Version\/([0-9]*)#', $userAgent, $matches)
-		|| preg_match('#Opera[/\s]([0-9]*)#', $userAgent, $matches))
+		elseif (
+			// (9.80) взято в скобки, чтобы индекс был [2], т.к. во втором выражении он [2]
+			preg_match('#Opera/(9.80).*Version\/([0-9]*)#', $userAgent, $matches)
+			|| preg_match('#Opera[/\s]([0-9]*)#', $userAgent, $matches)
+		)
 		{
 			$browser = 'Opera '. $matches[1];
 		}
 		elseif (preg_match('#OPR/([0-9]*)#', $userAgent, $matches))
 		{
 			$browser = 'Opera '. $matches[1];
+		}
+		elseif (preg_match('#OPT/([0-9]*)#', $userAgent, $matches))
+		{
+			$browser = 'Opera One '. $matches[1];
 		}
 		// Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) GSA/302.0.603406840 Mobile/15E148 Safari/604.1
 		elseif (preg_match('#GSA/([0-9]*)#', $userAgent, $matches))
@@ -253,35 +275,35 @@ class Core_Browser
 	{
 		if (strpos($browser, 'Chrome') !== FALSE)
 		{
-			$return = 'fab fa-chrome fa-fw green';
+			$return = 'fa-fw fa-brands fa-chrome green';
 		}
 		elseif (strpos($browser, 'Firefox') !== FALSE)
 		{
-			$return = 'fab fa-firefox-browser fa-fw warning';
+			$return = 'fa-fw fa-brands fa-firefox-browser warning';
 		}
 		elseif (strpos($browser, 'Yandex Browser') !== FALSE)
 		{
-			$return = 'fab fa-yandex fa-fw darkorange';
+			$return = 'fa-fw fa-brands fa-yandex darkorange';
 		}
 		elseif (strpos($browser, 'Safari') !== FALSE)
 		{
-			$return = 'fab fa-safari fa-fw blue';
+			$return = 'fa-fw fa-brands fa-safari blue';
 		}
 		elseif (strpos($browser, 'Opera') !== FALSE)
 		{
-			$return = 'fab fa-opera fa-fw red';
+			$return = 'fa-fw fa-brands fa-opera red';
 		}
 		elseif (strpos($browser, 'Edge') !== FALSE)
 		{
-			$return = 'fab fa-edge fa-fw sky';
+			$return = 'fa-fw fa-brands fa-edge sky';
 		}
 		elseif (strpos($browser, 'MS IE') !== FALSE)
 		{
-			$return = 'fab fa-internet-explorer fa-fw blue';
+			$return = 'fa-fw fa-brands fa-internet-explorer blue';
 		}
 		elseif (strpos($browser, 'Google Search App') !== FALSE)
 		{
-			$return = 'fab fa-google fa-fw green';
+			$return = 'fa-fw fa-brands fa-google green';
 		}
 		else
 		{

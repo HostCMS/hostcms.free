@@ -71,7 +71,7 @@ class Shop_Tab_Dir_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event shop_tab_dir.onBeforeRedeclaredDelete
+	 * @hostcms-event shop_tab_dir.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

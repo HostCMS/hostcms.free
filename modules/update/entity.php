@@ -67,7 +67,7 @@ class Update_Entity extends Core_Empty_Entity
 				'[!]',
 			), array(
 				'<i class="fa-solid fa-circle-plus success"></i>',
-				'<i class="fa-solid fa-circle-check warning"></i>',
+				'<i class="fa-regular fa-circle-check warning"></i>',
 				'<i class="fa-solid fa-circle-exclamation danger"></i>',
 			), htmlspecialchars($this->description))
 		);
@@ -342,6 +342,16 @@ class Update_Entity extends Core_Empty_Entity
 							if (Core::moduleIsActive('shortcode'))
 							{
 								Shortcode_Controller::instance()->rebuild();
+							}
+
+							// Минимизированные CSS+JS
+							$minPath = CMS_FOLDER . Core_Skin::instance()->getMinDirPath();
+							if (Core_File::isDir($minPath))
+							{
+								try {
+									Core_File::deleteDir($minPath);
+								}
+								catch (Exception $e) { }
 							}
 
 							// Если не было ошибок

@@ -20,9 +20,9 @@ class Field_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 	/**
 	 * Module name
@@ -41,7 +41,7 @@ class Field_Module extends Core_Module_Abstract
 			array(
 				'sorting' => 270,
 				'block' => 3,
-				'ico' => 'fas fa-user-cog',
+				'ico' => 'fa-solid fa-user-gear',
 				'name' => Core::_('field.menu'),
 				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/field/index.php"),
 				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/field/index.php'}); return false")

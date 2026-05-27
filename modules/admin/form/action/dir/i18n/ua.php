@@ -8,7 +8,7 @@ return array(
 	'admin_form_id' => 'Ідентифікатор форми центру адміністрування',
 	'id' => 'Ідентифікатор поля форми',
 	'name' => 'Назва',
-	'icon' => '<acronym title="CSS-стиль піктограми для дії у списку дій, наприклад fa fa-pencil">Піктограма</acronym>',
+	'icon' => '<acronym title="CSS-стиль піктограми для дії у списку дій, наприклад fa-solid fa-pencil">Піктограма</acronym>',
 	'color' => '<acronym title="Назва CSS-стилю, що визначає колір дії в списку дій, наприклад success">Колір</acronym>',
 	'sorting' => 'Порядок сортування',
 	'edit_success' => 'Розділ дій форми доданий!',

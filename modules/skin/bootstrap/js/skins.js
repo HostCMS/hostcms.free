@@ -8,7 +8,7 @@ if (readCookie("current-skin")) {
 
 //Handle RTL SUpport
 //Checks Not to Do rtl-support for Arabic and Persian Demo Pages
-if (location.pathname != "/index-rtl-fa.html" && location.pathname != "/index-rtl-ar.html") {
+/*if (location.pathname != "/index-rtl-fa.html" && location.pathname != "/index-rtl-ar.html") {
     if (readCookie("rtl-support")) {
         if (document.getElementById("beyond-link") != null)
             document.getElementById("beyond-link").setAttribute("href", "/modules/skin/bootstrap/css/beyond-rtl.min.css");
@@ -35,7 +35,7 @@ if (location.pathname != "/index-rtl-fa.html" && location.pathname != "/index-rt
             document.getElementsByTagName("head")[0].appendChild(a);
         }
     }
-}
+}*/
 
 //Create Cookie Function
 function createCookie(name, value, days) {

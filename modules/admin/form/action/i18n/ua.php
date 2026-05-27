@@ -26,7 +26,7 @@ return array(
 	'name' => '<acronym title="Назва функції-обробника дії">Функція-обробник</acronym>',
 	'sorting' => 'Порядок сортування',
 	'picture' => '<acronym title="Зображення для дії в списку дій, наприклад /admin/images/edit.gif">Зображення</acronym>',
-	'icon' => '<acronym title="CSS-стиль піктограми для дії в списку дій, наприклад fa fa-pencil">Піктограма</acronym>',
+	'icon' => '<acronym title="CSS-стиль піктограми для дії в списку дій, наприклад fa-solid fa-pencil">Піктограма</acronym>',
 	'color' => '<acronym title="Назва CSS-стилю, що визначає колір дії в списку дій, наприклад success">Колір</acronym>',
 	'dataset' => '<acronym title="Індекс набору даних, яким є дія (-1 — дія для всіх наборів даних)">Індекс набору даних</acronym>',
 	'single' => '<acronym title="Відображати дію в правому блоці зі списком дій">Відображати в списку дій</acronym>',

@@ -1,13 +1,12 @@
 /**
- * Frontend slidepanels - Optimized version
- * (c) 2025 HostCMS LLC
+ * Frontend slidepanels
+ * (c) 2026 HostCMS LLC
  */
 class hostcmsSlidepanel {
 	static openPanels = new Set();
 	static outsideClickHandler = null;
 	static escapeHandler = null;
 
-	// Вынесены константы для переиспользования
 	static POSITION_STYLES = {
 		left: {
 			direction: 'horizontal',
@@ -48,7 +47,6 @@ class hostcmsSlidepanel {
 	};
 
 	constructor(options = {}) {
-		// Используем Object.assign вместо spread для лучшей производительности
 		this.options = Object.assign({
 			id: '',
 			className: '',
@@ -85,7 +83,6 @@ class hostcmsSlidepanel {
 		this.closeButton = null;
 		this.bodyElement = null;
 
-		// Биндим методы один раз в конструкторе
 		this.handleCloseClick = this.handleCloseClick.bind(this);
 		this.handlePanelClick = this.handlePanelClick.bind(this);
 		this.handleOutsideClick = this.handleOutsideClick.bind(this);
@@ -100,7 +97,6 @@ class hostcmsSlidepanel {
 		this.insertElement();
 		this.animateOpen();
 
-		// Оптимизированный вызов callback
 		if (this.options.onCreated) {
 			this.options.onCreated.call(this, this.element);
 		}
@@ -111,8 +107,7 @@ class hostcmsSlidepanel {
 	createPanelStructure() {
 		const pos = this.options.position;
 
-		// Создаём элемент один раз через template literal
-		this.element = $(`<div class="hostcms-slidepanel hostcms-slidepanel-${pos}">
+		this.element = hQuery(`<div class="hostcms-slidepanel hostcms-slidepanel-${pos}">
 			<div class="slidepanel">
 				<div class="slidepanel-button-close slidepanel-button-close-${pos}">
 					<i class="fa-solid fa-xmark"></i>
@@ -121,7 +116,6 @@ class hostcmsSlidepanel {
 			</div>
 		</div>`);
 
-		// Кешируем все необходимые элементы за один проход
 		this.slidepanel = this.element.children('.slidepanel');
 		this.closeButton = this.slidepanel.children(this.options.closeButtonSelector);
 		this.bodyElement = this.slidepanel.children(this.options.bodySelector);
@@ -165,7 +159,6 @@ class hostcmsSlidepanel {
 	setupEventHandlers() {
 		const events = this.options.events;
 
-		// Используем for...in для лучшей производительности с объектами
 		for (const event in events) {
 			if (events.hasOwnProperty(event)) {
 				this.element.on(event, events[event]);
@@ -191,13 +184,13 @@ class hostcmsSlidepanel {
 
 		// Оптимизированная вставка элемента
 		if (opt.insertAfter) {
-			$(opt.insertAfter).after(this.element);
+			hQuery(opt.insertAfter).after(this.element);
 		} else if (opt.insertBefore) {
-			$(opt.insertBefore).before(this.element);
+			hQuery(opt.insertBefore).before(this.element);
 		} else if (opt.prependTo) {
-			$(opt.prependTo).prepend(this.element);
+			hQuery(opt.prependTo).prepend(this.element);
 		} else {
-			$(opt.appendTo).append(this.element);
+			hQuery(opt.appendTo).append(this.element);
 		}
 	}
 
@@ -237,7 +230,6 @@ class hostcmsSlidepanel {
 			}
 		);
 
-		// Вызываем callback если есть
 		if (this.options.onClosed) {
 			this.options.onClosed.call(this, this.element);
 		}
@@ -246,25 +238,26 @@ class hostcmsSlidepanel {
 	setupGlobalClickHandler() {
 		if (!hostcmsSlidepanel.outsideClickHandler) {
 			hostcmsSlidepanel.outsideClickHandler = this.handleOutsideClick;
-			$(document).on('click touchstart', hostcmsSlidepanel.outsideClickHandler);
+			hQuery(document).on('click touchstart', hostcmsSlidepanel.outsideClickHandler);
 		}
 	}
 
 	setupGlobalEscapeHandler() {
 		if (!hostcmsSlidepanel.escapeHandler) {
 			hostcmsSlidepanel.escapeHandler = this.handleEscapeKey;
-			$(document).on('keydown', hostcmsSlidepanel.escapeHandler);
+			hQuery(document).on('keydown', hostcmsSlidepanel.escapeHandler);
 		}
 	}
 
 	handleOutsideClick(event) {
-		// Оптимизированная проверка клика вне панели
-		if (!$(event.target).closest('.hostcms-slidepanel').length) {
+		const $target = hQuery(event.target);
+
+		// Оптимизированная проверка: клик вне панели И вне элементов интерфейса TinyMCE
+		if (!$target.closest('.hostcms-slidepanel').length && !$target.closest('.tox').length) {
 			const panels = hostcmsSlidepanel.openPanels;
 			if (panels.size > 0) {
-				// Получаем последнюю панель без создания массива
 				let lastPanel;
-				for (lastPanel of panels) {} // Итерируемся до последнего элемента
+				for (lastPanel of panels) {}
 				lastPanel.close();
 			}
 		}
@@ -272,6 +265,11 @@ class hostcmsSlidepanel {
 
 	handleEscapeKey(event) {
 		if (event.key === 'Escape' || event.keyCode === 27) {
+			// Проверяем, не открыто ли сейчас модальное окно TinyMCE
+			if (hQuery('.tox-dialog-wrap:visible').length > 0) {
+				return; // Игнорируем закрытие панели, позволяем TinyMCE закрыть свое окно
+			}
+
 			const panels = hostcmsSlidepanel.openPanels;
 			if (panels.size > 0) {
 				let lastPanel;
@@ -284,12 +282,12 @@ class hostcmsSlidepanel {
 	cleanupGlobalHandlers() {
 		if (hostcmsSlidepanel.openPanels.size === 0) {
 			if (hostcmsSlidepanel.outsideClickHandler) {
-				$(document).off('click touchstart', hostcmsSlidepanel.outsideClickHandler);
+				hQuery(document).off('click touchstart', hostcmsSlidepanel.outsideClickHandler);
 				hostcmsSlidepanel.outsideClickHandler = null;
 			}
 
 			if (hostcmsSlidepanel.escapeHandler) {
-				$(document).off('keydown', hostcmsSlidepanel.escapeHandler);
+				hQuery(document).off('keydown', hostcmsSlidepanel.escapeHandler);
 				hostcmsSlidepanel.escapeHandler = null;
 			}
 		}
@@ -339,12 +337,10 @@ class hostcmsSlidepanel {
 	}
 
 	static closeAllOpenPanels() {
-		// Избегаем создания промежуточного массива
 		hostcmsSlidepanel.openPanels.forEach(panel => panel.close());
 	}
 
 	static closeBySelector(selector) {
-		// Оптимизированный поиск панели
 		for (const panel of hostcmsSlidepanel.openPanels) {
 			if (panel.element && panel.element.is(selector)) {
 				panel.close();

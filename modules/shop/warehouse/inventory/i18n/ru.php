@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Инвентаризация',
@@ -42,4 +42,5 @@ return array(
 	'post_success' => 'Документ проведен успешно!',
 	'unpost_success' => 'Документ распроведен успешно!',
 	'apply_item_change_attributes' => 'Инвентаризация при изменении атрибутов',
+	'apply_warehouse_item' => 'Инвентаризация из списка товаров на складе',
 );

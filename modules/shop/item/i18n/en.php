@@ -406,5 +406,6 @@ return array(
 
 	'aiApply_success' => 'AI integration successfully applied!',
 	'ai_prompt_description' => 'Write an engaging short description of product "%1$s" from manufacturer "%2$s" for sale in your online store. Do not use emojis. Please provide a descriptive text only, no more than 500 characters in your response.',
-	'ai_prompt_text' => 'Write a compelling description of product "%1$s" from manufacturer "%2$s" for sale in your online store. Do not use emojis. Use HTML markup, lists, and tables. If you have technical specifications, include them as well. Please provide a descriptive text only, no more than 5000 characters in your response.'
+	'ai_prompt_text' => 'Write a compelling description of product "%1$s" from manufacturer "%2$s" for sale in your online store. Do not use emojis. Use HTML markup, lists, and tables. If you have technical specifications, include them as well. Please provide a descriptive text only, no more than 5000 characters in your response.',
+	'item_edit_warehouse_limit' => 'The limit for displaying warehouses on the product card has been exceeded. Manage your inventory through <a target="_blank" href="%s">warehouses</a>.',
 );

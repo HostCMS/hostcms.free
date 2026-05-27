@@ -121,11 +121,11 @@ class Shop_Favorite_Model extends Core_Entity
 	 */
 	protected $_showXmlCommentsRating = FALSE;
 
-    /**
-     * Add Comments Rating XML to item
-     * @param bool $showXmlCommentsRating
-     * @return self
-     */
+	/**
+	 * Add Comments Rating XML to item
+	 * @param bool $showXmlCommentsRating
+	 * @return self
+	 */
 	public function showXmlCommentsRating($showXmlCommentsRating = TRUE)
 	{
 		$this->_showXmlCommentsRating = $showXmlCommentsRating;
@@ -148,7 +148,7 @@ class Shop_Favorite_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event shop_favorite.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')
@@ -227,7 +227,7 @@ class Shop_Favorite_Model extends Core_Entity
 	/**
 	 * Delete Favorite Item
 	 * @return Core_Entity
-     */
+	 */
 	public function markDeleted()
 	{
 		return $this->delete();

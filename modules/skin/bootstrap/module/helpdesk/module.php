@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Helpdesk_Module extends Helpdesk_Module
 {
@@ -31,7 +31,7 @@ class Skin_Bootstrap_Module_Helpdesk_Module extends Helpdesk_Module
 			<div class="databox radius-bordered databox-shadowed hostcms-widget-databox">
 				<div class="databox-left bg-azure">
 					<div class="databox-piechart">
-						<a href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/helpdesk/index.php')?>" onclick="$.adminLoad({path: hostcmsBackend + '/helpdesk/index.php'}); return false"><i class="fa fa-life-ring fa-3x"></i></a>
+						<a href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/helpdesk/index.php')?>" onclick="$.adminLoad({path: hostcmsBackend + '/helpdesk/index.php'}); return false"><i class="fa-solid fa-life-ring fa-3x"></i></a>
 					</div>
 				</div>
 				<?php
@@ -49,7 +49,7 @@ class Skin_Bootstrap_Module_Helpdesk_Module extends Helpdesk_Module
 					<span class="databox-number azure"><?php echo intval($row[0]['count']) ?></span>
 					<div class="databox-text"><?php echo Core::_('Helpdesk_Ticket.new_incidents')?></div>
 					<div class="databox-stat azure radius-bordered">
-						<i class="stat-icon icon-lg fa fa-life-ring"></i>
+						<i class="stat-icon icon-lg fa-solid fa-life-ring"></i>
 					</div>
 				</div>
 			</div>

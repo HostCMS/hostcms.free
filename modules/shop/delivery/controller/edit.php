@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -210,8 +210,8 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 			))
 			->ico(
 				array(
-					'fa-list',
-					'fa-file-code-o'
+					'fa-solid fa-list',
+					'fa-regular fa-file-code'
 				)
 			)
 			->divAttr(array('class' => 'form-group col-xs-12 col-md-4 margin-top-21 rounded-radio-group'))

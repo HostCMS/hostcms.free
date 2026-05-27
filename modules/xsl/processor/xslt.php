@@ -17,7 +17,7 @@ class Xsl_Processor_Xslt extends Xsl_Processor
 	/**
 	 * Execute processor
 	 * @return string|null
-     * @hostcms-event Xsl_Processor.onBeforeProcess
+	 * @hostcms-event Xsl_Processor.onBeforeProcess
 	 * @hostcms-event Xsl_Processor.onAfterProcess
 	 */
 	public function process()

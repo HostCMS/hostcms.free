@@ -79,7 +79,7 @@ class Update_Module_Entity extends Core_Empty_Entity
 				'[!]',
 			), array(
 				'<i class="fa-solid fa-circle-plus success"></i>',
-				'<i class="fa-solid fa-circle-check warning"></i>',
+				'<i class="fa-regular fa-circle-check warning"></i>',
 				'<i class="fa-solid fa-circle-exclamation danger"></i>',
 			), $this->description)
 		);

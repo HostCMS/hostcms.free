@@ -129,7 +129,7 @@ class Event_Controller
 	/**
 	 * Show crm projects filter
 	 * @return false|string
-     */
+	 */
 	static public function showCrmProjectFilter()
 	{
 		ob_start();

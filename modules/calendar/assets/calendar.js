@@ -68,12 +68,12 @@
 											{
 												// Удаляем событие из календаря
 												$('#calendar').fullCalendar('removeEvents', eventId + '_' + moduleId);
-												Notify('<span>' + $.escapeHtml(result['message']) + '</span>', '', 'top-right', '7000', 'success', 'fa-check', true);
+												Notify('<span>' + $.escapeHtml(result['message']) + '</span>', '', 'top-right', '7000', 'success', 'fa-solid fa-check', true);
 											}
 											 // Ошибка
 											else if (result['message'])
 											{
-												Notify('<span>' + $.escapeHtml(result['message']) + '</span>', '', 'top-right', '7000', 'danger', 'fa-warning', true);
+												Notify('<span>' + $.escapeHtml(result['message']) + '</span>', '', 'top-right', '7000', 'danger', 'fa-solid fa-triangle-exclamation', true);
 											}
 										}
 									});
@@ -161,7 +161,7 @@ function calendarEventClick(event) {
 		path: event.path,
 		action: 'edit',
 		operation: 'modal',
-		additionalParams: 'hostcms[checked][0][' + eventId + ']=1&parentWindowId=id_content',
+		additionalParams: 'hostcms[checked][0][' + eventId + ']=1&from_calendar=1',
 		windowId: 'id_content'
 	});
 }
@@ -188,7 +188,7 @@ function calendarEventRender(event, element) {
 	}
 
 	if (event.place) {
-		htmlBuffer += '<span class="fc-place"><i class="fa fa-map-marker black"></i> ' + $.escapeHtml(event.place) + '</span>';
+		htmlBuffer += '<span class="fc-place"><i class="fa-solid fa-location-dot black"></i> ' + $.escapeHtml(event.place) + '</span>';
 	}
 
 	if (event.amount) {
@@ -230,13 +230,13 @@ function calendarEventResize(event, delta, revertFunc) {
 
 			if (!result['error'] && result['message'])
 			{
-				Notify('<span>' + $.escapeHtml(result['message']) + '</span>', '', 'top-right', '7000', 'success', 'fa-check', true);
+				Notify('<span>' + $.escapeHtml(result['message']) + '</span>', '', 'top-right', '7000', 'success', 'fa-solid fa-check', true);
 				$('#calendar').fullCalendar('refetchEvents');
 			}
 			else if (result['message'])
 			{
 				if (result['error'] && typeof revertFunc === 'function') revertFunc();
-				Notify('<span>' + $.escapeHtml(result['message']) + '</span>', '', 'top-right', '7000', 'danger', 'fa-warning', true);
+				Notify('<span>' + $.escapeHtml(result['message']) + '</span>', '', 'top-right', '7000', 'danger', 'fa-solid fa-triangle-exclamation', true);
 			}
 		}
 	});
@@ -265,12 +265,12 @@ function calendarEventDrop(event, delta, revertFunc) {
 
 			if (!result['error'] && result['message'])
 			{
-				Notify('<span>' + $.escapeHtml(result['message']) + '</span>', '', 'top-right', '7000', 'success', 'fa-check', true);
+				Notify('<span>' + $.escapeHtml(result['message']) + '</span>', '', 'top-right', '7000', 'success', 'fa-solid fa-check', true);
 			}
 			else if (result['message'])
 			{
 				if (result['error'] && typeof revertFunc === 'function') revertFunc();
-				Notify('<span>' + $.escapeHtml(result['message']) + '</span>', '', 'top-right', '7000', 'danger', 'fa-warning', true);
+				Notify('<span>' + $.escapeHtml(result['message']) + '</span>', '', 'top-right', '7000', 'danger', 'fa-solid fa-triangle-exclamation', true);
 			}
 			// Обновляем события в любом случае для синхронизации
 			$('#calendar').fullCalendar('refetchEvents');

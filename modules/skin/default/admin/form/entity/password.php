@@ -73,7 +73,7 @@ class Skin_Default_Admin_Form_Entity_Password extends Admin_Form_Entity_Input
 		<?php
 		if ($this->generatePassword)
 		{
-			?><a class="generate-password" onclick="$.generatePassword(<?php echo htmlspecialchars((int) $this->generatePasswordLength)?>);"><i class="fa fa-keyboard-o"></i></a><?php
+			?><a class="generate-password" onclick="$.generatePassword(<?php echo htmlspecialchars((int) $this->generatePasswordLength)?>);"><i class="fa-regular fa-keyboard"></i></a><?php
 		}
 
 		$this->executeChildren();

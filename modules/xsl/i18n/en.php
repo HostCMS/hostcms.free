@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Xsl
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'XSL templates',
@@ -41,4 +41,7 @@ return array(
 	'import_file' => 'Choose file to upload',
 	'import_button' => 'Upload',
 	'importXsls_success' => 'Import completed successfully!',
+	'move_xsl_dir_title' => "Moving XSL Templates",
+	'move_xsl_dir_id' => "Parent Group",
+	'move_success' => 'XSL templates moved'
 );

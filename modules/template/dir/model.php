@@ -120,6 +120,25 @@ class Template_Dir_Model extends Core_Entity
 	}
 
 	/**
+	 * Move group to another group
+	 * @param int $document_dir_id dir id
+	 * @return self
+	 * @hostcms-event template_dir.onBeforeMove
+	 * @hostcms-event template_dir.onAfterMove
+	 */
+	public function move($template_dir_id)
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($template_dir_id));
+
+		$this->parent_id = $template_dir_id;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
+
+		return $this;
+	}
+
+	/**
 	 * Get parent comment
 	 * @return Template_Dir_Model|NULL
 	 */
@@ -129,6 +148,7 @@ class Template_Dir_Model extends Core_Entity
 		{
 			return Core_Entity::factory('Template_Dir', $this->parent_id);
 		}
+
 		return NULL;
 	}
 

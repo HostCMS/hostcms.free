@@ -25,8 +25,8 @@ function smarty_modifiercompiler_escape($params, Smarty_Internal_TemplateCompile
     $compiler->template->_checkPlugins(
         array(
             array(
-                'function' => 'smarty_literal_compiler_param',
-                'file'     => SMARTY_PLUGINS_DIR . 'shared.literal_compiler_param.php'
+            	'function' => 'smarty_literal_compiler_param',
+            	'file'     => SMARTY_PLUGINS_DIR . 'shared.literal_compiler_param.php'
             )
         )
     );
@@ -64,7 +64,7 @@ function smarty_modifiercompiler_escape($params, Smarty_Internal_TemplateCompile
                 // see https://html.spec.whatwg.org/multipage/scripting.html#restrictions-for-contents-of-script-elements
                 return 'strtr((string)' .
                        $params[ 0 ] .
-                       ', array("\\\\" => "\\\\\\\\", "\'" => "\\\\\'", "\"" => "\\\\\"", "\\r" => "\\\\r", "\\n" => "\\\n", "</" => "<\/", "<!--" => "<\!--", "<s" => "<\s", "<S" => "<\S" ))';
+                   	', array("\\\\" => "\\\\\\\\", "\'" => "\\\\\'", "\"" => "\\\\\"", "\\r" => "\\\\r", "\\n" => "\\\n", "</" => "<\/", "<!--" => "<\!--", "<s" => "<\s", "<S" => "<\S" ))';
         }
     } catch (SmartyException $e) {
         // pass through to regular plugin fallback
@@ -74,12 +74,12 @@ function smarty_modifiercompiler_escape($params, Smarty_Internal_TemplateCompile
         $compiler->required_plugins[ 'nocache' ][ 'escape' ][ 'modifier' ][ 'file' ] =
             SMARTY_PLUGINS_DIR . 'modifier.escape.php';
         $compiler->required_plugins[ 'nocache' ][ 'escape' ][ 'modifier' ][ 'function' ] =
-            'smarty_modifier_escape';
+        	'smarty_modifier_escape';
     } else {
         $compiler->required_plugins[ 'compiled' ][ 'escape' ][ 'modifier' ][ 'file' ] =
             SMARTY_PLUGINS_DIR . 'modifier.escape.php';
         $compiler->required_plugins[ 'compiled' ][ 'escape' ][ 'modifier' ][ 'function' ] =
-            'smarty_modifier_escape';
+        	'smarty_modifier_escape';
     }
     return 'smarty_modifier_escape(' . join(', ', $params) . ')';
 }

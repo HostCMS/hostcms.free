@@ -107,7 +107,7 @@ return array(
 	'key_not_found' => 'Не найден лицензионный ключ!',
 	'getting_key' => '<div style="width: 100%; margin-top: 20px; overflow: auto; z-index: 9999; background-color: rgba(255, 255, 255, .8); padding: 0 20px; text-shadow: 1px 1px 0 rgba(255, 255, 255, .4)">
 
-	<h2>Получение номера лицензии и PIN-кода <a href="https://www.hostcms.ru/documentation/introduction/licenses/licenses/" target="_blank"><i class="fa fa-external-link"></i></a></h2>
+	<h2>Получение номера лицензии и PIN-кода <a href="https://www.hostcms.ru/documentation/introduction/licenses/licenses/" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square small"></i></a></h2>
 
 	<p>После установки системы управления необходимо зарегистрироваться на нашем сайте в разделе «<a href="https://www.hostcms.ru/users/" target="_blank">Личный кабинет</a>»</p>
 	<p>После подтверждения регистрации пользователя и входа в личный кабинет, в разделе «Лицензии» доступен список выданных лицензий:</p>
@@ -119,7 +119,7 @@ return array(
 	<p>Коммерческие пользователи могут узнать свой номер лицензии и PIN-код из таблицы в разделе «Лицензии» личного кабинета, пользователи HostCMS.Старт могут добавить новую лицензию.</p>
 	<p>Узнав номер лицензии и PIN-код можно вернуться в <a href="/admin/" target="_blank">центр администрирования</a> и ввести эти данные в разделе «Система» → «Сайты» → пункт меню «Настройки» → «Регистрационные данные».</p>
 
-	<h2>Получение ключа <a href="https://www.hostcms.ru/documentation/introduction/key/key/" target="_blank"><i class="fa fa-external-link"></i></a></h2>
+	<h2>Получение ключа <a href="https://www.hostcms.ru/documentation/introduction/key/key/" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square small"></i></a></h2>
 
 	<p>Далее можно получать ключи в <a href="/admin/" target="_blank">центре администрирования</a> системы управления, перейдя в раздел «Система» → «Сайты», выбрать глобус для соответствующего сайта в столбце «Домены»:</p>
 

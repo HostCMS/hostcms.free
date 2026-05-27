@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -317,25 +317,21 @@ foreach ($aTmp as $key => $oBenchmark_Url)
 							<div id="benchmark-month-chart" class="chart chart-lg"></div>
 						</div>
 					</div>
-					<div class="row">
-						<div class="col-xs-12">
-							<div class="col-sm-12 col-md-6">
-								<button class="btn btn-palegreen" id="setOriginalZoom"><i class="fa fa-area-chart icon-separator"></i><?php echo Core::_('Benchmark.reset')?></button>
-							</div>
+					<div class="row margin-top-10 padding-left-10 padding-bottom-10">
+						<div class="col-sm-12 col-md-6">
+							<button class="btn btn-sm btn-gray" id="setOriginalZoom"><i class="fa-solid fa-arrow-rotate-left icon-separator"></i><?php echo Core::_('Benchmark.reset')?></button>
 						</div>
 					</div>
 				</div>
-				<div id="benchmark_day" class="tab-pane padding-left-5 padding-right-10 animated fadeInUp">
+				<div id="benchmark_day" class="tab-pane padding-right-10 animated fadeInUp">
 					<div class="row">
 						<div class="col-xs-12">
 							<div id="benchmark-day-chart" class="chart chart-lg" style="width:100%"></div>
 						</div>
 					</div>
-					<div class="row">
-						<div class="col-xs-12">
-							<div class="col-sm-12 col-md-6">
-								<button class="btn btn-palegreen" id="setOriginalZoom"><i class="fa fa-area-chart icon-separator"></i><?php echo Core::_('Benchmark.reset')?></button>
-							</div>
+					<div class="row margin-top-10 padding-left-10 padding-bottom-10">
+						<div class="col-sm-12 col-md-6">
+							<button class="btn btn-sm btn-gray" id="setOriginalZoom"><i class="fa-solid fa-arrow-rotate-left icon-separator"></i><?php echo Core::_('Benchmark.reset')?></button>
 						</div>
 					</div>
 				</div>
@@ -405,7 +401,8 @@ $(function(){
 					opacity: 1
 				}]
 			}
-		}
+		},
+		shadowSize: 0
 	},
 	{
 		color: themesecondary,
@@ -427,19 +424,21 @@ $(function(){
 		points: {
 			show: false
 		},
-		shadowSize: 0
+		shadowSize: 0,
 	},
 	{
 		color: themethirdcolor,
 		label: "<?php echo Core::_('Benchmark.dns_lookup') ?>",
 		data: valueTitlesDnsPerDay,
-		yaxis: 2
+		yaxis: 2,
+		shadowSize: 0
 	},
 	{
 		color: themefourthcolor,
 		label: "<?php echo Core::_('Benchmark.connect_server') ?>",
 		data: valueTitlesServerPerDay,
-		yaxis: 2
+		yaxis: 2,
+		shadowSize: 0
 	}],
 	dataPerHour = [
 		{
@@ -460,7 +459,8 @@ $(function(){
 						opacity: 1
 					}]
 				}
-			}
+			},
+			shadowSize: 0
 			//points: {show: true}
 		},
 		{
@@ -503,8 +503,8 @@ $(function(){
 					}]
 				},
 				*/
-			}
-
+			},
+			shadowSize: 0
 		},
 		{
 			color: themefourthcolor,
@@ -522,7 +522,8 @@ $(function(){
 						opacity: 0
 					}]
 				}*/
-			}
+			},
+			shadowSize: 0
 		}
 	];
 
@@ -673,22 +674,23 @@ $(function(){
 			plotPerHour = $.plot(placeholderPerHour, dataPerHour, optionsForHourGraph);
 		});
 
-		var plotPerDay = $.plot(placeholderPerDay, dataPerDay, optionsForDayGraph),
-			plotPerHour = $.plot(placeholderPerHour, dataPerHour, optionsForHourGraph);
+		setTimeout(function() {
+			var plotPerDay = $.plot(placeholderPerDay, dataPerDay, optionsForDayGraph),
+				plotPerHour = $.plot(placeholderPerHour, dataPerHour, optionsForHourGraph);
 
+			$("#<?php echo $sWindowId?> #benchmark_month #clearSelection").click(function () {
+				plotPerDay.clearSelection();
+			});
 
-		$("#<?php echo $sWindowId?> #benchmark_month #clearSelection").click(function () {
-			plotPerDay.clearSelection();
-		});
+			$("#<?php echo $sWindowId?> #benchmark_day #clearSelection").click(function () {
+				plotPerHour.clearSelection();
+			});
 
-		$("#<?php echo $sWindowId?> #benchmark_day #clearSelection").click(function () {
-			plotPerHour.clearSelection();
-		});
-
-		// Вызываем однократно обработчик нажатия кнопки, для правильной отрисовки графика
-		$('#<?php echo $sWindowId?> .page-content').one('shown.bs.tab', 'a[data-toggle="tab"]', function(e){
-			$('#<?php echo $sWindowId ?> ' + $(e.target).attr('href') + ' #setOriginalZoom').click();
-		});
+			// Вызываем однократно обработчик нажатия кнопки, для правильной отрисовки графика
+			$('#<?php echo $sWindowId?> a[data-toggle="tab"]').on('shown.bs.tab', function(e){
+				$('#<?php echo $sWindowId ?> ' + $(e.target).attr('href') + ' #setOriginalZoom').click();
+			});
+		}, 200);
 	});
 });
 </script>

@@ -364,12 +364,12 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	 * // HAVING `a7` BETWEEN 1 AND 10
 	 * $Core_QueryBuilder_Select->having('a7', 'BETWEEN', array(1, 10));
 	 * </code>
-	 * @param string $column column
-	 * @param string $expression expression
-	 * @param string $value value
+	 * @param string|object $column column
+	 * @param string|NULL $expression expression
+	 * @param string|NULL $value value
 	 * @return self
 	 */
-	public function having($column, $expression, $value)
+	public function having($column, $expression = NULL, $value = NULL)
 	{
 		$this->_having[] = array(
 			$this->_operator => array($column, $expression, $value)
@@ -567,7 +567,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	 * LIMIT for UNION
 	 * @param string $arg1 offset
 	 * @param string $arg2 count
-     * @return self
+	 * @return self
 	 */
 	public function unionLimit($arg1, $arg2 = NULL)
 	{
@@ -639,17 +639,17 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	public function build()
 	{
 		$query = array();
-		
+
 		if (!empty($this->_comment))
 		{
 			$query[] = $this->_buildComment($this->_comment);
 		}
-		
+
 		if (!empty($this->_with))
 		{
 			$query[] = $this->_buildWith($this->_with);
 		}
-		
+
 		$sql = 'SELECT ';
 
 		if ($this->_distinct)
@@ -675,7 +675,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 		$sql .= !empty($this->_select)
 			? implode(', ', $this->_quoteColumns($this->_select))
 			: '*';
-		
+
 		$query[] = $sql;
 
 		if (!empty($this->_from))

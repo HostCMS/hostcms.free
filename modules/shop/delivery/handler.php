@@ -207,11 +207,11 @@ abstract class Shop_Delivery_Handler
 		self::_check($oShop, 'checkPaymentBeforeContent');
 	}
 
-    /**
-     * Call ->checkPaymentAfterContent() on each shop's Shop_Delivery_Handler
-     * @param Shop_Model $oShop
-     * @return null
-     */
+	/**
+	 * Call ->checkPaymentAfterContent() on each shop's Shop_Delivery_Handler
+	 * @param Shop_Model $oShop
+	 * @return null
+	 */
 	static public function checkAfterContent(Shop_Model $oShop)
 	{
 		return self::_check($oShop, 'checkPaymentAfterContent');

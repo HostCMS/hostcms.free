@@ -192,7 +192,7 @@ class Shop_Delivery_Condition_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event shop_delivery_condition.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')
@@ -212,8 +212,13 @@ class Shop_Delivery_Condition_Model extends Core_Entity
 	{
 		$aPrices = $this->getPriceArray();
 
+		$oShopCurrency = $this->Shop_Delivery->Shop->Shop_Currency;
+
 		$this->clearXmlTags()
-			->addXmlTag('price', $aPrices['price_tax']);
+			->addXmlTag('price', $aPrices['price_tax'], array(
+				'formatted' => $oShopCurrency->format($aPrices['price_tax']),
+				'formattedWithCurrency' => $oShopCurrency->formatWithCurrency($aPrices['price_tax']))
+			);
 
 		return $this;
 	}
@@ -256,7 +261,7 @@ class Shop_Delivery_Condition_Model extends Core_Entity
 	{
 		if ($this->time_from != '00:00:00' || $this->time_to != '00:00:00')
 		{
-			?><span class="badge badge-square badge-pink inverted margin-left-5 small"><i class="fas fa-stopwatch"></i> <?php echo date("H:i", strtotime($this->time_from)), ' — ', date("H:i", strtotime($this->time_to))?></span><?php
+			?><span class="badge badge-square badge-pink inverted margin-left-5 small"><i class="fa-solid fa-stopwatch"></i> <?php echo date("H:i", strtotime($this->time_from)), ' — ', date("H:i", strtotime($this->time_to))?></span><?php
 		}
 	}
 	

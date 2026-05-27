@@ -1,4 +1,4 @@
-/* global */
+/* global toastr */
 (function($) {
 	"use strict";
 
@@ -155,7 +155,45 @@
 				(path ? "; path=" + path : "") +
 				(domain ? "; domain=" + domain : "") +
 				(secure ? "; secure" : "");
-		}
+		},
+		removeLocalStorageItem: function(name) {
+			if (typeof localStorage !== 'undefined') {
+				localStorage.removeItem(name);
+			}
+		},
+		localStorageGetItem: function(itemName) {
+			if (typeof localStorage !== 'undefined') {
+				try {
+					var storage = localStorage.getItem(itemName);
+					return storage ? JSON.parse(storage) : null;
+				} catch (e) {
+					return null;
+				}
+			}
+			return null;
+		},
+
+		localStorageSetItem: function(itemName, object) {
+			if (typeof localStorage !== 'undefined') {
+				try {
+					localStorage.setItem(itemName, JSON.stringify(object));
+				} catch (e) {
+					console.log('localStorage error: ' + e);
+					$.removeLocalStorageItem(itemName);
+				}
+			}
+		},
+		storageAvailable: function(type) {
+			try {
+				var storage = window[type],
+					x = '__storage_test__';
+				storage.setItem(x, x);
+				storage.removeItem(x);
+				return true;
+			} catch (e) {
+				return false;
+			}
+		},
 	});
 })(jQuery);
 
@@ -262,4 +300,33 @@ function cookie_encode(string) {
 	// Encode value but allow specific chars for human readability
 	return encodeURIComponent(string)
 		.replace(/%(7B|7D|3A|22|23|5B|5D)/g, decodeURIComponent);
+}
+
+/*Show Notification*/
+function Notify(message, description, position, timeout, theme, icon, closable, sound) { // eslint-disable-line
+	var soundAvailable = $('#sound-switch').data('soundEnabled') === undefined
+		? false
+		: !!$('#sound-switch').data('soundEnabled');
+
+	if (typeof sound != 'undefined')
+	{
+		soundAvailable = soundAvailable && sound;
+	}
+
+	// icon = icon.replace(/\b(fa-regular|fa-solid|fa |fas|far)\b\s*/g, '').trim();
+
+	toastr.options.positionClass = 'toast-' + position;
+	toastr.options.extendedTimeOut = 0; //1000;
+	toastr.options.timeOut = timeout;
+	toastr.options.closeButton = closable;
+	toastr.options.toastClass = ' toast-' + theme;
+	toastr.options.iconClass = icon;
+	toastr.options.playSound = soundAvailable;
+
+	if (timeout == 0)
+	{
+		toastr.options.tapToDismiss = false;
+	}
+
+	toastr['custom'](description, message);
 }

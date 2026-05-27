@@ -18,7 +18,7 @@ class Shop_Price_Entry_Controller extends Core_Servant_Properties
 	 * @param $shop_item_id shop item id
 	 * @param $dateTo date
 	 * @return string|null
-     */
+	 */
 	public function getPrice($shop_price_id, $shop_item_id, $dateTo = NULL)
 	{
 		$price = NULL;

@@ -308,11 +308,11 @@ $additionalParamsComments = 'informationsystem_id=' . $iInformationsystemId . '&
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Informationsystem_Item.information_system_top_menu_items'))
-		->icon('fa fa-list-alt')
+		->icon('fa-solid fa-rectangle-list')
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Informationsystem_Item.show_information_groups_link2'))
-				->icon('fa fa-plus')
+				->icon('fa-solid fa-plus')
 				->href(
 					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
 				)
@@ -323,7 +323,7 @@ $oAdmin_Form_Entity_Menus->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Informationsystem_Item.show_information_groups_link3'))
-				->icon('fa fa-gears')
+				->icon('fa-solid fa-gears')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref($sInformationsystemItemProperties, NULL, NULL, $additionalParamsItemProperties)
 				)
@@ -334,7 +334,7 @@ $oAdmin_Form_Entity_Menus->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Informationsystem_Item.export'))
-				->icon('fa fa-upload')
+				->icon('fa-solid fa-upload')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/informationsystem/item/export/index.php', NULL, NULL, $additionalParamsItemProperties)
 				)
@@ -345,7 +345,7 @@ $oAdmin_Form_Entity_Menus->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Informationsystem_Item.import'))
-				->icon('fa fa-download')
+				->icon('fa-solid fa-download')
 				->href(
           $oAdmin_Form_Controller->getAdminLoadHref('/{admin}/informationsystem/item/import/index.php', NULL, NULL, $additionalParamsItemProperties)
 				)
@@ -357,11 +357,11 @@ $oAdmin_Form_Entity_Menus->add(
 ->add(
 		Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Informationsystem_Group.information_system_top_menu_groups'))
-		->icon('fa fa-folder-open')
+		->icon('fa-solid fa-folder-open')
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Informationsystem_Group.show_information_groups_link1'))
-				->icon('fa fa-plus')
+				->icon('fa-solid fa-plus')
 				->href(
 					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 				)
@@ -372,7 +372,7 @@ $oAdmin_Form_Entity_Menus->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Informationsystem_Group.show_information_groups_link4'))
-				->icon('fa fa-gears')
+				->icon('fa-solid fa-gears')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref($sInformationsystemGroupProperties, NULL, NULL, $additionalParamsItemProperties)
 				)
@@ -384,7 +384,7 @@ $oAdmin_Form_Entity_Menus->add(
 ->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Informationsystem_Item.show_all_comments_top_menu'))
-		->icon('fa fa-comments')
+		->icon('fa-solid fa-comments')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($sInformationsystemComments, NULL, NULL, $additionalParamsComments)
 		)
@@ -449,7 +449,7 @@ $oAdmin_Form_Controller->addEntity(
 							' . $modeContent . '
 							<div class="col-xs-6 col-md-10">
 								<input type="text" name="globalSearch" class="form-control w-100" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
-								<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParamsItemProperties) . '"></i>
+								<i class="fa-solid fa-circle-xmark no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParamsItemProperties) . '"></i>
 								<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParamsItemProperties) . '"><i class="fa-solid fa-magnifying-glass fa-fw"></i></button>
 							</div>
 						</div>
@@ -798,7 +798,11 @@ if (Core::moduleIsActive('ai') && $oAdminFormActionAiApply && $oAdmin_Form_Contr
 		->title(Core::_('Ai_Prompt.apply'))
 		->selectCaption(Core::_('Ai_Prompt.ai_prompt_id'))
 		->autocompletePath(Admin_Form_Controller::correctBackendPath('/{admin}/ai/index.php?autocomplete=1&site_id=' . $oInformationsystem->site_id . '&models=' . implode(',', $aModels) . '&show_prompts=1'))
-		->autocompleteEntityId($oInformationsystem->site_id);
+		->autocompleteEntityId($oInformationsystem->site_id)
+		->datasets(array(
+			0 => 'Informationsystem_Group',
+			1 => 'Informationsystem_Item'
+		));
 
 	if (count($aModels))
 	{
@@ -855,6 +859,8 @@ if (strlen($sGlobalSearch))
 				->addCondition(array('setOr' => array()))
 				->addCondition(array('where' => array('informationsystem_groups.seo_keywords', 'LIKE', '%' . $sGlobalSearch . '%')))
 			->addCondition(array('close' => array()));
+
+		Core_Event::notify('Informationsystem_Item_GlobalSearch.onAfterSetConditions', NULL, array($oAdmin_Form_Dataset, $sGlobalSearch, $iGlobalSearchMode));
 	}
 	else
 	{
@@ -962,6 +968,8 @@ if (strlen($sGlobalSearch))
 		$oAdmin_Form_Dataset
 			->addCondition(array('whereRaw' => array('0 = 1')));
 	}
+
+	Core_Event::notify('Informationsystem_Item_GlobalSearch.onAfterSetConditions', NULL, array($oAdmin_Form_Dataset, $sGlobalSearch, $iGlobalSearchMode));
 }
 else
 {

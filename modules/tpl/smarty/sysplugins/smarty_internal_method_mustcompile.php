@@ -11,23 +11,23 @@
  */
 class Smarty_Internal_Method_MustCompile
 {
-    /**
-     * Valid for template object
-     *
-     * @var int
-     */
+	/**
+	 * Valid for template object
+	 *
+	 * @var int
+	 */
     public $objMap = 2;
 
-    /**
-     * Returns if the current template must be compiled by the Smarty compiler
-     * It does compare the timestamps of template source and the compiled templates and checks the force compile
-     * configuration
-     *
-     * @param \Smarty_Internal_Template $_template
-     *
-     * @return bool
-     * @throws \SmartyException
-     */
+	/**
+	 * Returns if the current template must be compiled by the Smarty compiler
+	 * It does compare the timestamps of template source and the compiled templates and checks the force compile
+	 * configuration
+	 *
+	 * @param \Smarty_Internal_Template $_template
+	 *
+	 * @return bool
+	 * @throws \SmartyException
+	 */
     public function mustCompile(Smarty_Internal_Template $_template)
     {
         if (!$_template->source->exists) {

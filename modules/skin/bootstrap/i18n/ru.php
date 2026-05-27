@@ -1,12 +1,5 @@
 <?php
-/**
- * Skin.
- *
- * @package HostCMS
- * @subpackage Skin
- * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
- */
+
 return array(
 	'admin_menu_content' => 'Контент',
 	'admin_menu_structure' => 'Структура сайта',
@@ -21,4 +14,5 @@ return array(
 	'admin_menu_administration' => 'Обслуживание',
 	'admin_menu_trash' => 'Корзина',
 	'admin_menu_finance' => 'Финансы',
+	'admin_menu_timeline' => 'Лента',
 );

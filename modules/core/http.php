@@ -888,7 +888,7 @@ abstract class Core_Http
 			}, $url
 		);
 	}
-	
+
 	/**
 	 * Parse Cookie string to array
 	 * @param string $str e.g. 'foo=bar; baz=qux"
@@ -914,7 +914,7 @@ abstract class Core_Http
 	/**
 	 * Extract array of cookies from raw headers
 	 * @param string $headers
-	 * @return array 
+	 * @return array
 	 */
 	static public function extractCookiesFromHeaders($headers)
 	{

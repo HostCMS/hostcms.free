@@ -576,14 +576,14 @@ class Shop_Controller_Show extends Core_Controller
 		);
 	}
 
-    /**
-     * Apply warehouse's conditions
-     *
-     * @param Core_QueryBuilder_Select $oCore_QueryBuilder_Select
-     * @param string $fieldName , default 'shop_items.id'
-     * @param bool $groupBy
-     * @return self
-     */
+	/**
+	 * Apply warehouse's conditions
+	 *
+	 * @param Core_QueryBuilder_Select $oCore_QueryBuilder_Select
+	 * @param string $fieldName , default 'shop_items.id'
+	 * @param bool $groupBy
+	 * @return self
+	 */
 	protected function _applyWarehouseConditionsQueryBuilder(Core_QueryBuilder_Select $oCore_QueryBuilder_Select, $fieldName = 'shop_items.id', $groupBy = TRUE)
 	{
 		switch ($this->warehouseMode)
@@ -783,6 +783,7 @@ class Shop_Controller_Show extends Core_Controller
 	/**
 	 * Add comparing goods
 	 * @return self
+	 * @hostcms-event Shop_Controller_Show.onBeforeAddCompareEntity
 	 */
 	protected function _addComparing()
 	{
@@ -829,7 +830,7 @@ class Shop_Controller_Show extends Core_Controller
 						//$this->applyItemsForbiddenTags($oCompare_Shop_Item);
 						$this->applyForbiddenAllowedTags('/shop/comparing/shop_item|/shop/shop_item', $oCompare_Shop_Item);
 
-						Core_Event::notify(get_class($this) . '.onBeforeAddCompareEntity', $this, array($oCompare_Shop_Item));
+						Core_Event::notify(get_class($this) . '.onBeforeAddCompareEntity', $this, array($oCompare_Shop_Item, $oCompareEntity));
 
 						$oCompareEntity->addEntity($oCompare_Shop_Item);
 					}
@@ -1393,11 +1394,11 @@ class Shop_Controller_Show extends Core_Controller
 		return $aReturn;
 	}
 
-    /**
-     * Typical conversion of Shop_Groups to an array
-     * @param array $aShop_Groups
-     * @return array
-     */
+	/**
+	 * Typical conversion of Shop_Groups to an array
+	 * @param array $aShop_Groups
+	 * @return array
+	 */
 	protected function _getGroupData(array $aShop_Groups)
 	{
 		$aReturn = array();
@@ -1514,7 +1515,7 @@ class Shop_Controller_Show extends Core_Controller
 					->queryBuilder()
 					->where(NULL, 'NOT EXISTS', Core_QueryBuilder::select(1)
 						->from(array('shop_groups', 'sg'))
-						->where('sg.id', '=', 'shop_items.shop_group_id')
+						->where('sg.id', '=', Core_QueryBuilder::raw('`shop_items`.`shop_group_id`'))
 						// Inverted conditions
 						->where('sg.active', '=', 0)
 						->where('sg.deleted', '=', 1)
@@ -1957,7 +1958,7 @@ class Shop_Controller_Show extends Core_Controller
 		}
 
 		// Показывать SEO-фильтры
-		if ($this->seoFilters && $this->group !== FALSE)
+		if ($this->seoFilters)
 		{
 			$oShop_Filter_Seos = $oShop->Shop_Filter_Seos;
 			$oShop_Filter_Seos->queryBuilder()
@@ -1965,7 +1966,10 @@ class Shop_Controller_Show extends Core_Controller
 				->where('shop_filter_seos.active', '=', 1);
 				//->where('shop_filter_seos.shop_group_id', is_array($this->group) ? 'IN' : '=', $this->group);
 
-			$this->applyFilterGroupCondition($oShop_Filter_Seos->queryBuilder(), 'shop_filter_seos.shop_group_id');
+			$this->group !== FALSE
+				? $this->applyFilterGroupCondition($oShop_Filter_Seos->queryBuilder(), 'shop_filter_seos.shop_group_id')
+				: $oShop_Filter_Seos->queryBuilder()
+					->where('shop_filter_seos.shop_group_id', '=', 0);
 
 			Core_Event::notify(get_class($this) . '.onBeforeSelectSeoFilters', $this, array($oShop_Filter_Seos));
 
@@ -2777,8 +2781,14 @@ class Shop_Controller_Show extends Core_Controller
 
 			if (Core_Array::getPost('producer_id'))
 			{
-				$iProducerId = Core_Array::getPost('producer_id', 0, 'int');
-				$this->producer($iProducerId);
+				//$iProducerId = Core_Array::getPost('producer_id', 0, 'int');
+				$mProducerId = Core_Array::getPost('producer_id', 0);
+
+				$mProducerId = is_array($mProducerId)
+					? array_map('intval', $mProducerId)
+					: intval($mProducerId);
+
+				$this->producer($mProducerId);
 			}
 
 			// до applyGroupCondition
@@ -4878,7 +4888,7 @@ class Shop_Controller_Show extends Core_Controller
 					Core_Html_Entity::factory('A')
 						->data('confirm-message', Core::_('Admin_Form.msg_information_delete'))
 						->href("{$sPath}?{$sAdditional}")
-						->onclick("res = confirm(this.getAttribute('data-confirm-message')); if (res) { hQuery.openWindow({path: '{$sPath}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'});} return false")
+						->onclick("res = confirm(this.getAttribute('data-confirm-message')); if (res) { hQuery.openWindow({path: '{$sPath}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6', justAction: true});} return false")
 						->add(
 							Core_Html_Entity::factory('I')
 								->title($sTitle)
@@ -4965,7 +4975,7 @@ class Shop_Controller_Show extends Core_Controller
 				Core_Html_Entity::factory('A')
 					->data('confirm-message', Core::_('Admin_Form.msg_information_delete'))
 					->href("{$sPath}?{$sAdditional}")
-					->onclick("res = confirm(this.getAttribute('data-confirm-message')); if (res) { hQuery.openWindow({path: '{$sPath}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'});} return false")
+					->onclick("res = confirm(this.getAttribute('data-confirm-message')); if (res) { hQuery.openWindow({path: '{$sPath}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6', justAction: true});} return false")
 					->add(
 						Core_Html_Entity::factory('I')
 							->title($sTitle)
@@ -6636,7 +6646,7 @@ class Shop_Controller_Show extends Core_Controller
 	}
 
 	/**
-	 * Get Filter Properties
+	 * Get Filter Properties conditions, see addFilter()
 	 * @return array
 	 */
 	public function getFilterProperties()
@@ -6929,6 +6939,24 @@ class Shop_Controller_Show extends Core_Controller
 			$oProducersXmlEntity->addEntity($oShop_Producer);
 		}
 
+		return $this;
+	}
+
+	/**
+	 * Set SEO Template
+	 * @param string $type Item|Group
+	 * @param string $option Title|Description|Keywords|H1
+	 * @param string $value
+	 * @return self
+	 */
+	public function setSeoTemplate($type, $option, $value)
+	{
+		$fieldName = "_seo{$type}{$option}";
+		if (isset($this->$fieldName))
+		{
+			$this->$fieldName = $value;
+		}
+		
 		return $this;
 	}
 

@@ -117,7 +117,7 @@ class Shop_Payment_System_Model extends Core_Entity
 
 				Core_Html_Entity::factory('Span')
 					->class('badge badge-square badge-hostcms')
-					->value('<i class="fa fa-users darkgray"></i> ' . $siteuserGroupName)
+					->value('<i class="fa-solid fa-users darkgray"></i> ' . $siteuserGroupName)
 					->execute();
 
 				// Если "Все", то прерываем формирование списка
@@ -131,7 +131,7 @@ class Shop_Payment_System_Model extends Core_Entity
 		{
 			Core_Html_Entity::factory('Span')
 				->class('badge badge-darkorange badge-ico white')
-				->add(Core_Html_Entity::factory('I')->class('fa fa-exclamation-triangle'))
+				->add(Core_Html_Entity::factory('I')->class('fa-solid fa-triangle-exclamation'))
 				->title('Empty siteuser group list!')
 				->execute();
 		}
@@ -446,7 +446,7 @@ class Shop_Payment_System_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event shop_payment_system.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')

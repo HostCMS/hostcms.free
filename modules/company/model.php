@@ -246,7 +246,7 @@ class Company_Model extends Core_Entity
 					$aHeadIds[] = $oUser->id;
 				}
 
-				?><div id="department<?php echo $aDepartment["department"]->id?>"><div class="depatment_info"><div class="title_department"><?php echo ($issetChildrenItems ? '<i class="fa fa-caret-down fa-fw"></i>' : '') . htmlspecialchars($aDepartment["department"]->name)?><span class="icons_permissions no-actions"><?php
+				?><div id="department<?php echo $aDepartment["department"]->id?>"><div class="depatment_info"><div class="title_department"><?php echo ($issetChildrenItems ? '<i class="fa-solid fa-caret-down fa-fw"></i>' : '') . htmlspecialchars($aDepartment["department"]->name)?><span class="icons_permissions no-actions"><?php
 
 				$oDeal_Template_Step_Access_Department = $aDepartment["department"]->Deal_Template_Step_Access_Departments->getByDeal_template_step_id($deal_template_step_id);
 
@@ -278,7 +278,7 @@ class Company_Model extends Core_Entity
 							$actionTitle = Core::_('Deal_Template_Step.actionTitleDelete');
 							break;
 					}
-					?><i id="department_<?php echo $aDepartment["department"]->id . '_' . $deal_template_step_id . '_' . $bitNumber?>" title="<?php echo $actionTitle?>" data-action="<?php echo $actionName?>" data-allowed="<?php echo $bitValue?>" class="fa fa-fw <?php echo ($bitValue ? 'fa-circle' : 'fa-circle-o')?>"></i><?php
+					?><i id="department_<?php echo $aDepartment["department"]->id . '_' . $deal_template_step_id . '_' . $bitNumber?>" title="<?php echo $actionTitle?>" data-action="<?php echo $actionName?>" data-allowed="<?php echo $bitValue?>" class="<?php echo ($bitValue ? 'fa-solid fa-circle' : 'fa-regular fa-circle')?> fa-fw"></i><?php
 				}
 				?></span>
 				</div></div>
@@ -313,7 +313,7 @@ class Company_Model extends Core_Entity
 										if (in_array($aUserInfo['user']->id, $aHeadIds))
 										{
 										?>
-											<i class="fas fa-crown margin-left-5 gold"></i>
+											<i class="fa-solid fa-crown margin-left-5 gold"></i>
 										<?php
 										}
 										?>
@@ -382,11 +382,11 @@ class Company_Model extends Core_Entity
 
 	/**
 	 * Build visual representation of group tree
-     * @param int $iCompanyDepartmentParentId
-     * @param array $aExclude exclude group ID
-     * @param int $iLevel current nesting level
-     * @return array
-     * @throws Core_Exception
+	 * @param int $iCompanyDepartmentParentId
+	 * @param array $aExclude exclude group ID
+	 * @param int $iLevel current nesting level
+	 * @return array
+	 * @throws Core_Exception
     */
 	public function fillDepartments($iCompanyDepartmentParentId = 0, $aExclude = array(), $iLevel = 0)
 	{
@@ -489,21 +489,34 @@ class Company_Model extends Core_Entity
 						{
 							$aUserCompanyPosts[] = $oObjectUserCompanyPost->name;
 						}
-						$sUserCompanyPosts = implode('###', $aUserCompanyPosts);
 
-						$sOptionValue = $oDepartmentUser->getFullName() . '%%%' . $oCompanyDepartment->name
+						// $sUserCompanyPosts = implode('###', $aUserCompanyPosts);
+
+						/*$sOptionValue = $oDepartmentUser->getFullName() . '%%%' . $oCompanyDepartment->name
 							. '%%%' . (!empty($sUserCompanyPosts) ? $sUserCompanyPosts : '')
-							. '%%%' . $oDepartmentUser->getAvatar() . '?rand=' . rand();
+							. '%%%' . $oDepartmentUser->getAvatar() . '?rand=' . rand();*/
+
+						$sUserCompanyPosts = implode(', ', $aUserCompanyPosts);
+
+						$aUserInfo = array(
+							'fio' => $oDepartmentUser->getFullName(),
+							'department' => $oCompanyDepartment->name,
+							'posts' => $sUserCompanyPosts,
+							'avatar' => $oDepartmentUser->getAvatar() . '?rand=' . rand(),
+							'login' => $oDepartmentUser->login
+						);
 
 						$oOptgroup->children[$oDepartmentUser->id] = array(
-							'value' => $sOptionValue,
-							'attr' => array('class' => 'user-name', 'style' => "margin-left: {$iMarginLeft}px", 'xxx' => 'yyy')
+							// 'value' => $sOptionValue,
+							'value' => $oDepartmentUser->getFullName(),
+							'attr' => array('class' => 'user-name', 'style' => "margin-left: {$iMarginLeft}px", 'data-info' => json_encode($aUserInfo, defined('JSON_UNESCAPED_UNICODE') ? JSON_UNESCAPED_UNICODE : 0))
 						);
 					}
 
 					$oOptgroup->children += $this->fillDepartmentsAndUsers($childrenDepartment['id'], $aExclude, $iLevel + 1);
 
-					$aReturn['company_department_' . $childrenDepartment['id']] = $oOptgroup;
+					count($oOptgroup->children)
+						&& $aReturn['company_department_' . $childrenDepartment['id']] = $oOptgroup;
 				}
 			}
 		}
@@ -522,14 +535,14 @@ class Company_Model extends Core_Entity
 		$count && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
 			->title(Core::_('Company_Department.caption_block_users'))
-			->value('<i class="fa fa-user"></i> ' . $count)
+			->value('<i class="fa-solid fa-user"></i> ' . $count)
 			->execute();
 
 		$oCompany_Site = $this->Company_Sites->getBySite_id(CURRENT_SITE);
 
 		!is_null($oCompany_Site) &&
 			Core_Html_Entity::factory('Span')
-				->value('<i class="fa fa-check-circle-o palegreen"></i>')
+				->value('<i class="fa-regular fa-circle-check palegreen"></i>')
 				->title(Core::_('Company.sites'))
 				->execute();
 	}
@@ -814,7 +827,7 @@ class Company_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event company.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')
@@ -953,7 +966,7 @@ class Company_Model extends Core_Entity
 						? htmlspecialchars($oDirectory_Address_Type->name) . ": "
 						: '';
 
-					?><div><span class="popup-type"><i class="fa fa-map-marker fa-fw darkorange"></i> <?php echo $sAddressType?></span><span><?php echo htmlspecialchars($oDirectory_Address->getFullAddress())?></span></div><?php
+					?><div><span class="popup-type"><i class="fa-solid fa-location-dot fa-fw darkorange"></i> <?php echo $sAddressType?></span><span><?php echo htmlspecialchars($oDirectory_Address->getFullAddress())?></span></div><?php
 				}
 			}
 		}
@@ -973,7 +986,7 @@ class Company_Model extends Core_Entity
 						? htmlspecialchars($oDirectory_Phone_Type->name) . ": "
 						: '';
 
-					?><div><span class="popup-type"><i class="fa fa-phone fa-fw palegreen"></i> <?php echo $sPhoneType?></span><span><?php echo htmlspecialchars($oDirectory_Phone->value)?></span></div><?php
+					?><div><span class="popup-type"><i class="fa-solid fa-phone fa-fw palegreen"></i> <?php echo $sPhoneType?></span><span><?php echo htmlspecialchars($oDirectory_Phone->value)?></span></div><?php
 				}
 			}
 			?></div><?php
@@ -994,7 +1007,7 @@ class Company_Model extends Core_Entity
 						? htmlspecialchars($oDirectory_Email_Type->name) . ": "
 						: '';
 
-						?><div><span class="popup-type"><i class="fa fa-envelope-o fa-fw warning"></i> <?php echo $sEmailType?></span><span><a href="mailto:<?php echo htmlspecialchars($oDirectory_Email->value)?>"><?php echo htmlspecialchars($oDirectory_Email->value)?></a></span></div><?php
+						?><div><span class="popup-type"><i class="fa-regular fa-envelope fa-fw warning"></i> <?php echo $sEmailType?></span><span><a href="mailto:<?php echo htmlspecialchars($oDirectory_Email->value)?>"><?php echo htmlspecialchars($oDirectory_Email->value)?></a></span></div><?php
 				}
 			}
 		}
@@ -1032,8 +1045,8 @@ class Company_Model extends Core_Entity
 
 	/**
 	 * Add company CommerceML
-     * @param Core_SimpleXMLElement $oXml
-     * @return Company_Model
+	 * @param Core_SimpleXMLElement $oXml
+	 * @return Company_Model
     */
 	public function addCml(Core_SimpleXMLElement $oXml)
 	{

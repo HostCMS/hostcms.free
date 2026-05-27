@@ -16,4 +16,5 @@ return array(
 	'site_id' => 'Ідентифікатор сайту',
 	'delete_success' => 'Елемент видалено!',
 	'undelete_success' => 'Елемент відновлено!',
+	'move_success' => 'Розділи документів перенесені',
 );

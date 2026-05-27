@@ -30,5 +30,8 @@ return array(
 	'backendWriteoffSuccess' => 'Бонуси списані успішно!',
 	'active' => 'Активність',
 	'changeActive_success' => 'Інформація успішно змінена',
-	'card_already_exist' => 'У користувача вже є дисконтна карта'
+	'card_already_exist' => 'У користувача вже є дисконтна карта',
+	'rebuild_levels' => 'Перелічити рівні',
+	'rebuildLevels_success' => 'Рівні успішно перераховані',
+	'update_levels' => 'Перераховано %s рівнів',
 );

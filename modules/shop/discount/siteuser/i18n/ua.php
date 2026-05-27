@@ -9,4 +9,5 @@ return array(
 	'select_group' => 'Виберіть групу',
 	'select_producer' => 'Виберіть виробника',
 	'quantity' => 'Кількість товарів',
+	'empty_siteuser_id' => 'Виберіть клієнта!',
 );

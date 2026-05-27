@@ -1,12 +1,5 @@
 <?php
-/**
- * Online shop.
- *
- * @package HostCMS
- * @subpackage Shop
- * @version 7.x
- * @copyright © 2005-2026, https://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'Purchase discounts',
 	'order_discount_show_title' => 'Discounts from order amount',
@@ -56,4 +49,7 @@ return array(
 	'siteuser_groups' => "Access Group",
 	'all' => 'All',
 	'conditions' => 'Conditions',
+	'coupon_not_check' => 'The "Apply only with coupon" flag is not set',
+	'tab_coupons' => 'Coupons',
+	'coupon_header' => 'Coupons associated with the discount',
 );

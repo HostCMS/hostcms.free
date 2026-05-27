@@ -20,9 +20,9 @@ class Tag_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 	/**
 	 * Module name
@@ -40,7 +40,7 @@ class Tag_Module extends Core_Module_Abstract
 			array(
 				'sorting' => 200,
 				'block' => 3,
-				'ico' => 'fa fa-tags',
+				'ico' => 'fa-solid fa-tags',
 				'name' => Core::_('Tag.menu'),
 				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/tag/index.php"),
 				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/tag/index.php'}); return false")

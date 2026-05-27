@@ -6,6 +6,9 @@ return array(
 	'authorization_form_password' => 'Password',
 	'authorization_form_ip' => 'Attach session to IP address',
 	'authorization_form_button' => 'Enter',
+	'authorization_form_login_with_password' => 'Login with password',
+	'authorization_form_enable_quick_login' => 'Enable quick login?',
+	
 	'themes' => 'Themes',
 	'authorization_error_valid_user' => "Error! Incorrect data, login <b>%s</b>!<br />Your IP is <b>%s</b>, administrator is notified of this event.",
 	'authorization_error_access_temporarily_unavailable' => 'Access temporarily unavailable. Please try again in %s seconds',

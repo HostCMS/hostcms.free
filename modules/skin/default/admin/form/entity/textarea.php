@@ -28,6 +28,9 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 		'wysiwygOptions',
 		'wysiwygInline',
 		'wysiwygMode',
+		'wysiwygMentions',
+		'wysiwygMentionTemplate',
+		'wysiwygContentStyle'
 	);
 
 	/**
@@ -35,13 +38,16 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 	 * @var array
 	 */
 	protected $_allowedProperties = array(
+		'syntaxHighlighter',
+		'syntaxHighlighterMode',
+		'syntaxHighlighterOptions',
 		'wysiwyg',
 		'wysiwygOptions',
 		'wysiwygInline',
 		'wysiwygMode',
-		'syntaxHighlighter',
-		'syntaxHighlighterMode',
-		'syntaxHighlighterOptions'
+		'wysiwygMentions',
+		'wysiwygMentionTemplate',
+		'wysiwygContentStyle'
 	);
 
 	/**
@@ -165,8 +171,14 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 
 				if ($oSyntaxhighlighter)
 				{
-					$oSyntaxhighlighter_Handler = Syntaxhighlighter_Handler::instance($oSyntaxhighlighter);
-					$oSyntaxhighlighter_Handler->init($this);
+					try {
+						$oSyntaxhighlighter_Handler = Syntaxhighlighter_Handler::instance($oSyntaxhighlighter);
+						$oSyntaxhighlighter_Handler->init($this);
+					}
+					catch (Exception $e)
+					{
+						Core_Message::show($e->getMessage(), 'error');
+					}
 				}
 			}
 		}

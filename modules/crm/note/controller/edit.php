@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Crm_Note_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -124,8 +124,8 @@ class Crm_Note_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->add(
 					Admin_Form_Entity::factory('Code')->html('<div class="input-group-addon add-remove-property">
 					<div class="no-padding-left col-lg-12">
-					<div class="btn btn-palegreen" onclick="$.cloneFile(\'' . $windowId .'\'); event.stopPropagation();"><i class="fa fa-plus-circle close"></i></div>
-					<div class="btn btn-darkorange" onclick="$(this).parents(\'#file\').remove(); event.stopPropagation();"><i class="fa fa-minus-circle close"></i></div>
+					<div class="btn btn-palegreen" onclick="$.cloneFile(\'' . $windowId .'\'); event.stopPropagation();"><i class="fa-solid fa-circle-plus close"></i></div>
+					<div class="btn btn-darkorange" onclick="$(this).parents(\'#file\').remove(); event.stopPropagation();"><i class="fa-solid fa-circle-minus close"></i></div>
 					</div>
 					</div>')
 				)

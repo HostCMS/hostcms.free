@@ -15,16 +15,16 @@
  */
 class Smarty_Internal_Runtime_WriteFile
 {
-    /**
-     * Writes file in a safe way to disk
-     *
-     * @param string $_filepath complete filepath
-     * @param string $_contents file content
-     * @param Smarty $smarty    smarty instance
-     *
-     * @throws SmartyException
-     * @return boolean true
-     */
+	/**
+	 * Writes file in a safe way to disk
+	 *
+	 * @param string $_filepath complete filepath
+	 * @param string $_contents file content
+	 * @param Smarty $smarty    smarty instance
+	 *
+	 * @throws SmartyException
+	 * @return boolean true
+	 */
     public function writeFile($_filepath, $_contents, Smarty $smarty)
     {
         $_error_reporting = error_reporting();
@@ -54,12 +54,12 @@ class Smarty_Internal_Runtime_WriteFile
             throw new SmartyException("unable to write file {$_tmp_file}");
         }
         /*
-         * Windows' rename() fails if the destination exists,
-         * Linux' rename() properly handles the overwrite.
-         * Simply unlink()ing a file might cause other processes
-         * currently reading that file to fail, but linux' rename()
-         * seems to be smart enough to handle that for us.
-         */
+    	 * Windows' rename() fails if the destination exists,
+    	 * Linux' rename() properly handles the overwrite.
+    	 * Simply unlink()ing a file might cause other processes
+    	 * currently reading that file to fail, but linux' rename()
+    	 * seems to be smart enough to handle that for us.
+    	 */
         if (Smarty::$_IS_WINDOWS) {
             // remove original file
             if (is_file($_filepath)) {

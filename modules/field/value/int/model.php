@@ -10,25 +10,13 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @version 7.x
  * @copyright © 2005-2026, https://www.hostcms.ru
  */
-class Field_Value_Int_Model extends Core_Entity
+class Field_Value_Int_Model extends Field_Value_Abstract
 {
 	/**
 	 * Model name
 	 * @var mixed
 	 */
 	protected $_modelName = 'field_value_int';
-
-	/**
-	 * Disable markDeleted()
-	 * @var mixed
-	 */
-	protected $_marksDeleted = NULL;
-
-	/**
-	 * Column consist item's name
-	 * @var string
-	 */
-	protected $_nameColumn = 'id';
 
 	/**
 	 * Belongs to relations
@@ -44,14 +32,6 @@ class Field_Value_Int_Model extends Core_Entity
 	);
 
 	/**
-	 * Forbidden tags. If list of tags is empty, all tags will show.
-	 * @var array
-	 */
-	protected $_forbiddenTags = array(
-		'entity_id'
-	);
-
-	/**
 	 * Set field value
 	 * @param int $value value
 	 * @return self
@@ -61,12 +41,6 @@ class Field_Value_Int_Model extends Core_Entity
 		$this->value = intval($value);
 		return $this;
 	}
-
-	/**
-	 * Name of the tag in XML
-	 * @var string
-	 */
-	protected $_tagName = 'field_value';
 
 	/**
 	 * Module config
@@ -87,34 +61,6 @@ class Field_Value_Int_Model extends Core_Entity
 				'recursive_fields' => TRUE,
 			);
 		}
-	}
-
-	/**
-	 * Get XML for entity and children entities
-	 * @return string
-	 * @hostcms-event field_value_int.onBeforeRedeclaredGetXml
-	 */
-	public function getXml()
-	{
-		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
-
-		$this->_prepareData();
-
-		return parent::getXml();
-	}
-
-	/**
-	 * Get stdObject for entity and children entities
-	 * @return stdObject
-	 * @hostcms-event field_value_int.onBeforeRedeclaredGetStdObject
-	 */
-	public function getStdObject($attributePrefix = '_')
-	{
-		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
-
-		$this->_prepareData();
-
-		return parent::getStdObject($attributePrefix);
 	}
 
 	/**

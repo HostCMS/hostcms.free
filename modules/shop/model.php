@@ -304,7 +304,7 @@ class Shop_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event shop.onBeforeRedeclaredDelete
+	 * @hostcms-event shop.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -836,9 +836,9 @@ class Shop_Model extends Core_Entity
 		foreach ($aItemReplaces as $old_shop_order_item_status_id => $oShop_Order_Item_Status_New)
 		{
 			$oShop_Order_Item_Status_New->parent_id
-			&& $oShop_Order_Item_Status_New->parent_id = isset($aItemReplace[$oShop_Order_Item_Status_New->parent_id])
-				? intval($aItemReplace[$oShop_Order_Item_Status_New->parent_id]->id)
-				: 0;
+				&& $oShop_Order_Item_Status_New->parent_id = isset($aItemReplaces[$oShop_Order_Item_Status_New->parent_id])
+					? intval($aItemReplaces[$oShop_Order_Item_Status_New->parent_id]->id)
+					: 0;
 
 			$oShop_Order_Item_Status_New->shop_order_status_id
 				&& $oShop_Order_Item_Status_New->shop_order_status_id = isset($aOrderReplace[$oShop_Order_Item_Status_New->shop_order_status_id])
@@ -1168,7 +1168,7 @@ class Shop_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event shop.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')
@@ -1262,7 +1262,7 @@ class Shop_Model extends Core_Entity
 	{
 		!$this->structure_id && Core_Html_Entity::factory('Span')
 			->class('badge badge-darkorange badge-ico white')
-			->add(Core_Html_Entity::factory('I')->class('fa fa-chain-broken'))
+			->add(Core_Html_Entity::factory('I')->class('fa-solid fa-link-slash'))
 			->execute();
 
 		$countShopGroups = $this->Shop_Groups->getCount();
@@ -1320,13 +1320,13 @@ class Shop_Model extends Core_Entity
 		$this->structure_id && $this->Structure->pathBackend();
 	}
 
-    /**
-     * Backend callback method
-     * @param Admin_Form_Field_Model $oAdmin_Form_Field
-     * @param Admin_Form_Controller $oAdmin_Form_Controller
-     * @return string
-     * @throws Core_Exception
-     */
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 * @throws Core_Exception
+	 */
 	public function rebuildBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$return = '';
@@ -1351,7 +1351,7 @@ class Shop_Model extends Core_Entity
 				ob_start();
 
 				Core_Html_Entity::factory('I')
-					->class('fa fa-exclamation-triangle darkorange')
+					->class('fa-solid fa-triangle-exclamation darkorange')
 					->execute();
 
 				$return .= ob_get_clean();
@@ -1397,7 +1397,7 @@ class Shop_Model extends Core_Entity
 	public function shop_currency_idBadge()
 	{
 		$this->Shop_Currency->id == 0 && Core_Html_Entity::factory('I')
-			->class('fa fa-exclamation-triangle darkorange')
+			->class('fa-solid fa-triangle-exclamation darkorange')
 			->execute();
 	}
 

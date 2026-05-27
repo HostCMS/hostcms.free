@@ -385,7 +385,7 @@ class Core_Date
 	 */
 	static function strftime($format, $timestamp = NULL)
 	{
-		if (is_null($format))
+		if (is_null($format) || is_bool($timestamp))
 		{
 			return FALSE;
 		}
@@ -400,7 +400,7 @@ class Core_Date
 
 			if (is_numeric($timestamp))
 			{
-				$timestamp = date_create('@' . $timestamp);
+				$timestamp = date_create('@' . intval($timestamp));
 
 				$timestamp
 					&& $timestamp->setTimezone(new DateTimezone(date_default_timezone_get()));

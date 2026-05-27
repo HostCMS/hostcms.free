@@ -16,10 +16,10 @@
  * - address    - (required) - e-mail address
  * - text       - (optional) - text to display, default is address
  * - encode     - (optional) - can be one of:
- *                             * none : no encoding (default)
- *                             * javascript : encode with javascript
- *                             * javascript_charcode : encode with javascript charcode
- *                             * hex : encode with hexadecimal (no javascript)
+ *                        	 * none : no encoding (default)
+ *                        	 * javascript : encode with javascript
+ *                        	 * javascript_charcode : encode with javascript charcode
+ *                        	 * hex : encode with hexadecimal (no javascript)
  * - cc         - (optional) - address(es) to carbon copy
  * - bcc        - (optional) - address(es) to blind carbon copy
  * - subject    - (optional) - e-mail subject
@@ -49,10 +49,10 @@
 function smarty_function_mailto($params)
 {
     static $_allowed_encoding = [
-        'javascript' => true,
-        'javascript_charcode' => true,
-        'hex' => true,
-        'none' => true
+    	'javascript' => true,
+    	'javascript_charcode' => true,
+    	'hex' => true,
+    	'none' => true
     ];
 
     $extra = '';
@@ -102,7 +102,7 @@ function smarty_function_mailto($params)
     }
 
     $string = '<a href="mailto:' . htmlspecialchars($address, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, Smarty::$_CHARSET) .
-        '" ' . $extra . '>' . htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, Smarty::$_CHARSET) . '</a>';
+    	'" ' . $extra . '>' . htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, Smarty::$_CHARSET) . '</a>';
 
     if ($encode === 'javascript') {
         $js_encode = '';

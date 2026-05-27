@@ -16,39 +16,39 @@
  */
 class Smarty_Internal_Compile_Function extends Smarty_Internal_CompileBase
 {
-    /**
-     * Attribute definition: Overwrites base class.
-     *
-     * @var array
-     * @see Smarty_Internal_CompileBase
-     */
+	/**
+	 * Attribute definition: Overwrites base class.
+	 *
+	 * @var array
+	 * @see Smarty_Internal_CompileBase
+	 */
     public $required_attributes = array('name');
 
-    /**
-     * Attribute definition: Overwrites base class.
-     *
-     * @var array
-     * @see Smarty_Internal_CompileBase
-     */
+	/**
+	 * Attribute definition: Overwrites base class.
+	 *
+	 * @var array
+	 * @see Smarty_Internal_CompileBase
+	 */
     public $shorttag_order = array('name');
 
-    /**
-     * Attribute definition: Overwrites base class.
-     *
-     * @var array
-     * @see Smarty_Internal_CompileBase
-     */
+	/**
+	 * Attribute definition: Overwrites base class.
+	 *
+	 * @var array
+	 * @see Smarty_Internal_CompileBase
+	 */
     public $optional_attributes = array('_any');
 
-    /**
-     * Compiles code for the {function} tag
-     *
-     * @param array                                 $args     array with attributes from parser
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler compiler object
-     *
-     * @return bool true
-     * @throws \SmartyCompilerException
-     */
+	/**
+	 * Compiles code for the {function} tag
+	 *
+	 * @param array                                 $args     array with attributes from parser
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler compiler object
+	 *
+	 * @return bool true
+	 * @throws \SmartyCompilerException
+	 */
     public function compile($args, Smarty_Internal_TemplateCompilerBase $compiler)
     {
         // check and get attributes
@@ -85,21 +85,21 @@ class Smarty_Internal_Compile_Function extends Smarty_Internal_CompileBase
  */
 class Smarty_Internal_Compile_Functionclose extends Smarty_Internal_CompileBase
 {
-    /**
-     * Compiler object
-     *
-     * @var object
-     */
+	/**
+	 * Compiler object
+	 *
+	 * @var object
+	 */
     private $compiler = null;
 
-    /**
-     * Compiles code for the {/function} tag
-     *
-     * @param array                                        $args     array with attributes from parser
-     * @param object|\Smarty_Internal_TemplateCompilerBase $compiler compiler object
-     *
-     * @return bool true
-     */
+	/**
+	 * Compiles code for the {/function} tag
+	 *
+	 * @param array                                        $args     array with attributes from parser
+	 * @param object|\Smarty_Internal_TemplateCompilerBase $compiler compiler object
+	 *
+	 * @return bool true
+	 */
     public function compile($args, Smarty_Internal_TemplateCompilerBase $compiler)
     {
         $this->compiler = $compiler;
@@ -215,19 +215,19 @@ class Smarty_Internal_Compile_Functionclose extends Smarty_Internal_CompileBase
         return true;
     }
 
-    /**
-     * Remove nocache code
-     *
-     * @param $match
-     *
-     * @return string
-     */
+	/**
+	 * Remove nocache code
+	 *
+	 * @param $match
+	 *
+	 * @return string
+	 */
     public function removeNocache($match)
     {
         $code =
             preg_replace(
                 "/((<\?php )?echo '\/\*%%SmartyNocache:{$this->compiler->template->compiled->nocache_hash}%%\*\/)|(\/\*\/%%SmartyNocache:{$this->compiler->template->compiled->nocache_hash}%%\*\/';(\?>\n)?)/",
-                '',
+            	'',
                 $match[ 0 ]
             );
         $code = str_replace(array('\\\'', '\\\\\''), array('\'', '\\\''), $code);

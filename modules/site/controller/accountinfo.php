@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Site
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Site_Controller_AccountInfo extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -89,29 +89,29 @@ class Site_Controller_AccountInfo extends Admin_Form_Action_Controller_Type_Edit
 		{
 			$oConstantLogin = Core_Entity::factory('Constant');
 			$oConstantLogin->name = 'HOSTCMS_USER_LOGIN';
-			$oConstantLogin->active = 1;
 		}
-
+		
 		if (is_null($oConstantNumber))
 		{
 			$oConstantNumber = Core_Entity::factory('Constant');
 			$oConstantNumber->name = 'HOSTCMS_CONTRACT_NUMBER';
-			$oConstantNumber->active = 1;
 		}
 
 		if (is_null($oConstantPin))
 		{
 			$oConstantPin = Core_Entity::factory('Constant');
 			$oConstantPin->name = 'HOSTCMS_PIN_CODE';
-			$oConstantPin->active = 1;
 		}
 
+		$oConstantLogin->active = 1;
 		$oConstantLogin->value = trim(Core_Array::getPost('HOSTCMS_USER_LOGIN'));
 		$oConstantLogin->save();
 
+		$oConstantNumber->active = 1;
 		$oConstantNumber->value = trim(Core_Array::getPost('HOSTCMS_CONTRACT_NUMBER'));
 		$oConstantNumber->save();
 
+		$oConstantPin->active = 1;
 		$oConstantPin->value = trim(Core_Array::getPost('HOSTCMS_PIN_CODE'));
 		$oConstantPin->save();
 

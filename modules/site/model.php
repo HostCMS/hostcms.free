@@ -215,7 +215,7 @@ class Site_Model extends Core_Entity
 	/**
 	 * Change status of activity for site
 	 * @return Core_Entity
-     */
+	 */
 	public function changeStatus()
 	{
 		$this->active = 1 - $this->active;
@@ -1715,7 +1715,7 @@ class Site_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event site.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')
@@ -1761,47 +1761,44 @@ class Site_Model extends Core_Entity
 	 */
 	public function nameBadge()
 	{
-		if ($this->https)
-		{
-			Core_Html_Entity::factory('Span')
-				->class('badge badge-square badge-info')
-				->style('font-size: 10px !important;')
-				->value('HTTPS')
-				->execute();
-		}
+		$this->https && Core_Html_Entity::factory('Span')
+			->class('badge badge-square badge-info')
+			->style('font-size: 10px !important;')
+			->value('HTTPS')
+			->execute();
 
-		if ($this->protect)
-		{
-			Core_Html_Entity::factory('Span')
-				->class('badge badge-square badge-azure')
-				->style('font-size: 10px !important;')
-				->value('<i class="fa fa-shield"></i>')
-				->title(Core::_('Site.protect'))
-				->execute();
-		}
+		$this->protect && Core_Html_Entity::factory('Span')
+			->class('badge badge-square badge-green')
+			->style('font-size: 10px !important;')
+			->value('<i class="fa-fw fa-solid fa-shield"></i>')
+			->title(Core::_('Site.protect'))
+			->execute();
 
-		if ($this->csp != '')
-		{
-			Core_Html_Entity::factory('Span')
-				->class('badge badge-square badge-maroon')
-				->style('font-size: 10px !important;')
-				->title('Content-Security-Policy: ' . $this->csp)
-				->value('CSP')
-				->execute();
-		}
+		$this->check_browser && Core_Html_Entity::factory('Span')
+			->class('badge badge-square badge-orange')
+			->style('font-size: 10px !important;')
+			->value('<i class="fa-fw fa-solid fa-robot"></i>')
+			->title(Core::_('Site.check_browser'))
+			->execute();
+
+		$this->csp != '' && Core_Html_Entity::factory('Span')
+			->class('badge badge-square badge-maroon')
+			->style('font-size: 10px !important;')
+			->title('Content-Security-Policy: ' . $this->csp)
+			->value('CSP')
+			->execute();
 
 		$aSite_Aliases = $this->Site_Aliases->findAll();
-
 		if (count($aSite_Aliases))
 		{
-			$oDiv = Core_Html_Entity::factory('Div')->class('margin-top-5');
+			$oDiv = Core_Html_Entity::factory('Div')->class('w-100');
 
 			$aTmpSite_Aliases = array_slice($aSite_Aliases, 0, 12);
 			foreach ($aTmpSite_Aliases as $oSite_Aliases)
 			{
 				$oDiv->add(
 					$oSpan = Core_Html_Entity::factory('Span')
-						->class('label label-' . ($oSite_Aliases->current ? 'palegreen' : 'gray'))
+						->class('badge badge-' . ($oSite_Aliases->current ? 'sky inverted' : 'lightgray'))
 						->value(htmlspecialchars(substr($oSite_Aliases->name, 0, 4) === "xn--"
 							? Core_Str::idnToUtf8($oSite_Aliases->name) . ' [' . $oSite_Aliases->name . ']'
 							: Core_Str::cut($oSite_Aliases->name, 25)
@@ -1812,7 +1809,7 @@ class Site_Model extends Core_Entity
 				{
 					$oSpan->add(
 						Core_Html_Entity::factory('I')
-							->class('fa fa-arrow-circle-right azure fa-small')
+							->class('fa-solid fa-circle-arrow-right azure fa-small')
 					);
 				}
 			}

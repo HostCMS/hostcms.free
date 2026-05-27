@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Structure
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Structure',
@@ -94,4 +94,5 @@ return array(
 	'shortcut_success' => "Shortcut added successfully",
 	'changeShow_success' => 'Show in the structure section menu has been successfully changed.',
 	'changeShow_error' => 'Error while changing the show in the structure menu.',
+	'shortcut' => 'Shortcut',
 );

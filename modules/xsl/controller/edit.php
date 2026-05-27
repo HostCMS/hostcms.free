@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Xsl
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Xsl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -167,7 +167,7 @@ class Xsl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oSelect_Dirs
 					->options(
-						array(' … ') + $this->fillXslDir(0, $this->_object->id)
+						array(' … ') + $this->fillXslDir(0, array($this->_object->id))
 					)
 					->name('parent_id')
 					->value($this->_object->parent_id)
@@ -190,11 +190,11 @@ class Xsl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	/**
 	 * Create visual tree of the directories
 	 * @param int $iXslDirParentId parent directory ID
-	 * @param boolean $bExclude exclude group ID
+	 * @param array $bExclude exclude group ID
 	 * @param int $iLevel current nesting level
 	 * @return array
 	 */
-	public function fillXslDir($iXslDirParentId = 0, $bExclude = FALSE, $iLevel = 0)
+	public function fillXslDir($iXslDirParentId = 0, $aExclude = array(), $iLevel = 0)
 	{
 		$iXslDirParentId = intval($iXslDirParentId);
 		$iLevel = intval($iLevel);
@@ -208,12 +208,13 @@ class Xsl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		if (count($childrenDirs))
 		{
+			$countExclude = count($aExclude);
 			foreach ($childrenDirs as $childrenDir)
 			{
-				if ($bExclude != $childrenDir->id)
+				if ($countExclude == 0 || !in_array($childrenDir->id, $aExclude))
 				{
-					$aReturn[$childrenDir->id] = str_repeat('  ', $iLevel) . $childrenDir->name;
-					$aReturn += $this->fillXslDir($childrenDir->id, $bExclude, $iLevel+1);
+					$aReturn[$childrenDir->id] = str_repeat('  ', $iLevel) . '[' . $childrenDir->id . '] ' . $childrenDir->name;
+					$aReturn += $this->fillXslDir($childrenDir->id, $aExclude, $iLevel+1);
 				}
 			}
 		}

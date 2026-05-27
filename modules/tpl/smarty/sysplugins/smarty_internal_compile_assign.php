@@ -16,35 +16,35 @@
  */
 class Smarty_Internal_Compile_Assign extends Smarty_Internal_CompileBase
 {
-    /**
-     * Attribute definition: Overwrites base class.
-     *
-     * @var array
-     * @see Smarty_Internal_CompileBase
-     */
+	/**
+	 * Attribute definition: Overwrites base class.
+	 *
+	 * @var array
+	 * @see Smarty_Internal_CompileBase
+	 */
     public $option_flags = array('nocache', 'noscope');
 
-    /**
-     * Valid scope names
-     *
-     * @var array
-     */
+	/**
+	 * Valid scope names
+	 *
+	 * @var array
+	 */
     public $valid_scopes = array(
-        'local'    => Smarty::SCOPE_LOCAL, 'parent' => Smarty::SCOPE_PARENT,
-        'root'     => Smarty::SCOPE_ROOT, 'global' => Smarty::SCOPE_GLOBAL,
-        'tpl_root' => Smarty::SCOPE_TPL_ROOT, 'smarty' => Smarty::SCOPE_SMARTY
+    	'local'    => Smarty::SCOPE_LOCAL, 'parent' => Smarty::SCOPE_PARENT,
+    	'root'     => Smarty::SCOPE_ROOT, 'global' => Smarty::SCOPE_GLOBAL,
+    	'tpl_root' => Smarty::SCOPE_TPL_ROOT, 'smarty' => Smarty::SCOPE_SMARTY
     );
 
-    /**
-     * Compiles code for the {assign} tag
-     *
-     * @param array                                 $args      array with attributes from parser
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler  compiler object
-     * @param array                                 $parameter array with compilation parameter
-     *
-     * @return string compiled code
-     * @throws \SmartyCompilerException
-     */
+	/**
+	 * Compiles code for the {assign} tag
+	 *
+	 * @param array                                 $args      array with attributes from parser
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler  compiler object
+	 * @param array                                 $parameter array with compilation parameter
+	 *
+	 * @return string compiled code
+	 * @throws \SmartyCompilerException
+	 */
     public function compile($args, Smarty_Internal_TemplateCompilerBase $compiler, $parameter)
     {
         // the following must be assigned at runtime because it will be overwritten in Smarty_Internal_Compile_Append

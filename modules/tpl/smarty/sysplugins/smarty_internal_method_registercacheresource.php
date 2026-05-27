@@ -11,25 +11,25 @@
  */
 class Smarty_Internal_Method_RegisterCacheResource
 {
-    /**
-     * Valid for Smarty and template object
-     *
-     * @var int
-     */
+	/**
+	 * Valid for Smarty and template object
+	 *
+	 * @var int
+	 */
     public $objMap = 3;
 
-    /**
-     * Registers a resource to fetch a template
-     *
-     * @api  Smarty::registerCacheResource()
-     * @link https://www.smarty.net/docs/en/api.register.cacheresource.tpl
-     *
-     * @param \Smarty_Internal_TemplateBase|\Smarty_Internal_Template|\Smarty $obj
-     * @param string                                                          $name name of resource type
-     * @param \Smarty_CacheResource                                           $resource_handler
-     *
-     * @return \Smarty|\Smarty_Internal_Template
-     */
+	/**
+	 * Registers a resource to fetch a template
+	 *
+	 * @api  Smarty::registerCacheResource()
+	 * @link https://www.smarty.net/docs/en/api.register.cacheresource.tpl
+	 *
+	 * @param \Smarty_Internal_TemplateBase|\Smarty_Internal_Template|\Smarty $obj
+	 * @param string                                                          $name name of resource type
+	 * @param \Smarty_CacheResource                                           $resource_handler
+	 *
+	 * @return \Smarty|\Smarty_Internal_Template
+	 */
     public function registerCacheResource(
         Smarty_Internal_TemplateBase $obj,
         $name,

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Antispam
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Antispam_Stopword_Export_Controller
 {
@@ -39,7 +39,7 @@ class Antispam_Stopword_Export_Controller
 			return FALSE;
 		}
 
-		header("Pragma: public");
+		header("Cache-Control: no-cache, must-revalidate");
 		header("Content-Description: File Transfer");
 		header("Content-Type: application/force-download");
 		header("Content-Disposition: attachment; filename = " . 'antispam_stopwords_' . date("Y_m_d_H_i_s") . '.csv' . ";");

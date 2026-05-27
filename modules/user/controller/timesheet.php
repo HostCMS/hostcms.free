@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage User
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class User_Controller_Timesheet extends Admin_Form_Controller_View
 {
@@ -162,16 +162,16 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 										<li class="nav-item">
 											<div class="btn-group margin-left-10 absence-list">
 												<a class="btn btn-success" href="javascript:void(0);"><?php echo Core::_('User_Absence.absence_button')?></a>
-												<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
+												<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa-solid fa-angle-down"></i></a>
 												<ul class="dropdown-menu dropdown-palegreen">
 													<li>
-														<a class="add-absence-button" data-action="add_absence" href="javascript:void(0);"><i class="fa fa-fw fa-plus"></i><?php echo Core::_('Admin_Form.add')?></a>
+														<a class="add-absence-button" data-action="add_absence" href="javascript:void(0);"><i class="fa-fw fa-solid fa-plus"></i><?php echo Core::_('Admin_Form.add')?></a>
 													</li>
 													<li>
-														<a href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/user/absence/index.php')?>" onclick="<?php echo $oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/user/absence/index.php', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'list')?>"><i class="fa fa-fw fa-list"></i><?php echo Core::_('User_Absence.absence_list')?></a>
+														<a href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/user/absence/index.php')?>" onclick="<?php echo $oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/user/absence/index.php', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'list')?>"><i class="fa-fw fa-solid fa-list"></i><?php echo Core::_('User_Absence.absence_list')?></a>
 													</li>
 													<li>
-														<a href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/user/absence/type/index.php')?>" onclick="<?php echo $oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/user/absence/type/index.php', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'list')?>"><i class="fa fa-fw fa-circle"></i><?php echo Core::_('User_Absence_Type.title')?></a>
+														<a href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/user/absence/type/index.php')?>" onclick="<?php echo $oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/user/absence/type/index.php', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'list')?>"><i class="fa-fw fa-solid fa-circle"></i><?php echo Core::_('User_Absence_Type.title')?></a>
 													</li>
 												</ul>
 											</div>
@@ -594,7 +594,7 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 
 					$sWorkdayDurationInfo = $sDurationHtml
 					. ($bShowExclamation
-						? ' <i class="fa fa-exclamation-triangle ' . $pointer . ' danger"'
+						? ' <i class="fa-solid fa-triangle-exclamation ' . $pointer . ' danger"'
 							. ($bSelfHead ? ' data-action="showAnotherTimeDetailsApprovalForm" data-workday-id="' : '')
 							. $aUserWorkdayInfo[$i]['id'] . '"></i>'
 						: ''

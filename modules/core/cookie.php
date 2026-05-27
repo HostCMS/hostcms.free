@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Cookie
 {
@@ -29,8 +29,8 @@ class Core_Cookie
 			'httponly' => FALSE,
 			'samesite' => 'Lax'
 		);
-		
-		$bSendSameSite = Core_Cookie::sendSameSite($options['samesite']);
+
+		$bSendSameSite = self::sendSameSite($options['samesite']);
 
 		if (!$bSendSameSite)
 		{
@@ -53,7 +53,7 @@ class Core_Cookie
 		// SameSite attribute of Lax or Strict is OK
 		return strcasecmp($samesite, 'lax') === 0 || strcasecmp($samesite, 'strict') === 0
 			? TRUE
-			: !Core_Cookie::isSameSiteIncompatible(!is_null($userAgent) ? $userAgent : Core_Array::get($_SERVER, 'HTTP_USER_AGENT', '', 'str'));
+			: !self::isSameSiteIncompatible(!is_null($userAgent) ? $userAgent : Core_Array::get($_SERVER, 'HTTP_USER_AGENT', '', 'str'));
 	}
 
 	/**
@@ -126,15 +126,7 @@ class Core_Cookie
 	 */
 	static public function safari($userAgent)
 	{
-		if (preg_match('~Version/.* Safari/~', $userAgent))
-		{
-			if (self::chromiumBased($userAgent) === FALSE)
-			{
-				return FALSE;
-			}
-		}
-
-		return TRUE;
+		return preg_match('~Version/.* Safari/~', $userAgent) && !self::chromiumBased($userAgent);
 	}
 
 	/**

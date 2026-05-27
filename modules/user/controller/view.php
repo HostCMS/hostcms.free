@@ -27,8 +27,6 @@ class User_Controller_View extends Admin_Form_Action_Controller
 	 * Executes the business logic.
 	 * @param mixed $operation Operation for action
 	 * @return boolean
-	 * @hostcms-event User_Controller_View.onBeforeExecute
-	 * @hostcms-event User_Controller_View.onAfterExecute
 	 */
 	public function execute($operation = NULL)
 	{
@@ -45,13 +43,11 @@ class User_Controller_View extends Admin_Form_Action_Controller
 		{
 			case 'modal':
 				$this->addContent($this->_showEditForm());
-
 				$return = TRUE;
 			break;
 
 			default:
 			case NULL: // Показ формы
-
 				ob_start();
 
 				$content = $this->_showEditForm();
@@ -81,275 +77,190 @@ class User_Controller_View extends Admin_Form_Action_Controller
 
 	/**
 	 * Show edit form
-	 * @return boolean
+	 * @return string
 	 */
 	protected function _showEditForm()
 	{
 		ob_start();
 		?>
-		<div class="row representative-view">
-			<div class="col-md-12">
-				<div class="profile-container">
-					<div class="profile-header row">
-						<div class="col-lg-2 col-md-4 col-sm-12 text-center">
-							<img class="header-avatar" src="<?php echo $this->_object->getAvatar()?>" alt="">
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="hc-profile-card">
+
+					<aside class="hc-profile-sidebar">
+						<div class="hc-profile-avatar">
+							<img src="<?php echo htmlspecialchars((string) $this->_object->getAvatar())?>" alt="">
 						</div>
-						<div class="col-lg-5 col-md-8 col-sm-12 profile-info">
-							<div class="header-fullname"><?php echo htmlspecialchars((string) $this->_object->getFullName())?></div>
-							<div class="header-information"><?php echo htmlspecialchars((string) $this->_object->description)?></div>
-							<?php
-							if (strlen((string) $this->_object->address))
+
+						<h1 class="hc-profile-name">
+							<?php echo htmlspecialchars((string) $this->_object->getFullName())?>
+							<?php if ($this->_object->superuser): ?>
+								<i class="fa-solid fa-crown hc-profile-superuser-star" title="Superuser"></i>
+							<?php endif; ?>
+						</h1>
+
+						<div class="hc-profile-status">
+							<?php echo nl2br(htmlspecialchars((string) $this->_object->description))?>
+						</div>
+
+						<div class="hc-profile-meta hc-meta-row">
+							<?php if (strlen((string) $this->_object->address)): ?>
+								<div class="hc-profile-meta-item" style="flex-direction: column; align-items: center; text-align: center; gap: 4px;">
+									<span class="hc-profile-meta-label"><i class="fa-solid fa-location-dot"></i></span>
+									<span class="hc-profile-meta-value" style="text-align: center;"><?php echo htmlspecialchars($this->_object->address)?></span>
+								</div>
+							<?php endif; ?>
+
+							<div class="d-flex w-100" style="gap: 20px;">
+								<div class="hc-profile-meta-item">
+									<span class="hc-profile-meta-label"><?php echo Core::_("User.view_sex")?></span>
+									<span class="hc-profile-meta-value margin-left-10"><?php echo $this->_object->getSex()?></span>
+								</div>
+
+								<?php if (!is_null($this->_object->birthday) && $this->_object->birthday != '0000-00-00'): ?>
+									<div class="hc-profile-meta-item">
+										<span class="hc-profile-meta-label"><?php echo Core::_("User.view_age")?></span>
+										<span class="hc-profile-meta-value margin-left-10"><?php echo htmlspecialchars((string) $this->_object->getAge())?></span>
+									</div>
+								<?php endif; ?>
+							</div>
+						</div>
+					</aside>
+
+					<main class="hc-profile-content">
+						<?php
+						$aCompanies = Core_Entity::factory('Company')->findAll(FALSE);
+
+						$bHasCareer = FALSE;
+
+						ob_start();
+						foreach ($aCompanies as $oCompany)
+						{
+							$aCompany_Department_Post_Users = $this->_object->Company_Department_Post_Users->getAllByCompany_id($oCompany->id);
+
+							if (count($aCompany_Department_Post_Users))
 							{
-							?>
-								<div class="header-information"><i class="glyphicon glyphicon-map-marker margin-right-5 red"></i><?php echo htmlspecialchars($this->_object->address)?></div>
-							<?php
+								$bHasCareer = true;
+								?>
+								<div class="hc-profile-career-block">
+									<h3 class="hc-profile-company-name"><?php echo htmlspecialchars((string) $oCompany->name)?></h3>
+									<ul class="hc-profile-role-list">
+										<?php foreach ($aCompany_Department_Post_Users as $oCompany_Department_Post_User): ?>
+											<li class="hc-profile-role-item">
+												<span class="hc-profile-role-dept" title="<?php echo htmlspecialchars((string) $oCompany_Department_Post_User->Company_Department->name)?>"><?php echo htmlspecialchars((string) $oCompany_Department_Post_User->Company_Department->name)?></span>
+												<span class="hc-profile-role-pos" title="<?php echo htmlspecialchars((string) $oCompany_Department_Post_User->Company_Post->name)?>"><?php echo htmlspecialchars((string) $oCompany_Department_Post_User->Company_Post->name)?></span>
+											</li>
+										<?php endforeach; ?>
+									</ul>
+								</div>
+								<?php
 							}
-							?>
-						</div>
-						<div class="col-lg-5 col-md-12 col-sm-12 col-xs-12 profile-stats">
-							<div class="row">
-								<div class="col-xs-12 stats-col">
-									<!-- <div class="stats-value pink">284</div>-->
-									<!-- <div class="stats-title">FOLLOWING</div>-->
+						}
+						$sCareerContent = ob_get_clean();
 
-									<?php
-									$aCompanies = Core_Entity::factory('Company')->findAll();
+						if ($bHasCareer): ?>
+							<section class="hc-profile-section">
+								<?php echo $sCareerContent; ?>
+							</section>
+						<?php endif; ?>
 
-									foreach ($aCompanies as $oCompany)
-									{
-										$aCompany_Department_Post_Users = $this->_object->Company_Department_Post_Users->getAllByCompany_id($oCompany->id);
-
-										if (count($aCompany_Department_Post_Users))
-										{
-											?>
-											<div class="h5 user-view-h5 semi-bold">
-												<?php echo htmlspecialchars((string) $oCompany->name)?>
-											</div>
-											<?php
-
-											foreach ($aCompany_Department_Post_Users as $oCompany_Department_Post_User)
-											{
-												?>
-												<div class="user-view-posts">
-													<span><?php echo htmlspecialchars((string) $oCompany_Department_Post_User->Company_Department->name)?></span> <span class="gray"><?php echo htmlspecialchars((string) $oCompany_Department_Post_User->Company_Post->name)?></span>
-												</div>
-												<?php
-											}
-										}
-									}
+						<section class="hc-profile-section">
+							<div class="hc-profile-contacts-grid">
+								<?php
+								// Телефоны
+								$aDirectory_Phones = $this->_object->Directory_Phones->findAll();
+								foreach ($aDirectory_Phones as $oDirectory_Phone)
+								{
+									$oDirectory_Phone_Type = Core_Entity::factory('Directory_Phone_Type')->find($oDirectory_Phone->directory_phone_type_id);
+									$sPhoneType = !is_null($oDirectory_Phone_Type->id) ? htmlspecialchars($oDirectory_Phone_Type->name) : Core::_("User.view_phones");
 									?>
-								</div>
-							</div>
-							<div class="row">
-								<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 inlinestats-col">
-								<?php
-								if ($this->_object->superuser)
-								{
-								?>
-									<span class="fa fa-star gold"></span>
-								<?php
-								}
-								?>
-								</div>
-								<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 inlinestats-col">
-									<?php echo Core::_("User.view_sex")?> <strong><?php echo $this->_object->getSex()?></strong>
-								</div>
-								<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 inlinestats-col">
-								<?php
-								if (!is_null($this->_object->birthday) && $this->_object->birthday != '0000-00-00')
-								{
-								?>
-									<?php echo Core::_("User.view_age")?> <strong><?php echo $this->_object->getAge()?></strong>
-								<?php
-								}
-								?>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="profile-body">
-						<div class="col-lg-12">
-							<div class="tabbable">
-								<div class="tab-content tabs-flat">
-									<div id="overview" class="tab-pane active">
-										<div class="row profile-overview">
-											<div class="col-xs-12">
-												<div class="row">
-												<?php
-												// Телефоны
-												$aDirectory_Phones = $this->_object->Directory_Phones->findAll();
-
-												if (count($aDirectory_Phones))
-												{
-												?>
-													<div class="col-xs-12 col-md-6">
-														<div class="profile-contacts no-padding-left no-padding-top no-padding-right">
-															<div class="profile-badge palegreen">
-																<i class="fa fa-phone palegreen"></i>
-																<span><?php echo Core::_("User.view_phones")?></span>
-															</div>
-															<div class="contact-info">
-															<?php
-															foreach ($aDirectory_Phones as $oDirectory_Phone)
-															{
-																$oDirectory_Phone_Type = Core_Entity::factory('Directory_Phone_Type')->find($oDirectory_Phone->directory_phone_type_id);
-
-																$sPhoneType = !is_null($oDirectory_Phone_Type->id)
-																	? htmlspecialchars($oDirectory_Phone_Type->name) . ": "
-																	: '<i class="fa fa-phone palegreen margin-right-10"></i>';
-															?>
-																<p><span class="popup-type"><?php echo $sPhoneType?></span><span><?php echo htmlspecialchars($oDirectory_Phone->value)?></span></p>
-															<?php
-															}
-															?>
-															</div>
-														</div>
-													</div>
-												<?php
-												}
-
-												// Электронные адреса
-												$aDirectory_Emails = $this->_object->Directory_Emails->findAll();
-
-												if (count($aDirectory_Emails))
-												{
-												?>
-													<div class="col-xs-12 col-md-6">
-														<div class="profile-contacts no-padding-left no-padding-top no-padding-right">
-															<div class="profile-badge warning">
-																<i class="fa fa-envelope-o warning"></i>
-																<span><?php echo Core::_("User.view_emails")?></span>
-															</div>
-															<div class="contact-info">
-															<?php
-															foreach ($aDirectory_Emails as $oDirectory_Email)
-															{
-																$oDirectory_Email_Type = Core_Entity::factory('Directory_Email_Type')->find($oDirectory_Email->directory_email_type_id);
-
-																$sEmailType = !is_null($oDirectory_Email_Type->id)
-																	? htmlspecialchars($oDirectory_Email_Type->name) . ": "
-																	: '<i class="fa fa-envelope-o warning margin-right-10"></i>';
-															?>
-																<p><span class="popup-type"><?php echo $sEmailType?></span><a href="mailto:<?php echo htmlspecialchars($oDirectory_Email->value)?>"><span><?php echo htmlspecialchars($oDirectory_Email->value)?></span></a></p>
-															<?php
-															}
-															?>
-															</div>
-														</div>
-													</div>
-												<?php
-												}
-												?>
-												</div>
-												<div class="row">
-												<?php
-												// Социальные сети
-												$aDirectory_Socials = $this->_object->Directory_Socials->findAll();
-
-												if (count($aDirectory_Socials))
-												{
-												?>
-													<div class="col-xs-12 col-md-6">
-														<div class="profile-contacts no-padding-left no-padding-top no-padding-right">
-															<div class="profile-badge azure">
-																<i class="fa fa-share-alt azure"></i>
-																<span><?php echo Core::_("User.view_socials")?></span>
-															</div>
-															<div class="contact-info">
-															<?php
-															foreach ($aDirectory_Socials as $oDirectory_Social)
-															{
-																$oDirectory_Social_Type = Core_Entity::factory('Directory_Social_Type')->find($oDirectory_Social->directory_social_type_id);
-
-																$sSocialType = !is_null($oDirectory_Social_Type->id) && strlen($oDirectory_Social_Type->ico)
-																	? '<i class="' . htmlspecialchars($oDirectory_Social_Type->ico) . ' margin-right-10"></i>'
-																	: '<i class="fa fa-envelope-o azure margin-right-10"></i>';
-															?>
-																<p><span class="popup-type"><?php echo $sSocialType?></span><a href="<?php echo htmlspecialchars($oDirectory_Social->value)?>" target="_blank"><?php echo htmlspecialchars($oDirectory_Social->value)?></a></p>
-															<?php
-															}
-															?>
-															</div>
-														</div>
-													</div>
-												<?php
-												}
-
-												// Мессенджеры
-												$aDirectory_Messengers = $this->_object->Directory_Messengers->findAll();
-
-												if (count($aDirectory_Messengers))
-												{
-												?>
-													<div class="col-xs-12 col-md-6">
-														<div class="profile-contacts no-padding-left no-padding-top no-padding-right">
-															<div class="profile-badge purple">
-																<i class="fa fa-comments-o purple"></i>
-																<span><?php echo Core::_("User.view_messengers")?></span>
-															</div>
-															<div class="contact-info">
-															<?php
-															foreach ($aDirectory_Messengers as $oDirectory_Messenger)
-															{
-																$oDirectory_Messenger_Type = Core_Entity::factory('Directory_Messenger_Type')->find($oDirectory_Messenger->directory_messenger_type_id);
-
-																$sMessengerType = !is_null($oDirectory_Messenger_Type->id) && strlen($oDirectory_Messenger_Type->ico)
-																	? '<i class="' . htmlspecialchars($oDirectory_Messenger_Type->ico) . ' margin-right-10"></i>'
-																	: '<i class="fa fa-comments-o purple margin-right-10"></i>';
-															?>
-																<p><span class="popup-type"><?php echo $sMessengerType?></span><a href="<?php echo sprintf($oDirectory_Messenger_Type->link, $oDirectory_Messenger->value)?>" target="_blank"><?php echo htmlspecialchars($oDirectory_Messenger->value)?></a></p>
-															<?php
-															}
-															?>
-															</div>
-														</div>
-													</div>
-												<?php
-												}
-												?>
-												</div>
-												<div class="row">
-												<?php
-												// Сайты
-												$aDirectory_Websites = $this->_object->Directory_Websites->findAll();
-
-												if (count($aDirectory_Websites))
-												{
-												?>
-													<div class="col-xs-12 col-md-6">
-														<div class="profile-contacts no-padding-left no-padding-top no-padding-right">
-															<div class="profile-badge magenta">
-																<i class="fa fa-globe magenta"></i>
-																<span><?php echo Core::_("User.view_websites")?></span>
-															</div>
-															<div class="contact-info">
-															<?php
-															foreach ($aDirectory_Websites as $oDirectory_Website)
-															{
-															?>
-																<p><a href="<?php echo htmlspecialchars($oDirectory_Website->value)?>" target="_blank"><?php echo htmlspecialchars($oDirectory_Website->value)?></a></p>
-															<?php
-															}
-															?>
-															</div>
-														</div>
-													</div>
-												<?php
-												}
-												?>
-												</div>
-											</div>
+									<div class="hc-profile-contact-card hc-profile-highlight-green">
+										<div class="hc-profile-contact-icon"><i class="fa-solid fa-phone"></i></div>
+										<div class="hc-profile-contact-info">
+											<div class="hc-profile-contact-type"><?php echo $sPhoneType?></div>
+											<div class="hc-profile-contact-value"><?php echo htmlspecialchars((string) $oDirectory_Phone->value)?></div>
 										</div>
 									</div>
-								</div>
+									<?php
+								}
+
+								// Электронные адреса
+								$aDirectory_Emails = $this->_object->Directory_Emails->findAll();
+								foreach ($aDirectory_Emails as $oDirectory_Email)
+								{
+									$oDirectory_Email_Type = Core_Entity::factory('Directory_Email_Type')->find($oDirectory_Email->directory_email_type_id);
+									$sEmailType = !is_null($oDirectory_Email_Type->id) ? htmlspecialchars($oDirectory_Email_Type->name) : Core::_("User.view_emails");
+									?>
+									<div class="hc-profile-contact-card hc-profile-highlight-yellow">
+										<div class="hc-profile-contact-icon"><i class="fa-regular fa-envelope"></i></div>
+										<div class="hc-profile-contact-info">
+											<div class="hc-profile-contact-type"><?php echo $sEmailType?></div>
+											<div class="hc-profile-contact-value"><a href="mailto:<?php echo htmlspecialchars((string) $oDirectory_Email->value)?>"><?php echo htmlspecialchars((string) $oDirectory_Email->value)?></a></div>
+										</div>
+									</div>
+									<?php
+								}
+
+								// Социальные сети
+								$aDirectory_Socials = $this->_object->Directory_Socials->findAll();
+								foreach ($aDirectory_Socials as $oDirectory_Social)
+								{
+									$oDirectory_Social_Type = Core_Entity::factory('Directory_Social_Type')->find($oDirectory_Social->directory_social_type_id);
+									$sSocialType = !is_null($oDirectory_Social_Type->id) ? htmlspecialchars($oDirectory_Social_Type->name) : Core::_("User.view_socials");
+									$sIconClass = (!is_null($oDirectory_Social_Type->id) && strlen($oDirectory_Social_Type->ico)) ? htmlspecialchars($oDirectory_Social_Type->ico) : 'fa-solid fa-share-nodes';
+									?>
+									<div class="hc-profile-contact-card hc-profile-highlight-blue">
+										<div class="hc-profile-contact-icon"><i class="<?php echo $sIconClass; ?>"></i></div>
+										<div class="hc-profile-contact-info">
+											<div class="hc-profile-contact-type"><?php echo $sSocialType?></div>
+											<div class="hc-profile-contact-value"><a href="<?php echo htmlspecialchars((string) $oDirectory_Social->value)?>" target="_blank"><?php echo htmlspecialchars((string) $oDirectory_Social->value)?></a></div>
+										</div>
+									</div>
+									<?php
+								}
+
+								// Мессенджеры
+								$aDirectory_Messengers = $this->_object->Directory_Messengers->findAll();
+								foreach ($aDirectory_Messengers as $oDirectory_Messenger)
+								{
+									$oDirectory_Messenger_Type = Core_Entity::factory('Directory_Messenger_Type')->find($oDirectory_Messenger->directory_messenger_type_id);
+									$sMessengerType = !is_null($oDirectory_Messenger_Type->id) ? htmlspecialchars($oDirectory_Messenger_Type->name) : Core::_("User.view_messengers");
+									$sIconClass = (!is_null($oDirectory_Messenger_Type->id) && strlen($oDirectory_Messenger_Type->ico)) ? htmlspecialchars($oDirectory_Messenger_Type->ico) : 'fa-solid fa-comment-dots';
+									$sLink = !is_null($oDirectory_Messenger_Type->id) ? sprintf($oDirectory_Messenger_Type->link, $oDirectory_Messenger->value) : $oDirectory_Messenger->value;
+									?>
+									<div class="hc-profile-contact-card hc-profile-highlight-purple">
+										<div class="hc-profile-contact-icon"><i class="<?php echo $sIconClass; ?>"></i></div>
+										<div class="hc-profile-contact-info">
+											<div class="hc-profile-contact-type"><?php echo $sMessengerType?></div>
+											<div class="hc-profile-contact-value"><a href="<?php echo htmlspecialchars((string) $sLink)?>" target="_blank"><?php echo htmlspecialchars((string) $oDirectory_Messenger->value)?></a></div>
+										</div>
+									</div>
+									<?php
+								}
+
+								// Сайты
+								$aDirectory_Websites = $this->_object->Directory_Websites->findAll();
+								foreach ($aDirectory_Websites as $oDirectory_Website)
+								{
+									?>
+									<div class="hc-profile-contact-card hc-profile-highlight-pink">
+										<div class="hc-profile-contact-icon"><i class="fa-solid fa-globe"></i></div>
+										<div class="hc-profile-contact-info">
+											<div class="hc-profile-contact-type"><?php echo Core::_("User.view_websites")?></div>
+											<div class="hc-profile-contact-value"><a href="<?php echo htmlspecialchars((string) $oDirectory_Website->value)?>" target="_blank"><?php echo htmlspecialchars((string) $oDirectory_Website->value)?></a></div>
+										</div>
+									</div>
+									<?php
+								}
+								?>
 							</div>
-						</div>
-					</div>
+						</section>
+
+					</main>
 				</div>
 			</div>
 		</div>
 		<?php
-
 		return ob_get_clean();
 	}
 }

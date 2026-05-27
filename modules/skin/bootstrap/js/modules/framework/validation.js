@@ -136,36 +136,37 @@
 			const element = $object[0];
 			const defaultValue = $object.prop('defaultValue');
 
-			// Оптимизированный поиск caption
 			const $parentGroup = $object.closest('.form-group');
 			const $parentCaption = $parentGroup.find('.caption').first();
 
-			let oldValue = defaultValue;
+			if ($parentCaption.text() !== '')
+			{
+				let oldValue = defaultValue;
 
-			if (element.tagName === 'SELECT') {
-				// Нативный поиск выбранной опции быстрее
-				const selectedOption = element.options[element.selectedIndex];
-				oldValue = (selectedOption && selectedOption.defaultSelected) ? selectedOption.value : 0;
+				if (element.tagName === 'SELECT') {
+					const selectedOption = element.options[element.selectedIndex];
+					oldValue = (selectedOption && selectedOption.defaultSelected) ? selectedOption.value : 0;
 
-				// Если defaultValue не сработал для select (бывает в старых браузерах), фоллбэк на jQuery
-				if (!oldValue && $object.find('option[selected]').length) {
-					oldValue = $object.find('option[selected]').val();
+					// Если defaultValue не сработал для select в старых браузерах, фоллбэк на jQuery
+					if (!oldValue && $object.find('option[selected]').length) {
+						oldValue = $object.find('option[selected]').val();
+					}
 				}
-			}
 
-			// Единоразовое установка data-атрибутов
-			$object.data({
-				'old-value': oldValue,
-				'data-old-value': oldValue
-			});
+				// Единоразовое установка data-атрибутов
+				$object.data({
+					'old-value': oldValue,
+					'data-old-value': oldValue
+				});
 
-			// Автодополнение
-			if ($object.hasClass('ui-autocomplete-input')) {
-				this._handleAutocompleteRestore($object);
-			}
+				// Автодополнение
+				if ($object.hasClass('ui-autocomplete-input')) {
+					this._handleAutocompleteRestore($object);
+				}
 
-			if (!$parentCaption.find('i.restore-field').length) {
-				$parentCaption.append('<i class="fa-solid fa-rotate-left restore-field" onclick="mainFieldChecker.restoreField(this)"></i>');
+				if (!$parentCaption.find('i.restore-field').length) {
+					$parentCaption.append('<i class="fa-solid fa-rotate-left restore-field" onclick="mainFieldChecker.restoreField(this)"></i>');
+				}
 			}
 		}
 

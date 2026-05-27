@@ -16,7 +16,7 @@ class Event_Controller_Status extends Admin_Form_Action_Controller
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name
 	 * @return true|void
-     */
+	 */
 	public function execute($operation = NULL)
 	{
 		if (is_null($operation))

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -50,8 +50,8 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 		{
 			$printlayoutsButton = '
 				<div class="btn-group">
-					<a class="btn btn-labeled btn-success" href="javascript:void(0);"><i class="btn-label fa fa-print"></i>' . Core::_('Printlayout.print') . '</a>
-					<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
+					<a class="btn btn-labeled btn-success" href="javascript:void(0);"><i class="btn-label fa-solid fa-print"></i>' . Core::_('Printlayout.print') . '</a>
+					<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa-solid fa-angle-down"></i></a>
 					<ul class="dropdown-menu dropdown-palegreen">
 			';
 
@@ -162,7 +162,7 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 				->value(Core::_('Shop_Warehouse_Regrade.recalc_price'));
 		$oRecalcPriceLink
 			->icon
-				->class('btn-label fa fa-recycle');
+				->class('btn-label fa-solid fa-recycle');
 
 		$oMainRow3->add($oRecalcPriceLink);
 
@@ -177,7 +177,7 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 				->value(Core::_('Shop_Warehouse_Regrade.add_item'));
 		$oAddItemLink
 			->icon
-				->class('fa fa-plus');
+				->class('fa-solid fa-plus');
 
 		$oShopItemBlock
 			->add(Admin_Form_Entity::factory('Div')
@@ -255,7 +255,7 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 							<td><span class="incoming-price">' . htmlspecialchars((string) $oShop_Warehouse_Regrade_Item->incoming_price) . '</span></td>
 							<td>' . htmlspecialchars((string) $oShop_Item_Incoming->Shop_Currency->sign) . '</td>
 							<td width="80"><input class="set-item-count form-control" name="shop_item_quantity_' . $oShop_Warehouse_Regrade_Item->id . '" value="' . $oShop_Warehouse_Regrade_Item->count . '" /></td>
-							<td><a class="delete-associated-item" onclick="mainFormLocker.unlock(); res = confirm(\'' . Core::_('Shop_Warehouse_Regrade.delete_dialog') . '\'); if (res) { var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next); ' . $onclick . ' } return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
+							<td><a class="delete-associated-item" onclick="mainFormLocker.unlock(); res = confirm(\'' . Core::_('Shop_Warehouse_Regrade.delete_dialog') . '\'); if (res) { var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next); ' . $onclick . ' } return res;"><i class="fa-solid fa-circle-xmark darkorange"></i></a></td>
 						</tr>
 					';
 				}

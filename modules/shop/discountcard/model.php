@@ -113,25 +113,29 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	{
 		$fSum = 0;
 
-		$oShop = $this->Shop;
-		$oSiteuser = $this->Siteuser;
-
-		$oShop_Orders = $oShop->Shop_Orders;
-		$oShop_Orders->queryBuilder()
-			->where('shop_orders.siteuser_id', '=', $oSiteuser->id)
-			->where('shop_orders.paid', '=', 1);
-
-		$aShop_Orders = $oShop_Orders->findAll(FALSE);
-		foreach ($aShop_Orders as $oShop_Order)
+		if ($this->siteuser_id)
 		{
-			// Определяем коэффициент пересчета
-			$fCurrencyCoefficient = $oShop_Order->Shop_Currency->id > 0 && $oShop->Shop_Currency->id > 0
-				? Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
-					$oShop_Order->Shop_Currency, $oShop->Shop_Currency
-				)
-				: 0;
+			$oShop = $this->Shop;
 
-			$fSum += $oShop_Order->getAmount() * $fCurrencyCoefficient;
+			$oShop_Orders = $oShop->Shop_Orders;
+			$oShop_Orders->queryBuilder()
+				->where('shop_orders.siteuser_id', '=', $this->siteuser_id)
+				->where('shop_orders.paid', '=', 1);
+
+			$oShop_Currency = $oShop->Shop_Currency;
+
+			$aShop_Orders = $oShop_Orders->findAll(FALSE);
+			foreach ($aShop_Orders as $oShop_Order)
+			{
+				// Определяем коэффициент пересчета
+				$fCurrencyCoefficient = $oShop_Order->Shop_Currency->id > 0 && $oShop_Currency->id > 0
+					? Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
+						$oShop_Order->Shop_Currency, $oShop_Currency
+					)
+					: 0;
+
+				$fSum += $oShop_Order->getAmount() * $fCurrencyCoefficient;
+			}
 		}
 
 		$this->amount = $fSum;
@@ -147,7 +151,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 */
 	public function dataSiteuserBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		return $this->Siteuser->counterpartyBackend($oAdmin_Form_Field, $oAdmin_Form_Controller);
+		return $this->siteuser_id
+			? $this->Siteuser->counterpartyBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+			: '';
 	}
 
 	/**
@@ -163,7 +169,14 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 			: '#aebec4'
 		);
 
-		return '<span class="label" style="background-color: ' . $color . '">' . htmlspecialchars($this->number) . '</span><br /><span class="small darkgray">Σ ' . htmlspecialchars($this->Shop->Shop_Currency->formatWithCurrency($this->amount)) . '</span>';
+		$return = '<span class="label" style="background-color: ' . $color . '">' . htmlspecialchars($this->number) . '</span><br />';
+
+		if ($this->siteuser_id)
+		{
+			$return .= '<span class="small darkgray">Σ ' . htmlspecialchars($this->Shop->Shop_Currency->formatWithCurrency($this->amount)) . '</span>';
+		}
+
+		return $return;
 	}
 
 	/**
@@ -180,7 +193,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		);
 
 		return $this->shop_discountcard_level_id
-			? '<i class="fa fa-circle" style="margin-right: 5px; color: ' . $color . '"></i><span style="color: ' . $color . '">' . htmlspecialchars($this->Shop_Discountcard_Level->name) . '</span>'
+			? '<i class="fa-solid fa-circle" style="margin-right: 5px; color: ' . $color . '"></i><span style="color: ' . $color . '">' . htmlspecialchars($this->Shop_Discountcard_Level->name) . '</span>'
 			: '—';
 	}
 
@@ -192,20 +205,25 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 */
 	public function dataLoginBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		$isOnline = $this->Siteuser->isOnline();
+		if ($this->siteuser_id)
+		{
+			$isOnline = $this->Siteuser->isOnline();
 
-		$sStatus = $isOnline ? 'online' : 'offline';
+			$sStatus = $isOnline ? 'online' : 'offline';
 
-		$lng = $isOnline ? 'siteuser_active' : 'siteuser_last_activity';
+			$lng = $isOnline ? 'siteuser_active' : 'siteuser_last_activity';
 
-		$sStatusTitle = !is_null($this->Siteuser->last_activity)
-			? Core::_('Siteuser.' . $lng, Core_Date::sql2datetime($this->Siteuser->last_activity))
-			: '';
+			$sStatusTitle = !is_null($this->Siteuser->last_activity)
+				? Core::_('Siteuser.' . $lng, Core_Date::sql2datetime($this->Siteuser->last_activity))
+				: '';
 
-		return $this->dataLogin
-			? htmlspecialchars($this->dataLogin)
-				. '&nbsp;<span title="' . htmlspecialchars($sStatusTitle) . '" class="' . htmlspecialchars($sStatus) . '"></span>'
-			: '';
+			return $this->dataLogin
+				? htmlspecialchars($this->dataLogin)
+					. '&nbsp;<span title="' . htmlspecialchars($sStatusTitle) . '" class="' . htmlspecialchars($sStatus) . '"></span>'
+				: '';
+		}
+
+		return '';
 	}
 
 	/**
@@ -257,7 +275,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event shop_discountcard.onBeforeRedeclaredDelete
+	 * @hostcms-event shop_discountcard.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -291,7 +309,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event shop_discountcard.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')

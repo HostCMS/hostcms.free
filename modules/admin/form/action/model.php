@@ -92,7 +92,7 @@ class Admin_Form_Action_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event admin_form_action.onBeforeRedeclaredDelete
+	 * @hostcms-event admin_form_action.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -216,7 +216,7 @@ class Admin_Form_Action_Model extends Core_Entity
 			Core_Html_Entity::factory('Span')
 				->class('badge badge-hostcms badge-square darkgray pull-right')
 				->title(Core::_('Admin_Form_Action.modalBadge'))
-				->value('<i class="fa fa-window-restore fa-fw"></i>')
+				->value('<i class="fa-solid fa-window-restore fa-fw"></i>')
 				->execute();
 		}
 	}

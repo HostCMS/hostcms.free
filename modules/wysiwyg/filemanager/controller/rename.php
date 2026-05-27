@@ -137,7 +137,7 @@ class Wysiwyg_Filemanager_Controller_Rename extends Admin_Form_Action_Controller
 			$new_name = Core_Array::getPost('new_name', '', 'trim');
 			if ($new_name != '')
 			{
-				Core_File::rename($this->_getFilePath($this->_object->name), $this->_getFilePath($new_name), TRUE);
+				Core_File::rename($this->_getFilePath($this->_object->name), $this->_getFilePath($new_name));
 			}
 		}
 	}

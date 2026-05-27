@@ -194,7 +194,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				<ul class="nav nav-tabs tabs-flat" id="eventTabs">
 					<li class="active" data-type="timeline">
 						<a data-toggle="tab" href="#<?php echo $windowId?>_timeline" data-path="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/event/timeline/index.php')?>" data-window-id="<?php echo $windowId?>-event-timeline" data-additional="event_id=<?php echo $this->_object->id?>">
-							<i class="fa fa-bars"></i>
+							<i class="fa-solid fa-bars"></i>
 						</a>
 					</li>
 					<li data-type="note">
@@ -308,7 +308,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								->html('
 									<div class="form-group">
 										<span class="caption">' . Core::_('Event.all_day_view') . '</span>
-										<span class="darkgray"><i class="fa fa-clock-o ' . $deadlineClass . '" style="margin-right: 5px;"></i><span class="' . $deadlineClass . '">' . Event_Controller::getDate($this->_object->start) . '</span></span>
+										<span class="darkgray"><i class="fa-regular fa-clock ' . $deadlineClass . '" style="margin-right: 5px;"></i><span class="' . $deadlineClass . '">' . Event_Controller::getDate($this->_object->start) . '</span></span>
 									</div>
 								')
 						)
@@ -320,7 +320,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								->html('
 									<div class="form-group">
 										<span class="caption">' . Core::_('Event.datetime_view') . '</span>
-										<span class="darkgray"><i class="fa fa-clock-o" style="margin-right: 5px;"></i><span>' . Event_Controller::getDateTime($this->_object->datetime) . '</span></span>
+										<span class="darkgray"><i class="fa-regular fa-clock" style="margin-right: 5px;"></i><span>' . Event_Controller::getDateTime($this->_object->datetime) . '</span></span>
 									</div>
 								')
 						)
@@ -336,7 +336,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								->html('
 									<div class="form-group">
 										<span class="caption">' . Core::_('Event.start_view') . '</span>
-										<span class="darkgray"><i class="fa fa-clock-o" style="margin-right: 5px;"></i><span>' . Event_Controller::getDateTime($this->_object->start) . '</span></span>
+										<span class="darkgray"><i class="fa-regular fa-clock" style="margin-right: 5px;"></i><span>' . Event_Controller::getDateTime($this->_object->start) . '</span></span>
 									</div>
 								')
 						)
@@ -348,7 +348,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								->html('
 									<div class="form-group">
 										<span class="caption">' . Core::_('Event.datetime_view') . '</span>
-										<span class="darkgray"><i class="fa fa-clock-o" style="margin-right: 5px;"></i><span>' . Event_Controller::getDateTime($this->_object->datetime) . '</span></span>
+										<span class="darkgray"><i class="fa-regular fa-clock" style="margin-right: 5px;"></i><span>' . Event_Controller::getDateTime($this->_object->datetime) . '</span></span>
 									</div>
 								')
 						)
@@ -360,7 +360,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								->html('
 									<div class="form-group">
 										<span class="caption">' . Core::_('Event.deadline_view') . '</span>
-										<span class="darkgray"><i class="fa fa-clock-o ' . $deadlineClass . '" style="margin-right: 5px;"></i><span class="' . $deadlineClass . '">' . Event_Controller::getDateTime($this->_object->deadline) . '</span></span>
+										<span class="darkgray"><i class="fa-regular fa-clock ' . $deadlineClass . '" style="margin-right: 5px;"></i><span class="' . $deadlineClass . '">' . Event_Controller::getDateTime($this->_object->deadline) . '</span></span>
 									</div>
 								')
 						)
@@ -404,7 +404,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						Admin_Form_Entity::factory('Code')
 							->html('
 								<div class="event-group">
-									<i class="fa fa-circle" style="margin-right: 5px; color: ' . htmlspecialchars($sEventGroupColor) . '"></i><span style="color: ' . htmlspecialchars($sEventGroupColor) . '">' . htmlspecialchars($sEventGroupName) . '</span>
+									<i class="fa-solid fa-circle" style="margin-right: 5px; color: ' . htmlspecialchars($sEventGroupColor) . '"></i><span style="color: ' . htmlspecialchars($sEventGroupColor) . '">' . htmlspecialchars($sEventGroupName) . '</span>
 								</div>
 							')
 					)
@@ -444,7 +444,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								->html('
 									<div class="form-group">
 										<span class="caption">' . Core::_('Event.finish_view') . '</span>
-										<span class="darkgray"><i class="fa fa-clock-o" style="margin-right: 5px;"></i><span>' . Event_Controller::getDateTime($this->_object->finish) . '</span></span>
+										<span class="darkgray"><i class="fa-regular fa-clock" style="margin-right: 5px;"></i><span>' . Event_Controller::getDateTime($this->_object->finish) . '</span></span>
 									</div>
 								')
 						)
@@ -580,7 +580,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 											<div>' . $email . '</div>
 										</div>
 										<div class="delete-responsible-user" onclick="$.dealRemoveUserBlock($(this))">
-											<i class="fa fa-times"></i>
+											<i class="fa-solid fa-xmark"></i>
 										</div>
 									</div>
 								</div>
@@ -605,7 +605,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							->add(
 								Admin_Form_Entity::factory('Code')
 									->html('
-										<i class="fa fa-map-marker azure"></i><span class="margin-left-5 azure">' . htmlspecialchars($this->_object->place) . '</span>
+										<i class="fa-solid fa-location-dot azure"></i><span class="margin-left-5 azure">' . htmlspecialchars($this->_object->place) . '</span>
 									')
 							)
 				);
@@ -657,7 +657,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								</div>
 								<div class="databox-right padding-top-20">
 									<div class="databox-stat orange radius-bordered">
-										<div class="databox-text black semi-bold darkgray event-user-view"><?php $oUser->showLink($this->_Admin_Form_Controller->getWindowId(), $oUser->getFullName()); echo ($bCreator ? '<i title="' . Core::_('Event.creator') . '" class="fa fa-star gold"></i>' : '')?></div>
+										<div class="databox-text black semi-bold darkgray event-user-view"><?php $oUser->showLink($this->_Admin_Form_Controller->getWindowId(), $oUser->getFullName()); echo ($bCreator ? '<i title="' . Core::_('Event.creator') . '" class="fa-solid fa-star gold"></i>' : '')?></div>
 										<div class="databox-text darkgray"><?php echo htmlspecialchars($sUserPost)?></div>
 									</div>
 								</div>
@@ -697,8 +697,8 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						-1 => $failed,
 					))
 					->ico(array(
-						1 => 'fa-check',
-						-1 => 'fa-ban',
+						1 => 'fa-solid fa-check',
+						-1 => 'fa-solid fa-ban',
 					))
 					->colors(array('btn-palegreen', 'btn-darkorange'))
 					->name('completed')
@@ -723,7 +723,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		if ($this->_object->completed == 1)
 		{
-			$completedIcon = 'fa-solid fa-circle-check palegreen';
+			$completedIcon = 'fa-regular fa-circle-check palegreen';
 		}
 		elseif ($this->_object->completed == -1)
 		{
@@ -1579,7 +1579,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$oEntityDiv->add(
 						Admin_Form_Entity::factory('Code')
-							->html('<span class="badge badge-square margin-right-5" style="color: ' . $oLead->Lead_Status->color . '; background-color: ' . Core_Str::hex2lighter($oLead->Lead_Status->color, 0.88) . '"><i class="fa fa-user-circle-o margin-right-5"></i><a style="color: inherit;" href="' . Admin_Form_Controller::correctBackendPath('/{admin}/lead/index.php') . '?hostcms[action]=edit&hostcms[checked][0][' . $oLead->id . ']=1" onclick="$.modalLoad({path: hostcmsBackend + \'/lead/index.php\', action: \'edit\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $oLead->id . ']=1\', windowId: \'' . $this->_Admin_Form_Controller->getWindowId() . '\'}); return false">' . htmlspecialchars($oLead->getFullName()) . '</a></span>')
+							->html('<span class="badge badge-square margin-right-5" style="color: ' . $oLead->Lead_Status->color . '; background-color: ' . Core_Str::hex2lighter($oLead->Lead_Status->color, 0.88) . '"><i class="fa-regular fa-circle-user margin-right-5"></i><a style="color: inherit;" href="' . Admin_Form_Controller::correctBackendPath('/{admin}/lead/index.php') . '?hostcms[action]=edit&hostcms[checked][0][' . $oLead->id . ']=1" onclick="$.modalLoad({path: hostcmsBackend + \'/lead/index.php\', action: \'edit\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $oLead->id . ']=1\', windowId: \'' . $this->_Admin_Form_Controller->getWindowId() . '\'}); return false">' . htmlspecialchars($oLead->getFullName()) . '</a></span>')
 					);
 				}
 			}
@@ -1592,7 +1592,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$oEntityDiv->add(
 						Admin_Form_Entity::factory('Code')
-							->html('<span class="badge badge-square margin-right-5" style="color: ' . $oDeal->Deal_Template->color . '; background-color: ' . Core_Str::hex2lighter($oDeal->Deal_Template->color, 0.88) . '"><i class="fa fa-user-circle-o margin-right-5"></i><a style="color: inherit;" href="' . Admin_Form_Controller::correctBackendPath('/{admin}/deal/index.php') . '?hostcms[action]=edit&hostcms[checked][0][' . $oDeal->id . ']=1" onclick="$.modalLoad({path: hostcmsBackend + \'/deal/index.php\', action: \'edit\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $oDeal->id . ']=1\', windowId: \'' . $this->_Admin_Form_Controller->getWindowId() . '\'}); return false">' . htmlspecialchars($oDeal->name) . '</a></span>')
+							->html('<span class="badge badge-square margin-right-5" style="color: ' . $oDeal->Deal_Template->color . '; background-color: ' . Core_Str::hex2lighter($oDeal->Deal_Template->color, 0.88) . '"><i class="fa-regular fa-circle-user margin-right-5"></i><a style="color: inherit;" href="' . Admin_Form_Controller::correctBackendPath('/{admin}/deal/index.php') . '?hostcms[action]=edit&hostcms[checked][0][' . $oDeal->id . ']=1" onclick="$.modalLoad({path: hostcmsBackend + \'/deal/index.php\', action: \'edit\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $oDeal->id . ']=1\', windowId: \'' . $this->_Admin_Form_Controller->getWindowId() . '\'}); return false">' . htmlspecialchars($oDeal->name) . '</a></span>')
 					);
 				}
 			}
@@ -1634,7 +1634,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->divAttr(array('class' => 'form-group col-xs-12'))
 				->class('btn-group')
 				->add(Admin_Form_Entity::factory('Code')
-					->html('<a class="add-event-checklist btn btn-gray" onclick="$.addEventChecklist(\'' . $windowId . '\', \'#' . $windowId . ' .event-checklist-wrapper\')"><i class="fa fa-plus icon-separator"></i>' . Core::_("Event.add_checklist") . '</a>')
+					->html('<a class="add-event-checklist btn btn-gray" onclick="$.addEventChecklist(\'' . $windowId . '\', \'#' . $windowId . ' .event-checklist-wrapper\')"><i class="fa-solid fa-plus icon-separator"></i>' . Core::_("Event.add_checklist") . '</a>')
 				)
 			)
 			->add(
@@ -1717,8 +1717,8 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						-1 => $failed,
 					))
 					->ico(array(
-						1 => 'fa-check',
-						-1 => 'fa-ban',
+						1 => 'fa-solid fa-check',
+						-1 => 'fa-solid fa-ban',
 					))
 					->colors(array('btn-palegreen', 'btn-darkorange'))
 					->name('completed')
@@ -1759,7 +1759,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			<ul class="nav nav-tabs tabs-flat" id="eventTabs">
 				<li class="active" data-type="timeline">
 					<a data-toggle="tab" href="#<?php echo $windowId?>_timeline" data-path="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/event/timeline/index.php')?>" data-window-id="<?php echo $windowId?>-event-timeline" data-additional="event_id=<?php echo $this->_object->id?>">
-						<i class="fa fa-bars"></i>
+						<i class="fa-solid fa-bars"></i>
 					</a>
 				</li>
 				<li data-type="note">
@@ -1882,8 +1882,8 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								->add(
 									Admin_Form_Entity::factory('Code')->html('<div class="input-group-addon add-remove-property">
 									<div class="no-padding-left col-lg-12">
-									<div class="btn btn-palegreen inverted" onclick="$.cloneFile(\'' . $windowId . '\'); event.stopPropagation();"><i class="fa fa-plus-circle close"></i></div>
-									<div class="btn btn-darkorange inverted" onclick="$(this).parents(\'#file\').remove(); event.stopPropagation();"><i class="fa fa-minus-circle close"></i></div>
+									<div class="btn btn-palegreen inverted" onclick="$.cloneFile(\'' . $windowId . '\'); event.stopPropagation();"><i class="fa-solid fa-circle-plus close"></i></div>
+									<div class="btn btn-darkorange inverted" onclick="$(this).parents(\'#file\').remove(); event.stopPropagation();"><i class="fa-solid fa-circle-minus close"></i></div>
 									</div>
 									</div>')
 								)
@@ -3255,7 +3255,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name
 	 * @return bool
-     */
+	 */
 	public function execute($operation = NULL)
 	{
 		$oUser = Core_Auth::getCurrentUser();
@@ -3272,16 +3272,20 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$.updateCaldav();
 
-		if ($("#id_content .kanban-board").length && typeof _windowSettings != \'undefined\') {
+		if ($("#id_content .kanban-board, #id_content .timeline-wrapper").length && typeof _windowSettings != \'undefined\') {
 			$(\'#id_content #refresh-toggler\').click();
-		}
+		}';
 
-		// CRM-Projects
-		if ($("#id_content .timeline-crm").length && typeof _windowSettings != \'undefined\') {
-			$.adminLoad({ path: hostcmsBackend + \'/crm/project/entity/index.php\', additionalParams: \'crm_project_id=' . $crm_project_id . '\', windowId: \'id_content\' });
+		if ($crm_project_id)
+		{
+			$sJsRefresh .= '
+				// CRM-Projects
+				if ($("#id_content .timeline-wrapper").length && typeof _windowSettings != \'undefined\') {
+					$.adminLoad({ path: hostcmsBackend + \'/crm/project/entity/index.php\', additionalParams: \'crm_project_id=' . $crm_project_id . '\', windowId: \'id_content\' });
+				}
+				// /CRM-Projects
+				';
 		}
-		// /CRM-Projects
-		';
 
 		if ($this->_object->id)
 		{

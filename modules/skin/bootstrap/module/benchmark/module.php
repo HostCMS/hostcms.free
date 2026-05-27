@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Benchmark_Module extends Benchmark_Module
 {
@@ -60,7 +60,7 @@ class Skin_Bootstrap_Module_Benchmark_Module extends Benchmark_Module
 					<span class="databox-number <?php echo $sColor?>"><?php echo $iBenchmark?> / 100</span>
 					<div class="databox-text"><?php echo Core::_('Benchmark.menu')?></div>
 					<div class="databox-stat <?php echo $sColor?> radius-bordered">
-						<i class="stat-icon icon-lg fa fa-trophy"></i>
+						<i class="stat-icon icon-lg fa-solid fa-trophy"></i>
 					</div>
 				</div>
 			</div>

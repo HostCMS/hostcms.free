@@ -11,27 +11,27 @@
  */
 class Smarty_Internal_Method_ClearCompiledTemplate
 {
-    /**
-     * Valid for Smarty object
-     *
-     * @var int
-     */
+	/**
+	 * Valid for Smarty object
+	 *
+	 * @var int
+	 */
     public $objMap = 1;
 
-    /**
-     * Delete compiled template file
-     *
-     * @api  Smarty::clearCompiledTemplate()
-     * @link https://www.smarty.net/docs/en/api.clear.compiled.template.tpl
-     *
-     * @param \Smarty $smarty
-     * @param string  $resource_name template name
-     * @param string  $compile_id    compile id
-     * @param integer $exp_time      expiration time
-     *
-     * @return int number of template files deleted
-     * @throws \SmartyException
-     */
+	/**
+	 * Delete compiled template file
+	 *
+	 * @api  Smarty::clearCompiledTemplate()
+	 * @link https://www.smarty.net/docs/en/api.clear.compiled.template.tpl
+	 *
+	 * @param \Smarty $smarty
+	 * @param string  $resource_name template name
+	 * @param string  $compile_id    compile id
+	 * @param integer $exp_time      expiration time
+	 *
+	 * @return int number of template files deleted
+	 * @throws \SmartyException
+	 */
     public function clearCompiledTemplate(Smarty $smarty, $resource_name = null, $compile_id = null, $exp_time = null)
     {
         // clear template objects cache

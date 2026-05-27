@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Bonus_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -136,8 +136,8 @@ class Shop_Bonus_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					))
 					->ico(
 						array(
-							0 => 'fa-calendar',
-							1 => 'fa-arrows-h',
+							0 => 'fa-solid fa-calendar',
+							1 => 'fa-solid fa-arrows-h',
 					))
 					->colors(
 						array(

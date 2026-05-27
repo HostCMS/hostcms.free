@@ -87,4 +87,5 @@ return array(
 	'shortcut_success' => "Ярлик успішно доданий",
 	'changeShow_success' => 'Показ у меню розділу структури успішно змінено.',
 	'changeShow_error' => 'Помилка при зміні показу в меню структури.',
+	'shortcut' => 'Ярлик',
 );

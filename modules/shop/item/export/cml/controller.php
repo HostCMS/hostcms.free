@@ -125,7 +125,7 @@ class Shop_Item_Export_Cml_Controller extends Core_Servant_Properties
 	/**
 	 * Export import.xml
 	 * @return false
-     */
+	 */
 	public function exportImport()
 	{
 		$oUser = Core_Auth::getCurrentUser();

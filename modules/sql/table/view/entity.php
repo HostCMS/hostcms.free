@@ -85,13 +85,13 @@ class Sql_Table_View_Entity extends Core_Empty_Entity
 		$this->_fields[$property] = $value;
 	}
 
-    /**
-     * Triggered when invoking inaccessible methods in an object context
-     * @param string $methodName
-     * @param array $arguments arguments
-     * @return string|void
-     * @hostcms-event modelname.onCall
-     */
+	/**
+	 * Triggered when invoking inaccessible methods in an object context
+	 * @param string $methodName
+	 * @param array $arguments arguments
+	 * @return string|void
+	 * @hostcms-event modelname.onCall
+	 */
 	public function __call($methodName, $arguments)
 	{
 		// Будет вызываться только при NULL, в остальных случаях стандартный вывод

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Discountcard_Bonus_Type_Model extends Core_Entity
 {
@@ -116,7 +116,7 @@ class Shop_Discountcard_Bonus_Type_Model extends Core_Entity
 		$link = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $link);
 		$onclick = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $onclick);
 
-		return '<i class="fa fa-circle" style="margin-right: 5px; color: ' . ($this->color ? htmlspecialchars($this->color) : '#aebec4') . '"></i> '
+		return '<i class="fa-solid fa-circle" style="margin-right: 5px; color: ' . ($this->color ? htmlspecialchars($this->color) : '#aebec4') . '"></i> '
 			. '<span>' . htmlspecialchars($this->name) . '</span>';
 	}
 

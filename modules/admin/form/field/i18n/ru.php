@@ -6,7 +6,7 @@
  * @package HostCMS
  * @subpackage Admin
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Поля формы центра администрирования',
@@ -29,7 +29,7 @@ return array(
 	'allow_filter' => 'Разрешить фильтр',
 	'editable' => 'Редактировать прямо на форме',
 	'width' => 'Ширина поля (px, %)',
-	'ico' => '<acronym title="Изображение для поля, указывается классом для тега &lt;i&gt;, например &quot;fa fa-comment&quot;">Изображение для поля</acronym>',
+	'ico' => '<acronym title="Изображение для поля, указывается классом для тега &lt;i&gt;">Изображение для поля</acronym>',
 	'class' => '<acronym title="CSS-класс отображения поля">CSS-класс</acronym>',
 	'attributes' => '<acronym title="Список атрибутов поля">Атрибуты поля</acronym>',
 	'image' => '<acronym title="Соответствие изображений значениям поля. Задается в формате <Значение поля>=<Путь к изображению>">Соответствие изображений значениям поля</acronym>',

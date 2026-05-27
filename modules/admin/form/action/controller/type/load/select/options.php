@@ -151,7 +151,7 @@ class Admin_Form_Action_Controller_Type_Load_Select_Options extends Admin_Form_A
 	/**
 	 * Get count of objects
 	 * @return int|null
-     */
+	 */
 	protected function _getCount()
 	{
 		return NULL;

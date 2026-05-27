@@ -257,14 +257,14 @@ class Site_Favicon_Controller_Tab extends Core_Servant_Properties
 				->class('no-padding add-remove-property margin-top-20 pull-left')
 				->add(
 					Admin_Form_Entity::factory('Div')
-						->class('btn btn-palegreen')
-						->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-plus-circle close"></i>'))
+						->class('btn btn-palegreen inverted')
+						->add(Admin_Form_Entity::factory('Code')->html('<i class="fa-solid fa-circle-plus close"></i>'))
 						->onclick("{$addFunction}('{$windowId}', this);")
 				)
 				->add(
 					Admin_Form_Entity::factory('Div')
-						->class('btn btn-darkorange btn-delete')
-						->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-minus-circle close"></i>'))
+						->class('btn btn-darkorange btn-delete inverted')
+						->add(Admin_Form_Entity::factory('Code')->html('<i class="fa-solid fa-circle-minus close"></i>'))
 						->onclick($deleteOnclick)
 				)
 				->execute();

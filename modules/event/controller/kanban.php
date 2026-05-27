@@ -176,7 +176,7 @@ class Event_Controller_Kanban extends Skin_Bootstrap_Admin_Form_Controller_List
 								?>
 							</h5>
 							<span class="triangle" style="border-left-color: <?php echo $aEventStatus['color']?>"></span>
-							<span class="add" style="background-color: <?php echo htmlspecialchars($aEventStatus['color'])?>" onclick="$.modalLoad({path: hostcmsBackend + '/event/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&event_status_id=<?php echo $iEventStatusId?>', windowId: '<?php echo $windowId?>'}); return false"><i class="fa fa-plus-circle"></i></span>
+							<span class="add" style="background-color: <?php echo htmlspecialchars($aEventStatus['color'])?>" onclick="$.modalLoad({path: hostcmsBackend + '/event/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&event_status_id=<?php echo $iEventStatusId?>', windowId: '<?php echo $windowId?>'}); return false"><i class="fa-solid fa-circle-plus"></i></span>
 						</div>
 
 						<ul id="entity-list-<?php echo $iEventStatusId?>" data-step-id="<?php echo $iEventStatusId?>" class="kanban-list connectedSortable event-status-<?php echo $iEventStatusId?>">
@@ -223,7 +223,7 @@ class Event_Controller_Kanban extends Skin_Bootstrap_Admin_Form_Controller_List
 											<?php
 											if ($oEntity->Event_Attachments->getCount(FALSE))
 											{
-												?><i class="fa fa-paperclip name-attachments"></i><?php
+												?><i class="fa-solid fa-paperclip name-attachments"></i><?php
 											}
 											?>
 											<a class="evetn-title name" onclick="$.modalLoad({path: hostcmsBackend + '/event/index.php', action: 'edit',operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oEntity->id?>]=1&parentWindowId=id_content', windowId: 'id_content', width: '90%'});"><?php echo htmlspecialchars($oEntity->name)?></a>
@@ -241,7 +241,7 @@ class Event_Controller_Kanban extends Skin_Bootstrap_Admin_Form_Controller_List
 											</div>
 											<?php if ($bExpand)
 											{
-												?><div class="more-wrapper"><div class="more" onclick="$.showAllDescription(this)"><?php echo Core::_('Event.more')?> <i class="fas fa-chevron-down"></i></div></div><?php
+												?><div class="more-wrapper"><div class="more" onclick="$.showAllDescription(this)"><?php echo Core::_('Event.more')?> <i class="fa-solid fa-chevron-down"></i></div></div><?php
 											}
 											?>
 											</div><?php
@@ -255,7 +255,7 @@ class Event_Controller_Kanban extends Skin_Bootstrap_Admin_Form_Controller_List
 											foreach ($aTags as $oTag)
 											{
 												Core_Html_Entity::factory('Code')
-													->value('<span class="badge badge-square badge-tag badge-max-width badge-lightgray margin-right-5" title="' . htmlspecialchars($oTag->name) . '"><i class="fa fa-tag"></i> ' . htmlspecialchars($oTag->name) . '</span>')
+													->value('<span class="badge badge-square badge-tag badge-max-width badge-lightgray margin-right-5" title="' . htmlspecialchars($oTag->name) . '"><i class="fa-solid fa-tags"></i> ' . htmlspecialchars($oTag->name) . '</span>')
 													->execute();
 											}
 											?></div></div><?php
@@ -313,7 +313,7 @@ class Event_Controller_Kanban extends Skin_Bootstrap_Admin_Form_Controller_List
 										if (strlen($oEntity->place))
 										{
 											?><div class="crm-description">
-												<span class="kanban-place"><i class="fa fa-map-marker black"></i> <?php echo htmlspecialchars($oEntity->place)?></span>
+												<span class="kanban-place"><i class="fa-solid fa-location-dot black"></i> <?php echo htmlspecialchars($oEntity->place)?></span>
 											</div><?php
 										}
 										?>
@@ -329,7 +329,7 @@ class Event_Controller_Kanban extends Skin_Bootstrap_Admin_Form_Controller_List
 										<!-- <div class="footer">
 											<?php echo $oEntity->relatedBackend(NULL, $oAdmin_Form_Controller)?>
 										</div> -->
-										<!-- <div class="edit-entity" onclick=""><i class="fa fa-pencil"></i></div> -->
+										<!-- <div class="edit-entity" onclick=""><i class="fa-solid fa-pencil"></i></div> -->
 									</div>
 								</li>
 							<?php
@@ -366,12 +366,12 @@ class Event_Controller_Kanban extends Skin_Bootstrap_Admin_Form_Controller_List
 					foreach ($aEvent_Statuses as $oEvent_Status)
 					{
 						?>
-						<ul id="entity-list-<?php echo $oEvent_Status->id?>" data-hover-bg="<?php echo htmlspecialchars(Core_Str::hex2lighter($oEvent_Status->color, 0.8))?>" data-step-id="<?php echo $oEvent_Status->id?>" data-id="<?php echo $oEvent_Status->id?>" style="width: <?php echo $width?>%; background-color: <?php echo htmlspecialchars(Core_Str::hex2lighter($oEvent_Status->color, 0.27))?>; border-top: 3px solid <?php echo htmlspecialchars($oEvent_Status->color)?>; color: #fff;" class="connectedSortable kanban-action-item"><div class="kanban-action-item-name"><?php echo htmlspecialchars($oEvent_Status->name)?></div><div class="return hidden"><i class="fa fa-undo"></i> <?php echo htmlspecialchars($oEvent_Status->name)?></div></ul>
+						<ul id="entity-list-<?php echo $oEvent_Status->id?>" data-hover-bg="<?php echo htmlspecialchars(Core_Str::hex2lighter($oEvent_Status->color, 0.8))?>" data-step-id="<?php echo $oEvent_Status->id?>" data-id="<?php echo $oEvent_Status->id?>" style="width: <?php echo $width?>%; background-color: <?php echo htmlspecialchars(Core_Str::hex2lighter($oEvent_Status->color, 0.27))?>; border-top: 3px solid <?php echo htmlspecialchars($oEvent_Status->color)?>; color: #fff;" class="connectedSortable kanban-action-item"><div class="kanban-action-item-name"><?php echo htmlspecialchars($oEvent_Status->name)?></div><div class="return hidden"><i class="fa-solid fa-rotate-left"></i> <?php echo htmlspecialchars($oEvent_Status->name)?></div></ul>
 						<?php
 					}
 					?>
 
-					<ul data-id="-1" data-hover-bg="<?php echo htmlspecialchars(Core_Str::hex2lighter('#e5e5e5', 0.8))?>" style="width: <?php echo $deleteWidth?>%; background-color: #e5e5e5; border-top: 3px solid #777; color: #777;" class="connectedSortable kanban-action-item"><div class="kanban-action-item-name"><i class="fa fa-trash"></i></div><div class="return hidden"><i class="fa fa-undo"></i></div></ul>
+					<ul data-id="-1" data-hover-bg="<?php echo htmlspecialchars(Core_Str::hex2lighter('#e5e5e5', 0.8))?>" style="width: <?php echo $deleteWidth?>%; background-color: #e5e5e5; border-top: 3px solid #777; color: #777;" class="connectedSortable kanban-action-item"><div class="kanban-action-item-name"><i class="fa-solid fa-trash-can"></i></div><div class="return hidden"><i class="fa-solid fa-rotate-left"></i></div></ul>
 				</div>
 			</div>
 		</div>

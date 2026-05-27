@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Directory
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Messengers',
@@ -15,7 +15,7 @@ return array(
 	'add_title' => 'Add messenger type',
 	'edit_title' => 'Edit messenger type',
 	'name' => 'Name',
-	'ico' => '<acronym title="CSS for logo, e.g. fa fa-comments">Logo CSS</acronym>',
+	'ico' => '<acronym title="CSS for logo, e.g. fa-solid fa-comments">Logo CSS</acronym>',
 	'link' => 'Link',
 	'id' => 'ID',
 	'delete_success' => 'Item deleted successfully!',

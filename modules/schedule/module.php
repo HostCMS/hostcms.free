@@ -20,9 +20,9 @@ class Schedule_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 	/**
 	 * Module name
@@ -40,7 +40,7 @@ class Schedule_Module extends Core_Module_Abstract
 			array(
 				'sorting' => 100,
 				'block' => 0,
-				'ico' => 'fa fa-calendar-check-o',
+				'ico' => 'fa-regular fa-calendar-check',
 				'name' => Core::_('Schedule.menu'),
 				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/schedule/index.php"),
 				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/schedule/index.php'}); return false")

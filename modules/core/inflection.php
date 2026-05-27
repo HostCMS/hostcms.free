@@ -67,20 +67,34 @@ abstract class Core_Inflection
 	}
 
 	/**
-	 * Chech if $word is PLURAL and IRRIGUAL
+	 * @deprecated Use isPluralIrregular()
+	 */
+	public function isPluralIrrigular($word) {
+		return $this->isPluralIrregular($word);
+	}
+
+	/**
+	 * Chech if $word is PLURAL and IRREGULAR
 	 * @return boolean
 	 */
-	public function isPluralIrrigular($word)
+	public function isPluralIrregular($word)
 	{
 		// self::$singularIrregular consists plural => singular
 		return isset(self::$singularIrregular[$word]);
 	}
 
 	/**
-	 * Chech if $word is SINGULAR and IRRIGUAL
+	 * @deprecated Use isSingularIrregular()
+	 */
+	public function isSingularIrrigular($word) {
+		return $this->isSingularIrregular($word);
+	}
+
+	/**
+	 * Chech if $word is SINGULAR and IRREGULAR
 	 * @return boolean
 	 */
-	public function isSingularIrrigular($word)
+	public function isSingularIrregular($word)
 	{
 		// self::$pluralIrregular consists singular => plural
 		return isset(self::$pluralIrregular[$word]);

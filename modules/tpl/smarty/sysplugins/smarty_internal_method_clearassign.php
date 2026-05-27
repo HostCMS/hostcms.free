@@ -11,24 +11,24 @@
  */
 class Smarty_Internal_Method_ClearAssign
 {
-    /**
-     * Valid for all objects
-     *
-     * @var int
-     */
+	/**
+	 * Valid for all objects
+	 *
+	 * @var int
+	 */
     public $objMap = 7;
 
-    /**
-     * clear the given assigned template variable(s).
-     *
-     * @api  Smarty::clearAssign()
-     * @link https://www.smarty.net/docs/en/api.clear.assign.tpl
-     *
-     * @param \Smarty_Internal_Data|\Smarty_Internal_Template|\Smarty $data
-     * @param string|array                                            $tpl_var the template variable(s) to clear
-     *
-     * @return \Smarty_Internal_Data|\Smarty_Internal_Template|\Smarty
-     */
+	/**
+	 * clear the given assigned template variable(s).
+	 *
+	 * @api  Smarty::clearAssign()
+	 * @link https://www.smarty.net/docs/en/api.clear.assign.tpl
+	 *
+	 * @param \Smarty_Internal_Data|\Smarty_Internal_Template|\Smarty $data
+	 * @param string|array                                            $tpl_var the template variable(s) to clear
+	 *
+	 * @return \Smarty_Internal_Data|\Smarty_Internal_Template|\Smarty
+	 */
     public function clearAssign(Smarty_Internal_Data $data, $tpl_var)
     {
         if (is_array($tpl_var)) {

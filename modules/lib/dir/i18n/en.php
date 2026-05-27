@@ -1,12 +1,5 @@
 <?php
-/**
- * Libs.
- *
- * @package HostCMS
- * @subpackage Lib
- * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'Sample dynamic page sections',
 	'markDeleted_success' => 'Section deleted successfully!',
@@ -24,4 +17,5 @@ return array(
 	'undelete_success' => 'Sections restored successfully!',
 	'sorting' => "Sorting order",
 	'apply_success' => "Information successfully changed",
+	'move_success' => 'Sections of typical dynamic pages have been moved',
 );

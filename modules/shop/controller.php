@@ -150,7 +150,7 @@ class Shop_Controller
 	 * Convert decimal
 	 * @param mixed $value
 	 * @return array|int|string|string[]
-     */
+	 */
 	public function convertFloat($value)
 	{
 		return self::convertDecimal($value);
@@ -160,7 +160,7 @@ class Shop_Controller
 	 * Convert decimal
 	 * @param mixed $value
 	 * @return array|int|string|string[]
-     */
+	 */
 	static public function convertDecimal($value)
 	{
 		if (!is_null($value))
@@ -186,7 +186,7 @@ class Shop_Controller
 	 * @param mixed $price price
 	 * @param int $decimalDigits e.g. 2, default uses $this->_decimalDigits
 	 * @return float|int
-     */
+	 */
 	public function convertPrice($price, $decimalDigits = NULL)
 	{
 		$price = self::convertDecimal($price);
@@ -266,8 +266,8 @@ class Shop_Controller
 				})
 			</script>
 			<div class="btn-group pull-right">
-				<a class="btn btn-sm btn-default"><i class="fa fa-plus"></i></a>
-				<a class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
+				<a class="btn btn-sm btn-default"><i class="fa-solid fa-plus"></i></a>
+				<a class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-angle-down"></i></a>
 				<ul class="dropdown-menu dropdown-default" role="menu">
 					<li class="disabled">
 						<a class="bold">' . Core::_("Shop.seo_template_shop") . '</a>
@@ -325,8 +325,8 @@ class Shop_Controller
 				})
 			</script>
 			<div class="btn-group pull-right">
-				<a class="btn btn-sm btn-default"><i class="fa fa-plus"></i></a>
-				<a class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
+				<a class="btn btn-sm btn-default"><i class="fa-solid fa-plus"></i></a>
+				<a class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-angle-down"></i></a>
 				<ul class="dropdown-menu dropdown-default" role="menu">
 					<li class="disabled">
 						<a class="bold">' . Core::_("Shop.seo_template_shop") . '</a>
@@ -403,8 +403,8 @@ class Shop_Controller
 				})
 			</script>
 			<div class="btn-group pull-right">
-				<a class="btn btn-sm btn-default"><i class="fa fa-plus"></i></a>
-				<a class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
+				<a class="btn btn-sm btn-default"><i class="fa-solid fa-plus"></i></a>
+				<a class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-angle-down"></i></a>
 				<ul class="dropdown-menu dropdown-default" role="menu">
 					<li class="disabled">
 						<a class="bold">' . Core::_("Shop.seo_template_shop") . '</a>

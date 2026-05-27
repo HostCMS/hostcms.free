@@ -42,13 +42,13 @@ class Core_Array
 		);
 	}
 
-    /**
-     * Filter Value
-     * @param mixed $value
-     * @param array $aFilter
-     * @return mixed
-     * @throws Core_Exception
-     */
+	/**
+	 * Filter Value
+	 * @param mixed $value
+	 * @param array $aFilter
+	 * @return mixed
+	 * @throws Core_Exception
+	 */
 	static protected function _filter($value, $aFilter)
 	{
 		if (!is_null($aFilter))
@@ -280,7 +280,7 @@ class Core_Array
 	 * var_dump($array);
 	 * </code>
 	 * @return array
-     */
+	 */
 	static public function toInt($array)
 	{
 		$array = Core_Type_Conversion::toArray($array);
@@ -552,14 +552,14 @@ class Core_Array
 		return $bIsList && ($array === array_filter($array, 'is_scalar'));
 	}
 
-    /**
-     * Change $oldKey to the $newKey with $newValue (optional)
-     * @param array $array
-     * @param mixed $oldKey Old Key
-     * @param mixed $newKey New Key
-     * @param mixed $newValue New Value, if NULL the old value is used
-     * @return array
-     */
+	/**
+	 * Change $oldKey to the $newKey with $newValue (optional)
+	 * @param array $array
+	 * @param mixed $oldKey Old Key
+	 * @param mixed $newKey New Key
+	 * @param mixed $newValue New Value, if NULL the old value is used
+	 * @return array
+	 */
 	static public function changeKey(array $array, $oldKey, $newKey, $newValue = NULL)
 	{
 		if (!array_key_exists($oldKey, $array))

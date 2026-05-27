@@ -39,8 +39,8 @@ function smarty_function_html_options($params, Smarty_Internal_Template $templat
     $template->_checkPlugins(
         array(
             array(
-                'function' => 'smarty_function_escape_special_chars',
-                'file'     => SMARTY_PLUGINS_DIR . 'shared.escape_special_chars.php'
+            	'function' => 'smarty_function_escape_special_chars',
+            	'file'     => SMARTY_PLUGINS_DIR . 'shared.escape_special_chars.php'
             )
         )
     );
@@ -75,7 +75,7 @@ function smarty_function_html_options($params, Smarty_Internal_Template $templat
                                 $_sel = smarty_function_escape_special_chars((string)$_sel->__toString());
                             } else {
                                 trigger_error(
-                                    'html_options: selected attribute contains an object of class \'' .
+                                	'html_options: selected attribute contains an object of class \'' .
                                     get_class($_sel) . '\' without __toString() method',
                                     E_USER_NOTICE
                                 );
@@ -91,8 +91,8 @@ function smarty_function_html_options($params, Smarty_Internal_Template $templat
                         $selected = smarty_function_escape_special_chars((string)$_val->__toString());
                     } else {
                         trigger_error(
-                            'html_options: selected attribute is an object of class \'' . get_class($_val) .
-                            '\' without __toString() method',
+                        	'html_options: selected attribute is an object of class \'' . get_class($_val) .
+                        	'\' without __toString() method',
                             E_USER_NOTICE
                         );
                     }
@@ -147,8 +147,8 @@ function smarty_function_html_options($params, Smarty_Internal_Template $templat
         $_html_class = !empty($class) ? ' class="' . $class . '"' : '';
         $_html_id = !empty($id) ? ' id="' . $id . '"' : '';
         $_html_result =
-            '<select name="' . $name . '"' . $_html_class . $_html_id . $extra . '>' . "\n" . $_html_result .
-            '</select>' . "\n";
+        	'<select name="' . $name . '"' . $_html_class . $_html_id . $extra . '>' . "\n" . $_html_result .
+        	'</select>' . "\n";
     }
     return $_html_result;
 }
@@ -182,8 +182,8 @@ function smarty_function_html_options_optoutput($key, $value, $selected, $id, $c
                 $value = smarty_function_escape_special_chars((string)$value->__toString());
             } else {
                 trigger_error(
-                    'html_options: value is an object of class \'' . get_class($value) .
-                    '\' without __toString() method',
+                	'html_options: value is an object of class \'' . get_class($value) .
+                	'\' without __toString() method',
                     E_USER_NOTICE
                 );
                 return '';

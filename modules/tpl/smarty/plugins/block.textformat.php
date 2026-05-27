@@ -41,8 +41,8 @@ function smarty_block_textformat($params, $content, Smarty_Internal_Template $te
         $template->_checkPlugins(
             array(
                 array(
-                    'function' => 'smarty_modifier_mb_wordwrap',
-                    'file'     => SMARTY_PLUGINS_DIR . 'modifier.mb_wordwrap.php'
+                	'function' => 'smarty_modifier_mb_wordwrap',
+                	'file'     => SMARTY_PLUGINS_DIR . 'modifier.mb_wordwrap.php'
                 )
             )
         );
@@ -88,12 +88,12 @@ function smarty_block_textformat($params, $content, Smarty_Internal_Template $te
         $_paragraph =
             preg_replace(
                 array(
-                    '!\s+!' . Smarty::$_UTF8_MODIFIER,
-                    '!(^\s+)|(\s+$)!' . Smarty::$_UTF8_MODIFIER
+                	'!\s+!' . Smarty::$_UTF8_MODIFIER,
+                	'!(^\s+)|(\s+$)!' . Smarty::$_UTF8_MODIFIER
                 ),
                 array(
-                    ' ',
-                    ''
+                	' ',
+                	''
                 ),
                 $_paragraph
             );

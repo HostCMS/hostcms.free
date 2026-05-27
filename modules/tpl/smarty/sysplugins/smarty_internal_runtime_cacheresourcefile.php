@@ -15,17 +15,17 @@
  */
 class Smarty_Internal_Runtime_CacheResourceFile
 {
-    /**
-     * Empty cache for a specific template
-     *
-     * @param Smarty  $smarty
-     * @param string  $resource_name template name
-     * @param string  $cache_id      cache id
-     * @param string  $compile_id    compile id
-     * @param integer $exp_time      expiration time (number of seconds, not timestamp)
-     *
-     * @return int number of cache files deleted
-     */
+	/**
+	 * Empty cache for a specific template
+	 *
+	 * @param Smarty  $smarty
+	 * @param string  $resource_name template name
+	 * @param string  $cache_id      cache id
+	 * @param string  $compile_id    compile id
+	 * @param integer $exp_time      expiration time (number of seconds, not timestamp)
+	 *
+	 * @return int number of cache files deleted
+	 */
     public function clear(Smarty $smarty, $resource_name, $cache_id, $compile_id, $exp_time)
     {
         $_cache_id = isset($cache_id) ? preg_replace('![^\w\|]+!', '_', $cache_id) : null;

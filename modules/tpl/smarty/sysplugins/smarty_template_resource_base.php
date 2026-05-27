@@ -9,100 +9,100 @@
  */
 abstract class Smarty_Template_Resource_Base
 {
-    /**
-     * Compiled Filepath
-     *
-     * @var string
-     */
+	/**
+	 * Compiled Filepath
+	 *
+	 * @var string
+	 */
     public $filepath = null;
 
-    /**
-     * Compiled Timestamp
-     *
-     * @var integer|bool
-     */
+	/**
+	 * Compiled Timestamp
+	 *
+	 * @var integer|bool
+	 */
     public $timestamp = false;
 
-    /**
-     * Compiled Existence
-     *
-     * @var boolean
-     */
+	/**
+	 * Compiled Existence
+	 *
+	 * @var boolean
+	 */
     public $exists = false;
 
-    /**
-     * Template Compile Id (Smarty_Internal_Template::$compile_id)
-     *
-     * @var string
-     */
+	/**
+	 * Template Compile Id (Smarty_Internal_Template::$compile_id)
+	 *
+	 * @var string
+	 */
     public $compile_id = null;
 
-    /**
-     * Compiled Content Loaded
-     *
-     * @var boolean
-     */
+	/**
+	 * Compiled Content Loaded
+	 *
+	 * @var boolean
+	 */
     public $processed = false;
 
-    /**
-     * unique function name for compiled template code
-     *
-     * @var string
-     */
+	/**
+	 * unique function name for compiled template code
+	 *
+	 * @var string
+	 */
     public $unifunc = '';
 
-    /**
-     * flag if template does contain nocache code sections
-     *
-     * @var bool
-     */
+	/**
+	 * flag if template does contain nocache code sections
+	 *
+	 * @var bool
+	 */
     public $has_nocache_code = false;
 
-    /**
-     * resource file dependency
-     *
-     * @var array
-     */
+	/**
+	 * resource file dependency
+	 *
+	 * @var array
+	 */
     public $file_dependency = array();
 
-    /**
-     * Content buffer
-     *
-     * @var string
-     */
+	/**
+	 * Content buffer
+	 *
+	 * @var string
+	 */
     public $content = null;
 
-    /**
-     * Included sub templates
-     * - index name
-     * - value use count
-     *
-     * @var int[]
-     */
+	/**
+	 * Included sub templates
+	 * - index name
+	 * - value use count
+	 *
+	 * @var int[]
+	 */
     public $includes = array();
 
-    /**
-     * Flag if this is a cache resource
-     *
-     * @var bool
-     */
+	/**
+	 * Flag if this is a cache resource
+	 *
+	 * @var bool
+	 */
     public $isCache = false;
 
-    /**
-     * Process resource
-     *
-     * @param Smarty_Internal_Template $_template template object
-     */
+	/**
+	 * Process resource
+	 *
+	 * @param Smarty_Internal_Template $_template template object
+	 */
     abstract public function process(Smarty_Internal_Template $_template);
 
-    /**
-     * get rendered template content by calling compiled or cached template code
-     *
-     * @param \Smarty_Internal_Template $_template
-     * @param string                    $unifunc function with template code
-     *
-     * @throws \Exception
-     */
+	/**
+	 * get rendered template content by calling compiled or cached template code
+	 *
+	 * @param \Smarty_Internal_Template $_template
+	 * @param string                    $unifunc function with template code
+	 *
+	 * @throws \Exception
+	 */
     public function getRenderedTemplateCode(Smarty_Internal_Template $_template, $unifunc = null)
     {
         $smarty = &$_template->smarty;
@@ -137,11 +137,11 @@ abstract class Smarty_Template_Resource_Base
         }
     }
 
-    /**
-     * Get compiled time stamp
-     *
-     * @return int
-     */
+	/**
+	 * Get compiled time stamp
+	 *
+	 * @return int
+	 */
     public function getTimeStamp()
     {
         if ($this->exists && !$this->timestamp) {

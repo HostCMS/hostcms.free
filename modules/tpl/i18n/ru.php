@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Tpl
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'TPL-шаблоны',
@@ -40,4 +40,7 @@ return array(
 	'import_file' => 'Выберите файл с компьютера',
 	'import_button' => 'Загрузить',
 	'importTpls_success' => 'Импорт завершен!',
+	'move_tpl_dir_title' => "Перенос TPL-шаблонов",
+	'move_tpl_dir_id' => "Родительская группа",
+	'move_success' => 'TPL-шаблоны перенесены',
 );

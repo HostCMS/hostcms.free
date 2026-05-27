@@ -267,7 +267,7 @@ if (Core_Auth::logged())
 						<label for="user_absence_type"><?php echo Core::_('User_Absence.user_absence_type_id')?></label>
 						<div id="user_absence_type" class="btn-group" style="display: block;">
 							<a data-toggle="dropdown" style="color: <?php echo $user_absence_type_color?>" href="javascript:void(0);" aria-expanded="true">
-								<i class="fa fa-circle"></i><?php echo htmlspecialchars($user_absence_type_name)?><i class="fa fa-angle-down icon-separator-left"></i>
+								<i class="fa-solid fa-circle"></i><?php echo htmlspecialchars($user_absence_type_name)?><i class="fa-solid fa-angle-down icon-separator-left"></i>
 							</a>
 							<ul class="dropdown-menu form-element">
 								<?php
@@ -282,7 +282,7 @@ if (Core_Auth::logged())
 									}
 									?>
 									<li id="<?php echo $oUser_Absence_Type->id?>" <?php echo $selected?>>
-										<a href="javascript:void(0);" style="color: <?php echo htmlspecialchars($oUser_Absence_Type->color)?>"><i class="fa fa-circle"></i><?php echo htmlspecialchars($oUser_Absence_Type->name)?></a>
+										<a href="javascript:void(0);" style="color: <?php echo htmlspecialchars($oUser_Absence_Type->color)?>"><i class="fa-solid fa-circle"></i><?php echo htmlspecialchars($oUser_Absence_Type->name)?></a>
 									</li>
 									<?php
 								}
@@ -306,7 +306,7 @@ if (Core_Auth::logged())
 						?>
 						<div class="col-xs-12 col-sm-4">
 							<label for="datetime"><?php echo Core::_('User_Absence.datetime')?></label>
-							<div><i class="fa fa-clock-o" style="margin-right: 5px"></i><span> <?php echo $datetime?></div>
+							<div><i class="fa-regular fa-clock" style="margin-right: 5px"></i><span> <?php echo $datetime?></div>
 						</div>
 						<?php
 					}
@@ -434,7 +434,7 @@ if (Core_Auth::logged())
 				?>
 				<div class="row">
 					<div class="col-xs-12 another-time-answer">
-						<i class="fa fa-check-circle fa-5x palegreen"></i>
+						<i class="fa-solid fa-check-circle fa-5x palegreen"></i>
 						<span><?php echo Core::_('User_Absence.request_success')?></span>
 					</div>
 				</div>
@@ -591,7 +591,7 @@ if (Core_Auth::logged())
 				?>
 				<div class="row">
 					<div class="col-xs-12 another-time-answer">
-						<i class="fa fa-check-circle fa-5x palegreen"></i>
+						<i class="fa-solid fa-check-circle fa-5x palegreen"></i>
 						<span><?php echo Core::_('User_Workday.request_success')?></span>
 					</div>
 				</div>
@@ -801,7 +801,7 @@ if (Core_Auth::logged())
 		?>
 		<div class="row">
 			<div class="col-xs-12 another-time-answer">
-				<i class="fa fa-check-circle fa-5x palegreen"></i>
+				<i class="fa-solid fa-check-circle fa-5x palegreen"></i>
 				<span><?php echo Core::_('User_Workday.approve_success')?></span>
 			</div>
 		</div>
@@ -1082,7 +1082,7 @@ $sActionAdditionalParam = '&mode=action';
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Admin_Form.add'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
@@ -1092,7 +1092,7 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('User.wallpaper'))
-		->icon('fa fa-image')
+		->icon('fa-regular fa-image')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/user/wallpaper/index.php', NULL, NULL, '')
 		)
@@ -1102,7 +1102,7 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('User.session'))
-		->icon('fa fa-history')
+		->icon('fa-solid fa-clock-rotate-left')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/user/session/index.php', NULL, NULL, '')
 		)
@@ -1112,7 +1112,7 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('User.accessdenied'))
-		->icon('fa fa-ban')
+		->icon('fa-solid fa-ban')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/user/accessdenied/index.php', NULL, NULL, '')
 		)

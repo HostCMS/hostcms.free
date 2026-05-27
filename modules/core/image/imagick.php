@@ -152,6 +152,7 @@ class Core_Image_Imagick extends Core_Image
 			}
 
 			$oImagick = new Imagick($sourceFile);
+			$oImagick->autoOrient();
 
 			// PNG => another types
 			$iSourceImagetype == IMAGETYPE_PNG && $iSourceImagetype != $iDestImagetype
@@ -275,6 +276,8 @@ class Core_Image_Imagick extends Core_Image
 		if (Core_File::isFile($watermark))
 		{
 			$oImagick = new Imagick($source);
+			$oImagick->autoOrient();
+			
 			$watermarkImage = new Imagick($watermark);
 
 			$iSourceImagetype = self::exifImagetype($source);
@@ -378,17 +381,18 @@ class Core_Image_Imagick extends Core_Image
 	 * Get image size
 	 * @param string $path path
 	 * @return array|null
-     */
+	 */
 	public function getImageSize($path)
 	{
 		if (Core_File::isFile($path) && is_readable($path) && filesize($path) > 12 && self::exifImagetype($path))
 		{
 			$oImagick = new Imagick($path);
+			$oImagick->autoOrient();
 
-			$result = [
+			$result = array(
 				'width' => $oImagick->getImageWidth(),
 				'height' => $oImagick->getImageHeight()
-			];
+			);
 
 			$oImagick->clear();
 			$oImagick->destroy();

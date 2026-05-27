@@ -1,12 +1,5 @@
 <?php
-/**
- * Documents.
- *
- * @package HostCMS
- * @subpackage Document
- * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'Разделы документов',
 	'folders' => 'Раздел',
@@ -23,4 +16,5 @@ return array(
 	'site_id' => 'Идентификатор сайта',
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
+	'move_success' => 'Разделы документов перенесены',
 );

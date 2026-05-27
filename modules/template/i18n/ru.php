@@ -1,12 +1,5 @@
 <?php
-/**
- * Templates.
- *
- * @package HostCMS
- * @subpackage Template
- * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'Макеты сайта',
 	'menu' => 'Макеты сайта',
@@ -52,4 +45,8 @@ return array(
 	'design_icon_tablet_wide' => 'Планшет горизонтально',
 	'design_icon_mobile' => 'Смартфон',
 	'design_icon_mobile_wide' => 'Смартфон горизонтально',
+
+	'move_templates_dir_title' => "Перенос макетов",
+	'move_templates_dir_id' => "Родительская группа",
+	'move_success' => 'Макеты перенесены',
 );

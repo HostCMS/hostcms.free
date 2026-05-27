@@ -33,7 +33,7 @@ class Skin_Bootstrap_Module_Counter_Module extends Counter_Module
 	 * @param int $type
 	 * @param boolean $ajax
 	 * @return true
-     */
+	 */
 	public function adminPage($type = 0, $ajax = FALSE)
 	{
 		$oModule = Core_Entity::factory('Module')->getByPath($this->getModuleName());

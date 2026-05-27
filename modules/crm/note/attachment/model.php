@@ -248,7 +248,7 @@ class Crm_Note_Attachment_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event crm_note_attachment.onBeforeRedeclaredDelete
+	 * @hostcms-event crm_note_attachment.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

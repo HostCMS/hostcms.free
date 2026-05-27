@@ -17,7 +17,7 @@ $sAdminFormAction = '/{admin}/shop/warehouse/item/index.php';
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
 // Идентификатор склада
-$shop_warehouse_id = intval(Core_Array::getGet('shop_warehouse_id'));
+$shop_warehouse_id = Core_Array::getGet('shop_warehouse_id', 0, 'int');
 // Идентификатор магазина
 $shop_id = Core_Array::getGet('shop_id', 0, 'int');
 // Идентификатор группы товаров
@@ -48,7 +48,7 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Warehouse_Item.export'))
-		->icon('fa fa-upload')
+		->icon('fa-solid fa-upload')
 		->target('_blank')
 		->onclick('')
 		->href(
@@ -70,6 +70,25 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 );
 
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
+
+$additionalParams = 'shop_warehouse_id=' . $shop_warehouse_id . '&shop_id=' . $shop_id . '&shop_group_id=' . $shop_group_id;
+
+$sGlobalSearch = Core_Array::getGet('globalSearch', '', 'trim');
+
+$oAdmin_Form_Controller->addEntity(
+	Admin_Form_Entity::factory('Code')
+		->html('
+			<div class="row search-field margin-bottom-20">
+				<div class="col-xs-12">
+					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
+						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
+						<i class="fa-solid fa-circle-xmark no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
+						<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '"><i class="fa-solid fa-magnifying-glass fa-fw"></i></button>
+					</form>
+				</div>
+			</div>
+		')
+);
 
 // Добавляем крошки для групп магазинов
 if ($oShopDir->id)
@@ -151,6 +170,19 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParams))
 );
 
+// Действие "Применить"
+$oAdminFormActionApply = $oAdmin_Form->Admin_Form_Actions->getByName('apply');
+
+if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
+{
+	$oShop_Warehouse_Item_Controller_Apply = Admin_Form_Action_Controller::factory(
+		'Shop_Warehouse_Item_Controller_Apply', $oAdminFormActionApply
+	);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oShop_Warehouse_Item_Controller_Apply);
+}
+
 // Действие экспорта
 $oAdminFormActionExport = $oAdmin_Form->Admin_Form_Actions->getByName('exportItems');
 
@@ -182,15 +214,17 @@ $aShop_Producers = $oShop_Producers->findAll(FALSE);
 
 if (count($aShop_Producers))
 {
-	$options = '';
+	$aOptions = array();
 
 	foreach ($aShop_Producers as $oShop_Producer)
 	{
-		$options .= $oShop_Producer->id . "=" . $oShop_Producer->name . "\n";
+		// $options .= $oShop_Producer->id . "=" . $oShop_Producer->name . "\n";
+		$aOptions[$oShop_Producer->id] = array('value' => $oShop_Producer->name);
 	}
 
 	$oAdmin_Form_Dataset
-		->changeField('shop_items.shop_producer_id', 'list', $options)
+		->changeField('shop_items.shop_producer_id', 'type', 8)
+		->changeField('shop_items.shop_producer_id', 'list', $aOptions)
 		->addExternalField('shop_producer_id');
 }
 
@@ -211,6 +245,22 @@ $oAdmin_Form_Dataset
 	->addCondition(
 		array('where' => array('shop_items.shop_id', '=', $oShop->id))
 	);
+
+if (strlen($sGlobalSearch))
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('open' => array()))
+		->addCondition(array('where' => array('shop_items.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('shop_items.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('shop_items.marking', 'LIKE', '%' . $sGlobalSearch . '%')))
+		// ->addCondition(array('setOr' => array()))
+		// ->addCondition(array('where' => array('shop_items.price', 'LIKE', '%' . $sGlobalSearch . '%')))
+		// ->addCondition(array('setOr' => array()))
+		// ->addCondition(array('where' => array('shop_warehouse_items.count', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
+}
 
 $oAdmin_Form_Controller
 	->addExternalReplace('{shop_group_id}', $shop_group_id)

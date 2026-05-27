@@ -46,7 +46,7 @@ class Trash_Entity extends Core_Empty_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return self
-     */
+	 */
 	public function delete($primaryKey = NULL)
 	{
 		if ($this->table_name != '')

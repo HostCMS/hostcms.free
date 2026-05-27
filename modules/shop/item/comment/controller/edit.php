@@ -68,7 +68,7 @@ class Shop_Item_Comment_Controller_Edit extends Comment_Controller_Edit
 				Admin_Form_Entity::factory('A')
 					->id('pathLink')
 					->class('input-group-addon blue')
-					->value('<i class="fa fa-external-link"></i>')
+					->value('<i class="fa-solid fa-arrow-up-right-from-square small"></i>')
 					->target('_blank')
 					->href(Admin_Form_Controller::correctBackendPath("/{admin}/shop/item/index.php?hostcms[action]=edit&hostcms[window]=id_content&shop_id={$oShop->id}&shop_group_id={$oShop_Item->shop_group_id}&hostcms[checked][1][{$shop_item_id}]=1"))
 			);
