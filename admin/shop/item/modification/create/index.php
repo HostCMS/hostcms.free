@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../../../bootstrap.php');
 
@@ -244,7 +244,7 @@ $oMainRow2->add(
 		->value($markingPattern)
 		->add(
 			Admin_Form_Entity::factory('Code')
-				->html('<i class="fa fa-times-circle no-margin" onclick="$.clearMarkingPattern(\'marking\', \'' . $markingPattern . '\')"></i>')
+				->html('<i class="fa-solid fa-circle-xmark no-margin" onclick="$.clearMarkingPattern(\'marking\', \'' . $markingPattern . '\')"></i>')
 		)
 		->value(
 			isset($_COOKIE['marking']) ? strval($_COOKIE['marking']) : $markingPattern
@@ -270,7 +270,7 @@ $oMainRow3->add(
 		->divAttr(array('class' => 'form-group col-xs-12 clear-pattern'))
 		->add(
 			Admin_Form_Entity::factory('Code')
-				->html('<i class="fa fa-times-circle no-margin" onclick="$.clearMarkingPattern(\'name\', \'' . $oShopItemParent->name . '\')"></i>')
+				->html('<i class="fa-solid fa-circle-xmark no-margin" onclick="$.clearMarkingPattern(\'name\', \'' . $oShopItemParent->name . '\')"></i>')
 		)
 );
 

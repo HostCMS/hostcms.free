@@ -66,7 +66,7 @@ class Shop_Warehouse_Type_Model extends Core_Entity
 	 */
 	public function nameBackend($oAdmin_Form_Field)
 	{
-		return '<i class="fa fa-circle" style="margin-right: 5px; color: ' . ($this->color ? htmlspecialchars($this->color) : '#aebec4') . '"></i> '
+		return '<i class="fa-solid fa-circle" style="margin-right: 5px; color: ' . ($this->color ? htmlspecialchars($this->color) : '#aebec4') . '"></i> '
 			. '<span class="editable" id="apply_check_0_' . $this->id . '_fv_' . $oAdmin_Form_Field->id . '">' . htmlspecialchars($this->name) . '</span>';
 	}
 }

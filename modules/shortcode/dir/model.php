@@ -75,7 +75,7 @@ class Shortcode_Dir_Model extends Core_Entity
 
 	/**
 	 * Get parent
-	 * @return Hostcms_Redirect_Group_Model|NULL
+	 * @return Shortcode_Dir_Model|NULL
 	 */
 	public function getParent()
 	{

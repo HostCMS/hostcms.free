@@ -16,26 +16,26 @@
  */
 abstract class Smarty_Resource_Uncompiled extends Smarty_Resource
 {
-    /**
-     * Flag that it's an uncompiled resource
-     *
-     * @var bool
-     */
+	/**
+	 * Flag that it's an uncompiled resource
+	 *
+	 * @var bool
+	 */
     public $uncompiled = true;
 
-    /**
-     * Resource does implement populateCompiledFilepath() method
-     *
-     * @var bool
-     */
+	/**
+	 * Resource does implement populateCompiledFilepath() method
+	 *
+	 * @var bool
+	 */
     public $hasCompiledHandler = true;
 
-    /**
-     * populate compiled object with compiled filepath
-     *
-     * @param Smarty_Template_Compiled $compiled  compiled object
-     * @param Smarty_Internal_Template $_template template object
-     */
+	/**
+	 * populate compiled object with compiled filepath
+	 *
+	 * @param Smarty_Template_Compiled $compiled  compiled object
+	 * @param Smarty_Internal_Template $_template template object
+	 */
     public function populateCompiledFilepath(Smarty_Template_Compiled $compiled, Smarty_Internal_Template $_template)
     {
         $compiled->filepath = $_template->source->filepath;

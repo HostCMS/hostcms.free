@@ -65,7 +65,6 @@ class Shop_Discountcard_Export_Controller
 			return FALSE;
 		}
 
-		header("Pragma: public");
 		header("Content-Description: File Transfer");
 		header("Content-Type: application/force-download");
 		header("Content-Disposition: attachment; filename = " . 'shop_discountcards_' . date("Y_m_d_H_i_s") . '.csv' . ";");

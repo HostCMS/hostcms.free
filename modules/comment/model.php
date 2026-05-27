@@ -124,11 +124,11 @@ class Comment_Model extends Core_Entity
 	 */
 	protected $_showXmlVotes = FALSE;
 
-    /**
-     * Add votes XML to item
-     * @param bool $showXmlVotes
-     * @return self
-     */
+	/**
+	 * Add votes XML to item
+	 * @param bool $showXmlVotes
+	 * @return self
+	 */
 	public function showXmlVotes($showXmlVotes = TRUE)
 	{
 		$this->_showXmlVotes = $showXmlVotes;
@@ -294,7 +294,7 @@ class Comment_Model extends Core_Entity
 			$windowId = $oAdmin_Form_Controller->getWindowId();
 
 			Core_Html_Entity::factory('I')
-				->class('fa fa-user')
+				->class('fa-solid fa-user')
 				->execute();
 
 			Core_Html_Entity::factory('A')
@@ -452,7 +452,7 @@ class Comment_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event comment.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')

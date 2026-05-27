@@ -146,7 +146,7 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event shop_warehouse_item.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')
@@ -248,7 +248,7 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 		$this->Shop_Item->type == 3 && Core_Html_Entity::factory('Span')
 			->class('badge badge-ico badge-purple white')
 			->style('padding-left: 1px;')
-			->value('<i class="fa fa-archive fa-fw"></i>')
+			->value('<i class="fa-solid fa-box-archive fa-fw"></i>')
 			->execute();
 	}
 
@@ -280,12 +280,12 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 		return htmlspecialchars((string) $oShop_Item->Shop_Measure->name);
 	}
 
-    /**
-     * Get item's name
-     * @param Admin_Form_Field_Model $oAdmin_Form_Field
-     * @param Admin_Form_Controller $oAdmin_Form_Controller
-     * @throws Core_Exception
-     */
+	/**
+	 * Get item's name
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @throws Core_Exception
+	 */
 	public function name($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$oShop_Item = $this->Shop_Item;
@@ -321,7 +321,7 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 						->href($href)
 						->target('_blank')
 						->add(
-							Core_Html_Entity::factory('I')->class('fa fa-external-link')
+							Core_Html_Entity::factory('I')->class('fa-solid fa-arrow-up-right-from-square small')
 						)
 				);
 			}
@@ -330,7 +330,7 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 		{
 			$oCore_Html_Entity_Div
 				->add(
-					Core_Html_Entity::factory('I')->class('fa fa-clock-o black')
+					Core_Html_Entity::factory('I')->class('fa-regular fa-clock black')
 				);
 		}
 
@@ -347,6 +347,21 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 			);
 
 		$oCore_Html_Entity_Div->execute();
+	}
+
+	/**
+	 * Get producer name
+	 * @return string
+	 */
+	public function shop_producer_idBackend()
+	{
+		$oShop_Producer = $this->shop_item_id && $this->Shop_Item->shop_producer_id
+			? Core_Entity::factory('Shop_Producer', $this->Shop_Item->shop_producer_id)
+			: NULL;
+
+		return !is_null($oShop_Producer)
+			? htmlspecialchars((string) $oShop_Producer->name)
+			: '';
 	}
 
 	/**
@@ -373,7 +388,7 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 
 		$oShop_Item->shop_currency_id == 0 && Core_Html_Entity::factory('Span')
 			->class('badge badge-ico badge-darkorange white')
-			->value('<i class="fa fa-exclamation fa-fw"></i>')
+			->value('<i class="fa-solid fa-exclamation fa-fw"></i>')
 			->title(Core::_('Shop_Item.shop_item_not_currency'))
 			->execute();
 	}
@@ -396,7 +411,7 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 		}
 		else
 		{
-			return '<i class="fa fa-file-text-o"></i>';
+			return '<i class="fa-regular fa-file-lines"></i>';
 		}
 	}
 
@@ -415,18 +430,24 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
+	 * @throws Core_Exception
 	 */
-	public function countBackend()
+	public function countBackend($oAdmin_Form_Field)
 	{
 		$class = $this->count > 0
-			? 'success'
-			: 'darkorange';
+			? ' success'
+			: ' darkorange';
 
 		$this->count == 0 && $class = '';
 
-		Core_Html_Entity::factory('Span')
-			->class($class)
+		Core_Html_Entity::factory('Input')
+			->id('apply_check_0_' . $this->id . '_fv_' . $oAdmin_Form_Field->id)
+			->name('apply_check_0_' . $this->id . '_fv_' . $oAdmin_Form_Field->id)
+			->class('form-control input-xs' . $class)
 			->value(Core_Str::hideZeros($this->count))
+			->onchange("$.setCheckbox('id_content', 'check_0_{$this->id}'); $('#' + $.getWindowId('id_content') + ' #row_0_{$this->id}').toggleHighlight()")
+			->onkeydown("$.setCheckbox('id_content', 'check_0_{$this->id}'); $('#' + $.getWindowId('id_content') + ' #row_0_{$this->id}').toggleHighlight()")
 			->execute();
 	}
 

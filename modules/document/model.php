@@ -84,10 +84,10 @@ class Document_Model extends Core_Entity
 		return htmlspecialchars((string) $this->Template->name);
 	}
 
-    /**
-     * Edit-in-Place callback
-     * @return self
-     */
+	/**
+	 * Edit-in-Place callback
+	 * @return self
+	 */
 	public function editInPlace()
 	{
 		$args = func_get_args();
@@ -485,7 +485,7 @@ class Document_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event document.onBeforeRedeclaredDelete
+	 * @hostcms-event document.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -504,6 +504,25 @@ class Document_Model extends Core_Entity
 		}
 
 		return parent::delete($primaryKey);
+	}
+
+	/**
+	 * Move to another
+	 * @param int $document_dir_id dir id
+	 * @return self
+	 * @hostcms-event document.onBeforeMove
+	 * @hostcms-event document.onAfterMove
+	 */
+	public function move($document_dir_id)
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($document_dir_id));
+
+		$this->document_dir_id = $document_dir_id;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
+
+		return $this;
 	}
 
 	/**

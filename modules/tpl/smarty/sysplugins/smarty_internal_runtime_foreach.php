@@ -9,29 +9,29 @@
  */
 class Smarty_Internal_Runtime_Foreach
 {
-    /**
-     * Stack of saved variables
-     *
-     * @var array
-     */
+	/**
+	 * Stack of saved variables
+	 *
+	 * @var array
+	 */
     private $stack = array();
 
-    /**
-     * Init foreach loop
-     *  - save item and key variables, named foreach property data if defined
-     *  - init item and key variables, named foreach property data if required
-     *  - count total if required
-     *
-     * @param \Smarty_Internal_Template $tpl
-     * @param mixed                     $from       values to loop over
-     * @param string                    $item       variable name
-     * @param bool                      $needTotal  flag if we need to count values
-     * @param null|string               $key        variable name
-     * @param null|string               $name       of named foreach
-     * @param array                     $properties of named foreach
-     *
-     * @return mixed $from
-     */
+	/**
+	 * Init foreach loop
+	 *  - save item and key variables, named foreach property data if defined
+	 *  - init item and key variables, named foreach property data if required
+	 *  - count total if required
+	 *
+	 * @param \Smarty_Internal_Template $tpl
+	 * @param mixed                     $from       values to loop over
+	 * @param string                    $item       variable name
+	 * @param bool                      $needTotal  flag if we need to count values
+	 * @param null|string               $key        variable name
+	 * @param null|string               $name       of named foreach
+	 * @param array                     $properties of named foreach
+	 *
+	 * @return mixed $from
+	 */
     public function init(
         Smarty_Internal_Template $tpl,
         $from,
@@ -106,14 +106,14 @@ class Smarty_Internal_Runtime_Foreach
         return $from;
     }
 
-    /**
-     * [util function] counts an array, arrayAccess/traversable or PDOStatement object
-     *
-     * @param mixed $value
-     *
-     * @return int   the count for arrays and objects that implement countable, 1 for other objects that don't, and 0
-     *               for empty elements
-     */
+	/**
+	 * [util function] counts an array, arrayAccess/traversable or PDOStatement object
+	 *
+	 * @param mixed $value
+	 *
+	 * @return int   the count for arrays and objects that implement countable, 1 for other objects that don't, and 0
+	 *               for empty elements
+	 */
     public function count($value)
     {
         if ($value instanceof IteratorAggregate) {
@@ -132,14 +132,14 @@ class Smarty_Internal_Runtime_Foreach
         return count((array)$value);
     }
 
-    /**
-     * Restore saved variables
-     *
-     * will be called by {break n} or {continue n} for the required number of levels
-     *
-     * @param \Smarty_Internal_Template $tpl
-     * @param int                       $levels number of levels
-     */
+	/**
+	 * Restore saved variables
+	 *
+	 * will be called by {break n} or {continue n} for the required number of levels
+	 *
+	 * @param \Smarty_Internal_Template $tpl
+	 * @param int                       $levels number of levels
+	 */
     public function restore(Smarty_Internal_Template $tpl, $levels = 1)
     {
         while ($levels) {

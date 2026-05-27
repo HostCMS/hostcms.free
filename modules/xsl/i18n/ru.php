@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Xsl
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'XSL-шаблоны',
@@ -41,4 +41,7 @@ return array(
 	'import_file' => 'Выберите файл с компьютера',
 	'import_button' => 'Загрузить',
 	'importXsls_success' => 'Импорт завершен!',
+	'move_xsl_dir_title' => "Перенос XSL-шаблонов",
+	'move_xsl_dir_id' => "Родительская группа",
+	'move_success' => 'XSL-шаблоны перенесены',
 );

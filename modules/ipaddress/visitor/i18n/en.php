@@ -8,4 +8,5 @@ return array(
 	'result0' => 'Blocked',
 	'result1' => 'Allowed',
 	'result2' => 'Capcha',
+	'result3' => 'Browser check',
 );

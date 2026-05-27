@@ -582,16 +582,16 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 	 */
 	protected $_propertyNotAList = array();
 
-    /**
-     * Add property to item
-     * @param Shop_Item_Model $oShopItem item
-     * @param Property_Model $oProperty
-     * @param string $sValue property value
-     * @return Shop_Item_Import_Cml_Controller
-     * @throws Core_Exception
-     * @hostcms-event Shop_Item_Import_Cml_Controller.onBeforeAddItemPropertyValue
-     * @hostcms-event Shop_Item_Import_Cml_Controller.onAddItemPropertyValueDefault
-     */
+	/**
+	 * Add property to item
+	 * @param Shop_Item_Model $oShopItem item
+	 * @param Property_Model $oProperty
+	 * @param string $sValue property value
+	 * @return Shop_Item_Import_Cml_Controller
+	 * @throws Core_Exception
+	 * @hostcms-event Shop_Item_Import_Cml_Controller.onBeforeAddItemPropertyValue
+	 * @hostcms-event Shop_Item_Import_Cml_Controller.onAddItemPropertyValueDefault
+	 */
 	protected function _addItemPropertyValue(Shop_Item_Model $oShopItem, Property_Model $oProperty, $sValue)
 	{
 		$oShop = Core_Entity::factory('Shop', $this->iShopId);
@@ -674,7 +674,7 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 						$changedValue = NULL;
 					}
 				break;
-				case 7:
+				case 7: // checkbox
 					$value = mb_strtolower($value);
 
 					if ($value == 'true' || $value == 'да')
@@ -889,6 +889,31 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 
 				if (Core_File::isValidExtension($PictureData, Core::$mainConfig['availableExtension']) || $bHttp)
 				{
+					// Создаем папку назначения
+					$oShopItem->createDir();
+
+					// Файл-источник
+					if ($bHttp)
+					{
+						try {
+							$sSourceFile = $this->_downloadHttpFile($PictureData);
+						}
+						catch (Exception $e)
+						{
+							Core_Message::show($e->getMessage(), 'error');
+							$sSourceFile = NULL;
+						}
+					}
+					else
+					{
+						$sSourceFile = CMS_FOLDER . $this->sPicturesPath . ltrim($PictureData, '/\\');
+					}
+
+					if (!Core_File::isFile($sSourceFile))
+					{
+						continue;
+					}
+
 					// Папка назначения
 					$sDestinationFolder = $oShopItem->getItemPath();
 
@@ -939,8 +964,6 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 
 						is_null($oProperty_Value) && $oProperty_Value = $oProperty->createNewValue($oShopItem->id);
 
-						$oProperty_Value->save();
-
 						/*$oProperty_Value = isset($aPropertyValues[0])
 							? $aPropertyValues[0]
 							: $oProperty->createNewValue($oShopItem->id);*/
@@ -950,6 +973,7 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 							try
 							{
 								Core_File::delete($sDestinationFolder . $oProperty_Value->file);
+								$oProperty_Value->file = '';
 							} catch (Exception $e) {}
 						}
 
@@ -959,8 +983,11 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 							try
 							{
 								Core_File::delete($sDestinationFolder . $oProperty_Value->file_small);
+								$oProperty_Value->file_small = '';
 							} catch (Exception $e) {}
 						}
+						
+						$oProperty_Value->save();
 					}
 					else
 					{
@@ -969,6 +996,7 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 							try
 							{
 								Core_File::delete($sDestinationFolder . $oShopItem->image_large);
+								$oShopItem->image_large = '';
 							} catch (Exception $e) {}
 						}
 
@@ -978,35 +1006,15 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 							try
 							{
 								Core_File::delete($sDestinationFolder . $oShopItem->image_small);
+								$oShopItem->image_small = '';
 							} catch (Exception $e) {}
 						}
+						
+						$oShopItem->save();
 					}
 
 					clearstatcache();
-
-					// Удаляем папку назначения вместе со всеми старыми файлами
-					//Core_File::deleteDir($sDestinationFolder);
-
-					// Создаем папку назначения
-					$oShopItem->createDir();
-
-					// Файл-источник
-					if ($bHttp)
-					{
-						try {
-							$sSourceFile = $this->_downloadHttpFile($PictureData);
-						}
-						catch (Exception $e)
-						{
-							Core_Message::show($e->getMessage(), 'error');
-							$sSourceFile = NULL;
-						}
-					}
-					else
-					{
-						$sSourceFile = CMS_FOLDER . $this->sPicturesPath . ltrim($PictureData, '/\\');
-					}
-
+					
 					if (Core_File::isFile($sSourceFile))
 					{
 						$sSourceFileBaseName = basename($PictureData);
@@ -1197,18 +1205,18 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 		return $oProperty;
 	}
 
-    /**
-     * Import property values
-     *
-     * ЗначенияСвойств/ЗначенияСвойства
-     * ХарактеристикиТовара/ХарактеристикаТовара
-     *
-     * @param Shop_Item_Model $oShop_Item item
-     * @param SimpleXMLElement $oPropertyValue
-     * @return Shop_Item_Import_Cml_Controller
-     * @throws Core_Exception
-     * @retrun self
-     */
+	/**
+	 * Import property values
+	 *
+	 * ЗначенияСвойств/ЗначенияСвойства
+	 * ХарактеристикиТовара/ХарактеристикаТовара
+	 *
+	 * @param Shop_Item_Model $oShop_Item item
+	 * @param SimpleXMLElement $oPropertyValue
+	 * @return Shop_Item_Import_Cml_Controller
+	 * @throws Core_Exception
+	 * @return self
+	 */
 	protected function _importPropertyValues(Shop_Item_Model $oShop_Item, SimpleXMLElement $oPropertyValue)
 	{
 		$sPropertyGUID = strval($oPropertyValue->Ид);
@@ -1978,17 +1986,8 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 					$this->_loadJson($packageOfProposals->ИдКлассификатора);
 				}
 
-				if (isset($this->_oSimpleXMLElement->Классификатор) && $importPosition == 0)
+				if ($importPosition == 0)
 				{
-					$classifier = $this->_oSimpleXMLElement->Классификатор;
-
-					// Импортируем дополнительные свойства товаров из предложений
-					$this->_importProperties($classifier);
-
-					$this->debug && Core_Log::instance()->clear()
-						->status(Core_Log::$MESSAGE)
-						->write('1С, обработка offers.xml, импорт свойств закончен');
-
 					// CML 2.x: ТипыЦен/ТипЦены
 					$this->_importSpecialPrices($packageOfProposals);
 
@@ -2001,9 +2000,21 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 					$this->debug && Core_Log::instance()->clear()
 						->status(Core_Log::$MESSAGE)
 						->write('1С, обработка offers.xml, импорт складов закончен');
+						
+					if (isset($this->_oSimpleXMLElement->Классификатор))
+					{
+						$classifier = $this->_oSimpleXMLElement->Классификатор;
 
-					// Сохраняем классификатор
-					$this->_saveJson($classifier->Ид);
+						// Импортируем дополнительные свойства товаров из предложений
+						$this->_importProperties($classifier);
+
+						$this->debug && Core_Log::instance()->clear()
+							->status(Core_Log::$MESSAGE)
+							->write('1С, обработка offers.xml, импорт свойств закончен');
+
+						// Сохраняем классификатор
+						$this->_saveJson($classifier->Ид);
+					}
 				}
 
 				// Ищем главный склад
@@ -2434,7 +2445,7 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 
 						return $this->_aReturn;
 					}
-				}
+				} // /foreach ($this->xpath ...
 
 				$this->deleteLockFile();
 			}
@@ -2772,15 +2783,27 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 		// Пересчет количества товаров в группах
 		$oShop->recount();
 
+		$this->debug && Core_Log::instance()->clear()
+			->status(Core_Log::$MESSAGE)
+			->write(sprintf('1С, пересчет количества товаров и групп завершен'));
+
 		// Fast filter
 		if ($oShop->filter)
 		{
 			$Shop_Filter_Group_Controller = new Shop_Filter_Group_Controller($oShop);
 			$Shop_Filter_Group_Controller->rebuild();
+			
+			$this->debug && Core_Log::instance()->clear()
+				->status(Core_Log::$MESSAGE)
+				->write(sprintf('1С, перестроение быстрого фильтра завершено'));
 		}
 
 		// Post all
 		$this->postAll();
+		
+		$this->debug && Core_Log::instance()->clear()
+			->status(Core_Log::$MESSAGE)
+			->write(sprintf('1С, проводка всех документов завершена'));
 
 		Core_Event::notify('Shop_Item_Import_Cml_Controller.onAfterImport', $this);
 
@@ -3543,6 +3566,10 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 		return Core_Entity::factory('Shop_Price_Setting', $this->_Shop_Price_Setting_Id);
 	}
 
+	/**
+	 * Post All Shop_Warehouse_Inventory and Shop_Price_Setting
+	 * @return self
+	 */
 	public function postAll()
 	{
 		foreach ($this->_aShop_Warehouse_Inventory_Ids as $shop_warehouse_id => $shop_warehouse_inventory_id)
@@ -3556,5 +3583,7 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 			$oShop_Price_Setting = Core_Entity::factory('Shop_Price_Setting', $this->_Shop_Price_Setting_Id);
 			$oShop_Price_Setting->post();
 		}
+		
+		return $this; 
 	}
 }

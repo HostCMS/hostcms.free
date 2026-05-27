@@ -97,7 +97,7 @@ class Benchmark_Model extends Core_Entity
 	/**
 	 * Get coefficient for benchmark
 	 * @return int
-     */
+	 */
 	public function getCoefficient($value, $max)
 	{
 		$iCoefficient = intval($value * 100 / $max);
@@ -110,7 +110,7 @@ class Benchmark_Model extends Core_Entity
 	/**
 	 * Get coefficient for mail
 	 * @return float|int
-     */
+	 */
 	public function getMailCoefficient()
 	{
 		// $iMin = $this->etalon_mail;
@@ -130,7 +130,7 @@ class Benchmark_Model extends Core_Entity
 	/**
 	 * Get benchmark
 	 * @return float
-     */
+	 */
 	public function getBenchmark()
 	{
 		return ceil(

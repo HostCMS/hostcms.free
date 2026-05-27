@@ -148,11 +148,11 @@ class Shop_Currency_Model extends Core_Entity
 		return '<span class="darkgray">' . htmlspecialchars($this->formatWithCurrency(345)) . '</span>';
 	}
 
-    /**
-     * Backend callback method
-     * @param Admin_Form_Field_Model $oAdmin_Form_Field
-     * @throws Core_Exception
-     */
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
+	 * @throws Core_Exception
+	 */
 	public function nameBackend($oAdmin_Form_Field)
 	{
 		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')->value(

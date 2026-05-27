@@ -79,41 +79,41 @@ class Crm_Project_Model extends Core_Entity
 	 */
 	public function nameBadge()
 	{
-		if (Core::moduleIsActive('event') && $countEvents = $this->Events->getCount())
+		if (Core::moduleIsActive('event') && $countEvents = $this->Event_Crm_Projects->getCount(FALSE))
 		{
 			$eventColor = '#53a93f';
 
-			?><span class="badge badge-round badge-max-width margin-left-5" title="<?php echo Core::_('Crm_Project.events_count', $countEvents)?>" style="color: <?php echo Core_Str::hex2darker($eventColor, 0.2)?>; background-color:<?php echo Core_Str::hex2lighter($eventColor, 0.88)?>"><i class="fa fa-tasks fa-fw"></i> <?php echo $countEvents?></span><?php
+			?><span class="badge badge-round badge-max-width margin-left-5" title="<?php echo Core::_('Crm_Project.events_count', $countEvents)?>" style="color: <?php echo Core_Str::hex2darker($eventColor, 0.2)?>; background-color:<?php echo Core_Str::hex2lighter($eventColor, 0.88)?>"><i class="fa-solid fa-list-check fa-fw"></i> <?php echo $countEvents?></span><?php
 		}
 
-		if (Core::moduleIsActive('deal') && $countDeals = $this->Deals->getCount())
+		if (Core::moduleIsActive('deal') && $countDeals = $this->Deals->getCount(FALSE))
 		{
 			$dealColor = '#57b5e3';
 
-			?><span class="badge badge-round badge-max-width margin-left-5" title="<?php echo Core::_('Crm_Project.deals_count', $countDeals)?>" style="color: <?php echo Core_Str::hex2darker($dealColor, 0.2)?>; background-color:<?php echo Core_Str::hex2lighter($dealColor, 0.88)?>"><i class="fa fa-handshake-o fa-fw"></i> <?php echo $countDeals?></span><?php
+			?><span class="badge badge-round badge-max-width margin-left-5" title="<?php echo Core::_('Crm_Project.deals_count', $countDeals)?>" style="color: <?php echo Core_Str::hex2darker($dealColor, 0.2)?>; background-color:<?php echo Core_Str::hex2lighter($dealColor, 0.88)?>"><i class="fa-regular fa-handshake fa-fw"></i> <?php echo $countDeals?></span><?php
 		}
 
-		if (Core::moduleIsActive('dms') && $countDocuments = $this->Dms_Documents->getCount())
+		if (Core::moduleIsActive('dms') && $countDocuments = $this->Dms_Documents->getCount(FALSE))
 		{
 			$dmsColor = '#d73d32';
 
-			?><span class="badge badge-round badge-max-width margin-left-5" title="<?php echo Core::_('Crm_Project.documents_count', $countDocuments)?>" style="color: <?php echo Core_Str::hex2darker($dmsColor, 0.2)?>; background-color:<?php echo Core_Str::hex2lighter($dmsColor, 0.88)?>"><i class="fa fa-columns fa-fw"></i> <?php echo $countDocuments?></span><?php
+			?><span class="badge badge-round badge-max-width margin-left-5" title="<?php echo Core::_('Crm_Project.documents_count', $countDocuments)?>" style="color: <?php echo Core_Str::hex2darker($dmsColor, 0.2)?>; background-color:<?php echo Core_Str::hex2lighter($dmsColor, 0.88)?>"><i class="fa-solid fa-table-columns fa-fw"></i> <?php echo $countDocuments?></span><?php
 		}
 
-		$countNotes = $this->Crm_Project_Crm_Notes->getCount();
+		$countNotes = $this->Crm_Project_Crm_Notes->getCount(FALSE);
 		if ($countNotes)
 		{
 			$notesColor = '#f4b400';
 
-			?><span class="badge badge-round badge-max-width margin-left-5" title="<?php echo Core::_('Crm_Project.notes_count', $countNotes)?>" style="color: <?php echo Core_Str::hex2darker($notesColor, 0.2)?>; background-color:<?php echo Core_Str::hex2lighter($notesColor, 0.88)?>"><i class="fa fa-comment-o fa-fw"></i> <?php echo $countNotes?></span><?php
+			?><span class="badge badge-round badge-max-width margin-left-5" title="<?php echo Core::_('Crm_Project.notes_count', $countNotes)?>" style="color: <?php echo Core_Str::hex2darker($notesColor, 0.2)?>; background-color:<?php echo Core_Str::hex2lighter($notesColor, 0.88)?>"><i class="fa-regular fa-comment fa-fw"></i> <?php echo $countNotes?></span><?php
 		}
 
-		$countFiles = $this->Crm_Project_Attachments->getCount();
+		$countFiles = $this->Crm_Project_Attachments->getCount(FALSE);
 		if ($countFiles)
 		{
 			$filesColor = '#981b48';
 
-			?><span class="badge badge-round badge-max-width margin-left-5" title="<?php echo Core::_('Crm_Project.files_count', $countFiles)?>" style="color: <?php echo Core_Str::hex2darker($filesColor, 0.2)?>; background-color:<?php echo Core_Str::hex2lighter($filesColor, 0.88)?>"><i class="fa fa-file-text-o fa-fw"></i> <?php echo $countFiles?></span><?php
+			?><span class="badge badge-round badge-max-width margin-left-5" title="<?php echo Core::_('Crm_Project.files_count', $countFiles)?>" style="color: <?php echo Core_Str::hex2darker($filesColor, 0.2)?>; background-color:<?php echo Core_Str::hex2lighter($filesColor, 0.88)?>"><i class="fa-regular fa-file-lines fa-fw"></i> <?php echo $countFiles?></span><?php
 		}
 	}
 
@@ -221,7 +221,7 @@ class Crm_Project_Model extends Core_Entity
 
 		$icon = $this->crm_icon_id
 			? $this->Crm_Icon->value
-			: 'fas fa-tasks';
+			: 'fa-solid fa-list-check';
 
 		?><span class="badge badge-square margin-right-5" style="color: <?php echo $color?>; background-color:<?php echo Core_Str::hex2lighter($color, 0.88)?>"><i class="<?php echo $icon?>"></i> <?php echo $name?></span><?php
 	}

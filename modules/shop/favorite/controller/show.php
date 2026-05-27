@@ -154,7 +154,7 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 	/**
 	 * Get Shop_Favorite_Controller
 	 * @return object|null
-     */
+	 */
 	protected function _getFavoriteController()
 	{
 		return Shop_Favorite_Controller::instance();

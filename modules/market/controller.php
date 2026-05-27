@@ -40,7 +40,9 @@ class Market_Controller extends Core_Servant_Properties
 		'tmpDir',
 		'order',
 		'protocol',
-		'backend'
+		'backend',
+		'path',
+		'itemAction'
 	);
 
 	/**
@@ -87,8 +89,11 @@ class Market_Controller extends Core_Servant_Properties
 
 		$this->options = $this->items = array();
 		$this->page = 1;
-		$this->limit = 15;
+		$this->limit = 16;
 		$this->error = 0;
+
+		$this->path = Admin_Form_Controller::correctBackendPath('/{admin}/market/index.php');
+		$this->itemAction = '';
 	}
 
 	/**
@@ -1056,45 +1061,51 @@ class Market_Controller extends Core_Servant_Properties
 	 */
 	public function showItemsList()
 	{
-		$oMainTab = Admin_Form_Entity::factory('Tab')->name('main');
+		$sContent = '';
 
 		if ($this->error == 0)
 		{
 			$this->_aTmpOptions = array(Core::_('Market.select_section'));
 			$this->_getCategoryOptions(0);
 
-			$oMainTab->add(
-				Admin_Form_Entity::factory('Div')->class('row')
-				->add(
-					Admin_Form_Entity::factory('Select')
-						->name('category_id')
-						->value($this->category_id)
-						->onchange('changeCategory(this)')
-						->options($this->_aTmpOptions)
-						->divAttr(array('class' => 'col-xs-12 col-sm-6'))
-				)->add(
-					Admin_Form_Entity::factory('Input')
-						->name('search_query')
-						->class('form-control search-query')
-						->placeholder(Core::_('Market.search_placeholder'))
-						->divAttr(array('class' => 'col-xs-12 col-sm-6 search-query-input'))
-						->add(
-							Admin_Form_Entity::factory('Code')->html('<span class="input-group-btn"><button class="btn btn-default" type="submit" onclick="$.adminSendForm({buttonObject: $(this), action: \'sendSearchQuery\', windowId: \'id_content\'}); return false"><i class="fa-solid fa-magnifying-glass fa-fw"></i></button></span>')
-					)
-					->value(Core_Array::getRequest('search_query'))
-				)
-			);
+			ob_start();
+			?><div class="market-wrapper">
+				<header class="market-header">
+					<div class="custom-select">
+						<?php
+						Admin_Form_Entity::factory('Select')
+							->name('category_id')
+							->value($this->category_id)
+							->onchange('changeCategory(this)')
+							->options($this->_aTmpOptions)
+							->divAttr(array('class' => ''))
+							->class('custom-select')
+							->execute();
+						?>
+					</div>
+					<div class="search-box">
+						<?php
+						Admin_Form_Entity::factory('Input')
+							->name('search_query')
+							->class('')
+							->placeholder(Core::_('Market.search_placeholder'))
+							->divAttr(array('class' => 'w-100'))
+							->add(
+								Admin_Form_Entity::factory('Code')->html('<button class="search-btn" type="submit" onclick="$.adminSendForm({buttonObject: $(this), action: \'sendSearchQuery\', windowId: \'id_content\'}); return false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></button>')
+						)
+						->value(Core_Array::getRequest('search_query'))
+						->execute();
+						?>
+					</div>
+				</header>
+			<?php
 
 			$sHtml = $this->getMarketItemsHtml();
 
 			$count_pages = ceil($this->total / $this->limit);
 
-			$oMainTab->add(
-				Admin_Form_Entity::factory('Div')->class('row')
-					->add(
-						Admin_Form_Entity::factory('Code')->html($sHtml)
-					)
-			);
+			Admin_Form_Entity::factory('Code')->html($sHtml)
+				->execute();
 
 			if ($this->category_id && $count_pages > 1)
 			{
@@ -1107,13 +1118,16 @@ class Market_Controller extends Core_Servant_Properties
 
 				$sFooter = '<div class="col-xs-12">' . ob_get_clean() . '</div>';
 
-				$oMainTab->add(
-					Admin_Form_Entity::factory('Div')->class('row')
-						->add(
-							Admin_Form_Entity::factory('Code')->html($sFooter)
-						)
-				);
+				Admin_Form_Entity::factory('Div')->class('row')
+					->add(
+						Admin_Form_Entity::factory('Code')->html($sFooter)
+					)
+					->execute();
 			}
+
+			?></div><?php
+
+			$sContent = ob_get_clean();
 		}
 		else
 		{
@@ -1133,7 +1147,7 @@ class Market_Controller extends Core_Servant_Properties
 		Admin_Form_Entity::factory('Form')
 			->controller($this->controller)
 			->action($this->controller->getPath())
-			->add($oMainTab)
+			->add(Admin_Form_Entity::factory('Code')->html($sContent))
 			->add(Admin_Form_Entity::factory('Code')
 				->html('<script>
 				function changeCategory(object)
@@ -1141,7 +1155,7 @@ class Market_Controller extends Core_Servant_Properties
 					if (object && object.tagName == "SELECT")
 					{
 						category_id = parseInt(object.options[object.selectedIndex].value);
-						$.adminLoad({path: hostcmsBackend + "/market/index.php", windowId:"' . $sWindowId . '", additionalParams: "category_id=" + category_id, current: 1});
+						$.adminLoad({path: "' . $this->path . '", windowId:"' . $sWindowId . '", additionalParams: "category_id=" + category_id, current: 1});
 					}
 					return false;
 				}</script>')
@@ -1155,12 +1169,12 @@ class Market_Controller extends Core_Servant_Properties
 	 */
 	public function getMarketItemsHtml()
 	{
-		$sHtml = '<div class="market">';
+		$sHtml = '<main class="app-grid">';
 		foreach ($this->items as $object)
 		{
-			$sHtml .= $this->_getMarketItemHtml($object);
+			$sHtml .= $this->getMarketItemHtml($object);
 		}
-		$sHtml .= '</div>';
+		$sHtml .= '</main>';
 
 		return $sHtml;
 	}
@@ -1170,92 +1184,82 @@ class Market_Controller extends Core_Servant_Properties
 	 * @param object $object
 	 * @return string
 	 */
-	protected function _getMarketItemHtml($object)
+	public function getMarketItemHtml($object)
 	{
 		$sWindowId = $this->controller
 			? $this->controller->getWindowId()
 			: 'id_content';
 
-		$sHtml = '<div class="col-xs-12 col-sm-6 col-lg-4 market-item">
-			<div class="databox databox-xlg databox-halved radius-bordered databox-shadowed databox-vertical">
-				<div class="databox-top bg-white padding-10">
-					<div class="row">
-						<div class="col-xs-4">
-							<a target="_blank" href="' . htmlspecialchars($object->url) . '">
-								<img src="' . htmlspecialchars($object->image_small) . '" style="width:80px; height:80px;" class="market-item-image bordered-3 bordered-white" />
-							</a>
-						</div>
-						<div class="col-xs-8 text-align-left padding-10">
-							<span class="databox-header carbon no-margin"><a target="_blank" href="' . htmlspecialchars($object->url) . '">' . htmlspecialchars($object->name) . '</a></span>
-							<span class="databox-text lightcarbon no-margin"> ' . htmlspecialchars($object->category_name) . ' </span>
-						</div>
-					</div>
+		ob_start();
+
+		?><article class="app-card">
+			<div class="app-card-header">
+				<div class="app-icon">
+					<a target="_blank" href="<?php echo htmlspecialchars($object->url)?>">
+						<img src="<?php echo htmlspecialchars($object->image_small)?>" style="width:80px; height:80px;" class="market-item-image bordered-3 bordered-white" />
+					</a>
 				</div>
-				<div class="databox-bottom bg-white no-padding">
-					<div class="databox-row row-4">
-						<div class="databox-cell cell-12 text-align-left">
-							<div class="databox-text darkgray"> ' . $object->description . '</div>
-						</div>
-					</div>
-					<div class="databox-row row-6">
-		';
-
-		if ($object->installed)
-		{
-			$sHtml .= '<div class="databox-row row-6 padding-10">
-					<span class="btn btn-labeled btn-default pull-right">
-						<i class="btn-label fa fa-check"></i>
-						' . Core::_('Market.installed') . '
-					</span>
-				</div>';
-		}
-		else
-		{
-			$sHtml .= '<div class="databox-row row-6 padding-10">
-
-				<div class="databox-cell cell-6 no-padding">
-					<div class="databox-text black market-item-price"> ' . (floatval($object->price)
-						? number_format(round($object->price), 0, ',', ' ') . ' ' . (
-							$object->currency == 'руб.'
-								? '<i class="fa fa-rub"></i>'
-								: $object->currency
-						)
-						: Core::_('Market.free')
-					) . ' </div>
+				<div class="app-title-group">
+					<h2 class="app-title"><a target="_blank" href="<?php echo htmlspecialchars($object->url)?>"><?php echo htmlspecialchars($object->name)?></a></h2>
+					<span class="app-category"><?php echo htmlspecialchars($object->category_name)?></span>
 				</div>
-
-				<div class="databox-cell cell-6 no-padding">';
-
-			if ($object->isset_version)
-			{
-				if ($object->paid && !$object->installed || $object->price == 0)
+			</div>
+			<div class="app-card-body">
+				<p class="app-description"><?php echo $object->description?></p>
+			</div>
+			<div class="app-card-footer">
+				<?php
+				if ($object->installed)
 				{
-					$sHtml .= '
-						<a class="btn btn-labeled btn-darkorange pull-right" onclick="res =confirm(\'' . Core::_('Market.install_warning') . '\'); if (res){ $.adminLoad({path: hostcmsBackend + \'/market/index.php\',action:\'\',operation:\'\',additionalParams:\'install=' . $object->id . '&category_id=' . $this->category_id . '&current=' . $this->page . '\',windowId:\'' . $sWindowId . '\'}); } return false" href="' . Admin_Form_Controller::correctBackendPath('/{admin}/market/index.php') . '?hostcms[window]=' . $sWindowId . '&install=' . $object->id . '&category_id=' . $this->category_id . '&current=' . $this->page . '">
-							<i class="btn-label fa fa-download"></i>
-							' . Core::_('Market.install') . '
-						</a>
-					';
+					?> <button class="btn btn-installed" disabled aria-disabled="true">
+         				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          				<?php echo Core::_('Market.installed')?>
+        			</button><?php
 				}
 				else
 				{
-					$sHtml .= '<a class="btn btn-labeled btn-palegreen pull-right" target="_blank" href="' . htmlspecialchars($object->url) . '"><i class="btn-label fa fa-shopping-cart"></i>' . Core::_('Market.buy') . '</a>';
+					?><span class="app-price"><?php
+						echo floatval($object->price)
+							? number_format(round($object->price), 0, ',', ' ') . ' ' . (
+								$object->currency == 'руб.'
+									? '<i class="fa-solid fa-ruble-sign"></i>'
+									: $object->currency
+							)
+							: Core::_('Market.free');
+					?></span>
+					<?php
+					if ($object->isset_version)
+					{
+						if ($object->paid && !$object->installed || $object->price == 0)
+						{
+							$onclick = "res=confirm('" . Core::_('Market.install_warning') . "'); if (res){ $.adminLoad({path: '{$this->path}', action:'{$this->itemAction}', operation:'', additionalParams:'install=" . $object->id . "&category_id=" . $this->category_id . "&current=" . $this->page . "', windowId:'" . $sWindowId . "'}); } return false";
+
+							$href = $this->path . "?hostcms[window]={$sWindowId}&=hostcms[action]={$this->itemAction}&install={$object->id}&category_id={$this->category_id}&current={$this->page}";
+
+							?><a class="btn btn-install" onclick="<?php echo $onclick?>" href="<?php echo $href?>">
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+								<?php echo Core::_('Market.install')?>
+							</a><?php
+						}
+						else
+						{
+							?><a class="btn btn-buy" target="_blank" href="<?php echo htmlspecialchars($object->url)?>">
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+								<?php echo Core::_('Market.buy')?>
+							</a><?php
+						}
+					}
+					else
+					{
+						?><button class="btn btn-unavailable" disabled aria-disabled="true">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+							<?php echo Core::_('Market.version_absent')?>
+						</button><?php
+					}
 				}
-			}
-			else
-			{
-				$sHtml .= '<span class="btn btn-labeled btn-default pull-right"><i class="btn-label fa fa-times"></i>' . Core::_('Market.version_absent') . '</span>';
-			}
+			?></div>
+		</article><?php
 
-			$sHtml .= '</div>
-			</div>';
-		}
-
-		$sHtml .= '</div>
-				</div>
-			</div>
-		</div>';
-
-		return $sHtml;
+		return ob_get_clean();
 	}
 }

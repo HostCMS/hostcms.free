@@ -20,9 +20,9 @@ class Crm_Project_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 	/**
 	 * Module name
@@ -40,7 +40,7 @@ class Crm_Project_Module extends Core_Module_Abstract
 			array(
 				'sorting' => 100,
 				'block' => 0,
-				'ico' => 'fas fa-tasks',
+				'ico' => 'fa-solid fa-clipboard-list',
 				'name' => Core::_('Crm_Project.menu'),
 				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/crm/project/index.php"),
 				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/crm/project/index.php'}); return false")
@@ -61,14 +61,14 @@ class Crm_Project_Module extends Core_Module_Abstract
 		switch ($type)
 		{
 			case 6: // Добавлена заметка
-				$sIconIco = "fa-comment-o";
+				$sIconIco = "fa-regular fa-comment";
 				$sIconColor = "white";
 				$sBackgroundColor = "bg-azure";
 				$sNotificationColor = 'azure';
 			break;
 
 			default:
-				$sIconIco = "fa-info";
+				$sIconIco = "fa-solid fa-info";
 				$sIconColor = "white";
 				$sBackgroundColor = "bg-themeprimary";
 				$sNotificationColor = 'info';
@@ -76,7 +76,7 @@ class Crm_Project_Module extends Core_Module_Abstract
 
 		return array(
 			'icon' => array(
-				'ico' => "fa {$sIconIco}",
+				'ico' => $sIconIco,
 				'color' => $sIconColor,
 				'background-color' => $sBackgroundColor
 			),

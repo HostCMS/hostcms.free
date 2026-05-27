@@ -32,14 +32,14 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 
 	static protected $_aSortingTree = array();
 
-    /**
-     * Get JSON
-     * @param Core_Entity $oObject
-     * @param array $aLib_Properties
-     * @param array $aOptions
-     * @param string $prefix
-     * @return array
-     */
+	/**
+	 * Get JSON
+	 * @param Core_Entity $oObject
+	 * @param array $aLib_Properties
+	 * @param array $aOptions
+	 * @param string $prefix
+	 * @return array
+	 */
 	static protected function _getJson(Core_Entity $oObject, $aLib_Properties, $aOptions, $prefix = 'lib_property_')
 	{
 		$LA = array();
@@ -119,7 +119,9 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 								$propertyValue[] = $aOptions[$oLib_Property->varible_name][$sortingKey];
 							}
 							// Старое значение множественного файла, которое не пришло
-							elseif (isset($aOptions[$oLib_Property->varible_name][$sortingKey]))
+							elseif (isset($aOptions[$oLib_Property->varible_name][$sortingKey])
+								&& !isset($_FILES[$propertyName . '_' . $sortingKey])
+							)
 							{
 								$oldValue = $aOptions[$oLib_Property->varible_name][$sortingKey];
 
@@ -134,6 +136,20 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 									{
 										Core_Message::show($e->getMessage(), 'error');
 									}
+								}
+							}
+							// Существующий, но перезаписываемый
+							else
+							{
+								$aTmp = Core_Array::getFiles($propertyName . '_' . $sortingKey);
+
+								//  echo "<pre>";
+								//  var_dump($aTmp);
+								//  echo "</pre>";
+
+								if (isset($aTmp['name']))
+								{
+									$propertyValue[] = self::_correctPropertyValue($oLib_Property, $oObject, $aTmp);
 								}
 							}
 						}
@@ -162,6 +178,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 								Core_Message::show($e->getMessage(), 'error');
 							}
 						}
+
 						$propertyValue = NULL;
 					}
 				}
@@ -171,14 +188,19 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 				$propertyValue = NULL;
 			}
 
+			// Новые значения
 			if ($oLib_Property->type == 8)
 			{
 				$aTmp = Core_Array::getFiles($propertyName);
 
-				// echo "<pre>";
+				is_null($aTmp)
+					&& !$oLib_Property->multivalue
+					&& $aTmp = Core_Array::getFiles($propertyName . '_0');
+
+				//  echo "<pre>";
 				// var_dump($propertyName);
-				// var_dump($aTmp);
-				// echo "</pre>";
+				//  var_dump($aTmp);
+				//  echo "</pre>";
 
 				if (isset($aTmp['name']))
 				{
@@ -368,12 +390,12 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 		return json_encode($LA, defined('JSON_UNESCAPED_UNICODE') ? JSON_UNESCAPED_UNICODE : 0);
 	}
 
-    /**
-     * Get options list
-     * @param array $LA
-     * @param Core_Entity $oObject
-     * @hostcms-event Lib_Controller_Libproperties.onGetOptionsList
-     */
+	/**
+	 * Get options list
+	 * @param array $LA
+	 * @param Core_Entity $oObject
+	 * @hostcms-event Lib_Controller_Libproperties.onGetOptionsList
+	 */
 	public function getOptionsList(array $LA, Core_Entity $oObject)
 	{
 		$oLib = Core_Entity::factory('Lib', $this->_libId);
@@ -566,7 +588,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 													->href(Admin_Form_Controller::correctBackendPath("/{admin}/xsl/index.php?xsl_dir_id={$xsl_dir_id}&hostcms[checked][1][{$xsl_id}]=1&hostcms[action]=edit"))
 													->target('_blank')
 													->class('input-group-addon blue')
-													->value('<i class="fa fa-pencil"></i>')
+													->value('<i class="fa-solid fa-pencil"></i>')
 											)
 									)
 							)
@@ -858,7 +880,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 													->href(Admin_Form_Controller::correctBackendPath("/{admin}/tpl/index.php?tpl_dir_id={$tpl_dir_id}&hostcms[checked][1][{$tpl_id}]=1&hostcms[action]=edit"))
 													->target('_blank')
 													->class('input-group-addon blue')
-													->value('<i class="fa fa-pencil"></i>')
+													->value('<i class="fa-solid fa-pencil"></i>')
 											)
 									)
 							)
@@ -917,6 +939,12 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 					{
 						$path = Admin_Form_Controller::correctBackendPath($path);
 
+						// lib_property_123 для обычного файла, при удалении у него в operation берется $key
+						// lib_property_0_815 для составного, при удалении берется (\d+)
+						preg_match('/lib_property_(\d+)_/', $entityId, $matches);
+
+						$deleteOperation = isset($matches[1]) ? $matches[1] : $key;
+
 						$oFileClone->largeImage(
 							array(
 								'id' => "id_{$entityId}_{$key}",
@@ -924,7 +952,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 								'path' => $valueItem,
 								'show_params' => FALSE,
 								'originalName' => basename($valueItem),
-								'delete_onclick' => "$.adminLoad({path: '{$path}', additionalParams: 'hostcms[checked][0][{$this->_object->id}]=1&varible_name=" . Core_Str::escapeJavascriptVariable($oLib_Property->varible_name) . "&secret_csrf=" . Core_Security::getCsrfToken() . "', operation: '{$key}', action: 'deleteLibFile', windowId: '{$windowId}'}); return false",
+								'delete_onclick' => "$.adminLoad({path: '{$path}', additionalParams: 'hostcms[checked][0][{$this->_object->id}]=1&lib_property_id=" . intval($oLib_Property->id) . "&position=" . $key . "&secret_csrf=" . Core_Security::getCsrfToken() . "', operation: '{$deleteOperation}', action: 'deleteLibFile', windowId: '{$windowId}'}); return false",
 								// 'delete_href' => '',
 							)
 						);
@@ -934,7 +962,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 						$oFileClone->largeImage(
 							array(
 								'id' => "id_{$entityId}_{$key}",
-								'name' => "{$entityId}_{$key}",
+								'name' => "{$entityId}",
 								'show_params' => FALSE,
 								'show_description' => FALSE
 							)
@@ -953,11 +981,11 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 
 				if (/*$oLib_Property->multivalue || */!count($value))
 				{
+					$oFile->id = "id_{$entityId}_0";
+
 					$oFile->name = $oLib_Property->multivalue
 						? "{$entityId}[]"
 						: "{$entityId}";
-
-					$oFile->id = "id_{$entityId}_0";
 
 					$oDivRow = Core_Html_Entity::factory('Div')
 						->id('lib_property_' . $oLib_Property->id)
@@ -1154,14 +1182,14 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 		return $this;
 	}
 
-    /**
-     * Get options list
-     * @param $aLib_Properties
-     * @param array $LA
-     * @param Core_Entity $oObject
-     * @throws Core_Exception
-     * @hostcms-event Lib_Controller_Libproperties.onGetOptionsList
-     */
+	/**
+	 * Get options list
+	 * @param $aLib_Properties
+	 * @param array $LA
+	 * @param Core_Entity $oObject
+	 * @throws Core_Exception
+	 * @hostcms-event Lib_Controller_Libproperties.onGetOptionsList
+	 */
 	protected function _showLevelOptionsList($aLib_Properties, array $LA, Core_Entity $oObject)
 	{
 		if (is_array($LA))
@@ -1280,13 +1308,13 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 					->add(
 						Admin_Form_Entity::factory('Div')
 							->class('btn btn-palegreen btn-clone inverted')
-							->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-plus-circle close"></i>'))
+							->add(Admin_Form_Entity::factory('Code')->html('<i class="fa-solid fa-circle-plus close"></i>'))
 							->onclick("{$addFunction}('{$windowId}', {$oLib_Property->id}, this); event.stopPropagation();")
 					)
 					->add(
 						Admin_Form_Entity::factory('Div')
 							->class('btn btn-darkorange btn-delete inverted')
-							->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-minus-circle close"></i>'))
+							->add(Admin_Form_Entity::factory('Code')->html('<i class="fa-solid fa-circle-minus close"></i>'))
 							->onclick("{$deleteOnclick}(this, {$oLib_Property->id}); event.stopPropagation();")
 					)
 				)

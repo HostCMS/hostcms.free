@@ -73,7 +73,7 @@ class Admin_Form_Field_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event admin_form_field.onBeforeRedeclaredDelete
+	 * @hostcms-event admin_form_field.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -146,13 +146,13 @@ class Admin_Form_Field_Model extends Core_Entity
 		{
 			case 0:
 			default:
-				$badge = '<i class="fa fa-bars fa-fw"></i>';
+				$badge = '<i class="fa-solid fa-bars fa-fw"></i>';
 			break;
 			case 1:
-				$badge = '<i class="fa fa-filter fa-fw"></i>';
+				$badge = '<i class="fa-solid fa-filter fa-fw"></i>';
 			break;
 			case 2:
-				$badge = '<i class="fa fa-minus fa-fw"></i>';
+				$badge = '<i class="fa-solid fa-minus fa-fw"></i>';
 			break;
 		}
 

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Lib
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Разделы типовых динамических страниц',
@@ -24,4 +24,5 @@ return array(
 	'undelete_success' => 'Элемент восстановлен!',
 	'sorting' => "Порядок сортировки",
 	'apply_success' => "Информация успешно изменена",
+	'move_success' => 'Разделы типовых динамических страниц перенесены',
 );

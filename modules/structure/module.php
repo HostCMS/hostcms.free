@@ -20,9 +20,9 @@ class Structure_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 	/**
 	 * Module name
@@ -40,7 +40,7 @@ class Structure_Module extends Core_Module_Abstract
 			array(
 				'sorting' => 10,
 				'block' => 0,
-				'ico' => 'fa fa-sitemap',
+				'ico' => 'fa-solid fa-sitemap',
 				'name' => Core::_('Structure.menu'),
 				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/structure/index.php"),
 				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/structure/index.php'}); return false")
@@ -146,7 +146,7 @@ class Structure_Module extends Core_Module_Abstract
 		}
 
 		return array(
-			'icon' => 'fa-sitemap',
+			'icon' => 'fa-solid fa-sitemap',
 			'href' => $href,
 			'onclick' => $onclick
 		);

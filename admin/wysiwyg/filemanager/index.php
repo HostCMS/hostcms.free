@@ -67,7 +67,7 @@ if (!is_null(Core_Array::getPost('checkFileExist')))
 
 // Корневая директория для пользователя
 $oUser = Core_Auth::getCurrentUser();
-$root_dir = ltrim(Core_File::pathCorrection($oUser->root_dir), DIRECTORY_SEPARATOR);
+$root_dir = ltrim(Core_File::pathCorrection(rtrim($oUser->root_dir . '/\\') . DIRECTORY_SEPARATOR), DIRECTORY_SEPARATOR);
 
 $cdir = Core_Array::getRequest('cdir', '', 'str');
 
@@ -81,6 +81,7 @@ if ($cdir === '')
 }
 
 $cdir = Core_File::pathCorrection($cdir);
+
 $cdir = substr($cdir, 0, strrpos($cdir, DIRECTORY_SEPARATOR)) . DIRECTORY_SEPARATOR;
 
 if (Core_Array::getRequest('dir', '', 'str') !== '')
@@ -204,7 +205,7 @@ if (!$oUser->read_only)
 				->add(
 					Core_Html_Entity::factory('Div')
 					->class('dz-message needsclick')
-					->value('<i class="fa fa-arrow-circle-o-up"></i> ' . Core::_('Wysiwyg_Filemanager.upload_message'))
+					->value('<i class="fa-regular fa-circle-up"></i> ' . Core::_('Wysiwyg_Filemanager.upload_message'))
 				)
 		)
 		->add(Admin_Form_Entity::factory('Code')->html('
@@ -227,7 +228,9 @@ if (!$oUser->read_only)
 								aFilenames.push(file.name);
 
 								$(file.previewElement).on("click", function() {
-									window.opener.wysiwygFileManager.insertFile("' . rawurlencode(DIRECTORY_SEPARATOR . ltrim($cdir, DIRECTORY_SEPARATOR)) . '" + file.name); return false;
+									if (window.opener && window.opener.location.origin === window.location.origin) {
+										window.opener.wysiwygFileManager.insertFile("' . rawurlencode(DIRECTORY_SEPARATOR . ltrim($cdir, DIRECTORY_SEPARATOR)) . '" + file.name); return false;
+									}
 								});
 							});
 
@@ -251,7 +254,11 @@ if (!$oUser->read_only)
 											}
 										}
 
-										bProcess && dropzone.processQueue();
+										if (bProcess)
+										{
+											dropzone.processQueue();
+											aFilenames = [];
+										}
 									}
 								});
 							});' .

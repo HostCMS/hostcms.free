@@ -14,17 +14,17 @@
  */
 class Smarty_Internal_Runtime_CodeFrame
 {
-    /**
-     * Create code frame for compiled and cached templates
-     *
-     * @param Smarty_Internal_Template              $_template
-     * @param string                                $content   optional template content
-     * @param string                                $functions compiled template function and block code
-     * @param bool                                  $cache     flag for cache file
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler
-     *
-     * @return string
-     */
+	/**
+	 * Create code frame for compiled and cached templates
+	 *
+	 * @param Smarty_Internal_Template              $_template
+	 * @param string                                $content   optional template content
+	 * @param string                                $functions compiled template function and block code
+	 * @param bool                                  $cache     flag for cache file
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler
+	 *
+	 * @return string
+	 */
     public function create(
         Smarty_Internal_Template $_template,
         $content = '',
@@ -72,11 +72,11 @@ class Smarty_Internal_Runtime_CodeFrame
         // remove unneeded PHP tags
         if (preg_match('/\s*\?>[\n]?<\?php\s*/', $output)) {
             $curr_split = preg_split(
-                '/\s*\?>[\n]?<\?php\s*/',
+            	'/\s*\?>[\n]?<\?php\s*/',
                 $output
             );
             preg_match_all(
-                '/\s*\?>[\n]?<\?php\s*/',
+            	'/\s*\?>[\n]?<\?php\s*/',
                 $output,
                 $curr_parts
             );
@@ -90,7 +90,7 @@ class Smarty_Internal_Runtime_CodeFrame
         }
         if (preg_match('/\?>\s*$/', $output)) {
             $curr_split = preg_split(
-                '/\?>\s*$/',
+            	'/\?>\s*$/',
                 $output
             );
             $output = '';

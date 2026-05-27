@@ -11,20 +11,20 @@
  */
 class Smarty_Template_Compiled extends Smarty_Template_Resource_Base
 {
-    /**
-     * nocache hash
-     *
-     * @var string|null
-     */
+	/**
+	 * nocache hash
+	 *
+	 * @var string|null
+	 */
     public $nocache_hash = null;
 
-    /**
-     * get a Compiled Object of this source
-     *
-     * @param Smarty_Internal_Template $_template template object
-     *
-     * @return Smarty_Template_Compiled compiled object
-     */
+	/**
+	 * get a Compiled Object of this source
+	 *
+	 * @param Smarty_Internal_Template $_template template object
+	 *
+	 * @return Smarty_Template_Compiled compiled object
+	 */
     public static function load($_template)
     {
         $compiled = new Smarty_Template_Compiled();
@@ -36,11 +36,11 @@ class Smarty_Template_Compiled extends Smarty_Template_Resource_Base
         return $compiled;
     }
 
-    /**
-     * populate Compiled Object with compiled filepath
-     *
-     * @param Smarty_Internal_Template $_template template object
-     **/
+	/**
+	 * populate Compiled Object with compiled filepath
+	 *
+	 * @param Smarty_Internal_Template $_template template object
+	 **/
     public function populateCompiledFilepath(Smarty_Internal_Template $_template)
     {
         $source = &$_template->source;
@@ -80,14 +80,14 @@ class Smarty_Template_Compiled extends Smarty_Template_Resource_Base
         }
     }
 
-    /**
-     * render compiled template code
-     *
-     * @param Smarty_Internal_Template $_template
-     *
-     * @return string
-     * @throws Exception
-     */
+	/**
+	 * render compiled template code
+	 *
+	 * @param Smarty_Internal_Template $_template
+	 *
+	 * @return string
+	 * @throws Exception
+	 */
     public function render(Smarty_Internal_Template $_template)
     {
         // checks if template exists
@@ -121,13 +121,13 @@ class Smarty_Template_Compiled extends Smarty_Template_Resource_Base
         }
     }
 
-    /**
-     * load compiled template or compile from source
-     *
-     * @param Smarty_Internal_Template $_smarty_tpl do not change variable name, is used by compiled template
-     *
-     * @throws Exception
-     */
+	/**
+	 * load compiled template or compile from source
+	 *
+	 * @param Smarty_Internal_Template $_smarty_tpl do not change variable name, is used by compiled template
+	 *
+	 * @throws Exception
+	 */
     public function process(Smarty_Internal_Template $_smarty_tpl)
     {
         $source = &$_smarty_tpl->source;
@@ -159,13 +159,13 @@ class Smarty_Template_Compiled extends Smarty_Template_Resource_Base
         }
     }
 
-    /**
-     * compile template from source
-     *
-     * @param Smarty_Internal_Template $_template
-     *
-     * @throws Exception
-     */
+	/**
+	 * compile template from source
+	 *
+	 * @param Smarty_Internal_Template $_template
+	 *
+	 * @throws Exception
+	 */
     public function compileTemplateSource(Smarty_Internal_Template $_template)
     {
         $this->file_dependency = array();
@@ -194,15 +194,15 @@ class Smarty_Template_Compiled extends Smarty_Template_Resource_Base
         unset($_template->compiler);
     }
 
-    /**
-     * Write compiled code by handler
-     *
-     * @param Smarty_Internal_Template $_template template object
-     * @param string                   $code      compiled code
-     *
-     * @return bool success
-     * @throws \SmartyException
-     */
+	/**
+	 * Write compiled code by handler
+	 *
+	 * @param Smarty_Internal_Template $_template template object
+	 * @param string                   $code      compiled code
+	 *
+	 * @return bool success
+	 * @throws \SmartyException
+	 */
     public function write(Smarty_Internal_Template $_template, $code)
     {
         if (!$_template->source->handler->recompiled) {
@@ -218,13 +218,13 @@ class Smarty_Template_Compiled extends Smarty_Template_Resource_Base
         return true;
     }
 
-    /**
-     * Read compiled content from handler
-     *
-     * @param Smarty_Internal_Template $_template template object
-     *
-     * @return string content
-     */
+	/**
+	 * Read compiled content from handler
+	 *
+	 * @param Smarty_Internal_Template $_template template object
+	 *
+	 * @return string content
+	 */
     public function read(Smarty_Internal_Template $_template)
     {
         if (!$_template->source->handler->recompiled) {
@@ -233,12 +233,12 @@ class Smarty_Template_Compiled extends Smarty_Template_Resource_Base
         return isset($this->content) ? $this->content : false;
     }
 
-    /**
-     * Load fresh compiled template by including the PHP file
-     * HHVM requires a work around because of a PHP incompatibility
-     *
-     * @param \Smarty_Internal_Template $_smarty_tpl do not change variable name, is used by compiled template
-     */
+	/**
+	 * Load fresh compiled template by including the PHP file
+	 * HHVM requires a work around because of a PHP incompatibility
+	 *
+	 * @param \Smarty_Internal_Template $_smarty_tpl do not change variable name, is used by compiled template
+	 */
     private function loadCompiledTemplate(Smarty_Internal_Template $_smarty_tpl)
     {
         if (function_exists('opcache_invalidate')

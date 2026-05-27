@@ -66,8 +66,8 @@ class Chartaccount_Closure_Period_Model extends Core_Entity
 	public function postedBackend()
 	{
 		return $this->posted
-			? '<i class="fa fa-check-circle-o green">'
-			: '<i class="fa fa-times-circle-o red">';
+			? '<i class="fa-regular fa-circle-check green">'
+			: '<i class="fa-regular fa-circle-xmark red">';
 	}
 
 	/**
@@ -77,8 +77,8 @@ class Chartaccount_Closure_Period_Model extends Core_Entity
 	public function closure_cost_accountingBackend()
 	{
 		return $this->closure_cost_accounting
-			? '<i class="fa fa-check-circle-o green">'
-			: '<i class="fa fa-times-circle-o red">';
+			? '<i class="fa-regular fa-circle-check green">'
+			: '<i class="fa-regular fa-circle-xmark red">';
 	}
 
 	/**
@@ -88,8 +88,8 @@ class Chartaccount_Closure_Period_Model extends Core_Entity
 	public function financial_resultBackend()
 	{
 		return $this->financial_result
-			? '<i class="fa fa-check-circle-o green">'
-			: '<i class="fa fa-times-circle-o red">';
+			? '<i class="fa-regular fa-circle-check green">'
+			: '<i class="fa-regular fa-circle-xmark red">';
 	}
 
 	/**
@@ -99,8 +99,8 @@ class Chartaccount_Closure_Period_Model extends Core_Entity
 	public function balance_reformationBackend()
 	{
 		return $this->balance_reformation
-			? '<i class="fa fa-check-circle-o green">'
-			: '<i class="fa fa-times-circle-o red">';
+			? '<i class="fa-regular fa-circle-check green">'
+			: '<i class="fa-regular fa-circle-xmark red">';
 	}
 
 	/**

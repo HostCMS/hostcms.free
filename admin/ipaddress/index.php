@@ -116,7 +116,7 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Admin_Form.add'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0, $additionalParams)
 		)
@@ -126,7 +126,7 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Ipaddress.add_dir'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0, $additionalParams)
 		)
@@ -146,7 +146,7 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Ipaddress_Filter.import'))
-		->icon('fa fa-download')
+		->icon('fa-solid fa-download')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/ipaddress/import/index.php', NULL, NULL, 'ipaddress_dir_id=' . $oIpaddress_Dir->id)
 		)
@@ -182,7 +182,7 @@ $oAdmin_Form_Controller->addEntity(
 				<div class="col-xs-12">
 					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
 						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
-						<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
+						<i class="fa-solid fa-circle-xmark no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
 						<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '"><i class="fa-solid fa-magnifying-glass fa-fw"></i></button>
 					</form>
 				</div>
@@ -232,31 +232,24 @@ $oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('importFilters
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'importFilters')
 {
+	$oIpaddress_Import_Controller = Admin_Form_Action_Controller::factory(
+		'Ipaddress_Import_Controller', $oAdmin_Form_Action
+	);
+
 	$oUserCurrent = Core_Auth::getCurrentUser();
 	if (!$oUserCurrent->read_only)
 	{
 		if (isset($_FILES['json_file']) && intval($_FILES['json_file']['size']) > 0)
 		{
-			try {
-				$content = Core_File::read($_FILES['json_file']['tmp_name']);
+			$content = Core_File::read($_FILES['json_file']['tmp_name']);
 
-				$oIpaddress_Import_Controller = Admin_Form_Action_Controller::factory(
-					'Ipaddress_Import_Controller', $oAdmin_Form_Action
-				);
-
-				$oIpaddress_Import_Controller
-					->content($content)
-					->ipaddress_dir_id($oIpaddress_Dir->id)
-					// ->execute()
-					;
-
-				$oAdmin_Form_Controller->addAction($oIpaddress_Import_Controller);
-			}
-			catch (Exception $exc) {
-				Core_Message::show($exc->getMessage(), "error");
-			}
+			$oIpaddress_Import_Controller
+				->content($content)
+				->ipaddress_dir_id($oIpaddress_Dir->id);
 		}
 	}
+
+	$oAdmin_Form_Controller->addAction($oIpaddress_Import_Controller);
 }
 
 // Действие "Экспорт"
@@ -398,6 +391,8 @@ if (strlen($sGlobalSearch))
 	$oAdmin_Form_Dataset
 			->addCondition(array('where' => array('ipaddress_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
+
+	Core_Event::notify('Ipaddress_GlobalSearch.onAfterSetConditions', NULL, array($oAdmin_Form_Dataset, $sGlobalSearch));
 }
 else
 {
@@ -449,6 +444,8 @@ if (strlen($sGlobalSearch))
 			->addCondition(array('setOr' => array()))
 			->addCondition(array('where' => array('ipaddresses.comment', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
+
+	Core_Event::notify('Ipaddress_GlobalSearch.onAfterSetConditions', NULL, array($oAdmin_Form_Dataset, $sGlobalSearch));
 }
 else
 {

@@ -266,13 +266,13 @@ class Shop_Delivery_Interval_Controller_Tab extends Core_Servant_Properties
 				->add(
 					Admin_Form_Entity::factory('Div')
 						->class('btn btn-palegreen')
-						->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-plus-circle close"></i>'))
+						->add(Admin_Form_Entity::factory('Code')->html('<i class="fa-solid fa-circle-plus close"></i>'))
 						->onclick("{$addFunction}('{$windowId}', this);")
 				)
 				->add(
 					Admin_Form_Entity::factory('Div')
 						->class('btn btn-darkorange btn-delete')
-						->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-minus-circle close"></i>'))
+						->add(Admin_Form_Entity::factory('Code')->html('<i class="fa-solid fa-circle-minus close"></i>'))
 						->onclick($deleteOnclick)
 				)
 				->execute();

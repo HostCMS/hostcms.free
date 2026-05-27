@@ -35,7 +35,12 @@ class Xsl_Import_Controller extends Admin_Form_Action_Controller
 			return FALSE;
 		}
 
-		$aContent = json_decode($this->content, TRUE);
+		if (!is_string($this->content) || strlen($this->content) < 10)
+		{
+			return FALSE;
+		}
+
+		$aContent = @json_decode($this->content, TRUE);
 
 		if (is_array($aContent))
 		{
@@ -62,6 +67,11 @@ class Xsl_Import_Controller extends Admin_Form_Action_Controller
 	 */
 	protected function _import(array $aContent = array())
 	{
+		if (!isset($aContent['name']) || !isset($aContent['format']) || !isset($aContent['description']) || !isset($aContent['dirName']))
+		{
+			throw new Core_Exception('Wrong XSL json!', array(), 0, FALSE);
+		}
+
 		$aExplodeDir = explode('/', $aContent['dirName']);
 
 		$iParent_Id = $this->xsl_dir_id;

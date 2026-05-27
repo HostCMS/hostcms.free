@@ -20,9 +20,9 @@ class Update_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 	/**
 	 * Module name
@@ -40,7 +40,7 @@ class Update_Module extends Core_Module_Abstract
 			array(
 				'sorting' => 150,
 				'block' => 3,
-				'ico' => 'fa fa-refresh',
+				'ico' => 'fa-solid fa-refresh',
 				'name' => Core::_('Update.menu'),
 				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/update/index.php"),
 				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/update/index.php'}); return false")
@@ -74,7 +74,7 @@ class Update_Module extends Core_Module_Abstract
 				'background-color' => 'bg-warning'
 			),
 			'notification' => array(
-				'ico' => 'fa-refresh',
+				'ico' => 'fa-solid fa-refresh',
 				'background-color' => 'warning'
 			),
 			'href' => $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, 0, 0),

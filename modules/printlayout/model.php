@@ -212,7 +212,7 @@ class Printlayout_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event printlayout.onBeforeRedeclaredDelete
+	 * @hostcms-event printlayout.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

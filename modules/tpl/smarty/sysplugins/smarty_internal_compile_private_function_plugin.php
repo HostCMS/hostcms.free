@@ -16,35 +16,35 @@
  */
 class Smarty_Internal_Compile_Private_Function_Plugin extends Smarty_Internal_CompileBase
 {
-    /**
-     * Attribute definition: Overwrites base class.
-     *
-     * @var array
-     * @see Smarty_Internal_CompileBase
-     */
+	/**
+	 * Attribute definition: Overwrites base class.
+	 *
+	 * @var array
+	 * @see Smarty_Internal_CompileBase
+	 */
     public $required_attributes = array();
 
-    /**
-     * Attribute definition: Overwrites base class.
-     *
-     * @var array
-     * @see Smarty_Internal_CompileBase
-     */
+	/**
+	 * Attribute definition: Overwrites base class.
+	 *
+	 * @var array
+	 * @see Smarty_Internal_CompileBase
+	 */
     public $optional_attributes = array('_any');
 
-    /**
-     * Compiles code for the execution of function plugin
-     *
-     * @param array                                 $args      array with attributes from parser
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler  compiler object
-     * @param array                                 $parameter array with compilation parameter
-     * @param string                                $tag       name of function plugin
-     * @param string                                $function  PHP function name
-     *
-     * @return string compiled code
-     * @throws \SmartyCompilerException
-     * @throws \SmartyException
-     */
+	/**
+	 * Compiles code for the execution of function plugin
+	 *
+	 * @param array                                 $args      array with attributes from parser
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler  compiler object
+	 * @param array                                 $parameter array with compilation parameter
+	 * @param string                                $tag       name of function plugin
+	 * @param string                                $function  PHP function name
+	 *
+	 * @return string compiled code
+	 * @throws \SmartyCompilerException
+	 * @throws \SmartyException
+	 */
     public function compile($args, Smarty_Internal_TemplateCompilerBase $compiler, $parameter, $tag, $function)
     {
         // check and get attributes
@@ -64,11 +64,11 @@ class Smarty_Internal_Compile_Private_Function_Plugin extends Smarty_Internal_Co
         $output = "{$function}({$_params},\$_smarty_tpl)";
         if (!empty($parameter[ 'modifierlist' ])) {
             $output = $compiler->compileTag(
-                'private_modifier',
+            	'private_modifier',
                 array(),
                 array(
-                    'modifierlist' => $parameter[ 'modifierlist' ],
-                    'value'        => $output
+                	'modifierlist' => $parameter[ 'modifierlist' ],
+                	'value'        => $output
                 )
             );
         }

@@ -94,7 +94,7 @@ class Seo_Site_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event seo_site.onBeforeRedeclaredDelete
+	 * @hostcms-event seo_site.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

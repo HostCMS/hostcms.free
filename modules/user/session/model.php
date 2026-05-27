@@ -71,7 +71,7 @@ class User_Session_Model extends Core_Entity
 	public function imgBackend()
 	{
 		!is_null($this->dataSession) && Core_Html_Entity::factory('Span')
-			->value('<i class="fa fa-check-circle green" title="Session exists"></i>')
+			->value('<i class="fa-solid fa-check-circle green" title="Session exists"></i>')
 			->execute();
 	}
 
@@ -126,7 +126,7 @@ class User_Session_Model extends Core_Entity
 				break;
 			}
 
-			$return = '<i class="fa ' . $icon . '" title="' . Core::_('User_Session.device' . $device) . '"></i>';
+			$return = '<i class="fa-solid ' . $icon . '" title="' . Core::_('User_Session.device' . $device) . '"></i>';
 		}
 
 		return $return;

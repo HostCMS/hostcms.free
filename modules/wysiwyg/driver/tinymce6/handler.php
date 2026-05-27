@@ -110,7 +110,7 @@ class Wysiwyg_Driver_Tinymce6_Handler extends Wysiwyg_Handler
 					'statusbar' => 'false',
 					'plugins' => '"advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table code wordcount"',
 					//'toolbar1' => '"bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat"'
-					'toolbar1' => '"copy paste | undo redo | formatselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | removeformat"',
+					'toolbar' => '"copy paste | undo redo | formatselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | removeformat code' . (Core::moduleIsActive('ai') ? ' | insertAiResponse' : '' ) . '"'
 				);
 			break;
 			case 'fullpage':
@@ -208,7 +208,7 @@ class Wysiwyg_Driver_Tinymce6_Handler extends Wysiwyg_Handler
 												}
 												else
 												{
-													Notify(\'<span>AI response error! Please try again later.</span>\', \'\', \'bottom-left\', \'5000\', \'danger\', \'fa-ban\', true);
+													Notify(\'<span>AI response error! Please try again later.</span>\', \'\', \'bottom-left\', \'5000\', \'danger\', \'fa-solid fa-ban\', true);
 												}
 											}
 										});
@@ -279,6 +279,60 @@ class Wysiwyg_Driver_Tinymce6_Handler extends Wysiwyg_Handler
 			}
 		}
 
+		if (is_array($oAdmin_Form_Entity_Textarea->wysiwygMentions) && count($oAdmin_Form_Entity_Textarea->wysiwygMentions)
+			&& $oAdmin_Form_Entity_Textarea->wysiwygMentionTemplate != ''
+		)
+		{
+			$initSetup .= '
+				const employees = ' . json_encode($oAdmin_Form_Entity_Textarea->wysiwygMentions, defined('JSON_UNESCAPED_UNICODE') ? JSON_UNESCAPED_UNICODE : 0) . ';
+
+				editor.ui.registry.addAutocompleter(\'mentions\', {
+					ch: \'@\',
+					minChars: 0,
+					columns: 1,
+
+					fetch: function (pattern) {
+						return new Promise((resolve) => {
+							const searchString = pattern.toLowerCase();
+
+							// ФИЛЬТРАЦИЯ: Ищем совпадения ИЛИ в имени, ИЛИ в логине
+							const filtered = employees.filter(emp =>
+								emp.name.toLowerCase().includes(searchString) ||
+								emp.login.toLowerCase().includes(searchString)
+							);
+
+							const results = filtered.map(emp => ({
+								type: \'autocompleteitem\',
+								value: emp.id.toString(),
+								// ОТОБРАЖЕНИЕ В СПИСКЕ: Показываем "Имя (@login)"
+								text: emp.name != \'\'
+									? `${emp.name} (@${emp.login})`
+									: `@${emp.login}`
+							}));
+
+							resolve(results);
+						});
+					},
+
+					onAction: function (autocompleteApi, rng, value) {
+						editor.selection.setRng(rng);
+
+						const selectedEmp = employees.find(e => e.id.toString() === value);
+
+						const mentionText = selectedEmp.name != \'\'
+							? `${selectedEmp.name} (@${selectedEmp.login})`
+							: `${selectedEmp.login}`;
+
+						// Формируем HTML-плашку
+						const mentionHtml = `' . $oAdmin_Form_Entity_Textarea->wysiwygMentionTemplate . '`;
+
+						editor.insertContent(mentionHtml);
+						autocompleteApi.hide();
+					}
+				});
+			';
+		}
+
 		$initSetup .= '}';
 
 		/*!is_null($initSetup)
@@ -290,6 +344,11 @@ class Wysiwyg_Driver_Tinymce6_Handler extends Wysiwyg_Handler
 			&& $init['height'] = '"' . ($oAdmin_Form_Entity_Textarea->rows * 30) . 'px"';
 
 		// $init['theme'] = '$(window).width() < 700 ? "inlite" : "modern"';
+
+		if (!isset($init['content_style']) && $oAdmin_Form_Entity_Textarea->wysiwygContentStyle != '')
+		{
+			$init['content_style'] = "`" . $oAdmin_Form_Entity_Textarea->wysiwygContentStyle . "`";
+		}
 
 		$userCss = trim(Core_Array::get($init, 'content_css', ''), '\'"');
 
@@ -342,7 +401,27 @@ class Wysiwyg_Driver_Tinymce6_Handler extends Wysiwyg_Handler
 
 		$Core_Html_Entity_Script = new Core_Html_Entity_Script();
 		$Core_Html_Entity_Script
-			->value("$(function() { setTimeout(function(){ $('#" . Core_Str::escapeJavascriptVariable($windowId) . " #" . Core_Str::escapeJavascriptVariable($oAdmin_Form_Entity_Textarea->id) . "').tinymce({ {$sInit} }); }, 300); });")
+			->value("$(function() {
+				var selector = '#" . Core_Str::escapeJavascriptVariable($windowId) . " #" . Core_Str::escapeJavascriptVariable($oAdmin_Form_Entity_Textarea->id) . "';
+				var attempts = 0;
+
+				var initEditor = function() {
+					var textarea = $(selector);
+
+					if (textarea.length > 0) {
+						var id = textarea.attr('id');
+						if (tinymce.get(id)) {
+							tinymce.execCommand('mceRemoveEditor', false, id);
+						}
+
+						setTimeout(function(){ textarea.tinymce({ {$sInit} }); }, 500);
+					} else if (attempts < 10) {
+						attempts++;
+						setTimeout(initEditor, 100);
+					}
+				};
+				initEditor();
+			});")
 			->execute();
 	}
 }

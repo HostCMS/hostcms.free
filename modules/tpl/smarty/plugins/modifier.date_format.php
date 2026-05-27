@@ -31,9 +31,9 @@ function smarty_modifier_date_format($string, $format = null, $default_date = ''
     if ($format === null) {
         $format = Smarty::$_DATE_FORMAT;
     }
-    /**
-     * require_once the {@link shared.make_timestamp.php} plugin
-     */
+	/**
+	 * require_once the {@link shared.make_timestamp.php} plugin
+	 */
     static $is_loaded = false;
     if (!$is_loaded) {
         if (!is_callable('smarty_make_timestamp')) {
@@ -51,22 +51,22 @@ function smarty_modifier_date_format($string, $format = null, $default_date = ''
     if ($formatter === 'strftime' || ($formatter === 'auto' && strpos($format, '%') !== false)) {
         if (Smarty::$_IS_WINDOWS) {
             $_win_from = array(
-                '%D',
-                '%h',
-                '%n',
-                '%r',
-                '%R',
-                '%t',
-                '%T'
+            	'%D',
+            	'%h',
+            	'%n',
+            	'%r',
+            	'%R',
+            	'%t',
+            	'%T'
             );
             $_win_to = array(
-                '%m/%d/%y',
-                '%b',
+            	'%m/%d/%y',
+            	'%b',
                 "\n",
-                '%I:%M:%S %p',
-                '%H:%M',
+            	'%I:%M:%S %p',
+            	'%H:%M',
                 "\t",
-                '%H:%M:%S'
+            	'%H:%M:%S'
             );
             if (strpos($format, '%e') !== false) {
                 $_win_from[] = '%e';

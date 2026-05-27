@@ -16,17 +16,17 @@
  */
 class Smarty_Internal_Compile_Private_Modifier extends Smarty_Internal_CompileBase
 {
-    /**
-     * Compiles code for modifier execution
-     *
-     * @param array                                 $args      array with attributes from parser
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler  compiler object
-     * @param array                                 $parameter array with compilation parameter
-     *
-     * @return string compiled code
-     * @throws \SmartyCompilerException
-     * @throws \SmartyException
-     */
+	/**
+	 * Compiles code for modifier execution
+	 *
+	 * @param array                                 $args      array with attributes from parser
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler  compiler object
+	 * @param array                                 $parameter array with compilation parameter
+	 *
+	 * @return string compiled code
+	 * @throws \SmartyCompilerException
+	 * @throws \SmartyException
+	 */
     public function compile($args, Smarty_Internal_TemplateCompilerBase $compiler, $parameter)
     {
         // check and get attributes
@@ -52,7 +52,7 @@ class Smarty_Internal_Compile_Private_Modifier extends Smarty_Internal_CompileBa
                             if (is_callable($compiler->smarty->registered_plugins[ Smarty::PLUGIN_MODIFIER ][ $modifier ][ 0 ])) {
                                 $output =
                                     sprintf(
-                                        'call_user_func_array($_smarty_tpl->registered_plugins[ \'%s\' ][ %s ][ 0 ], array( %s ))',
+                                    	'call_user_func_array($_smarty_tpl->registered_plugins[ \'%s\' ][ %s ][ 0 ], array( %s ))',
                                         Smarty::PLUGIN_MODIFIER,
                                         var_export($modifier, true),
                                         $params
@@ -110,8 +110,8 @@ class Smarty_Internal_Compile_Private_Modifier extends Smarty_Internal_CompileBa
                                 || $compiler->smarty->security_policy->isTrustedPhpModifier($modifier, $compiler)
                             ) {
                                 trigger_error('Using php-function "' . $modifier . '" as a modifier is deprecated and will be ' .
-                                    'removed in a future release. Use Smarty::registerPlugin to explicitly register ' .
-                                    'a custom modifier.', E_USER_DEPRECATED);
+                                	'removed in a future release. Use Smarty::registerPlugin to explicitly register ' .
+                                	'a custom modifier.', E_USER_DEPRECATED);
                                 $output = "{$modifier}({$params})";
                             }
                             $compiler->known_modifier_type[ $modifier ] = $type;

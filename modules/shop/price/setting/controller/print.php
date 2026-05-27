@@ -8,10 +8,14 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Price_Setting_Controller_Print extends Printlayout_Controller_Print
 {
+	/**
+	 * Prepare
+	 * @return self
+	 */
 	protected function _prepare()
 	{
 		$oPrintlayout = Core_Entity::factory('Printlayout')->getById($this->printlayout);
@@ -35,7 +39,7 @@ class Shop_Price_Setting_Controller_Print extends Printlayout_Controller_Print
 
 				if (!is_null($oShop_Price_Setting))
 				{
-					$shop_price_id = intval(Core_Array::getGet('shop_price_id', 0));
+					$shop_price_id = Core_Array::getGet('shop_price_id', 0, 'int');
 
 					$oShop_Price = Core_Entity::factory('Shop_Price')->getById($shop_price_id);
 					$priceName = !is_null($oShop_Price)
@@ -56,7 +60,6 @@ class Shop_Price_Setting_Controller_Print extends Printlayout_Controller_Print
 					$position = 1;
 
 					$aShop_Price_Setting_Items = $oShop_Price_Setting->Shop_Price_Setting_Items->getAllByShop_price_id($shop_price_id);
-
 					foreach ($aShop_Price_Setting_Items as $oShop_Price_Setting_Item)
 					{
 						$oShop_Item = $oShop_Price_Setting_Item->Shop_Item;
@@ -82,6 +85,10 @@ class Shop_Price_Setting_Controller_Print extends Printlayout_Controller_Print
 		return $this;
 	}
 
+	/**
+	 * Print
+	 * @return self
+	 */
 	protected function _print()
 	{
 		$this->_oPrintlayout_Controller->execute()->downloadFile();

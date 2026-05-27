@@ -282,7 +282,7 @@ class Shop_Delivery_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event shop_delivery.onBeforeRedeclaredDelete
+	 * @hostcms-event shop_delivery.onBeforeRedeclaredDelete
 	 * @hostcms-event shop_delivery.onAfterDeleteHandlerFile
 	 */
 	public function delete($primaryKey = NULL)
@@ -329,7 +329,7 @@ class Shop_Delivery_Model extends Core_Entity
 	/**
 	 * Load content of handler
 	 * @return false|string|null
-     */
+	 */
 	public function loadHandlerFile()
 	{
 		$path = $this->getHandlerFilePath();
@@ -394,7 +394,7 @@ class Shop_Delivery_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event shop_delivery.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')
@@ -463,7 +463,7 @@ class Shop_Delivery_Model extends Core_Entity
 		{
 			foreach ($aShop_Payment_Systems as $oShop_Payment_System)
 			{
-				?><span class="label label-gray margin-left-5 small"><i class="fa fa-usd"></i> <?php echo htmlspecialchars($oShop_Payment_System->name)?></span><?php
+				?><span class="label label-gray margin-left-5 small"><i class="fa-solid fa-dollar-sign"></i> <?php echo htmlspecialchars($oShop_Payment_System->name)?></span><?php
 			}
 		}
 		else
@@ -476,7 +476,7 @@ class Shop_Delivery_Model extends Core_Entity
 		{
 			if ($oShop_Delivery_Interval->from_time != '00:00:00' || $oShop_Delivery_Interval->to_time != '00:00:00')
 			{
-				?><span class="badge badge-square badge-pink inverted margin-left-5 small"><i class="fas fa-stopwatch"></i> <?php echo date("H:i", strtotime($oShop_Delivery_Interval->from_time)), ' — ', date("H:i", strtotime($oShop_Delivery_Interval->to_time))?></span><?php
+				?><span class="badge badge-square badge-pink inverted margin-left-5 small"><i class="fa-solid fa-stopwatch"></i> <?php echo date("H:i", strtotime($oShop_Delivery_Interval->from_time)), ' — ', date("H:i", strtotime($oShop_Delivery_Interval->to_time))?></span><?php
 			}
 		}
 
@@ -497,7 +497,7 @@ class Shop_Delivery_Model extends Core_Entity
 
 				Core_Html_Entity::factory('Span')
 					->class('badge badge-square badge-hostcms')
-					->value('<i class="fa fa-users darkgray"></i> ' . $siteuserGroupName)
+					->value('<i class="fa-solid fa-users darkgray"></i> ' . $siteuserGroupName)
 					->execute();
 
 				// Если "Все", то прерываем формирование списка
@@ -511,7 +511,7 @@ class Shop_Delivery_Model extends Core_Entity
 		{
 			Core_Html_Entity::factory('Span')
 				->class('badge badge-darkorange badge-ico white')
-				->add(Core_Html_Entity::factory('I')->class('fa fa-exclamation-triangle'))
+				->add(Core_Html_Entity::factory('I')->class('fa-solid fa-triangle-exclamation'))
 				->title('Empty group list!')
 				->execute();
 		}

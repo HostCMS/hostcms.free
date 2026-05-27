@@ -34,7 +34,7 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Admin_Form.add'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
@@ -44,7 +44,7 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Price.set_prices'))
-		->icon('fa fa-dollar')
+		->icon('fa-solid fa-dollar-sign')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/price/setting/index.php', NULL, NULL)
 		)

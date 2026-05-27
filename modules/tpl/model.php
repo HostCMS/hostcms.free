@@ -195,6 +195,25 @@ class Tpl_Model extends Core_Entity
 	}
 
 	/**
+	 * Move to another
+	 * @param int $tpl_dir_id dir id
+	 * @return self
+	 * @hostcms-event tpl.onBeforeMove
+	 * @hostcms-event tpl.onAfterMove
+	 */
+	public function move($tpl_dir_id)
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($tpl_dir_id));
+
+		$this->tpl_dir_id = $tpl_dir_id;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
+
+		return $this;
+	}
+
+	/**
 	 * Search indexation
 	 * @return Search_Page_Model
 	 * @hostcms-event tpl.onBeforeIndexing
@@ -340,6 +359,6 @@ class Tpl_Model extends Core_Entity
 	 */
 	public function exportBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		return '<a target="_blank" href="' . $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'exportTpls', NULL, 1, intval($this->id), 'tpl_dir_id=' . Core_Array::getGet('tpl_dir_id')) . '"><i class="fa fa-upload"></i></a>';
+		return '<a target="_blank" href="' . $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'exportTpls', NULL, 1, intval($this->id), 'tpl_dir_id=' . Core_Array::getGet('tpl_dir_id')) . '"><i class="fa-solid fa-upload"></i></a>';
 	}
 }

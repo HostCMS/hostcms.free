@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -31,7 +31,7 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Admin_Form.add'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
@@ -41,7 +41,7 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Seo.drivers'))
-		->icon('fa fa-gear')
+		->icon('fa-solid fa-gear')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref('/{admin}/seo/driver/index.php', NULL, NULL, 0, 0)
 		)
@@ -369,7 +369,7 @@ if (count($aTmpQueriesFirstBlock))
 <div class="row">
 	<div class="col-xs-12">
 		<h5 class="row-title before-darkorange">
-			<i class="fa fa-question-circle-o darkorange"></i>
+			<i class="fa-regular fa-circle-question darkorange"></i>
 			<?php echo Core::_('Seo.popular_query_header')?>
 		</h5>
 	</div>
@@ -391,7 +391,7 @@ if (count($aTmpPagesFirstBlock))
 <div class="row">
 	<div class="col-xs-12">
 		<h5 class="row-title before-azure">
-			<i class="fa fa-file-text-o azure"></i>
+			<i class="fa-regular fa-file-lines azure"></i>
 			<?php echo Core::_('Seo.popular_page_header')?>
 		</h5>
 	</div>
@@ -413,7 +413,7 @@ if (count($aLinks))
 <div class="row">
 	<div class="col-xs-12">
 		<h5 class="row-title before-palegreen">
-			<i class="fa fa-external-link palegreen"></i>
+			<i class="fa-solid fa-arrow-up-right-from-square palegreen"></i>
 			<?php echo Core::_('Seo.external_link_header')?>
 		</h5>
 	</div>
@@ -428,10 +428,10 @@ if (count($aLinks))
 							<div id="seo-links-chart" class="chart chart-lg"></div>
 						</div>
 					</div>
-					<div class="row">
+					<div class="row margin-top-10 padding-left-10">
 						<div class="col-xs-12">
 							<div class="col-sm-12 col-md-6">
-								<button class="btn btn-palegreen" id="setOriginalZoom"><i class="fa fa-area-chart icon-separator"></i><?php echo Core::_('Seo.reset')?></button>
+								<button class="btn btn-sm btn-gray" id="setOriginalZoom"><i class="fa-solid fa-chart-area icon-separator"></i><?php echo Core::_('Seo.reset')?></button>
 							</div>
 						</div>
 					</div>
@@ -449,7 +449,7 @@ if (count($aRatings))
 <div class="row">
 	<div class="col-xs-12">
 		<h5 class="row-title before-info">
-			<i class="fa fa-line-chart info"></i>
+			<i class="fa-solid fa-chart-line info"></i>
 			<?php echo Core::_('Seo.tic_header')?>
 		</h5>
 	</div>
@@ -464,10 +464,10 @@ if (count($aRatings))
 							<div id="seo-ratings-chart" class="chart chart-lg"></div>
 						</div>
 					</div>
-					<div class="row">
+					<div class="row margin-top-10 padding-left-10">
 						<div class="col-xs-12">
 							<div class="col-sm-12 col-md-6">
-								<button class="btn btn-palegreen" id="setOriginalZoom"><i class="fa fa-area-chart icon-separator"></i><?php echo Core::_('Seo.reset')?></button>
+								<button class="btn btn-sm btn-gray" id="setOriginalZoom"><i class="fa-solid fa-chart-area icon-separator"></i><?php echo Core::_('Seo.reset')?></button>
 							</div>
 						</div>
 					</div>
@@ -485,7 +485,7 @@ if (count($aSearchable))
 <div class="row">
 	<div class="col-xs-12">
 		<h5 class="row-title before-magenta">
-			<i class="fa fa-database magenta"></i>
+			<i class="fa-solid fa-database magenta"></i>
 			<?php echo Core::_('Seo.indexed_header')?>
 		</h5>
 	</div>
@@ -503,7 +503,7 @@ if (count($aSearchable))
 					<div class="row">
 						<div class="col-xs-12">
 							<div class="col-sm-12 col-md-6">
-								<button class="btn btn-palegreen" id="setOriginalZoom"><i class="fa fa-area-chart icon-separator"></i><?php echo Core::_('Seo.reset')?></button>
+								<button class="btn btn-palegreen" id="setOriginalZoom"><i class="fa-solid fa-chart-area icon-separator"></i><?php echo Core::_('Seo.reset')?></button>
 							</div>
 						</div>
 					</div>
@@ -519,400 +519,418 @@ if (count($aSeo_Sites))
 {
 	$windowId = $oAdmin_Form_Controller->getWindowId();
 
-?><script type="text/javascript">
-	$(function(){
-	var aScripts = [
-		'jquery.flot.js',
-		'jquery.flot.time.min.js',
-		'jquery.flot.categories.min.js',
-		'jquery.flot.tooltip.min.js',
-		'jquery.flot.crosshair.min.js',
-		'jquery.flot.selection.min.js',
-		'jquery.flot.pie.min.js',
-		'jquery.flot.resize.js'
-	];
+	try {
 
-	$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/flot/').done(function() {
-		<?php
-		foreach ($aSeo_Sites as $oSeo_Site)
-		{
-			if (isset($aLinks[$oSeo_Site->id]))
-			{
-			?>
-			var title_links<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_keys($aLinks[$oSeo_Site->id]))?>],
-			link_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aLinks[$oSeo_Site->id]))?>],
-			valueTitlesLinks<?php echo $oSeo_Site->id?> = new Array();
-			<?php
-			}
-
-			if (isset($aRatings[$oSeo_Site->id]))
-			{
-			?>
-			var title_ratings<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_keys($aRatings[$oSeo_Site->id]))?>],
-			rating_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aRatings[$oSeo_Site->id]))?>],
-			valueTitlesRatings<?php echo $oSeo_Site->id?> = new Array();
-			<?php
-			}
-
-			if (isset($aSearchable[$oSeo_Site->id]))
-			{
-			?>
-			var title_indexed<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_keys($aSearchable[$oSeo_Site->id]))?>],
-			searchable_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aSearchable[$oSeo_Site->id]))?>],
-			downloaded_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded[$oSeo_Site->id]))?>],
-			downloaded2xx_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded2xx[$oSeo_Site->id]))?>],
-			downloaded3xx_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded3xx[$oSeo_Site->id]))?>],
-			downloaded4xx_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded4xx[$oSeo_Site->id]))?>],
-			downloaded5xx_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded5xx[$oSeo_Site->id]))?>],
-			failed_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aFailed[$oSeo_Site->id]))?>],
-			excluded_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aExcluded[$oSeo_Site->id]))?>],
-			valueTitlesSearchable<?php echo $oSeo_Site->id?> = new Array(),
-			valueTitlesDownloaded<?php echo $oSeo_Site->id?> = new Array(),
-			valueTitlesDownloaded2xx<?php echo $oSeo_Site->id?> = new Array(),
-			valueTitlesDownloaded3xx<?php echo $oSeo_Site->id?> = new Array(),
-			valueTitlesDownloaded4xx<?php echo $oSeo_Site->id?> = new Array(),
-			valueTitlesDownloaded5xx<?php echo $oSeo_Site->id?> = new Array(),
-			valueTitlesFailed<?php echo $oSeo_Site->id?> = new Array(),
-			valueTitlesExcluded<?php echo $oSeo_Site->id?> = new Array();
-			<?php
-			}
-		}
-
-		foreach ($aSeo_Sites as $oSeo_Site)
-		{
-			if (isset($aLinks[$oSeo_Site->id]))
-			{
-			?>
-			for(var i = 0; i < link_values<?php echo $oSeo_Site->id?>.length; i++) {
-				valueTitlesLinks<?php echo $oSeo_Site->id?>.push([new Date(title_links<?php echo $oSeo_Site->id?>[i]), link_values<?php echo $oSeo_Site->id?>[i]]);
-			}
-			<?php
-			}
-
-			if (isset($aRatings[$oSeo_Site->id]))
-			{
-			?>
-			for(var i = 0; i < rating_values<?php echo $oSeo_Site->id?>.length; i++) {
-				valueTitlesRatings<?php echo $oSeo_Site->id?>.push([new Date(title_ratings<?php echo $oSeo_Site->id?>[i]), rating_values<?php echo $oSeo_Site->id?>[i]]);
-			}
-			<?php
-			}
-
-			if (isset($aSearchable[$oSeo_Site->id]))
-			{
-			?>
-			for(var i = 0; i < searchable_values<?php echo $oSeo_Site->id?>.length; i++) {
-				valueTitlesSearchable<?php echo $oSeo_Site->id?>.push([new Date(title_indexed<?php echo $oSeo_Site->id?>[i]), searchable_values<?php echo $oSeo_Site->id?>[i]]);
-				valueTitlesDownloaded<?php echo $oSeo_Site->id?>.push([new Date(title_indexed<?php echo $oSeo_Site->id?>[i]), downloaded_values<?php echo $oSeo_Site->id?>[i]]);
-				valueTitlesDownloaded2xx<?php echo $oSeo_Site->id?>.push([new Date(title_indexed<?php echo $oSeo_Site->id?>[i]), downloaded2xx_values<?php echo $oSeo_Site->id?>[i]]);
-				valueTitlesDownloaded3xx<?php echo $oSeo_Site->id?>.push([new Date(title_indexed<?php echo $oSeo_Site->id?>[i]), downloaded3xx_values<?php echo $oSeo_Site->id?>[i]]);
-				valueTitlesDownloaded4xx<?php echo $oSeo_Site->id?>.push([new Date(title_indexed<?php echo $oSeo_Site->id?>[i]), downloaded4xx_values<?php echo $oSeo_Site->id?>[i]]);
-				valueTitlesDownloaded5xx<?php echo $oSeo_Site->id?>.push([new Date(title_indexed<?php echo $oSeo_Site->id?>[i]), downloaded5xx_values<?php echo $oSeo_Site->id?>[i]]);
-				valueTitlesFailed<?php echo $oSeo_Site->id?>.push([new Date(title_indexed<?php echo $oSeo_Site->id?>[i]), failed_values<?php echo $oSeo_Site->id?>[i]]);
-				valueTitlesExcluded<?php echo $oSeo_Site->id?>.push([new Date(title_indexed<?php echo $oSeo_Site->id?>[i]), excluded_values<?php echo $oSeo_Site->id?>[i]]);
-			}
-			<?php
-			}
-		}
-		?>
-
-		var gridbordercolor = "#eee", dataLinks = [
-			<?php
-
-			foreach ($aSeo_Sites as $key => $oSeo_Site)
-			{
-				$oSeo_Driver_Controller = Seo_Controller::instance($oSeo_Site->Seo_Driver->driver);
-
-				if (isset($aLinks[$oSeo_Site->id]) && count($aLinks[$oSeo_Site->id]))
-				{
-					?>{
-						color: "<?php echo $oSeo_Driver_Controller->getColor()?>",
-						label: "<?php echo htmlspecialchars($oSeo_Site->Seo_Driver->name)?>",
-						data: valueTitlesLinks<?php echo $oSeo_Site->id?>
-					}<?php
-
-					if ($key != $last_key)
-					{
-						echo ", ";
-					}
-				}
-			}
-			?>
-		], dataRatings = [
-			<?php
-
-			foreach ($aSeo_Sites as $key => $oSeo_Site)
-			{
-				$oSeo_Driver_Controller = Seo_Controller::instance($oSeo_Site->Seo_Driver->driver);
-
-				if (isset($aRatings[$oSeo_Site->id]) && count($aRatings[$oSeo_Site->id]))
-				{
-					?>{
-						color: "<?php echo $oSeo_Driver_Controller->getColor()?>",
-						label: "<?php echo htmlspecialchars($oSeo_Driver_Controller->getRatingName())?>",
-						data: valueTitlesRatings<?php echo $oSeo_Site->id?>
-					}<?php
-
-					if ($key != $last_key)
-					{
-						echo ", ";
-					}
-				}
-			}
-			?>
-		], dataIndexed = [
-			<?php
-			foreach ($aSeo_Sites as $key => $oSeo_Site)
-			{
-				if (isset($aSearchable[$oSeo_Site->id]) && count($aSearchable[$oSeo_Site->id]))
-				{
-					?>{
-						color: "#A0D468",
-						label: "<?php echo Core::_('Seo.searchable')?>",
-						data: valueTitlesSearchable<?php echo $oSeo_Site->id?>
-					}<?php
-
-					if ($key != $last_key)
-					{
-						echo ", ";
-					}
-				}
-
-				if (isset($aDownloaded[$oSeo_Site->id]) && count($aDownloaded[$oSeo_Site->id]))
-				{
-					?>{
-						color: "#2DC3E8",
-						label: "<?php echo Core::_('Seo.downloaded')?>",
-						data: valueTitlesDownloaded<?php echo $oSeo_Site->id?>
-					}<?php
-
-					if ($key != $last_key)
-					{
-						echo ", ";
-					}
-				}
-
-				if (isset($aDownloaded2xx[$oSeo_Site->id]) && count($aDownloaded2xx[$oSeo_Site->id]))
-				{
-					?>{
-						color: "#E0FF92",
-						label: "<?php echo Core::_('Seo.downloaded2xx')?>",
-						data: valueTitlesDownloaded2xx<?php echo $oSeo_Site->id?>
-					}<?php
-
-					if ($key != $last_key)
-					{
-						echo ", ";
-					}
-				}
-
-				if (isset($aDownloaded3xx[$oSeo_Site->id]) && count($aDownloaded3xx[$oSeo_Site->id]))
-				{
-					?>{
-						color: "#FFCE55",
-						label: "<?php echo Core::_('Seo.downloaded3xx')?>",
-						data: valueTitlesDownloaded3xx<?php echo $oSeo_Site->id?>
-					}<?php
-
-					if ($key != $last_key)
-					{
-						echo ", ";
-					}
-				}
-
-				if (isset($aDownloaded4xx[$oSeo_Site->id]) && count($aDownloaded4xx[$oSeo_Site->id]))
-				{
-					?>{
-						color: "#ff0000",
-						label: "<?php echo Core::_('Seo.downloaded4xx')?>",
-						data: valueTitlesDownloaded4xx<?php echo $oSeo_Site->id?>
-					}<?php
-
-					if ($key != $last_key)
-					{
-						echo ", ";
-					}
-				}
-
-				if (isset($aDownloaded5xx[$oSeo_Site->id]) && count($aDownloaded5xx[$oSeo_Site->id]))
-				{
-					?>{
-						color: "#FB6E52",
-						label: "<?php echo Core::_('Seo.downloaded5xx')?>",
-						data: valueTitlesDownloaded5xx<?php echo $oSeo_Site->id?>
-					}<?php
-
-					if ($key != $last_key)
-					{
-						echo ", ";
-					}
-				}
-
-				if (isset($aFailed[$oSeo_Site->id]) && count($aFailed[$oSeo_Site->id]))
-				{
-					?>{
-						color: "#D73D32",
-						label: "<?php echo Core::_('Seo.failed')?>",
-						data: valueTitlesFailed<?php echo $oSeo_Site->id?>
-					}<?php
-
-					if ($key != $last_key)
-					{
-						echo ", ";
-					}
-				}
-
-				if (isset($aExcluded[$oSeo_Site->id]) && count($aExcluded[$oSeo_Site->id]))
-				{
-					?>{
-						color: "#999999",
-						label: "<?php echo Core::_('Seo.excluded')?>",
-						data: valueTitlesExcluded<?php echo $oSeo_Site->id?>
-					}<?php
-
-					if ($key != $last_key)
-					{
-						echo ", ";
-					}
-				}
-			}
-			?>
+	?><script type="text/javascript">
+		$(function(){
+		var aScripts = [
+			'jquery.flot.js',
+			'jquery.flot.time.min.js',
+			'jquery.flot.categories.min.js',
+			'jquery.flot.tooltip.min.js',
+			'jquery.flot.crosshair.min.js',
+			'jquery.flot.selection.min.js',
+			'jquery.flot.pie.min.js',
+			'jquery.flot.resize.js'
 		];
 
-		var options = {
-			series: {
-				lines: {
-					show: true
-				},
-				points: {
-					show: true,
-					radius: 1
+		$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/flot/').done(function() {
+			<?php
+			foreach ($aSeo_Sites as $oSeo_Site)
+			{
+				if (isset($aLinks[$oSeo_Site->id]))
+				{
+					?>
+					var title_links<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_keys($aLinks[$oSeo_Site->id]))?>],
+						link_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aLinks[$oSeo_Site->id]))?>],
+						valueTitlesLinks<?php echo $oSeo_Site->id?> = new Array();
+					<?php
 				}
-			},
-			legend: {
-				noColumns: 4,
-				backgroundOpacity: 0.65
-			},
-			xaxis: {
-				mode: "time",
-				timeformat: "%d.%m.%Y",
-				//tickDecimals: 0,
-				color: gridbordercolor
-			},
-			yaxis: {
-				min: 0,
-				color: gridbordercolor
-			},
-			selection: {
-				mode: "x"
-			},
-			grid: {
-				hoverable: true,
-				clickable: false,
-				borderWidth: 0,
-				aboveData: false
-			},
-			tooltip: true,
-			tooltipOpts: {
-				defaultTheme: false,
-				dateFormat: "%d.%m.%Y",
-				content: "<b>%s</b> : <span>%x</span> : <span>%y</span>",
-			},
-			crosshair: {
-				mode: "x"
-			},
-		};
 
-		// Links
-		<?php
-		if (count($aLinks))
-		{
-			?>
-			var placeholderSeoLinks = $("#<?php echo $windowId?> #seo-links-chart");
+				if (isset($aRatings[$oSeo_Site->id]))
+				{
+					?>
+					var title_ratings<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_keys($aRatings[$oSeo_Site->id]))?>],
+						rating_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aRatings[$oSeo_Site->id]))?>],
+						valueTitlesRatings<?php echo $oSeo_Site->id?> = new Array();
+					<?php
+				}
 
-			placeholderSeoLinks.bind("plotselected", function (event, ranges) {
-				plotSeoLinks = $.plot(placeholderSeoLinks, dataLinks, $.extend(true, {}, options, {
-					xaxis: {
-						min: ranges.xaxis.from,
-						max: ranges.xaxis.to
+				if (isset($aSearchable[$oSeo_Site->id]))
+				{
+					?>
+					var title_indexed<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_keys($aSearchable[$oSeo_Site->id]))?>],
+						searchable_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aSearchable[$oSeo_Site->id]))?>],
+						downloaded_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded[$oSeo_Site->id]))?>],
+						downloaded2xx_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded2xx[$oSeo_Site->id]))?>],
+						downloaded3xx_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded3xx[$oSeo_Site->id]))?>],
+						downloaded4xx_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded4xx[$oSeo_Site->id]))?>],
+						downloaded5xx_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded5xx[$oSeo_Site->id]))?>],
+						failed_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aFailed[$oSeo_Site->id]))?>],
+						excluded_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aExcluded[$oSeo_Site->id]))?>],
+						valueTitlesSearchable<?php echo $oSeo_Site->id?> = new Array(),
+						valueTitlesDownloaded<?php echo $oSeo_Site->id?> = new Array(),
+						valueTitlesDownloaded2xx<?php echo $oSeo_Site->id?> = new Array(),
+						valueTitlesDownloaded3xx<?php echo $oSeo_Site->id?> = new Array(),
+						valueTitlesDownloaded4xx<?php echo $oSeo_Site->id?> = new Array(),
+						valueTitlesDownloaded5xx<?php echo $oSeo_Site->id?> = new Array(),
+						valueTitlesFailed<?php echo $oSeo_Site->id?> = new Array(),
+						valueTitlesExcluded<?php echo $oSeo_Site->id?> = new Array();
+					<?php
+				}
+			}
+
+			foreach ($aSeo_Sites as $oSeo_Site)
+			{
+				if (isset($aLinks[$oSeo_Site->id]))
+				{
+					?>
+					for(var i = 0; i < link_values<?php echo $oSeo_Site->id?>.length; i++) {
+						valueTitlesLinks<?php echo $oSeo_Site->id?>.push([new Date(title_links<?php echo $oSeo_Site->id?>[i]), link_values<?php echo $oSeo_Site->id?>[i]]);
 					}
-				}));
-			});
+					<?php
+				}
 
-			$('#<?php echo $windowId?> #seo-links #setOriginalZoom').on('click', function(){
-				plotSeoLinks = $.plot(placeholderSeoLinks, dataLinks, options);
-			});
-
-			var plotSeoLinks = $.plot(placeholderSeoLinks, dataLinks, options);
-
-			$("#<?php echo $windowId?> #seo-links #clearSelection").click(function () {
-				plotSeoLinks.clearSelection();
-			});
-			<?php
-		}
-		?>
-
-		// Rating
-		<?php
-		if (count($aRatings))
-		{
-			?>
-			var placeholderSeoRatings = $("#<?php echo $windowId?> #seo-ratings-chart");
-
-			placeholderSeoRatings.bind("plotselected", function (event, ranges) {
-				plotSeoRatings = $.plot(placeholderSeoRatings, dataRatings, $.extend(true, {}, options, {
-					xaxis: {
-						min: ranges.xaxis.from,
-						max: ranges.xaxis.to
+				if (isset($aRatings[$oSeo_Site->id]))
+				{
+					?>
+					for(var i = 0; i < rating_values<?php echo $oSeo_Site->id?>.length; i++) {
+						valueTitlesRatings<?php echo $oSeo_Site->id?>.push([new Date(title_ratings<?php echo $oSeo_Site->id?>[i]), rating_values<?php echo $oSeo_Site->id?>[i]]);
 					}
-				}));
-			});
+					<?php
+				}
 
-			$('#<?php echo $windowId?> #seo-ratings #setOriginalZoom').on('click', function(){
-				plotSeoRatings = $.plot(placeholderSeoRatings, dataRatings, options);
-			});
-
-			var plotSeoRatings = $.plot(placeholderSeoRatings, dataRatings, options);
-
-			$("#<?php echo $windowId?> #seo-ratings #clearSelection").click(function () {
-				plotSeoRatings.clearSelection();
-			});
-			<?php
-		}
-		?>
-
-		// Indexed
-		<?php
-		if (count($aSearchable))
-		{
-			?>
-			var placeholderSeoIndexed = $("#<?php echo $windowId?> #seo-indexed-chart");
-
-			placeholderSeoIndexed.bind("plotselected", function (event, ranges) {
-				plotSeoIndexed = $.plot(placeholderSeoIndexed, dataIndexed, $.extend(true, {}, options, {
-					xaxis: {
-						min: ranges.xaxis.from,
-						max: ranges.xaxis.to
+				if (isset($aSearchable[$oSeo_Site->id]))
+				{
+					?>
+					for(var i = 0; i < searchable_values<?php echo $oSeo_Site->id?>.length; i++) {
+						valueTitlesSearchable<?php echo $oSeo_Site->id?>.push([new Date(title_indexed<?php echo $oSeo_Site->id?>[i]), searchable_values<?php echo $oSeo_Site->id?>[i]]);
+						valueTitlesDownloaded<?php echo $oSeo_Site->id?>.push([new Date(title_indexed<?php echo $oSeo_Site->id?>[i]), downloaded_values<?php echo $oSeo_Site->id?>[i]]);
+						valueTitlesDownloaded2xx<?php echo $oSeo_Site->id?>.push([new Date(title_indexed<?php echo $oSeo_Site->id?>[i]), downloaded2xx_values<?php echo $oSeo_Site->id?>[i]]);
+						valueTitlesDownloaded3xx<?php echo $oSeo_Site->id?>.push([new Date(title_indexed<?php echo $oSeo_Site->id?>[i]), downloaded3xx_values<?php echo $oSeo_Site->id?>[i]]);
+						valueTitlesDownloaded4xx<?php echo $oSeo_Site->id?>.push([new Date(title_indexed<?php echo $oSeo_Site->id?>[i]), downloaded4xx_values<?php echo $oSeo_Site->id?>[i]]);
+						valueTitlesDownloaded5xx<?php echo $oSeo_Site->id?>.push([new Date(title_indexed<?php echo $oSeo_Site->id?>[i]), downloaded5xx_values<?php echo $oSeo_Site->id?>[i]]);
+						valueTitlesFailed<?php echo $oSeo_Site->id?>.push([new Date(title_indexed<?php echo $oSeo_Site->id?>[i]), failed_values<?php echo $oSeo_Site->id?>[i]]);
+						valueTitlesExcluded<?php echo $oSeo_Site->id?>.push([new Date(title_indexed<?php echo $oSeo_Site->id?>[i]), excluded_values<?php echo $oSeo_Site->id?>[i]]);
 					}
-				}));
-			});
+					<?php
+				}
+			}
+			?>
 
-			$('#<?php echo $windowId?> #seo-indexed #setOriginalZoom').on('click', function(){
-				plotSeoIndexed = $.plot(placeholderSeoIndexed, dataIndexed, options);
-			});
+			var gridbordercolor = "#eee", dataLinks = [
+				<?php
 
-			var plotSeoIndexed = $.plot(placeholderSeoIndexed, dataIndexed, options);
+				foreach ($aSeo_Sites as $key => $oSeo_Site)
+				{
+					$driverName = $oSeo_Site->Seo_Driver->driver;
 
-			$("#<?php echo $windowId?> #seo-indexed #clearSelection").click(function () {
-				plotSeoIndexed.clearSelection();
-			});
+					if ($driverName != '')
+					{
+						$oSeo_Driver_Controller = Seo_Controller::instance($driverName);
+
+						if (isset($aLinks[$oSeo_Site->id]) && count($aLinks[$oSeo_Site->id]))
+						{
+							?>{
+								color: "<?php echo $oSeo_Driver_Controller->getColor()?>",
+								label: "<?php echo htmlspecialchars($oSeo_Site->Seo_Driver->name)?>",
+								data: valueTitlesLinks<?php echo $oSeo_Site->id?>
+							}<?php
+
+							if ($key != $last_key)
+							{
+								echo ", ";
+							}
+						}
+					}
+				}
+				?>
+			], dataRatings = [
+				<?php
+
+				foreach ($aSeo_Sites as $key => $oSeo_Site)
+				{
+					$driverName = $oSeo_Site->Seo_Driver->driver;
+
+					if ($driverName != '')
+					{
+						$oSeo_Driver_Controller = Seo_Controller::instance($driverName);
+						$ratingName = $oSeo_Driver_Controller->getRatingName();
+
+						if ($ratingName != '' && isset($aRatings[$oSeo_Site->id]) && count($aRatings[$oSeo_Site->id]))
+						{
+							?>{
+								color: "<?php echo $oSeo_Driver_Controller->getColor()?>",
+								label: "<?php echo htmlspecialchars($ratingName)?>",
+								data: valueTitlesRatings<?php echo $oSeo_Site->id?>
+							}<?php
+
+							if ($key != $last_key)
+							{
+								echo ", ";
+							}
+						}
+					}
+				}
+				?>
+			], dataIndexed = [
+				<?php
+				foreach ($aSeo_Sites as $key => $oSeo_Site)
+				{
+					if (isset($aSearchable[$oSeo_Site->id]) && count($aSearchable[$oSeo_Site->id]))
+					{
+						?>{
+							color: "#A0D468",
+							label: "<?php echo Core::_('Seo.searchable')?>",
+							data: valueTitlesSearchable<?php echo $oSeo_Site->id?>
+						}<?php
+
+						if ($key != $last_key)
+						{
+							echo ", ";
+						}
+					}
+
+					if (isset($aDownloaded[$oSeo_Site->id]) && count($aDownloaded[$oSeo_Site->id]))
+					{
+						?>{
+							color: "#2DC3E8",
+							label: "<?php echo Core::_('Seo.downloaded')?>",
+							data: valueTitlesDownloaded<?php echo $oSeo_Site->id?>
+						}<?php
+
+						if ($key != $last_key)
+						{
+							echo ", ";
+						}
+					}
+
+					if (isset($aDownloaded2xx[$oSeo_Site->id]) && count($aDownloaded2xx[$oSeo_Site->id]))
+					{
+						?>{
+							color: "#E0FF92",
+							label: "<?php echo Core::_('Seo.downloaded2xx')?>",
+							data: valueTitlesDownloaded2xx<?php echo $oSeo_Site->id?>
+						}<?php
+
+						if ($key != $last_key)
+						{
+							echo ", ";
+						}
+					}
+
+					if (isset($aDownloaded3xx[$oSeo_Site->id]) && count($aDownloaded3xx[$oSeo_Site->id]))
+					{
+						?>{
+							color: "#FFCE55",
+							label: "<?php echo Core::_('Seo.downloaded3xx')?>",
+							data: valueTitlesDownloaded3xx<?php echo $oSeo_Site->id?>
+						}<?php
+
+						if ($key != $last_key)
+						{
+							echo ", ";
+						}
+					}
+
+					if (isset($aDownloaded4xx[$oSeo_Site->id]) && count($aDownloaded4xx[$oSeo_Site->id]))
+					{
+						?>{
+							color: "#ff0000",
+							label: "<?php echo Core::_('Seo.downloaded4xx')?>",
+							data: valueTitlesDownloaded4xx<?php echo $oSeo_Site->id?>
+						}<?php
+
+						if ($key != $last_key)
+						{
+							echo ", ";
+						}
+					}
+
+					if (isset($aDownloaded5xx[$oSeo_Site->id]) && count($aDownloaded5xx[$oSeo_Site->id]))
+					{
+						?>{
+							color: "#FB6E52",
+							label: "<?php echo Core::_('Seo.downloaded5xx')?>",
+							data: valueTitlesDownloaded5xx<?php echo $oSeo_Site->id?>
+						}<?php
+
+						if ($key != $last_key)
+						{
+							echo ", ";
+						}
+					}
+
+					if (isset($aFailed[$oSeo_Site->id]) && count($aFailed[$oSeo_Site->id]))
+					{
+						?>{
+							color: "#D73D32",
+							label: "<?php echo Core::_('Seo.failed')?>",
+							data: valueTitlesFailed<?php echo $oSeo_Site->id?>
+						}<?php
+
+						if ($key != $last_key)
+						{
+							echo ", ";
+						}
+					}
+
+					if (isset($aExcluded[$oSeo_Site->id]) && count($aExcluded[$oSeo_Site->id]))
+					{
+						?>{
+							color: "#999999",
+							label: "<?php echo Core::_('Seo.excluded')?>",
+							data: valueTitlesExcluded<?php echo $oSeo_Site->id?>
+						}<?php
+
+						if ($key != $last_key)
+						{
+							echo ", ";
+						}
+					}
+				}
+				?>
+			];
+
+			var options = {
+				series: {
+					shadowSize: 0,
+					lines: {
+						show: true
+					},
+					points: {
+						show: false,
+						radius: 1
+					}
+				},
+				legend: {
+					noColumns: 4,
+					backgroundOpacity: 0.65
+				},
+				xaxis: {
+					mode: "time",
+					timeformat: "%d.%m.%Y",
+					//tickDecimals: 0,
+					color: gridbordercolor
+				},
+				yaxis: {
+					min: 0,
+					color: gridbordercolor
+				},
+				selection: {
+					mode: "x"
+				},
+				grid: {
+					hoverable: true,
+					clickable: false,
+					borderWidth: 0,
+					aboveData: false
+				},
+				tooltip: true,
+				tooltipOpts: {
+					defaultTheme: false,
+					dateFormat: "%d.%m.%Y",
+					content: "<b>%s</b> : <span>%x</span> : <span>%y</span>",
+				},
+				crosshair: {
+					mode: "x"
+				},
+			};
+
+			// Links
 			<?php
-		}
-		?>
+			if (count($aLinks))
+			{
+				?>
+				var placeholderSeoLinks = $("#<?php echo $windowId?> #seo-links-chart");
+
+				placeholderSeoLinks.bind("plotselected", function (event, ranges) {
+					plotSeoLinks = $.plot(placeholderSeoLinks, dataLinks, $.extend(true, {}, options, {
+						xaxis: {
+							min: ranges.xaxis.from,
+							max: ranges.xaxis.to
+						}
+					}));
+				});
+
+				$('#<?php echo $windowId?> #seo-links #setOriginalZoom').on('click', function(){
+					plotSeoLinks = $.plot(placeholderSeoLinks, dataLinks, options);
+				});
+
+				var plotSeoLinks = $.plot(placeholderSeoLinks, dataLinks, options);
+
+				$("#<?php echo $windowId?> #seo-links #clearSelection").click(function () {
+					plotSeoLinks.clearSelection();
+				});
+				<?php
+			}
+			?>
+
+			// Rating
+			<?php
+			if (count($aRatings))
+			{
+				?>
+				var placeholderSeoRatings = $("#<?php echo $windowId?> #seo-ratings-chart");
+
+				placeholderSeoRatings.bind("plotselected", function (event, ranges) {
+					plotSeoRatings = $.plot(placeholderSeoRatings, dataRatings, $.extend(true, {}, options, {
+						xaxis: {
+							min: ranges.xaxis.from,
+							max: ranges.xaxis.to
+						}
+					}));
+				});
+
+				$('#<?php echo $windowId?> #seo-ratings #setOriginalZoom').on('click', function(){
+					plotSeoRatings = $.plot(placeholderSeoRatings, dataRatings, options);
+				});
+
+				var plotSeoRatings = $.plot(placeholderSeoRatings, dataRatings, options);
+
+				$("#<?php echo $windowId?> #seo-ratings #clearSelection").click(function () {
+					plotSeoRatings.clearSelection();
+				});
+				<?php
+			}
+			?>
+
+			// Indexed
+			<?php
+			if (count($aSearchable))
+			{
+				?>
+				var placeholderSeoIndexed = $("#<?php echo $windowId?> #seo-indexed-chart");
+
+				placeholderSeoIndexed.bind("plotselected", function (event, ranges) {
+					plotSeoIndexed = $.plot(placeholderSeoIndexed, dataIndexed, $.extend(true, {}, options, {
+						xaxis: {
+							min: ranges.xaxis.from,
+							max: ranges.xaxis.to
+						}
+					}));
+				});
+
+				$('#<?php echo $windowId?> #seo-indexed #setOriginalZoom').on('click', function(){
+					plotSeoIndexed = $.plot(placeholderSeoIndexed, dataIndexed, options);
+				});
+
+				var plotSeoIndexed = $.plot(placeholderSeoIndexed, dataIndexed, options);
+
+				$("#<?php echo $windowId?> #seo-indexed #clearSelection").click(function () {
+					plotSeoIndexed.clearSelection();
+				});
+				<?php
+			}
+			?>
+			});
 		});
-	});
-</script>
-<?php
+	</script>
+	<?php
+	}
+	catch (Exception $e) {
+		Core_Message::show($e->getMessage(), 'error');
+	}
 }
 
 $oAdmin_Form_Controller->addEntity(

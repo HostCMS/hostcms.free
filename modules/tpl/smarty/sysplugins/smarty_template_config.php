@@ -17,59 +17,59 @@
  */
 class Smarty_Template_Config extends Smarty_Template_Source
 {
-    /**
-     * array of section names, single section or null
-     *
-     * @var null|string|array
-     */
+	/**
+	 * array of section names, single section or null
+	 *
+	 * @var null|string|array
+	 */
     public $config_sections = null;
 
-    /**
-     * scope into which the config variables shall be loaded
-     *
-     * @var int
-     */
+	/**
+	 * scope into which the config variables shall be loaded
+	 *
+	 * @var int
+	 */
     public $scope = 0;
 
-    /**
-     * Flag that source is a config file
-     *
-     * @var bool
-     */
+	/**
+	 * Flag that source is a config file
+	 *
+	 * @var bool
+	 */
     public $isConfig = true;
 
-    /**
-     * Name of the Class to compile this resource's contents with
-     *
-     * @var string
-     */
+	/**
+	 * Name of the Class to compile this resource's contents with
+	 *
+	 * @var string
+	 */
     public $compiler_class = 'Smarty_Internal_Config_File_Compiler';
 
-    /**
-     * Name of the Class to tokenize this resource's contents with
-     *
-     * @var string
-     */
+	/**
+	 * Name of the Class to tokenize this resource's contents with
+	 *
+	 * @var string
+	 */
     public $template_lexer_class = 'Smarty_Internal_Configfilelexer';
 
-    /**
-     * Name of the Class to parse this resource's contents with
-     *
-     * @var string
-     */
+	/**
+	 * Name of the Class to parse this resource's contents with
+	 *
+	 * @var string
+	 */
     public $template_parser_class = 'Smarty_Internal_Configfileparser';
 
-    /**
-     * initialize Source Object for given resource
-     * Either [$_template] or [$smarty, $template_resource] must be specified
-     *
-     * @param Smarty_Internal_Template $_template         template object
-     * @param Smarty                   $smarty            smarty object
-     * @param string                   $template_resource resource identifier
-     *
-     * @return Smarty_Template_Config Source Object
-     * @throws SmartyException
-     */
+	/**
+	 * initialize Source Object for given resource
+	 * Either [$_template] or [$smarty, $template_resource] must be specified
+	 *
+	 * @param Smarty_Internal_Template $_template         template object
+	 * @param Smarty                   $smarty            smarty object
+	 * @param string                   $template_resource resource identifier
+	 *
+	 * @return Smarty_Template_Config Source Object
+	 * @throws SmartyException
+	 */
     public static function load(
         Smarty_Internal_Template $_template = null,
         Smarty $smarty = null,

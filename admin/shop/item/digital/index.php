@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -61,7 +61,7 @@ $additionalParams = "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}";
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Item_Digital.shop_eitems_menu_title'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref(
 				$oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0

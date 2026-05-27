@@ -800,7 +800,7 @@ class Core_DataBase_Mysql extends Core_DataBase
 	 * Get mysql_fetch_assoc() last result
 	 * @param $result resource
 	 * @return array
-     */
+	 */
 	protected function _currentAssoc($result = NULL)
 	{
 		return mysql_fetch_assoc(is_null($result) ? $this->_result : $result);

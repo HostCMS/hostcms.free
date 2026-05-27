@@ -983,7 +983,7 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Template.menu1'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
 		)
@@ -998,7 +998,7 @@ if (!$template_id)
 
 		Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Template_Dir.menu'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
@@ -1033,7 +1033,7 @@ $oAdmin_Form_Controller->addEntity(
 				<div class="col-xs-12">
 					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
 						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
-						<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParamsProperties) . '"></i>
+						<i class="fa-solid fa-circle-xmark no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParamsProperties) . '"></i>
 						<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParamsProperties) . '"><i class="fa-solid fa-magnifying-glass fa-fw"></i></button>
 					</form>
 				</div>
@@ -1186,10 +1186,48 @@ if ($oAdminFormActionRollback && $oAdmin_Form_Controller->getAction() == 'rollba
 	$oAdmin_Form_Controller->addAction($oControllerRollback);
 }
 
+// Действие "Перенести"
+$oAdminFormActionMove = $oAdmin_Form->Admin_Form_Actions->getByName('move');
+
+if ($oAdminFormActionMove && $oAdmin_Form_Controller->getAction() == 'move')
+{
+	$oTemplateControllerMove = new Admin_Form_Action_Controller_Type_Move($oAdminFormActionMove);
+
+	$aExclude = array();
+	$aChecked = $oAdmin_Form_Controller->getChecked();
+	foreach ($aChecked as $datasetKey => $checkedItems)
+	{
+		// Exclude just dirs
+		if ($datasetKey == 0)
+		{
+			foreach ($checkedItems as $key => $value)
+			{
+				$aExclude[] = $key;
+			}
+		}
+	}
+
+	$oTemplate_Controller_Edit = Admin_Form_Action_Controller::factory(
+		'Template_Controller_Edit', $oAdmin_Form_Action
+	);
+
+	$oTemplateControllerMove
+		->title(Core::_('Template.move_templates_dir_title'))
+		->selectCaption(Core::_('Template.move_templates_dir_id'))
+		// Список директорий генерируется другим контроллером
+		->selectOptions(array(' … ') + $oTemplate_Controller_Edit->fillTemplateDir(0, $aExclude))
+		->value($template_dir_id);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oTemplateControllerMove);
+}
+
 // Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Template_Dir')
 );
+
+$oAdmin_Form_Dataset->changeField('name', 'class', 'semi-bold');
 
 // Ограничение источника 0 по родительской группе
 $oAdmin_Form_Dataset->addCondition(
@@ -1236,6 +1274,8 @@ if (strlen($sGlobalSearch))
 	$oAdmin_Form_Dataset
 			->addCondition(array('where' => array('templates.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
+
+	Core_Event::notify('Template_GlobalSearch.onAfterSetConditions', NULL, array($oAdmin_Form_Dataset, $sGlobalSearch));
 }
 else
 {

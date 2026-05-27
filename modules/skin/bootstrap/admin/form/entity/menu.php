@@ -101,7 +101,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Menu extends Admin_Form_Entity
 		{
 			if (!$this->href && !$this->onclick)
 			{
-				?><a class="btn <?php echo htmlspecialchars($aSecondColors[$index])?> dropdown-toggle" data-toggle="dropdown"><i class="fa fa-angle-down"></i></a><?php
+				?><a class="btn <?php echo htmlspecialchars($aSecondColors[$index])?> dropdown-toggle" data-toggle="dropdown"><i class="fa-solid fa-angle-down"></i></a><?php
 			}
 
 			?><ul class="dropdown-menu <?php echo $aDropdownColors[$index]?>"><?php

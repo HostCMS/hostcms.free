@@ -269,7 +269,7 @@ class Lib_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event lib.onBeforeRedeclaredDelete
+	 * @hostcms-event lib.onBeforeRedeclaredDelete
 	 * @hostcms-event lib.onAfterDeleteLibFile
 	 * @hostcms-event lib.onAfterDeleteLibConfigFile
 	 */
@@ -416,13 +416,6 @@ class Lib_Model extends Core_Entity
 			Core_File::copy($this->getLibConfigFilePath(), $newObject->getLibConfigFilePath());
 		} catch (Exception $e) {}
 
-		// $aLib_Properties = $this->Lib_Properties->findAll();
-
-		// foreach ($aLib_Properties as $oLib_Property)
-		// {
-		// 	$newObject->add($oLib_Property->copy());
-		// }
-
 		$aTmp = array();
 
 		$aLib_Properties = $this->Lib_Properties->findAll(FALSE);
@@ -436,7 +429,7 @@ class Lib_Model extends Core_Entity
 			$aLib_Property_List_Values = $oLib_Property->Lib_Property_List_Values->findAll(FALSE);
 			foreach ($aLib_Property_List_Values as $oLib_Property_List_Value)
 			{
-				$newObject->add(clone $oLib_Property_List_Value);
+				$oNew_Lib_Property->add(clone $oLib_Property_List_Value);
 			}
 		}
 
@@ -451,6 +444,26 @@ class Lib_Model extends Core_Entity
 
 		return $newObject;
 	}
+
+	/**
+	 * Move to another
+	 * @param int $lib_dir_id dir id
+	 * @return self
+	 * @hostcms-event lib.onBeforeMove
+	 * @hostcms-event lib.onAfterMove
+	 */
+	public function move($lib_dir_id)
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($lib_dir_id));
+
+		$this->lib_dir_id = $lib_dir_id;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
+
+		return $this;
+	}
+
 
 	/**
 	 * Search indexation
@@ -600,7 +613,7 @@ class Lib_Model extends Core_Entity
 	 */
 	public function exportBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		return '<a target="_blank" href="' . $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'exportLibs', NULL, 1, intval($this->id), 'lib_dir_id=' . Core_Array::getGet('lib_dir_id')) . '"><i class="fa fa-upload"></i></a>';
+		return '<a target="_blank" href="' . $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'exportLibs', NULL, 1, intval($this->id), 'lib_dir_id=' . Core_Array::getGet('lib_dir_id')) . '"><i class="fa-solid fa-upload"></i></a>';
 	}
 
 	/**

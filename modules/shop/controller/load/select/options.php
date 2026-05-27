@@ -91,7 +91,7 @@ class Shop_Controller_Load_Select_Options extends Admin_Form_Action_Controller_T
 	/**
 	 * Get count of objects
 	 * @return int
-     */
+	 */
 	protected function _getCount()
 	{
 		return $this->_model->getCount();

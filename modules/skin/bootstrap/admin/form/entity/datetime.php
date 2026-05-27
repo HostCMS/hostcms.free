@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_DateTime extends Skin_Default_Admin_Form_Entity_DateTime {
 
@@ -66,7 +66,7 @@ class Skin_Bootstrap_Admin_Form_Entity_DateTime extends Skin_Default_Admin_Form_
 		?><div id="div_<?php echo htmlspecialchars((string) $this->id)?>" class="input-group">
 			<input <?php echo implode(' ', $aAttr) ?>/>
 			<span class="input-group-addon<?php echo $this->disabled == 'disabled' ? ' disabled'  : ''; ?>">
-				<span class="fa fa-calendar"></span>
+				<span class="fa-solid fa-calendar-days"></span>
 			</span>
 			<?php
 			$this->executeChildren();

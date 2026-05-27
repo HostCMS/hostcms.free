@@ -18,15 +18,20 @@ class Ipaddress_Visitor_Controller
 	 */
 	static protected $_cleaningFrequency = 500;
 	
+	static public function getIpaddressVisitorByCookie()
+	{
+		return isset($_COOKIE['_h_tag']) && strlen($_COOKIE['_h_tag']) == 22
+			? Core_Entity::factory('Ipaddress_Visitor')->getById($_COOKIE['_h_tag'], FALSE)
+			: NULL;
+	}
+	
 	/**
 	 * Get current Ipaddress_Visitor by _h_tag cookie
 	 * @return Ipaddress_Visitor_Model
 	 */
 	static public function getCurrentIpaddressVisitor()
 	{
-		$oIpaddress_Visitor = isset($_COOKIE['_h_tag']) && strlen($_COOKIE['_h_tag']) == 22
-			? Core_Entity::factory('Ipaddress_Visitor')->getById($_COOKIE['_h_tag'], FALSE)
-			: NULL;
+		$oIpaddress_Visitor = self::getIpaddressVisitorByCookie();
 
 		if (!$oIpaddress_Visitor)
 		{
@@ -57,6 +62,8 @@ class Ipaddress_Visitor_Controller
 		}
 		else
 		{
+			$oIpaddress_Visitor->visits += 1;
+
 			$oCore_QueryBuilder_Update = Core_QueryBuilder::update('ipaddress_visitors')
 				->set('visits', Core_QueryBuilder::raw('`visits` + 1'))
 				->set('datetime', Core_Date::timestamp2sql(time()))
@@ -67,10 +74,10 @@ class Ipaddress_Visitor_Controller
 		return $oIpaddress_Visitor;
 	}
 
-    /**
-     * Clear Old Data
-     * @throws Core_Exception
-     */
+	/**
+	 * Clear Old Data
+	 * @throws Core_Exception
+	 */
 	static protected function _clearOldData()
 	{
 		$cleaningDate = date('Y-m-d', strtotime("-10 day"));
@@ -78,6 +85,6 @@ class Ipaddress_Visitor_Controller
 		$iLimit = intval(self::$_cleaningFrequency * 1.2);
 
 		Core_DataBase::instance()->setQueryType(3)
-			->query("DELETE LOW_PRIORITY QUICK FROM `ipaddress_visitors` WHERE `datetime` < '{$cleaningDate} 00:00:00' LIMIT {$iLimit}");
+			->query("DELETE FROM `ipaddress_visitors` WHERE `datetime` < '{$cleaningDate} 00:00:00' LIMIT {$iLimit}");
 	}
 }

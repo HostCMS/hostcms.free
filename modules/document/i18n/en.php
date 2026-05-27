@@ -34,5 +34,8 @@ return array(
 	'template_id' => 'Website template',
 	'datetime' => 'Date',
 	'rollback_success' => 'Version restored successfully!',
-	'ai_prompt_default' => 'Write an article about..., don\'t use emoji, use HTML markup, lists, and tables. Provide only the meaning in your answer, no more than 2500 characters long.'
+	'ai_prompt_default' => 'Write an article about..., don\'t use emoji, use HTML markup, lists, and tables. Provide only the meaning in your answer, no more than 2500 characters long.',
+	'move_documents_dir_title' => "Moving Documents",
+	'move_documents_dir_id' => "Parent Group",
+	'move_success' => 'Documents moved'
 );

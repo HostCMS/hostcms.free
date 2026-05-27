@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Lib
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Типовые динамические страницы',
@@ -45,4 +45,7 @@ return array(
 	'deleteFile_success' => 'Файл удален успешно!',
 	'sorting' => "Порядок сортировки",
 	'apply_success' => "Информация успешно изменена",
+	'move_lib_dir_title' => "Перенос типовых динамических страниц",
+	'move_lib_dir_id' => "Родительская группа",
+	'move_success' => 'Типовых динамические страницы перенесены',
 );

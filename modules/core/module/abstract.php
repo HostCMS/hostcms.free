@@ -20,7 +20,7 @@ abstract class Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
 	public $date = NULL;
 
@@ -151,7 +151,7 @@ abstract class Core_Module_Abstract
 						),
 						'sorting' => 10,								//-- сортировка для действий
 						'picture' => '',
-						'icon' => 'fa fa-pencil',
+						'icon' => 'fa-solid fa-pencil',
 						'color' => 'palegreen',
 						'single' => 1,
 						'group' => 0,
@@ -206,7 +206,7 @@ abstract class Core_Module_Abstract
 	/**
 	 * Get module name
 	 * @return string|null
-     */
+	 */
 	public function getModuleName()
 	{
 		return $this->_moduleName;
@@ -257,7 +257,7 @@ abstract class Core_Module_Abstract
 	{
 		return array(
 			'icon' => array(
-				'ico' => 'fa fa-check',
+				'ico' => 'fa-solid fa-check',
 				'color' => 'white',
 				'background-color' => 'bg-themeprimary'
 			),
@@ -558,14 +558,14 @@ abstract class Core_Module_Abstract
 		return $aOptions;
 	}
 
-    /**
-     * Validate option
-     * @param array $aNewConfig
-     * @param array $aOldConfig
-     * @param array $aModule_Options
-     * @param array $aSettings
-     * @return array
-     */
+	/**
+	 * Validate option
+	 * @param array $aNewConfig
+	 * @param array $aOldConfig
+	 * @param array $aModule_Options
+	 * @param array $aSettings
+	 * @return array
+	 */
 	protected function _setOptionValidate(array $aNewConfig, array $aOldConfig, array $aModule_Options = array(), $aSettings = array())
 	{
 		//echo "<pre>"; var_dump($aSettings); echo "</pre>";

@@ -175,6 +175,11 @@ input:focus {
 	color: #f84343;
 }
 
+#iframePreloader { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; z-index: 999; display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden;}
+#iframePreloader i {
+	color: #ccc;
+}
+
 @media (max-width: 514.99px) {
 	.top-panel .icons {
 		width: 100%;

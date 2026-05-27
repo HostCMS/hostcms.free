@@ -80,7 +80,7 @@ class Admin_Form_Action_Dir_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event admin_form_action_dir.onBeforeRedeclaredDelete
+	 * @hostcms-event admin_form_action_dir.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

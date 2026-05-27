@@ -112,7 +112,7 @@ class Shop_Delivery_Condition_Dir_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event shop_delivery_condition_dir.onBeforeRedeclaredDelete
+	 * @hostcms-event shop_delivery_condition_dir.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

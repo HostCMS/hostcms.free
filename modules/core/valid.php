@@ -72,11 +72,11 @@ class Core_Valid
 		|| version_compare($ip, "10.0.0.0", ">") && version_compare($ip, "10.255.255.255", "<");
 	}
 
-    /**
-     * Checks if $url is valid URL
-     * @param string $url
-     * @return boolean
-     */
+	/**
+	 * Checks if $url is valid URL
+	 * @param string $url
+	 * @return boolean
+	 */
 	static public function url($url)
 	{
 		return is_string($url)

@@ -152,7 +152,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 	/**
 	 * Get user id
 	 * @return int
-     */
+	 */
 	public function getUserId()
 	{
 		if (is_null($this->_user_id))
@@ -244,7 +244,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 	/**
 	 * Add current site
 	 * @return string|NULL
-     */
+	 */
 	public function addCurrentSite()
 	{
 		// "host_url": "http://example.com"
@@ -626,15 +626,15 @@ class Seo_Controller_Yandex extends Seo_Controller
 	 */
 	public function getRatingName()
 	{
-		return "тИЦ";
+		return "ИКС";
 	}
 
-    /**
-     * Get site popular queries
-     * @param int $host_id Yandex.Webmaster site id
-     * @return array
-     * @throws Core_Exception
-     */
+	/**
+	 * Get site popular queries
+	 * @param int $host_id Yandex.Webmaster site id
+	 * @return array
+	 * @throws Core_Exception
+	 */
 	public function getSitePopularQueries($host_id)
 	{
 		$limit = 100;

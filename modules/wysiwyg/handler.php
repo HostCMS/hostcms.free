@@ -36,6 +36,13 @@ abstract class Wysiwyg_Handler
 	static public function factory($driverName/*, $primaryKey = NULL*/)
 	{
 		$driver = self::_getDriverName($driverName);
+
+		if (!class_exists($driver))
+		{
+			throw new Core_Exception("Class '%className' does not exist",
+				array('%className' => $driver));
+		}
+
 		return new $driver();
 	}
 

@@ -20,9 +20,9 @@ class Wysiwyg_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 	/**
 	 * Module name
@@ -40,7 +40,7 @@ class Wysiwyg_Module extends Core_Module_Abstract
 			array(
 				'sorting' => 150,
 				'block' => 3,
-				'ico' => 'fa-solid fa-file-code-o',
+				'ico' => 'fa-regular fa-file-code',
 				'name' => Core::_('Wysiwyg.menu'),
 				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/wysiwyg/index.php"),
 				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/wysiwyg/index.php'}); return false")

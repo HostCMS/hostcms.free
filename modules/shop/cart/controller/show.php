@@ -214,7 +214,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 	/**
 	 * Get Shop_Cart_Controller
 	 * @return object
-     */
+	 */
 	protected function _getCartController()
 	{
 		return Shop_Cart_Controller::instance();
@@ -446,6 +446,8 @@ class Shop_Cart_Controller_Show extends Core_Controller
 			}
 		}
 
+		$itemsAmount = $this->amount + $fAppliedDiscountsAmount;
+
 		// Total order amount
 		$this->addEntity(
 			Core::factory('Core_Xml_Entity')
@@ -453,6 +455,12 @@ class Shop_Cart_Controller_Show extends Core_Controller
 				->value($this->amount)
 				->addAttribute('formatted', $oShop->Shop_Currency->format($this->amount))
 				->addAttribute('formattedWithCurrency', $oShop->Shop_Currency->formatWithCurrency($this->amount))
+		)->addEntity(
+			Core::factory('Core_Xml_Entity')
+				->name('total_items_amount')
+				->value($itemsAmount)
+				->addAttribute('formatted', $oShop->Shop_Currency->format($itemsAmount))
+				->addAttribute('formattedWithCurrency', $oShop->Shop_Currency->formatWithCurrency($itemsAmount))
 		)->addEntity(
 			Core::factory('Core_Xml_Entity')
 				->name('total_discount')

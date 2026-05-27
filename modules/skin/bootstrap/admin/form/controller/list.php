@@ -165,7 +165,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 				->onclick('$.toggleFilter(); $.changeFilterStatus({ path: \'' . $path . '\', show: +$(".topFilter").is(":visible") })')
 				->title(Core::_('Admin_Form.filter'))
 				->add(
-					Core_Html_Entity::factory('I')->class('fa fa-filter no-margin')
+					Core_Html_Entity::factory('I')->class('fa-solid fa-filter no-margin')
 				);
 
 			$iFilters = count(Core_Array::get($oAdmin_Form_Controller->filterSettings, 'tabs', array()));
@@ -190,7 +190,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 			->title(Core::_('Admin_Form.export_csv'))
 			->target('_blank')
 			->add(
-				Core_Html_Entity::factory('I')->class('fa fa-upload no-margin')
+				Core_Html_Entity::factory('I')->class('fa-solid fa-upload no-margin')
 			)
 			->execute();
 
@@ -215,7 +215,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 				->title(Core::_('Admin_Form.admin_form_field_settings'))
 				->onclick('$.showAdminFormSettings(' . $oAdmin_Form->id . ', ' . CURRENT_SITE . ', \'' . implode(',', $aModelNames) . '\')')
 				->add(
-					Core_Html_Entity::factory('I')->class('fa-solid fa-cog no-margin')
+					Core_Html_Entity::factory('I')->class('fa-solid fa-gear no-margin')
 				)
 				->execute();
 		}
@@ -525,7 +525,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 										<button type="submit" class="btn btn-default" onclick="mainFormLocker.unlock(); <?php echo $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath())?>"><?php echo Core::_('Admin_Form.button_to_filter')?></button>
 										<div class="btn-group">
 											<a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-												<i class="fa fa-plus"></i>
+												<i class="fa-solid fa-plus"></i>
 											</a>
 											<ul class="dropdown-menu dropdown-menu-right">
 												<?php
@@ -542,10 +542,10 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 															$class = isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['show'])
 																&& $aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['show'] == 0
 																? ''
-																: ' fa-check';
+																: ' fa-solid fa-check';
 
 															?><li>
-																<a data-filter-field-id="<?php echo htmlspecialchars($tabName) . '-field-' . $oAdmin_Form_Field->id?>" onclick="$.changeFilterField({ path: '<?php echo $path?>', tab: '<?php echo htmlspecialchars($tabName)?>', field: '<?php echo Core_Str::escapeJavascriptVariable($oAdmin_Form_Field->name)?>', context: this })"><i class="dropdown-icon fa<?php echo $class?>"></i> <?php echo htmlspecialchars($fieldName)?></a>
+																<a data-filter-field-id="<?php echo htmlspecialchars($tabName) . '-field-' . $oAdmin_Form_Field->id?>" onclick="$.changeFilterField({ path: '<?php echo $path?>', tab: '<?php echo htmlspecialchars($tabName)?>', field: '<?php echo Core_Str::escapeJavascriptVariable($oAdmin_Form_Field->name)?>', context: this })"><i class="dropdown-icon<?php echo $class?>"></i> <?php echo htmlspecialchars($fieldName)?></a>
 															</li><?php
 														}
 													}
@@ -556,7 +556,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 										<div class="btn-group">
 											<a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-												<i class="fa fa-gear"></i>
+												<i class="fa-solid fa-gear"></i>
 											</a>
 											<ul class="dropdown-menu dropdown-menu-right">
 												<li>
@@ -575,7 +575,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 											</ul>
 										</div>
 
-										<a class="btn btn-default" title="<?php echo Core::_('Admin_Form.clear')?>" onclick="$.clearTopFilter('<?php echo Core_Str::escapeJavascriptVariable($windowId)?>')"><i class="fa fa-times-circle no-margin"></i></a>
+										<a class="btn btn-default" title="<?php echo Core::_('Admin_Form.clear')?>" onclick="$.clearTopFilter('<?php echo Core_Str::escapeJavascriptVariable($windowId)?>')"><i class="fa-solid fa-circle-xmark no-margin"></i></a>
 									</div>
 								</div>
 							</form>
@@ -838,7 +838,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 				?><td class="apply-button sticky-column"><?php
 					?><div class="btn-group">
 						<a class="btn btn-xs btn-palegreen" id="admin_forms_apply_button" title="<?php echo Core::_('Admin_Form.button_to_filter')?>" onclick="mainFormLocker.unlock(); <?php echo $onclick?>"><i class="fa-solid fa-magnifying-glass"></i></a>
-						<a title="<?php echo Core::_('Admin_Form.clear')?>" class="btn btn-xs btn-magenta" onclick="$.clearFilter('<?php echo $windowId?>')"><i class="fa fa-times-circle"></i></a>
+						<a title="<?php echo Core::_('Admin_Form.clear')?>" class="btn btn-xs btn-magenta" onclick="$.clearFilter('<?php echo $windowId?>')"><i class="fa-solid fa-circle-xmark"></i></a>
 					</div><?php
 				?></td><?php
 			}
@@ -1400,7 +1400,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 										$icon = $oAdmin_Form_Action_Dir->icon != ''
 											? htmlspecialchars($oAdmin_Form_Action_Dir->icon)
-											: 'fa fa-bars';
+											: 'fa-solid fa-bars';
 
 										$additionalClass = $oAdmin_Form_Action_Dir->getWordName() == ''
 											? ' no-margin-right no-padding-right'
@@ -1455,24 +1455,27 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 										// Change onclick to true
 										$oAdmin_Form_Action->new_window && $onclick = 'return true;';
 
+										$aAttrs = isset($oAdmin_Form_Action->attrs)
+											? $oAdmin_Form_Action->attrs
+											: array();
+
 										// Добавляем установку метки для чекбокса и строки + добавлем уведомление, если необходимо
 										if ($oAdmin_Form_Action->confirm)
 										{
 											$onclick = "res = confirm(this.getAttribute('data-confirm-message')); if (!res) { $('#{$windowId} #row_{$escapedDatasetKey}_{$escapedEntityKey}').toggleHighlight(); } else {{$onclick}} return res;";
+											
+											$aAttrs += array(
+												'data-confirm-message' => htmlspecialchars(Core::_('Admin_Form.confirm_dialog', $name))
+											);
 										}
 
 										is_null($oAdmin_Form_Action->color) && $oAdmin_Form_Action->color = 'info';
-										is_null($oAdmin_Form_Action->icon) && $oAdmin_Form_Action->icon = 'fa fa-bar';
-
-										$aAttrs = isset($oAdmin_Form_Action->attrs)
-											? $oAdmin_Form_Action->attrs
-											: array();
+										is_null($oAdmin_Form_Action->icon) && $oAdmin_Form_Action->icon = 'fa-solid fa-bar';
 
 										$aAttrs += array(
 											'title' => $name,
 											'href' => $href,
 											'onclick' => "mainFormLocker.unlock(); $onclick",
-											'data-confirm-message' => htmlspecialchars(Core::_('Admin_Form.confirm_dialog', $name))
 										);
 
 										$oAdmin_Form_Action->new_window
@@ -1508,7 +1511,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 								if ($iActionsCount > 1)
 								{
 								?><div class="visible-xs visible-sm"><div class="btn-group">
-									<button class="btn btn-palegreen btn-xs dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bars"></i></button>
+									<button class="btn btn-palegreen btn-xs dropdown-toggle" data-toggle="dropdown"><i class="fa-solid fa-bars"></i></button>
 									<ul class="dropdown-menu actions-dropdown-menu dropdown-menu-right" role="menu"><?php
 									echo $sActionsShortView;
 									?></ul>
@@ -1602,7 +1605,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 						$icon = $oAdmin_Form_Action_Dir->icon != ''
 							? htmlspecialchars($oAdmin_Form_Action_Dir->icon)
-							: 'fa fa-bars';
+							: 'fa-solid fa-bars';
 
 						$additionalClass = $oAdmin_Form_Action_Dir->getWordName() == ''
 							? ' no-margin-right no-padding-right'
@@ -1663,7 +1666,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 					?><div class="visible-sm visible-xs">
 						<div class="btn-group dropup">
 							<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown">
-								<i class="fa fa-bars icon-separator"></i>
+								<i class="fa-solid fa-bars icon-separator"></i>
 								<?php echo Core::_('Admin_Form.actions')?>
 							</a>
 							<ul class="dropdown-menu">

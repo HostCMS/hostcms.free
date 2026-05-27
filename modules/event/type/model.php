@@ -76,7 +76,7 @@ class Event_Type_Model extends Core_Entity
 
 				Core_Html_Entity::factory('Span')
 					->class('badge badge-square badge-hostcms')
-					->value('<i class="fa fa-android"></i> ' . $sParents . htmlspecialchars($oBot->name))
+					->value('<i class="fa-solid fa-robot"></i> ' . $sParents . htmlspecialchars($oBot->name))
 					->execute();
 			}
 		}

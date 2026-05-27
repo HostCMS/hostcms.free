@@ -45,10 +45,10 @@ class Chartaccount_Trialbalance_Controller
 		self::$_path = $path;
 	}
 
-    /**
-     * Set path
-     * @return string
-     */
+	/**
+	 * Set path
+	 * @return string
+	 */
 	static public function getPath()
 	{
 		return Admin_Form_Controller::correctBackendPath(self::$_path);
@@ -351,13 +351,13 @@ class Chartaccount_Trialbalance_Controller
 		return ob_get_clean();
 	}
 
-    /**
-     * Show content
-     * @param object $oTab
-     * @param array $aParams
-     * @return object
-     * @throws Core_Exception
-     */
+	/**
+	 * Show content
+	 * @param object $oTab
+	 * @param array $aParams
+	 * @return object
+	 * @throws Core_Exception
+	 */
 	static public function showContent($oTab, array $aParams = array())
 	{
 		if (!Core::moduleIsActive('company'))

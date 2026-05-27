@@ -11,8 +11,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * <code>
  * $oController->options(
  * 	array(
- * 		0 => array('value' => 'Default', 'icon' => 'fa fa-user', 'color' => '#eee'),
- * 		1 => array('value' => 'Second', 'icon' => 'fa fa-phone', 'color' => '#aaa'),
+ * 		0 => array('value' => 'Default', 'icon' => 'fa-solid fa-user', 'color' => '#eee'),
+ * 		1 => array('value' => 'Second', 'icon' => 'fa-solid fa-phone', 'color' => '#aaa'),
  * 		2 => 'Third',
  * )
  * );

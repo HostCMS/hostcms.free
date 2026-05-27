@@ -291,13 +291,13 @@ abstract class Core_Html_Entity extends Core_Servant_Properties
 		);
 	}
 
-    /**
-     * Delete object
-     * @param object $oSource_Object
-     * @param Core_Html_Entity $Core_Html_Entity
-     * @return boolean
-     * @ignore
-     */
+	/**
+	 * Delete object
+	 * @param object $oSource_Object
+	 * @param Core_Html_Entity $Core_Html_Entity
+	 * @return boolean
+	 * @ignore
+	 */
 	protected function _deleteObject($oSource_Object, Core_Html_Entity $Core_Html_Entity)
 	{
 		$haystack = $oSource_Object->getChildren();
@@ -479,11 +479,11 @@ abstract class Core_Html_Entity extends Core_Servant_Properties
 		return $this;
 	}
 
-    /**
-     * Get/set data, e.g. $obj->data('foo', 'bar'); echo $obj->data('foo');
-     * @param string $name
-     * @return self|string
-     */
+	/**
+	 * Get/set data, e.g. $obj->data('foo', 'bar'); echo $obj->data('foo');
+	 * @param string $name
+	 * @return self|string
+	 */
 	public function data($name)
 	{
 		$args = func_get_args();

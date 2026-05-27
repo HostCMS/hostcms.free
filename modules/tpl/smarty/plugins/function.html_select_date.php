@@ -47,8 +47,8 @@ function smarty_function_html_select_date($params, Smarty_Internal_Template $tem
     $template->_checkPlugins(
         array(
             array(
-                'function' => 'smarty_function_escape_special_chars',
-                'file'     => SMARTY_PLUGINS_DIR . 'shared.escape_special_chars.php'
+            	'function' => 'smarty_function_escape_special_chars',
+            	'file'     => SMARTY_PLUGINS_DIR . 'shared.escape_special_chars.php'
             )
         )
     );
@@ -174,9 +174,9 @@ function smarty_function_html_select_date($params, Smarty_Internal_Template $tem
         if (isset($time[$prefix . 'Year'])) {
             // $_REQUEST[$field_array] given
             foreach ([
-                         'Y' => 'Year',
-                         'm' => 'Month',
-                         'd' => 'Day'
+                     	'Y' => 'Year',
+                     	'm' => 'Month',
+                     	'd' => 'Day'
                      ] as $_elementKey => $_elementName) {
                 $_variableName = '_' . strtolower($_elementName);
                 $$_variableName =
@@ -186,9 +186,9 @@ function smarty_function_html_select_date($params, Smarty_Internal_Template $tem
         } elseif (isset($time[$field_array][$prefix . 'Year'])) {
             // $_REQUEST given
             foreach ([
-                         'Y' => 'Year',
-                         'm' => 'Month',
-                         'd' => 'Day'
+                     	'Y' => 'Year',
+                     	'm' => 'Month',
+                     	'd' => 'Day'
                      ] as $_elementKey => $_elementName) {
                 $_variableName = '_' . strtolower($_elementName);
                 $$_variableName = isset($time[$field_array][$prefix . $_elementName]) ?
@@ -213,8 +213,8 @@ function smarty_function_html_select_date($params, Smarty_Internal_Template $tem
         $template->_checkPlugins(
             array(
                 array(
-                    'function' => 'smarty_make_timestamp',
-                    'file'     => SMARTY_PLUGINS_DIR . 'shared.make_timestamp.php'
+                	'function' => 'smarty_make_timestamp',
+                	'file'     => SMARTY_PLUGINS_DIR . 'shared.make_timestamp.php'
                 )
             )
         );
@@ -225,8 +225,8 @@ function smarty_function_html_select_date($params, Smarty_Internal_Template $tem
     // make syntax "+N" or "-N" work with $start_year and $end_year
     // Note preg_match('!^(\+|\-)\s*(\d+)$!', $end_year, $match) is slower than trim+substr
     foreach (array(
-        'start',
-        'end'
+    	'start',
+    	'end'
     ) as $key) {
         $key .= '_year';
         $t = $$key;
@@ -258,7 +258,7 @@ function smarty_function_html_select_date($params, Smarty_Internal_Template $tem
         }
         if ($year_as_text) {
             $_html_years =
-                '<input type="text" name="' . $_name . '" value="' . $_year . '" size="4" maxlength="4"' . $_extra .
+            	'<input type="text" name="' . $_name . '" value="' . $_year . '" size="4" maxlength="4"' . $_extra .
                 $extra_attrs . ' />';
         } else {
             $_html_years = '<select name="' . $_name . '"';
@@ -281,7 +281,7 @@ function smarty_function_html_select_date($params, Smarty_Internal_Template $tem
             $op = $start_year > $end_year ? -1 : 1;
             for ($i = $start_year; $op > 0 ? $i <= $end_year : $i >= $end_year; $i += $op) {
                 $_html_years .= '<option value="' . $i . '"' . ($_year == $i ? ' selected="selected"' : '') . '>' . $i .
-                                '</option>' . $option_separator;
+                            	'</option>' . $option_separator;
             }
             $_html_years .= '</select>';
         }
@@ -319,7 +319,7 @@ function smarty_function_html_select_date($params, Smarty_Internal_Template $tem
                 ($month_format === '%m' ? $_val : @strftime($month_format, $_month_timestamps[ $i ]));
             $_value = $month_value_format === '%m' ? $_val : @strftime($month_value_format, $_month_timestamps[ $i ]);
             $_html_months .= '<option value="' . $_value . '"' . ($_val == $_month ? ' selected="selected"' : '') .
-                             '>' . $_text . '</option>' . $option_separator;
+                         	'>' . $_text . '</option>' . $option_separator;
         }
         $_html_months .= '</select>';
     }

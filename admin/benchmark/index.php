@@ -45,7 +45,7 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Benchmark.menu_rate'))
-		->icon('fa fa-rocket')
+		->icon('fa-solid fa-rocket')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'check', NULL, 0, 0)
 		)
@@ -55,7 +55,7 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Benchmark.menu_site_speed'))
-		->icon('fa fa-tachometer')
+		->icon('fa-solid fa-gauge-high')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/benchmark/url/index.php', NULL, NULL, '')
 		)
@@ -343,7 +343,7 @@ function benchmarkShow($oAdmin_Form_Controller)
 	<?php
 	}
 	?>
-	<h5 class="row-title before-green"><i class="fa fa-dashboard green"></i> <?php echo Core::_('Benchmark.speedUp')?></h5>
+	<h5 class="row-title before-green"><i class="fa-solid fa-gauge green"></i> <?php echo Core::_('Benchmark.speedUp')?></h5>
 	<div class="well">
 		<?php
 		function showModule($oAdmin_Form_Controller, $modulePath, $integration, $name, $description)
@@ -358,21 +358,21 @@ function benchmarkShow($oAdmin_Form_Controller)
 				{
 					$status = TRUE;
 					$alert = 'btn-success';
-					$ico = 'fa fa-check';
+					$ico = 'fa-solid fa-check';
 					$caption = Core::_('Admin_Form.enabled');
 				}
 				elseif (Core_Array::get(Core::$config->get('core_hostcms'), 'integration', 0) > $integration)
 				{
 					$alert = 'btn-darkorange';
 					$status = FALSE;
-					$ico = 'fa fa-times';
+					$ico = 'fa-solid fa-xmark';
 					$caption = Core::_('Admin_Form.disabled');
 				}
 				else
 				{
 					$alert = 'btn-darkorange';
 					$status = NULL;
-					$ico = 'fa fa-times';
+					$ico = 'fa-solid fa-xmark';
 					$caption = Core::_('Admin_Form.not-installed');
 				}
 				?>
@@ -396,7 +396,7 @@ function benchmarkShow($oAdmin_Form_Controller)
 						// Купить
 						?>
 						<a class="btn btn-labeled btn-success" href="<?php echo $sBuyLink?>" target="_blank">
-							<i class="btn-label fa fa-money"></i>
+							<i class="btn-label fa-regular fa-money-bill-1"></i>
 							<?php echo Core::_('Admin_Form.buy')?>
 						</a>
 						<?php
@@ -406,7 +406,7 @@ function benchmarkShow($oAdmin_Form_Controller)
 						// Включить
 						?>
 						<a class="btn btn-labeled btn-success" onclick="<?php echo $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), '', NULL, 0, 0, 'enable=' . $modulePath)?>">
-							<i class="btn-label fa fa-lightbulb-o"></i>
+							<i class="btn-label fa-regular fa-lightbulb"></i>
 							<?php echo Core::_('Admin_Form.enable')?>
 						</a>
 						<?php
@@ -425,7 +425,7 @@ function benchmarkShow($oAdmin_Form_Controller)
 		?>
 	</div>
 
-	<h5 class="row-title before-info"><i class="fa fa-database info"></i> <?php echo Core::_('Benchmark.database')?></h5>
+	<h5 class="row-title before-info"><i class="fa-solid fa-database info"></i> <?php echo Core::_('Benchmark.database')?></h5>
 
 	<?php
 	// Доступные хранилища
@@ -528,6 +528,7 @@ function benchmarkShow($oAdmin_Form_Controller)
 					$sNewCollation = $sNewCharset . '_' . $aCollation[1];
 
 					$sNewCollation == 'utf8mb4_0900_ai_ci' && $sNewCollation = 'utf8mb4_general_ci';
+					$sNewCollation == 'utf8_0900_ai_ci' && $sNewCollation = 'utf8_general_ci';
 
 					try {
 						$oCore_DataBase
@@ -559,6 +560,7 @@ function benchmarkShow($oAdmin_Form_Controller)
 							$sNewColumCollation = $sNewCharset . '_' . $aColumnCollation[1];
 
 							$sNewColumCollation == 'utf8mb4_0900_ai_ci' && $sNewColumCollation = 'utf8mb4_general_ci';
+							$sNewColumCollation == 'utf8_0900_ai_ci' && $sNewColumCollation = 'utf8_general_ci';
 
 							$sDefault = strtoupper($aColumn['Null']) == 'YES'
 								? 'NULL'

@@ -16,68 +16,68 @@
  */
 class Smarty_Internal_Compile_Private_ForeachSection extends Smarty_Internal_CompileBase
 {
-    /**
-     * Name of this tag
-     *
-     * @var string
-     */
+	/**
+	 * Name of this tag
+	 *
+	 * @var string
+	 */
     public $tagName = '';
 
-    /**
-     * Valid properties of $smarty.xxx variable
-     *
-     * @var array
-     */
+	/**
+	 * Valid properties of $smarty.xxx variable
+	 *
+	 * @var array
+	 */
     public $nameProperties = array();
 
-    /**
-     * {section} tag has no item properties
-     *
-     * @var array
-     */
+	/**
+	 * {section} tag has no item properties
+	 *
+	 * @var array
+	 */
     public $itemProperties = null;
 
-    /**
-     * {section} tag has always name attribute
-     *
-     * @var bool
-     */
+	/**
+	 * {section} tag has always name attribute
+	 *
+	 * @var bool
+	 */
     public $isNamed = true;
 
-    /**
-     * @var array
-     */
+	/**
+	 * @var array
+	 */
     public $matchResults = array();
 
-    /**
-     * Preg search pattern
-     *
-     * @var string
-     */
+	/**
+	 * Preg search pattern
+	 *
+	 * @var string
+	 */
     private $propertyPreg = '';
 
-    /**
-     * Offsets in preg match result
-     *
-     * @var array
-     */
+	/**
+	 * Offsets in preg match result
+	 *
+	 * @var array
+	 */
     private $resultOffsets = array();
 
-    /**
-     * Start offset
-     *
-     * @var int
-     */
+	/**
+	 * Start offset
+	 *
+	 * @var int
+	 */
     private $startOffset = 0;
 
-    /**
-     * Scan sources for used tag attributes
-     *
-     * @param array                                 $attributes
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler
-     *
-     * @throws \SmartyException
-     */
+	/**
+	 * Scan sources for used tag attributes
+	 *
+	 * @param array                                 $attributes
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler
+	 *
+	 * @throws \SmartyException
+	 */
     public function scanForProperties($attributes, Smarty_Internal_TemplateCompilerBase $compiler)
     {
         $this->propertyPreg = '~(';
@@ -102,12 +102,12 @@ class Smarty_Internal_Compile_Private_ForeachSection extends Smarty_Internal_Com
         $this->matchBlockSource($compiler);
     }
 
-    /**
-     * Build property preg string
-     *
-     * @param bool  $named
-     * @param array $attributes
-     */
+	/**
+	 * Build property preg string
+	 *
+	 * @param bool  $named
+	 * @param array $attributes
+	 */
     public function buildPropertyPreg($named, $attributes)
     {
         if ($named) {
@@ -132,11 +132,11 @@ class Smarty_Internal_Compile_Private_ForeachSection extends Smarty_Internal_Com
         $this->propertyPreg .= '))';
     }
 
-    /**
-     * Find matches in source string
-     *
-     * @param string $source
-     */
+	/**
+	 * Find matches in source string
+	 *
+	 * @param string $source
+	 */
     public function matchProperty($source)
     {
         preg_match_all($this->propertyPreg, $source, $match);
@@ -149,23 +149,23 @@ class Smarty_Internal_Compile_Private_ForeachSection extends Smarty_Internal_Com
         }
     }
 
-    /**
-     * Find matches in template source
-     *
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler
-     */
+	/**
+	 * Find matches in template source
+	 *
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler
+	 */
     public function matchTemplateSource(Smarty_Internal_TemplateCompilerBase $compiler)
     {
         $this->matchProperty($compiler->parser->lex->data);
     }
 
-    /**
-     * Find matches in all parent template source
-     *
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler
-     *
-     * @throws \SmartyException
-     */
+	/**
+	 * Find matches in all parent template source
+	 *
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler
+	 *
+	 * @throws \SmartyException
+	 */
     public function matchParentTemplateSource(Smarty_Internal_TemplateCompilerBase $compiler)
     {
         // search parent compiler template source
@@ -181,7 +181,7 @@ class Smarty_Internal_Compile_Private_ForeachSection extends Smarty_Internal_Com
                          isset($nextCompiler->smarty->registered_filters[ 'pre' ]))
                     ) {
                         $_content = $nextCompiler->smarty->ext->_filterHandler->runFilter(
-                            'pre',
+                        	'pre',
                             $_content,
                             $nextCompiler->template
                         );
@@ -192,25 +192,25 @@ class Smarty_Internal_Compile_Private_ForeachSection extends Smarty_Internal_Com
         }
     }
 
-    /**
-     * Find matches in {block} tag source
-     *
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler
-     */
+	/**
+	 * Find matches in {block} tag source
+	 *
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler
+	 */
     public function matchBlockSource(Smarty_Internal_TemplateCompilerBase $compiler)
     {
     }
 
-    /**
-     * Compiles code for the {$smarty.foreach.xxx} or {$smarty.section.xxx}tag
-     *
-     * @param array                                 $args      array with attributes from parser
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler  compiler object
-     * @param array                                 $parameter array with compilation parameter
-     *
-     * @return string compiled code
-     * @throws \SmartyCompilerException
-     */
+	/**
+	 * Compiles code for the {$smarty.foreach.xxx} or {$smarty.section.xxx}tag
+	 *
+	 * @param array                                 $args      array with attributes from parser
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler  compiler object
+	 * @param array                                 $parameter array with compilation parameter
+	 *
+	 * @return string compiled code
+	 * @throws \SmartyCompilerException
+	 */
     public function compileSpecialVariable($args, Smarty_Internal_TemplateCompilerBase $compiler, $parameter)
     {
         $tag = smarty_strtolower_ascii(trim($parameter[ 0 ], '"\''));

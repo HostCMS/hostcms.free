@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -96,7 +96,8 @@ $oAdmin_Form_Controller->addDataset(
 $aOptions = array(
 	0 => Core::_('Ipaddress_Visitor.result0'),
 	1 => Core::_('Ipaddress_Visitor.result1'),
-	2 => Core::_('Ipaddress_Visitor.result2')
+	2 => Core::_('Ipaddress_Visitor.result2'),
+	3 => Core::_('Ipaddress_Visitor.result3')
 );
 
 $oAdmin_Form_Dataset

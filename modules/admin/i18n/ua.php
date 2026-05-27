@@ -6,6 +6,9 @@ return array(
 	'authorization_form_password' => 'Пароль',
 	'authorization_form_ip' => 'Прив\'язати сесію до IP-адреси',
 	'authorization_form_button' => 'Ввійти',
+	'authorization_form_login_with_password' => 'Увійти по паролю',
+	'authorization_form_enable_quick_login' => 'Підключити швидкий вхід?',
+	
 	'themes' => 'Теми',
 	'authorization_error_valid_user' => "Помилка! Невірні данні, логін <b>%s</b>!<br />Ваша IP-адреса <b>%s</b>, адміністратору повідомлено про подію.",
 	'authorization_error_access_temporarily_unavailable' => 'Доступ тимчасово заборонений. Ви можете спробувати ввести пароль через %s сек.',

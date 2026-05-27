@@ -20,15 +20,26 @@ class Report_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 	/**
 	 * Module name
 	 * @var string
 	 */
 	protected $_moduleName = 'report';
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct()
+	{
+		parent::__construct();
+
+		Core_Skin::instance()
+			->addCss('/modules/report/assets/report.css');
+	}
 
 	/**
 	 * Get Module's Menu
@@ -40,7 +51,7 @@ class Report_Module extends Core_Module_Abstract
 			array(
 				'sorting' => 260,
 				'block' => 3,
-				'ico' => 'fa fa-line-chart',
+				'ico' => 'fa-solid fa-line-chart',
 				'name' => Core::_('Report.menu'),
 				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/report/index.php"),
 				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/report/index.php'}); return false")

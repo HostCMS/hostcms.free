@@ -99,7 +99,7 @@ var InitiateEditableDataTable = function () {
             $('#editabledatatable_new').click(function (e) {
                 e.preventDefault();
                 var aiNew = oTable.fnAddData(['', '', '', '',
-                        '<a href="#" class="btn btn-success btn-xs save"><i class="fa fa-edit"></i> Save</a> <a href="#" class="btn btn-warning btn-xs cancel" data-mode="new"><i class="fa fa-times"></i> Cancel</a>'
+                        '<a href="#" class="btn btn-success btn-xs save"><i class="fa fa-edit"></i> Save</a> <a href="#" class="btn btn-warning btn-xs cancel" data-mode="new"><i class="fa-solid fa-xmark"></i> Cancel</a>'
                 ]);
                 var nRow = oTable.fnGetNodes(aiNew[0]);
                 editAddedRow(oTable, nRow);
@@ -177,7 +177,7 @@ var InitiateEditableDataTable = function () {
                 jqTds[1].innerHTML = '<input type="text" class="form-control input-small" value="' + aData[1] + '">';
                 jqTds[2].innerHTML = '<input type="text" class="form-control input-small" value="' + aData[2] + '">';
                 jqTds[3].innerHTML = '<input type="text" class="form-control input-small" value="' + aData[3] + '">';
-                jqTds[4].innerHTML = '<a href="#" class="btn btn-success btn-xs save"><i class="fa fa-save"></i> Save</a> <a href="#" class="btn btn-warning btn-xs cancel"><i class="fa fa-times"></i> Cancel</a>';
+                jqTds[4].innerHTML = '<a href="#" class="btn btn-success btn-xs save"><i class="fa fa-save"></i> Save</a> <a href="#" class="btn btn-warning btn-xs cancel"><i class="fa-solid fa-xmark"></i> Cancel</a>';
             }
 
             function editAddedRow(oTable, nRow) {
@@ -196,7 +196,7 @@ var InitiateEditableDataTable = function () {
                 oTable.fnUpdate(jqInputs[1].value, nRow, 1, false);
                 oTable.fnUpdate(jqInputs[2].value, nRow, 2, false);
                 oTable.fnUpdate(jqInputs[3].value, nRow, 3, false);
-                oTable.fnUpdate('<a href="#" class="btn btn-info btn-xs edit"><i class="fa fa-edit"></i> Edit</a> <a href="#" class="btn btn-danger btn-xs delete"><i class="fa fa-trash-o"></i> Delete</a>', nRow, 4, false);
+                oTable.fnUpdate('<a href="#" class="btn btn-info btn-xs edit"><i class="fa fa-edit"></i> Edit</a> <a href="#" class="btn btn-danger btn-xs delete"><i class="fa-regular fa-trash-can"></i> Delete</a>', nRow, 4, false);
                 oTable.fnDraw();
             }
 
@@ -206,7 +206,7 @@ var InitiateEditableDataTable = function () {
                 oTable.fnUpdate(jqInputs[1].value, nRow, 1, false);
                 oTable.fnUpdate(jqInputs[2].value, nRow, 2, false);
                 oTable.fnUpdate(jqInputs[3].value, nRow, 3, false);
-                oTable.fnUpdate('<a href="#" class="btn btn-info btn-xs edit"><i class="fa fa-edit"></i> Edit</a> <a href="#" class="btn btn-danger btn-xs delete"><i class="fa fa-trash-o"></i> Delete</a>', nRow, 4, false);
+                oTable.fnUpdate('<a href="#" class="btn btn-info btn-xs edit"><i class="fa fa-edit"></i> Edit</a> <a href="#" class="btn btn-danger btn-xs delete"><i class="fa-regular fa-trash-can"></i> Delete</a>', nRow, 4, false);
                 oTable.fnDraw();
             }
         }
@@ -234,7 +234,7 @@ var InitiateExpandableDataTable = function () {
              */
             var nCloneTh = document.createElement('th');
             var nCloneTd = document.createElement('td');
-            nCloneTd.innerHTML = '<i class="fa fa-plus-square-o row-details"></i>';
+            nCloneTd.innerHTML = '<i class="fa-regular fa-square-plus row-details"></i>';
 
             $('#expandabledatatable thead tr').each(function () {
                 this.insertBefore(nCloneTh, this.childNodes[0]);
@@ -285,12 +285,12 @@ var InitiateExpandableDataTable = function () {
                 var nTr = $(this).parents('tr')[0];
                 if (oTable.fnIsOpen(nTr)) {
                     /* This row is already open - close it */
-                    $(this).addClass("fa-plus-square-o").removeClass("fa-minus-square-o");
+                    $(this).addClass("fa-square-plus").removeClass("fa-square-minus");
                     oTable.fnClose(nTr);
                 }
                 else {
                     /* Open this row */
-                    $(this).addClass("fa-minus-square-o").removeClass("fa-plus-square-o");;
+                    $(this).addClass("fa-square-minus").removeClass("fa-square-plus");;
                     oTable.fnOpen(nTr, fnFormatDetails(oTable, nTr), 'details');
                 }
             });

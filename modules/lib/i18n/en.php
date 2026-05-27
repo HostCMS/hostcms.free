@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Lib
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Lib',
@@ -44,4 +44,7 @@ return array(
 	'deleteFile_success' => 'File deleted successfully!',
 	'sorting' => "Sorting order",
 	'apply_success' => "Information successfully changed",
+	'move_lib_dir_title' => "Moving standard dynamic pages",
+	'move_lib_dir_id' => "Parent group",
+	'move_success' => 'Moved standard dynamic pages',
 );

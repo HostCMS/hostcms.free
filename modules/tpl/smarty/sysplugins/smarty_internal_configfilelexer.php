@@ -28,112 +28,112 @@ class Smarty_Internal_Configfilelexer
     const SECTION            = 5;
     const TRIPPLE            = 6;
 
-    /**
-     * Source
-     *
-     * @var string
-     */
+	/**
+	 * Source
+	 *
+	 * @var string
+	 */
     public $data;
 
-    /**
-     * Source length
-     *
-     * @var int
-     */
+	/**
+	 * Source length
+	 *
+	 * @var int
+	 */
     public $dataLength = null;
 
-    /**
-     * byte counter
-     *
-     * @var int
-     */
+	/**
+	 * byte counter
+	 *
+	 * @var int
+	 */
     public $counter;
 
-    /**
-     * token number
-     *
-     * @var int
-     */
+	/**
+	 * token number
+	 *
+	 * @var int
+	 */
     public $token;
 
-    /**
-     * token value
-     *
-     * @var string
-     */
+	/**
+	 * token value
+	 *
+	 * @var string
+	 */
     public $value;
 
-    /**
-     * current line
-     *
-     * @var int
-     */
+	/**
+	 * current line
+	 *
+	 * @var int
+	 */
     public $line;
 
-    /**
-     * state number
-     *
-     * @var int
-     */
+	/**
+	 * state number
+	 *
+	 * @var int
+	 */
     public $state = 1;
 
-    /**
-     * Smarty object
-     *
-     * @var Smarty
-     */
+	/**
+	 * Smarty object
+	 *
+	 * @var Smarty
+	 */
     public $smarty = null;
 
-    /**
-     * trace file
-     *
-     * @var resource
-     */
+	/**
+	 * trace file
+	 *
+	 * @var resource
+	 */
     public $yyTraceFILE;
 
-    /**
-     * trace prompt
-     *
-     * @var string
-     */
+	/**
+	 * trace prompt
+	 *
+	 * @var string
+	 */
     public $yyTracePrompt;
 
-    /**
-     * state names
-     *
-     * @var array
-     */
+	/**
+	 * state names
+	 *
+	 * @var array
+	 */
     public $state_name = array(
         1 => 'START', 2 => 'VALUE', 3 => 'NAKED_STRING_VALUE', 4 => 'COMMENT', 5 => 'SECTION', 6 => 'TRIPPLE'
     );
 
-    /**
-     * token names
-     *
-     * @var array
-     */
+	/**
+	 * token names
+	 *
+	 * @var array
+	 */
     public $smarty_token_names = array(        // Text for parser error messages
     );
 
-    /**
-     * compiler object
-     *
-     * @var Smarty_Internal_Config_File_Compiler
-     */
+	/**
+	 * compiler object
+	 *
+	 * @var Smarty_Internal_Config_File_Compiler
+	 */
     private $compiler = null;
 
-    /**
-     * copy of config_booleanize
-     *
-     * @var bool
-     */
+	/**
+	 * copy of config_booleanize
+	 *
+	 * @var bool
+	 */
     private $configBooleanize = false;
 
-    /**
-     * storage for assembled token patterns
-     *
-     * @var string
-     */
+	/**
+	 * storage for assembled token patterns
+	 *
+	 * @var string
+	 */
     private $yy_global_pattern1 = null;
 
     private $yy_global_pattern2 = null;
@@ -150,12 +150,12 @@ class Smarty_Internal_Configfilelexer
 
     private $_yy_stack          = array();
 
-    /**
-     * constructor
-     *
-     * @param   string                             $data template source
-     * @param Smarty_Internal_Config_File_Compiler $compiler
-     */
+	/**
+	 * constructor
+	 *
+	 * @param   string                             $data template source
+	 * @param Smarty_Internal_Config_File_Compiler $compiler
+	 */
     public function __construct($data, Smarty_Internal_Config_File_Compiler $compiler)
     {
         $this->data = $data . "\n"; //now all lines are \n-terminated
@@ -263,7 +263,7 @@ class Smarty_Internal_Configfilelexer
                 }
                 if (empty($yymatches)) {
                     throw new Exception('Error: lexing failed because a rule matched' .
-                                        ' an empty string.  Input "' . substr(
+                                    	' an empty string.  Input "' . substr(
                                             $this->data,
                                             $this->counter,
                                             5
@@ -293,7 +293,7 @@ class Smarty_Internal_Configfilelexer
                 }
             } else {
                 throw new Exception('Unexpected input at line' . $this->line .
-                                    ': ' . $this->data[ $this->counter ]);
+                                	': ' . $this->data[ $this->counter ]);
             }
             break;
         } while (true);
@@ -363,7 +363,7 @@ class Smarty_Internal_Configfilelexer
                 }
                 if (empty($yymatches)) {
                     throw new Exception('Error: lexing failed because a rule matched' .
-                                        ' an empty string.  Input "' . substr(
+                                    	' an empty string.  Input "' . substr(
                                             $this->data,
                                             $this->counter,
                                             5
@@ -393,7 +393,7 @@ class Smarty_Internal_Configfilelexer
                 }
             } else {
                 throw new Exception('Unexpected input at line' . $this->line .
-                                    ': ' . $this->data[ $this->counter ]);
+                                	': ' . $this->data[ $this->counter ]);
             }
             break;
         } while (true);
@@ -480,7 +480,7 @@ class Smarty_Internal_Configfilelexer
                 }
                 if (empty($yymatches)) {
                     throw new Exception('Error: lexing failed because a rule matched' .
-                                        ' an empty string.  Input "' . substr(
+                                    	' an empty string.  Input "' . substr(
                                             $this->data,
                                             $this->counter,
                                             5
@@ -510,7 +510,7 @@ class Smarty_Internal_Configfilelexer
                 }
             } else {
                 throw new Exception('Unexpected input at line' . $this->line .
-                                    ': ' . $this->data[ $this->counter ]);
+                                	': ' . $this->data[ $this->counter ]);
             }
             break;
         } while (true);
@@ -542,7 +542,7 @@ class Smarty_Internal_Configfilelexer
                 }
                 if (empty($yymatches)) {
                     throw new Exception('Error: lexing failed because a rule matched' .
-                                        ' an empty string.  Input "' . substr(
+                                    	' an empty string.  Input "' . substr(
                                             $this->data,
                                             $this->counter,
                                             5
@@ -572,7 +572,7 @@ class Smarty_Internal_Configfilelexer
                 }
             } else {
                 throw new Exception('Unexpected input at line' . $this->line .
-                                    ': ' . $this->data[ $this->counter ]);
+                                	': ' . $this->data[ $this->counter ]);
             }
             break;
         } while (true);
@@ -614,7 +614,7 @@ class Smarty_Internal_Configfilelexer
                 }
                 if (empty($yymatches)) {
                     throw new Exception('Error: lexing failed because a rule matched' .
-                                        ' an empty string.  Input "' . substr(
+                                    	' an empty string.  Input "' . substr(
                                             $this->data,
                                             $this->counter,
                                             5
@@ -644,7 +644,7 @@ class Smarty_Internal_Configfilelexer
                 }
             } else {
                 throw new Exception('Unexpected input at line' . $this->line .
-                                    ': ' . $this->data[ $this->counter ]);
+                                	': ' . $this->data[ $this->counter ]);
             }
             break;
         } while (true);
@@ -681,7 +681,7 @@ class Smarty_Internal_Configfilelexer
                 }
                 if (empty($yymatches)) {
                     throw new Exception('Error: lexing failed because a rule matched' .
-                                        ' an empty string.  Input "' . substr(
+                                    	' an empty string.  Input "' . substr(
                                             $this->data,
                                             $this->counter,
                                             5
@@ -711,7 +711,7 @@ class Smarty_Internal_Configfilelexer
                 }
             } else {
                 throw new Exception('Unexpected input at line' . $this->line .
-                                    ': ' . $this->data[ $this->counter ]);
+                                	': ' . $this->data[ $this->counter ]);
             }
             break;
         } while (true);

@@ -71,7 +71,7 @@ if (!is_null($oShop_Item->id) || $comment_parent_id)
 	$oAdmin_Form_Entity_Menus->add(
 		Admin_Form_Entity::factory('Menu')
 			->name(Core::_('Shop.items_catalog_add_form_comment_link'))
-			->icon('fa fa-plus')
+			->icon('fa-solid fa-plus')
 			->href(
 				$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 			)
@@ -88,7 +88,7 @@ if ($oShop->id)
 	$oAdmin_Form_Entity_Menus->add(
 		Admin_Form_Entity::factory('Menu')
 			->name(Core::_('Shop_Item.property_header'))
-			->icon('fa fa-gears')
+			->icon('fa-solid fa-gears')
 			->href(
 				$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/comment/property/index.php', NULL, NULL, $additionalParamsProperties)
 			)

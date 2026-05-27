@@ -153,7 +153,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event shop_discountcard_bonus.onBeforeRedeclaredDelete
+	 * @hostcms-event shop_discountcard_bonus.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

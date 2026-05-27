@@ -10,129 +10,129 @@
  */
 class Smarty_Template_Source
 {
-    /**
-     * Unique Template ID
-     *
-     * @var string
-     */
+	/**
+	 * Unique Template ID
+	 *
+	 * @var string
+	 */
     public $uid = null;
 
-    /**
-     * Template Resource (Smarty_Internal_Template::$template_resource)
-     *
-     * @var string
-     */
+	/**
+	 * Template Resource (Smarty_Internal_Template::$template_resource)
+	 *
+	 * @var string
+	 */
     public $resource = null;
 
-    /**
-     * Resource Type
-     *
-     * @var string
-     */
+	/**
+	 * Resource Type
+	 *
+	 * @var string
+	 */
     public $type = null;
 
-    /**
-     * Resource Name
-     *
-     * @var string
-     */
+	/**
+	 * Resource Name
+	 *
+	 * @var string
+	 */
     public $name = null;
 
-    /**
-     * Source Filepath
-     *
-     * @var string
-     */
+	/**
+	 * Source Filepath
+	 *
+	 * @var string
+	 */
     public $filepath = null;
 
-    /**
-     * Source Timestamp
-     *
-     * @var integer
-     */
+	/**
+	 * Source Timestamp
+	 *
+	 * @var integer
+	 */
     public $timestamp = null;
 
-    /**
-     * Source Existence
-     *
-     * @var boolean
-     */
+	/**
+	 * Source Existence
+	 *
+	 * @var boolean
+	 */
     public $exists = false;
 
-    /**
-     * Source File Base name
-     *
-     * @var string
-     */
+	/**
+	 * Source File Base name
+	 *
+	 * @var string
+	 */
     public $basename = null;
 
-    /**
-     * The Components an extended template is made of
-     *
-     * @var \Smarty_Template_Source[]
-     */
+	/**
+	 * The Components an extended template is made of
+	 *
+	 * @var \Smarty_Template_Source[]
+	 */
     public $components = null;
 
-    /**
-     * Resource Handler
-     *
-     * @var \Smarty_Resource
-     */
+	/**
+	 * Resource Handler
+	 *
+	 * @var \Smarty_Resource
+	 */
     public $handler = null;
 
-    /**
-     * Smarty instance
-     *
-     * @var Smarty
-     */
+	/**
+	 * Smarty instance
+	 *
+	 * @var Smarty
+	 */
     public $smarty = null;
 
-    /**
-     * Resource is source
-     *
-     * @var bool
-     */
+	/**
+	 * Resource is source
+	 *
+	 * @var bool
+	 */
     public $isConfig = false;
 
-    /**
-     * Template source content eventually set by default handler
-     *
-     * @var string
-     */
+	/**
+	 * Template source content eventually set by default handler
+	 *
+	 * @var string
+	 */
     public $content = null;
 
-    /**
-     * Name of the Class to compile this resource's contents with
-     *
-     * @var string
-     */
+	/**
+	 * Name of the Class to compile this resource's contents with
+	 *
+	 * @var string
+	 */
     public $compiler_class = 'Smarty_Internal_SmartyTemplateCompiler';
 
-    /**
-     * Name of the Class to tokenize this resource's contents with
-     *
-     * @var string
-     */
+	/**
+	 * Name of the Class to tokenize this resource's contents with
+	 *
+	 * @var string
+	 */
     public $template_lexer_class = 'Smarty_Internal_Templatelexer';
 
-    /**
-     * Name of the Class to parse this resource's contents with
-     *
-     * @var string
-     */
+	/**
+	 * Name of the Class to parse this resource's contents with
+	 *
+	 * @var string
+	 */
     public $template_parser_class = 'Smarty_Internal_Templateparser';
 
-    /**
-     * create Source Object container
-     *
-     * @param Smarty $smarty   Smarty instance this source object belongs to
-     * @param string $resource full template_resource
-     * @param string $type     type of resource
-     * @param string $name     resource name
-     *
-     * @throws   \SmartyException
-     * @internal param \Smarty_Resource $handler Resource Handler this source object communicates with
-     */
+	/**
+	 * create Source Object container
+	 *
+	 * @param Smarty $smarty   Smarty instance this source object belongs to
+	 * @param string $resource full template_resource
+	 * @param string $type     type of resource
+	 * @param string $name     resource name
+	 *
+	 * @throws   \SmartyException
+	 * @internal param \Smarty_Resource $handler Resource Handler this source object communicates with
+	 */
     public function __construct(Smarty $smarty, $resource, $type, $name)
     {
         $this->handler =
@@ -144,17 +144,17 @@ class Smarty_Template_Source
         $this->name = $name;
     }
 
-    /**
-     * initialize Source Object for given resource
-     * Either [$_template] or [$smarty, $template_resource] must be specified
-     *
-     * @param Smarty_Internal_Template $_template         template object
-     * @param Smarty                   $smarty            smarty object
-     * @param string                   $template_resource resource identifier
-     *
-     * @return Smarty_Template_Source Source Object
-     * @throws SmartyException
-     */
+	/**
+	 * initialize Source Object for given resource
+	 * Either [$_template] or [$smarty, $template_resource] must be specified
+	 *
+	 * @param Smarty_Internal_Template $_template         template object
+	 * @param Smarty                   $smarty            smarty object
+	 * @param string                   $template_resource resource identifier
+	 *
+	 * @return Smarty_Template_Source Source Object
+	 * @throws SmartyException
+	 */
     public static function load(
         Smarty_Internal_Template $_template = null,
         Smarty $smarty = null,
@@ -187,11 +187,11 @@ class Smarty_Template_Source
         return $source;
     }
 
-    /**
-     * Get source time stamp
-     *
-     * @return int
-     */
+	/**
+	 * Get source time stamp
+	 *
+	 * @return int
+	 */
     public function getTimeStamp()
     {
         if (!isset($this->timestamp)) {
@@ -200,12 +200,12 @@ class Smarty_Template_Source
         return $this->timestamp;
     }
 
-    /**
-     * Get source content
-     *
-     * @return string
-     * @throws \SmartyException
-     */
+	/**
+	 * Get source content
+	 *
+	 * @return string
+	 * @throws \SmartyException
+	 */
     public function getContent()
     {
         return isset($this->content) ? $this->content : $this->handler->getContent($this);

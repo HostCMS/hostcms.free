@@ -38,7 +38,7 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Admin_Form.add'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
@@ -49,7 +49,7 @@ $oAdmin_Form_Entity_Menus->add(
 	->add(
 		Admin_Form_Entity::factory('Menu')
 			->name(Core::_('Shop_Discountcard.levels'))
-			->icon('fa fa-bars')
+			->icon('fa-solid fa-bars')
 			->href(
 				$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/discountcard/level/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}")
 			)
@@ -60,7 +60,7 @@ $oAdmin_Form_Entity_Menus->add(
 	->add(
 		Admin_Form_Entity::factory('Menu')
 			->name(Core::_('Shop_Discountcard.types'))
-			->icon('fa fa-circle icon-separator')
+			->icon('fa-solid fa-circle icon-separator')
 			->href(
 				$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/discountcard/bonus/type/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}")
 			)
@@ -71,7 +71,7 @@ $oAdmin_Form_Entity_Menus->add(
 	->add(
 		Admin_Form_Entity::factory('Menu')
 			->name(Core::_('Shop_Discountcard.export'))
-			->icon('fa fa-upload')
+			->icon('fa-solid fa-upload')
 			->target('_blank')
 			->href(
 				$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'exportDiscountcards', NULL, 0, 0)
@@ -80,12 +80,23 @@ $oAdmin_Form_Entity_Menus->add(
 	->add(
 		Admin_Form_Entity::factory('Menu')
 			->name(Core::_('Shop_Discountcard.import'))
-			->icon('fa fa-download')
+			->icon('fa-solid fa-download')
 			->href(
 				$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'importDiscountcards', NULL, 0, 0)
 			)
 			->onclick(
 				$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'importDiscountcards', NULL, 0, 0)
+			)
+	)
+	->add(
+		Admin_Form_Entity::factory('Menu')
+			->name(Core::_('Shop_Discountcard.rebuild_levels'))
+			->icon('fa-solid fa-arrows-rotate')
+			->href(
+				$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'rebuildLevels', NULL, 0, 0)
+			)
+			->onclick(
+				$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'rebuildLevels', NULL, 0, 0)
 			)
 	)
 ;
@@ -194,12 +205,12 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 }
 
 // Действие импорта
-$oAdminFormActionEdit = $oAdmin_Form->Admin_Form_Actions->getByName('importDiscountcards');
+$oAdminFormActionImport = $oAdmin_Form->Admin_Form_Actions->getByName('importDiscountcards');
 
-if ($oAdminFormActionEdit && $oAdmin_Form_Controller->getAction() == 'importDiscountcards')
+if ($oAdminFormActionImport && $oAdmin_Form_Controller->getAction() == 'importDiscountcards')
 {
 	$oShopDiscountcardImport = Admin_Form_Action_Controller::factory(
-		'Shop_Discountcard_Import_Controller', $oAdminFormActionEdit
+		'Shop_Discountcard_Import_Controller', $oAdminFormActionImport
 	);
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
@@ -216,6 +227,24 @@ if ($oAdminFormActionExport && $oAdmin_Form_Controller->getAction() == 'exportDi
 {
 	$Shop_Discountcard_Export_Controller = new Shop_Discountcard_Export_Controller($oShop);
 	$Shop_Discountcard_Export_Controller->execute();
+}
+
+$oAdminFormActionRebuild = $oAdmin_Form->Admin_Form_Actions->getByName('rebuildLevels');
+
+if ($oAdminFormActionRebuild && $oAdmin_Form_Controller->getAction() == 'rebuildLevels')
+{
+	$oShop_Discountcard_Controller_Rebuild = Admin_Form_Action_Controller::factory(
+		'Shop_Discountcard_Controller_Rebuild', $oAdminFormActionRebuild
+	);
+
+	$oShop_Discountcard_Controller_Rebuild->Shop = $oShop;
+	$oShop_Discountcard_Controller_Rebuild->shop_group_id = $oShopGroup->id;
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oShop_Discountcard_Controller_Rebuild);
+
+	// Крошки при редактировании
+	$oShop_Discountcard_Controller_Rebuild->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 }
 
 if (!Core::moduleIsActive('siteuser'))

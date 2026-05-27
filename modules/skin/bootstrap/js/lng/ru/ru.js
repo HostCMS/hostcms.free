@@ -25,5 +25,6 @@ var i18n =
 "confirm_unsign": "Вы уверены, что хотите отозвать сертификат?",
 "important": "важно",
 "webauth_register_success": "Авторизация успешно сохранена",
-"copy_error_clipboard": "Скопировать ошибку в буфер"
+"copy_error_clipboard": "Скопировать ошибку в буфер",
+"copy_success": "Скопировано!",
 };

@@ -421,12 +421,12 @@ EOD;
 		return $this;
 	}
 
-    /**
-     * Creates or update a calendar resource on the CalDAV-Server (event, todo, etc.)
-     * @param string $sCalendar
-     * @return self
-     * @throws Core_Exception
-     */
+	/**
+	 * Creates or update a calendar resource on the CalDAV-Server (event, todo, etc.)
+	 * @param string $sCalendar
+	 * @return self
+	 * @throws Core_Exception
+	 */
 	public function save($sCalendar)
 	{
 		if (is_null($this->_client))

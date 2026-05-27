@@ -65,23 +65,23 @@ class Shop_Warehouse_Cell_Model extends Core_Entity
 		$count = $this->Shop_Warehouse_Cells->getCount();
 		$count && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
-			->value('<i class="fa fa-folder-o"></i> ' . $count)
+			->value('<i class="fa-regular fa-folder"></i> ' . $count)
 			->title(Core::_('Shop_Warehouse_Cell.all_cells_count', $count))
 			->execute();
 
 		$iCountShopItems = $this->getChildCount();
 		$iCountShopItems > 0 && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
-			->value('<i class="fa fa-file-o"></i> ' . $iCountShopItems)
+			->value('<i class="fa-regular fa-file"></i> ' . $iCountShopItems)
 			->title(Core::_('Shop_Warehouse_Cell.all_items_count', $iCountShopItems))
 			->execute();
 	}
 
-    /**
-     * Get cell name with separator
-     * @param int $offset
-     * @return string
-     */
+	/**
+	 * Get cell name with separator
+	 * @param int $offset
+	 * @return string
+	 */
 	public function nameWithSeparator($offset = 0)
 	{
 		$aParentCells = array();

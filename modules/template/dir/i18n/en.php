@@ -1,12 +1,5 @@
 <?php
-/**
- * Templates.
- *
- * @package HostCMS
- * @subpackage Template
- * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'Template sections',
 	'menu' => 'Template section',
@@ -32,4 +25,5 @@ return array(
 
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
+	'move_success' => 'Template sections moved',
 );

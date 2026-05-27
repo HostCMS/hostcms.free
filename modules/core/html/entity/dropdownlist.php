@@ -70,7 +70,7 @@ class Core_Html_Entity_Dropdownlist extends Core_Html_Entity
 					?><i class="<?php echo $aItemInfo['icon']?>"></i><?php
 				}
 
-				echo htmlspecialchars($aItemInfo['value']) . (!$this->disabled ? '<i class="fa fa-angle-down icon-separator-left"></i>' : '')?>
+				echo htmlspecialchars($aItemInfo['value']) . (!$this->disabled ? '<i class="fa-solid fa-angle-down icon-separator-left"></i>' : '')?>
 			</a>
 			<?php
 			if (!$this->disabled)
@@ -134,7 +134,7 @@ class Core_Html_Entity_Dropdownlist extends Core_Html_Entity
 			: array('value' => $aOptions[$itemIndex]);
 
 		$aItemInfo += array(
-			'icon' => 'fa fa-circle fa-dropdownlist',
+			'icon' => 'fa-solid fa-circle fa-dropdownlist',
 			'color' => '#aebec4',
 			'value' => NULL,
 			'class' => NULL,

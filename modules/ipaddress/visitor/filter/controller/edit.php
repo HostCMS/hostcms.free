@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Ipaddress
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Ipaddress_Visitor_Filter_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -80,7 +80,7 @@ class Ipaddress_Visitor_Filter_Controller_Edit extends Admin_Form_Action_Control
 				ob_start();
 				?>
 				<div class="form-group col-xs-12">
-					<a class="btn btn-sky" onclick="$.addIpaddressVisitorFilterCondition(this)"><i class="fa fa-plus"></i> <?php echo Core::_('Ipaddress_Filter.condition')?></a>
+					<a class="btn btn-sky" onclick="$.addIpaddressVisitorFilterCondition(this)"><i class="fa-solid fa-plus"></i> <?php echo Core::_('Ipaddress_Filter.condition')?></a>
 				</div>
 				<script>
 					$(function() {
@@ -98,7 +98,7 @@ class Ipaddress_Visitor_Filter_Controller_Edit extends Admin_Form_Action_Control
 				?>
 				<div class="col-xs-12">
 					<div class="well well-sm margin-bottom-10 ipaddress-filter-conditions">
-						<p class="semi-bold"><i class="widget-icon fa fa-list icon-separator palegreen"></i><?php echo Core::_('Ipaddress_Filter.conditions')?></p>
+						<p class="semi-bold"><i class="widget-icon fa-solid fa-list icon-separator palegreen"></i><?php echo Core::_('Ipaddress_Filter.conditions')?></p>
 
 						<?php
 						if (is_array($aJson))
@@ -201,7 +201,7 @@ class Ipaddress_Visitor_Filter_Controller_Edit extends Admin_Form_Action_Control
 															->controller($this->_Admin_Form_Controller)
 															->execute();
 														?>
-														<a class="delete-associated-item" onclick="res = confirm('<?php echo Core::_('Admin_Form.confirm_dialog', htmlspecialchars(Core::_('Admin_Form.delete')))?>'); if (res) { $(this).parents('.dd').remove() } return false"><i class="fa fa-times-circle darkorange"></i></a>
+														<a class="delete-associated-item" onclick="res = confirm('<?php echo Core::_('Admin_Form.confirm_dialog', htmlspecialchars(Core::_('Admin_Form.delete')))?>'); if (res) { $(this).parents('.dd').remove() } return false"><i class="fa-solid fa-circle-xmark darkorange"></i></a>
 													</div>
 												</div>
 											</div>
@@ -344,6 +344,7 @@ class Ipaddress_Visitor_Filter_Controller_Edit extends Admin_Form_Action_Control
 			{
 				$aLine['header'] = Core_Array::get($aHeader_Names, $key);
 				$aLine['header_case_sensitive'] = Core_Array::get($aHeader_Case_Sensitives, $key, 0, 'int');
+				$aLine['times'] = 1;
 			}
 
 			$aJson[] = $aLine;

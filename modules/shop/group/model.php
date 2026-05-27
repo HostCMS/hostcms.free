@@ -105,9 +105,11 @@ class Shop_Group_Model extends Core_Entity
 		'media_shop_group' => array(),
 		'media_item' => array('through' => 'media_shop_group'),
 		'shop_bonus' => array('through' => 'shop_group_bonus'),
+		'shop_gift' => array('through' => 'shop_group_gift'),
 		'shop_discount' => array('through' => 'shop_group_discount'),
 		'shop_group_discount' => array(),
-		'shop_group_bonus' => array()
+		'shop_group_bonus' => array(),
+		'shop_group_gift' => array()
 	);
 
 	/**
@@ -634,7 +636,7 @@ class Shop_Group_Model extends Core_Entity
 	/**
 	 * Switch indexation mode
 	 * @return Core_Entity
-     */
+	 */
 	public function changeIndexation()
 	{
 		$this->indexing = 1 - $this->indexing;
@@ -997,7 +999,7 @@ class Shop_Group_Model extends Core_Entity
 						->target('_blank')
 						->add(
 							Core_Html_Entity::factory('I')
-							->class('fa fa-external-link')
+							->class('fa-solid fa-arrow-up-right-from-square small')
 						)
 				);
 			}
@@ -1110,7 +1112,7 @@ class Shop_Group_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event shop_group.onBeforeRedeclaredDelete
+	 * @hostcms-event shop_group.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -1146,6 +1148,7 @@ class Shop_Group_Model extends Core_Entity
 
 		$this->Shop_Group_Discounts->deleteAll(FALSE);
 		$this->Shop_Group_Bonuses->deleteAll(FALSE);
+		$this->Shop_Group_Gifts->deleteAll(FALSE);
 
 		if (Core::moduleIsActive('media'))
 		{
@@ -1349,11 +1352,11 @@ class Shop_Group_Model extends Core_Entity
 	 */
 	protected $_showXmlMedia = FALSE;
 
-    /**
-     * Show properties in XML
-     * @param bool $showXmlMedia
-     * @return self
-     */
+	/**
+	 * Show properties in XML
+	 * @param bool $showXmlMedia
+	 * @return self
+	 */
 	public function showXmlMedia($showXmlMedia = TRUE)
 	{
 		$this->_showXmlMedia = $showXmlMedia;
@@ -1377,7 +1380,7 @@ class Shop_Group_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event shop_group.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')
@@ -1789,9 +1792,9 @@ class Shop_Group_Model extends Core_Entity
 			->execute();
 	}
 
-/**
+	/**
 	 * RestApi Upload Large Image from $_FILES['image']
-	 * @retrun string|NULL Uploaded image path
+	 * @return string|NULL Uploaded image path
 	 */
 	public function uploadLargeImage()
 	{
@@ -1836,7 +1839,7 @@ class Shop_Group_Model extends Core_Entity
 
 	/**
 	 * RestApi Upload Small Image from $_FILES['image']
-	 * @retrun string|NULL Uploaded image path
+	 * @return string|NULL Uploaded image path
 	 */
 	public function uploadSmallImage()
 	{

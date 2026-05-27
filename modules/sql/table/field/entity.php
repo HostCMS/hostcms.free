@@ -126,19 +126,19 @@ class Sql_Table_Field_Entity extends Core_Empty_Entity
 			{
 				case 'PRI':
 					Core_Html_Entity::factory('I')
-						->class('fas fa-key azure')
+						->class('fa-solid fa-key azure')
 						->title('PRIMARY KEY')
 						->execute();
 				break;
 				case 'UNI':
 					Core_Html_Entity::factory('I')
-						->class('fas fa-key darkorange')
+						->class('fa-solid fa-key darkorange')
 						->title('UNIQUE KEY')
 						->execute();
 				break;
 				case 'MUL':
 					Core_Html_Entity::factory('I')
-						->class('fas fa-key warning')
+						->class('fa-solid fa-key warning')
 						->title('MULTIPLE KEY')
 						->execute();
 				break;
@@ -163,7 +163,7 @@ class Sql_Table_Field_Entity extends Core_Empty_Entity
 	public function NullBackend()
 	{
 		$this->Null == 'YES' && Core_Html_Entity::factory('Span')
-			->value('<i class="fa fa-check-circle green" title="NULL"></i>')
+			->value('<i class="fa-solid fa-check-circle green" title="NULL"></i>')
 			->execute();
 	}
 
@@ -206,13 +206,13 @@ class Sql_Table_Field_Entity extends Core_Empty_Entity
 		$this->_values[$property] = $value;
 	}
 
-    /**
-     * Triggered when invoking inaccessible methods in an object context
-     * @param string $methodName
-     * @param array $arguments arguments
-     * @return mixed
-     * @hostcms-event modelname.onCall
-     */
+	/**
+	 * Triggered when invoking inaccessible methods in an object context
+	 * @param string $methodName
+	 * @param array $arguments arguments
+	 * @return mixed
+	 * @hostcms-event modelname.onCall
+	 */
 	public function __call($methodName, $arguments)
 	{
 		if (isset($this->_values[$methodName]) && count($arguments) == 0)

@@ -11,24 +11,24 @@
  */
 class Smarty_Internal_Method_GetStreamVariable
 {
-    /**
-     * Valid for all objects
-     *
-     * @var int
-     */
+	/**
+	 * Valid for all objects
+	 *
+	 * @var int
+	 */
     public $objMap = 7;
 
-    /**
-     * gets  a stream variable
-     *
-     * @api Smarty::getStreamVariable()
-     *
-     * @param \Smarty_Internal_Data|\Smarty_Internal_Template|\Smarty $data
-     * @param string                                                  $variable the stream of the variable
-     *
-     * @return mixed
-     * @throws \SmartyException
-     */
+	/**
+	 * gets  a stream variable
+	 *
+	 * @api Smarty::getStreamVariable()
+	 *
+	 * @param \Smarty_Internal_Data|\Smarty_Internal_Template|\Smarty $data
+	 * @param string                                                  $variable the stream of the variable
+	 *
+	 * @return mixed
+	 * @throws \SmartyException
+	 */
     public function getStreamVariable(Smarty_Internal_Data $data, $variable)
     {
         $_result = '';

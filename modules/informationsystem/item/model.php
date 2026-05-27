@@ -290,7 +290,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event informationsystem_item.onBeforeRedeclaredDelete
+	 * @hostcms-event informationsystem_item.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -1046,7 +1046,7 @@ class Informationsystem_Item_Model extends Core_Entity
 			$oCore_Html_Entity_Div
 			->add(
 				Core_Html_Entity::factory('I')
-					->class('fa fa-lock darkorange locked-item')
+					->class('fa-solid fa-lock darkorange locked-item')
 					->title(Core::_('Informationsystem_Item.closed'))
 			);
 		}
@@ -1082,7 +1082,7 @@ class Informationsystem_Item_Model extends Core_Entity
 							->target('_blank')
 							->add(
 								Core_Html_Entity::factory('I')
-									->class('fa fa-external-link')
+									->class('fa-solid fa-arrow-up-right-from-square small')
 							)
 					);
 			}
@@ -1092,7 +1092,7 @@ class Informationsystem_Item_Model extends Core_Entity
 			$oCore_Html_Entity_Div
 				->add(
 					Core_Html_Entity::factory('I')
-						->class('fa fa-clock-o black')
+						->class('fa-regular fa-clock black')
 				);
 		}
 
@@ -1308,11 +1308,11 @@ class Informationsystem_Item_Model extends Core_Entity
 	 */
 	protected $_showXmlCommentsRating = FALSE;
 
-    /**
-     * Add Comments Rating XML to item
-     * @param bool $showXmlCommentsRating
-     * @return self
-     */
+	/**
+	 * Add Comments Rating XML to item
+	 * @param bool $showXmlCommentsRating
+	 * @return self
+	 */
 	public function showXmlCommentsRating($showXmlCommentsRating = TRUE)
 	{
 		$this->_showXmlCommentsRating = $showXmlCommentsRating;
@@ -1376,11 +1376,11 @@ class Informationsystem_Item_Model extends Core_Entity
 	 */
 	protected $_showXmlVotes = FALSE;
 
-    /**
-     * Add votes XML to item
-     * @param bool $showXmlVotes
-     * @return self
-     */
+	/**
+	 * Add votes XML to item
+	 * @param bool $showXmlVotes
+	 * @return self
+	 */
 	public function showXmlVotes($showXmlVotes = TRUE)
 	{
 		$this->_showXmlVotes = $showXmlVotes;
@@ -1438,11 +1438,11 @@ class Informationsystem_Item_Model extends Core_Entity
 	 */
 	protected $_showXmlMedia = FALSE;
 
-    /**
-     * Show properties in XML
-     * @param bool $showXmlMedia
-     * @return self
-     */
+	/**
+	 * Show properties in XML
+	 * @param bool $showXmlMedia
+	 * @return self
+	 */
 	public function showXmlMedia($showXmlMedia = TRUE)
 	{
 		$this->_showXmlMedia = $showXmlMedia;
@@ -1525,7 +1525,7 @@ class Informationsystem_Item_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event informationsystem_item.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')
@@ -1831,7 +1831,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	/**
 	 * Create item
 	 * @return Core_Entity
-     */
+	 */
 	public function create()
 	{
 		$return = parent::create();
@@ -1870,20 +1870,19 @@ class Informationsystem_Item_Model extends Core_Entity
 				$oSiteAlias = $oSite->getCurrentAlias();
 				if ($oSiteAlias)
 				{
-					if ($this->informationsystem_group_id)
-					{
-						$url = $oSiteAlias->name
-							. $this->Informationsystem->Structure->getPath()
-							. $this->Informationsystem_Group->getPath();
-					}
-					else
-					{
-						$url = $oSiteAlias->name
-							. $this->Informationsystem->Structure->getPath();
-							//. $this->getPath();
-					}
-
 					$oCache_Static = Core_Cache::instance('static');
+					
+					// Group
+					$url = $oSiteAlias->name
+						. $this->Informationsystem->Structure->getPath();
+					$this->informationsystem_group_id
+						&& $url .= $this->Informationsystem_Group->getPath();
+					$oCache_Static->delete($url);
+					
+					// Item
+					$url = $oSiteAlias->name
+						. $this->Informationsystem->Structure->getPath()
+						. $this->getPath();
 					$oCache_Static->delete($url);
 				}
 			}
@@ -2031,13 +2030,13 @@ class Informationsystem_Item_Model extends Core_Entity
 		}
 	}
 
-    /**
-     * Get property value for SEO-templates
-     * @param int $property_id Property ID
-     * @param string $format string format, e.g. '%s: %s'. %1$s - Property Name, %2$s - List of Values
-     * @param string $separator
-     * @return string
-     */
+	/**
+	 * Get property value for SEO-templates
+	 * @param int $property_id Property ID
+	 * @param string $format string format, e.g. '%s: %s'. %1$s - Property Name, %2$s - List of Values
+	 * @param string $separator
+	 * @return string
+	 */
 	public function propertyValue($property_id, $format = '%2$s', $separator = ', ')
 	{
 		$oProperty = Core_Entity::factory('Property', $property_id);
@@ -2133,7 +2132,7 @@ class Informationsystem_Item_Model extends Core_Entity
 
 	/**
 	 * RestApi Upload Large Image from $_FILES['image']
-	 * @retrun string|NULL Uploaded image path
+	 * @return string|NULL Uploaded image path
 	 */
 	public function uploadLargeImage()
 	{
@@ -2178,7 +2177,7 @@ class Informationsystem_Item_Model extends Core_Entity
 
 	/**
 	 * RestApi Upload Small Image from $_FILES['image']
-	 * @retrun string|NULL Uploaded image path
+	 * @return string|NULL Uploaded image path
 	 */
 	public function uploadSmallImage()
 	{

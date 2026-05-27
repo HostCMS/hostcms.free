@@ -9,11 +9,13 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @copyright © 2005-2026, https://www.hostcms.ru
+ * @method static string _(mixed ...$key) Returns a string produced according to the formatting string.
  */
 class Core
 {
 	/**
 	 * Core::init() has been called
+	 * @var mixed
 	 */
 	static protected $_init = NULL;
 
@@ -65,7 +67,7 @@ class Core
 	/**
 	 * Check if self::init() has been called
 	 * @return boolean|null
-     */
+	 */
 	static public function isInit()
 	{
 		return self::$_init;
@@ -225,6 +227,11 @@ class Core
 		);
 	}
 
+	/**
+	 * Add content security policy
+	 * @param string $directive
+	 * @param string $value
+	 */
 	static public function addContentSecurityPolicy($directive, $value)
 	{
 		$aDirectives = array();
@@ -265,6 +272,7 @@ class Core
 
 	/**
 	 * Load Module Time
+	 * @var int
 	 */
 	static protected $_loadModuleTime = 0;
 
@@ -306,9 +314,6 @@ class Core
 
 		Core_Event::notify('Core.onAfterLoadModuleList');
 
-		/*self::$_logged && Core_Page::instance()->addFrontendExecutionTimes(
-			Core::_('Core.time_load_modules', Core::getmicrotime() - $fBeginTime)
-		);*/
 		self::$_logged && self::$_loadModuleTime += Core::getmicrotime() - $fBeginTime;
 	}
 
@@ -612,7 +617,6 @@ class Core
 	/**
 	 * Returns a string produced according to the formatting string $key.
 	 * @param string $key source string
-	 * @param boolean $convertSpecialCharacters Convert special characters, default TRUE
 	 *
 	 * <code>
 	 * // with convert special characters
@@ -654,13 +658,14 @@ class Core
 
 	/**
 	 * Site LNG
+	 * @var mixed
 	 */
 	static protected $_lng = NULL;
 
 	/**
 	 * Get Site Language
 	 * @return string|null
-     */
+	 */
 	static public function getLng()
 	{
 		return self::$_lng;
@@ -668,7 +673,7 @@ class Core
 
 	/**
 	 * Set Site Language
-	 * @param sting $lng
+	 * @param string $lng
 	 */
 	static public function setLng($lng)
 	{
@@ -1021,7 +1026,6 @@ class Core
 		if (!headers_sent())
 		{
 			header('Cache-Control: private, no-cache');
-			header('Pragma: no-cache'); // для старых систем
 			header('Content-Disposition: inline; filename="files.json"');
 			header('Vary: Accept');
 
@@ -1106,7 +1110,7 @@ class Core
 	static public function checkSearchEngineBot($agent)
 	{
 		return is_string($agent)
-			? (bool) preg_match('/360Spider|Applebot|Baiduspider|baidu|bingbot|BingPreview|Bytespider|coccocbot|Daumoa|DuckDuckBot|duckduckgo|Googlebot|GoogleOther|google|Mail\.RU_Bot|MojeekBot|Rambler|SeznamBot|Sogou|Swisscows|Yahoo|YandexBot|yandex|YisouSpider/iu', $agent)
+			? (bool) preg_match('/360Spider|Applebot|Baiduspider|baidu|bingbot|BingPreview|Bytespider|coccocbot|Daumoa|DuckDuckBot|duckduckgo|Googlebot|GoogleOther|google|Mail\.RU_Bot|MojeekBot|PetalBot|Rambler|SeznamBot|Sogou|Swisscows|Yahoo|YandexBot|yandex|YisouSpider/iu', $agent)
 			: FALSE;
 	}
 

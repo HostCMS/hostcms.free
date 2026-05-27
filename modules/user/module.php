@@ -20,9 +20,9 @@ class User_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 	/**
 	 * Module name
@@ -51,21 +51,21 @@ class User_Module extends Core_Module_Abstract
 			array(
 				'sorting' => 10,
 				'block' => 2,
-				'ico' => 'fa fa-user',
+				'ico' => 'fa-solid fa-user',
 				'name' => Core::_('User.menu'),
 				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/user/index.php"),
 				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/user/index.php'}); return false"),
 				'submenu' => array(
 					array(
 						'sorting' => 10,
-						'ico' => 'fa fa-clock-o',
+						'ico' => 'fa-regular fa-clock',
 						'name' => Core::_('User.timesheet_title'),
 						'href' => Admin_Form_Controller::correctBackendPath("/{admin}/user/timesheet/index.php"),
 						'onclick' => "$.adminLoad({path: hostcmsBackend + '/user/timesheet/index.php'}); return false"
 					),
 					array(
 						'sorting' => 20,
-						'ico' => 'fa fa-history',
+						'ico' => 'fa-solid fa-history',
 						'name' => Core::_('User.session'),
 						'href' => Admin_Form_Controller::correctBackendPath("/{admin}/user/session/index.php"),
 						'onclick' => "$.adminLoad({path: hostcmsBackend + '/user/session/index.php'}); return false"
@@ -169,34 +169,34 @@ class User_Module extends Core_Module_Abstract
 		{
 			// Завершение рабочего дня
 			case 0:
-				$sIconIco = "fa-child";
+				$sIconIco = "fa-solid fa-child";
 				$sIconColor = "white";
 				$sBackgroundColor = "bg-success";
 				$sNotificationColor = 'success';
 			break;
 			// Уведомление руководителя о завершениии дня с другим временем
 			case 1:
-				$sIconIco = "fa-clock-o";
+				$sIconIco = "fa-regular fa-clock";
 				$sIconColor = "white";
 				$sBackgroundColor = "bg-warning";
 				$sNotificationColor = 'warning';
 			break;
 			// Сотрудник не завершил предыдущий рабочий день
 			case 2:
-				$sIconIco = "fa-exclamation-circle";
+				$sIconIco = "fa-solid fa-exclamation-circle";
 				$sIconColor = "white";
 				$sBackgroundColor = "bg-danger";
 				$sNotificationColor = 'danger';
 			break;
 			// Уведомление от бота User_Bot_Send_Notification
 			case 3:
-				$sIconIco = "fa-android";
+				$sIconIco = "fa-solid fa-android";
 				$sIconColor = "white";
 				$sBackgroundColor = "bg-azure";
 				$sNotificationColor = 'azure';
 			break;
 			default:
-				$sIconIco = "fa-info";
+				$sIconIco = "fa-solid fa-info";
 				$sIconColor = "white";
 				$sBackgroundColor = "bg-themeprimary";
 				$sNotificationColor = 'info';
@@ -204,7 +204,7 @@ class User_Module extends Core_Module_Abstract
 
 		return array(
 			'icon' => array(
-				'ico' => "fa {$sIconIco}",
+				'ico' => "{$sIconIco}",
 				'color' => $sIconColor,
 				'background-color' => $sBackgroundColor
 			),

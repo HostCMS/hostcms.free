@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Trash_Module extends Trash_Module
 {
@@ -31,7 +31,7 @@ class Skin_Bootstrap_Module_Trash_Module extends Trash_Module
 			<div class="databox radius-bordered databox-shadowed hostcms-widget-databox">
 				<div class="databox-left bg-themesecondary">
 					<div class="databox-piechart">
-						<a href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/trash/index.php')?>" onclick="$.adminLoad({path: hostcmsBackend + '/trash/index.php'}); return false"><i class="fa fa-trash fa-3x"></i></a>
+						<a href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/trash/index.php')?>" onclick="$.adminLoad({path: hostcmsBackend + '/trash/index.php'}); return false"><i class="fa-solid fa-trash-can fa-3x"></i></a>
 					</div>
 				</div>
 				<?php
@@ -57,7 +57,7 @@ class Skin_Bootstrap_Module_Trash_Module extends Trash_Module
 						? Core::_('Trash.mark-deleted')
 						: Core::_('Trash.empty')?></div>
 					<div class="databox-stat themesecondary radius-bordered">
-						<i class="stat-icon icon-lg fa fa-trash"></i>
+						<i class="stat-icon icon-lg fa-solid fa-trash-can"></i>
 					</div>
 				</div>
 			</div>

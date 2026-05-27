@@ -100,7 +100,7 @@ class Chartaccount_Model extends Core_Entity
 	public function currencyBackend()
 	{
 		$this->currency && Core_Html_Entity::factory('Span')
-			->value('<i class="fa fa-check-circle-o palegreen"></i>')
+			->value('<i class="fa-regular fa-circle-check palegreen"></i>')
 			->execute();
 	}
 
@@ -110,7 +110,7 @@ class Chartaccount_Model extends Core_Entity
 	public function quantitativeBackend()
 	{
 		$this->quantitative && Core_Html_Entity::factory('Span')
-			->value('<i class="fa fa-check-circle-o palegreen"></i>')
+			->value('<i class="fa-regular fa-circle-check palegreen"></i>')
 			->execute();
 	}
 
@@ -120,7 +120,7 @@ class Chartaccount_Model extends Core_Entity
 	public function off_balanceBackend()
 	{
 		$this->off_balance && Core_Html_Entity::factory('Span')
-			->value('<i class="fa fa-check-circle-o palegreen"></i>')
+			->value('<i class="fa-regular fa-circle-check palegreen"></i>')
 			->execute();
 	}
 

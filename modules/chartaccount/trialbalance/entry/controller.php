@@ -111,7 +111,7 @@ class Chartaccount_Trialbalance_Entry_Controller extends Chartaccount_Trialbalan
 									$oSubcounts->add(
 										Admin_Form_Entity::factory('Span')
 											->class('btn btn-sm btn-default margin-right-10')
-											->add(Core_Html_Entity::factory('I')->class('fa fa-filter no-margin'))
+											->add(Core_Html_Entity::factory('I')->class('fa-solid fa-filter no-margin'))
 											->onclick("$.filterChartaccountTrialbalanceEntries(this, '" . $windowId . "', '" . $code . "')")
 									);
 

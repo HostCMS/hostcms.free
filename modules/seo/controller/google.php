@@ -37,7 +37,13 @@ class Seo_Controller_Google extends Seo_Controller
 					->data('refresh_token', $oGoogleToken->refresh_token)
 					->execute();
 
-				$oNewGoogleToken = json_decode($Core_Http->getDecompressedBody());
+				$message = $Core_Http->getDecompressedBody();
+				$oNewGoogleToken = json_decode($message);
+
+				if (!is_object($oNewGoogleToken) || !isset($oNewGoogleToken->access_token))
+				{
+					throw new Core_Exception("setToken(), Wrong response %message", array('%message' => $message), 0, FALSE);
+				}
 
 				$oNewGoogleToken->refresh_token = $oGoogleToken->refresh_token;
 				$oNewGoogleToken->time = time();
@@ -90,7 +96,7 @@ class Seo_Controller_Google extends Seo_Controller
 
 	/**
 	 * Get host id
-	 * @return id|NULL
+	 * @return int|NULL
 	 */
 	public function getHostId()
 	{
@@ -145,7 +151,7 @@ class Seo_Controller_Google extends Seo_Controller
 	/**
 	 * Add current site
 	 * @return string|NULL
-     */
+	 */
 	public function addCurrentSite()
 	{
 		// "host_url": "http://example.com"
@@ -316,7 +322,7 @@ class Seo_Controller_Google extends Seo_Controller
 	 */
 	public function getIcon()
 	{
-		return "<i class='fa fa-google google'></i>";
+		return "<i class='fa-brands fa-google google'></i>";
 	}
 
 	/**

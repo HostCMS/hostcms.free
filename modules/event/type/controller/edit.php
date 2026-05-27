@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Event_Type_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -81,7 +81,7 @@ class Event_Type_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		// Не задана иконка
 		if (trim(Core_Array::getPost('icon', '')) == FALSE)
 		{
-			$this->_formValues['icon'] = 'fa fa-circle';
+			$this->_formValues['icon'] = 'fa-solid fa-circle';
 		}
 
 		parent::_applyObjectProperty();

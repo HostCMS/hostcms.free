@@ -20,9 +20,9 @@ class Admin_Form_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 	/**
 	 * Module name
@@ -40,7 +40,7 @@ class Admin_Form_Module extends Core_Module_Abstract
 			array(
 				'sorting' => 174,
 				'block' => 3,
-				'ico' => 'fa fa-table',
+				'ico' => 'fa-solid fa-table',
 				'name' => Core::_('Admin_Form.menu'),
 				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/admin_form/index.php"),
 				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/admin_form/index.php'}); return false")

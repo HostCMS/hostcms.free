@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Lib
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -84,8 +84,8 @@ class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->buttonset(TRUE)
 					->ico(
 						array(
-							0 => 'fa-regular fa-file-lines fa-fw',
-							1 => 'fa-regular fa-file-lines fa-fw'
+							0 => 'fa-fw fa-regular fa-file-lines',
+							1 => 'fa-fw fa-regular fa-file-lines'
 						)
 					)
 					->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [0,1]); window.dispatchEvent(new Event('resize'));");
@@ -209,7 +209,7 @@ class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oAdmin_Form_Entity_Select = Admin_Form_Entity::factory('Select')
 					->options(
-						array(' … ') + $this->fillLibDir(0, $this->_object->id)
+						array(' … ') + $this->fillLibDir(0, array($this->_object->id))
 					)
 					->name('parent_id')
 					->value($this->_object->parent_id)
@@ -281,11 +281,11 @@ class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	/**
 	 * Create visual tree of the directories
 	 * @param int $iLibDirParentId parent directory ID
-	 * @param boolean $bExclude exclude group ID
+	 * @param array $bExclude exclude group ID
 	 * @param int $iLevel current nesting level
 	 * @return array
 	 */
-	public function fillLibDir($iLibDirParentId, $bExclude = FALSE, $iLevel = 0)
+	public function fillLibDir($iLibDirParentId, $aExclude = array(), $iLevel = 0)
 	{
 		$iLibDirParentId = intval($iLibDirParentId);
 		$iLevel = intval($iLevel);
@@ -299,12 +299,13 @@ class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		if (count($aChildrenDirs))
 		{
+			$countExclude = count($aExclude);
 			foreach ($aChildrenDirs as $oChildrenDir)
 			{
-				if ($bExclude != $oChildrenDir->id)
+				if ($countExclude == 0 || !in_array($oChildrenDir->id, $aExclude))
 				{
-					$aResult[$oChildrenDir->id] = str_repeat('  ', $iLevel) . $oChildrenDir->name;
-					$aResult += $this->fillLibDir($oChildrenDir->id, $bExclude, $iLevel+1);
+					$aResult[$oChildrenDir->id] = str_repeat('  ', $iLevel) . '[' . $oChildrenDir->id . '] ' . $oChildrenDir->name;
+					$aResult += $this->fillLibDir($oChildrenDir->id, $aExclude, $iLevel+1);
 				}
 			}
 		}

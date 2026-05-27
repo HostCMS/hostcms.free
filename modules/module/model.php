@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Module
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Module_Model extends Core_Entity
 {
@@ -338,7 +338,7 @@ class Module_Model extends Core_Entity
 		{
 			case 'markDeleted':
 			case 'changeActive':
-				if (in_array($this->path, array('core', 'module', 'admin_form', 'user', 'site', 'trash', 'constant', 'template')))
+				if (in_array($this->path, array('core', 'module', 'admin_form', 'user', 'site', 'trash', 'constant', 'template', 'structure')))
 				{
 					return FALSE;
 				}

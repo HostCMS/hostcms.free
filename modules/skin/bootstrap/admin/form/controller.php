@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 {
@@ -100,10 +100,10 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 					switch ($viewName)
 					{
 						case 'list':
-							?><i class="fa fa-bars"></i><?php
+							?><i class="fa-solid fa-bars"></i><?php
 						break;
 						case 'kanban':
-							?><i class="fa fa-align-left fa-rotate-90"></i><?php
+							?><i class="fa-solid fa-align-left fa-rotate-90"></i><?php
 						break;
 					}
 				?><span class="hidden-xxs hidden-xs"><?php echo Core::_('Admin_Form.' . $viewName)?></span></a><?php
@@ -161,7 +161,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 					$oCore_Html_Entity_A
 						->id('id_prev')
 						->add(Admin_Form_Entity::factory('Code')
-							->html('<i class="fa fa-angle-left"></i>')
+							->html('<i class="fa-solid fa-angle-left"></i>')
 						)
 				);
 
@@ -317,7 +317,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 					$oCore_Html_Entity_A
 						->id('id_next')
 						->add(Admin_Form_Entity::factory('Code')
-								->html('<i class="fa fa-angle-right"></i>')
+								->html('<i class="fa-solid fa-angle-right"></i>')
 							)
 				);
 
@@ -339,7 +339,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 								<div class="page-selector input-group input-group-xs hide">
 									<input type="text" class="form-control input-xs">
 									<span class="input-group-btn">
-										<a href="' . $sHref . '" onclick="' . $sOnclick . '" class="btn btn-xs btn-default icon-only"><i class="fa fa-caret-right success circular"></i></a>
+										<a href="' . $sHref . '" onclick="' . $sOnclick . '" class="btn btn-xs btn-default icon-only"><i class="fa-solid fa-caret-right success circular"></i></a>
 									</span>
 								</div>
 						')
@@ -357,9 +357,11 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 	 * @param string $href
 	 * @param string $onclick
 	 * @param string $class
+	 * @param string $selector
+	 * @param string $target
 	 * @return Admin_Form_Entity
 	 */
-	public function getTitleEditIcon($href, $onclick, $class = 'fa fa-pencil-square-o h5-edit-icon palegreen', $selector = 'h5.row-title', $target = "")
+	public function getTitleEditIcon($href, $onclick, $class = 'fa-solid fa-pencil-square h5-edit-icon palegreen', $selector = 'h5.row-title', $target = "")
 	{
 		// .attr("onclick", "' . $onclick . '")
 		return Admin_Form_Entity::factory('Code')
@@ -383,7 +385,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 	 * @param string $class
 	 * @return Admin_Form_Entity
 	 */
-	public function getTitlePathIcon($href, $class = 'fa fa-external-link h5-edit-icon azure')
+	public function getTitlePathIcon($href, $class = 'fa-solid fa-arrow-up-right-from-square h5-edit-icon azure')
 	{
 		return Admin_Form_Entity::factory('Code')
 			->html('

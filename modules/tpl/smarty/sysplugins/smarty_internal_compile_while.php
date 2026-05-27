@@ -16,16 +16,16 @@
  */
 class Smarty_Internal_Compile_While extends Smarty_Internal_CompileBase
 {
-    /**
-     * Compiles code for the {while} tag
-     *
-     * @param array                                 $args      array with attributes from parser
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler  compiler object
-     * @param array                                 $parameter array with compilation parameter
-     *
-     * @return string compiled code
-     * @throws \SmartyCompilerException
-     */
+	/**
+	 * Compiles code for the {while} tag
+	 *
+	 * @param array                                 $args      array with attributes from parser
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler  compiler object
+	 * @param array                                 $parameter array with compilation parameter
+	 *
+	 * @return string compiled code
+	 * @throws \SmartyCompilerException
+	 */
     public function compile($args, Smarty_Internal_TemplateCompilerBase $compiler, $parameter)
     {
         $compiler->loopNesting++;
@@ -79,14 +79,14 @@ class Smarty_Internal_Compile_While extends Smarty_Internal_CompileBase
  */
 class Smarty_Internal_Compile_Whileclose extends Smarty_Internal_CompileBase
 {
-    /**
-     * Compiles code for the {/while} tag
-     *
-     * @param array                                 $args     array with attributes from parser
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler compiler object
-     *
-     * @return string compiled code
-     */
+	/**
+	 * Compiles code for the {/while} tag
+	 *
+	 * @param array                                 $args     array with attributes from parser
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler compiler object
+	 *
+	 * @return string compiled code
+	 */
     public function compile($args, Smarty_Internal_TemplateCompilerBase $compiler)
     {
         $compiler->loopNesting--;

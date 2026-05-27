@@ -121,7 +121,7 @@ class Shop_Discountcard_Controller_Edit extends Admin_Form_Action_Controller_Typ
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name
 	 * @return bool
-     */
+	 */
 	public function execute($operation = NULL)
 	{
 		if (!$this->_object->id && !is_null($operation) && $operation != '')

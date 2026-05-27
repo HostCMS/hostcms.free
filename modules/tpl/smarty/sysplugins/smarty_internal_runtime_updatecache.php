@@ -9,26 +9,26 @@
  **/
 class Smarty_Internal_Runtime_UpdateCache
 {
-    /**
-     * check client side cache
-     *
-     * @param \Smarty_Template_Cached  $cached
-     * @param Smarty_Internal_Template $_template
-     * @param string                   $content
-     */
+	/**
+	 * check client side cache
+	 *
+	 * @param \Smarty_Template_Cached  $cached
+	 * @param Smarty_Internal_Template $_template
+	 * @param string                   $content
+	 */
     public function cacheModifiedCheck(Smarty_Template_Cached $cached, Smarty_Internal_Template $_template, $content)
     {
     }
 
-    /**
-     * Cache was invalid , so render from compiled and write to cache
-     *
-     * @param \Smarty_Template_Cached   $cached
-     * @param \Smarty_Internal_Template $_template
-     * @param                           $no_output_filter
-     *
-     * @throws \Exception
-     */
+	/**
+	 * Cache was invalid , so render from compiled and write to cache
+	 *
+	 * @param \Smarty_Template_Cached   $cached
+	 * @param \Smarty_Internal_Template $_template
+	 * @param                           $no_output_filter
+	 *
+	 * @throws \Exception
+	 */
     public function updateCache(Smarty_Template_Cached $cached, Smarty_Internal_Template $_template, $no_output_filter)
     {
         ob_start();
@@ -55,15 +55,15 @@ class Smarty_Internal_Runtime_UpdateCache
         }
     }
 
-    /**
-     * Sanitize content and write it to cache resource
-     *
-     * @param \Smarty_Template_Cached  $cached
-     * @param Smarty_Internal_Template $_template
-     * @param bool                     $no_output_filter
-     *
-     * @throws \SmartyException
-     */
+	/**
+	 * Sanitize content and write it to cache resource
+	 *
+	 * @param \Smarty_Template_Cached  $cached
+	 * @param Smarty_Internal_Template $_template
+	 * @param bool                     $no_output_filter
+	 *
+	 * @throws \SmartyException
+	 */
     public function removeNoCacheHash(
         Smarty_Template_Cached $cached,
         Smarty_Internal_Template $_template,
@@ -126,14 +126,14 @@ class Smarty_Internal_Runtime_UpdateCache
         $this->writeCachedContent($_template, $content);
     }
 
-    /**
-     * Writes the content to cache resource
-     *
-     * @param Smarty_Internal_Template $_template
-     * @param string                   $content
-     *
-     * @return bool
-     */
+	/**
+	 * Writes the content to cache resource
+	 *
+	 * @param Smarty_Internal_Template $_template
+	 * @param string                   $content
+	 *
+	 * @return bool
+	 */
     public function writeCachedContent(Smarty_Internal_Template $_template, $content)
     {
         if ($_template->source->handler->recompiled || !$_template->caching
@@ -148,14 +148,14 @@ class Smarty_Internal_Runtime_UpdateCache
         return $this->write($_template, $content);
     }
 
-    /**
-     * Write this cache object to handler
-     *
-     * @param Smarty_Internal_Template $_template template object
-     * @param string                   $content   content to cache
-     *
-     * @return bool success
-     */
+	/**
+	 * Write this cache object to handler
+	 *
+	 * @param Smarty_Internal_Template $_template template object
+	 * @param string                   $content   content to cache
+	 *
+	 * @return bool success
+	 */
     public function write(Smarty_Internal_Template $_template, $content)
     {
         if (!$_template->source->handler->recompiled) {

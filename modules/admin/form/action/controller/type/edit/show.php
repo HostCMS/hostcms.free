@@ -44,12 +44,12 @@ abstract class Admin_Form_Action_Controller_Type_Edit_Show extends Core_Servant_
 		$this->_Admin_Form_Entity_Form = $oAdmin_Form_Entity_Form;
 	}
 
-    /**
-     * Create new form controller
-     * @param object $oAdmin_Form_Entity_Form
-     * @return object
-     * @throws Core_Exception
-     */
+	/**
+	 * Create new form controller
+	 * @param object $oAdmin_Form_Entity_Form
+	 * @return object
+	 * @throws Core_Exception
+	 */
 	static public function create($oAdmin_Form_Entity_Form)
 	{
 		$className = 'Skin_' . ucfirst(Core_Skin::instance()->getSkinName()) . '_' . __CLASS__;

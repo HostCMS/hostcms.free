@@ -16,15 +16,15 @@
  */
 class Smarty_Internal_Compile_Setfilter extends Smarty_Internal_CompileBase
 {
-    /**
-     * Compiles code for setfilter tag
-     *
-     * @param array                                 $args      array with attributes from parser
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler  compiler object
-     * @param array                                 $parameter array with compilation parameter
-     *
-     * @return string compiled code
-     */
+	/**
+	 * Compiles code for setfilter tag
+	 *
+	 * @param array                                 $args      array with attributes from parser
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler  compiler object
+	 * @param array                                 $parameter array with compilation parameter
+	 *
+	 * @return string compiled code
+	 */
     public function compile($args, Smarty_Internal_TemplateCompilerBase $compiler, $parameter)
     {
         $compiler->variable_filter_stack[] = $compiler->variable_filters;
@@ -43,15 +43,15 @@ class Smarty_Internal_Compile_Setfilter extends Smarty_Internal_CompileBase
  */
 class Smarty_Internal_Compile_Setfilterclose extends Smarty_Internal_CompileBase
 {
-    /**
-     * Compiles code for the {/setfilter} tag
-     * This tag does not generate compiled output. It resets variable filter.
-     *
-     * @param array                                 $args     array with attributes from parser
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler compiler object
-     *
-     * @return string compiled code
-     */
+	/**
+	 * Compiles code for the {/setfilter} tag
+	 * This tag does not generate compiled output. It resets variable filter.
+	 *
+	 * @param array                                 $args     array with attributes from parser
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler compiler object
+	 *
+	 * @return string compiled code
+	 */
     public function compile($args, Smarty_Internal_TemplateCompilerBase $compiler)
     {
         $_attr = $this->getAttributes($compiler, $args);

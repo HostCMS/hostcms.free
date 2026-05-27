@@ -17,14 +17,14 @@
  */
 class Smarty_Internal_Resource_File extends Smarty_Resource
 {
-    /**
-     * populate Source Object with meta data from Resource
-     *
-     * @param Smarty_Template_Source   $source    source object
-     * @param Smarty_Internal_Template $_template template object
-     *
-     * @throws \SmartyException
-     */
+	/**
+	 * populate Source Object with meta data from Resource
+	 *
+	 * @param Smarty_Template_Source   $source    source object
+	 * @param Smarty_Internal_Template $_template template object
+	 *
+	 * @throws \SmartyException
+	 */
     public function populate(Smarty_Template_Source $source, Smarty_Internal_Template $_template = null)
     {
         $source->filepath = $this->buildFilepath($source, $_template);
@@ -43,11 +43,11 @@ class Smarty_Internal_Resource_File extends Smarty_Resource
         }
     }
 
-    /**
-     * populate Source Object with timestamp and exists from Resource
-     *
-     * @param Smarty_Template_Source $source source object
-     */
+	/**
+	 * populate Source Object with timestamp and exists from Resource
+	 *
+	 * @param Smarty_Template_Source $source source object
+	 */
     public function populateTimestamp(Smarty_Template_Source $source)
     {
         if (!$source->exists) {
@@ -58,46 +58,46 @@ class Smarty_Internal_Resource_File extends Smarty_Resource
         }
     }
 
-    /**
-     * Load template's source from file into current template object
-     *
-     * @param Smarty_Template_Source $source source object
-     *
-     * @return string                 template source
-     * @throws SmartyException        if source cannot be loaded
-     */
+	/**
+	 * Load template's source from file into current template object
+	 *
+	 * @param Smarty_Template_Source $source source object
+	 *
+	 * @return string                 template source
+	 * @throws SmartyException        if source cannot be loaded
+	 */
     public function getContent(Smarty_Template_Source $source)
     {
         if ($source->exists) {
             return file_get_contents($source->filepath);
         }
         throw new SmartyException(
-            'Unable to read ' . ($source->isConfig ? 'config' : 'template') .
+        	'Unable to read ' . ($source->isConfig ? 'config' : 'template') .
             " {$source->type} '{$source->name}'"
         );
     }
 
-    /**
-     * Determine basename for compiled filename
-     *
-     * @param Smarty_Template_Source $source source object
-     *
-     * @return string                 resource's basename
-     */
+	/**
+	 * Determine basename for compiled filename
+	 *
+	 * @param Smarty_Template_Source $source source object
+	 *
+	 * @return string                 resource's basename
+	 */
     public function getBasename(Smarty_Template_Source $source)
     {
         return basename($source->filepath);
     }
 
-    /**
-     * build template filepath by traversing the template_dir array
-     *
-     * @param Smarty_Template_Source   $source    source object
-     * @param Smarty_Internal_Template $_template template object
-     *
-     * @return string fully qualified filepath
-     * @throws SmartyException
-     */
+	/**
+	 * build template filepath by traversing the template_dir array
+	 *
+	 * @param Smarty_Template_Source   $source    source object
+	 * @param Smarty_Internal_Template $_template template object
+	 *
+	 * @return string fully qualified filepath
+	 * @throws SmartyException
+	 */
     protected function buildFilepath(Smarty_Template_Source $source, Smarty_Internal_Template $_template = null)
     {
         $file = $source->name;

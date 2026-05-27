@@ -6,6 +6,9 @@ return array(
 	'authorization_form_password' => 'Пароль',
 	'authorization_form_ip' => 'Привязать сессию к IP-адресу',
 	'authorization_form_button' => 'Войти',
+	'authorization_form_login_with_password' => 'Войти по паролю',
+	'authorization_form_enable_quick_login' => 'Подключить быстрый вход?',
+	
 	'themes' => 'Темы',
 	'authorization_error_valid_user' => "Ошибка! Неверные данные, логин <b>%s</b>!<br />Ваш IP-адрес <b>%s</b>, администратор уведомлен о событии.",
 	'authorization_error_access_temporarily_unavailable' => 'Доступ временно запрещен, логин %s. Вы можете попробовать ввести пароль через %d сек.',

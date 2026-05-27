@@ -802,7 +802,7 @@ class Core_Diagram extends Core_Servant_Properties
 		}
 
 		imagepng($im);
-		
+
 		PHP_VERSION_ID < 80500 && imagedestroy($im);
 		unset($im);
 
@@ -812,7 +812,7 @@ class Core_Diagram extends Core_Servant_Properties
 	/**
 	 * Метод возвращает идентификатор основного цвета
 	 *
-	 * @param int $im Ресурс
+	 * @param GdImage $im Ресурс
 	 * @param int $color_id Порядковый номер цвета
 	 * @return int $return Идентификатор основного цвета
 	 */
@@ -904,7 +904,7 @@ class Core_Diagram extends Core_Servant_Properties
 	/**
 	 * Метод для рисования заполненного округленного прямоугольника
 	 *
-	 * @param int $im Ресурс
+	 * @param GdImage $im Ресурс
 	 * @param int $X1 Координата х верхнего левого угла прямоугольника
 	 * @param int $Y1 Координата у верхнего левого угла прямоугольника
 	 * @param int $X2 Координата х правого нижнего угла прямоугольника
@@ -940,7 +940,7 @@ class Core_Diagram extends Core_Servant_Properties
 	/**
 	 * Метод для рисования незаполненного округленного прямоугольника.
 	 *
-	 * @param int $im Ресурс
+	 * @param GdImage $im Ресурс
 	 * @param int $X1 Координата х верхнего левого угла прямоугольника
 	 * @param int $Y1 Координата у верхнего левого угла прямоугольника
 	 * @param int $X2 Координата х правого нижнего угла прямоугольника
@@ -965,7 +965,7 @@ class Core_Diagram extends Core_Servant_Properties
 	/**
 	 * Метод для рисования заполненного прямоугольника
 	 *
-	 * @param int $im Ресурс
+	 * @param GdImage $im Ресурс
 	 * @param int $X1 Координата х верхнего левого угла прямоугольника
 	 * @param int $Y1 Координата у верхнего левого угла прямоугольника
 	 * @param int $X2 Координата х правого нижнего угла прямоугольника
@@ -1049,7 +1049,7 @@ class Core_Diagram extends Core_Servant_Properties
 	/**
 	 * Рисование точки
 	 *
-	 * @param int $im Ресурс
+	 * @param GdImage $im Ресурс
 	 * @param int $X Координата х
 	 * @param int $Y Координата у
 	 * @param int $R Значение красного цвета
@@ -1111,7 +1111,7 @@ class Core_Diagram extends Core_Servant_Properties
 	/**
 	 * Рисования точки с оттенком
 	 *
-	 * @param int $im Ресурс
+	 * @param GdImage $im Ресурс
 	 * @param int $X Координата х
 	 * @param int $Y Координата у
 	 * @param int $alpha Коэффициент изменения цвета
@@ -1148,7 +1148,7 @@ class Core_Diagram extends Core_Servant_Properties
 	/**
 	 * Оттенок цвета
 	 *
-	 * @param int $im Ресурс
+	 * @param GdImage $im Ресурс
 	 * @param int $color_id Идентификатор исходного цвета
 	 * @param int $color_factor Коэффициент смещения оттенка
 	 * @return int $color Идентификатор оттенка
@@ -1191,7 +1191,7 @@ class Core_Diagram extends Core_Servant_Properties
 		imagefill($im, 0, 0, $white);
 
 		imagepng($im);
-		
+
 		PHP_VERSION_ID < 80500 && imagedestroy($im);
 		unset($im);
 
@@ -1435,6 +1435,7 @@ class Core_Diagram extends Core_Servant_Properties
 
 		// Массив с координатами верхней части сегментов диаграммы
 		$TopParts = array();
+
 		// Массив с координатами нижней части сегментов диаграммы
 		$BotParts = array();
 
@@ -1456,8 +1457,6 @@ class Core_Diagram extends Core_Servant_Properties
 
 		// Процент сегмента от всей диаграммы
 		$JointPercent = $value_sum ? 100 / $value_sum : 1;
-
-		$BotParts = "";
 
 		// Центр диаграммы
 		$center_x =($image_width - $legend_width - 25) / 2;
@@ -1613,7 +1612,7 @@ class Core_Diagram extends Core_Servant_Properties
 		}
 
 		imagepng($im);
-		
+
 		PHP_VERSION_ID < 80500 && imagedestroy($im);
 		unset($im);
 	}
@@ -1690,7 +1689,7 @@ class Core_Diagram extends Core_Servant_Properties
 		$max = intval($max);
 		$H1 = count($this->values) > 2 ? $H + 60 : $H;
 
-		$im = imagecreate($W,$H1);
+		$im = imagecreate($W, $H1);
 		// Цвет фона(белый)
 		$bg[0] = imagecolorallocate($im, 255, 255, 255);
 		// Цвет задней грани графика(серый)
@@ -1705,19 +1704,19 @@ class Core_Diagram extends Core_Servant_Properties
 		$black = imagecolorallocate($im, 0, 0, 0);
 
 		// Цвета для столбиков
-		$bar[0][0] = imagecolorallocate($im,255,128,234);
-		$bar[0][1] = imagecolorallocate($im,222,95,201);
-		$bar[0][2] = imagecolorallocate($im,191,65,170);
-		$bar[2][0] = imagecolorallocate($im,222,214,0);
-		$bar[2][1] = imagecolorallocate($im,181,187,65);
-		$bar[2][2] = imagecolorallocate($im,161,155,0);
-		$bar[1][0] = imagecolorallocate($im,128,234,255);
-		$bar[1][1] = imagecolorallocate($im,95,201,222);
-		$bar[1][2] = imagecolorallocate($im,65,170,191);
+		$bar[0][0] = imagecolorallocate($im, 255, 128, 234);
+		$bar[0][1] = imagecolorallocate($im, 222, 95, 201);
+		$bar[0][2] = imagecolorallocate($im, 191, 65, 170);
+		$bar[2][0] = imagecolorallocate($im, 222, 214, 0);
+		$bar[2][1] = imagecolorallocate($im, 181, 187, 65);
+		$bar[2][2] = imagecolorallocate($im, 161, 155, 0);
+		$bar[1][0] = imagecolorallocate($im, 128, 234, 255);
+		$bar[1][1] = imagecolorallocate($im, 95, 201, 222);
+		$bar[1][2] = imagecolorallocate($im, 65, 170, 191);
 
 		// Количество подписей и горизонтальных линий
 		// сетки по оси Y.
-		$county = count($this->values[0]);
+		// $county = count($this->values[0]);
 
 		// Подравняем левую границу с учетом ширины подписей по оси Y
 		$text_width = mb_strlen($max) * $LW;
@@ -1738,13 +1737,13 @@ class Core_Diagram extends Core_Servant_Properties
 		// Вывод неизменяемой сетки(горизонтальные линии на нижней грани и вертикальные линии сетки на левой грани
 		for ($i=1; $i < (count($this->values)-1); $i++)
 		{
-			imageline($im, $ML + $i * intval($DX /(count($this->values) - 1)),
-				$M + $DY - $i * intval($DY /(count($this->values) - 1)),
-				$ML + $i * intval($DX /(count($this->values) - 1)),
+			imageline($im, $ML + $i * intval($DX /(count($this->values) - 1)), 
+				$M + $DY - $i * intval($DY /(count($this->values) - 1)), 
+				$ML + $i * intval($DX /(count($this->values) - 1)), 
 				$H - $MB - $i * intval($DY /(count($this->values) - 1)), $c);
-			imageline($im, $ML + $i * intval($DX /(count($this->values) - 1)),
-				$H - $MB - $i * intval($DY /(count($this->values) - 1)),
-				$W - $M - $DX + $i * intval($DX /(count($this->values) - 1)),
+			imageline($im, $ML + $i * intval($DX /(count($this->values) - 1)), 
+				$H - $MB - $i * intval($DY /(count($this->values) - 1)), 
+				$W - $M - $DX + $i * intval($DX /(count($this->values) - 1)), 
 				$H - $MB - $i * intval($DY /(count($this->values) - 1)), $c);
 		}
 
@@ -1759,8 +1758,8 @@ class Core_Diagram extends Core_Servant_Properties
 		// Вывод изменяемой сетки(вертикальные линии сетки на нижней грани графика и вертикальные линии на задней грани графика)
 		for ($i = 0; $i < $count; $i++)
 		{
-			imageline($im,$X0 + $i *($RW / $count),$Y0,$X0 + $i *($RW / $count) - $DX,$Y0 + $DY,$c);
-			imageline($im,$X0 + $i *($RW / $count),$Y0,$X0 + $i *($RW / $count),$Y0 - $RH,$c);
+			imageline($im, intval($X0 + $i *($RW / $count)), $Y0, intval($X0 + $i *($RW / $count) - $DX), $Y0 + $DY, $c);
+			imageline($im, intval($X0 + $i *($RW / $count)), $Y0, intval($X0 + $i *($RW / $count)), $Y0 - $RH, $c);
 		}
 
 		// Горизонтальные линии сетки задней и левой граней.
@@ -1785,7 +1784,7 @@ class Core_Diagram extends Core_Servant_Properties
 			{
 				if (isset($this->values[$j][$i]))
 				{
-					$this->_imagebar($im, $X0 + $i *($RW / $count) + 4 -($j + 1) * intval($DX / 3), $Y0 +($j + 1) * intval($DY / 3), intval($RW / $count) - 4, $step / $k * $this->values[$j][$i], intval($DX / 3) - 5, intval($DY / 3) - 3, $bar[$j][0], $bar[$j][1], $bar[$j][2]);
+					$this->_imagebar($im, intval($X0 + $i *($RW / $count) + 4 -($j + 1) * intval($DX / 3)), intval($Y0 +($j + 1) * intval($DY / 3)), intval($RW / $count) - 4, intval($step / $k * $this->values[$j][$i]), intval($DX / 3) - 5, intval($DY / 3) - 3, $bar[$j][0], $bar[$j][1], $bar[$j][2]);
 				}
 			}
 		}
@@ -1794,16 +1793,18 @@ class Core_Diagram extends Core_Servant_Properties
 		for ($i = 0; $i <= $n; $i++)
 		{
 			$lenght = mb_strlen($max) - 1;
-			$str = $lenght > 0 ? $i * pow(10,$lenght) : $i;
+			$str = $lenght > 0 ? $i * pow(10, $lenght) : $i;
 
-			// Вертекальная градация
-			imagestring($im, 2, $X0 - $DX - mb_strlen($str) * $LW - $ML / 4 - 2, $Y0 + $DY - $step * $i - imagefontheight(2) / 2, $str, $text);
+			// Вертикальная градация
+			imagestring($im, 2, intval($X0 - $DX - mb_strlen($str) * $LW - $ML / 4 - 2), intval($Y0 + $DY - $step * $i - imagefontheight(2) / 2), $str, $text);
 		}
 
 		// Вывод подписей по оси X
 		$max_strlen = 0;
 
-		if (Core_Type_Conversion::toInt($param['horizontal_orientation']) == 0)
+		$horizontal_orientation = 0;
+
+		if ($horizontal_orientation == 0)
 		{
 			for ($i = 0; $i < count($this->values["x"]); $i++)
 			{
@@ -1824,7 +1825,7 @@ class Core_Diagram extends Core_Servant_Properties
 		{
 			if ($prev - $twidth > $i)
 			{
-				$drawx = $i + 1 -($RW / $count) / 2;
+				$drawx = intval($i + 1 - ($RW / $count) / 2);
 				if ($drawx > $X0 - $DX)
 				{
 					$k = round(($i - $X0 + $DX) /($RW / $count)) - 1;
@@ -1832,18 +1833,18 @@ class Core_Diagram extends Core_Servant_Properties
 					{
 						/* Горизонтальная градация */
 						$str = $this->values["x"][$k];
-						imageline($im, $drawx, $Y0 + $DY, $i + 1 -($RW / $count) / 2, $Y0 + $DY + 5, $text);
+						imageline($im, $drawx, intval($Y0 + $DY), intval($i + 1 -($RW / $count) / 2), intval($Y0 + $DY + 5), $text);
 
 						/* Определяем тип вывода текста для оси Ox */
-						if (Core_Type_Conversion::toInt($param['horizontal_orientation']) == 0)
+						if ($horizontal_orientation == 0)
 						{
 							// Тест отображается горизонтально
-							imagestring($im, 2, $drawx + 1 -(mb_strlen($str) * $LW) / 2, $Y0 + $DY + 7, $str, $text);
+							imagestring($im, 2, intval($drawx + 1 -(mb_strlen($str) * $LW) / 2), intval($Y0 + $DY + 7), $str, $text);
 						}
 						else
 						{
 							// Текст отображается вертикально слева на право
-							imagestringup($im, 2, $drawx - $LH / 2, $Y0 + $DY + 7 + mb_strlen($str) * $LW, $str, $text);
+							imagestringup($im, 2, intval($drawx - $LH / 2), intval($Y0 + $DY + 7 + mb_strlen($str) * $LW), $str, $text);
 						}
 					}
 				}
@@ -1885,26 +1886,26 @@ class Core_Diagram extends Core_Servant_Properties
 			foreach ($this->legend as $v)
 			{
 				$dy = $y +($i * $font_h);
-				imagettftext($im,$fontSize,0,$text_x, $dy + $font_h, $black, $this->_fontPath . $this->fontName, $v);
-				ImageFilledRectangle($im, $square_x + 2,$dy + 2,$square_x + $font_h,$dy + $font_h, $bar[$i][1]);
-				ImageRectangle($im, $square_x + 2,$dy + 2,$square_x + $font_h,$dy + $font_h, $black);
+				imagettftext($im, $fontSize, 0, $text_x, $dy + $font_h, $black, $this->_fontPath . $this->fontName, $v);
+				ImageFilledRectangle($im, $square_x + 2, $dy + 2, $square_x + $font_h, $dy + $font_h, $bar[$i][1]);
+				ImageRectangle($im, $square_x + 2, $dy + 2, $square_x + $font_h, $dy + $font_h, $black);
 				$i++;
 			}
 		}
 
 		header("Content-Type: image/png");
 		imagepng($im);
-		
+
 		PHP_VERSION_ID < 80500 && imagedestroy($im);
 		unset($im);
-		
+
 		return TRUE;
 	}
 
 	/**
 	 * Рисование BAR
 	 *
-	 * @param int $im идентификатор изображения
+	 * @param GdImage $im идентификатор изображения
 	 * @param int $x координата x верхнего левого угла куба
 	 * @param int $y координата y верхнего левого угла куба
 	 * @param int $w ширина куба
@@ -1924,14 +1925,14 @@ class Core_Diagram extends Core_Servant_Properties
 				$x + $w, $y - $h,
 				$x + $w + $dx, $y - $h - $dy,
 				$x + $dx, $y - $dy - $h
-				), 4, $c1);
+				), $c1);
 
 			imagefilledpolygon($im, array(
-			$x + $w, $y - $h,
-			$x + $w, $y,
-			$x + $w + $dx, $y - $dy,
-			$x + $w + $dx, $y - $dy - $h
-			), 4, $c3);
+				$x + $w, $y - $h,
+				$x + $w, $y,
+				$x + $w + $dx, $y - $dy,
+				$x + $w + $dx, $y - $dy - $h
+				), $c3);
 		}
 		imagefilledrectangle($im, $x, $y - $h, $x + $w, $y, $c2);
 

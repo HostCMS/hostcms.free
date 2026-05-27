@@ -60,7 +60,7 @@ class Shop_Group_Discount_Model extends Core_Entity
 	/**
 	 * Get element by discount id
 	 * @param int $iDiscountId id
-	 * @return Shop_Discount|NULL
+	 * @return Shop_Discount_Model|NULL
 	 */
 	public function getByDiscountId($iDiscountId)
 	{
@@ -260,7 +260,7 @@ class Shop_Group_Discount_Model extends Core_Entity
 	 */
 	public function imgBackend()
 	{
-		return '<i class="fa-regular fa-folder-open"></i>';
+		return '<i class="fa-regular fa-folder-open warning"></i>';
 	}
 
 	/**

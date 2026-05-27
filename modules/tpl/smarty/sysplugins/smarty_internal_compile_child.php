@@ -15,38 +15,38 @@
  */
 class Smarty_Internal_Compile_Child extends Smarty_Internal_CompileBase
 {
-    /**
-     * Attribute definition: Overwrites base class.
-     *
-     * @var array
-     * @see Smarty_Internal_CompileBase
-     */
+	/**
+	 * Attribute definition: Overwrites base class.
+	 *
+	 * @var array
+	 * @see Smarty_Internal_CompileBase
+	 */
     public $optional_attributes = array('assign');
 
-    /**
-     * Tag name
-     *
-     * @var string
-     */
+	/**
+	 * Tag name
+	 *
+	 * @var string
+	 */
     public $tag = 'child';
 
-    /**
-     * Block type
-     *
-     * @var string
-     */
+	/**
+	 * Block type
+	 *
+	 * @var string
+	 */
     public $blockType = 'Child';
 
-    /**
-     * Compiles code for the {child} tag
-     *
-     * @param array                                 $args      array with attributes from parser
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler  compiler object
-     * @param array                                 $parameter array with compilation parameter
-     *
-     * @return string compiled code
-     * @throws \SmartyCompilerException
-     */
+	/**
+	 * Compiles code for the {child} tag
+	 *
+	 * @param array                                 $args      array with attributes from parser
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler  compiler object
+	 * @param array                                 $parameter array with compilation parameter
+	 *
+	 * @return string compiled code
+	 * @throws \SmartyCompilerException
+	 */
     public function compile($args, Smarty_Internal_TemplateCompilerBase $compiler, $parameter)
     {
         // check and get attributes

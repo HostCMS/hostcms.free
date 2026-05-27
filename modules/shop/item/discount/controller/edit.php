@@ -91,14 +91,14 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 		$oMainRow2->add(Admin_Form_Entity::factory('Radiogroup')
 			->radio(array(
 				'—',
-				Core::_("Shop_Discount.shop_apply_modification_discount"),
-				Core::_("Shop_Discount.shop_not_apply_modification_discount")
+				Core::_('Shop_Discount.shop_apply_modification_discount'),
+				Core::_('Shop_Discount.shop_not_apply_modification_discount')
 			))
 			->ico(
 				array(
-					'fa-minus-circle',
-					'fa-check',
-					'fa-ban'
+					'fa-solid fa-circle-minus',
+					'fa-solid fa-check',
+					'fa-solid fa-ban'
 				)
 			)
 			->name('apply_for_modifications')

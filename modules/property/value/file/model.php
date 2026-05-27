@@ -10,33 +10,13 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @version 7.x
  * @copyright © 2005-2026, https://www.hostcms.ru
  */
-class Property_Value_File_Model extends Core_Entity
+class Property_Value_File_Model extends Property_Value_Abstract
 {
 	/**
 	 * Model name
 	 * @var mixed
 	 */
 	protected $_modelName = 'property_value_file';
-
-	/**
-	 * Column consist item's name
-	 * @var string
-	 */
-	protected $_nameColumn = 'id';
-
-	/**
-	 * Disable markDeleted()
-	 * @var mixed
-	 */
-	protected $_marksDeleted = NULL;
-
-	/**
-	 * Belongs to relations
-	 * @var array
-	 */
-	protected $_belongsTo = array(
-		'property' => array()
-	);
 
 	/**
 	 * List of preloaded values
@@ -59,6 +39,12 @@ class Property_Value_File_Model extends Core_Entity
 		'entity_id',
 		'file',
 		'file_small',
+		'size',
+		'width',
+		'height',
+		'small_size',
+		'small_width',
+		'small_height'
 	);
 
 	/**
@@ -99,7 +85,7 @@ class Property_Value_File_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event property_value_file.onBeforeRedeclaredDelete
+	 * @hostcms-event property_value_file.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -213,40 +199,6 @@ class Property_Value_File_Model extends Core_Entity
 	}
 
 	/**
-	 * Name of tag
-	 * @var string
-	 */
-	protected $_tagName = 'property_value';
-
-	/**
-	 * Get XML for entity and children entities
-	 * @return string
-	 * @hostcms-event property_value_file.onBeforeRedeclaredGetXml
-	 */
-	public function getXml()
-	{
-		$this->clearXmlTags();
-
-		$this->_prepareData();
-
-		return parent::getXml();
-	}
-
-	/**
-	 * Get stdObject for entity and children entities
-	 * @return stdObject
-	 * @hostcms-event property_value_file.onBeforeRedeclaredGetStdObject
-	 */
-	public function getStdObject($attributePrefix = '_')
-	{
-		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
-
-		$this->_prepareData();
-
-		return parent::getStdObject($attributePrefix);
-	}
-
-	/**
 	 * Prepare entity and children entities
 	 * @return self
 	 */
@@ -262,24 +214,32 @@ class Property_Value_File_Model extends Core_Entity
 
 			if ($this->file)
 			{
-				$path = $this->getLargeFilePath();
-
-				if (Core_File::isFile($path) && is_readable($path))
+				if ($this->size == 0)
 				{
-					$fileSize = filesize($path);
-					$oFile_Entity->addAttribute('size', $fileSize);
+					$path = $this->getLargeFilePath();
 
-					if ($fileSize > 12 && Core_Image::instance()->exifImagetype($path))
+					if (Core_File::isFile($path) && is_readable($path))
 					{
-						$picsize = @getimagesize($path);
-						if ($picsize)
+						$this->size = filesize($path);
+
+						if ($this->size > 12 && Core_Image::instance()->exifImagetype($path))
 						{
-							$oFile_Entity
-								->addAttribute('width', $picsize[0])
-								->addAttribute('height', $picsize[1]);
+							$picsize = @getimagesize($path);
+							if ($picsize)
+							{
+								$this->width = $picsize[0];
+								$this->height = $picsize[1];
+							}
 						}
+
+						$this->save();
 					}
 				}
+
+				$oFile_Entity
+					->addAttribute('size', $this->size)
+					->addAttribute('width', $this->width)
+					->addAttribute('height', $this->height);
 			}
 
 			$oFile_Small_Entity = Core::factory('Core_Xml_Entity')
@@ -288,27 +248,37 @@ class Property_Value_File_Model extends Core_Entity
 
 			if ($this->file_small)
 			{
-				$path = $this->getSmallFilePath();
-
-				if (Core_File::isFile($path) && is_readable($path))
+				if ($this->small_size == 0)
 				{
-					$fileSize = filesize($path);
-					$oFile_Small_Entity->addAttribute('size', $fileSize);
+					$path = $this->getSmallFilePath();
 
-					if ($fileSize > 12 && Core_Image::instance()->exifImagetype($path))
+					if (Core_File::isFile($path) && is_readable($path))
 					{
-						$picsize = @getimagesize($path);
-						if ($picsize)
+						$this->small_size = filesize($path);
+
+						if ($this->small_size > 12 && Core_Image::instance()->exifImagetype($path))
 						{
-							$oFile_Small_Entity
-								->addAttribute('width', $picsize[0])
-								->addAttribute('height', $picsize[1]);
+							$picsize = @getimagesize($path);
+							if ($picsize)
+							{
+								$this->small_width = $picsize[0];
+								$this->small_height = $picsize[1];
+							}
 						}
+
+						$this->save();
 					}
 				}
+
+				$oFile_Small_Entity
+					->addAttribute('size', $this->small_size)
+					->addAttribute('width', $this->small_width)
+					->addAttribute('height', $this->small_height);
 			}
 
-			$this->addEntity($oFile_Entity)->addEntity($oFile_Small_Entity);
+			$this
+				->addEntity($oFile_Entity)
+				->addEntity($oFile_Small_Entity);
 
 			if (Core::moduleIsActive('cdn'))
 			{
@@ -332,17 +302,6 @@ class Property_Value_File_Model extends Core_Entity
 						&& $this->addXmlTag('cdn_file_small', !is_null($link) ? $link : $this->getSmallFileHref());
 				}
 			}
-
-			/*
-			if ($this->file != '')
-			{
-				$this->addXmlTag('file_path', $this->_href . rawurlencode($this->file));
-			}
-
-			if ($this->file_small != '')
-			{
-				$this->addXmlTag('file_small_path', $this->_href . rawurlencode($this->file_small));
-			}*/
 		}
 
 		$this
@@ -350,19 +309,5 @@ class Property_Value_File_Model extends Core_Entity
 			->addXmlTag('tag_name', $this->Property->tag_name);
 
 		return $this;
-	}
-
-	/**
-	 * Convert Object to Array
-	 * @return array
-	 * @hostcms-event modelname.onAfterToArray
-	 */
-	public function toArray()
-	{
-		$return = parent::toArray();
-
-		$return['__model_name'] = $this->_modelName;
-
-		return $return;
 	}
 }

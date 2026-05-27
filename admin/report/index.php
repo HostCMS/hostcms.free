@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -112,10 +112,6 @@ foreach ($aModules as $oModule)
 $oMainTab = Admin_Form_Entity::factory('Tab')->name('main');
 $oLefttabs = Admin_Form_Entity::factory('Lefttabs');
 
-$oMainTab
-	->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row report-header'))
-	->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'));
-
 foreach ($aModuleReports as $moduleId => $aModuleReport)
 {
 	foreach ($aModuleReport as $reportName => $aReport)
@@ -163,71 +159,64 @@ switch (Core_Array::getPost('group_by', 1))
 $previousStartDatetime = date('Y-m-d', strtotime($condition, $iStart));
 ob_start();
 ?>
-<div class="col-xs-12 col-sm-6 col-lg-3 report-timeInterval">
-	<div class="wrap-tabs-left-collapse"><i class="fa fa-bars tabs-left-collapse"></i></div>
-	<span class="text margin-right-10"><?php echo Core::_('Report.data_for')?> </span><span id="daterange" class="label label-primary"><?php echo date('d.m.Y', Core_Date::sql2timestamp($startDatetime))?> — <?php echo date('d.m.Y', Core_Date::sql2timestamp($endDatetime))?></span>
-	<input type="hidden" name="range_start_date" value="<?php echo $startDatetime?>" />
-	<input type="hidden" name="range_end_date" value="<?php echo $endDatetime?>" />
-</div>
-<div class="col-xs-12 col-sm-5 col-md-4 col-lg-2 report-group">
-	<div class="group-by">
-		<span><?php echo Core::_('Report.group_by')?> </span>
-		<div class="group-by-period">
-			<span data-value="0" class="text"><?php echo Core::_('Report.day')?></span>
-			<span data-value="1" class="label label-primary"><?php echo Core::_('Report.week')?></span>
-			<span data-value="2" class="text"><?php echo Core::_('Report.month')?></span>
+<div class="report-header global-filters">
+	<div class="filter-group report-timeInterval">
+		<span class="filter-label"><?php echo Core::_('Report.data_for')?></span><span id="daterange" class="btn-date"><?php echo date('d.m.Y', Core_Date::sql2timestamp($startDatetime))?> — <?php echo date('d.m.Y', Core_Date::sql2timestamp($endDatetime))?></span>
+		<input type="hidden" name="range_start_date" value="<?php echo $startDatetime?>" />
+		<input type="hidden" name="range_end_date" value="<?php echo $endDatetime?>" />
+	</div>
+
+	<div class="filter-group">
+		<span class="filter-label"><?php echo Core::_('Report.group_by')?></span>
+		<div class="segmented-control group-by-period">
+			<span data-value="0" class="segment-btn"><?php echo Core::_('Report.day')?></span>
+			<span data-value="1" class="segment-btn active"><?php echo Core::_('Report.week')?></span>
+			<span data-value="2" class="segment-btn"><?php echo Core::_('Report.month')?></span>
 		</div>
 		<input type="hidden" name="group_by" value="1" />
 	</div>
-</div>
-<div class="col-xs-12 col-sm-6 col-lg-3 report-comparePrevious">
-	<div class="compare-period">
-		<?php echo Core::_('Report.compare_previous_period')?>
-		<label>
-			<input class="checkbox-slider toggle colored-success" name="compare_previous_period" onchange="$(this).val(+this.checked); sendRequest({tab: $('.report-tabs .nav-tabs li.active')}); $('.previous-ranges span#previous_daterange').toggleClass('disabled')" value="0" type="checkbox" />
-			<span class="text"></span>
-		</label>
+
+	<div class="filter-group report-comparePrevious">
+		<span class="filter-label"><?php echo Core::_('Report.compare_previous_period')?></span>
+		<div class="toggle-wrapper">
+			<label class="switch">
+				<input type="checkbox" name="compare_previous_period" value="0" onchange="$(this).val(+this.checked); sendRequest({tab: $('.report-layout aside.sidebar .tab-item.active')}); $('.previous-ranges span#previous_daterange').toggleClass('disabled')"><span class="slider"></span>
+			</label>
+		</div>
 	</div>
-</div>
-<div class="no-padding-right col-xs-12 col-sm-5 col-lg-3 report-previousTimeInterval">
-	<span class="text margin-right-10"><?php echo Core::_('Report.previuos_period')?> </span><span class="previous-ranges"><span id="previous_daterange" class="label label-azure disabled"><?php echo date('d.m.Y', Core_Date::sql2timestamp($previousStartDatetime))?> — <?php echo date('d.m.Y', Core_Date::sql2timestamp($previousEndDatetime))?></span></span>
-	<input type="hidden" name="previous_range_start_date" value="<?php echo $previousStartDatetime?>" />
-	<input type="hidden" name="previous_range_end_date" value="<?php echo $previousEndDatetime?>" />
-</div>
-<div class="col-xs-12 col-sm-1 report-print">
-	<a class="btn btn-default btn-xs icon-only black report-print-button" href="javascript:void(0);"><i class="fa fa-print"></i></a>
+
+	<div class="filter-group report-previousTimeInterval previous-ranges">
+		<span class="filter-label"><?php echo Core::_('Report.previuos_period')?></span>
+		<!-- <span class="previous-ranges"> -->
+			<span id="previous_daterange" class="btn-date secondary disabled"><?php echo date('d.m.Y', Core_Date::sql2timestamp($previousStartDatetime))?> — <?php echo date('d.m.Y', Core_Date::sql2timestamp($previousEndDatetime))?></span>
+		<!-- </span> -->
+		<input type="hidden" name="previous_range_start_date" value="<?php echo $previousStartDatetime?>" />
+		<input type="hidden" name="previous_range_end_date" value="<?php echo $previousEndDatetime?>" />
+	</div>
+
+	<span class="btn-icon report-print-button"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg></span>
 </div>
 <?php
-$oMainRow1->add(
+$oMainTab->add(
 	Admin_Form_Entity::factory('Code')
 		->html(ob_get_clean())
 );
 
-$oMainRow2
-	->add(Admin_Form_Entity::factory('Div')->class('col-xs-12 report-tabs')
-		->add($oLefttabs)
-	);
+$oMainTab->add($oLefttabs);
 
 Admin_Form_Entity::factory('Form')
+	->class('report-layout')
 	->controller($oAdmin_Form_Controller)
 	->action($sAdminFormAction)
 	->add($oMainTab)
 	->execute();
 ?>
 <script>
+	$('.report-layout>.sidebar>.tab-item').on('click', function() {
+		$('.report-layout>.sidebar>.tab-item').removeClass('active');
+		$(this).addClass('active');
 
-	$('.tabs-left-collapse').on('click', function() {
-
-		if (!$(this).hasClass('active'))
-		{
-			$(this).addClass('active');
-			$('.report-tabs>.tabs-left>.nav-tabs').addClass('hide');
-		}
-		else
-		{
-			$(this).removeClass('active');
-			$('.report-tabs>.tabs-left>.nav-tabs').removeClass('hide');
-		}
+		sendRequest({tab: $(this)});
 	});
 
 	// {tab: li, data: {shop_id: 2} }
@@ -250,7 +239,8 @@ Admin_Form_Entity::factory('Form')
 			external_data: settings.data
 		};
 
-		var context = settings.tab.find('a').attr('href');
+		// var context = settings.tab.find('a').attr('href');
+		var context = settings.tab.data('tab');
 
 		$.ajax({
 			url: '<?php echo Admin_Form_Controller::correctBackendPath("/{admin}/report/index.php")?>',
@@ -265,8 +255,11 @@ Admin_Form_Entity::factory('Form')
 				data.previousTimeInterval == 0 ? $('.report-previousTimeInterval').addClass('hidden') : $('.report-previousTimeInterval').removeClass('hidden');
 				data.print == 0 ? $('.report-print').addClass('hidden') : $('.report-print').removeClass('hidden');
 
+				$('.report-layout>.content>.tab-item-content').removeClass('active');
+				this.addClass('active')
+
 				this.html(data.content);
-				settings.tab.find('a .tab-description').html(data.captionHTML);
+				settings.tab.find('.tab-value').html(data.captionHTML);
 			}
 		});
 	}
@@ -277,24 +270,23 @@ Admin_Form_Entity::factory('Form')
 		];
 		$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/').done(function() {
 			$('.report-print-button').on('click', function(){
-				$('.report-tabs .tab-content .tab-pane.active').printThis({
+				$('.report-layout').printThis({
+					importCSS: true,
+					loadCSS: '/modules/report/assets/report.css',
 					canvas: true
 				});
 			});
 		});
 
 		var selectorGroupBy = $('.report-header .group-by-period span');
-
 		$(selectorGroupBy).on('click', function(){
-			selectorGroupBy.each(function(i) {
-				$(this).attr('class', 'text');
-			});
+			selectorGroupBy.removeClass('active');
 
-			$(this).toggleClass('text label label-primary');
+			$(this).addClass('active');
 
 			$('input[name="group_by"]').val($(this).data('value'));
 
-			sendRequest({tab: $('.report-tabs .nav-tabs li.active')});
+			sendRequest({tab: $('.report-layout aside.sidebar .tab-item.active')});
 		});
 
 		$('#daterange').daterangepicker({
@@ -317,7 +309,7 @@ Admin_Form_Entity::factory('Form')
 
 			$('span#daterange').text(startDateText + ' — ' + endDateText);
 
-			sendRequest({tab: $('.report-tabs .nav-tabs li.active')});
+			sendRequest({tab: $('.report-layout aside.sidebar .tab-item.active')});
 		});
 
 		$('#previous_daterange').daterangepicker({
@@ -341,17 +333,8 @@ Admin_Form_Entity::factory('Form')
 
 			$('span#previous_daterange').text(previousStartDateText + ' — ' + previousEndDateText);
 
-			sendRequest({tab: $('.report-tabs .nav-tabs li.active')});
+			sendRequest({tab: $('.report-layout aside.sidebar .tab-item.active')});
 		});
-
-		$('.report-tabs .nav-tabs a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-			sendRequest({tab: $(e.target).parent()});
-		});
-
-		/*var firstTabA = $('.report-tabs .nav-tabs a:first');
-		firstTabA.parent().removeClass('active');
-		firstTabA.tab('show');*/
-
 
 		$(window).on('resize', resizeThrottler);
 
@@ -371,12 +354,11 @@ Admin_Form_Entity::factory('Form')
 		}
 
 		function actualResizeHandler() {
-
 			// Изменение ширины графиков
-			$('.report-tabs>.tabbable>.tab-content>.tab-pane.active .chart').each(function (){
+			$('.report-layout>aside.sidebar>.tab-item.active .chart').each(function (){
 
 				// Проверка на активность вкладок (внутренних), находящихся на других вкладках (внешних)
-				if (!$(this).parentsUntil('.report-tabs').filter(':hidden').length)
+				if (!$(this).parentsUntil('.report-layout').filter(':hidden').length)
 				{
 					var plot = $(this).data('plot');
 

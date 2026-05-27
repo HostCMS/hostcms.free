@@ -228,8 +228,8 @@ class Core_Config
 	/**
 	 * Escape key or value
 	 * @param mixed $value
-     * @return float|int|string
-     */
+	 * @return float|int|string
+	 */
 	protected function _escape($value)
 	{
 		if (is_int($value) || is_float($value))

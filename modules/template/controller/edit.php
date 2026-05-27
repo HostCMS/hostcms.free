@@ -59,20 +59,19 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			switch ($modelName)
 			{
 				case 'template':
-					$object->template_id = intval(Core_Array::getGet('template_id', 0));
+					$object->template_id = Core_Array::getGet('template_id', 0, 'int');
 
 					$object->template_dir_id = $object->template_id
 						? 0
-						: intval(Core_Array::getGet('template_dir_id', 0));
+						: Core_Array::getGet('template_dir_id', 0, 'int');
 				break;
 				case 'template_dir':
-					$object->parent_id = intval(Core_Array::getGet('template_dir_id', 0));
+					$object->parent_id = Core_Array::getGet('template_dir_id', 0, 'int');
 				break;
 			}
 		}
 
-		$this
-			->addSkipColumn('timestamp');
+		$this->addSkipColumn('timestamp');
 
 		return parent::setObject($object);
 	}
@@ -163,7 +162,7 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				// Селектор с родительским макетом
 				$oSelect_Templates
 					->options(
-						array(' … ') + $this->fillTemplateParent(0, $this->_object->id)
+						array(' … ') + $this->fillTemplateParent(0, array($this->_object->id))
 					)
 					->name('template_id')
 					->value($this->_object->template_id)
@@ -341,7 +340,7 @@ EOD;
 
 				$oSelect_Dirs
 					->options(
-						array(' … ') + $this->fillTemplateDir(0, $this->_object->id)
+						array(' … ') + $this->fillTemplateDir(0, array($this->_object->id))
 					)
 					->name('parent_id')
 					->value($this->_object->parent_id)
@@ -481,11 +480,11 @@ EOD;
 	/**
 	 * Create visual tree of the directories
 	 * @param int $iTemplateDirParentId parent directory ID
-	 * @param boolean $bExclude exclude group ID
+	 * @param array $bExclude exclude group ID
 	 * @param int $iLevel current nesting level
 	 * @return array
 	 */
-	public function fillTemplateDir($iTemplateDirParentId = 0, $bExclude = FALSE, $iLevel = 0)
+	public function fillTemplateDir($iTemplateDirParentId = 0, $aExclude = array(), $iLevel = 0)
 	{
 		$iTemplateDirParentId = intval($iTemplateDirParentId);
 		$iLevel = intval($iLevel);
@@ -503,12 +502,13 @@ EOD;
 
 		if (count($childrenDirs))
 		{
+			$countExclude = count($aExclude);
 			foreach ($childrenDirs as $childrenDir)
 			{
-				if ($bExclude != $childrenDir->id)
+				if ($countExclude == 0 || !in_array($childrenDir->id, $aExclude))
 				{
-					$aReturn[$childrenDir->id] = str_repeat('  ', $iLevel) . $childrenDir->name;
-					$aReturn += $this->fillTemplateDir($childrenDir->id, $bExclude, $iLevel + 1);
+					$aReturn[$childrenDir->id] = str_repeat('  ', $iLevel) . '[' . $childrenDir->id . '] ' . $childrenDir->name;
+					$aReturn += $this->fillTemplateDir($childrenDir->id, $aExclude, $iLevel + 1);
 				}
 			}
 		}
@@ -519,11 +519,11 @@ EOD;
 	/**
 	 * Create visual tree of the directories
 	 * @param int $iTemplateParentId parent template ID
-	 * @param boolean $bExclude exclude template ID
+	 * @param array $aExclude exclude template ID
 	 * @param int $iLevel current nesting level
 	 * @return array
 	 */
-	public function fillTemplateParent($iTemplateParentId = 0, $bExclude = FALSE, $iLevel = 0)
+	public function fillTemplateParent($iTemplateParentId = 0, $aExclude = array(), $iLevel = 0)
 	{
 		$iTemplateParentId = intval($iTemplateParentId);
 		$iLevel = intval($iLevel);
@@ -541,12 +541,13 @@ EOD;
 
 		if (count($childrenTemplates))
 		{
+			$countExclude = count($aExclude);
 			foreach ($childrenTemplates as $childrenTemplate)
 			{
-				if ($bExclude != $childrenTemplate->id)
+				if ($countExclude == 0 || !in_array($childrenTemplate->id, $aExclude))
 				{
-					$aReturn[$childrenTemplate->id] = str_repeat('  ', $iLevel) . $childrenTemplate->name;
-					$aReturn += $this->fillTemplateParent($childrenTemplate->id, $bExclude, $iLevel + 1);
+					$aReturn[$childrenTemplate->id] = str_repeat('  ', $iLevel) . '[' . $childrenTemplate->id . '] ' . $childrenTemplate->name;
+					$aReturn += $this->fillTemplateParent($childrenTemplate->id, $aExclude, $iLevel + 1);
 				}
 			}
 		}

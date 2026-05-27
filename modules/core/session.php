@@ -36,7 +36,7 @@ abstract class Core_Session
 	{
 		return self::$_started;
 	}
-	
+
 	/**
 	 * Set started
 	 */
@@ -248,6 +248,9 @@ abstract class Core_Session
 				session_id($id);
 				ini_set('session.use_strict_mode', 0);
 			}
+
+			// Disable Cache headers by default
+			session_cache_limiter('');
 
 			@session_start();
 

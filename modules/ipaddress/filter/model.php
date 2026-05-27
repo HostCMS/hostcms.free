@@ -181,13 +181,13 @@ class Ipaddress_Filter_Model extends Core_Entity
 		return $newObject;
 	}
 
-    /**
-     * Move item to another group
-     * @param int $ipaddress_filter_dir_id
-     * @return Core_Entity
-     * @hostcms-event ipaddress_filter.onBeforeMove
-     * @hostcms-event ipaddress_filter.onAfterMove
-     */
+	/**
+	 * Move item to another group
+	 * @param int $ipaddress_filter_dir_id
+	 * @return Core_Entity
+	 * @hostcms-event ipaddress_filter.onBeforeMove
+	 * @hostcms-event ipaddress_filter.onAfterMove
+	 */
 	public function move($ipaddress_filter_dir_id)
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($ipaddress_filter_dir_id));
@@ -206,6 +206,6 @@ class Ipaddress_Filter_Model extends Core_Entity
 	 */
 	public function exportBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		return '<a target="_blank" href="' . $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'exportFilters', NULL, 1, intval($this->id), 'ipaddress_filter_dir_id=' . Core_Array::getGet('ipaddress_filter_dir_id')) . '"><i class="fa fa-upload"></i></a>';
+		return '<a target="_blank" href="' . $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'exportFilters', NULL, 1, intval($this->id), 'ipaddress_filter_dir_id=' . Core_Array::getGet('ipaddress_filter_dir_id')) . '"><i class="fa-solid fa-upload"></i></a>';
 	}
 }

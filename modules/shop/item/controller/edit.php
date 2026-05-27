@@ -421,11 +421,11 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					)
 					->ico(
 						array(
-							0 => 'fa-file-text-o',
-							2 => 'fa-puzzle-piece',
-							1 => 'fa-table',
-							3 => 'fa-archive',
-							4 => 'fa-certificate'
+							0 => 'fa-regular fa-file-text',
+							2 => 'fa-solid fa-puzzle-piece',
+							1 => 'fa-solid fa-table',
+							3 => 'fa-solid fa-archive',
+							4 => 'fa-solid fa-certificate'
 					))
 					->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [0,1,2,3,4])");
 
@@ -440,14 +440,14 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$sTmpHtml .= '<div class="btn-group">';
 
-					$sTmpHtml .= '<a href="' . $this->_Admin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/associated/index.php', NULL, NULL, $additionalParams1) . '" onclick="' . $this->_Admin_Form_Controller->getAdminLoadAjax('/{admin}/shop/item/associated/index.php', NULL, NULL, $additionalParams1) . '" class="btn btn-default"><i class="fa fa-magnet fa-fw no-margin"></i></a>
-					<a href="' . $this->_Admin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/modification/index.php', NULL, NULL, $additionalParams2) . '" onclick="' . $this->_Admin_Form_Controller->getAdminLoadAjax('/{admin}/shop/item/modification/index.php', NULL, NULL, $additionalParams2) . '" class="btn btn-default"><i class="fa fa-code-fork fa-fw no-margin"></i></a>';
+					$sTmpHtml .= '<a href="' . $this->_Admin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/associated/index.php', NULL, NULL, $additionalParams1) . '" onclick="' . $this->_Admin_Form_Controller->getAdminLoadAjax('/{admin}/shop/item/associated/index.php', NULL, NULL, $additionalParams1) . '" class="btn btn-default"><i class="fa-solid fa-magnet fa-fw no-margin"></i></a>
+					<a href="' . $this->_Admin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/modification/index.php', NULL, NULL, $additionalParams2) . '" onclick="' . $this->_Admin_Form_Controller->getAdminLoadAjax('/{admin}/shop/item/modification/index.php', NULL, NULL, $additionalParams2) . '" class="btn btn-default"><i class="fa-solid fa-code-fork fa-fw no-margin"></i></a>';
 
 					if ($this->_object->modification_id)
 					{
 						$additionalParams3 = "shop_item_id={$this->_object->modification_id}";
 
-						$sTmpHtml .= '<a href="' . $this->_Admin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/modification/index.php', NULL, NULL, $additionalParams3) . '" onclick="' . $this->_Admin_Form_Controller->getAdminLoadAjax('/{admin}/shop/item/modification/index.php', NULL, NULL, $additionalParams3) . '" class="btn btn-default"><i class="fa fa-list fa-fw no-margin"></i></a>';
+						$sTmpHtml .= '<a href="' . $this->_Admin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/modification/index.php', NULL, NULL, $additionalParams3) . '" onclick="' . $this->_Admin_Form_Controller->getAdminLoadAjax('/{admin}/shop/item/modification/index.php', NULL, NULL, $additionalParams3) . '" class="btn btn-default"><i class="fa-solid fa-list fa-fw no-margin"></i></a>';
 					}
 
 					$sTmpHtml .= "</div></div>";
@@ -675,7 +675,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								. $oShop->Structure->getPath()
 								. $oShop_Item->getPath();
 
-							$externalLink = '<a class="margin-left-5" target="_blank" href="' . $sItemUrl . '"><i class="fa fa-external-link"></i></a>';
+							$externalLink = '<a class="margin-left-5" target="_blank" href="' . $sItemUrl . '"><i class="fa-solid fa-arrow-up-right-from-square small"></i></a>';
 						}
 
 						$smallImage = $oShop_Item->image_small
@@ -692,7 +692,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								<td>' . htmlspecialchars((string) $oShop_Item->marking) . '</td>
 								<td width="25"><input class="set-item-count form-control" name="set_count_' . $oShop_Item_Set->id . '" value="' . $oShop_Item_Set->count . '" /></td>
 								<td>' . htmlspecialchars($oShop_Item->Shop_Currency->formatWithCurrency($price)) . '</td>
-								<td><a class="delete-associated-item" onclick="' . $onclick . '"><i class="fa fa-times-circle darkorange"></i></a></td>
+								<td><a class="delete-associated-item" onclick="' . $onclick . '"><i class="fa-solid fa-circle-xmark darkorange"></i></a></td>
 							</tr>
 						';
 					}
@@ -724,7 +724,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							shop_currency_id: 0
 						}, function(event, ui) {
 							$('#{$windowId} .set-item-table > tbody').append(
-								$('<tr><td><img class=\"backend-thumbnail\" src=\"' + ui.item.image_small + '\" /></td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'set_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.marking) + '</td><td><input class=\"set-item-count form-control\" name=\"set_count[]\" value=\"1.00\"/></td><td>' + ui.item.price_with_tax + ' ' + ui.item.currency + '</td><td><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove()\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>')
+								$('<tr><td><img class=\"backend-thumbnail\" src=\"' + ui.item.image_small + '\" /></td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'set_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.marking) + '</td><td><input class=\"set-item-count form-control\" name=\"set_count[]\" value=\"1.00\"/></td><td>' + ui.item.price_with_tax + ' ' + ui.item.currency + '</td><td><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove()\"><i class=\"fa-solid fa-circle-xmark darkorange\"></i></a></td></tr>')
 						);
 						ui.item.value = '';
 					});");
@@ -1287,17 +1287,19 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$aWarehouses = $oShop->Shop_Warehouses->findAll(FALSE);
 				$aConfig = Shop_Controller::getConfig();
 
-				if (count($aWarehouses) <= $aConfig['itemEditWarehouseLimit'])
+				$bShowWarehouses = count($aWarehouses) <= $aConfig['itemEditWarehouseLimit'];
+
+				$oMainTab
+					->add($oWarehouseBlock = Admin_Form_Entity::factory('Div')->id('warehouses')->class('well with-header shop-item-warehouses-list'));
+
+				$oWarehouseBlock
+					->add($oHeaderDiv = Admin_Form_Entity::factory('Div')
+						->class('header bordered-pink')
+						->value(Core::_("Shop_Item.warehouse_header"))
+					);
+
+				if ($bShowWarehouses)
 				{
-					$oMainTab
-						->add($oWarehouseBlock = Admin_Form_Entity::factory('Div')->id('warehouses')->class('well with-header shop-item-warehouses-list'));
-
-					$oWarehouseBlock
-						->add($oHeaderDiv = Admin_Form_Entity::factory('Div')
-							->class('header bordered-pink')
-							->value(Core::_("Shop_Item.warehouse_header"))
-						);
-
 					if ($this->_object->id)
 					{
 						$oHeaderDiv
@@ -1314,88 +1316,109 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							->class('pull-right margin-right-10 darkgray')
 							->onclick('$.editWarehouses(this)')
 						);
-
-					ob_start();
-					?>
-					<div class="table-scrollable no-border">
-					<table class="table table-hover">
-						<thead>
-							<tr>
-								<th><?php echo Core::_('Shop_Item.warehouse_name')?></th>
-								<th><?php echo Core::_('Shop_Item.warehouse_quantity')?></th>
-								<th><?php echo Core::_('Shop_Item.warehouse_cell')?></th>
-								<th><?php echo Core::_('Shop_Item.warehouse_in_price')?></th>
-								<th><?php echo Core::_('Shop_Item.warehouse_measure')?></th>
-							</tr>
-						</thead>
-						<tbody>
-							<?php
-							foreach ($aWarehouses as $oWarehouse)
-							{
-								// Получаем количество товара на текущем складе
-								$oWarehouseItem =
-									$this->_object->Shop_Warehouse_Items->getByWarehouseId($oWarehouse->id, FALSE);
-
-								$countItems = is_null($oWarehouseItem)
-									? (defined('DEFAULT_REST') ? DEFAULT_REST : 0)
-									: $oWarehouseItem->count;
-
-								// на складе 0 или идет добавление товара - строку скрываем!
-								$trClass = $countItems == 0 || !$this->_object->id
-									? 'hidden'
-									: '';
-
-								$aPrices = self::fillPricesList($oShop);
-
-								$aCells = $this->_getCells($oWarehouse);
-								?>
-								<tr class="<?php echo $trClass?>">
-									<td><?php echo htmlspecialchars($oWarehouse->name)?></td>
-									<td width="20%">
-										<input class="form-control" name="warehouse_<?php echo $oWarehouse->id?>" value="<?php echo $countItems?>" disabled="disabled"/>
-									</td>
-									<td width="20%">
-										<select class="form-control" name="warehouse_cell_<?php echo $oWarehouse->id?>">
-											<?php
-											foreach ($aCells as $shop_warehouse_cell_id => $name)
-											{
-												$oShop_Warehouse_Cell_Item = $oWarehouse->Shop_Warehouse_Cell_Items->getByShop_item_id($this->_object->id);
-
-												$selected = !is_null($oShop_Warehouse_Cell_Item) && $oShop_Warehouse_Cell_Item->shop_warehouse_cell_id == $shop_warehouse_cell_id
-													? 'selected="selected"'
-													: '';
-												?>
-												<option <?php echo $selected?> value="<?php echo $shop_warehouse_cell_id?>"><?php echo htmlspecialchars($name)?></option>
-												<?php
-											}
-											?>
-										</select>
-									</td>
-									<td width="20%">
-										<select class="form-control hidden" name="warehouse_shop_price_id_<?php echo $oWarehouse->id?>">
-											<?php
-											foreach ($aPrices as $shop_price_id => $name)
-											{
-												?>
-												<option value="<?php echo $shop_price_id?>"><?php echo htmlspecialchars($name)?></option>
-												<?php
-											}
-											?>
-										</select>
-									</td>
-									<td width="10%"><?php echo htmlspecialchars((string) $this->_object->Shop_Measure->name)?></td>
-								</tr>
-								<?php
-							}
-							?>
-						</tbody>
-					</table>
-					</div>
-					<?php
-					$oWarehouseBlock->add(
-						Admin_Form_Entity::factory('Code')->html(ob_get_clean())
-					);
 				}
+
+				ob_start();
+
+				if ($bShowWarehouses)
+				{
+					?><div class="table-scrollable no-border">
+						<table class="table table-hover">
+							<thead>
+								<tr>
+									<th><?php echo Core::_('Shop_Item.warehouse_name')?></th>
+									<th><?php echo Core::_('Shop_Item.warehouse_quantity')?></th>
+									<th><?php echo Core::_('Shop_Item.warehouse_cell')?></th>
+									<th><?php echo Core::_('Shop_Item.warehouse_in_price')?></th>
+									<th><?php echo Core::_('Shop_Item.warehouse_measure')?></th>
+									<th><?php echo Core::_('Shop_Warehouse.entries')?></th>
+								</tr>
+							</thead>
+							<tbody>
+								<?php
+								foreach ($aWarehouses as $oWarehouse)
+								{
+									// Получаем количество товара на текущем складе
+									$oWarehouseItem = $this->_object->Shop_Warehouse_Items->getByWarehouseId($oWarehouse->id, FALSE);
+
+									$countItems = is_null($oWarehouseItem)
+										? (defined('DEFAULT_REST') ? DEFAULT_REST : 0)
+										: $oWarehouseItem->count;
+
+									// на складе 0 или идет добавление товара - строку скрываем!
+									$trClass = $countItems == 0 || !$this->_object->id
+										? 'hidden'
+										: '';
+
+									$aPrices = self::fillPricesList($oShop);
+
+									$entriesLink = $this->_object->id
+										? Admin_Form_Controller::correctBackendPath("/{admin}/shop/warehouse/entry/index.php?shop_item_id={$this->_object->id}&shop_warehouse_id={$oWarehouse->id}&shop_id={$this->_object->shop_id}&shop_group_id={$this->_object->shop_group_id}")
+										: NULL;
+
+									$aCells = $this->_getCells($oWarehouse);
+									?>
+									<tr class="<?php echo $trClass?>">
+										<td><?php echo htmlspecialchars($oWarehouse->name)?></td>
+										<td width="20%">
+											<input class="form-control" name="warehouse_<?php echo $oWarehouse->id?>" value="<?php echo $countItems?>" disabled="disabled"/>
+										</td>
+										<td width="20%">
+											<select class="form-control" name="warehouse_cell_<?php echo $oWarehouse->id?>">
+												<?php
+												foreach ($aCells as $shop_warehouse_cell_id => $name)
+												{
+													$oShop_Warehouse_Cell_Item = $oWarehouse->Shop_Warehouse_Cell_Items->getByShop_item_id($this->_object->id);
+
+													$selected = !is_null($oShop_Warehouse_Cell_Item) && $oShop_Warehouse_Cell_Item->shop_warehouse_cell_id == $shop_warehouse_cell_id
+														? 'selected="selected"'
+														: '';
+													?>
+													<option <?php echo $selected?> value="<?php echo $shop_warehouse_cell_id?>"><?php echo htmlspecialchars($name)?></option>
+													<?php
+												}
+												?>
+											</select>
+										</td>
+										<td width="20%">
+											<select class="form-control hidden" name="warehouse_shop_price_id_<?php echo $oWarehouse->id?>">
+												<?php
+												foreach ($aPrices as $shop_price_id => $name)
+												{
+													?>
+													<option value="<?php echo $shop_price_id?>"><?php echo htmlspecialchars($name)?></option>
+													<?php
+												}
+												?>
+											</select>
+										</td>
+										<td width="10%"><?php echo htmlspecialchars((string) $this->_object->Shop_Measure->name)?></td>
+										<td width="5%">
+											<?php
+											if (!is_null($entriesLink))
+											{
+												?><a href="<?php echo $entriesLink?>" target="_blank"><i class="fa-solid fa-list-check" title="<?php echo Core::_('Shop_Warehouse.entries')?>"></i></a><?php
+											}
+											?>
+										</td>
+									</tr>
+									<?php
+								}
+								?>
+							</tbody>
+						</table>
+					</div><?php
+				}
+				else
+				{
+					$warehouseHref = Admin_Form_Controller::correctBackendPath("/{admin}/shop/warehouse/index.php?shop_id={$this->_object->shop_id}&shop_group_id={$this->_object->shop_group_id}");
+
+					?><span class="darkgray"><?php echo Core::_('Shop_Item.item_edit_warehouse_limit', $warehouseHref)?></span><?php
+				}
+
+				$oWarehouseBlock->add(
+					Admin_Form_Entity::factory('Code')->html(ob_get_clean())
+				);
 
 				$this->getField('path')
 					->id('path')
@@ -1408,7 +1431,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						$pathLink = Admin_Form_Entity::factory('A')
 							->id('pathLink')
 							->class('input-group-addon blue')
-							->value('<i class="fa fa-external-link"></i>')
+							->value('<i class="fa-solid fa-arrow-up-right-from-square small"></i>')
 					);
 
 					$pathLink
@@ -1587,7 +1610,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 									<td>' . htmlspecialchars((string) $oShop_Item->marking) . '</td>
 									<td width="25"><input class="set-item-count form-control" name="associated_count_' . $oShop_Item_Associated->id . '" value="' . $oShop_Item_Associated->count . '" /></td>
 									<td>' . htmlspecialchars($oShop_Item->Shop_Currency->formatWithCurrency($oShop_Item->price)) . '</td>
-									<td><a class="delete-associated-item" onclick="' . $link . '"><i class="fa fa-times-circle darkorange"></i></a></td>
+									<td><a class="delete-associated-item" onclick="' . $link . '"><i class="fa-solid fa-circle-xmark darkorange"></i></a></td>
 								</tr>
 							';
 						}
@@ -1626,7 +1649,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							.insertAfter($('#{$windowId} .associated-item-table'));
 
 						$('#{$windowId} .associated-item-table > tbody').append(
-							$('<tr><td>' + $.escapeHtml(ui.item.label) + '</td><td>' + $.escapeHtml(ui.item.marking) + '</td><td><input class=\"set-item-count form-control\" name=\"associated_count[]\" value=\"1\"/></td><td>' + ui.item.price_with_tax + ' ' + ui.item.currency + '</td><td><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove()\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>')
+							$('<tr><td>' + $.escapeHtml(ui.item.label) + '</td><td>' + $.escapeHtml(ui.item.marking) + '</td><td><input class=\"set-item-count form-control\" name=\"associated_count[]\" value=\"1\"/></td><td>' + ui.item.price_with_tax + ' ' + ui.item.currency + '</td><td><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove()\"><i class=\"fa-solid fa-circle-xmark darkorange\"></i></a></td></tr>')
 						);
 						ui.item.value = '';
 					});");
@@ -2021,7 +2044,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						$pathLink = Admin_Form_Entity::factory('A')
 							->id('pathLink')
 							->class('input-group-addon blue')
-							->value('<i class="fa fa-external-link"></i>')
+							->value('<i class="fa-solid fa-arrow-up-right-from-square small"></i>')
 					);
 
 					$pathLink
@@ -3210,7 +3233,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	public function execute($operation = NULL)
 	{
-		if (!is_null($operation) && $operation != '')
+		if (!is_null($operation) && $operation != '' && $operation != 'modal')
 		{
 			$shop_id = Core_Array::getPost('shop_id');
 			$path = Core_Array::getPost('path');
@@ -3536,11 +3559,11 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		return $aReturn;
 	}
 
-    /**
-     * Fill shortcut groups list
-     * @param object $oObject
-     * @return array
-     */
+	/**
+	 * Fill shortcut groups list
+	 * @param object $oObject
+	 * @return array
+	 */
 	protected function _fillShortcutGroupList($oObject)
 	{
 		$aReturn = array();
@@ -3769,13 +3792,13 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->add(
 					Admin_Form_Entity::factory('Div')
 						->class('btn btn-palegreen')
-						->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-plus-circle close"></i>'))
+						->add(Admin_Form_Entity::factory('Code')->html('<i class="fa-solid fa-circle-plus close"></i>'))
 						->onclick("{$addFunction}('{$windowId}', this);")
 				)
 				->add(
 					Admin_Form_Entity::factory('Div')
 						->class('btn btn-darkorange btn-delete')
-						->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-minus-circle close"></i>'))
+						->add(Admin_Form_Entity::factory('Code')->html('<i class="fa-solid fa-circle-minus close"></i>'))
 						->onclick($deleteOnclick)
 				)
 				->execute();

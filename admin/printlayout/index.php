@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -105,7 +105,7 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Admin_Form.add'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
 		)
@@ -115,7 +115,7 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 	->name(Core::_('Printlayout_Dir.main_menu'))
-	->icon('fa fa-plus')
+	->icon('fa-solid fa-plus')
 	->href(
 		$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 	)
@@ -125,7 +125,7 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 	->name(Core::_('Printlayout_Driver.model_name'))
-	->icon('fa fa-gear')
+	->icon('fa-solid fa-gear')
 	->href(
 		$oAdmin_Form_Controller->getAdminActionLoadHref('/{admin}/printlayout/driver/index.php', NULL, NULL, 0, 0)
 	)
@@ -268,6 +268,8 @@ if ($oAdminFormActionRollback && $oAdmin_Form_Controller->getAction() == 'rollba
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Printlayout_Dir')
 );
+
+$oAdmin_Form_Dataset->changeField('name', 'class', 'semi-bold');
 
 // Ограничение источника 0 по родительской группе
 $oAdmin_Form_Dataset->addCondition(

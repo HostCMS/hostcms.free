@@ -11,24 +11,24 @@
  */
 class Smarty_Internal_Method_UnregisterResource
 {
-    /**
-     * Valid for Smarty and template object
-     *
-     * @var int
-     */
+	/**
+	 * Valid for Smarty and template object
+	 *
+	 * @var int
+	 */
     public $objMap = 3;
 
-    /**
-     * Registers a resource to fetch a template
-     *
-     * @api  Smarty::unregisterResource()
-     * @link https://www.smarty.net/docs/en/api.unregister.resource.tpl
-     *
-     * @param \Smarty_Internal_TemplateBase|\Smarty_Internal_Template|\Smarty $obj
-     * @param string                                                          $type name of resource type
-     *
-     * @return \Smarty|\Smarty_Internal_Template
-     */
+	/**
+	 * Registers a resource to fetch a template
+	 *
+	 * @api  Smarty::unregisterResource()
+	 * @link https://www.smarty.net/docs/en/api.unregister.resource.tpl
+	 *
+	 * @param \Smarty_Internal_TemplateBase|\Smarty_Internal_Template|\Smarty $obj
+	 * @param string                                                          $type name of resource type
+	 *
+	 * @return \Smarty|\Smarty_Internal_Template
+	 */
     public function unregisterResource(Smarty_Internal_TemplateBase $obj, $type)
     {
         $smarty = $obj->_getSmartyObj();

@@ -83,7 +83,7 @@ class Field_Controller_Tab
 	/**
 	* Get object
 	* @return object|null
-     */
+	 */
 	public function getObject()
 	{
 		return $this->_object;
@@ -422,7 +422,7 @@ class Field_Controller_Tab
 					$oAdmin_Form_Entity
 						->name("field_{$oField->id}[]")
 						->id("id_field_{$oField->id}_00{$iFieldCounter}")
-						->caption(htmlspecialchars($oField->name) . ($oField->visible ? '' : ' <i class="fa fa-eye-slash fa-inactive"></i>'))
+						->caption(htmlspecialchars($oField->name) . ($oField->visible ? '' : ' <i class="fa-solid fa-eye-slash fa-inactive"></i>'))
 						->value(
 							$this->_correctPrintValue($oField, $oField->default_value)
 						)
@@ -1844,23 +1844,28 @@ class Field_Controller_Tab
 					$aNewValueSmall = Core_Array::getFiles("small_field_{$oField->id}", array());
 
 					// New values of field
-					if (is_array($aNewValueLarge) && isset($aNewValueLarge['name']))
+					if (is_array($aNewValueLarge) && isset($aNewValueLarge['name'])
+						|| is_array($aNewValueSmall) && isset($aNewValueSmall['name'])
+					)
 					{
-						$iCount = count($aNewValueLarge['name']);
+						$iLargeCount = isset($aNewValueLarge['name']) ? count($aNewValueLarge['name']) : 0;
+						$iSmallCount = isset($aNewValueSmall['name']) ? count($aNewValueSmall['name']) : 0;
+
+						$iCount = max($iLargeCount, $iSmallCount);
 
 						for ($i = 0; $i < $iCount; $i++)
 						{
-							$oFileValue = $oField->createNewValue($this->_object->id);
-
 							ob_start();
 
-							$aLargeFile = array(
-								'name' => $aNewValueLarge['name'][$i],
-								'type' => $aNewValueLarge['type'][$i],
-								'tmp_name' => $aNewValueLarge['tmp_name'][$i],
-								'error' => $aNewValueLarge['error'][$i],
-								'size' => $aNewValueLarge['size'][$i],
-							);
+							$aLargeFile = isset($aNewValueLarge['name'][$i])
+								? array(
+									'name' => $aNewValueLarge['name'][$i],
+									'type' => $aNewValueLarge['type'][$i],
+									'tmp_name' => $aNewValueLarge['tmp_name'][$i],
+									'error' => $aNewValueLarge['error'][$i],
+									'size' => $aNewValueLarge['size'][$i],
+								)
+								: NULL;
 
 							$aSmallFile = isset($aNewValueSmall['name'][$i])
 								? array(
@@ -1872,51 +1877,55 @@ class Field_Controller_Tab
 								)
 								: NULL;
 
-							// -------
-							$description = $this->_getEachPost("description_field_{$oField->id}");
-							if (!is_null($description))
+							if (!is_null($aLargeFile) || !is_null($aSmallFile))
 							{
-								$oFileValue->file_description = $description;
+								$oFileValue = $oField->createNewValue($this->_object->id);
+
+								$description = $this->_getEachPost("description_field_{$oField->id}");
+								if (!is_null($description))
+								{
+									$oFileValue->file_description = $description;
+								}
+
+								$description_small = $this->_getEachPost("description_small_field_{$oField->id}");
+
+								if (!is_null($description_small))
+								{
+									$oFileValue->file_small_description = $description_small;
+								}
+								// -------
+
+								$oFileValue->save();
+
+								$this->_loadFiles($aLargeFile, $aSmallFile, $oFileValue, $oField, "field_{$oField->id}");
+
+								$this->_Admin_Form_Controller->addMessage(ob_get_clean());
+
+								ob_start();
+								Core_Html_Entity::factory('Script')
+									->value("$(\"#{$windowId} div[id^='file_large'] input[name='field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'field_{$oField->id}_{$oFileValue->id}');" .
+									"$(\"#{$windowId} div[id^='file_small'] input[name='small_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'small_field_{$oField->id}_{$oFileValue->id}');" .
+									// Description
+									"$(\"#{$windowId} input[name='description_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'description_field_{$oField->id}_{$oFileValue->id}');" .
+									"$(\"#{$windowId} input[name='description_small_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'description_small_field_{$oField->id}_{$oFileValue->id}');" .
+									// Large
+									"$(\"#{$windowId} input[name='large_max_width_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'large_max_width_field_{$oField->id}_{$oFileValue->id}');" .
+									"$(\"#{$windowId} input[name='large_max_height_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'large_max_height_field_{$oField->id}_{$oFileValue->id}');" .
+									"$(\"#{$windowId} input[name='large_preserve_aspect_ratio_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'large_preserve_aspect_ratio_field_{$oField->id}_{$oFileValue->id}');" .
+									"$(\"#{$windowId} input[name='large_place_watermark_checkbox_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'large_place_watermark_checkbox_field_{$oField->id}_{$oFileValue->id}');" .
+									"$(\"#{$windowId} input[name='watermark_position_x_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'watermark_position_x_field_{$oField->id}_{$oFileValue->id}');" .
+									"$(\"#{$windowId} input[name='watermark_position_y_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'watermark_position_y_field_{$oField->id}_{$oFileValue->id}');" .
+									// Small
+									"$(\"#{$windowId} input[name='small_max_width_small_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'small_max_width_small_field_{$oField->id}_{$oFileValue->id}');" .
+									"$(\"#{$windowId} input[name='small_max_height_small_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'small_max_height_small_field_{$oField->id}_{$oFileValue->id}');" .
+									"$(\"#{$windowId} input[name='small_preserve_aspect_ratio_small_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'small_preserve_aspect_ratio_small_field_{$oField->id}_{$oFileValue->id}');" .
+									"$(\"#{$windowId} input[name='small_place_watermark_checkbox_small_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'small_place_watermark_checkbox_small_field_{$oField->id}_{$oFileValue->id}');" .
+									"$(\"#{$windowId} input[name='create_small_image_from_large_small_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'create_small_image_from_large_small_field_{$oField->id}_{$oFileValue->id}');"
+									)
+									->execute();
+
+								$this->_Admin_Form_Controller->addMessage(ob_get_clean());
 							}
-
-							$description_small = $this->_getEachPost("description_small_field_{$oField->id}");
-
-							if (!is_null($description_small))
-							{
-								$oFileValue->file_small_description = $description_small;
-							}
-							// -------
-
-							$oFileValue->save();
-
-							$this->_loadFiles($aLargeFile, $aSmallFile, $oFileValue, $oField, "field_{$oField->id}");
-
-							$this->_Admin_Form_Controller->addMessage(ob_get_clean());
-
-							ob_start();
-							Core_Html_Entity::factory('Script')
-								->value("$(\"#{$windowId} div[id^='file_large'] input[name='field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'field_{$oField->id}_{$oFileValue->id}');" .
-								"$(\"#{$windowId} div[id^='file_small'] input[name='small_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'small_field_{$oField->id}_{$oFileValue->id}');" .
-								// Description
-								"$(\"#{$windowId} input[name='description_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'description_field_{$oField->id}_{$oFileValue->id}');" .
-								"$(\"#{$windowId} input[name='description_small_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'description_small_field_{$oField->id}_{$oFileValue->id}');" .
-								// Large
-								"$(\"#{$windowId} input[name='large_max_width_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'large_max_width_field_{$oField->id}_{$oFileValue->id}');" .
-								"$(\"#{$windowId} input[name='large_max_height_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'large_max_height_field_{$oField->id}_{$oFileValue->id}');" .
-								"$(\"#{$windowId} input[name='large_preserve_aspect_ratio_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'large_preserve_aspect_ratio_field_{$oField->id}_{$oFileValue->id}');" .
-								"$(\"#{$windowId} input[name='large_place_watermark_checkbox_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'large_place_watermark_checkbox_field_{$oField->id}_{$oFileValue->id}');" .
-								"$(\"#{$windowId} input[name='watermark_position_x_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'watermark_position_x_field_{$oField->id}_{$oFileValue->id}');" .
-								"$(\"#{$windowId} input[name='watermark_position_y_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'watermark_position_y_field_{$oField->id}_{$oFileValue->id}');" .
-								// Small
-								"$(\"#{$windowId} input[name='small_max_width_small_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'small_max_width_small_field_{$oField->id}_{$oFileValue->id}');" .
-								"$(\"#{$windowId} input[name='small_max_height_small_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'small_max_height_small_field_{$oField->id}_{$oFileValue->id}');" .
-								"$(\"#{$windowId} input[name='small_preserve_aspect_ratio_small_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'small_preserve_aspect_ratio_small_field_{$oField->id}_{$oFileValue->id}');" .
-								"$(\"#{$windowId} input[name='small_place_watermark_checkbox_small_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'small_place_watermark_checkbox_small_field_{$oField->id}_{$oFileValue->id}');" .
-								"$(\"#{$windowId} input[name='create_small_image_from_large_small_field_{$oField->id}\\[\\]']\").eq(0).attr('name', 'create_small_image_from_large_small_field_{$oField->id}_{$oFileValue->id}');"
-								)
-								->execute();
-
-							$this->_Admin_Form_Controller->addMessage(ob_get_clean());
 						}
 					}
 				break;
@@ -2063,8 +2072,7 @@ class Field_Controller_Tab
 				}
 				else
 				{
-					// $small_image = $this->linkedObject->getSmallFileName($this->_object, $oFileValue, $aSmallFileData['name']);
-					$small_image = 'small_field' . $oFileValue->id . '.' . Core_File::getExtension($aFileData['name']);
+					$small_image = 'small_field' . $oFileValue->id . '.' . Core_File::getExtension($aSmallFileData['name']);
 				}
 			}
 			elseif ($create_small_image_from_large && $bLargeImageIsCorrect)
@@ -2163,6 +2171,23 @@ class Field_Controller_Tab
 					$oFileValue->file_name = is_null($param['large_image_name'])
 						? ''
 						: $param['large_image_name'];
+
+					$oFileValue->width = $oFileValue->height = $oFileValue->size = 0;
+
+					if (Core_File::isFile($large_image) && is_readable($large_image))
+					{
+						$oFileValue->size = filesize($large_image);
+
+						if ($oFileValue->size > 12 && Core_Image::instance()->exifImagetype($large_image))
+						{
+							$picsize = @getimagesize($large_image);
+							if ($picsize)
+							{
+								$oFileValue->width = $picsize[0];
+								$oFileValue->height = $picsize[1];
+							}
+						}
+					}
 				}
 
 				if ($result['small_image'])
@@ -2171,6 +2196,23 @@ class Field_Controller_Tab
 					$oFileValue->file_small_name = is_null($param['small_image_name'])
 						? ''
 						: $param['small_image_name'];
+
+					$oFileValue->small_width = $oFileValue->small_height = $oFileValue->small_size = 0;
+
+					if (Core_File::isFile($small_image) && is_readable($small_image))
+					{
+						$oFileValue->small_size = filesize($small_image);
+
+						if ($oFileValue->small_size > 12 && Core_Image::instance()->exifImagetype($small_image))
+						{
+							$picsize = @getimagesize($small_image);
+							if ($picsize)
+							{
+								$oFileValue->small_width = $picsize[0];
+								$oFileValue->small_height = $picsize[1];
+							}
+						}
+					}
 				}
 
 				$oFileValue->save();

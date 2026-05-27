@@ -108,11 +108,11 @@ class Xsl_Export_Controller extends Core_Servant_Properties
 		return implode('/', $aReturn);
 	}
 
-    /**
-     * Set objects
-     * @param Xsl_Model $oXsl xsl
-     * @return self
-     */
+	/**
+	 * Set objects
+	 * @param Xsl_Model $oXsl xsl
+	 * @return self
+	 */
 	protected function _setObjects(Xsl_Model $oXsl)
 	{
 		$this->_aObjects[$oXsl->name] = array(
@@ -148,7 +148,6 @@ class Xsl_Export_Controller extends Core_Servant_Properties
 
 		$fileName = $prefix . '_' . date("Y_m_d_H_i_s") . '.json';
 
-		header("Pragma: public");
 		header("Content-Description: File Transfer");
 		header("Content-Type: " . Core_Mime::getFileMime($fileName));
 		header("Content-Disposition: attachment; filename = \"" . rawurlencode(Core_Http::sanitizeHeader($fileName)) . "\";");

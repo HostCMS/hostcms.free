@@ -220,7 +220,7 @@ class Core_Controller extends Core_Servant_Properties
 	/**
 	 * Get ARRAY for entity and children entities
 	 * @return stdClass
-     */
+	 */
 	public function getStdObject()
 	{
 		$this->_entity

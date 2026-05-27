@@ -35,7 +35,7 @@ $oAdmin_Form_Entity_Menus->add(
 
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Lib.lib_page'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
 		)
@@ -46,7 +46,7 @@ $oAdmin_Form_Entity_Menus->add(
 
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Lib_Dir.lib_dir_folder'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
@@ -56,7 +56,7 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Lib.import'))
-		->icon('fa fa-download')
+		->icon('fa-solid fa-download')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/lib/import/index.php', NULL, NULL, 'lib_dir_id=' . $lib_dir_id)
 		)
@@ -80,7 +80,7 @@ $oAdmin_Form_Controller->addEntity(
 				<div class="col-xs-12">
 					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
 						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
-						<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
+						<i class="fa-solid fa-circle-xmark no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
 						<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '"><i class="fa-solid fa-magnifying-glass fa-fw"></i></button>
 					</form>
 				</div>
@@ -145,31 +145,24 @@ $oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('importLibs');
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'importLibs')
 {
+	$oLib_Import_Controller = Admin_Form_Action_Controller::factory(
+		'Lib_Import_Controller', $oAdmin_Form_Action
+	);
+
 	$oUserCurrent = Core_Auth::getCurrentUser();
 	if (!$oUserCurrent->read_only)
 	{
 		if (isset($_FILES['json_file']) && intval($_FILES['json_file']['size']) > 0)
 		{
-			try {
-				$content = Core_File::read($_FILES['json_file']['tmp_name']);
+			$content = Core_File::read($_FILES['json_file']['tmp_name']);
 
-				$oLib_Import_Controller = Admin_Form_Action_Controller::factory(
-					'Lib_Import_Controller', $oAdmin_Form_Action
-				);
-
-				$oLib_Import_Controller
-					->content($content)
-					->lib_dir_id($lib_dir_id)
-					// ->execute()
-					;
-
-				$oAdmin_Form_Controller->addAction($oLib_Import_Controller);
-			}
-			catch (Exception $exc) {
-				Core_Message::show($exc->getMessage(), "error");
-			}
+			$oLib_Import_Controller
+				->content($content)
+				->lib_dir_id($lib_dir_id);
 		}
 	}
+
+	$oAdmin_Form_Controller->addAction($oLib_Import_Controller);
 }
 
 // Действие редактирования
@@ -258,10 +251,49 @@ if ($oAction && $oAdmin_Form_Controller->getAction() == 'deleteFile')
 	$oAdmin_Form_Controller->addAction($oDeleteFileController);
 }
 
+
+// Действие "Перенести"
+$oAdminFormActionMove = $oAdmin_Form->Admin_Form_Actions->getByName('move');
+
+if ($oAdminFormActionMove && $oAdmin_Form_Controller->getAction() == 'move')
+{
+	$oLibControllerMove = new Admin_Form_Action_Controller_Type_Move($oAdminFormActionMove);
+
+	$aExclude = array();
+	$aChecked = $oAdmin_Form_Controller->getChecked();
+	foreach ($aChecked as $datasetKey => $checkedItems)
+	{
+		// Exclude just dirs
+		if ($datasetKey == 0)
+		{
+			foreach ($checkedItems as $key => $value)
+			{
+				$aExclude[] = $key;
+			}
+		}
+	}
+
+	$oLib_Controller_Edit = Admin_Form_Action_Controller::factory(
+		'Lib_Controller_Edit', $oAdmin_Form_Action
+	);
+
+	$oLibControllerMove
+		->title(Core::_('Lib.move_lib_dir_title'))
+		->selectCaption(Core::_('Lib.move_lib_dir_id'))
+		// Список директорий генерируется другим контроллером
+		->selectOptions(array(' … ') + $oLib_Controller_Edit->fillLibDir(0, $aExclude))
+		->value($lib_dir_id);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oLibControllerMove);
+}
+
 // Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Lib_Dir')
 );
+
+$oAdmin_Form_Dataset->changeField('name', 'class', 'semi-bold');
 
 if (strlen($sGlobalSearch))
 {
@@ -275,6 +307,8 @@ if (strlen($sGlobalSearch))
 	$oAdmin_Form_Dataset
 			->addCondition(array('where' => array('lib_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
+
+	Core_Event::notify('Lib_GlobalSearch.onAfterSetConditions', NULL, array($oAdmin_Form_Dataset, $sGlobalSearch));
 }
 else
 {
@@ -309,6 +343,8 @@ if (strlen($sGlobalSearch))
 	$oAdmin_Form_Dataset
 			->addCondition(array('where' => array('libs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
+
+	Core_Event::notify('Lib_GlobalSearch.onAfterSetConditions', NULL, array($oAdmin_Form_Dataset, $sGlobalSearch));
 }
 else
 {

@@ -235,11 +235,11 @@ abstract class Core_Webauthn_Format
 		{
 			return FALSE;
 		}
-		
+
 		// Сравнение issuer и subject
 		$issuerCn = isset($certInfo['issuer']['CN']) ? $certInfo['issuer']['CN'] : '';
 		$subjectCn = isset($certInfo['subject']['CN']) ? $certInfo['subject']['CN'] : '';
-		
+
 		if ($issuerCn && $subjectCn && $issuerCn === $subjectCn)
 		{
 			return TRUE;
@@ -526,7 +526,7 @@ abstract class Core_Webauthn_Format
 	/**
 	 * Get credential public key from authenticator data
 	 * @return false|OpenSSLAsymmetricKey|null
-     */
+	 */
 	protected function _getCredentialPublicKey()
 	{
 		$publicKeyPem = $this->_authenticatorData->getPublicKeyPem();

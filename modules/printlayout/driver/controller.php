@@ -49,11 +49,11 @@ abstract class Printlayout_Driver_Controller
 		return 'Printlayout_Driver_' . ucfirst($driver);
 	}
 
-    /**
-     * Create and return an object of printlayout
-     * @param $driverName
-     * @return mixed|string
-     */
+	/**
+	 * Create and return an object of printlayout
+	 * @param $driverName
+	 * @return mixed|string
+	 */
 	static public function factory($driverName)
 	{
 		$driver = self::_getDriverName($driverName);

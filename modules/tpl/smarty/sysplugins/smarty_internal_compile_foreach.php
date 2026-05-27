@@ -16,75 +16,75 @@
  */
 class Smarty_Internal_Compile_Foreach extends Smarty_Internal_Compile_Private_ForeachSection
 {
-    /**
-     * Attribute definition: Overwrites base class.
-     *
-     * @var array
-     * @see Smarty_Internal_CompileBase
-     */
+	/**
+	 * Attribute definition: Overwrites base class.
+	 *
+	 * @var array
+	 * @see Smarty_Internal_CompileBase
+	 */
     public $required_attributes = array('from', 'item');
 
-    /**
-     * Attribute definition: Overwrites base class.
-     *
-     * @var array
-     * @see Smarty_Internal_CompileBase
-     */
+	/**
+	 * Attribute definition: Overwrites base class.
+	 *
+	 * @var array
+	 * @see Smarty_Internal_CompileBase
+	 */
     public $optional_attributes = array('name', 'key', 'properties');
 
-    /**
-     * Attribute definition: Overwrites base class.
-     *
-     * @var array
-     * @see Smarty_Internal_CompileBase
-     */
+	/**
+	 * Attribute definition: Overwrites base class.
+	 *
+	 * @var array
+	 * @see Smarty_Internal_CompileBase
+	 */
     public $shorttag_order = array('from', 'item', 'key', 'name');
 
-    /**
-     * counter
-     *
-     * @var int
-     */
+	/**
+	 * counter
+	 *
+	 * @var int
+	 */
     public $counter = 0;
 
-    /**
-     * Name of this tag
-     *
-     * @var string
-     */
+	/**
+	 * Name of this tag
+	 *
+	 * @var string
+	 */
     public $tagName = 'foreach';
 
-    /**
-     * Valid properties of $smarty.foreach.name.xxx variable
-     *
-     * @var array
-     */
+	/**
+	 * Valid properties of $smarty.foreach.name.xxx variable
+	 *
+	 * @var array
+	 */
     public $nameProperties = array('first', 'last', 'index', 'iteration', 'show', 'total');
 
-    /**
-     * Valid properties of $item@xxx variable
-     *
-     * @var array
-     */
+	/**
+	 * Valid properties of $item@xxx variable
+	 *
+	 * @var array
+	 */
     public $itemProperties = array('first', 'last', 'index', 'iteration', 'show', 'total', 'key');
 
-    /**
-     * Flag if tag had name attribute
-     *
-     * @var bool
-     */
+	/**
+	 * Flag if tag had name attribute
+	 *
+	 * @var bool
+	 */
     public $isNamed = false;
 
-    /**
-     * Compiles code for the {foreach} tag
-     *
-     * @param array                                 $args     array with attributes from parser
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler compiler object
-     *
-     * @return string compiled code
-     * @throws \SmartyCompilerException
-     * @throws \SmartyException
-     */
+	/**
+	 * Compiles code for the {foreach} tag
+	 *
+	 * @param array                                 $args     array with attributes from parser
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler compiler object
+	 *
+	 * @return string compiled code
+	 * @throws \SmartyCompilerException
+	 * @throws \SmartyException
+	 */
     public function compile($args, Smarty_Internal_TemplateCompilerBase $compiler)
     {
         $compiler->loopNesting++;
@@ -191,7 +191,7 @@ class Smarty_Internal_Compile_Foreach extends Smarty_Internal_Compile_Private_Fo
         // Register tag
         $this->openTag(
             $compiler,
-            'foreach',
+        	'foreach',
             array('foreach', $compiler->nocache, $local, $itemVar, empty($itemAttr) ? 1 : 2)
         );
         // maybe nocache because of nocache variables
@@ -258,13 +258,13 @@ class Smarty_Internal_Compile_Foreach extends Smarty_Internal_Compile_Private_Fo
         return $output;
     }
 
-    /**
-     * Compiles code for to restore saved template variables
-     *
-     * @param int $levels number of levels to restore
-     *
-     * @return string compiled code
-     */
+	/**
+	 * Compiles code for to restore saved template variables
+	 *
+	 * @param int $levels number of levels to restore
+	 *
+	 * @return string compiled code
+	 */
     public function compileRestore($levels)
     {
         return "\$_smarty_tpl->smarty->ext->_foreach->restore(\$_smarty_tpl, {$levels});";
@@ -279,14 +279,14 @@ class Smarty_Internal_Compile_Foreach extends Smarty_Internal_Compile_Private_Fo
  */
 class Smarty_Internal_Compile_Foreachelse extends Smarty_Internal_CompileBase
 {
-    /**
-     * Compiles code for the {foreachelse} tag
-     *
-     * @param array                                 $args     array with attributes from parser
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler compiler object
-     *
-     * @return string compiled code
-     */
+	/**
+	 * Compiles code for the {foreachelse} tag
+	 *
+	 * @param array                                 $args     array with attributes from parser
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler compiler object
+	 *
+	 * @return string compiled code
+	 */
     public function compile($args, Smarty_Internal_TemplateCompilerBase $compiler)
     {
         // check and get attributes
@@ -310,15 +310,15 @@ class Smarty_Internal_Compile_Foreachelse extends Smarty_Internal_CompileBase
  */
 class Smarty_Internal_Compile_Foreachclose extends Smarty_Internal_CompileBase
 {
-    /**
-     * Compiles code for the {/foreach} tag
-     *
-     * @param array                                 $args     array with attributes from parser
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler compiler object
-     *
-     * @return string compiled code
-     * @throws \SmartyCompilerException
-     */
+	/**
+	 * Compiles code for the {/foreach} tag
+	 *
+	 * @param array                                 $args     array with attributes from parser
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler compiler object
+	 *
+	 * @return string compiled code
+	 * @throws \SmartyCompilerException
+	 */
     public function compile($args, Smarty_Internal_TemplateCompilerBase $compiler)
     {
         $compiler->loopNesting--;

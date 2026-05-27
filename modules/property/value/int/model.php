@@ -10,25 +10,13 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @version 7.x
  * @copyright © 2005-2026, https://www.hostcms.ru
  */
-class Property_Value_Int_Model extends Core_Entity
+class Property_Value_Int_Model extends Property_Value_Abstract
 {
 	/**
 	 * Model name
 	 * @var mixed
 	 */
 	protected $_modelName = 'property_value_int';
-
-	/**
-	 * Disable markDeleted()
-	 * @var mixed
-	 */
-	protected $_marksDeleted = NULL;
-
-	/**
-	 * Column consist item's name
-	 * @var string
-	 */
-	protected $_nameColumn = 'id';
 
 	/**
 	 * Belongs to relations
@@ -44,22 +32,6 @@ class Property_Value_Int_Model extends Core_Entity
 	);
 
 	/**
-	 * Forbidden tags. If list of tags is empty, all tags will show.
-	 * @var array
-	 */
-	protected $_forbiddenTags = array(
-		'entity_id'
-	);
-
-	/**
-	 * Default sorting for models
-	 * @var array
-	 */
-	/*protected $_sorting = array(
-		'property_value_ints.id' => 'ASC'
-	);*/
-
-	/**
 	 * Set property value
 	 * @param int $value value
 	 * @return self
@@ -69,12 +41,6 @@ class Property_Value_Int_Model extends Core_Entity
 		$this->value = intval($value);
 		return $this;
 	}
-
-	/**
-	 * Name of the tag in XML
-	 * @var string
-	 */
-	protected $_tagName = 'property_value';
 
 	/**
 	 * Module config
@@ -98,44 +64,16 @@ class Property_Value_Int_Model extends Core_Entity
 	}
 
 	/**
-	 * Get XML for entity and children entities
-	 * @return string
-	 * @hostcms-event property_value_int.onBeforeRedeclaredGetXml
-	 */
-	public function getXml()
-	{
-		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
-
-		$this->_prepareData();
-
-		return parent::getXml();
-	}
-
-	/**
-	 * Get stdObject for entity and children entities
-	 * @return stdObject
-	 * @hostcms-event property_value_int.onBeforeRedeclaredGetStdObject
-	 */
-	public function getStdObject($attributePrefix = '_')
-	{
-		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
-
-		$this->_prepareData();
-
-		return parent::getStdObject($attributePrefix);
-	}
-
-	/**
 	 * Show media in XML
 	 * @var boolean
 	 */
 	protected $_showXmlMedia = FALSE;
 
-    /**
-     * Show properties in XML
-     * @param bool $showXmlMedia
-     * @return self
-     */
+	/**
+	 * Show properties in XML
+	 * @param bool $showXmlMedia
+	 * @return self
+	 */
 	public function showXmlMedia($showXmlMedia = TRUE)
 	{
 		$this->_showXmlMedia = $showXmlMedia;

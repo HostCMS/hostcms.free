@@ -190,7 +190,7 @@ class Wysiwyg_Filemanager_File extends Core_Empty_Entity
 			Core_Html_Entity::factory('A')
 				->add(
 					Core_Html_Entity::factory('I')
-						->class('fa fa-download palegreen')
+						->class('fa-solid fa-download palegreen')
 				)
 				->href(Admin_Form_Controller::correctBackendPath("/{admin}/filemanager/index.php") . "?hostcms[action]=download&cdir=" . rawurlencode(Core_File::pathCorrection(Core_Array::getRequest('cdir'))) . "&dir=" . rawurlencode(Core_File::pathCorrection(Core_Array::getRequest('dir'))) ."&hostcms[checked][1][{$this->hash}]=1")
 				->target('_blank')
@@ -269,7 +269,7 @@ class Wysiwyg_Filemanager_File extends Core_Empty_Entity
 			->class('fm-preview-' . $this->type);
 
 		$oChild = Core_Html_Entity::factory('I')
-			->class('fa fa-file-text-o');
+			->class('fa-regular fa-file-lines');
 
 		if ($this->type == 'file')
 		{

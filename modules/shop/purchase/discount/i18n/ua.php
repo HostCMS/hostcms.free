@@ -49,4 +49,7 @@ return array(
 	'siteuser_groups' => "Група доступу",
 	'all' => 'Всі',
 	'conditions' => 'Умови',
+	'coupon_not_check' => 'Не встановлено прапорець "Застосовувати тільки з купоном"',
+	'tab_coupons' => 'Купони',
+	'coupon_header' => 'Купони, пов\'язані зі знижкою',
 );

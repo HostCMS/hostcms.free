@@ -35,7 +35,7 @@ function smarty_modifier_mb_wordwrap($str, $width = 75, $break = "\n", $cut = fa
         if ($token_length > $width) {
             if ($cut) {
                 $_tokens = preg_split(
-                    '!(.{' . $width . '})!S' . Smarty::$_UTF8_MODIFIER,
+                	'!(.{' . $width . '})!S' . Smarty::$_UTF8_MODIFIER,
                     $_token,
                     -1,
                     PREG_SPLIT_NO_EMPTY + PREG_SPLIT_DELIM_CAPTURE

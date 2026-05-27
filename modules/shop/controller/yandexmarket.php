@@ -491,7 +491,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	/**
 	 * Get groups set
 	 * @return Shop_Group_Model|null
-     */
+	 */
 	public function shopGroups()
 	{
 		return $this->_Shop_Groups;
@@ -1599,12 +1599,12 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	 */
 	protected $_cacheListItems = array();
 
-    /**
-     * Get List_Item value by ID
-     * @param Property_Model $oProperty
-     * @param int $listItemId
-     * @return mixed|null
-     */
+	/**
+	 * Get List_Item value by ID
+	 * @param Property_Model $oProperty
+	 * @param int $listItemId
+	 * @return mixed|null
+	 */
 	protected function _getCacheListItem(Property_Model $oProperty, $listItemId)
 	{
 		if (!isset($this->_cacheListItems[$listItemId]))
@@ -2800,7 +2800,6 @@ class Shop_Controller_YandexMarket extends Core_Controller
 				ob_end_clean();
 			}
 
-			header('Pragma: public');
 			header('Cache-Control: no-cache, must-revalidate');
 
 			// Disable Nginx cache

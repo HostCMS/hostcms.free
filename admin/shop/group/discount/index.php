@@ -16,7 +16,7 @@ $sFormAction = '/{admin}/shop/group/discount/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
-$oShop_Group = Core_Entity::factory('Shop_Group', Core_Array::getGet('shop_group_id', 0));
+$oShop_Group = Core_Entity::factory('Shop_Group', Core_Array::getGet('shop_group_id', 0, 'int'));
 
 if ($oShop_Group->shortcut_id)
 {
@@ -144,19 +144,6 @@ if ($oParentShopGroup->id)
 	}
 }
 
-// Если товар - модификация, значит мы пришли из формы списка модификаций,
-// добавляем соответствующую крошку
-// if ($oShopItem->modification_id)
-// {
-// 	// Крошка на текущую форму
-// 	$oAdmin_Form_Entity_Breadcrumbs->add(
-// 		Admin_Form_Entity::factory('Breadcrumb')
-// 			->name(Core::_("Shop_Item.item_modification_title", $oShopItem->Modification->name, FALSE))
-// 			->href($oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/item/modification/index.php', NULL, NULL, "shop_item_id={$oShopItem->Modification->id}"))
-// 			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/shop/item/modification/index.php', NULL, NULL, "shop_item_id={$oShopItem->Modification->id}"))
-// 	);
-// }
-
 // Последняя крошка на текущую форму
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
@@ -224,8 +211,9 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Shop_Discount')
 );
 
-// Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
+
+// Доступ только к своим
 !$oUser->superuser && $oUser->only_access_my_own
 	&& $oAdmin_Form_Dataset->addUserConditions();
 
@@ -249,7 +237,6 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 );
 
 // Доступ только к своим
-$oUser = Core_Auth::getCurrentUser();
 !$oUser->superuser && $oUser->only_access_my_own
 	&& $oAdmin_Form_Dataset->addUserConditions();
 
@@ -272,7 +259,6 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 );
 
 // Доступ только к своим
-$oUser = Core_Auth::getCurrentUser();
 !$oUser->superuser && $oUser->only_access_my_own
 	&& $oAdmin_Form_Dataset->addUserConditions();
 
@@ -287,10 +273,10 @@ $oAdmin_Form_Dataset
 
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 
-$oAdmin_Form_Controller->deleteAdminFormFieldById(2157);
-
-$oAdmin_Form_Controller->deleteAdminFormActionById(1334);
-$oAdmin_Form_Controller->deleteAdminFormActionById(1338);
+$oAdmin_Form_Controller
+	->deleteAdminFormActionById(1334)
+	->deleteAdminFormActionById(1338)
+	->deleteAdminFormFieldById(2157);
 
 // Показ формы
 $oAdmin_Form_Controller->execute();

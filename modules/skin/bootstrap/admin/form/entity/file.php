@@ -229,14 +229,14 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 						->id('preview_large_' . $this->largeImage['id'])
 						->class('input-group-addon control-item ')
 						->onclick('$("#' . $windowId . ' input#' . $this->largeImage['id'] . ', #' . $windowId . ' div#file_preview_large_' . $this->largeImage['id'] . '").toggleClass(\'hidden\'); $("#' . $windowId . ' a#preview_large_' . $this->largeImage['id'] . ' > i").toggleClass(\'fa-pencil fa-image\')')
-						->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-pencil"></i>'))
+						->add(Admin_Form_Entity::factory('Code')->html('<i class="fa-solid fa-pencil"></i>'))
 					)
 					->add(
 						Core_Html_Entity::factory('A')
 							->id('delete_large_' . $this->largeImage['id'])
 							->class('input-group-addon control-item')
 							->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { $('#" . $windowId . " input#" . $this->largeImage['id'] . "').removeClass('hidden'); $('#" . $windowId . " div#file_preview_large_" . $this->largeImage['id'] . "').addClass('hidden'); $('#" . $windowId . " a#crop_" . $this->largeImage['id'] . "').removeClass('input-group-addon control-item').addClass('hidden'); mainFormLocker.unlock(); {$this->largeImage['delete_onclick']} } else {return false;}")
-							->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-trash"></i>'))
+							->add(Admin_Form_Entity::factory('Code')->html('<i class="fa-solid fa-trash-can"></i>'))
 					);
 			}
 		}
@@ -257,7 +257,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 					->id('crop_' . $this->largeImage['id'])
 					->class($this->largeImage['path'] == '' ? 'hidden' : 'input-group-addon control-item')
 					->onclick("$.showCropModal('{$this->largeImage['id']}', '" . Core_Str::escapeJavascriptVariable($this->largeImage['path']) . "', '" . Core_Str::escapeJavascriptVariable($originalName) . "')")
-					->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-crop"></i>'))
+					->add(Admin_Form_Entity::factory('Code')->html('<i class="fa-solid fa-crop"></i>'))
 			);
 		}
 
@@ -428,7 +428,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 					->addAllowedProperty('data-title')
 					->set('data-title', '<b>' . htmlspecialchars($this->largeImage['windowTitle']) . '</b>')
 					->add(
-						Admin_Form_Entity::factory('Code')->html('<i class="fa fa-cog"></i>')
+						Admin_Form_Entity::factory('Code')->html('<i class="fa-solid fa-gear"></i>')
 					)
 			)
 			->add($oLargeWatermark_Div);
@@ -553,14 +553,14 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 							->id('preview_' . $this->smallImage['id'])
 							->class('input-group-addon control-item')
 							->onclick('$("#' . $windowId . ' input#' . $this->smallImage['id'] . ', #' . $windowId . ' div#file_preview_' . $this->smallImage['id'] . '").toggleClass(\'hidden\'); $("#' . $windowId . ' a#preview_' . $this->smallImage['id'] . ' > i").toggleClass(\'fa-pencil fa-image\')')
-							->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-pencil"></i>'))
+							->add(Admin_Form_Entity::factory('Code')->html('<i class="fa-solid fa-pencil"></i>'))
 						)
 						->add(
 							Core_Html_Entity::factory('A')
 								->id('delete_' . $this->smallImage['id'])
 								->class('input-group-addon control-item')
 								->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { $('#" . $windowId . " input#" . $this->smallImage['id'] . "').removeClass('hidden'); $('#" . $windowId . " div#file_preview_" . $this->smallImage['id'] . "').addClass('hidden'); $('#" . $windowId . " a#crop_" . $this->smallImage['id'] . "').removeClass('input-group-addon control-item').addClass('hidden'); mainFormLocker.unlock(); {$this->smallImage['delete_onclick']} } else {return false;}")
-								->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-trash"></i>'))
+								->add(Admin_Form_Entity::factory('Code')->html('<i class="fa-solid fa-trash-can"></i>'))
 						);
 				}
 			}
@@ -581,7 +581,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 						->id('crop_' . $this->smallImage['id'])
 						->class($this->smallImage['path'] == '' ? 'hidden' : 'input-group-addon control-item')
 						->onclick("$.showCropModal('{$this->smallImage['id']}', '" . Core_Str::escapeJavascriptVariable($this->smallImage['path']) . "', '" . Core_Str::escapeJavascriptVariable($originalName) . "')")
-						->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-crop"></i>'))
+						->add(Admin_Form_Entity::factory('Code')->html('<i class="fa-solid fa-crop"></i>'))
 				);
 			}
 
@@ -734,7 +734,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 							->addAllowedProperty('data-title')
 							->set('data-title', '<b>' . htmlspecialchars($this->smallImage['windowTitle']) . '</b>')
 							->add(
-								Admin_Form_Entity::factory('Code')->html('<i class="fa fa-cog"></i>')
+								Admin_Form_Entity::factory('Code')->html('<i class="fa-solid fa-gear"></i>')
 							)
 					)
 					->add($oSmallWatermark_Div);

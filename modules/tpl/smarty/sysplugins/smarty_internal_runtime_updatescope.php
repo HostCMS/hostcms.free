@@ -9,13 +9,13 @@
  **/
 class Smarty_Internal_Runtime_UpdateScope
 {
-    /**
-     * Update new assigned template or config variable in other effected scopes
-     *
-     * @param Smarty_Internal_Template $tpl      data object
-     * @param string|null              $varName  variable name
-     * @param int                      $tagScope tag scope to which bubble up variable value
-     */
+	/**
+	 * Update new assigned template or config variable in other effected scopes
+	 *
+	 * @param Smarty_Internal_Template $tpl      data object
+	 * @param string|null              $varName  variable name
+	 * @param int                      $tagScope tag scope to which bubble up variable value
+	 */
     public function _updateScope(Smarty_Internal_Template $tpl, $varName, $tagScope = 0)
     {
         if ($tagScope) {
@@ -40,14 +40,14 @@ class Smarty_Internal_Runtime_UpdateScope
         }
     }
 
-    /**
-     * Get array of objects which needs to be updated  by given scope value
-     *
-     * @param Smarty_Internal_Template $tpl
-     * @param int                      $mergedScope merged tag and template scope to which bubble up variable value
-     *
-     * @return array
-     */
+	/**
+	 * Get array of objects which needs to be updated  by given scope value
+	 *
+	 * @param Smarty_Internal_Template $tpl
+	 * @param int                      $mergedScope merged tag and template scope to which bubble up variable value
+	 *
+	 * @return array
+	 */
     public function _getAffectedScopes(Smarty_Internal_Template $tpl, $mergedScope)
     {
         $_stack = array();
@@ -81,13 +81,13 @@ class Smarty_Internal_Runtime_UpdateScope
         return $_stack;
     }
 
-    /**
-     * Update variable in other scope
-     *
-     * @param array                     $tpl_vars template variable array
-     * @param \Smarty_Internal_Template $from
-     * @param string                    $varName  variable name
-     */
+	/**
+	 * Update variable in other scope
+	 *
+	 * @param array                     $tpl_vars template variable array
+	 * @param \Smarty_Internal_Template $from
+	 * @param string                    $varName  variable name
+	 */
     public function _updateVariableInOtherScope(&$tpl_vars, Smarty_Internal_Template $from, $varName)
     {
         if (!isset($tpl_vars[ $varName ])) {
@@ -98,12 +98,12 @@ class Smarty_Internal_Runtime_UpdateScope
         }
     }
 
-    /**
-     * Update variable in template local variable stack
-     *
-     * @param \Smarty_Internal_Template $tpl
-     * @param string|null               $varName variable name or null for config variables
-     */
+	/**
+	 * Update variable in template local variable stack
+	 *
+	 * @param \Smarty_Internal_Template $tpl
+	 * @param string|null               $varName variable name or null for config variables
+	 */
     public function _updateVarStack(Smarty_Internal_Template $tpl, $varName)
     {
         $i = 0;

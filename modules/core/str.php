@@ -369,7 +369,7 @@ class Core_Str
 	 * Convert IP into hexadecimal value
 	 * @param string $ip IP
 	 * @return string|NULL
-     * @see Core_Ip::ip2hex()
+	 * @see Core_Ip::ip2hex()
 	 */
 	static public function ip2hex($ip)
 	{
@@ -385,14 +385,6 @@ class Core_Str
 	static public function hex2ip($hex)
 	{
 		return Core_Ip::hex2ip($hex);
-	}
-
-	/**
-	 * Callback function
-	 */
-	static protected function _callbackChr($matches)
-	{
-		return chr($matches[1]);
 	}
 
 	/**
@@ -510,7 +502,7 @@ class Core_Str
 
 		$text = preg_replace($search, $replace, $text);
 
-		$text = preg_replace_callback('(&#(\d+);)', 'Core_Str::_callbackChr', $text);
+		$text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
 		$text = str_replace($aConfig['separators'], ' ', $text);
 
@@ -523,7 +515,6 @@ class Core_Str
 		$text = trim($text);
 		$result = explode(' ', $text);
 
-		// Нормализация и хеширование слов
 		foreach ($result as $key => $res)
 		{
 			$word = $res;
@@ -997,7 +988,7 @@ class Core_Str
 	 * Convert HEX color to RGB or HSL
 	 * @param string $hex HEX color, e.g. #B781AF or #FF0
 	 * @return array
-     */
+	 */
 	static public function hex2hsl($hex)
 	{
 		$hex = ltrim($hex, '#');
@@ -1186,7 +1177,7 @@ class Core_Str
 		$fullName = mb_strtoupper(trim((string) $fullName));
 		$aFullName = explode(' ', $fullName);
 
-		$initials = array_reduce(str_replace(array('*', '"'), '', $aFullName), array('Core_Str', '_getInitialsReduce'));
+		$initials = strval(array_reduce(str_replace(array('*', '"'), '', $aFullName), array('Core_Str', '_getInitialsReduce')));
 
 		$initials = mb_strlen($initials) < $length
 			? mb_substr($fullName, 0, $length)
@@ -1591,7 +1582,7 @@ class Core_Str
 	 * @param string $to_encoding The output charset, e.g. 'UTF-8'
 	 * @param string|array $mValue
 	 * @return array|false|string
-     */
+	 */
 	static public function iconv($from_encoding, $to_encoding, $mValue)
 	{
 		if (is_array($mValue))
@@ -1614,11 +1605,11 @@ class Core_Str
 		return $mValue;
 	}
 
-    /**
-     * Convert $str to the string
-     * @param mixed $mixed
-     * @return string
-     */
+	/**
+	 * Convert $str to the string
+	 * @param mixed $mixed
+	 * @return string
+	 */
 	static public function toStr($mixed)
 	{
 		if (is_array($mixed))
@@ -1640,7 +1631,7 @@ class Core_Str
 	 * @param string $to
 	 * @param mixed $value
 	 * @return string
-     */
+	 */
 	static public function convertWeight($from, $to, $value)
 	{
 		switch ($from)
@@ -1707,7 +1698,7 @@ class Core_Str
 	 * @param string $to
 	 * @param mixed $value
 	 * @return string
-     */
+	 */
 	static public function convertDimension($from, $to, $value)
 	{
 		switch ($from)
@@ -1877,7 +1868,7 @@ class Core_Str
 		$text = strip_tags($text);
 
 		// Преобразуем html-сущности
-		$text = html_entity_decode($text, ENT_COMPAT, 'UTF-8');
+		$text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
 		// Различные виды пробелов
 		$text = self::convertSpaces($text);
@@ -1941,6 +1932,37 @@ class Core_Str
 		$text = str_replace("\n", "", $text);
 
 		return trim($text);
+	}
+
+	/**
+	 * Проверка строки на то, является ли она закодированной base64
+	 *
+	 * @param $string строка
+	 * @return boolean
+	 */
+	public static function isBase64($string)
+	{
+		if (empty($string))
+		{
+			return FALSE;
+		}
+
+		// Удаляем пробельные символы, которые могут присутствовать в строке (например, из email)
+		$string = preg_replace('/\s+/', '', $string);
+
+		// Проверка кратности 4 (после удаления пробелов)
+		if (strlen($string) % 4 !== 0)
+		{
+			return FALSE;
+		}
+
+		// Допустимые символы base64 + '=' только в конце
+		if (!preg_match('/^[A-Za-z0-9+\/]+={0,2}$/', $string))
+		{
+			return FALSE;
+		}
+
+		return TRUE;
 	}
 
 	/**

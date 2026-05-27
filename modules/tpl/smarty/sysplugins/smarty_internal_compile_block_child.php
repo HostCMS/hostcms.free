@@ -15,10 +15,10 @@
  */
 class Smarty_Internal_Compile_Block_Child extends Smarty_Internal_Compile_Child
 {
-    /**
-     * Tag name
-     *
-     * @var string
-     */
+	/**
+	 * Tag name
+	 *
+	 * @var string
+	 */
     public $tag = 'block_child';
 }

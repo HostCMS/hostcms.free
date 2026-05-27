@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Structure
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Структура сайта',
@@ -94,4 +94,5 @@ return array(
 	'shortcut_success' => "Ярлык успешно добавлен",
 	'changeShow_success' => 'Показ в меню раздела структуры успешно изменен.',
 	'changeShow_error' => 'Ошибка при изменении показа в меню структуры.',
+	'shortcut' => 'Ярлык',
 );

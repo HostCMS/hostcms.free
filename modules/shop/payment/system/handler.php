@@ -51,11 +51,11 @@ abstract class Shop_Payment_System_Handler
 		self::_check($oShop, 'checkPaymentBeforeContent');
 	}
 
-    /**
-     * Call ->checkPaymentAfterContent() on each shop's Shop_Payment_System_Handlers
-     * @param Shop_Model $oShop
-     * @return null
-     */
+	/**
+	 * Call ->checkPaymentAfterContent() on each shop's Shop_Payment_System_Handlers
+	 * @param Shop_Model $oShop
+	 * @return null
+	 */
 	static public function checkAfterContent(Shop_Model $oShop)
 	{
 		return self::_check($oShop, 'checkPaymentAfterContent');
@@ -63,6 +63,8 @@ abstract class Shop_Payment_System_Handler
 
 	/**
 	 * Protected method to call $methodName on each shop's Shop_Payment_System_Handlers
+	 * @param Shop_Model $oShop
+	 * @param string $methodName
 	 */
 	static protected function _check(Shop_Model $oShop, $methodName)
 	{
@@ -297,6 +299,7 @@ abstract class Shop_Payment_System_Handler
 
 	/**
 	 * Объект заказа до изменения.
+	 * @var Shop_Order_Model|NULL
 	 */
 	protected $_shopOrderBeforeAction = NULL;
 
@@ -322,6 +325,7 @@ abstract class Shop_Payment_System_Handler
 
 	/**
 	 * Объект заказа
+	 * @var Shop_Order_Model|NULL
 	 */
 	protected $_shopOrder = NULL;
 
@@ -1026,12 +1030,12 @@ abstract class Shop_Payment_System_Handler
 		return $this;
 	}
 
-    /**
-     * Get delivery name
-     * @param Shop_Delivery_Model $oShop_Delivery
-     * @param null $shop_delivery_condition_name
-     * @return string
-     */
+	/**
+	 * Get delivery name
+	 * @param Shop_Delivery_Model $oShop_Delivery
+	 * @param null $shop_delivery_condition_name
+	 * @return string
+	 */
 	protected function _getDeliveryName(Shop_Delivery_Model $oShop_Delivery, $shop_delivery_condition_name = NULL)
 	{
 		return is_null($shop_delivery_condition_name)
@@ -1109,6 +1113,7 @@ abstract class Shop_Payment_System_Handler
 
 	/**
 	 * XSL данных о заказе
+	 * @var Xsl_Model|NULL
 	 */
 	protected $_xsl = NULL;
 
@@ -1289,6 +1294,7 @@ abstract class Shop_Payment_System_Handler
 
 	/**
 	 * XSL письма администратору о заказе
+	 * @var Xsl_Model|NULL
 	 */
 	protected $_xslAdminMail = NULL;
 
@@ -1305,6 +1311,7 @@ abstract class Shop_Payment_System_Handler
 
 	/**
 	 * XSL письма пользователю о заказе
+	 * @var Xsl_Model|NULL
 	 */
 	protected $_xslSiteuserMail = NULL;
 
@@ -1353,6 +1360,7 @@ abstract class Shop_Payment_System_Handler
 
 	/**
 	 * Тема письма администратору о заказе
+	 * @var mixed
 	 */
 	protected $_adminMailSubject = NULL;
 
@@ -1369,14 +1377,15 @@ abstract class Shop_Payment_System_Handler
 
 	/**
 	 * Имя отправителя
+	 * @var mixed
 	 */
 	protected $_senderName = NULL;
 
-    /**
-     * Set subject to user e-mail
-     * @param string $senderName
-     * @return self
-     */
+	/**
+	 * Set subject to user e-mail
+	 * @param string $senderName
+	 * @return self
+	 */
 	public function senderName($senderName)
 	{
 		$this->_senderName = $senderName;
@@ -1385,6 +1394,7 @@ abstract class Shop_Payment_System_Handler
 
 	/**
 	 * Адреса отправителя
+	 * @var mixed
 	 */
 	protected $_from = NULL;
 
@@ -1401,6 +1411,7 @@ abstract class Shop_Payment_System_Handler
 
 	/**
 	 * Тема письма пользователю о заказе
+	 * @var mixed
 	 */
 	protected $_siteuserMailSubject = NULL;
 

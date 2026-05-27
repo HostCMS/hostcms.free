@@ -119,7 +119,7 @@ abstract class Admin_Form_Action_Controller extends Core_Servant_Properties
 	/**
 	 * Get content
 	 * @return string|null
-     */
+	 */
 	public function getContent()
 	{
 		return $this->_content;
@@ -149,7 +149,7 @@ abstract class Admin_Form_Action_Controller extends Core_Servant_Properties
 	/**
 	 * Get message
 	 * @return string|null
-     */
+	 */
 	public function getMessage()
 	{
 		return $this->_message;

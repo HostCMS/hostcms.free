@@ -9,16 +9,16 @@
  **/
 class Smarty_Internal_Runtime_CacheModify
 {
-    /**
-     * check client side cache
-     *
-     * @param \Smarty_Template_Cached   $cached
-     * @param \Smarty_Internal_Template $_template
-     * @param string                    $content
-     *
-     * @throws \Exception
-     * @throws \SmartyException
-     */
+	/**
+	 * check client side cache
+	 *
+	 * @param \Smarty_Template_Cached   $cached
+	 * @param \Smarty_Internal_Template $_template
+	 * @param string                    $content
+	 *
+	 * @throws \Exception
+	 * @throws \SmartyException
+	 */
     public function cacheModifiedCheck(Smarty_Template_Cached $cached, Smarty_Internal_Template $_template, $content)
     {
         $_isCached = $_template->isCached() && !$_template->compiled->has_nocache_code;
@@ -55,7 +55,7 @@ class Smarty_Internal_Runtime_CacheModify
                     !empty($_SERVER[ 'SMARTY_PHPUNIT_DISABLE_HEADERS' ]) /* phpunit$ */
                     ) {
                         $_SERVER[ 'SMARTY_PHPUNIT_HEADERS' ][] =
-                            'Last-Modified: ' . gmdate('D, d M Y H:i:s', $cached->timestamp) . ' GMT';
+                        	'Last-Modified: ' . gmdate('D, d M Y H:i:s', $cached->timestamp) . ' GMT';
                     }
                     break;
                 default:

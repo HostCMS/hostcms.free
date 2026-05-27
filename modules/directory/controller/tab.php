@@ -139,7 +139,7 @@ abstract class Directory_Controller_Tab extends Core_Servant_Properties
 			->class('add-remove-property ' . $margin_top_23 . ' pull-right' . (count($this->_aDirectory_Relations) ? ' btn-group' : '') . ($className ? ' ' . $className : ''))
 			->add(
 				Admin_Form_Entity::factory('Code')
-					->html('<div class="btn btn-palegreen inverted" onclick="$.cloneFormRow(this); event.stopPropagation();"><i class="fa fa-plus-circle close"></i></div><div class="btn btn-darkorange btn-delete inverted' . (count($this->_aDirectory_Relations) ? '' : ' hide') . '" onclick="$.deleteFormRow(this); event.stopPropagation();"><i class="fa fa-minus-circle close"></i></div>')
+					->html('<div class="btn btn-palegreen inverted" onclick="$.cloneFormRow(this); event.stopPropagation();"><i class="fa-solid fa-circle-plus close"></i></div><div class="btn btn-darkorange btn-delete inverted' . (count($this->_aDirectory_Relations) ? '' : ' hide') . '" onclick="$.deleteFormRow(this); event.stopPropagation();"><i class="fa-solid fa-circle-minus close"></i></div>')
 			);
 	}
 

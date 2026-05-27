@@ -36,7 +36,7 @@ class Core_ZipArchive
 	/**
 	 * Get Zip Class Name
 	 * @return string
-     */
+	 */
 	static public function getZipClassName()
 	{
 		return class_exists('ZipArchive')

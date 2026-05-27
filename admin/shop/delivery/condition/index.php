@@ -51,11 +51,11 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Delivery_Condition.show_cond_of_delivery'))
-		->icon('fa fa-truck')
+		->icon('fa-solid fa-truck')
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Delivery_Condition.show_cond_of_delivery_add'))
-				->icon('fa fa-plus')
+				->icon('fa-solid fa-plus')
 				->href(
 					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
 				)
@@ -66,7 +66,7 @@ $oAdmin_Form_Entity_Menus->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Delivery_Condition.show_cond_of_delivery_import'))
-				->icon('fa fa-download')
+				->icon('fa-solid fa-download')
 				->href(
 					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'import', NULL, 0, 0)
 				)
@@ -77,11 +77,11 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Delivery_Condition_Dir.menu_caption'))
-		->icon('fa fa-folder-o')
+		->icon('fa-regular fa-folder')
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Delivery_Condition_Dir.menu_caption_add'))
-				->icon('fa fa-plus')
+				->icon('fa-solid fa-plus')
 				->href(
 					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 				)

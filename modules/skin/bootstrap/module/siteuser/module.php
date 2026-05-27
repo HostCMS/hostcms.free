@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Siteuser_Module extends Siteuser_Module
 {
@@ -69,7 +69,7 @@ class Skin_Bootstrap_Module_Siteuser_Module extends Siteuser_Module
 					<span class="databox-number sky"><?php echo $iSiteusers?></span>
 					<div class="databox-text"><?php echo Core::_('Siteuser.siteusers')?></div>
 					<div class="databox-stat sky radius-bordered">
-						<i class="stat-icon icon-lg fa fa-users"></i>
+						<i class="stat-icon icon-lg fa-solid fa-users"></i>
 					</div>
 				</div>
 			</div>

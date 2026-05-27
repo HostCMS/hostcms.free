@@ -45,7 +45,7 @@ class Admin_Form_Action_Controller_Type_Rollback extends Admin_Form_Action_Contr
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name
 	 * @return true|null
-     */
+	 */
 	public function execute($operation = NULL)
 	{
 		if (is_null($operation))

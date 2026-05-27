@@ -414,7 +414,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 	 * Save group
 	 * @param Informationsystem_Group_Model $oInformationsystem_Group group
 	 * @return Informationsystem_Group_Model
-     */
+	 */
 	protected function _doSaveGroup(Informationsystem_Group_Model $oInformationsystem_Group)
 	{
 		is_null($oInformationsystem_Group->path) && $oInformationsystem_Group->path = '';
@@ -2439,16 +2439,16 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 		return $iCurrentSeekPosition;
 	}
 
-    /**
-     * Add property to item
-     * @param Informationsystem_Item_Model $oInformationsystemItem
-     * @param Property_Model $oProperty
-     * @param string $sPropertyValue property value
-     * @param int $position
-     * @return false|mixed|Property_Value_Model
-     * @throws Core_Exception
-     * @hostcms-event Informationsystem_Item_Import_Csv_Controller.onAddItemPropertyValueDefault
-     */
+	/**
+	 * Add property to item
+	 * @param Informationsystem_Item_Model $oInformationsystemItem
+	 * @param Property_Model $oProperty
+	 * @param string $sPropertyValue property value
+	 * @param int $position
+	 * @return false|mixed|Property_Value_Model
+	 * @throws Core_Exception
+	 * @hostcms-event Informationsystem_Item_Import_Csv_Controller.onAddItemPropertyValueDefault
+	 */
 	protected function _addItemPropertyValue(Informationsystem_Item_Model $oInformationsystemItem, Property_Model $oProperty, $sPropertyValue, $position = 0)
 	{
 		$aPropertyValues = $oProperty->getValues($oInformationsystemItem->id, FALSE);
@@ -2852,16 +2852,16 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 		return FALSE;
 	}
 
-    /**
-     * Add field to item
-     * @param Informationsystem_Item_Model $oInformationsystemItem
-     * @param Field_Model $oField
-     * @param string $sFieldValue field value
-     * @param int $position
-     * @return false|mixed|object
-     * @throws Core_Exception
-     * @hostcms-event Informationsystem_Item_Import_Csv_Controller.onAddItemFieldValueDefault
-     */
+	/**
+	 * Add field to item
+	 * @param Informationsystem_Item_Model $oInformationsystemItem
+	 * @param Field_Model $oField
+	 * @param string $sFieldValue field value
+	 * @param int $position
+	 * @return false|mixed|object
+	 * @throws Core_Exception
+	 * @hostcms-event Informationsystem_Item_Import_Csv_Controller.onAddItemFieldValueDefault
+	 */
 	protected function _addItemFieldValue(Informationsystem_Item_Model $oInformationsystemItem, Field_Model $oField, $sFieldValue, $position = 0)
 	{
 		$aFieldValues = $oField->getValues($oInformationsystemItem->id, FALSE);
@@ -3436,7 +3436,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 	 * Correct checkbox value
 	 * @param string $value
 	 * @return int
-     */
+	 */
 	protected function _correctCheckbox($value)
 	{
 		return $value == 1 || strtolower($value) === 'true' || strtolower($value) === 'да'

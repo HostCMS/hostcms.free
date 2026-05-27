@@ -875,10 +875,10 @@ protected function _copyFileFromSource($info)
 	protected $_streamState = NULL;
 
 /**
-     * Begin streaming a file into the zip
-     * @param string $name Filename inside zip
-     * @param int $timestamp
-     */
+	 * Begin streaming a file into the zip
+	 * @param string $name Filename inside zip
+	 * @param int $timestamp
+	 */
     public function beginWriteStream(string $name, int $timestamp = 0)
     {
         if ($this->_isClose) throw new RuntimeException("Archive closed.");
@@ -909,15 +909,15 @@ protected function _copyFileFromSource($info)
 
         // Подготовка контекста
         $this->_streamState = [
-            'name' => $name,
-            'method' => 8,
-            'dostime' => $dostime,
-            'offset' => $this->_offset,
-            'crc_ctx' => hash_init('crc32b'),
-            'deflate_ctx' => deflate_init(ZLIB_ENCODING_RAW, ['level' => -1]),
-            'size' => 0,
-            'compressed_size' => $headerSize,
-            'flags' => $flags
+        	'name' => $name,
+        	'method' => 8,
+        	'dostime' => $dostime,
+        	'offset' => $this->_offset,
+        	'crc_ctx' => hash_init('crc32b'),
+        	'deflate_ctx' => deflate_init(ZLIB_ENCODING_RAW, ['level' => -1]),
+        	'size' => 0,
+        	'compressed_size' => $headerSize,
+        	'flags' => $flags
         ];
 
         // Пишем Local File Header

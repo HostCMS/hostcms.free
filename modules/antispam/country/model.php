@@ -95,7 +95,7 @@ class Antispam_Country_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event antispam_country.onBeforeRedeclaredDelete
+	 * @hostcms-event antispam_country.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

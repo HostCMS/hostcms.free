@@ -220,7 +220,6 @@
 
 		ajaxCallback: function(data, textStatus, jqXHR) {
 			const triggerReturn = $('body').triggerHandler('beforeAjaxCallback', [data]);
-
 			if (triggerReturn === 'break') {
 				$.loadingScreen('hide');
 				return false;
@@ -298,6 +297,36 @@
 			}
 		},
 
+		ajaxCallbackModal: function(data) {
+			$.loadingScreen('hide');
+			if (data == null || data.form_html == null) {
+				alert('AJAX response error.');
+				return;
+			}
+
+			const jObject = $(this);
+			const jBody = jObject.find(".modal-body");
+
+			if (data.form_html !== '') {
+				$.beforeContentLoad(jBody);
+				$.insertContent(jBody, data.form_html);
+				$.afterContentLoad(jBody, data);
+			}
+
+			let jMessage = jBody.find("#id_message");
+
+			if (jMessage.length === 0) {
+				jMessage = $("<div>").attr('id', 'id_message');
+				jBody.prepend(jMessage);
+			}
+
+			jMessage.empty().html(data.error);
+
+			if (data.title) {
+				jObject.find(".modal-title").text(data.title);
+			}
+		},
+
 		ajaxCallbackSkin: function(data) {
 			if (typeof data.module !== 'undefined' && data.module !== null) {
 				$.currentMenu(data.module);
@@ -324,7 +353,6 @@
 			// Кешируем контейнер окна
 			const $window = $("#" + settings.windowId);
 
-			// 1. ОПТИМИЗИРОВАННЫЙ СБОР ЧЕКБОКСОВ
 			const $checkedItems = $window.find(":input[type='checkbox'][id^='check_']:checked");
 
 			$checkedItems.each(function() {
@@ -354,7 +382,7 @@
 				}
 			});
 
-			// 2. СТАНДАРТНЫЕ ФИЛЬТРЫ
+			// СТАНДАРТНЫЕ ФИЛЬТРЫ
 			const $filtersItems = $window.find(":input[name^='admin_form_filter_']");
 			$filtersItems.each(function() {
 				const $filter = $(this);
@@ -370,16 +398,17 @@
 				}
 			});
 
-			// 3. РАСШИРЕННЫЕ ФИЛЬТРЫ (Top Filters)
+			// РАСШИРЕННЫЕ ФИЛЬТРЫ (Top Filters)
 			const $topFilter = $('.topFilter');
 			let filterId = null;
 
 			if ($topFilter.is(':visible')) {
 				filterId = $('#filterTabs .active').data('filter-id');
 			}
+
 			data['hostcms[filterId]'] = filterId;
 
-			if (filterId) {
+			// if (filterId) { // e.g. 'main', '0', etc.
 				const $topFiltersItems = $window.find(`#filter-${filterId} :input[name^='topFilter_']`);
 
 				$topFiltersItems.each(function() {
@@ -394,7 +423,7 @@
 						data[$filter.attr('name')] = filter_value;
 					}
 				});
-			}
+			// }
 
 			// Очистка сообщений
 			$window.find("#id_message").empty();

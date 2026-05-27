@@ -245,7 +245,7 @@ class Sql_Controller
 	/**
 	 * Sanitize MySQL Identifiers
 	 * @param string $str
-     * @return string
+	 * @return string
 	 */
 	static public function sanitizeIdentifiers($str)
 	{
@@ -259,14 +259,14 @@ class Sql_Controller
 		return !is_null($str) ? preg_replace('/[^A-Za-z0-9$_\x{0001}-\x{007F}\x{0080}-\x{FFFF}]/u', '', $str) : '';
 	}
 
-    /**
-     * Get fields icon
-     * @param string $tableName
-     * @param string $class
-     * @return Admin_Form_Entity
-     * @throws Core_Exception
-     */
-	static public function getTableViewIcon($tableName, $class = 'fa fa-table h5-edit-icon warning')
+	/**
+	 * Get fields icon
+	 * @param string $tableName
+	 * @param string $class
+	 * @return Admin_Form_Entity
+	 * @throws Core_Exception
+	 */
+	static public function getTableViewIcon($tableName, $class = 'fa-solid fa-table h5-edit-icon warning')
 	{
 		$href = Admin_Form_Controller::correctBackendPath('/{admin}/sql/table/view/index.php?table=') . $tableName;
 		$onclick = "$.adminLoad({path: hostcmsBackend + '/sql/table/view/index.php',additionalParams: 'table={$tableName}', windowId: 'id_content'}); return false";
@@ -286,14 +286,14 @@ class Sql_Controller
 		');
 	}
 
-    /**
-     * Get fields icon
-     * @param string $tableName
-     * @param string $class
-     * @return Admin_Form_Entity
-     * @throws Core_Exception
-     */
-	static public function getFieldsIcon($tableName, $class = 'fa fa-th-list h5-edit-icon azure')
+	/**
+	 * Get fields icon
+	 * @param string $tableName
+	 * @param string $class
+	 * @return Admin_Form_Entity
+	 * @throws Core_Exception
+	 */
+	static public function getFieldsIcon($tableName, $class = 'fa-solid fa-list h5-edit-icon azure')
 	{
 		$href = Admin_Form_Controller::correctBackendPath('/{admin}/sql/table/field/index.php?table=') . $tableName;
 		$onclick = "$.adminLoad({path: hostcmsBackend + '/sql/table/field/index.php',additionalParams: 'table={$tableName}', windowId: 'id_content'}); return false";
@@ -313,14 +313,14 @@ class Sql_Controller
 		');
 	}
 
-    /**
-     * Get indexes icon
-     * @param string $tableName
-     * @param string $class
-     * @return Admin_Form_Entity
-     * @throws Core_Exception
-     */
-	static public function getIndexesIcon($tableName, $class = 'fas fa-key h5-edit-icon success')
+	/**
+	 * Get indexes icon
+	 * @param string $tableName
+	 * @param string $class
+	 * @return Admin_Form_Entity
+	 * @throws Core_Exception
+	 */
+	static public function getIndexesIcon($tableName, $class = 'fa-solid fa-key h5-edit-icon success')
 	{
 		$href = Admin_Form_Controller::correctBackendPath('/{admin}/sql/table/index/index.php?table=') . $tableName;
 		$onclick = "$.adminLoad({path: hostcmsBackend + '/sql/table/index/index.php',additionalParams: 'table={$tableName}', windowId: 'id_content'}); return false";

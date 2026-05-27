@@ -292,7 +292,7 @@ class Property_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event property.onBeforeRedeclaredDelete
+	 * @hostcms-event property.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -601,7 +601,7 @@ class Property_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event property.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')
@@ -772,7 +772,7 @@ class Property_Model extends Core_Entity
 
 		if ($this->type == 3 && $this->list_id && Core::moduleIsActive('list'))
 		{
-			$return .= '<a href="' . Admin_Form_Controller::correctBackendPath('/{admin}/list/item/index.php') . '?list_id=' . $this->list_id . '" target="_blank"><i title="' . Core::_('Property.move_to_list') . '" class="fa fa-external-link margin-left-5"></i></a>';
+			$return .= '<a href="' . Admin_Form_Controller::correctBackendPath('/{admin}/list/item/index.php') . '?list_id=' . $this->list_id . '" target="_blank"><i title="' . Core::_('Property.move_to_list') . '" class="fa-solid fa-arrow-up-right-from-square small margin-left-5"></i></a>';
 		}
 
 		return $return;
@@ -832,14 +832,14 @@ class Property_Model extends Core_Entity
 		{
 			Core_Html_Entity::factory('Span')
 				->class('badge badge-hostcms badge-square gray pull-right')
-				->value('<i class="fa fa-filter fa-fw"></i>')
+				->value('<i class="fa-solid fa-filter fa-fw"></i>')
 				->execute();
 		}
 
 		if ($this->obligatory)
 		{
 			Core_Html_Entity::factory('Span')
-				->value('<i class="fa fa-asterisk darkorange fa-small"></i>')
+				->value('<i class="fa-solid fa-asterisk darkorange fa-small"></i>')
 				->execute();
 		}
 
@@ -847,7 +847,7 @@ class Property_Model extends Core_Entity
 		{
 			Core_Html_Entity::factory('Span')
 				->class('badge badge-darkorange badge-ico white')
-				->add(Core_Html_Entity::factory('I')->class('fa fa-chain-broken'))
+				->add(Core_Html_Entity::factory('I')->class('fa-solid fa-link-slash'))
 				->execute();
 		}
 

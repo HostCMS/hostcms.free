@@ -91,7 +91,7 @@ class Field_Dir_Model extends Core_Entity
 		$countFields = $this->Fields->getCount();
 		$countFields && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
-			->value('<i class="fa fa-file-o"></i> ' . $countFields)
+			->value('<i class="fa-regular fa-file"></i> ' . $countFields)
 			->title(Core::_('Informationsystem.all_items_count', $countFields))
 			->execute();
 	}
@@ -119,7 +119,7 @@ class Field_Dir_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event field_dir.onBeforeRedeclaredDelete
+	 * @hostcms-event field_dir.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

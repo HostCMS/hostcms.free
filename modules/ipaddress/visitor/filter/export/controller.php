@@ -108,11 +108,11 @@ class Ipaddress_Visitor_Filter_Export_Controller extends Core_Servant_Properties
 		return implode('/', $aReturn);
 	}
 
-    /**
-     * Set objects
-     * @param Ipaddress_Visitor_Filter_Model $oIpaddress_Visitor_Filter filter
-     * @return self
-     */
+	/**
+	 * Set objects
+	 * @param Ipaddress_Visitor_Filter_Model $oIpaddress_Visitor_Filter filter
+	 * @return self
+	 */
 	protected function _setObjects(Ipaddress_Visitor_Filter_Model $oIpaddress_Visitor_Filter)
 	{
 		$this->_aObjects[$oIpaddress_Visitor_Filter->name] = array(
@@ -150,7 +150,6 @@ class Ipaddress_Visitor_Filter_Export_Controller extends Core_Servant_Properties
 
 			$fileName = $prefix . '_' . date("Y_m_d_H_i_s") . '.json';
 
-			header("Pragma: public");
 			header("Content-Description: File Transfer");
 			header("Content-Type: " . Core_Mime::getFileMime($fileName));
 			header("Content-Disposition: attachment; filename = \"" . rawurlencode(Core_Http::sanitizeHeader($fileName)) . "\";");

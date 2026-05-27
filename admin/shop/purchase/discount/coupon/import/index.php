@@ -138,7 +138,7 @@ if ($oAdmin_Form_Controller->getAction() != 'start_import')
 }
 else
 {
-	if ($_FILES['csv_file']['size'] === 0)
+	if (!isset($_FILES['csv_file']) || $_FILES['csv_file']['size'] === 0)
 	{
 		// Файл не указан!
 		Core_Message::show(Core::_('Shop_Item.file_does_not_specified'), "error");
@@ -239,7 +239,7 @@ else
 								}
 								catch (Exception $e)
 								{
-									Core_Message::show('Save error', "error");
+									Core_Message::show('Coupon save error', 'error');
 								}
 							}
 						}

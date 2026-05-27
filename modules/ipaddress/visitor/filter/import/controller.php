@@ -34,7 +34,12 @@ class Ipaddress_Visitor_Filter_Import_Controller extends Admin_Form_Action_Contr
 			return FALSE;
 		}
 
-		$aContent = json_decode($this->content, TRUE);
+		if (!is_string($this->content) || strlen($this->content) < 10)
+		{
+			return FALSE;
+		}
+
+		$aContent = @json_decode($this->content, TRUE);
 
 		if (is_array($aContent))
 		{

@@ -20,9 +20,9 @@ class Lib_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 	/**
 	 * Module name
@@ -50,16 +50,16 @@ class Lib_Module extends Core_Module_Abstract
 		return parent::getMenu();
 	}
 
-    /**
-     * Функция обратного вызова для поисковой индексации
-     *
-     * @param int $site_id
-     * @param int $offset
-     * @param int $limit
-     * @return array
-     * @throws Core_Exception
-     * @hostcms-event Lib_Module.indexing
-     */
+	/**
+	 * Функция обратного вызова для поисковой индексации
+	 *
+	 * @param int $site_id
+	 * @param int $offset
+	 * @param int $limit
+	 * @return array
+	 * @throws Core_Exception
+	 * @hostcms-event Lib_Module.indexing
+	 */
 	public function indexing($site_id, $offset, $limit)
 	{
 		$offset = intval($offset);
@@ -125,7 +125,7 @@ class Lib_Module extends Core_Module_Abstract
 		}
 
 		return array(
-			'icon' => 'fa fa-file-code-o',
+			'icon' => 'fa-regular fa-file-code',
 			'href' => $href,
 			'onclick' => $onclick
 		);

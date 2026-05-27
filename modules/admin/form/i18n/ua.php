@@ -105,7 +105,7 @@ return array(
 	'undelete_success' => 'Елемент відновлено!',
 
 	'note' => 'Увага',
-	'note-license' => 'Не заповнені ліцензійні дані, система управління працює в обмеженому режимі, див. <a href="http://www.hostcms.ru/documentation/introduction/licenses/licenses/" target="_blank">інструкцію <i class="fa fa-external-link"></i></a>',
+	'note-license' => 'Не заповнені ліцензійні дані, система управління працює в обмеженому режимі, див. <a href="http://www.hostcms.ru/documentation/introduction/licenses/licenses/" target="_blank">інструкцію <i class="fa-solid fa-arrow-up-right-from-square small"></i></a>',
 	'note-bad-password' => 'В системі існує співробітник зі стандартними логіном і паролем, необхідно змінити пароль співробітника "admin".',
 	'list' => 'Список',
 	'kanban' => 'Канбан',

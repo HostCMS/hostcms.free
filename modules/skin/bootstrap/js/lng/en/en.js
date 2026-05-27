@@ -22,5 +22,6 @@ var i18n =
 "ban_error": "IP address already blocked!",
 "important": "important",
 "webauth_register_success": "Authorization saved successfully",
-"copy_error_clipboard": "Copy error to clipboard"
+"copy_error_clipboard": "Copy error to clipboard",
+"copy_success": "Copied!",
 };

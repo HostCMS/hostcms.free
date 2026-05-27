@@ -1,4 +1,13 @@
-import initSoftophone from './softophone.js';
+/*global hostcmsBackendCompression */
+
+// import initSoftophone from './softophone.js';
+
+if (!hostcmsBackendCompression) {
+    // Загружаем модуль сразу
+    import('./softophone.js').then(module => {
+        window.initSoftophone = module.default;
+    });
+}
 
 $(function (){
 	$.extend({
@@ -47,8 +56,19 @@ $(function (){
 				$('.phone-number').focus();
 			});
 		},
-		initSoftophone: function (line, data) {
-			initSoftophone(line, data);
-		}
+		/*initSoftophone: function (line, data) {
+			initSoftophone(line, data); // eslint-disable-line
+		}*/
+        initSoftophone: async function (line, data) {
+            if (!hostcmsBackendCompression) {
+                // Загружаем модуль только когда он реально нужен
+                const { default: initSoftophone } = await import('./softophone.js');
+                initSoftophone(line, data);
+            }
+			else
+			{
+				initSoftophone(line, data); // eslint-disable-line
+			}
+        }
 	});
 });

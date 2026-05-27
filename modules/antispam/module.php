@@ -20,9 +20,9 @@ class Antispam_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 	/**
 	 * Module name
@@ -40,7 +40,7 @@ class Antispam_Module extends Core_Module_Abstract
 			array(
 				'sorting' => 200,
 				'block' => 3,
-				'ico' => 'fa fa-ban',
+				'ico' => 'fa-solid fa-ban',
 				'name' => Core::_('Antispam.menu'),
 				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/antispam/index.php"),
 				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/antispam/index.php'}); return false")

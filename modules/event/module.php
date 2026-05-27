@@ -20,15 +20,25 @@ class Event_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 	/**
 	 * Module name
 	 * @var string
 	 */
 	protected $_moduleName = 'event';
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct()
+	{
+		parent::__construct();
+
+		Core_Skin::instance()->addJs('/modules/event/assets/event.js');
+	}
 
 	/**
 	 * Get Module's Menu
@@ -40,7 +50,7 @@ class Event_Module extends Core_Module_Abstract
 			array(
 				'sorting' => 140,
 				'block' => 3,
-				'ico' => 'fa fa-tasks',
+				'ico' => 'fa-solid fa-tasks',
 				'name' => Core::_('Event.model_name'),
 				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/event/index.php"),
 				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/event/index.php'}); return false")
@@ -61,19 +71,19 @@ class Event_Module extends Core_Module_Abstract
 		switch ($type)
 		{
 			case 100: // Напоминание о событии
-				$sIconIco = "fa-clock-o";
+				$sIconIco = "fa-regular fa-clock";
 				$sIconColor = "white";
 				$sBackgroundColor = "bg-warning";
 				$sNotificationColor = 'darkorange';
 			break;
 			case 6: // В дело добавлена заметка
-				$sIconIco = "fa-comment-o";
+				$sIconIco = "fa-regular fa-comment";
 				$sIconColor = "white";
 				$sBackgroundColor = "bg-azure";
 				$sNotificationColor = 'azure';
 			break;
 			default:
-				$sIconIco = "fa-tasks";
+				$sIconIco = "fa-solid fa-tasks";
 				$sIconColor = "white";
 				$sBackgroundColor = "bg-themeprimary";
 				$sNotificationColor = 'info';
@@ -81,7 +91,7 @@ class Event_Module extends Core_Module_Abstract
 
 		return array(
 			'icon' => array(
-				'ico' => "fa {$sIconIco}",
+				'ico' => $sIconIco,
 				'color' => $sIconColor,
 				'background-color' => $sBackgroundColor
 			),
@@ -173,7 +183,7 @@ class Event_Module extends Core_Module_Abstract
 	 */
 	public function getCalendarContextMenuActions()
 	{
-		return array('<a href="javascript:void(0);" onclick="$.modalLoad({path: hostcmsBackend + \'/event/index.php\', action: \'edit\', operation: \'modal\', additionalParams: \'hostcms[checked][0][0]=1&date=\' + $(this).parents(\'ul\').data(\'timestamp\') + \'&parentWindowId=id_content&from_calendar=1\', windowId: \'id_content\'}); return false">' . Core::_('Event.add_event') . '</a>');
+		return array('<a href="javascript:void(0);" onclick="$.modalLoad({path: hostcmsBackend + \'/event/index.php\', action: \'edit\', operation: \'modal\', additionalParams: \'hostcms[checked][0][0]=1&date=\' + $(this).parents(\'ul\').data(\'timestamp\') + \'&from_calendar=1\', windowId: \'id_content\'}); return false">' . Core::_('Event.add_event') . '</a>');
 	}
 
 	/**
@@ -311,13 +321,13 @@ class Event_Module extends Core_Module_Abstract
 		return $aReturnEvents;
 	}
 
-    /**
-     * Перемещение события на календаре
-     * @param int $entity_id идентификатор события
-     * @param int $startTimestamp
-     * @param int $allDay весь день
-     * @return bool
-     */
+	/**
+	 * Перемещение события на календаре
+	 * @param int $entity_id идентификатор события
+	 * @param int $startTimestamp
+	 * @param int $allDay весь день
+	 * @return bool
+	 */
 	public function calendarEventDrop($entity_id, $startTimestamp, $allDay)
 	{
 		$oEvent = Core_Entity::factory('Event', $entity_id);
@@ -374,7 +384,7 @@ class Event_Module extends Core_Module_Abstract
 	 * @param int $entity_id идентификатор события
 	 * @param int $deltaSeconds размер изменения продолжительности в секундах
 	 * @return bool
-     */
+	 */
 	public function calendarEventResize($entity_id, $deltaSeconds)
 	{
 		$oEvent = Core_Entity::factory('Event', $entity_id);
@@ -495,7 +505,7 @@ class Event_Module extends Core_Module_Abstract
 	 * Удаление события, связанного с календарем
 	 * @param int $entity_id идентификатор события
 	 * @return bool
-     */
+	 */
 	public function calendarEventDelete($entity_id)
 	{
 		$oEvent = Core_Entity::factory('Event', $entity_id);

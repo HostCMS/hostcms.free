@@ -57,7 +57,7 @@ class Crm_Project_Attachment_Controller_Edit extends Admin_Form_Action_Controlle
 		<div class="row margin-top-10 dms-document-attachments-dropzone">
 			<div class="col-xs-12">
 				<div id="dropzone">
-					<div class="dz-message needsclick"><i class="fa fa-arrow-circle-o-up"></i> <?php echo Core::_('Admin_Form.upload_file')?></div>
+					<div class="dz-message needsclick"><i class="fa-regular fa-circle-up"></i> <?php echo Core::_('Admin_Form.upload_file')?></div>
 				</div>
 			</div>
 		</div>
@@ -110,7 +110,7 @@ class Crm_Project_Attachment_Controller_Edit extends Admin_Form_Action_Controlle
 	/**
 	 * Get save button
 	 * @return Admin_Form_Entity_Buttons|null
-     */
+	 */
 	protected function _getSaveButton()
 	{
 		return NULL;

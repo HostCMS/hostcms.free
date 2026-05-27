@@ -184,11 +184,11 @@ class Informationsystem_Model extends Core_Entity
 	 */
 	protected $_showXmlCounts = TRUE;
 
-    /**
-     * Add comments XML to item
-     * @param bool $showXmlCounts
-     * @return self
-     */
+	/**
+	 * Add comments XML to item
+	 * @param bool $showXmlCounts
+	 * @return self
+	 */
 	public function showXmlCounts($showXmlCounts = TRUE)
 	{
 		$this->_showXmlCounts = $showXmlCounts;
@@ -356,7 +356,7 @@ class Informationsystem_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event informationsystem.onBeforeRedeclaredDelete
+	 * @hostcms-event informationsystem.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -710,7 +710,7 @@ class Informationsystem_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event informationsystem.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')
@@ -773,7 +773,7 @@ class Informationsystem_Model extends Core_Entity
 	{
 		!$this->structure_id && Core_Html_Entity::factory('Span')
 			->class('badge badge-darkorange badge-ico white')
-			->add(Core_Html_Entity::factory('I')->class('fa fa-chain-broken'))
+			->add(Core_Html_Entity::factory('I')->class('fa-solid fa-link-slash'))
 			->execute();
 
 		$countInformationsystemGroups = $this->Informationsystem_Groups->getCount();
@@ -792,7 +792,7 @@ class Informationsystem_Model extends Core_Entity
 
 		$countInformationsystemItems && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
-			->value('<i class="fa fa-list-alt"></i> ' . number_format($countInformationsystemItems, 0, ',', ' '))
+			->value('<i class="fa-solid fa-rectangle-list"></i> ' . number_format($countInformationsystemItems, 0, ',', ' '))
 			->title(Core::_('Informationsystem.all_items_count', number_format($countInformationsystemItems, 0, ',', ' ')))
 			->execute();
 

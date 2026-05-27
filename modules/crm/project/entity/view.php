@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Crm
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Crm_Project_Entity_View extends Admin_Form_Controller_View
 {
@@ -93,7 +93,7 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 
 		$aAdmin_Form_Fields = $oAdmin_Form->Admin_Form_Fields->findAll();
 
-		$oSortingField = $oAdmin_Form_Controller->getSortingField();
+		// $oSortingField = $oAdmin_Form_Controller->getSortingField();
 
 		if (empty($aAdmin_Form_Fields))
 		{
@@ -120,7 +120,7 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 
 		$aEntities = $aDatasets[0]->load();
 		?>
-		<ul class="timeline timeline-left timeline-crm">
+		<div class="timeline-wrapper">
 			<?php
 			foreach ($aEntities as $oEntity)
 			{
@@ -132,7 +132,7 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 				{
 					// Events
 					case 0:
-						$badge = 'fa fa-tasks';
+						$badge = 'fa-solid fa-tasks';
 
 						$color = 'success';
 
@@ -143,12 +143,12 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 						$oEventCreator = $oObject->getCreator();
 
 						// Временая метка создания дела
-						$iEventCreationTimestamp = Core_Date::sql2timestamp($oObject->datetime);
+						// $iEventCreationTimestamp = Core_Date::sql2timestamp($oObject->datetime);
 
 						// Сотрудник - создатель дела
 						$userIsEventCreator = !is_null($oEventCreator) && $oEventCreator->id == $oUser->id;
 
-						$oEvent_Type = $oObject->Event_Type;
+						// $oEvent_Type = $oObject->Event_Type;
 
 						$oObject->event_type_id && $oObject->showType();
 
@@ -190,7 +190,7 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 							}
 							?>
 							<div class="event-status">
-								<i class="fa fa-circle" style="margin-right: 5px; color: <?php echo $sEventStatusColor?>"></i><span style="color: <?php echo $sEventStatusColor?>"><?php echo $sEventStatusName?></span>
+								<i class="fa-solid fa-circle" style="margin-right: 5px; color: <?php echo $sEventStatusColor?>"></i><span style="color: <?php echo $sEventStatusColor?>"><?php echo $sEventStatusName?></span>
 							</div>
 							<?php
 						}
@@ -200,13 +200,13 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 							: '';
 
 						$deadlineIcon = $oObject->deadline()
-							? '<i class="fa fa-clock-o event-title-deadline"></i>'
+							? '<i class="fa-regular fa-clock event-title-deadline"></i>'
 							: '';
 
 						?>
-						<div class="event-title <?php echo $nameColorClass?>"><?php echo $deadlineIcon, htmlspecialchars($oObject->name)?></div>
+						<div class="event-title <?php echo $nameColorClass?>"><?php echo $deadlineIcon, htmlspecialchars((string) $oObject->name)?></div>
 
-						<div class="event-description"><?php echo Core_Str::cutSentences(strip_tags($oObject->description), 250)?></div>
+						<div class="event-description"><?php echo Core_Str::cutSentences(strip_tags((string) $oObject->description), 250)?></div>
 
 						<div class="crm-date"><?php
 						if ($oObject->all_day)
@@ -234,12 +234,14 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 						}
 
 						// ФИО создателя дела, если оным не является текущий сотрудник
-						if (!$userIsEventCreator && !is_null($oEventCreator))
+						/*if (!$userIsEventCreator && !is_null($oEventCreator))
 						{
 							$userColor = Core_Str::createColor($oEventCreator->id);
 
-							?><div class="<?php echo $oEventCreator->isOnline() ? 'online' : 'offline'?> margin-left-20 margin-right-5"></div><span style="color: <?php echo $userColor?>"><?php $oEventCreator->showLink($oAdmin_Form_Controller->getWindowId());?></span><?php
-						}
+							?><div class="<?php echo $oEventCreator->isOnline() ? 'online' : 'offline'?> margin-left-20 margin-right-5"></div>
+							<span style="color: <?php echo $userColor?>"><?php $oEventCreator->showLink($oAdmin_Form_Controller->getWindowId());?></span>
+							<?php
+						}*/
 						?>
 						</div><?php
 
@@ -250,7 +252,7 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 					break;
 					// Deals
 					case 1:
-						$badge = 'fa fa-handshake-o';
+						$badge = 'fa-regular fa-handshake';
 
 						$color = 'info';
 
@@ -265,7 +267,7 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 					break;
 					// Notes
 					case 2:
-						$badge = 'fa fa-comment-o';
+						$badge = 'fa-regular fa-comment';
 
 						$color = 'warning';
 
@@ -273,6 +275,12 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 						$oObject->result && $class = 'timeline-crm-note-result';
 
 						ob_start();
+
+						if ($oObject->subject != '')
+						{
+							echo "<b>", $oObject->subject, "</b>", "<br/>";
+						}
+
 						echo nl2br($oObject->text);
 
 						$files = $oObject->getFilesBlock($oObject->Crm_Project);
@@ -282,7 +290,7 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 							?><div class="crm-note-attachment-wrapper"><?php echo $files?></div><?php
 						}
 						?>
-						<div class="timeline-body-footer small gray"><span class="timeline-user"><?php $oObject->User->showLink($oAdmin_Form_Controller->getWindowId())?></span><span class="timeline-date pull-right"><?php echo date('H:i', $iDatetime)?></span></div>
+						<!-- <div class="timeline-body-footer small gray"><span class="timeline-user"><?php $oObject->User->showLink($oAdmin_Form_Controller->getWindowId())?></span><span class="timeline-date pull-right"><?php echo date('H:i', $iDatetime)?></span></div> -->
 						<?php
 						$text = ob_get_clean();
 
@@ -290,7 +298,7 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 						$entityPath = Admin_Form_Controller::correctBackendPath('/{admin}/crm/project/note/index.php');
 					break;
 					case 3:
-						$badge = 'fa fa-file-text-o';
+						$badge = 'fa-regular fa-file-text';
 
 						$color = 'maroon';
 
@@ -301,13 +309,13 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 						$ext = Core_File::getExtension($oObject->getFilePath());
 
 						$dataSrc = in_array($ext, array('png', 'jpg', 'jpeg', 'webp', 'gif'))
-							? 'data-popover="hover-file" data-src="' . $src. '"'
+							? 'data-popover="hover-file" data-src="' . $src. '" data-window-id="' . $windowId . '"'
 							: '';
 
 						ob_start();
 						?>
 						<div><i class="<?php echo Core_File::getIcon($oObject->file_name)?> margin-right-5"></i><a target="_blank" <?php echo $dataSrc?> href="<?php echo $src?>"><?php echo nl2br($oObject->file_name)?></a></div>
-						<div class="small gray"><span class="gray"><?php $oObject->User->showLink($oAdmin_Form_Controller->getWindowId())?></span><span class="pull-right"><?php echo date('H:i', $iDatetime)?></span></div>
+						<!-- <div class="small gray"><span class="gray"><?php $oObject->User->showLink($oAdmin_Form_Controller->getWindowId())?></span><span class="pull-right"><?php echo date('H:i', $iDatetime)?></span></div> -->
 						<?php
 						$text = ob_get_clean();
 
@@ -315,7 +323,7 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 						$entityPath = Admin_Form_Controller::correctBackendPath('/{admin}/crm/project/attachment/index.php');
 					break;
 					case 4:
-						$badge = 'fa fa-columns';
+						$badge = 'fa-solid fa-columns';
 
 						$color = 'danger';
 
@@ -341,21 +349,50 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 					break;
 				}
 
-				$badge = isset($oObject->user_id) && $oObject->user_id
-					? '<img class="img-circle" src="' . $oObject->User->getAvatar() . '" width="30" height="30"/>'
-					: '<i class="' . $badge . '"></i>';
+				$badge = get_class($oObject) == 'Crm_Note_Model' && isset($oObject->user_id) && $oObject->user_id
+					? '<img class="avatar" src="' . $oObject->User->getAvatar() . '"/>'
+					: '<i class="avatar ' . $badge . '"></i>';
 
 				?>
-				<li class="timeline-inverted <?php echo $class?>">
-					<div class="timeline-badge <?php echo $color?>">
+
+				<div class="message <?php echo $class?>" data-user-id="<?php echo $oUser->id?>" data-message-id="<?php echo $oObject->id?>">
+					<span class="d-flex <?php echo $color?>">
 						<?php echo $badge?>
-					</div>
-					<div class="timeline-panel">
-						<div class="timeline-header">
-							<div class="pull-right timeline-entity-actions">
+					</span>
+
+					<div class="message-content">
+						<div class="message-header">
+							<?php
+							$oUserAuthor = NULL;
+
+							if (method_exists($oObject, 'getCreator'))
+							{
+								$oUserAuthor = $oObject->getCreator();
+							}
+							else
+							{
+								if (isset($oObject->creator_id))
+								{
+									$oObject->creator_id
+										&& $oUserAuthor = $oObject->Creator;
+								}
+								elseif ($oObject->user_id)
+								{
+									$oUserAuthor = $oObject->User;
+								}
+							}
+
+							if (!is_null($oUserAuthor))
+							{
+								echo $oUserAuthor->showCrmTitleLine();
+							}
+							?>
+
+							<span class="message-actions">
 								<?php
 								$oEntity_Admin_Form = Core_Entity::factory('Admin_Form', $iEntityAdminFormId);
 
+								// 326 - форма Проекты, Файлы
 								if (!in_array($oEntity_Admin_Form->id, array(326)))
 								{
 									// Отображать в списке действий
@@ -401,7 +438,10 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 									foreach ($aAllowed_Admin_Form_Actions as $oAdmin_Form_Action)
 									{
 										// Отображаем действие, только если разрешено.
-										if (!$oAdmin_Form_Action->single || !method_exists($oObject, 'checkBackendAccess') || !$oObject->checkBackendAccess($oAdmin_Form_Action->name, $oUser))
+										if (!$oAdmin_Form_Action->single
+											|| !method_exists($oObject, 'checkBackendAccess')
+											|| !$oObject->checkBackendAccess($oAdmin_Form_Action->name, $oUser)
+										)
 										{
 											continue;
 										}
@@ -428,58 +468,36 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 									}
 								}
 								?>
-							</div>
+							</span>
 						</div>
-						<div class="timeline-body">
+						<div class="message-body">
 							<?php echo $text?>
 						</div>
+						<div class="message-footer">
+							<span class="timestamp"><?php echo Core_Date::timestamp2string($iDatetime)?></span>
+
+							<?php
+							if (get_class($oObject) == 'Crm_Note_Model')
+							{
+								?><span class="action-btn add-emoji"><i class="fa-regular fa-face-grin"></i></span><?php
+
+								// Reactions
+								echo Crm_Note_Controller::showReactions($oUser, $oObject);
+							}
+							?>
+						</div>
 					</div>
-				</li>
-				<?php
+				</div>
+			<?php
 			}
 			?>
-		</ul>
+
+			<?php echo Crm_Note_Controller::getEmojiBlock()?>
+		</div>
 
 		<script>
-			$('[data-popover="hover-file"]').on('mouseenter', function(event) {
-				var $this = $(this);
-
-				if (!$this.data("bs.popover"))
-				{
-					$this.popover({
-						placement: 'top',
-						trigger: 'manual',
-						html: true,
-						content: function() {
-							return '<img src="' + $(this).data('src') +'" style="max-width:200px" />';
-						},
-						container: "#<?php echo $windowId?>"
-					});
-
-					$this.attr('data-popoverAttached', true);
-
-					$this.on('hide.bs.popover', function(e) {
-						$this.attr('data-popoverAttached')
-							? $this.removeAttr('data-popoverAttached')
-							: e.preventDefault();
-					})
-					.on('show.bs.popover', function(e) {
-						!$this.attr('data-popoverAttached') && e.preventDefault();
-					})
-					.on('shown.bs.popover', function(e) {
-						$('#' + $this.attr('aria-describedby')).on('mouseleave', function(e) {
-							!$this.parent().find(e.relatedTarget).length && $this.popover('destroy');
-						});
-					})
-					.on('mouseleave', function(e) {
-						!$(e.relatedTarget).parent('#' + $this.attr('aria-describedby')).length
-						&& $this.attr('data-popoverAttached')
-						&& $this.popover('destroy');
-					});
-
-					$this.popover('show');
-				}
-			});
+			const wrapperTimeline = document.getElementById('id_content').querySelector('.timeline-wrapper');
+			crmNotesOnDOMReady(crmNotesCallback, wrapperTimeline);
 		</script>
 
 		<?php

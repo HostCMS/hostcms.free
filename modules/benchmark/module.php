@@ -20,9 +20,9 @@ class Benchmark_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 	/**
 	 * Module name
@@ -83,7 +83,7 @@ class Benchmark_Module extends Core_Module_Abstract
 			array(
 				'sorting' => 260,
 				'block' => 3,
-				'ico' => 'fa fa-dashboard',
+				'ico' => 'fa-solid fa-dashboard',
 				'name' => Core::_('benchmark.menu'),
 				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/benchmark/index.php"),
 				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/benchmark/index.php'}); return false")

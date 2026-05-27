@@ -130,7 +130,7 @@ abstract class Shop_Cart_Controller extends Core_Servant_Properties
 	 * Get full driver name
 	 * @param string $driver driver name
 	 * @return string
-     */
+	 */
 	static protected function _getDriverName($driver)
 	{
 		return __CLASS__ . '_' . ucfirst($driver);

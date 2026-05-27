@@ -68,7 +68,7 @@ class Informationsystem_Item_Comment_Controller_Edit extends Comment_Controller_
 				Admin_Form_Entity::factory('A')
 					->id('pathLink')
 					->class('input-group-addon blue')
-					->value('<i class="fa fa-external-link"></i>')
+					->value('<i class="fa-solid fa-arrow-up-right-from-square small"></i>')
 					->target('_blank')
 					->href(Admin_Form_Controller::correctBackendPath("/{admin}/informationsystem/item/index.php") . "?hostcms[action]=edit&hostcms[window]=id_content&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystem_Item->informationsystem_group_id}&hostcms[checked][1][{$informationsystem_item_id}]=1")
 			);

@@ -166,7 +166,7 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Admin_Form.add'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0, $additionalParams)
 		)
@@ -176,7 +176,7 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Ipaddress_Visitor_Filter.add_group'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0, $additionalParams)
 		)
@@ -186,7 +186,7 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Ipaddress_Visitor_Filter.import'))
-		->icon('fa fa-download')
+		->icon('fa-solid fa-download')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/ipaddress/visitor/filter/import/index.php', NULL, NULL, 'ipaddress_visitor_filter_dir_id=' . $oIpaddress_Visitor_Filter_Dir->id)
 		)
@@ -207,7 +207,7 @@ $oAdmin_Form_Controller->addEntity(
 				<div class="col-xs-12">
 					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
 						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
-						<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
+						<i class="fa-solid fa-circle-xmark no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
 						<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '"><i class="fa-solid fa-magnifying-glass fa-fw"></i></button>
 					</form>
 				</div>
@@ -280,31 +280,24 @@ $oAdmin_Form_Action = $oAdmin_Form->Admin_Form_Actions->getByName('importFilters
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'importFilters')
 {
+	$oIpaddress_Visitor_Filter_Import_Controller = Admin_Form_Action_Controller::factory(
+		'Ipaddress_Visitor_Filter_Import_Controller', $oAdmin_Form_Action
+	);
+
 	$oUserCurrent = Core_Auth::getCurrentUser();
 	if (!$oUserCurrent->read_only)
 	{
 		if (isset($_FILES['json_file']) && intval($_FILES['json_file']['size']) > 0)
 		{
-			try {
-				$content = Core_File::read($_FILES['json_file']['tmp_name']);
+			$content = Core_File::read($_FILES['json_file']['tmp_name']);
 
-				$oIpaddress_Visitor_Filter_Import_Controller = Admin_Form_Action_Controller::factory(
-					'Ipaddress_Visitor_Filter_Import_Controller', $oAdmin_Form_Action
-				);
-
-				$oIpaddress_Visitor_Filter_Import_Controller
-					->content($content)
-					->ipaddress_visitor_filter_dir_id($oIpaddress_Visitor_Filter_Dir->id)
-					// ->execute()
-					;
-
-				$oAdmin_Form_Controller->addAction($oIpaddress_Visitor_Filter_Import_Controller);
-			}
-			catch (Exception $exc) {
-				Core_Message::show($exc->getMessage(), "error");
-			}
+			$oIpaddress_Visitor_Filter_Import_Controller
+				->content($content)
+				->ipaddress_visitor_filter_dir_id($oIpaddress_Visitor_Filter_Dir->id);
 		}
 	}
+
+	$oAdmin_Form_Controller->addAction($oIpaddress_Visitor_Filter_Import_Controller);
 }
 
 // Действие "Экспорт"
@@ -439,6 +432,8 @@ if (strlen($sGlobalSearch))
 	$oAdmin_Form_Dataset
 			->addCondition(array('where' => array('ipaddress_visitor_filter_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
+
+	Core_Event::notify('Ipaddress_Visitor_Filter_GlobalSearch.onAfterSetConditions', NULL, array($oAdmin_Form_Dataset, $sGlobalSearch));
 }
 else
 {
@@ -471,6 +466,8 @@ if (strlen($sGlobalSearch))
 	$oAdmin_Form_Dataset
 			->addCondition(array('where' => array('ipaddress_visitor_filters.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
+
+	Core_Event::notify('Ipaddress_Visitor_Filter_GlobalSearch.onAfterSetConditions', NULL, array($oAdmin_Form_Dataset, $sGlobalSearch));
 }
 else
 {

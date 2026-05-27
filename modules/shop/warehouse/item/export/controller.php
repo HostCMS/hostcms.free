@@ -46,7 +46,6 @@ class Shop_Warehouse_Item_Export_Controller
 	 */
 	public function execute()
 	{
-		header("Pragma: public");
 		header("Content-Description: File Transfer");
 		header("Content-Type: application/force-download");
 		header("Content-Disposition: attachment; filename = " . 'shop_warehouse_items_' . date("Y_m_d_H_i_s") . '.csv' . ";");
@@ -103,7 +102,7 @@ class Shop_Warehouse_Item_Export_Controller
 	 */
 	protected function _prepareString($string)
 	{
-		return str_replace('"', '""', trim($string));
+		return str_replace('"', '""', trim((string) $string));
 	}
 
 	/**

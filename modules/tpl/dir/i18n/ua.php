@@ -17,4 +17,5 @@ return array(
 	'sorting' => 'Порядок сортування',
 	'delete_success' => 'Елемент видалений!',
 	'undelete_success' => 'Елемент відновлено!',
+	'move_success' => 'Розділи TPL перенесені',
 );

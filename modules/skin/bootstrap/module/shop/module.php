@@ -35,7 +35,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 	 * @param int $type
 	 * @param boolean $ajax
 	 * @return true
-     */
+	 */
 	public function adminPage($type = 0, $ajax = FALSE)
 	{
 		$type = intval($type);
@@ -282,8 +282,8 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 											<div class="databox-top">
 												<div class="databox-sparkline">
 													<span data-sparkline="line" data-height="125px" data-width="100%" data-fillcolor="false" data-linecolor="themesecondary"
-														 data-spotcolor="#fafafa" data-minspotcolor="#fafafa" data-maxspotcolor="#ffce55"
-														 data-highlightspotcolor="#ffce55" data-highlightlinecolor="#ffce55"
+														 data-spotcolor="#fafafa" data-minspotcolor="#fafafa" data-maxspotcolor="false"
+														 data-highlightspotcolor="#ffce55" data-highlightlinecolor="false"
 														 data-linewidth="1.5" data-spotradius="2">
 														<?php echo implode(',', $aOrdered)?>
 													</span>
@@ -300,8 +300,8 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 											<div class="databox-top">
 												<div class="databox-sparkline">
 													<span data-sparkline="line" data-height="125px" data-width="100%" data-fillcolor="false" data-linecolor="themefourthcolor"
-														 data-spotcolor="#fafafa" data-minspotcolor="#fafafa" data-maxspotcolor="#8cc474"
-														 data-highlightspotcolor="#8cc474" data-highlightlinecolor="#8cc474"
+														 data-spotcolor="#fafafa" data-minspotcolor="#fafafa" data-maxspotcolor="false"
+														 data-highlightspotcolor="#8cc474" data-highlightlinecolor="false"
 														 data-linewidth="1.5" data-spotradius="2">
 														 <?php echo implode(',', $aPaid)?>
 													</span>
@@ -319,8 +319,8 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 											<div class="databox-top">
 												<div class="databox-sparkline">
 													<span data-sparkline="line" data-height="125px" data-width="100%" data-fillcolor="false" data-linecolor="themeprimary"
-														 data-spotcolor="#fafafa" data-minspotcolor="#fafafa" data-maxspotcolor="#0072C6"
-														 data-highlightspotcolor="#0072C6" data-highlightlinecolor="#0072C6	"
+														 data-spotcolor="#fafafa" data-minspotcolor="#fafafa" data-maxspotcolor="false"
+														 data-highlightspotcolor="#0072C6" data-highlightlinecolor="false"
 														 data-linewidth="1.5" data-spotradius="2">
 														 <?php echo implode(',', $aOrderedAmount)?>
 													</span>
@@ -340,8 +340,8 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 											<div class="databox-top">
 												<div class="databox-sparkline">
 													<span data-sparkline="line" data-height="125px" data-width="100%" data-fillcolor="false" data-linecolor="themethirdcolor"
-														 data-spotcolor="#fafafa" data-minspotcolor="#fafafa" data-maxspotcolor="red"
-														 data-highlightspotcolor="red" data-highlightlinecolor="red"
+														 data-spotcolor="#fafafa" data-minspotcolor="#fafafa" data-maxspotcolor="false"
+														 data-highlightspotcolor="red" data-highlightlinecolor="false"
 														 data-linewidth="1.5" data-spotradius="2">
 														 <?php echo implode(',', $aPaidAmount)?>
 													</span>
@@ -475,7 +475,6 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 																	show: true,
 																	radius: 1,
 																	innerRadius: 0.5,
-
 																	label: {
 																			show: true,
 																			radius: 0,
@@ -555,14 +554,14 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 																	show: true,
 																	radius: 1,
 																	innerRadius: 0.5,
-
 																	label: {
 																			show: true,
 																			radius: 0,
 																			formatter: function(label, series) {
 																				return "<div style='font-size:8pt;' title='" + label + "'>" + label + "</div>";
 																			}
-																	}
+																	},
+																	shadowSize: 0
 																}
 															},
 
@@ -671,7 +670,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 								<div class="row">
 									<div class="col-xs-7 item-left">
 										<div class="item-time">
-											<i class="fa fa-<?php echo $oShop_Order->paid ? 'check' : 'calendar'?>"></i>
+											<i class="<?php echo $oShop_Order->paid ? 'fa-solid fa-check' : 'fa-solid fa-calendar'?>"></i>
 											<span><?php echo Core_Date::sql2datetime($oShop_Order->datetime)?></span>
 										</div>
 									</div>

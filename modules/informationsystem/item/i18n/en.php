@@ -53,7 +53,7 @@ return array(
 	'seo_title' => 'Title',
 	'seo_description' => 'Description',
 	'seo_keywords' => 'Keywords',
-	'tags' => '<acronym title="Labels (tags) of information item divided by comma, e.g. processors, AMD, Intel">Labels (tags)</acronym>',
+	'tags' => '<acronym title="Tags of information item divided by comma">Tags</acronym>',
 	'type_tag' => 'Type tag ...',
 
 	'error_information_group_URL_item' => 'Group already contains information item with this name in URL!',

@@ -29,8 +29,8 @@ function smarty_function_html_select_time($params, Smarty_Internal_Template $tem
     $template->_checkPlugins(
         array(
             array(
-                'function' => 'smarty_function_escape_special_chars',
-                'file'     => SMARTY_PLUGINS_DIR . 'shared.escape_special_chars.php'
+            	'function' => 'smarty_function_escape_special_chars',
+            	'file'     => SMARTY_PLUGINS_DIR . 'shared.escape_special_chars.php'
             )
         )
     );
@@ -79,8 +79,8 @@ function smarty_function_html_select_time($params, Smarty_Internal_Template $tem
                     $template->_checkPlugins(
                         array(
                             array(
-                                'function' => 'smarty_make_timestamp',
-                                'file'     => SMARTY_PLUGINS_DIR . 'shared.make_timestamp.php'
+                            	'function' => 'smarty_make_timestamp',
+                            	'file'     => SMARTY_PLUGINS_DIR . 'shared.make_timestamp.php'
                             )
                         )
                     );
@@ -142,9 +142,9 @@ function smarty_function_html_select_time($params, Smarty_Internal_Template $tem
         if (isset($params[ 'time' ][ $prefix . 'Hour' ])) {
             // $_REQUEST[$field_array] given
             foreach (array(
-                'H' => 'Hour',
-                'i' => 'Minute',
-                's' => 'Second'
+            	'H' => 'Hour',
+            	'i' => 'Minute',
+            	's' => 'Second'
             ) as $_elementKey => $_elementName) {
                 $_variableName = '_' . strtolower($_elementName);
                 $$_variableName =
@@ -153,15 +153,15 @@ function smarty_function_html_select_time($params, Smarty_Internal_Template $tem
             }
             $_meridian =
                 isset($params[ 'time' ][ $prefix . 'Meridian' ]) ? (' ' . $params[ 'time' ][ $prefix . 'Meridian' ]) :
-                    '';
+                	'';
             $time = strtotime($_hour . ':' . $_minute . ':' . $_second . $_meridian);
             list($_hour, $_minute, $_second) = $time = explode('-', date('H-i-s', $time));
         } elseif (isset($params[ 'time' ][ $field_array ][ $prefix . 'Hour' ])) {
             // $_REQUEST given
             foreach (array(
-                'H' => 'Hour',
-                'i' => 'Minute',
-                's' => 'Second'
+            	'H' => 'Hour',
+            	'i' => 'Minute',
+            	's' => 'Second'
             ) as $_elementKey => $_elementName) {
                 $_variableName = '_' . strtolower($_elementName);
                 $$_variableName = isset($params[ 'time' ][ $field_array ][ $prefix . $_elementName ]) ?
@@ -260,7 +260,7 @@ function smarty_function_html_select_time($params, Smarty_Internal_Template $tem
             $_text = $minute_format === '%02d' ? $_val : sprintf($minute_format, $i);
             $_value = $minute_value_format === '%02d' ? $_val : sprintf($minute_value_format, $i);
             $_html_minutes .= '<option value="' . $_value . '"' . ($selected === $i ? ' selected="selected"' : '') .
-                              '>' . $_text . '</option>' . $option_separator;
+                          	'>' . $_text . '</option>' . $option_separator;
         }
         $_html_minutes .= '</select>';
     }
@@ -298,7 +298,7 @@ function smarty_function_html_select_time($params, Smarty_Internal_Template $tem
             $_text = $second_format === '%02d' ? $_val : sprintf($second_format, $i);
             $_value = $second_value_format === '%02d' ? $_val : sprintf($second_value_format, $i);
             $_html_seconds .= '<option value="' . $_value . '"' . ($selected === $i ? ' selected="selected"' : '') .
-                              '>' . $_text . '</option>' . $option_separator;
+                          	'>' . $_text . '</option>' . $option_separator;
         }
         $_html_seconds .= '</select>';
     }
@@ -329,19 +329,19 @@ function smarty_function_html_select_time($params, Smarty_Internal_Template $tem
         $_html_meridian .= $_extra . $extra_attrs . '>' . $option_separator;
         if (isset($meridian_empty) || isset($all_empty)) {
             $_html_meridian .= '<option value="">' . (isset($meridian_empty) ? $meridian_empty : $all_empty) .
-                               '</option>' . $option_separator;
+                           	'</option>' . $option_separator;
         }
         $_html_meridian .= '<option value="am"' . ($_hour > 0 && $_hour < 12 ? ' selected="selected"' : '') .
-                           '>AM</option>' . $option_separator . '<option value="pm"' .
+                       	'>AM</option>' . $option_separator . '<option value="pm"' .
                            ($_hour < 12 ? '' : ' selected="selected"') . '>PM</option>' . $option_separator .
-                           '</select>';
+                       	'</select>';
     }
     $_html = '';
     foreach (array(
-        '_html_hours',
-        '_html_minutes',
-        '_html_seconds',
-        '_html_meridian'
+    	'_html_hours',
+    	'_html_minutes',
+    	'_html_seconds',
+    	'_html_meridian'
     ) as $k) {
         if (isset($$k)) {
             if ($_html) {

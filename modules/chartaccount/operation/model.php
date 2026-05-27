@@ -73,8 +73,8 @@ class Chartaccount_Operation_Model extends Core_Entity
 	public function postedBackend()
 	{
 		return $this->posted
-			? '<i class="fa fa-check-circle-o green">'
-			: '<i class="fa fa-times-circle-o red">';
+			? '<i class="fa-regular fa-circle-check green">'
+			: '<i class="fa-regular fa-circle-xmark red">';
 	}
 
 	/**

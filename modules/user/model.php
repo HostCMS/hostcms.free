@@ -53,6 +53,8 @@ class User_Model extends Core_Entity
 		'company_department' => array('through' => 'company_department_post_user'),
 		'company_department_post_user' => array(),
 		'crm_note' => array(),
+		'crm_note_attachment' => array(),
+		'crm_note_reaction' => array(),
 		'event' => array('through' => 'event_user'),
 		'event_user' => array(),
 		'forum' => array(),
@@ -119,6 +121,7 @@ class User_Model extends Core_Entity
 		'shop_warehouse_purchasereturn' => array(),
 		'telephony' => array(),
 		'telephony_line' => array(),
+		'timeline_user' => array(),
 		'production_process_stage' => array(),
 		'production_task_process_plan_stage_user' => array(),
 	);
@@ -632,6 +635,11 @@ class User_Model extends Core_Entity
 			$this->Ai_Chats->deleteAll(FALSE);
 		}
 
+		if (Core::moduleIsActive('timeline'))
+		{
+			$this->Timeline_Users->deleteAll(FALSE);
+		}
+
 		$this->User_Bookmarks->deleteAll(FALSE);
 		$this->User_Worktimes->deleteAll(FALSE);
 		$this->User_Workdays->deleteAll(FALSE);
@@ -855,7 +863,7 @@ class User_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-    */
+	*/
 	public function fullnameBadge()
 	{
 		if ($this->dismissed)
@@ -868,7 +876,7 @@ class User_Model extends Core_Entity
 
 	/**
 	 * Backend badge
-    */
+	*/
 	public function loginBadge()
 	{
 		echo '&nbsp;' . $this->getOnlineStatus();
@@ -897,7 +905,7 @@ class User_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
-    */
+	*/
 	public function departmentBackend()
 	{
 		$aTempDepartmentPost = array();
@@ -907,7 +915,7 @@ class User_Model extends Core_Entity
 		{
 			$aTempDepartmentPost[] = '<div ' . ( $key ? ' class="margin-top-5"' : '' ) . '>' . htmlspecialchars($oCompany_Department_Post_User->Company_Department->name) . '<br /><span class="user-post-name">'
 				. htmlspecialchars($oCompany_Department_Post_User->Company_Post->name) . '</span>'
-				. ($oCompany_Department_Post_User->head ? ' <i class="fa fa-star head-star" title="' . Core::_('User.head_title') . '"></i>' : '') . '</div>';
+				. ($oCompany_Department_Post_User->head ? ' <i class="fa-solid fa-star head-star" title="' . Core::_('User.head_title') . '"></i>' : '') . '</div>';
 		}
 
 		echo implode('', $aTempDepartmentPost);
@@ -929,10 +937,15 @@ class User_Model extends Core_Entity
 	public function getSex()
 	{
 		return $this->sex
-			? '<i class="fa fa-venus pink"></i>'
-			: '<i class="fa fa-mars sky"></i>';
+			? '<i class="fa-solid fa-venus pink"></i>'
+			: '<i class="fa-solid fa-mars sky"></i>';
 	}
 
+	/**
+	 * Get workday duration
+	 * @param string $date
+	 * @return string
+	 */
 	public function getWorkdayDuration($date)
 	{
 		$sDate = '00<span class="colon">:</span>00';
@@ -1245,7 +1258,7 @@ class User_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event user.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')
@@ -1298,75 +1311,95 @@ class User_Model extends Core_Entity
 	public function getProfilePopupBlock()
 	{
 		ob_start();
+
 		?>
-		<div class="siteuser-popup-wrapper">
-			<img class="avatar" src="<?php echo $this->getAvatar()?>"/>
-			<div class="siteuser-popup-name">
-				<div class="semi-bold"><?php echo htmlspecialchars($this->getFullName())?></div>
+		<div class="compact-popover">
+			<div class="compact-popover-header">
+				<div class="compact-popover-avatar">
+					<img src="<?php echo htmlspecialchars((string) $this->getAvatar())?>" alt="Avatar" />
+				</div>
+				<div class="compact-popover-title">
+					<div class="compact-popover-name" title="<?php echo htmlspecialchars((string) $this->getFullName())?>">
+						<?php echo htmlspecialchars((string) $this->getFullName())?>
+					</div>
 
-				<?php
-				$aCompanies = Core_Entity::factory('Company')->findAll();
-
-				if (isset($aCompanies[0]))
-				{
-					$oCompany = $aCompanies[0];
-
-					$aCompany_Department_Post_Users = $this->Company_Department_Post_Users->getAllByCompany_id($oCompany->id);
-
-					if (isset($aCompany_Department_Post_Users[0]))
+					<?php
+					$aCompanies = Core_Entity::factory('Company')->findAll();
+					if (isset($aCompanies[0]))
 					{
-						$oCompany_Department_Post_User = $aCompany_Department_Post_Users[0];
+						$oCompany = $aCompanies[0];
+						$aCompany_Department_Post_Users = $this->Company_Department_Post_Users->getAllByCompany_id($oCompany->id);
 
-						?>
-						<div><div><span class="small2"><?php echo htmlspecialchars($oCompany_Department_Post_User->Company_Department->name)?></span> <span class="popup-type"><?php echo htmlspecialchars($oCompany_Department_Post_User->Company_Post->name)?></span></div></div>
-						<?php
+						if (isset($aCompany_Department_Post_Users[0]))
+						{
+							$oCompany_Department_Post_User = $aCompany_Department_Post_Users[0];
+							?>
+							<div class="compact-popover-role">
+								<strong><?php echo htmlspecialchars((string) $oCompany_Department_Post_User->Company_Department->name)?></strong>
+								<?php echo htmlspecialchars((string) $oCompany_Department_Post_User->Company_Post->name)?>
+							</div>
+							<?php
+						}
+					}
+					?>
+				</div>
+			</div>
+
+			<div class="compact-popover-contacts">
+				<?php
+				// Телефоны
+				$aDirectory_Phones = $this->Directory_Phones->findAll(FALSE);
+				if (count($aDirectory_Phones))
+				{
+					foreach ($aDirectory_Phones as $oDirectory_Phone)
+					{
+						if (strlen(Core_Str::sanitizePhoneNumber(trim($oDirectory_Phone->value))))
+						{
+							$oDirectory_Phone_Type = Core_Entity::factory('Directory_Phone_Type')->find($oDirectory_Phone->directory_phone_type_id);
+							$sPhoneType = !is_null($oDirectory_Phone_Type->id) ? htmlspecialchars((string) $oDirectory_Phone_Type->name) . ':' : '';
+							?>
+							<div class="compact-popover-contact">
+								<div class="compact-popover-icon phone"><i class="fa-solid fa-phone"></i></div>
+								<div class="compact-popover-data">
+									<?php if ($sPhoneType): ?>
+										<span class="compact-popover-label"><?php echo $sPhoneType?></span>
+									<?php endif; ?>
+									<span class="compact-popover-value"><?php echo htmlspecialchars((string) $oDirectory_Phone->value)?></span>
+								</div>
+							</div>
+							<?php
+						}
+					}
+				}
+
+				// Электронные адреса
+				$aDirectory_Emails = $this->Directory_Emails->findAll(FALSE);
+				if (count($aDirectory_Emails))
+				{
+					foreach ($aDirectory_Emails as $oDirectory_Email)
+					{
+						if (strlen(trim($oDirectory_Email->value)))
+						{
+							$oDirectory_Email_Type = Core_Entity::factory('Directory_Email_Type')->find($oDirectory_Email->directory_email_type_id);
+							$sEmailType = !is_null($oDirectory_Email_Type->id) ? htmlspecialchars((string) $oDirectory_Email_Type->name) . ':' : '';
+							?>
+							<div class="compact-popover-contact">
+								<div class="compact-popover-icon email"><i class="fa-regular fa-envelope"></i></div>
+								<div class="compact-popover-data">
+									<?php if ($sEmailType): ?>
+										<span class="compact-popover-label"><?php echo $sEmailType?></span>
+									<?php endif; ?>
+									<span class="compact-popover-value"><a href="mailto:<?php echo htmlspecialchars((string) $oDirectory_Email->value)?>"><?php echo htmlspecialchars((string) $oDirectory_Email->value)?></a></span>
+								</div>
+							</div>
+							<?php
+						}
 					}
 				}
 				?>
 			</div>
 		</div>
 		<?php
-		$aDirectory_Phones = $this->Directory_Phones->findAll(FALSE);
-
-		if (count($aDirectory_Phones))
-		{
-			?><div><?php
-			foreach ($aDirectory_Phones as $oDirectory_Phone)
-			{
-				if (strlen(Core_Str::sanitizePhoneNumber(trim($oDirectory_Phone->value))))
-				{
-					$oDirectory_Phone_Type = Core_Entity::factory('Directory_Phone_Type')->find($oDirectory_Phone->directory_phone_type_id);
-
-					$sPhoneType = !is_null($oDirectory_Phone_Type->id)
-						? htmlspecialchars($oDirectory_Phone_Type->name) . ": "
-						: '';
-
-					?><div><span class="popup-type"><i class="fa fa-phone fa-fw palegreen"></i> <?php echo $sPhoneType?></span><span><?php echo htmlspecialchars($oDirectory_Phone->value)?></span></div><?php
-				}
-			}
-			?></div><?php
-		}
-
-		$aDirectory_Emails = $this->Directory_Emails->findAll(FALSE);
-
-		if (count($aDirectory_Emails))
-		{
-			?><div class="margin-top-5"><?php
-			foreach ($aDirectory_Emails as $oDirectory_Email)
-			{
-				if (strlen(trim($oDirectory_Email->value)))
-				{
-					$oDirectory_Email_Type = Core_Entity::factory('Directory_Email_Type')->find($oDirectory_Email->directory_email_type_id);
-
-					$sEmailType = !is_null($oDirectory_Email_Type->id)
-						? htmlspecialchars($oDirectory_Email_Type->name) . ": "
-						: '';
-
-						?><div><span class="popup-type"><i class="fa fa-envelope-o fa-fw warning"></i> <?php echo $sEmailType?></span><span><a href="mailto:<?php echo htmlspecialchars($oDirectory_Email->value)?>"><?php echo htmlspecialchars($oDirectory_Email->value)?></a></span></div><?php
-				}
-			}
-		}
-
 		return ob_get_clean();
 	}
 
@@ -1425,6 +1458,50 @@ class User_Model extends Core_Entity
 			?>href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/user/index.php')?>?hostcms[action]=view&hostcms[checked][0][<?php echo $this->id?>]=1" onclick="$.modalLoad({path: hostcmsBackend + '/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $this->id?>]=1', windowId: '<?php echo $windowId?>', width: '<?php echo $width?>'}); return false"<?php
 		}
 		?>><?php echo htmlspecialchars($content)?></a><?php
+	}
+
+	/**
+	 * Show crm message title line
+	 * @return string
+	 */
+	public function showCrmTitleLine($windowId = 'id_content', $width = '80%')
+	{
+		ob_start();
+
+		$aPartsFullName = array();
+
+		!empty($this->name) && $aPartsFullName[] = $this->name;
+		!empty($this->surname) && $aPartsFullName[] = $this->surname;
+
+		!count($aPartsFullName) && $aPartsFullName[] = $this->login;
+
+		$author = implode(' ', $aPartsFullName);
+
+		$aTempDepartmentPost = array();
+
+		$aCompany_Department_Post_Users = $this->Company_Department_Post_Users->findAll();
+		foreach ($aCompany_Department_Post_Users as $oCompany_Department_Post_User)
+		{
+			$aTempDepartmentPost[] = $oCompany_Department_Post_User->Company_Post->name;
+		}
+
+		$aTempDepartmentPost = array_slice($aTempDepartmentPost, 0, 2);
+		?>
+			<span class="author" data-popover="hover" data-container="body" data-user-id="<?php echo $this->id?>" style="color: inherit" <?php
+			if ($this->checkModuleAccess(array('user'), Core_Entity::factory('Site', CURRENT_SITE)))
+			{
+				?>onclick="$.modalLoad({path: hostcmsBackend + '/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $this->id?>]=1', windowId: '<?php echo $windowId?>', width: '<?php echo $width?>'}); return false"<?php
+			}
+			?>>
+				<?php echo htmlspecialchars($author)?>
+			</span>
+		<?php
+		foreach ($aTempDepartmentPost as $sPost)
+		{
+			?><span class="role" title="<?php echo htmlspecialchars($sPost)?>"><?php echo htmlspecialchars($sPost)?></span><?php
+		}
+
+		return ob_get_clean();
 	}
 
 	/**

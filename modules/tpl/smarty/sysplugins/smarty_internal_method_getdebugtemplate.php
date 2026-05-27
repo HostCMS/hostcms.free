@@ -11,22 +11,22 @@
  */
 class Smarty_Internal_Method_GetDebugTemplate
 {
-    /**
-     * Valid for Smarty and template object
-     *
-     * @var int
-     */
+	/**
+	 * Valid for Smarty and template object
+	 *
+	 * @var int
+	 */
     public $objMap = 3;
 
-    /**
-     * return name of debugging template
-     *
-     * @api Smarty::getDebugTemplate()
-     *
-     * @param \Smarty_Internal_TemplateBase|\Smarty_Internal_Template|\Smarty $obj
-     *
-     * @return string
-     */
+	/**
+	 * return name of debugging template
+	 *
+	 * @api Smarty::getDebugTemplate()
+	 *
+	 * @param \Smarty_Internal_TemplateBase|\Smarty_Internal_Template|\Smarty $obj
+	 *
+	 * @return string
+	 */
     public function getDebugTemplate(Smarty_Internal_TemplateBase $obj)
     {
         $smarty = $obj->_getSmartyObj();

@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -49,8 +49,8 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 		{
 			$printlayoutsButton = '
 				<div class="btn-group">
-					<a class="btn btn-labeled btn-success" href="javascript:void(0);"><i class="btn-label fa fa-print"></i>' . Core::_('Printlayout.print') . '</a>
-					<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
+					<a class="btn btn-labeled btn-success" href="javascript:void(0);"><i class="btn-label fa-solid fa-print"></i>' . Core::_('Printlayout.print') . '</a>
+					<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa-solid fa-angle-down"></i></a>
 					<ul class="dropdown-menu dropdown-palegreen">
 			';
 
@@ -213,7 +213,7 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 					$itemTable .= '<tr id="' . $oShop_Warehouse_Inventory_Item->id . '" data-item-id="' . $oShop_Item->id . '">
 						<td class="index">' . ++$index . '</td>
 						<td>' . htmlspecialchars($oShop_Item->name) . ($sShopUrl
-							? '<a class="margin-left-5" target="_blank" href="' . htmlspecialchars($sShopUrl . $oShop_Item->getPath()) . '"><i class="fa fa-external-link"></i></a>'
+							? '<a class="margin-left-5" target="_blank" href="' . htmlspecialchars($sShopUrl . $oShop_Item->getPath()) . '"><i class="fa-solid fa-arrow-up-right-from-square small"></i></a>'
 							: '') . '</td>
 						<td>' . htmlspecialchars((string) $oShop_Item->Shop_Measure->name) . '</td>
 						<td><span class="price">' . $aPrices['price_tax'] . '</span></td>
@@ -224,7 +224,7 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 						<td><span class="calc-warehouse-sum"></span></td>
 						<td><span class="warehouse-inv-sum"></span></td>
 						<td><span class="diff-warehouse-sum"></span></td>
-						<td><a class="delete-associated-item" onclick="mainFormLocker.unlock(); res = confirm(\'' . Core::_('Shop_Warehouse_Inventory.delete_dialog') . '\'); if (res) { var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next); ' . $onclick . ' } return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
+						<td><a class="delete-associated-item" onclick="mainFormLocker.unlock(); res = confirm(\'' . Core::_('Shop_Warehouse_Inventory.delete_dialog') . '\'); if (res) { var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next); ' . $onclick . ' } return res;"><i class="fa-solid fa-circle-xmark darkorange"></i></a></td>
 					</tr>';
 				}
 			}
@@ -271,7 +271,7 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 							foundRest = {count: 0};
 						}
 
-						var newRow = $('<tr data-item-id=\"' + ui.item.id + '\"><td class=\"index\"></td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td><span class=\"price\">' + ui.item.price_with_tax + '</span></td><td>' + $.escapeHtml(ui.item.currency) + '</td><td><span class=\"calc-warehouse-count\">' + foundRest.count + '</span></td><td width=\"80\"><input class=\"set-item-count form-control\" name=\"shop_item_quantity[]\" value=\"\"/></td><td class=\"diff-warehouse-count\"></td><td><span class=\"calc-warehouse-sum\"></span></td><td><span class=\"warehouse-inv-sum\"></span></td><td><span class=\"diff-warehouse-sum\"></span></td><td><a class=\"delete-associated-item\" onclick=\"var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>'),
+						var newRow = $('<tr data-item-id=\"' + ui.item.id + '\"><td class=\"index\"></td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td><span class=\"price\">' + ui.item.price_with_tax + '</span></td><td>' + $.escapeHtml(ui.item.currency) + '</td><td><span class=\"calc-warehouse-count\">' + foundRest.count + '</span></td><td width=\"80\"><input class=\"set-item-count form-control\" name=\"shop_item_quantity[]\" value=\"\"/></td><td class=\"diff-warehouse-count\"></td><td><span class=\"calc-warehouse-sum\"></span></td><td><span class=\"warehouse-inv-sum\"></span></td><td><span class=\"diff-warehouse-sum\"></span></td><td><a class=\"delete-associated-item\" onclick=\"var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)\"><i class=\"fa-solid fa-circle-xmark darkorange\"></i></a></td></tr>'),
 						jNewItemCount = newRow.find('.set-item-count');
 
 						//$('#{$windowId} .shop-item-table > tbody').append(

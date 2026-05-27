@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage User
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class User_Absence_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -78,7 +78,7 @@ class User_Absence_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 				Admin_Form_Entity::factory('Code')
 					->html('<div class="form-group col-xs-12 col-sm-4">
 							<span class="caption">' . Core::_('User_Absence.datetime') . '</span>
-							<i class="fa fa-clock-o" style="margin-right: 5px;"></i><span>' . date('d.m.Y H:i', Core_Date::sql2timestamp($this->_object->datetime)) . '</span>
+							<i class="fa-regular fa-clock" style="margin-right: 5px;"></i><span>' . date('d.m.Y H:i', Core_Date::sql2timestamp($this->_object->datetime)) . '</span>
 						</div>'
 					)
 			);

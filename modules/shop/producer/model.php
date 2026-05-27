@@ -102,7 +102,7 @@ class Shop_Producer_Model extends Core_Entity
 
 	/**
 	 * Search indexation
-	 * @return Search_Page
+	 * @return Search_Page_Model
 	 * @hostcms-event shop_producer.onBeforeIndexing
 	 * @hostcms-event shop_producer.onAfterIndexing
 	 */
@@ -535,7 +535,7 @@ class Shop_Producer_Model extends Core_Entity
 	/**
 	 * Switch default status
 	 * @return Core_Entity
-     */
+	 */
 	public function changeDefaultStatus()
 	{
 		$this->save();
@@ -655,7 +655,7 @@ class Shop_Producer_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event shop_producer.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')
@@ -684,7 +684,7 @@ class Shop_Producer_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event shop_producer.onBeforeRedeclaredDelete
+	 * @hostcms-event shop_producer.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

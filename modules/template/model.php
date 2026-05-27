@@ -517,7 +517,7 @@ class Template_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event template.onBeforeRedeclaredDelete
+	 * @hostcms-event template.onBeforeRedeclaredDelete
 	 * @hostcms-event template.onAfterDeleteTemplateFile
 	 * @hostcms-event template.onAfterDeleteTemplateCssFile
 	 */
@@ -1095,11 +1095,11 @@ class Template_Model extends Core_Entity
 
 	protected $_i18n = array();
 
-    /**
-     * Include lng file
-     * @param string $lng language name
-     * @return array
-     */
+	/**
+	 * Include lng file
+	 * @param string $lng language name
+	 * @return array
+	 */
 	protected function _getLngFile($lng)
 	{
 		if (!isset($this->_i18n[$lng]))
@@ -1116,6 +1116,25 @@ class Template_Model extends Core_Entity
 		}
 
 		return $this->_i18n[$lng];
+	}
+
+	/**
+	 * Move to another
+	 * @param int $template_dir_id dir id
+	 * @return self
+	 * @hostcms-event template.onBeforeMove
+	 * @hostcms-event template.onAfterMove
+	 */
+	public function move($template_dir_id)
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($template_dir_id));
+
+		$this->template_dir_id = $template_dir_id;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
+
+		return $this;
 	}
 
 	/**

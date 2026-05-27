@@ -67,7 +67,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 	 * @param int $type
 	 * @param boolean $ajax
 	 * @return true
-     */
+	 */
 	public function adminPage($type = 0, $ajax = FALSE)
 	{
 		$type = intval($type);
@@ -144,14 +144,14 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 		{
 			?><div class="widget">
 				<div class="widget-header bordered-bottom bordered-themesecondary">
-					<i class="widget-icon fa fa-comments themesecondary"></i>
+					<i class="widget-icon fa-solid fa-comments themesecondary"></i>
 					<span class="widget-caption themesecondary"><?php echo Core::_('Informationsystem.widget_title')?></span>
 					<div class="widget-buttons">
 						<a data-toggle="maximize">
-							<i class="fa fa-expand gray"></i>
+							<i class="fa-solid fa-expand gray"></i>
 						</a>
 						<a data-toggle="refresh" onclick="$(this).find('i').addClass('fa-spin'); $.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#informationsystemCommentsAdminPage'), 'button': $(this).find('i') });">
-							<i class="fa fa-refresh gray"></i>
+							<i class="fa-solid fa-arrows-rotate gray"></i>
 						</a>
 					</div>
 				</div>
@@ -160,7 +160,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 						<div class="task-container">
 							<ul class="tasks-list">
 							<?php
-							$masColorNames = array('yellow', 'orange', 'palegreen');
+							$masColorNames = array('sky', 'orange', 'palegreen');
 							$color = 0;
 
 							$iComments_Admin_Form_Id = 52;
@@ -184,7 +184,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 									<div class="row">
 										<div class="col-xs-9">
 											<div class="task-state">
-												<span class="label label-<?php echo $masColorNames[$color == 3 ? $color = 0 : $color]; ++$color;?>">
+												<span class="badge badge-square badge-<?php echo $masColorNames[$color == 3 ? $color = 0 : $color]; ++$color;?> inverted">
 												<?php echo $oComment->subject != ''
 													? htmlspecialchars(Core_Str::cut($oComment->subject, 150))
 													: Core::_('Admin_Form.noSubject')?>
@@ -197,16 +197,24 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 									</div>
 									<div class="row">
 										<div class="col-xs-12">
-											<div class="task-body"><?php echo trim(htmlspecialchars(Core_Str::cut(strip_tags(html_entity_decode($oComment->text, ENT_COMPAT, 'UTF-8')), 150)))?></div>
+											<div class="task-body no-margin-left"><?php echo trim(htmlspecialchars(Core_Str::cut(strip_tags(html_entity_decode($oComment->text, ENT_COMPAT, 'UTF-8')), 150)))?></div>
 										</div>
 									</div>
-									<div class="row">
+									<div class="row d-flex align-items-center margin-top-10">
 										<div class="col-xs-6">
-											<div class="task-creator pull-left">
+											<div class="task-assignedto pull-left no-margin-top"><?php
+											if ($oComment->author != '')
+											{
+												?><i class="fa-solid fa-user icon-separator"></i><?php echo htmlspecialchars($oComment->author);
+											}
+											?></div>
+										</div>
+										<div class="col-xs-6">
+											<div class="task-creator pull-right no-margin-top">
 												<div class="btn-group pull-right">
-													<a class="btn btn-xs darkgray" title="<?php echo Core::_('Comment.change_active')?>" href="<?php echo $sChangeActiveHref?>" onclick="$.widgetRequest({path: '<?php echo $sChangeActiveHref?>', context: $('#informationsystemCommentsAdminPage')}); return false"><i class="fa <?php echo $oComment->active ? "fa-dot-circle-o" : "fa-circle-o"?>"></i></a>
-													<a href="<?php echo $sEditHref?>" onclick="<?php echo $sEditOnClick?>" class="btn btn-xs darkgray" title="<?php echo Core::_('Comment.edit')?>"><i class="fa fa-pencil"></i> </a>
-													<a class="btn btn-xs darkgray" title="<?php echo Core::_('Comment.delete')?>" href="<?php echo $sMarkDeletedHref?>" onclick="res = confirm('<?php echo Core::_('Admin_Form.confirm_dialog', htmlspecialchars(Core::_('Admin_Form.delete')))?>'); if (res) { $.widgetRequest({path: '<?php echo $sMarkDeletedHref?>', context: $('#informationsystemCommentsAdminPage')}); } return false"><i class="fa fa-times"></i></a>
+													<a class="btn btn-xs darkgray" title="<?php echo Core::_('Comment.change_active')?>" href="<?php echo $sChangeActiveHref?>" onclick="$.widgetRequest({path: '<?php echo $sChangeActiveHref?>', context: $('#informationsystemCommentsAdminPage')}); return false"><i class="<?php echo $oComment->active ? "fa-regular fa-circle-dot" : "fa-regular fa-circle"?>"></i></a>
+													<a href="<?php echo $sEditHref?>" onclick="<?php echo $sEditOnClick?>" class="btn btn-xs darkgray" title="<?php echo Core::_('Comment.edit')?>"><i class="fa-solid fa-pencil"></i> </a>
+													<a class="btn btn-xs darkgray" title="<?php echo Core::_('Comment.delete')?>" href="<?php echo $sMarkDeletedHref?>" onclick="res = confirm('<?php echo Core::_('Admin_Form.confirm_dialog', htmlspecialchars(Core::_('Admin_Form.delete')))?>'); if (res) { $.widgetRequest({path: '<?php echo $sMarkDeletedHref?>', context: $('#informationsystemCommentsAdminPage')}); } return false"><i class="fa-solid fa-xmark"></i></a>
 													<?php
 													if ($oComment->active)
 													{
@@ -217,7 +225,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 														if ($oCurrentAlias)
 														{
 															$href = ($oStructure->https ? 'https://' : 'http://' ) . $oCurrentAlias->name . $oStructure->getPath() . $oComment->Informationsystem_Item->getPath() . '#comment' . $oComment->id;
-															?><a class="btn btn-xs darkgray" title="<?php echo Core::_('Comment.view_comment')?>" href="<?php echo htmlspecialchars($href)?>" target="_blank"><i class="fa fa-external-link"></i> </a><?php
+															?><a class="btn btn-xs darkgray" title="<?php echo Core::_('Comment.view_comment')?>" href="<?php echo htmlspecialchars($href)?>" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square small"></i> </a><?php
 														}
 													}
 
@@ -228,26 +236,18 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 													if ($bBlocked)
 													{
 													?>
-														<span class="btn btn-xs darkorange span-blocked disabled" title="<?php echo Core::_('Comment.ban')?>"><i class="fa fa-ban"></i></span>
+														<span class="btn btn-xs darkorange span-blocked disabled" title="<?php echo Core::_('Comment.ban')?>"><i class="fa-solid fa-ban"></i></span>
 													<?php
 													}
 													else
 													{
 													?>
-														<a onclick="$.blockIp({ ip: '<?php echo $oComment->ip?>', comment: '<?php echo Core_Str::escapeJavascriptVariable(Core::_('Comment.ban_comment', $oComment->subject))?>' }); $.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#informationsystemCommentsAdminPage'), 'button': $(this).find('i') });" class="btn btn-xs darkgray span-unblocked" title="<?php echo Core::_('Comment.ban')?>"><i class="fa fa-ban"></i> </a>
+														<a onclick="$.blockIp({ ip: '<?php echo $oComment->ip?>', comment: '<?php echo Core_Str::escapeJavascriptVariable(Core::_('Comment.ban_comment', $oComment->subject))?>' }); $.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#informationsystemCommentsAdminPage'), 'button': $(this).find('i') });" class="btn btn-xs darkgray" title="<?php echo Core::_('Comment.ban')?>"><i class="fa-solid fa-ban"></i> </a>
 													<?php
 													}
 													?>
 												</div>
 											</div>
-										</div>
-										<div class="col-xs-6">
-											<div class="task-assignedto pull-right"><?php
-											if ($oComment->author != '')
-											{
-												?><i class="fa fa-user icon-separator"></i><?php echo htmlspecialchars($oComment->author);
-											}
-											?></div>
 										</div>
 									</div>
 								</li>
@@ -257,7 +257,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 							</ul>
 							<div>
 								<a class="btn btn-info" onclick="$.adminLoad({path: hostcmsBackend + '/informationsystem/item/comment/index.php'}); return false" href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/informationsystem/item/comment/index.php')?>">
-									<i class="fa fa-comments"></i><?php echo Core::_('Informationsystem.widget_other_comments')?></a>
+									<i class="fa-solid fa-comments"></i><?php echo Core::_('Informationsystem.widget_other_comments')?></a>
 							</div>
 						</div>
 					</div>
@@ -298,11 +298,11 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 		{
 			?><div class="widget">
 				<div class="widget-header bordered-bottom bordered-themesecondary">
-					<i class="widget-icon fa fa-comments themesecondary"></i>
+					<i class="widget-icon fa-solid fa-comments themesecondary"></i>
 					<span class="widget-caption themesecondary"><?php echo Core::_('Shop.index_last_comments_shop')?></span>
 					<div class="widget-buttons">
 						<a data-toggle="maximize">
-							<i class="fa fa-expand gray"></i>
+							<i class="fa-solid fa-expand gray"></i>
 						</a>
 						<a data-toggle="refresh" onclick="$(this).find('i').addClass('fa-spin'); $.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#shopCommentsAdminPage'), 'button': $(this).find('i') });">
 							<i class="fa-solid fa-rotate gray"></i>
@@ -314,7 +314,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 						<div class="task-container">
 							<ul class="tasks-list">
 							<?php
-							$masColorNames = array('yellow', 'orange', 'palegreen');
+							$masColorNames = array('sky', 'orange', 'palegreen');
 							$color = 0;
 
 							$iComments_Admin_Form_Id = 52;
@@ -338,7 +338,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 									<div class="row">
 										<div class="col-xs-6">
 											<div class="task-state">
-												<span class="label label-<?php echo $masColorNames[$color == 3 ? $color = 0 : $color]; ++$color;?>">
+												<span class="badge badge-square badge-<?php echo $masColorNames[$color == 3 ? $color = 0 : $color]; ++$color;?> inverted">
 												<?php echo $oComment->subject != ''
 													? htmlspecialchars(Core_Str::cut($oComment->subject, 150))
 													: Core::_('Admin_Form.noSubject')?>
@@ -351,16 +351,24 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 									</div>
 									<div class="row">
 										<div class="col-xs-12">
-											<div class="task-body"><?php echo trim(htmlspecialchars(Core_Str::cut(strip_tags(html_entity_decode($oComment->text, ENT_COMPAT, 'UTF-8')), 150)))?></div>
+											<div class="task-body no-margin-left"><?php echo trim(htmlspecialchars(Core_Str::cut(strip_tags(html_entity_decode($oComment->text, ENT_COMPAT, 'UTF-8')), 150)))?></div>
 										</div>
 									</div>
-									<div class="row">
+									<div class="row d-flex align-items-center margin-top-10">
 										<div class="col-xs-6">
-											<div class="task-creator pull-left">
+											<div class="task-assignedto pull-left no-margin-top"><?php
+											if ($oComment->author != '')
+											{
+												?><i class="fa-solid fa-user icon-separator"></i><?php echo htmlspecialchars($oComment->author);
+											}
+											?></div>
+										</div>
+										<div class="col-xs-6">
+											<div class="task-creator pull-right no-margin-top">
 												<div class="btn-group pull-right">
-													<a class="btn btn-xs darkgray" title="<?php echo Core::_('Comment.change_active')?>" href="<?php echo $sChangeActiveHref?>" onclick="$.widgetRequest({path: '<?php echo $sChangeActiveHref?>', context: $('#shopCommentsAdminPage')}); return false"><i class="fa <?php echo $oComment->active ? "fa-dot-circle-o" : "fa-circle-o"?>"></i> </a>
-													<a href="<?php echo $sEditHref?>" onclick="<?php echo $sEditOnClick?>" class="btn btn-xs darkgray" title="<?php echo Core::_('Comment.edit')?>"><i class="fa fa-pencil"></i> </a>
-													<a class="btn btn-xs darkgray" title="<?php echo Core::_('Comment.delete')?>" href="<?php echo $sMarkDeletedHref?>" onclick="res = confirm('<?php echo Core::_('Admin_Form.confirm_dialog', htmlspecialchars(Core::_('Admin_Form.delete')))?>'); if (res) { $.widgetRequest({path: '<?php echo $sMarkDeletedHref?>', context: $('#shopCommentsAdminPage')}); } return false"><i class="fa fa-times"></i></a>
+													<a class="btn btn-xs darkgray" title="<?php echo Core::_('Comment.change_active')?>" href="<?php echo $sChangeActiveHref?>" onclick="$.widgetRequest({path: '<?php echo $sChangeActiveHref?>', context: $('#shopCommentsAdminPage')}); return false"><i class="<?php echo $oComment->active ? "fa-regular fa-circle-dot" : "fa-regular fa-circle"?>"></i> </a>
+													<a href="<?php echo $sEditHref?>" onclick="<?php echo $sEditOnClick?>" class="btn btn-xs darkgray" title="<?php echo Core::_('Comment.edit')?>"><i class="fa-solid fa-pencil"></i> </a>
+													<a class="btn btn-xs darkgray" title="<?php echo Core::_('Comment.delete')?>" href="<?php echo $sMarkDeletedHref?>" onclick="res = confirm('<?php echo Core::_('Admin_Form.confirm_dialog', htmlspecialchars(Core::_('Admin_Form.delete')))?>'); if (res) { $.widgetRequest({path: '<?php echo $sMarkDeletedHref?>', context: $('#shopCommentsAdminPage')}); } return false"><i class="fa-solid fa-xmark"></i></a>
 													<?php
 													if ($oComment->active)
 													{
@@ -372,7 +380,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 														{
 															$href = ($oStructure->https ? 'https://' : 'http://' ) . $oCurrentAlias->name . $oStructure->getPath() . $oComment->Shop_Item->getPath() . '#comment' . $oComment->id;
 
-															?><a class="btn btn-xs darkgray" title="<?php echo Core::_('Comment.view_comment')?>" href="<?php echo htmlspecialchars($href)?>" target="_blank"><i class="fa fa-external-link"></i></a><?php
+															?><a class="btn btn-xs darkgray" title="<?php echo Core::_('Comment.view_comment')?>" href="<?php echo htmlspecialchars($href)?>" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square small"></i></a><?php
 														}
 													}
 
@@ -383,26 +391,18 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 													if ($bBlocked)
 													{
 													?>
-														<span class="btn btn-xs darkorange span-blocked disabled" title="<?php echo Core::_('Comment.ban')?>"><i class="fa fa-ban"></i></span>
+														<span class="btn btn-xs darkorange span-blocked disabled" title="<?php echo Core::_('Comment.ban')?>"><i class="fa-solid fa-ban"></i></span>
 													<?php
 													}
 													else
 													{
 													?>
-														<a onclick="$.blockIp({ ip: '<?php echo $oComment->ip?>', comment: '<?php echo Core_Str::escapeJavascriptVariable(Core::_('Comment.ban_comment', $oComment->subject))?>' }); $.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#shopCommentsAdminPage'), 'button': $(this).find('i') });" class="btn btn-xs darkgray span-unblocked" title="<?php echo Core::_('Comment.ban')?>"><i class="fa fa-ban"></i> </a>
+														<a onclick="$.blockIp({ ip: '<?php echo $oComment->ip?>', comment: '<?php echo Core_Str::escapeJavascriptVariable(Core::_('Comment.ban_comment', $oComment->subject))?>' }); $.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#shopCommentsAdminPage'), 'button': $(this).find('i') });" class="btn btn-xs darkgray" title="<?php echo Core::_('Comment.ban')?>"><i class="fa-solid fa-ban"></i> </a>
 													<?php
 													}
 													?>
 												</div>
 											</div>
-										</div>
-										<div class="col-xs-6">
-											<div class="task-assignedto pull-right"><?php
-											if ($oComment->author != '')
-											{
-												?><i class="fa fa-user icon-separator"></i><?php echo htmlspecialchars($oComment->author);
-											}
-											?></div>
 										</div>
 									</div>
 								</li>
@@ -412,7 +412,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 							</ul>
 							<div>
 								<a class="btn btn-info" onclick="$.adminLoad({path: hostcmsBackend + '/shop/item/comment/index.php'}); return false" href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/shop/item/comment/index.php')?>">
-									<i class="fa fa-comments"></i><?php echo Core::_('Shop.widget_other_comments')?>
+									<i class="fa-solid fa-comments"></i><?php echo Core::_('Shop.widget_other_comments')?>
 								</a>
 							</div>
 						</div>

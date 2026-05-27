@@ -238,7 +238,7 @@
 
 						var newSorting = (sorting.length ? sorting[sorting.length - 1] : 0) + 1;
 
-						$('.filter-conditions').append('<div class="dd"><ol class="dd-list"><li class="dd-item bordered-palegreen" data-sorting="' + newSorting + '"><div class="dd-handle"><div class="form-horizontal"><div class="form-group no-margin-bottom">' + result.html + '<a class="delete-associated-item" onclick="$(this).parents(\'.dd-item\').remove()"><i class="fa fa-times-circle darkorange"></i></a></div></div></li></ol></div></div><input type="hidden" name="property_value_sorting[]" value="' + newSorting + '"/>');
+						$('.filter-conditions').append('<div class="dd"><ol class="dd-list"><li class="dd-item bordered-palegreen" data-sorting="' + newSorting + '"><div class="dd-handle"><div class="form-horizontal"><div class="form-group no-margin-bottom">' + result.html + '<a class="delete-associated-item" onclick="$(this).parents(\'.dd-item\').remove()"><i class="fa-regular fa-circle-xmark darkorange"></i></a></div></div></li></ol></div></div><input type="hidden" name="property_value_sorting[]" value="' + newSorting + '"/>');
 
 						// Reload nestable list
 						$.loadSeoFilterNestable();
@@ -552,7 +552,7 @@
 					<td><span class="incoming-price"></span></td>
 					<td><span class="incoming-currency"></span></td>
 					<td width="80"><input class="set-item-count form-control" name="shop_item_quantity[]" value=""/></td>
-					<td><a class="delete-associated-item" onclick="var next = $(this).parents('tr').next(); $(this).parents('tr').remove(); $.recountIndexes(next)"><i class="fa fa-times-circle darkorange"></i></a></td>
+					<td><a class="delete-associated-item" onclick="var next = $(this).parents('tr').next(); $(this).parents('tr').remove(); $.recountIndexes(next)"><i class="fa-regular fa-circle-xmark darkorange"></i></a></td>
 				</tr>`;
 
 			$('.shop-item-table').append(newRow);

@@ -240,6 +240,8 @@ class Ipaddress_Visitor_Filter_Controller
 		if (count($aFilters))
 		{
 			$aHeaders = Core::getallheaders() + $_SERVER;
+			$aHeaders['REMOTE_ADDR'] = Core::getClientIp();
+
 			$aHeadersLowercased = array_change_key_case($aHeaders);
 
 			foreach ($aFilters as $aFilter)
@@ -251,195 +253,142 @@ class Ipaddress_Visitor_Filter_Controller
 					$aJson = @json_decode($aFilter['json'], TRUE);
 					if (is_array($aJson) && count($aJson))
 					{
+						// Массив счетчиков совпадений
+						$aMatches = array();
+
+						$bHeaderConditions = $bVisitorConditions = FALSE;
+
+						foreach ($aJson as $conditionId => $aCondition)
+						{
+							$aCondition['type'] == 'header'
+								? $bHeaderConditions = TRUE
+								: $bVisitorConditions = TRUE;
+
+							if ($bHeaderConditions && $bVisitorConditions)
+							{
+								break;
+							}
+						}
+
 						// Расчет N Дней по данным в JSON
 						$hours = 0;
 						foreach ($aJson as $conditionId => $aCondition)
 						{
 							$aCondition['hours'] > $hours
 								&& $hours = $aCondition['hours'];
+
+							$aCondition['type'] == 'header'
+								&& $aJson[$conditionId]['times'] = 1;
 						}
 
-						$aCounter_Visits = $this->_getCounterData($hours);
-
-						// Массив счетчиков совпадений
-						$aMatches = array();
-
-						foreach ($aJson as $conditionId => $aCondition)
+						if ($bHeaderConditions)
 						{
-							if (isset($aCondition['type']) && isset($aCondition['condition']) && isset($aCondition['value'])
-								&& isset($aCondition['hours']) && isset($aCondition['times'])
-							)
+							// Отдельная проверка условий Header, т.к. они не изменяются и не зависят от $aCounter_Visits
+							foreach ($aJson as $conditionId => $aCondition)
 							{
-								$bCaseSensitive = isset($aCondition['case_sensitive']) && $aCondition['case_sensitive'] == 1;
-
-								// Для каждого условия $aCondition цикл по всем $oCounter_Visit
-								foreach ($aCounter_Visits as $oCounter_Visit)
+								if (isset($aCondition['type']) && isset($aCondition['condition']) && isset($aCondition['value'])
+									&& $aCondition['type'] == 'header')
 								{
-									// Дата визита входит в ограниченный для правила диапазон
-									if (Core_Date::sql2timestamp($oCounter_Visit->datetime) > time() - $aCondition['hours'] * 3600)
+
+									$compared = isset($aCondition['header'])
+										? (
+											// 'header_case_sensitive' since 7.1.5
+											!isset($aCondition['header_case_sensitive']) || !$aCondition['header_case_sensitive']
+												? Core_Array::get($aHeadersLowercased, strtolower($aCondition['header'])/*, '', 'str'*/) // Нужен NULL
+												: Core_Array::get($aHeaders, $aCondition['header']/*, '', 'str'*/) // Нужен NULL
+										)
+										: NULL;
+
+									$bReturn = $this->_checkCondition($compared, $aCondition);
+
+									if ($bReturn)
 									{
-										$aParseUrl = array();
-										if (in_array($aCondition['type'], array('host', 'uri', 'get')))
+										// NULL => TRUE, TRUE => TRUE
+										isset($aMatches[$conditionId])
+											? $aMatches[$conditionId]++
+											: $aMatches[$conditionId] = 1;
+									}
+								}
+							}
+						}
+						
+						if ($bVisitorConditions)
+						{
+							$aCounter_Visits = $this->_getCounterData($hours);
+
+							foreach ($aJson as $conditionId => $aCondition)
+							{
+								if (isset($aCondition['type']) && isset($aCondition['condition']) && isset($aCondition['value'])
+									&& isset($aCondition['hours']) && isset($aCondition['times'])
+									&& $aCondition['type'] != 'header'
+								)
+								{
+									// Для каждого условия $aCondition цикл по всем $oCounter_Visit
+									foreach ($aCounter_Visits as $oCounter_Visit)
+									{
+										// Дата визита входит в ограниченный для правила диапазон
+										if (Core_Date::sql2timestamp($oCounter_Visit->datetime) > time() - $aCondition['hours'] * 3600)
 										{
-											$oCounter_Visit->Counter_Page->page != ''
-												&& $aParseUrl = @parse_url($oCounter_Visit->Counter_Page->page);
-										}
-
-										$compared = NULL;
-										
-										switch ($aCondition['type'])
-										{
-											case 'referer':
-												$compared = ''; // Default empty referer
-												$oCounter_Visit->counter_referrer_id
-													&& $compared = $oCounter_Visit->Counter_Referrer->referrer;
-											break;
-											case 'user_agent':
-												$Counter_Session = $oCounter_Visit->Counter_Session;
-												if ($Counter_Session->counter_useragent_id)
-												{
-													$compared = $Counter_Session->Counter_Useragent->useragent != ''
-														? $Counter_Session->Counter_Useragent->useragent
-														: NULL;
-												}
-											break;
-											case 'host':
-												$compared = isset($aParseUrl['host']) ? $aParseUrl['host'] : NULL;
-											break;
-											case 'uri':
-												$compared = isset($aParseUrl['path']) ? $aParseUrl['path'] : NULL;
-											break;
-											case 'ip':
-												$compared = Core_Ip::hex2ip($oCounter_Visit->ip);
-											break;
-											case 'ptr':
-												$compared = Ipaddress_Controller::instance()->gethostbyaddr(Core_Ip::hex2ip($oCounter_Visit->ip));
-											break;
-											case 'get':
-												isset($aParseUrl['query']) && $aParseUrl['query'] !== ''
-													? @parse_str($aParseUrl['query'], $aVariables)
-													: $aVariables = array();
-
-												$compared = isset($aCondition['get'])
-													? Core_Array::get($aVariables, $aCondition['get']/*, '', 'str'*/) // Нужен NULL
-													: NULL;
-											break;
-											case 'header':
-												$compared = isset($aCondition['header'])
-													? (
-														// 'header_case_sensitive' since 7.1.5
-														!isset($aCondition['header_case_sensitive']) || !$aCondition['header_case_sensitive']
-															? Core_Array::get($aHeadersLowercased, strtolower($aCondition['header'])/*, '', 'str'*/) // Нужен NULL
-															: Core_Array::get($aHeaders, $aCondition['header']/*, '', 'str'*/) // Нужен NULL
-													)
-													: NULL;
-											break;
-											case 'lang':
-												$compared = $oCounter_Visit->lng;
-											break;
-											default:
-												$compared = NULL;
-										}
-
-										// NULL может проверяться в режимах содержит/не содержит
-										//if (!is_null($compared) || $aCondition['condition'] == 'like' || $aCondition['condition'] == 'not-like')
-										//{
-											if (!is_null($compared) && !in_array($aCondition['condition'], array('reg', '!reg')) && !$bCaseSensitive)
+											$aParseUrl = array();
+											if (in_array($aCondition['type'], array('host', 'uri', 'get')))
 											{
-												$compared = mb_strtolower($compared);
-												$aCondition['value'] = mb_strtolower($aCondition['value']);
+												$oCounter_Visit->Counter_Page->page != ''
+													&& $aParseUrl = @parse_url($oCounter_Visit->Counter_Page->page);
 											}
 
-											switch ($aCondition['condition'])
+											$compared = NULL;
+
+											switch ($aCondition['type'])
 											{
-												case '=':
-													if (!is_null($compared))
+												case 'referer':
+													$compared = ''; // Default empty referer
+													$oCounter_Visit->counter_referrer_id
+														&& $compared = $oCounter_Visit->Counter_Referrer->referrer;
+												break;
+												case 'user_agent':
+													$Counter_Session = $oCounter_Visit->Counter_Session;
+													if ($Counter_Session->counter_useragent_id)
 													{
-														// Не IP или IP не содержит подсеть
-														if ($aCondition['type'] != 'ip' || strpos($aCondition['value'], '/') === FALSE)
-														{
-															$bReturn = $compared == $aCondition['value'];
-														}
-														else
-														{
-															$bReturn = Ipaddress_Controller::instance()->ipCheck($compared, $aCondition['value']);
-														}
-													}
-													else
-													{
-														$bReturn = FALSE;
+														$compared = $Counter_Session->Counter_Useragent->useragent != ''
+															? $Counter_Session->Counter_Useragent->useragent
+															: NULL;
 													}
 												break;
-												case '!=':
-													if (!is_null($compared))
-													{
-														// Не IP или IP не содержит подсеть
-														if ($aCondition['type'] != 'ip' || strpos($aCondition['value'], '/') === FALSE)
-														{
-															$bReturn = $compared != $aCondition['value'];
-														}
-														else
-														{
-															$bReturn = !Ipaddress_Controller::instance()->ipCheck($compared, $aCondition['value']);
-														}
-													}
-													else
-													{
-														$bReturn = TRUE;
-													}
+												case 'host':
+													$compared = isset($aParseUrl['host']) ? $aParseUrl['host'] : NULL;
 												break;
-												case 'like':
-													$bReturn = is_scalar($compared) // NULL not scalar
-														? ($aCondition['value'] != ''
-															? mb_strpos($compared, $aCondition['value']) !== FALSE
-															: TRUE // для пустоты содержит будет TRUE
-														)
-														: FALSE; // содержит для отсутствующего значения будет FALSE
+												case 'uri':
+													$compared = isset($aParseUrl['path']) ? $aParseUrl['path'] : NULL;
 												break;
-												case 'not-like':
-													$bReturn = is_scalar($compared) // NULL not scalar
-														? ($aCondition['value'] != ''
-															? mb_strpos($compared, $aCondition['value']) === FALSE
-															: FALSE // для пустоты НЕ содержит будет FALSE
-														)
-														: TRUE; // не содержит для отсутствующего значения будет TRUE
-												break;
-												case '^':
-													$bReturn = is_scalar($compared) && $aCondition['value'] != ''
-														? mb_strpos($compared, $aCondition['value']) === 0
+												case 'ip':
+													$compared = !is_null($oCounter_Visit->ip)
+														? Core_Ip::hex2ip($oCounter_Visit->ip)
 														: FALSE;
 												break;
-												case '!^':
-													$bReturn = is_scalar($compared) && $aCondition['value'] != ''
-														? mb_strpos($compared, $aCondition['value']) !== 0
+												case 'ptr':
+													$compared = !is_null($oCounter_Visit->ip)
+														? Ipaddress_Controller::instance()->gethostbyaddr(Core_Ip::hex2ip($oCounter_Visit->ip))
 														: FALSE;
 												break;
-												case '$':
-													$bReturn = is_scalar($compared) && $aCondition['value'] != ''
-														? mb_strrpos($compared, $aCondition['value']) === (mb_strlen($compared) - mb_strlen($aCondition['value']))
-														: FALSE;
+												case 'get':
+													isset($aParseUrl['query']) && $aParseUrl['query'] !== ''
+														? @parse_str($aParseUrl['query'], $aVariables)
+														: $aVariables = array();
+
+													$compared = isset($aCondition['get'])
+														? Core_Array::get($aVariables, $aCondition['get']/*, '', 'str'*/) // Нужен NULL
+														: NULL;
 												break;
-												case '!$':
-													$bReturn = is_scalar($compared) && $aCondition['value'] != ''
-														? mb_strrpos($compared, $aCondition['value']) !== (mb_strlen($compared) - mb_strlen($aCondition['value']))
-														: FALSE;
-												break;
-												case 'reg':
-													//$pattern = '/' . preg_quote($aCondition['value'], '/') . '/' . ($bCaseSensitive ? '' : 'i');
-													$pattern = '/' . str_replace('/', '\/', $aCondition['value']) . '/' . ($bCaseSensitive ? '' : 'i');
-													$bReturn = is_scalar($compared)
-														? preg_match($pattern, $compared, $matches) > 0
-														: FALSE;
-												break;
-												case '!reg':
-													$pattern = '/' . str_replace('/', '\/', $aCondition['value']) . '/' . ($bCaseSensitive ? '' : 'i');
-													$bReturn = is_scalar($compared)
-														? preg_match($pattern, $compared, $matches) == 0
-														: FALSE;
+												/*case 'header':
+												break;*/
+												case 'lang':
+													$compared = $oCounter_Visit->lng;
 												break;
 												default:
-													$bReturn = FALSE;
+													$compared = NULL;
 											}
+
+											$bReturn = $this->_checkCondition($compared, $aCondition);
 
 											if ($bReturn)
 											{
@@ -448,11 +397,11 @@ class Ipaddress_Visitor_Filter_Controller
 													? $aMatches[$conditionId]++
 													: $aMatches[$conditionId] = 1;
 											}
-										//}
+										}
 									}
 								}
-							}
-						} // /foreach $aJson
+							} // /foreach $aJson
+						}
 
 						if (count($aMatches))
 						{
@@ -516,6 +465,121 @@ class Ipaddress_Visitor_Filter_Controller
 		$this->clearCacheGetCounterData();
 
 		return $bBlocked === TRUE;
+	}
+
+	/**
+	 * Check Condition
+	 * @param mixed $compared
+	 * @param array $aCondition
+	 * @return boolean
+	 */
+	protected function _checkCondition($compared, $aCondition)
+	{
+		$bCaseSensitive = isset($aCondition['case_sensitive']) && $aCondition['case_sensitive'] == 1;
+
+		// NULL может проверяться в режимах содержит/не содержит
+		//if (!is_null($compared) || $aCondition['condition'] == 'like' || $aCondition['condition'] == 'not-like')
+		//{
+		if (!is_null($compared) && !in_array($aCondition['condition'], array('reg', '!reg')) && !$bCaseSensitive)
+		{
+			$compared = mb_strtolower($compared);
+			$aCondition['value'] = mb_strtolower($aCondition['value']);
+		}
+
+		switch ($aCondition['condition'])
+		{
+			case '=':
+				if (!is_null($compared))
+				{
+					// Не IP (из Visitor или REMOTE_ADDR) или IP не содержит подсеть
+					if ($aCondition['type'] != 'ip' && ($aCondition['type'] != 'header' || $aCondition['header'] != 'REMOTE_ADDR')
+						|| strpos($aCondition['value'], '/') === FALSE
+					)
+					{
+						$bReturn = $compared == $aCondition['value'];
+					}
+					else
+					{
+						$bReturn = Ipaddress_Controller::instance()->ipCheck($compared, $aCondition['value']);
+					}
+				}
+				else
+				{
+					$bReturn = FALSE;
+				}
+			break;
+			case '!=':
+				if (!is_null($compared))
+				{
+					// Не IP или IP не содержит подсеть
+					if ($aCondition['type'] != 'ip' || strpos($aCondition['value'], '/') === FALSE)
+					{
+						$bReturn = $compared != $aCondition['value'];
+					}
+					else
+					{
+						$bReturn = !Ipaddress_Controller::instance()->ipCheck($compared, $aCondition['value']);
+					}
+				}
+				else
+				{
+					$bReturn = TRUE;
+				}
+			break;
+			case 'like':
+				$bReturn = is_scalar($compared) // NULL not scalar
+					? ($aCondition['value'] != ''
+						? mb_strpos($compared, $aCondition['value']) !== FALSE
+						: TRUE // для пустоты содержит будет TRUE
+					)
+					: FALSE; // содержит для отсутствующего значения будет FALSE
+			break;
+			case 'not-like':
+				$bReturn = is_scalar($compared) // NULL not scalar
+					? ($aCondition['value'] != ''
+						? mb_strpos($compared, $aCondition['value']) === FALSE
+						: FALSE // для пустоты НЕ содержит будет FALSE
+					)
+					: TRUE; // не содержит для отсутствующего значения будет TRUE
+			break;
+			case '^':
+				$bReturn = is_scalar($compared) && $aCondition['value'] != ''
+					? mb_strpos($compared, $aCondition['value']) === 0
+					: FALSE;
+			break;
+			case '!^':
+				$bReturn = is_scalar($compared) && $aCondition['value'] != ''
+					? mb_strpos($compared, $aCondition['value']) !== 0
+					: FALSE;
+			break;
+			case '$':
+				$bReturn = is_scalar($compared) && $aCondition['value'] != ''
+					? mb_strrpos($compared, $aCondition['value']) === (mb_strlen($compared) - mb_strlen($aCondition['value']))
+					: FALSE;
+			break;
+			case '!$':
+				$bReturn = is_scalar($compared) && $aCondition['value'] != ''
+					? mb_strrpos($compared, $aCondition['value']) !== (mb_strlen($compared) - mb_strlen($aCondition['value']))
+					: FALSE;
+			break;
+			case 'reg':
+				//$pattern = '/' . preg_quote($aCondition['value'], '/') . '/' . ($bCaseSensitive ? '' : 'i');
+				$pattern = '/' . str_replace('/', '\/', $aCondition['value']) . '/' . ($bCaseSensitive ? '' : 'i');
+				$bReturn = is_scalar($compared)
+					? preg_match($pattern, $compared, $matches) > 0
+					: FALSE;
+			break;
+			case '!reg':
+				$pattern = '/' . str_replace('/', '\/', $aCondition['value']) . '/' . ($bCaseSensitive ? '' : 'i');
+				$bReturn = is_scalar($compared)
+					? preg_match($pattern, $compared, $matches) == 0
+					: FALSE;
+			break;
+			default:
+				$bReturn = FALSE;
+		}
+
+		return $bReturn;
 	}
 
 	/**

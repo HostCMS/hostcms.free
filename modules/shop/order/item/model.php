@@ -183,7 +183,7 @@ class Shop_Order_Item_Model extends Core_Entity
 			$iShopItemId = $this->Shop_Item->id;
 
 			echo sprintf(
-				'<a href="%s" target="_blank">%s <i class="fa fa-external-link"></i></a>',
+				'<a href="%s" target="_blank">%s <i class="fa-solid fa-arrow-up-right-from-square small"></i></a>',
 				htmlspecialchars($oAdmin_Form_Controller->getAdminActionLoadHref($sShopItemPath, 'edit', NULL, 1, $iShopItemId)),
 				htmlspecialchars($this->name)
 			);
@@ -221,7 +221,7 @@ class Shop_Order_Item_Model extends Core_Entity
 				}
 				else
 				{
-					return '<i class="fa fa-file-text-o"></i>';
+					return '<i class="fa-regular fa-file-lines"></i>';
 				}
 			}
 		}
@@ -464,11 +464,11 @@ class Shop_Order_Item_Model extends Core_Entity
 	 */
 	protected $_showXmlMedia = FALSE;
 
-    /**
-     * Show properties in XML
-     * @param bool $showXmlMedia
-     * @return self
-     */
+	/**
+	 * Show properties in XML
+	 * @param bool $showXmlMedia
+	 * @return self
+	 */
 	public function showXmlMedia($showXmlMedia = TRUE)
 	{
 		$this->_showXmlMedia = $showXmlMedia;
@@ -492,7 +492,7 @@ class Shop_Order_Item_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event shop_order_item.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')
@@ -709,7 +709,7 @@ class Shop_Order_Item_Model extends Core_Entity
 		{
 			ob_start();
 			?>
-			<i class="fa fa-code shop-order-item-codes codes-<?php echo $this->id?>"></i>
+			<i class="fa-solid fa-code shop-order-item-codes codes-<?php echo $this->id?>"></i>
 			<script>
 				$(function() {
 					$('.codes-<?php echo $this->id?>').on('click', function(){

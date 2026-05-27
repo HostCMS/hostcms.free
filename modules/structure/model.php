@@ -474,12 +474,12 @@ class Structure_Model extends Core_Entity
 			->execute();
 	}*/
 
-    /**
-     * Backend callback method
-     * @param Admin_Form_Field_Model $oAdmin_Form_Field
-     * @param Admin_Form_Controller $oAdmin_Form_Controller
-     * @throws Core_Exception
-     */
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @throws Core_Exception
+	 */
 	public function nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$object = $this->shortcut_id
@@ -921,11 +921,11 @@ class Structure_Model extends Core_Entity
 	 */
 	protected $_showXmlMedia = FALSE;
 
-    /**
-     * Show properties in XML
-     * @param bool $showXmlMedia
-     * @return self
-     */
+	/**
+	 * Show properties in XML
+	 * @param bool $showXmlMedia
+	 * @return self
+	 */
 	public function showXmlMedia($showXmlMedia = TRUE)
 	{
 		$this->_showXmlMedia = $showXmlMedia;
@@ -949,7 +949,7 @@ class Structure_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event structure.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')
@@ -998,11 +998,11 @@ class Structure_Model extends Core_Entity
 		if ($this->_showXmlMedia && Core::moduleIsActive('media'))
 		{
 			$aEntities = Media_Item_Controller::getValues($this);
-			
+
 			Core_Event::notify($this->_modelName . '.onBeforeAddMediaItems', $this, array($aEntities));
 			$eventResult = Core_Event::getLastReturn();
 			is_array($eventResult) && $aEntities = $eventResult;
-			
+
 			foreach ($aEntities as $oEntity)
 			{
 				$oMedia_Item = $oEntity->Media_Item;
@@ -1289,6 +1289,21 @@ class Structure_Model extends Core_Entity
 			Core_Cache::instance(Core::$mainConfig['defaultCache'])
 				->deleteByTag('structure_' . $this->id)
 				->deleteByTag('structure_' . $this->parent_id);
+
+			// Static cache
+			$oSite = $this->Site;
+			if ($oSite->html_cache_use)
+			{
+				$oSiteAlias = $oSite->getCurrentAlias();
+				if ($oSiteAlias)
+				{
+					$url = $oSiteAlias->name
+						. $this->getPath();
+
+					$oCache_Static = Core_Cache::instance('static');
+					$oCache_Static->delete($url);
+				}
+			}
 		}
 
 		return $this;
@@ -1503,27 +1518,32 @@ class Structure_Model extends Core_Entity
 	{
 		if ($this->shortcut_id)
 		{
-			return '<i class="fa-solid fa-link"></i>';
+			return '<i class="fa-solid fa-link" title="' . htmlspecialchars(Core::_('Structure.shortcut')) . '"></i>';
 		}
 
 		switch($this->type)
 		{
 			case 0:
-				$icon = 'fa fa-file-o';
+				$icon = 'fa-regular fa-file';
+				$caption = Core::_('Structure.static_page');
 			break;
 			case 1:
-				$icon = 'fa fa-file-code';
+				$icon = 'fa-solid fa-code';
+				$caption = Core::_('Structure.dynamic_page');
 			break;
 			case 2:
-				$icon = 'fa fa-list-alt';
+				$icon = 'fa-solid fa-layer-group';
+				$caption = Core::_('Structure.typical_dynamic_page');
 			break;
 			case 3:
 				$icon = 'fa-solid fa-link';
+				$caption = Core::_('Structure.link');
 			break;
 			default:
 				$icon = '—';
+				$caption = '';
 		}
 
-		return '<i class="' . $icon . '">';
+		return '<i class="' . $icon . '" title="' . htmlspecialchars($caption) . '">';
 	}
 }

@@ -248,12 +248,12 @@ class Admin_Form_Action_Controller_Type_Shortcut extends Admin_Form_Action_Contr
 		}
 		else
 		{
-			$destinationId = Core_Array::getPost('destinationId');
+			$destinationId = Core_Array::getPost('destinationId', 0, 'int');
 
-			if (is_null($destinationId))
+			/*if (is_null($destinationId))
 			{
 				throw new Core_Exception("destinationId is NULL");
-			}
+			}*/
 
 			$this->_object->shortcut($destinationId);
 		}

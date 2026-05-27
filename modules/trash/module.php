@@ -20,9 +20,9 @@ class Trash_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 	/**
 	 * Module name
@@ -64,7 +64,7 @@ class Trash_Module extends Core_Module_Abstract
 			array(
 				'sorting' => 260,
 				'block' => 3,
-				'ico' => 'fa fa-trash-o',
+				'ico' => 'fa-regular fa-trash-can',
 				'name' => Core::_('trash.menu'),
 				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/trash/index.php"),
 				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/trash/index.php'}); return false")

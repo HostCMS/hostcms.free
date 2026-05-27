@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -52,7 +52,7 @@ if (is_null(Core_Array::getGet('hideMenu')))
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Admin_Form.add'))
-				->icon('fa fa-plus')
+				->icon('fa-solid fa-plus')
 				->class('btn btn-gray')
 				->onclick(
 					$oAdmin_Form_Controller->getAdminActionModalLoad(array('path' => $oAdmin_Form_Controller->getPath(), 'action' => 'edit', 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => 0, 'additionalParams' => $additionalParams, 'width' => '90%'))

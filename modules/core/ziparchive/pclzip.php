@@ -94,15 +94,15 @@ class Core_ZipArchive_Pclzip
 	protected $_tmpDir;
 
 	/**
-     * Number of files (emulate ZipArchive::$numFiles)
-     * @var int
-     */
+	 * Number of files (emulate ZipArchive::$numFiles)
+	 * @var int
+	 */
     public $numFiles = 0;
 
-    /**
-     * Archive filename (emulate ZipArchive::$filename)
-     * @var string
-     */
+	/**
+	 * Archive filename (emulate ZipArchive::$filename)
+	 * @var string
+	 */
     public $filename;
 
 	public $context;
@@ -178,7 +178,8 @@ class Core_ZipArchive_Pclzip
 	public function addFile($filename, $localname = NULL)
 	{
 		$realpathFilename = realpath($filename);
-		if ($realpathFilename !== FALSE) {
+		if ($realpathFilename !== FALSE)
+		{
 			$filename = $realpathFilename;
 		}
 
@@ -186,7 +187,8 @@ class Core_ZipArchive_Pclzip
 		$localnameParts = pathinfo($localname);
 
 		$tempFile = FALSE;
-		if ($filenameParts['basename'] != $localnameParts['basename']) {
+		if ($filenameParts['basename'] != $localnameParts['basename'])
+		{
 			$tempFile = TRUE;
 			$temppath = $this->_tmpDir . DIRECTORY_SEPARATOR . $localnameParts['basename'];
 			copy($filename, $temppath);
@@ -199,7 +201,8 @@ class Core_ZipArchive_Pclzip
 
 		$res = $this->_oPclZip->add($filename, PCLZIP_OPT_REMOVE_PATH, $pathRemoved, PCLZIP_OPT_ADD_PATH, $pathAdded);
 
-		if ($tempFile) {
+		if ($tempFile)
+		{
 			// Remove temp file, if created
 			unlink($this->_tmpDir . DIRECTORY_SEPARATOR . $localnameParts['basename']);
 		}
@@ -276,6 +279,41 @@ class Core_ZipArchive_Pclzip
 		}
 
 		return ($listIndex > -1) ? $listIndex : FALSE;
+	}
+
+	/**
+	 * Returns the details of an entry defined by its name.
+	 *
+	 * @param string $name Name of the entry
+	 * @param int $flags The flags argument specifies how the name lookup should be done.
+	 * @return array|false Returns an array containing the entry details or FALSE on failure.
+	 */
+	public function statName($name, $flags = 0)
+	{
+		// PclZip locate name already performs case-insensitive search in your implementation
+		$index = $this->pclzipLocateName($name);
+
+		if ($index !== FALSE) {
+			$list = $this->_oPclZip->listContent();
+
+			if (isset($list[$index])) {
+				$item = $list[$index];
+
+				return array(
+					'name' => isset($item['filename']) ? $item['filename'] : $name,
+					'index' => $index,
+					'crc' => isset($item['crc']) ? $item['crc'] : 0,
+					'size' => isset($item['size']) ? $item['size'] : 0,
+					'mtime' => isset($item['mtime']) ? $item['mtime'] : 0,
+					'comp_size' => isset($item['compressed_size']) ? $item['compressed_size'] : 0,
+					// PclZip doesn't directly return the compression method constant,
+					// so we fallback to assuming DEFLATE if size changed, otherwise STORE
+					'comp_method' => (isset($item['compressed_size']) && isset($item['size']) && $item['compressed_size'] < $item['size']) ? self::CM_DEFLATE : self::CM_STORE,
+				);
+			}
+		}
+
+		return FALSE;
 	}
 
 	 /**

@@ -16,16 +16,16 @@
  */
 class Smarty_Internal_Compile_Private_Registered_Block extends Smarty_Internal_Compile_Private_Block_Plugin
 {
-    /**
-     * Setup callback, parameter array and nocache mode
-     *
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler
-     * @param array                                 $_attr attributes
-     * @param string                                $tag
-     * @param null                                  $function
-     *
-     * @return array
-     */
+	/**
+	 * Setup callback, parameter array and nocache mode
+	 *
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler
+	 * @param array                                 $_attr attributes
+	 * @param string                                $tag
+	 * @param null                                  $function
+	 *
+	 * @return array
+	 */
     public function setup(Smarty_Internal_TemplateCompilerBase $compiler, $_attr, $tag, $function)
     {
         if (isset($compiler->smarty->registered_plugins[ Smarty::PLUGIN_BLOCK ][ $tag ])) {

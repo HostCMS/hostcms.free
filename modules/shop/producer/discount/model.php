@@ -60,7 +60,7 @@ class Shop_Producer_Discount_Model extends Core_Entity
 	/**
 	 * Get element by discount id
 	 * @param int $iDiscountId id
-	 * @return Shop_Discount|NULL
+	 * @return Shop_Discount_Model|NULL
 	 */
 	public function getByDiscountId($iDiscountId)
 	{
@@ -248,7 +248,7 @@ class Shop_Producer_Discount_Model extends Core_Entity
 	 */
 	public function imgBackend()
 	{
-		return '<i class="fa fa-industry icon-separator"></i>';
+		return '<i class="fa-solid fa-industry icon-separator info"></i>';
 	}
 
 	/**

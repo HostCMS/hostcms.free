@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Discount cards',
@@ -37,5 +37,8 @@ return array(
 	'backendWriteoffSuccess' => 'Bonuses debited successfull!',
 	'active' => 'Active',
 	'changeActive_success' => 'Information changed successfully',
-	'card_already_exist' => 'User already has a discountcard'
+	'card_already_exist' => 'User already has a discountcard',
+	'rebuild_levels' => 'Recalculate levels',
+	'rebuildLevels_success' => 'Levels recalculated successfully',
+	'update_levels' => '%s levels recalculated',
 );

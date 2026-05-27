@@ -44,7 +44,7 @@ class Seo_Driver_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event seo_driver.onBeforeRedeclaredDelete
+	 * @hostcms-event seo_driver.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

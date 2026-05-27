@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Ipaddress
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Ipaddress_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -301,7 +301,7 @@ class Ipaddress_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->onclick("res = confirm('" . Core::_('Ipaddress.confirm_ban') . "'); if (res) {" . $onclick . " } else { return false }")
 						->add(
 							Core_Html_Entity::factory('Span')
-								->class('fa fa-ban darkorange')
+								->class('fa-solid fa-ban darkorange')
 						)
 				);
 		}

@@ -319,7 +319,7 @@ class Tag_Model extends Core_Entity
 	/**
 	 * Check if there another tag with this name is
 	 * @return Core_Entity
-     */
+	 */
 	public function update()
 	{
 		!$this->deleted && $this->_setPath()
@@ -513,7 +513,7 @@ class Tag_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event tag.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')

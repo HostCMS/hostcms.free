@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 
 require_once('../../../../bootstrap.php');
@@ -39,11 +39,11 @@ if ($document_id)
 	$oAdmin_Form_Entity_Menus->add(
 		Admin_Form_Entity::factory('Menu')
 			->name(Core::_('Shop_Document_Relation.documents'))
-			->icon('fa fa-plus')
+			->icon('fa-solid fa-plus')
 			->add(
 				Admin_Form_Entity::factory('Menu')
 					->name(Core::_('Shop_Document_Relation.add_purchaseorder'))
-					->icon('fa fa-plus')
+					->icon('fa-solid fa-plus')
 					->onclick(
 						// $oAdmin_Form_Controller->getAdminActionModalLoad($addPath, NULL, 'modal', 0, 0, "shop_id={$shop_id}&document_id={$document_id}&type=6")
 						$oAdmin_Form_Controller->getAdminActionModalLoad(array('path' => $addPath, 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => 0, 'additionalParams' => "shop_id={$shop_id}&document_id={$document_id}&type=6", 'width' => '90%'))
@@ -52,7 +52,7 @@ if ($document_id)
 			->add(
 				Admin_Form_Entity::factory('Menu')
 					->name(Core::_('Shop_Document_Relation.add_shop_warehouse_invoice'))
-					->icon('fa fa-plus')
+					->icon('fa-solid fa-plus')
 					->onclick(
 						// $oAdmin_Form_Controller->getAdminActionModalLoad($addPath, NULL, 'modal', 0, 0, "shop_id={$shop_id}&document_id={$document_id}&type=7")
 						$oAdmin_Form_Controller->getAdminActionModalLoad(array('path' => $addPath, 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => 0, 'additionalParams' => "shop_id={$shop_id}&document_id={$document_id}&type=7", 'width' => '90%'))
@@ -61,7 +61,7 @@ if ($document_id)
 			->add(
 				Admin_Form_Entity::factory('Menu')
 					->name(Core::_('Shop_Document_Relation.add_shop_warehouse_supply'))
-					->icon('fa fa-plus')
+					->icon('fa-solid fa-plus')
 					->onclick(
 						// $oAdmin_Form_Controller->getAdminActionModalLoad($addPath, NULL, 'modal', 0, 0, "shop_id={$shop_id}&document_id={$document_id}&type=8")
 						$oAdmin_Form_Controller->getAdminActionModalLoad(array('path' => $addPath, 'operation' => 'modal', 'datasetKey' => 0, 'datasetValue' => 0, 'additionalParams' => "shop_id={$shop_id}&document_id={$document_id}&type=8", 'width' => '90%'))

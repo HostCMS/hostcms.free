@@ -27,7 +27,7 @@ class Core_Webauthn_Format_AndroidKey extends Core_Webauthn_Format
 	/**
 	 * Get public key for verification
 	 * @return false|OpenSSLAsymmetricKey
-     */
+	 */
 	protected function _doGetPublicKey()
 	{
 		$x5c = $this->_getX5cCertificate(0);

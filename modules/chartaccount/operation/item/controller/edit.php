@@ -232,7 +232,7 @@ class Chartaccount_Operation_Item_Controller_Edit extends Admin_Form_Action_Cont
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name
 	 * @return bool
-     */
+	 */
 	public function execute($operation = NULL)
 	{
 		$chartaccount_operation_id = Core_Array::getGet('chartaccount_operation_id', 0, 'int');

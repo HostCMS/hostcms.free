@@ -154,36 +154,6 @@
 			return jWin;
 		},
 
-		ajaxCallbackModal: function(data) {
-			$.loadingScreen('hide');
-			if (data == null || data.form_html == null) {
-				alert('AJAX response error.');
-				return;
-			}
-
-			const jObject = $(this);
-			const jBody = jObject.find(".modal-body");
-
-			if (data.form_html !== '') {
-				$.beforeContentLoad(jBody);
-				$.insertContent(jBody, data.form_html);
-				$.afterContentLoad(jBody, data);
-			}
-
-			let jMessage = jBody.find("#id_message");
-
-			if (jMessage.length === 0) {
-				jMessage = $("<div>").attr('id', 'id_message');
-				jBody.prepend(jMessage);
-			}
-
-			jMessage.empty().html(data.error);
-
-			if (data.title) {
-				jObject.find(".modal-title").text(data.title);
-			}
-		},
-
 		modalLoad: function(settings) {
 			settings = $.requestSettings(settings);
 
@@ -238,8 +208,9 @@
 
 			const dialog = bootbox.dialog({
 				message: ' ', // Заполняется позже
-				title: $.escapeHtml(settings.title),
+				title: $.escapeHtml(settings.title) + ' ',
 				className: settings.className,
+
 				onEscape: function() {
 					arguments[0].stopImmediatePropagation();
 				}
@@ -277,7 +248,7 @@
 				: settings.width;
 
 			dialog.find('.modal-dialog')
-				.data({ 'originalWidth': settings.width ? settings.width : widthModalDialog })
+				.data({'originalWidth': settings.width ? settings.width : widthModalDialog})
 				.width(widthModalDialog);
 
 			if (typeof settings.height !== 'undefined') {
@@ -371,6 +342,368 @@
 			const $this = $(this);
 			$this.val($this.val() + data);
 		},
+		bookmarksPrepare: function() {
+			$.refreshBookmarksList();
+
+			var jBookmarksListBox = $('.navbar-account #bookmarksListBox');
+
+			jBookmarksListBox.on({
+				'click': function(event) {
+					event.stopPropagation();
+				},
+				'touchstart': function() {
+					$(this).data({
+						'isTouchStart': true
+					});
+				}
+			});
+
+			// Показ списка закладок
+			$('.navbar li#bookmarks').on('shown.bs.dropdown', function() {
+				$.setBookmarksSlimScroll();
+
+				$('.scroll-bookmarks .bookmarks-list').sortable({
+					connectWith: '.bookmarks-list',
+					items: '.bookmark-item',
+					scroll: false,
+					placeholder: 'placeholder',
+					tolerance: 'pointer',
+					start: function(evt, ui) {
+						var link = ui.item.find('a');
+						link.data('click-event', link.attr('onclick'));
+						link.attr('onclick', '');
+					},
+					stop: function(evt, ui) {
+						setTimeout(function() {
+							var link = ui.item.find('a');
+							link.attr('onclick', link.data('click-event'));
+						}, 200);
+
+						setTimeout(function() {
+							var aIds = $('.bookmarks-list li.bookmark-item').map(function() {
+								return $(this).attr('id').split('-')[1];
+							}).get();
+
+							$.ajax({
+								url: hostcmsBackend + '/user/index.php',
+								type: 'POST',
+								data: {
+									'sortableBookmarks': 1,
+									'bookmarks': aIds
+								},
+								dataType: 'json',
+								error: function() {},
+								success: function(result) {
+									if (result.status == 'success') {
+										$.removeLocalStorageItem('bookmarks');
+										// Принудительно обновляем список (сброс таймера внутри)
+										$.refreshBookmarksList(true);
+									}
+								}
+							});
+						}, 500);
+					}
+				}).disableSelection();
+			});
+		},
+
+		refreshBookmarksCallback: function(resultData) {
+			if (typeof resultData['Bookmarks'] != 'undefined') {
+				var jEventUl = $('.navbar-account #bookmarksListBox .scroll-bookmarks > ul');
+
+				var $addBtn = $('li[id="bookmark-0"]', jEventUl).detach();
+				jEventUl.empty();
+
+				if (resultData['Bookmarks'].length) {
+					$addBtn.hide();
+					var docFragment = document.createDocumentFragment();
+
+					$.each(resultData['Bookmarks'], function(index, event) {
+						docFragment.appendChild($.createBookmarkElement(event));
+					});
+
+					jEventUl.append(docFragment);
+					jEventUl.append($addBtn);
+				} else {
+					$addBtn.show();
+					jEventUl.append($addBtn);
+				}
+			}
+		},
+
+		createBookmarkElement: function(oBookmark) {
+			var li = document.createElement('li');
+			li.id = 'bookmark-' + oBookmark['id'];
+			li.className = 'bookmark-item';
+
+			var href = oBookmark['href'].length ? $.escapeHtml(oBookmark['href']) : '#';
+			var onclick = oBookmark['onclick'].length ? $.escapeHtml(oBookmark['onclick']) : '';
+
+			li.innerHTML = '<a href="' + href + '" onclick="' + onclick + '">' +
+				'<div class="clearfix notification-bookmark">' +
+				'<div class="notification-icon">' +
+				'<i class="' + $.escapeHtml(oBookmark['ico']) + ' bg-darkorange white"></i>' +
+				'</div>' +
+				'<div class="notification-body">' +
+				'<span class="title">' + $.escapeHtml(oBookmark['name']) + '</span>' +
+				'<span class="description">' + $.escapeHtml(oBookmark['href']) + '</span>' +
+				'</div>' +
+				'<div class="notification-extra">' +
+				'<i class="fa-solid fa-xmark gray bookmark-delete"></i>' +
+				'</div>' +
+				'</div>' +
+				'</a>';
+
+			// Навешиваем обработчик удаления через jQuery на созданный элемент
+			$(li).find('.bookmark-delete').on('click', function(e) {
+				e.stopPropagation();
+				e.preventDefault();
+				$.removeUserBookmark({
+					title: $.escapeHtml(oBookmark['remove-title']),
+					submit: $.escapeHtml(oBookmark['remove-submit']),
+					cancel: $.escapeHtml(oBookmark['remove-cancel']),
+					bookmark_id: oBookmark['id']
+				});
+			});
+
+			return li;
+		},
+
+		refreshBookmarksList: function(force) {
+			var jBookmarksListBox = $('.navbar-account #bookmarksListBox');
+			if (!jBookmarksListBox.length) return;
+
+			// Если вызвано принудительно, сбрасываем текущий таймер ожидания
+			if (force && jBookmarksListBox.data('timerId')) {
+				clearTimeout(jBookmarksListBox.data('timerId'));
+			}
+
+			var data = $.getData({});
+			var bLocalStorage = $.storageAvailable('localStorage');
+			var bNeedsRequest = false;
+
+			if (bLocalStorage) {
+				try {
+					var storage = localStorage.getItem('bookmarks'),
+						storageObj = storage ? JSON.parse(storage) : {
+							userId: 0,
+							expired_in: 0
+						};
+
+					if (jBookmarksListBox.data('userId') != storageObj['userId'] || Date.now() > storageObj['expired_in']) {
+						bNeedsRequest = true;
+					} else {
+						$.refreshBookmarksCallback(storageObj);
+					}
+				} catch (e) {
+					bNeedsRequest = true;
+				}
+			} else {
+				bNeedsRequest = true;
+			}
+
+			var scheduleNext = function() {
+				var timerId = setTimeout($.refreshBookmarksList, 120000);
+				jBookmarksListBox.data('timerId', timerId);
+			};
+
+			if (bNeedsRequest) {
+				$.ajax({
+					url: hostcmsBackend + '/index.php?ajaxWidgetLoad&moduleId=' + jBookmarksListBox.data('moduleId') + '&type=85',
+					type: 'POST',
+					data: data,
+					dataType: 'json',
+					error: function() {
+						scheduleNext();
+					},
+					success: function(resultData) {
+						if (bLocalStorage) {
+							resultData['expired_in'] = Date.now() + 120000;
+							try {
+								localStorage.setItem('bookmarks', JSON.stringify(resultData));
+							} catch (e) {
+								console.log('localStorage error: ' + e);
+							}
+						}
+						$.refreshBookmarksCallback(resultData);
+						scheduleNext();
+					}
+				});
+			} else {
+				scheduleNext();
+			}
+		},
+
+		setBookmarksSlimScroll: function() {
+			var jSlimScrollBar = $('#bookmarksListBox .slimScrollBar'),
+				slimScrollBarData = !jSlimScrollBar.data() ? {
+					'isMousedown': false
+				} : jSlimScrollBar.data(),
+				jScrollBookmarks = $('#bookmarksListBox .scroll-bookmarks');
+
+			if ($('#bookmarksListBox > .slimScrollDiv').length) {
+				jScrollBookmarks.slimscroll({
+					destroy: true
+				});
+				jScrollBookmarks.attr('style', '');
+			}
+
+			jScrollBookmarks.slimscroll({
+				height: $('.navbar-account #bookmarksListBox .scroll-bookmarks > ul li[id != "bookmark-0"]').length ? ($(window).height() * 0.7) : '55px',
+				color: 'rgba(0, 0, 0, 0.3)',
+				size: '5px',
+				wheelStep: 5
+			});
+
+			$('#bookmarksListBox .slimScrollBar')
+				.data(slimScrollBarData)
+				.on({
+					'mousedown': function() {
+						$(this).data('isMousedown', true);
+					},
+					'mouseenter': function() {
+						$(this).css('width', '8px');
+					},
+					'mouseout': function() {
+						!$(this).data('isMousedown') && $(this).css('width', '5px');
+					}
+				});
+		},
+
+		addBookmark: function(oBookmark, jBox) {
+			// Legacy support if called directly
+			jBox.append($.createBookmarkElement(oBookmark));
+			if ($('.navbar li#notification-bookmark').hasClass('open')) {
+				!$('li', jBox).length && $.setBookmarksSlimScroll();
+			}
+		},
+
+		addUserBookmark: function(settings) {
+			bootbox.prompt({
+				title: settings.title,
+				value: settings.value,
+				className: 'add-bookmark-form',
+				buttons: {
+					confirm: {
+						label: settings.submit,
+						className: 'btn-palegreen add-bookmark-btn'
+					},
+					cancel: {
+						label: settings.cancel,
+						className: 'btn-default'
+					}
+				},
+				callback: function(name) {
+					if (name) {
+						$.ajax({
+							url: hostcmsBackend + '/user/index.php',
+							type: "POST",
+							data: {
+								'add_bookmark': 1,
+								'name': name,
+								'path': settings.path,
+								'module_id': settings.module_id
+							},
+							dataType: 'json',
+							error: function() {},
+							success: function(result) {
+								if (result.length) {
+									$.removeLocalStorageItem('bookmarks');
+									$.refreshBookmarksList(true); // Force refresh
+
+									$('li#bookmarks > a').addClass('wave in');
+									$('a#bookmark-toggler').addClass('active');
+
+									setTimeout(function() {
+										$('li#bookmarks > a').removeClass('wave in');
+									}, 5000);
+								}
+							}
+						});
+					}
+				}
+			});
+
+			$('.add-bookmark-form form').on('keypress', function(e) {
+				if (e.which == 13) {
+					$('.add-bookmark-btn').trigger('click');
+				}
+			});
+		},
+
+		removeUserBookmark: function(settings) {
+			bootbox.confirm({
+				message: settings.title,
+				className: 'delete-bookmark-form',
+				buttons: {
+					confirm: {
+						label: settings.submit,
+						className: 'btn-darkorange delete-bookmark-btn'
+					},
+					cancel: {
+						label: settings.cancel,
+						className: 'btn-default'
+					}
+				},
+				callback: function(result) {
+					if (result) {
+						$.ajax({
+							url: hostcmsBackend + '/user/index.php',
+							type: "POST",
+							data: {
+								'remove_bookmark': 1,
+								'bookmark_id': settings.bookmark_id
+							},
+							dataType: 'json',
+							error: function() {},
+							success: function(result) {
+								if (result.length && result == 'OK') {
+									$.removeLocalStorageItem('bookmarks');
+									$.refreshBookmarksList(true);
+								}
+							}
+						});
+					}
+				}
+			});
+
+			$('.delete-bookmark-form').on('keypress', function(e) {
+				if (e.which == 13) {
+					$('.delete-bookmark-btn').trigger('click');
+				}
+			});
+		},
+		refreshClock: function() {
+			var update = function() {
+				var date = new Date();
+				var minutes = date.getMinutes();
+				var hours = date.getHours();
+				$(".clock #min").html((minutes < 10 ? "0" : "") + minutes);
+				$(".clock #hours").html((hours < 10 ? "0" : "") + hours);
+			};
+			update();
+			setInterval(update, 1000);
+		},
+		blinkColon: function(workdayStatus) {
+			// Логика таймера оставлена (один таймер для двоеточия)
+			var toggle = true;
+			if ((workdayStatus == 2 || workdayStatus == 5) && !window.timerId) {
+				window.timerId = setInterval(function() {
+					$('.workday-timer .colon').css({ visibility: toggle ? 'hidden' : 'visible' });
+					toggle = !toggle;
+				}, 1000);
+			}
+
+			if ((workdayStatus != 2 && workdayStatus != 5) && window.timerId) {
+				clearInterval(window.timerId);
+				window.timerId = undefined;
+				$('.workday-timer .colon').css({ visibility: 'visible' });
+			}
+		},
+		toggleBackspace: function() {
+			var phone = $('.phone-number').val();
+			phone.length ? $('.backspace-button').removeClass('hidden') : $('.backspace-button').addClass('hidden');
+		}
 	});
 
 	$.fn.extend({
@@ -440,7 +773,7 @@ function navbarHeaderCustomization(withoutAnimation) { // eslint-disable-line
 				}
 
 				if (!$navbarAccount.find('#leftNavbarArrow').length) {
-					$navbarAccount.append('<div id="leftNavbarArrow"><a href="#"><i class="icon fa fa-chevron-left"></i></a></div>');
+					$navbarAccount.append('<div id="leftNavbarArrow"><a href="#"><i class="icon fa-solid fa-chevron-left"></i></a></div>');
 					leftNavbarArrow = $navbarAccount.find('#leftNavbarArrow');
 					leftNavbarArrowIsExist = true;
 				}
@@ -524,16 +857,22 @@ function setResizableAdminTableTh() {
 
 	$visibleHeaders.width('');
 
-	// Оптимизация: чтение DOM вне цикла или минимизация перекомпоновки
 	$visibleHeaders.each(function() {
-		const $this = $(this);
-		const wideData = $this.data('wide');
+		const $this = $(this),
+			wideData = $this.data('wide'),
+			expandClass = 'fa-up-right-and-down-left-from-center',
+			compressClass = 'fa-down-left-and-up-right-to-center';
 
 		if (wideData > 0) {
-			$this.find('i').removeClass('fa-expand').addClass('fa-compress');
+			$this.find('i')
+				.removeClass(expandClass)
+				.addClass(compressClass);
+
 			$this.data('prev-width', $this.outerWidth()).css('width', wideData);
 		} else {
-			$this.find('i').addClass('fa-expand').removeClass('fa-compress');
+			$this.find('i')
+				.addClass(expandClass)
+				.removeClass(compressClass);
 
 			let removeResizable = true;
 			const currentWidth = $this.width();
@@ -555,7 +894,7 @@ function setResizableAdminTableTh() {
 					'position': 'absolute'
 				}).text(text).appendTo('body');
 
-				const thContentRealWidth = $testSpan.width() + 25; // +25 запас на иконки/сортування
+				const thContentRealWidth = $testSpan.width() + 25; // +25 запас на иконки/сортировку
 				$testSpan.remove();
 
 				if (thContentRealWidth > currentWidth || thMinContentWidth > currentWidth) {
@@ -569,7 +908,7 @@ function setResizableAdminTableTh() {
 					$this.removeClass('resizable-th').find('i.th-width-toggle').remove();
 				}
 			} else if (!removeResizable) {
-				$this.addClass('resizable-th').append('<i class="th-width-toggle fa fa-expand gray"></i>');
+				$this.addClass('resizable-th').append('<i class="th-width-toggle fa-solid ' + expandClass + ' gray"></i>');
 			}
 		}
 	});
@@ -838,7 +1177,7 @@ function setTableWithFixedHeaderAndLeftColumn() { // eslint-disable-line
 
 function setSlimScrolling4SidebarMenu() {
 	if (!$('.page-sidebar').hasClass('menu-compact')) {
-		const position = (readCookie("rtl-support") || location.pathname === "/index-rtl-fa.html" || location.pathname === "/index-rtl-ar.html") ? 'right' : 'left';
+		const position = /*(readCookie("rtl-support") || location.pathname === "/index-rtl-fa.html" || location.pathname === "/index-rtl-ar.html") ? 'right' :*/ 'left';
 		$('.sidebar-menu').slimscroll({
 			position: position,
 			size: '3px',
@@ -923,7 +1262,7 @@ function cSelectFilter(windowId, sObjectId) { // eslint-disable-line
 		const self = this;
 		const $icon = $("#" + this.windowId + " #filter_" + this.sObjectId).prev('span').find('i');
 
-		$icon.removeClass('fa-search').addClass('fa-spinner fa-spin');
+		$icon.removeClass('fa-magnifying-glass').addClass('fa-spinner fa-spin');
 
 		// Debounce logic moved to caller or handled here by simple timeout
 		if (this.timeout) clearTimeout(this.timeout);
@@ -971,7 +1310,7 @@ function cSelectFilter(windowId, sObjectId) { // eslint-disable-line
 					self.oCurrentSelectObject.trigger('change');
 				}
 
-				$icon.removeClass('fa-spinner fa-spin').addClass('fa-search');
+				$icon.removeClass('fa-spinner fa-spin').addClass('fa-magnifying-glass');
 			}
 		}, 100);
 	};

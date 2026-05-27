@@ -18,26 +18,26 @@
  */
 class Smarty_Internal_ParseTree_Template extends Smarty_Internal_ParseTree
 {
-    /**
-     * Array of template elements
-     *
-     * @var array
-     */
+	/**
+	 * Array of template elements
+	 *
+	 * @var array
+	 */
     public $subtrees = array();
 
-    /**
-     * Create root of parse tree for template elements
-     */
+	/**
+	 * Create root of parse tree for template elements
+	 */
     public function __construct()
     {
     }
 
-    /**
-     * Append buffer to subtree
-     *
-     * @param \Smarty_Internal_Templateparser $parser
-     * @param Smarty_Internal_ParseTree       $subtree
-     */
+	/**
+	 * Append buffer to subtree
+	 *
+	 * @param \Smarty_Internal_Templateparser $parser
+	 * @param Smarty_Internal_ParseTree       $subtree
+	 */
     public function append_subtree(Smarty_Internal_Templateparser $parser, Smarty_Internal_ParseTree $subtree)
     {
         if (!empty($subtree->subtrees)) {
@@ -49,12 +49,12 @@ class Smarty_Internal_ParseTree_Template extends Smarty_Internal_ParseTree
         }
     }
 
-    /**
-     * Append array to subtree
-     *
-     * @param \Smarty_Internal_Templateparser $parser
-     * @param \Smarty_Internal_ParseTree[]    $array
-     */
+	/**
+	 * Append array to subtree
+	 *
+	 * @param \Smarty_Internal_Templateparser $parser
+	 * @param \Smarty_Internal_ParseTree[]    $array
+	 */
     public function append_array(Smarty_Internal_Templateparser $parser, $array = array())
     {
         if (!empty($array)) {
@@ -62,12 +62,12 @@ class Smarty_Internal_ParseTree_Template extends Smarty_Internal_ParseTree
         }
     }
 
-    /**
-     * Prepend array to subtree
-     *
-     * @param \Smarty_Internal_Templateparser $parser
-     * @param \Smarty_Internal_ParseTree[]    $array
-     */
+	/**
+	 * Prepend array to subtree
+	 *
+	 * @param \Smarty_Internal_Templateparser $parser
+	 * @param \Smarty_Internal_ParseTree[]    $array
+	 */
     public function prepend_array(Smarty_Internal_Templateparser $parser, $array = array())
     {
         if (!empty($array)) {
@@ -75,13 +75,13 @@ class Smarty_Internal_ParseTree_Template extends Smarty_Internal_ParseTree
         }
     }
 
-    /**
-     * Sanitize and merge subtree buffers together
-     *
-     * @param \Smarty_Internal_Templateparser $parser
-     *
-     * @return string template code content
-     */
+	/**
+	 * Sanitize and merge subtree buffers together
+	 *
+	 * @param \Smarty_Internal_Templateparser $parser
+	 *
+	 * @return string template code content
+	 */
     public function to_smarty_php(Smarty_Internal_Templateparser $parser)
     {
         $code = '';
@@ -94,7 +94,7 @@ class Smarty_Internal_ParseTree_Template extends Smarty_Internal_ParseTree
                         $text .= $subtree->to_smarty_php($parser);
                     }
                     $code .= preg_replace(
-                        '/((<%)|(%>)|(<\?php)|(<\?)|(\?>)|(<\/?script))/',
+                    	'/((<%)|(%>)|(<\?php)|(<\?)|(\?>)|(<\/?script))/',
                         "<?php echo '\$1'; ?>\n",
                         $parser->compiler->processText($text)
                     );
@@ -104,7 +104,7 @@ class Smarty_Internal_ParseTree_Template extends Smarty_Internal_ParseTree
                         $text .= $subtree->to_smarty_php($parser);
                     }
                     $code .= preg_replace(
-                        '/((<%)|(%>)|(<\?php)|(<\?)|(\?>)|(<\/?script))/',
+                    	'/((<%)|(%>)|(<\?php)|(<\?)|(\?>)|(<\/?script))/',
                         "<?php echo '\$1'; ?>\n",
                         $text
                     );
@@ -151,8 +151,8 @@ class Smarty_Internal_ParseTree_Template extends Smarty_Internal_ParseTree
                 $currentChunk[] = $this->subtrees[ $key ];
             } else {
                 $chunks[] = array(
-                    'mode' => $currentMode,
-                    'subtrees' => $currentChunk
+                	'mode' => $currentMode,
+                	'subtrees' => $currentChunk
                 );
                 $currentMode = $newMode;
                 $currentChunk = array($this->subtrees[ $key ]);
@@ -160,8 +160,8 @@ class Smarty_Internal_ParseTree_Template extends Smarty_Internal_ParseTree
         }
         if ($currentMode && $currentChunk) {
             $chunks[] = array(
-                'mode' => $currentMode,
-                'subtrees' => $currentChunk
+            	'mode' => $currentMode,
+            	'subtrees' => $currentChunk
             );
         }
         return $chunks;

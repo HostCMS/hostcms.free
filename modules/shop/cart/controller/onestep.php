@@ -385,12 +385,12 @@ class Shop_Cart_Controller_Onestep extends Core_Controller
 		return $this;
 	}
 
-    /**
-     * Calculate amount and weight
-     * @param Shop_Item_Model $oShop_Item
-     * @return array
-     * @throws Core_Exception
-     */
+	/**
+	 * Calculate amount and weight
+	 * @param Shop_Item_Model $oShop_Item
+	 * @return array
+	 * @throws Core_Exception
+	 */
 	public function calculatePrice(Shop_Item_Model $oShop_Item)
 	{
 		$aTotal = array(

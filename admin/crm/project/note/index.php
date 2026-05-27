@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -78,6 +78,9 @@ $oAdmin_Form_Dataset
 	)
 	->addCondition(
 		array('orderBy' => array('crm_notes.datetime', 'DESC'))
+	)
+	->addCondition(
+		array('where' => array('crm_notes.parent_id', '=', 0))
 	);
 
 // Добавляем источник данных контроллеру формы

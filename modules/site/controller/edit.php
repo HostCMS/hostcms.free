@@ -154,6 +154,7 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		/* $oMainRow1 */
 		$oMainTab->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow1);
+
 		$oMainTab->move($this->getField('https')->onchange('$("#' . $windowId . ' input[name = set_https]").parents(".form-group").toggleClass("hidden");')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow1);
 
 		$oSetHttps = Admin_Form_Entity::factory('Checkbox')
@@ -242,16 +243,18 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$this->getField('lng')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'));
 		$oMainTab->move($this->getField('lng'), $oMainRow3);
 
+		$oMainTab->move($this->getField('check_browser')->divAttr(array('class' => 'form-group col-xs-12')), $oSiteTabProtectsRow1);
+		$oMainTab->move($this->getField('protect')->divAttr(array('class' => 'form-group col-xs-12')), $oSiteTabProtectsRow1);
+		$oMainTab->move($this->getField('safe_email')->divAttr(array('class' => 'form-group col-xs-12')), $oSiteTabProtectsRow1);
+
 		/* $oMainRow4 */
-		$oMainTab->move($this->getField('send_attendance_report')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4')), $oMainRow4);
-		$oMainTab->move($this->getField('protect')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-lg-2')), $oSiteTabProtectsRow1);
-		$oMainTab->move($this->getField('safe_email')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4')), $oSiteTabProtectsRow1);
+		$this->getField('uploaddir')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4'));
+		$oMainTab->move($this->getField('uploaddir'), $oMainRow4);
+		$this->getField('nesting_level')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-2'));
+		$oMainTab->move($this->getField('nesting_level'), $oMainRow4);
 
 		/* $oMainRow5 */
-		$this->getField('uploaddir')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4'));
-		$oMainTab->move($this->getField('uploaddir'), $oMainRow5);
-		$this->getField('nesting_level')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-2'));
-		$oMainTab->move($this->getField('nesting_level'), $oMainRow5);
+		$oMainTab->move($this->getField('send_attendance_report')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4')), $oMainRow5);
 
 		$oSite_Favicon_Controller_Tab = new Site_Favicon_Controller_Tab($this->_Admin_Form_Controller);
 		$oSiteFavicon = $oSite_Favicon_Controller_Tab

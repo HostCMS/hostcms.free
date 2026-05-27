@@ -68,7 +68,6 @@ class Core_Auth
 				$oCore_Response
 					->status(403)
 					->header('Cache-Control', 'private, no-cache')
-					->header('Pragma', 'no-cache') // для старых систем
 					->header('Last-Modified', gmdate('D, d M Y H:i:s', time()) . ' GMT')
 					->header('X-Powered-By', 'HostCMS')
 					->body('HostCMS: Error 403. Access Forbidden!')
@@ -170,7 +169,7 @@ class Core_Auth
 					{
 						$oCore_Response
 							->status(401)
-							->header('Pragma', 'no-cashe')
+							->header('Cache-Control', 'no-cache, must-revalidate, max-age=0')
 							->header('WWW-authenticate', "basic realm='HostCMS'");
 					}
 					else
@@ -307,7 +306,6 @@ class Core_Auth
 
 		header('Content-type: text/html; charset=UTF-8');
 		header('Cache-Control: no-cache, must-revalidate, max-age=0');
-		header('Pragma: no-cache'); // для старых систем
 		header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
 		header('X-Frame-Options: SAMEORIGIN');
 		header('X-Content-Type-Options: nosniff');
@@ -584,7 +582,7 @@ class Core_Auth
 	 * @param string $password пароль
 	 * @param boolean $assignSessionToIp привязать сессию к IP-адресу
 	 * @return bool
-     * <br />true -- автооризация произведена успешно
+	 * <br />true -- автооризация произведена успешно
 	 * <br />false -- неправильные данные доступа
 	 * <br />-1 -- не истекло время до следующей попытки авторизации
 	 */

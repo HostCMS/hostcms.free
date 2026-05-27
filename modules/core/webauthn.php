@@ -87,7 +87,7 @@ class Core_Webauthn extends Core_Servant_Properties
 	 * Generates a new challange
 	 * @param int $length
 	 * @return Core_Bytebuffer
-     */
+	 */
 	protected function _createChallenge($length = 32)
 	{
 		return Core_Bytebuffer::randomBuffer($length);
@@ -488,15 +488,15 @@ class Core_Webauthn extends Core_Servant_Properties
 		return $data;
 	}
 
-    /**
-     * Generates the object for key validation
-     * Provide this data to navigator.credentials.get
-     * @param array $credentialIds binary
-     * @param int $timeout timeout in seconds
-     * @param bool $allowInternal allow client device-specific transport. These authenticators are not removable from the client device.
-     * @param bool|string $requireUserVerification indicates that you require user verification and will fail the operation if the response does not have the UV flag set. Valid values: TRUE = required, FALSE = preferred, string 'required' 'preferred' 'discouraged'
-     * @return stdClass
-     */
+	/**
+	 * Generates the object for key validation
+	 * Provide this data to navigator.credentials.get
+	 * @param array $credentialIds binary
+	 * @param int $timeout timeout in seconds
+	 * @param bool $allowInternal allow client device-specific transport. These authenticators are not removable from the client device.
+	 * @param bool|string $requireUserVerification indicates that you require user verification and will fail the operation if the response does not have the UV flag set. Valid values: TRUE = required, FALSE = preferred, string 'required' 'preferred' 'discouraged'
+	 * @return stdClass
+	 */
 	public function getGetArgs($credentialIds = array(), $timeout = 20, $allowInternal = TRUE, $requireUserVerification = FALSE)
 	{
 		// validate User Verification Requirement
@@ -594,8 +594,7 @@ class Core_Webauthn extends Core_Servant_Properties
 			if (hash_equals($allowedIdBinary, $credentialIdBinary))
 			{
 				$credentialAllowed = TRUE;
-				// Не прерываем для защиты от атак по времени
-				//break;
+				break;
 			}
 		}
 
@@ -757,7 +756,10 @@ class Core_Webauthn extends Core_Servant_Properties
 
 		// The RP ID must be equal to the origin's effective domain, or a registrable
 		// domain suffix of the origin's effective domain.
-		return preg_match('/' . preg_quote($this->rpId) . '$/i', $host) === 1;
+		// return preg_match('/' . preg_quote($this->rpId) . '$/i', $host) === 1;
+
+		return strcasecmp($host, $this->rpId) === 0 ||
+			substr(strtolower($host), -(strlen($this->rpId) + 1)) === '.' . strtolower($this->rpId);
 	}
 
 	/**

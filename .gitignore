@@ -54,8 +54,10 @@ Thumbs.db
 !admin/site/**
 !admin/sql/**
 !admin/structure/**
+!admin/syntaxhighlighter/**
 !admin/tag/**
 !admin/template/**
+!admin/timeline/**
 !admin/tpl/**
 !admin/trash/**
 !admin/typograph/**
@@ -132,8 +134,10 @@ modules/skin/bootstrap/js/node_modules/**
 !modules/source/**
 !modules/sql/**
 !modules/structure/**
+!modules/syntaxhighlighter/**
 !modules/tag/**
 !modules/template/**
+!modules/timeline/**
 !modules/tpl/**
 !modules/trash/**
 !modules/typograph/**

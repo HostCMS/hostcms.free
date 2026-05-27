@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Event
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Event_Timeline_Dataset extends Admin_Form_Dataset
 {
@@ -84,6 +84,7 @@ class Event_Timeline_Dataset extends Admin_Form_Dataset
 			->from('crm_notes')
 			->leftJoin('event_crm_notes', 'crm_notes.id', '=', 'event_crm_notes.crm_note_id')
 			->where('event_crm_notes.event_id', '=', $this->_event->id)
+			->where('crm_notes.parent_id', '=', 0)
 			->where('crm_notes.deleted', '=', 0);
 
 		$id && $oQb->where('crm_notes.id', '=', $id);

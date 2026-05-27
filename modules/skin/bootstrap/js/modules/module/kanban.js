@@ -34,7 +34,7 @@
 					});
 				}
 			} else if (result.status == 'error' && result.error_text) {
-				Notify('<span>' + $.escapeHtml(result.error_text) + '</span>', '', 'bottom-left', '7000', 'danger', 'fa-check', true);
+				Notify('<span>' + $.escapeHtml(result.error_text) + '</span>', '', 'bottom-left', '7000', 'danger', 'fa-solid fa-check', true);
 				$('ul#entity-list-' + result.target_id).addClass('error-drop');
 			}
 		},

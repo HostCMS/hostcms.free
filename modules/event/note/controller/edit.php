@@ -16,7 +16,7 @@ class Event_Note_Controller_Edit extends Crm_Note_Controller_Edit
 	 * Set object
 	 * @param object $object object
 	 * @return Crm_Note_Controller_Edit
-     */
+	 */
 	public function setObject($object)
 	{
 		$iEventId = Core_Array::getGet('event_id', 0, 'int');
@@ -61,7 +61,7 @@ class Event_Note_Controller_Edit extends Crm_Note_Controller_Edit
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name
 	 * @return bool
-     */
+	 */
 	public function execute($operation = NULL)
 	{
 		// $iEventId = intval(Core_Array::getGet('event_id'));

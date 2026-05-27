@@ -16,65 +16,65 @@
  */
 class Smarty_Internal_Compile_Include extends Smarty_Internal_CompileBase
 {
-    /**
-     * caching mode to create nocache code but no cache file
-     */
+	/**
+	 * caching mode to create nocache code but no cache file
+	 */
     const CACHING_NOCACHE_CODE = 9999;
 
-    /**
-     * Attribute definition: Overwrites base class.
-     *
-     * @var array
-     * @see Smarty_Internal_CompileBase
-     */
+	/**
+	 * Attribute definition: Overwrites base class.
+	 *
+	 * @var array
+	 * @see Smarty_Internal_CompileBase
+	 */
     public $required_attributes = array('file');
 
-    /**
-     * Attribute definition: Overwrites base class.
-     *
-     * @var array
-     * @see Smarty_Internal_CompileBase
-     */
+	/**
+	 * Attribute definition: Overwrites base class.
+	 *
+	 * @var array
+	 * @see Smarty_Internal_CompileBase
+	 */
     public $shorttag_order = array('file');
 
-    /**
-     * Attribute definition: Overwrites base class.
-     *
-     * @var array
-     * @see Smarty_Internal_CompileBase
-     */
+	/**
+	 * Attribute definition: Overwrites base class.
+	 *
+	 * @var array
+	 * @see Smarty_Internal_CompileBase
+	 */
     public $option_flags = array('nocache', 'inline', 'caching');
 
-    /**
-     * Attribute definition: Overwrites base class.
-     *
-     * @var array
-     * @see Smarty_Internal_CompileBase
-     */
+	/**
+	 * Attribute definition: Overwrites base class.
+	 *
+	 * @var array
+	 * @see Smarty_Internal_CompileBase
+	 */
     public $optional_attributes = array('_any');
 
-    /**
-     * Valid scope names
-     *
-     * @var array
-     */
+	/**
+	 * Valid scope names
+	 *
+	 * @var array
+	 */
     public $valid_scopes = array(
-        'parent' => Smarty::SCOPE_PARENT, 'root' => Smarty::SCOPE_ROOT,
-        'global' => Smarty::SCOPE_GLOBAL, 'tpl_root' => Smarty::SCOPE_TPL_ROOT,
-        'smarty' => Smarty::SCOPE_SMARTY
+    	'parent' => Smarty::SCOPE_PARENT, 'root' => Smarty::SCOPE_ROOT,
+    	'global' => Smarty::SCOPE_GLOBAL, 'tpl_root' => Smarty::SCOPE_TPL_ROOT,
+    	'smarty' => Smarty::SCOPE_SMARTY
     );
 
-    /**
-     * Compiles code for the {include} tag
-     *
-     * @param array                                  $args     array with attributes from parser
-     * @param Smarty_Internal_SmartyTemplateCompiler $compiler compiler object
-     *
-     * @return string
-     * @throws \Exception
-     * @throws \SmartyCompilerException
-     * @throws \SmartyException
-     */
+	/**
+	 * Compiles code for the {include} tag
+	 *
+	 * @param array                                  $args     array with attributes from parser
+	 * @param Smarty_Internal_SmartyTemplateCompiler $compiler compiler object
+	 *
+	 * @return string
+	 * @throws \Exception
+	 * @throws \SmartyCompilerException
+	 * @throws \SmartyException
+	 */
     public function compile($args, Smarty_Internal_SmartyTemplateCompiler $compiler)
     {
         $uid = $t_hash = null;
@@ -147,11 +147,11 @@ class Smarty_Internal_Compile_Include extends Smarty_Internal_CompileBase
             }
         }
         /*
-        * if the {include} tag provides individual parameter for caching or compile_id
-        * the subtemplate must not be included into the common cache file and is treated like
-        * a call in nocache mode.
-        *
-        */
+   	 * if the {include} tag provides individual parameter for caching or compile_id
+   	 * the subtemplate must not be included into the common cache file and is treated like
+   	 * a call in nocache mode.
+   	 *
+   	 */
         if ($_attr[ 'nocache' ] !== true && $_attr[ 'caching' ]) {
             $_caching = $_new_caching = (int)$_attr[ 'caching' ];
             $call_nocache = true;
@@ -277,17 +277,17 @@ class Smarty_Internal_Compile_Include extends Smarty_Internal_CompileBase
         return $_output;
     }
 
-    /**
-     * Compile inline sub template
-     *
-     * @param \Smarty_Internal_SmartyTemplateCompiler $compiler
-     * @param \Smarty_Internal_Template               $tpl
-     * @param string                                  $t_hash
-     *
-     * @return bool
-     * @throws \Exception
-     * @throws \SmartyException
-     */
+	/**
+	 * Compile inline sub template
+	 *
+	 * @param \Smarty_Internal_SmartyTemplateCompiler $compiler
+	 * @param \Smarty_Internal_Template               $tpl
+	 * @param string                                  $t_hash
+	 *
+	 * @return bool
+	 * @throws \Exception
+	 * @throws \SmartyException
+	 */
     public function compileInlineTemplate(
         Smarty_Internal_SmartyTemplateCompiler $compiler,
         Smarty_Internal_Template $tpl,

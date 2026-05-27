@@ -4,6 +4,39 @@
 	"use strict";
 
 	$.extend({
+		changeUserWorkdayButtons: function(status) {
+			var data = {},
+				aStatuses = ['ready', 'denied', 'working', 'break', 'completed', 'expired'],
+				currentStatusIndex = $('li.workday #workdayControl').data('status');
+
+			if (currentStatusIndex == status) return;
+
+			if (currentStatusIndex == 0 && status == 2) data = {'startUserWorkday': 1};
+			else if ((currentStatusIndex == 2 && status == 3) || (currentStatusIndex == 3 && status == 2)) data = {'pauseUserWorkday': 1};
+			else if ((currentStatusIndex == 2 || currentStatusIndex == 5) && status == 4) data = {'stopUserWorkday': 1};
+			else return false;
+
+			$.ajax({
+				url: hostcmsBackend + '/user/index.php',
+				type: "POST",
+				data: data,
+				dataType: 'json',
+				error: function() {},
+				success: function(answer) {
+					if (answer.result) {
+						$('li.workday #workdayControl')
+							.toggleClass(aStatuses[currentStatusIndex] + ' ' + aStatuses[answer.result])
+							.data('status', answer.result);
+
+						if (answer.result != 5) {
+							$('#user-info-dropdown .login-area').removeClass('wave in');
+						}
+						$('span.user-workday-last-date').remove();
+						$.blinkColon(answer.result);
+					}
+				}
+			});
+		},
 		toggleModificationPattern: function(checkbox, propertyId, propertyName, selectName) {
 			const $checkbox = $(checkbox);
 			const $targetInput = $('input[name="name"]');
@@ -164,7 +197,7 @@
 
 			if (admin_form_id) {
 				const dataset = $form.data('datasetid');
-				const entity_id = $('input[name="id"]', $form).val();
+				const entity_id = $('input[name="id"]', $form).val() || $('input[data-lock-id]', $form).val();
 
 				$.ajax({
 					url: hostcmsBackend + '/admin_form/index.php',
@@ -458,7 +491,7 @@
 			// Закрываем настройки изображений
 			jSourceProperty.find("span[id^='file_large_settings_'], span[id^='file_small_settings_']").each(function() {
 				const $span = $(this);
-				if ($span.children('i').hasClass('fa-times')) {
+				if ($span.children('i').hasClass('fa-xmark')) {
 					$span.click();
 				}
 			});
@@ -778,7 +811,7 @@
 					if (jCopiedProperty.hasClass('complex-block')) {
 						let incremented = parseInt($('.section-' + lib_property_id + ' > div.multiple_value').length - 1);
 						if (incremented < 0) incremented = 0;
-						newName = prefix + incremented + '_' + arr[3] + '[]';
+						newName = prefix + incremented + '_' + arr[3] + arr[4]/* + '[]'*/;
 					} else {
 						newName = prefix + arr[2] + '_' + arr[3] + '[]';
 					}
@@ -825,7 +858,7 @@
 				items: '> div#property_' + propertyId + ':not(\'.new-property\')',
 				scroll: false,
 				placeholder: 'placeholder',
-				cancel: '.add-remove-property, .form-control',
+				cancel: '.add-remove-property, .form-control, .tox, .tox-tinymce, .cke',
 				tolerance: 'pointer',
 				helper: function(event, ui) {
 					const clone = $(ui).clone(true);
@@ -865,7 +898,7 @@
 				items: '> div#lib_property_' + libPropertyId + ':not(\'.new-lib-property\')',
 				scroll: false,
 				placeholder: 'placeholder',
-				cancel: '.add-remove-property, .form-control',
+				cancel: '.add-remove-property, .form-control, .tox, .tox-tinymce, .cke',
 				tolerance: 'pointer',
 				helper: function(event, ui) {
 					const clone = $(ui).clone(true);
@@ -1014,7 +1047,7 @@
 
 			dropdownMenu.next('input[type="hidden"]').val($li.attr('id')).trigger('change');
 			containerCurrentChoice.css('color', $a.css('color'));
-			containerCurrentChoice.html($a.html() + '<i class="fa fa-angle-down icon-separator-left"></i>');
+			containerCurrentChoice.html($a.html() + '<i class="fa-solid fa-angle-down icon-separator-left"></i>');
 
 			dropdownMenu.find('li[selected][id!="' + $li.prop('id') + '"]').removeAttr('selected');
 			$li.attr('selected', 'selected');
@@ -1186,7 +1219,7 @@ class FormAutosave {
 				const date = new Date();
 				const $h4 = $('h4.modal-title');
 				const $h5 = $('h5.row-title');
-				const iconHtml = `<i title="${i18n['autosave_icon_title']}${date.toLocaleString()}" class="fas fa-save autosave-icon azure"></i>`;
+				const iconHtml = `<i title="${i18n['autosave_icon_title']}${date.toLocaleString()}" class="fa-solid fa-floppy-disk autosave-icon azure"></i>`;
 
 				$h5.find('.autosave-icon').remove();
 				$h4.find('.autosave-icon').remove();
@@ -1229,20 +1262,21 @@ class FormLocker {
 			const aKeycodes = [13, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36, 37, 38, 39, 40, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 144, 145];
 
 			if (!this._locked && (!keycode || !aKeycodes.includes(keycode))) {
-				$('body').on('beforeAdminLoad beforeAjaxCallback beforeHideModal', (e) => this._confirm(e));
-
-				$('h5.row-title, h4.modal-title').append('<i class="fa fa-lock edit-lock"></i>');
-				this._locked = true;
-
 				if (event && event.delegateTarget && event.delegateTarget.nodeName === 'FORM') {
-					const $form = $(event.delegateTarget);
+					$('body').on('beforeAdminLoad beforeAjaxCallback beforeHideModal', (e) => this._confirm(e));
+
+					$('h5.row-title, h4.modal-title').append('<i class="fa-solid fa-lock edit-lock"></i>');
+					this._locked = true;
+
+					//const $form = $(event.delegateTarget);
+					this._form = $(event.delegateTarget);
 					$.ajax({
 						url: hostcmsBackend + '/admin_form/index.php',
 						data: {
 							'lock': 1,
-							'admin_form_id': $form.data('adminformid'),
-							'dataset': $form.data('datasetid'),
-							'entity_id': $('input[name="id"]', $form).val()
+							'admin_form_id': this._form.data('adminformid'),
+							'dataset': this._form.data('datasetid'),
+							'entity_id': $('input[name="id"]', this._form).val() || $('input[data-lock-id]', this._form).val()
 						},
 						dataType: 'json',
 						type: 'POST'
@@ -1253,26 +1287,28 @@ class FormLocker {
 		return this;
 	}
 
-	_confirm(event) {
+	_confirm(event) { // eslint-disable-line
 		if (!confirm(i18n['lock_message'])) {
 			return 'break';
 		}
+
 		this.unlock();
 
-		if (event && event.delegateTarget && event.delegateTarget.nodeName === 'FORM') {
-			const $form = $(event.delegateTarget);
+		//if (event && event.delegateTarget && event.delegateTarget.nodeName === 'FORM') {
+			//const $form = $(event.delegateTarget);
+			const $form = this._form;
 			$.ajax({
 				url: hostcmsBackend + '/admin_form/index.php',
 				data: {
 					'delete_lock': 1,
 					'admin_form_id': $form.data('adminformid'),
 					'dataset': $form.data('datasetid'),
-					'entity_id': $('input[name="id"]', $form).val()
+					'entity_id': $('input[name="id"]', $form).val() || $('input[data-lock-id]', $form).val()
 				},
 				dataType: 'json',
 				type: 'POST'
 			});
-		}
+		// }
 	}
 
 	unlock() {
@@ -1352,7 +1388,7 @@ $(function() {
 
 	$('.page-container').on('click', '.fa.profile-details', function() {
 		$(this).closest('.ticket-item').next('li.profile-details').toggle(400, function() {
-			$(this).prev('.ticket-item').find('.fa.profile-details').toggleClass('fa-chevron-down fa-chevron-up');
+			$(this).prev('.ticket-item').find('.fa-solid.profile-details').toggleClass('fa-chevron-down fa-chevron-up');
 		});
 	});
 
@@ -1371,6 +1407,27 @@ $(function() {
 	let dropdownMenu2;
 
 	$('body')
+		.on('click', '.workday #workdayControl > span:not(.user-workday-end-text)', function(e) {
+			e.stopPropagation();
+			var object = $(this), status = 0;
+
+			if (object.hasClass('user-workday-start') || object.hasClass('user-workday-continue')) status = 2;
+			else if (object.hasClass('user-workday-pause')) status = 3;
+			else if (object.hasClass('user-workday-stop')) {
+				if (confirm($(this).data('confirm'))) status = 4;
+			} else if (object.hasClass('user-workday-stop-another-time')) {
+				$.modalLoad({
+					title: $(this).data('title'),
+					path: hostcmsBackend + '/user/index.php',
+					additionalParams: 'showAnotherTimeModalForm',
+					width: '50%',
+					windowId: 'id_content',
+					onHide: function() { $(".wickedpicker").remove(); }
+				});
+				return true;
+			}
+			$.changeUserWorkdayButtons(status);
+		})
 		.on('click', '[id^="file_"][id*="_settings_"]', function() {
 			$(this).popover({
 				placement: 'left',
@@ -1386,10 +1443,10 @@ $(function() {
 			if (popoverContent.length) {
 				$(this).after(popoverContent.hide());
 			}
-			$(this).find("i.fa").toggleClass("fa-times fa-cog");
+			$(this).find("i.fa-solid").toggleClass("fa-xmark fa-gear");
 		})
 		.on('show.bs.popover', '[id^="file_"][id*="_settings_"]', function() {
-			$(this).find("i.fa").toggleClass("fa-times fa-cog");
+			$(this).find("i.fa-solid").toggleClass("fa-xmark fa-gear");
 		})
 		.on('shown.bs.tab', 'a[data-toggle="tab"]', function() {
 			if (typeof prepareKanbanBoards === 'function') prepareKanbanBoards();
@@ -1459,7 +1516,7 @@ $(function() {
 				if (longestWidth < 50) longestWidth = 50;
 				else if (longestWidth > 250) longestWidth = 250;
 
-				if ($i.hasClass('fa-expand')) {
+				if ($i.hasClass('fa-up-right-and-down-left-from-center')) {
 					$th.data('wide', longestWidth);
 				} else {
 					$th.removeData('wide');
@@ -1643,7 +1700,7 @@ $(function() {
 					$(this).addClass('hide');
 					if (this === accountAreaRightLi.get(accountAreaRightLi.length - 1)) {
 						if (!navbarAccount.find('#rightNavbarArrow').length) {
-							navbarAccount.append('<div id="rightNavbarArrow"><a href="#"><i class="icon fa fa-chevron-right"></i></a></div>');
+							navbarAccount.append('<div id="rightNavbarArrow"><a href="#"><i class="icon fa-solid fa-chevron-right"></i></a></div>');
 						}
 						const rightNavbarArrow = navbarAccount.find('#rightNavbarArrow');
 						rightNavbarArrow.removeClass('hide');
@@ -1705,5 +1762,90 @@ $(function() {
 		if (typeof setResizableAdminTableTh === 'function') setResizableAdminTableTh();
 		if (typeof changeDublicateTables === 'function') changeDublicateTables();
 		if (typeof prepareKanbanBoards === 'function') prepareKanbanBoards();
+	});
+
+	$('[data-popover="hover-file"]').on('mouseenter', function() {
+		var $this = $(this);
+		var imgSrc = $this.data('src');
+		var windowId = $this.data('window-id');
+
+		if (!$this.data("bs.popover")) {
+			var img = new Image();
+
+			var initPopover = function() {
+				// Рассчитываем точные размеры для HTML, чтобы Firefox сразу зарезервировал место
+				var w = img.width;
+				var h = img.height;
+				if (w > 200) {
+					h = Math.round(h * (200 / w));
+					w = 200;
+				}
+
+				$this.popover({
+					placement: 'top',
+					trigger: 'manual',
+					html: true,
+					// pointer-events: none убивает моргание на 100% (курсор "проходит" сквозь popover)
+					template: '<div class="popover" style="pointer-events: none;" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>',
+					content: function() {
+						// Жестко передаем width и height, чтобы высота больше никогда не была равна 0
+						return '<img src="' + imgSrc + '" width="' + w + '" height="' + h + '" style="display:block; max-width:200px;" />';
+					},
+					container: '#' + windowId
+				});
+
+				$this.attr('data-popoverAttached', true);
+
+				$this.on('hide.bs.popover', function(e) {
+					$this.attr('data-popoverAttached')
+						? $this.removeAttr('data-popoverAttached')
+						: e.preventDefault();
+				})
+				.on('show.bs.popover', function(e) {
+					!$this.attr('data-popoverAttached') && e.preventDefault();
+				})
+				.on('shown.bs.popover', function() {
+					$('#' + $this.attr('aria-describedby')).on('mouseleave', function(e) {
+						!$this.parent().find(e.relatedTarget).length && $this.popover('destroy');
+					});
+				})
+				.on('mouseleave', function(e) {
+					!$(e.relatedTarget).parent('#' + $this.attr('aria-describedby')).length
+					&& $this.attr('data-popoverAttached', false)
+					&& $this.off('hide.bs.popover').off('show.bs.popover').off('shown.bs.popover').off('mouseleave')
+					&& $this.popover('destroy');
+				});
+
+				if ($this.is(':hover')) {
+					$this.popover('show');
+				}
+			};
+
+			img.onload = initPopover;
+			img.src = imgSrc;
+
+			// Защита от кэша Firefox: если картинка загрузилась моментально, вызываем вручную
+			if (img.complete && img.naturalHeight !== 0) {
+				img.onload = null; // Отключаем дублирование
+				initPopover();
+			}
+		} else {
+			$this.popover('show');
+		}
+	});
+
+	$(document).on('hidden.bs.modal', '.modal', function() {
+		var visibleModals = $('.modal:visible').length;
+
+		if (visibleModals > 0) {
+			// Если есть другие открытые модальные окна
+			$('html').css({
+				'overflow': 'hidden',
+				'margin-right': '' // очищаем margin-right если был
+			});
+		} else {
+			// Если это последнее модальное окно
+			$('html').css('overflow', '');
+		}
 	});
 });

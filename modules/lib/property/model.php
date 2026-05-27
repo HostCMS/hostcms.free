@@ -101,7 +101,7 @@ class Lib_Property_Model extends Core_Entity
 			$link = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $link);
 			$onclick = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $onclick);
 
-			return '<a href="' . $link . '" onclick="' . $onclick . '"><i class="fa fa-list-ul" title="' . $oAdmin_Form_Field->name . '"></i></a>';
+			return '<a href="' . $link . '" onclick="' . $onclick . '"><i class="fa-solid fa-list-ul" title="' . $oAdmin_Form_Field->name . '"></i></a>';
 		}
 
 		return '—';
@@ -168,7 +168,7 @@ class Lib_Property_Model extends Core_Entity
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
-     * @hostcms-event lib_property.onBeforeRedeclaredDelete
+	 * @hostcms-event lib_property.onBeforeRedeclaredDelete
 	 */
 	public function delete($primaryKey = NULL)
 	{

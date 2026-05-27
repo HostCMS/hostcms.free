@@ -25,7 +25,7 @@ function smarty_outputfilter_trimwhitespace($source)
     $source = preg_replace('/\015\012|\015|\012/', "\n", $source);
     // capture Internet Explorer and KnockoutJS Conditional Comments
     if (preg_match_all(
-        '#<!--((\[[^\]]+\]>.*?<!\[[^\]]+\])|(\s*/?ko\s+.+))-->#is',
+    	'#<!--((\[[^\]]+\]>.*?<!\[[^\]]+\])|(\s*/?ko\s+.+))-->#is',
         $source,
         $matches,
         PREG_OFFSET_CAPTURE | PREG_SET_ORDER
@@ -46,7 +46,7 @@ function smarty_outputfilter_trimwhitespace($source)
     // capture html elements not to be messed with
     $_offset = 0;
     if (preg_match_all(
-        '#(<script[^>]*>.*?</script[^>]*>)|(<textarea[^>]*>.*?</textarea[^>]*>)|(<pre[^>]*>.*?</pre[^>]*>)#is',
+    	'#(<script[^>]*>.*?</script[^>]*>)|(<textarea[^>]*>.*?</textarea[^>]*>)|(<pre[^>]*>.*?</pre[^>]*>)#is',
         $source,
         $matches,
         PREG_OFFSET_CAPTURE | PREG_SET_ORDER
@@ -63,13 +63,13 @@ function smarty_outputfilter_trimwhitespace($source)
     }
     $expressions = array(// replace multiple spaces between tags by a single space
                          // can't remove them entirely, becaue that might break poorly implemented CSS display:inline-block elements
-                         '#(:SMARTY@!@|>)\s+(?=@!@SMARTY:|<)#s'                                    => '\1 \2',
+                     	'#(:SMARTY@!@|>)\s+(?=@!@SMARTY:|<)#s'                                    => '\1 \2',
                          // remove spaces between attributes (but not in attribute values!)
-                         '#(([a-z0-9]\s*=\s*("[^"]*?")|(\'[^\']*?\'))|<[a-z0-9_]+)\s+([a-z/>])#is' => '\1 \5',
+                     	'#(([a-z0-9]\s*=\s*("[^"]*?")|(\'[^\']*?\'))|<[a-z0-9_]+)\s+([a-z/>])#is' => '\1 \5',
                          // note: for some very weird reason trim() seems to remove spaces inside attributes.
                          // maybe a \0 byte or something is interfering?
-                         '#^\s+<#Ss'                                                               => '<',
-                         '#>\s+$#Ss'                                                               => '>',
+                     	'#^\s+<#Ss'                                                               => '<',
+                     	'#>\s+$#Ss'                                                               => '>',
     );
     $source = preg_replace(array_keys($expressions), array_values($expressions), $source);
     // note: for some very weird reason trim() seems to remove spaces inside attributes.

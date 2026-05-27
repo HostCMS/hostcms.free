@@ -27,12 +27,12 @@ class User_Controller
 		</script><?php
 	}
 
-    /**
-     * Show popover
-     * @param $controller
-     * @param array $args
-     * @throws Core_Exception
-     */
+	/**
+	 * Show popover
+	 * @param $controller
+	 * @param array $args
+	 * @throws Core_Exception
+	 */
 	static public function onAfterRedeclaredPrepareForm($controller, $args)
 	{
 		list($object, $Admin_Form_Controller) = $args;

@@ -41,7 +41,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 	 * @param int $type
 	 * @param boolean $ajax
 	 * @return true
-     */
+	 */
 	public function adminPage($type = 0, $ajax = FALSE)
 	{
 		$type = intval($type);
@@ -190,11 +190,11 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 		?>
 		<div class="widget events">
 			<div class="widget-header bordered-bottom bordered-themeprimary">
-				<i class="widget-icon fa fa-tasks themeprimary"></i>
+				<i class="widget-icon fa-solid fa-list-check themeprimary"></i>
 				<span class="widget-caption themeprimary"><?php echo Core::_('Event.events_title')?></span>
 				<div class="widget-buttons">
 					<a data-toggle="maximize">
-						<i class="fa fa-expand gray"></i>
+						<i class="fa-solid fa-expand gray"></i>
 					</a>
 					<a data-toggle="upload" data-module-id="<?php echo $oModule->id?>">
 						<i class="fa-solid fa-rotate gray"></i>
@@ -203,7 +203,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 					if (!$oUser->read_only)
 					{
 						?><a href="#" data-toggle="toggle-actions">
-							<i class="fa fa-plus darkgray" title="<?php echo Core::_('Event.titleAddEvent');?>"></i>
+							<i class="fa-solid fa-plus darkgray" title="<?php echo Core::_('Event.titleAddEvent');?>"></i>
 							<i class="fa-solid fa-magnifying-glass darkgray hidden" title="<?php echo Core::_('Event.titleSearch');?>"></i>
 						</a><?php
 					}
@@ -225,9 +225,9 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 								<form>
 									<div class="input-group input-icon">
 										<input type="text" name="event_name" class="form-control" placeholder="<?php echo Core::_('Event.placeholderEventName');?>">
-										<i class="fa fa-plus gray"></i>
+										<i class="fa-solid fa-plus gray"></i>
 										<span id="sendForm" class="input-group-addon bg-azure bordered-azure" onclick="$(this).parents('form').submit()">
-											<i class="fa fa-check no-margin"></i>
+											<i class="fa-solid fa-check no-margin"></i>
 										</span>
 									</div>
 								</form>
@@ -285,7 +285,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 								?>
 								<li id="event-<?php echo $oEvent_User->event_id?>" class="task-item">
 									<div class="task-check">
-										<i class="fa <?php echo $oEvent->completed ? 'fa-check-square-o success' : 'fa-square-o'?> fa-lg" title="<?php echo Core::_('Event.titleCompleted')?>"></i>
+										<i class="<?php echo $oEvent->completed ? 'fa-regular fa-square-check success' : 'fa-regular fa-square'?> fa-lg" title="<?php echo Core::_('Event.titleCompleted')?>"></i>
 									</div>
 									<div class="task-state">
 										<?php
@@ -295,7 +295,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 
 										if ($oEvent->deadline())
 										{
-											?><div class="btn-group"><i class="fa fa-exclamation-circle red margin-right-10"></i></div><?php
+											?><div class="btn-group"><i class="fa-solid fa-circle-exclamation red margin-right-10"></i></div><?php
 										}
 
 										$iAdmin_Form_Id = 220;
@@ -327,11 +327,11 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 										}
 										?>
 									</div>
-									<div class="task-time"><i class="fa fa-clock-o"></i> <?php echo Core_Date::time2string(time() - Core_Date::sql2timestamp($oEvent->datetime)) ?></div>
+									<div class="task-time"><i class="fa-regular fa-clock"></i> <?php echo Core_Date::time2string(time() - Core_Date::sql2timestamp($oEvent->datetime)) ?></div>
 									<div class="task-body">
 										<?php
 										$deadlineIcon = $oEvent->deadline()
-											? '<i class="fa fa-clock-o event-title-deadline"></i>'
+											? '<i class="fa-regular fa-clock event-title-deadline"></i>'
 											: '';
 										?>
 										<span class="task-title editable" id="apply_check_0_<?php echo $oEvent->id ?>_fv_1226"><?php echo $deadlineIcon, htmlspecialchars($oEvent->name);?></span>
@@ -361,7 +361,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 											</div>
 											<?php if ($bExpand)
 											{
-												?><div class="more-wrapper"><div class="more" onclick="$.showAllDescription(this)"><?php echo Core::_('Event.more')?> <i class="fas fa-chevron-down"></i></div></div><?php
+												?><div class="more-wrapper"><div class="more" onclick="$.showAllDescription(this)"><?php echo Core::_('Event.more')?> <i class="fa-solid fa-chevron-down"></i></div></div><?php
 											}
 											?>
 											</div><?php
@@ -370,7 +370,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 										if (strlen($oEvent->place))
 										{
 											?>
-												<span class="kanban-place"><i class="fa fa-map-marker black"></i> <?php echo htmlspecialchars($oEvent->place)?></span>
+												<span class="kanban-place"><i class="fa-solid fa-location-dot black"></i> <?php echo htmlspecialchars($oEvent->place)?></span>
 											<?php
 										}
 										?>

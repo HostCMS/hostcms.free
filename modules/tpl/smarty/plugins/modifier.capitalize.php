@@ -32,7 +32,7 @@ function smarty_modifier_capitalize($string, $uc_digits = false, $lc_rest = fals
             // uppercase word breaks
             $upper_string = preg_replace_callback(
                 "!(^|[^\p{L}'])([\p{Ll}])!S" . Smarty::$_UTF8_MODIFIER,
-                'smarty_mod_cap_mbconvert_cb',
+            	'smarty_mod_cap_mbconvert_cb',
                 $string
             );
         }
@@ -59,7 +59,7 @@ function smarty_modifier_capitalize($string, $uc_digits = false, $lc_rest = fals
         $upper_string =
             preg_replace_callback(
                 "!((^|\s)['\"])(\w)!" . Smarty::$_UTF8_MODIFIER,
-                'smarty_mod_cap_mbconvert2_cb',
+            	'smarty_mod_cap_mbconvert2_cb',
                 $upper_string
             );
         return $upper_string;
@@ -72,7 +72,7 @@ function smarty_modifier_capitalize($string, $uc_digits = false, $lc_rest = fals
     $upper_string =
         preg_replace_callback(
             "!(^|[^\p{L}'])([\p{Ll}])!S" . Smarty::$_UTF8_MODIFIER,
-            'smarty_mod_cap_ucfirst_cb',
+        	'smarty_mod_cap_ucfirst_cb',
             $string
         );
     // check uc_digits case
@@ -92,7 +92,7 @@ function smarty_modifier_capitalize($string, $uc_digits = false, $lc_rest = fals
     }
     $upper_string = preg_replace_callback(
         "!((^|\s)['\"])(\w)!" . Smarty::$_UTF8_MODIFIER,
-        'smarty_mod_cap_ucfirst2_cb',
+    	'smarty_mod_cap_ucfirst2_cb',
         $upper_string
     );
     return $upper_string;

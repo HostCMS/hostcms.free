@@ -16,32 +16,32 @@
  */
 class Smarty_Internal_Compile_Private_Print_Expression extends Smarty_Internal_CompileBase
 {
-    /**
-     * Attribute definition: Overwrites base class.
-     *
-     * @var array
-     * @see Smarty_Internal_CompileBase
-     */
+	/**
+	 * Attribute definition: Overwrites base class.
+	 *
+	 * @var array
+	 * @see Smarty_Internal_CompileBase
+	 */
     public $optional_attributes = array('assign');
 
-    /**
-     * Attribute definition: Overwrites base class.
-     *
-     * @var array
-     * @see Smarty_Internal_CompileBase
-     */
+	/**
+	 * Attribute definition: Overwrites base class.
+	 *
+	 * @var array
+	 * @see Smarty_Internal_CompileBase
+	 */
     public $option_flags = array('nocache', 'nofilter');
 
-    /**
-     * Compiles code for generating output from any expression
-     *
-     * @param array                                 $args      array with attributes from parser
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler  compiler object
-     * @param array                                 $parameter array with compilation parameter
-     *
-     * @return string
-     * @throws \SmartyException
-     */
+	/**
+	 * Compiles code for generating output from any expression
+	 *
+	 * @param array                                 $args      array with attributes from parser
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler  compiler object
+	 * @param array                                 $parameter array with compilation parameter
+	 *
+	 * @return string
+	 * @throws \SmartyException
+	 */
     public function compile($args, Smarty_Internal_TemplateCompilerBase $compiler, $parameter)
     {
         // check and get attributes
@@ -50,11 +50,11 @@ class Smarty_Internal_Compile_Private_Print_Expression extends Smarty_Internal_C
         // tag modifier
         if (!empty($parameter[ 'modifierlist' ])) {
             $output = $compiler->compileTag(
-                'private_modifier',
+            	'private_modifier',
                 array(),
                 array(
-                    'modifierlist' => $parameter[ 'modifierlist' ],
-                    'value'        => $output
+                	'modifierlist' => $parameter[ 'modifierlist' ],
+                	'value'        => $output
                 )
             );
         }
@@ -70,7 +70,7 @@ class Smarty_Internal_Compile_Private_Print_Expression extends Smarty_Internal_C
                         $modifierlist = array();
                         foreach ($compiler->smarty->default_modifiers as $key => $single_default_modifier) {
                             preg_match_all(
-                                '/(\'[^\'\\\\]*(?:\\\\.[^\'\\\\]*)*\'|"[^"\\\\]*(?:\\\\.[^"\\\\]*)*"|:|[^:]+)/',
+                            	'/(\'[^\'\\\\]*(?:\\\\.[^\'\\\\]*)*\'|"[^"\\\\]*(?:\\\\.[^"\\\\]*)*"|:|[^:]+)/',
                                 $single_default_modifier,
                                 $mod_array
                             );
@@ -83,11 +83,11 @@ class Smarty_Internal_Compile_Private_Print_Expression extends Smarty_Internal_C
                         $compiler->default_modifier_list = $modifierlist;
                     }
                     $output = $compiler->compileTag(
-                        'private_modifier',
+                    	'private_modifier',
                         array(),
                         array(
-                            'modifierlist' => $compiler->default_modifier_list,
-                            'value'        => $output
+                        	'modifierlist' => $compiler->default_modifier_list,
+                        	'value'        => $output
                         )
                     );
                 }
@@ -128,7 +128,7 @@ class Smarty_Internal_Compile_Private_Print_Expression extends Smarty_Internal_C
                         $output = $result;
                     } else {
                         $output = $compiler->compileTag(
-                            'private_modifier',
+                        	'private_modifier',
                             array(),
                             array('modifierlist' => array($filter), 'value' => $output)
                         );
@@ -140,14 +140,14 @@ class Smarty_Internal_Compile_Private_Print_Expression extends Smarty_Internal_C
         return $output;
     }
 
-    /**
-     * @param \Smarty_Internal_TemplateCompilerBase $compiler compiler object
-     * @param string                                $name     name of variable filter
-     * @param string                                $output   embedded output
-     *
-     * @return string
-     * @throws \SmartyException
-     */
+	/**
+	 * @param \Smarty_Internal_TemplateCompilerBase $compiler compiler object
+	 * @param string                                $name     name of variable filter
+	 * @param string                                $output   embedded output
+	 *
+	 * @return string
+	 * @throws \SmartyException
+	 */
     private function compile_variable_filter(Smarty_Internal_TemplateCompilerBase $compiler, $name, $output)
     {
         $function = $compiler->getPlugin($name, 'variablefilter');

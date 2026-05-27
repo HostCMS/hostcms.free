@@ -44,7 +44,7 @@ remoteAudio.autoplay = true;
 
 export default async function initSoftophone(line, data) {
 	if (location.protocol != 'https:') {
-		console.error('Softophone: HTTPS connection required!');
+		console.log('Softophone: HTTPS connection required!');
 		return false;
 	}
 
@@ -63,7 +63,7 @@ export default async function initSoftophone(line, data) {
 		userAgent: 'HostCMS-JsSip-' + JsSIP.version
 	}, data);
 
-	console.log('initSoftophone', line, data);
+	// console.log('initSoftophone', line, data);
 
 	if (bMicro)
 	{
@@ -314,7 +314,7 @@ function add_stream(){
 
 	// This is for Safari.
 	session.connection.addEventListener('track', function(e) { // eslint-disable-line
-		console.log('Add stream track on connection')
+		console.log('Add stream track on connection');
 		remoteAudio.srcObject = e.streams[0]; // eslint-disable-line
 		remoteAudio.play(); // eslint-disable-line
 	});

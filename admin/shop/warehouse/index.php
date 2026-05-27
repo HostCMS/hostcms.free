@@ -76,7 +76,7 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		// ->name(Core::_('Admin_Form.add'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
@@ -134,11 +134,11 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Warehouse.operations'))
-		->icon('fa fa-calendar-check-o')
+		->icon('fa-regular fa-calendar-check')
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Warehouse.incoming'))
-				->icon('fa fa-calendar-plus-o')
+				->icon('fa-regular fa-calendar-plus')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/warehouse/incoming/index.php', NULL, NULL, $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}")
 				)
@@ -148,7 +148,7 @@ $oAdmin_Form_Entity_Menus->add(
 		)->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Warehouse.writeoff'))
-				->icon('fa fa-calendar-minus-o')
+				->icon('fa-regular fa-calendar-minus')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/warehouse/writeoff/index.php', NULL, NULL, $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}")
 				)
@@ -158,7 +158,7 @@ $oAdmin_Form_Entity_Menus->add(
 		)->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Warehouse.regrade'))
-				->icon('fa fa-calendar-o')
+				->icon('fa-regular fa-calendar-days')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/warehouse/regrade/index.php', NULL, NULL, $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}")
 				)
@@ -168,7 +168,7 @@ $oAdmin_Form_Entity_Menus->add(
 		)->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Warehouse.movement'))
-				->icon('fa fa-arrows-h')
+				->icon('fa-solid fa-left-right')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/warehouse/movement/index.php', NULL, NULL, $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}")
 				)
@@ -179,7 +179,7 @@ $oAdmin_Form_Entity_Menus->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Warehouse.inventory'))
-				->icon('fa fa-calendar-check-o')
+				->icon('fa-regular fa-calendar-check')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/warehouse/inventory/index.php', NULL, NULL, $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}")
 				)
@@ -190,7 +190,7 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Warehouse.types'))
-		->icon('fa fa-list')
+		->icon('fa-solid fa-list')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/warehouse/type/index.php', NULL, NULL, $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}")
 		)
@@ -200,7 +200,7 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Warehouse.entries'))
-		->icon('fa fa-list-check')
+		->icon('fa-solid fa-list-check')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/warehouse/entry/index.php', NULL, NULL, $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}")
 		)

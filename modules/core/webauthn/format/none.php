@@ -12,29 +12,29 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  */
 class Core_Webauthn_Format_None extends Core_Webauthn_Format
 {
-    /**
-     * Get certificate PEM
-     * @return string|null
-     */
+	/**
+	 * Get certificate PEM
+	 * @return string|null
+	 */
     protected function _doGetCertificatePem()
     {
         return NULL;
     }
 
-    /**
-     * Get public key for verification
-     * @return resource|false|null
-     */
+	/**
+	 * Get public key for verification
+	 * @return resource|false|null
+	 */
     protected function _doGetPublicKey()
     {
         return NULL;
     }
 
-    /**
-     * Validate attestation signature
-     * @param string $clientDataHash
-     * @return bool
-     */
+	/**
+	 * Validate attestation signature
+	 * @param string $clientDataHash
+	 * @return bool
+	 */
     public function validateAttestation($clientDataHash)
     {
 	    // Убеждаемся, что для формата 'none' оператор аттестации пуст
@@ -46,11 +46,11 @@ class Core_Webauthn_Format_None extends Core_Webauthn_Format
         return TRUE;
     }
 
-    /**
-     * Validates the certificate against root certificates
-     * @param array $rootCas
-     * @return boolean
-     */
+	/**
+	 * Validates the certificate against root certificates
+	 * @param array $rootCas
+	 * @return boolean
+	 */
     public function validateRootCertificate($rootCas)
     {
         return FALSE;

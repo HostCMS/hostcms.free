@@ -20,9 +20,9 @@ class Company_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 
 	/**
@@ -41,7 +41,7 @@ class Company_Module extends Core_Module_Abstract
 			array(
 				'sorting' => 140,
 				'block' => 3,
-				'ico' => 'fa fa-building-o',
+				'ico' => 'fa-regular fa-building',
 				'name' => Core::_('Company.model_name'),
 				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/company/index.php"),
 				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/company/index.php'}); return false")

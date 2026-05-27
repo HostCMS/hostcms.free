@@ -8,14 +8,14 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Directory
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Directory_Controller_Tab_Phone extends Directory_Controller_Tab
 {
 	protected $_directoryTypeName = 'Directory_Phone_Type';
 	// protected $_titleHeaderColor = 'bordered-palegreen';
 	protected $_titleHeaderColor = 'palegreen';
-	protected $_faTitleIcon = 'fa fa-phone';
+	protected $_faTitleIcon = 'fa-solid fa-phone';
 
 	protected function _execute($oPersonalDataInnerWrapper)
 	{

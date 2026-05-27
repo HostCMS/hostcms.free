@@ -83,10 +83,10 @@ class Shop_Discountcard_Bonus_Type_Controller_Edit extends Admin_Form_Action_Con
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 	}
 
-    /**
-     * Create visual tree of the statuses for dropdownlist
-     * @return array
-     */
+	/**
+	 * Create visual tree of the statuses for dropdownlist
+	 * @return array
+	 */
 	static public function getDropdownlistOptions()
 	{
 		$aReturn = array(array('value' => Core::_('Shop_Order.notStatus'), 'color' => '#aebec4'));
@@ -98,7 +98,7 @@ class Shop_Discountcard_Bonus_Type_Controller_Edit extends Admin_Form_Action_Con
 			$aReturn[$oShop_Discountcard_Bonus_Type->id] = array(
 				'value' => $oShop_Discountcard_Bonus_Type->name,
 				'color' => $oShop_Discountcard_Bonus_Type->color,
-				'icon' => 'fa fa-circle'
+				'icon' => 'fa-solid fa-circle'
 			);
 		}
 

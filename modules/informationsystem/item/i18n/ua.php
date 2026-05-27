@@ -53,7 +53,7 @@ return array(
 	'seo_description' => 'Опис (Description)',
 	'seo_keywords' => 'Ключові слова (Keywords)',
 
-	'tags' => '<acronym title="Мітки (теги) інформаційного елемента, розділяються комою, наприклад процесори, AMD, Intel">Мітки (теги)</acronym>',
+	'tags' => '<acronym title="Мітки інформаційного елемента, розділяються комою">Мітки</acronym>',
 	'type_tag' => 'Введіть тег ...',
 
 	'error_information_group_URL_item' => 'У групі вже існує інформаційний елемент з такою назвою в URL!',

@@ -59,7 +59,7 @@ class Shop_Delivery_Condition_Controller_Import extends Admin_Form_Action_Contro
 	 * @param string $sCSVFilePath file path
 	 * @param Shop_Delivery_Model $oShopDelivery delivery
 	 * @return int|true
-     */
+	 */
 	public function import($sCSVFilePath, $oShopDelivery)
 	{
 		$counter = 0;
@@ -206,7 +206,7 @@ class Shop_Delivery_Condition_Controller_Import extends Admin_Form_Action_Contro
 	/**
 	 * Add form buttons
 	 * @return object
-     */
+	 */
 	protected function _addButtons()
 	{
 		// Кнопки

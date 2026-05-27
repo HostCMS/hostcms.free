@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Wysiwyg
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Wysiwyg_Controller
 {
@@ -94,7 +94,7 @@ class Wysiwyg_Controller
 							Core_File::mkdir($newPath, TRUE);
 						}
 
-						Core_File::rename(CMS_FOLDER . ltrim($realFilepath, DIRECTORY_SEPARATOR), $newPath . basename($realFilepath));
+						Core_File::rename(CMS_FOLDER . ltrim($realFilepath, DIRECTORY_SEPARATOR), $newPath . basename($realFilepath), TRUE);
 
 						$aConform[$filepath] = '/' . ltrim($newHref, '/') . basename($filepath);
 					} catch (Exception $e) {

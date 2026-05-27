@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 require_once('../../../../../bootstrap.php');
 
@@ -105,13 +105,33 @@ $oAdmin_Form_Controller
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
-$additionalParams = "shop_purchase_discount_coupon_dir_id={$oShop_Purchase_Discount_Coupon_Dir->id}";
+$additionalParams = "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&shop_purchase_discount_coupon_dir_id={$oShop_Purchase_Discount_Coupon_Dir->id}";
+
+// Глобальный поиск
+$sGlobalSearch = Core_Array::getGet('globalSearch', '', 'trim');
+
+$oAdmin_Form_Controller->addEntity(
+	Admin_Form_Entity::factory('Code')
+		->html('
+			<div class="row search-field margin-bottom-20">
+				<div class="col-xs-12">
+					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
+						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
+						<i class="fa-solid fa-circle-xmark no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
+						<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '"><i class="fa-solid fa-magnifying-glass fa-fw"></i></button>
+					</form>
+				</div>
+			</div>
+		')
+);
+
+$sGlobalSearch = str_replace(' ', '%', Core_DataBase::instance()->escapeLike($sGlobalSearch));
 
 // Элементы меню
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 	->name(Core::_('Shop_Purchase_Discount_Coupon.coupon'))
-	->icon('fa fa-plus')
+	->icon('fa-solid fa-plus')
 	->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref(
 			$oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0
@@ -126,7 +146,7 @@ $oAdmin_Form_Entity_Menus->add(
 ->add(
 	Admin_Form_Entity::factory('Menu')
 	->name(Core::_('Shop_Purchase_Discount_Coupon_Dir.menu'))
-	->icon('fa fa-plus')
+	->icon('fa-solid fa-plus')
 	->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref(
 			$oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0
@@ -141,7 +161,7 @@ $oAdmin_Form_Entity_Menus->add(
 ->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Purchase_Discount_Coupon.import'))
-		->icon('fa fa-download')
+		->icon('fa-solid fa-download')
 		->href(
 	$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/shop/purchase/discount/coupon/import/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}")
 		)
@@ -344,10 +364,27 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Shop_Purchase_Discount_Coupon_Dir')
 );
 
-$oAdmin_Form_Dataset
-	->changeField('name', 'class', 'semi-bold')
-	->addCondition(array('where' => array('parent_id', '=', $oShop_Purchase_Discount_Coupon_Dir->id)))
-	->addCondition(array('where' => array('shop_id', '=', $oShop->id)));
+$oAdmin_Form_Dataset->addCondition(array('where' => array('shop_purchase_discount_coupon_dirs.shop_id', '=', $oShop->id)));
+
+if (strlen($sGlobalSearch))
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('open' => array()));
+
+	is_numeric($sGlobalSearch) && $oAdmin_Form_Dataset
+			->addCondition(array('where' => array('shop_purchase_discount_coupon_dirs.id', '=', intval($sGlobalSearch))))
+			->addCondition(array('setOr' => array()));
+
+	$oAdmin_Form_Dataset
+		->addCondition(array('where' => array('shop_purchase_discount_coupon_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
+}
+else
+{
+	$oAdmin_Form_Dataset->addCondition(array('where' => array('shop_purchase_discount_coupon_dirs.parent_id', '=', $oShop_Purchase_Discount_Coupon_Dir->id)));
+}
+
+$oAdmin_Form_Dataset->changeField('name', 'class', 'semi-bold');
 
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 
@@ -361,14 +398,29 @@ $oUser = Core_Auth::getCurrentUser();
 	&& $oAdmin_Form_Dataset->addUserConditions();
 
 $oAdmin_Form_Dataset
-	->addCondition(array('where' => array('shop_purchase_discount_coupon_dir_id', '=', $oShop_Purchase_Discount_Coupon_Dir->id)))
 	->addCondition(
 		array('select' => array('shop_purchase_discount_coupons.*'))
 	)->addCondition(
 		array('join' => array('shop_purchase_discounts', 'shop_purchase_discounts.id', '=', 'shop_purchase_discount_coupons.shop_purchase_discount_id'))
 	)->addCondition(
 		array('where' => array('shop_purchase_discounts.shop_id', '=', $oShop->id))
-	)
+	);
+
+if (strlen($sGlobalSearch))
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('open' => array()))
+			->addCondition(array('where' => array('shop_purchase_discount_coupons.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('shop_purchase_discount_coupons.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
+}
+else
+{
+	$oAdmin_Form_Dataset->addCondition(array('where' => array('shop_purchase_discount_coupons.shop_purchase_discount_coupon_dir_id', '=', $oShop_Purchase_Discount_Coupon_Dir->id)));
+}
+
+$oAdmin_Form_Dataset
 	->changeField('name', 'type', 1)
 	->changeField('active', 'link', "/{admin}/shop/purchase/discount/coupon/index.php?hostcms[action]=changeStatus&hostcms[checked][{dataset_key}][{id}]=1&shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&shop_purchase_discount_coupon_dir_id={$oShop_Purchase_Discount_Coupon_Dir->id}")
 	->changeField('active', 'onclick', "$.adminLoad({path: '/{admin}/shop/purchase/discount/coupon/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&shop_purchase_discount_coupon_dir_id={$oShop_Purchase_Discount_Coupon_Dir->id}', action: 'changeStatus', windowId: '{windowId}'}); return false");

@@ -536,8 +536,8 @@ class Printlayout_Controller extends Core_Controller
 				// Печать
 				$printlayoutsButton = '
 					<div class="btn-group">
-						<a class="btn btn-default" href="javascript:void(0);"><i class="fa fa-print"></i></a>
-						<a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
+						<a class="btn btn-default" href="javascript:void(0);"><i class="fa-solid fa-print"></i></a>
+						<a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa-solid fa-angle-down"></i></a>
 						<ul class="dropdown-menu dropdown-default">
 				';
 

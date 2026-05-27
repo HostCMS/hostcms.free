@@ -21,7 +21,8 @@ class Shop_Group_Discount_Controller_Edit extends Admin_Form_Action_Controller_T
 	{
 		if (!$object->id)
 		{
-			$oShop_Group = Core_Entity::factory('Shop_Group', Core_Array::getGet('shop_group_id', 0, 'int'));
+			$shop_group_id = Core_Array::getGet('shop_group_id', 0, 'int');
+			$oShop_Group = Core_Entity::factory('Shop_Group', $shop_group_id);
 
 			$object->shop_id = $oShop_Group->shop_id;
 		}
@@ -36,6 +37,12 @@ class Shop_Group_Discount_Controller_Edit extends Admin_Form_Action_Controller_T
 	 */
 	protected function _prepareForm()
 	{
+		$this
+			->addSkipColumn('shop_discount_dir_id')
+			->addSkipColumn('shop_gift_dir_id')
+			->addSkipColumn('shop_bonus_dir_id')
+			->addSkipColumn('shop_currency_id');
+
 		parent::_prepareForm();
 
 		$oMainTab = Admin_Form_Entity::factory('Tab')
@@ -43,9 +50,7 @@ class Shop_Group_Discount_Controller_Edit extends Admin_Form_Action_Controller_T
 			->name('main');
 
 		$oMainTab
-			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
-			// ->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-			;
+			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		$this->addTab($oMainTab);
 

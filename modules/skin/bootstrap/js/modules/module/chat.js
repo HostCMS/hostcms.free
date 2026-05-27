@@ -153,7 +153,7 @@
 				var unreadHtml = '<div id="unread_messages" class="text-align-center ' + (+result['count_unread'] ? '' : 'hide') + ' ">!!' +
 								result['count_unread_message'] +
 								'<span class="unread_messages_top"><span class="count_unread_messages_top">' +
-								result['count_unread'] + '</span> <i class="fa fa-caret-up margin-left-5"></i></span> <span class="unread_messages_bottom hide"><span class="count_unread_messages_bottom"></span><i class="fa fa-caret-down margin-left-5"></i></span></div>';
+								result['count_unread'] + '</span> <i class="fa-solid fa-caret-up margin-left-5"></i></span> <span class="unread_messages_bottom hide"><span class="count_unread_messages_bottom"></span><i class="fa-solid fa-caret-down margin-left-5"></i></span></div>';
 
 				jMessagesList.before(unreadHtml);
 
@@ -780,7 +780,7 @@
 
 		refreshChatCallback: function(data) {
 			if (data["info"]) {
-				Notify('<img width="24px" height="24px" src="' + $.escapeHtml(data["info"].avatar) + '"><span style="padding-left:10px">' + $.escapeHtml(data["info"].text) + '</span>', '', 'bottom-left', '7000', 'blueberry', 'fa-comment-o', true);
+				Notify('<img width="24px" height="24px" src="' + $.escapeHtml(data["info"].avatar) + '"><span style="padding-left:10px">' + $.escapeHtml(data["info"].text) + '</span>', '', 'bottom-left', '7000', 'blueberry', 'fa-regular fa-comment', true);
 
 				var user_id = data["info"]['user_id'],
 					jContact = $('#chat-user-id-' + user_id + ' .contact-info .contact-name'),

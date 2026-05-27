@@ -41,29 +41,29 @@ class Smarty_Internal_Extension_Handler
 {
     public $objType = null;
 
-    /**
-     * Cache for property information from generic getter/setter
-     * Preloaded with names which should not use with generic getter/setter
-     *
-     * @var array
-     */
+	/**
+	 * Cache for property information from generic getter/setter
+	 * Preloaded with names which should not use with generic getter/setter
+	 *
+	 * @var array
+	 */
     private $_property_info     = array(
-        'AutoloadFilters' => 0, 'DefaultModifiers' => 0, 'ConfigVars' => 0,
-        'DebugTemplate'   => 0, 'RegisteredObject' => 0, 'StreamVariable' => 0,
-        'TemplateVars'    => 0, 'Literals' => 'Literals',
+    	'AutoloadFilters' => 0, 'DefaultModifiers' => 0, 'ConfigVars' => 0,
+    	'DebugTemplate'   => 0, 'RegisteredObject' => 0, 'StreamVariable' => 0,
+    	'TemplateVars'    => 0, 'Literals' => 'Literals',
     );//
 
     private $resolvedProperties = array();
 
-    /**
-     * Call external Method
-     *
-     * @param \Smarty_Internal_Data $data
-     * @param string                $name external method names
-     * @param array                 $args argument array
-     *
-     * @return mixed
-     */
+	/**
+	 * Call external Method
+	 *
+	 * @param \Smarty_Internal_Data $data
+	 * @param string                $name external method names
+	 * @param array                 $args argument array
+	 *
+	 * @return mixed
+	 */
     public function _callExternalMethod(Smarty_Internal_Data $data, $name, $args)
     {
         /* @var Smarty $data ->smarty */
@@ -92,9 +92,9 @@ class Smarty_Internal_Extension_Handler
                             $property = $this->resolvedProperties['property'][$basename] ??
                                 $this->resolvedProperties['property'][$basename] = smarty_strtolower_ascii(
                                 join(
-                                    '_',
+                                	'_',
                                     preg_split(
-                                        '/([A-Z][^A-Z]*)/',
+                                    	'/([A-Z][^A-Z]*)/',
                                         $basename,
                                         -1,
                                         PREG_SPLIT_NO_EMPTY |
@@ -135,13 +135,13 @@ class Smarty_Internal_Extension_Handler
         return call_user_func_array(array(new Smarty_Internal_Undefined(), $name), $args);
     }
 
-    /**
-     * Make first character of name parts upper case
-     *
-     * @param string $name
-     *
-     * @return string
-     */
+	/**
+	 * Make first character of name parts upper case
+	 *
+	 * @param string $name
+	 *
+	 * @return string
+	 */
     public function upperCase($name)
     {
         $_name = explode('_', $name);
@@ -149,13 +149,13 @@ class Smarty_Internal_Extension_Handler
         return implode('_', $_name);
     }
 
-    /**
-     * get extension object
-     *
-     * @param string $property_name property name
-     *
-     * @return mixed|Smarty_Template_Cached
-     */
+	/**
+	 * get extension object
+	 *
+	 * @param string $property_name property name
+	 *
+	 * @return mixed|Smarty_Template_Cached
+	 */
     public function __get($property_name)
     {
         // object properties of runtime template extensions will start with '_'
@@ -170,26 +170,26 @@ class Smarty_Internal_Extension_Handler
         return $this->$property_name = new $class();
     }
 
-    /**
-     * set extension property
-     *
-     * @param string $property_name property name
-     * @param mixed  $value         value
-     *
-     */
+	/**
+	 * set extension property
+	 *
+	 * @param string $property_name property name
+	 * @param mixed  $value         value
+	 *
+	 */
     public function __set($property_name, $value)
     {
         $this->$property_name = $value;
     }
 
-    /**
-     * Call error handler for undefined method
-     *
-     * @param string $name unknown method-name
-     * @param array  $args argument array
-     *
-     * @return mixed
-     */
+	/**
+	 * Call error handler for undefined method
+	 *
+	 * @param string $name unknown method-name
+	 * @param array  $args argument array
+	 *
+	 * @return mixed
+	 */
     public function __call($name, $args)
     {
         return call_user_func_array(array(new Smarty_Internal_Undefined(), $name), array($this));

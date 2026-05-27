@@ -27,7 +27,7 @@ return array(
 	'name' => 'Handler function name',
 	'sorting' => 'Sort',
 	'picture' => '<acronym title="Action picture, e.g. /admin/images/edit.gif">Picture</acronym>',
-	'icon' => '<acronym title="CSS icon, e.g. fa fa-comment">Icon</acronym>',
+	'icon' => '<acronym title="CSS icon">Icon</acronym>',
 	'color' => '<acronym title="CSS class, e.g. success">Color</acronym>',
 	'dataset' => '<acronym title="Dataset index available for action (-1 — action available for all datasets)">Dataset index</acronym>',
 	'single' => '<acronym title="Display action in actions list">Display in actions list</acronym>',

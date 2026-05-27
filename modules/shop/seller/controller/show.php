@@ -167,7 +167,7 @@ class Shop_Seller_Controller_Show extends Core_Controller
 	/**
 	 * Parse URL and set controller properties
 	 * @return Shop_Seller_Controller_Show
-     * @hostcms-event Shop_Seller_ontroller_Show.onBeforeParseUrl
+	 * @hostcms-event Shop_Seller_ontroller_Show.onBeforeParseUrl
 	 * @hostcms-event Shop_Seller_ontroller_Show.onAfterParseUrl
 	 */
 	public function parseUrl()

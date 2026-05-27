@@ -85,13 +85,16 @@ class Skin_Bootstrap_Module_Search_Module extends Search_Module
 		}
 	}
 
+	/**
+	 * Get JSON
+	 * @param array $aSearch_Pages
+	 * @return array
+	 */
 	protected function _getJson($aSearch_Pages)
 	{
 		$aJson = array();
 
-		$aConfig = Core::$config->get('search_config', array()) + array(
-			'modules' => array()
-		);
+		$aConfig = Search_Controller::getConfig();
 
 		foreach ($aSearch_Pages as $oSearch_Page)
 		{
@@ -110,7 +113,7 @@ class Skin_Bootstrap_Module_Search_Module extends Search_Module
 							'label' => strlen($oSearch_Page->title) ? $oSearch_Page->title : Core::_('Admin.no_title'),
 							'href' => Core_Array::get($aReturn, 'href'),
 							'onclick' => Core_Array::get($aReturn, 'onclick'),
-							'icon' => 'fa ' . Core_Array::get($aReturn, 'icon')
+							'icon' => Core_Array::get($aReturn, 'icon')
 						);
 					}
 				}

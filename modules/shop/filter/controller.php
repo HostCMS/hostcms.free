@@ -100,11 +100,11 @@ class Shop_Filter_Controller
 		);
 	}
 
-    /**
-     * Get price sql string
-     * @param Shop_Price_Model $oShop_Price
-     * @return array array('column' => ..., 'index' => ...)
-     */
+	/**
+	 * Get price sql string
+	 * @param Shop_Price_Model $oShop_Price
+	 * @return array array('column' => ..., 'index' => ...)
+	 */
 	protected function _getPriceSql(Shop_Price_Model $oShop_Price)
 	{
 		return array(

@@ -12,19 +12,19 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  */
 class Core_Image_Gd extends Core_Image
 {
-    /**
-     * ICC header size in APP2 segment
-     */
+	/**
+	 * ICC header size in APP2 segment
+	 */
     const ICC_HEADER_LEN = 14;
 
-    /**
-     * maximum data len of a JPEG marker
-     */
+	/**
+	 * maximum data len of a JPEG marker
+	 */
     const MAX_BYTES_IN_MARKER = 65533;
 
-    /**
-     * ICC header marker
-     */
+	/**
+	 * ICC header marker
+	 */
     const ICC_MARKER = "ICC_PROFILE\x00";
 
 	/**
@@ -742,7 +742,7 @@ class Core_Image_Gd extends Core_Image
 	 * Get image size
 	 * @param string $path path
 	 * @return array|NULL
-     */
+	 */
 	public function getImageSize($path)
 	{
 		if (Core_File::isFile($path) && is_readable($path) && filesize($path) > 12 && self::exifImagetype($path))

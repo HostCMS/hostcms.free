@@ -32,7 +32,6 @@ class Sql_Table_Controller_Structure extends Admin_Form_Action_Controller
 
 		$aConfig = Core_DataBase::instance()->getConfig();
 
-		header("Pragma: public");
 		header("Content-Description: File Transfer");
 		header("Content-Type: application/force-download");
 		header("Content-Disposition: attachment; filename = " . $sTablesName . '_structure_' . date("Y_m_d_H_i_s") . '.sql' . ";");

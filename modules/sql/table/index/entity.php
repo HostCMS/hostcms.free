@@ -46,7 +46,7 @@ class Sql_Table_Index_Entity extends Core_Empty_Entity
 	/**
 	 * Get primary key value
 	 * @return string
-     */
+	 */
 	public function getPrimaryKeyName()
 	{
 		return 'name';
@@ -76,7 +76,7 @@ class Sql_Table_Index_Entity extends Core_Empty_Entity
 	 * Utilized for reading data from inaccessible properties
 	 * @param string $property property name
 	 * @return string|void
-     */
+	 */
 	public function __get($property)
 	{
 		if (isset($this->_tableColums[$property]))
@@ -134,7 +134,7 @@ class Sql_Table_Index_Entity extends Core_Empty_Entity
 	public function uniqueBackend()
 	{
 		$this->unique && Core_Html_Entity::factory('Span')
-			->value('<i class="fa fa-check-circle green"></i>')
+			->value('<i class="fa-solid fa-check-circle green"></i>')
 			->execute();
 	}
 
@@ -153,7 +153,7 @@ class Sql_Table_Index_Entity extends Core_Empty_Entity
 				. ($row['Sub_part'] != '' ? ' (' . htmlspecialchars($row['Sub_part']) . ')' : '')
 			. '</td>
 			<td width="10%">' . htmlspecialchars((string) $row['Cardinality']) . '</td>
-			<td width="30">' . ($row['Null'] == 'YES' ? '<i class="fa fa-circle-o azure" title="NULL"></i>' : '') . '</td>
+			<td width="30">' . ($row['Null'] == 'YES' ? '<i class="fa-regular fa-circle azure" title="NULL"></i>' : '') . '</td>
 			</tr>';
 		}
 

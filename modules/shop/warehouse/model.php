@@ -237,7 +237,7 @@ class Shop_Warehouse_Model extends Core_Entity
 			foreach ($aTags as $oTag)
 			{
 				Core_Html_Entity::factory('Code')
-					->value('<span class="badge badge-square badge-tag badge-max-width badge-lightgray margin-left-5" title="' . htmlspecialchars($oTag->name) . '"><i class="fa fa-tag"></i> ' . htmlspecialchars($oTag->name) . '</span>')
+					->value('<span class="badge badge-square badge-tag badge-max-width badge-lightgray margin-left-5" title="' . htmlspecialchars($oTag->name) . '"><i class="fa-solid fa-tags"></i> ' . htmlspecialchars($oTag->name) . '</span>')
 					->execute();
 			}
 		}
@@ -264,7 +264,7 @@ class Shop_Warehouse_Model extends Core_Entity
 	 * @param int $shop_item_id shop item id
 	 * @param string|null $dateTo date
 	 * @return string|null
-     */
+	 */
 	public function getRest($shop_item_id, $dateTo = NULL)
 	{
 		// Get last accumulated value
@@ -494,7 +494,7 @@ class Shop_Warehouse_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event shop_warehouse.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')

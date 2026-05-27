@@ -110,7 +110,7 @@ class Tag_Dir_Model extends Core_Entity
 	 * Get dir by name
 	 * @param string $name
 	 * @return Core_Entity
-     */
+	 */
 	public function getByName($name)
 	{
 		$this->queryBuilder()

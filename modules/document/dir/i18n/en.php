@@ -1,12 +1,5 @@
 <?php
-/**
- * Documents.
- *
- * @package HostCMS
- * @subpackage Document
- * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'Document divisions',
 	'folders' => 'Division',
@@ -23,4 +16,5 @@ return array(
 	'site_id' => 'Site Id',
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
+	'move_success' => 'Document sections moved',
 );

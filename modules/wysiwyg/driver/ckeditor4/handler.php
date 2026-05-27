@@ -132,6 +132,175 @@ class Wysiwyg_Driver_Ckeditor4_Handler extends Wysiwyg_Handler
 			'on' => '{ fileUploadRequest: function (evt) { return wysiwyg.uploadImageHandler(evt) } }'
 		);
 
+		$aiJs = '';
+		$shortcodeJs = '';
+
+		// Интеграция кнопок AI и Shortcode
+		if (Core::moduleIsActive('ai') || Core::moduleIsActive('shortcode'))
+		{
+			if (Core::moduleIsActive('ai'))
+			{
+				$oSite = Core_Entity::factory('Site', CURRENT_SITE);
+				$oAi = $oSite->Ais->getDefault();
+
+				if (!is_null($oAi))
+				{
+					$aiPromptDefault = Core_Str::escapeJavascriptVariable($oAdmin_Form_Entity_Textarea->data('ai_prompt_default'));
+
+					$aiJs = "
+					CKEDITOR.dialog.add('aiDialog', function(editor) {
+						return {
+							title: 'AI',
+							minWidth: 400,
+							minHeight: 180,
+							contents: [{
+								id: 'info',
+								elements: [{
+									type: 'textarea',
+									id: 'ai_prompt',
+									label: 'Prompt',
+									'default': '{$aiPromptDefault}',
+									inputStyle: 'height: 120px;'
+								}]
+							}],
+							onOk: function() {
+								var prompt = this.getValueOf('info', 'ai_prompt');
+								if (prompt !== '') {
+									$.loadingScreen('show');
+									$.ajax({
+										url: hostcmsBackend + '/ai/index.php',
+										data: { 'aiSendWysiwygQuery': 1, 'ai_id': " . $oAi->id . ", 'query': prompt },
+										dataType: 'json',
+										type: 'POST',
+										success: function(response){
+											$.loadingScreen('hide');
+											if (response.status == 'success') {
+												editor.insertHtml(response.text);
+											} else {
+												Notify('<span>AI response error! Please try again later.</span>', '', 'bottom-left', '5000', 'danger', 'fa-solid fa-ban', true);
+											}
+										}
+									});
+								}
+							}
+						};
+					});
+					editor.addCommand('aiDialog', new CKEDITOR.dialogCommand('aiDialog'));
+					editor.ui.addButton('insertAiResponse', {
+						label: 'AI',
+						command: 'aiDialog',
+						toolbar: 'insert,100'
+					});";
+				}
+			}
+
+			if (Core::moduleIsActive('shortcode'))
+			{
+				$aShortcodes = Core_Entity::factory('Shortcode')->getAllByActive(1);
+				$aTmpShortcodes = array();
+
+				foreach ($aShortcodes as $oShortcode)
+				{
+					$label = Core_Str::escapeJavascriptVariable($oShortcode->name) . " [" . $oShortcode->id . "]";
+					$value = Core_Str::escapeJavascriptVariable($oShortcode->example);
+					$aTmpShortcodes[] = "['" . $label . "', '" . $value . "']";
+				}
+				$sShortcodes = implode(',', $aTmpShortcodes);
+				$shortcodeTitle = Core::_('Shortcode.title');
+
+				$shortcodeJs = "
+				CKEDITOR.dialog.add('shortcodeDialog', function(editor) {
+					return {
+						title: '{$shortcodeTitle}',
+						minWidth: 320,
+						minHeight: 100,
+						contents: [{
+							id: 'info',
+							elements: [{
+								type: 'select',
+								id: 'shortcode',
+								label: '{$shortcodeTitle}',
+								items: [" . $sShortcodes . "]
+							}]
+						}],
+						onOk: function() {
+							var val = this.getValueOf('info', 'shortcode');
+							if (val !== '') {
+								editor.insertHtml(val);
+							}
+						}
+					};
+				});
+				editor.addCommand('shortcodeDialog', new CKEDITOR.dialogCommand('shortcodeDialog'));
+				editor.ui.addButton('insertShortcode', {
+					label: '{$shortcodeTitle}',
+					command: 'shortcodeDialog',
+					toolbar: 'insert,101'
+				});";
+			}
+		}
+
+		$pluginJs = "";
+		if ($aiJs !== "" || $shortcodeJs !== "")
+		{
+			$pluginJs = "
+			if (typeof CKEDITOR !== 'undefined' && !CKEDITOR.plugins.get('hostcms_custom')) {
+				CKEDITOR.plugins.add('hostcms_custom', {
+					init: function(editor) {
+						{$aiJs}
+						{$shortcodeJs}
+					}
+				});
+			}";
+
+			$init['extraPlugins'] = isset($init['extraPlugins'])
+				? '"' . trim($init['extraPlugins'], '"\'') . ',hostcms_custom"'
+				: '"hostcms_custom"';
+		}
+
+		// Интеграция автокомплита для mentions
+		if (is_array($oAdmin_Form_Entity_Textarea->wysiwygMentions) && count($oAdmin_Form_Entity_Textarea->wysiwygMentions)
+			&& $oAdmin_Form_Entity_Textarea->wysiwygMentionTemplate != ''
+		)
+		{
+			$init['mentions'] = "[{
+				feed: function(options, callback) {
+					var searchString = options.query.toLowerCase();
+					var employees = " . json_encode($oAdmin_Form_Entity_Textarea->wysiwygMentions, defined('JSON_UNESCAPED_UNICODE') ? JSON_UNESCAPED_UNICODE : 0) . ";
+
+					var filtered = employees.filter(emp =>
+						emp.name.toLowerCase().includes(searchString) ||
+						emp.login.toLowerCase().includes(searchString)
+					);
+
+					var results = filtered.map(emp => {
+						emp.displayText = emp.name != ''
+							? emp.name + ' (@' + emp.login + ')'
+							: '@' + emp.login;
+
+						return emp;
+					});
+
+					callback(results);
+				},
+				itemTemplate: '<li data-id=\"{id}\">{displayText}</li>',
+				outputTemplate: function(item) {
+					const selectedEmp = item;
+
+					const mentionText = selectedEmp.name != ''
+						? selectedEmp.name + ' (@' + selectedEmp.login + ')'
+						: selectedEmp.login;
+
+					return `" . $oAdmin_Form_Entity_Textarea->wysiwygMentionTemplate . "`;
+				},
+				minChars: 0
+			}]";
+
+			$init['extraPlugins'] = isset($init['extraPlugins'])
+				? '"' . trim($init['extraPlugins'], '"\'') . ',mentions"'
+				: '"mentions"';
+		}
+
 		!isset($init['height'])
 			&& $init['height'] = '"' . ($oAdmin_Form_Entity_Textarea->rows * 30) . 'px"';
 
@@ -159,9 +328,23 @@ class Wysiwyg_Driver_Ckeditor4_Handler extends Wysiwyg_Handler
 			$sInit = '';
 		}
 
+		$customCssJs = '';
+		if ($oAdmin_Form_Entity_Textarea->wysiwygContentStyle != '')
+		{
+			// Экранируем стили для безопасной передачи в JS
+			$safeCss = Core_Str::escapeJavascriptVariable($oAdmin_Form_Entity_Textarea->wysiwygContentStyle);
+			$customCssJs = "if (typeof CKEDITOR !== 'undefined') { CKEDITOR.addCss('{$safeCss}'); }";
+		}
+
 		$Core_Html_Entity_Script = new Core_Html_Entity_Script();
 		$Core_Html_Entity_Script
-			->value("$(function() { setTimeout(function(){ $('#" . Core_Str::escapeJavascriptVariable($windowId) . " #" . Core_Str::escapeJavascriptVariable($oAdmin_Form_Entity_Textarea->id) . "').ckeditor({ {$sInit} }); }, 300); });")
+			->value("$(function() {
+				{$pluginJs}
+				{$customCssJs}
+				setTimeout(function(){
+					$('#" . Core_Str::escapeJavascriptVariable($windowId) . " #" . Core_Str::escapeJavascriptVariable($oAdmin_Form_Entity_Textarea->id) . "').ckeditor({ {$sInit} });
+				}, 300);
+			});")
 			->execute();
 	}
 }

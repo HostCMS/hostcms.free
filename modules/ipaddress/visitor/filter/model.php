@@ -131,7 +131,7 @@ class Ipaddress_Visitor_Filter_Model extends Core_Entity
 				case 2:
 					Core_Html_Entity::factory('Span')
 					->class('badge badge-round green white')
-					->value('<i class="fa-solid fa-circle-check"></i> ' . Core::_('Ipaddress_Visitor_Filter.block_mode2'))
+					->value('<i class="fa-regular fa-circle-check"></i> ' . Core::_('Ipaddress_Visitor_Filter.block_mode2'))
 					->execute();
 				break;
 			}
@@ -140,7 +140,7 @@ class Ipaddress_Visitor_Filter_Model extends Core_Entity
 		{
 			$this->ban_hours && Core_Html_Entity::factory('Span')
 				->class('badge badge-round orange white')
-				->value('<i class="fa fa-ban"></i> ' . $this->_getHoursByText($this->ban_hours))
+				->value('<i class="fa-solid fa-ban"></i> ' . $this->_getHoursByText($this->ban_hours))
 				->execute();
 		}
 
@@ -281,6 +281,6 @@ class Ipaddress_Visitor_Filter_Model extends Core_Entity
 	 */
 	public function exportBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		return '<a target="_blank" href="' . $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'exportFilters', NULL, 1, intval($this->id), 'ipaddress_visitor_filter_dir_id=' . Core_Array::getGet('ipaddress_visitor_filter_dir_id')) . '"><i class="fa fa-upload"></i></a>';
+		return '<a target="_blank" href="' . $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'exportFilters', NULL, 1, intval($this->id), 'ipaddress_visitor_filter_dir_id=' . Core_Array::getGet('ipaddress_visitor_filter_dir_id')) . '"><i class="fa-solid fa-upload"></i></a>';
 	}
 }

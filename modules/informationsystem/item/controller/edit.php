@@ -380,7 +380,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 						$pathLink = Admin_Form_Entity::factory('A')
 							->id('pathLink')
 							->class('input-group-addon blue')
-							->value('<i class="fa fa-external-link"></i>')
+							->value('<i class="fa-solid fa-arrow-up-right-from-square small"></i>')
 					);
 
 					$pathLink
@@ -925,7 +925,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 						$pathLink = Admin_Form_Entity::factory('A')
 							->id('pathLink')
 							->class('input-group-addon blue')
-							->value('<i class="fa fa-external-link"></i>')
+							->value('<i class="fa-solid fa-arrow-up-right-from-square small"></i>')
 					);
 
 					$pathLink
@@ -1795,11 +1795,11 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 			});");
 	}
 
-    /**
-     * Fill shortcut groups list
-     * @param object $oObject
-     * @return array
-     */
+	/**
+	 * Fill shortcut groups list
+	 * @param object $oObject
+	 * @return array
+	 */
 	protected function _fillShortcutGroupList($oObject)
 	{
 		$aReturnArray = array();
@@ -1880,10 +1880,10 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name
 	 * @return bool
-     */
+	 */
 	public function execute($operation = NULL)
 	{
-		if (!is_null($operation) && $operation != '')
+		if (!is_null($operation) && $operation != '' && $operation != 'modal')
 		{
 			$informationsystem_id = Core_Array::getPost('informationsystem_id');
 			$path = Core_Array::getPost('path');

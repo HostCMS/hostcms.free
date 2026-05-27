@@ -16,20 +16,20 @@
  */
 class Smarty_Internal_Runtime_FilterHandler
 {
-    /**
-     * Run filters over content
-     * The filters will be lazy loaded if required
-     * class name format: Smarty_FilterType_FilterName
-     * plugin filename format: filtertype.filtername.php
-     * Smarty2 filter plugins could be used
-     *
-     * @param string                   $type     the type of filter ('pre','post','output') which shall run
-     * @param string                   $content  the content which shall be processed by the filters
-     * @param Smarty_Internal_Template $template template object
-     *
-     * @throws SmartyException
-     * @return string                   the filtered content
-     */
+	/**
+	 * Run filters over content
+	 * The filters will be lazy loaded if required
+	 * class name format: Smarty_FilterType_FilterName
+	 * plugin filename format: filtertype.filtername.php
+	 * Smarty2 filter plugins could be used
+	 *
+	 * @param string                   $type     the type of filter ('pre','post','output') which shall run
+	 * @param string                   $content  the content which shall be processed by the filters
+	 * @param Smarty_Internal_Template $template template object
+	 *
+	 * @throws SmartyException
+	 * @return string                   the filtered content
+	 */
     public function runFilter($type, $content, Smarty_Internal_Template $template)
     {
         // loop over autoload filters of specified type

@@ -1,15 +1,25 @@
 $('body')
 	// For TinyMCE init
 	.on('afterTinyMceInit', function(event, editor) {
-		editor.on('change', function() { mainFormLocker.lock() });
-		editor.on('input', function(e) { mainFormAutosave.changed($('form[id ^= "formEdit"]'), e) });
+		editor.on('change', function() {
+			if (typeof mainFormLocker !== 'undefined') {
+				mainFormLocker.lock();
+			}
+		});
+		editor.on('input', function(e) {
+			if (typeof mainFormAutosave !== 'undefined') {
+				mainFormAutosave.changed($('form[id ^= "formEdit"]'), e);
+			}
+		});
 	});
 
-document.addEventListener('focusin', (e) => {
+const focusinHandler = (e) => {
 	if (e.target.closest(".tox-tinymce-aux, .moxman-window, .tam-assetmanager-root") !== null) {
 		e.stopImmediatePropagation();
 	}
-});
+};
+
+document.addEventListener('focusin', focusinHandler);
 
 class wysiwyg {
 	static saveAll($parent)
@@ -26,13 +36,9 @@ class wysiwyg {
 		{
 			$parent.find('textarea, div[wysiwyg = "1"]').each(function(){
 				var elementId = this.id;
-				// if (tinyMCE.getInstanceById(elementId) != null)
 				if (tinyMCE.get(elementId) != null)
 				{
-					// console.log('mceRemoveControl');
-					tinyMCE.remove('#' + elementId);
-					//tinyMCE.execCommand('mceRemoveControl', false, elementId);
-					//jQuery('#content').tinymce().execCommand('mceInsertContent',false, elementId);
+					tinyMCE.execCommand('mceRemoveEditor', false, elementId);
 				}
 			});
 		}
@@ -57,7 +63,7 @@ class wysiwyg {
 
 			if (editor != null)
 			{
-				tinyMCE.remove('#' + elementId);
+				tinyMCE.execCommand('mceRemoveEditor', false, elementId);
 				$textarea.attr('name', elementName);
 			}
 		}
@@ -100,8 +106,6 @@ class wysiwyg {
 					return;
 				}
 
-				// console.log(xhr);
-
 				const json = JSON.parse(xhr.responseText);
 
 				if (!json || typeof json.url != 'string') {
@@ -109,15 +113,10 @@ class wysiwyg {
 					return;
 				}
 
-				// console.log(json);
-
 				if (json.status == 'success' && json.url != '')
 				{
-					// console.log(entity_id);
-
-					if (entity_id == '')
+					if (typeof entity_id == 'undefined' || entity_id === null || entity_id === '')
 					{
-						// Добавляем скрытое поле
 						$form.append('<input type="hidden" name="wysiwyg_images[]" value="' + json.url + '"/>');
 					}
 
@@ -125,7 +124,7 @@ class wysiwyg {
 				}
 				else
 				{
-					reject();
+					reject('Upload failed');
 					return;
 				}
 			};
@@ -134,16 +133,40 @@ class wysiwyg {
 				reject('Image upload failed due to a XHR Transport error. Code: ' + xhr.status);
 			};
 
-			let textarea = tinymce.activeEditor.getElement();
-			let $form = $(textarea).parents('form');
-			let entity_id = $form.data('entity_id');
-			let entity_type = $form.data('entity_type');
+			let textarea, $form, entity_id, entity_type;
+
+			if (blobInfo.editor) {
+				textarea = blobInfo.editor.getElement();
+			} else if (tinymce.activeEditor) {
+				textarea = tinymce.activeEditor.getElement();
+			}
+
+			if (textarea) {
+				$form = $(textarea).parents('form');
+				entity_id = $form.data('entity_id');
+				entity_type = $form.data('entity_type');
+
+				// frontend
+				if (typeof entity_id == 'undefined')
+				{
+					const item = $(textarea).prevAll('.hostcmsEditable').first();
+					if (item.length > 0)
+					{
+						entity_id = item.attr('hostcms:id');
+						entity_type = item.attr('hostcms:entity');
+					}
+				}
+			} else {
+				$form = $('form').first();
+			}
 
 			const formData = new FormData();
-			formData.append('entity_type', entity_type);
-			formData.append('entity_id', entity_id);
+			formData.append('entity_type', entity_type || '');
+			formData.append('entity_id', entity_id || '');
 			formData.append('filename', blobInfo.filename());
-			formData.append('blob', blobInfo.blob());
+
+			const blob = typeof blobInfo.blob === 'function' ? blobInfo.blob() : blobInfo.blob;
+			formData.append('blob', blob);
 
 			xhr.send(formData);
 		});
@@ -161,7 +184,7 @@ class wysiwyg {
 					var content = tinyMCE.get(elementId).getContent();
 
 					$.each(aConform, function(index, object){
-						content = content.replace(object.source, object.destination);
+						content = content.split(object.source).join(object.destination);
 					});
 
 					tinyMCE.get(elementId).setContent(content);
@@ -175,18 +198,27 @@ class wysiwyg {
 		$parent.tinymce({
 			language: backendLng,
 			language_url: '/modules/wysiwyg/driver/tinymce7/langs/' + backendLng + '.js',
-			init_instance_callback: function (editor) {
-				editor.on('blur', function (e) {
+			setup: function(editor) {
+				editor.on('init', () => {
+					// Сброс шрифта к стандартному
+					const fontFormats = editor.options.get('font_family_formats');
+					if (fontFormats && !fontFormats.includes('Default=')) {
+						editor.options.set('font_family_formats', 'Default=inherit; ' + fontFormats);
+					}
+				});
+
+				editor.on('blur', function(e) {
 					e.stopImmediatePropagation();
 					editor.remove();
 					$parent.css('visibility', '');
 					$parent.removeClass('editing');
 				});
 			},
-			//script_url: hostcmsBackend + "/wysiwyg/tinymce.min.js",
+			file_picker_callback: wysiwygFileManager.fileBrowser.bind(wysiwygFileManager),
+			images_upload_handler: wysiwyg.uploadImageHandler,
 			menubar: false,
 			inline: true,
-			plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table  importcss',
+			plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table importcss',
 			toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist | link unlink image media preview table | removeformat code',
 			font_size_formats: "8pt 9pt 10pt 11pt 12pt 14pt 16pt 18pt 20pt 24pt 30pt 36pt 48pt 60pt 72pt 96pt"
 		});
@@ -195,42 +227,67 @@ class wysiwyg {
 	static frontendDbl($parent, settings, aCss)
 	{
 		$parent.tinymce(hQuery.extend({
-			// theme: "silver",
-			// toolbar_items_size: "small",
 			language: backendLng,
 			language_url: '/modules/wysiwyg/driver/tinymce7/langs/' + backendLng + '.js',
-			init_instance_callback: function (editor) {
-				editor.on('blur', function (e) {
-					settings.blur($parent);
+			setup: function(editor) {
+				editor.on('init', () => {
+					// Сброс шрифта к стандартному
+					const fontFormats = editor.options.get('font_family_formats');
+					if (fontFormats && !fontFormats.includes('Default=')) {
+						editor.options.set('font_family_formats', 'Default=inherit; ' + fontFormats);
+					}
+
+					// Фокус и скролл после инициализации
+					setTimeout(function() {
+						if (editor.getWin()) {
+							editor.getWin().scrollTo(0, 0);
+						}
+						editor.execCommand('mceFocus', false, editor.id);
+						editor.selection.select(editor.getBody(), true);
+						editor.selection.collapse(true);
+					}, 300);
+				});
+
+				editor.on('blur', function(e) {
+					if (settings.blur) {
+						settings.blur($parent);
+					}
 				});
 			},
-			//script_url: hostcmsBackend + "/wysiwyg/tinymce.min.js",
+			file_picker_callback: wysiwygFileManager.fileBrowser.bind(wysiwygFileManager),
+			images_upload_handler: wysiwyg.uploadImageHandler,
 			menubar: false,
-			plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table  importcss',
+			plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table importcss',
 			toolbar: 'undo redo | styleselect formatselect | bold italic underline backcolor | alignleft aligncenter alignright alignjustify | bullist numlist | link unlink image media preview table | removeformat code',
 			content_css: aCss
-		}, settings.wysiwygConfig));
+		}, settings.wysiwygConfig || {}));
 	}
 
 	static frontendSettingsRow($parent)
 	{
 		$parent.tinymce({
 			language: backendLng,
-			language_url: '/modules/wysiwyg/driver/tinymce6/langs/' + backendLng + '.js',
-			init_instance_callback: function (editor) {
-				editor.on('init', function (e) {
+			language_url: '/modules/wysiwyg/driver/tinymce7/langs/' + backendLng + '.js',
+			setup: function(editor) {
+				editor.on('init', function(e) {
 					e.stopImmediatePropagation();
-					editor.remove();
+
+					// Сброс шрифта к стандартному
+					const fontFormats = editor.options.get('font_family_formats');
+					if (fontFormats && !fontFormats.includes('Default=')) {
+						editor.options.set('font_family_formats', 'Default=inherit; ' + fontFormats);
+					}
+
+					// editor.remove();
 					$parent.css('visibility', '');
 				});
 			},
-			// script_url: hostcmsBackend + "/wysiwyg/tinymce.min.js",
+			file_picker_callback: wysiwygFileManager.fileBrowser.bind(wysiwygFileManager),
+			images_upload_handler: wysiwyg.uploadImageHandler,
 			menubar: false,
 			toolbar_mode: 'sliding',
-			toolbar_items_size: 'small',
 			promotion: false,
 			statusbar: false,
-			// inline: true,
 			plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table importcss',
 			toolbar: 'undo redo bold italic underline forecolor backcolor | blocks fontfamily fontsize | alignleft aligncenter alignright alignjustify | bullist numlist | link unlink image media preview table | removeformat code',
 			font_size_formats: "8pt 9pt 10pt 11pt 12pt 14pt 16pt 18pt 20pt 24pt 30pt 36pt 48pt 60pt 72pt 96pt"
@@ -238,14 +295,15 @@ class wysiwyg {
 	}
 }
 
-// http://www.tinymce.com/wiki.php/How-to_implement_a_custom_file_browser
-function wysiwygFileManager() // eslint-disable-line
-{
-	//this.fileBrowserCallBack = function(field_name, url, type, win)
-	this.fileBrowser = function(callback, value, meta)
-	{
+class WysiwygFileManager {
+	constructor() {
+		this.win = null;
+		this.callback = null;
+		this.field = null;
+	}
+
+	fileBrowser(callback, value, meta) {
 		this.field = value;
-		//this.callerWindow = win;
 		this.callback = callback;
 
 		var url = this.field.split('\\').join('/');
@@ -258,7 +316,6 @@ function wysiwygFileManager() // eslint-disable-line
 		if (lastPos != -1)
 		{
 			url = url.substr(0, lastPos);
-			// => /upload
 
 			lastPos = url.lastIndexOf('/');
 
@@ -269,24 +326,33 @@ function wysiwygFileManager() // eslint-disable-line
 			}
 		}
 
-		var path = hostcmsBackend + "/wysiwyg/filemanager/index.php?field_name=" + this.field + "&cdir=" + cdir + "&dir=" + dir + "&type=" + type, width = screen.width / 1.2, height = screen.height / 1.2;
+		var path = hostcmsBackend + "/wysiwyg/filemanager/index.php?field_name=" + encodeURIComponent(this.field) + "&cdir=" + encodeURIComponent(cdir) + "&dir=" + encodeURIComponent(dir) + "&type=" + encodeURIComponent(type),
+			width = screen.width / 1.2,
+			height = screen.height / 1.2;
 
-		var x = parseInt(screen.width / 2.0) - (width / 2.0), y = parseInt(screen.height / 2.0) - (height / 2.0);
+		var x = parseInt(screen.width / 2.0) - (width / 2.0),
+			y = parseInt(screen.height / 2.0) - (height / 2.0);
 
 		this.win = window.open(path, "FM", "top=" + y + ",left=" + x + ",scrollbars=yes,width=" + width + ",height=" + height + ",resizable=yes");
 
 		return false;
 	}
 
-	this.insertFile = function(url, openedWindow)
+	insertFile(url, openedWindow)
 	{
 		url = decodeURIComponent(url);
 		url = url.replace(new RegExp(/\\/g), '/');
 
-		this.callback(url);
+		if (this.callback) {
+			this.callback(url);
+		}
 
-		this.win.close();
+		if (this.win) {
+			this.win.close();
+		}
 	}
 }
 
-wysiwygFileManager = new wysiwygFileManager();
+const wysiwygFileManager = new WysiwygFileManager();
+
+window.wysiwygFileManager = wysiwygFileManager;

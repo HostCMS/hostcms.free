@@ -223,6 +223,25 @@ class Xsl_Model extends Core_Entity
 	}
 
 	/**
+	 * Move to another
+	 * @param int $xsl_dir_id dir id
+	 * @return self
+	 * @hostcms-event xsl.onBeforeMove
+	 * @hostcms-event xsl.onAfterMove
+	 */
+	public function move($xsl_dir_id)
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($xsl_dir_id));
+
+		$this->xsl_dir_id = $xsl_dir_id;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
+
+		return $this;
+	}
+
+	/**
 	 * Search indexation
 	 * @return Search_Page_Model
 	 * @hostcms-event xsl.onBeforeIndexing
@@ -368,6 +387,6 @@ class Xsl_Model extends Core_Entity
 	 */
 	public function exportBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		return '<a target="_blank" href="' . $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'exportXsls', NULL, 1, intval($this->id), 'xsl_dir_id=' . Core_Array::getGet('xsl_dir_id')) . '"><i class="fa fa-upload"></i></a>';
+		return '<a target="_blank" href="' . $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'exportXsls', NULL, 1, intval($this->id), 'xsl_dir_id=' . Core_Array::getGet('xsl_dir_id')) . '"><i class="fa-solid fa-upload"></i></a>';
 	}
 }

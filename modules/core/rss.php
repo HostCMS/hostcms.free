@@ -43,14 +43,14 @@ class Core_Rss
 	 */
 	protected $_entities = array();
 
-    /**
-     * Add entity.
-     *
-     * @param string $name entity name
-     * @param string $value entity value
-     * @param array $attributes array attributes
-     * @return self
-     */
+	/**
+	 * Add entity.
+	 *
+	 * @param string $name entity name
+	 * @param string $value entity value
+	 * @param array $attributes array attributes
+	 * @return self
+	 */
 	public function add($name, $value, array $attributes = array())
 	{
 		$this->_entities[] = array(

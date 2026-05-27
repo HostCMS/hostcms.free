@@ -37,7 +37,7 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Property.menu'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
 		)
@@ -47,7 +47,7 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Property_Dir.menu'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
@@ -228,7 +228,7 @@ $oAdmin_Form_Controller->addEntity(
 				<div class="col-xs-12">
 					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
 						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
-						<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
+						<i class="fa-solid fa-circle-xmark no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
 						<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '"><i class="fa-solid fa-magnifying-glass fa-fw"></i></button>
 					</form>
 				</div>
@@ -341,17 +341,17 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 
 // Ограничение источника 0
 $oAdmin_Form_Dataset->addCondition(
-	array('select' => array('property_dirs.*'))
-)->addCondition(
-	array('join' => array('informationsystem_group_property_dirs', 'informationsystem_group_property_dirs.property_dir_id', '=', 'property_dirs.id'))
-)/*->addCondition(
-	array('where' => array('parent_id', '=', $property_dir_id))
-)*/->addCondition(
-	array('where' => array('informationsystem_group_property_dirs.informationsystem_id', '=', $informationsystem_id))
-)
-->changeField('name', 'type', 4)
-->changeField('name', 'link', "/{admin}/informationsystem/group/property/index.php?informationsystem_id=" . $informationsystem_id . "&informationsystem_group_id=" . $informationsystem_group_id . "&property_dir_id={id}")
-->changeField('name', 'onclick', "$.adminLoad({path: '/{admin}/informationsystem/group/property/index.php', additionalParams: 'informationsystem_id=" . $informationsystem_id . "&informationsystem_group_id=" . $informationsystem_group_id ."&property_dir_id={id}', windowId: '{windowId}'}); return false");
+		array('select' => array('property_dirs.*'))
+	)->addCondition(
+		array('join' => array('informationsystem_group_property_dirs', 'informationsystem_group_property_dirs.property_dir_id', '=', 'property_dirs.id'))
+	)/*->addCondition(
+		array('where' => array('parent_id', '=', $property_dir_id))
+	)*/->addCondition(
+		array('where' => array('informationsystem_group_property_dirs.informationsystem_id', '=', $informationsystem_id))
+	)
+	->changeField('name', 'type', 4)
+	->changeField('name', 'link', "/{admin}/informationsystem/group/property/index.php?informationsystem_id=" . $informationsystem_id . "&informationsystem_group_id=" . $informationsystem_group_id . "&property_dir_id={id}")
+	->changeField('name', 'onclick', "$.adminLoad({path: '/{admin}/informationsystem/group/property/index.php', additionalParams: 'informationsystem_id=" . $informationsystem_id . "&informationsystem_group_id=" . $informationsystem_group_id ."&property_dir_id={id}', windowId: '{windowId}'}); return false");
 
 if (strlen($sGlobalSearch))
 {
@@ -365,6 +365,8 @@ if (strlen($sGlobalSearch))
 	$oAdmin_Form_Dataset
 			->addCondition(array('where' => array('property_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
+		
+	Core_Event::notify('Informationsystem_Group_Property_GlobalSearch.onAfterSetConditions', NULL, array($oAdmin_Form_Dataset, $sGlobalSearch));
 }
 else
 {
@@ -412,6 +414,8 @@ if (strlen($sGlobalSearch))
 			->addCondition(array('setOr' => array()))
 			->addCondition(array('where' => array('properties.tag_name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
+		
+	Core_Event::notify('Informationsystem_Group_Property_GlobalSearch.onAfterSetConditions', NULL, array($oAdmin_Form_Dataset, $sGlobalSearch));
 }
 else
 {
@@ -419,15 +423,14 @@ else
 }
 
 $oAdmin_Form_Dataset
-->changeField('multiple', 'link', "/{admin}/informationsystem/group/property/index.php?hostcms[action]=changeMultiple&hostcms[checked][{dataset_key}][{id}]=1&informationsystem_id=" . $informationsystem_id . "&informationsystem_group_id=" . $informationsystem_group_id . "&property_dir_id={property_dir_id}")
-->changeField('multiple', 'onclick', "$.adminLoad({path: '/{admin}/informationsystem/group/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&informationsystem_id=" . $informationsystem_id . "&informationsystem_group_id=" . $informationsystem_group_id ."&property_dir_id={property_dir_id}', action: 'changeMultiple', windowId: '{windowId}'}); return false")
-->changeField('indexing', 'link', "/{admin}/informationsystem/group/property/index.php?hostcms[action]=changeIndexing&hostcms[checked][{dataset_key}][{id}]=1&informationsystem_id=" . $informationsystem_id . "&informationsystem_group_id=" . $informationsystem_group_id . "&property_dir_id={property_dir_id}")
-->changeField('indexing', 'onclick', "$.adminLoad({path: '/{admin}/informationsystem/group/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&informationsystem_id=" . $informationsystem_id . "&informationsystem_group_id=" . $informationsystem_group_id ."&property_dir_id={property_dir_id}', action: 'changeIndexing', windowId: '{windowId}'}); return false");
+	->changeField('multiple', 'link', "/{admin}/informationsystem/group/property/index.php?hostcms[action]=changeMultiple&hostcms[checked][{dataset_key}][{id}]=1&informationsystem_id=" . $informationsystem_id . "&informationsystem_group_id=" . $informationsystem_group_id . "&property_dir_id={property_dir_id}")
+	->changeField('multiple', 'onclick', "$.adminLoad({path: '/{admin}/informationsystem/group/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&informationsystem_id=" . $informationsystem_id . "&informationsystem_group_id=" . $informationsystem_group_id ."&property_dir_id={property_dir_id}', action: 'changeMultiple', windowId: '{windowId}'}); return false")
+	->changeField('indexing', 'link', "/{admin}/informationsystem/group/property/index.php?hostcms[action]=changeIndexing&hostcms[checked][{dataset_key}][{id}]=1&informationsystem_id=" . $informationsystem_id . "&informationsystem_group_id=" . $informationsystem_group_id . "&property_dir_id={property_dir_id}")
+	->changeField('indexing', 'onclick', "$.adminLoad({path: '/{admin}/informationsystem/group/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&informationsystem_id=" . $informationsystem_id . "&informationsystem_group_id=" . $informationsystem_group_id ."&property_dir_id={property_dir_id}', action: 'changeIndexing', windowId: '{windowId}'}); return false");
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(
 	$oAdmin_Form_Dataset
 );
 
-// Показ формы
 $oAdmin_Form_Controller->execute();

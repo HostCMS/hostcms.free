@@ -172,7 +172,7 @@ class Shop_Producer_Controller_Show extends Core_Controller
 	/**
 	 * Get producer dirs
 	 * @return Shop_Producer_Dir_Model|null
-     */
+	 */
 	public function shopProducerDirs()
 	{
 		return $this->_Shop_Producer_Dirs;

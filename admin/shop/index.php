@@ -258,7 +258,7 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop.header_admin_forms'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
 		)
@@ -268,7 +268,7 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Dir.shop_dir_top_menu_title'))
-		->icon('fa fa-plus')
+		->icon('fa-solid fa-plus')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
@@ -278,11 +278,11 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop.show_sds_link'))
-		->icon('fa fa-book')
+		->icon('fa-solid fa-book')
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Measure.mesures'))
-				->icon('fa fa-tachometer')
+				->icon('fa-solid fa-gauge-high')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref($sMeasuresFormPath = '/{admin}/shop/measure/index.php', NULL, NULL, $sAdditionalParam = "&shop_dir_id=" . intval(Core_Array::getGet('shop_dir_id', 0)))
 				)
@@ -293,7 +293,7 @@ $oAdmin_Form_Entity_Menus->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Country.shop_form_menu_countries'))
-				->icon('fa fa-flag')
+				->icon('fa-solid fa-flag')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref($sCountriesFormPath = '/{admin}/shop/country/index.php', NULL, NULL, $sAdditionalParam = "&shop_dir_id=" . intval(Core_Array::getGet('shop_dir_id', 0)))
 				)
@@ -304,7 +304,7 @@ $oAdmin_Form_Entity_Menus->add(
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Codetype.title'))
-				->icon('fa fa-code')
+				->icon('fa-solid fa-code')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref($sCodesFormPath = '/{admin}/shop/codetype/index.php', NULL, NULL, $sAdditionalParam = "&shop_dir_id=" . intval(Core_Array::getGet('shop_dir_id', 0)))
 				)
@@ -326,11 +326,11 @@ $oAdmin_Form_Entity_Menus->add(
 	)->add(
 	Admin_Form_Entity::factory('Menu')
 	->name(Core::_('Shop.show_finance'))
-	->icon('fa fa-usd')
+	->icon('fa-solid fa-dollar-sign')
 	->add(
 		Admin_Form_Entity::factory('Menu')
 			->name(Core::_('Shop_Tax.show_tax_link'))
-			->icon('fa fa-money')
+			->icon('fa-regular fa-money-bill-1')
 			->href(
 				$oAdmin_Form_Controller->getAdminLoadHref($sTaxFormPath = '/{admin}/shop/tax/index.php', NULL, NULL, '')
 			)
@@ -340,7 +340,7 @@ $oAdmin_Form_Entity_Menus->add(
 	)->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Currency.show_currency_link'))
-		->icon('fa fa-eur')
+		->icon('fa-solid fa-euro-sign')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($sCurrenciesFormPath = '/{admin}/shop/currency/index.php', NULL, NULL, '')
 		)

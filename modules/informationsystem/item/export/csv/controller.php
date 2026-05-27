@@ -488,12 +488,12 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 		return $aRow;
 	}
 
-    /**
-     * Get block of Item/Group Property values
-     * @param array $aFields
-     * @param object $object
-     * @return array
-     */
+	/**
+	 * Get block of Item/Group Property values
+	 * @param array $aFields
+	 * @param object $object
+	 * @return array
+	 */
 	public function getFieldsData(array $aFields, $object)
 	{
 		$aRow = array();
@@ -757,7 +757,6 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 
 		$sFilename = 'Informationsystem_' . $this->informationsystemId . '_' . date("Y_m_d_H_i_s") . '.csv';
 
-		header("Pragma: public");
 		header("Content-Description: File Transfer");
 		header("Content-Type: application/force-download");
 		header("Content-Disposition: attachment; filename = " . $sFilename . ";");

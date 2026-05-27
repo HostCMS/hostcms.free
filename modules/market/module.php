@@ -20,15 +20,26 @@ class Market_Module extends Core_Module_Abstract
 
 	/**
 	 * Module date
-	 * @var date
+	 * @var string
 	 */
-	public $date = '2026-02-10';
+	public $date = '2026-05-12';
 
 	/**
 	 * Module name
 	 * @var string
 	 */
 	protected $_moduleName = 'market';
+
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct()
+	{
+		parent::__construct();
+
+		Core_Skin::instance()->addCss('/modules/market/assets/market.css');
+	}
 
 	/**
 	 * Get Module's Menu
@@ -40,7 +51,7 @@ class Market_Module extends Core_Module_Abstract
 			array(
 				'sorting' => 150,
 				'block' => 3,
-				'ico' => 'fa fa-cogs',
+				'ico' => 'fa-solid fa-puzzle-piece',
 				'name' => Core::_('Market.menu'),
 				'href' => Admin_Form_Controller::correctBackendPath("/{admin}/market/index.php"),
 				'onclick' => Admin_Form_Controller::correctBackendPath("$.adminLoad({path: '/{admin}/market/index.php'}); return false")

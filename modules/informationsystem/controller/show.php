@@ -2431,7 +2431,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 					Core_Html_Entity::factory('A')
 						->data('confirm-message', Core::_('Admin_Form.msg_information_delete'))
 						->href("{$sPath}?{$sAdditional}")
-						->onclick("res = confirm(this.getAttribute('data-confirm-message')); if (res) { hQuery.openWindow({path: '{$sPath}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'});} return false")
+						->onclick("res = confirm(this.getAttribute('data-confirm-message')); if (res) { hQuery.openWindow({path: '{$sPath}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6', justAction: true});} return false")
 						->add(
 							Core_Html_Entity::factory('I')
 								->title($sTitle)
@@ -2533,7 +2533,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 				Core_Html_Entity::factory('A')
 					->data('confirm-message', Core::_('Admin_Form.msg_information_delete'))
 					->href("{$sPath}?{$sAdditional}")
-					->onclick("res = confirm(this.getAttribute('data-confirm-message')); if (res) { hQuery.openWindow({path: '{$sPath}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'});} return false")
+					->onclick("res = confirm(this.getAttribute('data-confirm-message')); if (res) { hQuery.openWindow({path: '{$sPath}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6', justAction: true});} return false")
 					->add(
 						Core_Html_Entity::factory('I')
 							->title($sTitle)
@@ -2909,7 +2909,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 		return $this;
 	}
-	
+
 	/**
 	 * Convert property value, e.g. '23.11.2020' => '2020-11-23 00:00:00'
 	 * @param Property_Model $oProperty
@@ -2937,7 +2937,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 	}
 
 	/**
-	 * Get Filter Properties
+	 * Get Filter Properties conditions, see addFilter()
 	 * @return array
 	 */
 	public function getFilterProperties()
@@ -2953,6 +2953,24 @@ class Informationsystem_Controller_Show extends Core_Controller
 	public function setFilterProperties(array $array)
 	{
 		$this->_aFilterProperties = $array;
+		return $this;
+	}
+
+	/**
+	 * Set SEO Template
+	 * @param string $type Item|Group
+	 * @param string $option Title|Description|Keywords|H1
+	 * @param string $value
+	 * @return self
+	 */
+	public function setSeoTemplate($type, $option, $value)
+	{
+		$fieldName = "_seo{$type}{$option}";
+		if (isset($this->$fieldName))
+		{
+			$this->$fieldName = $value;
+		}
+		
 		return $this;
 	}
 

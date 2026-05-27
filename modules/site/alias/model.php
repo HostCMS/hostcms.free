@@ -315,7 +315,7 @@ class Site_Alias_Model extends Core_Entity
 
 	/**
 	 * Get stdObject for entity and children entities
-	 * @return stdObject
+	 * @return stdClass
 	 * @hostcms-event site_alias.onBeforeRedeclaredGetStdObject
 	 */
 	public function getStdObject($attributePrefix = '_')
@@ -351,7 +351,7 @@ class Site_Alias_Model extends Core_Entity
 			->target('_blank')
 			->add(
 				Core_Html_Entity::factory('I')
-					->class('fa fa-external-link')
+					->class('fa-solid fa-arrow-up-right-from-square small')
 			)
 			->execute();
 	}

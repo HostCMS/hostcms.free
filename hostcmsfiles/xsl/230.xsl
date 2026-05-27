@@ -87,7 +87,7 @@
 							{
 								if (typeof jObject.attr('name') !== 'undefined' && jObject.attr('name').indexOf('_from') !== -1)
 								{
-									path += encodeURIComponent(tag_name + '-' + jObject.val() + '-' + jObject.nextAll('input').eq(0).val()) + '/';
+									path += encodeURIComponent(tag_name + '-' + jObject.val() + '-' + jObject.nextAll('input').first().val()) + '/';
 								}
 								else
 								{

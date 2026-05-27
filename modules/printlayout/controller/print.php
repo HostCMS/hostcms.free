@@ -156,7 +156,7 @@ abstract class Printlayout_Controller_Print extends Admin_Form_Action_Controller
 				->onclick('setTimeout(function() { bootbox.hideAll(); }, 500); $(this).closest("form").submit();')
 				->add(
 					Core_Html_Entity::factory('I')
-						->class('fa fa-download no-margin')
+						->class('fa-solid fa-download no-margin')
 				);
 
 			// Send mail button
@@ -191,7 +191,7 @@ abstract class Printlayout_Controller_Print extends Admin_Form_Action_Controller
 				')
 				->add(
 					Core_Html_Entity::factory('I')
-						->class('fa fa-envelope no-margin')
+						->class('fa-solid fa-envelope no-margin')
 				);
 
 			$oCore_Html_Entity_Form

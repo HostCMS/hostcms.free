@@ -86,13 +86,13 @@ class Ipaddress_Controller
 		return $this->_DenyAccessIpaddresses;
 	}
 
-    /**
-     * Check is IP blocked in Frontend
-     * @param array $aIp
-     * @param bool $incBanned Increase blocked counter
-     * @return boolean
-     * @throws Core_Exception
-     */
+	/**
+	 * Check is IP blocked in Frontend
+	 * @param array $aIp
+	 * @param bool $incBanned Increase blocked counter
+	 * @return boolean
+	 * @throws Core_Exception
+	 */
 	public function isBlocked($aIp, $incBanned = TRUE)
 	{
 		!is_array($aIp) && $aIp = array($aIp);
@@ -181,6 +181,7 @@ class Ipaddress_Controller
 	 */
 	public function incIpaddressBanned($id)
 	{
+		$id = intval($id);
 		Core_DataBase::instance()
 			->setQueryType(2)
 			->query("UPDATE `ipaddresses` SET `banned` = `banned` + 1 WHERE `id` = {$id}");
@@ -327,6 +328,12 @@ class Ipaddress_Controller
 					->write('Ipaddress: Wrong mask: ' . $cidr);
 
 				return FALSE;
+			}
+
+			if ($netmask == 0)
+			{
+				// любая сеть
+				return TRUE;
 			}
 
 			$iIpMask = ~((1 << (32 - $netmask)) - 1);

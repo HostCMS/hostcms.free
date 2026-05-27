@@ -64,7 +64,7 @@ class User_Workday_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name
 	 * @return bool
-     */
+	 */
 	public function execute($operation = NULL)
 	{
 		// Всегда id_content

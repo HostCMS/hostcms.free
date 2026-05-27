@@ -5,7 +5,7 @@
  * @package HostCMS
  * @subpackage Shop
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Дисконтные карты',
@@ -37,5 +37,8 @@ return array(
 	'backendWrongWriteoffWarning' => 'Недостаточно бонусов для списания!',
 	'backendWriteoffSuccess' => 'Бонусы списаны успешно!',
 	'changeActive_success' => 'Информация успешно изменена',
-	'card_already_exist' => 'У пользователя уже есть дисконтная карта'
+	'card_already_exist' => 'У пользователя уже есть дисконтная карта',
+	'rebuild_levels' => 'Пересчитать уровни',
+	'rebuildLevels_success' => 'Уровни пересчитаны успешно',
+	'update_levels' => 'Пересчитано %s уровней',
 );
