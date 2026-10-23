@@ -1,0 +1,14 @@
+.ipaddress-filter-conditions .delete-associated-item, .filter-conditions .delete-associated-item {
+	display: inline-block;
+	margin-top: 7px;
+	width: 12px;
+	padding-left: 15px;
+}
+.ipaddress-filter-conditions .delete-associated-item:hover, .filter-conditions .delete-associated-item:hover {
+	cursor: pointer;
+}
+.ipaddress-filter-conditions .dd-handle:hover, .filter-conditions .dd-handle:hover { background-color: #f7f7f7 !important }
+
+.ipaddress-filter-conditions .dd {
+	max-width: 100%;
+}

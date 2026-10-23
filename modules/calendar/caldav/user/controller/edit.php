@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Calendar
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Calendar_Caldav_User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -96,11 +96,6 @@ class Calendar_Caldav_User_Controller_Edit extends Admin_Form_Action_Controller_
 				->setPassword($this->_object->password)
 				->applyObjectProperty($this);
 		}
-
-		/*ob_start();
-		print_r($_GET);
-		print_r($_POST);
-		$this->addContent(ob_get_clean());*/
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 

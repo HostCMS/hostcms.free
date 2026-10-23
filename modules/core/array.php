@@ -142,8 +142,8 @@ class Core_Array
 
 	/**
 	 * Get value for $key in array $_REQUEST. If value does not exist will return defaultValue.
-	 * @param $key key
-	 * @param $defaultValue default value
+	 * @param string $key key
+	 * @param string $defaultValue default value
 	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim', 'array'
 	 * <code>
 	 * // Return value for 'foo' or NULL if $key does not exist
@@ -162,8 +162,8 @@ class Core_Array
 
 	/**
 	 * Get value for $key in array $_POST. If value does not exist will return defaultValue.
-	 * @param $key key
-	 * @param $defaultValue default value
+	 * @param string $key key
+	 * @param string $defaultValue default value
 	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim', 'array'
 	 * <code>
 	 * // Return value for 'foo' or NULL if $key does not exist
@@ -254,8 +254,8 @@ class Core_Array
 
 	/**
 	 * Get value for $key in array $_FILES. If value does not exist will return defaultValue.
-	 * @param $key key
-	 * @param $defaultValue default value
+	 * @param string $key key
+	 * @param string $defaultValue default value
 	 * <code>
 	 * // Return value for 'foo' or NULL if $key does not exist
 	 * $value = Core_Array::getFiles('foo');
@@ -273,7 +273,7 @@ class Core_Array
 
 	/**
 	 * Convert all values of array to int
-	 * @param $array array
+	 * @param array $array array
 	 * <code>
 	 * $array = (1, 2, '3', 'a' => '321')
 	 * $array = Core_Array::toInt($array);

@@ -46,7 +46,19 @@ if ($Shop_Controller_Show->item == 0)
 		$sorting = Core_Array::getGet('sorting', 0, 'int');
 
 		($sorting == 1 || $sorting == 2)
-			&& $Shop_Controller_Show->orderBy('absolute_price', $sorting == 1 ? 'ASC' : 'DESC');
+			&& $Shop_Controller_Show->orderBy('price_absolute', $sorting == 1 ? 'ASC' : 'DESC');
+
+		/*
+		// Сортировка с размещением 0-вых товаров в самом конце списка
+		if ($sorting == 1 || $sorting == 2)
+		{
+			$Shop_Controller_Show->addAbsolutePrice();
+			$Shop_Controller_Show->shopItems()
+				->queryBuilder()
+				->clearOrderBy()
+				->orderBy('SIGN(price_absolute)', 'DESC')
+				->orderBy('price_absolute', $sorting == 1 ? 'ASC' : 'DESC');
+		}*/
 
 		$sorting == 3 && $Shop_Controller_Show->orderBy('shop_items.name', 'ASC');
 
@@ -315,7 +327,7 @@ $Shop_Controller_Show
 	)
 	->addMinMaxWidth()
 	->addMinMaxLength()
-    // ->itemsMedia(TRUE)
+	//->itemsMedia(TRUE)
 	//->addAllowedTags('/shop', array('name'))
 	//->addAllowedTags('/shop/shop_item', array('name'))
 	//->addAllowedTags('/shop/shop_group', array('name'))

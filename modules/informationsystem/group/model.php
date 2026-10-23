@@ -1407,8 +1407,8 @@ class Informationsystem_Group_Model extends Core_Entity
 			$oCache->deleteByTag('informationsystem_group_' . $this->id);
 
 			// When importing on the popular sites new data is permanently write for the root-group.
-			$this->parent_id != 0
-				&& $oCache->deleteByTag('informationsystem_group_' . $this->parent_id);
+			/*$this->parent_id != 0
+				&& */$oCache->deleteByTag('informationsystem_group_' . $this->parent_id);
 
 			// Static cache
 			$oSite = $this->Informationsystem->Site;

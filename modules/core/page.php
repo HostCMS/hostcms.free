@@ -148,6 +148,7 @@ class Core_Page extends Core_Servant_Properties
 
 	/**
 	 * Current executing object
+	 * @var mixed
 	 */
 	protected $_currentObject = NULL;
 
@@ -313,7 +314,7 @@ class Core_Page extends Core_Servant_Properties
 				$timestamp = $this->fileTimestamp && Core_File::isFile($sPath = CMS_FOLDER . ltrim($css, DIRECTORY_SEPARATOR))
 					? filemtime($sPath)
 					: Core_Date::sql2timestamp($this->template->timestamp);
-					
+
 				$aAttr = array(
 					'rel="' . htmlspecialchars($rel) . '"',
 					'href="' . $this->cssCDN . $css . '?' . $timestamp . '"'
@@ -322,7 +323,7 @@ class Core_Page extends Core_Servant_Properties
 				$aAttr[] = $rel == 'preload' || $rel == 'prefetch'
 					? 'as="style"'
 					: 'type="text/css"';
-					
+
 				foreach ($attr as $key => $value)
 				{
 					$aAttr[] = "{$key}=\"" . htmlspecialchars($value) . "\"";
@@ -496,7 +497,7 @@ class Core_Page extends Core_Servant_Properties
 			$currentMode = $aJs[1] === FALSE ? $mode : $aJs[1];
 
 			$isHint  = $currentMode === 'preload' || $currentMode === 'prefetch';
-			
+
 			$tagName = $isHint ? 'link' : 'script';
 			$attr = $isHint ? 'href' : 'src';
 
@@ -549,10 +550,10 @@ class Core_Page extends Core_Servant_Properties
 
 		return $sReturn;
 	}
-	
+
 	/**
 	 * Get JS mode
-	 * @param $mode
+	 * @param string $mode
 	 * @return string
 	 */
 	protected function _getMode($mode)
@@ -757,6 +758,7 @@ class Core_Page extends Core_Servant_Properties
 
 	/**
 	 * Show 404 error
+	 * @param int $code
 	 * @return self
 	 * @hostcms-event Core_Page.onBeforeError404
 	 */
@@ -816,7 +818,7 @@ class Core_Page extends Core_Servant_Properties
 
 	/**
 	 * Add Frontend Execution Time
-	 * @var string $value
+	 * @param string $value
 	 * @return self
 	 */
 	public function addFrontendExecutionTimes($value)
@@ -836,6 +838,8 @@ class Core_Page extends Core_Servant_Properties
 
 	/**
 	 * Fix name bug
+	 * @param string $value
+	 * @return self
 	 */
 	public function addFrontentExecutionTimes($value)
 	{

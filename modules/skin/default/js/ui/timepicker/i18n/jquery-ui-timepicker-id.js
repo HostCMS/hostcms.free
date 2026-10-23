@@ -1,6 +1,6 @@
 /* Indonesian translation for the jQuery Timepicker Addon */
 /* Written by Nia */
-(function($) {
+(function($){
 	$.timepicker.regional['id'] = {
 		timeOnlyTitle: 'Pilih Waktu',
 		timeText: 'Waktu',

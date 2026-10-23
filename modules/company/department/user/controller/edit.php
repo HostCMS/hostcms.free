@@ -244,7 +244,7 @@ class Company_Department_User_Controller_Edit extends Admin_Form_Action_Controll
 
 				$iCompanyPostId = intval(Core_Array::getPost('company_post_id'));
 
-				$oCompany_Post = Core_Entity::factory('Company_Post', $iCompanyPostId);
+				// $oCompany_Post = Core_Entity::factory('Company_Post', $iCompanyPostId);
 
 				$iOriginalDepartmentId = intval(Core_Array::getPost('original_department_id'));
 				$iOriginalCompanyPostId = intval(Core_Array::getPost('original_company_post_id'));
@@ -268,16 +268,16 @@ class Company_Department_User_Controller_Edit extends Admin_Form_Action_Controll
 					// Сотрудник является начальником в отделе на этой должности
 					if ($aCompany_Department_Post_Users[0]->head != $iHead && $iOriginalUserId)
 					{
-						$sStatusMessage = $iHead
+						/*$sStatusMessage = $iHead
 							? Core_Message::get(Core::_('Company_Department.addUserToHeads_success', $oUser->getFullName(), $oDepartment->name))
-							: Core_Message::get(Core::_('Company_Department.deleteUserFromHeads_success', $oUser->getFullName(), $oDepartment->name));
+							: Core_Message::get(Core::_('Company_Department.deleteUserFromHeads_success', $oUser->getFullName(), $oDepartment->name));*/
 
 						$oCompany_Department_Post_User = $aCompany_Department_Post_Users[0];
 					}
-					elseif (!$iOriginalUserId)
+					/*elseif (!$iOriginalUserId)
 					{
 						$sStatusMessage = Core_Message::get(Core::_('Company_Department.addUserToHeads_error', $oUser->getFullName(), $oCompany_Post->name, $oDepartment->name), 'error');
-					}
+					}*/
 				}
 				else // Запись о должности сотрудника в отделе отсутствует
 				{
@@ -305,7 +305,8 @@ class Company_Department_User_Controller_Edit extends Admin_Form_Action_Controll
 					else // Добавление должности сотрудника
 					{
 						$oCompany_Department_Post_User = Core_Entity::factory('Company_Department_Post_User');
-						$sStatusMessage = Core_Message::get(Core::_('Company_Department.addUserToDepartmentPost_success', $oUser->getFullName(), $oCompany_Post->name, $oDepartment->name));
+
+						// $sStatusMessage = Core_Message::get(Core::_('Company_Department.addUserToDepartmentPost_success', $oUser->getFullName(), $oCompany_Post->name, $oDepartment->name));
 					}
 				}
 
@@ -320,6 +321,7 @@ class Company_Department_User_Controller_Edit extends Admin_Form_Action_Controll
 					$oDepartment->add($oCompany_Department_Post_User);
 				}
 			}
+
 			return $this;
 		}
 	}

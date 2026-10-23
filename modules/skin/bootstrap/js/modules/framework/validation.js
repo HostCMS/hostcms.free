@@ -1,6 +1,6 @@
 /* global hostcmsBackend, i18n, declension */
 
-(function($) {
+(function($){
 	"use strict";
 
 	class FieldChecker {

@@ -91,6 +91,7 @@ abstract class Core_Session
 	static public function cookieLifetime($lifetime)
 	{
 		self::$_cookieLifetime = $lifetime;
+		self::$_sessionConfigured = FALSE;
 	}
 
 	/**
@@ -106,6 +107,8 @@ abstract class Core_Session
 	static public function domain($domain)
 	{
 		self::$_domain = $domain;
+		self::$_sessionConfigured = FALSE;
+		self::$_oldCookieDeleted = FALSE;
 	}
 
 	/**
@@ -123,7 +126,7 @@ abstract class Core_Session
 
 	/**
 	 * Correct domain
-	 * @param str $domain domain
+	 * @param string $domain domain
 	 * @return string
 	 */
 	static public function correctDomain($domain)
@@ -139,7 +142,7 @@ abstract class Core_Session
 
 	/**
 	 * Get Session Config
-	 * @rerurn array
+	 * @return array
 	 */
 	static public function getConfig()
 	{
@@ -154,48 +157,49 @@ abstract class Core_Session
 	}
 
 	/**
-	 * Start session
-	 * @param string|NULL $id Session ID
-	 * @return boolean
+	 * Cookie params and cache limiter have been configured
+	 * @var boolean
 	 */
-	static public function start($id = NULL)
+	static protected $_sessionConfigured = FALSE;
+
+	/**
+	 * Old subdomain cookie has been deleted
+	 * @var boolean
+	 */
+	static protected $_oldCookieDeleted = FALSE;
+
+	/**
+	 * Configure cookie params and cache limiter once per request
+	 */
+	static protected function _configureSession()
 	{
-		if (!self::isStarted())
+		// Параметры нельзя менять при активной сессии или после отправки заголовков
+		if (self::$_sessionConfigured || self::isActive() || headers_sent())
 		{
-			self::$_debug && self::_log('start()');
+			return;
+		}
 
-			// Destroy existing session started by session.auto_start
-			if (is_null(self::$_handler) && session_id())
+		$cookieLifetime = max((int) self::$_cookieLifetime, (int) self::$_maxlifetime);
+		
+		if (!defined('DENY_INI_SET') || !DENY_INI_SET)
+		{
+			ini_set('session.cookie_lifetime', $cookieLifetime);
+		}
+
+		$domain = self::getDomain();
+
+		if (!empty($domain))
+		{
+			$aConfig = self::getConfig();
+
+			$domain = self::correctDomain($domain);
+
+			if (!$aConfig['subdomain'])
 			{
-				session_unset();
-				session_destroy();
-			}
-
-			self::_setSessionHandler();
-
-			$cookieLifetime = self::$_cookieLifetime > self::$_maxlifetime
-				? self::$_cookieLifetime
-				: self::$_maxlifetime;
-
-			if ((!defined('DENY_INI_SET') || !DENY_INI_SET) && !headers_sent())
-			{
-				ini_set('session.cookie_lifetime', $cookieLifetime);
-				//ini_set('session.gc_maxlifetime', $cookieLifetime);
-			}
-
-			$domain = self::getDomain();
-
-			if (!empty($domain) && !headers_sent())
-			{
-				$aConfig = self::getConfig();
-
-				$domain = self::correctDomain($domain);
-
-				// Do not set on subdomains, change $domain to NULL
-				if (!$aConfig['subdomain'])
+				// Delete old subdomain cookie only once
+				if ($domain != '' && !self::$_oldCookieDeleted)
 				{
-					// Delete old subdomain cookie
-					$domain != '' && Core_Cookie::set(session_name(), '', array(
+					Core_Cookie::set(session_name(), '', array(
 						'expires' => 0,
 						'path' => '/',
 						'domain' => $domain,
@@ -203,120 +207,165 @@ abstract class Core_Session
 						'httponly' => $aConfig['httponly'])
 					);
 
-					$domain = NULL;
+					self::$_oldCookieDeleted = TRUE;
 				}
 
-				// SameSite=None; Secure
-				$aConfig['samesite'] == 'None' && $aConfig['secure'] = TRUE;
+				$domain = '';
+			}
 
-				// SameSite attribute of Lax or Strict is OK
-				$bSendSameSite = Core_Cookie::sendSameSite($aConfig['samesite']);
+			// SameSite=None; Secure
+			$aConfig['samesite'] == 'None' && $aConfig['secure'] = TRUE;
 
-				// Браузер совместим
-				if ($bSendSameSite)
+			// Браузер совместим
+			if (Core_Cookie::sendSameSite($aConfig['samesite']))
+			{
+				if (PHP_VERSION_ID >= 70300)
 				{
-					if (PHP_VERSION_ID >= 70300)
-					{
-						session_set_cookie_params(array(
-							'lifetime' => $cookieLifetime,
-							'path' => '/',
-							'domain' => $domain,
-							'secure' => $aConfig['secure'],
-							'httponly' => $aConfig['httponly'],
-							'samesite' => $aConfig['samesite']
-						));
-					}
-					else
-					{
-						session_set_cookie_params($cookieLifetime, '/; SameSite=' . $aConfig['samesite'], $domain, $aConfig['secure'], $aConfig['httponly']);
-					}
+					session_set_cookie_params(array(
+						'lifetime' => $cookieLifetime,
+						'path' => '/',
+						'domain' => $domain,
+						'secure' => $aConfig['secure'],
+						'httponly' => $aConfig['httponly'],
+						'samesite' => $aConfig['samesite']
+					));
 				}
 				else
 				{
-					session_set_cookie_params($cookieLifetime, '/', $domain, $aConfig['secure'], $aConfig['httponly']);
+					session_set_cookie_params($cookieLifetime, '/; SameSite=' . $aConfig['samesite'], $domain, $aConfig['secure'], $aConfig['httponly']);
 				}
 			}
-
-			// При повторном запуске $_SESSION уже будет
-			//if (Core_Array::getRequest(self::getName())/* && !isset($_SESSION)*/)
-			//{
-
-			if (!is_null($id))
+			else
 			{
-				self::$_debug && self::_log('start(), set session id ' . $id);
-
-				session_id($id);
-				ini_set('session.use_strict_mode', 0);
+				session_set_cookie_params($cookieLifetime, '/', $domain, $aConfig['secure'], $aConfig['httponly']);
 			}
-
-			// Disable Cache headers by default
-			session_cache_limiter('');
-
-			@session_start();
-
-			if (!is_null($id))
-			{
-				//ini_restore('session.use_strict_mode');
-			}
-
-			if (!self::$_started)
-			{
-				//echo $error = error_get_last();
-				if (Core_Array::getRequest('_', FALSE))
-				{
-					Core::showJson(array('error' => Core_Message::get(self::$_error, 'error'), 'form_html' => NULL));
-				}
-				else
-				{
-					// Service Unavailable
-					Core_Response::sendHttpStatusCode(503);
-					@header('Content-Type: text/html; charset=UTF-8');
-
-					throw new Core_Exception(self::$_error . 'Please wait! Refreshing page ... <script>setTimeout(function() {window.location.reload(true);}, 3000);</script>');
-				}
-			}
-
-			// Сессия помечена уничтожаемой
-			/*if (is_null($id) && isset($_SESSION['_destroyed']) && isset($_SESSION['_new_session_id']))
-			{
-				self::$_debug && self::_log('start(), old regenerated session, time ' . $_SESSION['_destroyed'] . ', new session id ' . $_SESSION['_new_session_id']);
-
-				// Прошло 30 сек.
-				if ($_SESSION['_destroyed'] < time() - 30)
-				{
-					self::$_debug && self::_log('start(), destroy old regenerated session');
-
-					self::destroy(session_id());
-					return FALSE;
-				}
-
-				if (isset($_SESSION['_new_session_id']))
-				{
-					self::$_debug && self::_log('start(), change old regenerated session id to ' . $_SESSION['_new_session_id']);
-
-					// Срок действия ещё не полностью истёк, заново пытаемся установить правильный cookie идентификатора сессиии.
-					self::close();
-
-					// Стартуем сессию с новым идентификатором.
-					return self::start($_SESSION['_new_session_id']);
-				}
-			}*/
-
-			//self::$_started = TRUE; // Moved to Read & Lock
-			self::$_hasSessionId = TRUE;
-			//}
 		}
+
+		// Disable Cache headers by default
+		session_cache_limiter('');
+
+		self::$_sessionConfigured = TRUE;
+	}
+
+	/**
+	 * Start session
+	 * @param string|NULL $id Session ID
+	 * @return boolean
+	 */
+	static public function start($id = NULL)
+	{
+		if (self::isStarted())
+		{
+			return TRUE;
+		}
+
+		self::$_debug && self::_log('start()');
+
+		// Destroy existing session started by session.auto_start
+		if (is_null(self::$_handler) && session_id())
+		{
+			session_unset();
+			session_destroy();
+		}
+
+		self::_setSessionHandler();
+
+		// Выполняется только при первом старте (или после смены настроек)
+		self::_configureSession();
+
+		$prevStrictMode = NULL;
+
+		// session_id() нельзя менять у активной сессии
+		if (!is_null($id) && !self::isActive())
+		{
+			self::$_debug && self::_log('start(), set session id ' . $id);
+
+			session_id($id);
+
+			// Временно отключаем strict mode, чтобы принять переданный ID
+			$prevStrictMode = ini_get('session.use_strict_mode');
+			ini_set('session.use_strict_mode', 0);
+		}
+
+		@session_start();
+
+		// Возвращаем прежнее значение
+		if (!is_null($prevStrictMode))
+		{
+			ini_set('session.use_strict_mode', $prevStrictMode);
+		}
+
+		// $_started выставляется обработчиком в read/lock
+		if (!self::$_started)
+		{
+			//echo $error = error_get_last();
+			if (Core_Array::getRequest('_', FALSE))
+			{
+				Core::showJson(array('error' => Core_Message::get(self::$_error, 'error'), 'form_html' => NULL));
+			}
+			else
+			{
+				// Service Unavailable
+				Core_Response::sendHttpStatusCode(503);
+				@header('Content-Type: text/html; charset=UTF-8');
+
+				throw new Core_Exception(self::$_error . 'Please wait! Refreshing page ... <script>setTimeout(function() {window.location.reload(true);}, 3000);</script>');
+			}
+		}
+
+		// Сессия помечена уничтожаемой
+		/*if (is_null($id) && isset($_SESSION['_destroyed']) && isset($_SESSION['_new_session_id']))
+		{
+			self::$_debug && self::_log('start(), old regenerated session, time ' . $_SESSION['_destroyed'] . ', new session id ' . $_SESSION['_new_session_id']);
+
+			// Прошло 30 сек.
+			if ($_SESSION['_destroyed'] < time() - 30)
+			{
+				self::$_debug && self::_log('start(), destroy old regenerated session');
+
+				self::destroy(session_id());
+				return FALSE;
+			}
+
+			if (isset($_SESSION['_new_session_id']))
+			{
+				self::$_debug && self::_log('start(), change old regenerated session id to ' . $_SESSION['_new_session_id']);
+
+				// Срок действия ещё не полностью истёк, заново пытаемся установить правильный cookie идентификатора сессиии.
+				self::close();
+
+				// Стартуем сессию с новым идентификатором.
+				return self::start($_SESSION['_new_session_id']);
+			}
+		}*/
+
+		self::$_hasSessionId = TRUE;
 
 		return TRUE;
 	}
 
 	/**
-	 * Get session name
-	 * @return string
+	 * Close session
+	 * @return boolean
 	 */
-	static public function getName()
+	static public function close()
 	{
-		return session_name();
+		if (self::$_started)
+		{
+			self::$_debug && self::_log('close()');
+
+			if (self::isActive())
+			{
+				session_write_close();
+			}
+
+			self::$_started = FALSE;
+
+			// cause session_destroy(): Trying to destroy uninitialized session
+			//self::$_handler = NULL;
+		}
+
+		return TRUE;
 	}
 
 	/**
@@ -340,8 +389,17 @@ abstract class Core_Session
 	}
 
 	/**
+	 * Get session name
+	 * @return string
+	 */
+	static public function getName()
+	{
+		return session_name();
+	}
+
+	/**
 	 * Is the current request has sent the session ID.
-	 * @return boolean|NULL
+	 * @var boolean|NULL
 	 */
 	static protected $_hasSessionId = NULL;
 
@@ -481,30 +539,6 @@ abstract class Core_Session
 	static protected function _getDriverName($driver)
 	{
 		return __CLASS__ . '_' . ucfirst($driver);
-	}
-
-	/**
-	 * Close session
-	 * @return boolean
-	 */
-	static public function close()
-	{
-		if (self::$_started)
-		{
-			self::$_debug && self::_log('close()');
-
-			if (self::isActive())
-			{
-				session_write_close();
-			}
-
-			self::$_started = FALSE;
-
-			// cause session_destroy(): Trying to destroy uninitialized session
-			//self::$_handler = NULL;
-		}
-
-		return TRUE;
 	}
 
 	/**

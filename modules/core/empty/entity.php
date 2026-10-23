@@ -8,16 +8,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Empty_Entity
 {
-	/**
-	 * Columns
-	 * @var mixed
-	 */
-	protected $_columns = NULL;
-
 	/**
 	 * data-values, e.g. dataMyValue
 	 * @var array
@@ -66,7 +60,7 @@ class Core_Empty_Entity
 	 * Table columns
 	 * @var array
 	 */
-	protected $_tableColums = array();
+	protected $_tableColumns = array();
 
 	/**
 	 * Set table columns
@@ -75,7 +69,7 @@ class Core_Empty_Entity
 	 */
 	public function setTableColums($tableColums)
 	{
-		$this->_tableColums = $tableColums;
+		$this->_tableColumns = $tableColums;
 		return $this;
 	}
 
@@ -85,7 +79,7 @@ class Core_Empty_Entity
 	 */
 	public function getTableColumns()
 	{
-		return $this->_tableColums;
+		return $this->_tableColumns;
 	}
 
 	/**
@@ -105,4 +99,31 @@ class Core_Empty_Entity
 	{
 		return NULL;
 	}
+	
+	/**
+	 * Convert object to string
+	 * @return string
+	 * @ignore
+	 */
+	public function __toString()
+	{
+		$return = array();
+
+		if (!empty($this->_tableColumns))
+		{
+			// Model columns
+			$return[] = implode(",\n", array_keys($this->_tableColumns));
+
+			// 'dataXXX' values
+			foreach ($this->_dataValues as $key => $value)
+			{
+				$return[] = htmlspecialchars((string) $key) . '=' . htmlspecialchars((string) $value);
+			}
+
+			return "Core_Empty_Entity, model: '" . strval($this->_modelName) . "',\nfields: " . implode(",\n", $return);
+		}
+
+		return '';
+	}
+
 }

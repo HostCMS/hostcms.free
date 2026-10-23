@@ -35,4 +35,5 @@ return array(
 	'post_success' => 'Document posted successfully!',
 	'unpost_success' => 'Document unposted successfully!',
 	'apply_item_change_attributes' => 'Inventory when attributes change',
+	'apply_warehouse_item' => 'Inventory from the warehouse stock list',
 );

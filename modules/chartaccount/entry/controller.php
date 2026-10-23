@@ -18,6 +18,10 @@ class Chartaccount_Entry_Controller
 	 */
 	static protected $_lastError = NULL;
 
+	/**
+	 * Delete entries by document id
+	 * @param int $documentId
+	 */
 	static public function deleteEntriesByDocumentId($documentId)
 	{
 		$aChartaccount_Entries = Core_Entity::factory('Chartaccount_Entry')->getAllByDocument_id($documentId);

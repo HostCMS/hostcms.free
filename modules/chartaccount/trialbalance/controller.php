@@ -12,28 +12,76 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  */
 class Chartaccount_Trialbalance_Controller
 {
+	/**
+	 * Period
+	 * @var integer
+	 */
 	static public $period = 1;
 
+	/**
+	 * All year
+	 * @var integer
+	 */
 	static public $bAllYear = 0;
 
+	/**
+	 * Year
+	 * @var mixed
+	 */
 	static public $year = NULL;
 
+	/**
+	 * Current quarter
+	 * @var integer
+	 */
 	static public $iCurrentQuarter = 0;
 
+	/**
+	 * Month
+	 * @var mixed
+	 */
 	static public $month = NULL;
 
+	/**
+	 * Start
+	 * @var string
+	 */
 	static public $iStart = '';
 
+	/**
+	 * End
+	 * @var string
+	 */
 	static public $iEnd = '';
 
+	/**
+	 * Start datetime
+	 * @var string
+	 */
 	static public $startDatetime = '';
 
+	/**
+	 * End datetime
+	 * @var string
+	 */
 	static public $endDatetime = '';
 
+	/**
+	 * Company id
+	 * @var integer
+	 */
 	static public $company_id = 0;
 
+	/**
+	 * Company default
+	 * @var Company_Model|NUll
+	 */
 	static public $oCompanyDefault = NULL;
 
+	/**
+	 * Path
+	 * @var string
+	 */
 	static protected $_path = '/{admin}/chartaccount/trialbalance/index.php';
 
 	/**
@@ -53,6 +101,11 @@ class Chartaccount_Trialbalance_Controller
 	{
 		return Admin_Form_Controller::correctBackendPath(self::$_path);
 	}
+
+	/**
+	 * Admin_Form_Controller object
+	 * @var Admin_Form_Controller|NULL
+	 */
 	static protected $_Admin_Form_Controller = NULL;
 
 	/**

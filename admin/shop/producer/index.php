@@ -298,6 +298,67 @@ if ($oAdminFormActionMove && $oAdmin_Form_Controller->getAction() == 'move')
 	$oAdmin_Form_Controller->addAction($oShopProducerControllerMove);
 }
 
+// Действие "AI"
+$oAdminFormActionAiApply = $oAdmin_Form->Admin_Form_Actions->getByName('aiApply');
+
+if (Core::moduleIsActive('ai') && $oAdminFormActionAiApply && $oAdmin_Form_Controller->getAction() == 'aiApply')
+{
+	$oAi_Prompt_Controller_Apply = Admin_Form_Action_Controller::factory(
+		'Ai_Prompt_Controller_Apply', $oAdminFormActionAiApply
+	);
+
+	$aModels = array();
+
+	$aChecked = $oAdmin_Form_Controller->getChecked();
+	foreach ($aChecked as $datasetKey => $checkedItems)
+	{
+		switch ($datasetKey)
+		{
+			case 0:
+				$model = 'shop_producer_dir';
+			break;
+			case 1:
+				$model = 'shop_producer';
+			break;
+			default:
+				$model = NULL;
+		}
+
+		if (!is_null($model) && !in_array($model, $aModels))
+		{
+			$aModels[] = $model;
+		}
+	}
+
+	$oAi_Prompt_Controller_Apply
+		->title(Core::_('Ai_Prompt.apply'))
+		->selectCaption(Core::_('Ai_Prompt.ai_prompt_id'))
+		->autocompletePath(Admin_Form_Controller::correctBackendPath('/{admin}/ai/index.php?autocomplete=1&site_id=' . $oShop->site_id . '&models=' . implode(',', $aModels) . '&show_prompts=1'))
+		->autocompleteEntityId($oShop->site_id)
+		->datasets(array(
+			0 => 'Shop_Producer_Dir',
+			1 => 'Shop_Producer'
+		));
+
+	if (count($aModels))
+	{
+		$aAi_Prompts = Ai_Prompt_Controller::getPrompts($oShop->Site, $aModels);
+
+		if (count($aAi_Prompts) < Core::$mainConfig['switchSelectToAutocomplete'])
+		{
+			$oAi_Prompt_Controller_Apply
+				->selectOptions(array(' … ') + Ai_Prompt_Controller::fillAiPrompts($oShop->Site, $aModels));
+		}
+		else
+		{
+			$oAi_Prompt_Controller_Apply->autocomplete(TRUE);
+		}
+	}
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oAi_Prompt_Controller_Apply);
+}
+
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(Core_Entity::factory('Shop_Producer_Dir'));
 $oAdmin_Form_Dataset->changeField('active', 'type', 1);
 $oAdmin_Form_Dataset->addCondition(array('where' => array('shop_id', '=', $shop_id)));

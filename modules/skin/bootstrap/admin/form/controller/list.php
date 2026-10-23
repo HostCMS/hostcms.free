@@ -183,7 +183,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 		}
 
 		// CSV Export
-		Core_Html_Entity::factory('A')
+		/*Core_Html_Entity::factory('A')
 			->class('btn btn-sm btn-default margin-right-10')
 			->id('exportCsvButton')
 			->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath()) . '&hostcms[export]=csv')
@@ -192,7 +192,22 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 			->add(
 				Core_Html_Entity::factory('I')->class('fa-solid fa-upload no-margin')
 			)
-			->execute();
+			->execute();*/
+
+		// Export Dropdown (CSV / XLSX)
+		?><div class="btn-group margin-right-5" style="margin-bottom: 0;">
+			<a class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" title="<?php echo Core::_('Admin_Form.export_csv')?>">
+				<i class="fa-solid fa-upload no-margin"></i>
+			</a>
+			<ul class="dropdown-menu" style="min-width: 100px;">
+				<li>
+					<a id="exportCsvButton" href="<?php echo htmlspecialchars($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath()) . '&hostcms[export]=csv')?>" target="_blank"><i class="fa-solid fa-file-csv"></i>CSV</a>
+				</li>
+				<li>
+					<a id="exportXlsxButton" href="<?php echo htmlspecialchars($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath()) . '&hostcms[export]=xlsx')?>" target="_blank"><i class="fa-regular fa-file-excel"></i>XLSX</a>
+				</li>
+			</ul>
+		</div><?php
 
 		// Settings
 		if ($oAdmin_Form->Admin_Form_Fields->getCount(FALSE))
@@ -392,8 +407,11 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 										{
 											$sFormGroupId = $tabName . '-field-' . $oAdmin_Form_Field_Changed->id;
 
-											$bHide = $tabName != 'main' && (!isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field_Changed->name]['show'])
-												|| $aTabs[$tabName]['fields'][$oAdmin_Form_Field_Changed->name]['show'] == 0);
+											/*$bHide = $tabName != 'main' && (!isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field_Changed->name]['show'])
+												|| $aTabs[$tabName]['fields'][$oAdmin_Form_Field_Changed->name]['show'] == 0);*/
+
+											$bHide = isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field_Changed->name]['show'])
+												&& $aTabs[$tabName]['fields'][$oAdmin_Form_Field_Changed->name]['show'] == 0;
 
 											$bHide && $aHide[] = '#' . $sFormGroupId;
 
@@ -417,6 +435,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 																<?php
 																$aOptions = array(
 																	'=' => '=',
+																	'!=' => '!=',
 																	'>' => '>',
 																	'<' => '<',
 																	'>=' => '≥',
@@ -967,7 +986,6 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 											// значение свойства
 											$value = htmlspecialchars((string) $oEntity->$fieldName);
 										}
-										//elseif (strpos($fieldName, 'uf_') === 0 && isset($oEntity->$fieldName))
 										elseif ($oAdmin_Form_Controller->isCallable($oEntity, $fieldName))
 										{
 											// Выполним функцию обратного вызова
@@ -1007,7 +1025,6 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 												$link = htmlspecialchars($oAdmin_Form_Field_Changed->link);
 												$onclick = htmlspecialchars($oAdmin_Form_Field_Changed->onclick);
 
-												//$link_text = trim($value);
 												$link_text = $oAdmin_Form_Controller->applyFormat($value, $sFormat);
 
 												$link = $oAdmin_Form_Controller->doReplaces($aAdmin_Form_Fields, $oEntity, $link);
@@ -1039,7 +1056,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 															</div>
 														</div>
 														<script type="text/javascript">
-														(function($) {
+														(function($){
 															var el = $('#<?php echo $windowId?> #<?php echo $element_name?>');
 															el.datetimepicker({
 																locale: '<?php echo $sCurrentLng?>',
@@ -1081,7 +1098,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 															</div>
 														</div>
 														<script type="text/javascript">
-														(function($) {
+														(function($){
 															var el = $('#<?php echo $windowId?> #<?php echo $element_name?>');
 															el.datetimepicker({
 																locale: '<?php echo $sCurrentLng?>',
@@ -1463,7 +1480,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 										if ($oAdmin_Form_Action->confirm)
 										{
 											$onclick = "res = confirm(this.getAttribute('data-confirm-message')); if (!res) { $('#{$windowId} #row_{$escapedDatasetKey}_{$escapedEntityKey}').toggleHighlight(); } else {{$onclick}} return res;";
-											
+
 											$aAttrs += array(
 												'data-confirm-message' => htmlspecialchars(Core::_('Admin_Form.confirm_dialog', $name))
 											);

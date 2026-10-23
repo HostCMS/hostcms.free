@@ -65,6 +65,16 @@ class Shop_Controller
 		$this->_decimalDigits = $decimalDigits;
 		return $this;
 	}
+	
+	/**
+	 * Get number of decimal digits
+	 * @param string $decimalDigits format
+	 * @return self
+	 */
+	public function getDecimalDigits()
+	{
+		return $this->_decimalDigits;
+	}
 
 	/**
 	 * Use Banker's Rounding. Default TRUE

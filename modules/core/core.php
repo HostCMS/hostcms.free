@@ -190,7 +190,8 @@ class Core
 			'dateTimePickerFormat' => 'DD.MM.YYYY HH:mm:ss',
 			'timePickerFormat' => 'HH:mm:ss',
 			'availableExtension' => array('JPG', 'JPEG', 'JFIF', 'GIF', 'PNG', 'WEBP', 'AVIF', 'SVG', 'PDF', 'ZIP', 'GZ', 'DOC', 'DOCX', 'XLS', 'XLSX', 'TXT'),
-			'availableGetVariables' => array('_openstat', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'srsltid', 'gclid', 'yclid', 'ymclid', 'ysclid', 'yadclid', 'fbclid', 'yadordid', 'from', 'etext'),
+			'availableGetVariables' => array('_openstat', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'srsltid', 'gclid', 'yclid', 'ymclid', 'ysclid', 'yadclid', 'fbclid', 'yadordid', 'from', 'etext', 'ttclid', 'tgclid', 'msclkid'),
+			'staticFiles' => array(),
 			'clientIpHeaders' => array('HTTP_CF_CONNECTING_IP', 'HTTP_DDG_CONNECTING_IP', 'HTTP_X_FORWARDED_FOR_Y', 'HTTP_X_QRATOR_IP_SOURCE', 'HTTP_X_REAL_IP'),
 			'defaultCache' => 'file',
 			'timezone' => 'America/New_York',
@@ -223,6 +224,7 @@ class Core
 				'X-XSS-Protection' => '1;mode=block'
 			),
 			'backendContentSecurityPolicy' => "default-src 'self' www.hostcms.ru www.youtube.com youtube.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: *.cloudflare.com *.kaspersky-labs.com  www.hostcms.ru; img-src 'self' chart.googleapis.com data: blob: www.hostcms.ru; font-src 'self'; connect-src 'self' blob:; style-src 'self' 'unsafe-inline'",
+			'antibotMinFonts' => 5, 
 			'backend' => 'admin'
 		);
 	}
@@ -1110,7 +1112,7 @@ class Core
 	static public function checkSearchEngineBot($agent)
 	{
 		return is_string($agent)
-			? (bool) preg_match('/360Spider|Applebot|Baiduspider|baidu|bingbot|BingPreview|Bytespider|coccocbot|Daumoa|DuckDuckBot|duckduckgo|Googlebot|GoogleOther|google|Mail\.RU_Bot|MojeekBot|PetalBot|Rambler|SeznamBot|Sogou|Swisscows|Yahoo|YandexBot|yandex|YisouSpider/iu', $agent)
+			? (bool) preg_match('/360Spider|Applebot|Baiduspider|baidu|bingbot|BingPreview|Bytespider|coccocbot|Daumoa|DuckDuckBot|duckduckgo|Googlebot|GoogleOther|google|meta-webindexer|facebookexternalhit|MojeekBot|PetalBot|SeznamBot|Sogou|Swisscows|Yahoo|YandexBot|yandex|Yeti|YisouSpider/iu', $agent)
 			: FALSE;
 	}
 

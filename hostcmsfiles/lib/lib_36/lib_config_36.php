@@ -186,9 +186,11 @@ elseif ($sType == 'catalog' && $sMode == 'file' && ($sFileName = Core_Array::get
 
 	$sessionId = preg_replace('/[^A-Za-z0-9_-]/', '', session_id());
 
-	$sFullFileName = Core_File::getExtension($sFileName) == 'xml'
-		? $sCmsFolderTemporaryDirectory . $sessionId . '_' . $sFileName
-		: $sCmsFolderTemporaryDirectory . $sFileName;
+	$sFullFileName = $sCmsFolderTemporaryDirectory
+		. (Core_File::getExtension($sFileName) == 'xml'
+			? $sessionId . '_' . Core_File::filenameCorrection($sFileName)
+			: Core_File::filenameCorrection($sFileName)
+		);
 
 	Core_File::mkdir(dirname($sFullFileName), CHMOD, TRUE);
 

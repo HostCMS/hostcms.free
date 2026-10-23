@@ -1,6 +1,6 @@
 /* Galician translation for the jQuery Timepicker Addon */
 /* Written by David Barral */
-(function($) {
+(function($){
 	$.timepicker.regional['gl'] = {
 		timeOnlyTitle: 'Elixir unha hora',
 		timeText: 'Hora',

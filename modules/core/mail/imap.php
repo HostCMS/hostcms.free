@@ -122,7 +122,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 
 	/**
 	 * Заголовки письма
-	 * @var str
+	 * @var string
 	 */
 	protected $_headers = '';
 
@@ -435,7 +435,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 	 * Сохранение структуры сообщения
 	 *
 	 * @param array $aStructureParts Массив со структурой
-	 * @return str
+	 * @return string
 	 */
 	protected function _saveStructure($aStructureParts)
 	{
@@ -534,7 +534,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 	 * @param IMAP\Connection $stream  IMAP-поток
 	 * @param int $i                   Номер письма
 	 * @param string $number           Номер части (например, "1.2.3")
-	 * @param array $part              Структура части (из _structure2array)
+	 * @param array $aPart              Структура части (из _structure2array)
 	 */
 	protected function _processPart($stream, $i, $number, $aPart)
 	{
@@ -659,7 +659,6 @@ class Core_Mail_Imap extends Core_Servant_Properties
 	 * @param int $i Порядковый номер письма
 	 * @param array $aStructurePart Структура части
 	 * @param string $body Тело части
-	 * @param int $n Счетчик вложений
 	 */
 	protected function _saveAsAttachment($i, $aStructurePart, $body)
 	{
@@ -717,10 +716,13 @@ class Core_Mail_Imap extends Core_Servant_Properties
 	 */
 	public function decodeMimeheader($str)
 	{
-		if (preg_match('/=\?([^?]+)\?([BQ])\?([^?]+)\?=/', $str, $matches))
-		{
-			$charset = $matches[1];
-			$encoding = $matches[2];
+		// По стандарту RFC 2047 пробелы и переносы строк между закодированными блоками должны игнорироваться
+		$str = preg_replace('/(\?=)\s+(=\?)/', '$1$2', $str);
+
+		// preg_replace_callback для обработки всех найденных блоков
+		return preg_replace_callback('/=\?([^?]+)\?([BQbq])\?([^?]+)\?=/', function ($matches) {
+			$charset = strtolower($matches[1]);
+			$encoding = strtoupper($matches[2]);
 			$data = $matches[3];
 
 			if ($encoding === 'B')
@@ -739,12 +741,11 @@ class Core_Mail_Imap extends Core_Servant_Properties
 			}
 			else
 			{
-				// Пытаемся преобразовать из заявленной кодировки $charset в UTF-8
-				return mb_convert_encoding($decoded, 'UTF-8', $charset);
+				// Пытаемся преобразовать из заявленной кодировки в UTF-8
+				$converted = @mb_convert_encoding($decoded, 'UTF-8', $charset);
+				return $converted !== FALSE ? $converted : $decoded;
 			}
-		}
-
-		return $str;
+		}, $str);
 	}
 
 	/**

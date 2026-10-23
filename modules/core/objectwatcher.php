@@ -27,7 +27,7 @@ class Core_ObjectWatcher
 	/**
 	 * Maximum count of objects
 	 * Максимальное количество объектов
-	 * @var array
+	 * @var int
 	 */
 	static protected $_maxObjects = NULL;
 
@@ -95,7 +95,7 @@ class Core_ObjectWatcher
 	public function reduce()
 	{
 		$databaseDriver = Core_ORM::getDatabaseDriver();
-		
+
 		if (isset($this->_cache[$databaseDriver]))
 		{
 			$this->_cache[$databaseDriver] = array_slice($this->_cache[$databaseDriver], floor(self::$_maxObjects / 4), NULL, TRUE);

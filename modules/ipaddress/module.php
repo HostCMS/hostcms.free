@@ -22,7 +22,7 @@ class Ipaddress_Module extends Core_Module_Abstract
 	 * Module date
 	 * @var string
 	 */
-	public $date = '2026-05-12';
+	public $date = '2026-10-22';
 
 	/**
 	 * Module name
@@ -30,6 +30,17 @@ class Ipaddress_Module extends Core_Module_Abstract
 	 */
 	protected $_moduleName = 'ipaddress';
 
+	/**
+	 * Constructor.
+	 */
+	public function __construct()
+	{
+		parent::__construct();
+
+		Core_Skin::instance()->addJs('/modules/ipaddress/assets/ipaddress.js');
+		Core_Skin::instance()->addCss('/modules/ipaddress/assets/ipaddress.css');
+	}
+	
 	/**
 	 * Get Module's Menu
 	 * @return array

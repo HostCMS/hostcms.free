@@ -1,6 +1,6 @@
 /* Russian translation for the jQuery Timepicker Addon */
 /* Written by Trent Richardson */
-(function($) {
+(function($){
 	$.timepicker.regional['ru'] = {
 		timeOnlyTitle: 'Выберите время',
 		timeText: 'Время',

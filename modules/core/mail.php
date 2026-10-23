@@ -55,6 +55,9 @@ abstract class Core_Mail
 		return __CLASS__ . '_' . ucfirst($driver);
 	}
 
+	/**
+	 * @var mixed
+	 */
 	protected $_log = NULL;
 
 	/**
@@ -710,7 +713,7 @@ abstract class Core_Mail
 
 	/**
 	 * Get the array of the "relaxed" header canonicalization
-	 * @param $sHeaders Headers
+	 * @param string $sHeaders Headers
 	 * @return array
 	 */
 	protected function _dkimRelaxedCanonicalizeHeader($sHeaders)
@@ -848,7 +851,7 @@ abstract class Core_Mail
 
 	/**
 	 * Get DKIM-Signature header or empty string
-	 * @param string $dkimRelaxedCanonicalizeHeader
+	 * @param array $dkimRelaxedCanonicalizeHeader
 	 * @param string $body
 	 * @return string
 	 */

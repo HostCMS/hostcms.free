@@ -216,7 +216,10 @@ class Company_Model extends Core_Entity
 
 	/**
 	 * Показ прав доступа к этапу сделки отделов и сотрудников с учетом организационной структуры компании
-	 * @var array $aDepartment информация об отделе
+	 * @param int $deal_template_step_id
+	 * @param array $aDepartment
+	 * @param object $oPotentialHeadOfDepartment
+	 * @return array
 	 */
 	public function showDepartmentsAndUsers4DealTemplateStepAccess($deal_template_step_id, $aDepartment = NULL, $oPotentialHeadOfDepartment = NULL)
 	{
@@ -231,6 +234,8 @@ class Company_Model extends Core_Entity
 			}
 		}
 
+		$aHeadIds = array();
+
 		if (is_array($aDepartment) && count($aDepartment))
 		{
 			if (isset($aDepartment["department"]))
@@ -238,8 +243,6 @@ class Company_Model extends Core_Entity
 				$issetChildrenItems = isset($aDepartment["users"]) || isset($aDepartment["departments"]);
 
 				$aUsers = $aDepartment["department"]->getHeads();
-
-				$aHeadIds = array();
 
 				foreach ($aUsers as $oUser)
 				{
@@ -255,6 +258,8 @@ class Company_Model extends Core_Entity
 					$bitValue = !is_null($oDeal_Template_Step_Access_Department)
 						? Core_Bit::getBit($oDeal_Template_Step_Access_Department->access, $bitNumber)
 						: 0;
+
+					$actionTitle = $actionName = '';
 
 					switch($bitNumber)
 					{

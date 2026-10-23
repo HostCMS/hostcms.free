@@ -295,6 +295,8 @@ class Core_Controller extends Core_Servant_Properties
 
 	/**
 	 * Assign variables/objects to the TPL-template
+	 * @param string $varname
+	 * @param string $var
 	 * @return self
 	 */
 	public function assign($varname, $var)
@@ -306,6 +308,8 @@ class Core_Controller extends Core_Servant_Properties
 
 	/**
 	 * Append an element to an assigned array
+	 * @param string $varname
+	 * @param string $var
 	 * @return self
 	 */
 	public function append($varname, $var)
@@ -380,7 +384,7 @@ class Core_Controller extends Core_Servant_Properties
 				Core_Event::notify(get_class($this) . '.onAfterShow', $this);
 			break;
 			case 'json':
-				$return = json_encode($this->getStdObject());
+				$return = json_encode($this->getStdObject(), defined('JSON_UNESCAPED_UNICODE') ? JSON_UNESCAPED_UNICODE : 0);
 			break;
 			default:
 				throw new Core_Exception('Core_Controller::get(), wrong mode: %mode.', array('%mode' => $this->_mode));
@@ -413,7 +417,7 @@ class Core_Controller extends Core_Servant_Properties
 		$this->_cacheSignatures[] = $signature;
 		return $this;
 	}
-	
+
 	/**
 	 * Add additional signatures for cache name
 	 * @param array $aSignature
@@ -427,7 +431,7 @@ class Core_Controller extends Core_Servant_Properties
 		}
 		return $this;
 	}
-	
+
 	/**
 	 * Get additional signatures for cache name
 	 * @return array
@@ -436,7 +440,7 @@ class Core_Controller extends Core_Servant_Properties
 	{
 		return $this->_cacheSignatures;
 	}
-	
+
 	/**
 	 * Clear additional signatures for cache name
 	 * @return self

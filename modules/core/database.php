@@ -20,6 +20,7 @@ abstract class Core_DataBase
 
 	/**
 	 * Driver's configuration
+	 * @var mixed
 	 */
 	protected $_config = NULL;
 
@@ -30,11 +31,13 @@ abstract class Core_DataBase
 
 	/**
 	 * Driver's connection
+	 * @var mixed
 	 */
 	protected $_connection = NULL;
 
 	/**
 	 * Last executed query
+	 * @var mixed
 	 */
 	protected $_lastQuery = NULL;
 
@@ -52,6 +55,7 @@ abstract class Core_DataBase
 	 * 9 - SHOW
 	 * 10 - LOCK
 	 * 99 - OTHER
+	 * @var mixed
 	 */
 	protected $_queryType = NULL;
 
@@ -126,7 +130,7 @@ abstract class Core_DataBase
 
 	/**
 	 * Fetch query result
-	 * @param $result resource
+	 * @param string $result resource
 	 * @param boolean $bCache use cache
 	 * @return array
 	 */

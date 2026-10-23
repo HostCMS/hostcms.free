@@ -639,6 +639,8 @@ else
 			->open()
 				->where('shop_orders.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)
 				->setOr()
+				->where('shop_orders.tin', '=', $sGlobalSearch)
+				->setOr()
 				->where('shop_orders.invoice', 'LIKE', '%' . $sGlobalSearch . '%')
 				->setOr()
 				->where('shop_orders.coupon', 'LIKE', '%' . $sGlobalSearch . '%')

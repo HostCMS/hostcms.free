@@ -19,7 +19,7 @@ class Timeline_View extends Admin_Form_Controller_View
 	public function execute()
 	{
 		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
-		$oAdmin_Form = $oAdmin_Form_Controller->getAdminForm();
+		// $oAdmin_Form = $oAdmin_Form_Controller->getAdminForm();
 
 		$oAdmin_View = Admin_View::create($this->_Admin_Form_Controller->Admin_View)
 			->pageTitle($oAdmin_Form_Controller->pageTitle)
@@ -418,7 +418,11 @@ class Timeline_View extends Admin_Form_Controller_View
 	{
 		$iDatetime = Core_Date::sql2timestamp($oEntity->dataDatetime);
 
-		$class = '';
+		$oObject = NULL;
+		$class = $badge = $text = '';
+
+		$iEntityAdminFormId = 0;
+		$entityPath = '';
 
 		//switch ($oEntity->type)
 		switch (get_class($oEntity))
@@ -432,7 +436,7 @@ class Timeline_View extends Admin_Form_Controller_View
 				$color = 'warning';
 
 				$oObject = Core_Entity::factory('Crm_Note', $oEntity->id);
-				$oObject->result && $class = 'timeline-crm-note-result';
+				$oObject->result && $class = 'completed-message';
 
 				ob_start();
 
@@ -465,6 +469,11 @@ class Timeline_View extends Admin_Form_Controller_View
 
 				$oObject = Core_Entity::factory('Deal', $oEntity->id);
 
+				if ($oObject->deal_template_step_id && $oObject->Deal_Template_Step->status == 1) // Сделка завершена успешно
+				{
+					$class = 'completed-message';
+				}
+
 				ob_start();
 				echo $oObject->nameBackend(NULL, $oAdmin_Form_Controller, TRUE);
 				$text = ob_get_clean();
@@ -479,6 +488,11 @@ class Timeline_View extends Admin_Form_Controller_View
 				$color = 'success';
 
 				$oObject = Core_Entity::factory('Event', $oEntity->id);
+
+				if ($oObject->completed)
+				{
+					$class = 'completed-message';
+				}
 
 				ob_start();
 

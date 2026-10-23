@@ -39,7 +39,7 @@ $oAdmin_Form_Entity_Menus->add(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'destroyAll', NULL, 0, 0, $additionalParams)
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'destroyAll', NULL, 0, 0, $additionalParams)
+			"res = confirm('" . htmlspecialchars(Core::_('Admin_Form.confirm_dialog', Core::_('User_Session.destroy_all'))) . "'); if (res) { " . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), 'destroyAll', NULL, $additionalParams) . " } return res;"
 		)
 );
 
@@ -102,6 +102,12 @@ $oAdmin_Form_Dataset
 
 // Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
+
+if (!$oUser->superuser)
+{
+	throw new Core_Exception('Access forbidden');
+}
+
 !$oUser->superuser && $oUser->only_access_my_own
 	&& $oAdmin_Form_Dataset->addUserConditions();
 

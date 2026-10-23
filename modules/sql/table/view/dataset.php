@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Sql
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Sql_Table_View_Dataset extends Admin_Form_Dataset
 {
@@ -239,8 +239,19 @@ class Sql_Table_View_Dataset extends Admin_Form_Dataset
 		// Уточнение таблицы при поиске WHERE
 		if (isset($condition['where']))
 		{
+			$aColumns = $this->_entity->getTableColumns();
 			
-			//
+			// BINARY
+			if (isset($condition['where'][2]) && is_string($condition['where'][2])
+				&& isset($aColumns[$condition['where'][0]]['binary']) && $aColumns[$condition['where'][0]]['binary']
+			)
+			{
+				strpos($condition['where'][2], '0x') === 0
+					&& $condition['where'][2] = substr($condition['where'][2], 2);
+				
+				$condition['where'][2] = Core_QueryBuilder::raw('UNHEX(' . Core_DataBase::instance()->escape($condition['where'][2]) . ')');
+			}
+			
 			if (isset($condition['where'][0]))
 			{
 				if (is_string($condition['where'][0])
@@ -249,11 +260,6 @@ class Sql_Table_View_Dataset extends Admin_Form_Dataset
 				{
 					$condition['where'][0] = $this->_tableName . '.' . $condition['where'][0];
 				}
-			}
-
-			if (isset($condition['where'][2]) && is_string($condition['where'][2]) && strpos($condition['where'][2], '0x') === 0)
-			{
-				$condition['where'][2] = Core_QueryBuilder::raw('UNHEX(' . Core_DataBase::instance()->escape(substr($condition['where'][2], 2)) . ')');
 			}
 		}
 

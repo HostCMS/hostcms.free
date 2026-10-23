@@ -1,7 +1,8 @@
 /* global hostcmsBackend, i18n, bootbox, Notify, jQuery */
-"use strict";
 
 (function($){
+	"use strict";
+	
 	$.extend({
 		updateCaldav: function() {
 			var $calendar = $("#calendar");

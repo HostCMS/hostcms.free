@@ -276,6 +276,8 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * // FROM|JOIN `tableName` PARTITION (`p0`, `p1`)
 	 * $oCore_QueryBuilder_Select = $Core_QueryBuilder_Select->from('tableName')->partition('tableName', array('p0', 'p1'));
 	 * </code>
+	 * @param string $tableName
+	 * @param array $partitions
 	 * @return Core_QueryBuilder_Select
 	*/
 	public function partition($tableName, array $partitions)
@@ -283,7 +285,6 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 		$this->_partition[$tableName] = $partitions;
 		return $this;
 	}
-
 
 	/**
 	 * Add Index Hints
@@ -392,7 +393,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	/**
 	 * Quote columns
 	 * @param string|object $tableName
-	 * @return array
+	 * @return string
 	 * @throws Core_Exception
 	 */
 	public function quoteTable($tableName)

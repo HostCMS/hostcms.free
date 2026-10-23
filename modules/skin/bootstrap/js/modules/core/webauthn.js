@@ -1,11 +1,12 @@
 /* global hostcmsBackend Notify i18n */
 (function($){
 	$.extend({
-		unavailableWebauthn: function()
-		{
-			return !window.isSecureContext && location.protocol !== 'https:'
-				|| !window.fetch || !navigator.credentials || !navigator.credentials.create;
-		},
+		unavailableWebauthn: function() {
+			return (!window.isSecureContext || (location.protocol !== 'https:' && location.hostname !== 'localhost'))
+				|| !window.fetch
+				|| typeof navigator.credentials === 'undefined'
+				|| !navigator.credentials.create;
+		}
 	});
 })(jQuery);
 

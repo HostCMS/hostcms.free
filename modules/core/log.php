@@ -98,6 +98,11 @@ abstract class Core_Log
 		return self::$_instance[$name];
 	}
 
+	/**
+	 * Write
+	 * @param string $message
+	 * @return self
+	 */
 	abstract public function write($message);
 
 	/**
@@ -167,7 +172,7 @@ abstract class Core_Log
 		$this->_notify = $notify;
 		return $this;
 	}
-	
+
 	/**
 	 * Clear object
 	 * @return self

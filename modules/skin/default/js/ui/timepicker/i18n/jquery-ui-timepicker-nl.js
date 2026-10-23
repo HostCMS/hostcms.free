@@ -1,6 +1,6 @@
 /* Dutch translation for the jQuery Timepicker Addon */
 /* Written by Martijn van der Lee */
-(function($) {
+(function($){
 	$.timepicker.regional['nl'] = {
 		timeOnlyTitle: 'Tijdstip',
 		timeText: 'Tijd',

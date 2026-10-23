@@ -142,13 +142,11 @@ if (!is_null(Core_Array::getRequest('loadEvents')))
 	Core::showJson($aJson);
 }
 
-// Синхронизация каждые 10 минут
+// Обновление связанных календарей
 if (!is_null(Core_Array::getPost('updateCaldav')))
 {
 	Core_Session::close();
-
 	Calendar_Controller::sync($oUser);
-
 	Core::showJson('OK');
 }
 
@@ -239,7 +237,7 @@ $(function () {
 					click: function() {
 						$('#caldav-dropdown').dropdown().toggle();
 					},
-					icon: 'fa-solid fa-calendar-days'
+					icon: 'fa-solid fa-solid fa-calendar-days'
 				}
 			},
 			header: {
@@ -283,16 +281,12 @@ $(function () {
 });
 </script>
 
-<div class="row">
-	<div class="col-xs-12">
-		<div class="widget flat">
-			<!--Widget Header-->
-			<div class="widget-body">
-				<div id='calendar'></div>
-			</div>
-			<!--Widget Body-->
-		</div>
+<div class="widget flat">
+	<!--Widget Header-->
+	<div class="widget-body">
+		<div id='calendar'></div>
 	</div>
+	<!--Widget Body-->
 </div>
 
 <div class="dropdown" id="caldav-list" >
@@ -321,7 +315,7 @@ $(function () {
 			}
 		?>
 		<li role="separator" class="divider"></li>
-		<li><a class="caldav-settings" href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/calendar/caldav/index.php')?>" onclick="$.adminLoad({path: '<?php Admin_Form_Controller::correctBackendPath('/{admin}/calendar/caldav/index.php')?>',action: '',operation: '',additionalParams: '',current: '1',sortingFieldId: '1290',sortingDirection: '1',windowId: 'id_content'}); return false"><i class="fa-solid fa-gear"></i><?php echo Core::_('Calendar.settings')?></a></li>
+		<li><a class="caldav-settings" href="<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/calendar/caldav/index.php')?>" onclick="$.adminLoad({path: '<?php echo Admin_Form_Controller::correctBackendPath('/{admin}/calendar/caldav/index.php')?>',action: '',operation: '',additionalParams: '',current: '1',sortingFieldId: '1290',sortingDirection: '1',windowId: 'id_content'}); return false"><i class="fa-solid fa-gear"></i><?php echo Core::_('Calendar.settings')?></a></li>
 	</ul>
 </div>
 

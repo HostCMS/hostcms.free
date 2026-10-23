@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Barcode
 {
@@ -60,7 +60,7 @@ class Core_Barcode
 		return $barcode;
 	}
 
-	/*
+	/**
 	 * Check EAN-8 barcode
 	 * @param string $value barcode
 	 * @return bool
@@ -70,7 +70,7 @@ class Core_Barcode
 		return is_scalar($value) && strlen($value) == 8 && self::_validEAN($value);
 	}
 
-	/*
+	/**
 	 * Check EAN-13 barcode
 	 * @param string $value barcode
 	 * @return bool
@@ -80,7 +80,7 @@ class Core_Barcode
 		return is_scalar($value) && strlen($value) == 13 && self::_validEAN($value);
 	}
 
-	/*
+	/**
 	 * Check ITF-14 barcode
 	 * @param string $value barcode
 	 * @return bool
@@ -90,7 +90,7 @@ class Core_Barcode
 		return is_scalar($value) && strlen($value) == 14 && self::_validEAN($value);
 	}
 
-	/*
+	/**
 	 * Check ITF-14 barcode
 	 * @param string $value barcode
 	 * @return bool
@@ -101,7 +101,7 @@ class Core_Barcode
 			&& strlen($value) <= 43;
 	}
 
-	/*
+	/**
 	 * Check EAN-128/GS1-128 barcode
 	 * @param string $value barcode
 	 * @return bool
@@ -113,7 +113,7 @@ class Core_Barcode
 			&& strpos($value, '(') !== FALSE;
 	}
 
-	/*
+	/**
 	 * Check valid EAN control sum
 	 * @param string $value barcode
 	 * @return bool
@@ -147,7 +147,7 @@ class Core_Barcode
 		return substr(10 - substr($calculation, -1), -1);
 	}
 
-	/*
+	/**
 	 * Check valid CODE39 control symbol (mod 43 check digit)
 	 * @param string $value barcode
 	 * @return bool

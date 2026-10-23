@@ -427,6 +427,7 @@ class Template_Model extends Core_Entity
 
 	/**
 	 * Create directory for template
+	 * @param string $lng
 	 * @return self
 	 */
 	protected function _createLngDir($lng)
@@ -828,10 +829,16 @@ class Template_Model extends Core_Entity
 		}
 	}
 
+	/**
+	 * LESS variable
+	 * @var mixed
+	 */
 	protected $_lessVariables = NULL;
 
 	/**
 	 * Обратная совместимость с версией до 6.8.9
+	 * @param string $less
+	 * @return self
 	 */
 	public function less($less)
 	{
@@ -988,13 +995,13 @@ class Template_Model extends Core_Entity
 
 											if (isset($aSelectOptions[0]))
 											{
-												foreach ($aSelectOptions as $key => $oOption)
+												foreach ($aSelectOptions as $key => $oSelectOption)
 												{
-													$value = !is_null($oOption->attributes()->value)
-														? strval($oOption->attributes()->value)
+													$value = !is_null($oSelectOption->attributes()->value)
+														? strval($oSelectOption->attributes()->value)
 														: $key;
 
-													$sName = strval($oOption[0]);
+													$sName = strval($oSelectOption[0]);
 
 													$sSelected = $value == $lessFieldValue
 														? 'selected="selected"'
@@ -1086,6 +1093,8 @@ class Template_Model extends Core_Entity
 
 	/**
 	 * Get i18n value
+	 * @param string $name
+	 * @return string
 	 */
 	public function _($name)
 	{

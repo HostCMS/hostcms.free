@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Lib
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Lib_Property_List_Value_Model extends Core_Entity
 {
@@ -20,6 +20,14 @@ class Lib_Property_List_Value_Model extends Core_Entity
 		'lib_property' => array(),
 		'user' => array()
 	);
+
+	/**
+	 * Default sorting for models
+	 * @var array
+	 */
+	protected $_sorting = array(
+		'lib_property_list_values.sorting' => 'ASC'
+	 );
 
 	/**
 	 * Constructor.

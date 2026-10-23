@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Inflection
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Inflection_En extends Core_Inflection
 {
@@ -273,12 +273,19 @@ class Core_Inflection_En extends Core_Inflection
 	/**
 	 * Number to str
 	 * @param float $float
+	 * @return string
 	 */
 	protected function numberInWords($float)
 	{
 		return 'Core_Inflection_En: numberInWords is undefined';
 	}
 
+	/**
+	 * Currency in word
+	 * @param float $float
+	 * @param mixed $currencyCode
+	 * @return string
+	 */
 	public function currencyInWords($float, $currencyCode)
 	{
 		return 'Core_Inflection_En: currencyInWords is undefined';

@@ -537,6 +537,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 	/**
 	 * Get Admin_Form_Field by ID
+	 * @param int $id
 	 * @return object|NULL
 	 */
 	public function getAdminFormFieldById($id)
@@ -550,6 +551,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 	/**
 	 * Get Admin_Form_Field by Name
+	 * @param string $name
 	 * @return object|NULL
 	 */
 	public function getAdminFormFieldByName($name)
@@ -569,6 +571,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 	/**
 	 * Delete Admin_Form_Field by ID
+	 * @param int $id
 	 * @return self
 	 */
 	public function deleteAdminFormFieldById($id)
@@ -643,6 +646,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 	/**
 	 * Get Admin_Form_Action by ID
+	 * @param int $id
 	 * @return object|NULL
 	 */
 	public function getAdminFormActionById($id)
@@ -656,6 +660,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 	/**
 	 * Get Admin_Form_Action by Name
+	 * @param string $name
 	 * @return object|NULL
 	 */
 	public function getAdminFormActionByName($name)
@@ -675,6 +680,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 	/**
 	 * Delete Admin_Form_Action by ID
+	 * @param int $id
 	 * @return self
 	 */
 	public function deleteAdminFormActionById($id)
@@ -969,7 +975,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 	/**
 	 * Set page <title>
-	 * @param $pageTitle title
+	 * @param string $pageTitle title
 	 * @return self
 	 */
 	public function pageTitle($pageTitle)
@@ -1388,6 +1394,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 	/**
 	 * Get fields
+	 * @param int $site_id
 	 * @param string|array $modelNames
 	 * @return array
 	 */
@@ -1543,6 +1550,10 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 					// Change current filter
 					$this->filterId(key($tabs));
+				}
+				else
+				{
+					Core_Message::show('Empty Conditions!', 'error');
 				}
 			}
 		}
@@ -1793,18 +1804,28 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		$this->addMessage(ob_get_clean());
 
 		$formSettings = Core_Array::get($this->request, 'hostcms');
-		if (is_array($formSettings) && Core_Array::get($formSettings, 'export') == 'csv')
-		{
-			header('Cache-Control: no-cache, must-revalidate');
-			header('Content-Description: File Transfer');
-			header('Content-Type: application/force-download');
-			header('Content-Disposition: attachment; filename="' . addslashes($this->title) . '_' .date('Y_m_d_H_i_s').'.csv";');
-			header('Content-Transfer-Encoding: binary');
+		$exportType = is_array($formSettings) ? Core_Array::get($formSettings, 'export') : NULL;
 
+		if ($exportType == 'csv' || $exportType == 'xlsx')
+		{
 			$oAdmin_Language = $this->getAdminLanguage();
 			$this->limit = NULL;
 
 			$aData = $aFields = array();
+
+			if ($exportType == 'csv')
+			{
+				header('Cache-Control: no-cache, must-revalidate');
+				header('Content-Description: File Transfer');
+				header('Content-Type: application/force-download');
+				header('Content-Disposition: attachment; filename="' . addslashes($this->title) . ' ' .date('Y-m-d H-i-s').'.csv";');
+				header('Content-Transfer-Encoding: binary');
+			}
+			else
+			{
+				$oCore_Xlsx = new Core_Xlsx();
+				$oCore_Xlsx->setSheetName($this->title);
+			}
 
 			// Поля формы
 			$aAdmin_Form_Fields = $this->getAdminFormFields();
@@ -1817,7 +1838,9 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 						? $oAdmin_Form_Field->getCaption($oAdmin_Language->id)
 						: $oAdmin_Form_Field->name;
 
-					$aData[] = $this->prepareCell($fieldName);
+					$aData[] = $exportType == 'csv'
+						? $this->prepareCell($fieldName)
+						: strip_tags(strval($fieldName));
 
 					$aFields[$oAdmin_Form_Field->name] = $oAdmin_Form_Field;
 				}
@@ -1838,7 +1861,10 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 					{
 						if (!isset($aFields[$columnName]) && Core_I18n::instance()->check($modelName . '.' . $columnName))
 						{
-							$aData[] = $this->prepareCell(strip_tags(Core::_($modelName . '.' . $columnName)));
+							$fieldCaption = strip_tags(Core::_($modelName . '.' . $columnName));
+							$aData[] = $exportType == 'csv'
+								? $this->prepareCell($fieldCaption)
+								: $fieldCaption;
 
 							$aFields[$columnName] = NULL;
 						}
@@ -1846,10 +1872,43 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 				}
 			}
 
-			// BOM
-			echo "\xEF\xBB\xBF";
+			if ($exportType == 'csv')
+			{
+				// BOM
+				echo "\xEF\xBB\xBF";
+				$this->_printRow($aData);
+			}
+			else
+			{
+				$oCore_Xlsx->addRow($aData);
 
-			$this->_printRow($aData);
+				// Настройки стиля для первой строки
+				$headerStyle = array(
+					'fill' => '#CCCCCC',
+					'font' => array(
+						'bold' => TRUE,
+						'color' => '#000000',
+						'size' => 12
+					)
+				);
+
+				$colIndex = 0;
+				foreach ($aData as $title)
+				{
+					// Вычисляем буквенный адрес колонки (A, B ... Z, AA, AB и т.д.)
+					$colLetter = '';
+					$tempIndex = $colIndex;
+					while ($tempIndex >= 0)
+					{
+						$colLetter = chr($tempIndex % 26 + 65) . $colLetter;
+						$tempIndex = floor($tempIndex / 26) - 1;
+					}
+
+					// Применяем стиль к первой строке текущей колонки (A1, B1, C1...)
+					$oCore_Xlsx->setStyle($colLetter . '1', $headerStyle);
+					$colIndex++;
+				}
+			}
 
 			$this->setDatasetConditions();
 
@@ -1870,107 +1929,110 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 						foreach ($aEntities as $oEntity)
 						{
 							$aData = array();
-							//foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 							foreach ($aFields as $fieldName => $mixed)
 							{
-								// 0 - Столбец и фильтр, 2 - Столбец
-								//if ($oAdmin_Form_Field->view == 0 || $oAdmin_Form_Field->view == 2)
-								//{
-									// Перекрытие параметров для данного поля. Может быть $oAdmin_Form_Field или NULL
-									if ($mixed)
-									{
-										$oAdmin_Form_Field_Changed = $this->changeField($oAdmin_Form_Dataset, $mixed);
-										$fieldName = $oAdmin_Form_Field_Changed->name;
+								// Перекрытие параметров для данного поля. Может быть $oAdmin_Form_Field или NULL
+								if ($mixed)
+								{
+									$oAdmin_Form_Field_Changed = $this->changeField($oAdmin_Form_Dataset, $mixed);
+									$fieldName = $oAdmin_Form_Field_Changed->name;
 
-										if (isset($oEntity->$fieldName))
-										{
-											// значение свойства
-											$value = $oEntity->$fieldName;
-										}
-										elseif ($this->isCallable($oEntity, $fieldName))
-										{
-											// Выполним функцию обратного вызова
-											$value = $oEntity->$fieldName($oAdmin_Form_Field_Changed, $this);
-										}
-										else
-										{
-											$value = NULL;
-										}
+									if (isset($oEntity->$fieldName))
+									{
+										// значение свойства
+										$value = $oEntity->$fieldName;
+										$value = $this->applyFormat($value, $oAdmin_Form_Field_Changed->format);
+									}
+									elseif ($this->isCallable($oEntity, $fieldName))
+									{
+										// Выполним функцию обратного вызова
+										$value = $oEntity->$fieldName($oAdmin_Form_Field_Changed, $this);
 									}
 									else
 									{
-										$oAdmin_Form_Field_Changed = NULL;
-
-										$value = isset($oEntity->$fieldName) ? $oEntity->$fieldName : NULL;
+										$value = NULL;
 									}
+								}
+								else
+								{
+									$oAdmin_Form_Field_Changed = NULL;
+									$value = isset($oEntity->$fieldName) ? $oEntity->$fieldName : NULL;
+								}
 
-									$iType = $oAdmin_Form_Field_Changed ? $oAdmin_Form_Field_Changed->type : 1;
-									$sFormat = $oAdmin_Form_Field_Changed ? $oAdmin_Form_Field_Changed->format : '';
+								$iType = $oAdmin_Form_Field_Changed ? $oAdmin_Form_Field_Changed->type : 1;
+								$sFormat = $oAdmin_Form_Field_Changed ? $oAdmin_Form_Field_Changed->format : '';
 
-									switch ($iType)
-									{
-										case 1: // Текст.
-										case 2: // Поле ввода.
-										case 4: // Ссылка.
-										case 7: // Картинка-ссылка.
-											!is_null($value)
-												&& $value = $this->applyFormat($value, $sFormat);
-										break;
-										case 3: // Checkbox.
-											$value = $value == 1 ? Core::_('Admin_Form.yes') : Core::_('Admin_Form.no');
-										break;
-										case 5: // Дата-время.
-											if (!is_null($value))
-											{
-												$value = $value == '0000-00-00 00:00:00' || $value == ''
-													? ''
-													: Core_Date::sql2datetime($value);
-											}
-										break;
-										case 6: // Дата.
-											if (!is_null($value))
-											{
-												$value = $value == '0000-00-00 00:00:00' || $value == ''
-													? ''
-													: Core_Date::sql2date($value);
-											}
-										break;
-										case 8: // Выпадающий список
-										case 12: // Элемент списка
-											if (is_array($oAdmin_Form_Field_Changed->list))
-											{
-												$aValue = $oAdmin_Form_Field_Changed->list;
-											}
-											else
-											{
-												$aValue = array();
+								switch ($iType)
+								{
+									case 1: // Текст.
+									case 2: // Поле ввода.
+									case 4: // Ссылка.
+									case 7: // Картинка-ссылка.
+										!is_null($value)
+											&& $value = $this->applyFormat($value, $sFormat);
+									break;
+									case 3: // Checkbox.
+										$value = $value == 1 ? Core::_('Admin_Form.yes') : Core::_('Admin_Form.no');
+									break;
+									case 5: // Дата-время.
+										if (!is_null($value))
+										{
+											$value = $value == '0000-00-00 00:00:00' || $value == ''
+												? ''
+												: Core_Date::sql2datetime($value);
+										}
+									break;
+									case 6: // Дата.
+										if (!is_null($value))
+										{
+											$value = $value == '0000-00-00 00:00:00' || $value == ''
+												? ''
+												: Core_Date::sql2date($value);
+										}
+									break;
+									case 8: // Выпадающий список
+									case 12: // Элемент списка
+										if (is_array($oAdmin_Form_Field_Changed->list))
+										{
+											$aValue = $oAdmin_Form_Field_Changed->list;
+										}
+										else
+										{
+											$aValue = array();
 
-												$aListExplode = explode("\n", $oAdmin_Form_Field_Changed->list);
-												foreach ($aListExplode as $str_value)
+											$aListExplode = explode("\n", $oAdmin_Form_Field_Changed->list);
+											foreach ($aListExplode as $str_value)
+											{
+												// Каждую строку разделяем по равно
+												$str_explode = explode('=', $str_value);
+
+												if (count($str_explode) > 1 && $str_explode[1] != '…')
 												{
-													// Каждую строку разделяем по равно
-													$str_explode = explode('=', $str_value);
-
-													if (count($str_explode) > 1 && $str_explode[1] != '…')
-													{
-														// сохраняем в массив варинаты значений и ссылки для них
-														$aValue[trim($str_explode[0])] = trim($str_explode[1]);
-													}
+													// сохраняем в массив варинаты значений и ссылки для них
+													$aValue[trim($str_explode[0])] = trim($str_explode[1]);
 												}
 											}
+										}
 
-											if (isset($aValue[$value]))
-											{
-												$value = $aValue[$value];
-											}
-										break;
-									}
+										if (isset($aValue[$value]))
+										{
+											$value = $aValue[$value];
+										}
+									break;
+								}
 
-									$aData[] = is_scalar($value) ? $this->prepareCell(trim(strip_tags($value))) : gettype($value);
-								//}
+								$rawValue = is_scalar($value) ? trim(strip_tags($value)) : gettype($value);
+								$aData[] = $exportType == 'csv' ? $this->prepareCell($rawValue) : $rawValue;
 							}
 
-							$this->_printRow($aData);
+							if ($exportType == 'csv')
+							{
+								$this->_printRow($aData);
+							}
+							else
+							{
+								$oCore_Xlsx->addRow($aData);
+							}
 						}
 					}
 					catch (Exception $e)
@@ -1980,10 +2042,21 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 					$offset += $limit;
 
-					Core_File::flush();
+					if ($exportType == 'csv')
+					{
+						Core_File::flush();
+					}
 
 				} while(count($aEntities) == $limit);
 			}
+
+			if ($exportType == 'xlsx')
+			{
+				$oCore_Xlsx->enableAutoFilter(TRUE);
+
+				$oCore_Xlsx->download(addslashes($this->title) . ' ' . date('Y-m-d H-i-s') . '.xlsx');
+			}
+
 			die();
 		}
 
@@ -2199,6 +2272,10 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		return $this;
 	}
 
+	/**
+	 * Show settings
+	 * @return self
+	 */
 	public function showSettings()
 	{
 		$aTmp = array();
@@ -2213,10 +2290,16 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		$aTmp[] = "view:'" . Core_Str::escapeJavascriptVariable($this->view) . "'";
 		$aTmp[] = "windowId:'" . Core_Str::escapeJavascriptVariable($this->windowId) . "'";
 
-		?><script>//<![CDATA[
-var _windowSettings={<?php echo implode(',', $aTmp)?>}
-//]]></script>
-		<?php
+		$windowId = Core_Str::escapeJavascriptVariable($this->windowId);
+
+		// Инициализируем глобальный реестр window._allWindowSettings, если его еще нет
+		// Записываем настройки конкретно для этого windowId в window._allWindowSettings[windowId]
+		// window._windowSettings Для обратной совместимости со старыми скриптами, делаем так, чтобы _windowSettings всегда ссылалась на настройки ПОСЛЕДНЕГО ДОБАВЛЕННОГО ИЛИ АКТИВНОГО окна
+		?><script>
+		window._allWindowSettings = window._allWindowSettings || {};
+		window._allWindowSettings['<?php echo $windowId?>'] = {<?php echo implode(',', $aTmp)?>};
+		window._windowSettings = window._allWindowSettings['<?php echo $windowId?>'];
+		</script><?php
 
 		return $this;
 	}
@@ -2741,8 +2824,8 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 	/**
 	 * Filter datetime callback
-	 * @param $date_from
-	 * @param $date_to
+	 * @param string $date_from
+	 * @param string $date_to
 	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @param string $filterPrefix
 	 * @param string $tabName
@@ -2767,7 +2850,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			</div>
 		</div>
 		<script>
-		(function($) {
+		(function($){
 			$('#<?php echo $windowId?> #<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['dateTimePickerFormat']?>', showTodayButton: true, showClear: true}).on('dp.show', datetimepickerOnShow);
 			$('#<?php echo $windowId?> #<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['dateTimePickerFormat']?>', showTodayButton: true, showClear: true}).on('dp.show', datetimepickerOnShow);
 		})(jQuery);
@@ -2776,6 +2859,11 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 	/**
 	 * Date-filed (from-to)
+	 * @param string $date_from
+	 * @param string $date_to
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
+	 * @param string $filterPrefix
+	 * @param string $tabName
 	 */
 	protected function _filterCallbackDate($date_from, $date_to, $oAdmin_Form_Field, $filterPrefix, $tabName)
 	{
@@ -2797,7 +2885,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			</div>
 		</div>
 		<script>
-		(function($) {
+		(function($){
 			$('#<?php echo $windowId?> #<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['datePickerFormat']?>', showTodayButton: true, showClear: true}).on('dp.show', datetimepickerOnShow);
 
 			$('#<?php echo $windowId?> #<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['datePickerFormat']?>', showTodayButton: true, showClear: true}).on('dp.show', datetimepickerOnShow);
@@ -2808,6 +2896,11 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 	/**
 	 * Date-filed (single-mode)
+	 * @param string $date_from
+	 * @param string $date_to
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
+	 * @param string $filterPrefix
+	 * @param string $tabName
 	 */
 	protected function _filterCallbackDateSingle($date_from, $date_to, $oAdmin_Form_Field, $filterPrefix, $tabName)
 	{
@@ -2823,7 +2916,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			</div>
 		</div>
 		<script>
-		(function($) {
+		(function($){
 			$('#<?php echo $windowId?> #<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['datePickerFormat']?>'}).on('dp.show', datetimepickerOnShow);
 		})(jQuery);
 		</script>
@@ -3291,7 +3384,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 				{
 					// Перекрытие параметров для данного поля
 					$oAdmin_Form_Field_Changed = $oAdmin_Form_Field;
-					foreach ($this->_datasets as $datasetKey => $oTmpAdmin_Form_Dataset)
+					foreach ($this->_datasets as $datasetKey2 => $oTmpAdmin_Form_Dataset)
 					{
 						$oAdmin_Form_Field_Changed = $this->changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
 					}
@@ -3356,7 +3449,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 										$mLikeFilterValue = $this->convertLike($mFilterValue);
 
-										$condition = in_array($filterCondition, array('=', '<', '>', '<=', '>='))
+										$condition = in_array($filterCondition, array('=', '!=', '<', '>', '<=', '>='))
 											? $filterCondition
 											: '=';
 
@@ -3747,7 +3840,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 	/**
 	 * Apply external changes for actions
 	 * @param Admin_Form_Dataset $oAdmin_Form_Dataset dataset
-	 * @param Admin_Form_Action $oAdmin_Form_Action actions
+	 * @param Admin_Form_Action_Model $oAdmin_Form_Action actions
 	 * @return object
 	 */
 	public function changeAction($oAdmin_Form_Dataset, $oAdmin_Form_Action)

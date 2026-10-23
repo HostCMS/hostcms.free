@@ -1554,10 +1554,10 @@ class Informationsystem_Item_Model extends Core_Entity
 			&& $this->addXmlTag('url', $this->Informationsystem->Structure->getPath() . $this->getPath());
 
 		$this->_isTagAvailable('date')
-			&& $this->addXmlTag('date', Core_Date::strftime($oInformationsystem->format_date, Core_Date::sql2timestamp($this->datetime)));
+			&& $this->addXmlTag('date', Core_Date::strftime($oInformationsystem->format_date, Core_Date::sql2timestamp($this->datetime)), array('raw' => explode(' ', $this->datetime)[0]));
 
 		/*$this->_isTagAvailable('datetime')
-			&& */$this->addXmlTag('datetime', Core_Date::strftime($oInformationsystem->format_datetime, Core_Date::sql2timestamp($this->datetime)));
+			&& */$this->addXmlTag('datetime', Core_Date::strftime($oInformationsystem->format_datetime, Core_Date::sql2timestamp($this->datetime)), array('raw' => $this->datetime));
 
 		/*$this->_isTagAvailable('start_datetime')
 			&& */$this->addXmlTag('start_datetime', $this->start_datetime == '0000-00-00 00:00:00'

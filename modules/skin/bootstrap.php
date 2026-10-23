@@ -155,8 +155,18 @@ class Skin_Bootstrap extends Core_Skin
 	protected function _showCompressedCss()
 	{
 		$timestamp = $this->_getTimestamp();
-		?><link type="text/css" href="<?php echo $this->compressCss() . '?' . $timestamp?>" rel="stylesheet" /><?php
-		echo PHP_EOL;
+
+		$compressedCss = $this->compressCss();
+
+		if (is_string($compressedCss))
+		{
+			?><link type="text/css" href="<?php echo $compressedCss . '?' . $timestamp?>" rel="stylesheet" /><?php
+			echo PHP_EOL;
+		}
+		else
+		{
+			$this->_showCss();
+		}
 
 		return $this;
 	}
@@ -188,34 +198,34 @@ class Skin_Bootstrap extends Core_Skin
 	{
 		$timestamp = $this->_getTimestamp();
 
-		$aJsSrc = $aJsSrcType = array();
+		$aJsSrcType = array('' => array());
 		foreach ($this->_js as $aJs)
 		{
-			if (!is_null($aJs['type']))
-			{
-				$aJsSrcType[$aJs['type']][] = $aJs['src'];
-			}
-			else
-			{
-				$aJsSrc[] = $aJs['src'];
-			}
+			$type = !is_null($aJs['type']) ? $aJs['type'] : '';
+			$aJsSrcType[$type][] = $aJs['src'];
 		}
 
-		$minJs = $this->compressJs($aJsSrc);
-
-		Core_Html_Entity::factory('Script')
-			->src($minJs . '?' . $timestamp)
-			->execute();
-
-		// Если есть JS с типом
+		$aCompressed = array();
 		foreach ($aJsSrcType as $type => $aJs)
 		{
-			$minJsType = $this->compressJs($aJs);
+			$sJs = $this->compressJs($aJs);
 
-			Core_Html_Entity::factory('Script')
-				->src($minJsType . '?' . $timestamp)
-				->type($type)
-				->execute();
+			if (!is_string($sJs))
+			{
+				return $this->_showJs();
+			}
+
+			$aCompressed[$type] = $sJs;
+		}
+
+		foreach ($aCompressed as $type => $sJs)
+		{
+			$oScript = Core_Html_Entity::factory('Script')
+				->src($sJs . '?' . $timestamp);
+
+			$type !== '' && $oScript->type($type);
+
+			$oScript->execute();
 		}
 
 		return $this;

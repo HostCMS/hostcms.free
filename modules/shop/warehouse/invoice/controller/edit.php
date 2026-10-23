@@ -586,7 +586,7 @@ class Shop_Warehouse_Invoice_Controller_Edit extends Admin_Form_Action_Controlle
 			if ($operation == 'applyModal')
 			{
 				$sJsRefresh = "<script>
-					(function($) {
+					(function($){
 						bootbox.hideAll();
 					})(jQuery);
 				</script>";

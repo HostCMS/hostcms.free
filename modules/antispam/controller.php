@@ -179,6 +179,8 @@ class Antispam_Controller extends Core_Servant_Properties
 		$eventResult = Core_Event::getLastReturn();
 		!is_null($eventResult) && $result = $eventResult;
 
+		$oAntispam_Log = NULL;
+
 		if ($this->log)
 		{
 			$oAntispam_Log = Core_Entity::factory('Antispam_Log');

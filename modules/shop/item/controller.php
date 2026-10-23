@@ -312,7 +312,7 @@ class Shop_Item_Controller extends Core_Servant_Properties
 			$shop_group_id = $oShop_Item->modification_id
 				? $oShop_Item->Modification->shop_group_id
 				: $oShop_Item->shop_group_id;
-			
+
 			// Скидки на товары группы
 			$aShop_Group_Discounts = $shop_group_id
 				? self::_getShopGroupDiscounts($shop_group_id)
@@ -538,6 +538,7 @@ class Shop_Item_Controller extends Core_Servant_Properties
 	/**
 	 * Calculate total bonuses for oShop_Item
 	 * @param Shop_Item_Model $oShop_Item item
+	 * @param float $price
 	 * @return array array('total' => Total bonuses, 'bonuses' => array of bonuses)
 	 * @hostcms-event Shop_Item_Controller.onBeforeGetBonuses
 	 */

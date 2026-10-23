@@ -61,7 +61,7 @@ abstract class Bot_Controller
 
 	/**
 	 * Entity object
-	 * @var _Model
+	 * @var mixed
 	 */
 	protected $_oObject = NULL;
 

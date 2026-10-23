@@ -2661,10 +2661,10 @@ class Shop_Item_Model extends Core_Entity
 			&& $this->addXmlTag('url', $this->Shop->Structure->getPath() . $this->getPath());
 
 		$this->_isTagAvailable('date')
-			&& $this->addXmlTag('date', Core_Date::strftime($oShop->format_date, Core_Date::sql2timestamp($this->datetime)));
+			&& $this->addXmlTag('date', Core_Date::strftime($oShop->format_date, Core_Date::sql2timestamp($this->datetime)), array('raw' => explode(' ', $this->datetime)[0]));
 
 		/*$this->_isTagAvailable('datetime')
-			&& */$this->addXmlTag('datetime', Core_Date::strftime($oShop->format_datetime, Core_Date::sql2timestamp($this->datetime)));
+			&& */$this->addXmlTag('datetime', Core_Date::strftime($oShop->format_datetime, Core_Date::sql2timestamp($this->datetime)), array('raw' => $this->datetime));
 
 		/*$this->_isTagAvailable('start_datetime')
 			&& */$this->addXmlTag('start_datetime', $this->start_datetime == '0000-00-00 00:00:00'
@@ -3438,12 +3438,18 @@ class Shop_Item_Model extends Core_Entity
 				->deleteByTag('shop_item_' . $this->id);
 
 			// Clear group's cache
-			$this->shop_group_id
-				? $this->Shop_Group->clearCache()
-				: Core_Cache::instance(Core::$mainConfig['defaultCache'])
-					->deleteByTag('shop_group_0');
-
-			$this->modification_id && $this->Modification->clearCache();
+			if (!$this->modification_id)
+			{
+				$this->shop_group_id
+					? $this->Shop_Group->clearCache()
+					: Core_Cache::instance(Core::$mainConfig['defaultCache'])
+						->deleteByTag('shop_group_0');
+			}
+			else
+			{
+				// Clear cache for the Parent Item
+				$this->Modification->clearCache();
+			}
 
 			// Static cache
 			$oSite = $this->Shop->Site;
@@ -3827,7 +3833,7 @@ class Shop_Item_Model extends Core_Entity
 			? $this->Shop_Item
 			: $this;
 
-		return htmlspecialchars($oShop_Item->marking);
+		return htmlspecialchars((string) $oShop_Item->marking);
 	}
 
 	/**
@@ -4097,6 +4103,22 @@ class Shop_Item_Model extends Core_Entity
 				return $this->getSmallFileHref();
 			}
 		}
+	}
+
+	/**
+	 * Unmodify
+	 * @return self
+	 */
+	public function unmodify()
+	{
+		if ($this->modification_id)
+		{
+			$this->shop_group_id = $this->Modification->shop_group_id;
+			$this->modification_id = 0;
+			$this->save();
+		}
+
+		return $this;
 	}
 
 	/**

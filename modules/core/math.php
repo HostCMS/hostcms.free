@@ -8,10 +8,15 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Math
 {
+	/**
+	 * Encode HEX
+	 * @param string $hex
+	 * @return string
+	 */
 	static public function encodeHexBase36($hex)
 	{
 		// Проверяем, что строка содержит только hex-символы

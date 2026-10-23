@@ -22,7 +22,7 @@ class Template_Module extends Core_Module_Abstract
 	 * Module date
 	 * @var string
 	 */
-	public $date = '2026-05-12';
+	public $date = '2026-10-22';
 
 	/**
 	 * Module name
@@ -47,6 +47,10 @@ class Template_Module extends Core_Module_Abstract
 
 			Core_Router::add('template-less.php', '/template-less.php')
 				->controller('Template_Less_Command_Controller');
+				
+			Core::$mainConfig['staticFiles'][] = '/template-section-lib.php';
+			Core::$mainConfig['staticFiles'][] = '/template-section.php';
+			Core::$mainConfig['staticFiles'][] = '/template-less.php';
 		}
 	}
 

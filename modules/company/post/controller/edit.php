@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Company
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Company_Post_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -25,16 +25,15 @@ class Company_Post_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		$this->getField('description')
 			->rows(7)
 			->wysiwyg(Core::moduleIsActive('wysiwyg'));
 
 		$oMainTab
-			->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2)
-			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-md-3')), $oMainRow3);
+			->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1)
+			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-md-3')), $oMainRow2);
 
 		$this->title($this->_object->id
 			? Core::_('Company_Post.edit_title')

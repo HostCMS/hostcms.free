@@ -1,6 +1,6 @@
 /* Hebrew translation for the jQuery Timepicker Addon */
 /* Written by Lior Lapid */
-(function($) {
+(function($){
 	$.timepicker.regional["he"] = {
 		timeOnlyTitle: "בחרית זמן",
 		timeText: "שעה",

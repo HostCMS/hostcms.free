@@ -836,27 +836,31 @@ class Core_Entity extends Core_ORM
 		}
 
 		// data-values, e.g. dataMyValue
-		foreach ($this->_dataValues as $field_name => $field_value)
+		foreach ($this->_dataValues as $dataName => $dataValue)
 		{
 			// Allowed Tags
-			if ($bAllowedTagsIsEmpty || isset($this->_allowedTags[$field_name]))
+			if ($bAllowedTagsIsEmpty || isset($this->_allowedTags[$dataName]))
 			{
 				// Forbidden Tags
-				if ($bForbiddenTagsIsEmpty || !isset($this->_forbiddenTags[$field_name]))
+				if ($bForbiddenTagsIsEmpty || !isset($this->_forbiddenTags[$dataName]))
 				{
-					is_scalar($field_value)
-						&& $xml .= "<{$field_name}>" . Core_Str::xml($field_value) . "</{$field_name}>\n";
+					is_scalar($dataValue)
+						&& $xml .= "<{$dataName}>" . Core_Str::xml($dataValue) . "</{$dataName}>\n";
 				}
 			}
 		}
 
 		// User fields
-		$aField_Values = $this->getFields();
-		foreach ($aField_Values as $oField_Value)
+		if ($bForbiddenTagsIsEmpty || !isset($this->_forbiddenTags['field_value']))
 		{
-			$oField_Value->Field->type == 2 && $oField_Value->setDir(CMS_FOLDER . ($sPath = Field_Controller::getPath($this)))->setHref('/' . $sPath);
+			$aField_Values = $this->getFields();
+			foreach ($aField_Values as $oField_Value)
+			{
+				$oField_Value->Field->type == 2
+					&& $oField_Value->setDir(CMS_FOLDER . ($sPath = Field_Controller::getPath($this)))->setHref('/' . $sPath);
 
-			$xml .= $oField_Value->getXml();
+				$xml .= $oField_Value->getXml();
+			}
 		}
 
 		$xml .= "</" . $this->_tagName . ">\n";

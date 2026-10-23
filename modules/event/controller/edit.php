@@ -166,6 +166,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 				->add($oMainRow3_1 = Admin_Form_Entity::factory('Div')->class('row margin-top-20'))
 				->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row profile-container'))
+				->add($oMainRowChecklist = Admin_Form_Entity::factory('Div')->class('row'))
 				->add($oMainClientsRow = Admin_Form_Entity::factory('Div')->class('row event-clients-row'))
 				->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row '))
 				->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -610,6 +611,21 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							)
 				);
 			}
+
+			$oMainRowChecklist
+				->add(Admin_Form_Entity::factory('Div')
+					->class('event-checklist-wrapper col-xs-12')
+				)
+				->add(Admin_Form_Entity::factory('Span')
+					->divAttr(array('class' => 'form-group col-xs-12'))
+					->class('btn-group')
+					->add(Admin_Form_Entity::factory('Code')
+						->html('<a class="add-event-checklist btn btn-gray" onclick="$.addEventChecklist(\'' . $windowId . '\', \'#' . $windowId . ' .event-checklist-wrapper\')"><i class="fa-solid fa-plus icon-separator"></i>' . Core::_("Event.add_checklist") . '</a>')
+					)
+				)
+				->add(
+					Core_Html_Entity::factory('Script')->value("$.loadEventChecklists('{$windowId}', '#{$windowId} .event-checklist-wrapper', {$this->_object->id});")
+				);
 
 			// Ответственные сотрудники
 			$aEvent_Users = $this->_object->Event_Users->findAll(FALSE);
@@ -2634,6 +2650,8 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$this->_callDmsExecution();
 			}
 
+			$this->_saveChecklists($windowId);
+
 			return TRUE;
 		}
 
@@ -3098,13 +3116,24 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$this->_object->applyTagsArray($aRecievedTags);
 		}
 
+		$this->_saveChecklists($windowId);
+
+		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
+	}
+
+	/**
+	 * Save checklists
+	 * @param string $windowId
+	 * @return self
+	 */
+	protected function _saveChecklists($windowId)
+	{
 		// Обработчка чек-листов
 		$aChecklists = $aNewChecklists = array();
 
 		// echo "<pre>";
 		// var_dump($_POST);
 		// echo "</pre>";
-
 
 		foreach ($_POST as $key => $value)
 		{
@@ -3240,16 +3269,14 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			}
 		}
 
-
 		ob_start();
 		Core_Html_Entity::factory('Script')
 			->value("$.loadEventChecklists('{$windowId}', '#{$windowId} .event-checklist-wrapper', {$this->_object->id});")
 			->execute();
 		$this->_Admin_Form_Controller->addMessage(ob_get_clean());
 
-		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
+		return $this;
 	}
-
 
 	/**
 	 * Executes the business logic.
@@ -3272,7 +3299,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$.updateCaldav();
 
-		if ($("#id_content .kanban-board, #id_content .timeline-wrapper").length && typeof _windowSettings != \'undefined\') {
+		if ($("#id_content .kanban-board, #id_content .timeline-wrapper").length && typeof window._windowSettings != \'undefined\') {
 			$(\'#id_content #refresh-toggler\').click();
 		}';
 
@@ -3280,7 +3307,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			$sJsRefresh .= '
 				// CRM-Projects
-				if ($("#id_content .timeline-wrapper").length && typeof _windowSettings != \'undefined\') {
+				if ($("#id_content .timeline-wrapper").length && typeof window._windowSettings != \'undefined\') {
 					$.adminLoad({ path: hostcmsBackend + \'/crm/project/entity/index.php\', additionalParams: \'crm_project_id=' . $crm_project_id . '\', windowId: \'id_content\' });
 				}
 				// /CRM-Projects

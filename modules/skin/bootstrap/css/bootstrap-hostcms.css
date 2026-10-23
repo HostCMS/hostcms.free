@@ -2747,7 +2747,13 @@ td.td-badge .badge-ico {
 	padding: 0;
 }
 td.td-badge.td-two-line .badge-ico { top: 25px !important }
-.badge-ico .fa, .badge-ico .fa-regular, .badge-ico .fa-solid { font-size: 10px !important; /*padding: 0 1px*/ }
+.badge-ico .fa, .badge-ico .fa-regular, .badge-ico .fa-solid, .badge-ico .fa-brands { font-size: 10px !important; /*padding: 0 1px*/ }
+
+.badge-black {
+    background-color:#000;
+    background-image:none !important
+}
+
 /* --- /Badge --- */
 
 /* --- Chat --- */
@@ -4441,9 +4447,10 @@ table.deals-aggregate-info tr th:not(:first-child) { text-align: right }
 	padding-bottom: 0;
 }
 
-.fc-icon-fa {
-	font-family: FontAwesome;
+.fc-icon-fa, .fc-icon-fa-solid, .fc-icon-fa-regular {
+	font-family:"Font Awesome 7 Free";
 }
+.fc-icon-fa-solid { font-weight: 900 }
 
 .fc .fc-button-group > .dropdown { float: none !important }
 
@@ -5998,21 +6005,6 @@ li.autocomplete-suggestion:hover, li.autocomplete-suggestion:active, li.autocomp
 
 .systems-characteristics .user-name, #coreEventsAdminPage .user-name { width: initial !important }
 
-.ipaddress-filter-conditions .delete-associated-item, .filter-conditions .delete-associated-item {
-	display: inline-block;
-	margin-top: 7px;
-	width: 12px;
-	padding-left: 15px;
-}
-.ipaddress-filter-conditions .delete-associated-item:hover, .filter-conditions .delete-associated-item:hover {
-	cursor: pointer;
-}
-.ipaddress-filter-conditions .dd-handle:hover, .filter-conditions .dd-handle:hover { background-color: #f7f7f7 !important }
-
-.ipaddress-filter-conditions .dd {
-	max-width: 100%;
-}
-
 .crop-image-modal .modal-footer { text-align: left !important }
 
 .kanban-action-wrapper { position: sticky; bottom: 0; /*margin: 0 -15px; */padding: 0; background-color: #fff; z-index: 99 }
@@ -6522,21 +6514,21 @@ a#register-button, a.more-info-link, a#recount-button /* , .more-info-link:hover
 	}
 }
 
-@media (max-width: 1256.98px) {
- .partners .well {
+@media (max-width: 701.99px) {
+	.partners .well {
 		max-height: 300px;
 	}
- .partners .well iframe {
+	.partners .well iframe {
 		height: 300px;
 	}
 }
-@media (max-width: 480px)
+@media (max-width: 679.99px)
 {
- .partners .well {
-		max-height: 500px;
+	.partners .well {
+		max-height: 610px;
 	}
- .partners .well iframe {
-		height: 500px;
+	.partners .well iframe {
+		height: 610px;
 	}
 }
 
@@ -6608,7 +6600,7 @@ input[type="text"] + .input-group-btn > select {
 .overflow-hidden { overflow: hidden !important; }
 
 .page-sidebar {
-	z-index: 50; /* fix modal + searchhelper on mobile devices */
+	z-index: 100; /* fix modal + searchhelper on mobile devices */
 }
 .page-sidebar, .navbar, .noselect, .nav {
 	-webkit-touch-callout: none; /* iOS Safari */
@@ -7699,6 +7691,9 @@ audio {
 .complex-lib-property > div {
 	border-bottom: 2px solid #fff;
 }
+.complex-lib-property .complex-block.input-group {
+	width: 100%;
+}
 
 .error-clipboard-wrapper {
 	display: flex;
@@ -7844,6 +7839,9 @@ audio {
 	background-color: #fff;
 	border-radius: 10px;
 	outline: 1px solid #f3f4f6;
+}
+.timeline-wrapper .message.completed-message {
+	opacity: .7 !important;
 }
 /* .timeline-wrapper .message:hover {
 	background-color: #fbfbfb;
@@ -9028,4 +9026,10 @@ table.table.plan-materials-table tr td:last-child {
 	filter: none !important;
 	-webkit-filter: none !important;
 	box-shadow: none !important;
+}
+
+/* Жестко скрываем и подменю, и всплывающий текст при AJAX-переходе */
+#sidebar.force-hide-submenus .sidebar-menu > li > .submenu,
+#sidebar.force-hide-submenus .sidebar-menu > li > a > .menu-text {
+	display: none !important;
 }

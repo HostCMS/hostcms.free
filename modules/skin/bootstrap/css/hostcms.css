@@ -2864,12 +2864,6 @@ a:focus,a:active {
     }
 }
 @media(max-width:500px) {
-    .page-sidebar.hide~.page-content .page-header .header-title {
-        display:none
-    }
-    .page-sidebar.hide~.page-content .page-header .header-buttons .refresh,.page-sidebar.hide~.page-content .page-header .header-buttons .fullscreen {
-        display:none
-    }
     .page-sidebar.menu-compact.hide~.page-content .page-header .header-buttons .refresh,.page-sidebar.menu-compact.hide~.page-content .page-header .header-buttons .fullscreen {
         display:inline-block
     }
@@ -2966,12 +2960,17 @@ a:focus,a:active {
     z-index:0;
     min-height:40px;
     border-bottom:1px solid #e5e5e5;
-    height:40px
+    height:40px;
+	display: flex;
+	justify-content: space-between;
 }
 .page-header .header-title {
     display:inline-block;
     position:relative;
-    height:40px
+    height:40px;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 .page-header .header-title h1 {
     padding:0;
@@ -2991,9 +2990,10 @@ a:focus,a:active {
 }
 .page-header .header-buttons {
     display:inline-block;
-    position:absolute;
+    /*position:absolute;
     right:0;
-    top:0
+    top:0*/
+	flex-shrink: 0;
 }
 .page-header .header-buttons a {
     position:relative;
@@ -3023,11 +3023,13 @@ a:focus,a:active {
     overflow:hidden;
     background-color:#2dc3e8
 }
-.page-header .header-buttons a:hover {
-    -webkit-box-shadow:0 0 20px rgba(0,0,0,.2);
-    -moz-box-shadow:0 0 20px rgba(0,0,0,.2);
-    box-shadow:0 0 20px rgba(0,0,0,.2);
-    color:#2dc3e8
+@media (hover: hover) and (pointer: fine) {
+	.page-header .header-buttons a:hover {
+		-webkit-box-shadow:0 0 20px rgba(0,0,0,.2);
+		-moz-box-shadow:0 0 20px rgba(0,0,0,.2);
+		box-shadow:0 0 20px rgba(0,0,0,.2);
+		color:#2dc3e8
+	}
 }
 .page-header .header-buttons a.active {
     color:#2dc3e8

@@ -1,6 +1,6 @@
 /* global bootbox, i18n, checkRegistration, mainFormAutosave, isEmpty, readCookiesForInitiateSettings, wysiwyg, syntaxhighlighter */
 
-(function($) {
+(function($){
 	"use strict"; // Включаем строгий режим
 
 	// Кешируем регулярные выражения для повторного использования
@@ -10,13 +10,23 @@
 
 	$.ajaxSetup({
 		cache: false,
+		beforeSend: function(jqXHR, settings) {
+			// Устанавливаем заголовок, который запрещает Firefox делать Keep-Alive для тяжелых POST-запросов, заставляя его закрывать сокет без авто-повторов
+			if (settings.type === 'POST') {
+				jqXHR.setRequestHeader('Connection', 'close');
+			}
+		},
 		error: function(jqXHR, textStatus) {
 			if (jqXHR.status === 403 || jqXHR.status === 401) {
 				document.documentElement.innerHTML = jqXHR.responseText;
 				return;
 			}
 
-			if (jqXHR.statusText === 'abort') return;
+			//if (jqXHR.statusText === 'abort') return;
+			if (jqXHR.status === 0 || textStatus === 'abort' || jqXHR.statusText === 'abort') {
+				 $.loadingScreen('hide');
+				return;
+			}
 
 			$.loadingScreen('hide');
 
@@ -138,7 +148,6 @@
 					});
 
 					const uiDialog = $(this).parent('.ui-dialog');
-					// Исправление: установка ширины/высоты самому себе может быть избыточной, но оставил для совместимости
 					uiDialog.width(uiDialog.width()).height(uiDialog.height());
 				},
 				focus: function() {
@@ -234,8 +243,13 @@
 			if (data.action === 'showWebauthn') {
 				checkRegistration(location)
 					.then(function(result) {
-						if (result === false && typeof _windowSettings !== 'undefined') {
-							const settings = _windowSettings; // eslint-disable-line
+						window._windowSettings =
+							(window._allWindowSettings && 'id_content' in window._allWindowSettings)
+								? window._allWindowSettings['id_content']
+								: window._windowSettings;
+
+						if (result === false && typeof window._windowSettings !== 'undefined') {
+							const settings = window._windowSettings; // eslint-disable-line
 							settings.additionalParams = settings.additionalParams + '&noWebauthns';
 							$.adminLoad(settings);
 						}
@@ -466,7 +480,8 @@
 					});
 
 					if (aUrlOptions.length) {
-						path += '&' + aUrlOptions.join('&');
+						const separator = path.includes('?') ? '&' : '?';
+						path += separator + aUrlOptions.join('&');
 					}
 				}
 

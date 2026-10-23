@@ -1,6 +1,6 @@
 /* Romanian translation for the jQuery Timepicker Addon */
 /* Written by Romeo Adrian Cioaba */
-(function($) {
+(function($){
 	$.timepicker.regional['ro'] = {
 		timeOnlyTitle: 'Alegeţi o oră',
 		timeText: 'Timp',

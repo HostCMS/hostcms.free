@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Calendar
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Calendar_Controller
 {
@@ -85,6 +85,7 @@ class Calendar_Controller
 	/**
 	 * Get upload calendar entities
 	 * @param string $last_modified
+	 * @param int $calendar_caldav_id
 	 * @return array
 	 */
 	static public function getUploadCalendarEntities($last_modified, $calendar_caldav_id)

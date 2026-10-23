@@ -1,6 +1,6 @@
 /* Polish translation for the jQuery Timepicker Addon */
 /* Written by Michał Pena */
-(function($) {
+(function($){
 	$.timepicker.regional['pl'] = {
 		timeOnlyTitle: 'Wybierz godzinę',
 		timeText: 'Czas',

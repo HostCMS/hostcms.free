@@ -207,8 +207,11 @@ abstract class Shop_Cart_Controller extends Core_Servant_Properties
 
 		$oItem_In_Cart = $this->get();
 
-		// Увеличиваем на количество уже в корзине
-		$this->quantity = Shop_Controller::convertDecimal($this->quantity) + $oItem_In_Cart->quantity;
+		if ($oItem_In_Cart)
+		{
+			// Увеличиваем на количество уже в корзине
+			$this->quantity = Shop_Controller::convertDecimal($this->quantity) + $oItem_In_Cart->quantity;
+		}
 
 		Core_Event::notify('Shop_Cart_Controller.onAfterAdd', $this);
 

@@ -5,11 +5,11 @@
  * @package HostCMS
  * @subpackage Company
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Departments',
-	'title' => 'The structure of the company',
+	'title' => 'Department of the company "%s"',
 	'company' => 'Company',
 	'warning' => 'There are no companies associated with site',
 	'add_form_title' => 'Add department',

@@ -308,6 +308,12 @@ class Ipaddress_Visitor_Filter_Controller
 											? $aMatches[$conditionId]++
 											: $aMatches[$conditionId] = 1;
 									}
+									// 0 - AND, 1 - OR
+									elseif ($aFilter['mode'] == 0)
+									{
+										// Прерываем, если не совпало хоть одно условие
+										break 2;
+									}
 								}
 							}
 						}
@@ -396,6 +402,12 @@ class Ipaddress_Visitor_Filter_Controller
 												isset($aMatches[$conditionId])
 													? $aMatches[$conditionId]++
 													: $aMatches[$conditionId] = 1;
+											}
+											// 0 - AND, 1 - OR
+											elseif ($aFilter['mode'] == 0)
+											{
+												// Прерываем, если не совпало хоть одно условие
+												break 2;
 											}
 										}
 									}

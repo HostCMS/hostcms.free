@@ -13,6 +13,29 @@ const focusinHandler = (e) => {
 
 document.addEventListener('focusin', focusinHandler);
 
+// Fix Bootstrap 3 / Bootbox focus trap for TinyMCE dialogs
+if (typeof jQuery !== 'undefined' && jQuery.fn.modal && jQuery.fn.modal.Constructor) {
+	jQuery.fn.modal.Constructor.prototype.enforceFocus = function () {
+		var that = this;
+
+		jQuery(document)
+			.off('focusin.bs.modal')
+			.on('focusin.bs.modal', function (e) {
+				// Пропускаем фокус, попавший в диалоги TinyMCE и filemanager
+				if (jQuery(e.target).closest('.tox-tinymce-aux, .moxman-window, .tam-assetmanager-root').length > 0) {
+					return;
+				}
+
+				// Оригинальное поведение Bootstrap
+				if (document !== e.target &&
+					that.$element[0] !== e.target &&
+					!that.$element.has(e.target).length) {
+					that.$element.focus();
+				}
+			});
+	};
+}
+
 class wysiwyg {
 	static saveAll($parent)
 	{
@@ -275,7 +298,7 @@ class wysiwyg {
 			language_url: '/modules/wysiwyg/driver/tinymce6/langs/' + backendLng + '.js',
 			setup: function (editor) {
 				editor.on('init', function (e) {
-					e.stopImmediatePropagation();
+					// e.stopImmediatePropagation();
 
 					// Сброс шрифта к стандартному
 					const fontFormats = editor.options.get('font_family_formats');
@@ -287,7 +310,7 @@ class wysiwyg {
 					}
 
 					// editor.remove();
-					$parent.css('visibility', '');
+					// $parent.css('visibility', '');
 				});
 			},
 			file_picker_callback: wysiwygFileManager.fileBrowser.bind(wysiwygFileManager),

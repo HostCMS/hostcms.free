@@ -24,7 +24,7 @@ class Sql_Table_Index_Entity extends Core_Empty_Entity
 	 * Fields
 	 * @var array
 	 */
-	protected $_tableColums = array(
+	protected $_tableColumns = array(
 		'name' => array(
 			'datatype' => 'string',
 			'type' => 'string',
@@ -64,7 +64,7 @@ class Sql_Table_Index_Entity extends Core_Empty_Entity
 	 */
 	public function __isset($property)
 	{
-		if (isset($this->_tableColums[$property]))
+		if (isset($this->_tableColumns[$property]))
 		{
 			return TRUE;
 		}
@@ -79,7 +79,7 @@ class Sql_Table_Index_Entity extends Core_Empty_Entity
 	 */
 	public function __get($property)
 	{
-		if (isset($this->_tableColums[$property]))
+		if (isset($this->_tableColumns[$property]))
 		{
 			return '';
 		}

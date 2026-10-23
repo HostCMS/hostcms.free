@@ -1,6 +1,6 @@
 /* Catalan translation for the jQuery Timepicker Addon */
 /* Written by Sergi Faber */
-(function($) {
+(function($){
 	$.timepicker.regional['ca'] = {
 		timeOnlyTitle: 'Escollir una hora',
 		timeText: 'Hora',

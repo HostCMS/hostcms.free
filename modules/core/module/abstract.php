@@ -498,7 +498,7 @@ abstract class Core_Module_Abstract
 	/**
 	 * Add Module Reports
 	 * @param string $reportName Report Name
-	 * @param callback $callback
+	 * @param mixed $callback
 	 * @return self
 	 */
 	public function addReport($reportName, $callback)
@@ -696,6 +696,7 @@ abstract class Core_Module_Abstract
 
 	/**
 	 * Cache for getSettings()
+	 * @var mixed
 	 */
 	protected $_settings = NULL;
 

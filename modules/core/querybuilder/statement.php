@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Querybuilder
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 abstract class Core_QueryBuilder_Statement
 {
@@ -59,7 +59,7 @@ abstract class Core_QueryBuilder_Statement
 		$this->_dataBase = $dataBase;
 		return $this;
 	}
-	
+
 	/**
 	 * Get DataBase
 	 * @return Core_DataBase
@@ -68,6 +68,12 @@ abstract class Core_QueryBuilder_Statement
 	{
 		return $this->_dataBase;
 	}
+
+	/**
+	 * DataBase Query Type
+	 * @var int
+	 */
+	protected $_queryType = 0;
 
 	/**
 	 * Execute query
@@ -91,7 +97,7 @@ abstract class Core_QueryBuilder_Statement
 	/**
 	 * Is $object Core_QueryBuilder_Select
 	 *
-	 * @param $object
+	 * @param object $object
 	 * @return bool
 	 */
 	protected function _isObjectSelect($object)
@@ -124,7 +130,7 @@ abstract class Core_QueryBuilder_Statement
 
 		// prohibited, since the required order of the columns sometimes can be violated
 		//$array = array_unique($array);
-		
+
 		return $array;
 	}
 
@@ -157,7 +163,7 @@ abstract class Core_QueryBuilder_Statement
 	public function comment($comment)
 	{
 		$this->_comment[] = $comment;
-		
+
 		return $this;
 	}
 
@@ -172,7 +178,7 @@ abstract class Core_QueryBuilder_Statement
 		if (!empty($aComment))
 		{
 			$commentSql = '';
-			
+
 			foreach ($aComment as $sComment)
 			{
 				$commentSql .= "-- " . str_replace(array("\r", "\n", "\0", ''), '', $sComment) . "\n";

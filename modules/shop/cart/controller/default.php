@@ -356,7 +356,8 @@ class Shop_Cart_Controller_Default extends Shop_Cart_Controller
 				}
 			}
 
-			usort($aShop_Cart, function ($a, $b) {
+			// 000354422
+			/*usort($aShop_Cart, function ($a, $b) {
 				if ($a->shop_item_id && $b->shop_item_id)
 				{
 					$oShop_Item1 = $a->Shop_Item;
@@ -369,7 +370,7 @@ class Shop_Cart_Controller_Default extends Shop_Cart_Controller
 
 					return ($oShop_Item1->price > $oShop_Item2->price) ? -1 : 1;
 				}
-			});
+			});*/
 
 			!$isActive && Core_Session::close();
 		}
@@ -386,6 +387,8 @@ class Shop_Cart_Controller_Default extends Shop_Cart_Controller
 	public function get()
 	{
 		Core_Event::notify('Shop_Cart_Controller.onBeforeGet', $this);
+
+		$oShop_Cart = NULL;
 
 		// Проверяем наличие данных о пользователе
 		if ($this->siteuser_id)
@@ -405,21 +408,24 @@ class Shop_Cart_Controller_Default extends Shop_Cart_Controller
 		{
 			Core_Session::start();
 
-			$Shop_Item = Core_Entity::factory('Shop_Item', $this->shop_item_id);
+			$oShop_Item = Core_Entity::factory('Shop_Item')->find($this->shop_item_id);
 
-			$aCart = Core_Array::getSession('hostcmsCart', array());
-			$aCart[$Shop_Item->shop_id] = Core_Array::get($aCart, $Shop_Item->shop_id, array());
+			if (!is_null($oShop_Item->id))
+			{
+				$aCart = Core_Array::getSession('hostcmsCart', array());
+				$aCart[$oShop_Item->shop_id] = Core_Array::get($aCart, $oShop_Item->shop_id, array());
 
-			$aReturn = Core_Array::get($aCart[$Shop_Item->shop_id], $this->shop_item_id, array()) + array(
-				'shop_item_id' => $this->shop_item_id,
-				'quantity' => 0,
-				'postpone' => 0,
-				'marking' => '',
-				'shop_id' => $Shop_Item->shop_id,
-				'shop_warehouse_id' => 0
-			);
+				$aReturn = Core_Array::get($aCart[$oShop_Item->shop_id], $this->shop_item_id, array()) + array(
+					'shop_item_id' => $this->shop_item_id,
+					'quantity' => 0,
+					'postpone' => 0,
+					'marking' => '',
+					'shop_id' => $oShop_Item->shop_id,
+					'shop_warehouse_id' => 0
+				);
 
-			$oShop_Cart = (object)$aReturn;
+				$oShop_Cart = (object)$aReturn;
+			}
 		}
 
 		Core_Event::notify('Shop_Cart_Controller.onAfterGet', $this);

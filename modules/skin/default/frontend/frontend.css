@@ -675,7 +675,7 @@ button.backendBody .ui-button::-moz-focus-inner {
 .backendBody .hostcmsSection .hostcmsSectionPanel .fa-palette, .backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel .fa-palette { color: #9b458a !important }
 
 /* Section Widgets */
-.backendBody .hostcmsSection .hostcmsSectionWidget { border: 1px dashed #ccc; }
+.backendBody .hostcmsSection .hostcmsSectionWidget { border: 1px dashed #ccc; min-height: 80px; }
 .backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel span { cursor: pointer }
 
 .backendBody .hostcmsSection .hostcmsSectionWidget .drag-handle {
@@ -1522,6 +1522,9 @@ button.backendBody .ui-button::-moz-focus-inner {
 	font-size: 16px;
 	font-weight: bold;
 }
+.bootstrap-iso .section-wrapper .libs-wrapper .lib-item .description {
+	color: #ccc;
+}
 .bootstrap-iso .section-wrapper .libs-wrapper .lib-item .image img {
 	max-width: 100%;
 	object-fit: contain;
@@ -1782,7 +1785,7 @@ button.backendBody .ui-button::-moz-focus-inner {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	margin-left: 10px;
+	/* margin-left: 10px; */
 	width: 40px;
 	border: 2px solid #eee;
 }
@@ -1842,16 +1845,18 @@ button.backendBody .ui-button::-moz-focus-inner {
 	align-items: center;
 	justify-content: center;
 	position: relative;
+	margin-left: 10px;
 }
 .bootstrap-iso .input-settings-row-icon-wrapper:hover {
 	cursor: pointer;
 }
 .bootstrap-iso .input-settings-row-icon-wrapper i {
 	position: absolute;
-	left: 50%;
+	/* left: 50%; */
 	pointer-events: none;
 }
 
+.dash { position: relative; }
 .dash::before {
 	background-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxNi4wLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+DQo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB3aWR0aD0iNHB4IiBoZWlnaHQ9IjRweCIgdmlld0JveD0iMCAwIDQgNCIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAwIDAgNCA0IiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxsaW5lIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0FCQUJBQiIgc3Ryb2tlLXdpZHRoPSIwLjUiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgeDE9IjAiIHkxPSIwIiB4Mj0iNCIgeTI9IjQiLz4NCjwvc3ZnPg0K");
 	background-repeat: repeat;

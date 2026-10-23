@@ -1,5 +1,5 @@
 /* global hostcmsBackend bootbox Notify */
-(function($) {
+(function($){
 	"use strict";
 
 	$.extend({

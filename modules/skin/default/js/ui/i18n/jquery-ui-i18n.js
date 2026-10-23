@@ -76,7 +76,7 @@ jQuery(function($){
 });
 /* Azerbaijani (UTF-8) initialisation for the jQuery UI date picker plugin. */
 /* Written by Jamil Najafov (necefov33@gmail.com). */
-jQuery(function($) {
+jQuery(function($){
 	$.datepicker.regional['az'] = {
 		closeText: 'Bağla',
 		prevText: '&#x3c;Geri',
@@ -454,7 +454,7 @@ jQuery(function($){
 /* Persian (Farsi) Translation for the jQuery UI date picker plugin. */
 /* Javad Mowlanezhad -- jmowla@gmail.com */
 /* Jalali calendar should supported soon! (Its implemented but I have to test it) */
-jQuery(function($) {
+jQuery(function($){
 	$.datepicker.regional['fa'] = {
 		closeText: 'بستن',
 		prevText: '&#x3C;قبلی',

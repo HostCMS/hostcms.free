@@ -50,6 +50,16 @@ class User_Controller
 	{
 		$ip = Core::getClientIp();
 		$sessionId = session_id();
+		
+		// Если сессия еще не стартовала, хэшировать нечего
+		if (empty($sessionId))
+		{
+			return;
+		}
+		
+		// Хэшируем ID сессии алгоритмом SHA-256 для скрытия реального значения.
+		$hashedSessionId = hash('sha256', $sessionId);
+		
 		$userAgent = Core_Array::get($_SERVER, 'HTTP_USER_AGENT', '', 'str');
 
 		$oUser = Core_Auth::getCurrentUser();
@@ -59,7 +69,8 @@ class User_Controller
 			->set('time', time())
 			->set('user_agent', $userAgent)
 			//->set('ip', $ip)
-			->where('id', '=', $sessionId)
+			->where('id', '=', $hashedSessionId)
+			->where('session_id', '=', $sessionId)
 			->where('ip', '=', $ip)
 			->execute();
 
@@ -69,8 +80,8 @@ class User_Controller
 		{
 			Core_QueryBuilder::insert('user_sessions')
 				->ignore()
-				->columns('id', 'user_id', 'time', 'user_agent', 'ip')
-				->values($sessionId, $oUser->id, time(), $userAgent, $ip)
+				->columns('id', 'session_id', 'user_id', 'time', 'user_agent', 'ip')
+				->values($hashedSessionId, $sessionId, $oUser->id, time(), $userAgent, $ip)
 				->execute();
 		}
 	}

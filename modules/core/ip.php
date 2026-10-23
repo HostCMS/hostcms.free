@@ -41,9 +41,16 @@ class Core_Ip
 	 */
 	static public function ip2hex($ip)
 	{
-		return Core_Valid::ip($ip)
-			? bin2hex(inet_pton($ip))
-			: NULL;
+		if (Core_Valid::ip($ip))
+		{
+			$result = @inet_pton($ip);
+			
+			return $result !== FALSE
+				? bin2hex($result)
+				: NULL;
+		}
+		
+		return NULL;
 	}
 
 	/**

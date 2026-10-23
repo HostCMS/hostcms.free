@@ -527,7 +527,7 @@ class Shop_Warrant_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 			if ($operation == 'applyModal')
 			{
 				$sJsRefresh = "<script>
-					(function($) {
+					(function($){
 						bootbox.hideAll();
 					})(jQuery);
 				</script>";

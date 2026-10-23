@@ -107,33 +107,33 @@ class Company_Department_Model extends Core_Entity
 
 		for ($bitNumber = 0; $bitNumber < 4 ; $bitNumber++)
 		{
+			$bitValue = !is_null($oDeal_Template_Step_Access_Department->id)
+				? Core_Bit::getBit($oDeal_Template_Step_Access_Department->access, $bitNumber)
+				: 0;
 
-			$bitValue = !is_null($oDeal_Template_Step_Access_Department->id) ? Core_Bit::getBit($oDeal_Template_Step_Access_Department->access, $bitNumber) : 0;
+			$actionTitle = $actionName = '';
 
-			switch($bitNumber)
+			switch ($bitNumber)
 			{
 				case 0:
 					$actionName = 'create';
 					$actionTitle = Core::_('Deal_Template_Step.actionTitleCreate');
-					break;
-
+				break;
 				case 1:
 					$actionName = 'edit';
 					$actionTitle = Core::_('Deal_Template_Step.actionTitleEdit');
-					break;
-
+				break;
 				case 2:
 					$actionName = 'show';
 					$actionTitle = Core::_('Deal_Template_Step.actionTitleShow');
-					break;
-
+				break;
 				case 3:
 					$actionName = 'delete';
 					$actionTitle = Core::_('Deal_Template_Step.actionTitleDelete');
-					break;
+				break;
 			}
 
-			echo '<i id="department_' . $oDeal_Template_Step_Access_Department->company_department_id . '_' . $deal_template_step_id . '_' . $bitNumber. '" title="' . $actionTitle . '" data-action="' . $actionName . '" data-allowed="' . $bitValue . '" class="' . ($bitValue ? 'fa-solid fa-circle' : 'fa-regular fa-circle'). '"></i>';
+			echo '<i id="department_' . $oDeal_Template_Step_Access_Department->company_department_id . '_' . $deal_template_step_id . '_' . $bitNumber. '" title="' . htmlspecialchars($actionTitle) . '" data-action="' . htmlspecialchars($actionName) . '" data-allowed="' . $bitValue . '" class="' . ($bitValue ? 'fa-solid fa-circle' : 'fa-regular fa-circle'). '"></i>';
 
 		}
 		echo '</span></div>';
@@ -194,7 +194,7 @@ class Company_Department_Model extends Core_Entity
 	 * Get acces to module
 	 * @param Module_Model $oModule module
 	 * @param Site_Model $oSite site
-	 * @return Company_Department_Module
+	 * @return Company_Department_Model
 	 */
 	public function getModuleAccess(Module_Model $oModule, Site_Model $oSite)
 	{
@@ -221,7 +221,7 @@ class Company_Department_Model extends Core_Entity
 	 * @param Admin_Form_Action_Model $oAdmin_Form_Action action
 	 * @param Site_Model $oSite site
 	 * @param bool $bCache cache
-	 * @return User_Group_Action_Access_Model
+	 * @return Company_Department_Action_Access_Model
 	 */
 	public function getAdminFormActionAccess(Admin_Form_Action_Model $oAdmin_Form_Action, Site_Model $oSite, $bCache = TRUE)
 	{

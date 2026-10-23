@@ -1,6 +1,6 @@
 /* Lithuanian translation for the jQuery Timepicker Addon */
 /* Written by Irmantas Šiupšinskas */
-(function($) {
+(function($){
 	$.timepicker.regional['lt'] = {
 		timeOnlyTitle: 'Pasirinkite laiką',
 		timeText: 'Laikas',

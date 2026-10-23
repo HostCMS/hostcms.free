@@ -55,7 +55,7 @@ More detail and specific examples can be found in the included HTML file.
 
 */
 
-(function($) {
+(function($){
 
 	// Maximum redraw attempts when fitting labels within the plot
 

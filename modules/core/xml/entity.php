@@ -91,6 +91,21 @@ class Core_Xml_Entity extends Core_Servant_Properties
 		$this->_attributes[$name] = $value;
 		return $this;
 	}
+	
+	/**
+	 * Add attributes
+	 *
+	 * @param array $array
+	 * @return self
+	 */
+	public function addAttributes(array $array)
+	{
+		foreach ($array as $name => $value)
+		{
+			$this->addAttribute($name, $value);
+		}
+		return $this;
+	}
 
 	/**
 	 * External XML tags for entity.

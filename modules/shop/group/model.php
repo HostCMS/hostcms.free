@@ -1490,7 +1490,7 @@ class Shop_Group_Model extends Core_Entity
 
 	/**
 	 * Prepare Property Value
-	 * @param Property_Value_Model $oProperty_Value
+	 * @param object $oProperty_Value
 	 */
 	protected function _preparePropertyValue($oProperty_Value)
 	{
@@ -1529,8 +1529,8 @@ class Shop_Group_Model extends Core_Entity
 			$oCache->deleteByTag('shop_group_' . $this->id);
 
 			// When importing on the popular sites new data is permanently write for the root-group.
-			$this->parent_id != 0
-				&& $oCache->deleteByTag('shop_group_' . $this->parent_id);
+			/*$this->parent_id != 0
+				&& */$oCache->deleteByTag('shop_group_' . $this->parent_id);
 
 			// Static cache
 			$oSite = $this->Shop->Site;

@@ -184,6 +184,8 @@ class Core_ZipArchive
 
 	/**
 	 * Add Excluding Dir
+	 * @param string $dirPath
+	 * @return self
 	 */
 	public function excludeDir($dirPath)
 	{

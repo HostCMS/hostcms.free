@@ -205,7 +205,7 @@ abstract class Core_Skin
 
 	/**
 	 * Compress and minify css
-	 * @return string
+	 * @return string|bool
 	 */
 	public function compressCss()
 	{
@@ -257,6 +257,11 @@ abstract class Core_Skin
 
 					$sContent .= $str . "\n";
 				}
+				else
+				{
+					// Stop compression
+					return FALSE;
+				}
 			}
 
 			Core_File::write($sMinDir . $sCssFileName, trim($sContent));
@@ -268,7 +273,7 @@ abstract class Core_Skin
 	/**
 	 * Compress and minify JS
 	 * @param array $aJs
-	 * @return string
+	 * @return string|bool
 	 */
 	public function compressJs($aJs)
 	{
@@ -400,7 +405,6 @@ abstract class Core_Skin
 							$str = preg_replace('/\}\s*else/', '}else', $str);
 
 							$str = preg_replace('/^[ \t]+|[ \t]+$/m', '', $str);
-							$str = preg_replace('/[ \t]+/', ' ', $str);
 
 							$str = trim($str);
 
@@ -413,6 +417,11 @@ abstract class Core_Skin
 					}
 
 					$sContent .= $str . "\n";
+				}
+				else
+				{
+					// Stop compression
+					return FALSE;
 				}
 			}
 
@@ -709,6 +718,10 @@ abstract class Core_Skin
 		return $this->_answer;
 	}
 
+	/**
+	 * Timestamp
+	 * @var int|NULL
+	 */
 	protected $_timestamp = NULL;
 
 	/**

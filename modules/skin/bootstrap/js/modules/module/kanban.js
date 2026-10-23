@@ -1,5 +1,5 @@
 /*global Notify hostcmsBackend */
-(function($) {
+(function($){
 	"use strict";
 
 	// Полифилл для rAF, если вдруг используется старый браузер

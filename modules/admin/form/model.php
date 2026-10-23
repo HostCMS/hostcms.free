@@ -44,12 +44,13 @@ class Admin_Form_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_hasMany = array(
-		'admin_form_setting' => array(),
-		'admin_form_field' => array(),
 		'admin_form_action' => array(),
 		'admin_form_action_dir' => array(),
 		'admin_form_autosave' => array(),
-		'admin_form_field_setting' => array()
+		'admin_form_field' => array(),
+		'admin_form_setting' => array(),
+		'admin_form_lock' => array(),
+		'admin_form_field_setting' => array()		
 	);
 
 	/**
@@ -98,12 +99,13 @@ class Admin_Form_Model extends Core_Entity
 
 		$this->Admin_Word->delete();
 
-		$this->Admin_Form_Fields->deleteAll(FALSE);
 		$this->Admin_Form_Actions->deleteAll(FALSE);
 		$this->Admin_Form_Action_Dirs->deleteAll(FALSE);
-		$this->Admin_Form_Settings->deleteAll(FALSE);
 		$this->Admin_Form_Autosaves->deleteAll(FALSE);
+		$this->Admin_Form_Fields->deleteAll(FALSE);
 		$this->Admin_Form_Field_Settings->deleteAll(FALSE);
+		$this->Admin_Form_Settings->deleteAll(FALSE);
+		$this->Admin_Form_Locks->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);
 	}

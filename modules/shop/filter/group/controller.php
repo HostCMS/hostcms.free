@@ -156,13 +156,23 @@ class Shop_Filter_Group_Controller
 
 	/**
 	 * Fill table rows
-	 * @param $shop_group_id
+	 * @param int $shop_group_id
+	 * @param array $visited
 	 * @return array
 	 * @throws Core_Exception
 	 */
-	public function fill($shop_group_id)
+	public function fill($shop_group_id, $visited = array())
 	{
 		$shop_group_id = intval($shop_group_id);
+
+		// Если узел уже был посещён в текущей ветке, прекращаем обход
+		if (in_array($shop_group_id, $visited))
+		{
+			return array();
+		}
+
+		// Добавляем текущий узел в список посещённых
+		$visited[] = $shop_group_id;
 
 		$aValues = array();
 
@@ -182,8 +192,9 @@ class Shop_Filter_Group_Controller
 			{
 				foreach ($this->_tree[$shop_group_id] as $child_id)
 				{
+					// Рекурсивный обход с передачей обновлённого $visited
 					//$aValues[] = $child_id;
-					$aValues = array_merge($aValues, $this->fill($child_id));
+					$aValues = array_merge($aValues, $this->fill($child_id, $visited));
 				}
 
 				$aValues = array_unique($aValues);

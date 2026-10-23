@@ -105,8 +105,15 @@ class Core_ZipArchive_Pclzip
 	 */
     public $filename;
 
+	/**
+	 * Context
+	 * @var string
+	 */
 	public $context;
 
+	/**
+	 * Constructor
+	 */
 	public function __construct()
 	{
 		$this->_tmpDir = CMS_FOLDER . rtrim(TMP_DIR, '/\\');
@@ -118,6 +125,12 @@ class Core_ZipArchive_Pclzip
 		require_once(CMS_FOLDER . 'modules/vendor/pclzip/pclzip.lib.php');
 	}
 
+	/**
+	 * Open
+	 * @param string $filename
+	 * @param string $flags
+	 * @return boolean
+	 */
 	public function open($filename, $flags = NULL)
 	{
 		$this->filename = $filename;

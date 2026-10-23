@@ -54,7 +54,6 @@ class Site_Model extends Core_Entity
 		'html_cache_with',
 		'html_cache_without',
 		'html_cache_clear_probability',
-		'~favicon',
 	);
 
 	/**
@@ -127,6 +126,7 @@ class Site_Model extends Core_Entity
 		'poll_group' => array(),
 		'search_link' => array(),
 		'search_log' => array(),
+		'search_index_log' => array(),
 		'seo_site' => array(),
 		'shop' => array(),
 		'shop_dir' => array(),
@@ -461,6 +461,7 @@ class Site_Model extends Core_Entity
 		if (Core::moduleIsActive('search'))
 		{
 			$this->Search_Logs->deleteAll(FALSE);
+			$this->Search_Index_Logs->deleteAll(FALSE);
 			$this->Search_Links->deleteAll(FALSE);
 
 			$Search_Controller = Search_Controller::instance();

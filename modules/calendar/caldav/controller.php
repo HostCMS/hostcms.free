@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Calendar
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 abstract class Calendar_Caldav_Controller extends Core_Servant_Properties
 {
@@ -121,6 +121,8 @@ abstract class Calendar_Caldav_Controller extends Core_Servant_Properties
 
 	/**
 	 * Set calendar url
+	 * @param string $sUrl
+	 * @return self
 	 */
 	public function setUrl($sUrl)
 	{
@@ -133,6 +135,8 @@ abstract class Calendar_Caldav_Controller extends Core_Servant_Properties
 
 	/**
 	 * Set calendar username
+	 * @param string $sUsername
+	 * @return self
 	 */
 	public function setUsername($sUsername)
 	{
@@ -143,6 +147,8 @@ abstract class Calendar_Caldav_Controller extends Core_Servant_Properties
 
 	/**
 	 * Set calendar password
+	 * @param string $sPassword
+	 * @return self
 	 */
 	public function setPassword($sPassword)
 	{
@@ -153,6 +159,8 @@ abstract class Calendar_Caldav_Controller extends Core_Servant_Properties
 
 	/**
 	 * Set calendar data
+	 * @param string $sData
+	 * @return self
 	 */
 	public function setData($sData)
 	{

@@ -42,11 +42,10 @@
 	};
 
 	function cookie_encode(string) {
-		// Optimized regex replacement
 		return encodeURIComponent(string).replace(/(%7B|%7D|%3A|%22|%23|%5B|%5D)/g, decodeURIComponent);
 	}
 
-	// Helper to extract data info without expensive jQuery Selectors
+	// Helper to extract data info
 	function getEditableData(element, prefix) {
 		const regex = new RegExp('^' + prefix);
 		if (!element.attributes) return null;
@@ -72,7 +71,7 @@
 	hQuery.extend({
 		lockPanel: function(object) {
 			const $object = hQuery(object),
-				$parentDiv = $object.closest('.hostcmsInformationPanel'), // closest быстрее parents
+				$parentDiv = $object.closest('.hostcmsInformationPanel'),
 				$icon = $object.find('i#hostcmsLock'),
 				cookieVal = hQuery.cookie('lock-panel'),
 				isLocked = cookieVal ? parseInt(cookieVal) : 0;
@@ -107,7 +106,7 @@
 						'entity': item.attr('hostcms:entity'),
 						'field': item.attr('hostcms:field'),
 						'value': value,
-						'_': Date.now() // Faster than new Date().getTime()
+						'_': Date.now()
 					};
 
 					hQuery.ajax({
@@ -120,7 +119,7 @@
 					});
 				},
 				blur: function(jEditInPlace) {
-					const item = jEditInPlace.prevAll('.hostcmsEditable').first(), // .first() is clearer
+					const item = jEditInPlace.prevAll('.hostcmsEditable').first(),
 						type = item.attr('hostcms:type');
 
 					switch (type) {
@@ -263,7 +262,9 @@
 					const h = uiDialog.height();
 					uiDialog.width(w).height(h);
 
-					hQuery(".xmlWindow").children(".ui-dialog-titlebar").append("<button id='btnMaximize' class='ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only ui-dialog-titlebar-maximize' type='button' role='button' title='Maximize'><span class='ui-button-icon-primary ui-icon ui-icon-newwin'></span><span class='ui-button-text'>Maximize</span></button>");
+					hQuery(".xmlWindow")
+						.children(".ui-dialog-titlebar")
+						.append("<button id='btnMaximize' class='ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only ui-dialog-titlebar-maximize' type='button' role='button' title='Maximize'><span class='ui-button-icon-primary ui-icon ui-icon-newwin'></span><span class='ui-button-text'>Maximize</span></button>");
 
 					let max = false;
 					let original_dims = { w: w, h: h, pos: uiDialog.position() };
@@ -354,13 +355,19 @@
 			return jWin;
 		},
 		openWindow: function(settings) {
-			const $win = hQuery(window);
+			const $win = hQuery(window),
+				currentWidth = window.innerWidth,
+				currentHeight = window.innerHeight,
+				isMobile = screen.width < 768;
+
 			settings = hQuery.extend({
-				width: $win.width() * 0.7,
-				height: $win.height() * 0.7,
+				width: isMobile ? currentWidth * 0.95 : currentWidth * 0.7,
+				height: isMobile ? currentHeight * 0.95 : currentHeight * 0.7,
 				path: '',
 				additionalParams: '',
-				justAction: false
+				justAction: false,
+				autoOpen: false,
+				position: { my: "center", at: "center", of: window }
 			}, settings);
 
 			let cmsrequest = settings.path;
@@ -445,7 +452,6 @@
 		refreshSectionCallback: function(result) {
 			const newDiv = hQuery(result);
 
-			// Warning: modifying document.write is dangerous
 			const oldWrite = document.write;
 			document.write = function(str) {
 				newDiv.find('script').first().after(str);
@@ -595,8 +601,10 @@
 				$widget.removeAttr('data-bg').removeClass(background);
 			}
 
+			var widgetClass = $widget.attr('class').replaceAll(/\bhostcmsSectionWidget\b/g, '').replace(/\s+/g, ' ').trim();
+
 			hQuery.ajax({
-				data: { 'changePreset': 1, 'template_section_lib_id': template_section_lib_id, 'field': field, 'class': $widget.attr('class') },
+				data: { 'changePreset': 1, 'template_section_lib_id': template_section_lib_id, 'field': field, 'class': widgetClass },
 				type: "POST",
 				dataType: 'json',
 				url: hostcmsBackend + '/template/index.php',
@@ -654,9 +662,10 @@
 
 			hQuery('#font_panel' + template_section_lib_id).find('.font').removeClass('active');
 
-			$widget.removeClass(function(index, className) {
-				return (className.match(/(^|\s)h-font-\S+/g) || []).join(' ');
-			});
+			$widget
+				.removeClass(function(index, className) {
+					return (className.match(/(^|\s)h-font-\S+/g) || []).join(' ');
+				});
 
 			if (font !== '') {
 				$widget.addClass(font);
@@ -678,8 +687,10 @@
 				}
 			}
 
+			var widgetClass = $widget.attr('class').replaceAll(/\bhostcmsSectionWidget\b/g, '').replace(/\s+/g, ' ').trim();
+
 			hQuery.ajax({
-				data: { 'changeFont': 1, 'template_section_lib_id': template_section_lib_id, 'class': $widget.attr('class') },
+				data: { 'changeFont': 1, 'template_section_lib_id': template_section_lib_id, 'class': widgetClass },
 				type: "POST",
 				dataType: 'json',
 				url: hostcmsBackend + '/template/index.php'
@@ -1266,6 +1277,15 @@
 				panel.classList.remove('touch-active');
 			}
 		}, { passive: true });
+	});
+
+	var SEL = '.hostcmsPanel a, .hostcmsSectionPanel a, .hostcmsSectionWidgetPanel a, .ui-dialog-titlebar-close';
+	['touchstart', 'touchmove', 'touchend'].forEach(function (type) {
+		window.addEventListener(type, function (e) {
+			if (e.target.closest && e.target.closest(SEL)) {
+				e.stopPropagation();
+			}
+		}, { capture: true, passive: true });
 	});
 
 })(hQuery);

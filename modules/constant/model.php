@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Constant
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Constant_Model extends Core_Entity
 {
@@ -70,11 +70,19 @@ class Constant_Model extends Core_Entity
 
 	/**
 	 * Change constant status
-	 * return self
+	 * @return self
+	 * @hostcms-event constant.onBeforeChangeStatus
+	 * @hostcms-event constant.onAfterChangeStatus
 	 */
 	public function changeStatus()
 	{
+		Core_Event::notify($this->_modelName . '.onBeforeChangeStatus', $this);
+
 		$this->active = 1 - $this->active;
-		return $this->save();
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterChangeStatus', $this);
+
+		return $this;
 	}
 }

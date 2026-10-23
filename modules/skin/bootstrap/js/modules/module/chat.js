@@ -1,5 +1,5 @@
 /*global Notify themeprimary readCookie hostcmsBackend setResizableAdminTableTh */
-(function($) {
+(function($){
 	"use strict";
 
 	// Хелпер для кеширования селекторов, если они используются часто в рамках одной сессии,

@@ -94,10 +94,6 @@ class Wysiwyg_Driver_Tinymce6_Handler extends Wysiwyg_Handler
 
 		$lng = Core_I18n::instance()->getLng();
 
-		/*$init = is_null($this->wysiwygOptions)
-			? Core_Config::instance()->get('core_wysiwyg')
-			: $this->wysiwygOptions;*/
-
 		switch ($oAdmin_Form_Entity_Textarea->wysiwygMode)
 		{
 			case 'full':
@@ -111,7 +107,7 @@ class Wysiwyg_Driver_Tinymce6_Handler extends Wysiwyg_Handler
 					'plugins' => '"advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table code wordcount"',
 					//'toolbar1' => '"bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat"'
 					'toolbar' => '"copy paste | undo redo | formatselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | removeformat code' . (Core::moduleIsActive('ai') ? ' | insertAiResponse' : '' ) . '"'
-				);
+				) + $this->getConfig();
 			break;
 			case 'fullpage':
 				$init = $this->getConfig();
@@ -134,8 +130,6 @@ class Wysiwyg_Driver_Tinymce6_Handler extends Wysiwyg_Handler
 			'images_upload_handler' => 'function (blobInfo, progress) { return hostcms_image_upload_handler(blobInfo, progress) }'
 		);
 
-		// $initSetup = NULL;
-
 		$initSetup = 'function(editor) {';
 
 		$initSetup .= "editor.on('init', () => {
@@ -146,6 +140,24 @@ class Wysiwyg_Driver_Tinymce6_Handler extends Wysiwyg_Handler
 				editor.options.set('font_family_formats',
 					'Default=inherit; ' + fontFormats
 				);
+			}
+		});";
+
+		// Ctrl+Enter
+		$initSetup .= "editor.on('keydown', function(e) {
+			if ((e.ctrlKey || e.metaKey) && (e.key === 'Enter' || e.keyCode === 13)) {
+				e.preventDefault();
+
+				// Синхронизируем содержимое с <textarea>
+				editor.save();
+
+				// Получаем оригинальный элемент <textarea>
+				const textarea = editor.getElement();
+
+				// Проверяем, есть ли у исходного textarea атрибут onkeypress
+				if (typeof textarea.onkeypress === 'function') {
+					textarea.onkeypress(e);
+				}
 			}
 		});";
 
@@ -333,10 +345,13 @@ class Wysiwyg_Driver_Tinymce6_Handler extends Wysiwyg_Handler
 			';
 		}
 
-		$initSetup .= '}';
+		// Внешнее добавление для setup
+		if (isset($init['setup']))
+		{
+			$initSetup .= $init['setup'];
+		}
 
-		/*!is_null($initSetup)
-			&& $init['setup'] = $initSetup;*/
+		$initSetup .= '}';
 
 		$init['setup'] = $initSetup;
 

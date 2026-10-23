@@ -176,25 +176,7 @@ class Shop_Order_Model extends Core_Entity
 	{
 		if ($this->source_id)
 		{
-			$title = htmlspecialchars((string) $this->Source->service);
-
-			switch ($this->Source->service)
-			{
-				case 'google':
-					echo ' <span title="' . $title . '" class="badge badge-ico badge-blue white"><i class="fa-brands fa-google"></i></span>';
-				break;
-				case 'direct.yandex.ru':
-				case 'yandex.ru':
-				case 'yandex':
-					echo ' <span title="' . $title . '" class="badge badge-ico badge-darkorange white">Я</span>';
-				break;
-				case 'twitterfeed':
-					echo ' <span title="' . $title . '" class="badge badge-ico badge-blue white"><i class="fa-brands fa-twitter"></i></span>';
-				break;
-				default:
-					echo ' <span title="' . $title . '" class="badge badge-ico badge-palegreen white"><i class="fa-solid fa-tags"></i></span>';
-				break;
-			}
+			echo $this->Source->showBadge();
 		}
 
 		if (Core::moduleIsActive('tag'))
@@ -1806,8 +1788,9 @@ class Shop_Order_Model extends Core_Entity
 							->subject($oCore_Meta->apply($oShop->certificate_subject))
 							->message($oCore_Meta->apply($oShop->certificate_text))
 							->contentType('text/html')
+							->header('Auto-Submitted', 'auto-generated')
 							->header('X-HostCMS-Reason', 'Certificate')
-							->header('Precedence', 'bulk')
+							//->header('Precedence', 'bulk')
 							->messageId()
 							->send();
 					}
@@ -2361,7 +2344,7 @@ class Shop_Order_Model extends Core_Entity
 		$oOrderXml->addChild('Номер', $this->invoice);
 		$datetime = explode(' ', $this->datetime);
 		$date = $datetime[0];
-		$time = $datetime[1];
+		$time = isset($datetime[1]) ? $datetime[1] : '00:00:00';
 		$oOrderXml->addChild('Дата', $date);
 		$oOrderXml->addChild('ХозОперация', 'Заказ товара');
 		$oOrderXml->addChild('Роль', 'Продавец');
@@ -2498,10 +2481,11 @@ class Shop_Order_Model extends Core_Entity
 
 			if ($this->status_datetime != '0000-00-00 00:00:00')
 			{
+				$aTmp = explode(' ', $this->status_datetime);
 				// Статус заказа
 				$oOrderProperty = $oOrderProperties->addChild('ЗначениеРеквизита');
 				$oOrderProperty->addChild('Наименование', 'Дата изменения статуса');
-				$oOrderProperty->addChild('Значение', $this->status_datetime);
+				$oOrderProperty->addChild('Значение', $aTmp[0]);
 			}
 		}
 

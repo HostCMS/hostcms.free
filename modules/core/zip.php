@@ -100,7 +100,7 @@ class Core_Zip
 	 * Constructor
 	 * @param string $filename Path to the zip file
 	 */
-	public function __construct(string $filename)
+	public function __construct($filename)
 	{
 		$this->_filename = $filename;
 		$this->_open();
@@ -111,7 +111,7 @@ class Core_Zip
 	 * @param string $password
 	 * @return self
 	 */
-	public function setPassword(string $password)
+	public function setPassword($password)
 	{
 		$this->_password = $password;
 		return $this;
@@ -225,7 +225,7 @@ class Core_Zip
 	 * @param string $name
 	 * @return string
 	 */
-	public function getFromName(string $name)
+	public function getFromName($name)
 	{
 		$name = str_replace('\\', '/', $name);
 
@@ -265,7 +265,7 @@ class Core_Zip
 	 * Delete file
 	 * @param string $name
 	 */
-	public function delete(string $name)
+	public function delete($name)
 	{
 		$name = str_replace('\\', '/', $name);
 		$this->_deletedFiles[$name] = TRUE;
@@ -280,7 +280,7 @@ class Core_Zip
 	 * Exclude dir
 	 * @param string $dir
 	 */
-	public function excludeDir(string $dir)
+	public function excludeDir($dir)
 	{
 		$dir = str_replace('\\', '/', $dir);
 		$this->_excludedDirs[] = rtrim($dir, '/');
@@ -291,7 +291,7 @@ class Core_Zip
 	 * @param string $dir
 	 * @param string $zipPathPrefix
 	 */
-	public function addDir(string $dir, string $zipPathPrefix = '')
+	public function addDir($dir, $zipPathPrefix = '')
 	{
 		$dir = rtrim($dir, '/\\');
 		if (!is_dir($dir)) return;
@@ -318,11 +318,36 @@ class Core_Zip
 	}
 
 	/**
+	 * Add an empty directory to the archive
+	 * @param string $dirName Path of the directory inside the archive
+	 * @param integer $timestamp
+	 * @return self
+	 */
+	public function addEmptyDir($dirName, $timestamp = 0)
+	{
+		if ($this->_isClose) throw new RuntimeException("Archive closed.");
+
+		// Нормализуем путь: меняем обратные слеши и принудительно добавляем слеш в конец
+		$dirName = str_replace('\\', '/', $dirName);
+		$dirName = rtrim($dirName, '/') . '/';
+
+		// Удаляем старую запись, если она есть
+		$this->delete($dirName);
+
+		// Для директории размер и контрольная сумма всегда 0, метод сжатия — 0 (Store)
+		$this->_writeHeaderAndData(
+			$dirName, 0, $timestamp ?: time(), 0, 0, 0, '', NULL
+		);
+
+		return $this;
+	}
+
+	/**
 	 * Check is file excluded
 	 * @param string $realPath
 	 * @return boolean
 	 */
-	protected function _isFileExcluded(string $realPath): bool
+	protected function _isFileExcluded($realPath)
 	{
 		if (empty($this->_excludedDirs)) return FALSE;
 
@@ -345,7 +370,7 @@ class Core_Zip
 	 * @param string $name
 	 * @param integer $timestamp
 	 */
-	public function addFile(string $data, string $name, int $timestamp = 0)
+	public function addFile($data, $name, $timestamp = 0)
 	{
 		if ($this->_isClose) throw new RuntimeException("Archive closed.");
 
@@ -367,7 +392,7 @@ class Core_Zip
 	 * @param string $fsPath
 	 * @param string $zipName
 	 */
-	protected function _addFileFromPath(string $fsPath, string $zipName)
+	protected function _addFileFromPath($fsPath, $zipName)
 	{
 		if ($this->_isClose) throw new RuntimeException("Archive closed.");
 
@@ -391,7 +416,7 @@ class Core_Zip
 	 * @param integer $size
 	 * @param integer $timestamp
 	 */
-	protected function _processStore(string $fsPath, string $name, int $size, int $timestamp)
+	protected function _processStore($fsPath, $name, $size, $timestamp)
 	{
 		$crc32 = hexdec(hash_file('crc32b', $fsPath));
 		$this->_writeHeaderAndData($name, 0, $timestamp, $crc32, $size, $size, NULL, $fsPath);
@@ -404,7 +429,7 @@ class Core_Zip
 	 * @param integer $size
 	 * @param integer $timestamp
 	 */
-	protected function _processDeflate(string $fsPath, string $name, int $size, int $timestamp)
+	protected function _processDeflate($fsPath, $name, $size, $timestamp)
 	{
 		$data = file_get_contents($fsPath);
 		$crc32 = crc32($data);
@@ -415,7 +440,7 @@ class Core_Zip
 		$this->_writeHeaderAndData($name, 8, $timestamp, $crc32, $compressedSize, $size, $compressedData, NULL);
 	}
 
-/**
+	/**
 	 * Write metadata and data (encrypted if password set)
 	 * @param string $name
 	 * @param integer $method
@@ -426,7 +451,7 @@ class Core_Zip
 	 * @param string|null $dataString
 	 * @param string|null $sourceFile
 	 */
-	protected function _writeHeaderAndData(string $name, int $method, int $timestamp, int $crc32, int $compressedSize, int $size, ?string $dataString, ?string $sourceFile)
+	protected function _writeHeaderAndData($name, $method, $timestamp, $crc32, $compressedSize, $size, $dataString = NULL, $sourceFile = NULL)
 	{
 		$dostime = $this->_unix2DosTime($timestamp);
 
@@ -505,7 +530,7 @@ class Core_Zip
 	 * Copy existing file from source to dest directly
 	 * @param array $info
 	 */
-protected function _copyFileFromSource($info)
+	protected function _copyFileFromSource($info)
 	{
 		fseek($this->_srcFileHandle, $info['offset']);
 		$headerData = fread($this->_srcFileHandle, 30);
@@ -553,7 +578,7 @@ protected function _copyFileFromSource($info)
 	 * Initialize keys
 	 * @param string $password
 	 */
-	protected function _initKeys(string $password)
+	protected function _initKeys($password)
 	{
 		$this->_keys = [305419896, 591751049, 878082192];
 		$this->_initCrc32Table();
@@ -569,7 +594,7 @@ protected function _copyFileFromSource($info)
 	 * Update keys with a byte
 	 * @param int $char
 	 */
-	protected function _updateKeys(int $char)
+	protected function _updateKeys($char)
 	{
 		// Key 0: CRC32 update
 		// Используем таблицу, так как нативный crc32() не умеет обновлять состояние
@@ -588,7 +613,7 @@ protected function _copyFileFromSource($info)
 	 * @param int $char
 	 * @return int
 	 */
-	protected function _encryptByte(int $char)
+	protected function _encryptByte($char)
 	{
 		$temp = ($this->_keys[2] & 0xFFFF) | 2;
 		// Важно: приведение к int для сброса возможных float при умножении на 32-битных системах
@@ -605,7 +630,7 @@ protected function _copyFileFromSource($info)
 	 * @param string $data
 	 * @return string
 	 */
-	protected function _encryptData(string $data)
+	protected function _encryptData($data)
 	{
 		$len = strlen($data);
 		$out = '';
@@ -622,7 +647,7 @@ protected function _copyFileFromSource($info)
 	 * @param int $crc32
 	 * @return string
 	 */
-	protected function _makeDecryptHeader(int $crc32)
+	protected function _makeDecryptHeader($crc32)
 	{
 		$header = '';
 
@@ -674,7 +699,7 @@ protected function _copyFileFromSource($info)
 	 * @param string $destination Destination directory path
 	 * @return boolean
 	 */
-	public function extract(string $destination)
+	public function extract($destination)
 	{
 		$destination = rtrim($destination, '/\\');
 
@@ -749,7 +774,7 @@ protected function _copyFileFromSource($info)
 	 * @param integer $timestamp
 	 * @return integer
 	 */
-	protected function _unix2DosTime(int $timestamp)
+	protected function _unix2DosTime($timestamp)
 	{
 		$date = getdate($timestamp);
 
@@ -757,9 +782,12 @@ protected function _copyFileFromSource($info)
 			return (1 << 21) | (1 << 16);
 		}
 
-		return (($date['year'] - 1980) << 25) | (($date['mon'] + 1) << 21) |
-			($date['mday'] << 16) | ($date['hours'] << 11) |
-			($date['minutes'] << 5) | ($date['seconds'] >> 1);
+		return (($date['year'] - 1980) << 25) |
+			   ($date['mon'] << 21) |
+			   ($date['mday'] << 16) |
+			   ($date['hours'] << 11) |
+			   ($date['minutes'] << 5) |
+			   ($date['seconds'] >> 1);
 	}
 
 	/**
@@ -768,7 +796,7 @@ protected function _copyFileFromSource($info)
 	 * @param integer $mtime
 	 * @return integer
 	 */
-	protected function _dos2UnixTime(int $mdate, int $mtime)
+	protected function _dos2UnixTime($mdate, $mtime)
 	{
 		$year = (($mdate >> 9) & 0x7F) + 1980;
 		$mon = ($mdate >> 5) & 0x0F;
@@ -783,6 +811,7 @@ protected function _copyFileFromSource($info)
 
 	/**
 	 * Close zip
+	 * @param int $mode
 	 */
 	public function close($mode = CHMOD_FILE)
 	{
@@ -879,7 +908,7 @@ protected function _copyFileFromSource($info)
 	 * @param string $name Filename inside zip
 	 * @param int $timestamp
 	 */
-    public function beginWriteStream(string $name, int $timestamp = 0)
+    public function beginWriteStream($name, $timestamp = 0)
     {
         if ($this->_isClose) throw new RuntimeException("Archive closed.");
 
@@ -906,6 +935,9 @@ protected function _copyFileFromSource($info)
             $encryptionHeader = $this->_makeDecryptHeader($dostime << 16);
             $headerSize = 12;
         }
+		
+		// Проверяем наличие deflate_init (PHP 7+)
+		$hasDeflateInit = function_exists('deflate_init');
 
         // Подготовка контекста
         $this->_streamState = [
@@ -914,7 +946,8 @@ protected function _copyFileFromSource($info)
         	'dostime' => $dostime,
         	'offset' => $this->_offset,
         	'crc_ctx' => hash_init('crc32b'),
-        	'deflate_ctx' => deflate_init(ZLIB_ENCODING_RAW, ['level' => -1]),
+			'deflate_ctx' => $hasDeflateInit ? deflate_init(ZLIB_ENCODING_RAW, ['level' => -1]) : NULL,
+			'buffer' => $hasDeflateInit ? '' : '', // Buffer for PHP 5.6
         	'size' => 0,
         	'compressed_size' => $headerSize,
         	'flags' => $flags
@@ -947,7 +980,7 @@ protected function _copyFileFromSource($info)
 	 * Write a chunk of data to the current stream
 	 * @param string $data
 	 */
-	public function writeStreamChunk(string $data)
+	public function writeStreamChunk($data)
 	{
 		if (!$this->_streamState) throw new RuntimeException("No active stream.");
 		if ($data === '') return;
@@ -957,18 +990,29 @@ protected function _copyFileFromSource($info)
 		$this->_streamState['size'] += strlen($data);
 
 		// Сжимаем
-		$compressed = deflate_add($this->_streamState['deflate_ctx'], $data, ZLIB_NO_FLUSH);
+		if ($this->_streamState['deflate_ctx'] !== NULL)
+		{
+			// Для PHP 7+ (потоковое сжатие)
+			$compressed = deflate_add($this->_streamState['deflate_ctx'], $data, ZLIB_NO_FLUSH);
 
-		if ($compressed !== '') {
-			// Если пароль установлен, шифруем сжатые данные
-			if ($this->_password !== NULL) {
-				$compressed = $this->_encryptData($compressed);
+			if ($compressed !== '')
+			{
+				// Если пароль установлен, шифруем сжатые данные
+				if ($this->_password !== NULL)
+				{
+					$compressed = $this->_encryptData($compressed);
+				}
+
+				$len = strlen($compressed);
+				$this->_streamState['compressed_size'] += $len;
+				fwrite($this->_zipFileHandle, $compressed);
+				$this->_offset += $len;
 			}
-
-			$len = strlen($compressed);
-			$this->_streamState['compressed_size'] += $len;
-			fwrite($this->_zipFileHandle, $compressed);
-			$this->_offset += $len;
+		}
+		else
+		{
+			// Для PHP 5.6 накапливаем данные в памяти
+			$this->_streamState['buffer'] .= $data;
 		}
 	}
 
@@ -978,11 +1022,23 @@ protected function _copyFileFromSource($info)
 	public function endWriteStream()
 	{
 		if (!$this->_streamState) return;
+		
+		if ($this->_streamState['deflate_ctx'] !== NULL)
+		{
+			// Для PHP 7+ финализируем поток
+			$finalCompressed = deflate_add($this->_streamState['deflate_ctx'], '', ZLIB_FINISH);
+		}
+		else
+		{
+			// Для PHP 5.6 сжимаем весь накопленный буфер целиком
+			$finalCompressed = gzdeflate($this->_streamState['buffer']);
+			unset($this->_streamState['buffer']); // освобождаем память
+		}
 
-		$finalCompressed = deflate_add($this->_streamState['deflate_ctx'], '', ZLIB_FINISH);
-
-		if ($finalCompressed !== '') {
-			if ($this->_password !== NULL) {
+		if ($finalCompressed !== '')
+		{
+			if ($this->_password !== NULL)
+			{
 				$finalCompressed = $this->_encryptData($finalCompressed);
 			}
 			$len = strlen($finalCompressed);

@@ -15,7 +15,7 @@
  *	jquery.ui.widget.js
  *
  */
-(function($) {
+(function($){
 
 $.widget('ui.stars', {
 	options: {

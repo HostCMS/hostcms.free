@@ -60,7 +60,6 @@ class Skin_Bootstrap_Admin_Form_Entity_Radiogroup extends Skin_Default_Admin_For
 		?><span class="caption"><?php echo $this->caption?></span><?php
 		?><div class="radio-group"><?php
 		$aClassBtnColors = $this->colors;
-		$i = 0;
 
 		foreach ($this->radio as $key => $value)
 		{
@@ -77,7 +76,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Radiogroup extends Skin_Default_Admin_For
 
 			<label class="checkbox-inline">
 			<input <?php echo implode(' ', $tmpAttr)?> />
-			<span class="btn btn-labeled <?php echo htmlspecialchars($i < count($aClassBtnColors) ? $aClassBtnColors[$i++] : $aClassBtnColors[$i = 0])?>">
+			<span class="btn btn-labeled <?php echo htmlspecialchars(isset($aClassBtnColors[$key]) ? $aClassBtnColors[$key] : $aClassBtnColors[array_rand($aClassBtnColors)])?>">
 			<?php
 			// ico к пункту
 			if (isset($this->ico[$key]))

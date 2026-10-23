@@ -141,7 +141,7 @@ class Module_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 * @param string $value
 	 * @param array $aDefaultValues
 	 * @param array $aModule_Options
-	 * @return Admin_Form_Entity_Model
+	 * @return object
 	 */
 	protected function _getConfigItem($configName, $isset, $name, $value, $aDefaultValues, $aModule_Options = array())
 	{
@@ -281,6 +281,9 @@ class Module_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$id = $configName . '[' . $name . ']';
 
+				// Fix abort for identical requests with same xsl_dir_id
+				$guid = Core_Guid::get();
+
 				$oPrev_Admin_Form_Entity = 	Admin_Form_Entity::factory('Select')
 					->name("xsl_dir_id_{$configName}_{$name}")
 					->id("xsl_dir_id_{$configName}_{$name}")
@@ -290,7 +293,7 @@ class Module_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						array(' … ') + $aXslDirs
 					)
 					->value($xsl_dir_id)
-					->onchange("$.ajaxRequest({path: hostcmsBackend + '/structure/index.php', context: $.escapeSelector('{$id}'), callBack: [$.loadSelectOptionsCallback, function(){var xsl_id = \$('#{$windowId} #' + $.escapeSelector('{$id}') + ' [value=\'{$xsl_id}\']').get(0) ? {$xsl_id} : 0; \$('#{$windowId} #' + \$.escapeSelector('{$id}')).val(xsl_id)}], action: 'loadXslList',additionalParams: 'xsl_dir_id=' + this.value, windowId: '{$windowId}'}); return false");
+					->onchange("$.ajaxRequest({path: hostcmsBackend + '/structure/index.php', context: $.escapeSelector('{$id}'), callBack: [$.loadSelectOptionsCallback, function(){var xsl_id = \$('#{$windowId} #' + $.escapeSelector('{$id}') + ' [value=\'{$xsl_id}\']').get(0) ? {$xsl_id} : 0; \$('#{$windowId} #' + \$.escapeSelector('{$id}')).val(xsl_id)}], action: 'loadXslList',additionalParams: 'xsl_dir_id=' + this.value + '&r={$guid}', windowId: '{$windowId}'}); return false");
 
 				$oAdmin_Form_Entity = Admin_Form_Entity::factory('Select')
 					->value($xsl_id)

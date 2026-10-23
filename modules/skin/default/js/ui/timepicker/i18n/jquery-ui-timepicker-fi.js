@@ -1,6 +1,6 @@
 /* Finnish translation for the jQuery Timepicker Addon */
 /* Written by Juga Paazmaya (http://github.com/paazmaya) */
-(function($) {
+(function($){
 	$.timepicker.regional['fi'] = {
 		timeOnlyTitle: 'Valitse aika',
 		timeText: 'Aika',

@@ -547,7 +547,7 @@ class Shop_Warehouse_Purchasereturn_Controller_Edit extends Admin_Form_Action_Co
 					if ($operation == 'applyModal')
 					{
 						$sJsRefresh = "<script>
-							(function($) {
+							(function($){
 								bootbox.hideAll();
 							})(jQuery);
 						</script>";

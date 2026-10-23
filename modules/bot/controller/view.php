@@ -19,13 +19,13 @@ class Bot_Controller_View extends Admin_Form_Controller_View
 	public function execute()
 	{
 		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
-		$oAdmin_Form = $oAdmin_Form_Controller->getAdminForm();
+		// $oAdmin_Form = $oAdmin_Form_Controller->getAdminForm();
 
 		$oAdmin_View = Admin_View::create($this->_Admin_Form_Controller->Admin_View)
 			->pageTitle($oAdmin_Form_Controller->pageTitle)
 			->module($oAdmin_Form_Controller->module);
 
-		$oUser = Core_Auth::getCurrentUser();
+		// $oUser = Core_Auth::getCurrentUser();
 
 		// При показе формы могут быть добавлены сообщения в message, поэтому message показывается уже после отработки формы
 		ob_start();
@@ -53,11 +53,11 @@ class Bot_Controller_View extends Admin_Form_Controller_View
 		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
 		$oAdmin_Form = $oAdmin_Form_Controller->getAdminForm();
 
-		$oAdmin_Language = $oAdmin_Form_Controller->getAdminLanguage();
+		// $oAdmin_Language = $oAdmin_Form_Controller->getAdminLanguage();
 
 		$aAdmin_Form_Fields = $oAdmin_Form->Admin_Form_Fields->findAll();
 
-		$oSortingField = $oAdmin_Form_Controller->getSortingField();
+		// $oSortingField = $oAdmin_Form_Controller->getSortingField();
 
 		$oUser = Core_Auth::getCurrentUser();
 

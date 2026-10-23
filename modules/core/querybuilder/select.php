@@ -453,7 +453,6 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	 * // GROUP BY `field`, COUNT(`id`)
 	 * $Core_QueryBuilder_Select->groupBy('field1')->groupBy('COUNT(id)');
 	 * </code>
-	 * @param string $column column
 	 * @return self
 	 */
 	public function groupBy()
@@ -602,7 +601,8 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 
 	/**
 	 * Offset compatibility with PostgreSQL, default TRUE
-	 * $param boolean $compatible
+	 * @param boolean $compatible
+	 * @return self
 	 */
 	public function offsetPostgreSQLSyntax($compatible)
 	{

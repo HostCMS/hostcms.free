@@ -329,7 +329,7 @@ abstract class Core_Webauthn_Format
 	 * Verify signature with public key
 	 * @param string $data
 	 * @param string $signature
-	 * @param resource $publicKey
+	 * @param string $publicKey
 	 * @param int $algorithm
 	 * @return bool
 	 */

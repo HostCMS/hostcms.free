@@ -487,6 +487,8 @@ class Comment_Model extends Core_Entity
 
 		if (!is_array($aPropertiesId) || !count($aPropertiesId))
 		{
+			$entityModel = NULL;
+
 			if ($this->Comment_Informationsystem_Item->id)
 			{
 				$entityModel = 'Informationsystem_Comment_Property_List';
@@ -503,14 +505,17 @@ class Comment_Model extends Core_Entity
 				$entityId = $this->Comment_Shop_Order->Shop_Order->shop_id;
 			}
 
-			$aProperties = Core_Entity::factory($entityModel, $entityId)
-				->Properties
-				->findAll();
-
-			$aPropertiesId = array();
-			foreach ($aProperties as $oProperty)
+			if (!is_null($entityModel))
 			{
-				$aPropertiesId[] = $oProperty->id;
+				$aProperties = Core_Entity::factory($entityModel, $entityId)
+					->Properties
+					->findAll();
+
+				$aPropertiesId = array();
+				foreach ($aProperties as $oProperty)
+				{
+					$aPropertiesId[] = $oProperty->id;
+				}
 			}
 		}
 
@@ -554,7 +559,7 @@ class Comment_Model extends Core_Entity
 
 	/**
 	 * Prepare Property Value
-	 * @param Property_Value_Model $oProperty_Value
+	 * @param object $oProperty_Value
 	 */
 	protected function _preparePropertyValue($oProperty_Value)
 	{
@@ -587,8 +592,8 @@ class Comment_Model extends Core_Entity
 	protected function _prepareData()
 	{
 		$this->clearXmlTags()
-			->addXmlTag('date', Core_Date::strftime($this->_dateFormat, Core_Date::sql2timestamp($this->datetime)))
-			->addXmlTag('datetime', Core_Date::strftime($this->_dateTimeFormat, Core_Date::sql2timestamp($this->datetime)));
+			->addXmlTag('date', Core_Date::strftime($this->_dateFormat, Core_Date::sql2timestamp($this->datetime)), array('raw' => explode(' ', $this->datetime)[0]))
+			->addXmlTag('datetime', Core_Date::strftime($this->_dateTimeFormat, Core_Date::sql2timestamp($this->datetime)), array('raw' => $this->datetime));
 
 		$this->_isTagAvailable('dir')
 			&& $this->addXmlTag('dir', $this->getHref());

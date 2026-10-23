@@ -15,9 +15,18 @@ class Core_Out_ZipStream extends Core_Out
 	/** @var Core_Zip */
 	protected $_zip;
 
+	/**
+	 * Filename in ZIP
+	 * @var string
+	 */
 	protected $_filenameInZip;
 
-	public function __construct(Core_Zip $zip, string $filenameInZip)
+	/**
+	 * Constructor
+	 * @param Core_Zip $zip
+	 * @param string $filenameInZip
+	 */
+	public function __construct(Core_Zip $zip, $filenameInZip)
 	{
 		$this->_zip = $zip;
 
@@ -26,6 +35,7 @@ class Core_Out_ZipStream extends Core_Out
 
 	/**
 	 * Open stream
+	 * @return self
 	 */
 	public function open()
 	{
@@ -35,7 +45,11 @@ class Core_Out_ZipStream extends Core_Out
 		return $this;
 	}
 
-	// Перехватываем запись
+	/**
+	 * Перехватываем запись
+	 * @param string $content
+	 * @return self
+	 */
 	public function write($content)
 	{
 		$this->_zip->writeStreamChunk($content);
@@ -43,7 +57,9 @@ class Core_Out_ZipStream extends Core_Out
 		return $this;
 	}
 
-	// Завершаем файл при уничтожении объекта или явном закрытии
+	/**
+	 * Завершаем файл при уничтожении объекта или явном закрытии
+	 */
 	public function close()
 	{
 		$this->_zip->endWriteStream();

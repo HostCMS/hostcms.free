@@ -62,7 +62,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 	 * @var array
 	 */
 	protected $_aClearedGroupsFieldValues = array();
-	
+
 	/**
 	 * Array of ID's parent items for which associated products were cleared
 	 * @var array
@@ -2827,10 +2827,10 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 									$this->_aClearedAssociatedItems[] = $this->_oCurrentItem->id;
 									$this->_oCurrentItem->Shop_Item_Associateds->deleteAll(FALSE);
 								}
-								
+
 								$aTmp_Markings = array_map('trim', explode(',', $sData));
 								$aTmp_Markings = array_filter($aTmp_Markings, 'strlen');
-								
+
 								foreach ($aTmp_Markings as $sAssociatedMarking)
 								{
 									$oTmp_Shop_Item = $this->_oCurrentShop->Shop_Items->getByMarking($sAssociatedMarking, FALSE);
@@ -3452,15 +3452,15 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 
 					$sExtension = Core_File::getExtension($this->_oCurrentShopEItem->filename);
 
-					$sSourceFile = CMS_FOLDER . $this->imagesPath . $sAdditionalPath . '/' . $this->_oCurrentShopEItem->filename;
+					$sEitemSourceFile = CMS_FOLDER . $this->imagesPath . $sAdditionalPath . '/' . $this->_oCurrentShopEItem->filename;
 					$sTargetFile = $this->_oCurrentShop->getPath() . '/eitems/item_catalog_' . $this->_oCurrentItem->id . '/' . $this->_oCurrentShopEItem->id . ($sExtension == '' ? '' : '.' . $sExtension);
 
-					if (Core_File::isFile($sSourceFile)
-						&& Core_File::isValidExtension($sSourceFile, Core::$mainConfig['availableExtension']))
+					if (Core_File::isFile($sEitemSourceFile)
+						&& Core_File::isValidExtension($sEitemSourceFile, Core::$mainConfig['availableExtension']))
 					{
 						try
 						{
-							Core_File::copy($sSourceFile, $sTargetFile);
+							Core_File::copy($sEitemSourceFile, $sTargetFile);
 						} catch (Exception $e) {}
 					}
 				}
@@ -3471,6 +3471,8 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 						->deleteLargeImage()
 						->deleteSmallImage();
 				}
+
+				$sSourceFileLarge = $sSourceFileSmall = NULL;
 
 				if (/*!is_null($this->_sBigImageFile) && */$this->_sBigImageFile != ''/* && $this->importAction != 2*/)
 				{
@@ -3499,17 +3501,17 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 						if ($bHttp)
 						{
 							try {
-								$sSourceFile = $this->_downloadHttpFile($sTmpFilePath);
+								$sSourceFileLarge = $this->_downloadHttpFile($sTmpFilePath);
 							}
 							catch (Exception $e)
 							{
 								Core_Message::show($e->getMessage(), 'error');
-								$sSourceFile = NULL;
+								$sSourceFileLarge = NULL;
 							}
 						}
 						else
 						{
-							$sSourceFile = CMS_FOLDER . trim(Core_File::pathCorrection($sTmpFilePath), DIRECTORY_SEPARATOR);
+							$sSourceFileLarge = CMS_FOLDER . trim(Core_File::pathCorrection($sTmpFilePath), DIRECTORY_SEPARATOR);
 						}
 
 						if (!$this->_oCurrentShop->change_filename)
@@ -3528,7 +3530,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 
 						if ($this->_oCurrentItem->image_large != '')
 						{
-							if ($sDestinationFolder . $this->_oCurrentItem->image_large != $sSourceFile)
+							if ($sDestinationFolder . $this->_oCurrentItem->image_large != $sSourceFileLarge)
 							{
 								try
 								{
@@ -3540,7 +3542,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 						// Создаем массив параметров для загрузки картинок элементу
 						$aPicturesParam = array();
 
-						$aPicturesParam['large_image_source'] = (string) $sSourceFile;
+						$aPicturesParam['large_image_source'] = (string) $sSourceFileLarge;
 						$aPicturesParam['large_image_name'] = $sSourceFileBaseName;
 						$aPicturesParam['large_image_target'] = $sDestinationFolder . $sTargetFileName;
 						$aPicturesParam['watermark_file_path'] = $this->_oCurrentShop->getWatermarkFilePath();
@@ -3603,18 +3605,15 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 						}
 
 						$this->_oCurrentItem->save();
-
-						if (!is_null($sSourceFile) && strpos(basename($sSourceFile), "CMS") === 0)
-						{
-							// Файл временный, подлежит удалению
-							Core_File::delete($sSourceFile);
-						}
 					}
 				}
 
 				if ($this->_sSmallImageFile != '' || $this->_sBigImageFile != '')
 				{
-					$this->_sSmallImageFile == '' && $this->_sSmallImageFile = $this->_sBigImageFile;
+					$this->_sSmallImageFile == ''
+						&& $this->_sSmallImageFile = !is_null($sSourceFileLarge)
+							? $sSourceFileLarge
+							: $this->_sBigImageFile;
 
 					// Папка назначения
 					$sDestinationFolder = $this->_oCurrentItem->getItemPath();
@@ -3639,17 +3638,17 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 						if ($bHttp)
 						{
 							try {
-								$sSourceFile = $this->_downloadHttpFile($sTmpFilePath);
+								$sSourceFileSmall = $this->_downloadHttpFile($sTmpFilePath);
 							}
 							catch (Exception $e)
 							{
 								Core_Message::show($e->getMessage(), 'error');
-								$sSourceFile = NULL;
+								$sSourceFileSmall = NULL;
 							}
 						}
 						else
 						{
-							$sSourceFile = CMS_FOLDER . trim(Core_File::pathCorrection($sTmpFilePath), DIRECTORY_SEPARATOR);
+							$sSourceFileSmall = CMS_FOLDER . trim(Core_File::pathCorrection($sTmpFilePath), DIRECTORY_SEPARATOR);
 						}
 
 						if (!$this->_oCurrentShop->change_filename)
@@ -3666,12 +3665,12 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 							$sTargetFileName = "small_item_image{$this->_oCurrentItem->id}{$sTargetFileExtension}";
 						}
 
-						if (Core_File::isFile($sSourceFile) && filesize($sSourceFile))
+						if (Core_File::isFile($sSourceFileSmall) && filesize($sSourceFileSmall))
 						{
 							// Удаляем старое малое изображение
 							if ($this->_oCurrentItem->image_small != '')
 							{
-								if ($sDestinationFolder . $this->_oCurrentItem->image_small != $sSourceFile)
+								if ($sDestinationFolder . $this->_oCurrentItem->image_small != $sSourceFileSmall)
 								{
 									try
 									{
@@ -3681,7 +3680,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 							}
 
 							$aPicturesParam = array();
-							$aPicturesParam['small_image_source'] = $sSourceFile;
+							$aPicturesParam['small_image_source'] = $sSourceFileSmall;
 							$aPicturesParam['small_image_name'] = $sSourceFileBaseName;
 							$aPicturesParam['small_image_target'] = $sDestinationFolder . $sTargetFileName;
 							$aPicturesParam['create_small_image_from_large'] = FALSE;
@@ -3716,12 +3715,6 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 								$this->_oCurrentItem->setSmallImageSizes();
 							}
 						}
-
-						if (!is_null($sSourceFile) && strpos(basename($sSourceFile), "CMS") === 0)
-						{
-							// Файл временный, подлежит удалению
-							Core_File::delete($sSourceFile);
-						}
 					}
 
 					$this->_sSmallImageFile = '';
@@ -3735,6 +3728,20 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 							Core_File::delete($this->_oCurrentItem->getItemPath() . $this->_oCurrentItem->image_small);
 						} catch (Exception $e) {}
 					}
+				}
+
+				if (!is_null($sSourceFileLarge) && strpos(basename($sSourceFileLarge), "CMS") === 0)
+				{
+					// Файл временный, подлежит удалению
+					Core_File::delete($sSourceFileLarge);
+				}
+
+				if (!is_null($sSourceFileSmall) && strpos(basename($sSourceFileSmall), "CMS") === 0
+					&& $sSourceFileSmall != $sSourceFileLarge
+				)
+				{
+					// Файл временный, подлежит удалению
+					Core_File::delete($sSourceFileSmall);
 				}
 
 				//$aImportedFileProperties = array();
@@ -4213,8 +4220,6 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 
 			$iCounter++;
 
-			//$this->_oCurrentItem->clear();
-
 			$this->_clearWhileLoop();
 		} // end line
 
@@ -4347,7 +4352,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 	 * @param Property_Model $oProperty
 	 * @param string $sPropertyValue property value
 	 * @param integer $position
-	 * @return false|mixed|Property_Value_Model
+	 * @return false|object
 	 * @throws Core_Exception
 	 * @hostcms-event Shop_Item_Import_Csv_Controller.onAddItemPropertyValueDefault
 	 */
@@ -5971,6 +5976,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 
 	/**
 	 * Array of cached tags
+	 * @var array|NULL
 	 */
 	protected $_aTags = NULL;
 
@@ -6048,7 +6054,7 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 
 		// see __sleep()/__wakeup()
 		$this->_aInsertedGroupIDs = $this->_aUpdatedGroupIDs = $this->_aInsertedItemIDs = $this->_aUpdatedItemIDs = $this->_aCreatedItemIDs = array();
-		
+
 		$this->_aClearedItemsPropertyValues = $this->_aClearedGroupsPropertyValues = $this->_aClearedItemsFieldValues
 			= $this->_aClearedGroupsFieldValues = $this->_aCreatedProperties = $this->_aCreatedFields = $this->_aClearedAssociatedItems = array();
 
@@ -6075,8 +6081,10 @@ class Shop_Item_Import_Csv_Controller extends Shop_Item_Import_Controller
 				'_aUpdatedItemIDs' => $this->_aUpdatedItemIDs,
 				'_aCreatedItemIDs' => $this->_aCreatedItemIDs,
 				'_aCreatedProperties' => $this->_aCreatedProperties,
-				'_aCreatedFields' => $this->_aCreatedFields
+				'_aCreatedFields' => $this->_aCreatedFields,
+				//'csv_fields' => $this->csv_fields, // Сохранено для возможности отладки, не используется по назначению и не извлекается
 			)
+			, defined('JSON_UNESCAPED_UNICODE') ? JSON_UNESCAPED_UNICODE : 0
 		));
 
 		$this->clear();

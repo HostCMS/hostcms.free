@@ -15,13 +15,13 @@ class Core_Session_Phpredis implements SessionHandlerInterface
 {
 	/**
 	 * Redis instance
-	 * @var Redis
+	 * @var mixed
 	 */
 	static protected $_redis = NULL;
 
 	/**
 	 * Redis instance
-	 * @var Redis
+	 * @var mixed
 	 */
 	static protected $_config = NULL;
 
@@ -52,16 +52,19 @@ class Core_Session_Phpredis implements SessionHandlerInterface
 
 	/**
 	 * Lock Token
+	 * @var mixed
 	 */
 	protected $_lockToken = NULL;
 
 	/**
 	 * Lock Key
+	 * @var mixed
 	 */
 	protected $_lockKey = NULL;
 
 	/**
 	 * Lock Expire
+	 * @var mixed
 	 */
 	protected $_lockexpire = NULL;
 
@@ -90,8 +93,8 @@ class Core_Session_Phpredis implements SessionHandlerInterface
 		// Should be INT
 		$this->_ttl = intval(ini_get('session.gc_maxlifetime'));
 
-		$this->_lockexpire = ini_get('max_execution_time');
-		$this->_lockexpire < 0 && $this->_lockexpire = 30;
+		$this->_lockexpire = intval(ini_get('max_execution_time'));
+		$this->_lockexpire <= 0 && $this->_lockexpire = 30;
 	}
 
 	/**
@@ -101,36 +104,43 @@ class Core_Session_Phpredis implements SessionHandlerInterface
 	{
 		if (is_null(self::$_redis))
 		{
-			self::$_redis = new Redis();
+			try {
+				self::$_redis = new Redis();
 
-			self::$_config = Core::$mainConfig['session'] + array(
-				'server' => '127.0.0.1',
-				'port' => 6379,
-				'auth' => NULL,
-				'database' => NULL
-			);
+				self::$_config = Core::$mainConfig['session'] + array(
+					'server' => '127.0.0.1',
+					'port' => 6379,
+					'auth' => NULL,
+					'database' => NULL
+				);
 
-			if (!self::$_redis->connect(self::$_config['server'], self::$_config['port']))
-			{
-				Core_Session::error('Redis connection error. Check \'session\' section, see modules/core/config/config.php');
-				self::$_redis = NULL;
+				if (!self::$_redis->connect(self::$_config['server'], self::$_config['port']))
+				{
+					Core_Session::error('Redis connection error. Check \'session\' section, see modules/core/config/config.php');
+					self::$_redis = NULL;
 
-				return FALSE;
+					return FALSE;
+				}
+
+				if (!is_null(self::$_config['auth']) && !self::$_redis->auth(self::$_config['auth']))
+				{
+					Core_Session::error('Redis connection authenticate error. Check \'session\' section, see modules/core/config/config.php');
+					self::$_redis = NULL;
+
+					return FALSE;
+				}
+
+				if (!is_null(self::$_config['database']) && !self::$_redis->select(self::$_config['database']))
+				{
+					Core_Session::error('Redis changing the selected database error. Check \'session\' section, see modules/core/config/config.php');
+					self::$_redis = NULL;
+
+					return FALSE;
+				}
 			}
-
-			if (!is_null(self::$_config['auth']) && !self::$_redis->auth(self::$_config['auth']))
+			catch (Exception $e)
 			{
-				Core_Session::error('Redis connection authenticate error. Check \'session\' section, see modules/core/config/config.php');
-				self::$_redis = NULL;
-
-				return FALSE;
-			}
-
-			if (!is_null(self::$_config['database']) && !self::$_redis->select(self::$_config['database']))
-			{
-				Core_Session::error('Redis changing the selected database error. Check \'session\' section, see modules/core/config/config.php');
-				self::$_redis = NULL;
-
+				echo "\nCore_Session_Phpredis: " . htmlspecialchars($e->getMessage());
 				return FALSE;
 			}
 		}
@@ -160,6 +170,11 @@ class Core_Session_Phpredis implements SessionHandlerInterface
 		return TRUE;
 	}
 
+	/**
+	 * Get key
+	 * @param string $id
+	 * @return string
+	 */
 	protected function _getKey($id)
 	{
 		return $this->_prefix . '#' . $id;
@@ -322,7 +337,7 @@ class Core_Session_Phpredis implements SessionHandlerInterface
 
 		//$this->_lockToken = uniqid();
 		$this->_lockToken = Core::generateUniqueId(16);
-		
+
 		$this->_lockKey = $this->_getKey($id) . '.lock';
 
 		while (!is_null(self::$_redis) && !connection_aborted())
