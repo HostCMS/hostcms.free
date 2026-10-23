@@ -65,6 +65,7 @@ abstract class Core_Http
 
 	/**
 	 * Original Config
+	 * @var mixed
 	 */
 	protected $_originalConfig = NULL;
 
@@ -111,6 +112,7 @@ abstract class Core_Http
 
 	/**
 	 * Constructor.
+	 * @param array $config
 	 */
 	public function __construct($config)
 	{
@@ -641,7 +643,9 @@ abstract class Core_Http
 	static public function getOs($browser, $version = NULL)
 	{
 		is_null($version) && $browser == 'firefox'
-			&& $version = rand(110, 128) . '.' . rand(0, 9);
+			&& $version = rand(140, 151) . '.' . rand(0, 9);
+
+		$os = '';
 
 		switch (rand(0, 2))
 		{
@@ -688,14 +692,14 @@ abstract class Core_Http
 
 		if ($browser == 'chrome')
 		{
-			$version = rand(110, 128) . '.0.' . rand(1000, 5000) . '.' . rand(10, 400);
+			$version = rand(140, 151) . '.0.0.0';
 			$os = self::getOs($browser, $version);
 			$appleVersion = (rand(0, 1) ? rand(533, 537) : rand(600, 603)) . '.' . rand(30, 50);
 			$userAgent = "Mozilla/5.0 ({$os}) AppleWebKit/{$appleVersion} (KHTML, like Gecko) Chrome/{$version} Safari/{$appleVersion}";
 		}
 		elseif ($browser == 'firefox')
 		{
-			$version = rand(110, 128) . '.' . rand(0, 9);
+			$version = rand(140, 151) . '.' . rand(0, 3);
 			$os = self::getOs($browser, $version);
 			$userAgent = "Mozilla/5.0 ({$os}) Gecko/20100101 Firefox/{$version}";
 		}
@@ -899,11 +903,11 @@ abstract class Core_Http
 		$aReturn = array();
 
 		$aTmp = explode('; ', $str);
-		foreach ($aTmp as $str)
+		foreach ($aTmp as $string)
 		{
-			if (strpos($str, '=') !== FALSE)
+			if (strpos($string, '=') !== FALSE)
 			{
-				list($key, $value) = explode('=', $str, 2);
+				list($key, $value) = explode('=', $string, 2);
 				$aReturn[$key] = $value;
 			}
 		}

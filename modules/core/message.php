@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Message
 {
@@ -22,8 +22,8 @@ class Core_Message
 	 * // Error message
 	 * Core_Message::show(Core::_('constant.message', 'value1', 'value2'), 'error');
 	 * </code>
-	 * @param $message Message text
-	 * @param $type Message type
+	 * @param string $message Message text
+	 * @param string $type Message type
 	 */
 	static public function show($message, $type = 'success')
 	{
@@ -37,8 +37,8 @@ class Core_Message
 	 * echo Core_Message::get(Core::_('constant.name'));
 	 * echo Core_Message::get(Core::_('constant.message', 'value1', 'value2'));
 	 * </code>
-	 * @param $message Message text
-	 * @param $type Message type
+	 * @param string $message Message text
+	 * @param string $type Message type
 	 * @see Core_Message::show()
 	 * @return string
 	 */

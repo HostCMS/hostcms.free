@@ -63,7 +63,7 @@ class Timeline_Note_Controller_Edit extends Crm_Note_Controller_Edit
 	public function execute($operation = NULL)
 	{
 		$sJsRefresh = '<script>
-			if ($("#id_content .timeline-wrapper").length && typeof _windowSettings != \'undefined\') {
+			if ($("#id_content .timeline-wrapper").length && typeof window._windowSettings != \'undefined\') {
 				$.adminLoad({ path: hostcmsBackend + \'/timeline/index.php\', additionalParams: \'\', windowId: \'id_content\' });
 			}
 		</script>';

@@ -74,7 +74,7 @@ class Skin_Bootstrap_Admin_Form_Entity_DateTime extends Skin_Default_Admin_Form_
 		</div>
 
 		<script>
-		(function($) {
+		(function($){
 			$('#<?php echo Core_Str::escapeJavascriptVariable($windowId)?> #div_<?php echo Core_Str::escapeJavascriptVariable($this->id)?>')
 				.datetimepicker({<?php echo Core_Array::array2jsObject($this->options)?>});
 		})(jQuery);

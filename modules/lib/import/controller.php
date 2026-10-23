@@ -66,48 +66,52 @@ class Lib_Import_Controller extends Admin_Form_Action_Controller
 	 */
 	protected function _import(array $aContent = array())
 	{
-		if (!isset($aContent['name']) || !isset($aContent['description']) || !isset($aContent['type'])
-			|| !isset($aContent['class']) || !isset($aContent['style']) || !isset($aContent['dirName'])
+		if (!isset($aContent['name'])
+			|| !isset($aContent['lib']) || !isset($aContent['lib_config']) /*|| !isset($aContent['type'])
+			|| !isset($aContent['class']) || !isset($aContent['style']) || !isset($aContent['dirName'])*/
 		)
 		{
 			throw new Core_Exception('Wrong LIB json!', array(), 0, FALSE);
 		}
 
-		$aExplodeDir = explode('/', $aContent['dirName']);
-
 		$iParent_Id = $this->lib_dir_id;
 
-		foreach ($aExplodeDir as $sDirName)
+		if (isset($aContent['dirName']))
 		{
-			if ($sDirName != '')
+			$aExplodeDir = explode('/', $aContent['dirName']);
+
+			foreach ($aExplodeDir as $sDirName)
 			{
-				$oLib_Dirs = Core_Entity::factory('Lib_Dir');
-				$oLib_Dirs
-					->queryBuilder()
-					->where('lib_dirs.parent_id', '=', $iParent_Id);
-
-				$oLib_Dir = $oLib_Dirs->getByName($sDirName, FALSE);
-
-				if (is_null($oLib_Dir))
+				if ($sDirName != '')
 				{
-					$oLib_Dir = Core_Entity::factory('Lib_Dir');
-					$oLib_Dir
-						->parent_id($iParent_Id)
-						->name($sDirName)
-						->save();
-				}
+					$oLib_Dirs = Core_Entity::factory('Lib_Dir');
+					$oLib_Dirs
+						->queryBuilder()
+						->where('lib_dirs.parent_id', '=', $iParent_Id);
 
-				$iParent_Id = $oLib_Dir->id;
+					$oLib_Dir = $oLib_Dirs->getByName($sDirName, FALSE);
+
+					if (is_null($oLib_Dir))
+					{
+						$oLib_Dir = Core_Entity::factory('Lib_Dir');
+						$oLib_Dir
+							->parent_id($iParent_Id)
+							->name($sDirName)
+							->save();
+					}
+
+					$iParent_Id = $oLib_Dir->id;
+				}
 			}
 		}
 
 		$oLib = Core_Entity::factory('Lib');
 		$oLib->lib_dir_id = $iParent_Id;
 		$oLib->name = $aContent['name'];
-		$oLib->description = $aContent['description'];
-		$oLib->type = $aContent['type'];
-		$oLib->class = $aContent['class'];
-		$oLib->style = $aContent['style'];
+		$oLib->description = Core_Array::get($aContent, 'description', '', 'trim');
+		$oLib->type = Core_Array::get($aContent, 'type', 0, 'int');
+		$oLib->class = Core_Array::get($aContent, 'class', '', 'trim');
+		$oLib->style = Core_Array::get($aContent, 'style', '', 'trim');
 		$oLib->save();
 
 		if (isset($aContent['file']) && $aContent['file'] != ''
@@ -137,10 +141,10 @@ class Lib_Import_Controller extends Admin_Form_Action_Controller
 			}
 		}
 
-		isset($aContent['lib'])
+		$aContent['lib'] != ''
 			&& $oLib->saveLibFile($aContent['lib']);
 
-		isset($aContent['lib_config'])
+		$aContent['lib_config'] != ''
 			&& $oLib->saveLibConfigFile($aContent['lib_config']);
 
 		// Массив для сопоставления старых ID новым

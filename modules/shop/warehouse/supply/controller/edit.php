@@ -588,7 +588,7 @@ class Shop_Warehouse_Supply_Controller_Edit extends Admin_Form_Action_Controller
 			if ($operation == 'applyModal')
 			{
 				$sJsRefresh = "<script>
-					(function($) {
+					(function($){
 						bootbox.hideAll();
 					})(jQuery);
 				</script>";

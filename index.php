@@ -212,6 +212,8 @@ if (!empty($_SESSION['current_lng']))
 
 $sRemoteAddr = Core::getClientIp();
 
+Core_Event::notify('Index.onBeforeCheckIp', NULL);
+
 // Check IP addresses
 $bBlockedIp = $bBlockedFilter = $bBlockedVisitorFilter = $bCaptchaVisitorFilter = $bCheckBrowser = FALSE;
 
@@ -241,28 +243,49 @@ if (Core::moduleIsActive('ipaddress'))
 }
 
 $oIpaddress_Visitor = NULL;
-
 if (!$bBlockedIp)
 {
 	$userAgent = Core_Array::get($_SERVER, 'HTTP_USER_AGENT', '', 'str');
 	$requestURI = urldecode(Core_Array::get($_SERVER, 'REQUEST_URI', '', 'str'));
 
-	// Static files that should be ignored
-	Core_Event::notify('Ipaddress.isStaticFile', NULL, array($requestURI));
-	$eventResult = Core_Event::getLastReturn();
+	$aStaticFiles = Core::$mainConfig['staticFiles']
+		+ array('/favicon.ico', '/favicon.gif', '/favicon.png', '/favicon.svg', '/sitemap.xml', '/robots.txt', '/llms.txt', '/llms-full.txt', '/apple-touch-icon', '/.well-known', '/hostcms-benchmark.php');
 
-	$bStaticFiles = is_bool($eventResult)
-		? $eventResult
-		: in_array($requestURI, array('/favicon.ico', '/favicon.gif', '/favicon.png', '/favicon.svg', '/robots.txt', '/hostcms-benchmark.php'))
-			|| strpos($requestURI, '/apple-touch-icon') === 0
-			|| strpos($requestURI, '/.well-known') === 0;
+	$bStaticFiles = FALSE;
+	foreach ($aStaticFiles as $staticFile)
+	{
+		if (strpos($requestURI, $staticFile) === 0)
+		{
+			$bStaticFiles = TRUE;
+			break;
+		}
+	}
+
+	if (!$bStaticFiles)
+	{
+		// Static files that should be ignored
+		Core_Event::notify('Ipaddress.isStaticFile', NULL, array($requestURI));
+		$eventResult = Core_Event::getLastReturn();
+
+		is_bool($eventResult) && $bStaticFiles = $eventResult;
+	}
 
 	if (!$bBlockedFilter && !$bStaticFiles)
 	{
 		$bSearchEngineBot = Core::checkSearchEngineBot($userAgent);
 
-		!$bSearchEngineBot
-			&& $bCheckBrowser = $oSite->check_browser == 1;
+		if (!$bSearchEngineBot)
+		{
+			$bCheckBrowser = $oSite->check_browser == 1;
+
+			if ($bCheckBrowser)
+			{
+				Core_Event::notify('Ipaddress.onCheckBrowser', NULL, array());
+				$eventResult = Core_Event::getLastReturn();
+
+				is_bool($eventResult) && $bCheckBrowser = $eventResult;
+			}
+		}
 
 		if (Core::moduleIsActive('counter'))
 		{
@@ -295,7 +318,7 @@ if (!$bBlockedIp)
 				$bUseIpaddressVisitors = FALSE;
 			}
 
-			// Нет определенного $oIpaddress_Visitor или уже статус проверки браузера и первый запрос
+			// Нет определенного $oIpaddress_Visitor или уже статус проверки браузера или первый запрос
 			if (!$oIpaddress_Visitor || $oIpaddress_Visitor->result !== 3 || $oIpaddress_Visitor->visits == 1)
 			{
 				$oCounter_Controller = Counter_Controller::instance()
@@ -363,24 +386,15 @@ if (!$bBlockedIp)
 
 					$bBlockedVisitorFilter = $oIpaddress_Visitor->result == 0;
 					$bCaptchaVisitorFilter = $oIpaddress_Visitor->result == 2;
-					
-					if ($oSite->check_browser)
+
+					if ($bCheckBrowser)
 					{
 						// Браузер проверяем если для посетителя статус (1 - разрешен доступ, 3 - проверка браузера) и не было применено какого-то фильтра (например резрешительного или для капчи)
 						// Т.е. посетитель не подошел ни под одни из проверок, заданных в фильтре и ему не была показана капча
-						Core_Event::notify('Ipaddress.onCheckBrowser', NULL, array($oIpaddress_Visitor));
-						$eventResult = Core_Event::getLastReturn();
-						
-						$bCheckBrowser = !is_bool($eventResult)
-							? $oIpaddress_Visitor->result == 1 && !$oIpaddress_Visitor->ipaddress_visitor_filter_id || $oIpaddress_Visitor->result == 3
-							: $eventResult;
-					}
-					else
-					{
-						$bCheckBrowser = FALSE;
+						$bCheckBrowser = $oIpaddress_Visitor->result == 1 && !$oIpaddress_Visitor->ipaddress_visitor_filter_id || $oIpaddress_Visitor->result == 3;
 					}
 				}
-				
+
 				if (!$bBlockedVisitorFilter && !$bCaptchaVisitorFilter && !$bCheckBrowser)
 				{
 					// Учесть данные о визите и применить накопительную статистику за день
@@ -433,6 +447,7 @@ if (Core::moduleIsActive('ipaddress'))
 	}
 }
 
+Core_Event::notify('Index.onBeforeCheckBrowser', NULL);
 if ($bCheckBrowser)
 {
 	$cookieName = '_h_ct';
@@ -442,21 +457,40 @@ if ($bCheckBrowser)
 	if (isset($_COOKIE[$cookieName]))
 	{
 		$parts = explode('.', $_COOKIE[$cookieName], 2);
-		
+
 		if (count($parts) == 2)
 		{
 			list($clientHash, $payloadBase64) = $parts;
 			$payloadJson = @base64_decode($payloadBase64);
-			
+
 			if ($payloadJson != '')
 			{
 				$payload = @json_decode($payloadJson, TRUE);
 
-				if ($payload && isset($payload['fp'], $payload['bh'], $payload['ts']))
+				if ($payload
+					&& isset($payload['fp'], $payload['bh'], $payload['ts'])
+					&& is_scalar($payload['fp']) && is_scalar($payload['bh']) && is_scalar($payload['ts'])
+				)
 				{
+					if (Core::moduleIsActive('ipaddress'))
+					{
+						$oIpaddress_Visitor = Ipaddress_Visitor_Controller::getIpaddressVisitorByCookie();
+
+						if ($oIpaddress_Visitor)
+						{
+							$aHeaders = @json_decode($oIpaddress_Visitor->headers, TRUE);
+							if (is_array($aHeaders) && !isset($aHeaders['Browser FP']))
+							{
+								$aHeaders['Browser FP'] = $payload['fp'];
+								$oIpaddress_Visitor->headers = json_encode($aHeaders, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+								$oIpaddress_Visitor->save();
+							}
+						}
+					}
+
 					// 1. Проверка срока жизни токена
 					$tokenAge = time() - intval($payload['ts']);
-					
+
 					if ($tokenAge > 0 && $tokenAge < Core_Command_Controller_Check_Challenge::$maxAge)
 					{
 						// 2. Явный запрет, если JS сообщил о наличии WebDriver (puppeteer, selenium)
@@ -476,22 +510,22 @@ if ($bCheckBrowser)
 								// Расшифровываем строку поведения: moves|distance|scrolls|scrollDelta|keys|elapsed
 								$behaviorParts = explode('|', $payload['bh']);
 
-								if (count($behaviorParts) === 11)
+								if (count($behaviorParts) === 15)
 								{
 									$moves = intval($behaviorParts[0]);
 									$distance = intval($behaviorParts[1]);
 									$keys = intval($behaviorParts[4]);
-									
+
 									$taps = intval($behaviorParts[5]);
 									$touchMoves = intval($behaviorParts[6]);
 									$wheelAttempts = intval($behaviorParts[7]);
-									
+
 									$elapsed = intval($behaviorParts[8]);
 									$audio = strval($behaviorParts[9]); // e.g. supported-48000-2-suspended
 									$fonts = intval($behaviorParts[10]);
 
 									// Защита от ботов, которые пытаются сдать токен слишком быстро (быстрее 1.5 секунд)
-									if ($elapsed >= 1350 && $fonts >= 6)
+									if ($elapsed >= 1410 && $fonts >= Core::$mainConfig['antibotMinFonts'])
 									{
 										$userAgent = Core_Array::get($_SERVER, 'HTTP_USER_AGENT', '', 'str');
 
@@ -507,24 +541,18 @@ if ($bCheckBrowser)
 										)
 										{
 											$showChallenge = FALSE;
-											
+
 											if (Core::moduleIsActive('ipaddress'))
 											{
 												// Access granted
-												$oIpaddress_Visitor = Ipaddress_Visitor_Controller::getIpaddressVisitorByCookie();
-												if ($oIpaddress_Visitor)
+												if ($oIpaddress_Visitor && $oIpaddress_Visitor->result != 1)
 												{
 													$oIpaddress_Visitor->result = 1; // Access granted
-													$oIpaddress_Visitor->visits = 1; // Reset number of visits
+
+													$oIpaddress_Visitor->visits <= 4
+														&& $oIpaddress_Visitor->visits = 1; // Reset number of visits
+
 													$oIpaddress_Visitor->save();
-													
-													if (Core::moduleIsActive('counter'))
-													{
-														$oCounter_Controller = Counter_Controller::instance()
-															->site($oSite)
-															->counterId(0)
-															->applySummary();
-													}
 												}
 											}
 										}
@@ -533,12 +561,13 @@ if ($bCheckBrowser)
 									{
 										Core_Log::instance()->clear()
 											->status(Core_Log::$MESSAGE)
-											->write("Challenge failure; elapsed: {$elapsed}, fonts: {$fonts}, ip: {$sRemoteAddr}");
+											->write("CheckBrowser '{$sRemoteAddr}', Failure: elapsed: {$elapsed}, fonts: {$fonts}, JSON: {$payloadJson}");
 									}
 								}
 							}
 						//}
 					}
+
 				}
 			}
 		}
@@ -554,7 +583,7 @@ if ($bCheckBrowser)
 
 			Core_Command_Controller_Check_Challenge::$attempt = $oIpaddress_Visitor->visits;
 		}
-		
+
 		Core_Router::add('check-challenge', '()')
 			->setUri(Core::$url['path'])
 			->controller('Core_Command_Controller_Check_Challenge')->execute()
@@ -564,6 +593,14 @@ if ($bCheckBrowser)
 
 		exit();
 	}
+}
+
+if (Core::moduleIsActive('counter'))
+{
+	$oCounter_Controller = Counter_Controller::instance()
+		->site($oSite)
+		->counterId(0)
+		->applySummary();
 }
 
 Core_Router::factory(Core::$url['path'])

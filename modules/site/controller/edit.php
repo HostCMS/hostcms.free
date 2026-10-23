@@ -24,8 +24,6 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$object->lng = Core::_('Site.lng_default');
 		}
 
-		$this->addSkipColumn('~favicon');
-
 		return parent::setObject($object);
 	}
 

@@ -639,13 +639,12 @@ $(function(){
 						$cloneDiv.attr('id', 'userTab_' + result.id);
 						$cloneDiv.find('input[name = "file"]').val();
 
-						// $cloneDiv.find('.ace_editor').remove();
-
 						syntaxhighlighter.remove($cloneDiv);
 
 						$cloneDiv.find('.alert').remove();
 						$cloneDiv.find('table').parent('div').remove();
 						$cloneDiv.find('p').remove();
+						$cloneDiv.find('.ace-editor-wrapper').remove();
 
 						var _textarea = $cloneDiv.find('textarea'),
 							_oldId = _textarea.attr('id'),

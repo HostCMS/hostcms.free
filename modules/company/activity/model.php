@@ -46,6 +46,7 @@ class Company_Activity_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
 	 * @return string
 	 */
 	public function nameBackend($oAdmin_Form_Field)

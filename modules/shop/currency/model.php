@@ -174,27 +174,36 @@ class Shop_Currency_Model extends Core_Entity
 
 	/**
 	 * Format Number
-	 * @param mixed $decimal
+	 * @param mixed $num
+	 * @param int|NULL $decimals
 	 * @return string
 	 */
-	public function format($decimal)
+	public function format($num, $decimals = NULL)
 	{
-		$return = number_format(floatval($decimal), 2, $this->decimal_separator, $this->thousands_separator);
+		is_null($decimals)
+			&& $decimals = Shop_Controller::instance()->getDecimalDigits();
 
-		$this->hide_zeros && $this->decimal_separator != ''
-			&& $return = str_replace($this->decimal_separator . '00', '', $return);
+		$return = number_format(floatval($num), $decimals, $this->decimal_separator, $this->thousands_separator);
+
+		$decimals > 0 && $this->hide_zeros && $this->decimal_separator != ''
+			//&& $return = str_replace($this->decimal_separator . str_repeat('0', $decimals), '', $return);
+			&& $return = rtrim(preg_replace('/(' . preg_quote($this->decimal_separator, '/') . '\d*?)0+$/', '$1', $return), $this->decimal_separator);
 
 		return $return;
 	}
 
 	/**
 	 * Format Decimal with Currency
-	 * @param mixed $decimal
+	 * @param mixed $num
+	 * @param int|NULL $decimals
 	 * @return string
 	 */
-	public function formatWithCurrency($decimal)
+	public function formatWithCurrency($num, $decimals = NULL)
 	{
-		$str = $this->format($decimal);
+		is_null($decimals)
+			&& $decimals = Shop_Controller::instance()->getDecimalDigits();
+
+		$str = $this->format($num, $decimals);
 
 		return $this->sign_position == 0
 			? $str . ' ' . $this->sign

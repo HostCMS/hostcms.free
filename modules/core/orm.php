@@ -356,6 +356,7 @@ class Core_ORM
 
 	/**
 	 * Set table name
+	 * @param string $tableName
 	 * @return self
 	 */
 	public function setTableName($tableName)
@@ -408,7 +409,7 @@ class Core_ORM
 
 	/**
 	 * Get Model CallsName
-	 * @param $modelName Model name
+	 * @param string $modelName Model name
 	 * @return string
 	 */
 	static public function getClassName($modelName)
@@ -418,8 +419,8 @@ class Core_ORM
 
 	/**
 	 * Create and return an object of model
-	 * @param $modelName Model name
-	 * @param $primaryKey Primary key
+	 * @param string $modelName Model name
+	 * @param int|NULL $primaryKey Primary key
 	 */
 	static public function factory($modelName, $primaryKey = NULL)
 	{
@@ -1052,6 +1053,16 @@ class Core_ORM
 		}
 
 		return $this->_modelName;
+	}
+
+	/**
+	 * Get model columns
+	 * @return array
+	 */
+	public function getModelColumns()
+	{
+		$this->_load();
+		return $this->_modelColumns;
 	}
 
 	/**

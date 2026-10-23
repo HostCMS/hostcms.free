@@ -480,7 +480,7 @@ EOD;
 	/**
 	 * Create visual tree of the directories
 	 * @param int $iTemplateDirParentId parent directory ID
-	 * @param array $bExclude exclude group ID
+	 * @param array $aExclude exclude group ID
 	 * @param int $iLevel current nesting level
 	 * @return array
 	 */

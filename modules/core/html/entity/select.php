@@ -21,6 +21,7 @@ class Core_Html_Entity_Select extends Core_Html_Entity
 		'options',
 		'disabled',
 		'multiple',
+		'required',
 		'name',
 		'size',
 		'form'
@@ -34,7 +35,6 @@ class Core_Html_Entity_Select extends Core_Html_Entity
 		'options', // array
 		'value'
 	);
-
 	
 	/**
 	 * Executes the business logic.

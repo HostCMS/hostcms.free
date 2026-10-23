@@ -25,7 +25,11 @@ class Syntaxhighlighter_Driver_Ace_Handler extends Syntaxhighlighter_Handler
 	 */
 	public function getConfig()
 	{
-		return Core_Config::instance()->get('syntaxhighlighter_ace', array());
+		return Core_Config::instance()->get('syntaxhighlighter_ace', array()) + array(
+			'enableFormat' => TRUE,
+			'useSoftTabs' => TRUE,
+			'tabSize' => 4
+		);
 	}
 
 	/**
@@ -84,6 +88,10 @@ class Syntaxhighlighter_Driver_Ace_Handler extends Syntaxhighlighter_Handler
 		$aConfig = $this->getConfig();
 		$aConfig['mode'] = '"ace/mode/' . $oAdmin_Form_Entity_Textarea->syntaxHighlighterMode . '"';
 
+		// Изолируем настройку от ядра Ace Editor
+		$enableFormat = !empty($aConfig['enableFormat']);
+		unset($aConfig['enableFormat']);
+
 		foreach ($aConfig as $key => $value)
 		{
 			is_string($value) && !is_numeric($value) && $value[0] != '"' && $value = '"' . $value . '"';
@@ -96,96 +104,113 @@ class Syntaxhighlighter_Driver_Ace_Handler extends Syntaxhighlighter_Handler
 				);
 		}
 
-		$Core_Html_Entity_Script = new Core_Html_Entity_Script();
-		$Core_Html_Entity_Script
-			->value("
+		$sScriptValue = "
 				$(function() {
 					var textarea = document.getElementById('" . Core_Str::escapeJavascriptVariable($oAdmin_Form_Entity_Textarea->id) . "'),
 						jTextarea = $(textarea),
 						wrapper = $('<div class=\"ace-editor-wrapper\" style=\"position:relative; border: 1px solid #e5e5e5; border-radius: 3px;\"></div>'),
-						toolbar = $('<div class=\"ace-toolbar\" style=\"background: #f9f9f9; padding: 5px 10px; border-bottom: 1px solid #e5e5e5; text-align: right; display: flex; justify-content: flex-end; gap: 5px;\"></div>'),
-						btnBeautify = $('<button type=\"button\" class=\"btn btn-xs btn-info\" title=\"" . Core::_('Syntaxhighlighter.beautify_code_title') . "\"><i class=\"fa-solid fa-wand-magic\"></i> " . Core::_('Syntaxhighlighter.beautify_code') . "</button>'),
-						btnFullscreen = $('<button type=\"button\" class=\"btn btn-xs btn-default\" title=\"" . Core::_('Syntaxhighlighter.fullscreen') . "\"><i class=\"fa-solid fa-expand\"></i></button>'),
 						div = document.createElement('div');
 
 					jTextarea.hide().before(wrapper);
+		";
+
+		if ($enableFormat)
+		{
+			$sScriptValue .= "
+				var
+					toolbar = $('<div class=\"ace-toolbar\" style=\"background: #f9f9f9; padding: 5px 10px; border-bottom: 1px solid #e5e5e5; text-align: right; display: flex; justify-content: flex-end; gap: 5px;\"></div>'),
+					btnBeautify = $('<button type=\"button\" class=\"btn btn-xs btn-info\" title=\"" . Core::_('Syntaxhighlighter.beautify_code_title') . "\"><i class=\"fa-solid fa-wand-magic\"></i> " . Core::_('Syntaxhighlighter.beautify_code') . "</button>'),
+					btnFullscreen = $('<button type=\"button\" class=\"btn btn-xs btn-default\" title=\"" . Core::_('Syntaxhighlighter.fullscreen') . "\"><i class=\"fa-solid fa-expand\"></i></button>');
+
 					toolbar.append(btnBeautify).append(btnFullscreen);
-					wrapper.append(toolbar).append(div);
+					wrapper.append(toolbar);
+			";
+		}
 
-					$(div).text(jTextarea.val());
+		$sScriptValue .= "
+			wrapper.append(div);
 
-					ace.config.set('basePath', '/modules/syntaxhighlighter/driver/ace/');
-					ace.config.set('themePath', '/modules/syntaxhighlighter/driver/ace/');
-					ace.config.set('workerPath', '/modules/syntaxhighlighter/driver/ace/');
+			$(div).text(jTextarea.val());
 
-					// Инициализация плагина Beautify
-					var beautify = ace.require('ace/ext/beautify');
+			ace.config.set('basePath', '/modules/syntaxhighlighter/driver/ace/');
+			ace.config.set('themePath', '/modules/syntaxhighlighter/driver/ace/');
+			ace.config.set('workerPath', '/modules/syntaxhighlighter/driver/ace/');
 
-					var editor = ace.edit(div, {
-						" . implode(",\n							", $aTmp) . "
-					});
+			// Инициализация плагина Beautify
+			var beautify = ace.require('ace/ext/beautify');
 
-					// Включаем валидатор (он включен по умолчанию, но для надежности)
-					editor.session.setUseWorker(true);
+			var editor = ace.edit(div, {
+				" . implode(",\n							", $aTmp) . "
+			});
 
-					// Перехватываем ошибки от Web Worker и фильтруем ложные срабатывания
-					var isFilteringAnnotations = false;
-					editor.session.on('changeAnnotation', function() {
-						if (isFilteringAnnotations) return;
+			// Включаем валидатор (он включен по умолчанию, но для надежности)
+			editor.session.setUseWorker(true);
 
-						var annotations = editor.session.getAnnotations();
-						if (!annotations || annotations.length === 0) return;
+			// Перехватываем ошибки от Web Worker и фильтруем ложные срабатывания
+			var isFilteringAnnotations = false;
+			editor.session.on('changeAnnotation', function() {
+				if (isFilteringAnnotations) return;
 
-						var filteredAnnotations = annotations.filter(function(anno) {
-							var text = anno.text.toLowerCase();
-							// Исключаем ошибки, связанные с DTD сущностями
-							var isEntityError = text.indexOf('entity') !== -1 || text.indexOf('not defined') !== -1;
-							return !isEntityError;
-						});
+				var annotations = editor.session.getAnnotations();
+				if (!annotations || annotations.length === 0) return;
 
-						// Обновляем аннотации в редакторе только если массив изменился,
-						// чтобы избежать бесконечного цикла событий
-						if (annotations.length !== filteredAnnotations.length) {
-							isFilteringAnnotations = true;
-							editor.session.setAnnotations(filteredAnnotations);
-							isFilteringAnnotations = false;
-						}
-					});
+				var filteredAnnotations = annotations.filter(function(anno) {
+					var text = anno.text.toLowerCase();
+					// Исключаем ошибки, связанные с DTD сущностями
+					var isEntityError = text.indexOf('entity') !== -1 || text.indexOf('not defined') !== -1;
+					return !isEntityError;
+				});
 
-					editor.setOptions({
-						maxLines: '{$oAdmin_Form_Entity_Textarea->rows}',
-						minLines: '{$oAdmin_Form_Entity_Textarea->rows}'
-					});
+				// Обновляем аннотации в редакторе только если массив изменился,
+				// чтобы избежать бесконечного цикла событий
+				if (annotations.length !== filteredAnnotations.length) {
+					isFilteringAnnotations = true;
+					editor.session.setAnnotations(filteredAnnotations);
+					isFilteringAnnotations = false;
+				}
+			});
 
-					// Синхронизация и сохранение по Ctrl+S
-					// Постоянная синхронизация содержимого с оригинальной textarea
-					editor.getSession().on('change', function() {
-						jTextarea.val(editor.getSession().getValue());
-					});
+			editor.setOptions({
+				maxLines: '{$oAdmin_Form_Entity_Textarea->rows}',
+				minLines: '{$oAdmin_Form_Entity_Textarea->rows}'
+			});
 
-					editor.commands.addCommand({
-						name: 'save',
-						bindKey: {win: 'Ctrl-S',  mac: 'Command-S'},
-						exec: function() {
-							// Принудительно обновляем textarea перед сохранением
-							jTextarea.val(editor.getSession().getValue());
+			// Синхронизация и сохранение по Ctrl+S
+			// Постоянная синхронизация содержимого с оригинальной textarea
+			editor.getSession().on('change', function() {
+				jTextarea.val(editor.getSession().getValue());
+			});
 
-							var btnSave = jTextarea.closest('form').find('button[name=\"save\"], input[name=\"save\"]');
-							if (btnSave.length) {
-								btnSave.click();
-							} else {
-								jTextarea.closest('form').submit();
-							}
-						}
-					});
+			editor.commands.addCommand({
+				name: 'save',
+				bindKey: {win: 'Ctrl-S',  mac: 'Command-S'},
+				exec: function() {
+					// Принудительно обновляем textarea перед сохранением
+					jTextarea.val(editor.getSession().getValue());
 
+					var btnSave = jTextarea.closest('form').find('button[name=\"save\"], input[name=\"save\"]');
+					if (btnSave.length) {
+						btnSave.click();
+					} else {
+						jTextarea.closest('form').submit();
+					}
+				}
+			});
+			";
+
+			if ($enableFormat)
+			{
+				$sScriptValue .= "
 					// Полноэкранный режим
 					var isFullscreen = false;
+
 					btnFullscreen.on('click', function(e) {
 						e.preventDefault();
+
 						isFullscreen = !isFullscreen;
 
-						if (isFullscreen) {
+						if (isFullscreen)
+						{
 							// Разворачиваем wrapper
 							wrapper.css({
 								position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -196,7 +221,9 @@ class Syntaxhighlighter_Driver_Ace_Handler extends Syntaxhighlighter_Handler
 							// Снимаем лимиты строк для корректного ресайза по высоте
 							editor.setOptions({ maxLines: null, minLines: null });
 							btnFullscreen.html('<i class=\"fa-solid fa-compress\"></i>');
-						} else {
+						}
+						else
+						{
 							// Возвращаем исходные стили
 							wrapper.attr('style', 'position:relative; border: 1px solid #e5e5e5; border-radius: 3px;');
 							$(div).css({ height: '', width: '' });
@@ -206,8 +233,10 @@ class Syntaxhighlighter_Driver_Ace_Handler extends Syntaxhighlighter_Handler
 								maxLines: '{$oAdmin_Form_Entity_Textarea->rows}',
 								minLines: '{$oAdmin_Form_Entity_Textarea->rows}'
 							});
+
 							btnFullscreen.html('<i class=\"fa-solid fa-expand\"></i>');
 						}
+
 						editor.resize();
 					});
 
@@ -235,13 +264,27 @@ class Syntaxhighlighter_Driver_Ace_Handler extends Syntaxhighlighter_Handler
 						var restoreRegex = /(<(?:br|hr|img|meta|link|input|area|base|col|param)\b(?:[^>]|<\?[\s\S]*?\?>)*?)\s*data-ace-slash=\"1\"\s*>/gi;
 						var finalValue = beautifiedValue.replace(restoreRegex, '$1 />');
 
+						// Заменяем табуляцию на пробелы между атрибутами
+						/*finalValue = finalValue.replace(/<([a-zA-Z0-9\-]+)([^>]+)>/g, function(match, tag, attrs) {
+							// Ищем все табуляции (\t) внутри строки атрибутов и меняем на пробел
+							return '<' + tag + attrs.replace(/\\t+/g, ' ') + '>';
+						});*/
+
 						if (beautifiedValue !== finalValue) {
 							// Обновляем финальный код в редакторе с восстановленными тегами
 							editor.setValue(finalValue, -1);
 						}
 					});
-				});
-			")
+				";
+			}
+
+		$sScriptValue .= "
+			});
+		";
+
+		$Core_Html_Entity_Script = new Core_Html_Entity_Script();
+		$Core_Html_Entity_Script
+			->value($sScriptValue)
 			->execute();
 	}
 }

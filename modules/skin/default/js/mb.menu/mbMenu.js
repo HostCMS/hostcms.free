@@ -43,7 +43,7 @@ hoverInted:0, 							--> if you use jquery.hoverinted.js set this to time in mil
 onContextualMenu:function(o,e){} --> a function invoked once you call a contextual menu; it pass o (the menu you clicked on) and e (the event)
 },
 */
-(function($) {
+(function($){
   $.mbMenu = {
     name:"mbMenu",
     author:"Matteo Bicocchi",

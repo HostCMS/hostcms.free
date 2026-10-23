@@ -1,6 +1,6 @@
 /* Japanese translation for the jQuery Timepicker Addon */
 /* Written by Jun Omae */
-(function($) {
+(function($){
 	$.timepicker.regional['ja'] = {
 		timeOnlyTitle: '時間を選択',
 		timeText: '時間',

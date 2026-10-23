@@ -227,6 +227,9 @@ class Shop_Model extends Core_Entity
 		'send_order_email_admin',
 		'send_order_email_user',
 		'guid',
+		'certificate_template',
+		'certificate_subject',
+		'certificate_text',
 		'yandex_market_sales_notes_default',
 		'filter'
 	);

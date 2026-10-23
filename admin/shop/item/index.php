@@ -100,7 +100,11 @@ if (!is_null(Core_Array::getGet('shortcuts')) && !is_null(Core_Array::getGet('te
 
 		$oShop_Groups = $oShop->Shop_Groups;
 		$oShop_Groups->queryBuilder()
-			->where('shop_groups.name', 'LIKE', $sQueryLike)
+			->open()
+				->where('shop_groups.id', 'LIKE', $sQueryLike)
+				->setOr()
+				->where('shop_groups.name', 'LIKE', $sQueryLike)
+			->close()
 			->where('shop_groups.shortcut_id', '=', 0)
 			->limit(Core::$mainConfig['autocompleteItems']);
 
@@ -138,7 +142,11 @@ if (!is_null(Core_Array::getGet('items')) && (!is_null(Core_Array::getGet('term'
 
 		$oShop_Items = $oShop->Shop_Items;
 		$oShop_Items->queryBuilder()
-			->where('shop_items.name', 'LIKE', $sQueryLike)
+			->open()
+				->where('shop_items.id', 'LIKE', $sQueryLike)
+				->setOr()
+				->where('shop_items.name', 'LIKE', $sQueryLike)
+			->close()
 			->where('shop_items.shortcut_id', '=', 0)
 			->limit(Core::$mainConfig['autocompleteItems']);
 

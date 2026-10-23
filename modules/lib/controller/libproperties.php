@@ -282,12 +282,19 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 				}
 			}
 
-			// Множественные значения или файл
-			if ($oLib_Property->multivalue/* || $oLib_Property->type == 8*/)
+			// Множественные значения, составные свойства или файл
+			if ($oLib_Property->multivalue || $oLib_Property->type == 10 /* || $oLib_Property->type == 8*/)
 			{
 				$propertyValue = is_array($propertyValue)
 					? $propertyValue
 					: array();
+
+				// Если составное свойство НЕ является множественным,
+				// но пришло несколько блоков - оставляем только первый
+				if ($oLib_Property->type == 10 && !$oLib_Property->multivalue && count($propertyValue) > 1)
+				{
+					$propertyValue = array(reset($propertyValue));
+				}
 			}
 			else
 			{
@@ -304,7 +311,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 
 	/**
 	 * Correct property value
-	 * @param Lib_Property_Value $oLib_Property
+	 * @param Lib_Property_Model $oLib_Property
 	 * @param object $oObject
 	 * @param string $propertyValue
 	 * @return string
@@ -409,6 +416,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 	 * @param Lib_Property_Model $oLib_Property
 	 * @param object $oObject
 	 * @param mixed $value
+	 * @param int $entityId
 	 * @return self
 	 */
 	protected function _showLevelOptionItem($oLib_Property, $oObject, $value, $entityId)
@@ -1184,7 +1192,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 
 	/**
 	 * Get options list
-	 * @param $aLib_Properties
+	 * @param array $aLib_Properties
 	 * @param array $LA
 	 * @param Core_Entity $oObject
 	 * @throws Core_Exception
@@ -1230,6 +1238,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 				$aSub_Lib_Property = $oLib->Lib_Properties->getAllByparent_id($oLib_Property->id, FALSE);
 
 				!is_array($value) && $value = array($value);
+				!count($value) && $value = array(NULL);
 
 				Core_Html_Entity::factory('Div')
 					->class('row form-group')
@@ -1291,6 +1300,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 
 	/**
 	 * Create imageBox
+	 * @param Lib_Property_Model $oLib_Property
 	 * @param string $addFunction
 	 * @param string $deleteOnclick
 	 * @return self

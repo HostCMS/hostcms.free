@@ -62,7 +62,7 @@ class User_Session_Model extends Core_Entity
 	 */
 	public function idBackend()
 	{
-		return Core_Str::stringToSecret($this->id, 14);
+		return Core_Str::stringToSecret($this->session_id, 6);
 	}
 
 	/**
@@ -158,7 +158,7 @@ class User_Session_Model extends Core_Entity
 	 */
  	public function destroy()
 	{
-		Core_Session::destroy($this->id);
+		Core_Session::destroy($this->session_id);
 		$this->delete();
 
 		return $this;

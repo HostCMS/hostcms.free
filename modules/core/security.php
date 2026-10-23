@@ -79,6 +79,20 @@ class Core_Security
 	 */
 	static public function getCsrfToken()
 	{
+		/*
+		$sessionActive = Core_Session::isActive();
+
+		// Запускаем сессию. Strict_mode проверит ID и, если нужно, создаст валидный
+		!$sessionActive && Core_Session::start();
+
+		$sessionId = session_id();
+
+		!$sessionActive && Core_Session::close();
+
+		$time = time();
+
+		return $time . hash('sha256', $sessionId . $time);
+		*/
 		!Core_Session::hasSessionId() && Core_Session::start();
 
 		$time = time();
@@ -121,6 +135,7 @@ class Core_Security
 	/**
 	 * Check valid CSRF-token
 	 * @param string $secret_csrf Token to check
+	 * @param int $lifetime
 	 * @return boolean
 	 */
 	static public function checkCsrf($secret_csrf, $lifetime)

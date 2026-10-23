@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Rss
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Rss_Read
 {
@@ -62,6 +62,7 @@ class Core_Rss_Read
 
 	/**
 	 * XML parser
+	 * @var mixed
 	 */
 	protected $_xml_parser = NULL;
 
@@ -79,13 +80,13 @@ class Core_Rss_Read
 
 	/**
 	 * Массив с данными о канале
-	 *
 	 * @var array
 	 */
 	protected $_chanel = NULL;
 
 	/**
 	 * Массив элементов
+	 * @var mixed
 	 */
 	protected $_items = NULL;
 

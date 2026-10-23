@@ -29,7 +29,7 @@ class Core_Mail_Smtp extends Core_Mail
 	{
 		$header = "Date: " . date("D, d M Y H:i:s O") . $this->_separator;
 		$header .= "Subject: {$subject}{$this->_separator}";
-		$header .= "To: {$to}{$this->_separator}"; // 000298317
+		$header .= "To: {$to}{$this->_separator}";
 
 		// Change 'From' header
 		if (isset($this->_config['from']) && isset($this->_headers['From']))
@@ -189,6 +189,7 @@ class Core_Mail_Smtp extends Core_Mail
 			$aRecipients = explode(',', $to);
 			foreach ($aRecipients as $sTo)
 			{
+				// to всегда содержится в "<>", добавляется в Core_Mail->send()
 				preg_match('/<(.*?)>/', $sTo, $match);
 				
 				$sTo = isset($match[1]) ? $match[1] : '';

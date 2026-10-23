@@ -68,7 +68,7 @@ class Admin_Form_Action_Controller_Type_Delete_File extends Admin_Form_Action_Co
 		foreach ($this->divId as $sDivId)
 		{
 			$setCreateSmallFromLarge = strpos($sDivId, 'small') !== FALSE
-				? 'fileDiv.closest(\'.input-group\').find(\'input[id^=create_small_image_from_large]\').prop(\'checked\', true);'
+				? "fileDiv.closest('.input-group').find('input[id^=create_small_image_from_large]').prop('checked', true);"
 				: '';
 			
 			// Удаляем дочерние узлы

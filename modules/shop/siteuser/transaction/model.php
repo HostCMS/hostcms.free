@@ -56,7 +56,8 @@ class Shop_Siteuser_Transaction_Model extends Core_Entity
 	protected $_forbiddenTags = array(
 		'deleted',
 		'user_id',
-		'datetime'
+		'datetime',
+		'amount'
 	);
 
 	/**
@@ -153,6 +154,12 @@ class Shop_Siteuser_Transaction_Model extends Core_Entity
 		$this->clearXmlTags()
 			->addXmlTag('date', Core_Date::strftime($this->Shop->format_date, Core_Date::sql2timestamp($this->datetime)))
 			->addXmlTag('datetime', Core_Date::strftime($this->Shop->format_datetime, Core_Date::sql2timestamp($this->datetime)));
+
+		$this
+			->addXmlTag('amount', $this->amount, array(
+				'formatted' => $this->Shop_Currency->format($this->amount),
+				'formattedWithCurrency' => $this->Shop_Currency->formatWithCurrency($this->amount))
+			);
 
 		$this->shop_currency_id && $this->addEntity($this->Shop_Currency);
 		$this->shop_order_id && $this->addEntity($this->Shop_Order);

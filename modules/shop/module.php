@@ -36,7 +36,7 @@ class Shop_Module extends Core_Module_Abstract
 	 * Module date
 	 * @var string
 	 */
-	public $date = '2026-05-12';
+	public $date = '2026-10-22';
 
 	/**
 	 * Module name
@@ -249,7 +249,7 @@ class Shop_Module extends Core_Module_Abstract
 					$currentStepCount = count($aTmpResult);
 					break;
 				}
-
+			
 			case 3:
 				Core_Log::instance()->clear()
 					->notify(FALSE)
@@ -274,7 +274,7 @@ class Shop_Module extends Core_Module_Abstract
 					$currentStepCount = count($aTmpResult);
 					break;
 				}
-
+			
 			case 4:
 				Core_Log::instance()->clear()
 					->notify(FALSE)
@@ -778,12 +778,13 @@ class Shop_Module extends Core_Module_Abstract
 						}
 
 						$position += $limit;
+						
+						Core_ObjectWatcher::clear();
 					}
 					while(count($aShop_Items));
 				break;
 				case 5:
 					// Не применять скидки от суммы заказа и карты к товарам со скидками
-
 					$dayFieldName = 'day' . date('N');
 					$time = time();
 					$sDatetime = Core_Date::timestamp2sql(time());

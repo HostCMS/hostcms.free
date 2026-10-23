@@ -254,6 +254,7 @@ class Printlayout_Model extends Core_Entity
 			->join('printlayouts', 'printlayout_modules.printlayout_id', '=', 'printlayouts.id')
 			->where('printlayout_modules.module_id', '=', $module_id)
 			->where('printlayout_modules.type', '=', $type)
+			->where('printlayouts.deleted', '=', 0)
 			->clearOrderBy()
 			->orderBy('printlayouts.sorting', 'ASC');
 

@@ -717,6 +717,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			{
 				if (!count($aInformationsystem_Items) && ($this->page || $this->_oTag))
 				{
+					$this->_errorMessage = 'Requested page contains no items';
 					return $this->error410();
 				}
 
@@ -1103,6 +1104,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			{
 				if ($this->page && !count($aInformationsystem_Items))
 				{
+					$this->_errorMessage = 'Pagination index out of range';
 					return $this->error410();
 				}
 
@@ -1237,6 +1239,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 		if (!$this->checkPaginationConditions())
 		{
+			$this->_errorMessage = 'Zero limit with page requested';
 			return $this->error404();
 		}
 
@@ -1636,6 +1639,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 			}
 			else
 			{
+				// (page-{num}) - 1
+				$this->_errorMessage = 'Invalid page index: must be greater than two';
 				return $this->error410();
 			}
 		}
@@ -1661,6 +1666,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			}
 			else
 			{
+				$this->_errorMessage = 'Tag not found by the specified path';
 				return $this->error404();
 			}
 
@@ -1720,6 +1726,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 					}
 					else
 					{
+						$this->_errorMessage = 'Access forbidden';
 						return $this->error403();
 					}
 				}
@@ -1727,6 +1734,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 				{
 					if ($bFilterApplied)
 					{
+						$this->_errorMessage = 'Filters cannot be applied to a specific item page';
 						return $this->error410();
 					}
 
@@ -1754,12 +1762,14 @@ class Informationsystem_Controller_Show extends Core_Controller
 						}
 						else
 						{
+							$this->_errorMessage = 'Access forbidden';
 							return $this->error403();
 						}
 					}
 					else
 					{
 						$this->group = $this->item = FALSE;
+						$this->_errorMessage = 'Invalid routing step or unexpected URL segmen';
 						return $this->error410();
 					}
 				}
@@ -1767,6 +1777,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 		}
 		elseif (is_null($path) && $this->url != '/')
 		{
+			$this->_errorMessage = 'Routing path is undefined or null';
 			return $this->error404();
 		}
 
@@ -1987,6 +1998,12 @@ class Informationsystem_Controller_Show extends Core_Controller
 	}
 
 	/**
+	 * Error Message
+	 * @var string|NULL
+	 */
+	protected $_errorMessage = NULL;
+
+	/**
 	 * Define handler for 410 error
 	 * @return self
 	 */
@@ -1994,8 +2011,15 @@ class Informationsystem_Controller_Show extends Core_Controller
 	{
 		$this->_errorCode = 410;
 
-		!is_null(Core_Page::instance()->response)
-			&& Core_Page::instance()->error410();
+		if (!is_null(Core_Page::instance()->response))
+		{
+			Core_Page::instance()->error410();
+
+			!is_null($this->_errorMessage)
+				&& Core_Page::instance()->response->header('X-RTT-MESSAGE', $this->_errorMessage);
+		}
+
+		$this->_errorMessage = NULL;
 
 		return $this;
 	}
@@ -2008,8 +2032,15 @@ class Informationsystem_Controller_Show extends Core_Controller
 	{
 		$this->_errorCode = 404;
 
-		!is_null(Core_Page::instance()->response)
-			&& Core_Page::instance()->error404();
+		if (!is_null(Core_Page::instance()->response))
+		{
+			Core_Page::instance()->error404();
+
+			!is_null($this->_errorMessage)
+				&& Core_Page::instance()->response->header('X-RTT-MESSAGE', $this->_errorMessage);
+		}
+
+		$this->_errorMessage = NULL;
 
 		return $this;
 	}
@@ -2022,8 +2053,13 @@ class Informationsystem_Controller_Show extends Core_Controller
 	{
 		$this->_errorCode = 403;
 
-		!is_null(Core_Page::instance()->response)
-			&& Core_Page::instance()->error403();
+		if (!is_null(Core_Page::instance()->response))
+		{
+			Core_Page::instance()->error403();
+
+			!is_null($this->_errorMessage)
+				&& Core_Page::instance()->response->header('X-RTT-MESSAGE', $this->_errorMessage);
+		}
 
 		return $this;
 	}
@@ -2970,7 +3006,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 		{
 			$this->$fieldName = $value;
 		}
-		
+
 		return $this;
 	}
 

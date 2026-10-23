@@ -73,9 +73,9 @@ class Template_Section_Controller
 				$aTmpDir = $oLib_Dir;
 
 				// Добавляем все директории от текущей до родителя.
-				do {
-					$aTmpDir->parent_id && $aReturn[$aTmpDir->id] = $aTmpDir->name;
-				} while ($aTmpDir = $aTmpDir->getParent());
+				// do {
+					/*$aTmpDir->parent_id && */$aReturn[$aTmpDir->id] = $aTmpDir->name;
+				// } while ($aTmpDir = $aTmpDir->getParent());
 			}
 		}
 
@@ -134,6 +134,12 @@ class Template_Section_Controller
 			{
 				?><div class="lib-item">
 					<div class="title"><?php echo htmlspecialchars($oLib->name)?></div>
+					<?php
+					if ($oLib->description != '')
+					{
+						?><div class="description"><?php echo htmlspecialchars($oLib->description)?></div><?php
+					}
+					?>
 					<div class="image">
 						<img src="<?php echo htmlspecialchars($oLib->getFileHref())?>"/>
 						<i class="fa-solid fa-circle-plus" onclick="hQuery.addWidget(this, <?php echo $template_section_id?>, <?php echo $template_section_lib_id?>, <?php echo $oLib->id?>)"></i>

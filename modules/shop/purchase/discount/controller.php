@@ -138,10 +138,10 @@ class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 			//->where('shop_purchase_discounts.coupon', '=', 0)
 			->where('shop_purchase_discounts.start_datetime', '<=', $this->dateTime)
 			->where('shop_purchase_discounts.end_datetime', '>=', $this->dateTime)
-			->where('shop_purchase_discount_siteuser_groups.siteuser_group_id', 'IN', $aSiteuser_Group_IDs);
+			->where('shop_purchase_discount_siteuser_groups.siteuser_group_id', 'IN', $aSiteuser_Group_IDs)
+			->groupBy('shop_purchase_discounts.id');
 
 		$aShop_Purchase_Discounts = $oShop_Purchase_Discounts->findAll();
-
 		foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
 		{
 			if (!$oShop_Purchase_Discount->coupon || in_array($oShop_Purchase_Discount->id, $aShop_Purchase_Discount_IDs))
@@ -430,7 +430,8 @@ class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 		}
 
 		$oShop_Purchase_Discounts->queryBuilder()
-			->close();
+			->close()
+			->groupBy('shop_purchase_discounts.id');
 
 		// Применять скидку к первому заказу
 		if (Core::moduleIsActive('siteuser'))

@@ -1,6 +1,6 @@
 /* Hellenic translation for the jQuery Timepicker Addon */
 /* Written by Christos Pontikis */
-(function($) {
+(function($){
 	$.timepicker.regional['el'] = {
 		timeOnlyTitle: 'Επιλογή ώρας',
 		timeText: 'Ώρα',

@@ -739,6 +739,8 @@ if (!is_null(Core_Array::getPost('apply')))
 											)
 											->sendConfirmationMail(Core_Entity::factory('Xsl')->getByName($xsl_letter));
 
+										$Siteuser_Controller_Show->setSource();
+
 										// Спасибо за регистрацию
 										$Siteuser_Controller_Show->addEntity(
 											Core::factory('Core_Xml_Entity')
@@ -761,7 +763,7 @@ if (!is_null(Core_Array::getPost('apply')))
 										Core::factory('Core_Xml_Entity')
 											->name('error_code')->value('antispam')
 									);
-									
+
 									// Log action
 									Core_Log::instance()->clear()
 										->status(Core_Log::$MESSAGE)
@@ -775,7 +777,7 @@ if (!is_null(Core_Array::getPost('apply')))
 									Core::factory('Core_Xml_Entity')
 										->name('error_code')->value('repeatPasswordIncorrect')
 								);
-								
+
 								// Log action
 								Core_Log::instance()->clear()
 									->status(Core_Log::$MESSAGE)
@@ -789,7 +791,7 @@ if (!is_null(Core_Array::getPost('apply')))
 								Core::factory('Core_Xml_Entity')
 									->name('error_code')->value('userWithEmailAlreadyExists')
 							);
-							
+
 							// Log action
 							Core_Log::instance()->clear()
 								->status(Core_Log::$MESSAGE)
@@ -803,7 +805,7 @@ if (!is_null(Core_Array::getPost('apply')))
 							Core::factory('Core_Xml_Entity')
 								->name('error_code')->value('userWithLoginAlreadyExists')
 						);
-						
+
 						// Log action
 						Core_Log::instance()->clear()
 							->status(Core_Log::$MESSAGE)
@@ -817,7 +819,7 @@ if (!is_null(Core_Array::getPost('apply')))
 						Core::factory('Core_Xml_Entity')
 							->name('error_code')->value('requiredFieldsNotFilled')
 					);
-					
+
 					// Log action
 					Core_Log::instance()->clear()
 						->status(Core_Log::$MESSAGE)
@@ -831,7 +833,7 @@ if (!is_null(Core_Array::getPost('apply')))
 					Core::factory('Core_Xml_Entity')
 						->name('error_code')->value('wrongCaptcha')
 				);
-				
+
 				// Log action
 				Core_Log::instance()->clear()
 					->status(Core_Log::$MESSAGE)
@@ -845,7 +847,7 @@ if (!is_null(Core_Array::getPost('apply')))
 				Core::factory('Core_Xml_Entity')
 					->name('error_code')->value('wrongCsrf')
 			);
-			
+
 			// Log action
 			Core_Log::instance()->clear()
 				->status(Core_Log::$MESSAGE)
@@ -859,7 +861,7 @@ if (!is_null(Core_Array::getPost('apply')))
 			Core::factory('Core_Xml_Entity')
 				->name('error_code')->value('wrongEmail')
 		);
-		
+
 		// Log action
 		Core_Log::instance()->clear()
 			->status(Core_Log::$MESSAGE)

@@ -35,4 +35,5 @@ return array(
 	'post_success' => 'Документ проведено успішно!',
 	'unpost_success' => 'Документ розпроведено успішно!',
 	'apply_item_change_attributes' => 'Інвентаризація при зміні атрибутів',
+	'apply_warehouse_item' => 'Інвентаризація зі списку товарів на складі',
 );

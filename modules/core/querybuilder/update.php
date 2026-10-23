@@ -31,13 +31,13 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Querybuilder
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_QueryBuilder_Update extends Core_QueryBuilder_Selection
 {
 	/**
 	 * Name of the table
-	 * @var string
+	 * @var array
 	 */
 	protected $_tableName = array();
 
@@ -197,17 +197,17 @@ class Core_QueryBuilder_Update extends Core_QueryBuilder_Selection
 	public function build()
 	{
 		$sql = '';
-		
+
 		if (!empty($this->_comment))
 		{
 			$sql .= $this->_buildComment($this->_comment) . "\n";
 		}
-		
+
 		if (!empty($this->_with))
 		{
 			$sql .= $this->_buildWith($this->_with) . "\n";
 		}
-		
+
 		$sql .= 'UPDATE';
 
 		if (!is_null($this->_priority))
@@ -221,12 +221,12 @@ class Core_QueryBuilder_Update extends Core_QueryBuilder_Selection
 		}
 
 		$sql .= ' ' . implode(', ', $this->_quoteTables($this->_tableName));
-		
+
 		if (!empty($this->_join))
 		{
 			$sql .= ' ' . $this->_buildJoin($this->_join);
 		}
-		
+
 		$sql .= ' SET ' . $this->_buildSet($this->_columns);
 
 		if (!empty($this->_where))
@@ -248,7 +248,7 @@ class Core_QueryBuilder_Update extends Core_QueryBuilder_Selection
 		{
 			$sql .= ' OFFSET ' . $this->_offset;
 		}*/
-		
+
 		return $sql;
 	}
 

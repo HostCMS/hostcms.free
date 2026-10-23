@@ -490,6 +490,16 @@ class Market_Controller extends Core_Servant_Properties
 								);
 							}
 						}
+						
+						// Минимизированные CSS+JS
+						$minPath = CMS_FOLDER . Core_Skin::instance()->getMinDirPath();
+						if (Core_File::isDir($minPath))
+						{
+							try {
+								Core_File::deleteDir($minPath);
+							}
+							catch (Exception $e) { }
+						}
 
 						return $this->_Module;
 					}

@@ -122,6 +122,7 @@ class Crm_Note_Model extends Core_Entity
 
 	/**
 	 * Show files block
+	 * @param object $oObject
 	 * @return string
 	 */
 	public function getFilesBlock($oObject)
@@ -238,7 +239,7 @@ class Crm_Note_Model extends Core_Entity
 
 	/**
 	 * Delete attachment file
-	 * @param $crm_note_attachment_id attachment id
+	 * @param int $crm_note_attachment_id attachment id
 	 * @return self
 	 */
 	public function deleteFile($crm_note_attachment_id)
@@ -316,7 +317,10 @@ class Crm_Note_Model extends Core_Entity
 
 		if (Core::moduleIsActive('timeline'))
 		{
-			$this->Timeline->delete();
+			$oTimeline = $this->Timeline;
+			// Исключение зацикливания со стороны Timeline удаление 
+			$oTimeline->crm_note_id = 0;
+			$oTimeline->delete();
 		}
 
 		return parent::delete($primaryKey);

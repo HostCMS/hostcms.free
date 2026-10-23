@@ -1,6 +1,6 @@
 /* Slovak translation for the jQuery Timepicker Addon */
 /* Written by David Vallner */
-(function($) {
+(function($){
 	$.timepicker.regional['sk'] = {
 		timeOnlyTitle: 'Zvoľte čas',
 		timeText: 'Čas',

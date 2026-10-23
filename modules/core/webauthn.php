@@ -830,6 +830,7 @@ class Core_Webauthn extends Core_Servant_Properties
 
 	/**
 	 * Return the certificate issuer as string
+	 * @param string $pem
 	 * @return string
 	 */
 	public function getCertificateIssuer($pem)
@@ -867,6 +868,7 @@ class Core_Webauthn extends Core_Servant_Properties
 
 	/**
 	 * Return the certificate subject as string
+	 * @param string $pem
 	 * @return string
 	 */
 	public function getCertificateSubject($pem)

@@ -14,7 +14,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 {
 	/**
 	 * Result of query
-	 * @var resource|null
+	 * @var object|null
 	 */
 	protected $_result = NULL;
 
@@ -698,7 +698,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 
 	/**
 	 * Fetch query result
-	 * @param $result resource
+	 * @param resource $result resource
 	 * @param boolean $bCache use cache
 	 * @return array
 	 */
@@ -904,6 +904,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 
 	/**
 	 * Free result memory
+	 * @param object $result
 	 * @return self
 	 */
 	protected function _free($result)

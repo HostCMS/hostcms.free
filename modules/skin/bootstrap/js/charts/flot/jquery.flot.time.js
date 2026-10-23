@@ -8,7 +8,7 @@ API.txt for details.
 
 */
 
-(function($) {
+(function($){
 
 	var options = {
 		xaxis: {

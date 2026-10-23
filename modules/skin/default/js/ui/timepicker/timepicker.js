@@ -18,7 +18,7 @@
 * .ui-tpicker-grid-label { background: none; border: none; margin: 0; padding: 0; }
 */
 
-(function($) {
+(function($){
 
 $.extend($.ui, { timepicker: { version: "0.9.8" } });
 

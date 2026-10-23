@@ -16,7 +16,7 @@ class Template_Section_Lib_Controller
 	 * Forbidden types of lib properties to show
 	 * @var array
 	 */
-	static public $forbiddenToShow = array(2, 4, 7);
+	static public $forbiddenToShow = array(2, 7);
 
 	/**
 	 * Template_Section_Lib object
@@ -378,7 +378,7 @@ class Template_Section_Lib_Controller
 
 	/**
 	 * Get colorpicker html block
-	 * @param $type
+	 * @param int $type
 	 * @param string $name
 	 * @param string $property
 	 * @param array $aEntity
@@ -433,6 +433,7 @@ class Template_Section_Lib_Controller
 
 	/**
 	 * Get range html block
+	 * @param int $type
 	 * @param string $name
 	 * @param string $property
 	 * @param array $aEntity
@@ -497,6 +498,8 @@ class Template_Section_Lib_Controller
 	/**
 	 * Show background block
 	 * @param string $type
+	 * @param array $aEntity
+	 * @param string $field
 	 * @return self
 	 */
 	protected function _showBlock($type, $aEntity, $field = '')
@@ -797,11 +800,17 @@ class Template_Section_Lib_Controller
 				$aTmp = $oLib->Lib_Properties->getAllByparent_id($oLib_Property->id, FALSE);
 
 				!is_array($mValue) && $mValue = array($mValue);
+				!count($mValue) && $mValue = array(NULL);
 
 				?><div class="details-wrapper details-sort<?php echo intval($oLib_Property->id)?>">
 					<div class="details-title">
 						<span><?php echo htmlspecialchars($oLib_Property->name)?></span>
-						<i title="Add" class="fa-solid fa-plus" onclick="hQuery.addPoint(this, <?php echo intval($this->_oTemplate_Section_Lib->id)?>, '<?php echo intval($oLib_Property->id)?>', '<?php echo htmlspecialchars($oLib_Property->varible_name)?>');"></i>
+						<?php
+						if ($oLib_Property->multivalue)
+						{
+							?><i title="Add" class="fa-solid fa-plus" onclick="hQuery.addPoint(this, <?php echo intval($this->_oTemplate_Section_Lib->id)?>, '<?php echo intval($oLib_Property->id)?>', '<?php echo htmlspecialchars($oLib_Property->varible_name)?>');"></i><?php
+						}
+						?>
 					</div>
 					<div class="details-item-wrapper" data-block-name="<?php echo htmlspecialchars($oLib_Property->varible_name)?>"><?php
 						foreach (array_keys($mValue) as $key => $blockId)
@@ -864,7 +873,7 @@ class Template_Section_Lib_Controller
 				?></div></details>
 					<div class="details-item-actions">
 						<?php
-						if ($bCopy)
+						if ($oLib_Property->multivalue && $bCopy)
 						{
 							?><i title="Copy" class="fa-solid fa-copy" onclick="hQuery.copyPoint(this, <?php echo intval($this->_oTemplate_Section_Lib->id)?>, '<?php echo intval($oLib_Property->id)?>', '<?php echo htmlspecialchars($oLib_Property->varible_name)?>', <?php echo intval($blockId)?>);"></i><?php
 						}?>
@@ -874,6 +883,66 @@ class Template_Section_Lib_Controller
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Get SQL options
+	 * @param Lib_Property_Model $oLib_Property
+	 * @return array
+	 */
+	protected function _getSqlOptions(Lib_Property_Model $oLib_Property)
+	{
+		// Выполняем запрос
+		$query = $oLib_Property->sql_request;
+		$query = str_replace('{SITE_ID}', CURRENT_SITE, $query);
+
+		$aOptions = array();
+
+		if (trim($query) != '')
+		{
+			$Core_DataBase = Core_DataBase::instance();
+
+			$pattern = '/FROM\s+`?([a-zA-Z0-9_]+)`?/i';
+
+			$tableName = NULL;
+
+			if (preg_match($pattern, $query, $matches)) {
+				$tableName = isset($matches[1])
+					? $matches[1]
+					: NULL;
+			}
+
+			$aTables = array();
+
+			if (!is_null($tableName))
+			{
+				$aTables = $Core_DataBase->getTables($tableName);
+			}
+
+			if (count($aTables))
+			{
+				try
+				{
+					$aRows = $Core_DataBase
+						->setQueryType(0)
+						->query($query)
+						->asAssoc()
+						->result();
+
+					foreach ($aRows as $sql_row)
+					{
+						$aOptions[$sql_row[$oLib_Property->sql_value_field]]
+							= htmlspecialchars(Core_Type_Conversion::toStr($sql_row[$oLib_Property->sql_caption_field])) . ' [' . htmlspecialchars(Core_Type_Conversion::toStr($sql_row[$oLib_Property->sql_value_field])) . ']';
+					}
+				}
+				catch (Exception $e)
+				{
+					Core_Message::show($e->getMessage(), 'error');
+				}
+			}
+		}
+
+		return $aOptions;
 	}
 
 	/**
@@ -897,7 +966,14 @@ class Template_Section_Lib_Controller
 				? $oLib_Property->varible_name . '_' . $position
 				: $oLib_Property->varible_name;
 
-			?><div class="settings-row-item-wrapper" data-lib-property-id="<?php echo htmlspecialchars($oLib_Property->id)?>"><div class="settings-row-title"><?php echo htmlspecialchars($oLib_Property->name)?></div><?php
+			$bShowTitle = $oLib_Property->type == 4
+				? count($this->_getSqlOptions($oLib_Property))
+				: TRUE;
+
+			if ($bShowTitle)
+			{
+				?><div class="settings-row-item-wrapper" data-lib-property-id="<?php echo htmlspecialchars($oLib_Property->id)?>"><div class="settings-row-title"><?php echo htmlspecialchars($oLib_Property->name)?></div><?php
+			}
 
 			switch ($oLib_Property->type)
 			{
@@ -928,6 +1004,26 @@ class Template_Section_Lib_Controller
 						}
 						?>
 					</select><?php
+				break;
+				// SQL-запрос
+				case 4:
+					$aOptions = $this->_getSqlOptions($oLib_Property);
+
+					if (count($aOptions))
+					{
+						?><select class="form-control" name="<?php echo $name?>" data-old-position="<?php echo htmlspecialchars($old_position)?>">
+							<?php
+							foreach ($aOptions as $option_value => $option_name)
+							{
+								$selected = $option_value == $value
+									? 'selected="selected"'
+									: '';
+
+								?><option <?php echo $selected?> value="<?php echo htmlspecialchars($option_value)?>"><?php echo htmlspecialchars($option_name)?></option><?php
+							}
+							?>
+						</select><?php
+					}
 				break;
 				// Большое текстовое поле
 				case 5:

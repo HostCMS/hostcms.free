@@ -40,7 +40,7 @@ class Company_Controller_Structure extends Admin_Form_Controller_View
 		$this->_oCompany = Core_Entity::factory('Company', $company_id);
 
 		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
-		$oAdmin_Form = $oAdmin_Form_Controller->getAdminForm();
+		// $oAdmin_Form = $oAdmin_Form_Controller->getAdminForm();
 
 		$oAdmin_View = Admin_View::create($this->_Admin_Form_Controller->Admin_View)
 			->pageTitle($oAdmin_Form_Controller->pageTitle)
@@ -97,11 +97,11 @@ class Company_Controller_Structure extends Admin_Form_Controller_View
 		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
 		$oAdmin_Form = $oAdmin_Form_Controller->getAdminForm();
 
-		$oAdmin_Language = $oAdmin_Form_Controller->getAdminLanguage();
+		//$oAdmin_Language = $oAdmin_Form_Controller->getAdminLanguage();
 
 		$aAdmin_Form_Fields = $oAdmin_Form->Admin_Form_Fields->findAll();
 
-		$oSortingField = $oAdmin_Form_Controller->getSortingField();
+		//$oSortingField = $oAdmin_Form_Controller->getSortingField();
 
 		if (empty($aAdmin_Form_Fields))
 		{
@@ -488,7 +488,7 @@ class Company_Controller_Structure extends Admin_Form_Controller_View
 			{
 			?>
 				<li class="dd-item" data-id="<?php echo $oCompany_Department->id?>">
-					<div class="dd-handle department"><?php echo htmlspecialchars($oCompany_Department->name)?>
+					<div class="dd-handle department"><?php echo htmlspecialchars((string) $oCompany_Department->name)?>
 
 					<?php
 					// У сотрудника есть право редактирования структуры компании
@@ -510,7 +510,7 @@ class Company_Controller_Structure extends Admin_Form_Controller_View
 								if (in_array('editDepartment', $aAllowedActions))
 								{
 								?>
-									<a href="javascript:void(0);" class="bordered-gray" data-action="edit" title="<?php echo Core::_('Company_Department.editTitleAction', htmlspecialchars($oCompany_Department->name))?>" alt="<?php echo Core::_('Company_Department.editTitleAction', htmlspecialchars($oCompany_Department->name))?>">
+									<a href="javascript:void(0);" class="bordered-gray" data-action="edit" title="<?php echo Core::_('Company_Department.editTitleAction', htmlspecialchars((string) $oCompany_Department->name))?>" alt="<?php echo Core::_('Company_Department.editTitleAction', htmlspecialchars((string) $oCompany_Department->name))?>">
 										<i class="fa-solid fa-pencil darkgray"></i>
 									</a>
 								<?php

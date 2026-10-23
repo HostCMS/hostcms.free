@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Hash
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 abstract class Core_Hash
 {
@@ -21,6 +21,7 @@ abstract class Core_Hash
 
 	/**
 	 * Hash salt
+	 * @var mixed
 	 */
 	protected $_salt = NULL;
 

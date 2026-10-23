@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Skin
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Date extends Admin_Form_Entity_Input
 {
@@ -94,7 +94,7 @@ class Skin_Default_Admin_Form_Entity_Date extends Admin_Form_Entity_Input
 		?><input <?php echo implode(' ', $aAttr) ?>/>
 
 		<script>
-		(function($) {
+		(function($){
 			$("#<?php echo Core_Str::escapeJavascriptVariable($this->id)?>")
 				.datepicker({<?php echo Core_Array::array2jsObject($this->options)?>});
 		})(jQuery);

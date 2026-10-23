@@ -22,7 +22,7 @@ class Calendar_Module extends Core_Module_Abstract
 	 * Module date
 	 * @var string
 	 */
-	public $date = '2026-05-12';
+	public $date = '2026-10-22';
 
 	/**
 	 * Module name
@@ -55,6 +55,7 @@ class Calendar_Module extends Core_Module_Abstract
 			Core_Router::add('calendar-callback.php', '/calendar-callback.php')
 				->controller('Calendar_Caldav_Command_Controller');
 		}
+		Core::$mainConfig['staticFiles'][] = '/calendar-callback.php';
 	}
 
 	/**

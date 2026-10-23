@@ -67,49 +67,54 @@ class Tpl_Import_Controller extends Admin_Form_Action_Controller
 	 */
 	protected function _import(array $aContent = array())
 	{
-		if (!isset($aContent['name']) || !isset($aContent['description']) || !isset($aContent['dirName']))
+		if (!isset($aContent['name']) || !isset($aContent['tpl']) /*|| !isset($aContent['description']) || !isset($aContent['dirName'])*/)
 		{
 			throw new Core_Exception('Wrong TPL json!', array(), 0, FALSE);
 		}
 
-		$aExplodeDir = explode('/', $aContent['dirName']);
-
 		$iParent_Id = $this->tpl_dir_id;
 
-		foreach ($aExplodeDir as $sDirName)
+		if (isset($aContent['dirName']))
 		{
-			if ($sDirName != '')
+			$aExplodeDir = explode('/', $aContent['dirName']);
+
+			foreach ($aExplodeDir as $sDirName)
 			{
-				$oTpl_Dirs = Core_Entity::factory('Tpl_Dir');
-				$oTpl_Dirs
-					->queryBuilder()
-					->where('tpl_dirs.parent_id', '=', $iParent_Id);
-
-				$oTpl_Dir = $oTpl_Dirs->getByName($sDirName, FALSE);
-
-				if (is_null($oTpl_Dir))
+				if ($sDirName != '')
 				{
-					$oTpl_Dir = Core_Entity::factory('Tpl_Dir');
-					$oTpl_Dir
-						->parent_id($iParent_Id)
-						->name($sDirName)
-						->save();
-				}
+					$oTpl_Dirs = Core_Entity::factory('Tpl_Dir');
+					$oTpl_Dirs
+						->queryBuilder()
+						->where('tpl_dirs.parent_id', '=', $iParent_Id);
 
-				$iParent_Id = $oTpl_Dir->id;
+					$oTpl_Dir = $oTpl_Dirs->getByName($sDirName, FALSE);
+
+					if (is_null($oTpl_Dir))
+					{
+						$oTpl_Dir = Core_Entity::factory('Tpl_Dir');
+						$oTpl_Dir
+							->parent_id($iParent_Id)
+							->name($sDirName)
+							->save();
+					}
+
+					$iParent_Id = $oTpl_Dir->id;
+				}
 			}
 		}
+
+		$oTplExist = Core_Entity::factory('Tpl')->getByName($aContent['name'], FALSE);
 
 		$oTpl = Core_Entity::factory('Tpl');
 		$oTpl->name = $aContent['name'];
 		$oTpl->tpl_dir_id = $iParent_Id;
-		$oTpl->description = $aContent['description'];
+		$oTpl->description = Core_Array::get($aContent, 'description', '', 'trim');
 		$oTpl->save();
 
-		$oTpl->name = $oTpl->name . " [{$oTpl->id}]";
+		$oTpl->name = $oTpl->name . (!is_null($oTplExist) ? " [{$oTpl->id}]" : '');
 		$oTpl->save();
 
-		isset($aContent['tpl'])
+		$aContent['tpl'] != ''
 			&& $oTpl->saveTplFile($aContent['tpl']);
 
 		// Configs

@@ -1,4 +1,4 @@
-/* global createCookie readCookie _windowSettings */
+/* global createCookie readCookie */
 /*Sets Themed Colors Based on Themes*/
 
 var themeprimary = getThemeColorFromCss('themeprimary');
@@ -107,13 +107,18 @@ $('.page-content')
 	})
 	// refresh
 	.on('click', '#refresh-toggler', function () {
-		if (typeof _windowSettings == 'undefined')
+		window._windowSettings =
+			(window._allWindowSettings && 'id_content' in window._allWindowSettings)
+				? window._allWindowSettings['id_content']
+				: window._windowSettings;
+
+		if (typeof window._windowSettings == 'undefined')
 		{
 			window.location.reload();
 		}
 		else
 		{
-			$.adminLoad(_windowSettings);
+			$.adminLoad(window._windowSettings);
 		}
 	});
 
@@ -193,33 +198,82 @@ InitiateSettings();
 InitiateWidgets();
 
 function InitiateSideMenu() {
+	// Чтение кук при инициализации для восстановления состояния ---
+	var isSidebarHidden = readCookie("sidebar-hidden");
+	var isSidebarCompact = readCookie("sidebar-compact");
+
+	if (isSidebarHidden === "true") {
+		$("#sidebar").addClass("hide");
+		$(".sidebar-toggler").addClass("active");
+	} else if (isSidebarHidden === "false") {
+		$("#sidebar").removeClass("hide");
+		$(".sidebar-toggler").removeClass("active");
+	}
+
+	if (isSidebarCompact === "true") {
+		$("#sidebar").addClass("menu-compact");
+		$(".sidebar-collapse").addClass("active");
+	} else if (isSidebarCompact === "false") {
+		$("#sidebar").removeClass("menu-compact");
+		$(".sidebar-collapse").removeClass("active");
+	}
+	// -----------------------------------------------------------------------------
+
 	//Sidebar Toggler
 	$(".page-content").on('click', '.sidebar-toggler', function () {
 		$("#sidebar").toggleClass("hide");
 		$(".sidebar-toggler").toggleClass("active");
+
+		$("#sidebar").toggleClass("menu-compact");
+		$(".sidebar-collapse").toggleClass("active");
+
+		// Сохранение состояния в куки (храним 100 дней, по аналогии с другими настройками) ---
+		createCookie("sidebar-hidden", $("#sidebar").hasClass("hide"), 100);
+		createCookie("sidebar-compact", $("#sidebar").hasClass("menu-compact"), 100);
+		// ----------------------------------------------------------------------------------------------------
+
+		$(this).blur();
+
 		return false;
 	});
 	//End Sidebar Toggler
 
 	//Sidebar Collapse
 	var b = $("#sidebar").hasClass("menu-compact");
-	$("#sidebar-collapse").on('click', function () {
-		if (!$('#sidebar').is(':visible'))
+
+	$("#sidebar-collapse").on('click', function ()
+	{
+		if (!$('#sidebar').is(':visible')) {
 			$("#sidebar").toggleClass("hide");
+			$(".sidebar-toggler").toggleClass("active");
+		}
+
 		$("#sidebar").toggleClass("menu-compact");
 		$(".sidebar-collapse").toggleClass("active");
+
+		// Сохранение состояния в куки ---
+		createCookie("sidebar-hidden", $("#sidebar").hasClass("hide"), 100);
+		createCookie("sidebar-compact", $("#sidebar").hasClass("menu-compact"), 100);
+		// ----------------------------------------------
+
 		b = $("#sidebar").hasClass("menu-compact");
 
-		if ($(".sidebar-menu").closest("div").hasClass("slimScrollDiv")) {
+		if ($(".sidebar-menu").closest("div").hasClass("slimScrollDiv"))
+		{
 			$(".sidebar-menu").slimScroll({ destroy: true });
 			$(".sidebar-menu").attr('style', '');
 		}
-		if (b) {
-			$(".open > .submenu")
-				.removeClass("open");
-		} else {
-			if ($('.page-sidebar').hasClass('sidebar-fixed')) {
+
+		if (b)
+		{
+			$(".open > .submenu").removeClass("open");
+		}
+		else
+		{
+			if ($('.page-sidebar').hasClass('sidebar-fixed'))
+			{
 				var position = (readCookie("rtl-support") || location.pathname == "/index-rtl-fa.html" || location.pathname == "/index-rtl-ar.html") ? 'right' : 'left';
+
 				$('.sidebar-menu').slimscroll({
 					height: 'auto',
 					position: position,
@@ -229,16 +283,13 @@ function InitiateSideMenu() {
 			}
 		}
 		//Slim Scroll Handle
-
-
-
 	});
 	//End Sidebar Collapse
 
 	//Sidebar Menu Handle
 
 	//HostCMS: Fix i.menu-expand
-/* 	$(".sidebar-menu i.menu-expand").on('click touchend', function (e) {
+	/* $(".sidebar-menu i.menu-expand").on('click touchend', function (e) {
 		e.stopImmediatePropagation();
 		e.preventDefault();
 
@@ -246,7 +297,6 @@ function InitiateSideMenu() {
 	}); */
 
 	$(".sidebar-menu").on('click touchend', function (e) {
-
 		var menuLink = $(e.target).closest("a");
 
 		// Скрываем все контекстные меню
@@ -261,6 +311,8 @@ function InitiateSideMenu() {
 		// HostCMS: Fix submenu
 		if (menuLink.is('[href]') && !$(e.target).hasClass('menu-expand'))
 		{
+			menuLink.blur();
+
 			e.stopImmediatePropagation();
 			return;
 		}
@@ -283,12 +335,12 @@ function InitiateSideMenu() {
 			c.find("> .open > .submenu")
 				.each(function () {
 					if (this != submenu && !$(this.parentNode).hasClass("active"))
-						$(this).slideUp(200).parent().removeClass("open");
+						$(this)/*.slideUp(200)*/.parent().removeClass("open");
 				});
 		}
 		if (b && $(submenu.parentNode.parentNode).hasClass("sidebar-menu"))
 			return false;
-		$(submenu).slideToggle(200).parent().toggleClass("open");
+		$(submenu)/*.slideToggle(200)*/.parent().toggleClass("open");
 		return false;
 	});
 	//End Sidebar Menu Handle
@@ -611,6 +663,26 @@ function hasClass(elem, cls) {
 	var testCls = " " + cls + " ";
 	return (str.indexOf(testCls) != -1);
 }
+
+// Слушаем нативное событие HostCMS перед AJAX-загрузкой страницы
+$('body').on('beforeAdminLoad', function() {
+	var $sidebar = $('#sidebar');
+
+	// Применяем фикс только для компактного режима
+	if ($sidebar.hasClass('menu-compact')) {
+
+		// Жестко скрываем все подменю через наш новый CSS-класс
+		$sidebar.addClass('force-hide-submenus');
+
+		// Функция для возврата меню в рабочее состояние
+		var restoreMenu = function() {
+			$sidebar.removeClass('force-hide-submenus');
+			$(document).off('mousemove touchstart', restoreMenu);
+		};
+
+		$(document).one('mousemove touchstart', restoreMenu);
+	}
+});
 
 // Удалено 26/03/2018, проблема с вкладкой во вкладке
 /*$('.page-content')

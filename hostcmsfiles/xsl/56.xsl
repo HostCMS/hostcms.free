@@ -28,7 +28,6 @@
 	</xsl:template>
 
 	<xsl:template match="shop_item">
-
 		<!-- Название товара или SEO-шаблон для H1 товара -->
 		<xsl:choose>
 			<xsl:when test="/shop/seo_item_h1/node()">

@@ -232,6 +232,14 @@ class Core_Str
 
 				if (strlen($data))
 				{
+					// Ищем позицию последней закрывающей фигурной скобки '}'
+					$jsonEnd = strrpos($data, '}');
+					if ($jsonEnd !== FALSE)
+					{
+						// Отрезаем всё лишнее после JSON
+						$data = substr($data, 0, $jsonEnd + 1);
+					}
+
 					$oData = json_decode($data);
 
 					if (is_object($oData) && isset($oData->translations[0]))
@@ -579,6 +587,8 @@ class Core_Str
 
 	/**
 	 * stripTags() callback
+	 * @param array $matches
+	 * @return string
 	 */
 	static protected function _stripTagsCallback($matches)
 	{
@@ -1135,8 +1145,8 @@ class Core_Str
 	 * Возвращает строку согласно падежам
 	 * @param int $number number
 	 * @param string $nominative Nominative case
-	 * @param $genitive_singular Genitive singular case
-	 * @param $genitive_plural Genitive plural case
+	 * @param string $genitive_singular Genitive singular case
+	 * @param string $genitive_plural Genitive plural case
 	 * @return string
 	 */
 	static public function declensionNumber($number, $nominative, $genitive_singular, $genitive_plural)
@@ -1172,6 +1182,12 @@ class Core_Str
 		//return preg_replace('/[\x{1F600}-\x{1F64F}]|[\x{1F300}-\x{1F5FF}]|[\x{1F680}-\x{1F6FF}]|[\x{1F1E0}-\x{1F1FF}]/u', '', $str);
 	}
 
+	/**
+	 * Get initials
+	 * @param string $fullName
+	 * @param integer $length
+	 * @return void
+	 */
 	static public function getInitials($fullName, $length = 2)
 	{
 		$fullName = mb_strtoupper(trim((string) $fullName));
@@ -1548,6 +1564,7 @@ class Core_Str
 
 	/**
 	 * Sanitize phone numbers
+	 * @param string $phone
 	 * @return string
 	 */
 	static public function sanitizePhoneNumber($phone)
@@ -1562,6 +1579,7 @@ class Core_Str
 
 	/**
 	 * Get string of rand chars
+	 * @param int $number
 	 * @return string
 	 */
 	static public function generateChars($number)
@@ -1937,7 +1955,7 @@ class Core_Str
 	/**
 	 * Проверка строки на то, является ли она закодированной base64
 	 *
-	 * @param $string строка
+	 * @param string $string строка
 	 * @return boolean
 	 */
 	public static function isBase64($string)

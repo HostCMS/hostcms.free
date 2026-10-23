@@ -18,7 +18,7 @@ class Sql_Table_View_Entity extends Core_Empty_Entity
 	 */
 	protected $_modelName = 'sql_table_view';
 
-	protected $_columns = NULL;
+	protected $_tableColumns = NULL;
 
 	/**
 	 * Get table columns
@@ -26,10 +26,10 @@ class Sql_Table_View_Entity extends Core_Empty_Entity
 	 */
 	public function getTableColumns()
 	{
-		is_null($this->_columns) && !is_null($this->_tableName)
-			&& $this->_columns = Core_DataBase::instance()->getColumns($this->_tableName);
+		is_null($this->_tableColumns) && !is_null($this->_tableName)
+			&& $this->_tableColumns = Core_DataBase::instance()->getColumns($this->_tableName);
 
-		return $this->_columns;
+		return $this->_tableColumns;
 	}
 
 	/**
@@ -41,7 +41,7 @@ class Sql_Table_View_Entity extends Core_Empty_Entity
 	{
 		$this->getTableColumns();
 
-		return isset($this->_columns[$property]);
+		return isset($this->_tableColumns[$property]);
 	}
 
 	/**
@@ -65,7 +65,7 @@ class Sql_Table_View_Entity extends Core_Empty_Entity
 	{
 		if (isset($this->_fields[$property]))
 		{
-			return $this->_columns[$property]['binary']
+			return $this->_tableColumns[$property]['binary']
 				? (strlen($this->_fields[$property]) < 128
 					? '0x' . bin2hex($this->_fields[$property])
 					: 'Binary'
@@ -100,7 +100,7 @@ class Sql_Table_View_Entity extends Core_Empty_Entity
 			$name = substr($methodName, 0, -7);
 
 			$args = '';
-			strpos($this->_columns[$name]['datatype'], 'text') !== FALSE
+			strpos($this->_tableColumns[$name]['datatype'], 'text') !== FALSE
 				&& $args .= ' data-editable-type="textarea"';
 
 			return is_null($this->$name)

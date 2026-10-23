@@ -1099,17 +1099,26 @@ $oAdmin_Form_Entity_Menus->add(
 		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/user/wallpaper/index.php', NULL, NULL, '')
 		)
-)->add(
-	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('User.session'))
-		->icon('fa-solid fa-clock-rotate-left')
-		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/user/session/index.php', NULL, NULL, '')
-		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/user/session/index.php', NULL, NULL, '')
-		)
-)->add(
+);
+
+// Доступ к сессиям только у администраторов
+$oUser = Core_Auth::getCurrentUser();
+if ($oUser->superuser)
+{
+	$oAdmin_Form_Entity_Menus->add(
+		Admin_Form_Entity::factory('Menu')
+			->name(Core::_('User.session'))
+			->icon('fa-solid fa-clock-rotate-left')
+			->href(
+				$oAdmin_Form_Controller->getAdminLoadHref('/{admin}/user/session/index.php', NULL, NULL, '')
+			)
+			->onclick(
+				$oAdmin_Form_Controller->getAdminLoadAjax('/{admin}/user/session/index.php', NULL, NULL, '')
+			)
+	);
+}
+
+$oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('User.accessdenied'))
 		->icon('fa-solid fa-ban')

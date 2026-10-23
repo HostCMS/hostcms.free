@@ -14,7 +14,7 @@ abstract class Template_Preprocessor
 {
 	/**
 	 * Preprocessor
-	 * @var string
+	 * @var mixed
 	 */
 	protected $_preprocessor = NULL;
 

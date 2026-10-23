@@ -67,7 +67,7 @@ class Xsl_Import_Controller extends Admin_Form_Action_Controller
 	 */
 	protected function _import(array $aContent = array())
 	{
-		if (!isset($aContent['name']) || !isset($aContent['format']) || !isset($aContent['description']) || !isset($aContent['dirName']))
+		if (!isset($aContent['name']) || !isset($aContent['xsl'])/*|| !isset($aContent['format']) || !isset($aContent['description']) || !isset($aContent['dirName'])*/)
 		{
 			throw new Core_Exception('Wrong XSL json!', array(), 0, FALSE);
 		}
@@ -76,27 +76,30 @@ class Xsl_Import_Controller extends Admin_Form_Action_Controller
 
 		$iParent_Id = $this->xsl_dir_id;
 
-		foreach ($aExplodeDir as $sDirName)
+		if (isset($aContent['dirName']))
 		{
-			if ($sDirName != '')
+			foreach ($aExplodeDir as $sDirName)
 			{
-				$oXsl_Dirs = Core_Entity::factory('Xsl_Dir');
-				$oXsl_Dirs
-					->queryBuilder()
-					->where('xsl_dirs.parent_id', '=', $iParent_Id);
-
-				$oXsl_Dir = $oXsl_Dirs->getByName($sDirName, FALSE);
-
-				if (is_null($oXsl_Dir))
+				if ($sDirName != '')
 				{
-					$oXsl_Dir = Core_Entity::factory('Xsl_Dir');
-					$oXsl_Dir
-						->parent_id($iParent_Id)
-						->name($sDirName)
-						->save();
-				}
+					$oXsl_Dirs = Core_Entity::factory('Xsl_Dir');
+					$oXsl_Dirs
+						->queryBuilder()
+						->where('xsl_dirs.parent_id', '=', $iParent_Id);
 
-				$iParent_Id = $oXsl_Dir->id;
+					$oXsl_Dir = $oXsl_Dirs->getByName($sDirName, FALSE);
+
+					if (is_null($oXsl_Dir))
+					{
+						$oXsl_Dir = Core_Entity::factory('Xsl_Dir');
+						$oXsl_Dir
+							->parent_id($iParent_Id)
+							->name($sDirName)
+							->save();
+					}
+
+					$iParent_Id = $oXsl_Dir->id;
+				}
 			}
 		}
 
@@ -105,14 +108,14 @@ class Xsl_Import_Controller extends Admin_Form_Action_Controller
 		$oXsl = Core_Entity::factory('Xsl');
 		$oXsl->name = $aContent['name'];
 		$oXsl->xsl_dir_id = $iParent_Id;
-		$oXsl->format = intval($aContent['format']);
-		$oXsl->description = $aContent['description'];
+		$oXsl->format = Core_Array::get($aContent, 'format', 0, 'int');
+		$oXsl->description = Core_Array::get($aContent, 'description', '', 'trim');
 		$oXsl->save();
 
 		$oXsl->name = $oXsl->name . (!is_null($oXslExist) ? " [{$oXsl->id}]" : '');
 		$oXsl->save();
 
-		isset($aContent['xsl'])
+		$aContent['xsl'] != ''
 			&& $oXsl->saveXslFile($aContent['xsl']);
 
 		// DTD

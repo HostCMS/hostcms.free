@@ -1,5 +1,5 @@
 /* global toastr */
-(function($) {
+(function($){
 	"use strict";
 
 	// Кешируем регулярные выражения и карты символов

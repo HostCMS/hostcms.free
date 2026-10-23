@@ -68,7 +68,7 @@ class Property_Controller_Delete_Value extends Admin_Form_Action_Controller
 
 							ob_start();
 							Core_Html_Entity::factory('Script')
-								->value("$(\"#{$windowId} #preview_small_id_property_{$oProperty->id}_{$oValue->id},#{$windowId} #delete_small_id_property_{$oProperty->id}_{$oValue->id}\").remove()")
+								->value("$('#{$windowId} #preview_small_id_property_{$oProperty->id}_{$oValue->id},#{$windowId} #delete_small_id_property_{$oProperty->id}_{$oValue->id}').remove(); $('#{$windowId} input#create_small_image_from_large_small_property_{$oProperty->id}_{$oValue->id}').prop('checked', true);")
 								->execute();
 							$this->addMessage(ob_get_clean());
 						}

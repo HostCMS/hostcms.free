@@ -1582,8 +1582,9 @@ abstract class Shop_Payment_System_Handler
 				->subject($admin_subject)
 				->message($sInvoice)
 				->contentType($this->_adminMailContentType)
+				->header('Auto-Submitted', 'auto-generated')
 				->header('X-HostCMS-Reason', 'Order')
-				->header('Precedence', 'bulk')
+				//->header('Precedence', 'bulk')
 				->messageId();
 
 			// Attach order property files
@@ -1747,8 +1748,9 @@ abstract class Shop_Payment_System_Handler
 					->subject($user_subject)
 					->message($sInvoice)
 					->contentType($this->_siteuserMailContentType)
+					->header('Auto-Submitted', 'auto-generated')
 					->header('X-HostCMS-Reason', 'OrderConfirm')
-					->header('Precedence', 'bulk')
+					//->header('Precedence', 'bulk')
 					->messageId()
 					->send();
 

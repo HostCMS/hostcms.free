@@ -206,6 +206,15 @@ class Shortcode_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				&& $this->_object->backupRevision();
 		}
 
+		if ($modelName == 'shortcode')
+		{
+			$this->_formValues['php'] = trim($this->_formValues['php']);
+
+			// Отрезаем <?php в начале и в конце
+			$this->_formValues['php'] = preg_replace('/^<\?php\s*/i', '', $this->_formValues['php']);
+			$this->_formValues['php'] = preg_replace('/\s*\?>$/', '', $this->_formValues['php']);
+		}
+
 		parent::_applyObjectProperty();
 
 		switch ($modelName)

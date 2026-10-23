@@ -365,6 +365,126 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 				->service('yandex')
 				->apply();
 		}
+		elseif (!is_null(Core_Array::getGet('vkclid')))
+		{
+			$oSource_Controller = new Source_Controller();
+			$oSource_Controller
+				->type(3)
+				->service('vk')
+				->apply();
+		}
+		elseif (!is_null(Core_Array::getGet('fbclid')))
+		{
+			$oSource_Controller = new Source_Controller();
+			$oSource_Controller
+				->type(3)
+				->service('facebook')
+				->apply();
+		}
+		elseif (!is_null(Core_Array::getGet('ttclid')))
+		{
+			$oSource_Controller = new Source_Controller();
+			$oSource_Controller
+				->type(3)
+				->service('tiktok')
+				->apply();
+		}
+		elseif (!is_null(Core_Array::getGet('tgclid')))
+		{
+			$oSource_Controller = new Source_Controller();
+			$oSource_Controller
+				->type(3)
+				->service('telegram')
+				->apply();
+		}
+		elseif (!is_null(Core_Array::getGet('msclkid')))
+		{
+			$oSource_Controller = new Source_Controller();
+			$oSource_Controller
+				->type(3)
+				->service('bing')
+				->apply();
+		}
+		// Обработка перехода без меток
+		elseif (isset($_SERVER['HTTP_REFERER']) && !empty($_SERVER['HTTP_REFERER']) && isset($_SERVER['HTTP_HOST']))
+		{
+			// Извлекаем хост
+			$sRefererHost = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST);
+
+			if ($sRefererHost)
+			{
+				// Извлекаем текущий хост вашего сайта для надежности (или используйте жестко заданный $sMyDomain)
+				$sCurrentHost = preg_replace('/^www\./', '', strtolower($_SERVER['HTTP_HOST']));
+
+				// Очищаем от www.
+				$sRefererHost = preg_replace('/^www\./', '', strtolower($sRefererHost));
+
+				// Не внутренний переход
+				if ($sRefererHost !== $sCurrentHost)
+				{
+					$sService = $sRefererHost;
+
+					if (strpos($sRefererHost, 'yandex.') !== FALSE || strpos($sRefererHost, 'ya.ru') !== FALSE)
+					{
+						$sService = 'yandex';
+					}
+					elseif (strpos($sRefererHost, 'google.') !== FALSE)
+					{
+						$sService = 'google';
+					}
+					elseif (strpos($sRefererHost, 'mail.ru') !== FALSE)
+					{
+						$sService = 'mail.ru';
+					}
+					elseif (strpos($sRefererHost, 'rambler.ru') !== FALSE)
+					{
+						$sService = 'rambler';
+					}
+					elseif (strpos($sRefererHost, 'bing.com') !== FALSE)
+					{
+						$sService = 'bing';
+					}
+					elseif (strpos($sRefererHost, 'vk.com') !== FALSE || strpos($sRefererHost, 'vk.me') !== FALSE)
+					{
+						$sService = 'vk';
+						$sMedium = 'social';
+					}
+					elseif (strpos($sRefererHost, 't.me') !== FALSE || strpos($sRefererHost, 'telegram.org') !== FALSE)
+					{
+						$sService = 'telegram';
+						$sMedium = 'social';
+					}
+					elseif (strpos($sRefererHost, 'ok.ru') !== FALSE)
+					{
+						$sService = 'ok';
+						$sMedium = 'social';
+					}
+					elseif (strpos($sRefererHost, 'instagram.com') !== FALSE)
+					{
+						$sService = 'instagram';
+						$sMedium = 'social';
+					}
+					elseif (strpos($sRefererHost, 'facebook.com') !== FALSE)
+					{
+						$sService = 'facebook';
+						$sMedium = 'social';
+					}
+					elseif (strpos($sRefererHost, 'youtube.com') !== FALSE || strpos($sRefererHost, 'youtu.be') !== FALSE)
+					{
+						$sService = 'youtube';
+						$sMedium = 'social';
+					}
+
+					$oSource_Controller = new Source_Controller();
+					$oSource_Controller
+						->type(3)
+						->service($sService)
+						->medium('organic')
+						->content($_SERVER['HTTP_REFERER'])
+						->apply();
+				}
+			}
+		}
 
 		// Если доступ к узлу структуры только по HTTPS, а используется HTTP,
 		// то делаем 301 редирект
@@ -444,13 +564,11 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 			define('OB_START', TRUE);
 		//}
 
-		/*
-		Тип раздела
-		0 - Страница из документооборота
-		1 - Динамическая страница
-		2 - Типовая динамическая страница
-		3 - Ссылка на внешний ресурс
-		*/
+		/* Тип раздела
+			0 - Страница из документооборота
+			1 - Динамическая страница
+			2 - Типовая динамическая страница
+			3 - Ссылка на внешний ресурс */
 
 		// Если тип - страница
 		if ($oStructure->type == 0)
@@ -691,7 +809,10 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 
 							if (link && link.href) {
 								var hrefAttr = link.getAttribute('href') || '';
-								if (hrefAttr.startsWith('javascript:') || hrefAttr.startsWith('#')) return;
+
+								if (hrefAttr.startsWith('javascript:') || hrefAttr.startsWith('#') || link.hasAttribute('onclick')) {
+									return;
+								}
 
 								var linkUrl = new URL(link.href, iframeLocation.href);
 

@@ -1055,12 +1055,12 @@ class Structure_Model extends Core_Entity
 
 		$oSearch_Page->text = htmlspecialchars($this->name) . ' ' .
 			$this->id . ' ' .
-			htmlspecialchars($this->seo_title) . ' ' .
-			htmlspecialchars($this->seo_description) . ' ' .
-			htmlspecialchars($this->seo_keywords) . ' ' .
-			htmlspecialchars($this->path) . ' ';
+			htmlspecialchars((string) $this->seo_title) . ' ' .
+			htmlspecialchars((string) $this->seo_description) . ' ' .
+			htmlspecialchars((string) $this->seo_keywords) . ' ' .
+			htmlspecialchars((string) $this->path) . ' ';
 
-		$oSearch_Page->title = strlen($this->seo_title) > 0
+		$oSearch_Page->title = strlen((string) $this->seo_title) > 0
 			? $this->seo_title
 			: $this->name;
 

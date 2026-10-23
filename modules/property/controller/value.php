@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Property
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Property_Controller_Value
 {
@@ -65,7 +65,7 @@ class Property_Controller_Value
 				{
 					if ($oProperty->issetAllValues())
 					{
-						$aReturn = array_merge($aReturn, $oProperty->getValues($entityId));
+						$aReturn = array_merge($aReturn, $oProperty->getValues($entityId, $bCache));
 					}
 					else
 					{

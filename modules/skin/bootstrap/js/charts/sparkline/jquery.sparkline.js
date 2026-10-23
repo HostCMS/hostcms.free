@@ -210,7 +210,7 @@
         factory(jQuery);
     }
 }
-(function($) {
+(function($){
     'use strict';
 
     var UNSET_OPTION = {},

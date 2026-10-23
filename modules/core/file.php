@@ -219,7 +219,7 @@ class Core_File
 		{
 			return TRUE;
 		}
-			
+
 		if (self::isFile($oldname) || self::isDir($oldname))
 		{
 			if (!self::isDir($newname))
@@ -257,7 +257,7 @@ class Core_File
 			throw new Core_Exception("The file/dir '%oldname' does not exist.",
 				array('%oldname' => Core::cutRootPath($oldname)));
 		}
-		
+
 		return TRUE;
 	}
 
@@ -331,7 +331,7 @@ class Core_File
 			if ($dh = @opendir($dirname))
 			{
 				self::clearCache();
-				
+
 				while (($file = readdir($dh)) !== FALSE)
 				{
 					if ($file != '.' && $file != '..')
@@ -638,9 +638,9 @@ class Core_File
 	 * Например, для сущности с кодом 17 и уровнем вложенности 3 вернется строка 0/1/7 или массив из 3-х элементов - 0,1,7
 	 * Для сущности с кодом 23987 и уровнем вложенности 3 возвращается строка 2/3/9 или массив из 3-х элементов - 2,3,9.
 	 *
-	 * @param $id идентификатор сущности
-	 * @param $level уровень вложенности, по умолчанию 3
-	 * @param $type тип возвращаемого результата, 0 (по умолчанию) - строка, 1 - массив
+	 * @param int $id идентификатор сущности
+	 * @param int $level уровень вложенности, по умолчанию 3
+	 * @param int $type тип возвращаемого результата, 0 (по умолчанию) - строка, 1 - массив
 	 * @return array|string строка или массив названий групп
 	 */
 	static public function getNestingDirPath($id, $level = 3, $type = 0)
@@ -747,20 +747,20 @@ class Core_File
 			{
 				$start = intval($matches[1]);
 				$end = $matches[2] === '' ? $fileSize - 1 : intval($matches[2]);
-				
+
 				// Корректируем конечную позицию
 				if ($end >= $fileSize)
 				{
 					$end = $fileSize - 1;
 				}
-				
+
 				if ($start > $end || $start >= $fileSize)
 				{
 					header('HTTP/1.1 416 Requested Range Not Satisfiable');
 					header("Content-Range: bytes */{$fileSize}");
 					return FALSE;
 				}
-				
+
 				$aRanges = array(array($start, $end));
 			}
 			else
@@ -790,11 +790,11 @@ class Core_File
 			$start = $aRanges[0][0];
 			$end = $aRanges[0][1];
 			$length = $end - $start + 1;
-			
+
 			header('HTTP/1.1 206 Partial Content');
 			header("Content-Range: bytes {$start}-{$end}/{$fileSize}");
 			header('Content-Length: ' . $length);
-			
+
 			self::flush();
 
 			if ($fd = fopen($file, "rb"))
@@ -803,17 +803,17 @@ class Core_File
 				{
 					$bytesSent = 0;
 					$bufferSize = 1048576; // 1MB chunks
-					
+
 					while (!feof($fd) && $bytesSent < $length)
 					{
 						$bytesToRead = min($bufferSize, $length - $bytesSent);
 						$data = fread($fd, $bytesToRead);
-						
+
 						if ($data === FALSE)
 						{
 							break;
 						}
-						
+
 						echo $data;
 						$bytesSent += strlen($data);
 						self::flush();
@@ -826,7 +826,7 @@ class Core_File
 		{
 			// Отправка полного файла
 			header('Content-Length: ' . $fileSize);
-			
+
 			self::flush();
 
 			if ($fd = fopen($file, "rb"))
@@ -839,7 +839,7 @@ class Core_File
 				fclose($fd);
 			}
 		}
-		
+
 		return TRUE;
 	}
 

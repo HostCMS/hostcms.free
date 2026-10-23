@@ -714,7 +714,7 @@ class Core_DataBase_Mysql extends Core_DataBase
 
 	/**
 	 * Fetch query result
-	 * @param $result resource
+	 * @param resource $result resource
 	 * @param boolean $bCache use cache
 	 * @return array
 	 */
@@ -910,6 +910,7 @@ class Core_DataBase_Mysql extends Core_DataBase
 
 	/**
 	 * Free result memory
+	 * @param resource $result
 	 * @return self
 	 */
 	protected function _free($result)

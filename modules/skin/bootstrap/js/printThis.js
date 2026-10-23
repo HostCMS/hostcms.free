@@ -44,7 +44,7 @@
  *  - the loadCSS will load additional CSS (with or without @media print) into the iframe, adjusting layout
  */
 ;
-(function($) {
+(function($){
 
     function appendContent($el, content) {
         if (!content) return;

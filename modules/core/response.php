@@ -38,6 +38,7 @@ class Core_Response
 		100 => 'Continue', // (Продолжать).
 		101 => 'Switching Protocols', // (Переключение протоколов).
 		102 => 'Processing', // (Идет обработка).
+		103 => 'Early Hints', // (Ранние подсказки).
 
 		//2xx: Success (Успешно).
 		200 => 'OK', // (Хорошо).
@@ -59,6 +60,7 @@ class Core_Response
 		305 => 'Use Proxy', // (Использовать прокси).
 		306	=> '', // (зарезервировано).
 		307 => 'Temporary Redirect', // (Временное перенаправление).
+		308 => 'Permanent Redirect', // (Постоянное перенаправление).
 
 		//4xx: Client Error (Ошибка клиента).
 		400 => 'Bad Request', // (Плохой запрос).
@@ -80,12 +82,17 @@ class Core_Response
 		416 => 'Requested Range Not Satisfiable', // (Запрашиваемый диапазон не достижим).
 		417 => 'Expectation Failed', // (Ожидаемое не приемлемо).
 		418 => 'I\'m a teapot', // (Я - чайник).
+		421 => 'Misdirected Request', // (Неправильно направленный запрос).
 		422 => 'Unprocessable Entity', // (Необрабатываемый экземпляр).
 		423 => 'Locked', // (Заблокировано).
 		424 => 'Failed Dependency', // (Невыполненная зависимость).
-		425 => 'Unordered Collection', // (Неупорядоченный набор).
+		425 => 'Too Early', // (Слишком рано).
 		426 => 'Upgrade Required', // (Необходимо обновление).
+		428 => 'Precondition Required', // (Необходимо предусловие).
+		429 => 'Too Many Requests', // (Слишком много запросов).
+		431 => 'Request Header Fields Too Large', // (Заголовки запроса слишком велики).
 		449 => 'Retry With', // (Повторить с...).
+		451 => 'Unavailable For Legal Reasons', // (Недоступно по юридическим причинам).
 		456 => 'Unrecoverable Error', // (Некорректируемая ошибка...).
 
 		//5xx: Server Error (Ошибка сервера).
@@ -97,8 +104,10 @@ class Core_Response
 		505 => 'HTTP Version Not Supported', // (Версия HTTP не поддерживается).
 		506 => 'Variant Also Negotiates', // (Вариант тоже согласован).
 		507 => 'Insufficient Storage', // (Переполнение хранилища).
+		508 => 'Loop Detected', // (Обнаружена петля).
 		509 => 'Bandwidth Limit Exceeded', // (Исчерпана пропускная ширина канала).
-		510 => 'Not Extended' // (Не расширено).
+		510 => 'Not Extended', // (Не расширено).
+		511 => 'Network Authentication Required', // (Требуется аутентификация в сети).
 	);
 
 	/**
@@ -230,28 +239,27 @@ class Core_Response
 	 */
 	static public function sendHttpStatusCode($status)
 	{
-		if (isset(self::$_httpStatusCode[$status]))
+		$sHttpStatusCode = isset(self::$_httpStatusCode[$status])
+			? self::$_httpStatusCode[$status]
+			: 'Undefined';
+
+		$SERVER_PROTOCOL = Core_Array::get($_SERVER, 'SERVER_PROTOCOL');
+
+		if (substr(php_sapi_name(), 0, 3) == 'cgi')
 		{
-			$sHttpStatusCode = self::$_httpStatusCode[$status];
-
-			$SERVER_PROTOCOL = Core_Array::get($_SERVER, 'SERVER_PROTOCOL');
-
-			if (substr(php_sapi_name(), 0, 3) == 'cgi')
-			{
-				header("Status: {$status} {$sHttpStatusCode}", TRUE);
-			}
-			elseif ($SERVER_PROTOCOL == 'HTTP/1.0')
-			{
-				header("HTTP/1.0 {$status} {$sHttpStatusCode}", TRUE, $status);
-			}
-			else
-			{
-				header("HTTP/1.1 {$status} {$sHttpStatusCode}", TRUE, $status);
-			}
-			/*Core_Array::get($_SERVER, 'SERVER_PROTOCOL') == 'HTTP/1.1' && function_exists('apache_lookup_uri')
-				? header("HTTP/1.1 {$this->_status} {$sHttpStatusCode}")
-				: header("Status: {$this->_status} {$sHttpStatusCode}");*/
+			header("Status: {$status} {$sHttpStatusCode}", TRUE);
 		}
+		elseif ($SERVER_PROTOCOL == 'HTTP/1.0')
+		{
+			header("HTTP/1.0 {$status} {$sHttpStatusCode}", TRUE, $status);
+		}
+		else
+		{
+			header("HTTP/1.1 {$status} {$sHttpStatusCode}", TRUE, $status);
+		}
+		/*Core_Array::get($_SERVER, 'SERVER_PROTOCOL') == 'HTTP/1.1' && function_exists('apache_lookup_uri')
+			? header("HTTP/1.1 {$this->_status} {$sHttpStatusCode}")
+			: header("Status: {$this->_status} {$sHttpStatusCode}");*/
 	}
 
 	/**

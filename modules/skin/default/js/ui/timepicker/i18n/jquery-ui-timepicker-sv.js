@@ -1,6 +1,6 @@
 /* Swedish translation for the jQuery Timepicker Addon */
 /* Written by Nevon */
-(function($) {
+(function($){
 	$.timepicker.regional['sv'] = {
 		timeOnlyTitle: 'Välj en tid',
 		timeText: 'Timme',

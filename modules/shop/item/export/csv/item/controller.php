@@ -356,8 +356,15 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 			&& $this->_aGroup_Fields = Field_Controller::getFields('shop_group', $oShop->site_id);
 
 		// Заполняем цены
-		$this->exportPrices
-			&& $this->_aShopPrices = $oShop->Shop_Prices->findAll(FALSE);
+		if ($this->exportPrices)
+		{
+			$this->_aShopPrices = array();
+			$aTmp = $oShop->Shop_Prices->findAll(FALSE);
+			foreach ($aTmp as $oShop_Price)
+			{
+				$this->_aShopPrices[$oShop_Price->id] = $oShop_Price;
+			}
+		}
 
 		// Группы
 		$aGroupTitles = array_map(array($this, 'prepareCell'), $this->getGroupTitles());
@@ -799,20 +806,28 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 	 */
 	public function getPrices($oShop_Item)
 	{
-		$aShopPrices = array();
-
-		foreach ($this->_aShopPrices as $oShopPrice)
+		if (count($this->_aShopPrices))
 		{
-			$oShop_Price = $oShop_Item->Shop_Item_Prices->getByPriceId($oShopPrice->id, FALSE);
-			$aShopPrices[] = !is_null($oShop_Price) ? $oShop_Price->value : 0;
+			$aReturn = array_fill_keys(array_keys($this->_aShopPrices), 0);
+
+			$aShop_Prices = $oShop_Item->Shop_Item_Prices->getAllByshop_price_id(array_keys($this->_aShopPrices), FALSE, 'IN');
+			foreach ($aShop_Prices as $oShop_Price)
+			{
+				//$oShop_Price = $oShop_Item->Shop_Item_Prices->getByPriceId($oShopPrice->id, FALSE);
+				$aReturn[$oShop_Price->shop_price_id] = $oShop_Price->value;
+			}
+		}
+		else
+		{
+			$aReturn = array();
 		}
 
-		return $aShopPrices;
+		return $aReturn;
 	}
 
 	/**
 	 * Export special prices data for item
-	 * @param Shop_Item $oShopItem item
+	 * @param Shop_Item_Model $oShopItem item
 	 */
 	public function exportSpecialPriceData($oShopItem)
 	{
@@ -872,6 +887,10 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 		return $this;
 	}
 
+	/**
+	 * Shop groups
+	 * @var mixed
+	 */
 	protected $_shopGroups = NULL;
 
 	/**
@@ -1003,7 +1022,7 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 			@ini_set('zlib.output_compression', 0);
 			@ini_set('implicit_flush', 1);
 		}
-		
+
 		if (is_null($this->lastGroupId))
 		{
 			Core_Log::instance()->clear()
@@ -1114,9 +1133,6 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 				+ count($this->_aItemBaseProperties)
 				+ count($this->_aSpecialPriceBaseProperties);
 
-			$offset = 0;
-			$limit = 500;
-
 			if (strlen($this->startItemDate) && strlen($this->endItemDate))
 			{
 				$sStartDate = Core_Date::timestamp2sql(Core_Date::datetime2timestamp($this->startItemDate . " 00:00:00"));
@@ -1126,6 +1142,9 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 			{
 				$sStartDate = $sEndDate = NULL;
 			}
+
+			$lastItemId = 0;
+			$limit = 1000;
 
 			do {
 				if (!is_null($sStartDate) && !is_null($sEndDate))
@@ -1137,13 +1156,14 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 
 				$oShop_Items
 					->queryBuilder()
-					->offset($offset)
+					->where('shop_items.id', '>', $lastItemId)
 					->limit($limit);
 
 				$aShop_Items = $oShop_Items->findAll(FALSE);
-
 				foreach ($aShop_Items as $key => $oShopItem)
 				{
+					$lastItemId = $oShopItem->id;
+
 					// Set GUID
 					if ($oShopItem->guid == '')
 					{
@@ -1209,10 +1229,8 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 						$this->seller
 							&& $oModifications->queryBuilder()->where('shop_items.shop_seller_id', '=', $this->seller);
 
-						if ($this->exportInStock)
-						{
-							$this->applyInStockConditions($oModifications);
-						}
+						$this->exportInStock
+							&& $this->applyInStockConditions($oModifications);
 
 						$aModifications = $oModifications->findAll(FALSE);
 
@@ -1271,8 +1289,6 @@ class Shop_Item_Export_Csv_Item_Controller extends Shop_Item_Export_Csv_Controll
 				}
 
 				Core_ObjectWatcher::instance()->reduce();
-
-				$offset += $limit;
 			}
 			while (count($aShop_Items));
 

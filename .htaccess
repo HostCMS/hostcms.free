@@ -83,9 +83,15 @@ AddDefaultCharset Off
 
 	RewriteCond %{REQUEST_METHOD} GET
 	RewriteCond %{HTTP_COOKIE} !PHPSESSID [NC]
-	RewriteCond %{HTTP_COOKIE} !_hccagree [NC]
+	RewriteCond %{HTTP:Accept-Encoding} gzip [NC]
 	RewriteCond %{DOCUMENT_ROOT}/cache_html/%{SERVER_NAME}%{REQUEST_URI}%{QUERY_STRING}index.html -f
 	RewriteRule ^(.*)$ /cache_html/%{SERVER_NAME}%{REQUEST_URI}%{QUERY_STRING}index.html [L]
+	
+	# Добавляем флаг [E=SEND_GZIP_HEADER:1], который создает переменную SEND_GZIP_HEADER
+	#RewriteRule ^(.*)$ /cache_html/%{SERVER_NAME}%{REQUEST_URI}%{QUERY_STRING}index.html [E=SEND_GZIP_HEADER:1,L]
+	#<IfModule mod_headers.c>
+	#	Header set Content-Encoding gzip env=SEND_GZIP_HEADER
+	#</IfModule>
 
 	RewriteCond %{REQUEST_FILENAME} !-f
 	RewriteCond %{REQUEST_FILENAME} !-d

@@ -413,6 +413,8 @@ if (strlen($sGlobalSearch))
 			->addCondition(array('where' => array('shop_purchase_discount_coupons.id', '=', is_numeric($sGlobalSearch) ? intval($sGlobalSearch) : 0)))
 			->addCondition(array('setOr' => array()))
 			->addCondition(array('where' => array('shop_purchase_discount_coupons.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('shop_purchase_discount_coupons.text', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
 }
 else

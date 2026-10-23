@@ -1220,6 +1220,7 @@ class Shop_Controller_Show extends Core_Controller
 			{
 				/*if ($this->page && !count($aShop_Items))
 				{
+					$this->_errorMessage = 'Pagination index out of range';
 					//return $this->error404();
 				}*/
 
@@ -1826,6 +1827,7 @@ class Shop_Controller_Show extends Core_Controller
 
 		if (!$this->checkPaginationConditions())
 		{
+			$this->_errorMessage = 'Zero limit with page requested';
 			return $this->error404();
 		}
 
@@ -1863,6 +1865,7 @@ class Shop_Controller_Show extends Core_Controller
 			{
 				if (!count($aShop_Items) && ($this->page || $this->_oTag))
 				{
+					$this->_errorMessage = 'Requested page contains no items';
 					return $this->error410();
 				}
 
@@ -3231,6 +3234,8 @@ class Shop_Controller_Show extends Core_Controller
 			}
 			else
 			{
+				// (page-{num}) - 1
+				$this->_errorMessage = 'Invalid page index: must be greater than two';
 				return $this->error410();
 			}
 		}
@@ -3252,6 +3257,7 @@ class Shop_Controller_Show extends Core_Controller
 			}
 			else
 			{
+				$this->_errorMessage = 'Tag not found by the specified path';
 				return $this->error404();
 			}
 
@@ -3264,6 +3270,7 @@ class Shop_Controller_Show extends Core_Controller
 			// Producer has pagination!
 			/*if (isset($matches['page']) && $matches['page'] != '')
 			{
+				$this->_errorMessage = 'Pagination is forbidden for producer context';
 				return $this->error404();
 			}*/
 
@@ -3272,6 +3279,7 @@ class Shop_Controller_Show extends Core_Controller
 			$oShop_Producer = Core_Entity::factory('Shop_Producer')->find($this->producer);
 			if (is_null($oShop_Producer->id) || !$oShop_Producer->active)
 			{
+				$this->_errorMessage = 'Shop producer is missing or inactive';
 				return $this->error410();
 			}
 
@@ -3346,6 +3354,7 @@ class Shop_Controller_Show extends Core_Controller
 							}
 							else
 							{
+								$this->_errorMessage = 'Access forbidden';
 								return $this->error403();
 							}
 
@@ -3383,6 +3392,7 @@ class Shop_Controller_Show extends Core_Controller
 								}
 								else
 								{
+									$this->_errorMessage = 'Duplicate producer filter in URL path';
 									return $this->error410();
 								}
 							}
@@ -3413,6 +3423,7 @@ class Shop_Controller_Show extends Core_Controller
 								}
 								else
 								{
+									$this->_errorMessage = 'Invalid price range format in URL';
 									return $this->error410();
 								}
 
@@ -3445,6 +3456,7 @@ class Shop_Controller_Show extends Core_Controller
 									}
 									else
 									{
+										$this->_errorMessage = 'Invalid main property range format';
 										return $this->error410();
 									}
 
@@ -3545,6 +3557,7 @@ class Shop_Controller_Show extends Core_Controller
 								}
 								else
 								{
+									$this->_errorMessage = 'Invalid main property range format';
 									return $this->error410();
 								}
 							}
@@ -3578,6 +3591,7 @@ class Shop_Controller_Show extends Core_Controller
 									}
 									else
 									{
+										$this->_errorMessage = 'Range filter type is incompatible with current route';
 										return $this->error410();
 									}
 								}
@@ -3658,6 +3672,7 @@ class Shop_Controller_Show extends Core_Controller
 					case 'item':
 						if ($bFilterApplied)
 						{
+							$this->_errorMessage = 'Filters cannot be applied to a specific product page';
 							return $this->error410();
 						}
 
@@ -3696,6 +3711,7 @@ class Shop_Controller_Show extends Core_Controller
 							}
 							else
 							{
+								$this->_errorMessage = 'Access forbidden';
 								return $this->error403();
 							}
 						}
@@ -3736,6 +3752,8 @@ class Shop_Controller_Show extends Core_Controller
 								}
 
 								$this->group = $this->item = FALSE;
+								
+								$this->_errorMessage = 'Product modification not found by path';
 								return $this->error410();
 							}
 						}
@@ -3751,6 +3769,8 @@ class Shop_Controller_Show extends Core_Controller
 							}
 
 							$this->group = FALSE;
+							
+							$this->_errorMessage = 'Parent item context is missing for modification route';
 							return $this->error404();
 						}
 					break;
@@ -3759,6 +3779,7 @@ class Shop_Controller_Show extends Core_Controller
 					break;
 					default:
 						$this->group = $this->item = FALSE;
+						$this->_errorMessage = 'Invalid routing step or unexpected URL segmen';
 						return $this->error404();
 				}
 			}
@@ -3766,11 +3787,13 @@ class Shop_Controller_Show extends Core_Controller
 			// Был указан фильтр, требующий значений, но значения заданы не были
 			if ($step == 'filterValue' && !is_null($oProperty) && is_null($aPropertyValuesToSet))
 			{
+				$this->_errorMessage = 'Filter property specified but no values provided';
 				return $this->error404();
 			}
 		}
 		elseif (is_null($path))
 		{
+			$this->_errorMessage = 'Routing path is undefined or null';
 			return $this->error404();
 		}
 
@@ -4220,6 +4243,12 @@ class Shop_Controller_Show extends Core_Controller
 	}
 
 	/**
+	 * Error Message
+	 * @var string|NULL
+	 */
+	protected $_errorMessage = NULL;
+
+	/**
 	 * Define handler for 410 error
 	 * @return self
 	 */
@@ -4227,8 +4256,15 @@ class Shop_Controller_Show extends Core_Controller
 	{
 		$this->_errorCode = 410;
 
-		!is_null(Core_Page::instance()->response)
-			&& Core_Page::instance()->error410();
+		if (!is_null(Core_Page::instance()->response))
+		{
+			Core_Page::instance()->error410();
+			
+			!is_null($this->_errorMessage)
+				&& Core_Page::instance()->response->header('X-RTT-MESSAGE', $this->_errorMessage);
+		}
+		
+		$this->_errorMessage = NULL;
 
 		return $this;
 	}
@@ -4241,8 +4277,15 @@ class Shop_Controller_Show extends Core_Controller
 	{
 		$this->_errorCode = 404;
 
-		!is_null(Core_Page::instance()->response)
-			&& Core_Page::instance()->error404();
+		if (!is_null(Core_Page::instance()->response))
+		{
+			Core_Page::instance()->error404();
+			
+			!is_null($this->_errorMessage)
+				&& Core_Page::instance()->response->header('X-RTT-MESSAGE', $this->_errorMessage);
+		}
+		
+		$this->_errorMessage = NULL;
 
 		return $this;
 	}
@@ -4255,8 +4298,13 @@ class Shop_Controller_Show extends Core_Controller
 	{
 		$this->_errorCode = 403;
 
-		!is_null(Core_Page::instance()->response)
-			&& Core_Page::instance()->error403();
+		if (!is_null(Core_Page::instance()->response))
+		{
+			Core_Page::instance()->error403();
+			
+			!is_null($this->_errorMessage)
+				&& Core_Page::instance()->response->header('X-RTT-MESSAGE', $this->_errorMessage);
+		}
 
 		return $this;
 	}
@@ -6956,7 +7004,7 @@ class Shop_Controller_Show extends Core_Controller
 		{
 			$this->$fieldName = $value;
 		}
-		
+
 		return $this;
 	}
 

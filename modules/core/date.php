@@ -207,7 +207,7 @@ class Core_Date
 	/**
 	 * Преобразовывает дату из SQL в текстовый формат
 	 *
-	 * @param strin $sql
+	 * @param string $sql
 	 * @return string
 	 */
 	static public function sql2string($sql, $withTime = TRUE)
@@ -318,7 +318,7 @@ class Core_Date
 	static public function getDuration($duration)
 	{
 		$duration = intval($duration);
-		
+
 		$duration < 0 && $duration = 0;
 
 		$aReturn = array(

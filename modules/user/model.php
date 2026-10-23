@@ -119,9 +119,12 @@ class User_Model extends Core_Entity
 		'shop_warehouse_invoice' => array(),
 		'shop_warehouse_supply' => array(),
 		'shop_warehouse_purchasereturn' => array(),
+		'search_index_log' => array(),
 		'telephony' => array(),
 		'telephony_line' => array(),
 		'timeline_user' => array(),
+		'production_stage' => array('through' => 'production_stage_user'),
+		'production_stage_user' => array(),
 		'production_process_stage' => array(),
 		'production_task_process_plan_stage_user' => array(),
 	);
@@ -640,6 +643,11 @@ class User_Model extends Core_Entity
 			$this->Timeline_Users->deleteAll(FALSE);
 		}
 
+		if (Core::moduleIsActive('search'))
+		{
+			$this->Search_Index_Logs->deleteAll(FALSE);
+		}
+
 		$this->User_Bookmarks->deleteAll(FALSE);
 		$this->User_Worktimes->deleteAll(FALSE);
 		$this->User_Workdays->deleteAll(FALSE);
@@ -913,9 +921,13 @@ class User_Model extends Core_Entity
 		$aCompany_Department_Post_Users = $this->Company_Department_Post_Users->findAll();
 		foreach ($aCompany_Department_Post_Users as $key => $oCompany_Department_Post_User)
 		{
-			$aTempDepartmentPost[] = '<div ' . ( $key ? ' class="margin-top-5"' : '' ) . '>' . htmlspecialchars($oCompany_Department_Post_User->Company_Department->name) . '<br /><span class="user-post-name">'
-				. htmlspecialchars($oCompany_Department_Post_User->Company_Post->name) . '</span>'
-				. ($oCompany_Department_Post_User->head ? ' <i class="fa-solid fa-star head-star" title="' . Core::_('User.head_title') . '"></i>' : '') . '</div>';
+			$oCompany_Department = $oCompany_Department_Post_User->Company_Department;
+			if ($oCompany_Department->id)
+			{
+				$aTempDepartmentPost[] = '<div ' . ( $key ? ' class="margin-top-5"' : '' ) . '>' . htmlspecialchars((string) $oCompany_Department->name) . '<br /><span class="user-post-name">'
+					. htmlspecialchars($oCompany_Department_Post_User->Company_Post->name) . '</span>'
+					. ($oCompany_Department_Post_User->head ? ' <i class="fa-solid fa-star head-star" title="' . Core::_('User.head_title') . '"></i>' : '') . '</div>';
+			}
 		}
 
 		echo implode('', $aTempDepartmentPost);

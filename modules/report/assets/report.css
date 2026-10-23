@@ -261,10 +261,6 @@
 
 /* Мобильные устройства (до 768px) */
 @media (max-width: 768px) {
-	body {
-		padding: 12px; /* Уменьшаем отступы по краям экрана */
-	}
-
 	.report-layout {
 		gap: 16px; /* Уменьшаем расстояние между блоками */
 	}
@@ -344,6 +340,7 @@
 }
 
 @media print {
+	body { padding: 12px; }
 	/* Скрываем левое меню, шапку отчета и саму кнопку печати */
 	.report-layout .sidebar,
 	.report-layout .report-header,

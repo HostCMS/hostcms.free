@@ -111,7 +111,7 @@ class Wysiwyg_Driver_Tinymce7_Handler extends Wysiwyg_Handler
 					'plugins' => '"advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table code wordcount"',
 					//'toolbar1' => '"bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat"'
 					'toolbar1' => '"copy paste | undo redo | formatselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | removeformat"',
-				);
+				) + $this->getConfig();
 			break;
 			case 'fullpage':
 				$init = $this->getConfig();
@@ -329,6 +329,12 @@ class Wysiwyg_Driver_Tinymce7_Handler extends Wysiwyg_Handler
 					}
 				});
 			';
+		}
+
+		// Внешнее добавление для setup
+		if (isset($init['setup']))
+		{
+			$initSetup .= $init['setup'];
 		}
 
 		$initSetup .= '}';

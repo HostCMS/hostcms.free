@@ -26,7 +26,7 @@ class Sql_Table_Field_Entity extends Core_Empty_Entity
 	 * Fields
 	 * @var array
 	 */
-	protected $_tableColums = array(
+	protected $_tableColumns = array(
 		'Field' => array(
 			'datatype' => 'string',
 			'type' => 'string',

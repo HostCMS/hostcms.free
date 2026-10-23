@@ -1,5 +1,5 @@
 /* global hostcmsBackend i18n uuidv4 */
-(function($) {
+(function($){
 	"use strict";
 
 	$.extend({
@@ -1526,7 +1526,7 @@ $(function() {
 			return false;
 		})
 		// Удаление перехода сделки
-		.on('click', '[id ^= "conversion_"] .close', function() {
+		.on('click', '.deal-template-step[id ^= "conversion_"] .close', function() {
 			var wrapConversion = $(this).parent('[id ^="conversion_"]'),
 				startAndEndStepId = wrapConversion.attr('id').split('_'),
 				conversionStartStepId = startAndEndStepId[1],
@@ -1543,6 +1543,15 @@ $(function() {
 		.on('click', '.dropdown-step-list .close', function() {
 			var dropdownStepList = $(this).parent('.dropdown-step-list');
 			dropdownStepList.prev("[id ^= 'adding_conversion_to_']").show();
+						
+			var tmpDropdownDiv = dropdownStepList.find('#tmp-dropdown-div');
+			
+			if (tmpDropdownDiv.length)
+			{
+				var tmpId = tmpDropdownDiv.data('tmpId');	
+				$('body').find('.open[data-tmp-id = "' + tmpId + '"]').remove();
+			}
+						
 			dropdownStepList.remove();
 		})
 		// Сворачивание/разворачивание списков

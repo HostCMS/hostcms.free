@@ -720,8 +720,8 @@ class Core_Image_Gd extends Core_Image
 
 	/**
 	 * Установка прозрачности для $image_target, равной прозрачности $image_source
-	 * @param $image_target Ресурс изображения получателя
-	 * @param $image_source Ресурс изображения источника
+	 * @param GDImage $image_target Ресурс изображения получателя
+	 * @param GDImage $image_source Ресурс изображения источника
 	 */
 	public function setTransparency($image_target, $image_source)
 	{

@@ -1,6 +1,6 @@
 /* global hostcmsBackend, syntaxhighlighter, wysiwyg, i18n, mainFieldChecker, prepareKanbanBoards, navbarHeaderCustomization, changeDublicateTables, setCursorAdminTableWrap, setResizableAdminTableTh */
 
-(function($) {
+(function($){
 	"use strict";
 
 	$.extend({
@@ -1095,9 +1095,10 @@
 						dataType: 'json',
 						success: function(answer) {
 							this.remove();
-							const div = $('<div class="hidden-message hidden">').html(answer.error);
-							$(item).append(div);
-							div.remove();
+							if (answer.error && answer.error !== ''  && !answer.error.includes('alert-success')) {
+								const div = $('<div class="red small">').html(answer.error);
+								div.insertAfter(item);
+							}
 						}
 					});
 				},
@@ -1639,6 +1640,7 @@ $(function() {
 			if ($this.has('ul[data-change-context]').length) {
 				const rect = $this.get(0).getBoundingClientRect();
 				const offset = $this.offset();
+				const sTmpId = Math.random().toString().split('.')[1];
 
 				$this.after($('<div id="tmp-dropdown-div"></div>').css({
 					display: 'inline-block',
@@ -1646,7 +1648,9 @@ $(function() {
 					width: rect.width,
 					margin: $this.css('margin'),
 					'vertical-align': 'middle'
-				}));
+				}).data('tmpId', sTmpId));						
+												
+				$this.attr('data-tmp-id', sTmpId);
 
 				$('body').append($this.css({
 					position: 'absolute',
@@ -1674,6 +1678,7 @@ $(function() {
 		.on('hide.bs.dropdown', function(e) {
 			const $this = $(e.target);
 			if ($this.has('ul[data-change-context]').length) {
+												
 				$('#tmp-dropdown-div').after($this.css({
 					position: '',
 					left: '',
@@ -1681,6 +1686,8 @@ $(function() {
 					width: '',
 					'z-index': ''
 				})).remove();
+				
+				$this.removeAttr('data-tmp-id');
 			}
 		})
 		.on('touchend', '#leftNavbarArrow', function(event, withoutAnimation) {
@@ -1849,3 +1856,68 @@ $(function() {
 		}
 	});
 });
+
+/*$(document).ready(function() {
+
+	// --- 1. Выбор чекбокса по пробелу при наведении на строку ---
+	let $hoveredRow = null;
+
+	$('.admin-table tbody').on('mouseenter', 'tr', function() {
+		$hoveredRow = $(this);
+	}).on('mouseleave', 'tr', function() {
+		$hoveredRow = null;
+	});
+
+	$(document).on('keydown', function(e) {
+		if ($(e.target).is('input, textarea, select')) return;
+
+		if ((e.code === 'Space' || e.keyCode === 32) && $hoveredRow) {
+			e.preventDefault();
+
+			let $checkbox = $hoveredRow.find('.action-checkbox input[type="checkbox"]');
+			if ($checkbox.length) {
+				$checkbox.click();
+			}
+		}
+	});
+
+	// --- 2. Выделение чекбоксов зажатой левой кнопкой мыши ---
+	let isDragging = false;
+	let targetCheckState = false;
+
+	$('.admin-table tbody').on('mousedown', '.action-checkbox', function(e) {
+		if (e.which !== 1) return; // Только левая кнопка мыши
+
+		let $checkbox = $(this).find('input[type="checkbox"]');
+		if (!$checkbox.length) return;
+
+		isDragging = true;
+
+		// Если кликнули внутри label (по квадратику или тексту), браузер сам переключит чекбокс.
+		// Мы только запоминаем будущее состояние для остальных строк.
+		if ($(e.target).closest('label').length) {
+			targetCheckState = !$checkbox.prop('checked');
+		} else {
+			// Если кликнули по пустому месту в ячейке <td> (вне label), кликаем программно
+			$checkbox.click();
+			targetCheckState = $checkbox.prop('checked');
+		}
+	});
+
+	$(document).on('mouseup', function() {
+		isDragging = false;
+	});
+
+	$(document).on('selectstart', function(e) {
+		if (isDragging) e.preventDefault();
+	});
+
+	$('.admin-table tbody').on('mouseenter', 'tr', function() {
+		if (isDragging) {
+			let $checkbox = $(this).find('.action-checkbox input[type="checkbox"]');
+			if ($checkbox.length && $checkbox.prop('checked') !== targetCheckState) {
+				$checkbox.click();
+			}
+		}
+	});
+});*/

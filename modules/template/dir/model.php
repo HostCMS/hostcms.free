@@ -121,7 +121,7 @@ class Template_Dir_Model extends Core_Entity
 
 	/**
 	 * Move group to another group
-	 * @param int $document_dir_id dir id
+	 * @param int $template_dir_id dir id
 	 * @return self
 	 * @hostcms-event template_dir.onBeforeMove
 	 * @hostcms-event template_dir.onAfterMove

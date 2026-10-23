@@ -1,6 +1,6 @@
-/* global hostcmsBackend, wysiwyg, mainFormLocker, bootbox, readCookie, themeprimary */
+/* global hostcmsBackend, wysiwyg, tinyMCE, mainFormLocker, bootbox, readCookie, themeprimary */
 
-(function($) {
+(function($){
 	"use strict";
 
 	$.extend({
@@ -61,6 +61,68 @@
 			}
 
 			setResizableAdminTableTh();
+
+			// --- 1. Выбор чекбокса по пробелу при наведении на строку ---
+			let $hoveredRow = null;
+
+			jWindow.find('.admin-table tbody').on('mouseenter', 'tr', function() {
+				$hoveredRow = $(this);
+			}).on('mouseleave', 'tr', function() {
+				$hoveredRow = null;
+			});
+
+			$(document).off('keydown.spaceEvent').on('keydown.spaceEvent', function(e) {
+				if ($(e.target).is('input, textarea, select')) return;
+
+				if ((e.code === 'Space' || e.keyCode === 32) && $hoveredRow) {
+					e.preventDefault();
+
+					let $checkbox = $hoveredRow.find('.action-checkbox input[type="checkbox"]');
+					if ($checkbox.length) {
+						$checkbox.click();
+					}
+				}
+			});
+
+			// --- 2. Выделение чекбоксов зажатой левой кнопкой мыши ---
+			let isDragging = false;
+			let targetCheckState = false;
+
+			jWindow.find('.admin-table tbody').on('mousedown', '.action-checkbox', function(e) {
+				if (e.which !== 1) return; // Только левая кнопка мыши
+
+				let $checkbox = $(this).find('input[type="checkbox"]');
+				if (!$checkbox.length) return;
+
+				isDragging = true;
+
+				// Если кликнули внутри label (по квадратику или тексту), браузер сам переключит чекбокс.
+				// Мы только запоминаем будущее состояние для остальных строк.
+				if ($(e.target).closest('label').length) {
+					targetCheckState = !$checkbox.prop('checked');
+				} else {
+					// Если кликнули по пустому месту в ячейке <td> (вне label), кликаем программно
+					$checkbox.click();
+					targetCheckState = $checkbox.prop('checked');
+				}
+			});
+
+			jWindow.on('mouseup', function() {
+				isDragging = false;
+			});
+
+			jWindow.on('selectstart', function(e) {
+				if (isDragging) e.preventDefault();
+			});
+
+			jWindow.find('.admin-table tbody').on('mouseenter', 'tr', function() {
+				if (isDragging) {
+					let $checkbox = $(this).find('.action-checkbox input[type="checkbox"]');
+					if ($checkbox.length && $checkbox.prop('checked') !== targetCheckState) {
+						$checkbox.click();
+					}
+				}
+			});
 		},
 
 		beforeContentLoad: function($object) {
@@ -86,7 +148,6 @@
 			settings = $.extend({
 				open: function() {
 					const uiDialog = $(this).parent('.ui-dialog');
-					// Оптимизация: чтение и запись одной строкой, если значения не меняются - лишнее, но оставил для совместимости
 					uiDialog.css({ width: uiDialog.width(), height: uiDialog.height() });
 				},
 				close: function() {
@@ -336,12 +397,29 @@
 
 			$("#lib_properties", $form).empty().html(data.optionsHtml);
 		},
+		/*pasteStandartAnswer: function(data) {
+			$.loadingScreen('hide');
+			const $this = $(this);
+			$this.val($this.val() + data);
+		},*/
 
 		pasteStandartAnswer: function(data) {
 			$.loadingScreen('hide');
 			const $this = $(this);
-			$this.val($this.val() + data);
+			const editorId = $this.attr('id');
+
+			// Проверяем, существует ли TinyMCE и инициализирован ли он для текущего поля
+			if (typeof tinyMCE !== 'undefined' && tinyMCE.get(editorId) && !tinyMCE.get(editorId).isHidden()) {
+				// Заменяем обычные переносы строк на HTML-теги
+				const htmlData = data.replace(/\r\n|\r|\n/g, '<br />');
+
+				// Вставляем отформатированный текст в визуальный редактор
+				tinyMCE.get(editorId).execCommand('mceInsertContent', false, htmlData);
+			} else {
+				$this.val($this.val() + data);
+			}
 		},
+
 		bookmarksPrepare: function() {
 			$.refreshBookmarksList();
 

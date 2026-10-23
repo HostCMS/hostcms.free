@@ -1,5 +1,5 @@
 /* global */
-(function($) {
+(function($){
 	"use strict";
 
 	// http://james.padolsey.com/javascript/regex-selector-for-jquery/

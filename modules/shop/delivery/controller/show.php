@@ -64,6 +64,8 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 	{
 		parent::__construct($oShop->clearEntities());
 
+		$bSessionStarted = Core_Session::isStarted();
+
 		if (Core::moduleIsActive('siteuser'))
 		{
 			// Если есть модуль пользователей сайта, $siteuser_id равен 0 или ID авторизованного
@@ -85,6 +87,8 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 				 Shop_Item_Controller::coupon($_SESSION['hostcmsOrder']['coupon_text']);
 			 }
 		}
+		
+		!$bSessionStarted && Core_Session::close();
 	}
 
 	/**
@@ -168,20 +172,15 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 				->addAttribute('formattedWithCurrency', $oShop->Shop_Currency->formatWithCurrency($this->totalAmount))
 		);
 
-		Core_Session::start();
+		
 
 		$aSiteuser_Group_IDs = array(0);
-
-		if (Core::moduleIsActive('siteuser'))
+		if (Core::moduleIsActive('siteuser') && $this->_oSiteuser)
 		{
-			$oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
-			if ($oSiteuser)
+			$aSiteuser_Groups = $this->_oSiteuser->Siteuser_Groups->findAll();
+			foreach ($aSiteuser_Groups as $oSiteuser_Group)
 			{
-				$aSiteuser_Groups = $oSiteuser->Siteuser_Groups->findAll();
-				foreach ($aSiteuser_Groups as $oSiteuser_Group)
-				{
-					$aSiteuser_Group_IDs[] = $oSiteuser_Group->id;
-				}
+				$aSiteuser_Group_IDs[] = $oSiteuser_Group->id;
 			}
 		}
 
@@ -194,6 +193,7 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 		// Выбираем все типы доставки для данного магазина
 		$this->_aShop_Deliveries = $this->_Shop_Deliveries->findAll();
 
+		$aDeliveries = array();
 		foreach ($this->_aShop_Deliveries as $oShop_Delivery)
 		{
 			$aShop_Delivery_Conditions = $this->getShopDeliveryConditions($oShop_Delivery);
@@ -204,7 +204,7 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 			{
 				foreach ($aShop_Delivery_Conditions as $key => $object)
 				{
-					$_SESSION['hostcmsOrder']['deliveries'][$object->id] = array(
+					$aDeliveries[$object->id] = array(
 						'shop_delivery_id' => $oShop_Delivery->id,
 						'price' => $object->price,
 						'rate' => isset($object->rate) ? intval($object->rate) : 0,
@@ -260,6 +260,9 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 				}
 			}
 		}
+
+		Core_Session::start();
+		$_SESSION['hostcmsOrder']['deliveries'] = $aDeliveries;
 
 		return parent::show();
 	}

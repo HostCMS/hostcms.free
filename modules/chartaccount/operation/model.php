@@ -165,6 +165,7 @@ class Chartaccount_Operation_Model extends Core_Entity
 
 	/**
 	 * Get document full name
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
 	public function getDocumentFullName($oAdmin_Form_Controller)

@@ -1,6 +1,6 @@
 /* Simplified Chinese translation for the jQuery Timepicker Addon /
 / Written by Will Lu */
-(function($) {
+(function($){
 	$.timepicker.regional['zh-CN'] = {
 		timeOnlyTitle: '选择时间',
 		timeText: '时间',

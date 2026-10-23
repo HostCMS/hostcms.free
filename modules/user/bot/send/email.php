@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage User
  * @version 7.x
- * @copyright © 2005-2024, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class User_Bot_Send_Email extends Bot_Controller
 {
@@ -147,8 +147,9 @@ class User_Bot_Send_Email extends Bot_Controller
 					->subject($sSubject)
 					->message($sMessage)
 					->contentType('text/html')
+					->header('Auto-Submitted', 'auto-generated')
 					->header('X-HostCMS-Reason', 'User Bot Send Email')
-					->header('Precedence', 'bulk')
+					//->header('Precedence', 'bulk')
 					->send();
 
 				Core_Log::instance()->clear()

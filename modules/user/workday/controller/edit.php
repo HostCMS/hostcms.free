@@ -69,7 +69,7 @@ class User_Workday_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 	{
 		// Всегда id_content
 		$sJsRefresh = '<script>
-		if ($("#id_content .deals-aggregate-user-info").length && typeof _windowSettings != \'undefined\') {
+		if ($("#id_content .deals-aggregate-user-info").length && typeof window._windowSettings != \'undefined\') {
 			$(\'#id_content #refresh-toggler\').click();
 		}</script>';
 

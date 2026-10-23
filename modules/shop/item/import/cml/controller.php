@@ -147,8 +147,16 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 	 */
 	protected $_aConfig = NULL;
 
+	/**
+	 * TMP path
+	 * @var string
+	 */
 	protected $_tmpPath = NULL;
 
+	/**
+	 * Import file path
+	 * @var string
+	 */
 	protected $_importFilePath = NULL;
 
 	/**
@@ -350,7 +358,7 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 
 			is_null($oShop_Group->path) && $oShop_Group->path= '';
 
-			$oShop_Group->save()->clearCache();
+			$oShop_Group->save();
 
 			// Indexation
 			$this->searchIndexation
@@ -362,6 +370,8 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 
 				$oParent_Group
 					&& $oParent_Group->incCountGroups();
+					
+				$oShop_Group->clearCache();
 			}
 
 			// Указание "Картинка" для группы не соответствует формату обмена CML!
@@ -480,9 +490,13 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 
 	/**
 	 * Check if property exists in array and save it if so
+	 * @param Shop_Item_Model $oShop_Item
+	 * @param SimpleXMLElement $oPropertyValue
+	 * @param string $sValue
+	 * @param boolean $bForcedAdd
 	 * @return self
 	 */
-	protected function _addPredefinedAdditionalProperty($oShop_Item, SimpleXMLElement $oPropertyValue, $sValue, $bForcedAdd = FALSE)
+	protected function _addPredefinedAdditionalProperty(Shop_Item_Model $oShop_Item, SimpleXMLElement $oPropertyValue, $sValue, $bForcedAdd = FALSE)
 	{
 		if (is_null($oShop_Item))
 		{
@@ -503,7 +517,7 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 
 		if ($sPropertyName == 'ОписаниеВФорматеHTML' && strlen($sValue))
 		{
-			$oShop_Item->text = $sValue;
+			$oShop_Item->text = $this->_prepareText($sValue);
 			$oShop_Item->save();
 			return $this;
 		}
@@ -546,7 +560,7 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 	/**
 	 * Add tax info
 	 * @param SimpleXMLElement $oTax tax
-	 * @return Shop_Tax
+	 * @return Shop_Tax_Model
 	 */
 	protected function _addTax($oTax)
 	{
@@ -853,6 +867,10 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 				}
 				else
 				{
+					// Если визуальный редактор, форматируем текст
+					$oProperty->type == 6
+						&& $changedValue = $this->_prepareText($changedValue);
+					
 					$oProperty_Value->setValue($changedValue);
 					$oProperty_Value->save();
 				}
@@ -986,7 +1004,7 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 								$oProperty_Value->file_small = '';
 							} catch (Exception $e) {}
 						}
-						
+
 						$oProperty_Value->save();
 					}
 					else
@@ -1009,12 +1027,12 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 								$oShopItem->image_small = '';
 							} catch (Exception $e) {}
 						}
-						
+
 						$oShopItem->save();
 					}
 
 					clearstatcache();
-					
+
 					if (Core_File::isFile($sSourceFile))
 					{
 						$sSourceFileBaseName = basename($PictureData);
@@ -2000,7 +2018,7 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 					$this->debug && Core_Log::instance()->clear()
 						->status(Core_Log::$MESSAGE)
 						->write('1С, обработка offers.xml, импорт складов закончен');
-						
+
 					if (isset($this->_oSimpleXMLElement->Классификатор))
 					{
 						$classifier = $this->_oSimpleXMLElement->Классификатор;
@@ -2286,6 +2304,7 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 											$oShop_Currency->sign = $sCurrency;
 											$oShop_Currency->code = $sCurrency;
 											$oShop_Currency->exchange_rate = 1;
+											$oShop_Currency->save();
 										}
 
 										$newPrice = Shop_Controller::instance()->convertPrice(strval($oPrice->ЦенаЗаЕдиницу), 2);
@@ -2792,7 +2811,7 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 		{
 			$Shop_Filter_Group_Controller = new Shop_Filter_Group_Controller($oShop);
 			$Shop_Filter_Group_Controller->rebuild();
-			
+
 			$this->debug && Core_Log::instance()->clear()
 				->status(Core_Log::$MESSAGE)
 				->write(sprintf('1С, перестроение быстрого фильтра завершено'));
@@ -2800,7 +2819,7 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 
 		// Post all
 		$this->postAll();
-		
+
 		$this->debug && Core_Log::instance()->clear()
 			->status(Core_Log::$MESSAGE)
 			->write(sprintf('1С, проводка всех документов завершена'));
@@ -3517,13 +3536,26 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 		'961' => 'XAG'
 	);
 
+	/**
+	 * Get currency codes
+	 * @return array
+	 */
 	public function getCurrencyCodes()
 	{
 		return $this->_aCurrencyCodes;
 	}
 
+	/**
+	 * Shop warehouse inventory ids
+	 * @var array
+	 */
 	protected $_aShop_Warehouse_Inventory_Ids = array();
 
+	/**
+	 * Get inventriy
+	 * @param int $shop_warehouse_id
+	 * @return Shop_Warehouse_Inventory_Model
+	 */
 	public function getInventory($shop_warehouse_id)
 	{
 		if (!isset($this->_aShop_Warehouse_Inventory_Ids[$shop_warehouse_id]))
@@ -3544,8 +3576,16 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 		return Core_Entity::factory('Shop_Warehouse_Inventory', $this->_aShop_Warehouse_Inventory_Ids[$shop_warehouse_id]);
 	}
 
+	/**
+	 * Shop price setting id
+	 * @var int|NULL
+	 */
 	protected $_Shop_Price_Setting_Id = NULL;
 
+	/**
+	 * Get price
+	 * @return Shop_Price_Setting_Model
+	 */
 	public function getPrices()
 	{
 		if (is_null($this->_Shop_Price_Setting_Id))
@@ -3583,7 +3623,7 @@ class Shop_Item_Import_Cml_Controller extends Shop_Item_Import_Controller
 			$oShop_Price_Setting = Core_Entity::factory('Shop_Price_Setting', $this->_Shop_Price_Setting_Id);
 			$oShop_Price_Setting->post();
 		}
-		
-		return $this; 
+
+		return $this;
 	}
 }

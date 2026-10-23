@@ -1,7 +1,8 @@
 /* global hostcmsBackend, jQuery */
-"use strict";
 
 (function($){
+	"use strict";
+	
 	$.extend({
 		loadChartaccounts: function(windowId, chartaccount_id, prefix) {
 			$.ajax({

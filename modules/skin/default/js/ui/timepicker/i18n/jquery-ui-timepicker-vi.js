@@ -1,6 +1,6 @@
 /* Vietnamese translation for the jQuery Timepicker Addon */
 /* Written by Nguyen Dinh Trung */
-(function($) {
+(function($){
 	$.timepicker.regional['vi'] = {
 		timeOnlyTitle: 'Chọn giờ',
 		timeText: 'Thời gian',

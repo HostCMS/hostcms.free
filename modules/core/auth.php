@@ -189,7 +189,40 @@ class Core_Auth
 					Core_Html_Entity::factory('Div')
 						->class('indexMessage')
 						->add(Core_Html_Entity::factory('H1')->value($title))
-						->add(Core_Html_Entity::factory('Script')->value('checkRegistration(location)'))
+						//->add(Core_Html_Entity::factory('Script')->value('checkRegistration(location)'))
+						->add(
+							Core_Html_Entity::factory('Div')
+								->class('text-align-center')
+								->style('width: 100%')
+								->add(
+								Core_Html_Entity::factory('Div')
+									->id('webauthn-btn')
+									->class('btn btn-gray btn-lg')
+									->value(Core::_('Admin.fast_login'))
+									->style('margin-top: 20px; padding: 10px 20px; font-size: 18px; display: none')
+									->add(
+										Core_Html_Entity::factory('I')->class('fa-solid fa-fingerprint')
+									)
+							)
+						)
+						->add(
+							Core_Html_Entity::factory('Script')->value("
+								jQuery(function($) {
+									if ($.unavailableWebauthn()) {
+										return;
+									}
+
+									// Если всё хорошо — показываем кнопку
+									var btn = $('#webauthn-btn');
+									btn.css('display', 'inline-block');
+
+									document.getElementById('webauthn-btn').addEventListener('click', function() {
+										checkRegistration(window.location);
+									});
+									setTimeout(function() { checkRegistration(window.location); }, 300);
+								});
+							")
+						)
 						->execute();
 
 					$oSkin->footer();

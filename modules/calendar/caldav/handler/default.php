@@ -14,6 +14,7 @@ class Calendar_Caldav_Handler_Default extends Calendar_Caldav_Controller
 {
 	/**
 	 * Get Connection Config options
+	 * @param string $method
 	 * @return array
 	 */
 	protected function _getConnectionConfig($method)
@@ -147,18 +148,18 @@ EOD;
 				foreach ($oXml->xpath("{$curentNamespace}:response") as $oResponse)
 				{
 					$oProps = $oResponse->xpath("{$curentNamespace}:propstat/{$curentNamespace}:prop");
-					$responceChildren = (array)$oResponse->children($namespaces[$curentNamespace]);
+					$responseChildren = (array)$oResponse->children($namespaces[$curentNamespace]);
 
 					foreach ($oProps as $oProp)
 					{
-						$explodeHref = explode('/', strval($responceChildren['href']));
+						$explodeHref = explode('/', strval($responseChildren['href']));
 
 						if (isset($explodeHref[3]))
 						{
 							// Now we don’t have the URL hard-coded
 							$propChildren = (array)$oProp->children($namespaces[$curentNamespace]);
 
-							$return = $this->_getCalendarDetails($responceChildren, $oProp, $propChildren);
+							$return = $this->_getCalendarDetails($responseChildren, $oProp, $propChildren);
 
 							!is_null($return)
 								&& $aReturn[strval($explodeHref[3])] = $return;
@@ -175,18 +176,18 @@ EOD;
 
 	/**
 	 * Get calendar details
-	 * @param object $responceChildren
+	 * @param object $responseChildren
 	 * @param object $oProp
 	 * @param object $propChildren
 	 * @return array|NULL
 	 */
-	protected function _getCalendarDetails($responceChildren, $oProp, $propChildren)
+	protected function _getCalendarDetails($responseChildren, $oProp, $propChildren)
 	{
 		$return = NULL;
 
 		if (isset($propChildren['displayname']) && strlen($propChildren['displayname']))
 		{
-			$explodeHref = explode('/', strval($responceChildren['href']));
+			$explodeHref = explode('/', strval($responseChildren['href']));
 
 			if (isset($explodeHref[3]))
 			{
@@ -198,7 +199,7 @@ EOD;
 
 				$return = array(
 					'name' => strval($propChildren['displayname']),
-					'href' => strval($responceChildren['href']),
+					'href' => strval($responseChildren['href']),
 					'ctag' => isset($aGetctag[0]) ? strval($aGetctag[0]) : '',
 					'color' => isset($aCalendarColor[0]) ? strval($aCalendarColor[0]) : '',
 					'sync_token' => isset($propChildren['sync-token']) ? strval($propChildren['sync-token']) : NULL
@@ -261,7 +262,7 @@ EOD;
 				foreach ($oXml->xpath("{$curentNamespace}:response") as $oResponse)
 				{
 					$oProps = $oResponse->xpath("{$curentNamespace}:propstat/{$curentNamespace}:prop");
-					$responceChildren = (array)$oResponse->children($namespaces[$curentNamespace]);
+					$responseChildren = (array)$oResponse->children($namespaces[$curentNamespace]);
 
 					foreach ($oProps as $oProp)
 					{
@@ -273,7 +274,7 @@ EOD;
 
 						if (isset($aCalendarData[0]))
 						{
-							$explodeHref = explode('/', strval($responceChildren['href']));
+							$explodeHref = explode('/', strval($responseChildren['href']));
 
 							if (isset($explodeHref[3]))
 							{
@@ -329,11 +330,42 @@ EOD;
 									$row == 'BEGIN:VEVENT' && $bVEVENT = TRUE;
 									$row == 'END:VEVENT' && $bVEVENT = FALSE;
 
+									/* Внутри BEGIN:VEVENT могут быть другие BEGIN:..., например BEGIN:VALARM
+									BEGIN:VCALENDAR
+									VERSION:2.0
+									PRODID:DAVx5/4.5.14-ose ical4j/4.2.5
+									BEGIN:VEVENT
+									DTSTAMP:20260720T054743Z
+									UID:8baca93b-3377-4c0c-8010-466a5753b660
+									SUMMARY:заголовок
+									LOCATION:гостиница
+									DTSTART;TZID=Europe/Moscow:20260722T100000
+									DTEND;TZID=Europe/Moscow:20260722T180000
+									DESCRIPTION:описание
+									BEGIN:VALARM
+									TRIGGER:-PT20M
+									ACTION:DISPLAY
+									DESCRIPTION:заголовок
+									END:VALARM
+									END:VEVENT
+									BEGIN:VTIMEZONE
+									TZID:Europe/Moscow
+									BEGIN:STANDARD
+									TZNAME:MSK
+									TZOFFSETFROM:+0400
+									TZOFFSETTO:+0300
+									DTSTART:19190816T000000
+									RDATE:19211001T000000
+									RDATE:20141026T020000
+									END:STANDARD
+									END:VTIMEZONE
+									END:VCALENDAR*/
+									$bVEVENT && $row != 'BEGIN:VEVENT' && strpos($row, 'BEGIN:') === 0 && $bVEVENT = FALSE;
+
 									if ($bVEVENT)
 									{
 										// Delete all ;OPTION="VALUE"
 										$row = preg_replace('/;[A-Z\-]*=(:?"[^"]+"|[^:;]+)/i', '', $row);
-
 										list($name, $value) = explode(':', $row, 2);
 
 										/*
@@ -359,8 +391,7 @@ EOD;
 
 									if (isset($aEvent['DTEND']))
 									{
-										$iEnd = strtotime($aEvent['DTEND']);
-
+										/*$endTs = strtotime($aEvent['DTEND']);
 										if (!is_null($start_datetime)
 											&& strlen($aEvent['DTSTART']) == 8 && strlen($aEvent['DTEND']) == 8
 											&& $aEvent['DTEND'] - $aEvent['DTSTART'] == 1
@@ -368,14 +399,19 @@ EOD;
 										{
 											$allDay = TRUE;
 
-											$iEnd--; // delete one second
-										}
+											$endTs--; // delete one second
+										}*/
+										
+										$startTs = strtotime($aEvent['DTSTART']);
+										$endTs = strtotime($aEvent['DTEND']);
+										$allDay = ($startTs !== FALSE && $endTs !== FALSE && ($endTs - $startTs) == 86400);
+										$allDay && $endTs--; // delete one second
 
-										$end_datetime = date('Y-m-d H:i:s', $iEnd);
+										$end_datetime = date('Y-m-d H:i:s', $endTs);
 									}
 
 									$aReturn[] = array(
-										'href' => strval($responceChildren['href']),
+										'href' => strval($responseChildren['href']),
 										'getetag' => isset($propChildren['getetag']) ? strval($propChildren['getetag']) : '-',
 										'summary' => isset($aEvent['SUMMARY']) ? strval($aEvent['SUMMARY']) : '',
 										'start_datetime' => !is_null($start_datetime) ? $start_datetime : Core_Date::timestamp2sql(time()),
@@ -387,8 +423,6 @@ EOD;
 										'description' => isset($aEvent['DESCRIPTION']) ? strval($aEvent['DESCRIPTION']) : '',
 										'allDay' => $allDay
 									);
-
-
 								}
 							}
 						}
@@ -467,6 +501,9 @@ EOD;
 
 	/**
 	 * Create event
+	 * @param array $aEvent
+	 * @param string $sUrl
+	 * @param string $sCalendar
 	 * @return string
 	 */
 	public function create($aEvent, $sUrl, $sCalendar)
@@ -483,6 +520,9 @@ EOD;
 
 	/**
 	 * Update event
+	 * @param array $aEvent
+	 * @param string $sUrl
+	 * @param string $sCalendar
 	 * @return string
 	 */
 	public function update($aEvent, $sUrl, $sCalendar)
@@ -496,6 +536,7 @@ EOD;
 
 	/**
 	 * Get calendar event
+	 * @param string $sHref
 	 * @return array
 	 */
 	public function getEvent($sHref)
@@ -530,6 +571,7 @@ EOD;
 
 	/**
 	 * Delete event
+	 * @param string $sUrl
 	 * @return string
 	 */
 	public function delete($sUrl)

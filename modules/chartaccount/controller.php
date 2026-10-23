@@ -12,6 +12,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  */
 class Chartaccount_Controller
 {
+	/**
+	 * Admin_Form_Controller object
+	 * @var Admin_Form_Controller|NULL
+	 */
 	static protected $_Admin_Form_Controller = NULL;
 
 	/**
@@ -515,6 +519,12 @@ class Chartaccount_Controller
 		return $aSubcounts;
 	}
 
+	/**
+	 * Get subcount value
+	 * @param int $type
+	 * @param string $value
+	 * @return array|NULL
+	 */
 	static protected function _getSubcountValue($type, $value)
 	{
 		$oUser = Core_Auth::getCurrentUser();
@@ -623,6 +633,7 @@ class Chartaccount_Controller
 
 	/**
 	 * Get document type
+	 * @param int $document_id
 	 * @return int|NULL
 	 */
 	static public function getDocumentType($document_id)
@@ -634,6 +645,7 @@ class Chartaccount_Controller
 
 	/**
 	 * Get document
+	 * @param int $document_id
 	 * @return object|NULL
 	 */
 	static public function getDocument($document_id)

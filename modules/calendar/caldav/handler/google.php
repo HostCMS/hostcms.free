@@ -8,12 +8,13 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Calendar
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Calendar_Caldav_Handler_Google extends Calendar_Caldav_Handler_Default
 {
 	/**
 	 * Redirect uri
+	 * @var mixed
 	 */
 	protected $_redirectUri = NULL;
 

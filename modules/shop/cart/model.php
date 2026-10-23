@@ -206,10 +206,11 @@ class Shop_Cart_Model extends Core_Entity
 		$this->queryBuilder()
 			//->clear()
 			->select('shop_carts.*')
-			->leftJoin('shop_items', 'shop_items.id', '=', 'shop_carts.shop_item_id')
+			//->leftJoin('shop_items', 'shop_items.id', '=', 'shop_carts.shop_item_id') // 000354422
 			->where('shop_carts.siteuser_id', '=', $siteuser_id)
-			->clearOrderBy()
-			->orderBy('shop_items.price', 'DESC');
+			//->clearOrderBy() // 000354422
+			//->orderBy('shop_items.price', 'DESC') // 000354422
+			;
 
 		return $this->findAll($bCache);
 	}

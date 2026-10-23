@@ -62,7 +62,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 		?><input name="admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" size="17" class="form-control input-sm calendar_field" type="text" />
 		<div><input name="admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_to?>" size="17" class="form-control input-sm calendar_field" type="text" /></div>
 		<script>
-		(function($) {
+		(function($){
 			$("#id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>").datetimepicker({showOtherMonths: true, selectOtherMonths: true, changeMonth: true, changeYear: true, timeFormat: 'hh:mm:ss'});
 			$("#id_admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>").datetimepicker({showOtherMonths: true, selectOtherMonths: true, changeMonth: true, changeYear: true, timeFormat: 'hh:mm:ss'});
 		})(jQuery);
@@ -80,7 +80,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 		?><input type="text" name="admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" size="8" class="form-control input-sm calendar_field" />
 		<div><input type="text" name="admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_to?>" size="8" class="form-control input-sm calendar_field" /></div>
 		<script>
-		(function($) {
+		(function($){
 			$("#id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>").datetimepicker({showOtherMonths: true, selectOtherMonths: true, changeMonth: true, changeYear: true});
 			$("#id_admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>").datetimepicker({showOtherMonths: true, selectOtherMonths: true, changeMonth: true, changeYear: true});
 		})(jQuery);
@@ -95,7 +95,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 	{
 		?><input type="text" name="admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo htmlspecialchars($date_from)?>" size="8" class="form-control input-sm calendar_field" />
 		<script>
-		(function($) {
+		(function($){
 			$("#id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>").datetimepicker({showOtherMonths: true, selectOtherMonths: true, changeMonth: true, changeYear: true});
 		})(jQuery);
 		</script>

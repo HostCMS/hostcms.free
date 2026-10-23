@@ -96,6 +96,8 @@ class Benchmark_Model extends Core_Entity
 
 	/**
 	 * Get coefficient for benchmark
+	 * @param int $value
+	 * @param int $max
 	 * @return int
 	 */
 	public function getCoefficient($value, $max)
@@ -153,7 +155,7 @@ class Benchmark_Model extends Core_Entity
 		$iBenchmark = $this->getBenchmark();
 
 		$aColors = Benchmark_Controller::getColors();
-		$sColor = $aColors[ceil($iBenchmark / 25)];
+		$sColor = $aColors[intval(ceil($iBenchmark / 25))];
 
 		Core_Html_Entity::factory('Span')
 			->class($sColor)

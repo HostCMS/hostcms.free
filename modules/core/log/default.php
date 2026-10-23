@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Log
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_Log_Default extends Core_Log
 {
@@ -59,9 +59,9 @@ class Core_Log_Default extends Core_Log
 				: '-';
 		}
 
-		$sHttpHost = Core_Array::get($_SERVER, 'HTTP_HOST');
-		$page = !is_null($sHttpHost)
-			? (Core::httpsUses() ? 'https' : 'http') . '://' . $sHttpHost . Core_Array::get($_SERVER, 'REQUEST_URI')
+		$httpHost = Core_Array::get($_SERVER, 'HTTP_HOST');
+		$page = !is_null($httpHost)
+			? (Core::httpsUses() ? 'https' : 'http') . '://' . $httpHost . Core_Array::get($_SERVER, 'REQUEST_URI')
 			: Core_Array::get($_SERVER, 'PHP_SELF');
 
 		$user_ip = Core::getClientIp();
@@ -129,7 +129,7 @@ class Core_Log_Default extends Core_Log
 				? SUPERUSER_EMAIL_FROM
 				: $to;
 
-			$subject = "HostCMS - {$sHttpHost}: " . trim(strip_tags(mb_substr($message, 0, 150)));
+			$subject = "HostCMS - {$httpHost}: " . trim(strip_tags(mb_substr($message, 0, 150)));
 
 			Core_Mail::instance()
 				->to($to)

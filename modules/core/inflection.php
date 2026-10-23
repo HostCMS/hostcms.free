@@ -68,6 +68,7 @@ abstract class Core_Inflection
 
 	/**
 	 * @deprecated Use isPluralIrregular()
+	 * @param string $word
 	 */
 	public function isPluralIrrigular($word) {
 		return $this->isPluralIrregular($word);
@@ -75,6 +76,7 @@ abstract class Core_Inflection
 
 	/**
 	 * Chech if $word is PLURAL and IRREGULAR
+	 * @param string $word
 	 * @return boolean
 	 */
 	public function isPluralIrregular($word)
@@ -85,6 +87,7 @@ abstract class Core_Inflection
 
 	/**
 	 * @deprecated Use isSingularIrregular()
+	 * @param string $word
 	 */
 	public function isSingularIrrigular($word) {
 		return $this->isSingularIrregular($word);
@@ -92,6 +95,7 @@ abstract class Core_Inflection
 
 	/**
 	 * Chech if $word is SINGULAR and IRREGULAR
+	 * @param string $word
 	 * @return boolean
 	 */
 	public function isSingularIrregular($word)
@@ -224,5 +228,11 @@ abstract class Core_Inflection
 		return self::instance($lng)->numberInWords($float);
 	}
 
+	/**
+	 * Currency in word
+	 * @param float $float
+	 * @param string $currencyCode
+	 * @return string
+	 */
 	abstract public function currencyInWords($float, $currencyCode);
 }

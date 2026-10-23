@@ -55,6 +55,7 @@ class Event_Controller
 	/**
 	 * Show related events
 	 * @param Core_Entity $oEntity entity
+	 * @return string
 	 */
 	static public function showRelatedEvents(Core_Entity $oEntity)
 	{

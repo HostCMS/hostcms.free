@@ -20,6 +20,7 @@ abstract class Core_Cache
 
 	/**
 	 * Driver's configuration
+	 * @var mixed
 	 */
 	protected $_config = NULL;
 
@@ -127,7 +128,7 @@ abstract class Core_Cache
 		$aConfig = Core::$config->get('core_cache', array());
 		return isset($aConfig[$cacheName]) && isset($aConfig[$cacheName]['driver']);
 	}
-	
+
 	/**
 	 * Check cache config isset
 	 * @param string $cacheName
@@ -247,6 +248,7 @@ abstract class Core_Cache
 	 * @param string $cacheName $cacheName cache cache name
 	 * @param string $actualKey cache key
 	 * @param array $tags array of tags
+	 * @param int $expire
 	 * @return self
 	 */
 	protected function _saveTags($cacheName, $actualKey, array $tags, $expire)
@@ -380,7 +382,7 @@ abstract class Core_Cache
 
 		return $this;
 	}
-	
+
 	/**
 	 * Reset Opcache
 	 */

@@ -32,13 +32,13 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS
  * @subpackage Core\Querybuilder
  * @version 7.x
- * @copyright © 2005-2025, https://www.hostcms.ru
+ * @copyright © 2005-2026, https://www.hostcms.ru
  */
 class Core_QueryBuilder_Delete extends Core_QueryBuilder_Selection
 {
 	/**
 	 * Name of the table
-	 * @var string
+	 * @var array
 	 */
 	protected $_tableName = array();
 
@@ -159,17 +159,17 @@ class Core_QueryBuilder_Delete extends Core_QueryBuilder_Selection
 	public function build()
 	{
 		$query = array();
-		
+
 		if (!empty($this->_comment))
 		{
 			$query[] = $this->_buildComment($this->_comment);
 		}
-		
+
 		if (!empty($this->_with))
 		{
 			$query[] = $this->_buildWith($this->_with);
 		}
-		
+
 		$query[] = 'DELETE';
 
 		if (!is_null($this->_priority))

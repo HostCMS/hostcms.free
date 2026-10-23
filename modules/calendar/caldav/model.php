@@ -180,6 +180,10 @@ class Calendar_Caldav_Model extends Core_Entity
 							}
 						}
 					}
+
+					Core_Log::instance()->clear()
+						->status(Core_Log::$MESSAGE)
+						->write("Caldav UID: {$aObject['uid']}, summary: {$aObject['summary']}, description: {$aObject['description']}");
 				}
 			}
 
@@ -204,7 +208,6 @@ class Calendar_Caldav_Model extends Core_Entity
 		$date = Core_Date::gmdate("Ymd\THis\Z", time());
 
 		$title = str_replace("\n", '\n', $oEntity->title);
-
 		$description = str_replace("\n", '\n', $oEntity->description);
 
 		$last_modified = Core_Date::gmdate("Ymd\THis\Z", Core_Date::datetime2timestamp($oEntity->last_modified));
@@ -240,6 +243,8 @@ EOD;
 
 	/**
 	 * Backend callback method
+	 * @param Admin_Form_Field_Model $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
 	public function nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)

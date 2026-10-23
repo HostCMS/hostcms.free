@@ -14,6 +14,7 @@ abstract class Core_Image
 {
 	/**
 	 * Driver's configuration
+	 * @var mixed
 	 */
 	static protected $_config = NULL;
 

@@ -67,7 +67,7 @@ class Crm_Project_Note_Controller_Edit extends Crm_Note_Controller_Edit
 		$crm_project_id = Core_Array::getGet('crm_project_id', 0, 'int');
 
 		$sJsRefresh = '<script>
-			if ($("#id_content .timeline-wrapper").length && typeof _windowSettings != \'undefined\') {
+			if ($("#id_content .timeline-wrapper").length && typeof window._windowSettings != \'undefined\') {
 				$.adminLoad({ path: hostcmsBackend + \'/crm/project/entity/index.php\', additionalParams: \'crm_project_id=' . $crm_project_id . '\', windowId: \'id_content\' });
 			}
 			if ($("#id_content #crm-project-notes").length) {

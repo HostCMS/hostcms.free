@@ -107,13 +107,15 @@ class Wysiwyg_Controller
 			{
 				// Заменяем на новые пути в сохраненных данных
 				$aFields = array('description', 'text', 'comment');
+				$aModelColumns = $oEntity->getModelColumns();
 				foreach ($aFields as $fieldName)
 				{
-					if (isset($oEntity->$fieldName))
+					if (isset($aModelColumns[$fieldName]))
 					{
 						$oEntity->$fieldName = str_replace(array_keys($aConform), array_values($aConform), $oEntity->$fieldName);
 					}
 				}
+
 				$oEntity->save();
 
 				// Дополнительные свойства

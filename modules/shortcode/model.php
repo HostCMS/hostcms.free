@@ -154,6 +154,38 @@ class Shortcode_Model extends Core_Entity
 	}
 
 	/**
+	 * Mark entity as deleted
+	 * @return self
+	 * @hostcms-event modelname.onBeforeMarkDeleted
+	 * @hostcms-event modelname.onAfterMarkDeleted
+	 */
+	public function markDeleted()
+	{
+		parent::markDeleted();
+
+		// Rebuild shortcodes list
+		Shortcode_Controller::instance()->rebuild();
+
+		return $this;
+	}
+
+	/**
+	 * Turn off deleted status
+	 * @return self
+	 * @hostcms-event modelname.onBeforeUndelete
+	 * @hostcms-event modelname.onAfterUndelete
+	 */
+	public function undelete()
+	{
+		parent::undelete();
+
+		// Rebuild shortcodes list
+		Shortcode_Controller::instance()->rebuild();
+
+		return $this;
+	}
+
+	/**
 	 * Copy object
 	 * @return Core_Entity
 	 * @hostcms-event shortcode.onAfterRedeclaredCopy
